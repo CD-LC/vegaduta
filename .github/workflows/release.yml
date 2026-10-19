@@ -250,7 +250,7 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}
             org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
-            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.licenses=BUSL-1.1
           outputs: type=image,name=${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}/${{ matrix.repo || matrix.image }},push-by-digest=true,name-canonical=true,push=true
           # Provenance and SBOM are produced once, on the merged manifest, below.
           provenance: false
@@ -479,7 +479,7 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}
             org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
-            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.licenses=BUSL-1.1
           outputs: type=image,name=${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}/omnibus,push-by-digest=true,name-canonical=true,push=true
           provenance: false
           sbom: false

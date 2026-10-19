@@ -5,7 +5,7 @@
 [![CI](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/CD-LC/vegaduta/badge)](https://scorecard.dev/viewer/?uri=github.com/CD-LC/vegaduta)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License: BSL-1.1](https://img.shields.io/badge/license-BSL--1.1-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/CD-LC/vegaduta?sort=semver)](https://github.com/CD-LC/vegaduta/releases)
 [![Helm chart](https://img.shields.io/badge/helm-oci%3A%2F%2Fghcr.io%2Fcd-lc%2Fcharts-0F1689?logo=helm)](deploy/helm/README.md)
 
@@ -234,4 +234,4 @@ Please report vulnerabilities privately through GitHub Security Advisories, not 
 
 ## License
 
-[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for bundled third-party components (fonts, vendored JavaScript), trademarks, and the separate-process components the deployments run under their own licenses; license texts are in [LICENSES/](LICENSES/README.md). The runtime stays Apache-2.0; see the license commitment in [GOVERNANCE.md](GOVERNANCE.md).
+[Business Source License 1.1](LICENSE): free for any use except offering VegaDūta itself to third parties as a competing hosted service, and every version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0. See [NOTICE](NOTICE) for bundled third-party components (fonts, vendored JavaScript), trademarks, and the separate-process components the deployments run under their own licenses; license texts are in [LICENSES/](LICENSES/README.md), and the commitment in [GOVERNANCE.md](GOVERNANCE.md).

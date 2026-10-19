@@ -1,7 +1,8 @@
 VegaDūta
 Copyright 2026 The VegaDūta Authors
 
-This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+This product is licensed under the Business Source License 1.1 (see LICENSE);
+the sdk/ directory is licensed under the Apache License, Version 2.0.
 Full texts of every license named below are in LICENSES/, and
 LICENSES/README.md maps each bundled third-party file to its license.
 
@@ -85,7 +86,10 @@ Groq, OpenRouter, Ollama, Sarvam, ElevenLabs, E2B, WhatsApp, Instagram,
 Messenger, Slack, Discord, Telegram and X) are trademarks of their respective
 owners. They are used only to identify the services the platform connects
 to; their use does not imply endorsement, and they are not covered by this
-project's Apache-2.0 license.
+project's license.
+
+"VegaDūta" and the VegaDūta marks are trademarks of the Licensor. They are not
+licensed for use as the name or branding of a fork or a hosted service.
 
 ==============================================================================
 Separate-process components (not included, not linked)

@@ -5,8 +5,8 @@
     "version": "0.1.0",
     "description": "Event surfaces of the VegaDuta platform: Server-Sent Event streams, outbound webhooks and the voice relay WebSocket. Generated from docs/api/openapi.json and contracts/ by scripts/docs/asyncapi.mjs; do not edit by hand.",
     "license": {
-      "name": "Apache-2.0",
-      "identifier": "Apache-2.0"
+      "name": "BUSL-1.1",
+      "identifier": "BUSL-1.1"
     }
   },
   "servers": {

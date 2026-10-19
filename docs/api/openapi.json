@@ -5,8 +5,8 @@
     "version": "0.1.0",
     "description": "REST API of the VegaDuta agentic AI platform. Generated from the Spring controllers by OpenApiSpecGenerator; do not edit by hand. Errors are RFC 9457 Problem Details (application/problem+json) described by the Error schema; branch on its type or code, not on the message. Every response carries an X-Request-Id correlation header. Endpoints flagged x-sse stream Server-Sent Events. Where a handler builds its own ResponseEntity the exact 2xx status may differ from the documented one, so clients should accept any 2xx.",
     "license": {
-      "name": "Apache-2.0",
-      "identifier": "Apache-2.0"
+      "name": "BUSL-1.1",
+      "identifier": "BUSL-1.1"
     },
     "x-skipped": [
       "BriefController#planStream: duplicate POST /api/briefs/plan",
@@ -54005,7 +54005,7 @@
             "schema": {
               "type": "number",
               "format": "double",
-              "default": 0.10
+              "default": 0.1
             }
           },
           {
@@ -54015,7 +54015,7 @@
             "schema": {
               "type": "number",
               "format": "double",
-              "default": 0.90
+              "default": 0.9
             }
           },
           {

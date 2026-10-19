@@ -1,14 +1,18 @@
 # Licenses
 
-VegaDūta itself is licensed under the Apache License 2.0
-([../LICENSE](../LICENSE), also [Apache-2.0.txt](Apache-2.0.txt)). This folder
-holds the full text of every license that applies to third-party files
-redistributed in this repository or copied into the release images. Copyright
-lines and attributions are in [../NOTICE](../NOTICE).
+VegaDūta itself is licensed under the Business Source License 1.1
+([../LICENSE](../LICENSE), also [BUSL-1.1.txt](BUSL-1.1.txt)): free for any
+use except offering it to third parties as a competing hosted service, and it
+converts to Apache-2.0 four years after each version's release. The `sdk/`
+directory is separately licensed under Apache-2.0. This folder
+holds the full text of every license that applies to this project and to
+third-party files redistributed in this repository or copied into the release
+images. Copyright lines and attributions are in [../NOTICE](../NOTICE).
 
 | License | Text | Applies to |
 |---|---|---|
-| Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt) | this project; `@mlc-ai/web-llm`, `kokoro-js` and `@huggingface/transformers` copied into `web/public/vendored/` at build time |
+| BUSL-1.1 | [BUSL-1.1.txt](BUSL-1.1.txt) | this project outside `sdk/` |
+| Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt) | the `sdk/` directory; `@mlc-ai/web-llm`, `kokoro-js` and `@huggingface/transformers` copied into `web/public/vendored/` at build time |
 | MIT | [MIT.txt](MIT.txt) | `web/app/lib/vendor/qrcode-generator.js` (Copyright (c) 2009 Kazuhiko Arase); `@babel/standalone` and `onnxruntime-web` (inside `kokoro.web.js`) copied into `web/public/vendored/` |
 | OFL-1.1 | [OFL-1.1.txt](OFL-1.1.txt) | every font file listed below |
 

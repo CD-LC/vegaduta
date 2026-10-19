@@ -19,8 +19,9 @@ published yet, so every image is built from source.
 
 ## License and DCO sign-off
 
-VegaDūta is licensed under [Apache-2.0](LICENSE). Contributions are accepted
-under the same license through the [Developer Certificate of Origin](https://developercertificate.org/)
+VegaDūta is licensed under the [Business Source License 1.1](LICENSE)
+(converting to Apache-2.0 on each version's change date). Contributions are
+accepted under the same license through the [Developer Certificate of Origin](https://developercertificate.org/)
 (DCO). Sign off every commit to certify that you wrote it or otherwise have the
 right to submit it under the project license:
 

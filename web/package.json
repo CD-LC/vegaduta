@@ -1,7 +1,7 @@
 {
   "name": "web",
   "version": "0.1.0",
-  "license": "Apache-2.0",
+  "license": "BUSL-1.1",
   "private": true,
   "scripts": {
     "predev": "node scripts/vendor-webllm.mjs && node scripts/vendor-kokoro.mjs && node scripts/vendor-babel.mjs",

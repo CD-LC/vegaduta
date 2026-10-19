@@ -295,8 +295,8 @@ public final class OpenApiSpecGenerator {
                         + " ResponseEntity the exact 2xx status may differ from the documented one,"
                         + " so clients should accept any 2xx.");
             Map<String, Object> license = new LinkedHashMap<>();
-            license.put("name", "Apache-2.0");
-            license.put("identifier", "Apache-2.0");
+            license.put("name", "BUSL-1.1");
+            license.put("identifier", "BUSL-1.1");
             info.put("license", license);
             info.put("x-skipped", new ArrayList<>(new TreeSet<>(skipped)));
             return info;

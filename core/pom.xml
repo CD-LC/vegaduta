@@ -140,8 +140,8 @@
   <url>https://github.com/CD-LC/vegaduta</url>
   <licenses>
     <license>
-      <name>Apache-2.0</name>
-      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>BUSL-1.1</name>
+      <url>https://mariadb.com/bsl11/</url>
       <distribution>repo</distribution>
     </license>
   </licenses>

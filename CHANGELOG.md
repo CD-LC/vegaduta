@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **License: Business Source License 1.1.** The platform (everything outside `sdk/`) is now under BSL-1.1: free for any use except offering the software itself to third parties as a competing hosted service, and each version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0 so clients embed anywhere. Versions already released under Apache-2.0 remain under Apache-2.0.
+
 ### Added
 
 - **Assistant on every install.** `/assistant` is no longer personal-only: the rail lists it on lite and full too, and each person keeps their own Assistant agent (the lookup no longer adopts a teammate's shared agent that happens to be named "Assistant"). `/add-ons` also appears on lite, where its commands now render as `scripts/vegaduta up --lite ...`; the full stack keeps it off the rail (its service set is fixed at deploy time).

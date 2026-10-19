@@ -72,23 +72,30 @@ These are targets for a small team, not guarantees.
 
 ## License commitment
 
-- **The runtime stays Apache-2.0.** Everything needed to run VegaDūta, meaning
-  the core server, the consoles, the services under `services/`, the Compose
-  files and the Helm charts, is and will remain licensed under the Apache
-  License 2.0.
-- **No split-licensed server.** There will be no "open core" edition in which
+- **The platform is BSL-1.1 and converts to Apache-2.0.** Everything needed to
+  run VegaDūta — the core server, the consoles, the services under
+  `services/`, the Compose files and the Helm charts — is licensed under the
+  Business Source License 1.1: free for any use except offering the software
+  itself to third parties as a competing hosted service, and each version
+  converts to the Apache License 2.0 four years after its release.
+- **The SDKs stay Apache-2.0.** The `sdk/` directory (Java, Python and
+  TypeScript clients) is licensed under Apache-2.0 so the clients can be
+  embedded in any application, proprietary or not.
+- **No split-licensed server.** There is no "open core" edition in which
   parts of the server (for example SSO, RBAC, audit logging, multi-tenancy or
-  scaling features) move to a proprietary or source-available license, and no
-  relicensing of this repository to a non-OSI license.
-- Contributions are accepted under Apache-2.0 via the DCO (see
+  scaling features) move to a proprietary license. Monetization comes from
+  commercial licenses for hosted offerings, support and add-ons — not from
+  withholding platform features.
+- Contributions are accepted under the project license via the DCO (see
   [CONTRIBUTING.md](CONTRIBUTING.md)); there is no contributor license
   agreement that would allow relicensing.
-- Hosted services, support or separately distributed add-ons may be offered by
-  anyone, including maintainers, but they will not require removing features
-  from, or restricting the license of, this repository.
+- Hosted services, support or separately distributed add-ons may be offered
+  by the licensor under a commercial license; offering the platform itself to
+  third parties as a hosted service requires that license, per `LICENSE`.
 
-Changing this commitment would require the governance-change process above and
-could not apply retroactively to code already released under Apache-2.0.
+Changing this commitment would require the governance-change process above
+and could not apply retroactively to versions already released: every version
+becomes Apache-2.0 on its change date regardless.
 
 ## Evolution
 
