@@ -71,7 +71,7 @@ if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; 
   check "the chosen compose files merge into a valid project" "$c" "$out"
   # Regression: --search on lite once left core on search-net only, so it could not reach postgres.
   nets="$("$CLI" compose config --format json 2>/dev/null | python3 -c 'import json,sys; print(" ".join(sorted(json.load(sys.stdin)["services"]["core"]["networks"])))')"
-  check "core keeps the default network when search is added to lite" "$([ "$nets" = "default search-net" ]; echo $?)" "core networks: $nets"
+  check "core keeps the default network when search is added to lite" "$([ "$nets" = "default mcp-stdio-net search-net" ]; echo $?)" "core networks: $nets"
 else
   echo "  skip docker is not available"
 fi
