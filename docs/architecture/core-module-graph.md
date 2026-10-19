@@ -27,11 +27,11 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | Module | Kind | Main src files | Depends on (sibling modules) | Notes |
 |---|---|---:|---|---|
 | admin | kernel | 70 | audit, crypto, json, security |  |
-| agents | kernel | 257 | agents-budget, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, rl, sdlc, secrets, security, sharing, storage, tenancy |  |
+| agents | kernel | 259 | agents-budget, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, rl, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-browser | kernel | 134 | agents, agents-tools, audit, devices, json, knowledge, providers, secrets, security, sharing, tenancy |  |
 | agents-budget | kernel | 11 | audit, chat, providers, security, tenancy |  |
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |
-| agents-interop | kernel | 53 | agents, agents-budget, agents-turn, audit, chat, json, providers, security, sharing, tenancy |  |
+| agents-interop | kernel | 54 | agents, agents-budget, agents-turn, audit, chat, json, providers, security, sharing, tenancy |  |
 | agents-jobs | kernel | 171 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, sharing, tenancy |  |
 | agents-studio | kernel | 100 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 246 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
@@ -50,7 +50,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | crypto | kernel | 7 | (none) |  |
 | crypto-kms | kernel | 4 | crypto, json, security |  |
 | dbauth | kernel | 13 | (none) |  |
-| devices | kernel | 49 | security, tenancy |  |
+| devices | kernel | 50 | security, tenancy |  |
 | documentgen | kernel | 29 | eventbus, security, storage, tenancy |  |
 | elevenlabs | vendor | 45 | agents (test), agents-studio (test), agentspi, crypto, providers, security, speech, storage, tenancy | ElevenLabs TTS/voice clone/music |
 | eventbus | kernel | 23 | audit, crypto, mcp, security, tenancy |  |
@@ -62,7 +62,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | knowledge | kernel (hosts vendor code) | 128 | crypto, json, security, storage, tenancy | embeddings / OCR / sidecar clients |
 | mcp | kernel | 92 | crypto, json, secrets, security |  |
 | mcpserver | kernel | 44 | agents, agents-interop, agents-turn, audit, chat, json, knowledge, security, tenancy, workflow |  |
-| omnichannel | kernel (hosts vendor code) | 309 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
+| omnichannel | kernel (hosts vendor code) | 310 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
 | omnichannel-social | kernel | 94 | omnichannel |  |
 | payments | vendor | 55 | agents (test), agents-tools (test), agentspi, approval, audit, billing, crypto, eventbus, json, security, tenancy | UPI mandate payments |
 | platform | kernel | 153 | admin, agents, agents-turn, audit, chat, codeintel, crypto, guardrails, json, providers, security, tenancy, workflow |  |
