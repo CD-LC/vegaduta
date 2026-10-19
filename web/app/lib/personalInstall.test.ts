@@ -93,13 +93,15 @@ describe("hiddenOnPersonalInstall", () => {
     expect(hiddenOnPersonalInstall("/assistant-tools")).toBe(false);
   });
 
-  it("lists Add-ons on personal and lite installs (the registry is install-wide and host-applied)", () => {
+  it("lists Add-ons on every install (the registry is install-wide and host-applied)", () => {
     local();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
     lite();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
     hosted();
-    expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);
+    // On the shared tier the page marks what the tier cannot run and the switches follow the
+    // caller's add-on permission; the switchboard itself is not hidden.
+    expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
     expect(hiddenOnPersonalInstall("/add-ons-extra")).toBe(false);
   });
 });

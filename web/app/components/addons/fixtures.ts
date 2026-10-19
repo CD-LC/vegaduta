@@ -140,6 +140,8 @@ export interface MockOptions {
   bridge?: boolean;
   ollama?: boolean;
   ramGb?: number;
+  /** False simulates a caller who may read the catalog but not switch it (tenant admin, shared install). */
+  mayChange?: boolean;
 }
 
 export interface MockAddonsApi extends AddonsApi {
@@ -171,6 +173,7 @@ export function mockAddonsApi(opts: MockOptions = {}): MockAddonsApi {
     ollama: { reachable: opts.ollama ?? true },
     apply: applyFor(state.addons),
     addons: state.addons,
+    mayChange: opts.mayChange ?? true,
   });
   const change = (id: string, changed: string[]): AddonChange => ({
     addon: byId(id),

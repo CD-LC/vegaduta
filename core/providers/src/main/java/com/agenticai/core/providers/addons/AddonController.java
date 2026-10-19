@@ -55,16 +55,18 @@ public class AddonController {
 
     private final AddonService service;
     private final AddonHostAuth hostAuth;
+    private final AddonAccess access;
 
-    public AddonController(AddonService service, AddonHostAuth hostAuth) {
+    public AddonController(AddonService service, AddonHostAuth hostAuth, AddonAccess access) {
         this.service = service;
         this.hostAuth = hostAuth;
+        this.access = access;
     }
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public Overview list() {
-        return service.overview();
+    public Overview list(Authentication authentication) {
+        return service.overview(access.canChange(authentication));
     }
 
     @GetMapping("/{id}")

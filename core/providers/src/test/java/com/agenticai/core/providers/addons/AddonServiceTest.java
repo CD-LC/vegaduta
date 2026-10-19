@@ -35,7 +35,7 @@ class AddonServiceTest {
 
     @Test
     void theOverviewListsTheCatalogInOrderWithStateAndTheApplyPlan() {
-        AddonApi.Overview o = service.overview();
+        AddonApi.Overview o = service.overview(true);
         assertEquals(List.of("search", "docs", "browser", "work", "m-small", "m-big", "later"),
                 o.addons().stream().map(View::id).toList());
         assertEquals(1, o.catalogSchema());
@@ -151,7 +151,7 @@ class AddonServiceTest {
         View v = view("search");
         assertTrue(v.desired());
         assertEquals("on", v.status());
-        assertTrue(service.overview().apply().flags().contains("--search"));
+        assertTrue(service.overview(true).apply().flags().contains("--search"));
         // and the person can still switch it off
         service.disable("search", false, "u");
         assertFalse(view("search").desired());
@@ -160,7 +160,7 @@ class AddonServiceTest {
 
     @Test
     void envAddonsReportTheKeysToSetAndToClear() {
-        AddonApi.Apply before = service.overview().apply();
+        AddonApi.Apply before = service.overview(true).apply();
         assertEquals(Map.of(), before.envSet());
         assertEquals(List.of("CORE_IMAGE_VARIANT", "CORE_MEM_LIMIT"), before.envUnset());
         AddonApi.Apply after = service.enable("browser", "u").apply();
@@ -443,18 +443,28 @@ class AddonServiceTest {
     @Test
     void theApplyCommandFollowsTheInstallShape() {
         // Kit default: personal (local auth).
-        assertEquals("./scripts/vegaduta personal --profile workspace", service.overview().apply().command());
+        assertEquals("./scripts/vegaduta personal --profile workspace", service.overview(true).apply().command());
 
         // Lite (Keycloak auth, `lite` profile): the same wishes render as `up --lite` commands.
         kit.environment.setProperty("app.auth.mode", "keycloak");
         kit.environment.setActiveProfiles("lite");
-        assertEquals("./scripts/vegaduta up --lite --profile workspace", service.overview().apply().command());
+        assertEquals("./scripts/vegaduta up --lite --profile workspace", service.overview(true).apply().command());
         assertEquals("./scripts/vegaduta up --lite --search", view("search").hostCommand());
         // A command that does not start with the personal base is left alone.
         assertEquals("Set CORE_IMAGE_VARIANT=-full and CORE_MEM_LIMIT=2560m in .env", view("browser").hostCommand());
 
-        // Full: no lite profile -> the `up --full` shape.
+        // Full: no lite profile -> the `up --full` shape. `workspace` does not exist on the full
+        // stack's launcher, so the default-on wish leaves the apply command and the card is
+        // blocked instead of offering a switch that could never land.
         kit.environment.setActiveProfiles();
-        assertEquals("./scripts/vegaduta up --full --profile workspace", service.overview().apply().command());
+        assertEquals("./scripts/vegaduta up --full", service.overview(true).apply().command());
+        assertEquals("not_on_tier", view("work").blockedReason());
+        assertFalse(view("work").canEnable());
+        // `--search` and env-only compose entries still apply on the full tier.
+        assertEquals("./scripts/vegaduta up --full --search", view("search").hostCommand());
+        assertTrue(view("browser").canEnable());
+
+        AddonException e = assertThrows(AddonException.class, () -> service.enable("work", "u"));
+        assertEquals("not_available", e.code());
     }
 }

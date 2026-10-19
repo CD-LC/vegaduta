@@ -111,7 +111,7 @@ public class AddonService {
 
     // ---------------------------------------------------------------- reading
 
-    public Overview overview() {
+    public Overview overview(boolean mayChange) {
         Snapshot s = snapshot();
         List<View> views = new ArrayList<>();
         for (AddonDefinition d : catalog.all()) {
@@ -123,7 +123,8 @@ public class AddonService {
                 new HostBridge(hostAuth.configured()),
                 new OllamaInfo(s.tags.reachable()),
                 apply(s),
-                views);
+                views,
+                mayChange);
     }
 
     public View get(String id) {
@@ -143,6 +144,7 @@ public class AddonService {
         Snapshot before = snapshot();
         List<AddonDefinition> plan = new ArrayList<>(catalog.requirementsOf(id));
         plan.add(target);
+        requireOnTier(target, plan);
 
         boolean needsServer = plan.stream().anyMatch(d -> d.kind() == Kind.MODEL_PULL && !before.installed(d));
         if (needsServer && !before.tags.reachable()) {
@@ -284,12 +286,53 @@ public class AddonService {
         }
     }
 
+    // On the full stack the launcher honours the `tools` profile and `--search`. The catalog's other
+    // single-box selectors (`rag`, `workspace`) are ignored there, so an entry needing either could
+    // never land; `--browser` is reachable as the `browser` profile and the command is rewritten
+    // instead of the card being refused.
+    private static final java.util.Set<String> FULL_TIER_PROFILES = java.util.Set.of("tools");
+    private static final java.util.Set<String> FULL_TIER_FLAGS = java.util.Set.of("--search", "--browser");
+
+    private boolean isFullTier() {
+        return !"local".equalsIgnoreCase(environment.getProperty("app.auth.mode", "keycloak"))
+                && !environment.acceptsProfiles(org.springframework.core.env.Profiles.of("lite"));
+    }
+
+    private boolean tierInapplicable(AddonDefinition d) {
+        if (!isFullTier() || d.kind() != Kind.COMPOSE_PROFILE || d.compose() == null) {
+            return false;
+        }
+        for (String p : d.compose().profiles()) {
+            if (!FULL_TIER_PROFILES.contains(p)) {
+                return true;
+            }
+        }
+        for (String f : d.compose().flags()) {
+            if (!FULL_TIER_FLAGS.contains(f)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void requireOnTier(AddonDefinition target, List<AddonDefinition> plan) {
+        if (tierInapplicable(target) || plan.stream().anyMatch(this::tierInapplicable)) {
+            throw new AddonException(
+                    HttpStatus.CONFLICT,
+                    "not_available",
+                    "'" + target.name() + "' is not available on this installation tier.");
+        }
+    }
+
     private boolean isHostManaged(AddonDefinition d) {
         return d.isAvailable() && d.kind() == Kind.COMPOSE_PROFILE && d.compose() != null;
     }
 
     private List<AddonDefinition> hostManaged() {
-        return catalog.all().stream().filter(this::isHostManaged).toList();
+        // Entries the tier cannot run (rag/workspace on the full stack) leave the host surface
+        // entirely: the installer never sees them as wanted, and a default-on single-box wish
+        // does not leak into the apply command.
+        return catalog.all().stream().filter(d -> isHostManaged(d) && !tierInapplicable(d)).toList();
     }
 
     private void startPull(AddonDefinition d) {
@@ -416,6 +459,8 @@ public class AddonService {
         String blocked = null;
         if (!d.isAvailable()) {
             blocked = "planned";
+        } else if (tierInapplicable(d)) {
+            blocked = "not_on_tier";
         } else if (d.kind() == Kind.MODEL_PULL && !s.tags.reachable() && !Boolean.TRUE.equals(installed)) {
             blocked = "ollama_unreachable";
         }
@@ -478,7 +523,21 @@ public class AddonService {
     }
 
     private Apply apply(Snapshot s) {
-        return computeApply(hostManaged(), s::result, baseCommand());
+        Apply a = computeApply(hostManaged(), s::result, baseCommand());
+        if (!isFullTier() || !a.flags().contains("--browser")) {
+            return a;
+        }
+        // `--browser` layers the single-box browser-runner; the full stack reaches the same thing
+        // through the `browser` profile (the mcp-stdio-runner-browser swap), so the copy-paste
+        // command has to say that.
+        List<String> flags = a.flags().stream().filter(f -> !"--browser".equals(f)).toList();
+        List<String> profiles = new ArrayList<>(a.profiles());
+        profiles.add("browser");
+        StringBuilder command = new StringBuilder(baseCommand());
+        profiles.forEach(p -> command.append(" --profile ").append(p));
+        flags.forEach(f -> command.append(' ').append(f));
+        return new Apply(
+                command.toString(), profiles, flags, a.envSet(), a.envUnset(), a.pending());
     }
 
     /**
@@ -498,10 +557,14 @@ public class AddonService {
     /** A catalog {@code hostCommand} re-pointed at this install's shape (the personal prefix is the template). */
     private String hostCommand(AddonDefinition d) {
         String command = d.hostCommand();
-        if (command != null && command.startsWith(BASE_COMMAND)) {
-            return baseCommand() + command.substring(BASE_COMMAND.length());
+        if (command == null || !command.startsWith(BASE_COMMAND)) {
+            return command;
         }
-        return command;
+        String rewritten = baseCommand() + command.substring(BASE_COMMAND.length());
+        if (isFullTier()) {
+            rewritten = rewritten.replace(" --browser", " --profile browser");
+        }
+        return rewritten;
     }
 
     /** What the host must do so the stack matches the wanted compose add-ons. Pure, so it is unit-tested. */

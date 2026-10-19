@@ -1,18 +1,19 @@
 # Add-ons
 
-**Add-ons** (`/add-ons`, sidebar label "Add-ons", Configuration group) lists the optional extras of a
-single-box install - a [personal install](../personal-mode.md) or a lite one: the Assistant's build terminal,
-web search, document reading, the Assistant's own browser and free local model packs. Each card says what the
-add-on gives you and what it costs this computer, and has one button to turn it on or off. The page is a view
-over the add-on registry in core (`core/providers`, package `com.agenticai.core.providers.addons`); it adds no
-backend of its own.
+**Add-ons** (`/add-ons`, sidebar label "Add-ons", Configuration group) lists the install's optional extras:
+the Assistant's build terminal, web search, document reading, the Assistant's own browser and free local
+model packs. Each card says what the add-on gives you and what it costs this computer, and has one button to
+turn it on or off. On a [personal install](../personal-mode.md) or a lite one every card applies; on the
+full stack the entries its launcher cannot run are marked "not available on this installation tier" and the
+commands render for the `up --full` shape. The page is a view over the add-on registry in core
+(`core/providers`, package `com.agenticai.core.providers.addons`); it adds no backend of its own.
 
 | | |
 |---|---|
 | Route | `/add-ons` |
-| Sidebar | Configuration group, after "Data & Infrastructure". Shown on personal (local sign-in) and lite installs; the registry is install-wide and applied on the host, so installs whose service set is fixed at deploy time (the full stack) do not advertise it. A deep link still opens the page |
-| Nav needs | any signed-in user on a personal or lite install |
-| Backend rule | reading needs only a signed-in user. Changing needs `ROLE_platform-admin`, or `ROLE_tenant-admin` when `app.auth.mode=local` (the personal install, where the owner is the tenant admin) or `app.addons.tenant-admin-may-change=true` (default on lite, where a tenant admin is usually the box's operator). Changes are limited to 30 a minute per caller and audited as `addon.enable` and `addon.disable` |
+| Sidebar | Configuration group, after "Data & Infrastructure". Shown on every install; on the full stack the entries its launcher cannot run (the single-box `rag`/`workspace` profiles) are marked "not available on this installation tier", `--browser` renders as the `browser` profile, and a caller without change rights sees the switches disabled rather than a 403 after the click |
+| Nav needs | any signed-in user |
+| Backend rule | reading needs only a signed-in user. Changing needs `ROLE_platform-admin`, or `ROLE_tenant-admin` when `app.auth.mode=local` (the personal install, where the owner is the tenant admin) or `app.addons.tenant-admin-may-change=true` (default on lite, where a tenant admin is usually the box's operator). The overview's `mayChange` carries the verdict so the console can disable the switches up front. Changes are limited to 30 a minute per caller and audited as `addon.enable` and `addon.disable` |
 | API | `GET /api/addons`, `GET /api/addons/{id}`, `POST /api/addons/{id}/enable`, `POST /api/addons/{id}/disable[?cascade=true]` |
 | Page guide | "Add extras to your install" (the page-guide button in the top bar) |
 

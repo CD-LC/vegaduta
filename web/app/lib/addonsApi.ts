@@ -27,7 +27,7 @@ export type AddonStatus =
 
 /** Advice about this computer, never a block. */
 export type AddonFit = "ok" | "low_memory" | "needs_gpu" | "unknown";
-export type AddonBlockedReason = "planned" | "ollama_unreachable" | null;
+export type AddonBlockedReason = "planned" | "ollama_unreachable" | "not_on_tier" | null;
 
 export interface AddonView {
   id: string;
@@ -94,6 +94,9 @@ export interface AddonList {
   ollama: { reachable: boolean };
   apply: AddonApply;
   addons: AddonView[];
+  /** False when the caller may read the catalog but not switch it (AddonAccess); the
+   *  page then renders the switches disabled instead of letting a click hit the 403. */
+  mayChange: boolean;
 }
 
 export interface AddonChange {

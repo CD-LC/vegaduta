@@ -80,10 +80,10 @@ class AddonAuthorizationTest {
     void anyone_signed_in_may_read_and_nobody_else() {
         AddonController c = controller(new MockEnvironment());
         signIn(as("ROLE_user"));
-        assertDoesNotThrow(c::list);
+        assertDoesNotThrow(() -> c.list(null));
         assertDoesNotThrow(() -> c.get("search"));
         SecurityContextHolder.clearContext();
-        assertThrows(Exception.class, c::list, "no authentication at all");
+        assertThrows(Exception.class, () -> c.list(null), "no authentication at all");
         assertThrows(Exception.class, () -> c.get("search"));
     }
 

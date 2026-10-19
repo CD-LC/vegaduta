@@ -10005,11 +10005,26 @@
       "stops": "Guided stops: {count}",
       "noStops": "No guided stops here yet. Click to open its first page.",
       "regions": {
-        "build": { "name": "Build", "purpose": "Where you make things: agents, workflows, templates, knowledge, skills and one-off tasks." },
-        "connect": { "name": "Inbox & people", "purpose": "Who is talking to your agents: contacts, the conversations inbox with live takeover, and the leads board." },
-        "config": { "name": "Configuration", "purpose": "Setup: channels, integrations, secrets, code intelligence and data usage." },
-        "monitor": { "name": "Test & Monitor", "purpose": "Check what happened: the Playground for private tests, files your agents made and, for admins, issues, live activity and the audit log." },
-        "plans": { "name": "Plans & billing", "purpose": "What your plan includes, how much you have used, and billing." }
+        "build": {
+          "name": "Build",
+          "purpose": "Where you make things: agents, workflows, templates, knowledge, skills and one-off tasks."
+        },
+        "connect": {
+          "name": "Inbox & people",
+          "purpose": "Who is talking to your agents: contacts, the conversations inbox with live takeover, and the leads board."
+        },
+        "config": {
+          "name": "Configuration",
+          "purpose": "Setup: channels, integrations, secrets, code intelligence and data usage."
+        },
+        "monitor": {
+          "name": "Test & Monitor",
+          "purpose": "Check what happened: the Playground for private tests, files your agents made and, for admins, issues, live activity and the audit log."
+        },
+        "plans": {
+          "name": "Plans & billing",
+          "purpose": "What your plan includes, how much you have used, and billing."
+        }
       }
     },
     "field": {
@@ -12827,7 +12842,7 @@
     "colActions": "Actions",
     "totals": "Total",
     "resolvedAssumedNote": "+{count} assumed (idle-closed), not counted",
-    "costSplit": "your keys {byok} \u00b7 platform pool {pool}",
+    "costSplit": "your keys {byok} · platform pool {pool}",
     "editPriceFor": "Update the price for {model}",
     "costEstimatedHint": "Estimated from recorded tokens and your prices.",
     "costIncompleteHint": "Lower bound: some calls have no price or no usage recorded.",
@@ -14483,7 +14498,8 @@
     "failed": "It did not work. Try again.",
     "blocked": {
       "ollama_unreachable": "The local model server is not reachable, so this cannot be downloaded.",
-      "setupLink": "Set up local models"
+      "setupLink": "Set up local models",
+      "not_on_tier": "This add-on is not available on this installation tier."
     },
     "action": {
       "turnOn": "Turn on",
@@ -14601,7 +14617,8 @@
       "cascadeBody": "{dependents} need {name}. Turning it off turns those off too.",
       "cascadeConfirm": "Turn all off",
       "cancel": "Cancel"
-    }
+    },
+    "readOnly": "You can see what this installation runs. Only a platform administrator can switch add-ons on a shared install - ask yours, or set APP_ADDONS_TENANT_ADMIN_MAY_CHANGE=true on a self-hosted box."
   },
   "troubleshoot": {
     "eyebrow": "Setup",

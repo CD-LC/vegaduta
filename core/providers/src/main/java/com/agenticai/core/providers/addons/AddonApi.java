@@ -61,13 +61,18 @@ public final class AddonApi {
 
     public record OllamaInfo(boolean reachable) {}
 
+    /**
+     * {@code mayChange} mirrors {@link AddonAccess#canChange} for the caller: the console can
+     * disable the switches up front instead of letting a click hit the 403.
+     */
     public record Overview(
             int catalogSchema,
             HardwareProfile hardware,
             HostBridge hostBridge,
             OllamaInfo ollama,
             Apply apply,
-            List<View> addons) {}
+            List<View> addons,
+            boolean mayChange) {}
 
     /**
      * Answer of enable and disable. {@code changed} lists every add-on whose wish changed (an add-on

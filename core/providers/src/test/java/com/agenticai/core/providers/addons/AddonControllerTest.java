@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,7 +35,7 @@ class AddonControllerTest {
     void setUp() {
         LocalRateLimitFallback.reset();
         kit = new AddonKit();
-        mvc = MockMvcBuilders.standaloneSetup(new AddonController(kit.service, kit.hostAuth)).build();
+        mvc = MockMvcBuilders.standaloneSetup(new AddonController(kit.service, kit.hostAuth, new AddonAccess(new MockEnvironment()))).build();
     }
 
     // ------------------------------------------------------------------- reads
@@ -146,7 +147,7 @@ class AddonControllerTest {
     void aRacedWriteIsA409ConflictNotA500() throws Exception {
         AddonService broken = mock(AddonService.class);
         when(broken.enable("search", "owner-1")).thenThrow(new OptimisticLockingFailureException("raced"));
-        MockMvc racing = MockMvcBuilders.standaloneSetup(new AddonController(broken, kit.hostAuth)).build();
+        MockMvc racing = MockMvcBuilders.standaloneSetup(new AddonController(broken, kit.hostAuth, new AddonAccess(new MockEnvironment()))).build();
         racing.perform(post("/api/addons/search/enable").principal(OWNER))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("conflict"));
@@ -188,7 +189,7 @@ class AddonControllerTest {
     @Test
     void theHostBridgeIsOffUntilATokenIsConfigured() throws Exception {
         for (String token : new String[] {"", "short-token"}) {
-            MockMvc off = MockMvcBuilders.standaloneSetup(new AddonController(kit.service, new AddonHostAuth(token))).build();
+            MockMvc off = MockMvcBuilders.standaloneSetup(new AddonController(kit.service, new AddonHostAuth(token), new AddonAccess(new MockEnvironment()))).build();
             off.perform(get("/api/addons/host/wanted").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                     .andExpect(status().isServiceUnavailable())
                     .andExpect(jsonPath("$.error").value("host_bridge_disabled"));

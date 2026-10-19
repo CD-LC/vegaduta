@@ -36,11 +36,12 @@ const PERSONAL_HIDDEN_ROUTES: readonly string[] = [
 
 /**
  * Surfaces a shared/hosted install does not advertise. /assistant is for every install (the
- * Assistant agent is per user, on any tier). /add-ons is the install's switchboard: it exists on
- * the personal and lite shapes (the compose profiles and flags its commands name exist there);
- * the full stack's service set is already fixed at deploy time, so the page stays off it.
+ * Assistant agent is per user, on any tier), and /add-ons is the install's switchboard on every
+ * shape too - entries the tier cannot run are marked there instead of the page disappearing, and
+ * the switches follow the caller's add-on permission (a tenant member reads; who may change is
+ * core's AddonAccess).
  */
-const PERSONAL_ONLY_ROUTES: readonly string[] = ["/add-ons"];
+const SHARED_ONLY_ROUTES: readonly string[] = [];
 
 /** True on the lite tier (`NEXT_PUBLIC_DEPLOY_ENV=lite`): self-hosted, single box, Keycloak auth. */
 function isLiteInstall(): boolean {
@@ -51,13 +52,12 @@ const under = (href: string, route: string): boolean => href === route || href.s
 
 /**
  * True when {@code href} is a surface this install should not advertise: on a personal install the
- * multi-tenant and platform pages above; on a hosted/full install the add-ons switchboard (lite
- * self-hosted keeps it). Deep links to either keep working.
+ * multi-tenant and platform pages above; a shared install hides nothing here. Deep links keep
+ * working either way.
  */
 export function hiddenOnPersonalInstall(href: string): boolean {
   if (!isLocalAuth()) {
-    if (isLiteInstall()) return false;
-    return PERSONAL_ONLY_ROUTES.some((r) => under(href, r));
+    return SHARED_ONLY_ROUTES.some((r) => under(href, r));
   }
   return PERSONAL_HIDDEN_ROUTES.some((r) => under(href, r));
 }

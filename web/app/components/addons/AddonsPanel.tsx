@@ -157,6 +157,14 @@ export default function AddonsPanel({ api = addonsApi }: AddonsPanelProps) {
 
         {data && (
           <>
+            {!data.mayChange && (
+              <Alert variant="default" data-testid="addons-readonly">
+                <AlertDescription>
+                  <p>{t("readOnly")}</p>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {state.stale && (
               <Alert variant="warning" role="status" data-testid="addons-stale">
                 <AlertDescription>
@@ -227,6 +235,7 @@ export default function AddonsPanel({ api = addonsApi }: AddonsPanelProps) {
                             hardware={data.hardware}
                             bridgeConfigured={bridge}
                             busy={state.busy.has(a.id)}
+                            mayChange={data.mayChange}
                             onEnable={askEnable}
                             onDisable={askDisable}
                           />

@@ -48,6 +48,9 @@ export interface AddonCardProps {
   hardware: AddonHardware;
   bridgeConfigured: boolean;
   busy: boolean;
+  /** False when the caller may read the catalog but not switch it; the buttons then stay off
+   *  instead of letting a click hit the role check's 403. */
+  mayChange: boolean;
   onEnable: (addon: AddonView) => void;
   onDisable: (addon: AddonView) => void;
 }
@@ -141,7 +144,7 @@ function statusDetail(addon: AddonView, bridgeConfigured: boolean, text: AddonTe
   }
 }
 
-export default function AddonCard({ addon, byId, text, hardware, bridgeConfigured, busy, onEnable, onDisable }: AddonCardProps) {
+export default function AddonCard({ addon, byId, text, hardware, bridgeConfigured, busy, mayChange, onEnable, onDisable }: AddonCardProps) {
   const { t } = text;
   const name = text.name(addon);
   const planned = isPlanned(addon);
@@ -151,6 +154,7 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
   const pulling = addon.status === "pulling";
   const failed = addon.status === "failed";
   const ollamaBlocked = !addon.canEnable && addon.blockedReason === "ollama_unreachable";
+  const tierBlocked = !addon.canEnable && addon.blockedReason === "not_on_tier";
   // The wish decides the button; the badge reports reality. A model that is downloading cannot be cancelled here.
   const wanted = addon.desired;
 
@@ -221,11 +225,17 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
         </p>
       )}
 
+      {tierBlocked && (
+        <p className="text-xs text-muted-foreground" data-testid="addon-tier-blocked">
+          {t("blocked.not_on_tier")}
+        </p>
+      )}
+
       <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
         {!planned && wanted && (
           <>
             {failed && (
-              <Button size="sm" disabled={busy || !addon.canEnable} onClick={() => onEnable(addon)}>
+              <Button size="sm" disabled={busy || !addon.canEnable || !mayChange} onClick={() => onEnable(addon)}>
                 {t("action.retry")}
                 <span className="sr-only"> {name}</span>
               </Button>
@@ -233,7 +243,7 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
             <Button
               size="sm"
               variant="outline"
-              disabled={busy || pulling}
+              disabled={busy || pulling || !mayChange}
               onClick={() => onDisable(addon)}
             >
               {t("action.turnOff")}
@@ -242,7 +252,7 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
           </>
         )}
         {!planned && !wanted && (
-          <Button size="sm" disabled={busy || !addon.canEnable} onClick={() => onEnable(addon)}>
+          <Button size="sm" disabled={busy || !addon.canEnable || !mayChange} onClick={() => onEnable(addon)}>
             {t("action.turnOn")}
             <span className="sr-only"> {name}</span>
           </Button>

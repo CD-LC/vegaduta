@@ -75,7 +75,7 @@ class AddonRegistryIT extends AbstractContextIT {
     @Test
     void aRequestAndTheInstallersReportsRoundTripThroughRealBeansAndTheDatabase() {
         asOwner();
-        AddonApi.Overview first = service.overview();
+        AddonApi.Overview first = service.overview(true);
         assertThat(first.addons()).extracting(AddonApi.View::id).contains("workspace", "search", "documents", "browser", "tools");
         assertThat(first.addons()).filteredOn(v -> v.id().equals("tools")).singleElement()
                 .satisfies(v -> assertThat(v.status()).isEqualTo("unavailable"));
