@@ -47,6 +47,10 @@
 ARG ENABLE_AOT_CACHE=false
 # none | full - see the header. Also selects a stage, so it is declared here.
 ARG MCP_TOOLCHAIN=none
+# full | jlink - which Java runtime the final image carries (see the jre-*
+# stages before the runtime base). jlink is opt-in while it soaks; the
+# omnibus image uses it.
+ARG JRE=full
 
 # ---- Build stage --------------------------------------------------------
 FROM maven:3.9.16-eclipse-temurin-21@sha256:99e61abcff91a9b1333463bd8451fb18495d6eba9250ac66a338b518f8278320 AS build
@@ -163,8 +167,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends zip unzip \
          && rm -rf /tmp/drvx /tmp/drvin; \
        fi
 
+# ---- JRE variants (JRE=full|jlink) ----------------------------------------
+# jre-full is the unmodified temurin JRE (~230 MB of platform modules).
+FROM eclipse-temurin:21.0.12.1_1-jre-jammy@sha256:f04fb34e053148344e83317976114ec3f37e4b830ec8bdab5a2fe3cecd7d010b AS jre-full
+
+# jre-jlink keeps the same jre-jammy base (same glibc, CA store and packages)
+# but replaces /opt/java/openjdk with a jlink-minimal runtime - roughly half
+# the size. The module list is what Spring Boot 3.x plus this reactor's
+# dependencies actually load; jdk.crypto.ec (TLS on EC certs), jdk.jfr
+# (actuator/micrometer), jdk.localedata (non-US locales) and jdk.zipfs
+# (nested-jar reads) are the ones jdeps-style analysis misses. A missing
+# module fails loudly at JVM start; report the name and rebuild with
+# JRE=full.
+FROM eclipse-temurin:21.0.12.1_1-jdk-jammy@sha256:742daacb9316be4b6fc60258f6e4ac2a11882f6c597373c92290a57bfad0d2e0 AS jre-linker
+RUN "$JAVA_HOME/bin/jlink" \
+        --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
+        --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
+        --output /jre-minimal \
+    && rm -f /jre-minimal/lib/server/classes.jsa
+
+FROM jre-full AS jre-jlink
+COPY --from=jre-linker /jre-minimal /opt/java/openjdk
+
 # ---- Runtime base (shared by both MCP_TOOLCHAIN variants) ----------------
-FROM eclipse-temurin:21.0.12.1_1-jre-jammy@sha256:f04fb34e053148344e83317976114ec3f37e4b830ec8bdab5a2fe3cecd7d010b AS runtime-base
+FROM jre-${JRE} AS runtime-base
 WORKDIR /app
 
 # curl: nothing in the app needs it - it's here solely so this image's own
