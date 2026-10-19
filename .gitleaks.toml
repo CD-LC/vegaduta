@@ -21,4 +21,6 @@ regexTarget = "match"
 regexes = [
   '''(bodyKey|periodKey|labelKey|titleKey)\s*:\s*"[a-zA-Z0-9_.]+"''',
   '''[A-Z_]+_(STORAGE|SESSION)_KEY\s*=\s*"[a-zA-Z0-9_.:-]+"''',
+  # Prose in the data-architecture page listing credential types, not a key.
+  '''Sarvam/ElevenLabs/Jev''',
 ]

@@ -13,3 +13,5 @@
 # (a) Not a secret: generic-api-key false positive on prose ("keyed by
 # APP_ENCRYPTION_KEY ... tokens,") in the data-architecture page.
 0fbe3a957e57362bb357503c0c81134eda62907d:docs/platform-documentation/architecture/data-architecture.html:generic-api-key:118
+# Same line after the history fold (new commit sha, same content).
+6890ee7fa0104335d7411fd82bdd74cdb6b81c6f:docs/platform-documentation/architecture/data-architecture.html:generic-api-key:118
