@@ -188,13 +188,23 @@ jobs:
       # the compose stack uses and the release publishes.
       - name: Start Postgres (pgvector + Apache AGE)
         run: |
-          # The base image from Docker's mirror of its official images on Amazon ECR Public, by the
-          # same digest the Dockerfile pins: anonymous Docker Hub pulls from shared runners get
-          # rate-limited (429). The digest stays defined once, in the Dockerfile.
+          # The base image by the same digest the Dockerfile pins, from whichever registry mirror
+          # is answering: anonymous pulls from shared runners get rate-limited (429) on BOTH
+          # public.ecr.aws and docker.io at different times, so try each with a retry rather
+          # than hardcoding one. The digest stays defined once, in the Dockerfile.
           base="$(sed -n 's/^ARG BASE_IMAGE=//p' deploy/postgres/Dockerfile)"
           case "$base" in *@sha256:*) ;; *) echo "::error::BASE_IMAGE is not digest-pinned: $base"; exit 1 ;; esac
-          docker build --build-arg BASE_IMAGE="public.ecr.aws/docker/library/$base" \
-            -t vegaduta-postgres:ci deploy/postgres
+          ok=
+          for reg in public.ecr.aws/docker/library docker.io/library; do
+            for attempt in 1 2; do
+              if docker build --build-arg BASE_IMAGE="$reg/$base" -t vegaduta-postgres:ci deploy/postgres; then
+                ok=1; break 2
+              fi
+              echo "::warning::postgres base pull via $reg failed (attempt $attempt); retrying"
+              sleep 20
+            done
+          done
+          [ -n "$ok" ] || { echo "::error::postgres base image unreachable on every registry"; exit 1; }
           docker run -d --name pg -p 5432:5432 \
             -e POSTGRES_USER=agentic -e POSTGRES_PASSWORD=changeme -e POSTGRES_DB=agentic_ai \
             --health-cmd "pg_isready -U agentic -d agentic_ai" --health-interval 5s --health-retries 30 \
