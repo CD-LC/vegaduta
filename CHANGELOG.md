@@ -8,6 +8,19 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Assistant on every install.** `/assistant` is no longer personal-only: the rail lists it on lite and full too, and each person keeps their own Assistant agent (the lookup no longer adopts a teammate's shared agent that happens to be named "Assistant"). `/add-ons` also appears on lite, where its commands now render as `scripts/vegaduta up --lite ...`; the full stack keeps it off the rail (its service set is fixed at deploy time).
+- **Lite: the single-box add-ons work on `up --lite`.** `--profile tools` runs STDIO MCP connectors in a new `mcp-stdio-runner` container (its own network, no published port, no volumes), `--profile workspace` adds `workspace-runner` and the Assistant's projects folder (`VEGADUTA_PROJECTS_DIR`), and `--browser` layers the browser-runner overlay. Lite ships the Assistant's features on (routines, editable/persistent threads, resumable answers, data tables, learned skills and proposals) — each is an env switch away; without `--profile rag` core now reports the sidecar honestly off instead of failing calls to a missing host, and `APP_EMBEDDINGS_PROVIDER=auto` lets a cloud key or local Ollama serve embeddings.
+- **Full: the recent feature flags are wired.** `SCHEDULED_TASKS_ENABLED`, `APP_CHAT_BRANCHING_ENABLED`, `APP_CHAT_RESUMABLE_STREAMS_ENABLED(+_STORE)`, `DATA_TABLES_ENABLED`, `APP_SKILLS_LEARNING_ENABLED`, `APP_LEARNING_PROPOSALS_ENABLED`, `BROWSER_V2/PROFILES/TAKEOVER_ENABLED`, `APP_ADDONS_TENANT_ADMIN_MAY_CHANGE` and `APP_ADDONS_HOST_TOKEN` now pass through `.env` (all keep their shipped-off defaults; core.env remains the escape hatch for the rest).
+- **Personal: `--minimal` and `--no-valkey` for the smallest stack.** `scripts/vegaduta personal --minimal` runs just `postgres` + `core` + `web` (no SearXNG, no MCP runner, no Valkey, no browser); `--no-valkey` / `VEGADUTA_VALKEY=0` drops only Valkey and keeps the rest. Without the store, core's rate limits, budget windows and spend counters run in the bounded in-process fallback (`LocalRateLimitFallback`) — still enforced, still fail-closed; the choice is remembered in `.vegaduta-state`. Lite/Full keep Valkey always on.
+- **Omnibus image: the personal tier in one container.** `ghcr.io/cd-lc/omnibus:<version>` carries PostgreSQL (pgvector + Apache AGE), a Redis-protocol store, core and the console behind one `docker run`; the release workflow builds it after the per-service images publish and signs it like the rest. Data and generated secrets live under `/data`. Tradeoffs: docs/personal-mode.md, "One container".
+- **Slimmer image options.** `core/Dockerfile` accepts `--build-arg JRE=jlink` for a jlink-minimal runtime (same jammy base, ~half the Java footprint; the omnibus image uses it), and `deploy/postgres/Dockerfile.alpine` builds the same pgvector + Apache AGE extensions on `postgres:16-alpine` for size-sensitive installs.
+
+### Fixed
+
+- **Redis-backed counters no longer stall when the store is down.** After one failed Redis call, `RedisFixedWindowCounter` skips Redis for ~10 s instead of paying a connect timeout on every request before the in-process fallback engages — the same path `--no-valkey` installs depend on.
+
 ## [0.1.4] - 2026-10-19
 
 ### Fixed
