@@ -201,7 +201,13 @@ services:
       GHSEC: ${GITHUB_CLIENT_SECRET:-}
       MSID: ${MICROSOFT_CLIENT_ID:-}
       MSSEC: ${MICROSOFT_CLIENT_SECRET:-}
-    entrypoint: ["bash", "/realm-reconcile.kcadm.sh"]
+    # /health/ready can flip a moment before the admin API serves; the script
+    # is idempotent, so retry the login race rather than fail the boot.
+    entrypoint:
+      [
+        "bash", "-c",
+        "for i in $(seq 1 30); do bash /realm-reconcile.kcadm.sh && exit 0; sleep 5; done; exit 1",
+      ]
     volumes:
       - ../keycloak/reconcile-realm.kcadm.sh:/realm-reconcile.kcadm.sh:ro
 
