@@ -216,7 +216,7 @@ export default function DevicePage() {
         await new Promise((r) => setTimeout(r, POLL_MS));
       }
     };
-    tick();
+    void tick();
     return () => {
       alive = false;
       polling.current = false;
@@ -230,7 +230,7 @@ export default function DevicePage() {
       <h1 style={{ fontSize: 22, fontWeight: 700 }}>VegaDūta device</h1>
       <p style={{ color: "#555", marginTop: 8 }}>
         Pair this browser as a device your assistant can ask to do things — read your location, take a
-        photo, share a screen frame, write to the clipboard. Every capability asks for the browser's own
+        photo, share a screen frame, write to the clipboard. Every capability asks for the browser&apos;s own
         permission first.
       </p>
 
