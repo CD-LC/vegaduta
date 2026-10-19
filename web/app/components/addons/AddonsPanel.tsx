@@ -157,7 +157,11 @@ export default function AddonsPanel({ api = addonsApi }: AddonsPanelProps) {
 
         {data && (
           <>
-            {!data.mayChange && (
+            {/* === false, not falsy: a pre-mayChange core answers without the field
+                (mixed version during a rolling deploy), and switches must keep the
+                old behaviour - clickable, with the role check answering 403 - rather
+                than every card going read-only because the field is absent. */}
+            {data.mayChange === false && (
               <Alert variant="default" data-testid="addons-readonly">
                 <AlertDescription>
                   <p>{t("readOnly")}</p>
@@ -235,7 +239,7 @@ export default function AddonsPanel({ api = addonsApi }: AddonsPanelProps) {
                             hardware={data.hardware}
                             bridgeConfigured={bridge}
                             busy={state.busy.has(a.id)}
-                            mayChange={data.mayChange}
+                            mayChange={data.mayChange !== false}
                             onEnable={askEnable}
                             onDisable={askDisable}
                           />
