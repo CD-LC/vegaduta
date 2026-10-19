@@ -40,8 +40,15 @@ class AwsRdsIamTokenSourceTest {
                 .startsWith("mydb.abc123.eu-west-1.rds.amazonaws.com:5432/?")
                 .contains("Action=connect")
                 .contains("DBUser=agentic")
-                // The lifetime AWS enforces is the signed X-Amz-Expires, not our bookkeeping below.
-                .contains("X-Amz-Expires=" + AwsRdsIamTokenSource.TOKEN_LIFETIME.toSeconds())
+                // The lifetime AWS enforces is the signed X-Amz-Expires, not our bookkeeping
+                // below. The SDK floors it to whole seconds from the signing instant, so a
+                // call that crosses a second boundary reports one second less.
+                .containsPattern(
+                        "X-Amz-Expires=("
+                                + (AwsRdsIamTokenSource.TOKEN_LIFETIME.toSeconds() - 1)
+                                + "|"
+                                + AwsRdsIamTokenSource.TOKEN_LIFETIME.toSeconds()
+                                + ")")
                 .contains("X-Amz-Signature=")
                 .contains("eu-west-1%2Frds-db%2Faws4_request");
         assertThat(token.expiresAt())
