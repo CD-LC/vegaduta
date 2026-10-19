@@ -640,6 +640,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "systemStatusPanel"
   ],
+  "/device": [],
   "/devices": [],
   "/directory": [
     "auditNotifications",

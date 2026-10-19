@@ -45,7 +45,15 @@ export interface AgentResponse {
   ttsProvider: string | null;
   ttsModel: string | null;
   editable: boolean;
-  /** Caller's effective share level on this agent; null for the owner or an older core. */
+  /** Creator's auth subject (JWT sub); null on rows that predate V151. Audit trail only. */
+  createdBy?: string | null;
+  /** Last versioned editor's auth subject; null until the first save after V393. */
+  updatedBy?: string | null;
+  /**
+   * Caller's effective share level on this agent - EDITOR covers owner, tenant-admin and EDITOR
+   * grants alike, so it cannot distinguish "mine" from "shared with me editable"; use `createdBy`
+   * for that. Null on an older core or when the level cannot be resolved.
+   */
   accessLevel?: "EDITOR" | "VIEWER" | "RUNNER" | null;
   modalities: unknown;
   inputSchemaJson: string | null;

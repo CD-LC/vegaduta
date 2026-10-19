@@ -187,6 +187,36 @@ x-core-env: &core-env
   WHATSAPP_TEMPLATES_ENABLED: ${WHATSAPP_TEMPLATES_ENABLED:-false}
   WORKFLOW_DRAFT_SIMULATE_SENDS: ${WORKFLOW_DRAFT_SIMULATE_SENDS:-false}
   GRAPH_MEMORY_USER_FORGET_SYNC_ENABLED: ${GRAPH_MEMORY_USER_FORGET_SYNC_ENABLED:-false}
+  # The Assistant surface and its features (the /assistant page is for every
+  # install; its agent is per user). All default OFF on a shared install and
+  # switch on from .env: routines, persistent/editable chat history
+  # (branching writes each message to Postgres), reload-safe streaming answers,
+  # spreadsheet-like tables, learned skills and memory proposals.
+  SCHEDULED_TASKS_ENABLED: ${SCHEDULED_TASKS_ENABLED:-false}
+  SCHEDULED_TASKS_MAX_PER_TENANT: ${SCHEDULED_TASKS_MAX_PER_TENANT:-10}
+  APP_CHAT_BRANCHING_ENABLED: ${APP_CHAT_BRANCHING_ENABLED:-false}
+  APP_CHAT_RESUMABLE_STREAMS_ENABLED: ${APP_CHAT_RESUMABLE_STREAMS_ENABLED:-false}
+  # memory = a resume must reach the replica generating the turn; use redis with
+  # 2+ core replicas so any replica can serve a resume.
+  APP_CHAT_RESUMABLE_STREAMS_STORE: ${APP_CHAT_RESUMABLE_STREAMS_STORE:-memory}
+  DATA_TABLES_ENABLED: ${DATA_TABLES_ENABLED:-false}
+  APP_SKILLS_LEARNING_ENABLED: ${APP_SKILLS_LEARNING_ENABLED:-false}
+  APP_LEARNING_PROPOSALS_ENABLED: ${APP_LEARNING_PROPOSALS_ENABLED:-false}
+  # The agent's browser (browser_* tools) needs a Chromium - the `-browser`
+  # mcp-stdio-runner variant (profile browser) or the core-full image. The flags
+  # gate which of the browser tool families are offered once one exists.
+  BROWSER_V2_ENABLED: ${BROWSER_V2_ENABLED:-false}
+  BROWSER_PROFILES_ENABLED: ${BROWSER_PROFILES_ENABLED:-false}
+  BROWSER_TAKEOVER_ENABLED: ${BROWSER_TAKEOVER_ENABLED:-false}
+  # The Assistant's terminal/projects folder is deliberately NOT wired here: on a
+  # shared install any tenant's commands would run on the server. It needs
+  # app.assistant.local-shell.acknowledge-shared-host=true - set it in core.env
+  # if you run this stack for yourself only.
+  # /add-ons: the registry is install-wide; tenant admins may change it on a
+  # self-hosted box (true) - the default leaves it to the platform admin.
+  APP_ADDONS_TENANT_ADMIN_MAY_CHANGE: ${APP_ADDONS_TENANT_ADMIN_MAY_CHANGE:-}
+  # Shared secret for the installer's host bridge (GET /api/addons/host/wanted).
+  APP_ADDONS_HOST_TOKEN: ${ADDONS_HOST_TOKEN:-}
   # true = STDIO MCP servers (dynamic AND the static built-ins) run in the
   # isolated mcp-stdio-runner (profiles tools/browser/sandbox); with the
   # runner absent they refuse to start (fail closed). false = spawned inside
@@ -1422,6 +1452,7 @@ services:
     <<: [*restart, *logging]
     environment:
       MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      MCP_STDIO_RUNNER_MAX_CHILDREN: ${MCP_STDIO_RUNNER_MAX_CHILDREN:-8}
     volumes:
       - ../../examples/mcp-servers:/opt/mcp-servers:ro
       - outreach-data:/var/lib/outreach

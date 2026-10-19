@@ -161,6 +161,8 @@ export default function ApiCallPanel({ method, path, title, query, body }: Props
           return;
         }
       }
+      // contract-exempt: the path is runtime data - the generative-ui spec declares the endpoint,
+      // so there is no literal for the contract to name; auth and error handling still go through apiFetch.
       const res = await apiFetch(buildPath(path, values, query), {
         method,
         ...(payload ? { body: payload, headers: { "Content-Type": "application/json" } } : {}),

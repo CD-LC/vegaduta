@@ -439,4 +439,22 @@ class AddonServiceTest {
         assertEquals("./scripts/vegaduta personal --profile rag --profile workspace --search", all.command());
         assertEquals(List.of("search", "docs", "browser", "work"), all.pending());
     }
+
+    @Test
+    void theApplyCommandFollowsTheInstallShape() {
+        // Kit default: personal (local auth).
+        assertEquals("./scripts/vegaduta personal --profile workspace", service.overview().apply().command());
+
+        // Lite (Keycloak auth, `lite` profile): the same wishes render as `up --lite` commands.
+        kit.environment.setProperty("app.auth.mode", "keycloak");
+        kit.environment.setActiveProfiles("lite");
+        assertEquals("./scripts/vegaduta up --lite --profile workspace", service.overview().apply().command());
+        assertEquals("./scripts/vegaduta up --lite --search", view("search").hostCommand());
+        // A command that does not start with the personal base is left alone.
+        assertEquals("Set CORE_IMAGE_VARIANT=-full and CORE_MEM_LIMIT=2560m in .env", view("browser").hostCommand());
+
+        // Full: no lite profile -> the `up --full` shape.
+        kit.environment.setActiveProfiles();
+        assertEquals("./scripts/vegaduta up --full --profile workspace", service.overview().apply().command());
+    }
 }

@@ -87,6 +87,8 @@ final class AddonKit {
 
     AddonKit(String catalogJson) {
         catalog = AddonCatalog.parse(catalogJson);
+        // The kit simulates the personal install (local auth); tests flip it to check other shapes.
+        environment.setProperty("app.auth.mode", "local");
         AddonStateRepository repository = mock(AddonStateRepository.class);
         when(repository.findAll()).thenAnswer(i -> new ArrayList<>(rows.values()));
         when(repository.findById(anyString())).thenAnswer(i -> Optional.ofNullable(rows.get((String) i.getArgument(0))));

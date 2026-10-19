@@ -88,6 +88,19 @@ describe("pickAssistantAgent", () => {
     expect(pickAssistantAgent(agents, null)?.id).toBe("b");
     expect(pickAssistantAgent([agent("a", "Support")], null)).toBeNull();
   });
+
+  it("never adopts another user's shared agent by name on a shared install", () => {
+    // createdBy is the creator's auth subject; a colleague's agent (EDITOR grant included) does not match.
+    const theirs = agent("theirs", "Assistant", { createdBy: "teammate-sub" });
+    const mine = agent("mine", "Assistant", { createdBy: "my-sub" });
+    const legacy = agent("old", "Assistant", { createdBy: null });
+    expect(pickAssistantAgent([theirs], null, "my-sub")).toBeNull();
+    expect(pickAssistantAgent([theirs, mine], null, "my-sub")?.id).toBe("mine");
+    // A pre-V151 row has no creator recorded - anyone's guess, so it is fair to adopt.
+    expect(pickAssistantAgent([legacy], null, "my-sub")?.id).toBe("old");
+    // The marker still wins even when it names a teammate's row (the user wrote it).
+    expect(pickAssistantAgent([theirs, mine], "theirs", "my-sub")?.id).toBe("theirs");
+  });
 });
 
 describe("ensureAssistantAgent", () => {

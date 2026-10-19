@@ -34,7 +34,7 @@ describe("detectNeeds", () => {
 describe("unmetNeeds", () => {
   const needs = detectNeeds("read my whatsapp and check my calendar");
   it("blocks only what is known to be disconnected", () => {
-    const s = status({ whatsapp: "NOT_CONNECTED" }, true);
+    const s = status({ whatsappqr: "NOT_CONNECTED" }, true);
     expect(unmetNeeds(needs, s).map((n) => n.key)).toEqual(["whatsapp"]);
   });
   it("never blocks on unknown status", () => {
@@ -54,7 +54,7 @@ describe("agent context", () => {
     expect(connectionsContext(status(null, null))).toBeNull();
   });
   it("lists connected and missing services and round-trips through strip", () => {
-    const ctx = connectionsContext(status({ email: "CONNECTED", whatsapp: "NOT_CONNECTED" }, false));
+    const ctx = connectionsContext(status({ email: "CONNECTED", whatsappqr: "NOT_CONNECTED" }, false));
     expect(ctx).toContain("Connected: Email.");
     expect(ctx).toContain("Not connected: WhatsApp, Google");
     const sent = withAppContext("read my whatsapp", ctx);
@@ -65,14 +65,14 @@ describe("agent context", () => {
 
 describe("attached folder context", () => {
   it("adds the folder to the app_context block and is stripped from the stored text", () => {
-    const ctx = assistantContext(status({ whatsapp: "NOT_CONNECTED" }, true), "spring-demo");
+    const ctx = assistantContext(status({ whatsappqr: "NOT_CONNECTED" }, true), "spring-demo");
     expect(ctx).toContain("Not connected: WhatsApp");
     expect(ctx).toContain('Attached folder: "spring-demo"');
     expect(ctx).toContain('"spring-demo/"');
     expect(stripAppContext(withAppContext("build it", ctx))).toBe("build it");
   });
   it("is just the connection facts when no folder is attached", () => {
-    const s = status({ whatsapp: "NOT_CONNECTED" }, true);
+    const s = status({ whatsappqr: "NOT_CONNECTED" }, true);
     expect(assistantContext(s, null)).toBe(connectionsContext(s));
     expect(assistantContext(status(null, null), "demo")).toContain('Attached folder: "demo"');
   });

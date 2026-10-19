@@ -15,6 +15,11 @@
 // wrapper answers calls in files that import its name and only when the name is
 // exported once. A call of a wrapper whose argument the extractor cannot read stays
 // a dynamic call site at the caller, so the count never hides a call.
+//
+// The last resort is a `// contract-exempt: <reason>` comment on the call's line or
+// one of the three above it: the URL is runtime DATA, not code (the generative-ui
+// "try it" panel sends a path the docs content declares). The reason text is
+// required, so the opt-out always says why; the site is then not extracted at all.
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
@@ -31,6 +36,17 @@ import {
 
 /** Helpers whose own bodies forward their parameters; never discovered as wrappers. */
 const BUILTIN = new Set([...PATH_CALLERS, ...URL_CALLERS, "prefetchApiGets"]);
+
+// `// contract-exempt: <reason>` on the call's line or up to three lines above it
+// opts the site out (see the header). The reason after the colon is mandatory.
+const EXEMPT_COMMENT = /\bcontract-exempt:\s*\S/;
+
+function exempted(sourceFile, node) {
+  const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+  const lines = sourceFile.getFullText().split("\n");
+  for (let i = line; i >= 0 && i >= line - 3; i--) if (EXEMPT_COMMENT.test(lines[i])) return true;
+  return false;
+}
 
 function hasExport(node) {
   return !!(ts.canHaveModifiers(node) && ts.getModifiers(node)?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword));
@@ -253,7 +269,7 @@ export function extractFromSource(sourceFile, file, registry) {
         if (forwarded) {
           // nothing to record
         } else if (p && p.dynamic) {
-          calls.push({ file, line, method: "?", dynamic: true });
+          if (!exempted(sourceFile, node)) calls.push({ file, line, method: "?", dynamic: true });
         } else if (p) {
           const opts = target.builtin
             ? target.builtin === "fetchPaged"

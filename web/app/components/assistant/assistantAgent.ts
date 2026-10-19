@@ -155,6 +155,11 @@ export interface AssistantProfile {
   name?: string | null;
   locale?: string | null;
   timeZone?: string | null;
+  /**
+   * The caller's auth subject (JWT `sub`, `getUserId()`), used only to pick which existing agent is
+   * theirs on a shared install; it is never written into the marker or anywhere else.
+   */
+  subject?: string | null;
 }
 
 const MARKER_LINE = /^personal assistant agent id:\s*([0-9a-zA-Z_-]+)/im;
@@ -174,17 +179,31 @@ export function markerAgentId(memory: Pick<MemoryOverview, "blocks"> | null | un
   return m ? m[1] : null;
 }
 
-/** The existing agent to use: the marked one if it still exists, else the first one named "Assistant". */
+/**
+ * The existing agent to use: the marked one if it still exists, else the first one named "Assistant"
+ * THE CALLER CREATED. On a shared install (lite/full) the list holds teammates' agents too, and
+ * accessLevel is EDITOR for the owner as well as for EDITOR grants - so the name fallback (the
+ * upgrade path from before the marker existed) must compare `createdBy` to the caller's subject,
+ * or a teammate's shared "Assistant" would get this user's threads and memory writes. A row with
+ * no `createdBy` predates V151 and per-user assistants; it is fair to adopt.
+ */
 export function pickAssistantAgent(
   agents: ReadonlyArray<AgentResponse> | null | undefined,
-  markedId: string | null
+  markedId: string | null,
+  subject?: string | null
 ): AgentResponse | null {
   const list = agents ?? [];
   if (markedId) {
     const marked = list.find((a) => a.id === markedId);
     if (marked) return marked;
   }
-  return list.find((a) => (a.name ?? "").trim().toLowerCase() === ASSISTANT_AGENT_NAME.toLowerCase()) ?? null;
+  return (
+    list.find(
+      (a) =>
+        (a.createdBy == null || a.createdBy === subject) &&
+        (a.name ?? "").trim().toLowerCase() === ASSISTANT_AGENT_NAME.toLowerCase()
+    ) ?? null
+  );
 }
 
 /** The slice of `api` this module needs - the real client satisfies it, tests pass a mock. */
@@ -219,7 +238,7 @@ export async function ensureAssistantAgent(
     api.getMemoryQuiet().catch((): MemoryOverview | null => null),
   ]);
   const markedId = markerAgentId(memory);
-  const existing = pickAssistantAgent(agents, markedId);
+  const existing = pickAssistantAgent(agents, markedId, profile.subject ?? null);
   if (existing) {
     await syncAssistantTools(api, existing.id);
     // The Assistant answers from the person's documents: a knowledge base left off (the best-effort

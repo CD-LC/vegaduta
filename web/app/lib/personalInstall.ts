@@ -11,6 +11,7 @@
 // page, no machine API keys, no cost/ROI roll-up (billing is off) and no Studio
 // generation surface.
 import { isLocalAuth } from "./authMode";
+import { getPublicEnv } from "./env";
 
 const PERSONAL_HIDDEN_ROUTES: readonly string[] = [
   "/shared-with-me",
@@ -33,18 +34,31 @@ const PERSONAL_HIDDEN_ROUTES: readonly string[] = [
   "/jobs",
 ];
 
-/** Surfaces that exist for the one-person install only; any other install does not advertise them. */
-const PERSONAL_ONLY_ROUTES: readonly string[] = ["/assistant", "/add-ons"];
+/**
+ * Surfaces a shared/hosted install does not advertise. /assistant is for every install (the
+ * Assistant agent is per user, on any tier). /add-ons is the install's switchboard: it exists on
+ * the personal and lite shapes (the compose profiles and flags its commands name exist there);
+ * the full stack's service set is already fixed at deploy time, so the page stays off it.
+ */
+const PERSONAL_ONLY_ROUTES: readonly string[] = ["/add-ons"];
+
+/** True on the lite tier (`NEXT_PUBLIC_DEPLOY_ENV=lite`): self-hosted, single box, Keycloak auth. */
+function isLiteInstall(): boolean {
+  return getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV")?.trim().toLowerCase() === "lite";
+}
 
 const under = (href: string, route: string): boolean => href === route || href.startsWith(`${route}/`);
 
 /**
  * True when {@code href} is a surface this install should not advertise: on a personal install the
- * multi-tenant and platform pages above, on every other install the personal-only ones (the
- * Assistant). Deep links to either keep working.
+ * multi-tenant and platform pages above; on a hosted/full install the add-ons switchboard (lite
+ * self-hosted keeps it). Deep links to either keep working.
  */
 export function hiddenOnPersonalInstall(href: string): boolean {
-  if (!isLocalAuth()) return PERSONAL_ONLY_ROUTES.some((r) => under(href, r));
+  if (!isLocalAuth()) {
+    if (isLiteInstall()) return false;
+    return PERSONAL_ONLY_ROUTES.some((r) => under(href, r));
+  }
   return PERSONAL_HIDDEN_ROUTES.some((r) => under(href, r));
 }
 

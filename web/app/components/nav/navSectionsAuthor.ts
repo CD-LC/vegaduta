@@ -514,9 +514,10 @@ export const AUTHOR_NAV_SECTIONS: NavSection[] = [
         adminHidden: false,
         adminOnly: false,
       },
-      // /add-ons - optional extras of a personal install (web search, documents, the Assistant's
-      // browser, local model packs). Personal-install only: PERSONAL_ONLY_ROUTES in
-      // lib/personalInstall.ts keeps it off every other install's rail.
+      // /add-ons - optional extras of a single-box install (web search, documents, the Assistant's
+      // browser, local model packs). Personal and lite only: PERSONAL_ONLY_ROUTES in
+      // lib/personalInstall.ts keeps it off the full stack's rail (its service set is fixed at
+      // deploy time and the catalog's commands name the single-box tiers).
       {
         href: "/add-ons",
         labelKey: "railAddons",

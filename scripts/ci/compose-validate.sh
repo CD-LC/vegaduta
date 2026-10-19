@@ -55,10 +55,13 @@ elif [[ -d deploy/compose ]]; then
   done
   shopt -u nullglob
   # The local-AI overlays also stack on the Lite base, which the naming
-  # convention above never pairs (vegaduta up --lite --local-ai[=host]).
+  # convention above never pairs (vegaduta up --lite --local-ai[=host]). So do
+  # the search overlays and browser.yml (up --lite --search / --browser).
   sets+=(
     "deploy/compose/lite.yml deploy/compose/docker-compose.local-ai.yml"
     "deploy/compose/lite.yml deploy/compose/docker-compose.local-ai.yml deploy/compose/docker-compose.local-ai.host.yml"
+    "deploy/compose/lite.yml deploy/compose/docker-compose.search.yml deploy/compose/docker-compose.search.lite.yml"
+    "deploy/compose/lite.yml deploy/compose/browser.yml"
     # personal: local-AI overlays, the native-core overlay (scripts/vegaduta personal --native-core)
     # and both together; the base+build and base+native pairs come from the naming convention.
     "deploy/compose/personal.yml deploy/compose/docker-compose.local-ai.yml"

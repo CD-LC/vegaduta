@@ -12,8 +12,15 @@
 #             files on a local volume instead of S3
 #   web       Next.js console
 #
-# Optional:  --profile rag   adds the Python sidecar (document ingestion,
-#                            embeddings, rerank, transcription)
+# Optional (scripts/vegaduta up --lite ...):
+#   --profile rag        adds the Python sidecar (document ingestion,
+#                        embeddings, rerank, transcription)
+#   --profile tools      mcp-stdio-runner: the container STDIO MCP servers
+#                        (npx/uvx connectors) run in, away from core's secrets
+#   --profile workspace  workspace-runner: the Assistant's build terminal and
+#                        the projects folder it works in (VEGADUTA_PROJECTS_DIR)
+#   --search             SearXNG web search (docker-compose.search*.yml)
+#   --browser            the Assistant's own browser (deploy/compose/browser.yml)
 #
 # Upgrading to the full stack keeps the Postgres volume only if you reuse
 # the same COMPOSE_PROJECT_NAME; Keycloak users (dev-file) and local files do
@@ -180,11 +187,16 @@ services:
         condition: service_healthy
       db-roles:
         condition: service_completed_successfully
+      workspace-perms:
+        condition: service_completed_successfully
       valkey:
         condition: service_healthy
       keycloak:
         condition: service_healthy
       sidecar:
+        condition: service_healthy
+        required: false
+      mcp-stdio-runner:
         condition: service_healthy
         required: false
     env_file:
@@ -231,10 +243,68 @@ services:
       APP_STORAGE_LOCAL_PATH: /data/storage
       SIDECAR_BASE_URL: http://sidecar:8001
       SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:-}
-      # Single-user laptop mode: STDIO MCP servers spawn inside core (needs
-      # the core-full image - the slim one has no npx and core says so at
-      # startup if the `mcp` profile is on).
-      MCP_STDIO_SIDECAR_ENABLED: "false"
+      # The sidecar container only exists under --profile rag; the CLI exports
+      # APP_SIDECAR_ENABLED=true with it. Without it: rerank fails open, PDF/OCR/
+      # transcription answer 503 instead of a connection error, and `auto` picks a
+      # cloud key or a registered local Ollama for embeddings.
+      APP_SIDECAR_ENABLED: ${APP_SIDECAR_ENABLED:-false}
+      APP_EMBEDDINGS_PROVIDER: ${APP_EMBEDDINGS_PROVIDER:-auto}
+      # STDIO MCP servers run in the mcp-stdio-runner container (--profile tools;
+      # the CLI exports MCP_STDIO_SIDECAR_ENABLED=true). With ",mcp" in
+      # LITE_SPRING_PROFILES + CORE_IMAGE_VARIANT=-full they spawn inside core
+      # instead, and the container itself is the boundary (no sandbox-exec/bwrap
+      # in the image, and cap_drop blocks the unshare fallback) - hence `none`.
+      MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
+      MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
+      MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+      APP_MCP_STDIO_SANDBOX: ${APP_MCP_STDIO_SANDBOX:-none}
+      # Starter connectors (fetch, time, sequential-thinking) registered for every
+      # workspace at start when the runner is on. A deleted or edited one is never
+      # put back.
+      APP_MCP_STARTER_ENABLED: ${APP_MCP_STARTER_ENABLED:-false}
+      # The Assistant surface's features - on for this local single-node tier;
+      # set any to false in .env to switch it back off.
+      SCHEDULED_TASKS_ENABLED: ${SCHEDULED_TASKS_ENABLED:-true}
+      SCHEDULED_TASKS_MAX_PER_TENANT: ${SCHEDULED_TASKS_MAX_PER_TENANT:-25}
+      APP_CHAT_BRANCHING_ENABLED: ${APP_CHAT_BRANCHING_ENABLED:-true}
+      APP_CHAT_RESUMABLE_STREAMS_ENABLED: ${APP_CHAT_RESUMABLE_STREAMS_ENABLED:-true}
+      DATA_TABLES_ENABLED: ${DATA_TABLES_ENABLED:-true}
+      APP_SKILLS_LEARNING_ENABLED: ${APP_SKILLS_LEARNING_ENABLED:-true}
+      APP_SKILLS_LEARNING_SELF_CHECK_ENABLED: ${APP_SKILLS_LEARNING_SELF_CHECK_ENABLED:-true}
+      APP_LEARNING_PROPOSALS_ENABLED: ${APP_LEARNING_PROPOSALS_ENABLED:-true}
+      APP_LEARNING_LESSONS_ENABLED: ${APP_LEARNING_LESSONS_ENABLED:-true}
+      APP_LEARNING_PREFERENCES_ENABLED: ${APP_LEARNING_PREFERENCES_ENABLED:-true}
+      APP_LEARNING_ROUTINES_ENABLED: ${APP_LEARNING_ROUTINES_ENABLED:-true}
+      APP_LEARNING_REVIEW_ENABLED: ${APP_LEARNING_REVIEW_ENABLED:-true}
+      # Deep research stays opt-in: it needs a search provider (a stored key or
+      # the SearXNG add-on from --search).
+      RESEARCH_DEEP_ENABLED: ${RESEARCH_DEEP_ENABLED:-false}
+      RESEARCH_RUNS_ENABLED: ${RESEARCH_RUNS_ENABLED:-false}
+      # The Assistant's projects folder and build terminal (--profile workspace):
+      # commands run in the workspace-runner container; files land in the projects
+      # folder mounted at /workspace. Off until the operator opts in - on this
+      # Keycloak tier the CLI also sets APP_ASSISTANT_LOCAL_SHELL_ENABLED and
+      # ..._ACKNOWLEDGE_SHARED_HOST when the profile is chosen.
+      APP_ASSISTANT_LOCAL_SHELL_ENABLED: ${APP_ASSISTANT_LOCAL_SHELL_ENABLED:-false}
+      APP_ASSISTANT_LOCAL_SHELL_ACKNOWLEDGE_SHARED_HOST: ${APP_ASSISTANT_LOCAL_SHELL_ACKNOWLEDGE_SHARED_HOST:-false}
+      APP_ASSISTANT_LOCAL_SHELL_WORKSPACE: /workspace
+      APP_ASSISTANT_LOCAL_SHELL_WORKSPACE_HOST_PATH: ${VEGADUTA_PROJECTS_DIR:-}
+      APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL: ${APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL:-}
+      APP_ASSISTANT_LOCAL_SHELL_RUNNER_SECRET: ${WORKSPACE_RUNNER_SECRET:-}
+      APP_ASSISTANT_LOCAL_SHELL_MAX_TIMEOUT_SECONDS: ${WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS:-1800}
+      APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED: ${APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED:-true}
+      # The agent's browser (--browser layers browser.yml, a Playwright container
+      # core attaches to; CORE_IMAGE_VARIANT=-full puts Chromium inside core). The
+      # flags cost nothing while no browser exists; the domain policy is unchanged.
+      BROWSER_V2_ENABLED: ${BROWSER_V2_ENABLED:-true}
+      BROWSER_PROFILES_ENABLED: ${BROWSER_PROFILES_ENABLED:-true}
+      BROWSER_TAKEOVER_ENABLED: ${BROWSER_TAKEOVER_ENABLED:-true}
+      BROWSER_ALLOWED_DOMAINS: ${BROWSER_ALLOWED_DOMAINS:-}
+      BROWSER_BLOCKED_DOMAINS: ${BROWSER_BLOCKED_DOMAINS:-}
+      # /add-ons on this self-hosted box: tenant admins may switch extras (the
+      # registry is install-wide; set false to leave it to the platform admin).
+      APP_ADDONS_TENANT_ADMIN_MAY_CHANGE: ${APP_ADDONS_TENANT_ADMIN_MAY_CHANGE:-true}
+      APP_ADDONS_HOST_TOKEN: ${ADDONS_HOST_TOKEN:-}
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
       LIVEKIT_URL: ${PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
@@ -246,10 +316,19 @@ services:
       SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
     ports:
       - "${BIND_ADDR:-127.0.0.1}:${CORE_HOST_PORT:-8080}:8080"
+    # `default` is named explicitly because listing any network drops the implicit
+    # one; mcp-stdio-net is shared only with the runner (empty without `tools`).
+    networks:
+      - default
+      - mcp-stdio-net
     volumes:
       - core-storage:/data/storage
       - core-mcp-data:/app/mcp-data
       - ../../examples/mcp-servers:/opt/mcp-servers:ro
+      # The projects folder the Assistant works in (VEGADUTA_PROJECTS_DIR, set by
+      # --profile workspace); an empty named volume otherwise, so nothing of the
+      # host is mounted unless asked.
+      - ${VEGADUTA_PROJECTS_DIR:-core-projects}:/workspace
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health/readiness"]
       interval: 15s
@@ -286,6 +365,14 @@ services:
       NEXT_PUBLIC_EDGE_AGENTS: ${WEB_EDGE_AGENTS:-}
       NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-lite}
       NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+      NEXT_PUBLIC_SITE_MODE: ${WEB_SITE_MODE:-}
+      NEXT_PUBLIC_DOCS_URL: ${WEB_DOCS_URL:-}
+      NEXT_PUBLIC_COMMERCIAL_URL: ${WEB_COMMERCIAL_URL:-}
+      NEXT_PUBLIC_ACADEMY_URL: ${WEB_ACADEMY_URL:-}
+      NEXT_PUBLIC_CONTACT_EMAIL: ${WEB_CONTACT_EMAIL:-}
+      NEXT_PUBLIC_MCP_APPS: ${WEB_MCP_APPS:-}
+      NEXT_PUBLIC_ARTIFACTS: ${WEB_ARTIFACTS:-}
+      NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS: ${WEB_TRUSTED_IMAGE_HOSTS:-}
     ports:
       - "${BIND_ADDR:-127.0.0.1}:${WEB_HOST_PORT:-3000}:3000"
     healthcheck:
@@ -299,7 +386,25 @@ services:
         limits:
           memory: 512m
 
+  workspace-perms:
+    # One-shot, idempotent: the projects folder is shared by core (uid 999, saves
+    # chat uploads in "Chat uploads") and the workspace-runner (uid 1000, writes
+    # the build output). Whichever container creates the named volume first owns
+    # it, and a volume owned by 1000 refused core's upload - so attaching any file
+    # failed. Opened up only for the named volume (VEGADUTA_PROJECTS_DIR unset); a
+    # folder the user chose on the host keeps the permissions they gave it.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core${CORE_IMAGE_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    restart: "no"
+    user: "0:0"
+    entrypoint: ["sh", "-c", "[ -n \"$$VEGADUTA_PROJECTS_DIR\" ] || chmod 0777 /workspace"]
+    environment:
+      VEGADUTA_PROJECTS_DIR: ${VEGADUTA_PROJECTS_DIR:-}
+    volumes:
+      - ${VEGADUTA_PROJECTS_DIR:-core-projects}:/workspace
+
   # ----------------------------------------------------------- profile: rag
+  # Without the profile core runs with app.sidecar.enabled=false (above): the
+  # feature reports itself off instead of failing calls against a missing host.
   sidecar:
     image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/sidecar:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
     profiles: ["rag"]
@@ -322,12 +427,82 @@ services:
         limits:
           memory: ${SIDECAR_MEM_LIMIT:-2g}
 
+  # ---------------------------------------------------------- profile: tools
+  # STDIO MCP servers (workspace-registered `npx <pkg>` / `uvx <pkg>` and the
+  # starter connectors) run HERE, in their own container, away from core's
+  # secrets, database and Valkey. Same service the full stack runs; core reaches
+  # it over the mcp-stdio-net network only, through a relay that is part of the
+  # core image. No port is published, no volume is mounted (the projects folder
+  # is deliberately NOT visible here) and the shared secret is the only
+  # credential it knows about.
+  mcp-stdio-runner:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/mcp-stdio-runner:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["tools"]
+    <<: [*restart, *logging]
+    environment:
+      MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      MCP_STDIO_RUNNER_MAX_CHILDREN: ${MCP_STDIO_RUNNER_MAX_CHILDREN:-8}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8098/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:../../services/mcp-stdio-runner/seccomp-profile.json
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits:
+          memory: ${MCP_STDIO_RUNNER_MEM_LIMIT:-768m}
+          pids: 256
+    networks: [mcp-stdio-net]
+
+  # ------------------------------------------------------- profile: workspace
+  # The Assistant's build terminal (services/workspace-runner): runs the
+  # commands the user approves, in the folder they attached, with JDK 21, Maven,
+  # Node and git. Only the projects folder is mounted; it holds no platform
+  # secret and no Docker socket.
+  workspace-runner:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/workspace-runner:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["workspace"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      WORKSPACE_RUNNER_SECRET: ${WORKSPACE_RUNNER_SECRET:?run scripts/vegaduta secrets}
+      WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS: ${WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS:-1800}
+    # Dev servers the Assistant starts (local_shell background:true) listen on
+    # one of these ports; published on this machine's loopback only, so the
+    # console's Preview pane can show them.
+    ports:
+      - "127.0.0.1:13210-13219:13210-13219"
+    volumes:
+      - ${VEGADUTA_PROJECTS_DIR:-core-projects}:/workspace
+      # ~/.m2, ~/.gradle and ~/.npm caches survive restarts and stay out of the projects.
+      - workspace-runner-home:/home/runner
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8090/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${WORKSPACE_RUNNER_MEM_LIMIT:-3g}
+
 volumes:
   postgres-data:
   valkey-data:
   keycloak-data:
   core-storage:
   core-mcp-data:
+  core-projects:
+  workspace-runner-home:
   sidecar-workspace:
 
-# One network: Compose's default "<project>_default".
+# Compose's default "<project>_default" for everything, plus mcp-stdio-net: only
+# core and the mcp-stdio-runner are on it, so a package running there has no
+# route to postgres or valkey.
+networks:
+  mcp-stdio-net: {}

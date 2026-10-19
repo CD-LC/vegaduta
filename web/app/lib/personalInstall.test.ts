@@ -6,10 +6,23 @@ import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, poolLabe
 // ("personal install") is exercised by stubbing the env lookup - see
 // authMode.test.ts for the same approach.
 vi.mock("./authMode", () => ({ isLocalAuth: vi.fn() }));
+vi.mock("./env", () => ({ getPublicEnv: vi.fn() }));
 import { isLocalAuth } from "./authMode";
+import { getPublicEnv } from "./env";
 
-const local = () => vi.mocked(isLocalAuth).mockReturnValue(true);
-const hosted = () => vi.mocked(isLocalAuth).mockReturnValue(false);
+const local = () => {
+  vi.mocked(isLocalAuth).mockReturnValue(true);
+  vi.mocked(getPublicEnv).mockReturnValue(undefined);
+};
+const hosted = () => {
+  vi.mocked(isLocalAuth).mockReturnValue(false);
+  vi.mocked(getPublicEnv).mockReturnValue(undefined);
+};
+// Lite: Keycloak auth, but the self-hosted single-box tier (NEXT_PUBLIC_DEPLOY_ENV=lite).
+const lite = () => {
+  hosted();
+  vi.mocked(getPublicEnv).mockImplementation((key) => (key === "NEXT_PUBLIC_DEPLOY_ENV" ? "lite" : undefined));
+};
 
 describe("hiddenOnPersonalInstall", () => {
   it("hides multi-tenant surfaces on a personal install", () => {
@@ -75,13 +88,15 @@ describe("hiddenOnPersonalInstall", () => {
     expect(hiddenOnPersonalInstall("/assistant")).toBe(false);
     hosted();
     for (const href of ["/playground", "/quick-task", "/jobs"]) expect(hiddenOnPersonalInstall(href), href).toBe(false);
-    // The Assistant is a personal-install surface; other installs do not advertise it.
-    expect(hiddenOnPersonalInstall("/assistant")).toBe(true);
+    // The Assistant is for every install - the agent behind it is per user.
+    expect(hiddenOnPersonalInstall("/assistant")).toBe(false);
     expect(hiddenOnPersonalInstall("/assistant-tools")).toBe(false);
   });
 
-  it("lists Add-ons on a personal install only (the registry is install-wide and host-applied)", () => {
+  it("lists Add-ons on personal and lite installs (the registry is install-wide and host-applied)", () => {
     local();
+    expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
+    lite();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
     hosted();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);

@@ -71,6 +71,10 @@ public class AddonService {
 
     /** The command a host runs to bring the stack in line with the wanted set. */
     static final String BASE_COMMAND = "./scripts/vegaduta personal";
+    /** Same wish applied to the lite tier (`up --lite` accepts the same --profile/--search/--browser flags). */
+    static final String BASE_COMMAND_LITE = "./scripts/vegaduta up --lite";
+    /** On the full stack the catalog's single-box add-ons do not apply; still emit an honest command shape. */
+    static final String BASE_COMMAND_FULL = "./scripts/vegaduta up --full";
 
     private final AddonCatalog catalog;
     private final AddonStateStore store;
@@ -435,7 +439,7 @@ public class AddonService {
                 d.free(),
                 d.requires(),
                 d.defaultOn(),
-                d.hostCommand(),
+                hostCommand(d),
                 d.learnMore(),
                 d.unlocks(),
                 d.model(),
@@ -474,11 +478,39 @@ public class AddonService {
     }
 
     private Apply apply(Snapshot s) {
-        return computeApply(hostManaged(), s::result);
+        return computeApply(hostManaged(), s::result, baseCommand());
+    }
+
+    /**
+     * The installer's base command for this install's shape: {@code personal} on local auth,
+     * {@code up --lite} on the lite profile, {@code up --full} elsewhere.
+     */
+    private String baseCommand() {
+        if ("local".equalsIgnoreCase(environment.getProperty("app.auth.mode", "keycloak"))) {
+            return BASE_COMMAND;
+        }
+        if (environment.acceptsProfiles(org.springframework.core.env.Profiles.of("lite"))) {
+            return BASE_COMMAND_LITE;
+        }
+        return BASE_COMMAND_FULL;
+    }
+
+    /** A catalog {@code hostCommand} re-pointed at this install's shape (the personal prefix is the template). */
+    private String hostCommand(AddonDefinition d) {
+        String command = d.hostCommand();
+        if (command != null && command.startsWith(BASE_COMMAND)) {
+            return baseCommand() + command.substring(BASE_COMMAND.length());
+        }
+        return command;
     }
 
     /** What the host must do so the stack matches the wanted compose add-ons. Pure, so it is unit-tested. */
     static Apply computeApply(List<AddonDefinition> composeAddons, Function<AddonDefinition, Result> state) {
+        return computeApply(composeAddons, state, BASE_COMMAND);
+    }
+
+    /** Same as {@link #computeApply(List, Function)} with the tier's own base command. */
+    static Apply computeApply(List<AddonDefinition> composeAddons, Function<AddonDefinition, Result> state, String baseCommand) {
         Set<String> profiles = new LinkedHashSet<>();
         Set<String> flags = new LinkedHashSet<>();
         Map<String, String> envSet = new LinkedHashMap<>();
@@ -497,7 +529,7 @@ public class AddonService {
             }
         }
         List<String> envUnset = envKnown.stream().filter(k -> !envSet.containsKey(k)).toList();
-        StringBuilder command = new StringBuilder(BASE_COMMAND);
+        StringBuilder command = new StringBuilder(baseCommand);
         profiles.forEach(p -> command.append(" --profile ").append(p));
         flags.forEach(f -> command.append(' ').append(f));
         return new Apply(command.toString(), List.copyOf(profiles), List.copyOf(flags),

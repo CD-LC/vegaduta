@@ -29,3 +29,7 @@ services:
         NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
   sidecar:
     build: ../../services/sidecar
+  mcp-stdio-runner:
+    build: ../../services/mcp-stdio-runner
+  workspace-runner:
+    build: ../../services/workspace-runner

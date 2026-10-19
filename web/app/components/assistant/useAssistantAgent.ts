@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { assistantApi } from "../../lib/api/assistant";
 import { errorMessage } from "../../lib/errors";
+import { getUserId } from "../../lib/authClaims";
 import { useAuth } from "../AuthProvider";
 import { ensureAssistantAgent, type AssistantAgentResult } from "./assistantAgent";
 
@@ -40,6 +41,7 @@ export function useAssistantAgent(): AssistantAgentState & { retry: () => void }
       name: firstName ?? null,
       locale: typeof navigator !== "undefined" ? navigator.language : null,
       timeZone: safeTimeZone(),
+      subject: getUserId(),
     };
     runSetup(profile)
       .then((result) => {

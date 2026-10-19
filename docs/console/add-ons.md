@@ -1,17 +1,18 @@
 # Add-ons
 
 **Add-ons** (`/add-ons`, sidebar label "Add-ons", Configuration group) lists the optional extras of a
-[personal install](../personal-mode.md): the Assistant's build terminal, web search, document reading, the
-Assistant's own browser and free local model packs. Each card says what the add-on gives you and what it costs
-this computer, and has one button to turn it on or off. The page is a view over the add-on registry in core
-(`core/providers`, package `com.agenticai.core.providers.addons`); it adds no backend of its own.
+single-box install - a [personal install](../personal-mode.md) or a lite one: the Assistant's build terminal,
+web search, document reading, the Assistant's own browser and free local model packs. Each card says what the
+add-on gives you and what it costs this computer, and has one button to turn it on or off. The page is a view
+over the add-on registry in core (`core/providers`, package `com.agenticai.core.providers.addons`); it adds no
+backend of its own.
 
 | | |
 |---|---|
 | Route | `/add-ons` |
-| Sidebar | Configuration group, after "Data & Infrastructure". Shown on a personal install (local sign-in) only; the registry is install-wide and applied on the host, so other installs do not advertise it. A deep link still opens the page |
-| Nav needs | any signed-in user on a personal install |
-| Backend rule | reading needs only a signed-in user. Changing needs `ROLE_platform-admin`, or `ROLE_tenant-admin` when `app.auth.mode=local` (the personal install, where the owner is the tenant admin) or `app.addons.tenant-admin-may-change=true`. Changes are limited to 30 a minute per caller and audited as `addon.enable` and `addon.disable` |
+| Sidebar | Configuration group, after "Data & Infrastructure". Shown on personal (local sign-in) and lite installs; the registry is install-wide and applied on the host, so installs whose service set is fixed at deploy time (the full stack) do not advertise it. A deep link still opens the page |
+| Nav needs | any signed-in user on a personal or lite install |
+| Backend rule | reading needs only a signed-in user. Changing needs `ROLE_platform-admin`, or `ROLE_tenant-admin` when `app.auth.mode=local` (the personal install, where the owner is the tenant admin) or `app.addons.tenant-admin-may-change=true` (default on lite, where a tenant admin is usually the box's operator). Changes are limited to 30 a minute per caller and audited as `addon.enable` and `addon.disable` |
 | API | `GET /api/addons`, `GET /api/addons/{id}`, `POST /api/addons/{id}/enable`, `POST /api/addons/{id}/disable[?cascade=true]` |
 | Page guide | "Add extras to your install" (the page-guide button in the top bar) |
 
