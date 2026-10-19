@@ -34,6 +34,7 @@ class RedisFixedWindowCounterTest {
     @BeforeEach
     void clearFallback() {
         LocalRateLimitFallback.reset();
+        RedisFixedWindowCounter.resetRedisDownFlag();
     }
 
     @Test
