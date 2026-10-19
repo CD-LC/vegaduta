@@ -94,10 +94,11 @@ public class WorkspaceFolderController {
 
     /** Servers the Assistant is running for the Preview pane; empty when there is no runner or none started. */
     @GetMapping("/previews")
-    public List<PreviewEntry> previews() throws IOException {
-        return terminal.previews().stream()
-                .map(p -> new PreviewEntry(p.port(), p.folder(), p.command(), p.running()))
-                .toList();
+    public List<PreviewEntry> previews(
+            @RequestParam(value = "limit", required = false) Integer limit) throws IOException {
+        java.util.stream.Stream<PreviewEntry> out = terminal.previews().stream()
+                .map(p -> new PreviewEntry(p.port(), p.folder(), p.command(), p.running()));
+        return (limit == null ? out : out.limit(Math.max(0, limit))).toList();
     }
 
     @org.springframework.web.bind.annotation.DeleteMapping("/previews/{port}")

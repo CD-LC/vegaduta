@@ -55,7 +55,7 @@ DeviceAppUsageEventType = Literal["FOREGROUND", "BACKGROUND"]
 
 DeviceCommandStatus = Literal["PENDING", "DELIVERED", "COMPLETED", "FAILED"]
 
-DevicePlatform = Literal["ANDROID", "IOS", "DESKTOP"]
+DevicePlatform = Literal["ANDROID", "IOS", "DESKTOP", "WEB"]
 
 DeviceSmsDirection = Literal["INBOUND", "OUTBOUND"]
 
@@ -412,6 +412,7 @@ class AddonApi_Overview(TypedDict, total=False):
     ollama: AddonApi_OllamaInfo
     apply: AddonApi_Apply
     addons: List[AddonApi_View]
+    mayChange: bool
 
 
 class AddonApi_ReportItem(TypedDict, total=False):
@@ -3394,6 +3395,7 @@ class DeviceResponse(TypedDict, total=False):
     createdAt: str
     lastSeenAt: str
     revoked: bool
+    capabilities: str
 
 
 class DiscordActivationRequest(TypedDict):
@@ -10266,6 +10268,10 @@ class TwilioCredentialResponse(TypedDict, total=False):
 class UpdateAiModelPreferenceRequest(TypedDict, total=False):
     providerName: str
     model: str
+
+
+class UpdateCapabilitiesRequest(TypedDict, total=False):
+    capabilities: List[str]
 
 
 class _UpdateExperienceModeRequestRequired(TypedDict):

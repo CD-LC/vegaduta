@@ -47,6 +47,10 @@ class JsonbRoundTripTest {
     private static final Map<String, String> STRING_FIXTURES =
             new TreeMap<>(
                     Map.of(
+                            "com.agenticai.core.agents.learning.LearningProposal#evidence",
+                            "{\"source\":\"assistant-turn\",\"refs\":[{\"kind\":\"session\",\"id\":\"s1\"}],\"note\":null}",
+                            "com.agenticai.core.agents.learning.LearningProposal#payload",
+                            "{\"kind\":\"skill\",\"name\":\"summarize\",\"body\":\"Summarize the thread.\",\"unicode\":\"café ₹\"}",
                             "com.agenticai.core.agents.skills.Skill#pendingFilesJson",
                             "[{\"path\":\"scripts/run.py\",\"bytes\":120,\"sha256\":\"ab12\"}]",
                             "com.agenticai.core.brief.BriefTrustEventEntity#evidenceJson",
@@ -142,7 +146,7 @@ class JsonbRoundTripTest {
                 .as(
                         "A new @JdbcTypeCode(SqlTypes.JSON) attribute needs a fixture here and a case in JsonbRoundTripIT")
                 .isEqualTo(expected);
-        assertThat(found).hasSize(18);
+        assertThat(found).hasSize(20);
     }
 
     @Test

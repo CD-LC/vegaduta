@@ -4897,6 +4897,14 @@ export class DeviceGatewayApi {
   }
 
   /**
+   * Capabilities.
+   * `POST /api/devices/capabilities`
+   */
+  capabilities(body: T.UpdateCapabilitiesRequest, options: CallOptions<QueryParams, { "X-Device-Token": string; "Idempotency-Key"?: string }> & { headers: { "X-Device-Token": string; "Idempotency-Key"?: string } }): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "POST", path: "/api/devices/capabilities", body });
+  }
+
+  /**
    * Claim.
    * `POST /api/devices/claim`
    *
@@ -6802,7 +6810,7 @@ export class LearningProposalApi {
    *
    * Only available when the feature flag app.learning.proposals.enabled=true is on; otherwise this route answers 404.
    */
-  list(options?: CallOptions<{ status?: string; kind?: string }, HeaderParams>): Promise<T.LearningProposalView[]> {
+  list(options?: CallOptions<{ status?: string; kind?: string; limit?: number }, HeaderParams>): Promise<T.LearningProposalView[]> {
     return this.http.request<T.LearningProposalView[]>({ ...options, method: "GET", path: "/api/learning/proposals" });
   }
 
@@ -14185,6 +14193,8 @@ export class WhatsAppQrApi {
   /**
    * Set default agent.
    * `PUT /api/channels/whatsapp-qr/default-agent`
+   *
+   * Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
    */
   setDefaultAgent(body: T.SetDefaultAgentRequest, options?: CallOptions): Promise<void> {
     return this.http.request<void>({ ...options, method: "PUT", path: "/api/channels/whatsapp-qr/default-agent", body, response: "void" });
@@ -14193,6 +14203,8 @@ export class WhatsAppQrApi {
   /**
    * Send.
    * `POST /api/channels/whatsapp-qr/send`
+   *
+   * Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
    */
   send(body: T.WhatsAppQrController_SendRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.WhatsAppQrController_SendResult> {
     return this.http.request<T.WhatsAppQrController_SendResult>({ ...options, method: "POST", path: "/api/channels/whatsapp-qr/send", body });
@@ -14201,6 +14213,8 @@ export class WhatsAppQrApi {
   /**
    * Status.
    * `GET /api/channels/whatsapp-qr/session`
+   *
+   * Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
    */
   status(options?: CallOptions): Promise<T.WhatsAppQrStatusResponse> {
     return this.http.request<T.WhatsAppQrStatusResponse>({ ...options, method: "GET", path: "/api/channels/whatsapp-qr/session" });
@@ -14209,6 +14223,8 @@ export class WhatsAppQrApi {
   /**
    * Connect.
    * `POST /api/channels/whatsapp-qr/session`
+   *
+   * Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
    */
   connect(options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.WhatsAppQrStatusResponse> {
     return this.http.request<T.WhatsAppQrStatusResponse>({ ...options, method: "POST", path: "/api/channels/whatsapp-qr/session" });
@@ -14217,6 +14233,8 @@ export class WhatsAppQrApi {
   /**
    * Disconnect.
    * `DELETE /api/channels/whatsapp-qr/session`
+   *
+   * Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
    */
   disconnect(options?: CallOptions): Promise<void> {
     return this.http.request<void>({ ...options, method: "DELETE", path: "/api/channels/whatsapp-qr/session", response: "void" });
@@ -15114,7 +15132,7 @@ export class WorkspaceFolderApi {
    * Previews.
    * `GET /api/assistant/workspace/previews`
    */
-  previews(options?: CallOptions): Promise<T.WorkspaceFolderController_PreviewEntry[]> {
+  previews(options?: CallOptions<{ limit?: number }, HeaderParams>): Promise<T.WorkspaceFolderController_PreviewEntry[]> {
     return this.http.request<T.WorkspaceFolderController_PreviewEntry[]>({ ...options, method: "GET", path: "/api/assistant/workspace/previews" });
   }
 

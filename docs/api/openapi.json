@@ -20093,6 +20093,17 @@
         ],
         "summary": "Previews",
         "operationId": "WorkspaceFolderController_previews",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -20106,6 +20117,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -31560,6 +31574,15 @@
             }
           }
         },
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_CHANNELS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).",
         "responses": {
           "204": {
             "description": "Successful response."
@@ -31604,11 +31627,20 @@
             }
           }
         },
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_CHANNELS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "description": "Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -31656,6 +31688,15 @@
         ],
         "summary": "Status",
         "operationId": "WhatsAppQrController_status",
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_CHANNELS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -31692,11 +31733,20 @@
         ],
         "summary": "Connect",
         "operationId": "WhatsAppQrController_connect",
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_CHANNELS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "description": "Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -31739,6 +31789,15 @@
         ],
         "summary": "Disconnect",
         "operationId": "WhatsAppQrController_disconnect",
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_CHANNELS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).",
         "responses": {
           "204": {
             "description": "Successful response."
@@ -39988,6 +40047,77 @@
         "security": []
       }
     },
+    "/api/devices/capabilities": {
+      "post": {
+        "tags": [
+          "DeviceGateway"
+        ],
+        "summary": "Capabilities",
+        "operationId": "DeviceGatewayController_capabilities",
+        "parameters": [
+          {
+            "name": "X-Device-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCapabilitiesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/devices/claim": {
       "post": {
         "tags": [
@@ -46570,6 +46700,15 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -54005,7 +54144,7 @@
             "schema": {
               "type": "number",
               "format": "double",
-              "default": 0.1
+              "default": 0.10
             }
           },
           {
@@ -54015,7 +54154,7 @@
             "schema": {
               "type": "number",
               "format": "double",
-              "default": 0.9
+              "default": 0.90
             }
           },
           {
@@ -87566,10 +87705,15 @@
             "items": {
               "$ref": "#/components/schemas/AddonApi_View"
             }
+          },
+          "mayChange": {
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
-          "catalogSchema"
+          "catalogSchema",
+          "mayChange"
         ]
       },
       "AddonApi_ReportItem": {
@@ -97647,7 +97791,8 @@
         "enum": [
           "ANDROID",
           "IOS",
-          "DESKTOP"
+          "DESKTOP",
+          "WEB"
         ]
       },
       "DeviceResponse": {
@@ -97674,6 +97819,9 @@
           "revoked": {
             "type": "boolean",
             "default": false
+          },
+          "capabilities": {
+            "type": "string"
           }
         },
         "required": [
@@ -121139,6 +121287,18 @@
           },
           "model": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateCapabilitiesRequest": {
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 32
           }
         }
       },

@@ -39,11 +39,13 @@ public class LearningProposalController {
     public List<LearningProposalView> list(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "kind", required = false) String kind,
+            @RequestParam(value = "limit", required = false) Integer limit,
             Principal principal) {
         return service.list(
                 subject(principal),
                 parse(LearningProposalStatus.class, status),
-                parse(LearningProposalKind.class, kind));
+                parse(LearningProposalKind.class, kind),
+                limit);
     }
 
     @PostMapping("/{id}/approve")

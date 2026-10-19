@@ -227,6 +227,12 @@ public class LearningProposalService {
     /** The person's proposals, newest first (at most 200); null filters match everything. */
     public List<LearningProposalView> list(
             String subject, LearningProposalStatus status, LearningProposalKind kind) {
+        return list(subject, status, kind, null);
+    }
+
+    /** {@link #list(String, LearningProposalStatus, LearningProposalKind)} capped to {@code limit}. */
+    public List<LearningProposalView> list(
+            String subject, LearningProposalStatus status, LearningProposalKind kind, Integer limit) {
         expireStale(Instant.now());
         List<LearningProposal> rows;
         if (status != null && kind != null) {
@@ -240,7 +246,11 @@ public class LearningProposalService {
         } else {
             rows = repository.findTop200BySubjectOrderByCreatedAtDesc(subject);
         }
-        return rows.stream().map(p -> LearningProposalView.of(p, canApply(p.getKind()))).toList();
+        java.util.stream.Stream<LearningProposal> out = rows.stream();
+        if (limit != null) {
+            out = out.limit(Math.max(0, Math.min(limit, rows.size())));
+        }
+        return out.map(p -> LearningProposalView.of(p, canApply(p.getKind()))).toList();
     }
 
     /** {@link #approve(String, UUID, String)} with the proposal's own text. */

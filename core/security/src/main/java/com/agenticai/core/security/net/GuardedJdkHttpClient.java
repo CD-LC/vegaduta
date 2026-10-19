@@ -205,7 +205,7 @@ public final class GuardedJdkHttpClient extends HttpClient {
                 @Override public void request(long n) { demand.add(n); }
                 @Override public void cancel() { demand.cancel(); }
             });
-            Thread.ofVirtual().name("guarded-http-feeder").start(this::feed);
+            TenantAwareExecutors.startVirtualThread("guarded-http-feeder", this::feed);
         }
 
         /** Blocks until the handler's body future completes; for ofInputStream that is right away. */

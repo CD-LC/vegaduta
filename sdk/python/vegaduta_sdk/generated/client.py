@@ -4154,6 +4154,13 @@ class DeviceGatewayApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
+    def capabilities(self, body: m.UpdateCapabilitiesRequest, *, x_device_token: str, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
+        """Capabilities.
+
+        POST /api/devices/capabilities
+        """
+        return self._http.request("POST", "/api/devices/capabilities", headers={"X-Device-Token": x_device_token, "Idempotency-Key": idempotency_key}, body=body)
+
     def claim(self, body: m.ClaimRequest) -> Any:
         """Claim.
 
@@ -5755,14 +5762,14 @@ class LearningProposalApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(self, *, status: Optional[str] = None, kind: Optional[str] = None) -> List[m.LearningProposalView]:
+    def list(self, *, status: Optional[str] = None, kind: Optional[str] = None, limit: Optional[int] = None) -> List[m.LearningProposalView]:
         """List.
 
         GET /api/learning/proposals
 
         Only available when the feature flag app.learning.proposals.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request("GET", "/api/learning/proposals", query={"status": status, "kind": kind})
+        return self._http.request("GET", "/api/learning/proposals", query={"status": status, "kind": kind, "limit": limit})
 
     def approve(self, id: str, body: Optional[m.LearningProposalController_ApproveRequest] = None, *, idempotency_key: Optional[str] = None) -> m.LearningProposalView:
         """Approve.
@@ -12003,6 +12010,8 @@ class WhatsAppQrApi:
         """Set default agent.
 
         PUT /api/channels/whatsapp-qr/default-agent
+
+        Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
         return self._http.request("PUT", "/api/channels/whatsapp-qr/default-agent", body=body, response="void")
 
@@ -12010,6 +12019,8 @@ class WhatsAppQrApi:
         """Send.
 
         POST /api/channels/whatsapp-qr/send
+
+        Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
         return self._http.request("POST", "/api/channels/whatsapp-qr/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
@@ -12017,6 +12028,8 @@ class WhatsAppQrApi:
         """Status.
 
         GET /api/channels/whatsapp-qr/session
+
+        Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
         return self._http.request("GET", "/api/channels/whatsapp-qr/session")
 
@@ -12024,6 +12037,8 @@ class WhatsAppQrApi:
         """Connect.
 
         POST /api/channels/whatsapp-qr/session
+
+        Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
         return self._http.request("POST", "/api/channels/whatsapp-qr/session", headers={"Idempotency-Key": idempotency_key})
 
@@ -12031,6 +12046,8 @@ class WhatsAppQrApi:
         """Disconnect.
 
         DELETE /api/channels/whatsapp-qr/session
+
+        Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
         return self._http.request("DELETE", "/api/channels/whatsapp-qr/session", response="void")
 
@@ -12783,12 +12800,12 @@ class WorkspaceFolderApi:
         """
         return self._http.request("POST", "/api/assistant/workspace/folders", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def previews(self) -> List[m.WorkspaceFolderController_PreviewEntry]:
+    def previews(self, *, limit: Optional[int] = None) -> List[m.WorkspaceFolderController_PreviewEntry]:
         """Previews.
 
         GET /api/assistant/workspace/previews
         """
-        return self._http.request("GET", "/api/assistant/workspace/previews")
+        return self._http.request("GET", "/api/assistant/workspace/previews", query={"limit": limit})
 
     def stop_preview(self, port: int) -> None:
         """Stop preview.

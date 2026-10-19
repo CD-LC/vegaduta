@@ -183,6 +183,7 @@ Deferred [Mvc [pattern='/api/channels/matrix/**'], Ant [pattern='/api/channels/m
 Deferred [Mvc [pattern='/api/channels/email/credential'], Ant [pattern='/api/channels/email/credential']] => -----------Y-------Y-
 Deferred [Mvc [pattern='/api/channels/signal/credential'], Ant [pattern='/api/channels/signal/credential']] => -----------Y-------Y-
 Deferred [Mvc [pattern='/api/channels/signal/credential/policy', PUT], Ant [pattern='/api/channels/signal/credential/policy', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/whatsapp-qr/**'], Ant [pattern='/api/channels/whatsapp-qr/**']] => -----------Y-------Y-
 Deferred [Mvc [pattern='/api/channels/meta-whatsapp/credential', POST], Ant [pattern='/api/channels/meta-whatsapp/credential', POST]] => -----------Y-------Y-
 Deferred [Mvc [pattern='/api/channels/meta-whatsapp/credential', DELETE], Ant [pattern='/api/channels/meta-whatsapp/credential', DELETE]] => -----------Y-------Y-
 Deferred [Mvc [pattern='/api/channels/meta-whatsapp/embedded-signup/exchange', POST], Ant [pattern='/api/channels/meta-whatsapp/embedded-signup/exchange', POST]] => -----------Y-------Y-

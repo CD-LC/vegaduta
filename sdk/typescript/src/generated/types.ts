@@ -134,6 +134,7 @@ export interface AddonApi_Overview {
   ollama?: AddonApi_OllamaInfo;
   apply?: AddonApi_Apply;
   addons?: AddonApi_View[];
+  mayChange?: boolean;
 }
 
 export interface AddonApi_ReportItem {
@@ -3091,7 +3092,7 @@ export type DeviceAppUsageEventType = "FOREGROUND" | "BACKGROUND";
 
 export type DeviceCommandStatus = "PENDING" | "DELIVERED" | "COMPLETED" | "FAILED";
 
-export type DevicePlatform = "ANDROID" | "IOS" | "DESKTOP";
+export type DevicePlatform = "ANDROID" | "IOS" | "DESKTOP" | "WEB";
 
 export interface DeviceResponse {
   id?: string;
@@ -3100,6 +3101,7 @@ export interface DeviceResponse {
   createdAt?: string;
   lastSeenAt?: string;
   revoked?: boolean;
+  capabilities?: string;
 }
 
 export type DeviceSmsDirection = "INBOUND" | "OUTBOUND";
@@ -10041,6 +10043,10 @@ export type UnknownSenderPolicy = "PAIR" | "IGNORE";
 export interface UpdateAiModelPreferenceRequest {
   providerName?: string;
   model?: string;
+}
+
+export interface UpdateCapabilitiesRequest {
+  capabilities?: string[];
 }
 
 export interface UpdateExperienceModeRequest {

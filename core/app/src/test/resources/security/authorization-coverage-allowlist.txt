@@ -165,3 +165,9 @@ PUT /api/studio-projects/{id}  # HANDLER: StudioProjectService (owner or writer 
 PUT /api/templates/{id}  # HANDLER: CommunityTemplateService requireOwned (CommunityTemplateService)
 PUT /api/workflows/{workflowId}  # HANDLER: WorkflowService (EDITOR)
 PUT /api/workflows/{workflowId}/nodes/{nodeId}/pin  # HANDLER: WorkflowPinService (EDITOR)
+DELETE /api/assistant/workspace/previews/{port}  # MEMBER: stops a preview in the install's shared Assistant workspace (WorkspaceFolderController, workspace-runner feature)
+POST /api/assistant/workspace/files  # MEMBER: uploads into the install's shared Assistant workspace (WorkspaceFolderController)
+POST /api/assistant/workspace/folders  # MEMBER: creates a folder in the install's shared Assistant workspace (WorkspaceFolderController)
+POST /api/devices/capabilities  # HANDLER: X-Device-Token device auth resolved by DeviceAuthResolver in DeviceGatewayController
+POST /api/learning/proposals/{id}/approve  # MEMBER: approves the caller's own proposal; service returns 404 for another subject's (LearningProposalService.approve)
+POST /api/learning/proposals/{id}/reject  # MEMBER: rejects the caller's own proposal; service returns 404 for another subject's (LearningProposalService.reject)
