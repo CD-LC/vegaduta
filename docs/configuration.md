@@ -38,7 +38,7 @@ Defaults by where core runs:
 | `application.yml` (bare JVM) | `security,knowledge,workflow,graph-memory` |
 | core image (`core/Dockerfile`, default `MCP_TOOLCHAIN=none`) | `security,knowledge,workflow,graph-memory` |
 | core-full image (`MCP_TOOLCHAIN=full`) | `security,knowledge,workflow,graph-memory,mcp` |
-| Lite (`deploy/compose/lite.yml`) | `security,knowledge,graph-memory,lite` |
+| Lite (`deploy/compose/lite.yml`) | `security,knowledge,graph-memory,lite` (plus `,mcp` with `CORE_IMAGE_VARIANT=-full` if built-in STDIO servers should spawn in core instead of the runner) |
 | Personal (`deploy/compose/personal.yml`, `scripts/vegaduta personal`) | `security,knowledge,graph-memory,personal` (override with `PERSONAL_SPRING_PROFILES`) |
 | Full (`deploy/compose/docker-compose.yml`) | `security,knowledge,graph-memory,mcpserver` plus `CORE_MCP_PROFILE` (the CLI sets `,mcp` for the `tools`, `browser` and `sandbox` profiles) plus `CORE_PROFILES_EXTRA` (the CLI adds `,workflow` or `,workflow,temporal` for those profiles) |
 | Helm (`charts/vegaduta`) | `global.core.springProfiles` (`security,knowledge,workflow,graph-memory,mcpserver`); `,mcp` is added when `global.components.mcpStdioRunner=true` (every core role) or `global.core.mcpToolchain=full` (API only) |
@@ -929,6 +929,14 @@ timeout, Hikari pool `DB_HIKARI_MAX_POOL_SIZE` (10) and `DB_HIKARI_MIN_IDLE` (2)
 blocks that normally ship in the `workflow` profile (Telegram long polling on). Redis (Valkey) stays: about 60
 classes use it directly, so `personal.yml` runs a 128 MB one (a rate-limit counter evicted under pressure fails open, so it keeps headroom).
 
+**The lite tier** (`up --lite`) sits between the two: Keycloak auth like the full stack, one box like
+personal. `lite.yml` ships the Assistant's features on for it - `SCHEDULED_TASKS_ENABLED`,
+`APP_CHAT_BRANCHING_ENABLED`, `APP_CHAT_RESUMABLE_STREAMS_ENABLED`, `DATA_TABLES_ENABLED`,
+`APP_SKILLS_LEARNING_*`/`APP_LEARNING_*` and the `BROWSER_V2/PROFILES/TAKEOVER` flags (each can be set back to
+`false` in `.env`) - and accepts the single-box compose profiles `rag`, `tools`, `workspace` and the `--search`
+/`--browser` flags. `APP_SIDECAR_ENABLED` defaults `false` there (the `--profile rag` run sets it true) and
+`APP_EMBEDDINGS_PROVIDER=auto` falls back to a cloud key or a registered Ollama when no sidecar runs.
+
 Compose and launcher variables used by personal mode (none required in `.env`; the CLI generates the secrets):
 
 | Variable | Default | Meaning |
@@ -988,6 +996,7 @@ Read by `scripts/vegaduta personal` and the personal profile; see
 |---|---|---|
 | `VEGADUTA_SEARCH` | unset (on for a fresh personal install) | `0`, `off`, `false` or `no` in `.env` or the environment turns private web search off; `1`, `on`, `true` or `yes` forces it on. A `--search` / `--no-search` flag wins for that run; this wins over the remembered answer (`search=` in `.vegaduta-state`). Read by the launcher only |
 | `VEGADUTA_TOOLS` | unset (on for a fresh personal install) | the same for the MCP runner (compose profile `tools`). Not used with `--native-core` |
+| `VEGADUTA_VALKEY` | unset (always on) | `0` leaves the Valkey container out of a **personal** install; rate limits, budget windows and spend counters run in core's bounded in-process fallback (they stay enforced and fail closed). `--no-valkey` / `--valkey` wins for that run; this wins over the remembered answer (`valkey=` in `.vegaduta-state`). Ignored on lite/full - shared installs keep the shared store |
 | `app.mcp.starter.enabled` / `APP_MCP_STARTER_ENABLED` | `true` in the `personal` profile (the class is not loaded elsewhere) | `false` registers no starter connectors even when the runner is on. They are also registered only when `MCP_STDIO_SIDECAR_ENABLED=true` |
 | `MCP_STDIO_SIDECAR_ENABLED` | `false`; the launcher exports `true` with the runner | in `personal.yml` this was hard-coded `false`; it now reads the variable, so a raw `docker compose --profile tools` needs it in `.env` |
 | `MCP_STDIO_RUNNER_MEM_LIMIT` | `768m` in `personal.yml` (`1g` in the full stack) | memory limit of the runner container |
@@ -999,16 +1008,18 @@ runner on (kept as `tools=1|0` in `.vegaduta-state`, never in `profiles=`). Migr
 
 ### Add-ons (`/api/addons`)
 
-The add-on registry lists the optional capabilities of a personal install
+The add-on registry lists the optional capabilities of a single-box install - personal and lite
 (`core/providers/src/main/resources/addons/catalog.json`) and records which ones a person wants; the state is
-install-wide in `control_plane.addon_state` (V656). Core runs in a container and cannot start containers, so for
+install-wide in `control_plane.addon_state` (V656). On a lite install the catalog's commands render as
+`scripts/vegaduta up --lite ...` (the same profiles and flags exist there); on the full stack the console
+does not advertise the page because its service set is fixed at deploy time. Core runs in a container and cannot start containers, so for
 add-ons that are compose profiles it only records the wish; the host applies it. Model packs reuse
 `app.local-models.*` and the configured Ollama (`app.local-models.ollama-base-url` / `app.local-llm.bootstrap.base-url`).
 See [Add-ons](personal-mode.md#add-ons) and the [console guide](console/add-ons.md).
 
 | Property | Environment variable | Default | Meaning |
 |---|---|---|---|
-| `app.addons.host-token` | `APP_ADDONS_HOST_TOKEN` (Compose: `ADDONS_HOST_TOKEN` in `.env`, **not yet passed by `personal.yml`**) | empty | shared secret the host-side installer sends as `Authorization: Bearer <token>` to `GET /api/addons/host/wanted` and `POST /api/addons/host/report`. At least 32 characters (`openssl rand -hex 32`). Empty or shorter switches the installer surface off (`503 host_bridge_disabled`); there is no unauthenticated fallback and loopback is not trusted. Keep it in `.env`, never in the repo |
+| `app.addons.host-token` | `APP_ADDONS_HOST_TOKEN` (Compose: `ADDONS_HOST_TOKEN` in `.env`, passed by `lite.yml` and `docker-compose.yml`; `personal.yml` does not yet) | empty | shared secret the host-side installer sends as `Authorization: Bearer <token>` to `GET /api/addons/host/wanted` and `POST /api/addons/host/report`. At least 32 characters (`openssl rand -hex 32`). Empty or shorter switches the installer surface off (`503 host_bridge_disabled`); there is no unauthenticated fallback and loopback is not trusted. Keep it in `.env`, never in the repo |
 | `app.addons.tenant-admin-may-change` | `APP_ADDONS_TENANT_ADMIN_MAY_CHANGE` | `true` when `app.auth.mode=local`, otherwise `false` | whether a tenant admin may switch add-ons on and off. Add-ons are install-wide (a container or a model on the machine), so on a shared install only a platform admin may unless you set this on a self-hosted box you own. Reading the list needs only a signed-in user |
 
 ### Browser add-on and routine learning (personal)

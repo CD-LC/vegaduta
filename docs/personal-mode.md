@@ -12,9 +12,9 @@ and Lite and Full behave exactly as before.
 
 | | Personal | Lite | Full |
 |---|---|---|---|
-| Containers always on | Postgres, Valkey, core, web | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
+| Containers always on | Postgres, Valkey, core, web (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
 | Sign-in | local, one owner (core) | Keycloak | Keycloak |
-| Container memory limits (sum) | about 2.4 GB | more (Keycloak alone is about 768 MB) | more |
+| Container memory limits (sum) | about 2.4 GB (about 2.2 GB with `--minimal`) | more (Keycloak alone is about 768 MB) | more |
 | Billing, plans, payments | off | on unless disabled | on unless disabled |
 | Meant for | one person | trying it | one server, a team |
 
@@ -73,6 +73,8 @@ images are pulled instead.
 | `--cloud` | do not adopt a local Ollama; you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Install Ollama later and run `personal --local-ai=host` to switch |
 | `--search` / `--no-search` | start or leave out the private SearXNG that gives agents `web_search` with no API key. On by default for a fresh install; the choice is remembered (see [What is on from the start](#what-is-on-from-the-start)) |
 | `--no-tools` | leave out the MCP connector runner and its starter connectors. `--profile tools` turns it back on |
+| `--no-valkey` | leave out the Valkey container; core's counters and caches run in its in-process fallback (see [Running without Valkey](#running-without-valkey)). `--valkey` turns it back on |
+| `--minimal` | the floor: `postgres` + `core` + `web` and nothing else (implies `--no-search --no-tools --no-valkey` and `--no-browser`). Every piece a flag turned off stays off until you ask for it again |
 | `--profile rag` | add the ML sidecar (document extraction for PDF and scans, sidecar embeddings, transcription) and switch core's sidecar on |
 | `--profile workspace` | add the `workspace-runner` container and the projects folder — the Assistant's build terminal (see [Build projects with the Assistant](#build-projects-with-the-assistant)). The Setup app turns this profile on by default and offers `rag` as its documents checkbox |
 | `--dry-run` | print the plan, change nothing |
@@ -147,6 +149,51 @@ and about 1.3 GB more of memory limits (512 MB + 768 MB; limits, not measured us
 from about 2.4 GB to about 3.7 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s. None of
 this was run on a real Docker stack when it was written: the launcher plan, the compose files and the registration
 logic are tested, the containers were not started.
+
+## Running without Valkey
+
+`./scripts/vegaduta personal --no-valkey` (or `--minimal`, or `VEGADUTA_VALKEY=0`) starts the stack without the
+Valkey container. Valkey is a cache and counters store here, never a system of record, and every Redis-backed
+counter in core already degrades to a bounded in-process table (`RedisFixedWindowCounter` →
+`LocalRateLimitFallback`): rate limits, budget windows and spend counters keep working and keep failing closed
+under pressure — a full fallback table refuses new keys rather than letting traffic through uncounted. The choice
+is remembered (`valkey=` in `.vegaduta-state`), and `--valkey` puts the container back.
+
+What you give up, on purpose:
+
+- **Counters are per-process, per-boot.** Rate-limit and budget windows restart with core and are not shared —
+  fine for the single user a personal install is for; a lite or full stack (several users, maybe several replicas)
+  keeps Valkey always on and the flag is ignored there.
+- **A Redis outage pattern still works.** If the container is up but the store inside it dies, core skips Redis
+  calls for ~10 s after each failure instead of paying a connect timeout on every request — the same circuit
+  breaker that makes `--no-valkey` cheap.
+- **No cross-process state.** Anything a second process would need (shared session buffers between replicas,
+  future queue backends) has nowhere to live. If a feature ever needs shared state, it is added behind the
+  `valkey` compose profile, not silently required.
+
+## One container: the omnibus image
+
+For the smallest possible *operational* footprint there is also a single-container image, `omnibus`, built from
+the release's own images: PostgreSQL with pgvector + Apache AGE, a Redis-protocol store, core and the console in
+one box, supervised by a small entrypoint. It is the same personal Spring profile and the same jar — the
+difference is packaging, not capability:
+
+```sh
+docker run -d --name vegaduta \
+  -v vegaduta-data:/data \
+  -p 3000:3000 -p 8080:8080 \
+  ghcr.io/cd-lc/omnibus:0.1.3
+```
+
+Everything mutable lives under `/data` (the database cluster, uploaded files, Redis scratch space and the
+generated secrets file, mode 600). `APP_ENCRYPTION_KEY` is generated on first boot and written there — never
+rotate it, and back up `/data` like you would `.env`. The optional knobs are `PUBLIC_API_URL`, `PUBLIC_APP_URL`,
+`POSTGRES_DB`, `PERSONAL_JAVA_OPTS_EXTRA` and `SPRING_PROFILES_ACTIVE` (`-e` on `docker run`).
+
+Honest tradeoffs vs the compose tier: one process supervisor instead of per-service restarts (any child exiting
+stops the container), one volume for everything, Postgres and Redis exposed only inside the container's loopback,
+and no per-service resource limits — one memory ceiling for the whole box. It is the right shape for a laptop or
+a demo VM; the compose tiers stay the shape for anything shared.
 
 ## Add-ons
 

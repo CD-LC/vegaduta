@@ -120,6 +120,12 @@ services:
           memory: 64m
 
   valkey:
+    # Profile-gated so `scripts/vegaduta personal --no-valkey` (and --minimal)
+    # can run without it. The launcher adds `--profile valkey` by default, so
+    # a normal `personal` start is unchanged; a hand-run `docker compose up`
+    # without the profile now skips it (rate limiters and counters then live
+    # in core's in-process fallback).
+    profiles: ["valkey"]
     image: valkey/valkey:8.1.10-alpine
     <<: [*restart, *logging, *nnp]
     # allkeys-lru at 128 MB (a rate-limit counter evicted under pressure fails open, so keep headroom): everything kept here is a cache, a counter or a short-lived
@@ -160,8 +166,11 @@ services:
         condition: service_completed_successfully
       workspace-perms:
         condition: service_completed_successfully
-      valkey:
-        condition: service_healthy
+      # No `depends_on: valkey`: with the valkey compose profile off the
+      # service does not exist and this would refuse to start, and with it on
+      # the ordering is only a convenience - every Redis-backed counter in
+      # core falls back to the in-process implementation while Valkey warms
+      # up (RedisFixedWindowCounter -> LocalRateLimitFallback).
       sidecar:
         condition: service_healthy
         required: false

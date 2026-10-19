@@ -3,10 +3,13 @@
 # vegaduta — install / run / operate a self-hosted VegaDūta with Docker Compose
 #
 #   scripts/vegaduta up [--lite|--full] [--profile NAME]... [--build] [--domain D]
-#                       [--local-ai[=container|host]] [--local-model TAG] [--cloud] [--search] [--dry-run]
+#                       [--local-ai[=container|host]] [--local-model TAG] [--cloud] [--search] [--browser] [--dry-run]
+#                       (lite profiles: rag, tools, workspace; full: temporal events jobs observability
+#                       tracing voice rl code-intel builder sandbox tools browser)
 #   scripts/vegaduta personal [--native-core] [--build] [--local-ai[=container|host]] [--local-model TAG]
-#                       [--cloud] [--no-search] [--no-tools] [--browser] [--dry-run]
+#                       [--cloud] [--no-search] [--no-tools] [--no-valkey|--valkey] [--minimal] [--browser] [--dry-run]
 #                       (one-person laptop mode: postgres + valkey + core + web, no Keycloak; docs: deploy/compose/personal.yml)
+#                       --minimal runs the floor (postgres + core + web): no SearXNG, no MCP runner, no Valkey.
 #   scripts/vegaduta down [--volumes]
 #   scripts/vegaduta status
 #   scripts/vegaduta logs [SERVICE] [--no-follow]
@@ -204,7 +207,7 @@ cmd_secrets() {
 }
 
 # ------------------------------------------------------------ compose args
-TIER=""; PROFILES=""; BUILD=0; COMPOSE_ARGS=(); LOCAL_AI=""; LOCAL_MODEL=""; MODEL_CHOICE_DONE=0; SEARCH=""; TOOLS=""; BROWSER=""; SEARCH_EXPLICIT=0; TOOLS_EXPLICIT=0; BROWSER_EXPLICIT=0; PERSONAL_FRESH=0; DRY_RUN=0; NATIVE_CORE=0; CLOUD=""; MODEL_NOT_PULLED=0; EMBED_NOT_PULLED=0
+TIER=""; PROFILES=""; BUILD=0; COMPOSE_ARGS=(); LOCAL_AI=""; LOCAL_MODEL=""; MODEL_CHOICE_DONE=0; SEARCH=""; TOOLS=""; BROWSER=""; VALKEY=""; SEARCH_EXPLICIT=0; TOOLS_EXPLICIT=0; BROWSER_EXPLICIT=0; VALKEY_EXPLICIT=0; PERSONAL_FRESH=0; DRY_RUN=0; NATIVE_CORE=0; CLOUD=""; MODEL_NOT_PULLED=0; EMBED_NOT_PULLED=0
 
 load_state() {
   if [ -z "$TIER" ] && [ -f "$STATE_FILE" ]; then
@@ -216,6 +219,7 @@ load_state() {
     [ -n "$SEARCH" ] || SEARCH="$(sed -n 's/^search=//p' "$STATE_FILE")"
     [ -n "$TOOLS" ] || TOOLS="$(sed -n 's/^tools=//p' "$STATE_FILE")"
     [ -n "$BROWSER" ] || BROWSER="$(sed -n 's/^browser=//p' "$STATE_FILE")"
+    [ -n "$VALKEY" ] || VALKEY="$(sed -n 's/^valkey=//p' "$STATE_FILE")"
     [ "$NATIVE_CORE" = 1 ] || NATIVE_CORE="$(sed -n 's/^native_core=//p' "$STATE_FILE")"
     [ -n "$CLOUD" ] || CLOUD="$(sed -n 's/^cloud=//p' "$STATE_FILE")"
   fi
@@ -226,7 +230,7 @@ save_state() {
   [ -f "$STATE_FILE" ] && prev="$(sed -n 's/^previous_version=//p' "$STATE_FILE")"
   # cloud=1: the user said --cloud; a plain re-run must not second-guess it (a local model chosen later clears it).
   local cloud="${CLOUD:-0}"; [ -n "$LOCAL_AI" ] && cloud=0
-  printf 'tier=%s\nprofiles=%s\nbuild=%s\nlocal_ai=%s\nlocal_model=%s\nsearch=%s\nnative_core=%s\ncloud=%s\nprevious_version=%s\ntools=%s\nbrowser=%s\n' "$TIER" "$PROFILES" "$BUILD" "$LOCAL_AI" "$LOCAL_MODEL" "$SEARCH" "$NATIVE_CORE" "$cloud" "${PREVIOUS_VERSION:-$prev}" "$TOOLS" "$BROWSER" > "$STATE_FILE"
+  printf 'tier=%s\nprofiles=%s\nbuild=%s\nlocal_ai=%s\nlocal_model=%s\nsearch=%s\nnative_core=%s\ncloud=%s\nprevious_version=%s\ntools=%s\nbrowser=%s\nvalkey=%s\n' "$TIER" "$PROFILES" "$BUILD" "$LOCAL_AI" "$LOCAL_MODEL" "$SEARCH" "$NATIVE_CORE" "$cloud" "${PREVIOUS_VERSION:-$prev}" "$TOOLS" "$BROWSER" "$VALKEY" > "$STATE_FILE"
 }
 
 add_profile() { case " $PROFILES " in *" $1 "*) ;; *) PROFILES="${PROFILES:+$PROFILES }$1" ;; esac; }
@@ -239,13 +243,14 @@ resolve_profiles() {
   case " $PROFILES " in *" temporal "*) add_profile events ;; esac
   case " $PROFILES " in *" builder "*) add_profile code-intel ;; esac
   for p in $PROFILES; do
-    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; lite: rag; personal: rag workspace)" ;; esac
+    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; single-box tiers: rag workspace tools browser)" ;; esac
   done
-  if [ "$TIER" = personal ]; then
-    # personal has no Kafka/Temporal/Keycloak services: only `rag`, `workspace` and `tools` select anything.
-    # Say so instead of silently ignoring (COMPOSE_PROFILES in a shared .env may name others).
+  if [ "$TIER" = personal ] || [ "$TIER" = lite ]; then
+    # personal and lite have no Kafka/Temporal: only `rag`, `workspace`, `tools` and `browser`
+    # select anything. Say so instead of silently ignoring (COMPOSE_PROFILES in a shared .env
+    # may name full-stack profiles).
     for p in $PROFILES; do
-      case "$p" in rag|workspace|tools|browser) ;; *) warn "profile '$p' is not available in personal mode and is ignored" ;; esac
+      case "$p" in rag|workspace|tools|browser) ;; *) warn "profile '$p' is not available in $TIER mode and is ignored" ;; esac
     done
     # `tools` (the MCP runner) is a choice like web search: it lives in TOOLS and the state file, not in PROFILES,
     # so a caller that passes its own --profile list (the Setup app) cannot drop it. An explicit
@@ -269,14 +274,29 @@ resolve_profiles() {
       *" workspace "*)
         # The Assistant's build terminal: the workspace-runner container plus the projects folder,
         # mounted into it and into core (docs/personal-mode.md "Build projects with the Assistant").
+        # On lite (a shared/Keycloak tier) the terminal is off until the operator opts in: picking
+        # this profile IS the opt-in, so both switches are set here.
         local projects; projects="$(get_env VEGADUTA_PROJECTS_DIR)"; projects="${projects:-$HOME/VegaDuta-Projects}"
         mkdir -p "$projects"
         export VEGADUTA_PROJECTS_DIR="$projects"
-        export APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL="${APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL:-http://workspace-runner:8090}" ;;
+        export APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL="${APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL:-http://workspace-runner:8090}"
+        if [ "$TIER" = lite ]; then
+          export APP_ASSISTANT_LOCAL_SHELL_ENABLED=true APP_ASSISTANT_LOCAL_SHELL_ACKNOWLEDGE_SHARED_HOST=true
+        fi ;;
     esac
+    # lite.yml defaults app.sidecar.enabled to off so a stack without the sidecar degrades
+    # honestly; --profile rag flips it back on.
+    if [ "$TIER" = lite ]; then
+      case " $PROFILES " in *" rag "*) export APP_SIDECAR_ENABLED=true ;; esac
+    fi
     return 0
   fi
-  if [ "$TIER" = lite ]; then return 0; fi
+  # Full stack: `rag` and `workspace` pass the validation above but select nothing here - the
+  # sidecar is always on and the projects folder is a single-box feature (on a shared server it
+  # would hand every tenant the same folder). Say so instead of silently ignoring.
+  for p in $PROFILES; do
+    case "$p" in rag|workspace) warn "profile '$p' is not available in the full stack and is ignored" ;; esac
+  done
   case " $PROFILES " in *" events "*) extra=",workflow" ;; esac
   case " $PROFILES " in *" temporal "*) extra=",workflow,temporal"; export WORKFLOW_EXECUTION_ENGINE=temporal ;; esac
   [ -n "$extra" ] && [ -z "$(get_env CORE_PROFILES_EXTRA)" ] && export CORE_PROFILES_EXTRA="$extra"
@@ -315,17 +335,29 @@ search_args() {
   fi
 }
 
-# The MCP runner (personal mode, profile `tools`): the container STDIO MCP servers run in. Not for a host
-# JVM, which spawns them itself under the OS sandbox.
+# The MCP runner (personal/lite, profile `tools`): the container STDIO MCP servers run in. Not for a host
+# JVM, which spawns them itself under the OS sandbox. The full stack's `tools` profile is already in
+# PROFILES there, so this is a single-box helper only.
 tools_args() {
-  [ "$TIER" = personal ] && [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ] || return 0
+  { [ "$TIER" = personal ] || [ "$TIER" = lite ]; } && [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ] || return 0
   COMPOSE_ARGS+=(--profile tools)
 }
 
-# The agent's own browser (personal mode, `--browser`): a Playwright server in its own container that core
-# attaches to (deploy/compose/browser.yml). Opt-in; not for a host JVM.
+# Valkey is profile-gated in personal.yml: the container only starts when the
+# launcher asks for it. Default on (VALKEY=1); --no-valkey / --minimal leaves
+# it out and core's counters live in the in-process fallback
+# (LocalRateLimitFallback). lite.yml/docker-compose.yml keep it always on -
+# the flag only applies to personal.
+valkey_args() {
+  [ "$TIER" = personal ] || return 0
+  [ "${VALKEY:-1}" = 1 ] && COMPOSE_ARGS+=(--profile valkey)
+}
+
+# The agent's own browser (personal/lite, `--browser`): a Playwright server in its own container that core
+# attaches to (deploy/compose/browser.yml). Opt-in; not for a host JVM. The full stack's `browser` profile
+# instead swaps the mcp-stdio-runner for its -browser variant (handled in build_compose_args).
 browser_args() {
-  [ "$TIER" = personal ] && [ "$BROWSER" = 1 ] && [ "$NATIVE_CORE" != 1 ] || return 0
+  { [ "$TIER" = personal ] || [ "$TIER" = lite ]; } && [ "$BROWSER" = 1 ] && [ "$NATIVE_CORE" != 1 ] || return 0
   COMPOSE_ARGS+=(-f "$COMPOSE_DIR/browser.yml" --profile browser)
 }
 
@@ -404,6 +436,7 @@ build_compose_args() {
   search_args
   tools_args
   browser_args
+  valkey_args
   local p
   for p in $PROFILES; do COMPOSE_ARGS+=(--profile "$p"); done
   # COMPOSE_PROFILES from .env is already folded into PROFILES.
@@ -650,6 +683,9 @@ parse_tier_flags() {
       --no-tools) TOOLS=0; TOOLS_EXPLICIT=1; shift ;;
       --browser) BROWSER=1; BROWSER_EXPLICIT=1; shift ;;
       --no-browser) BROWSER=0; BROWSER_EXPLICIT=1; shift ;;
+      --valkey) VALKEY=1; VALKEY_EXPLICIT=1; shift ;;
+      --no-valkey) VALKEY=0; VALKEY_EXPLICIT=1; shift ;;
+      --minimal) SEARCH=0; SEARCH_EXPLICIT=1; TOOLS=0; TOOLS_EXPLICIT=1; BROWSER=0; BROWSER_EXPLICIT=1; VALKEY=0; VALKEY_EXPLICIT=1; shift ;;
       --dry-run) DRY_RUN=1; shift ;;
       --domain) DOMAIN_ARG="${2:?--domain needs a value}"; shift 2 ;;
       --domain=*) DOMAIN_ARG="${1#*=}"; shift ;;
@@ -827,8 +863,11 @@ cmd_down() {
   load_state; resolve_profiles; build_compose_args
   local vol=0 yes=0 a
   for a in "$@"; do case "$a" in --volumes|-v) vol=1 ;; --yes|-y) yes=1 ;; *) die "down: unknown option $a" ;; esac; done
-  # Include every profile so profiled services are stopped too.
-  local p; for p in $ALL_PROFILES rag; do COMPOSE_ARGS+=(--profile "$p"); done
+  # Include every profile so profiled services are stopped too. `valkey`
+  # (personal) is named explicitly for the install that ran with it before a
+  # `--no-valkey` switch - the remembered state no longer adds it back. So is
+  # `workspace` (personal/lite), which is not part of the full stack's list.
+  local p; for p in $ALL_PROFILES rag valkey workspace; do COMPOSE_ARGS+=(--profile "$p"); done
   if [ "$vol" = 1 ]; then
     if [ "$yes" != 1 ]; then
       printf '%sThis DELETES all data volumes of this %s install (database, users, files).%s\nType "delete my data" to continue: ' "$C_R" "$TIER" "$C_0"
@@ -1662,6 +1701,16 @@ personal_apply_defaults() {
     v="${VEGADUTA_BROWSER:-$(get_env VEGADUTA_BROWSER)}"
     case "$v" in 0|off|false|no) BROWSER=0 ;; 1|on|true|yes) BROWSER=1 ;; esac
   fi
+  if [ "$VALKEY_EXPLICIT" != 1 ]; then
+    v="${VEGADUTA_VALKEY:-$(get_env VEGADUTA_VALKEY)}"
+    case "$v" in 0|off|false|no) VALKEY=0 ;; 1|on|true|yes) VALKEY=1 ;; esac
+  fi
+  # Valkey is a personal-tier choice; on lite/full it is always on and the flag has nothing to gate.
+  if [ "$TIER" != personal ] && [ "$VALKEY" = 0 ]; then
+    warn "--no-valkey applies to personal installs only and is ignored on $TIER"
+    VALKEY=1
+  fi
+  [ "$TIER" = personal ] && VALKEY="${VALKEY:-1}"
   if [ "$PERSONAL_FRESH" = 1 ]; then
     [ -n "$SEARCH" ] || SEARCH=1
     [ -n "$TOOLS" ] || TOOLS=1
