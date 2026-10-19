@@ -1,0 +1,429 @@
+# principals: anonymous, member, end-customer, PERM_MANAGE_USERS, PERM_MANAGE_BILLING, PERM_MANAGE_INTEGRATIONS, PERM_MANAGE_TENANT_SETTINGS, PERM_MANAGE_WORKFLOWS_ADMIN, PERM_VIEW_AUDIT_LOG, PERM_MANAGE_APPROVALS, PERM_MANAGE_DATA_GOVERNANCE, PERM_MANAGE_CHANNELS, PERM_MANAGE_AGENTS, PERM_MANAGE_GUARDRAILS, PERM_MANAGE_TOOLS, PERM_MANAGE_TEMPLATES, PERM_VIEW_USAGE, PERM_MANAGE_LEADS, AGENTS+WORKFLOWS_ADMIN, tenant-admin, platform-admin
+Deferred [Mvc [pattern='/**', OPTIONS], Ant [pattern='/**', OPTIONS]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/actuator/health/**'], Ant [pattern='/actuator/health/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/actuator/info'], Ant [pattern='/actuator/info']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/system/status/live', GET], Ant [pattern='/api/system/status/live', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/public/status', GET], Ant [pattern='/api/public/status', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/public/landing-event', POST], Ant [pattern='/api/public/landing-event', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/actuator/prometheus'], Ant [pattern='/actuator/prometheus']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/actuator/startup'], Ant [pattern='/actuator/startup']] => --------------------Y
+Deferred [Mvc [pattern='/webhook/**'], Ant [pattern='/webhook/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/billing/webhook/**'], Ant [pattern='/api/billing/webhook/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/oauth/google/callback', GET], Ant [pattern='/oauth/google/callback', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/oauth/x/callback', GET], Ant [pattern='/oauth/x/callback', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/oauth/atlassian/callback', GET], Ant [pattern='/oauth/atlassian/callback', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/oauth/mcp/*/callback', GET], Ant [pattern='/oauth/mcp/*/callback', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/oauth/mcp/remote/*', GET], Ant [pattern='/oauth/mcp/remote/*', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/claim', POST], Ant [pattern='/api/devices/claim', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/poll', POST], Ant [pattern='/api/devices/poll', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/commands/*/result', POST], Ant [pattern='/api/devices/commands/*/result', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/screen-state', POST], Ant [pattern='/api/devices/screen-state', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/notifications', POST], Ant [pattern='/api/devices/notifications', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/app-usage', POST], Ant [pattern='/api/devices/app-usage', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/sms', POST], Ant [pattern='/api/devices/sms', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/devices/*/commands', POST], Ant [pattern='/api/devices/*/commands', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/devices/*', DELETE], Ant [pattern='/api/devices/*', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/devices/pairing-code', POST], Ant [pattern='/api/devices/pairing-code', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/devices/register', POST], Ant [pattern='/api/devices/register', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/signup', POST], Ant [pattern='/api/signup', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/auth/social-providers', GET], Ant [pattern='/api/auth/social-providers', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/demo/**'], Ant [pattern='/api/demo/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/share/agents/**'], Ant [pattern='/api/share/agents/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/share/workflows/**'], Ant [pattern='/api/share/workflows/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/public/apps/**'], Ant [pattern='/api/public/apps/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/studio-apps/publish', POST], Ant [pattern='/api/studio-apps/publish', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/studio-apps/*/**', POST], Ant [pattern='/api/studio-apps/*/**', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/studio-apps/*', DELETE], Ant [pattern='/api/studio-apps/*', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/studio-apps/*/**', DELETE], Ant [pattern='/api/studio-apps/*/**', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/public/email/unsubscribe'], Ant [pattern='/api/public/email/unsubscribe']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/public/workflow-forms/*', GET], Ant [pattern='/api/public/workflow-forms/*', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/public/workflow-forms/*', POST], Ant [pattern='/api/public/workflow-forms/*', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/share/branding/**', GET], Ant [pattern='/api/share/branding/**', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/templates/gallery', GET], Ant [pattern='/api/templates/gallery', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/templates/gallery/**', GET], Ant [pattern='/api/templates/gallery/**', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/plugins/catalog', GET], Ant [pattern='/api/plugins/catalog', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/plugins/artifacts/**', GET], Ant [pattern='/api/plugins/artifacts/**', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/commerce/feed/**'], Ant [pattern='/api/commerce/feed/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/.well-known/agent-card.json', GET], Ant [pattern='/.well-known/agent-card.json', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/.well-known/agent.json', GET], Ant [pattern='/.well-known/agent.json', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/.well-known/jwks.json', GET], Ant [pattern='/.well-known/jwks.json', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/directory/agents', GET], Ant [pattern='/api/directory/agents', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/directory/agents/*', GET], Ant [pattern='/api/directory/agents/*', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/x402/*'], Ant [pattern='/x402/*']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/config', GET], Ant [pattern='/api/edge/config', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/manifest', GET], Ant [pattern='/api/edge/manifest', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/tools', GET], Ant [pattern='/api/edge/tools', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/memory', GET], Ant [pattern='/api/edge/memory', GET]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/tools/execute', POST], Ant [pattern='/api/edge/tools/execute', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/turns', POST], Ant [pattern='/api/edge/turns', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/edge/manifest/full', GET], Ant [pattern='/api/edge/manifest/full', GET]] => --------------------Y
+Deferred [Mvc [pattern='/api/edge/manifest/registry', GET], Ant [pattern='/api/edge/manifest/registry', GET]] => --------------------Y
+Deferred [Mvc [pattern='/api/admin/users'], Ant [pattern='/api/admin/users']] => ---Y---------------Y-
+Deferred [Mvc [pattern='/api/admin/users/**'], Ant [pattern='/api/admin/users/**']] => ---Y---------------Y-
+Deferred [Mvc [pattern='/api/admin/templates'], Ant [pattern='/api/admin/templates']] => --------------------Y
+Deferred [Mvc [pattern='/api/admin/templates/**'], Ant [pattern='/api/admin/templates/**']] => --------------------Y
+Deferred [Mvc [pattern='/api/admin/issues'], Ant [pattern='/api/admin/issues']] => --------Y----------Y-
+Deferred [Mvc [pattern='/api/admin/issues/**'], Ant [pattern='/api/admin/issues/**']] => --------Y----------Y-
+Deferred [Mvc [pattern='/api/admin/llm-usage/**'], Ant [pattern='/api/admin/llm-usage/**']] => ----------------Y--Y-
+Deferred [Mvc [pattern='/api/admin/spend-reports/**'], Ant [pattern='/api/admin/spend-reports/**']] => ----------------Y--Y-
+Deferred [Mvc [pattern='/api/admin/**'], Ant [pattern='/api/admin/**']] => ---Y---------------Y-
+Deferred [Mvc [pattern='/api/rl/agents/*/policies'], Ant [pattern='/api/rl/agents/*/policies']] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/rl/agents/*/policies/**'], Ant [pattern='/api/rl/agents/*/policies/**']] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/rl/agents/*/preferences'], Ant [pattern='/api/rl/agents/*/preferences']] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/rl/agents/*/export/**'], Ant [pattern='/api/rl/agents/*/export/**']] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/approvals/policy/**', PUT], Ant [pattern='/api/approvals/policy/**', PUT]] => ---------Y---------Y-
+Deferred [Mvc [pattern='/api/guardrails/rules', POST], Ant [pattern='/api/guardrails/rules', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/guardrails/rules/**', PUT], Ant [pattern='/api/guardrails/rules/**', PUT]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/guardrails/rules/**', DELETE], Ant [pattern='/api/guardrails/rules/**', DELETE]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/procedures', POST], Ant [pattern='/api/procedures', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/procedures/**', POST], Ant [pattern='/api/procedures/**', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/procedures/**', PUT], Ant [pattern='/api/procedures/**', PUT]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/procedures/**', DELETE], Ant [pattern='/api/procedures/**', DELETE]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/agents/*/procedures', POST], Ant [pattern='/api/agents/*/procedures', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/agents/*/procedures/**', POST], Ant [pattern='/api/agents/*/procedures/**', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/agents/*/procedures/**', DELETE], Ant [pattern='/api/agents/*/procedures/**', DELETE]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/agents/*/improvements/*/accept', POST], Ant [pattern='/api/agents/*/improvements/*/accept', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/moderation/review/*/approve', POST], Ant [pattern='/api/moderation/review/*/approve', POST]] => -------------Y-----YY
+Deferred [Mvc [pattern='/api/moderation/review/*/block', POST], Ant [pattern='/api/moderation/review/*/block', POST]] => -------------Y-----YY
+Deferred [Mvc [pattern='/api/moderation/review/*/escalate', POST], Ant [pattern='/api/moderation/review/*/escalate', POST]] => -------------Y-----YY
+Deferred [Mvc [pattern='/api/agents/*/guardrails', PATCH], Ant [pattern='/api/agents/*/guardrails', PATCH]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/agents/*/hooks', PUT], Ant [pattern='/api/agents/*/hooks', PUT]] => -------------Y-----YY
+Deferred [Mvc [pattern='/api/settings/agent-hooks', PUT], Ant [pattern='/api/settings/agent-hooks', PUT]] => -------------Y-----YY
+Deferred [Mvc [pattern='/api/agents/*/tool-policies', PUT], Ant [pattern='/api/agents/*/tool-policies', PUT]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/audit-log'], Ant [pattern='/api/audit-log']] => --------Y----------Y-
+Deferred [Mvc [pattern='/api/audit-log/**'], Ant [pattern='/api/audit-log/**']] => --------Y----------Y-
+Deferred [Mvc [pattern='/api/agents/*/turns/*/journal', GET], Ant [pattern='/api/agents/*/turns/*/journal', GET]] => --------Y----------Y-
+Deferred [Mvc [pattern='/api/mcp/registry', POST], Ant [pattern='/api/mcp/registry', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/registry/*/connect', POST], Ant [pattern='/api/mcp/registry/*/connect', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/registry/**', PATCH], Ant [pattern='/api/mcp/registry/**', PATCH]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/registry/**', DELETE], Ant [pattern='/api/mcp/registry/**', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/oauth/**', POST], Ant [pattern='/api/mcp/oauth/**', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/oauth/**', DELETE], Ant [pattern='/api/mcp/oauth/**', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/registrations/*/test', POST], Ant [pattern='/api/mcp/registrations/*/test', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/registrations/*/acknowledge', POST], Ant [pattern='/api/mcp/registrations/*/acknowledge', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcp/tool-pins/*/approve', POST], Ant [pattern='/api/mcp/tool-pins/*/approve', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/jev/credential', POST], Ant [pattern='/api/jev/credential', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/jev/credential', DELETE], Ant [pattern='/api/jev/credential', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/jev/policy', PUT], Ant [pattern='/api/jev/policy', PUT]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/jev/playground', POST], Ant [pattern='/api/jev/playground', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/capabilities/*/credential', POST], Ant [pattern='/api/capabilities/*/credential', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/capabilities/*/credential', DELETE], Ant [pattern='/api/capabilities/*/credential', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/capabilities/*/policy', PUT], Ant [pattern='/api/capabilities/*/policy', PUT]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/capabilities/decision/playground', POST], Ant [pattern='/api/capabilities/decision/playground', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants', POST], Ant [pattern='/api/mcpserver/grants', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants/*/rotate', POST], Ant [pattern='/api/mcpserver/grants/*/rotate', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants/**', PUT], Ant [pattern='/api/mcpserver/grants/**', PUT]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants/**', PATCH], Ant [pattern='/api/mcpserver/grants/**', PATCH]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants/**', DELETE], Ant [pattern='/api/mcpserver/grants/**', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/exposure/*/*', PUT], Ant [pattern='/api/mcpserver/exposure/*/*', PUT]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants/auth-options', GET], Ant [pattern='/api/mcpserver/grants/auth-options', GET]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/mcpserver/grants/*/tool-calls', GET], Ant [pattern='/api/mcpserver/grants/*/tool-calls', GET]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/webhooks', POST], Ant [pattern='/api/webhooks', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/webhooks/*/rotate-secret', POST], Ant [pattern='/api/webhooks/*/rotate-secret', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/webhooks/*/test', POST], Ant [pattern='/api/webhooks/*/test', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/webhooks/**', PATCH], Ant [pattern='/api/webhooks/**', PATCH]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/webhooks/**', DELETE], Ant [pattern='/api/webhooks/**', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/providers', POST], Ant [pattern='/api/providers', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/providers/local-openai/probe', POST], Ant [pattern='/api/providers/local-openai/probe', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/providers/*', DELETE], Ant [pattern='/api/providers/*', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sarvam/credential', POST], Ant [pattern='/api/sarvam/credential', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sarvam/credential', DELETE], Ant [pattern='/api/sarvam/credential', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sdlc/credential', POST], Ant [pattern='/api/sdlc/credential', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sdlc/credential', DELETE], Ant [pattern='/api/sdlc/credential', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sdlc/sandbox/run-code', POST], Ant [pattern='/api/sdlc/sandbox/run-code', POST]] => -Y-----------------Y-
+Deferred [Mvc [pattern='/api/sdlc/sandbox', POST], Ant [pattern='/api/sdlc/sandbox', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sdlc/sandbox/**', POST], Ant [pattern='/api/sdlc/sandbox/**', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sdlc/credential/**', PUT], Ant [pattern='/api/sdlc/credential/**', PUT]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/sdlc/sandbox/**', DELETE], Ant [pattern='/api/sdlc/sandbox/**', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/code-intel/**'], Ant [pattern='/api/code-intel/**']] => -Y-----------------Y-
+Deferred [Mvc [pattern='/api/agents/*/code-intel-repo-access', PATCH], Ant [pattern='/api/agents/*/code-intel-repo-access', PATCH]] => -Y-----------------Y-
+Deferred [Mvc [pattern='/api/agents/*/capabilities/code-workspace', PATCH], Ant [pattern='/api/agents/*/capabilities/code-workspace', PATCH]] => -Y-----------------Y-
+Deferred [Mvc [pattern='/api/tools/code/generate', POST], Ant [pattern='/api/tools/code/generate', POST]] => -Y-----------------Y-
+Deferred [Mvc [pattern='/api/tools/code/validate', POST], Ant [pattern='/api/tools/code/validate', POST]] => -Y-----------------Y-
+Deferred [Mvc [pattern='/api/tools/code', POST], Ant [pattern='/api/tools/code', POST]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/code/**', POST], Ant [pattern='/api/tools/code/**', POST]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/code/**', PUT], Ant [pattern='/api/tools/code/**', PUT]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/code/**', PATCH], Ant [pattern='/api/tools/code/**', PATCH]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/code/**', DELETE], Ant [pattern='/api/tools/code/**', DELETE]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/scripts', POST], Ant [pattern='/api/tools/scripts', POST]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/scripts/test', POST], Ant [pattern='/api/tools/scripts/test', POST]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/scripts/*', PUT], Ant [pattern='/api/tools/scripts/*', PUT]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/scripts/*/enabled', PATCH], Ant [pattern='/api/tools/scripts/*/enabled', PATCH]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/scripts/*', DELETE], Ant [pattern='/api/tools/scripts/*', DELETE]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/openapi', POST], Ant [pattern='/api/tools/openapi', POST]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/openapi/**', POST], Ant [pattern='/api/tools/openapi/**', POST]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/openapi/**', PUT], Ant [pattern='/api/tools/openapi/**', PUT]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/openapi/**', PATCH], Ant [pattern='/api/tools/openapi/**', PATCH]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/tools/openapi/**', DELETE], Ant [pattern='/api/tools/openapi/**', DELETE]] => --------------Y----Y-
+Deferred [Mvc [pattern='/api/knowledge/ingest', POST], Ant [pattern='/api/knowledge/ingest', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/upload', POST], Ant [pattern='/api/knowledge/upload', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/upload-audio', POST], Ant [pattern='/api/knowledge/upload-audio', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/collections', POST], Ant [pattern='/api/knowledge/collections', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/collections/*/reembed', POST], Ant [pattern='/api/knowledge/collections/*/reembed', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/*/eval', POST], Ant [pattern='/api/knowledge/*/eval', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/collections/**', PUT], Ant [pattern='/api/knowledge/collections/**', PUT]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/collections/**', DELETE], Ant [pattern='/api/knowledge/collections/**', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/documents/**', DELETE], Ant [pattern='/api/knowledge/documents/**', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/face-enrollments', POST], Ant [pattern='/api/face-enrollments', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/face-enrollments/**', DELETE], Ant [pattern='/api/face-enrollments/**', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/ocr-provider', POST], Ant [pattern='/api/knowledge/ocr-provider', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/knowledge/ocr-provider', DELETE], Ant [pattern='/api/knowledge/ocr-provider', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/knowledge/connectors', POST], Ant [pattern='/api/knowledge/connectors', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/knowledge/connectors/**', POST], Ant [pattern='/api/knowledge/connectors/**', POST]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/knowledge/connectors/**', PUT], Ant [pattern='/api/knowledge/connectors/**', PUT]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/knowledge/connectors/**', DELETE], Ant [pattern='/api/knowledge/connectors/**', DELETE]] => -----Y-------------Y-
+Deferred [Mvc [pattern='/api/channels/twilio/credential', POST], Ant [pattern='/api/channels/twilio/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/twilio/credential', DELETE], Ant [pattern='/api/channels/twilio/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/elevenlabs/credential', POST], Ant [pattern='/api/elevenlabs/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/elevenlabs/credential', DELETE], Ant [pattern='/api/elevenlabs/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/elevenlabs/voices', POST], Ant [pattern='/api/elevenlabs/voices', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/elevenlabs/voices/*', DELETE], Ant [pattern='/api/elevenlabs/voices/*', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/telegram/credential'], Ant [pattern='/api/channels/telegram/credential']] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/matrix/**'], Ant [pattern='/api/channels/matrix/**']] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/email/credential'], Ant [pattern='/api/channels/email/credential']] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/signal/credential'], Ant [pattern='/api/channels/signal/credential']] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/signal/credential/policy', PUT], Ant [pattern='/api/channels/signal/credential/policy', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/meta-whatsapp/credential', POST], Ant [pattern='/api/channels/meta-whatsapp/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/meta-whatsapp/credential', DELETE], Ant [pattern='/api/channels/meta-whatsapp/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/meta-whatsapp/embedded-signup/exchange', POST], Ant [pattern='/api/channels/meta-whatsapp/embedded-signup/exchange', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/meta-social/credential', POST], Ant [pattern='/api/channels/meta-social/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/meta-social/credential', DELETE], Ant [pattern='/api/channels/meta-social/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/social/messenger/default-agent', PUT], Ant [pattern='/api/channels/social/messenger/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/social/instagram/default-agent', PUT], Ant [pattern='/api/channels/social/instagram/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/slack/credential', POST], Ant [pattern='/api/channels/slack/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/slack/credential', DELETE], Ant [pattern='/api/channels/slack/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/slack/default-agent', PUT], Ant [pattern='/api/channels/slack/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/discord/credential', POST], Ant [pattern='/api/channels/discord/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/discord/credential', DELETE], Ant [pattern='/api/channels/discord/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/discord/default-agent', PUT], Ant [pattern='/api/channels/discord/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/teams/credential', POST], Ant [pattern='/api/channels/teams/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/teams/credential', DELETE], Ant [pattern='/api/channels/teams/credential', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/teams/default-agent', PUT], Ant [pattern='/api/channels/teams/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/imessage/credential'], Ant [pattern='/api/channels/imessage/credential']] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/imessage/credential/settings', PUT], Ant [pattern='/api/channels/imessage/credential/settings', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/imessage/default-agent', PUT], Ant [pattern='/api/channels/imessage/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/health/*', POST], Ant [pattern='/api/channels/health/*', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/google/authorize-url', GET], Ant [pattern='/api/channels/google/authorize-url', GET]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/google/connection', DELETE], Ant [pattern='/api/channels/google/connection', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/x/credential', POST], Ant [pattern='/api/channels/x/credential', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/x/authorize-url', GET], Ant [pattern='/api/channels/x/authorize-url', GET]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/x/connection', DELETE], Ant [pattern='/api/channels/x/connection', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/x/default-agent', PUT], Ant [pattern='/api/channels/x/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/webhook', POST], Ant [pattern='/api/workflows/*/nodes/*/webhook', POST]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/webhook', DELETE], Ant [pattern='/api/workflows/*/nodes/*/webhook', DELETE]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/webhook', GET], Ant [pattern='/api/workflows/*/nodes/*/webhook', GET]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/webhook/signature', PUT], Ant [pattern='/api/workflows/*/nodes/*/webhook/signature', PUT]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/webhook/signature', DELETE], Ant [pattern='/api/workflows/*/nodes/*/webhook/signature', DELETE]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/poll-trigger', PUT], Ant [pattern='/api/workflows/*/nodes/*/poll-trigger', PUT]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/poll-trigger', DELETE], Ant [pattern='/api/workflows/*/nodes/*/poll-trigger', DELETE]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/schedule', PUT], Ant [pattern='/api/workflows/*/schedule', PUT]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/*/schedule', DELETE], Ant [pattern='/api/workflows/*/schedule', DELETE]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows', POST], Ant [pattern='/api/workflows', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/workflows/*/duplicate', POST], Ant [pattern='/api/workflows/*/duplicate', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/workflows/*/generate-graph', POST], Ant [pattern='/api/workflows/*/generate-graph', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/schedule', PUT], Ant [pattern='/api/agents/*/schedule', PUT]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/schedule', DELETE], Ant [pattern='/api/agents/*/schedule', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/schedule/resume', POST], Ant [pattern='/api/agents/*/schedule/resume', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/schedule/run-now', POST], Ant [pattern='/api/agents/*/schedule/run-now', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/specialties', PUT], Ant [pattern='/api/agents/*/specialties', PUT]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/triggers/**', PUT], Ant [pattern='/api/agents/*/triggers/**', PUT]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/triggers/**', DELETE], Ant [pattern='/api/agents/*/triggers/**', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/workflows/*/nodes/*/trigger-channel', PUT], Ant [pattern='/api/workflows/*/nodes/*/trigger-channel', PUT]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/channels/whatsapp/default-agent', PUT], Ant [pattern='/api/channels/whatsapp/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/whatsapp-compliance/opt-in', POST], Ant [pattern='/api/channels/whatsapp-compliance/opt-in', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/whatsapp-compliance/opt-in', DELETE], Ant [pattern='/api/channels/whatsapp-compliance/opt-in', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/voice/default-agent', PUT], Ant [pattern='/api/channels/voice/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/sms/default-agent', PUT], Ant [pattern='/api/channels/sms/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/edge-relay/**'], Ant [pattern='/api/channels/edge-relay/**']] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/voice/dtmf-menu/**', PUT], Ant [pattern='/api/channels/voice/dtmf-menu/**', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/voice/dtmf-menu/**', DELETE], Ant [pattern='/api/channels/voice/dtmf-menu/**', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/pairing/*/approve', POST], Ant [pattern='/api/channels/pairing/*/approve', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/pairing/*', DELETE], Ant [pattern='/api/channels/pairing/*', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/pairing/*/agent', PUT], Ant [pattern='/api/channels/pairing/*/agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/email/default-agent', PUT], Ant [pattern='/api/channels/email/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/telegram/default-agent', PUT], Ant [pattern='/api/channels/telegram/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/signal/default-agent', PUT], Ant [pattern='/api/channels/signal/default-agent', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/voice/numbers/*', PUT], Ant [pattern='/api/channels/voice/numbers/*', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/voice/numbers/*', DELETE], Ant [pattern='/api/channels/voice/numbers/*', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/pairing/*/unpair', POST], Ant [pattern='/api/channels/pairing/*/unpair', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/discord/send', POST], Ant [pattern='/api/channels/discord/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/email/send', POST], Ant [pattern='/api/channels/email/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/imessage/send', POST], Ant [pattern='/api/channels/imessage/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/slack/send', POST], Ant [pattern='/api/channels/slack/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/signal/send', POST], Ant [pattern='/api/channels/signal/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/social/instagram/send', POST], Ant [pattern='/api/channels/social/instagram/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/social/messenger/send', POST], Ant [pattern='/api/channels/social/messenger/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/teams/send', POST], Ant [pattern='/api/channels/teams/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/telegram/send', POST], Ant [pattern='/api/channels/telegram/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/whatsapp/send', POST], Ant [pattern='/api/channels/whatsapp/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/x/send', POST], Ant [pattern='/api/channels/x/send', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/handoff/sessions/*/escalate', POST], Ant [pattern='/api/handoff/sessions/*/escalate', POST]] => -----------Y-------YY
+Deferred [Mvc [pattern='/api/handoff/sessions/*/release', POST], Ant [pattern='/api/handoff/sessions/*/release', POST]] => -----------Y-------YY
+Deferred [Mvc [pattern='/api/handoff/sessions/*/reply', POST], Ant [pattern='/api/handoff/sessions/*/reply', POST]] => -----------Y-------YY
+Deferred [Mvc [pattern='/api/handoff/sessions/*/take-over', POST], Ant [pattern='/api/handoff/sessions/*/take-over', POST]] => -----------Y-------YY
+Deferred [Mvc [pattern='/api/channels/pairing/erase-subject', POST], Ant [pattern='/api/channels/pairing/erase-subject', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/contacts/**', POST], Ant [pattern='/api/channels/contacts/**', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/contacts/**', PUT], Ant [pattern='/api/channels/contacts/**', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/contacts/**', DELETE], Ant [pattern='/api/channels/contacts/**', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/contact-groups/**', POST], Ant [pattern='/api/channels/contact-groups/**', POST]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/contact-groups/**', PUT], Ant [pattern='/api/channels/contact-groups/**', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/contact-groups/**', DELETE], Ant [pattern='/api/channels/contact-groups/**', DELETE]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/channels/routing/**', PUT], Ant [pattern='/api/channels/routing/**', PUT]] => -----------Y-------Y-
+Deferred [Mvc [pattern='/api/leads'], Ant [pattern='/api/leads']] => -----------------Y-Y-
+Deferred [Mvc [pattern='/api/leads/**'], Ant [pattern='/api/leads/**']] => -----------------Y-Y-
+Deferred [Mvc [pattern='/api/data-tables', POST], Ant [pattern='/api/data-tables', POST]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/data-tables/**', POST], Ant [pattern='/api/data-tables/**', POST]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/data-tables/**', PUT], Ant [pattern='/api/data-tables/**', PUT]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/data-tables/**', DELETE], Ant [pattern='/api/data-tables/**', DELETE]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/tenant/settings', PUT], Ant [pattern='/api/tenant/settings', PUT]] => ------Y------------Y-
+Deferred [Mvc [pattern='/api/tenant/branding/logo', POST], Ant [pattern='/api/tenant/branding/logo', POST]] => ------Y------------Y-
+Deferred [Mvc [pattern='/api/tenant/branding/logo', DELETE], Ant [pattern='/api/tenant/branding/logo', DELETE]] => ------Y------------Y-
+Deferred [Mvc [pattern='/api/tenant/ai-model-preferences/**', PUT], Ant [pattern='/api/tenant/ai-model-preferences/**', PUT]] => ------Y------------Y-
+Deferred [Mvc [pattern='/api/tenant/ai-model-preferences/**', DELETE], Ant [pattern='/api/tenant/ai-model-preferences/**', DELETE]] => ------Y------------Y-
+Deferred [Mvc [pattern='/api/tenant/llm-gateway/content-policy', PUT], Ant [pattern='/api/tenant/llm-gateway/content-policy', PUT]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/tenant/sso'], Ant [pattern='/api/tenant/sso']] => ------Y------------Y-
+Deferred [Mvc [pattern='/api/tenant/sso/**'], Ant [pattern='/api/tenant/sso/**']] => ------Y------------Y-
+Deferred [Mvc [pattern='/scim/v2/**'], Ant [pattern='/scim/v2/**']] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/tenant/api-keys'], Ant [pattern='/api/tenant/api-keys']] => ---Y---------------Y-
+Deferred [Mvc [pattern='/api/tenant/api-keys/**'], Ant [pattern='/api/tenant/api-keys/**']] => ---Y---------------Y-
+Deferred [Mvc [pattern='/api/tenant/upgrade', POST], Ant [pattern='/api/tenant/upgrade', POST]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/invoices', GET], Ant [pattern='/api/tenant/invoices', GET]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/invoices/**', GET], Ant [pattern='/api/tenant/invoices/**', GET]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/billing-profile', GET], Ant [pattern='/api/tenant/billing-profile', GET]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/billing-profile', PUT], Ant [pattern='/api/tenant/billing-profile', PUT]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/resolutions'], Ant [pattern='/api/tenant/resolutions']] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/resolutions/**'], Ant [pattern='/api/tenant/resolutions/**']] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/roi', GET], Ant [pattern='/api/tenant/roi', GET]] => ----------------Y--Y-
+Deferred [Mvc [pattern='/api/tenant/roi/**', GET], Ant [pattern='/api/tenant/roi/**', GET]] => ----------------Y--Y-
+Deferred [Mvc [pattern='/api/tenant/roi'], Ant [pattern='/api/tenant/roi']] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/roi/**'], Ant [pattern='/api/tenant/roi/**']] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/subscription/cancel', POST], Ant [pattern='/api/tenant/subscription/cancel', POST]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/commerce/**', POST], Ant [pattern='/api/tenant/commerce/**', POST]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/commerce/**', PUT], Ant [pattern='/api/tenant/commerce/**', PUT]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/commerce/**', DELETE], Ant [pattern='/api/tenant/commerce/**', DELETE]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/billing/checkout/**', POST], Ant [pattern='/api/billing/checkout/**', POST]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/payments/mandates', POST], Ant [pattern='/api/payments/mandates', POST]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/payments/mandates/*/revoke', POST], Ant [pattern='/api/payments/mandates/*/revoke', POST]] => ----Y--------------Y-
+Deferred [Mvc [pattern='/api/tenant/comp-grant', POST], Ant [pattern='/api/tenant/comp-grant', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/internal/app-builder/generate-files', POST], Ant [pattern='/api/internal/app-builder/generate-files', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/internal/app-builder/generate-image', POST], Ant [pattern='/api/internal/app-builder/generate-image', POST]] => YYYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/tenant/data-export', POST], Ant [pattern='/api/tenant/data-export', POST]] => ----------Y--------Y-
+Deferred [Mvc [pattern='/api/tenant/data-deletion', POST], Ant [pattern='/api/tenant/data-deletion', POST]] => ----------Y--------Y-
+Deferred [Mvc [pattern='/api/tenant/data-usage', GET], Ant [pattern='/api/tenant/data-usage', GET]] => ----------Y--------Y-
+Deferred [Mvc [pattern='/api/tenant/privacy/**'], Ant [pattern='/api/tenant/privacy/**']] => ----------Y--------Y-
+Deferred [Mvc [pattern='/api/platform/**'], Ant [pattern='/api/platform/**']] => --------------------Y
+Deferred [Mvc [pattern='/api/briefs', GET], Ant [pattern='/api/briefs', GET]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/briefs/**', GET], Ant [pattern='/api/briefs/**', GET]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/briefs/*/readiness', POST], Ant [pattern='/api/briefs/*/readiness', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/a2a/rest/**', POST], Ant [pattern='/api/a2a/rest/**', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/a2a/rest/**', POST], Ant [pattern='/api/agents/*/a2a/rest/**', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/a2a/rest/**', DELETE], Ant [pattern='/api/a2a/rest/**', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/a2a/rest/**', DELETE], Ant [pattern='/api/agents/*/a2a/rest/**', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/briefs/*/trust/**', POST], Ant [pattern='/api/briefs/*/trust/**', POST]] => -------------------Y-
+Deferred [Mvc [pattern='/api/briefs/*/apply', POST], Ant [pattern='/api/briefs/*/apply', POST]] => ------------------YY-
+Deferred [Mvc [pattern='/api/briefs/*/versions/*/rollback', POST], Ant [pattern='/api/briefs/*/versions/*/rollback', POST]] => ------------------YY-
+Deferred [Mvc [pattern='/api/briefs/*/tune', POST], Ant [pattern='/api/briefs/*/tune', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/briefs/*/rehearse', POST], Ant [pattern='/api/briefs/*/rehearse', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/briefs/*/experiments', POST], Ant [pattern='/api/briefs/*/experiments', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/briefs'], Ant [pattern='/api/briefs']] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/briefs/**'], Ant [pattern='/api/briefs/**']] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/wallets', POST], Ant [pattern='/api/wallets', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/wallets/*/credit', POST], Ant [pattern='/api/wallets/*/credit', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/x402/offers', POST], Ant [pattern='/api/agents/*/x402/offers', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/x402/offers/*/disable', POST], Ant [pattern='/api/agents/*/x402/offers/*/disable', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/directory/publish', POST], Ant [pattern='/api/agents/*/directory/publish', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/directory/unpublish', POST], Ant [pattern='/api/agents/*/directory/unpublish', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/delegations', POST], Ant [pattern='/api/agents/*/delegations', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/delegations/*/revoke', POST], Ant [pattern='/api/agents/*/delegations/*/revoke', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/delegations/*/tokens', POST], Ant [pattern='/api/agents/*/delegations/*/tokens', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/delegations/introspect', POST], Ant [pattern='/api/agents/delegations/introspect', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/commerce/mandates/**', POST], Ant [pattern='/api/commerce/mandates/**', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/facts', POST], Ant [pattern='/api/memory/facts', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/blocks/*', PUT], Ant [pattern='/api/memory/blocks/*', PUT]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/facts/*/*', PATCH], Ant [pattern='/api/memory/facts/*/*', PATCH]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory', DELETE], Ant [pattern='/api/memory', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/blocks/*', DELETE], Ant [pattern='/api/memory/blocks/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/facts/*/*', DELETE], Ant [pattern='/api/memory/facts/*/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/research/runs', POST], Ant [pattern='/api/research/runs', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/research/runs/*/cancel', POST], Ant [pattern='/api/research/runs/*/cancel', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/account', DELETE], Ant [pattern='/api/account', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/ai-reports', POST], Ant [pattern='/api/ai-reports', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/mobile/sentinels/policy', PUT], Ant [pattern='/api/mobile/sentinels/policy', PUT]] => -------------------YY
+Deferred [Mvc [pattern='/api/mobile/sentinels/admin/summary', GET], Ant [pattern='/api/mobile/sentinels/admin/summary', GET]] => -------------------YY
+Deferred [Mvc [pattern='/api/mobile/sentinels/events', POST], Ant [pattern='/api/mobile/sentinels/events', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/mobile/sentinels/events', DELETE], Ant [pattern='/api/mobile/sentinels/events', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/assist/code-edit', POST], Ant [pattern='/api/assist/code-edit', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/import', POST], Ant [pattern='/api/agents/import', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/import/preview', POST], Ant [pattern='/api/agents/import/preview', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents', POST], Ant [pattern='/api/agents', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/generate', POST], Ant [pattern='/api/agents/generate', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/assist/draft', POST], Ant [pattern='/api/assist/draft', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agent-bundles/import', POST], Ant [pattern='/api/agent-bundles/import', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agent-bundles/preview', POST], Ant [pattern='/api/agent-bundles/preview', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/duplicate', POST], Ant [pattern='/api/agents/*/duplicate', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/templates/*/import', POST], Ant [pattern='/api/templates/*/import', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/simulations/personas', POST], Ant [pattern='/api/agents/*/quality/simulations/personas', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/templates', POST], Ant [pattern='/api/templates', POST]] => ---------------Y---Y-
+Deferred [Mvc [pattern='/api/templates/*/submit', POST], Ant [pattern='/api/templates/*/submit', POST]] => ---------------Y---Y-
+Deferred [Mvc [pattern='/api/skills', POST], Ant [pattern='/api/skills', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/import', POST], Ant [pattern='/api/skills/import', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/registry/install', POST], Ant [pattern='/api/skills/registry/install', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/improvement/apply', POST], Ant [pattern='/api/skills/*/improvement/apply', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/approve', POST], Ant [pattern='/api/skills/*/approve', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/reject', POST], Ant [pattern='/api/skills/*/reject', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/archive', POST], Ant [pattern='/api/skills/*/archive', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/agents', POST], Ant [pattern='/api/skills/*/agents', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/agents/*/skills/distill', POST], Ant [pattern='/api/agents/*/skills/distill', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*', PUT], Ant [pattern='/api/skills/*', PUT]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/enabled', PATCH], Ant [pattern='/api/skills/*/enabled', PATCH]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*', DELETE], Ant [pattern='/api/skills/*', DELETE]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skills/*/improvement', DELETE], Ant [pattern='/api/skills/*/improvement', DELETE]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/workflows/import', POST], Ant [pattern='/api/workflows/import', POST]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/workflows/import/preview', POST], Ant [pattern='/api/workflows/import/preview', POST]] => -------Y----------YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/judge-calibration-sets', POST], Ant [pattern='/api/agents/*/quality/judge-calibration-sets', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/judge-calibration-sets/*/items', POST], Ant [pattern='/api/agents/*/quality/judge-calibration-sets/*/items', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/judge-calibration-sets/*', PUT], Ant [pattern='/api/agents/*/quality/judge-calibration-sets/*', PUT]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/judge-calibration-sets/*', DELETE], Ant [pattern='/api/agents/*/quality/judge-calibration-sets/*', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/judge-calibration-sets/*/items/*', DELETE], Ant [pattern='/api/agents/*/quality/judge-calibration-sets/*/items/*', DELETE]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/agents/*/quality/trajectory-eval/datasets/*/cases/*', PUT], Ant [pattern='/api/agents/*/quality/trajectory-eval/datasets/*/cases/*', PUT]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/skill-security/skills/*/approve', POST], Ant [pattern='/api/skill-security/skills/*/approve', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skill-security/preview/draft', POST], Ant [pattern='/api/skill-security/preview/draft', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skill-security/preview/archive', POST], Ant [pattern='/api/skill-security/preview/archive', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/skill-security/preview/registry', POST], Ant [pattern='/api/skill-security/preview/registry', POST]] => ------------Y-----YYY
+Deferred [Mvc [pattern='/api/scheduled-tasks', POST], Ant [pattern='/api/scheduled-tasks', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/scheduled-tasks/**', POST], Ant [pattern='/api/scheduled-tasks/**', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/scheduled-tasks/*', PUT], Ant [pattern='/api/scheduled-tasks/*', PUT]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/scheduled-tasks/*', DELETE], Ant [pattern='/api/scheduled-tasks/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/chat-import', POST], Ant [pattern='/api/chat-import', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/chat-import/preview', POST], Ant [pattern='/api/chat-import/preview', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/chat-import/memory-candidates', POST], Ant [pattern='/api/chat-import/memory-candidates', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/chat-import/chats/*', DELETE], Ant [pattern='/api/chat-import/chats/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/import', POST], Ant [pattern='/api/memory/import', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/memory/import/preview', POST], Ant [pattern='/api/memory/import/preview', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/profiles', POST], Ant [pattern='/api/browser/profiles', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/profiles/*/clear-state', POST], Ant [pattern='/api/browser/profiles/*/clear-state', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/profiles/*', PATCH], Ant [pattern='/api/browser/profiles/*', PATCH]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/profiles/*/agents/*', PUT], Ant [pattern='/api/browser/profiles/*/agents/*', PUT]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/profiles/*', DELETE], Ant [pattern='/api/browser/profiles/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/profiles/*/agents/*', DELETE], Ant [pattern='/api/browser/profiles/*/agents/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/recipes', POST], Ant [pattern='/api/browser/recipes', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/recipes/from-run', POST], Ant [pattern='/api/browser/recipes/from-run', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/recipes/*', PATCH], Ant [pattern='/api/browser/recipes/*', PATCH]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/recipes/*', DELETE], Ant [pattern='/api/browser/recipes/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/takeover/pause', POST], Ant [pattern='/api/browser/takeover/pause', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/takeover/*/begin', POST], Ant [pattern='/api/browser/takeover/*/begin', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/takeover/*/cancel', POST], Ant [pattern='/api/browser/takeover/*/cancel', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/takeover/*/hand-back', POST], Ant [pattern='/api/browser/takeover/*/hand-back', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/takeover/*/input', POST], Ant [pattern='/api/browser/takeover/*/input', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/browser/takeover/*/token', POST], Ant [pattern='/api/browser/takeover/*/token', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/sessions/*/messages/*/edit', POST], Ant [pattern='/api/agents/*/sessions/*/messages/*/edit', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/sessions/*/messages/*/regenerate', POST], Ant [pattern='/api/agents/*/sessions/*/messages/*/regenerate', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/agents/*/sessions/*/messages/active-leaf', PUT], Ant [pattern='/api/agents/*/sessions/*/messages/active-leaf', PUT]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/coding-tasks', POST], Ant [pattern='/api/coding-tasks', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/coding-tasks/*/approve', POST], Ant [pattern='/api/coding-tasks/*/approve', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/coding-tasks/*/reject', POST], Ant [pattern='/api/coding-tasks/*/reject', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/coding-tasks/*/cancel', POST], Ant [pattern='/api/coding-tasks/*/cancel', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/coding-tasks/*/rollback', POST], Ant [pattern='/api/coding-tasks/*/rollback', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/completions/agent-turn', POST], Ant [pattern='/api/completions/agent-turn', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/v1/**'], Ant [pattern='/v1/**']] => -YYYYYYYYYYYYYYYYYYYY
+any request => -YYYYYYYYYYYYYYYYYYYY

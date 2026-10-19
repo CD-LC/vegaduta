@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/twilio-conversation-relay/dtmf.schema.json",
+  "title": "Twilio Conversation Relay - dtmf message",
+  "description": "Source: VoiceRelayWebSocketHandler.java#handleDtmf, read directly (2026-07-19). Master Roadmap 2026 item #17 fast-follow. A digit with no VoiceDtmfMappingService match is a silent no-op by design (ifPresent, no else branch) - not an error. B4 (voice-safety) owns DTMF ACTIONS; this handler and this schema only cover parsing/menu-routing, not action dispatch.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "dtmf" },
+    "digit": {
+      "type": "string",
+      "description": "A blank digit is a no-op (handler returns early if digit.isBlank()). Real Twilio DTMF digits are single characters (0-9, *, #) but the handler does not itself constrain length/charset beyond blank-check, so this schema doesn't either - it schemas what the handler enforces, not what Twilio's docs say it will send."
+    }
+  },
+  "required": ["type", "digit"],
+  "additionalProperties": true
+}

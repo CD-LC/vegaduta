@@ -1,0 +1,189 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-templates",
+      "method": "GET",
+      "path": "/api/templates",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-templates",
+      "method": "POST",
+      "path": "/api/templates",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.category",
+          "$.id",
+          "$.importCount",
+          "$.kind",
+          "$.status",
+          "$.summary",
+          "$.tags",
+          "$.title",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "put-api-templates-id",
+      "method": "PUT",
+      "path": "/api/templates/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.category",
+          "$.id",
+          "$.importCount",
+          "$.kind",
+          "$.status",
+          "$.summary",
+          "$.tags",
+          "$.title",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "post-api-templates-id-import",
+      "method": "POST",
+      "path": "/api/templates/{id}/import",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.kind",
+          "$.resourceId"
+        ]
+      }
+    },
+    {
+      "id": "post-api-templates-id-submit",
+      "method": "POST",
+      "path": "/api/templates/{id}/submit",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.category",
+          "$.id",
+          "$.importCount",
+          "$.kind",
+          "$.status",
+          "$.summary",
+          "$.tags",
+          "$.title",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "post-api-templates-id-validate",
+      "method": "POST",
+      "path": "/api/templates/{id}/validate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.ai",
+          "$.reviewedAt",
+          "$.rules",
+          "$.standardVersion"
+        ]
+      }
+    },
+    {
+      "id": "post-api-templates-id-withdraw",
+      "method": "POST",
+      "path": "/api/templates/{id}/withdraw",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.category",
+          "$.id",
+          "$.importCount",
+          "$.kind",
+          "$.status",
+          "$.summary",
+          "$.tags",
+          "$.title",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "get-api-templates-gallery",
+      "method": "GET",
+      "path": "/api/templates/gallery",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].category",
+          "$[*].id",
+          "$[*].importCount",
+          "$[*].kind",
+          "$[*].summary",
+          "$[*].tags",
+          "$[*].title",
+          "$[*].version"
+        ]
+      }
+    },
+    {
+      "id": "get-api-templates-gallery-id",
+      "method": "GET",
+      "path": "/api/templates/gallery/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.category",
+          "$.id",
+          "$.importCount",
+          "$.kind",
+          "$.summary",
+          "$.tags",
+          "$.title",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "get-api-templates-gallery-standard",
+      "method": "GET",
+      "path": "/api/templates/gallery/standard",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.examplePrompt",
+          "$.exampleSummary",
+          "$.intro",
+          "$.principles",
+          "$.rules",
+          "$.steps",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "get-api-templates-mine",
+      "method": "GET",
+      "path": "/api/templates/mine",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].category",
+          "$[*].id",
+          "$[*].importCount",
+          "$[*].kind",
+          "$[*].status",
+          "$[*].summary",
+          "$[*].tags",
+          "$[*].title",
+          "$[*].version"
+        ]
+      }
+    }
+  ]
+}

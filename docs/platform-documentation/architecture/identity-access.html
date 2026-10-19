@@ -1,0 +1,132 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Identity &amp; Access (Keycloak) — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="architecture" data-page="identity-access.html" data-doc="VD-AR-005" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>Identity &amp; Access (Keycloak)</div>
+<div class="doc-meta" data-auto></div><h1>Identity &amp; Access (Keycloak)</h1>
+
+<p class="lede">
+  Keycloak 26 is the platform's identity provider. Every API call into core is
+  authenticated as an OAuth2 resource-server request against realm
+  <code>agentic-ai</code>; tenancy itself is derived from the JWT's
+  <code>tenant_id</code> claim. The subtle part is not OAuth — it is that core
+  must accept tokens from <strong>two issuer URLs for the same realm</strong>,
+  and that realm import files drift from the live realm.
+</p>
+
+<pre class="mermaid">
+flowchart TD
+  U["User / client"] --> KC["Keycloak 26<br/>realm: agentic-ai"]
+  KC -->|"issues JWT<br/>iss = public or internal URL"| APP["core (OAuth2 resource server)"]
+  APP --> V{"issuer check"}
+  V -->|"KEYCLOAK_ISSUER_URI<br/>(raw/internal)"| OK["validate via JWKS"]
+  V -->|"KEYCLOAK_ADDITIONAL_ISSUERS<br/>auth.example.com/..."| OK
+  V -->|"anything else"| R401["401"]
+  OK --> AZP{"azp in allowed list?"}
+  AZP -->|no| R401
+  AZP -->|yes| CTX["TenantContext ← tenant_id claim<br/>SecurityContext ← roles + PERM_*"]
+</pre>
+
+<h2>1. Realm and clients</h2>
+<p>Realm <code>agentic-ai</code> (source: <code>deploy/keycloak/agentic-ai-realm.json</code>)
+registers these clients:</p>
+<table>
+  <thead><tr><th>Client ID</th><th>Used by</th></tr></thead>
+  <tbody>
+    <tr><td><code>agentic-ai-web</code></td><td>The tenant web app (<code>app.*</code>)</td></tr>
+    <tr><td><code>agentic-ai-platform-admin</code></td><td>The super-admin console (<code>admin.*</code>)</td></tr>
+    <tr><td><code>agentic-ai-core</code></td><td>Core backend (service-account / confidential flows)</td></tr>
+    <tr><td><code>agentic-ai-mobile</code></td><td>Reserved for an external mobile client (not in this repository)</td></tr>
+    <tr><td><code>agentic-ai-app</code></td><td>Reserved for an external desktop/agent client</td></tr>
+    <tr><td><code>agentic-ai-ide</code></td><td>Reserved for an external IDE client</td></tr>
+  </tbody>
+</table>
+<p>Identity-provider stubs for GitHub, Google and Microsoft exist in the realm
+JSON with placeholder client IDs (<code>REPLACE_WITH_*</code>) — they are
+enabled in the <em>live</em> realm only, one of the known JSON↔live drifts.</p>
+
+<h2>2. Roles and authorities</h2>
+<table>
+  <thead><tr><th>Realm role</th><th>Scope</th></tr></thead>
+  <tbody>
+    <tr><td><code>tenant-admin</code></td><td>Full administration within one tenant</td></tr>
+    <tr><td><code>platform-admin</code></td><td>Cross-tenant super-admin; the only role allowed under <code>/api/platform/**</code></td></tr>
+    <tr><td><code>agent-builder</code></td><td>Create and configure agents/workflows</td></tr>
+    <tr><td><code>delegated-user</code></td><td>Limited delegated operations</td></tr>
+    <tr><td><code>end-customer</code></td><td>Channel-facing consumer identity</td></tr>
+  </tbody>
+</table>
+<p>Beneath the roles sit granular <code>PERM_*</code> authorities enforced in
+<code>SecurityConfig</code>:</p>
+<table>
+  <thead><tr><th>Authority</th><th>Grants</th></tr></thead>
+  <tbody>
+    <tr><td><code>PERM_MANAGE_USERS</code></td><td>User administration within the tenant</td></tr>
+    <tr><td><code>PERM_MANAGE_AGENTS</code></td><td>Agent lifecycle</td></tr>
+    <tr><td><code>PERM_MANAGE_GUARDRAILS</code></td><td>Guardrail/policy configuration</td></tr>
+    <tr><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>Channel/provider integrations</td></tr>
+    <tr><td><code>PERM_MANAGE_APPROVALS</code></td><td>HITL approval queues</td></tr>
+    <tr><td><code>PERM_VIEW_AUDIT_LOG</code></td><td>Read the tenant audit log</td></tr>
+    <tr><td><code>PERM_VIEW_USAGE</code></td><td>Usage/cost dashboards</td></tr>
+    <tr><td><code>PERM_MANAGE_TEMPLATES</code></td><td>Community template submission/moderation</td></tr>
+  </tbody>
+</table>
+
+<h2>3. The dual-issuer requirement</h2>
+<div class="callout callout-danger">
+  <div class="callout-title">Removing KEYCLOAK_ADDITIONAL_ISSUERS 401s everything</div>
+  <p>Core validates tokens against <strong>two</strong> issuer URIs for the same
+  realm: <code>KEYCLOAK_ISSUER_URI</code> (the raw/internal issuer — historically
+  <code>localhost:8180</code> or the container DNS name) and
+  <code>KEYCLOAK_ADDITIONAL_ISSUERS</code> (the public issuer,
+  <code>https://auth.example.com/realms/agentic-ai</code>). Browser-issued tokens
+  carry the public issuer; internal flows carry the raw one. Both must be
+  configured — never "fix" one into the other. If either is missing, that whole
+  class of tokens fails with 401 on every endpoint.</p>
+</div>
+<p>Token validation additionally enforces an <strong>allowed-<code>azp</code>
+list</strong>: only tokens issued to the registered clients above are accepted.
+JWKS is fetched internally from <code>http://keycloak:8080</code> (compose DNS or the
+in-cluster Service), not through the public domain: a CDN or WAF in front of
+<code>auth.&lt;your-domain&gt;</code> may block Python user agents and break the Python
+services' key fetch.</p>
+
+<h2>4. User management and signup</h2>
+<ul>
+  <li><strong>Signup:</strong> <code>/api/signup</code> creates the Keycloak user <em>and</em> provisions the tenant schema in one flow.</li>
+  <li><strong>Admin operations:</strong> user management goes through the Keycloak Admin REST API via <code>KEYCLOAK_ADMIN_BASE_URL</code> (<code>core/admin</code> module's KeycloakAdminClient).</li>
+  <li><strong><code>unmanagedAttributePolicy=ADMIN_EDIT</code> is mandatory.</strong> Without it, Keycloak drops non-mapped user attributes — including <code>tenant_id</code> — and every token for that user silently loses its tenant claim, which then breaks tenant resolution downstream.</li>
+  <li><strong>Post-import reconcile scripts</strong> exist because realm imports do not fully reproduce the live realm — run them after any realm re-import.</li>
+</ul>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Realm JSON ≠ live realm</div>
+  <p><code>deploy/keycloak/agentic-ai-realm.json</code> is a provisioning
+  artifact, not a mirror. Known drift: identity providers (GitHub/Google/
+  Microsoft) are enabled in the live realm but carry placeholder IDs in the
+  JSON. Trust the live realm for "what is configured"; trust the JSON for "what
+  a fresh environment gets" — and reconcile after imports.</p>
+</div>
+
+<h2>5. Security configuration</h2>
+<ul>
+  <li><code>SecurityConfig</code> runs under profile <code>!insecure</code> — the <code>insecure</code> profile exists for local/test use and must never reach an environment.</li>
+  <li>The app <strong>fails closed</strong>: with neither the secure nor the insecure profile, authentication is still enforced — there is no configuration mistake that silently opens the API.</li>
+  <li>Route-level rules include <code>/api/platform/** → ROLE_platform-admin</code>; webhook paths are opened per-channel with their own signature validation instead of JWT auth.</li>
+</ul>
+
+<h2>6. Failure modes quick table</h2>
+<table>
+  <thead><tr><th>Symptom</th><th>Root cause to check first</th></tr></thead>
+  <tbody>
+    <tr><td>Every request 401s after a deploy/env change</td><td>Missing or wrong <code>KEYCLOAK_ADDITIONAL_ISSUERS</code> (or primary issuer rewritten to the public URL)</td></tr>
+    <tr><td>401 for one client type only</td><td>Client's <code>azp</code> not in the allowed-azp list</td></tr>
+    <tr><td>Python service can't start / can't validate tokens</td><td>JWKS pointed at the public domain and blocked by an edge proxy; use the internal Keycloak URL</td></tr>
+    <tr><td>User exists but lands in <code>public</code> schema / sees no data</td><td><code>tenant_id</code> attribute dropped — check <code>unmanagedAttributePolicy</code> on the realm</td></tr>
+    <tr><td><code>/api/platform/**</code> 403 for an admin user</td><td>User has tenant-admin, not the <code>platform-admin</code> realm role</td></tr>
+  </tbody>
+</table>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

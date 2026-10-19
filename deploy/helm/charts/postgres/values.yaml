@@ -1,0 +1,84 @@
+# postgres - a CloudNativePG `Cluster` (postgresql.cnpg.io/v1). PREREQUISITE: the
+# CloudNativePG operator (https://cloudnative-pg.io, Apache-2.0) installed cluster-wide:
+#   helm repo add cnpg https://cloudnative-pg.github.io/charts
+#   helm upgrade --install cnpg cnpg/cloudnative-pg -n cnpg-system --create-namespace
+#
+# Names (fixed, the core charts derive them): Cluster "<release>-postgres",
+# read-write Service "<release>-postgres-rw", app credentials Secret
+# "<release>-postgres-app" (created by the operator: keys username/password/...).
+# The database and owner come from global.postgresql.database / .username.
+#
+# The image must be CloudNativePG-compatible AND ship pgvector + Apache AGE: core's tenant
+# migrations create both extensions (an external server without AGE: global.postgresql.age=false).
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: database
+
+image:
+  registry: ""
+  # -- CNPG-compatible PostgreSQL 16 image with pgvector and Apache AGE.
+  repository: postgres
+  tag: "16-pgvector-age"
+  digest: ""
+
+# -- Number of instances (1 primary + N-1 streaming replicas; CNPG handles failover).
+instances: 1
+
+storage:
+  size: 20Gi
+  storageClass: ""
+walStorage:
+  enabled: false
+  size: 5Gi
+  storageClass: ""
+
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits: { memory: 2Gi }
+
+# -- postgresql.conf parameters.
+parameters:
+  max_connections: "200"
+  shared_buffers: "256MB"
+  timezone: "UTC"
+# -- shared_preload_libraries. `age` is preloaded so the non-superuser application role never
+# needs `LOAD 'age'` (superuser-only unless the path is $libdir/plugins/age, which the
+# postgres image also provides). Remove it only if you do not use graph memory.
+sharedPreloadLibraries: [age]
+
+# -- Extensions created in the application database right after initdb (as superuser; the
+# application role cannot create these untrusted extensions itself). The chart appends the
+# Apache AGE catalog grants for the application role (global.postgresql.username).
+initSQL:
+  - CREATE EXTENSION IF NOT EXISTS vector;
+  - CREATE EXTENSION IF NOT EXISTS age;
+
+# -- Keycloak database + role in the same cluster (created when the bundled Keycloak is used, i.e. global.oidc.issuerUrl is empty).
+keycloakDatabase:
+  enabled: auto
+  name: keycloak
+  owner: keycloak
+
+# -- Raw CNPG `spec.backup` (e.g. barmanObjectStore to S3). Strongly recommended in production.
+backup: {}
+# -- CNPG ScheduledBackup; needs `backup` configured.
+scheduledBackup:
+  enabled: false
+  schedule: "0 0 3 * * *"
+  backupOwnerReference: self
+
+# -- Create a PodMonitor (needs the Prometheus Operator CRDs).
+monitoring:
+  enablePodMonitor: false
+
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []
+
+networkPolicy:
+  # Namespace of the CloudNativePG operator (it talks to the instance manager on 8000).
+  operatorNamespace: cnpg-system
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, core-migrate, keycloak]

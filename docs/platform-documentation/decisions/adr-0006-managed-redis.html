@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0006 Managed Redis — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0006-managed-redis.html" data-doc="VD-ADR-006" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0006 Managed Redis</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0006: Managed Redis for the original hosted deployment</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-staging">superseded for self-hosting</span></dd>
+  <dt>Decided</dt><dd>September 2026 (hosted deployment, <a href="adr-0004-hosted-container-runtime.html">ADR-0004</a>)</dd>
+  <dt>Applies to this repository</dt><dd>Partly: core needs a Redis-API server; which one is your choice.</dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  Core uses one Spring Data Redis connection (<code>spring.data.redis.host/port/password</code>,
+  i.e. <code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_PASSWORD</code>) for rate limiters,
+  session memory, response caches and similar consumers. The hosted deployment used its
+  cloud's managed Redis, reached over a private network, instead of a Redis container.
+</p>
+
+<h2>Decision (historical)</h2>
+<p>
+  Use the cloud's managed Redis: plaintext protocol inside the private network, single
+  node, no clustering. Core's Redis configuration has no TLS setup, which is why
+  plaintext on a private network was accepted.
+</p>
+
+<h2>What applies to self-hosters</h2>
+<ul>
+  <li>Compose and Helm bundle <strong>Valkey</strong> (Redis API, <code>valkey/valkey:8.1-alpine</code>), single node, password from <code>VALKEY_PASSWORD</code> or the chart Secret.</li>
+  <li>To use your own Redis-compatible service, set the Helm <code>global.valkey</code> host values (or <code>REDIS_*</code> for core) and disable the bundled one. Keep it on a private network: core does not configure TLS to Redis.</li>
+  <li>Redis contents are disposable by design (caches, sessions, rate-limit windows); back up Postgres, not Redis.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/app-config/src/main/resources/application.yml</code> — <code>spring.data.redis</code> block.</li>
+  <li><code>deploy/compose/docker-compose.yml</code> (<code>valkey</code>), <code>deploy/helm/charts/valkey</code>, <code>deploy/helm/charts/vegaduta/values.yaml</code> (<code>global.valkey</code>).</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+</body></html>

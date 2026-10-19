@@ -1,0 +1,373 @@
+/* ---------------------------------------------------------------------------
+ * 19e. SEMANTIC ROLE COLOUR — colour as DATA, inside the console only
+ *
+ * WHY THIS EXISTS, AND WHY IT IS NOT "MAKE IT COLOURFUL".
+ * An earlier version of the hero card was called cheap, and the thing that
+ * made it cheap was nine pastel-tinted channel circles: colour used as
+ * DECORATION. Every reference product this page competes with (Stripe,
+ * Linear, Vercel, n8n) uses colour the opposite way — a hue means one thing,
+ * always the same thing, and an element with nothing to say stays neutral.
+ * n8n's canvas is genuinely colourful AND genuinely premium for exactly this
+ * reason: its hues encode node type.
+ *
+ * So every colour below has a JOB, stated in one sentence next to it. If a
+ * new hue cannot be described that way it does not belong in this block.
+ *
+ * ABOUT §1's THREE-HUE CEILING. That ceiling governs the marketing BANDS,
+ * where extra hues are ornament. It does not govern a quotation of a product
+ * whose whole job is to show state: a run log that paints "succeeded",
+ * "waiting on a human" and "failed" in the same ink is not restrained, it is
+ * broken. This set is therefore scoped to `.mkt-ui` and cannot leak out of
+ * the console frame — the same containment argument §19 makes for type.
+ *
+ * SOURCES. Nothing here is a raw hex. Six sources, four already in this file,
+ * two read from the app the way §1 reads --accent-500:
+ *   --mkt-accent    brand indigo-violet    --mkt-flow      cyan
+ *   --mkt-warm      brand orange           --mkt-positive  green
+ *   --danger        the app's rose         --mkt-ink-2     neutral
+ * Both themes follow automatically, because every value is a color-mix of
+ * tokens that already have a dark override.
+ *
+ * TWO AXES, NEVER MIXED. Node TYPE answers "what kind of step is this"; run
+ * STATE answers "how is it going". A row carries one of each. Where the two
+ * axes share a hue it is deliberate and consistent — cyan is always movement,
+ * orange is always "a human is holding this", rose is always failure.
+ *
+ * THREE VALUES PER ROLE:
+ *   --mkt-role       the source hue. DECORATIVE USE ONLY — bar fills, chip
+ *                    tints, glows. Raw --mkt-warm is 2.4:1 on a light pane
+ *                    and must never carry meaning on its own.
+ *   --mkt-role-ink   the readable form. >= 4.5:1 on the darkest console pane
+ *                    AND on its own chip tint in light mode; far higher in
+ *                    dark. This is what text and icons use.
+ *   --mkt-role-mark  the marker form, 65% of the way to the hue. >= 3:1 on
+ *                    the same pane (WCAG 1.4.11, non-text), so a 10px type
+ *                    square stays vivid without becoming decoration-only.
+ *
+ * MEASURED RATIOS — light mode, against --mkt-surface-sunken (#eceef3, the
+ * darkest surface a console pane uses) and against the role's own 12% chip
+ * tint composited over it. These are not estimates: each token was resolved
+ * in the browser (getComputedStyle on a probe inside a real .mkt-ui frame, in
+ * both themes) and the returned oklab converted to sRGB, so the numbers are
+ * what the engine actually paints.
+ *
+ *   role         ink        vs pane   on chip   mark vs pane
+ *   trigger      #256476      5.72      5.12        3.46
+ *   action       #5148b9      6.08      5.25        4.59
+ *   condition    #7f4891      5.59      4.80        4.82
+ *   approval     #954e29      5.32      4.76        3.14
+ *   error        #a11d38      6.58      5.39        5.79
+ *   queued       #4b515c      6.88      5.93        5.37
+ *   running      = trigger    5.72      5.12        3.46
+ *   ok           #126247      6.32      5.34        5.55
+ *   waiting      = approval   5.32      4.76        3.14
+ *   failed       = error      6.58      5.39        5.79
+ *
+ * Dark mode, ink against whichever of --mkt-surface (#1f2237) and
+ * --mkt-surface-raised (#262a43) is worse, then on its own 12% tint, same
+ * order: 9.94/7.60, 6.01/5.06, 6.48/5.25, 7.50/6.39, 8.13/6.34, 6.12/5.16,
+ * 8.05/6.38. Nothing in either theme lands under 4.5:1; the floor is
+ * approval's 4.76 in light.
+ *
+ * The two markers that sit closest to the 3:1 line — trigger's cyan at 3.46
+ * and approval's orange at 3.14 — are the reason --mkt-role-mark exists at
+ * all instead of the parts simply painting themselves --mkt-role: raw
+ * --mkt-warm measures 2.41:1 on this pane and raw --mkt-flow 2.69:1.
+ *
+ * The chip BORDER (40% of the hue) measures 1.4-2.7:1 and is deliberately
+ * decorative: a chip's state is carried by its label text and its dot, never
+ * by its edge, so 1.4.11 does not apply to it. Raising it to 3:1 would put a
+ * hard coloured ring around every row and bring the swatch book back.
+ *
+ * NOTE ON THE SELECTOR. This is a SECOND declaration block on
+ * `.marketing-root .mkt-ui`, not an edit of §19's. §19's block is the type
+ * scale and is left byte-identical so a future type change has exactly one
+ * home; role colour is a separate concern and gets a separate block.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-ui {
+  /* --- NODE / STEP TYPE: what kind of step this is ---------------------- */
+
+  /* TRIGGER — the step that STARTS a run: a webhook, a schedule, an inbound
+   * message. Cyan, because §1 already defines --mkt-flow as "signal /
+   * automation / data moving" and a trigger is signal arriving. */
+  --mkt-role-trigger: var(--mkt-flow);
+  --mkt-role-trigger-ink: color-mix(in oklab, var(--mkt-flow) 60%, var(--mkt-ink));
+
+  /* ACTION — a step that DOES something: calls a tool, writes a record, sends
+   * a message. The brand indigo-violet, and deliberately the most common node
+   * type on any real canvas, which is what keeps the brand accent dominant in
+   * a panel full of colour. */
+  --mkt-role-action: var(--mkt-accent);
+  --mkt-role-action-ink: color-mix(in oklab, var(--mkt-accent) 72%, var(--mkt-ink));
+
+  /* CONDITION / BRANCH — a step that ROUTES rather than works: if, switch,
+   * filter. The only role with no source token of its own, because the
+   * palette has no sixth hue to read; it is the accent pushed along the wheel
+   * toward the failure hue until it separates cleanly from both (318deg,
+   * about 37deg off action-indigo and 57deg off failed-rose). The mix is
+   * arithmetic, not semantics — a branch has nothing to do with an error. */
+  --mkt-role-condition: color-mix(in oklab, var(--mkt-accent) 55%, var(--danger, #be123c));
+  --mkt-role-condition-ink: color-mix(in oklab, var(--mkt-role-condition) 84%, var(--mkt-ink));
+
+  /* APPROVAL / HUMAN GATE — a step a person has to release. Orange, and this
+   * is not a new decision: §6's .mkt-dot--pending already paints the platform
+   * approval gate (HumanApprovalGateService holds side-effecting steps for a
+   * human) in --mkt-warm. This token names what that dot already meant. */
+  --mkt-role-approval: var(--mkt-warm);
+  --mkt-role-approval-ink: color-mix(in oklab, var(--mkt-warm) 60%, var(--mkt-ink));
+
+  /* ERROR PATH — the branch a run takes when a step throws: a catch node, a
+   * fallback, a dead-letter route. The app's own rose, read the way §1 reads
+   * --accent-500, so it is the same red the real console uses for failures. */
+  --mkt-role-error: var(--danger, #be123c);
+  --mkt-role-error-ink: color-mix(in oklab, var(--danger, #be123c) 84%, var(--mkt-ink));
+
+  /* --- RUN STATE: how a run or a step is going -------------------------- */
+
+  /* QUEUED — accepted, nothing has happened yet. Neutral ON PURPOSE. A queued
+   * row has no news, and giving it a hue is precisely the decoration this
+   * block exists to refuse; the neutral rows are also what make the coloured
+   * ones read as signal rather than as wallpaper.
+   *
+   * 72% and not the 85% the first pass used: dark --muted-foreground resolves
+   * to #8b90a0, not the #adb3c9 shadcn-theme.css declares further up, and at
+   * 85% a queued chip label measured 4.43:1 on its own tint in dark — a fail,
+   * caught by resolving the token in the browser rather than trusting the
+   * file it is written in. Quiet is carried by the ABSENCE OF HUE here, never
+   * by being faint; §19's contrast note applies to this role like any other. */
+  --mkt-role-queued: var(--mkt-ink-2);
+  --mkt-role-queued-ink: color-mix(in oklab, var(--mkt-ink-2) 72%, var(--mkt-ink));
+
+  /* RUNNING — in flight right now. Cyan again: movement, the same meaning as
+   * a trigger's incoming signal and as the packet on a §11 flowline. */
+  --mkt-role-running: var(--mkt-flow);
+  --mkt-role-running-ink: color-mix(in oklab, var(--mkt-flow) 60%, var(--mkt-ink));
+
+  /* OK — finished, succeeded. Green, the one convention it would be perverse
+   * to reassign. --mkt-positive is already §1's adversarially verified AA
+   * token, so this role inherits that fix rather than repeating it. */
+  --mkt-role-ok: var(--mkt-positive);
+  --mkt-role-ok-ink: color-mix(in oklab, var(--mkt-positive) 84%, var(--mkt-ink));
+
+  /* WAITING — stopped, and a HUMAN is the thing it is stopped on. The same
+   * orange as the approval gate, because it is the same fact seen from the
+   * run's side rather than the step's. Distinct from queued (nobody is
+   * blocked) and from failed (nothing is wrong). */
+  --mkt-role-waiting: var(--mkt-warm);
+  --mkt-role-waiting-ink: color-mix(in oklab, var(--mkt-warm) 60%, var(--mkt-ink));
+
+  /* FAILED — finished, did not succeed. The app's rose again. */
+  --mkt-role-failed: var(--danger, #be123c);
+  --mkt-role-failed-ink: color-mix(in oklab, var(--danger, #be123c) 84%, var(--mkt-ink));
+
+  /* --- THE CURRENT-ROLE CHANNEL ----------------------------------------- */
+  /* Components read these two and never a specific role, so one component
+   * serves all ten states and a new state is a hook, not a rewrite.
+   *
+   * They are declared as a PAIR rather than derived from each other, because
+   * a custom property's var() references are substituted where the property
+   * is DECLARED: a child that reset only --mkt-role would inherit an
+   * --mkt-role-ink still pointing at its parent's hue. Every hook sets both.
+   *
+   * The default is action/brand, so an unlabelled console element paints in
+   * the accent rather than in a surprise colour. */
+  --mkt-role: var(--mkt-role-action);
+  --mkt-role-ink: var(--mkt-role-action-ink);
+}
+
+/* --- ROLE HOOKS ----------------------------------------------------------
+ * Two spellings each, matching the hook convention §12/§13/§19b use for
+ * selection: a data attribute for state a component computes, a class for
+ * markup that is simply typed that way. Both are (0,3,0).
+ *
+ * These rules set custom properties and NOTHING else. An element already
+ * carrying data-state for an unrelated reason inherits two inert variables
+ * and renders exactly as before — only a component that opts in by reading
+ * --mkt-role changes appearance.
+ * --------------------------------------------------------------------- */
+
+.marketing-root .mkt-ui [data-node="trigger"],
+.marketing-root .mkt-ui .mkt-ui-node--trigger {
+  --mkt-role: var(--mkt-role-trigger);
+  --mkt-role-ink: var(--mkt-role-trigger-ink);
+}
+
+.marketing-root .mkt-ui [data-node="action"],
+.marketing-root .mkt-ui .mkt-ui-node--action {
+  --mkt-role: var(--mkt-role-action);
+  --mkt-role-ink: var(--mkt-role-action-ink);
+}
+
+.marketing-root .mkt-ui [data-node="condition"],
+.marketing-root .mkt-ui .mkt-ui-node--condition {
+  --mkt-role: var(--mkt-role-condition);
+  --mkt-role-ink: var(--mkt-role-condition-ink);
+}
+
+.marketing-root .mkt-ui [data-node="approval"],
+.marketing-root .mkt-ui .mkt-ui-node--approval {
+  --mkt-role: var(--mkt-role-approval);
+  --mkt-role-ink: var(--mkt-role-approval-ink);
+}
+
+.marketing-root .mkt-ui [data-node="error"],
+.marketing-root .mkt-ui .mkt-ui-node--error {
+  --mkt-role: var(--mkt-role-error);
+  --mkt-role-ink: var(--mkt-role-error-ink);
+}
+
+.marketing-root .mkt-ui [data-state="queued"],
+.marketing-root .mkt-ui .mkt-ui-state--queued {
+  --mkt-role: var(--mkt-role-queued);
+  --mkt-role-ink: var(--mkt-role-queued-ink);
+}
+
+.marketing-root .mkt-ui [data-state="running"],
+.marketing-root .mkt-ui .mkt-ui-state--running {
+  --mkt-role: var(--mkt-role-running);
+  --mkt-role-ink: var(--mkt-role-running-ink);
+}
+
+.marketing-root .mkt-ui [data-state="ok"],
+.marketing-root .mkt-ui .mkt-ui-state--ok {
+  --mkt-role: var(--mkt-role-ok);
+  --mkt-role-ink: var(--mkt-role-ok-ink);
+}
+
+.marketing-root .mkt-ui [data-state="waiting"],
+.marketing-root .mkt-ui .mkt-ui-state--waiting {
+  --mkt-role: var(--mkt-role-waiting);
+  --mkt-role-ink: var(--mkt-role-waiting-ink);
+}
+
+.marketing-root .mkt-ui [data-state="failed"],
+.marketing-root .mkt-ui .mkt-ui-state--failed {
+  --mkt-role: var(--mkt-role-failed);
+  --mkt-role-ink: var(--mkt-role-failed-ink);
+}
+
+/* ---------------------------------------------------------------------------
+ * 19f. ROLE-CARRYING PARTS
+ * Everything here reads --mkt-role / --mkt-role-ink and is therefore written
+ * once for all ten roles. Three of the four EXTEND vocabulary this file
+ * already has (.mkt-dot, .mkt-flowline, .mkt-pill) rather than standing up a
+ * parallel set of near-identical components.
+ * ------------------------------------------------------------------------ */
+
+/* THE TYPE MARKER — the small square at the head of a node row or step card.
+ * Colour says which type; SHAPE says it a second time, because colour is not
+ * allowed to be the only carrier (WCAG 1.4.1) and because a canvas where
+ * trigger / branch / gate are readable at a glance in greyscale is simply a
+ * better canvas. The shapes are border-radius and one rotation — no SVG, no
+ * icon font, nothing to load on the LCP element. */
+.marketing-root .mkt-ui .mkt-ui-mark {
+  --mkt-role-mark: color-mix(in oklab, var(--mkt-role) 65%, var(--mkt-role-ink));
+  box-sizing: border-box;
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px; /* ACTION: a plain square, the default step */
+  background: var(--mkt-role-mark);
+}
+
+/* TRIGGER: a circle — an entry point, the thing a line leaves but never
+ * enters. Deliberately the same silhouette as the .mkt-dot the page already
+ * uses for "live". */
+.marketing-root .mkt-ui .mkt-ui-mark--trigger {
+  border-radius: 999px;
+}
+
+/* CONDITION: a diamond — the flowchart decision shape, understood without a
+ * legend. */
+.marketing-root .mkt-ui .mkt-ui-mark--condition {
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+/* APPROVAL: a ring — held open, not filled in. "Waiting for someone." */
+.marketing-root .mkt-ui .mkt-ui-mark--approval {
+  background: none;
+  border: 2px solid var(--mkt-role-mark);
+  border-radius: 999px;
+}
+
+/* ERROR: a square with a bar cut through it — a stop sign, distinguishable
+ * from the plain action square without relying on the rose. */
+.marketing-root .mkt-ui .mkt-ui-mark--error {
+  position: relative;
+  border-radius: 2px;
+}
+
+.marketing-root .mkt-ui .mkt-ui-mark--error::after {
+  content: "";
+  position: absolute;
+  inset-inline: 1px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 1px;
+  /* The pane colour, not white: this has to read as a notch cut out of the
+   * marker in dark mode too. */
+  background: var(--mkt-surface-raised);
+}
+
+/* THE STATE CHIP — extends §6's .mkt-pill (whose density §19 already retunes)
+ * instead of adding a second chip component. Tint 12% / border 40% of the
+ * hue, label in the AA ink: the same tint/border/ink recipe .mkt-pill--accent
+ * already uses, generalised to all ten roles.
+ *
+ * (0,3,0), so it beats .mkt-pill--accent's (0,2,0) if a call site carries
+ * both classes. */
+.marketing-root .mkt-ui .mkt-pill--role {
+  border-color: color-mix(in oklab, var(--mkt-role) 40%, transparent);
+  background: color-mix(in oklab, var(--mkt-role) 12%, transparent);
+  color: var(--mkt-role-ink);
+}
+
+/* THE STATUS DOT — extends §6's .mkt-dot, which is hard-wired to
+ * --mkt-positive with one --pending orange variant. `--role` lets the same
+ * dot take whichever state its row is in, so a run log needs one dot class
+ * rather than one per state. The pulse ring follows the hue. */
+.marketing-root .mkt-ui .mkt-dot--role {
+  background: color-mix(in oklab, var(--mkt-role) 65%, var(--mkt-role-ink));
+}
+
+/* A settled state does not pulse. A breathing ring on a row that finished
+ * four minutes ago is the console equivalent of a blinking GIF, and it is
+ * also a lie — the ring means "this is still happening". Only running and
+ * waiting keep it. §6 generates that ::after inside a no-preference guard, so
+ * both the recolour and the suppression go in one too. */
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-ui .mkt-dot--role::after {
+    border-color: var(--mkt-role);
+  }
+
+  .marketing-root .mkt-ui .mkt-dot--role[data-state="queued"]::after,
+  .marketing-root .mkt-ui .mkt-dot--role[data-state="ok"]::after,
+  .marketing-root .mkt-ui .mkt-dot--role[data-state="failed"]::after,
+  .marketing-root .mkt-ui .mkt-dot--role.mkt-ui-state--queued::after,
+  .marketing-root .mkt-ui .mkt-dot--role.mkt-ui-state--ok::after,
+  .marketing-root .mkt-ui .mkt-dot--role.mkt-ui-state--failed::after {
+    content: none;
+  }
+}
+
+/* THE CONNECTOR — extends §11's .mkt-flowline so the packet travelling into a
+ * step is the colour of that step's type, and an edge the run has not reached
+ * yet carries no packet at all. The dashed line itself stays
+ * --mkt-line-strong: colouring the wire as well as the packet is how a canvas
+ * turns into spaghetti. */
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-ui .mkt-flowline--role::after {
+    background: var(--mkt-role);
+    box-shadow: 0 0 8px var(--mkt-role);
+  }
+
+  /* An edge nothing has crossed yet. `content: none` removes the packet
+   * outright rather than parking it at opacity 0. */
+  .marketing-root .mkt-ui .mkt-flowline--still::after {
+    content: none;
+  }
+}

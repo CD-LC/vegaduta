@@ -1,0 +1,106 @@
+# Latency recording rules for the "no latency regression" gate
+# (docs/ops/LATENCY-BASELINE-RUNBOOK.md). Recording rules only - no alerts;
+# the alert files next to this one are untouched. Loaded by prometheus.yml's
+# `rule_files: /etc/prometheus/rules/*.yml`.
+#
+# Naming: level:metric:operations (Prometheus convention), e.g.
+#   latency:http_server_requests_seconds:p95_5m
+#
+# PREREQUISITES:
+#   * http_server_requests_seconds_bucket exists only once core runs with
+#     management.metrics.distribution.percentiles-histogram for
+#     http.server.requests (core/app-config application.yml, this track).
+#     Before that build is deployed these rules evaluate to empty series.
+#   * agentic_chat_ttft_seconds_bucket does NOT exist yet. The timer
+#     `agentic.chat.ttft` (tag mode=cache_hit|llm|buffered) is emitted by the
+#     chat service in decomposition phase 2. The rules below are written
+#     against that contract and stay empty (harmless) until it ships.
+#
+# Every quantile aggregates across replicas with sum by (le, ...) - never
+# average per-instance quantiles. Only bounded labels are kept (uri is the
+# route TEMPLATE, never tenant/session id).
+groups:
+  - name: vegaduta-latency-http
+    interval: 30s
+    rules:
+      # All application traffic, actuator excluded (scrapes/health would
+      # otherwise dominate the low end of the distribution).
+      - record: latency:http_server_requests_seconds:p50_5m
+        expr: >-
+          histogram_quantile(0.50,
+            sum by (le) (rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])))
+      - record: latency:http_server_requests_seconds:p95_5m
+        expr: >-
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])))
+      - record: latency:http_server_requests_seconds:p99_5m
+        expr: >-
+          histogram_quantile(0.99,
+            sum by (le) (rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])))
+
+      # Per route template + method, for spotting which endpoint regressed.
+      - record: latency:http_server_requests_seconds:p50_5m_by_uri
+        expr: >-
+          histogram_quantile(0.50,
+            sum by (le, method, uri) (rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])))
+      - record: latency:http_server_requests_seconds:p95_5m_by_uri
+        expr: >-
+          histogram_quantile(0.95,
+            sum by (le, method, uri) (rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])))
+      - record: latency:http_server_requests_seconds:p99_5m_by_uri
+        expr: >-
+          histogram_quantile(0.99,
+            sum by (le, method, uri) (rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])))
+
+      # Interactive chat turn (POST /api/agents/{id}/chat, full SSE duration).
+      # Regex on the template so a path-variable rename does not break it.
+      - record: latency:http_server_requests_seconds:chat_p50_5m
+        expr: >-
+          histogram_quantile(0.50,
+            sum by (le) (rate(http_server_requests_seconds_bucket{method="POST",uri=~"/api/agents/.+/chat"}[5m])))
+      - record: latency:http_server_requests_seconds:chat_p95_5m
+        expr: >-
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_server_requests_seconds_bucket{method="POST",uri=~"/api/agents/.+/chat"}[5m])))
+      - record: latency:http_server_requests_seconds:chat_p99_5m
+        expr: >-
+          histogram_quantile(0.99,
+            sum by (le) (rate(http_server_requests_seconds_bucket{method="POST",uri=~"/api/agents/.+/chat"}[5m])))
+
+      # 5xx ratio, the "5xx rate" check in the runbook (application traffic).
+      - record: ratio:http_server_requests:5xx_5m
+        expr: >-
+          sum(rate(http_server_requests_seconds_count{status=~"5..",uri!~"/actuator.*"}[5m]))
+          /
+          sum(rate(http_server_requests_seconds_count{uri!~"/actuator.*"}[5m]))
+
+  # Future metric: agentic.chat.ttft (timer, tag mode). NOT emitted yet - see
+  # header. Empty until phase 2 lands.
+  - name: vegaduta-latency-chat-ttft
+    interval: 30s
+    rules:
+      - record: latency:agentic_chat_ttft_seconds:p50_5m
+        expr: >-
+          histogram_quantile(0.50,
+            sum by (le) (rate(agentic_chat_ttft_seconds_bucket[5m])))
+      - record: latency:agentic_chat_ttft_seconds:p95_5m
+        expr: >-
+          histogram_quantile(0.95,
+            sum by (le) (rate(agentic_chat_ttft_seconds_bucket[5m])))
+      - record: latency:agentic_chat_ttft_seconds:p99_5m
+        expr: >-
+          histogram_quantile(0.99,
+            sum by (le) (rate(agentic_chat_ttft_seconds_bucket[5m])))
+
+      - record: latency:agentic_chat_ttft_seconds:p50_5m_by_mode
+        expr: >-
+          histogram_quantile(0.50,
+            sum by (le, mode) (rate(agentic_chat_ttft_seconds_bucket[5m])))
+      - record: latency:agentic_chat_ttft_seconds:p95_5m_by_mode
+        expr: >-
+          histogram_quantile(0.95,
+            sum by (le, mode) (rate(agentic_chat_ttft_seconds_bucket[5m])))
+      - record: latency:agentic_chat_ttft_seconds:p99_5m_by_mode
+        expr: >-
+          histogram_quantile(0.99,
+            sum by (le, mode) (rate(agentic_chat_ttft_seconds_bucket[5m])))

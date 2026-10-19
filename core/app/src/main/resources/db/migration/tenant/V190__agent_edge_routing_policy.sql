@@ -1,0 +1,26 @@
+-- Edge Wave 2, EDGE-B (docs/rewriting-story/04-design/EDGE-AI-STRATEGY.md; closes
+-- the per-agent-policy half of finding E-3/F-25): a server-declared routing policy
+-- for on-device (edge) turns, per agent.
+--
+-- Version V190: application.yml's flyway.locations merges controlplane/ and
+-- tenant/ into ONE version stream, so this number must be unique across BOTH
+-- folders combined - same convention V184's header documents. Highest existing
+-- number as of this writing: controlplane V189
+-- (V189__platform_quota_reset_log.sql), tenant V187
+-- (V187__face_recognition_enrollment.sql). V190 is the next free number across
+-- both.
+--
+-- TENANT-schema table (no schema qualifier) - agent has always lived here (see
+-- V63/V64/V78/V95/V97/V187, all under db/migration/tenant/).
+--
+-- Values: EDGE_ONLY (fail rather than fall through to hosted - the privacy
+-- mode), EDGE_FIRST (prefer on-device, hosted fallback allowed), HOSTED_ONLY
+-- (never route locally). NULLABLE with no default and no backfill on purpose:
+-- null means "no server policy - the device's own localStorage preferences
+-- decide", which is exactly the pre-existing behavior for every agent, so this
+-- column's mere existence changes nothing until a tenant admin sets a policy.
+-- Where a policy IS set, it takes precedence over device-local preferences
+-- (web/app/lib/edge/tierRouter.ts) - the fix for the 2026-08-07 "BYOK selected
+-- but edge still answers" class of bug, where a per-device localStorage flag
+-- silently outranked what the tenant had configured server-side.
+ALTER TABLE agent ADD COLUMN edge_routing_policy VARCHAR(16);

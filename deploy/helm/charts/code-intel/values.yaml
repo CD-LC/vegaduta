@@ -1,0 +1,133 @@
+# code-intel - code intelligence (services/code-intel/Dockerfile, :8090). Public on
+# <global.hosts.codeintel>.<global.domain> (browser calls with the user's token) and
+# called by core with CODE_INTEL_INTERNAL_TOKEN (shared internal Secret).
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: code-intel
+
+image:
+  registry: ""
+  repository: code-intel
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+singleReplica: true
+singleReplicaReason: "the index lives on one ReadWriteOnce volume"
+replicaCount: 1
+strategy:
+  type: Recreate
+terminationGracePeriodSeconds: 60
+revisionHistoryLimit: 5
+containerPort: 8090
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8090
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+probes:
+  startup:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 30
+  liveness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 500m, memory: 1Gi }
+  # Hard ceiling: indexing a big repository once took a whole host down.
+  limits: { memory: 6Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 2Gi }
+  - { name: home, mountPath: /home/codeintel, sizeLimit: 256Mi }
+
+persistence:
+  enabled: true
+  size: 50Gi
+  storageClass: ""
+  accessModes: [ReadWriteOnce]
+  mountPath: /data
+  existingClaim: ""
+
+shareProcessNamespace: true
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: true
+  hostKey: codeintel
+  extraHosts: []
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, app-builder]
+  allowEgressTo: [keycloak]
+  # git clone/fetch, model downloads.
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /health
+
+env:
+  CODE_INTEL_AUTH_MODE: keycloak
+  CODE_INTEL_DATA_DIR: /data
+  HOME: /home/codeintel
+  HF_HOME: /data/.hf
+  HF_HUB_CACHE: /data/.hf/hub
+  FASTEMBED_CACHE_PATH: /data/.fastembed
+  CODE_INTEL_EMBEDDER: fastembed
+  CODE_INTEL_ALLOW_CONTEXT_SCRIPTS: "false"
+  CODE_INTEL_ALLOW_EXEC: "false"
+  # Fails CLOSED without a reachable container runtime; never `local` in a multi-tenant pod.
+  CODE_INTEL_RUN_MODE: docker
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

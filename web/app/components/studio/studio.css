@@ -1,0 +1,20 @@
+/* Studio-only motion: the tour's pulsing ring and the spotlight cut-out. */
+
+@keyframes studio-tour-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.55); }
+  70% { box-shadow: 0 0 0 14px rgba(124, 58, 237, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+}
+
+.studio-tour-pulse {
+  animation: studio-tour-pulse 1.6s ease-out infinite;
+}
+
+.studio-spotlight {
+  transition: top 260ms ease, left 260ms ease, width 260ms ease, height 260ms ease, opacity 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-tour-pulse { animation: none; outline: 2px solid rgba(124, 58, 237, 0.7); }
+  .studio-spotlight { transition: none; }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/razorpay/_envelope.schema.json",
+  "title": "Razorpay webhook envelope (shared base)",
+  "description": "Source: core/billing/.../gateway/RazorpayGatewayClient.java#parseWebhookEvent + #extractSubscriptionId, read directly (2026-07-19). Not a $ref target Razorpay itself publishes - this is the shape the CURRENT parser actually reads (json.optString('event',''), then payload.subscription.entity.id) via org.json's lenient opt*() accessors, which never throw on a missing field, they just return the fallback. Per-event schemas in this directory extend this one with allOf + an 'event' const. Real Razorpay payloads carry more top-level fields (account_id, contains[], created_at) not read by the parser today and therefore not required here.",
+  "type": "object",
+  "properties": {
+    "event": { "type": "string" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "subscription": {
+          "type": "object",
+          "properties": {
+            "entity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^sub_",
+                  "description": "extractSubscriptionId reads payload.subscription.entity.id via optString(\"id\", null) - a missing id is tolerated by the parser (returns null), but every real fixture in this corpus supplies one so the replay/schema tests exercise the populated case."
+                }
+              },
+              "required": ["id"]
+            }
+          },
+          "required": ["entity"]
+        }
+      },
+      "required": ["subscription"]
+    }
+  },
+  "required": ["event", "payload"],
+  "additionalProperties": true
+}

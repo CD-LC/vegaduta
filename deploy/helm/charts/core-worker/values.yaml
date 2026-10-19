@@ -1,0 +1,134 @@
+# core-worker - Temporal worker (core/Dockerfile with MODULE=app-worker). No REST
+# controllers, no scheduling, no migrations; HTTP serves actuator only. The API
+# and core-jobs run with app.workflow.temporal.worker-enabled=false while
+# Temporal is on, so executions are never split. Needs global.temporal.target.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: worker
+
+image:
+  registry: ""
+  # -- core/Dockerfile built with --build-arg MODULE=app-worker. Tag must match the core API image.
+  repository: core-worker
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+# -- Optional per-chart override; must equal global.core.appSecret.existingSecret when both are set.
+appSecret:
+  existingSecret: ""
+
+# -- Workers are stateless task-queue pollers and may scale out (watch the DB connection budget: 8 per pod).
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+terminationGracePeriodSeconds: 120
+revisionHistoryLimit: 5
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+javaToolOptions: "-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
+# -- Hikari overrides (default max 8).
+hikari: {}
+
+probes:
+  startup:
+    httpGet: { path: /actuator/health/readiness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  # Liveness only has to catch a JVM that is really stuck, so it tolerates load: a busy pod (CPU saturation, long GC)
+  # answers late, and killing it makes the overload worse. 10 s timeout x 12 failures at a 10 s period = about 2
+  # minutes of continuous silence before a restart. Readiness stays quick so a busy pod leaves rotation first.
+  # deploy/helm/test-guards.sh fails if these regress.
+  liveness:
+    httpGet: { path: /actuator/health/liveness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 12
+  readiness:
+    httpGet: { path: /actuator/health/readiness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 250m, memory: 1Gi }
+  limits: { memory: 2Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 1Gi }
+  - { name: mcp-data, mountPath: /app/mcp-data, sizeLimit: 1Gi }
+  - { name: npm-cache, mountPath: /home/agentic/.npm, sizeLimit: 1Gi }
+  - { name: uv-cache, mountPath: /home/agentic/.cache/uv, sizeLimit: 1Gi }
+  - { name: vegaduta-home, mountPath: /home/agentic/.vegaduta, sizeLimit: 1Gi }
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 75
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  path: /actuator/prometheus
+  interval: 30s
+
+networkPolicy:
+  allowFrom: []
+  allowEgressTo: [postgres, valkey, keycloak, seaweedfs, core, sidecar, code-intel, tool-sandbox, mcp-stdio-runner]
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  # -- Ports of the configured integrations (Temporal frontend, Kafka, OTLP, external DB, ...),
+  # see vegaduta-lib.integrationEgress; extras via global.networkPolicy.coreEgress.
+  integrationEgress: true
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /actuator/health/readiness
+
+env: {}
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []
+
+# -- Argo CD sync wave of the Deployment: after the migrate Job (wave 0).
+argocd:
+  syncWave: "1"

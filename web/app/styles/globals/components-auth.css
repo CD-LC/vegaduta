@@ -1,0 +1,171 @@
+@layer components {
+  /* --- Auth pages (login landing, signup, signup/complete) --------------
+   * These three screens are the platform's first impression and are far
+   * less surface area for the Playwright suite than the console panels
+   * below (mostly a handful of form fields + button text) - the right
+   * place to spend the "colorful, beautiful" budget without risking the
+   * heavily-tested panel DOM. A soft radial brand-colored glow over the
+   * elevated-neutral page background reads as premium without the harsh
+   * full-saturation gradient backgrounds that date fast - and now recolors
+   * with whichever accent a returning user last chose (ThemeProvider
+   * applies data-accent before this page ever paints, via the no-flash
+   * inline script in layout.js). */
+  .auth-shell {
+    @apply relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12;
+    background-color: var(--surface-page);
+    background-image:
+      radial-gradient(60% 50% at 15% 10%, var(--accent-100) 0%, transparent 60%),
+      radial-gradient(50% 45% at 100% 100%, var(--accent-50) 0%, transparent 60%);
+  }
+
+  /* Stage 3 cinematic redesign: signup's ambient glow switches to the same
+   * cyan/violet aurora the marketing site and console shell use instead of
+   * the flat indigo wash, so /signup (a public route, reachable before any
+   * dark-mode preference has a session to attach to, but still styled by
+   * the same persisted data-mode attribute) matches everywhere else. */
+  :root[data-mode="dark"] .auth-shell {
+    background-image:
+      radial-gradient(60% 50% at 15% 10%, var(--accent-glow-cyan) 0%, transparent 60%),
+      radial-gradient(50% 45% at 100% 100%, var(--accent-glow) 0%, transparent 60%);
+  }
+
+  /* Faint dot-grid texture, masked so it's brightest behind the card and
+   * fades to nothing at the viewport edges - ambient depth without a busy
+   * pattern competing with the form itself. No external image asset needed;
+   * pure CSS radial-gradient tiled as a background. */
+  .auth-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--accent-200) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.3;
+    -webkit-mask-image: radial-gradient(55% 55% at 50% 40%, black 0%, transparent 75%);
+    mask-image: radial-gradient(55% 55% at 50% 40%, black 0%, transparent 75%);
+    pointer-events: none;
+  }
+
+  /* Floating decorative icon chips (FloatingIcons.js) - small colored
+   * circles that drift gently around the auth card / dashboard header.
+   * Pure CSS/SVG (lucide icons), not raster images, so they stay crisp at
+   * any zoom and re-theme with the accent gradient automatically - the
+   * practical stand-in for "put images wherever required" in a context
+   * with no image-generation tool available, using the same iconographic
+   * language as the dashboard's own module cards instead of introducing an
+   * unrelated visual style. */
+  .floating-icon {
+    @apply absolute z-0 flex items-center justify-center rounded-2xl text-white shadow-lg;
+    animation:
+      float-bob 6s ease-in-out infinite,
+      fade-in-up 0.6s ease-out both;
+  }
+
+  @keyframes float-bob {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(-4deg);
+    }
+  }
+
+  .auth-card {
+    @apply relative z-10 w-full max-w-md rounded-3xl border p-8 shadow-xl backdrop-blur;
+    border-color: var(--surface-border);
+    background-color: color-mix(in srgb, var(--surface-card) 90%, transparent);
+    box-shadow: 0 20px 40px -15px rgb(15 23 42 / 15%);
+    animation: fade-in-up 0.45s ease-out both;
+  }
+
+  :root[data-mode="dark"] .auth-card {
+    border-color: var(--glass-border);
+    background-color: var(--glass-surface);
+    box-shadow: 0 20px 60px -20px var(--accent-glow-cyan);
+  }
+
+  .auth-card .brand-lockup {
+    @apply mb-6 justify-center;
+  }
+
+  .auth-eyebrow {
+    @apply mb-1 text-center text-sm font-medium text-[var(--accent-600)];
+  }
+
+  .auth-title {
+    @apply mb-1 text-center text-2xl font-semibold tracking-tight text-[var(--text-primary)];
+  }
+
+  .auth-subtitle {
+    @apply mb-6 text-center text-sm leading-relaxed text-[var(--text-muted)];
+  }
+
+  .auth-divider {
+    @apply my-5 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-[var(--text-faint)];
+  }
+
+  .auth-divider::before,
+  .auth-divider::after {
+    content: "";
+    @apply h-px flex-1 bg-[var(--surface-border)];
+  }
+
+  /* B2B/B2C/Family + Simple/Advanced signup picker (SignupPage's "plan"
+   * step) - wider than the standard .auth-card since it holds a row of
+   * cards rather than a stack of text fields. */
+  .auth-card-wide {
+    @apply max-w-2xl;
+  }
+
+  .plan-picker-grid {
+    @apply mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3;
+  }
+
+  .plan-picker-grid-2 {
+    @apply sm:grid-cols-2;
+  }
+
+  /* Plain <button>, not a styled checkbox/radio - a full card is the click
+   * target (Fitts's Law: bigger target, easier decision) and the selected
+   * state reads instantly via the accent border + glow rather than a small
+   * checkmark someone has to look for. */
+  .plan-card {
+    @apply flex flex-col gap-1.5 rounded-2xl border-2 p-4 text-left transition-[border-color,box-shadow,background-color] duration-150;
+    border-color: var(--surface-border);
+    background-color: var(--surface-card);
+  }
+
+  /* Hover = clearer border only, no translate lift (redesign 2026-07-21) -
+   * cards drifting up on hover read as cheap; selection is what matters here. */
+  .plan-card:hover {
+    border-color: var(--accent-300);
+  }
+
+  .plan-card-selected,
+  .plan-card-selected:hover {
+    border-color: var(--accent-500);
+    background-color: var(--accent-50);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+
+  .plan-card-title {
+    @apply text-sm font-semibold text-[var(--text-primary)];
+  }
+
+  .plan-card-tagline {
+    @apply text-sm leading-snug text-[var(--text-secondary)];
+  }
+
+  .plan-card-detail {
+    @apply text-xs font-medium text-[var(--accent-600)];
+  }
+
+  .link-button {
+    @apply inline text-[var(--accent-600)] underline-offset-2 hover:underline;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+}

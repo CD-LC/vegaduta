@@ -1,0 +1,190 @@
+/* =========================================================================
+ * Tenant Dashboard hierarchy pass (2026-07-20) - ADDITIONS ONLY, scoped to
+ * app/page.tsx (the "/" Cognition Cockpit) under an axh- prefix so nothing
+ * here collides with the shared ax- classes above or with concurrent work
+ * on other screens. Every color resolves through existing tokens.
+ * ========================================================================= */
+
+/* Row 1 dropped its hardcoded-sample RETRIEVAL tile, leaving the 4 real
+ * telemetry tiles. Same responsive progression as .ax-telemetry-row
+ * (which this class is applied alongside): 4 columns, 2 at 900px, 1 at
+ * 640px - restated here because this rule comes later in the file and
+ * would otherwise out-cascade those earlier breakpoint rules. */
+.axh-telemetry-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .axh-telemetry-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .axh-telemetry-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Approvals tile - the page's one directly actionable item, promoted to
+ * the top of the gauge column. Amber attention treatment only while
+ * something is actually waiting; calm neutral when the queue is clear. */
+.axh-approvals-tile {
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.axh-approvals-hot {
+  border-color: color-mix(in srgb, var(--ax-amber) 45%, var(--ax-border));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ax-amber) 9%, transparent), transparent 55%), var(--ax-panel2);
+  box-shadow: var(--shadow-raised);
+}
+
+.axh-approvals-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.axh-approvals-count {
+  font-size: 30px;
+  font-weight: 700;
+  font-family: var(--font-mono), monospace;
+  line-height: 1;
+}
+
+.axh-approvals-meta {
+  min-width: 0;
+}
+
+/* Sizing/placement tweaks on top of the shared .btn-link-primary look -
+ * the CTA itself reuses that class so primary styling stays one source
+ * of truth. */
+.axh-review-cta {
+  margin-top: 2px;
+  padding: 6px 12px;
+  font-size: var(--fs-caption);
+}
+
+.axh-review-cta:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+/* Agent activity - the agent's real provider and model assignment replaces
+ * the fabricated confidence bar. */
+.axh-activity-model {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+  flex-shrink: 0;
+}
+
+/* Panel empty states - a one-line explanation plus a real next action
+ * instead of a bare "none yet" line. */
+.axh-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.axh-empty .muted {
+  margin: 0;
+}
+
+.axh-empty-cta {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ax-violetd);
+  text-decoration: none;
+}
+
+.axh-empty-cta:hover,
+.axh-empty-cta:focus-visible {
+  text-decoration: underline;
+}
+
+/* =========================================================================
+ * AgentWorkbench (Screen 3) - button-hierarchy refinements. Added by the
+ * Agents-screen redesign pass; component-scoped (axw- prefix) and consumed
+ * only by app/components/agents/AgentWorkbench.tsx. Every value resolves
+ * through existing design tokens (surface, text, danger, accent, radius),
+ * so this block tracks the design-system palette automatically. Kept
+ * unlayered on purpose - these must win over the layered base <button>
+ * chrome (card background, border, shadow), same mechanism the other
+ * unlayered AXON action classes rely on.
+ * ========================================================================= */
+
+/* Quiet text-only action - demotes Duplicate and Delete out of the pill row
+ * so the single solid CTA (Save draft or Deploy) reads as the one
+ * unmistakable action in the bar. */
+.axw-btn-ghost {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  padding: 6px 10px;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+}
+
+.axw-btn-ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.axw-btn-ghost-danger {
+  color: var(--danger-text);
+}
+
+.axw-btn-ghost-danger:hover:not(:disabled) {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+/* Per-card inline edit affordance (edit prompt, change model, fallback,
+ * cost routing) - a quiet mono text action instead of one more pill, so
+ * status badges and clickable actions stop reading as the same element. */
+.axw-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid transparent;
+  box-shadow: none;
+  padding: 4px 8px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.02em;
+  color: var(--accent-500);
+  border-radius: var(--radius-md);
+}
+
+.axw-card-action:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.axw-card-action:disabled {
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------------------
+ * WorkflowCanvas topbar hierarchy (premium pass, 2026-07-20). Component-
+ * scoped additions ONLY, appended here by the Workflows-screen agent; the
+ * shared token blocks above are owned by the Design System Foundation
+ * pass and are not touched by these rules.
+ * ---------------------------------------------------------------------- */
+
+/* Alerts popover heading - was an inline style on the h2. */
+.wf-alerts-title {
+  margin: 0 0 8px;
+  font-size: var(--fs-meta);
+  font-weight: 600;
+}

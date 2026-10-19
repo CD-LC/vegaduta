@@ -1,0 +1,320 @@
+/* ============================================================================
+ * VEGADŪTA MARKETING SYSTEM — "Aurora" (2026-09-12)
+ * ----------------------------------------------------------------------------
+ * WHAT THIS IS
+ * A single design layer for the public funnel (landing / explore / hire /
+ * earn / docs — anything wrapped in `.marketing-root`). It exists because the
+ * landing had grown 18 bands deep with no shared visual vocabulary: every
+ * band invented its own card border, its own section padding and its own
+ * glow, and only 3 of ~28 band files had adopted the 2026-09-11 type scale.
+ * The result read flat and hand-assembled next to the pages it competes with
+ * (n8n, Zapier, Make, Linear, Vercel, Supabase, Retool).
+ *
+ * WHAT IT DELIBERATELY DOES NOT DO
+ *  - It does not touch the console. Every selector is under `.marketing-root`.
+ *  - It does not change the brand accent. `--accent-500` (indigo-violet) and
+ *    `--brand-accent` (#f97316, the "Dūta" orange) are READ, never redefined —
+ *    brand-colour edits are a sensitive area here and the per-refresh random
+ *    accent is retired (public pages paint the fixed brand default).
+ *  - It does not invent a second dark palette. Every surface derives from the
+ *    app's `--surface-*` elevation ladder via color-mix, so the 2026-07-29
+ *    "there is exactly one dark palette" fix cannot silently un-fix itself.
+ *
+ * LAYERING
+ * Unlayered on purpose, exactly like globals.css's `.marketing-root h1/h2`
+ * block and the `.mkt-*` type scale. Tailwind v4 utilities live in
+ * `@layer utilities`, and unlayered CSS beats every layered utility
+ * regardless of specificity. This file is imported AFTER globals.css so its
+ * rules win ties against that file's own unlayered marketing block.
+ *
+ * DARK MODE
+ * This app switches on `:root[data-mode="dark"]`, NOT on a `.dark` class and
+ * NOT on `prefers-color-scheme`. Any rule that needs a dark value uses that
+ * attribute. (The landing's old inline <style> keyed `--grid-color` off
+ * `prefers-color-scheme`, so a visitor on a light OS who picked dark in the
+ * nav got the light grid on a near-black canvas. `--mkt-grid` fixes that.)
+ *
+ * BROWSER SUPPORT
+ * color-mix(), @container, :has(), mask-image, oklch() — all Baseline widely
+ * available. Scroll-driven animation is progressive enhancement only, gated
+ * on `@supports ((animation-timeline: view()) and (animation-range: entry))`
+ * — the animation-range half of that test is required to exclude browsers
+ * with partial support. Everything degrades to a static, fully visible page.
+ * ==========================================================================*/
+
+/* Continued in styles/marketing/*.css. styles/marketingSystemStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+/* ---------------------------------------------------------------------------
+ * 1. TOKENS
+ * Two scopes only: light (bare `.marketing-root`) and dark. Everything else
+ * is derived, so there is one place to change the funnel's look.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root {
+  /* The fixed ambient layers (.mkt-canvas-bg, .mkt-grain, .mkt-emblem) sit at
+   * negative z-index so in-flow content always wins. That only works if this
+   * root is itself a stacking context — otherwise the layers park in the
+   * ROOT context and the root's own opaque bg-background paints straight
+   * over them. isolate fixes the authored layering with one declaration;
+   * without it every atmosphere layer below is silently invisible. */
+  isolation: isolate;
+  /* Accent triad. Primary is the brand indigo-violet, read from the app's own
+   * token so the funnel can never drift from the console. The two support
+   * hues are the only colours this file introduces:
+   *   --mkt-flow  a cyan that reads as "signal / automation / data moving",
+   *               used for flow lines, the second gradient stop, live dots.
+   *   --mkt-warm  the existing brand orange, promoted from wordmark-only duty
+   *               to the funnel's punctuation colour (counts, highlights).
+   * Three hues is the ceiling. A fourth turns a page into a swatch book. */
+  --mkt-accent: var(--accent-500, #6d5efc);
+  --mkt-flow: #1b9fbb;
+  --mkt-warm: var(--brand-accent, #ea580c);
+  /* Darkened from #0f9d76 (2026-09-12, adversarial verify pass). This token is
+   * used for small BOLD label text on a ~7% tint of itself — e.g.
+   * BusinessCaseBand's free-tier label at 14px. Bold does not count as
+   * "large text" for WCAG until 18.66px, so that needs the full 4.5:1, and
+   * #0f9d76 gave about 3.4:1. The `text-emerald-600` it replaced was ~3.9:1,
+   * so this was a pre-existing marginal failure that the token inherited and
+   * slightly worsened; fixing the token fixes every site at once rather than
+   * patching one band. The dark-mode value is unchanged — #34d399 on a
+   * near-black canvas is already far past AA. */
+  --mkt-positive: #04724f;
+
+  /* Canvas + elevation, derived from the app ladder. Mixing a few percent of
+   * the brand hue into every surface is what stops a dark funnel reading as
+   * dead grey — the trick Linear, Vercel and n8n all use. */
+  --mkt-canvas: var(--surface-page, #ffffff);
+  --mkt-surface: color-mix(in oklab, var(--surface-card, #ffffff) 97%, var(--mkt-accent));
+  --mkt-surface-raised: color-mix(in oklab, var(--surface-raised, #ffffff) 96%, var(--mkt-accent));
+  --mkt-surface-sunken: var(--surface-sunken, #f4f5f8);
+
+  /* Hairlines. Two weights only: --mkt-line for structure (card edges, band
+   * separators), --mkt-line-strong for emphasis (hover, active, focus). */
+  --mkt-line: color-mix(in oklab, var(--surface-border, #e6e8ef) 88%, var(--mkt-accent));
+  --mkt-line-strong: color-mix(in oklab, var(--mkt-accent) 34%, var(--surface-border, #e6e8ef));
+
+  /* Ink. The funnel bottoms out at --mkt-ink-3 and never goes fainter —
+   * under-contrast body copy is the most-reported readability complaint on
+   * this page, so the tertiary tone is derived, not hand-picked per band. */
+  --mkt-ink: var(--foreground, #0d0f17);
+  --mkt-ink-2: var(--muted-foreground, #5b6172);
+  --mkt-ink-3: color-mix(in oklab, var(--muted-foreground, #5b6172) 82%, var(--mkt-canvas));
+
+  /* Atmosphere. Kept as colour stops rather than blur() filters on purpose:
+   * the old backdrop put `blur-[140px]` on two 42rem circles, i.e. a
+   * full-viewport gaussian on every paint. That is why Browser-pane
+   * screenshots of this page time out, and it costs real frames on mid-range
+   * Android — most of this product's traffic. A radial-gradient renders the
+   * same glow for free. */
+  --mkt-glow-a: color-mix(in oklab, var(--mkt-accent) 16%, transparent);
+  --mkt-glow-b: color-mix(in oklab, var(--mkt-flow) 11%, transparent);
+  --mkt-glow-c: color-mix(in oklab, var(--mkt-warm) 8%, transparent);
+  --mkt-grid: color-mix(in oklab, var(--mkt-ink) 8%, transparent);
+  --mkt-grid-size: 56px;
+
+  /* Brand-emblem watermark (the .mkt-emblem layer, §2). Two stops: the idle
+   * floor and the top of the drift animation's breathe. Kept low on purpose —
+   * "slightly visible" is the brief: a watermark, not a second hero. */
+  --mkt-emblem-lo: 0.11;
+  --mkt-emblem-hi: 0.18;
+
+  /* Sheen = the 1px light line along a card's top edge that makes it read as
+   * lit from above. Halo = the accent bloom behind a focal element. */
+  --mkt-sheen: color-mix(in oklab, var(--mkt-ink) 6%, transparent);
+  --mkt-halo: color-mix(in oklab, var(--mkt-accent) 22%, transparent);
+
+  --mkt-shadow-sm: 0 1px 2px color-mix(in oklab, #000 6%, transparent);
+  --mkt-shadow: 0 4px 16px -4px color-mix(in oklab, #000 12%, transparent);
+  --mkt-shadow-lg: 0 24px 60px -20px color-mix(in oklab, #000 22%, transparent);
+  --mkt-shadow-glow: 0 12px 40px -12px var(--mkt-halo);
+
+  --mkt-radius: 14px;
+  --mkt-radius-lg: 20px;
+  --mkt-radius-sm: 10px;
+
+  /* Vertical rhythm. The landing previously ran py-16 / py-20 / py-24 / py-28
+   * more or less at random; three steps is enough, and a shared step is what
+   * makes a long page feel authored rather than accumulated. */
+  --mkt-band-y: 4.5rem;
+  --mkt-band-y-lg: 7rem;
+  --mkt-gutter: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-root {
+    --mkt-band-y: 5.5rem;
+    --mkt-band-y-lg: 8.5rem;
+    --mkt-gutter: 2rem;
+  }
+}
+
+:root[data-mode="dark"] .marketing-root {
+  --mkt-flow: #4dd8f5;
+  --mkt-warm: #f97316;
+  --mkt-positive: #34d399;
+
+  /* Sit the funnel canvas one rung BELOW the console's page surface. A
+   * marketing page wants more separation between canvas and card than a
+   * dashboard does — it has no sidebar chrome to do that work. */
+  --mkt-canvas: var(--surface-sunken, #080a10);
+  --mkt-surface: color-mix(in oklab, var(--surface-card, #171b28) 92%, var(--mkt-accent));
+  --mkt-surface-raised: color-mix(in oklab, var(--surface-raised, #1d2231) 90%, var(--mkt-accent));
+  --mkt-surface-sunken: #06070d;
+
+  --mkt-line: color-mix(in oklab, var(--surface-border, #2b3145) 82%, var(--mkt-accent));
+  --mkt-line-strong: color-mix(in oklab, var(--mkt-accent) 46%, var(--surface-border, #2b3145));
+
+  --mkt-ink-3: color-mix(in oklab, var(--muted-foreground, #adb3c9) 76%, var(--mkt-canvas));
+
+  --mkt-glow-a: color-mix(in oklab, var(--mkt-accent) 30%, transparent);
+  --mkt-glow-b: color-mix(in oklab, var(--mkt-flow) 18%, transparent);
+  --mkt-glow-c: color-mix(in oklab, var(--mkt-warm) 13%, transparent);
+  --mkt-grid: color-mix(in oklab, #ffffff 5%, transparent);
+
+  /* The emblem is a multicolour mark on transparency, so on a near-black
+   * canvas it needs a touch more alpha than on white to read the same. */
+  --mkt-emblem-lo: 0.14;
+  --mkt-emblem-hi: 0.22;
+
+  --mkt-sheen: color-mix(in oklab, #ffffff 9%, transparent);
+  --mkt-halo: color-mix(in oklab, var(--mkt-accent) 38%, transparent);
+
+  --mkt-shadow-sm: 0 1px 2px color-mix(in oklab, #000 40%, transparent);
+  --mkt-shadow: 0 6px 22px -6px color-mix(in oklab, #000 55%, transparent);
+  --mkt-shadow-lg: 0 30px 70px -24px color-mix(in oklab, #000 72%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. ATMOSPHERE — the fixed backdrop
+ * One element, three layers, zero filters: an engineering grid that fades out
+ * below the fold, three aurora pools, and a grain sheet that kills the
+ * banding large dark gradients always produce on 8-bit panels.
+ * ------------------------------------------------------------------------ */
+
+.mkt-canvas-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--mkt-canvas);
+}
+
+/* Layer 1 — aurora. Ellipses, not circles: a circle reads as a spotlight, an
+ * ellipse reads as atmosphere. Bounded to the top of the page so the lower
+ * half of a long scroll settles into flat canvas instead of glowing forever. */
+.mkt-canvas-bg::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% 30%;
+  background:
+    radial-gradient(58% 46% at 50% 0%, var(--mkt-glow-a) 0%, transparent 68%),
+    radial-gradient(40% 38% at 92% 26%, var(--mkt-glow-b) 0%, transparent 70%),
+    radial-gradient(36% 34% at 6% 40%, var(--mkt-glow-c) 0%, transparent 72%);
+}
+
+/* Layer 2 — the grid. 1px lines on a 56px module, radially masked so it
+ * exists behind the hero and dissolves by the second band. The mask is what
+ * separates "engineering surface" from "graph paper". */
+.mkt-canvas-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--mkt-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--mkt-grid) 1px, transparent 1px);
+  background-size: var(--mkt-grid-size) var(--mkt-grid-size);
+  mask-image: radial-gradient(ellipse 78% 52% at 50% 0%, #000 30%, transparent 100%);
+}
+
+/* Grain. 2.5% of a tiny tiled SVG — invisible as texture, decisive against
+ * gradient banding. Above the aurora, below all content. */
+.mkt-grain {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Layer 3 — the brand emblem as a watermark (2026-09-24, direct instruction:
+ * the landing had no brand presence beyond the 28px nav mark; the ask was
+ * "logo in the background, slightly visible, animating"). The winged-
+ * messenger mark repeated at viewport scale and single-digit alpha, fixed
+ * like the aurora so it is the page's background on every band rather than
+ * one band's decoration.
+ *
+ * The PNG is RGBA on transparency and is already the nav's priority fetch,
+ * so the background-image costs no extra request. The animation is
+ * transform/opacity only — no blur, no filter — for the same paint-cost
+ * reason the aurora is gradients: a fixed layer repaints on every frame it
+ * moves. Gated on prefers-reduced-motion like every other motion in this
+ * file: reduced gets the static mark at its floor alpha. */
+.mkt-emblem {
+  position: fixed;
+  inset: 0;
+  z-index: -8;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mkt-emblem::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: min(78vmin, 840px);
+  aspect-ratio: 1013 / 740; /* logo-mark.png's own proportions */
+  background: url("/logo-mark.png") center / contain no-repeat;
+  transform: translate(-50%, -50%);
+  opacity: var(--mkt-emblem-lo);
+  /* Radial mask so the mark dissolves into the canvas instead of ending on
+   * a hard raster edge — the same trick as the grid layer's fade. */
+  mask-image: radial-gradient(closest-side, #000 55%, transparent 98%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mkt-emblem::before {
+    animation: mkt-emblem-drift 36s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes mkt-emblem-drift {
+  from {
+    transform: translate(-50%, -50%) rotate(-1.8deg) scale(1);
+    opacity: var(--mkt-emblem-lo);
+  }
+  to {
+    transform: translate(-50%, -54%) rotate(1.8deg) scale(1.05);
+    opacity: var(--mkt-emblem-hi);
+  }
+}
+
+/* A band can opt into a local aurora pool of its own. Used sparingly — for
+ * the two or three bands that need to read as a focal point. */
+.marketing-root .mkt-spot {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ::after, NOT ::before — and this is load-bearing.
+ *
+ * Caught by the adversarial verify pass (2026-09-12): `.mkt-band--ruled` also
+ * draws from `::before` (its faded top hairline), and three sections in the
+ * page stack both classes — BusinessCaseBand, ContactBand and the closing CTA
+ * in DemoLanding. On one element there is only ONE ::before, so whichever rule
+ * came later silently won and the other effect never rendered at all. Every
+ * band that asked for a glow AND a hairline was quietly getting one of them.
+ *
+ * Nothing else on a <section> uses ::after (`.mkt-card--interactive::after` is
+ * a different element), so moving the glow here lets the two compose. */
+.marketing-root .mkt-spot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(52% 62% at 50% 0%, var(--mkt-glow-a) 0%, transparent 72%);
+}

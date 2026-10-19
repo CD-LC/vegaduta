@@ -1,0 +1,56 @@
+# piece-host allow-list: the ONLY packages this image installs and the host will load.
+#
+# Format: <package>@<exact version>   one per line; '#' starts a comment.
+#   - only the @activepieces/piece-<name> scope (community pieces, MIT)
+#   - exact versions, never ranges: a piece's behaviour (and the credentials it
+#     wants) can change between releases, so upgrades are a reviewed edit here.
+#
+# LICENSING - read README.md before adding anything. Activepieces is MIT outside
+# packages/ee and packages/server/api/src/app/ee
+# (https://github.com/activepieces/activepieces/blob/main/LICENSE). Every entry
+# below lives under packages/pieces/community/<name> in that repo. The published
+# npm manifests of these packages carry no `license` field (checked for slack and
+# google-sheets on 2026-10-04), so the licence evidence is the repository
+# location, not package metadata. Re-verify when bumping a version.
+#
+# Versions: the npm `latest` dist-tag read from registry.npmjs.org on 2026-10-04.
+# NOT yet exercised against a live install - `node server.js --describe --strict`
+# in the image build (Dockerfile) is the gate that proves each one loads.
+#
+# Optional support packages (uncomment ONLY if --describe shows a piece failing
+# with MODULE_NOT_FOUND for an @activepieces/* import; the slack and google-sheets
+# manifests declare no dependencies, i.e. they appear to be self-contained bundles):
+# @activepieces/pieces-framework@0.32.0
+# @activepieces/pieces-common@<exact version>
+# @activepieces/shared@0.95.1
+
+@activepieces/piece-slack@0.21.0
+@activepieces/piece-google-sheets@0.17.0
+@activepieces/piece-gmail@0.17.0
+@activepieces/piece-notion@0.7.3
+@activepieces/piece-airtable@0.9.0
+@activepieces/piece-hubspot@0.12.0
+@activepieces/piece-trello@0.7.0
+@activepieces/piece-asana@0.6.1
+@activepieces/piece-jira-cloud@0.5.1
+@activepieces/piece-github@0.9.0
+@activepieces/piece-stripe@0.8.0
+@activepieces/piece-shopify@0.4.1
+@activepieces/piece-twilio@0.6.0
+@activepieces/piece-discord@0.7.0
+@activepieces/piece-telegram-bot@0.7.0
+@activepieces/piece-zoho-crm@0.4.0
+@activepieces/piece-salesforce@0.9.1
+@activepieces/piece-mailchimp@0.5.8
+@activepieces/piece-calendly@0.6.0
+@activepieces/piece-typeform@0.6.1
+@activepieces/piece-woocommerce@0.4.0
+@activepieces/piece-clickup@0.8.1
+@activepieces/piece-linear@0.8.0
+@activepieces/piece-zendesk@0.4.0
+@activepieces/piece-freshdesk@0.3.0
+@activepieces/piece-pipedrive@0.10.0
+@activepieces/piece-dropbox@0.9.0
+@activepieces/piece-microsoft-onedrive@0.6.0
+@activepieces/piece-zoom@0.8.0
+@activepieces/piece-intercom@0.8.1

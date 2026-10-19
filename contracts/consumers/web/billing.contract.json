@@ -1,0 +1,36 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-billing-checkout-create-order",
+      "method": "POST",
+      "path": "/api/billing/checkout/create-order",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-billing-checkout-verify-payment",
+      "method": "POST",
+      "path": "/api/billing/checkout/verify-payment",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-billing-gateways",
+      "method": "GET",
+      "path": "/api/billing/gateways",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.defaultGateway",
+          "$.gateways"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+-- Optimistic locking for control_plane.tenant (JAVA-007).
+--
+-- Tenant rows are saved whole (no @DynamicUpdate) from ~20 call sites,
+-- including the Razorpay webhook path; two concurrent writers silently
+-- reverted each other's plan/billing/settings changes. The entity now carries
+-- a JPA @Version: every UPDATE is "... WHERE id = ? AND version = ?" and a
+-- lost race surfaces as ObjectOptimisticLockingFailureException (HTTP 409)
+-- instead of a silent overwrite.
+--
+-- VERSION NUMBER: V365.1 - an OSS-local "dotted minor" version on top of the
+-- current maximum (V365). controlplane/ and tenant/ share ONE Flyway version
+-- namespace; the upstream repository keeps allocating integer versions
+-- (V366, V367, ...), and a dotted version sorts between them (365 < 365.1 <
+-- 366) without ever colliding. Convention: docs/engineering/FLYWAY-VERSIONING.md.
+--
+-- Additive and backfill-free: ADD COLUMN ... NOT NULL DEFAULT 0 is a
+-- metadata-only change on Postgres 11+ (no table rewrite).
+ALTER TABLE control_plane.tenant ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;

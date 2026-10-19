@@ -1,0 +1,201 @@
+/* ---- Playhead ---- */
+.rfr-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 0;
+  pointer-events: none;
+}
+
+.rfr-playhead::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
+  width: 2px;
+  background: var(--rfr-head);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rfr-head) 45%, transparent);
+}
+
+.rfr-head-knob {
+  position: absolute;
+  top: 3px;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 2px solid var(--rfr-solid);
+  border-radius: 3px 3px 7px 7px;
+  background: var(--rfr-head);
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* The body overlay carrying the playhead sits over the track columns only. */
+.rfr-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--rfr-label-w) + 8px);
+  right: 12px;
+  pointer-events: none;
+}
+
+/* ---- Tooltip ---- */
+.rfr-tip {
+  position: absolute;
+  z-index: 6;
+  width: max-content;
+  max-width: min(320px, calc(100% - 16px));
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--rfr-border2);
+  background: var(--rfr-solid);
+  color: var(--rfr-text);
+  box-shadow: var(--ax-shadow-md, 0 8px 24px color-mix(in srgb, var(--rfr-text) 18%, transparent));
+  pointer-events: none;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.rfr-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.rfr-tip-head svg {
+  color: var(--rfr-tone);
+  flex: 0 0 auto;
+}
+
+.rfr-tip-sub {
+  margin-top: 2px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  color: var(--rfr-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+.rfr-tip-sum {
+  margin-top: 6px;
+  color: var(--rfr-mid);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.rfr-tip-crit {
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rfr-mid);
+}
+
+.rfr-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 12px;
+  color: var(--rfr-muted);
+  text-align: center;
+}
+
+.rfr-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Status tones (also consumed by pill, mini strip, axis events, tooltip) */
+[data-tone="ok"] {
+  --rfr-tone: var(--rfr-ok);
+}
+[data-tone="error"] {
+  --rfr-tone: var(--rfr-err);
+}
+[data-tone="paused"] {
+  --rfr-tone: var(--rfr-warn);
+}
+[data-tone="running"] {
+  --rfr-tone: var(--rfr-run);
+}
+[data-tone="skipped"],
+[data-tone="cancelled"],
+[data-tone="unknown"] {
+  --rfr-tone: var(--rfr-muted);
+}
+
+/* Single cycling speed button, shown only at phone width instead of the chip group. */
+.rfr-btn.rfr-speed-cycle {
+  display: none;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+}
+
+/* ---- Phone ---- */
+@media (max-width: 640px) {
+  .rfr {
+    --rfr-label-w: 76px;
+  }
+  .rfr-title-text,
+  .rfr-meta-started,
+  .rfr-meta-visits {
+    display: none;
+  }
+  .rfr-chip {
+    min-width: 26px;
+    padding: 0 4px;
+  }
+}
+
+@media (max-width: 420px) {
+  /* 375px: the speed group collapses to a single cycling button. */
+  .rfr-speeds {
+    display: none;
+  }
+  .rfr-btn.rfr-speed-cycle {
+    display: inline-flex;
+  }
+  .rfr-clock span {
+    display: none;
+  }
+  .rfr-meta-item {
+    display: none;
+  }
+  /* Icon-only status pill; the word stays for screen readers and as the tooltip. */
+  .rfr-pill {
+    padding: 0 5px;
+  }
+  .rfr-pill-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rfr-btn,
+  .rfr-bar-fill {
+    transition: none;
+  }
+  .rfr[data-live="true"] .rfr-rec,
+  .rfr-bar-visit[data-status="running"] .rfr-bar-fill {
+    animation: none;
+  }
+}

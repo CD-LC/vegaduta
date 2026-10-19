@@ -1,0 +1,16 @@
+# Maps the core API's open-request series to the per-pod custom metric `http_server_requests_active` that
+# deploy/helm/examples/values-autoscaling.yaml scales on.
+prometheus:
+  url: http://prometheus-server.monitoring.svc
+  port: 80
+rules:
+  default: false
+  custom:
+    - seriesQuery: 'http_server_requests_active_seconds_count{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: { resource: namespace }
+          pod: { resource: pod }
+      name:
+        as: http_server_requests_active
+      metricsQuery: 'sum(<<.Series>>{<<.LabelMatchers>>}) by (<<.GroupBy>>)'

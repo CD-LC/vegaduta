@@ -1,0 +1,14 @@
+/* Design tokens — the app-builder's Design panel edits these values
+   directly (no AI round-trip), and generated code should read them via
+   var(--token) instead of hardcoding colors/fonts. */
+:root {
+  --brand: #4f46e5;          /* primary accent */
+  --brand-ink: #ffffff;      /* text on top of --brand */
+  --bg: #ffffff;             /* page background */
+  --ink: #111827;            /* body text */
+  --muted: #6b7280;          /* secondary text */
+  --surface: #f9fafb;        /* cards / panels */
+  --line: #e5e7eb;           /* borders */
+  --radius: 12px;            /* corner rounding */
+  --font-body: system-ui, -apple-system, sans-serif;
+}

@@ -1,0 +1,127 @@
+# VegaDuta on AWS (EKS) with managed services: RDS/Aurora PostgreSQL, ElastiCache (Valkey or Redis OSS),
+# S3 through IRSA (or EKS Pod Identity), optional MSK.
+#
+#   helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta -n vegaduta --create-namespace \
+#     -f values-aws.yaml -f my-overrides.yaml
+#
+# STATUS: rendered and schema-validated only (deploy/helm/test-guards.sh). Not installed on a real EKS
+# cluster, and no AWS service was contacted. The core image ships the AWS SDK sts module that the web-identity
+# (IRSA) credential provider needs, but the IRSA / Pod Identity credential path itself has not been run on a cluster. Every host, ARN, account id and CIDR below is a placeholder.
+# Every existingSecret must exist before `helm install`: external-secrets/aws.yaml creates them from AWS
+# Secrets Manager with the External Secrets Operator.
+global:
+  domain: example.com
+  imageTag: "0.1.0"
+
+  # --- Ingress -----------------------------------------------------------------------------------
+  # Default: ingress-nginx behind an NLB. The NetworkPolicy peer below matches its pods.
+  ingress:
+    className: nginx
+  tls:
+    clusterIssuer: letsencrypt-prod       # cert-manager; or secretName: <wildcard TLS Secret>
+  networkPolicy:
+    enabled: true
+    ingressControllerNamespace: ingress-nginx
+    # No extraEgress is needed for the managed data services: the chart derives egress for the configured
+    # PostgreSQL, Valkey, object-storage and Kafka ports to any address except link-local 169.254.0.0/16, so
+    # private-range endpoints are reachable (rendered and checked in test-guards.sh). To narrow egress to your
+    # data subnets instead, set networkPolicy.integrationEgress=false on core, core-jobs and core-worker and add
+    # your own scoped extraEgress rules.
+    # AWS Load Balancer Controller (the "alb" IngressClass) instead of ingress-nginx:
+    #   global.ingress.className: alb
+    #   global.ingress.annotations: {alb.ingress.kubernetes.io/scheme: internet-facing,
+    #                                alb.ingress.kubernetes.io/target-type: ip,
+    #                                alb.ingress.kubernetes.io/certificate-arn: <ACM ARN>}
+    #   global.tls.enabled: false             # TLS ends at the ALB (ACM certificate)
+    # With target-type=ip the ALB reaches pods from VPC addresses, not from a pod in a namespace, so the
+    # ingress-controller peer above does not match: allow the ALB subnets in your own NetworkPolicy, or
+    # keep ingress-nginx. The ALB variant is not rendered or tested here.
+
+  # --- Secrets (External Secrets Operator -> Secrets Manager, see external-secrets/aws.yaml) -----
+  core:
+    appSecret:
+      existingSecret: vegaduta-core-app       # key APP_ENCRYPTION_KEY
+  internalSecret:
+    existingSecret: vegaduta-internal
+
+  # --- RDS / Aurora PostgreSQL 16 ----------------------------------------------------------------
+  # Needs the `vector` extension (CREATE EXTENSION vector; pgvector is available on RDS and Aurora).
+  # RDS and Aurora do not offer Apache AGE: age=false turns graph memory off. Do not put RDS Proxy or
+  # PgBouncer in transaction mode in front (tenants are schemas selected with SET search_path).
+  postgresql:
+    host: vegaduta.cluster-abcdefghijkl.eu-west-1.rds.amazonaws.com
+    port: 5432
+    database: vegaduta
+    username: vegaduta
+    existingSecret: vegaduta-postgres         # key password
+    sslMode: require                          # verify-full needs the RDS CA bundle in the image's trust store
+    age: false
+
+  # --- ElastiCache (in-transit encryption on) ----------------------------------------------------
+  # Replication group with cluster mode DISABLED (cluster and Sentinel are not supported, see the ADR).
+  valkey:
+    host: master.vegaduta.abc123.euw1.cache.amazonaws.com
+    port: 6379
+    tls: true
+    existingSecret: vegaduta-valkey           # key password (the AUTH token)
+    # username: app                           # ElastiCache RBAC user, if you use user groups
+
+  # --- S3 with IRSA: no access keys anywhere -----------------------------------------------------
+  objectStorage:
+    type: s3
+    endpoint: https://s3.eu-west-1.amazonaws.com
+    region: eu-west-1
+    bucket: vegaduta-files-123456789012
+    pathStyleAccess: false
+    credentials: default                      # AWS SDK default chain: IRSA / EKS Pod Identity (not run on a cluster)
+
+  # --- MSK with SASL/SCRAM (optional; workflow events) -------------------------------------------
+  # Uncomment, and add the kafka entry of external-secrets/aws.yaml. MSK IAM authentication is NOT
+  # supported by the core image. The chart derives the egress rule for the bootstrap port (9096) itself, private addresses included.
+  # kafka:
+  #   bootstrapServers: b-1.vegaduta.abc123.c2.kafka.eu-west-1.amazonaws.com:9096,b-2.vegaduta.abc123.c2.kafka.eu-west-1.amazonaws.com:9096
+  #   securityProtocol: SASL_SSL
+  #   saslMechanism: SCRAM-SHA-512
+  #   existingSecret: vegaduta-kafka          # key saslJaasConfig
+
+  # --- Identity provider: an EXTERNAL KEYCLOAK (see values-external.yaml for the other keys) ----------
+  # Not any OIDC issuer: today signup, user and SSO management call the Keycloak Admin API and tokens carry
+  # Keycloak-shaped claims (realm_access.roles, tenant_id), see the Identity row of the ADR. Point this at a
+  # Keycloak you run (the bundled chart is off in this file) that has the agentic-ai realm and the
+  # agentic-ai-core client imported (charts/keycloak ships the realm import). Cognito, Entra ID and Google
+  # Identity cannot be used for provisioning yet.
+  oidc:
+    issuerUrl: https://sso.example.com/realms/agentic-ai
+    internalBaseUrl: https://sso.example.com
+    realm: agentic-ai
+    clientId: agentic-ai-core
+    existingSecret: vegaduta-oidc             # key clientSecret
+
+# --- IRSA ----------------------------------------------------------------------------------------
+# Create an IAM role trusted by the cluster's OIDC provider for system:serviceaccount:vegaduta:<name>
+# with s3:GetObject/PutObject/DeleteObject on the bucket and s3:ListBucket on the bucket ARN, and annotate
+# the ServiceAccount of every pod that touches storage (service account names default to
+# <release>-core, <release>-core-jobs, <release>-core-worker). With EKS Pod Identity, drop the annotations
+# and create a Pod Identity association for the same ServiceAccounts. The migrate Job uses core's.
+core:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/vegaduta-core
+core-jobs:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/vegaduta-core
+core-worker:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/vegaduta-core
+
+# Everything above is managed: no bundled dependency runs.
+postgres:
+  enabled: false
+valkey:
+  enabled: false
+keycloak:
+  enabled: false
+seaweedfs:
+  enabled: false

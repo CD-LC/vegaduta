@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>app-worker</artifactId>
+  <name>app-worker</name>
+  <description>
+    The dedicated Temporal workflow-worker deployable: same Maven modules and
+    same configuration as `app` (via app-config), but booted as
+    WorkerApplication - no REST controllers, no @Scheduled jobs, no Flyway,
+    no per-tenant startup migration. Its only job is polling Temporal's
+    task queue and executing workflow/node activities. This is the first
+    independent deployable carved out of the modular monolith; see
+    docs/plans/CORE-DECOMPOSITION-EXECUTION-PLAN-2026-09-23.md.
+
+    Depends on the same modules `app` does (copy kept deliberately - if a
+    module gains an activity-side dependency the worker needs it too), plus
+    app-config. It does NOT depend on `app`: a repackaged Spring Boot jar
+    is not a usable Maven dependency, and none of app's web-layer glue
+    (GlobalExceptionHandler, WebConfig) is wanted here anyway.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>app-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>admin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Chat turn path: AgentChatService, memory, hooks, context, skills, shares,
+         the chat SSE endpoint (ADR-0023). In-process: a jar, not a network hop. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Tool layer: AgentToolProvider, resolvers, MCP connections, built-in tools,
+         data tables (ADR-0023). Implements the agents tool ports the turn path calls,
+         so every shape that runs turns loads it. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-jobs</artifactId>
+    </dependency>
+    <!-- A2A, AG-UI, OpenAI-compatible endpoints, collaboration and crew hand-off tools,
+         agent directory (ADR-0023). The delegation tools and the specialist hand-off run
+         inside agent turns, so every shape that runs turns loads it. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-interop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-browser</artifactId>
+    </dependency>
+    <!-- App builder, coding harness, agent import, demo studio, agent lab,
+         face enrollment, tutor, RAG quality: extracted from agents (ADR-0023). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-studio</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-budget</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>secrets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>billing</artifactId>
+    </dependency>
+    <!-- UPI mandate payments. Used to arrive transitively through agents;
+         since ADR-0011 moved the payment agent tools into payments (payments ->
+         agents), every shape declares it directly to keep the same bean set. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>payments</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- Cloud KMS providers (app.crypto.kms.provider=aws|azure|gcp); inert with the default `local`. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto-kms</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>devices</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>documentgen</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>eventbus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>google</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sarvam</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sdlc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>imagegen</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>elevenlabs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>mcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>mcpserver</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>omnichannel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>omnichannel-social</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>platform</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>rl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>templates</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>quality</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>voice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow-portability</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <!-- Prometheus + OTel: the worker emits the same metrics/traces the API
+         pod does - a deployable that can't be observed is a deployable that
+         can't be operated. Same BOM-managed versions as app/pom.xml. -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-exporter-otlp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>com.agenticai.core.WorkerApplication</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

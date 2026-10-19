@@ -1,0 +1,555 @@
+@layer components {
+  /* --- Theme picker (ThemePicker.js) -------------------------------------
+   * Accent swatch grid + light/dark/system toggle, opened from a topbar
+   * button next to the onboarding "?" - namespaced "theme-*", brand new
+   * surface. */
+  .theme-picker-trigger {
+    @apply flex items-center justify-center rounded-lg border-2 border-[var(--text-primary)] bg-transparent p-2 text-[var(--text-primary)] shadow-sm transition;
+    @apply hover:bg-[var(--surface-hover)] hover:border-[var(--text-primary)];
+  }
+
+  .theme-picker-popover {
+    @apply absolute right-0 top-[calc(100%+0.5rem)] z-30 w-72 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-4 shadow-xl;
+    transform-origin: top right;
+    animation: popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .theme-picker-heading {
+    @apply mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-faint)];
+  }
+
+  .theme-swatch-grid {
+    @apply mb-4 grid grid-cols-6 gap-2;
+  }
+
+  .theme-swatch {
+    @apply relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-transparent shadow-sm transition;
+    @apply hover:scale-110;
+  }
+
+  .theme-swatch-selected {
+    border-color: var(--text-primary);
+  }
+
+  .theme-mode-row {
+    @apply grid grid-cols-3 gap-1.5 rounded-xl bg-[var(--surface-hover)] p-1;
+  }
+
+  .theme-mode-btn {
+    @apply flex items-center justify-center gap-1.5 rounded-lg border-none bg-transparent px-2 py-1.5 text-xs font-medium text-[var(--text-muted)] shadow-none transition;
+    @apply hover:bg-transparent hover:text-[var(--text-primary)];
+  }
+
+  .theme-mode-btn-active {
+    /* Was bg-[var(--surface-card)] + shadow-sm alone - the same sub-3:1
+     * contrast issue as .select-option-active above (color audit
+     * follow-up): a lifted-white chip against a barely-different row
+     * background. Adds an accent ring that clears the 3:1 non-text minimum
+     * in both themes, on top of the existing lifted-surface + shadow cue. */
+    @apply bg-[var(--surface-card)] text-[var(--text-primary)];
+    box-shadow:
+      inset 0 0 0 1.5px var(--accent-600),
+      0 1px 2px 0 rgb(0 0 0 / 0.06);
+  }
+
+  /* --- Dashboard: card-based entry points into each section --------------
+   * A short-lived "orientation" screen before any single module's detail,
+   * rather than dumping every panel onto one page - progressive disclosure.
+   * Cards (not another list) because each one represents a distinct,
+   * differently-colored destination; recognizing a colored icon tile is
+   * faster than reading a bare row of text links (Hick's Law: fewer,
+   * chunkier choices read faster than many small ones). */
+  .dash-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  /* Same ultra-wide reasoning as .mc-bento above - Admin Overview's 5
+   * section cards shouldn't get stuck at 3-wide once there's room for more. */
+  @media (min-width: 1600px) {
+    .dash-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .dash-card {
+    @apply relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-5 no-underline shadow-sm transition;
+    @apply hover:-translate-y-0.5 hover:border-[var(--accent-200)] hover:shadow-md;
+    animation: fade-in-up 0.35s ease-out both;
+  }
+
+  /* Stage 3 of the console-wide cinematic redesign: dashboard cards/stats
+   * pick up the same glass surface as .glass-card in dark mode, plus a
+   * brighter cyan hover border instead of the light-mode indigo tint, so
+   * the command-center feel established by the shell (Stage 2) continues
+   * onto the first page a non-admin actually lands on. */
+  :root[data-mode="dark"] .dash-card {
+    background: var(--glass-surface);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(10px);
+  }
+
+  :root[data-mode="dark"] .dash-card:hover {
+    border-color: var(--accent-cyan);
+    box-shadow:
+      0 0 0 1px var(--accent-glow-cyan),
+      0 20px 45px -20px var(--accent-glow);
+  }
+
+  /* Staggered cascade instead of every card appearing at once - each card
+   * one tick behind the last (nth-child selectors, capped at 6 since a
+   * seventh+ card just reuses the last delay rather than growing forever).
+   * Small enough (60ms steps) to read as "polish," not a slideshow. */
+  .dash-card:nth-child(2) {
+    animation-delay: 0.06s;
+  }
+  .dash-card:nth-child(3) {
+    animation-delay: 0.12s;
+  }
+  .dash-card:nth-child(4) {
+    animation-delay: 0.18s;
+  }
+  .dash-card:nth-child(5) {
+    animation-delay: 0.24s;
+  }
+  .dash-card:nth-child(n + 6) {
+    animation-delay: 0.3s;
+  }
+
+  .dash-card-icon {
+    @apply mb-1 flex h-10 w-10 items-center justify-center rounded-xl text-white transition-transform duration-300 ease-out;
+  }
+
+  /* Same plain-CSS parent-hover fix as .brand-lockup above - no `group`
+   * marker class needed. */
+  .dash-card:hover .dash-card-icon {
+    transform: scale(1.1) rotate(3deg);
+  }
+
+  .dash-card h3 {
+    @apply m-0 text-[15px] font-semibold text-[var(--text-primary)];
+  }
+
+  .dash-card p {
+    @apply m-0 text-[13px] leading-relaxed text-[var(--text-muted)];
+  }
+
+  .dash-stat-row {
+    @apply mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4;
+  }
+
+  .dash-stat {
+    @apply rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] px-4 py-3.5 shadow-sm;
+  }
+
+  :root[data-mode="dark"] .dash-stat {
+    background: var(--glass-surface);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .dash-stat-value {
+    @apply text-2xl font-semibold text-[var(--text-primary)];
+  }
+
+  /* Real, API-sourced counts (see page.js's refresh()), not decorative -
+   * the gradient treatment is purely typographic emphasis on a genuine
+   * number, same principle as the marketing site's rule against fabricated
+   * stats: dress up real data, never invent fake data to dress up. */
+  :root[data-mode="dark"] .dash-stat-value {
+    background-image: var(--accent-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .dash-stat-label {
+    @apply text-xs font-medium text-[var(--text-muted)];
+  }
+
+  /* Pill-shaped nav-ish links (not prose anchors) - opts out of the plain
+   * `a` underline-sweep above (background-image: none) since a horizontal
+   * sweep line would cut across the middle of a rounded pill; gets its own
+   * lift + glow instead, matching .panel's hover language, so it still
+   * reads as "highlighted and animated" per direct feedback. */
+  .cross-link {
+    @apply mb-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium no-underline transition-transform;
+    border-color: var(--accent-100);
+    background-color: var(--accent-50);
+    color: var(--accent-700);
+    transition:
+      transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.18s ease,
+      border-color 0.18s ease,
+      background-color 0.18s ease;
+  }
+  .cross-link:hover {
+    border-color: var(--accent-200);
+    background-color: var(--accent-100);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -10px var(--hud-cyan, var(--accent-600));
+  }
+
+  /* button.primary's look, for the handful of spots (e.g. the Agents ->
+   * Playground "Chat" link) where the primary action is a same-app
+   * navigation link rather than a form submit - an <a>/<Link> never matches
+   * the `button.primary` element selector above, so it needs its own rule
+   * rather than silently rendering unstyled. */
+  .btn-link-primary {
+    @apply cursor-pointer rounded-lg border px-3.5 py-2 text-sm font-medium text-white no-underline shadow-sm transition-transform;
+    border-color: var(--accent-600);
+    background-image: var(--accent-gradient);
+  }
+
+  .btn-link-primary:hover {
+    @apply -translate-y-px shadow-md;
+    box-shadow: 0 10px 24px -10px var(--hud-cyan, var(--accent-600));
+  }
+
+  /* --- MCP Tools: curated catalog gallery ---------------------------------
+   * Replaces "type a name/type/description you have to already know" as the
+   * default path - a picker of well-known servers instead, each carrying
+   * the exact values this platform expects. The old free-text form still
+   * exists (behind .mcp-advanced-toggle) for a genuinely custom server. */
+  .mcp-grid {
+    @apply mb-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .mcp-card {
+    @apply flex flex-col rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-4 shadow-sm transition;
+    @apply hover:-translate-y-0.5 hover:border-[var(--accent-200)] hover:shadow-md;
+  }
+
+  .mcp-card-icon {
+    @apply flex h-9 w-9 items-center justify-center rounded-xl;
+  }
+
+  .mcp-card-title {
+    @apply m-0 mt-2 text-[15px] font-semibold text-[var(--text-primary)];
+  }
+
+  .mcp-card-description {
+    @apply m-0 mt-1 text-[13px] leading-relaxed text-[var(--text-muted)];
+  }
+
+  .mcp-card-docs-link {
+    @apply ml-auto flex items-center text-[var(--text-faint)];
+  }
+  .mcp-card-docs-link:hover {
+    color: var(--accent-600);
+  }
+
+  .mcp-setup-box {
+    @apply mt-3 rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card-alt)] p-3;
+  }
+
+  .mcp-yaml {
+    @apply overflow-x-auto rounded-lg p-3 text-[11px] leading-relaxed;
+    background-color: var(--code-bg);
+    color: var(--code-text);
+  }
+
+  .mcp-section-heading {
+    @apply mb-2 mt-1 text-sm font-semibold text-[var(--text-secondary)];
+  }
+
+  /* --- Workflows list: card grid instead of a single stretched column -----
+   * Direct feedback: "only 40% of screen used." A single-column list of at
+   * most WORKFLOW_LIMIT (3) rows wasted most of a wide screen; a card grid
+   * (same gap/breakpoint pattern as .mcp-grid above) uses it instead. */
+  .workflow-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .workflow-card {
+    @apply flex flex-col rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-4 shadow-sm transition;
+    @apply hover:-translate-y-0.5 hover:border-[var(--accent-200)] hover:shadow-md;
+  }
+
+  /* --- Agents page: multi-column split by use case ------------------------
+   * Direct feedback: "only 40% of screen used... replace simple panels with
+   * proper designs based on the use cases." AgentsPanel used to be one
+   * stacked column (template gallery -> create form -> agent list), which
+   * doesn't use freed-up width at all. Split into "build" (left, sticky -
+   * usually a one-time task per visit) and "manage existing" (right, grows
+   * over time and benefits most from extra width). Collapses to a single
+   * stacked column below 1100px, same breakpoint style used elsewhere in
+   * this file for two-column layouts. */
+  /* Generic "configure (left, sticky) + browse/manage a growing list
+   * (right)" split, used by pages with that shape - e.g. Approvals (policy
+   * form + request queue), Knowledge (collections + upload/search). Not
+   * used by Agents anymore - direct feedback: "agent creation should be
+   * first section... agent list should display in bottom" put that page
+   * back to a single stacked column instead of this side-by-side split. */
+  .split-layout {
+    display: grid;
+    grid-template-columns: minmax(300px, 400px) 1fr;
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .split-layout-aside {
+    position: sticky;
+    top: 1rem;
+  }
+
+  .split-layout-main {
+    min-width: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .split-layout {
+      grid-template-columns: 1fr;
+    }
+    .split-layout-aside {
+      position: static;
+    }
+  }
+
+  .mcp-advanced-toggle {
+    @apply mt-4 border-none bg-transparent text-xs font-medium shadow-none;
+    color: var(--accent-600);
+  }
+  .mcp-advanced-toggle:hover {
+    @apply bg-transparent underline;
+  }
+
+  /* --- InfoTip / credential help links (guidance for first-time users) --- */
+  .info-tip-panel {
+    @apply absolute z-30 mt-2 w-72 max-w-[85vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-3 text-xs leading-relaxed text-[var(--text-secondary)] shadow-xl;
+    transform-origin: top left;
+    animation: popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Small dark "quick tip" bubble (InfoTip.js) - kept as an inverted chip
+   * regardless of light/dark mode (same convention as most design systems:
+   * a tooltip reads as "system chrome," not page content, so it doesn't
+   * need to track the tenant's chosen theme). Replaces InfoTip's old
+   * fully-inline styling so it gets the shared popover-in animation and a
+   * safe max-width instead of a fixed 16rem that could overflow a narrow
+   * field's left edge. */
+  .info-tip-bubble {
+    @apply absolute z-30 w-64 max-w-[80vw] rounded-lg border px-2.5 py-2 text-xs leading-relaxed shadow-xl;
+    /* Was a literal #0f172a/#f1f5f9 pair, kept "always dark" regardless of
+     * theme (color audit follow-up) - in dark mode that background nearly
+     * matched the page behind it with no border, so the tooltip had no
+     * visible edge. Design-system elevated-surface/text tokens instead,
+     * which already resolve correctly in both themes. */
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    border-color: var(--surface-border-strong);
+    box-shadow: var(--shadow-popover, 0 10px 30px -10px rgba(0, 0, 0, 0.35));
+    transform-origin: top left;
+    animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .info-tip-trigger {
+    @apply inline-flex items-center justify-center rounded-full border border-[var(--surface-border-strong)] text-[0.65rem] font-bold leading-none text-[var(--text-muted)] transition;
+    background: var(--surface-card-alt);
+    /* At least a 24x24 CSS-pixel hit area (WCAG 2.5.8) regardless of the
+     * console-density root rescale - was 1.05rem (~14px under that density),
+     * well under the floor (responsive audit follow-up). */
+    width: max(1.5rem, 24px);
+    height: max(1.5rem, 24px);
+  }
+
+  .info-tip-trigger:hover {
+    @apply border-[var(--accent-200)] text-[var(--accent-600)];
+  }
+
+  .help-link {
+    @apply inline-flex items-center gap-1 text-xs font-medium no-underline;
+    color: var(--accent-600);
+  }
+  .help-link:hover {
+    text-decoration: underline;
+  }
+
+  /* --- Ask AI helper (AskAiHelper.js) - previously fully inline-styled
+   * with hardcoded indigo hex values, so it stayed indigo no matter which
+   * accent palette a tenant picked in the theme customizer. Converted to
+   * the same accent variables everything else uses. */
+  .ask-ai-trigger {
+    @apply ml-1.5 inline-flex items-center gap-1 rounded-full border px-2.5 py-[0.15rem] text-[0.72rem] font-medium transition;
+    border-color: var(--accent-200);
+    background: var(--accent-50);
+    color: var(--accent-600);
+  }
+  .ask-ai-trigger:hover {
+    background: var(--accent-100);
+  }
+  .ask-ai-trigger-active {
+    background: var(--accent-100);
+  }
+
+  .ask-ai-popover {
+    @apply absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[22rem] max-w-[80vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-3.5 shadow-xl;
+    transform-origin: top right;
+    animation: popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ask-ai-suggestion-box {
+    @apply mt-2 max-h-40 overflow-y-auto rounded-md border border-[var(--surface-border)] p-2;
+    background: var(--surface-card-alt);
+  }
+
+  /* Collapsible header (Admin Overview's "Get set up" panel) - a plain,
+   * full-width button rather than a <summary>/<details> pair, since the
+   * chevron rotation needs a Motion-driven spin (see admin/page.js), which
+   * <details> markup doesn't have a clean hook for. */
+  .setup-checklist-toggle {
+    @apply flex w-full items-center justify-between gap-3 rounded-lg border-none bg-transparent p-0 text-left;
+    cursor: pointer;
+  }
+
+  .setup-checklist {
+    @apply flex flex-col gap-2;
+  }
+
+  .setup-checklist-item {
+    @apply flex items-start gap-3 rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-3 no-underline transition;
+    @apply hover:border-[var(--accent-200)] hover:bg-[var(--accent-50)];
+  }
+
+  .setup-checklist-item-done {
+    /* Was hardcoded border-emerald-200/bg-emerald-50 (light-mode-only
+     * literal values, identical to --success-border/--success-bg's LIGHT
+     * values) - never repainted in dark mode, unlike every other status
+     * surface (.success-box/.error-box) which routes through the real
+     * light/dark-reactive --success-* and --danger-* tokens. */
+    @apply border-[var(--success-border)] bg-[var(--success-bg)];
+  }
+
+  /* Direct feedback: "get setup also needs to be highlighted." A pulsing
+   * accent border + soft glow on top of the plain .panel look - this
+   * section's whole purpose is temporary (see admin/page.js's allCoreDone
+   * gate, right below this in the DOM), so while it's still visible it
+   * should read as the most attention-worthy thing on the page, not blend
+   * in with the rest. Border-color/box-shadow only (no layout-affecting
+   * property), so this is cheap to leave running the whole time the
+   * section exists. */
+  .setup-highlight {
+    border-color: var(--accent-500);
+    animation: setup-highlight-pulse 2.8s ease-in-out infinite;
+  }
+
+  @keyframes setup-highlight-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 1px var(--accent-glow);
+    }
+    50% {
+      box-shadow:
+        0 0 0 4px var(--accent-glow),
+        0 0 24px -4px var(--accent-glow);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .setup-highlight {
+      animation: none;
+      box-shadow: 0 0 0 1px var(--accent-glow);
+    }
+  }
+
+  /* Standardized text sizes for this panel - direct feedback: "change the
+   * size of the text as per standard in application." Previously each of
+   * these was an ad hoc inline style (0.95rem/0.78rem/0.82rem picked
+   * independently); now one shared trio matching the sizes already
+   * established elsewhere in the app (.panel h2's text-base heading,
+   * .hint/.muted's text-xs supporting copy). */
+  .setup-heading {
+    @apply m-0 text-base font-semibold text-[var(--text-primary)];
+  }
+
+  .setup-subhint {
+    @apply text-xs text-[var(--text-muted)];
+  }
+
+  .setup-item-label {
+    @apply block text-sm text-[var(--text-primary)];
+  }
+
+  .setup-item-hint {
+    @apply text-xs text-[var(--text-muted)];
+  }
+
+  .setup-checklist-icon {
+    @apply mt-0.5 flex shrink-0 items-center justify-center;
+  }
+
+  /* Real, data-driven progress bar (setupProgressPct in admin/page.js) -
+   * replacing the old plain "N/M done" text with something animated that
+   * SHOWS progress, direct feedback: "animate most of the things with
+   * information, instead of displaying only text." */
+  .setup-progress-track {
+    @apply mt-2 h-1.5 w-full overflow-hidden rounded-full;
+    background: var(--surface-border);
+  }
+
+  .setup-progress-fill {
+    @apply h-full rounded-full;
+    background-image: var(--accent-gradient);
+  }
+
+  /* "Get set up" alert/popover (SetupChecklistAlert.js) - direct feedback:
+   * "remove get setup section and put it as an alert - a pop up menu."
+   * Replaces the old always-visible .setup-highlight <section> with a
+   * small floating trigger pill; the popover itself reuses .setup-heading/
+   * .setup-subhint/.setup-progress-track/.setup-checklist as-is so the
+   * checklist content looks identical to before, just no longer pinned
+   * open at the top of the page. */
+  .setup-alert-trigger {
+    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold;
+    border-color: var(--accent-500);
+    color: var(--accent-600);
+    background: var(--accent-50);
+    cursor: pointer;
+    animation: setup-highlight-pulse 2.8s ease-in-out infinite;
+  }
+
+  .setup-alert-trigger-count {
+    @apply rounded-full px-1.5 py-0.5 text-[0.68rem] font-bold;
+    background: var(--accent-500);
+    color: white;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .setup-alert-trigger {
+      animation: none;
+    }
+  }
+
+  .setup-alert-popover {
+    @apply absolute left-0 top-full z-30 mt-2 w-[22rem] max-w-[90vw] rounded-2xl border p-4 shadow-2xl;
+    border-color: var(--surface-border);
+    background: var(--surface-card);
+  }
+
+  .setup-alert-head {
+    @apply flex items-start justify-between gap-2;
+  }
+
+  /* Shared empty-state pattern (visual polish pass) - replaces bare "No X
+   * yet." <p className="muted"> lines across panels with a consistent
+   * dashed-border well, an icon, and room for an optional inline action, so
+   * a first-time tenant sees an inviting "nothing here yet, here's what to
+   * do" moment instead of a terse gray sentence. */
+  .empty-state {
+    @apply flex flex-col items-center gap-2 rounded-2xl border border-dashed border-[var(--surface-border-strong)];
+    @apply bg-[var(--surface-card-alt)] px-6 py-8 text-center;
+    animation: fade-in-up 0.35s ease-out both;
+  }
+
+  .empty-state-icon {
+    @apply flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent-100)] text-[var(--accent-600)];
+    animation: float-bob 5s ease-in-out infinite;
+  }
+
+  .empty-state-title {
+    @apply text-sm font-semibold text-[var(--text-primary)];
+  }
+
+  .empty-state-hint {
+    @apply max-w-sm text-sm text-[var(--text-muted)];
+  }
+}

@@ -1,0 +1,118 @@
+# Prometheus metrics pipeline (sibling to the Loki/Promtail log pipeline in
+# this same deploy/ tree - Prometheus is the metrics half of the observability
+# stack, Loki the logs half, both surfaced through the same Grafana instance).
+# Prometheus periodically pulls (scrapes) the Prometheus-format metrics each
+# target exposes over HTTP and stores them as time series; Grafana then queries
+# them via the auto-provisioned Prometheus datasource (uid "prometheus", see
+# deploy/grafana/provisioning/datasources/prometheus.yaml). This file is
+# mounted read-only into the prometheus container at
+# /etc/prometheus/prometheus.yml (see docker-compose.yml's prometheus service).
+# Additive: nothing about how core/any other service runs changes - core simply
+# started exposing /actuator/prometheus once micrometer-registry-prometheus was
+# added to core/app/pom.xml and the endpoint was exposed in application.yml.
+
+global:
+  # How often Prometheus pulls every target below. 15s is Prometheus's own
+  # common default - fine-grained enough to see short spikes, cheap enough to
+  # leave on for a single-node local-dev stack. Raise per environment if the
+  # time-series volume ever matters.
+  scrape_interval: 15s
+  # How often recording/alerting rules are evaluated (rule_files: below).
+  evaluation_interval: 15s
+
+# Alerting infrastructure pass (2026-07) - points Prometheus at the new
+# alertmanager compose service (docker-compose.yml) so a firing rule below
+# actually gets delivered somewhere instead of just changing color in
+# Prometheus's own /alerts UI. See deploy/alertmanager/alertmanager.yml for
+# what happens to an alert after it arrives here.
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+# Real, VegaDuta-specific alerting rules - previously empty. See
+# deploy/prometheus/rules/vegaduta-alerts.yml for the rule set and each
+# rule's metric-name provenance (which already exist today vs. depend on
+# other in-flight work landing first).
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+scrape_configs:
+  # The Spring Boot `core` service. Micrometer's Prometheus registry
+  # (micrometer-registry-prometheus, see core/app/pom.xml) renders every
+  # metric Actuator already collects - JVM memory/GC, HTTP server request
+  # timings, HikariCP pool stats, etc. - in Prometheus text format at
+  # /actuator/prometheus (the default Actuator path, NOT the root /metrics
+  # Prometheus assumes, so metrics_path is set explicitly). Target is the
+  # compose-network service name core:8080, matching how promtail/grafana/etc.
+  # reach other services on this network by name rather than localhost. A
+  # management.server.port split was tried (security audit, 2026-07-27) to
+  # get this off the tunnel-mapped port and reverted (see application.yml's
+  # management block) - public unreachability is instead enforced at
+  # deploy/caddy/Caddyfile, which this internal scrape never passes through.
+  - job_name: core
+    metrics_path: /actuator/prometheus
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["core:8080"]
+    relabel_configs:
+      # Add job label for custom queries
+      - source_labels: [__scheme__, __address__]
+        target_label: instance
+        regex: "([^:]+)(?::\\d+)?;([^:]+)(?::\\d+)?"
+        replacement: "${1}:8080"
+
+  # Infra audit (2026-07-27) - oliver006/redis_exporter (see docker-compose.yml's
+  # redis-exporter service), pointed at the primary `redis` service (NOT
+  # langfuse-redis, which is Langfuse's own internal BullMQ queue). Exposes
+  # standard redis_exporter metrics (redis_connected_clients,
+  # redis_memory_used_bytes, redis_commands_processed_total,
+  # redis_keyspace_hits_total/redis_keyspace_misses_total, etc.) at its own
+  # /metrics path (the exporter's default, unlike core's /actuator/prometheus
+  # above - no metrics_path override needed).
+  - job_name: redis-exporter
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["valkey-exporter:9121"]  # job name kept: alert rules match on it
+
+  # Prometheus scraping its own /metrics endpoint - standard practice, gives
+  # visibility into the scraper's own health (scrape durations, target
+  # up/down counts, TSDB stats). localhost here is the prometheus container
+  # itself; 9090 is its own listen port (see docker-compose.yml).
+  - job_name: prometheus
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Temporal Workflow Engine Metrics
+  # Exposed at :8000 /metrics by Temporal server
+  - job_name: temporal
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["temporal:8000"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: "temporal"
+
+  # Minio S3 Storage Metrics
+  # Prometheus endpoint enabled with MINIO_PROMETHEUS_AUTH_TYPE=public
+  # Bundled SeaweedFS S3 (full stack). Target is simply down when an external
+  # S3 is used instead.
+  - job_name: seaweedfs
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["seaweedfs:9327"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: "seaweedfs"

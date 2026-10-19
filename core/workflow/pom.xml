@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>workflow</artifactId>
+  <name>workflow</name>
+  <description>
+    Interactive Workflow Designer PRD, Phase 1 - WorkflowDefinition/WorkflowRun
+    persistence, OrchestratorService (structural validation + runtime
+    governance over sensitive node actions), and WorkflowExecutionEngine
+    (walks a node/edge graph, calling the *existing* agent-loop and
+    knowledge-search services directly rather than re-implementing them - see
+    Section 6 of the PRD). Depends on: tenancy/security (TenantContext,
+    schema-per-tenant persistence, same as every other module), agents
+    (AgentChatService - the Agent node), approval (HumanApprovalGateService -
+    the Approval node and OrchestratorService's runtime governance gate),
+    knowledge (KnowledgeSearchService - the Knowledge node; pulled in as an
+    ObjectProvider since the "knowledge" profile is optional, exactly like
+    AgentChatService's own AgentMemoryService dependency), eventbus
+    (WorkflowEventPublisher - every run/node lifecycle transition is also
+    published as a workflow.events record for the audit trail and, later,
+    the Grid/control-tower view).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- DocumentBrandResolver/PdfBrandHeader: workflow PDFs carry the tenant or VegaDuta brand. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>documentgen</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <!-- #815 Governance follow-up (roadmap §10.3 item 1) - WorkflowDefinition.webhookToken
+           hash+encrypt migration: EncryptionService is what encrypts the token at rest, the same
+           AES-256-GCM component every other secret-at-rest in this codebase already goes through. -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Admin Issues portal (#425/#426) - PlatformIssueService, called
+        synchronously from WorkflowExecutionEngine right where a run's FAILED
+        status is set. "audit" is a leaf module (see its own pom.xml
+        description) so this adds no new transitive dependency risk.
+      -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Agent and quality nodes call AgentChatService and turn.quality in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Tool and data-table nodes use AgentToolProvider and tables (ADR-0023).
+         No cycle: agents-tools never depends on workflow. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+    </dependency>
+    <!-- The http/ai nodes run HTTP calls through tools.web.HttpRequestExecutor,
+         which moved to core/agents-browser with the rest of tools.web
+         (ADR-0023). No cycle: agents-browser never depends on workflow. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-browser</artifactId>
+    </dependency>
+    <!-- The expression language (lexer, parser, evaluator) is a leaf library in
+         core/workflow-expression; it never depends on workflow. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow-expression</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        WorkflowShareVoiceController (push-to-talk on a public workflow
+        share) - reuses VoiceCallController#transcribeAudio/#synthesizeSpeech
+        for the STT/TTS legs rather than duplicating either fallback chain.
+        Cycle-free direction, verified by reading core/voice/pom.xml before
+        adding this: core/voice depends on agents/sarvam/elevenlabs/security/
+        tenancy/speech/storage only, never on workflow.
+      -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>voice</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        AI workflow generator (#392) - WorkflowGraphGeneratorService reuses
+        the exact same "whichever provider is active" LLM plumbing as
+        AssistService (core/agents' Ask-AI helper): ProviderCredentialResolver
+        to resolve a usable API key and ChatClientRegistry to build a
+        ChatClient from it. Both were already transitively on this module's
+        classpath via the "agents" dependency above (agents depends on both),
+        but are declared explicitly here since this module now imports their
+        classes directly rather than only through AgentChatService/AgentService.
+      -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <!-- Canvas eval badges read agents' latest eval run (quality depends on
+         neither agents nor workflow, so no cycle). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>quality</artifactId>
+    </dependency>
+    <!-- Lint's approval-no-approvers rule counts PERM_MANAGE_APPROVALS
+         holders (admin depends only on audit/security/crypto - no cycle). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>admin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>eventbus</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Mobile SDK "Device Control" node: queues a DeviceCommand for a
+        paired phone via DeviceCommandService, then returns immediately -
+        see WorkflowExecutionEngine#executeDeviceControlNode's javadoc for
+        why this is necessarily fire-and-forget rather than a synchronous
+        round trip like the other Output destinations below.
+      -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>devices</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Output node destinations (#152-155): the WhatsApp destination reuses
+        TwilioCredentialService.resolveActive() directly rather than
+        duplicating credential decryption - see WhatsAppOutputService's
+        javadoc. Pulled in as an ObjectProvider bean dependency, exactly like
+        "knowledge" above, since omnichannel's TwilioCredentialService is
+        only meaningfully configured once a tenant has activated Twilio via
+        the Channels page.
+      -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>omnichannel</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Output node Google Drive destination (#156): GoogleDriveOutputService
+        reaches Google only through the kernel port agentspi.DriveFileUploader,
+        whose adapter (google.agenttools.GoogleDriveFileUploader) lives in
+        core/google. Test scope only (ADR-0011): GoogleDriveOutputServiceTest
+        exercises the real adapter. Distributions declare google directly.
+      -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>google</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Cross-user resource sharing retrofit (Round 2) - ResourceAccessService/
+         PermissionLevel/ResourceType/ResourceOwnerLookup, used by WorkflowService/
+         WorkflowController to enforce RUNNER/VIEWER/EDITOR access on top of
+         WorkflowDefinition.createdBy (migration V151). No cycle: sharing depends
+         only on audit/security/admin, never on workflow. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Output node email destination (#153) - EmailOutputService checks
+        spring.mail.host at call time and throws a clear configuration error
+        if blank, rather than silently no-op'ing, so this dependency being
+        present doesn't imply email is actually wired up in every deployment.
+      -->
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Output-send idempotency (F-17) - WorkflowOutputDedupGuard uses
+        StringRedisTemplate (SETNX + TTL, same idiom as omnichannel's
+        InboundMessageDedupService) so at-least-once execution (Temporal
+        Activity retries, node retries) can't double-send an Output node's
+        email/Telegram/WhatsApp/Drive delivery. Redis was already on this
+        module's compile classpath transitively (agents and chat both declare
+        this starter), but a class we now reference by name deserves a
+        declared edge - same reasoning as omnichannel's own "chat" edge for
+        GovernanceDegradationSignal. No cycle: this is a Spring Boot starter,
+        not a module edge.
+      -->
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <!--
+        Output node PDF file type (#390 - "if he wants pdf, we should be
+        able to generate from output generator module"): renders the run's
+        text output as a real paginated PDF rather than just renaming a
+        .txt file. Apache PDFBox chosen over iText/OpenPDF for its
+        Apache-2.0 license (no per-seat/commercial-use licensing question
+        for a SaaS product) and because it needs nothing beyond simple
+        wrapped-text pages here - see PdfOutputRenderer.
+      -->
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+    <dependency>
+      <!--
+        Temporal Java SDK, core
+        artifact only (not temporal-spring-boot-starter): TemporalConfig
+        hand-wires WorkflowServiceStubs/WorkflowClient/WorkerFactory beans
+        behind @Profile("temporal") instead, matching this codebase's
+        existing convention (see WorkflowKafkaConfig's @Profile("workflow"))
+        of feature-gated manual @Configuration over auto-configuration, so a
+        core started without the "temporal" profile never even constructs
+        these beans, let alone attempts a connection - zero behavior change
+        by default, same posture as every other optional profile here.
+      -->
+      <groupId>io.temporal</groupId>
+      <artifactId>temporal-sdk</artifactId>
+      <version>1.31.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!--
+        Temporal's own in-memory Test Server (TestWorkflowEnvironment) - lets
+        WorkflowRunWorkflowImplTest exercise the real workflow orchestration
+        logic (graph traversal, retries, the deterministic loop) without a
+        live Temporal server, matching this codebase's test-first workflow
+        (task #101) the same way ChatClientToolCallVerifierServiceTest mocks
+        ChatClient instead of needing a live Anthropic API key.
+      -->
+      <groupId>io.temporal</groupId>
+      <artifactId>temporal-testing</artifactId>
+      <version>1.31.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

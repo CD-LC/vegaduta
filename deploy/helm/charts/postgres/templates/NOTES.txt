@@ -1,0 +1,6 @@
+postgres: CloudNativePG Cluster {{ include "vegaduta-lib.fullname" . }} ({{ .Values.instances }} instance(s), {{ include "vegaduta-lib.image" . }})
+  Requires the CloudNativePG operator. Check: kubectl -n {{ .Release.Namespace }} get cluster {{ include "vegaduta-lib.fullname" . }}
+  App credentials: Secret {{ include "vegaduta-lib.fullname" . }}-app (managed by the operator).
+{{- if not .Values.backup }}
+  WARNING: no backup configured (postgres.backup). Configure barmanObjectStore/plugin backups before storing real data.
+{{- end }}

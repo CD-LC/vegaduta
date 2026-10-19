@@ -1,0 +1,52 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-face-enrollments",
+      "method": "GET",
+      "path": "/api/face-enrollments",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].embedding",
+          "$[*].id",
+          "$[*].personName"
+        ]
+      }
+    },
+    {
+      "id": "post-api-face-enrollments",
+      "method": "POST",
+      "path": "/api/face-enrollments",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.collectionId",
+          "$.consented",
+          "$.embedding",
+          "$.personName"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.embedding",
+          "$.id",
+          "$.personName"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-face-enrollments-enrollmentId",
+      "method": "DELETE",
+      "path": "/api/face-enrollments/{enrollmentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

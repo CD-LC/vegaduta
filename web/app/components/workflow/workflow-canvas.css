@@ -1,0 +1,232 @@
+/* Workflow canvas node (Phase 1 redesign). All classes are wfx- prefixed so
+ * they never fight the legacy .wf-node / .ax-wf-node-* rules in globals.css.
+ * Colours come from theme tokens (which already flip with data-mode); the
+ * hex-looking fallbacks are only for a page that loads without globals. */
+
+.wfx-node {
+  --wfx-accent: var(--ax-cyan, var(--hud-cyan));
+  --wfx-bg: var(--surface-card, var(--hud-panel));
+  --wfx-border: var(--ax-border2, var(--surface-border-strong));
+  --wfx-text: var(--text-primary, var(--ax-text));
+  --wfx-muted: var(--text-muted, var(--ax-dim));
+  --wfx-chip-bg: var(--ax-chip, var(--surface-hover));
+  --wfx-ok: var(--ax-green, var(--hud-ok));
+  --wfx-err: var(--ax-red, var(--hud-magenta));
+  --wfx-warn: var(--ax-amber, var(--hud-warn));
+  --wfx-run: var(--ax-cyan, var(--hud-cyan));
+
+  --wfx-port-flow: var(--ax-sky, var(--hud-cyan));
+  --wfx-port-true: var(--wfx-ok);
+  --wfx-port-false: var(--wfx-warn);
+  --wfx-port-error: var(--wfx-err);
+  --wfx-port-route: var(--ax-violet, var(--hud-violet));
+
+  position: relative;
+  box-sizing: border-box;
+  width: 232px;
+  border-radius: 12px;
+  border: 1px solid var(--wfx-border);
+  background: var(--wfx-bg);
+  color: var(--wfx-text);
+  box-shadow: var(--ax-shadow-sm, 0 1px 2px rgb(0 0 0 / 0.12));
+  /* No hover transform: a shift would detach React Flow's cached edge
+   * endpoints from their ports. Border/shadow only. */
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wfx-node:hover {
+  border-color: var(--wfx-node-color, var(--wfx-accent));
+  box-shadow: var(--ax-shadow-md, 0 8px 24px -8px rgb(0 0 0 / 0.25));
+}
+
+.wfx-node[data-selected="true"] {
+  border-color: var(--wfx-accent);
+  box-shadow: 0 0 0 2px var(--wfx-accent);
+}
+
+.wfx-node[data-tour="true"] {
+  box-shadow: 0 0 0 2px var(--ax-violet, var(--hud-violet)), 0 0 18px var(--ax-glow, transparent);
+}
+
+.wfx-node[data-state="error"] { border-color: var(--wfx-err); }
+.wfx-node[data-state="paused"] { border-color: var(--wfx-warn); }
+.wfx-node[data-state="skipped"] { opacity: 0.6; }
+
+.wfx-node[data-state="running"] {
+  border-color: var(--wfx-run);
+  animation: wfx-ring 1.6s ease-in-out infinite;
+}
+
+@keyframes wfx-ring {
+  0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--wfx-run) 85%, transparent), 0 0 0 5px color-mix(in srgb, var(--wfx-run) 0%, transparent); }
+  50% { box-shadow: 0 0 0 2px var(--wfx-run), 0 0 0 7px color-mix(in srgb, var(--wfx-run) 28%, transparent); }
+}
+
+/* Header */
+.wfx-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 6px;
+  min-width: 0;
+}
+
+.wfx-icon {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--wfx-node-color, var(--wfx-accent));
+  color: white; /* glyph on a saturated node-colour tile; same in both modes */
+}
+
+.wfx-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.wfx-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wfx-kind {
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wfx-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wfx-glyph {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: var(--wfx-muted);
+}
+.wfx-glyph[data-state="ok"] { color: var(--wfx-ok); }
+.wfx-glyph[data-state="error"] { color: var(--wfx-err); }
+.wfx-glyph[data-state="paused"] { color: var(--wfx-warn); }
+.wfx-glyph[data-state="running"] { color: var(--wfx-run); }
+.wfx-glyph[data-state="running"] svg { animation: wfx-spin 1s linear infinite; }
+
+@keyframes wfx-spin { to { transform: rotate(360deg); } }
+
+/* Body */
+.wfx-body {
+  padding: 0 12px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-secondary, var(--ax-mid));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer chips */
+.wfx-foot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px 6px 12px;
+  box-sizing: content-box;
+}
+
+.wfx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--wfx-chip-bg);
+  color: var(--wfx-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.wfx-chip[data-state="ok"] { color: var(--wfx-ok); }
+.wfx-chip[data-state="error"] { color: var(--wfx-err); }
+.wfx-chip[data-state="paused"] { color: var(--wfx-warn); }
+.wfx-chip[data-state="running"] { color: var(--wfx-run); }
+
+/* Ports. The Handle box is the 24px hit target; the visible 10px dot is
+ * its ::after so growing it on hover never changes the measured handle rect. */
+.wfx-node .wfx-port {
+  width: 24px;
+  height: 24px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  --wfx-port-color: var(--wfx-port-flow);
+}
+.wfx-node .wfx-port::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: var(--wfx-port-color);
+  border: 2px solid var(--wfx-bg);
+  box-shadow: 0 0 0 1px var(--wfx-port-color);
+  transition: transform 0.12s ease;
+  pointer-events: none;
+}
+.wfx-node .wfx-port:hover::after,
+.wfx-node .wfx-port.connectingfrom::after,
+.wfx-node .wfx-port.connectingto::after {
+  transform: scale(1.5);
+}
+.wfx-node .wfx-port:focus-visible { outline: 2px solid var(--wfx-accent); outline-offset: -2px; }
+
+.wfx-node .wfx-port-true { --wfx-port-color: var(--wfx-port-true); }
+.wfx-node .wfx-port-false { --wfx-port-color: var(--wfx-port-false); }
+.wfx-node .wfx-port-error { --wfx-port-color: var(--wfx-port-error); }
+.wfx-node .wfx-port-route { --wfx-port-color: var(--wfx-port-route); }
+
+/* Semantic zoom: below ~0.5 the card collapses to an icon + title pill.
+ * Same port ids/sides, so edges keep their endpoints. */
+.wfx-node[data-compact="true"] {
+  width: 168px;
+  border-radius: 999px;
+}
+.wfx-node[data-compact="true"] .wfx-head { padding: 8px 12px 8px 8px; }
+.wfx-node[data-compact="true"] .wfx-icon { width: 24px; height: 24px; }
+.wfx-node[data-compact="true"] .wfx-title { font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wfx-node { transition: none; }
+  .wfx-node[data-state="running"] {
+    animation: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--wfx-run) 60%, transparent);
+  }
+  .wfx-glyph[data-state="running"] svg { animation: none; }
+  .wfx-node .wfx-port::after { transition: none; }
+}
+
+/* A failed Validate named this node (SE-26). */
+.wfx-node[data-invalid="true"] {
+  border-color: var(--wfx-err);
+  box-shadow: 0 0 0 2px var(--wfx-err);
+}

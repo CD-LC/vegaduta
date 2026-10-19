@@ -1,0 +1,10 @@
+{
+  "name": "Python + FastAPI",
+  "description": "Minimal FastAPI starter — a single JSON route, ready to extend.",
+  "install": "pip install -r requirements.txt",
+  "run": "uvicorn main:app --host 0.0.0.0 --port 8000",
+  "build": "python -c \"import main\"",
+  "test": "python -c \"import main\" && echo ok",
+  "port": 8000,
+  "image": "python:3.12-slim"
+}

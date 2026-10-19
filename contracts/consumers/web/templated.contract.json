@@ -1,0 +1,44 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-resourceKind-resourceId-grants",
+      "method": "GET",
+      "path": "/api/{resourceKind}/{resourceId}/grants",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-resourceKind-resourceId-grants",
+      "method": "POST",
+      "path": "/api/{resourceKind}/{resourceId}/grants",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.granteeEmail",
+          "$.permissionLevel"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.granteeEmail",
+          "$.granteeUserId",
+          "$.id",
+          "$.permissionLevel"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-resourceKind-resourceId-grants-grantId",
+      "method": "DELETE",
+      "path": "/api/{resourceKind}/{resourceId}/grants/{grantId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,1184 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-channels-contact-groups",
+      "method": "GET",
+      "path": "/api/channels/contact-groups",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].id",
+          "$[*].name"
+        ]
+      }
+    },
+    {
+      "id": "post-api-channels-contact-groups",
+      "method": "POST",
+      "path": "/api/channels/contact-groups",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-contact-groups-id",
+      "method": "DELETE",
+      "path": "/api/channels/contact-groups/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-contact-groups-id",
+      "method": "PUT",
+      "path": "/api/channels/contact-groups/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-contacts",
+      "method": "GET",
+      "path": "/api/channels/contacts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-contacts",
+      "method": "POST",
+      "path": "/api/channels/contacts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-contacts-id",
+      "method": "DELETE",
+      "path": "/api/channels/contacts/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-contacts-id",
+      "method": "PUT",
+      "path": "/api/channels/contacts/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-contacts-import",
+      "method": "POST",
+      "path": "/api/channels/contacts/import",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-contacts-import-rows",
+      "method": "POST",
+      "path": "/api/channels/contacts/import-rows",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.channel",
+          "$.groupId",
+          "$.text"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-discord-credential",
+      "method": "DELETE",
+      "path": "/api/channels/discord/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-discord-credential",
+      "method": "GET",
+      "path": "/api/channels/discord/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-discord-credential",
+      "method": "POST",
+      "path": "/api/channels/discord/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-discord-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/discord/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-discord-send",
+      "method": "POST",
+      "path": "/api/channels/discord/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-edge-relay-relayId",
+      "method": "DELETE",
+      "path": "/api/channels/edge-relay/{relayId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-edge-relay-relayId-heartbeat",
+      "method": "POST",
+      "path": "/api/channels/edge-relay/{relayId}/heartbeat",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-edge-relay-relayId-next",
+      "method": "GET",
+      "path": "/api/channels/edge-relay/{relayId}/next",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-edge-relay-jobs-jobId-fail",
+      "method": "POST",
+      "path": "/api/channels/edge-relay/jobs/{jobId}/fail",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.reason",
+          "$.relayId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-edge-relay-jobs-jobId-reply",
+      "method": "POST",
+      "path": "/api/channels/edge-relay/jobs/{jobId}/reply",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.relayId",
+          "$.text"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-edge-relay-register",
+      "method": "POST",
+      "path": "/api/channels/edge-relay/register",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.channels",
+          "$.deviceLabel",
+          "$.modelLabel"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.claimWaitSecondsMax",
+          "$.heartbeatSeconds",
+          "$.relayId",
+          "$.replyWaitSeconds"
+        ]
+      }
+    },
+    {
+      "id": "get-api-channels-edge-relay-status",
+      "method": "GET",
+      "path": "/api/channels/edge-relay/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.relays"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-channels-email-credential",
+      "method": "DELETE",
+      "path": "/api/channels/email/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-email-credential",
+      "method": "GET",
+      "path": "/api/channels/email/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-email-credential",
+      "method": "POST",
+      "path": "/api/channels/email/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-email-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/email/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-email-send",
+      "method": "POST",
+      "path": "/api/channels/email/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-google-authorize-url",
+      "method": "GET",
+      "path": "/api/channels/google/authorize-url",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-google-connection",
+      "method": "DELETE",
+      "path": "/api/channels/google/connection",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-google-oauth-config",
+      "method": "GET",
+      "path": "/api/channels/google/oauth-config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-google-personal-authorize-url",
+      "method": "GET",
+      "path": "/api/channels/google/personal/authorize-url",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-google-personal-connection",
+      "method": "DELETE",
+      "path": "/api/channels/google/personal/connection",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-google-status",
+      "method": "GET",
+      "path": "/api/channels/google/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-google-youtube-upload-authorize-url",
+      "method": "GET",
+      "path": "/api/channels/google/youtube-upload/authorize-url",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-health-key",
+      "method": "POST",
+      "path": "/api/channels/health/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-imessage-credential",
+      "method": "DELETE",
+      "path": "/api/channels/imessage/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-imessage-credential",
+      "method": "GET",
+      "path": "/api/channels/imessage/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-imessage-credential",
+      "method": "POST",
+      "path": "/api/channels/imessage/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-imessage-credential-settings",
+      "method": "PUT",
+      "path": "/api/channels/imessage/credential/settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-imessage-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/imessage/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-imessage-send",
+      "method": "POST",
+      "path": "/api/channels/imessage/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-matrix-credential",
+      "method": "DELETE",
+      "path": "/api/channels/matrix/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-matrix-credential",
+      "method": "GET",
+      "path": "/api/channels/matrix/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-matrix-credential",
+      "method": "POST",
+      "path": "/api/channels/matrix/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-matrix-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/matrix/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-matrix-policy",
+      "method": "PUT",
+      "path": "/api/channels/matrix/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-matrix-send",
+      "method": "POST",
+      "path": "/api/channels/matrix/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-meta-social-credential",
+      "method": "DELETE",
+      "path": "/api/channels/meta-social/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-meta-social-credential",
+      "method": "GET",
+      "path": "/api/channels/meta-social/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-meta-social-credential",
+      "method": "POST",
+      "path": "/api/channels/meta-social/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-meta-whatsapp-credential",
+      "method": "DELETE",
+      "path": "/api/channels/meta-whatsapp/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-meta-whatsapp-credential",
+      "method": "GET",
+      "path": "/api/channels/meta-whatsapp/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-meta-whatsapp-credential",
+      "method": "POST",
+      "path": "/api/channels/meta-whatsapp/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-meta-whatsapp-embedded-signup-config",
+      "method": "GET",
+      "path": "/api/channels/meta-whatsapp/embedded-signup/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-meta-whatsapp-embedded-signup-exchange",
+      "method": "POST",
+      "path": "/api/channels/meta-whatsapp/embedded-signup/exchange",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-pairing-sessionId",
+      "method": "DELETE",
+      "path": "/api/channels/pairing/{sessionId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-pairing-sessionId-agent",
+      "method": "PUT",
+      "path": "/api/channels/pairing/{sessionId}/agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-pairing-sessionId-approve",
+      "method": "POST",
+      "path": "/api/channels/pairing/{sessionId}/approve",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-pairing-sessionId-unpair",
+      "method": "POST",
+      "path": "/api/channels/pairing/{sessionId}/unpair",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-pairing-pending",
+      "method": "GET",
+      "path": "/api/channels/pairing/pending",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-routing",
+      "method": "GET",
+      "path": "/api/channels/routing",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-routing-channel",
+      "method": "PUT",
+      "path": "/api/channels/routing/{channel}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.autoApproveNewSenders"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-signal-credential",
+      "method": "DELETE",
+      "path": "/api/channels/signal/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-signal-credential",
+      "method": "GET",
+      "path": "/api/channels/signal/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-signal-credential",
+      "method": "POST",
+      "path": "/api/channels/signal/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-signal-credential-policy",
+      "method": "PUT",
+      "path": "/api/channels/signal/credential/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-signal-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/signal/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-signal-send",
+      "method": "POST",
+      "path": "/api/channels/signal/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-slack-credential",
+      "method": "DELETE",
+      "path": "/api/channels/slack/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-slack-credential",
+      "method": "GET",
+      "path": "/api/channels/slack/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-slack-credential",
+      "method": "POST",
+      "path": "/api/channels/slack/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-slack-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/slack/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-slack-send",
+      "method": "POST",
+      "path": "/api/channels/slack/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-sms-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/sms/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-social-instagram-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/social/instagram/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-social-instagram-send",
+      "method": "POST",
+      "path": "/api/channels/social/instagram/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-social-messenger-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/social/messenger/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-social-messenger-send",
+      "method": "POST",
+      "path": "/api/channels/social/messenger/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-status",
+      "method": "GET",
+      "path": "/api/channels/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.channels"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-channels-teams-credential",
+      "method": "DELETE",
+      "path": "/api/channels/teams/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-teams-credential",
+      "method": "GET",
+      "path": "/api/channels/teams/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-teams-credential",
+      "method": "POST",
+      "path": "/api/channels/teams/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-teams-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/teams/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-teams-send",
+      "method": "POST",
+      "path": "/api/channels/teams/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-telegram-credential",
+      "method": "DELETE",
+      "path": "/api/channels/telegram/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-telegram-credential",
+      "method": "GET",
+      "path": "/api/channels/telegram/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-telegram-credential",
+      "method": "POST",
+      "path": "/api/channels/telegram/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-telegram-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/telegram/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-telegram-send",
+      "method": "POST",
+      "path": "/api/channels/telegram/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-twilio-credential",
+      "method": "DELETE",
+      "path": "/api/channels/twilio/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-twilio-credential",
+      "method": "GET",
+      "path": "/api/channels/twilio/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-twilio-credential",
+      "method": "POST",
+      "path": "/api/channels/twilio/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-voice-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/voice/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-voice-dtmf-menu",
+      "method": "GET",
+      "path": "/api/channels/voice/dtmf-menu",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].digit"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-channels-voice-dtmf-menu-digit",
+      "method": "DELETE",
+      "path": "/api/channels/voice/dtmf-menu/{digit}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-voice-dtmf-menu-digit",
+      "method": "PUT",
+      "path": "/api/channels/voice/dtmf-menu/{digit}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.label"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.digit"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-channels-whatsapp-compliance-opt-in",
+      "method": "DELETE",
+      "path": "/api/channels/whatsapp-compliance/opt-in",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-whatsapp-compliance-opt-in",
+      "method": "GET",
+      "path": "/api/channels/whatsapp-compliance/opt-in",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-whatsapp-compliance-opt-in",
+      "method": "POST",
+      "path": "/api/channels/whatsapp-compliance/opt-in",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.evidence",
+          "$.phone",
+          "$.source"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-whatsapp-compliance-quality",
+      "method": "GET",
+      "path": "/api/channels/whatsapp-compliance/quality",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-whatsapp-qr-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/whatsapp-qr/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-whatsapp-qr-send",
+      "method": "POST",
+      "path": "/api/channels/whatsapp-qr/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-whatsapp-qr-session",
+      "method": "DELETE",
+      "path": "/api/channels/whatsapp-qr/session",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-whatsapp-qr-session",
+      "method": "GET",
+      "path": "/api/channels/whatsapp-qr/session",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-whatsapp-qr-session",
+      "method": "POST",
+      "path": "/api/channels/whatsapp-qr/session",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-whatsapp-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/whatsapp/default-agent",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.acknowledgeOpenEnded",
+          "$.agentId",
+          "$.task"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-whatsapp-send",
+      "method": "POST",
+      "path": "/api/channels/whatsapp/send",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.message",
+          "$.to"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-whatsapp-templates",
+      "method": "GET",
+      "path": "/api/channels/whatsapp/templates",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-x-authorize-url",
+      "method": "GET",
+      "path": "/api/channels/x/authorize-url",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-channels-x-connection",
+      "method": "DELETE",
+      "path": "/api/channels/x/connection",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-channels-x-credential",
+      "method": "GET",
+      "path": "/api/channels/x/credential",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-x-credential",
+      "method": "POST",
+      "path": "/api/channels/x/credential",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-channels-x-default-agent",
+      "method": "PUT",
+      "path": "/api/channels/x/default-agent",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.agentId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-channels-x-send",
+      "method": "POST",
+      "path": "/api/channels/x/send",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

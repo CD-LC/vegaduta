@@ -1,0 +1,271 @@
+/* ==== Mobile responsiveness: node palette + run/config inspector as
+ * off-canvas drawers (2026-07) ============================================
+ * The hardest case in this whole responsive pass. .ax-wf-main is a flex ROW
+ * of three columns: .ax-wf-palette (176px fixed), .ax-wf-canvas-col
+ * (flex:1, the actual react-flow graph), and .ax-wf-inspector (320px
+ * fixed). On a phone the two fixed columns alone (496px) already exceed the
+ * entire viewport width, which - because neither had a mobile override
+ * before this pass - forced .ax-wf-main, and with it the whole page, to
+ * overflow horizontally no matter how far the canvas itself could shrink.
+ * A full redesign of a node-graph editor for touch is out of scope for one
+ * pass (per the brief); this fix targets the two concrete, fixable
+ * problems: (1) no horizontal page overflow, (2) the canvas fills the
+ * available width with its own internal pan/zoom instead of being pushed
+ * off-screen by its neighbors.
+ *
+ * Below 900px (matching AppShell.js's own rail breakpoint) both fixed
+ * columns switch to `position: fixed` off-canvas panels - completely
+ * removed from .ax-wf-main's flow, so the row collapses to just
+ * .ax-wf-canvas-col at 100% width - toggled via the same boolean-state
+ * -> `-open` class -> `transform: translateX` + backdrop technique
+ * AppShell.js's .ax-rail/.ax-rail-open/.ax-rail-backdrop already established
+ * for the main nav drawer (see WorkflowCanvas.js's paletteOpen/
+ * inspectorOpen state and the .ax-wf-drawer-toggle buttons in its topbar).
+ * Selecting a node auto-opens the inspector (it becomes the node-config
+ * drawer at that point) since there's no side-by-side room left to notice a
+ * panel that just changed content off-screen.
+ *
+ * KNOWN RESIDUAL LIMITATION: this does not attempt to make the node-graph
+ * editing experience itself (drag-and-drop wiring, pinch-zoom ergonomics,
+ * multi-touch node dragging) touch-first - react-flow's own touch/pointer
+ * handling is used as-is. Dragging a palette item onto the canvas isn't
+ * meaningful on a touchscreen either, which is why palette items are also
+ * tap-to-add (already true before this pass - see addNodeByClick in
+ * WorkflowCanvas.js) and why tapping one now also closes the drawer so the
+ * newly-added node is immediately visible. Focus/immersive mode (the
+ * ax-wf-shell-immersive modifier below) keeps its existing desktop-hover-to-
+ * reveal chrome behavior unchanged here - a hover-based reveal has no touch
+ * equivalent, but reworking that hover affordance for touch is a separate,
+ * larger change than this pass's "don't literally break" mandate covers. */
+.ax-wf-drawer-toggle {
+  display: none;
+}
+
+.ax-wf-drawer-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .ax-wf-drawer-toggle {
+    display: inline-flex;
+  }
+
+  /* Dims/blocks the canvas behind whichever drawer is open, closing it on
+   * tap - only mounted in the DOM while open (see WorkflowCanvas.js), so it
+   * costs nothing the rest of the time. Sits above the canvas but below the
+   * drawers themselves (z-index 45 vs. 50). */
+  .ax-wf-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(4, 6, 14, 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  /* .ax-wf-main's three fixed-width/flex-row children collapse to just the
+   * canvas column once the other two are pulled out of flow below via
+   * position:fixed - explicit column direction here is mostly documentation
+   * (there's only one flowed child left), not a functional requirement. */
+  .ax-wf-main {
+    flex-direction: column;
+  }
+
+  .ax-wf-palette,
+  .ax-wf-inspector {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 50;
+    height: 100dvh;
+    box-shadow: 0 0 32px rgba(0, 0, 0, 0.4);
+    transition: transform 0.22s ease;
+  }
+
+  .ax-wf-palette {
+    left: 0;
+    width: min(78vw, 280px);
+    padding: 16px 14px;
+    border-radius: 0 16px 16px 0;
+    transform: translateX(-100%);
+  }
+
+  .ax-wf-palette-open {
+    transform: translateX(0);
+  }
+
+  .ax-wf-inspector {
+    right: 0;
+    width: min(92vw, 360px);
+    border-radius: 16px 0 0 16px;
+    transform: translateX(100%);
+  }
+
+  .ax-wf-inspector-open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .ax-wf-palette,
+  .ax-wf-inspector {
+    transition: none;
+  }
+}
+
+/* ==== Focus mode: true full-screen immersive canvas ======================
+ * Direct feedback: "on focus mode, canvas is not visible - it should fit
+ * the entire screen on top of it all the options and panels, transparent -
+ * on focus,hover - becomes opaque." The previous focus mode wrapped the
+ * canvas in a plain padded div, outside AppShell, with a separate "Exit
+ * focus mode" link floating above it - but every other .ax-wf-* rule above
+ * (palette/canvas/inspector as three columns sharing one flex row, sized by
+ * .ax-wf-shell's min-height) assumes it's living inside AppShell's fixed
+ * topbar + padding chain. None of that exists in focus mode, so the canvas
+ * never got the full viewport it actually needed - which is exactly why it
+ * read as "not visible."
+ *
+ * WorkflowCanvas.js now applies this modifier class (alongside .ax-wf-shell,
+ * never replacing it) only when rendered with focusMode=true - every rule
+ * here is scoped under it, so none of this touches the normal embedded
+ * /workflows/[id] canvas. The graph itself becomes the entire screen; every
+ * control (topbar, trigger-strip, palette, inspector, describe bar) becomes
+ * a low-opacity floating overlay on top of it that opaques on hover or
+ * keyboard focus (:focus-within), so the panels are always reachable but
+ * never compete with the graph for attention until you actually go looking
+ * for them. */
+.ax-wf-shell-immersive {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  /* Same dot-grid canvas background .ax-wf-canvas-zone normally paints, but
+   * here it covers the FULL screen (not just the canvas box) - reinforcing
+   * that the graph, not a bordered panel, is the entire view. */
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 26px 26px,
+    var(--ax-bg);
+}
+
+:root[data-mode="light"] .ax-wf-shell-immersive {
+  background:
+    radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px) 0 0 / 26px 26px,
+    var(--ax-bg);
+}
+
+.ax-wf-shell-immersive .ax-wf-main {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  margin-top: 0;
+  flex: none;
+  min-height: 0;
+}
+
+/* The graph itself: full-bleed, edge to edge, no border/card chrome - it IS
+ * the screen now, not a panel sitting on one. */
+.ax-wf-shell-immersive .ax-wf-canvas-col {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.ax-wf-shell-immersive .ax-wf-canvas-zone {
+  border: none;
+  border-radius: 0;
+}
+
+/* Every floating control panel shares the same translucent-until-you-look
+ * language: ~16% opacity at rest (still legibly present, so a new visitor
+ * discovers the controls exist, rather than a true 0% that hides them
+ * entirely) rising to fully opaque on hover or keyboard focus anywhere
+ * inside it. transition covers both directions so the fade-in AND fade-out
+ * feel deliberate, not a hard cut. */
+.ax-wf-shell-immersive .ax-wf-topbar,
+.ax-wf-shell-immersive .ax-wf-trigger-strip,
+.ax-wf-shell-immersive .ax-wf-palette,
+.ax-wf-shell-immersive .ax-wf-inspector,
+.ax-wf-shell-immersive .ax-wf-describe-bar {
+  position: absolute;
+  z-index: 5;
+  opacity: 0.16;
+  transition: opacity 0.18s ease;
+}
+
+.ax-wf-shell-immersive .ax-wf-topbar:hover,
+.ax-wf-shell-immersive .ax-wf-topbar:focus-within,
+.ax-wf-shell-immersive .ax-wf-trigger-strip:hover,
+.ax-wf-shell-immersive .ax-wf-trigger-strip:focus-within,
+.ax-wf-shell-immersive .ax-wf-palette:hover,
+.ax-wf-shell-immersive .ax-wf-palette:focus-within,
+.ax-wf-shell-immersive .ax-wf-inspector:hover,
+.ax-wf-shell-immersive .ax-wf-inspector:focus-within,
+.ax-wf-shell-immersive .ax-wf-describe-bar:hover,
+.ax-wf-shell-immersive .ax-wf-describe-bar:focus-within {
+  opacity: 1;
+}
+
+/* prefers-reduced-transparency isn't safe to lean on for actual visibility
+ * (support is inconsistent), so reduced-motion gets the fade duration cut
+ * to near-zero instead - still opacity-driven, just without the animated
+ * feel, for anyone who's asked the OS to minimize motion. */
+@media (prefers-reduced-motion: reduce) {
+  .ax-wf-shell-immersive .ax-wf-topbar,
+  .ax-wf-shell-immersive .ax-wf-trigger-strip,
+  .ax-wf-shell-immersive .ax-wf-palette,
+  .ax-wf-shell-immersive .ax-wf-inspector,
+  .ax-wf-shell-immersive .ax-wf-describe-bar {
+    transition: opacity 0.01s linear;
+  }
+}
+
+.ax-wf-shell-immersive .ax-wf-topbar {
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.ax-wf-shell-immersive .ax-wf-trigger-strip {
+  top: 70px;
+  left: 14px;
+  right: 14px;
+}
+
+.ax-wf-shell-immersive .ax-wf-trigger-strip .wf-trigger-box {
+  backdrop-filter: blur(10px);
+}
+
+.ax-wf-shell-immersive .ax-wf-palette {
+  left: 14px;
+  top: 70px;
+  bottom: 14px;
+  height: auto;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.ax-wf-shell-immersive .ax-wf-inspector {
+  right: 14px;
+  top: 70px;
+  bottom: 14px;
+  height: auto;
+  backdrop-filter: blur(10px);
+}
+
+.ax-wf-shell-immersive .ax-wf-describe-bar {
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: min(680px, calc(100% - 380px));
+}

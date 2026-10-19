@@ -1,0 +1,1 @@
+# Allow-list for no-telemetry-check.sh. Intentionally empty: "<path><TAB><reason>" per line.

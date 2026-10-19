@@ -1,0 +1,60 @@
+# Tool config for the app-builder service (lint, tests, types). First such
+# config this service has had (2026-09-30).
+#
+# WHY THIS FILE EXISTS AND WHAT IT IS NOT: this pyproject.toml carries ONLY
+# tool config. There is deliberately no [project]/[build-system] section -
+# the service is not a package (the Dockerfile pip-installs requirements.txt
+# and COPYs app/ + templates/, it never builds or installs this directory),
+# and adding packaging metadata here would invite someone to `pip install .`
+# a thing that was never designed to be installed. The Dockerfile doesn't
+# COPY this file, so it is completely inert for image builds.
+#
+# WHY py312 / line-length 100: same as sidecar/pyproject.toml - the image is
+# python:3.12-slim, and 100 is where this code already sits (zero E501 hits
+# at 100 when this file landed).
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# NARROWER THAN sidecar/pyproject.toml ON PURPOSE. Measured with ruff 0.12.4
+# (the CI version) when this file landed: the full sidecar set
+# (+ I, UP, B, C4, RUF) reports 36 pre-existing findings across 20 files in
+# app/ and tests/ - 11 I001 import-order, 11 UP015 redundant open() mode,
+# 8 RUF100 stale noqa, 2 B904 raise-without-from (app/generate.py,
+# app/main.py), 2 RUF012, 1 C408, 1 C416. Most are auto-fixable, but fixing
+# them touches ~20 files, and CI's blocking "Ruff lint + format (changed
+# files)" gate then runs `ruff format --check` on every touched file - none
+# of which is ruff-format clean yet - turning a lint tidy-up into a
+# whole-service reformat. That belongs in one dedicated
+# `ruff check --fix && ruff format` commit, after which this select should be
+# widened to the sidecar set. Until then: ruff's default defect-catching set
+# (F401 unused imports, F811 redefinition, F841 dead locals, E7/E9) plus
+# E501, all of which are clean today.
+select = ["E4", "E7", "E9", "F", "E501"]
+
+[tool.ruff.format]
+# Defaults on purpose (double quotes, 4-space indent) - they match the
+# existing style, so a future `ruff format` adoption is the smallest diff.
+
+[tool.pytest.ini_options]
+# The real tests are a SCRIPT HARNESS, not pytest: each tests/test_*.py has a
+# main() driven by a hand-rolled check(), and CI runs
+#   for f in tests/test_*.py; do python -m "tests.$(basename "$f" .py)"; done
+# Collecting those modules directly would find no test functions and pass
+# vacuously, so pytest collects ONLY the adapter, which runs every harness
+# module as a subprocess (the same invocation CI uses) and asserts exit 0.
+# Both entry points stay valid; the adapter adds no second copy of any test.
+testpaths = ["tests"]
+python_files = ["pytest_adapter.py"]
+
+[tool.mypy]
+# NON-BLOCKING / advisory: nothing in CI runs mypy against this service
+# today. The security-sensitive modules (app/auth.py and app/github_client.py,
+# which carries the PAT-redaction path) are kept clean under
+# --disallow-untyped-defs --check-untyped-defs; the rest of app/ is not yet
+# fully annotated. ignore_missing_imports so a checker venv without the
+# service's runtime deps (PyJWT, psycopg) still runs cleanly.
+python_version = "3.12"
+ignore_missing_imports = true

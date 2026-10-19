@@ -1,0 +1,295 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "delete-api-mcp-oauth-provider",
+      "method": "DELETE",
+      "path": "/api/mcp/oauth/{provider}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.disconnected",
+          "$.providerRevocation"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcp-oauth-provider-attach-registrationId",
+      "method": "POST",
+      "path": "/api/mcp/oauth/{provider}/attach/{registrationId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-mcp-oauth-provider-authorize",
+      "method": "POST",
+      "path": "/api/mcp/oauth/{provider}/authorize",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.provider",
+          "$.url"
+        ]
+      }
+    },
+    {
+      "id": "get-api-mcp-oauth-providers",
+      "method": "GET",
+      "path": "/api/mcp/oauth/providers",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.providers"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-mcp-oauth-remote",
+      "method": "DELETE",
+      "path": "/api/mcp/oauth/remote",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.disconnected",
+          "$.liveConnectionsDropped"
+        ]
+      }
+    },
+    {
+      "id": "get-api-mcp-oauth-remote",
+      "method": "GET",
+      "path": "/api/mcp/oauth/remote",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.cimd",
+          "$.enabled"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcp-oauth-remote-authorize",
+      "method": "POST",
+      "path": "/api/mcp/oauth/remote/authorize",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.url"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.clientMode",
+          "$.issuer",
+          "$.resource",
+          "$.url"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcp-oauth-remote-status",
+      "method": "POST",
+      "path": "/api/mcp/oauth/remote/status",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.url"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.issuer",
+          "$.resource",
+          "$.scope",
+          "$.state"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcp-registrations-id-acknowledge",
+      "method": "POST",
+      "path": "/api/mcp/registrations/{id}/acknowledge",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-mcp-registrations-id-test",
+      "method": "POST",
+      "path": "/api/mcp/registrations/{id}/test",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mcp-registry",
+      "method": "GET",
+      "path": "/api/mcp/registry",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].dynamic",
+          "$[*].enabled",
+          "$[*].id",
+          "$[*].name",
+          "$[*].type"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcp-registry",
+      "method": "POST",
+      "path": "/api/mcp/registry",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-mcp-registry-id",
+      "method": "DELETE",
+      "path": "/api/mcp/registry/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-mcp-registry-id",
+      "method": "PATCH",
+      "path": "/api/mcp/registry/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-mcp-registry-id-connect",
+      "method": "POST",
+      "path": "/api/mcp/registry/{id}/connect",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mcp-registry-atlassian-authorize-url",
+      "method": "GET",
+      "path": "/api/mcp/registry/atlassian/authorize-url",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-mcp-registry-atlassian-connection",
+      "method": "DELETE",
+      "path": "/api/mcp/registry/atlassian/connection",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mcp-registry-catalog",
+      "method": "GET",
+      "path": "/api/mcp/registry/catalog",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mcp-registry-search",
+      "method": "GET",
+      "path": "/api/mcp/registry/search",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.nextCursor",
+          "$.results"
+        ]
+      }
+    },
+    {
+      "id": "get-api-mcp-tool-pins",
+      "method": "GET",
+      "path": "/api/mcp/tool-pins",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].added",
+          "$[*].changed",
+          "$[*].changedAt",
+          "$[*].changedTools",
+          "$[*].mode",
+          "$[*].name",
+          "$[*].observedHash",
+          "$[*].pinned",
+          "$[*].pinnedAt",
+          "$[*].pinnedBy",
+          "$[*].pinnedHash",
+          "$[*].registrationId",
+          "$[*].removed"
+        ]
+      }
+    },
+    {
+      "id": "get-api-mcp-tool-pins-id",
+      "method": "GET",
+      "path": "/api/mcp/tool-pins/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.added",
+          "$.changed",
+          "$.changedAt",
+          "$.changedTools",
+          "$.mode",
+          "$.name",
+          "$.observedHash",
+          "$.pinned",
+          "$.pinnedAt",
+          "$.pinnedBy",
+          "$.pinnedHash",
+          "$.registrationId",
+          "$.removed"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcp-tool-pins-id-approve",
+      "method": "POST",
+      "path": "/api/mcp/tool-pins/{id}/approve",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.added",
+          "$.changed",
+          "$.changedAt",
+          "$.changedTools",
+          "$.mode",
+          "$.name",
+          "$.observedHash",
+          "$.pinned",
+          "$.pinnedAt",
+          "$.pinnedBy",
+          "$.pinnedHash",
+          "$.registrationId",
+          "$.removed"
+        ]
+      }
+    }
+  ]
+}

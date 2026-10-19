@@ -1,0 +1,28 @@
+# Opt-in profile: publish latency histograms so p50/p95/p99 can be computed with
+# histogram_quantile() (docs/ops/LATENCY-BASELINE-RUNBOOK.md, rules in
+# deploy/prometheus/rules/vegaduta-latency-recording.yml).
+# Enable with SPRING_PROFILES_ACTIVE=<existing profiles>,latency-histograms
+# (staging first; measure series count before enabling anywhere else).
+#
+# Cost: percentiles-histogram=true makes Micrometer emit its DEFAULT exponential
+# buckets (dozens per series, bounded by minimum/maximum-expected-value below)
+# and the slo values are added on top. Per-request recording CPU and the size of
+# /actuator/prometheus both grow. `agentic` is a PREFIX match, so it also covers
+# the planned agentic.chat.ttft timer. http.server.requests is tagged only by
+# method/uri-TEMPLATE/status/outcome (never tenant or session id); never add
+# tenant/session/user tags to any agentic.* timer.
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+        "[agentic]": true
+      minimum-expected-value:
+        "[http.server.requests]": 10ms
+        "[agentic]": 10ms
+      maximum-expected-value:
+        "[http.server.requests]": 300s
+        "[agentic]": 300s
+      slo:
+        "[http.server.requests]": 50ms,100ms,250ms,500ms,1s,2500ms,5s,10s,30s,60s,120s,300s
+        "[agentic]": 50ms,100ms,250ms,500ms,1s,2500ms,5s,10s,30s,60s,120s,300s

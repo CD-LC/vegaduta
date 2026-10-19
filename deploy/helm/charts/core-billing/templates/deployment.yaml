@@ -1,0 +1,2 @@
+{{- include "core-billing.guards" . -}}
+{{ include "vegaduta-lib.coreDeployment" (dict "root" . "role" "jobs") }}

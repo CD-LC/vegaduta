@@ -1,0 +1,232 @@
+@layer components {
+  /* --- Modal dialogs (validation checklist + run inputs) -----------------
+   * Shared shell for both wf-validate-modal and wf-run-modal - "display a
+   * validation dialog/panel" and "prompt users for required inputs at
+   * runtime" both want the same centered, focus-trapping-by-click-outside
+   * overlay, just different content inside. */
+  .wf-modal-backdrop {
+    @apply fixed inset-0 z-40 flex items-center justify-center p-4;
+    background: rgba(5, 6, 15, 0.55);
+    backdrop-filter: blur(3px);
+    animation: wf-modal-fade-in 0.15s ease-out both;
+  }
+
+  @keyframes wf-modal-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .wf-modal {
+    @apply relative flex max-h-[85vh] w-full max-w-lg flex-col overflow-y-auto rounded-2xl border p-5 shadow-2xl;
+    border-color: var(--hud-line);
+    background: var(--hud-panel);
+    animation: wf-modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes wf-modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wf-modal-backdrop,
+    .wf-modal {
+      animation: none;
+    }
+  }
+
+  .wf-modal-header {
+    @apply mb-1 flex items-center justify-between gap-3;
+  }
+
+  .wf-modal-header h2 {
+    @apply m-0 text-base font-semibold text-[var(--text-primary)];
+  }
+
+  .wf-modal-close {
+    @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--text-faint)] transition;
+    @apply hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)];
+  }
+
+  .wf-validate-list {
+    @apply my-3 flex flex-col gap-1.5 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-bg)] p-3 text-sm text-[var(--danger-text)];
+    list-style: disc;
+    padding-left: 2rem;
+  }
+
+  .wf-modal-label {
+    @apply mb-1 mt-3 block text-xs font-semibold uppercase tracking-wide text-[var(--text-faint)];
+  }
+
+  .wf-modal-label:first-of-type {
+    @apply mt-1;
+  }
+
+  .wf-run-param-row {
+    @apply mb-1.5 items-center gap-1.5;
+  }
+
+  .wf-add-param-btn {
+    @apply mt-1.5 self-start rounded-lg border-0 bg-transparent p-0 text-xs font-medium text-[var(--hud-cyan)];
+  }
+
+  /* Alerts & Warnings as a popover (direct feedback: "should be a pop menu,
+   * should be shown only when alerts are there - not always") - the trigger
+   * itself is only ever rendered when alerts.length > 0 (see WorkflowCanvas.js),
+   * so unlike .select-popover there's no "closed, nothing to show" state to
+   * design for; opening it is the only way to see the list at all now,
+   * instead of it always taking up a block of vertical space at the bottom
+   * of the page. right-0 (not left-0 like .select-popover) since this
+   * trigger sits at the right end of the sticky action bar - a left-aligned
+   * popover there would overflow off the right edge of the viewport. */
+  .wf-alerts-root {
+    @apply relative inline-block;
+  }
+
+  .wf-alerts-popover {
+    @apply absolute right-0 top-[calc(100%+0.375rem)] z-30 w-80 max-w-[90vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-2 shadow-xl;
+    transform-origin: top right;
+    animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Alerts & Warnings (#342) - bottom-of-page summary that replaces the
+   * old top-of-canvas trigger/schedule status sentences. Each row is one
+   * plain-language line, colored by tone (ok/warn/info) rather than an
+   * icon-heavy treatment - this is a status list, not another set of
+   * actionable controls (those stay in the admin-only boxes above the
+   * canvas). */
+  .wf-alerts-list {
+    @apply m-0 flex list-none flex-col gap-1.5 p-0;
+  }
+
+  .wf-alert-row {
+    @apply rounded-lg border-l-4 px-3 py-2 text-sm;
+  }
+
+  .wf-alert-ok {
+    border-color: var(--hud-ok, #22c55e);
+    background: color-mix(in srgb, var(--hud-ok, #22c55e) 10%, transparent);
+    color: var(--text-secondary);
+  }
+
+  .wf-alert-warn {
+    border-color: var(--danger-border);
+    background: var(--danger-bg);
+    color: var(--danger-text);
+  }
+
+  .wf-alert-info {
+    border-color: var(--hud-line);
+    background: var(--surface-card-alt);
+    color: var(--text-secondary);
+  }
+
+  /* Dark-mode parity pass for the Workflow Designer canvas - direct
+   * feedback: "in workflow page, if I switch to dark theme components are
+   * not aligning with colours and doesn't look proper." The .wf-node /
+   * .wf-palette-item block above was a deliberate light-only design early
+   * on (see that section's file comment) - this closes that gap instead of
+   * carrying it forward. @xyflow/react's own chrome (Controls/MiniMap/
+   * Attribution, shipped via @xyflow/react/dist/style.css) ships hardcoded
+   * light styling too, since it isn't part of this app's own design system -
+   * it gets the same treatment below via its library class names. */
+  :root[data-mode="dark"] .wf-node {
+    background: var(--hud-panel);
+    border-color: var(--hud-line);
+  }
+
+  :root[data-mode="dark"] .wf-node:hover {
+    box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.6);
+  }
+
+  :root[data-mode="dark"] .wf-node-title {
+    color: var(--text-primary);
+  }
+
+  :root[data-mode="dark"] .wf-node-subtitle,
+  :root[data-mode="dark"] .wf-condition-legend {
+    color: var(--text-muted);
+  }
+
+  :root[data-mode="dark"] .wf-node-soon {
+    background: var(--hud-panel);
+    border-color: var(--hud-line);
+    color: var(--text-faint);
+  }
+
+  :root[data-mode="dark"] .wf-node-status-dot {
+    border-color: var(--surface-page);
+  }
+
+  :root[data-mode="dark"] .wf-node-running-dot {
+    border-color: var(--surface-page);
+  }
+
+  :root[data-mode="dark"] .wf-handle {
+    border-color: var(--surface-page) !important;
+  }
+
+  :root[data-mode="dark"] .wf-palette-heading {
+    color: var(--text-faint);
+  }
+
+  :root[data-mode="dark"] .wf-palette-item {
+    background: var(--hud-panel);
+    border-color: var(--hud-line);
+    color: var(--text-primary);
+  }
+
+  :root[data-mode="dark"] .wf-palette-item:hover {
+    border-color: var(--hud-cyan);
+  }
+
+  :root[data-mode="dark"] .wf-palette-item-disabled {
+    color: var(--text-faint);
+  }
+
+  :root[data-mode="dark"] .wf-empty-hint {
+    background: color-mix(in srgb, var(--hud-panel) 90%, transparent);
+    border-color: var(--hud-line);
+    color: var(--hud-cyan);
+  }
+
+  :root[data-mode="dark"] .react-flow__controls {
+    background: var(--hud-panel);
+    border: 1px solid var(--hud-line);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  :root[data-mode="dark"] .react-flow__controls-button {
+    background: var(--hud-panel);
+    border-bottom: 1px solid var(--hud-line);
+    color: var(--text-secondary);
+    fill: var(--text-secondary);
+  }
+
+  :root[data-mode="dark"] .react-flow__controls-button:hover {
+    background: var(--surface-hover);
+  }
+
+  :root[data-mode="dark"] .react-flow__minimap {
+    background-color: var(--hud-panel) !important;
+  }
+
+  :root[data-mode="dark"] .react-flow__attribution {
+    background: color-mix(in srgb, var(--hud-panel) 80%, transparent);
+    color: var(--text-faint);
+  }
+
+  :root[data-mode="dark"] .react-flow__attribution a {
+    color: var(--text-secondary);
+  }
+}

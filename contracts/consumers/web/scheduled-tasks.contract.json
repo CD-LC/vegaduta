@@ -1,0 +1,201 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-scheduled-tasks",
+      "method": "GET",
+      "path": "/api/scheduled-tasks",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].consecutiveFailures",
+          "$[*].createdAt",
+          "$[*].cron",
+          "$[*].day",
+          "$[*].delivery",
+          "$[*].deliveryTo",
+          "$[*].disabledReason",
+          "$[*].enabled",
+          "$[*].expiresAt",
+          "$[*].frequency",
+          "$[*].id",
+          "$[*].lastJobId",
+          "$[*].lastRunAt",
+          "$[*].lastStatus",
+          "$[*].maxRuns",
+          "$[*].name",
+          "$[*].nextRunAt",
+          "$[*].ownerSubject",
+          "$[*].prompt",
+          "$[*].runCount",
+          "$[*].scheduleDescription",
+          "$[*].time",
+          "$[*].timezone",
+          "$[*].upcomingRuns",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-scheduled-tasks",
+      "method": "POST",
+      "path": "/api/scheduled-tasks",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-scheduled-tasks-id",
+      "method": "DELETE",
+      "path": "/api/scheduled-tasks/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-scheduled-tasks-id",
+      "method": "PUT",
+      "path": "/api/scheduled-tasks/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-scheduled-tasks-id-pause",
+      "method": "POST",
+      "path": "/api/scheduled-tasks/{id}/pause",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.consecutiveFailures",
+          "$.createdAt",
+          "$.cron",
+          "$.day",
+          "$.delivery",
+          "$.deliveryTo",
+          "$.disabledReason",
+          "$.enabled",
+          "$.expiresAt",
+          "$.frequency",
+          "$.id",
+          "$.lastJobId",
+          "$.lastRunAt",
+          "$.lastStatus",
+          "$.maxRuns",
+          "$.name",
+          "$.nextRunAt",
+          "$.ownerSubject",
+          "$.prompt",
+          "$.runCount",
+          "$.scheduleDescription",
+          "$.time",
+          "$.timezone",
+          "$.upcomingRuns",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-scheduled-tasks-id-resume",
+      "method": "POST",
+      "path": "/api/scheduled-tasks/{id}/resume",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.consecutiveFailures",
+          "$.createdAt",
+          "$.cron",
+          "$.day",
+          "$.delivery",
+          "$.deliveryTo",
+          "$.disabledReason",
+          "$.enabled",
+          "$.expiresAt",
+          "$.frequency",
+          "$.id",
+          "$.lastJobId",
+          "$.lastRunAt",
+          "$.lastStatus",
+          "$.maxRuns",
+          "$.name",
+          "$.nextRunAt",
+          "$.ownerSubject",
+          "$.prompt",
+          "$.runCount",
+          "$.scheduleDescription",
+          "$.time",
+          "$.timezone",
+          "$.upcomingRuns",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-scheduled-tasks-id-run-now",
+      "method": "POST",
+      "path": "/api/scheduled-tasks/{id}/run-now",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.attempt",
+          "$.costUsd",
+          "$.deliveryStatus",
+          "$.error",
+          "$.finishedAt",
+          "$.id",
+          "$.jobId",
+          "$.startedAt",
+          "$.status",
+          "$.taskId",
+          "$.trigger"
+        ]
+      }
+    },
+    {
+      "id": "get-api-scheduled-tasks-id-runs",
+      "method": "GET",
+      "path": "/api/scheduled-tasks/{id}/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].attempt",
+          "$[*].costUsd",
+          "$[*].deliveryStatus",
+          "$[*].error",
+          "$[*].finishedAt",
+          "$[*].id",
+          "$[*].jobId",
+          "$[*].startedAt",
+          "$[*].status",
+          "$[*].taskId",
+          "$[*].trigger"
+        ]
+      }
+    },
+    {
+      "id": "get-api-scheduled-tasks-capabilities",
+      "method": "GET",
+      "path": "/api/scheduled-tasks/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-scheduled-tasks-preview",
+      "method": "POST",
+      "path": "/api/scheduled-tasks/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+/* =========================================================================
+ * Screen 2 - Workflows canvas + run inspector (design_handoff_axon/
+ * design_files/Workflows.dc.html) - node palette (left), dot-grid canvas
+ * with the live flow graph and zoom controls (center), and a 376px run
+ * inspector with Steps/Raw trace/History tabs (right). This block only
+ * ever adds new ax-wf- classes, or restyles the existing wf-node/wf-handle/
+ * wf-alerts elements scoped under the ax-wf-shell ancestor - it never
+ * touches the working drag/connect/validate/run logic those already render
+ * against the real backend (WorkflowCanvas.js, WorkflowNode.js,
+ * NodeConfigDrawer.js). Reminder for future edits: never let a literal
+ * asterisk-slash sequence land inside a comment's prose - that exact typo
+ * broke this file's CSS parse once already on the Agents screen pass. */
+/* Direct feedback: "so much gaps and still not aligned properly, utilize
+ * the space in screen... always pages should be responsive." The previous
+ * approach sized .ax-wf-main with a JS-computed `calc(100vh - Npx)` inline
+ * style - a guess at how tall the topbar/trigger-strip above it would
+ * render, which silently drifted (leaving dead space, or the reverse)
+ * whenever that guess was wrong: the topbar wrapping to two lines on a
+ * narrower window, the trigger-strip appearing/growing once a workflow is
+ * ACTIVE, browser zoom, etc. Real flexbox math replaces the guess: this
+ * shell gets a genuine height floor derived from the two actually-fixed
+ * numbers in the chain above it (.ax-topbar's own 60px + the 1rem gap
+ * .app-content-bleed's padding-top leaves below it, plus the matching 1rem
+ * .app-content-bleed:has(.ax-wf-shell) now uses for ITS OWN bottom padding
+ * instead of the 96px meant for a scrolling page - see that rule below),
+ * and every row inside (.ax-wf-main via flex:1) automatically claims
+ * whatever is actually left over, computed by the browser on every resize
+ * rather than by a constant baked in at write-time. */
+.ax-wf-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: var(--ax-text);
+  min-height: calc(100dvh - 76px - 16px);
+}
+
+/* ---- Topbar: breadcrumb / status pill / actions / avatar -------------- */
+.ax-wf-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px 14px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ax-wf-spacer {
+  flex: 1;
+}
+
+.ax-wf-desc-row input {
+  width: 100%;
+}
+
+/* ---- Trigger/schedule admin boxes -------------------------------------- */
+.ax-wf-trigger-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ax-wf-trigger-strip:empty {
+  display: none;
+}
+
+.ax-wf-trigger-strip .wf-trigger-box {
+  border: 1px solid var(--ax-border);
+  background: var(--ax-panel);
+  border-radius: 12px;
+}
+
+/* ---- Main 3-column area: palette / canvas / inspector ------------------ */
+/* flex:1 (not a JS-computed inline height) - claims exactly whatever
+ * vertical space .ax-wf-shell's flex column has left after the topbar and
+ * trigger-strip above it, so the flow graph grows/shrinks correctly as
+ * those rows change instead of drifting from a stale height guess. 480px
+ * floor keeps the designer usable on a short/split window - beyond that
+ * point the PAGE scrolls (see .ax-wf-shell's min-height), the canvas itself
+ * never gets crushed. */
+.ax-wf-main {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex: 1;
+  min-height: 480px;
+}
+
+.ax-wf-palette {
+  width: 176px;
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.ax-wf-palette-heading {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.14em;
+  color: var(--ax-dim);
+  margin: 14px 0 6px;
+  text-transform: uppercase;
+}
+
+.ax-wf-palette-heading:first-child {
+  margin-top: 0;
+}
+
+.ax-wf-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  cursor: grab;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-wf-palette-item:hover {
+  background: var(--ax-panel2);
+  border-color: var(--ax-border);
+  color: var(--ax-text);
+}
+
+.ax-wf-palette-item-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ax-wf-palette-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ---- Canvas column: flow graph + describe bar stacked below it --------- */
+/* Direct feedback: "there is more space in the screen, flow graph size can
+ * be increased... [describe bar] fit it below canvas and make [the graph]
+ * bigger." The describe bar used to be position:absolute, overlaid on the
+ * bottom edge of .ax-wf-canvas-zone - visually appealing but it permanently
+ * covered whatever graph content sat under it and ate none of the reserved
+ * layout height (so removing it didn't free anything for the graph). Now
+ * canvas-zone and describe-bar are stacked in this flex column instead:
+ * describe-bar takes its own real (small, flex-shrink:0) height at the
+ * bottom, and canvas-zone (flex:1) gets everything else - which nets out
+ * bigger than before once CANVAS_AREA_HEIGHT's own reserved-chrome estimate
+ * was tightened (see WorkflowCanvas.js). */
+.ax-wf-canvas-col {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ax-wf-canvas-zone {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--ax-border);
+  border-radius: 16px;
+  overflow: hidden;
+  /* --ax-bg is itself a radial-gradient value (see the theme token block
+   * above), not a plain color, so it has to go through the `background`
+   * shorthand's multi-layer list rather than `background-color`. */
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 26px 26px,
+    var(--ax-bg);
+}
+
+:root[data-mode="light"] .ax-wf-canvas-zone {
+  background:
+    radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px) 0 0 / 26px 26px,
+    var(--ax-bg);
+}
+
+.ax-wf-canvas-zone .react-flow__attribution {
+  display: none;
+}
+
+/* Root cause of the white patch behind the Output node: @xyflow/react ships
+ * FOUR built-in node types of its own - "input", "default", "output", and
+ * "group" - and its base stylesheet (@xyflow/react/dist/style.css) styles
+ * them with a hardcoded white card (background:#fff, 1px dark border,
+ * border-radius:3px, 150px width, 10px padding). React Flow auto-appends a
+ * `react-flow__node-<type>` class to every node's wrapper element based on
+ * its `type` string - and this app's own Output node type is literally
+ * named "output" (see nodeDefs.js), so it collides with react-flow's own
+ * built-in type name and inherits that white card underneath our custom
+ * WorkflowNode content, peeking out from behind it. Neutralized here for
+ * all four reserved names so no future NODE_DEFS type can hit this again
+ * by accident. */
+.ax-wf-canvas-zone .react-flow__node-input,
+.ax-wf-canvas-zone .react-flow__node-default,
+.ax-wf-canvas-zone .react-flow__node-output,
+.ax-wf-canvas-zone .react-flow__node-group {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  width: auto;
+  min-width: 0;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+}
+
+.ax-wf-canvas-title {
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  z-index: 6;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--ax-violet);
+  pointer-events: none;
+}
+
+.ax-wf-describe-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(14, 18, 34, 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(124, 92, 255, 0.22);
+  border-radius: 13px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* Light mode: the fixed dark-navy fill above was tuned for --ax-text's dark
+ * value (near-white) - left unchanged in light mode it renders the typed
+ * text (which correctly follows --ax-text, near-black in light mode) as
+ * near-invisible near-black-on-dark-navy. Swap to a light glass fill so the
+ * dark-mode-only text color stays readable. */
+:root[data-mode="light"] .ax-wf-describe-bar {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(124, 92, 255, 0.28);
+}
+
+/* Same accessibility fix as .ax-pg-input above: .ax-wf-describe-input below
+ * sets outline:none with no replacement - :focus-within on this wrapper
+ * (where the visible border actually lives) gives keyboard users a real
+ * focus indicator instead of none at all. */
+.ax-wf-describe-bar:focus-within {
+  border-color: var(--ax-violet);
+  box-shadow: 0 0 0 3px rgba(155, 125, 255, 0.18);
+}
+
+.ax-wf-describe-icon {
+  color: var(--ax-violet);
+  flex-shrink: 0;
+}
+
+.ax-wf-describe-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--ax-text);
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-meta);
+  min-width: 0;
+}
+
+.ax-wf-describe-input::placeholder {
+  color: var(--ax-dim);
+}
+
+.ax-wf-describe-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 7px 13px;
+  background: var(--ax-violet);
+  color: #05070d;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ax-wf-describe-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -1,0 +1,257 @@
+@layer components {
+  /* ===== AXON admin sub-sidebar (AdminSubSidebar.js) =====================
+   * Matches design_handoff_axon/design_files/Admin.dc.html's own admin
+   * sub-sidebar: CONSOLE eyebrow, seven nav rows (square dot + label +
+   * trailing count/badge), an "approval SLA" widget pinned to the bottom.
+   * Reuses the same @keyframes axPulse already defined above for the
+   * PENDING pulse elsewhere in this file - direct feedback: "same
+   * animation panel," not a second, slightly-different pulse redefined
+   * here. */
+  .ax-admin-shell {
+    display: flex;
+    align-items: stretch;
+    min-height: calc(100vh - 60px - 2rem);
+  }
+
+  .ax-admin-subnav {
+    width: 216px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 18px 14px;
+    border-right: 1px solid var(--ax-border2);
+  }
+
+  /* Below 900px the two-column admin shell (216px subnav rail + main panel)
+   * used to just delete the subnav outright (`display: none`), which left
+   * admin users on a phone with NO way to move between Overview/Users/
+   * Approvals/Audit log/Live audit tail/Issues/Channels/Integrations/
+   * Maintenance - a real functional dead end, not a cosmetic gap. Fix:
+   * stack the shell into a single column and turn the subnav from a
+   * vertical left rail into a horizontally-scrollable row of pill tabs
+   * that sits above the page content, reusing the exact same nav items/
+   * active-state styling so behaviour is unchanged, only the axis is. */
+  @media (max-width: 900px) {
+    .ax-admin-shell {
+      flex-direction: column;
+    }
+
+    .ax-admin-subnav {
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      overflow-x: auto;
+      /* Momentum scrolling on iOS Safari plus a hidden scrollbar track so
+       * this reads as a tab strip rather than a broken/overflowing list. */
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      border-right: none;
+      border-bottom: 1px solid var(--ax-border2);
+    }
+
+    .ax-admin-subnav::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* The "CONSOLE" eyebrow label made sense as a heading above a vertical
+     * list; as the first item in a horizontal scroller it just eats space
+     * and forces every real nav pill further off-screen, so it's dropped
+     * here - the nav's own aria-label already identifies the region for
+     * assistive tech. */
+    .ax-admin-subnav-eyebrow {
+      display: none;
+    }
+
+    /* Each destination becomes a non-wrapping pill: flex-shrink: 0 stops
+     * the row from squeezing labels into an unreadable wrap, and the row
+     * scrolls horizontally instead of overflowing the viewport. */
+    .ax-admin-navitem {
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding: 8px 12px;
+    }
+
+    /* The "approval SLA" mini-widget was pinned to the bottom of the
+     * vertical rail via margin-top: auto, which has no meaning in a
+     * horizontal row and would otherwise render as just another (very
+     * wide) scrollable pill. It's supplementary telemetry, not a
+     * navigation destination, so it's hidden on phone/tablet widths
+     * rather than force-fit; the same numbers are already visible in the
+     * Admin Overview page's stat panels. */
+    .ax-admin-sla {
+      display: none;
+    }
+  }
+
+  .ax-admin-subnav-eyebrow {
+    @apply text-[10px] tracking-[0.1em];
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-mid);
+    padding: 0 8px 8px;
+  }
+
+  .ax-admin-navitem {
+    @apply flex items-center gap-[11px] rounded-[9px] no-underline;
+    padding: 10px 12px;
+    font-size: var(--fs-meta);
+    color: var(--ax-text);
+  }
+
+  .ax-admin-navitem::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background: var(--admin-nav-dot);
+    flex-shrink: 0;
+  }
+
+  .ax-admin-navitem:hover {
+    background: var(--ax-panel2);
+  }
+
+  .ax-admin-navitem-active {
+    background: var(--admin-nav-active-bg);
+    border: 1px solid var(--admin-nav-active-border);
+    color: var(--admin-nav-active-text);
+  }
+
+  .ax-admin-navitem-active::before {
+    background: var(--ax-violet);
+  }
+
+  .ax-admin-navcount {
+    @apply ml-auto;
+    font-size: var(--fs-label);
+    color: var(--ax-dim);
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-admin-navbadge {
+    @apply ml-auto rounded-full font-bold;
+    padding: 1px 8px;
+    background: var(--ax-amber);
+    color: #05070d;
+    font-size: var(--fs-label);
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-admin-sla {
+    margin-top: auto;
+    padding: 12px;
+    border-radius: 11px;
+    background: var(--ax-panel2);
+    border: 1px solid var(--ax-border);
+  }
+
+  .ax-admin-sla-label {
+    font-size: var(--fs-label);
+    color: var(--ax-mid);
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-admin-sla-value {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 3px;
+    color: var(--ax-green);
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-admin-sla-unit {
+    font-size: var(--fs-label);
+    color: var(--ax-dim);
+    font-weight: 400;
+  }
+
+  .ax-admin-main {
+    flex: 1;
+    min-width: 0;
+    padding: 22px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ===== Admin Overview grid (admin/page.js) ==============================
+   * That page is an intentional 1:1 inline-style port of AXON Dashboard.dc.
+   * html (see its own header comment) - every tile's colours/padding/fonts
+   * are inlined on the element so nothing here can drift from the design
+   * file. The one thing inline styles structurally can't do is respond to
+   * @media, so the handful of properties that actually decide the layout's
+   * *shape* (column/row counts) were pulled out into these three classes,
+   * added as plain className props alongside the untouched inline styles.
+   * Desktop values below match the inline styles they replaced exactly, so
+   * this is a no-op above 900px. */
+  .ax-admin-ovw-dash {
+    grid-template-columns: minmax(0, 288px) minmax(0, 1fr) minmax(0, 356px);
+    /* Hero row's floor was 340px (the dc.html reference's literal hero
+     * height) - direct feedback: "there shouldn't be any scroll in the
+     * page." Once the row1 telemetry strip grew a 6th tile and row3 keeps
+     * its own list content, a hard 340px middle row was the single biggest
+     * contributor to total page height exceeding a typical laptop viewport.
+     * Dropped to 300px; it's still a `1fr` track so on any viewport with
+     * room to spare it grows past this anyway - only short viewports
+     * actually feel the difference. */
+    grid-template-rows: auto minmax(300px, 1fr) auto;
+  }
+
+  .ax-admin-ovw-row1 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .ax-admin-ovw-row3 {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  @media (max-width: 900px) {
+    /* Same "stack the shell into one column" moment as .ax-admin-shell's
+     * own 900px override just above - a 288px + 1fr + 356px three-column
+     * grid has nowhere near enough room on a tablet/phone, let alone a
+     * fixed 340px-tall middle row once the side columns have already
+     * collapsed to nothing. grid-template-rows: auto lets every panel
+     * (telemetry strip, gauge stack, hero, event tail, approvals,
+     * channels) size to its own content instead of fighting the old
+     * 3-row template meant for a side-by-side layout. */
+    .ax-admin-ovw-dash {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+
+    /* 6 telemetry tiles: same 2-then-1 column progression already used by
+     * the tenant Dashboard's own .ax-telemetry-row, so both dashboards
+     * degrade the same way at the same widths. */
+    .ax-admin-ovw-row1 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Pending-approvals list and connected-channels list were laid out
+     * 1.5fr/1fr side by side, which leaves each one well under 200px wide
+     * at phone widths - text like a full actionType + requester name has
+     * no room and would wrap or clip. Stack them instead. */
+    .ax-admin-ovw-row3 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ax-admin-ovw-row1 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* See the ax-admin-ovw-hero comment in admin/page.js: this panel is 100%
+   * absolutely-positioned children, so once its grid row stops enforcing a
+   * fixed 340px height (900px breakpoint above) it needs an explicit
+   * min-height of its own or it renders as a 0px sliver. 260px keeps the
+   * hero's overlaid headline/counters/footer stats legible without eating
+   * the whole viewport on a phone. */
+  @media (max-width: 900px) {
+    .ax-admin-ovw-hero {
+      min-height: 260px;
+    }
+  }
+}

@@ -1,0 +1,45 @@
+# Local model catalog for `scripts/vegaduta models` and the console's model picker (Ollama tags).
+# Fields, pipe-separated (the first six are fixed in place; readers index them by position):
+#   tag | family | download GB (approx) | RAM GB wanted | tools | note
+#   | parameters B | context K tokens | VRAM GB (whole model on a GPU) | licence | thinking (yes/no) | best for
+# tools = how the model makes tool calls when `models pull` probes it (docs/local-models.md,
+# "Tool calls from small models"): structured (agents work), text (recovered, slower),
+# chat only (no tool use; the pool skips it for agent turns when another row exists),
+# unverified (not measured here yet; the pool measures it when the row is saved).
+# RAM GB is what the machine should have free for the model plus the rest of the stack;
+# VRAM GB is the video or unified memory that holds the whole model at its default quantisation.
+# Mixture-of-experts rows list total parameters; the note names the active share.
+# Sizes are rough starting points, not benchmarks; check each model's licence on
+# its Ollama library page before redistributing it. Add a line to offer a model.
+#
+# Default pick by memory: the first "#ladder" line whose minimum is at or below this
+# machine's RAM in GB names the recommended model. Read by scripts/vegaduta
+# (recommended_local_model) and by core (GET /api/local-models/recommendation);
+# the last line must have minimum 0. Keep the lines in descending order.
+#ladder|32|gpt-oss:20b
+#ladder|24|qwen3.5:9b
+#ladder|12|qwen3.5:4b
+#ladder|0|qwen3.5:2b
+qwen3.5:2b|Qwen|1.5|6|structured|small; 8 GB machines, chat and summaries|2|262|3|Apache-2.0|yes|quick chat and summaries on a low-memory laptop
+qwen3.5:4b|Qwen|3|10|structured|default; 16 GB laptop or Apple Silicon|4|262|5|Apache-2.0|yes|everyday agents with a handful of tools
+qwen3.5:9b|Qwen|7|14|structured|better quality; 16 GB+|9|262|9|Apache-2.0|yes|agents with many tools and longer documents
+qwen3.5:35b|Qwen|22|32|structured|35B mixture-of-experts, 3B active: close to 9b speed with much better answers; 32 GB+ Apple Silicon or a 24 GB GPU|35|262|24|Apache-2.0|yes|the best quality that still runs fast on a 32 GB laptop
+qwen3:8b|Qwen|5|12|structured|reliable tool use for its size; thinking on by default (slower first token)|8|40|7|Apache-2.0|yes|coding help and tool-heavy agents
+qwen3:14b|Qwen|9|16|structured|stronger reasoning than 8b; 16 GB GPU or 24 GB Apple Silicon|15|40|11|Apache-2.0|yes|analysis and multi-step tasks
+granite4.2:3b|Granite|2|8|structured|IBM, Apache-2.0; compact, trained for tool use and RAG|3|128|3|Apache-2.0|yes|retrieval over your documents on a small machine
+hermes3:8b|Hermes|5|12|unverified|Nous Research, tuned for function calling; run `models pull hermes3:8b` to measure it on your machine|8|128|7|Llama 3.1 community|no|function calling and structured JSON output
+llama3.2:3b|Llama|2|8|chat only|narrates tool runs instead of calling them; chat and summaries only|3|128|3|Llama 3.2 community|no|plain chat and summaries
+llama3.1:8b|Llama|5|12|structured|Meta's general-purpose model; calls tools natively|8|128|7|Llama 3.1 community|no|general chat and simple tool use
+phi4-mini|Phi|2.5|8|structured|Microsoft, MIT; strong for its size at maths and following instructions|3.8|128|4|MIT|no|maths and instructions on a small machine
+phi4:14b|Phi|9|16|unverified|Microsoft, MIT; strong reasoning, short context window|14|16|11|MIT|no|reasoning and maths without tools
+ministral-3:8b|Mistral|5|12|unverified|Mistral's small dense model with native function calling; run `models pull ministral-3:8b` to grade it|8|256|7|Apache-2.0|no|multilingual chat and function calling
+mistral-small3.2|Mistral|15|24|structured|24B dense; 24 GB+ GPU or 32 GB Apple Silicon|24|128|18|Apache-2.0|no|a strong general assistant with function calling and image input
+gemma4:e2b|Gemma|5|8|structured|Google; 2B effective parameters, runs on 8 GB machines|5|128|6|Apache-2.0|yes|small laptops; image input
+gemma4:e4b|Gemma|8|12|structured|Google; 4B effective parameters, the best small Gemma|8|128|9|Apache-2.0|yes|16 GB laptops; image input
+gemma4:26b|Gemma|18|32|structured|24 GB+ GPU or 32 GB+ Apple Silicon; mixture-of-experts, 4B active|26|256|20|Apache-2.0|yes|quality answers at small-model speed
+gemma4:31b|Gemma|20|40|structured|dense 31B; 32 GB GPU or 48 GB Apple Silicon|31|256|22|Apache-2.0|yes|the strongest Gemma; long documents
+deepseek-r1:8b|DeepSeek|5|12|unverified|R1 reasoning distilled on Llama; run `models pull deepseek-r1:8b` to grade tool calls|8|128|7|MIT|yes|step-by-step reasoning on a laptop
+deepseek-r1:14b|DeepSeek|9|16|unverified|R1 reasoning distilled on Qwen; better reasoning, 16 GB+|14|128|11|MIT|yes|harder reasoning, maths and code
+deepseek-r1:32b|DeepSeek|20|32|unverified|R1 reasoning distilled on Qwen 32B; 24 GB GPU or 32 GB+ Apple Silicon|32|128|22|MIT|yes|deep reasoning when speed matters less
+gpt-oss:20b|gpt-oss|14|24|structured|24 GB+ GPU or 32 GB+ Apple Silicon; stronger tool use|21|128|16|Apache-2.0|yes|strong tool use and reasoning with adjustable thinking effort
+gpt-oss:120b|gpt-oss|65|80|structured|workstations only: 80 GB+ VRAM or unified memory|117|128|80|Apache-2.0|yes|workstation-class agents close to frontier quality

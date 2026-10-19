@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>providers</artifactId>
+  <name>providers</name>
+  <description>LLM provider credential abstraction (BYOK, encrypted at rest). Depends on: crypto.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- @NullMarked/@Nullable for the NullAway pilot (-Pstatic-analysis). -->
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 2: no dependency on any vendor module (sarvam,
+         elevenlabs were removed). Vendor adapters implement this module's
+         SPIs (TextToSpeechProvider, SpeechToTextProvider,
+         ExternalProviderCredentialSource) from their own modules, so the
+         arrow is vendor -> providers. Enforced by
+         app/.../archrules/ModuleBoundaryRulesTest. -->
+    <!-- Sidecar transcription client (SidecarWhisperProvider /
+         SidecarWhisperVideoProvider in modality/ import the knowledge
+         module's sidecar client classes). Added 2026-07-29: the modality
+         package landed referencing these without declaring the dependency,
+         which broke every clean core build - knowledge has no dependency
+         back on providers, so this edge is acyclic. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <!-- Scheduler-lock sweep (Wave 2): ProviderModelCatalogService's daily
+         scheduledRefresh() wraps itself in tenancy's PgAdvisoryJobLock so
+         only one core replica hits every vendor's /models endpoint per
+         night. Already on the classpath transitively via knowledge
+         (depends on tenancy) - declared explicitly because
+         this module now uses a tenancy class directly. Acyclic: tenancy
+         depends only on admin/billing/security/storage, none of which
+         reach back to providers. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- Vertex AI / Veo (GOOGLE_VERTEX): service-account OAuth2 token exchange
+         for the platform-hosted 3-account pool AND tenant BYOK Vertex
+         credentials (see VertexAccessTokenProvider). Not pulled in
+         transitively via spring-ai-starter-model-google-genai here since
+         chat/imagegen both depend on this module and get it for free -
+         declared explicitly (with a version - not managed by spring-ai-bom)
+         so it resolves even if google-genai's own transitive graph shifts. -->
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-oauth2-http</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- AWS Bedrock provider validator (AwsBedrockProviderValidator) - the
+         control-plane "bedrock" client for the free, non-billed
+         ListFoundationModels probe used to validate a tenant's access
+         key/secret/region before activation. NOT bedrockruntime (that's
+         core/chat's dependency, for the actual per-call Converse inference) -
+         see AwsBedrockProviderValidator's javadoc for why Bedrock splits
+         these into two separate SDK modules. No explicit <version> - managed
+         by the awssdk bom imported below. -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>bedrock</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- AWS SDK v2 BOM - same version core/storage already pins for its
+           own "s3" artifact, kept identical here so both modules' transitive
+           AWS dependencies (auth, regions, http-client, etc.) resolve to
+           matching versions. -->
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>2.28.29</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

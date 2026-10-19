@@ -1,0 +1,208 @@
+/* =========================================================================
+ * 2026-07-20 premium redesign - Knowledge screen (scoped, additive only).
+ * The base .ax-kb- rules above are reused by several admin and dashboard
+ * panels, so this screen's refinements are scoped under the .ax-kb-v2
+ * marker class that knowledge/page.tsx sets on its topbar and body roots -
+ * nothing outside the Knowledge screen changes. Interaction accents move
+ * from the legacy cyan to the brand accent family (accent-500 for fills
+ * and borders, accent-600 for small text - the AA-safe step in both
+ * modes), radii and shadows come from the shared radius and shadow scales,
+ * and padding lands on the 8px spacing grid. The new .ax-kbx-empty classes
+ * back the fresh-workspace empty state: icon, title, hint, and exactly one
+ * primary next action. */
+.ax-kb-topbar.ax-kb-v2 {
+  /* The base rule's "gap: 3x" value is invalid CSS (dropped by the
+   * parser), so this is the row's first real gap. */
+  gap: 8px;
+}
+
+.ax-kb-body.ax-kb-v2 {
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-raised);
+}
+
+.ax-kb-v2 .ax-kb-sidebar {
+  padding: 16px 8px;
+  gap: 2px;
+}
+
+.ax-kb-v2 .ax-kb-collection-row {
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+}
+
+.ax-kb-v2 .ax-kb-collection-row-active {
+  background: color-mix(in srgb, var(--accent-500) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-500) 30%, transparent);
+}
+
+.ax-kb-v2 .ax-kb-collection-row-active .ax-kb-collection-name {
+  color: var(--accent-600);
+  font-weight: 500;
+}
+
+.ax-kb-v2 .ax-kb-new-row {
+  border-radius: var(--radius-lg);
+}
+
+.ax-kb-v2 .ax-kb-new-row:hover {
+  border-color: var(--accent-500);
+}
+
+.ax-kb-v2 .ax-kb-form {
+  border-radius: var(--radius-xl);
+  padding: 16px;
+}
+
+.ax-kb-v2 .ax-kb-form-input:focus {
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-500) 18%, transparent);
+}
+
+.ax-kb-v2 .ax-kb-detail {
+  padding: 24px;
+  gap: 16px;
+}
+
+.ax-kb-v2 .ax-kb-card {
+  border-radius: var(--radius-xl);
+  padding: 16px;
+}
+
+.ax-kb-v2 .ax-kb-empty {
+  border-radius: var(--radius-xl);
+}
+
+.ax-kb-v2 .ax-kb-upload-dropzone {
+  border-radius: var(--radius-lg);
+}
+
+.ax-kb-v2 .ax-kb-upload-dropzone:hover:not(:disabled) {
+  border-color: var(--accent-500);
+  color: var(--ax-text);
+}
+
+.ax-kb-v2 .ax-kb-avatar-add:hover {
+  border-color: var(--accent-500);
+  color: var(--accent-600);
+}
+
+.ax-kb-v2 .ax-kb-file-download:hover:not(:disabled) {
+  color: var(--accent-600);
+}
+
+/* Search column: neutral resting state (the always-on cyan tint read as a
+ * permanent focus ring); the brand focus ring appears only on focus, which
+ * is the one state change worth animating here. */
+.ax-kb-v2 .ax-kb-search-head {
+  padding: 24px 20px 16px;
+}
+
+.ax-kb-v2 .ax-kb-search-input-row {
+  border-color: var(--surface-border-strong);
+  background: var(--ax-panel);
+  border-radius: var(--radius-lg);
+}
+
+.ax-kb-v2 .ax-kb-search-input-row:focus-within {
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-500) 18%, transparent);
+}
+
+.ax-kb-v2 .ax-kb-search-icon {
+  color: var(--ax-dim);
+}
+
+.ax-kb-v2 .ax-kb-search-input-row:focus-within .ax-kb-search-icon {
+  color: var(--accent-600);
+}
+
+.ax-kb-v2 .ax-kb-search-dot {
+  background: var(--accent-500);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.ax-kb-v2 .ax-kb-scope-chip:hover {
+  border-color: var(--accent-500);
+}
+
+.ax-kb-v2 .ax-kb-scope-chip-active {
+  border-color: color-mix(in srgb, var(--accent-500) 45%, transparent);
+  background: color-mix(in srgb, var(--accent-500) 12%, transparent);
+  color: var(--accent-600);
+}
+
+.ax-kb-v2 .ax-kb-result-card {
+  border-radius: var(--radius-lg);
+}
+
+/* Fresh-workspace empty state (KnowledgePanel.tsx) - explains what a
+ * collection is for and carries the view's single primary action while
+ * the topbar's "Upload files" is necessarily disabled. */
+.ax-kbx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 56px 24px;
+  border: 1px dashed var(--ax-border2);
+  border-radius: var(--radius-xl);
+}
+
+.ax-kbx-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--accent-500) 12%, transparent);
+  color: var(--accent-600);
+}
+
+.ax-kbx-empty-title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-kbx-empty-hint {
+  font-size: var(--fs-caption);
+  line-height: 1.55;
+  color: var(--ax-mid);
+  max-width: 380px;
+}
+
+.ax-kbx-empty-action {
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+ * ProvidersPanel-scoped additions (2026-07-20 premium redesign, Providers
+ * screen pass). Layered on top of the shared .ax-tl-card family - which
+ * /tools and /admin/channels also use - instead of modifying that family.
+ * Two jobs: (1) a connected provider card reads as settled state at a
+ * glance (green-tinted fill and border, no hover lift, since a connected
+ * card is not clickable); (2) a not-yet-implemented card stops advertising
+ * interactivity on hover (the shared .ax-tl-card:hover cyan border and
+ * translateY lift read as "clickable", which these cards are not). Both
+ * hover neutralizers rely on sitting after the shared rules in source
+ * order, since they match the shared hover rule's specificity exactly.
+ * ========================================================================== */
+
+.ax-prov-card-connected {
+  background: color-mix(in srgb, var(--ax-green) 7%, transparent);
+  border-color: color-mix(in srgb, var(--ax-green) 38%, transparent);
+}
+
+.ax-prov-card-connected:hover {
+  border-color: color-mix(in srgb, var(--ax-green) 38%, transparent);
+  transform: none;
+}
+
+.ax-prov-card-soon:hover {
+  border-color: var(--ax-border2);
+  transform: none;
+}

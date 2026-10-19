@@ -1,0 +1,422 @@
+@layer components {
+  /* --- Unified header bar (TopNav.js + AppShell.js) -----------------------
+   * Direct fix for "my build/menu bar is currently broken - find why it
+   * doesn't open/work and fix it" + "move the menu onto the SAME header row
+   * as the page title." Root cause of the broken menu: the old two-bar
+   * layout put `.topnav` (nav items) in its OWN sticky bar with
+   * `overflow-x: auto` so it could scroll horizontally on narrow screens.
+   * Per the CSS overflow spec, setting overflow-x to anything but `visible`
+   * forces the OTHER axis to compute as `auto` too, even though it was never
+   * set - so that bar was *also* clipping its own y-overflow. The dropdown
+   * (.topnav-dropdown) opens BELOW the 52px bar via `top: calc(100% + 8px)`,
+   * which put it entirely inside the clipped region: it was mounting and
+   * animating in exactly as coded, just invisible, clipped to zero-height by
+   * its own scrolling ancestor. Every click looked like "the menu doesn't
+   * open." Fix: one unified row (`.app-topbar` below now hosts nav items
+   * directly, see AppShell.js), no element in the ancestor chain sets
+   * overflow-x any more, and narrow viewports get a real wrap (second line)
+   * instead of horizontal scroll - nothing left to clip a dropdown against. */
+  .topnav-items {
+    @apply flex flex-wrap items-center gap-1;
+  }
+
+  .topnav-link {
+    @apply flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-transparent px-3 py-2 text-[13px] font-medium no-underline transition;
+    color: var(--text-secondary);
+    font-family: var(--font-mono), monospace;
+    background: transparent;
+  }
+
+  .topnav-link:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  .topnav-link-icon {
+    color: var(--text-faint);
+    transition: color 0.15s ease;
+  }
+
+  .topnav-link:hover .topnav-link-icon,
+  .topnav-link-active .topnav-link-icon {
+    color: var(--hud-cyan);
+  }
+
+  .topnav-link-active {
+    color: var(--text-primary);
+    border-color: var(--hud-line);
+    background: var(--surface-hover);
+    box-shadow: inset 0 -2px 0 var(--hud-cyan);
+  }
+
+  .topnav-group {
+    position: relative;
+  }
+
+  .topnav-group-trigger {
+    cursor: pointer;
+  }
+
+  .topnav-group-chevron {
+    color: var(--text-faint);
+    transition: transform 0.15s ease;
+  }
+
+  .topnav-group-trigger-open .topnav-group-chevron {
+    transform: rotate(180deg);
+  }
+
+  .topnav-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+    display: flex;
+    min-width: 200px;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 12px;
+    border: 1px solid var(--hud-line);
+    background: var(--hud-panel);
+    padding: 6px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(14px);
+  }
+
+  .topnav-dropdown-item {
+    @apply flex items-center gap-2 rounded-md px-3 py-2 text-[13px] no-underline transition;
+    color: var(--text-secondary);
+  }
+
+  .topnav-dropdown-item:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  .topnav-dropdown-item-active {
+    color: var(--hud-cyan);
+  }
+
+  /* --- Floating bottom HUD dock (BottomDock.js) ---------------------------
+   * Replaces the topbar-merged nav above (.topnav-* / .app-topbar-nav, kept
+   * only so nothing else in this file has to be renumbered - TopNav.js is no
+   * longer rendered). Direct instruction: "move the main navigation menu to
+   * the bottom of the screen... modern HUD / dashboard-style navigation
+   * instead of rounded mobile-style tabs... floating and fixed to the
+   * viewport... remain visible while scrolling... feel futuristic and
+   * professional." `position: fixed` (not sticky, not inside .app-main) so
+   * it sits above every page's scroll container regardless of scroll
+   * position or page layout (wide/bleed pages included). Same
+   * uppercase-mono-with-scaleX-underline language the reference nav uses,
+   * just reoriented into a single floating instrument bar instead of a
+   * row inside the header. */
+  /* z-[600] (not the old z-30): the dock was getting visually buried behind
+   * ordinary page content on some screens - z-30 is Tailwind's "raised
+   * surface" tier, the same tier plain popovers/dropdowns elsewhere in this
+   * file already use (see the other z-30 rules above), so any one of those
+   * sitting later in paint order, or any ancestor accidentally establishing
+   * its own stacking context, could end up level with or above a nav the
+   * user needs to always reach. 600 clears every z-index in this file
+   * (highest previously used was 1200 for a top-right toast/status chip,
+   * unrelated screen area) with real margin, so "the menu" wins regardless
+   * of what else is on a given page. Direct feedback: "menu items are not
+   * loading, may be they are not visible and opening in background." */
+  .bottom-dock {
+    @apply fixed inset-x-0 bottom-4 z-[600] flex justify-center px-4;
+    pointer-events: none;
+  }
+
+  /* Direct feedback: "menu needs to be highlighted in dark if theme is
+   * light and light if theme is dark" - uses --dock-panel/--dock-line (the
+   * deliberately-inverted pair defined in :root/:root[data-mode="dark"]
+   * above), not --hud-panel/--hud-line like every other panel. The dock is
+   * the one surface in this app that never matches the current mode - it's
+   * always the opposite, so it reads as its own floating instrument, not
+   * more page chrome. */
+  .bottom-dock-inner {
+    @apply relative flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl border px-2 py-1.5 backdrop-blur-xl;
+    pointer-events: auto;
+    border-color: var(--dock-line);
+    background: color-mix(in srgb, var(--dock-panel) 92%, transparent);
+    box-shadow:
+      0 16px 40px -16px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+    scrollbar-width: none;
+    animation: dock-float-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Drag handle + hide button (direct feedback: "put a small label as menu
+   * in the toggle bar, user can toggle it or drag and put somewhere and
+   * hide it also, like how it works in apple and windows - all options in
+   * menu itself"). Both live inside .bottom-dock-inner, at opposite ends of
+   * the same bar - no separate floating control panel, exactly "in menu
+   * itself." */
+  .dock-handle {
+    @apply flex shrink-0 cursor-grab select-none items-center gap-1 rounded-xl px-2 py-2 text-[9px] font-semibold uppercase tracking-wide;
+    color: var(--dock-text-faint);
+    font-family: var(--font-mono), monospace;
+    touch-action: none;
+  }
+
+  .dock-handle:active {
+    cursor: grabbing;
+  }
+
+  /* Direct feedback: "animate the menu keyword always" - a continuous,
+   * always-on cue (not hover-only) so the label itself keeps drawing the
+   * eye to "this is the menu," on top of the drag handle's own grip icon.
+   * Animates color between --dock-text-faint and --dock-acc-style scan
+   * color (opacity/color only, no layout-affecting property) so it's cheap
+   * to run indefinitely. */
+  .dock-handle-label {
+    letter-spacing: 0.08em;
+    animation: dock-menu-breathe 2.6s ease-in-out infinite;
+  }
+
+  @keyframes dock-menu-breathe {
+    0%,
+    100% {
+      color: var(--dock-text-faint);
+      opacity: 0.85;
+    }
+    50% {
+      color: var(--dock-scan-1);
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dock-handle-label {
+      animation: none;
+    }
+  }
+
+  .dock-divider {
+    @apply mx-0.5 h-5 w-px shrink-0;
+    background: var(--dock-line);
+  }
+
+  .dock-hide-btn {
+    @apply flex shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent p-1.5;
+    color: var(--dock-text-faint);
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .dock-hide-btn:hover {
+    color: var(--dock-text-primary);
+    background: color-mix(in srgb, var(--dock-text-primary) 10%, transparent);
+  }
+
+  /* Reveal tab shown after the user hides the dock - same fixed bottom-
+   * center home as the dock's own default position, so it's always where a
+   * person would think to look (the same "auto-hidden taskbar" convention
+   * Windows/macOS use: the bar tucks away but a thin strip stays reachable
+   * at the same edge). */
+  .dock-reveal-pill {
+    @apply fixed bottom-4 left-1/2 z-[600] flex -translate-x-1/2 cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wide backdrop-blur-xl;
+    border-color: var(--dock-line);
+    background: color-mix(in srgb, var(--dock-panel) 92%, transparent);
+    color: var(--dock-text-faint);
+    font-family: var(--font-mono), monospace;
+    box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.45);
+    transition:
+      color 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .dock-reveal-pill:hover {
+    color: var(--hud-cyan);
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  .bottom-dock-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  @keyframes dock-float-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Same transform-only scan cue the topbar/panels carry, so the dock reads
+   * as one more "live instrument" rather than a bare mobile tab bar. Reads
+   * --hud-cyan/--hud-violet - the fixed ORBITAL command-center identity
+   * every other HUD surface in this file uses (see hud-dashboard-reference.
+   * html/hud-dashboard-v2-themed.html), not the 6-swatch ThemePicker accent -
+   * corrected back from --accent-600 after direct feedback that swapping the
+   * dock to the swatch color was itself a divergence from the established
+   * HUD look. --hud-cyan/violet still change with light/dark mode (see
+   * :root vs :root[data-mode="dark"] above), just not with the accent
+   * swatch - same rule every other .panel/.glass-card in the app follows. */
+  .bottom-dock-inner::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--dock-scan-1), var(--dock-scan-2), transparent);
+    transform-origin: center;
+    animation: hud-header-scan 4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bottom-dock-inner {
+      animation: none;
+    }
+    .bottom-dock-inner::before {
+      animation: none;
+    }
+  }
+
+  .dock-link {
+    @apply relative flex shrink-0 cursor-pointer flex-col items-center gap-1 whitespace-nowrap rounded-xl border-0 bg-transparent px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wide no-underline transition-transform;
+    color: var(--dock-text-faint);
+    font-family: var(--font-mono), monospace;
+  }
+
+  /* Icon always carries its item's own accent (see .dock-c-* above) - a
+   * resting cue that "each of these is a different, specific destination,"
+   * not just a hover/active-only reveal. Text label stays neutral
+   * (--dock-text-faint) at rest so the bar doesn't read as a rainbow at a
+   * glance - color concentrates on the icon and only spreads to the label
+   * on hover/active (below), same restraint every .p-* panel already uses
+   * (one accent stripe, not a fully-tinted card). */
+  .dock-link-icon {
+    color: var(--dock-acc, inherit);
+    transition: color 0.15s ease;
+  }
+
+  .dock-group-trigger .dock-group-chevron {
+    color: inherit;
+    transition: color 0.15s ease;
+  }
+
+  .dock-link:hover {
+    color: var(--dock-acc, var(--dock-text-primary));
+    transform: translateY(-2px);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--dock-acc, var(--hud-cyan)) 65%, transparent);
+  }
+
+  /* Falls back to --hud-cyan only for items with no assigned --dock-acc
+   * (shouldn't normally happen - every section gets one from BottomDock.js -
+   * but keeps the fixed ORBITAL identity as the safety net, same as every
+   * other HUD surface in this file). A soft persistent tint (not just the
+   * hover-only text-shadow above) so "which item am I on" stays visible
+   * without hovering - "always highlight" the current destination, not
+   * just the one the cursor happens to be over. */
+  .dock-link-active {
+    color: var(--dock-acc, var(--hud-cyan));
+    background-color: color-mix(in srgb, var(--dock-acc, var(--hud-cyan)) 12%, transparent);
+  }
+
+  /* scaleX underline - "style the menu like the reference nav: uppercase
+   * mono items with a scaleX underline on hover/active" - carried over from
+   * .topnav-link-active's box-shadow approach, but as a real ::after so it
+   * animates in on hover instead of only snapping on for the active route.
+   * Now painted in the item's own --dock-acc instead of one shared color,
+   * so the underline itself is part of "highlight menu in different
+   * colours." */
+  .dock-link::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--dock-acc, var(--hud-cyan));
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dock-link:hover::after,
+  .dock-link-active::after {
+    transform: scaleX(1);
+  }
+
+  .dock-group {
+    position: relative;
+  }
+
+  .dock-group-trigger {
+    @apply flex-row items-center gap-1.5 px-3;
+  }
+
+  .dock-group-chevron {
+    transition: transform 0.15s ease;
+  }
+
+  .dock-group-trigger-open .dock-group-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Rendered through a React portal straight into <body> (BottomDock.js),
+   * not as a normal in-flow child of .dock-group anymore - the dock bar
+   * needs overflow-x:auto for narrow viewports (many nav sections in a
+   * fixed-width bar), and per the CSS overflow spec, setting overflow-x to
+   * anything but visible forces overflow-y to an implicit auto too, which
+   * silently clipped this dropdown every time it tried to open upward past
+   * the bar's own box - it was rendering, just invisible/cut off. Direct
+   * feedback: "menu items are not loading, may be they are not visible."
+   * Portaling to body sidesteps the clipping entirely; .dock-portal-root
+   * (the plain wrapper BottomDock.js renders around this) carries the
+   * `position: fixed` + computed left/bottom coordinates instead, so this
+   * class only needs its own look, not its own placement. */
+  .dock-dropdown {
+    display: flex;
+    min-width: 200px;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 12px;
+    border: 1px solid var(--dock-line);
+    background: var(--dock-panel);
+    padding: 6px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(14px);
+  }
+
+  .dock-portal-root {
+    position: fixed;
+    z-index: 600;
+    pointer-events: auto;
+  }
+
+  .dock-dropdown-item {
+    @apply flex items-center gap-2 rounded-md px-3 py-2 text-[13px] normal-case tracking-normal no-underline transition;
+    color: var(--dock-text-faint);
+    font-family: inherit;
+  }
+
+  .dock-dropdown-item:hover {
+    background: color-mix(in srgb, var(--dock-text-primary) 10%, transparent);
+    color: var(--dock-text-primary);
+  }
+
+  /* --dock-acc is set on .dock-portal-root (BottomDock.js applies the same
+   * dock-c-* class it gave the group's trigger), so it inherits down to
+   * this item exactly like it does for the trigger button itself - the
+   * dropdown and its trigger always share one color per group. */
+  .dock-dropdown-item-active {
+    color: var(--dock-acc, var(--hud-cyan));
+  }
+
+  .app-main {
+    @apply relative z-10 flex min-w-0 flex-1 flex-col;
+    /* Room for the fixed 76px .ax-rail (see above) - the rail sits outside
+     * the flex flow (position:fixed) and expands to 216px on :hover as an
+     * overlay (box-shadow, not a layout push), so this margin only ever
+     * needs to clear the collapsed width. */
+    margin-left: 76px;
+  }
+}

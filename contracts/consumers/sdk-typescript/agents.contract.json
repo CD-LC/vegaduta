@@ -1,0 +1,22 @@
+{
+  "consumer": "sdk-typescript",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "agent-create",
+      "method": "POST",
+      "path": "/api/agents",
+      "status": 201,
+      "request": { "requiredFields": ["$.name", "$.systemPrompt", "$.providerName"] },
+      "response": { "requiredFields": ["$.id"] }
+    },
+    {
+      "id": "agent-chat-stream",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/chat",
+      "status": 200,
+      "request": { "requiredFields": ["$.message"] },
+      "response": { "requiredFields": [] }
+    }
+  ]
+}

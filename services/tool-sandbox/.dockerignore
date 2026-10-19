@@ -1,0 +1,14 @@
+# Tests compile fixtures with javac and are not needed at runtime; keeping them
+# out of the image also keeps deliberately-malicious fixture source out of a
+# container whose whole job is running code.
+tests/
+**/__pycache__/
+**/*.pyc
+.pytest_cache/
+README.md
+.git
+# Never ship local secrets or keys into the build context.
+.env
+.env.*
+*.pem
+*.key

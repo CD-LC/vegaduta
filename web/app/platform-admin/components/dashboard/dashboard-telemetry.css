@@ -1,0 +1,203 @@
+/* --- System Status + Connected Platforms (real telemetry panels) ------- */
+.mc-status-deck {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .mc-status-deck {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mc-hud-panel {
+  position: relative;
+  padding: 1.1rem 1.3rem 1.3rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--hud-line);
+  background: var(--hud-panel);
+  overflow: hidden;
+}
+
+:root[data-mode="dark"] .mc-hud-panel {
+  background: color-mix(in srgb, var(--hud-panel) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+/* Corner-bracket reticle REMOVED - nova reskin brief: no corner brackets
+ * anywhere. Without this file loaded at all, this rule (and the matching
+ * one for .mc-bento-corners below) never applied, so the SVG rendered at
+ * full unstyled size instead of being hidden - exactly the giant bracket
+ * bug this file's addition fixes. */
+.mc-status-corners {
+  display: none;
+}
+
+.mc-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.mc-status-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.mc-status-header-id {
+  color: var(--hud-violet);
+  opacity: 0.75;
+  font-weight: 700;
+}
+
+.mc-status-badge {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.mc-status-badge-nominal {
+  color: var(--hud-ok);
+  background: color-mix(in srgb, var(--hud-ok) 16%, transparent);
+}
+
+.mc-status-badge-degraded {
+  color: var(--hud-warn);
+  background: color-mix(in srgb, var(--hud-warn) 18%, transparent);
+}
+
+.mc-status-badge-critical {
+  color: var(--danger-text);
+  background: var(--danger-bg);
+}
+
+.mc-status-nosignal {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.78rem;
+  color: var(--hud-text-dim);
+  margin: 0.5rem 0;
+}
+
+.mc-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1.2rem;
+}
+
+@media (max-width: 560px) {
+  .mc-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mc-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: 0.82rem;
+}
+
+.mc-status-row:last-child,
+.mc-status-row:nth-last-child(2) {
+  border-bottom: none;
+}
+
+.mc-status-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.mc-status-row-detail {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.76rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.mc-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mc-status-dot-up {
+  background: var(--hud-ok);
+  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--hud-ok) 70%, transparent);
+  animation: mc-pulse 2.4s ease-in-out infinite;
+}
+
+.mc-status-dot-down {
+  background: var(--danger-text);
+  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--danger-text) 70%, transparent);
+}
+
+.mc-status-dot-unknown {
+  background: var(--hud-text-dim);
+}
+
+.mc-status-footnote {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  color: var(--hud-text-dim);
+}
+
+.mc-platform-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-platform-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: 0.83rem;
+}
+
+.mc-platform-item:last-child {
+  border-bottom: none;
+}
+
+.mc-platform-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.mc-platform-state {
+  margin-left: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hud-text-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-status-dot-up {
+    animation: none;
+  }
+}

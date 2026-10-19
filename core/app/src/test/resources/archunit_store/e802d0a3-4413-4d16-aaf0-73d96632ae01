@@ -1,0 +1,17 @@
+com.agenticai.core.agents.tools.openapi.OpenApiToolSource has a constructor with more than 12 collaborator parameters
+com.agenticai.core.audit.seal.AuditSeal has a constructor with more than 12 collaborator parameters
+com.agenticai.core.chat.LlmCallLog has a constructor with more than 12 collaborator parameters
+com.agenticai.core.common.quicktask.QuickTaskService has a constructor with more than 12 collaborator parameters
+com.agenticai.core.devices.sentinel.MobileSentinelEvent has a constructor with more than 12 collaborator parameters
+com.agenticai.core.guardrails.GuardedToolCallback has a constructor with more than 12 collaborator parameters
+com.agenticai.core.guardrails.toolargs.ToolArgRule has a constructor with more than 12 collaborator parameters
+com.agenticai.core.omnichannel.meta.MetaWhatsAppWebhookController has a constructor with more than 12 collaborator parameters
+com.agenticai.core.omnichannel.teams.TeamsWebhookController has a constructor with more than 12 collaborator parameters
+com.agenticai.core.platform.PlatformController has a constructor with more than 12 collaborator parameters
+com.agenticai.core.providers.PlatformHostedLlmProvider has a constructor with more than 12 collaborator parameters
+com.agenticai.core.quality.calibration.JudgeCalibrationResult has a constructor with more than 12 collaborator parameters
+com.agenticai.core.tenancy.PlanLimits has a constructor with more than 12 collaborator parameters
+com.agenticai.core.tenancy.aireport.AiContentReport has a constructor with more than 12 collaborator parameters
+com.agenticai.core.workflow.WorkflowExecutionEngine has a constructor with more than 12 collaborator parameters
+com.agenticai.core.workflow.WorkflowGraphGeneratorService has a constructor with more than 12 collaborator parameters
+com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequest has a constructor with more than 12 collaborator parameters

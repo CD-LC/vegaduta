@@ -1,0 +1,181 @@
+name: SDK release
+
+# Releases the Java Agent SDK (sdk/java, Maven group io.vegaduta) for a tag
+# `sdk-v1.2.3` (or `sdk-v1.2.3-rc.1`). Run it from the Actions tab with "Use
+# workflow from" set to that TAG; a branch is refused. It is independent of the
+# platform release (release.yml works on `v*.*.*` tags only).
+# Procedure and one-time setup: docs/maintainers/releasing-sdk.md.
+#
+#   1. verify    the tag equals the version in sdk/java/pom.xml, the build and all
+#                tests pass on JDK 17, japicmp passes against the previous release
+#                (when SDK_JAPICMP_BASELINE is set)
+#   2. build     jars, sources, javadoc and the CycloneDX SBOM per artifact, with a
+#                SHA256SUMS file; SLSA build provenance attested for every jar
+#   3. release   a GitHub Release with those files attached (pre-release for -rc)
+#   4. central   only when the repository variable SDK_PUBLISH_CENTRAL is "true":
+#                sign with GPG and upload to the Maven Central Portal for validation
+#                (autoPublish is off; a maintainer presses "Publish" in the portal)
+
+# Tag-dispatch only, deliberately: a release is a signed, human-initiated act.
+# Choose the `sdk-v*.*.*` TAG in "Use workflow from"; to fire on tag pushes
+# instead, add `push: tags: ["sdk-v*.*.*"]` here.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdk-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify (JDK 17)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: Require a tag ref
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/sdk-v*) ;;
+            *) echo "::error::run this workflow on an sdk-v* tag (Use workflow from: Tags), not $GITHUB_REF"; exit 1 ;;
+          esac
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Tag must equal the pom version
+        id: version
+        working-directory: sdk/java
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#sdk-v}"
+          pom_version="$(mvn -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)"
+          if [ "$tag_version" != "$pom_version" ]; then
+            echo "::error::tag says $tag_version but sdk/java/pom.xml says $pom_version (set it with: mvn versions:set -DnewVersion=$tag_version)"
+            exit 1
+          fi
+          case "$pom_version" in *-SNAPSHOT) echo "::error::refusing to release a SNAPSHOT"; exit 1 ;; esac
+          echo "version=$pom_version" >> "$GITHUB_OUTPUT"
+          case "$pom_version" in *-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;; *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;; esac
+      - name: Build and test (with API compatibility check when a baseline is set)
+        working-directory: sdk/java
+        env:
+          BASELINE: ${{ vars.SDK_JAPICMP_BASELINE }}
+        run: |
+          set -euo pipefail
+          if [ -n "${BASELINE:-}" ]; then
+            mvn -B -ntp verify -Djapicmp.skip=false "-Djapicmp.baseline=${BASELINE}"
+          else
+            echo "::warning::SDK_JAPICMP_BASELINE is not set; API compatibility was not checked"
+            mvn -B -ntp verify
+          fi
+
+  build:
+    name: Build release files
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write # sign the provenance attestation
+      attestations: write # store it
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Package
+        working-directory: sdk/java
+        run: mvn -B -ntp -DskipTests package
+      - name: Collect files and checksums
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp sdk/java/*/target/vegaduta-agent-*-${{ needs.verify.outputs.version }}.jar dist/
+          cp sdk/java/*/target/vegaduta-agent-*-${{ needs.verify.outputs.version }}-sources.jar dist/
+          cp sdk/java/*/target/vegaduta-agent-*-${{ needs.verify.outputs.version }}-javadoc.jar dist/
+          cp sdk/java/*/target/vegaduta-agent-*-${{ needs.verify.outputs.version }}-cyclonedx.json dist/
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -l dist
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: "dist/*.jar"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sdk-release-files
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the release and upload files
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sdk-release-files
+          path: dist
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.verify.outputs.version }}
+          PRERELEASE: ${{ needs.verify.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          flags=()
+          [ "$PRERELEASE" = "true" ] && flags+=(--prerelease)
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
+              --title "Java Agent SDK $VERSION" \
+              --notes "Java Agent SDK $VERSION (io.vegaduta:vegaduta-agent-*). Verify the jars with \`sha256sum -c SHA256SUMS\` and \`gh attestation verify <jar> --repo $GITHUB_REPOSITORY\`. Maven Central availability is announced in CHANGELOG.md." \
+              "${flags[@]}"
+          fi
+
+  central:
+    name: Maven Central (Portal)
+    needs: [verify, release]
+    # Off until a maintainer has verified the io.vegaduta namespace and added the secrets.
+    if: vars.SDK_PUBLISH_CENTRAL == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: maven-central
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.SDK_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Sign and upload for validation
+        working-directory: sdk/java
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.SDK_GPG_PASSPHRASE }}
+        run: mvn -B -ntp -Prelease -DskipTests deploy

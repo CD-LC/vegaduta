@@ -1,0 +1,73 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-assistant-workspace",
+      "method": "GET",
+      "path": "/api/assistant/workspace",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.available",
+          "$.folders",
+          "$.hostPath",
+          "$.root",
+          "$.terminal"
+        ]
+      }
+    },
+    {
+      "id": "post-api-assistant-workspace-files",
+      "method": "POST",
+      "path": "/api/assistant/workspace/files",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.files",
+          "$.folder"
+        ]
+      }
+    },
+    {
+      "id": "post-api-assistant-workspace-folders",
+      "method": "POST",
+      "path": "/api/assistant/workspace/folders",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.name"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.modified",
+          "$.name"
+        ]
+      }
+    },
+    {
+      "id": "get-api-assistant-workspace-previews",
+      "method": "GET",
+      "path": "/api/assistant/workspace/previews",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].command",
+          "$[*].folder",
+          "$[*].port",
+          "$[*].running"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-assistant-workspace-previews-port",
+      "method": "DELETE",
+      "path": "/api/assistant/workspace/previews/{port}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

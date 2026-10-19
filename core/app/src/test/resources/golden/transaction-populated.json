@@ -1,0 +1,22 @@
+{
+  "id" : "00000000-0000-0000-0000-000000000001",
+  "mandateId" : "00000000-0000-0000-0000-000000000001",
+  "agentId" : "00000000-0000-0000-0000-000000000001",
+  "sessionId" : "sessionId-value",
+  "type" : "PAYMENT_LINK",
+  "amountPaise" : 42,
+  "currency" : "currency-value",
+  "vpa" : "vpa-value",
+  "description" : "description-value",
+  "merchantCategory" : "merchantCategory-value",
+  "status" : "INITIATED",
+  "approvalId" : "00000000-0000-0000-0000-000000000001",
+  "shortUrl" : "shortUrl-value",
+  "receiptUrl" : "receiptUrl-value",
+  "gatewayPaymentId" : "gatewayPaymentId-value",
+  "failureReason" : "failureReason-value",
+  "expiresAt" : "2026-09-30T10:15:30.123456789Z",
+  "paidAt" : "2026-09-30T10:15:30.123456789Z",
+  "createdAt" : "2026-09-30T10:15:30.123456789Z",
+  "updatedAt" : "2026-09-30T10:15:30.123456789Z"
+}

@@ -1,0 +1,13 @@
+# SPDX license ids allowed in the vendored/redistributed trees the
+# license-scan workflow checks (vendored JS, bundled fonts, Keycloak theme).
+# scripts/ci/license-drift-check.py fails the run when ScanCode finds an id
+# not listed here.
+#
+# Add an id only after its license text is in LICENSES/ and the component is
+# attributed in NOTICE -- the allowlist mirrors the paperwork, it does not
+# replace it.
+apache-2.0
+mit
+ofl-1.1
+ofl-1.1-no-rfn
+ofl-1.1-rfn

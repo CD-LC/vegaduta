@@ -1,0 +1,165 @@
+/* ---------------------------------------------------------------------------
+ * 20. `.mkt-term` — THE HERO'S SIMULATED BUILD CONSOLE (HeroOutcome)
+ *
+ * A terminal quoted inside a light card — the same framing as the video
+ * block it replaced (light chrome bar, dark body). It is dark in BOTH
+ * themes on purpose: it quotes a CLI, and a light-terminal pastiche reads
+ * as neither the product nor the page.
+ *
+ * Type: --font-mono at 12px — the file's floor (§19). The lines carry
+ * hand-padded labels ("parse   →"), so the block is pre-wrap: alignment is
+ * content, and a long value still wraps rather than overflowing the card.
+ * min-height holds the full transcript's height from first paint so the
+ * staggered line reveal never moves the caption below it (no CLS).
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-term {
+  min-height: 17rem;
+  background:
+    radial-gradient(120% 90% at 85% 0%, color-mix(in oklab, var(--mkt-accent) 14%, transparent), transparent 60%),
+    #090d1a;
+  color: #c6cdea;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem; /* 12px — the console-type floor */
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.marketing-root .mkt-term__line {
+  margin: 0;
+}
+
+/* Staggered arrival for each streamed line — opacity only, 180ms. */
+.marketing-root .mkt-term__in {
+  animation: mkt-term-in 180ms ease-out both;
+}
+
+@keyframes mkt-term-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The prompt glyph — terminal green, the one colour that reads "shell". */
+.marketing-root .mkt-term__ps {
+  color: #4ade80;
+}
+
+/* The command itself is the brightest text on the console. */
+.marketing-root .mkt-term__cmd {
+  color: #e8ebf8;
+}
+
+/* The typed spec — quoted input gets the accent tint, not full brightness. */
+.marketing-root .mkt-term__arg {
+  color: #aab4dd;
+}
+
+/* Step labels ("parse →", "tools →") recede so the values carry the line. */
+.marketing-root .mkt-term__label {
+  color: #8b94b9;
+}
+
+.marketing-root .mkt-term__ok {
+  color: #4ade80;
+}
+
+/* The conversion line — link blue-violet inside the dark body, underlined on
+ * hover/focus only: it reads as a command, not a button. */
+.marketing-root .mkt-term__link {
+  color: #a5b4fc;
+  text-decoration: none;
+}
+
+.marketing-root .mkt-term__link:hover,
+.marketing-root .mkt-term__link:focus-visible {
+  text-decoration: underline;
+}
+
+/* Block cursor — blinks while typing and idles at the fresh prompt once the
+ * build completes. */
+.marketing-root .mkt-term__cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-inline-start: 1px;
+  vertical-align: -0.12em;
+  background: #c6cdea;
+  animation: mkt-term-blink 1.06s steps(1) infinite;
+}
+
+@keyframes mkt-term-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-root .mkt-term__in {
+    animation: none;
+  }
+  /* A cursor that never blinks is just a cursor. */
+  .marketing-root .mkt-term__cursor {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  /* Hue collapses here; the console's own palette is decorative, so hand the
+   * whole body to system colours — the label/value split still reads via the
+   * hand-padded spacing. */
+  .marketing-root .mkt-term {
+    background: Canvas;
+    color: CanvasText;
+  }
+  .marketing-root .mkt-term__ps,
+  .marketing-root .mkt-term__cmd,
+  .marketing-root .mkt-term__arg,
+  .marketing-root .mkt-term__label,
+  .marketing-root .mkt-term__ok {
+    color: CanvasText;
+  }
+  .marketing-root .mkt-term__link {
+    color: LinkText;
+  }
+  .marketing-root .mkt-term__cursor {
+    background: CanvasText;
+    animation: none;
+  }
+}
+
+@media print {
+  /* A dark body prints as an ink slab; the transcript is content, so it gets
+   * the same forced-light treatment §18 gives the page. */
+  .marketing-root .mkt-term {
+    min-height: 0;
+    background: none;
+    color: #000000;
+  }
+  .marketing-root .mkt-term__ps,
+  .marketing-root .mkt-term__cmd,
+  .marketing-root .mkt-term__arg,
+  .marketing-root .mkt-term__label,
+  .marketing-root .mkt-term__ok,
+  .marketing-root .mkt-term__link {
+    color: #000000;
+  }
+  .marketing-root .mkt-term__in,
+  .marketing-root .mkt-term__cursor {
+    animation: none !important;
+  }
+  .marketing-root .mkt-term__cursor {
+    display: none;
+  }
+}

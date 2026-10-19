@@ -1,0 +1,90 @@
+/* Agent Lab run graph node. All classes are alab- prefixed so they never
+ * fight the workflow canvas (.wfx-*) or the legacy .wf-node rules.
+ *
+ * Motion is opacity and box-shadow ONLY. No transform / translate / scale on
+ * a node in any state, :active included: a shifted node detaches React
+ * Flow's cached edge endpoints from its handles (same rule as
+ * workflow-canvas.css). */
+
+.alab-node {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border-strong, var(--border));
+  background: var(--surface-card, var(--card));
+  color: var(--text-primary, var(--foreground));
+  cursor: pointer;
+  animation: alab-node-in 0.24s ease-out both;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.alab-node:hover {
+  border-color: var(--ring);
+}
+
+/* Selection is an outline, not a box-shadow, so it survives the running
+ * pulse (which animates box-shadow). */
+.alab-node[data-selected="true"] {
+  border-color: var(--ring);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.alab-node[data-status="error"] {
+  border-color: var(--destructive);
+}
+
+.alab-node[data-status="blocked"],
+.alab-node[data-status="interrupted"] {
+  border-color: var(--warning);
+}
+
+.alab-node[data-status="running"],
+.alab-node[data-status="streaming"] {
+  border-color: var(--primary);
+  animation: alab-node-in 0.24s ease-out both, alab-node-running 1.6s ease-in-out infinite;
+}
+
+.alab-handle {
+  width: 6px;
+  height: 6px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  background: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+@keyframes alab-node-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes alab-node-running {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 28%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alab-node,
+  .alab-node[data-status="running"],
+  .alab-node[data-status="streaming"] {
+    animation: none;
+    transition: none;
+  }
+
+  /* React Flow's marching-dash on a live edge. */
+  .alab-canvas .react-flow__edge.animated path {
+    animation: none;
+  }
+}

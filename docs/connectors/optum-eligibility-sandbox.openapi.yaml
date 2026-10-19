@@ -1,0 +1,98 @@
+# Optum (UnitedHealthcare's clearinghouse, ex-Change Healthcare) - Eligibility API v3
+#
+# Import via Tools -> Import from OpenAPI -> "Paste the document".
+#   name:      Optum Eligibility (sandbox)
+#   baseUrl:   https://sandbox-apigw.optum.com
+#   authType:  OAUTH2_CLIENT_CREDENTIALS
+#   tokenUrl:  https://sandbox-apigw.optum.com/apip/auth/v2/token
+#   style:     JSON   <- Optum's token endpoint takes a JSON body, not a form
+#   clientId / secret: from your Optum developer sandbox project
+#   scope:     (leave blank - Optum does not use scopes)
+#
+# PRODUCTION: same paths on https://apigw.optum.com with the production
+# client_id/secret issued after contracting. The sandbox answers only its
+# documented fixture values (predefined member ids/NPIs) - see
+# developer.optum.com -> Eligibility and Claims -> API Environments.
+#
+# Field set below follows the Optum Eligibility v3 request schema (the JSON
+# translation of the X12 270). tradingPartnerServiceId is the Optum payer id.
+
+openapi: 3.0.0
+info:
+  title: Optum Eligibility API v3 (sandbox)
+  version: "3.0.0"
+  description: >-
+    Real-time eligibility and benefits verification (X12 270/271 translated
+    to JSON) across Optum's payer network, which includes UnitedHealthcare.
+    Returns the subscriber's plan membership, copays, coinsurance and
+    deductible position.
+servers:
+  - url: https://sandbox-apigw.optum.com
+paths:
+  /medicalnetwork/eligibility/v3/:
+    post:
+      operationId: checkEligibility
+      summary: Check a patient's eligibility and benefits with a payer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [controlNumber, tradingPartnerServiceId, providers, subscriber, encounter]
+              properties:
+                controlNumber:
+                  type: string
+                  description: 9-digit unique trace number for this request, e.g. "000000001".
+                tradingPartnerServiceId:
+                  type: string
+                  description: Optum payer id (the payer list is in the developer portal).
+                providers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      providerType: { type: string, description: "e.g. PayToProvider, BillingProvider, RenderingProvider" }
+                      npi: { type: string }
+                      taxonomyId: { type: string }
+                      firstName: { type: string }
+                      lastName: { type: string }
+                      organizationName: { type: string }
+                      employerId: { type: string, description: Provider tax id, when the payer requires it. }
+                subscriber:
+                  type: object
+                  properties:
+                    memberId: { type: string, description: Member id from the insurance card. }
+                    firstName: { type: string }
+                    lastName: { type: string }
+                    gender: { type: string, description: "M, F or U" }
+                    dateOfBirth: { type: string, description: CCYYMMDD }
+                    groupNumber: { type: string }
+                dependents:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      memberId: { type: string }
+                      firstName: { type: string }
+                      lastName: { type: string }
+                      gender: { type: string }
+                      dateOfBirth: { type: string }
+                      groupNumber: { type: string }
+                encounter:
+                  type: object
+                  properties:
+                    beginningDateOfService: { type: string, description: CCYYMMDD }
+                    endDateOfService: { type: string, description: CCYYMMDD }
+                    trackingNumber: { type: string }
+                    serviceTypeCodes:
+                      type: array
+                      items: { type: string }
+                      description: "e.g. [\"30\"] for a general coverage check, \"98\" for office visit."
+      responses:
+        "200":
+          description: Eligibility response (X12 271 as JSON).
+        "400":
+          description: Validation failure - the body describes the rejected fields.
+        "401":
+          description: Bad or expired bearer token.

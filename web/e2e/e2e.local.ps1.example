@@ -1,0 +1,46 @@
+# Copy this file to e2e.local.ps1 (already gitignored - never commit real
+# keys) in this same folder, fill in real values, then run the whole suite
+# with every opt-in scenario active in one pass:
+#
+#   cd web
+#   . .\e2e\e2e.local.ps1
+#   npm run e2e
+#
+# (or just the showcase: npx playwright test specs/00-full-platform-showcase.spec.js --headed)
+#
+# Dot-sourcing (the leading ". ") loads these into your current PowerShell
+# session's environment rather than a child process, so the values never
+# need to be typed into a chat, a one-line command, or shell history again.
+#
+# This session's E2E_KEYCLOAK_CLIENT_SECRET is REQUIRED (not opt-in) for
+# specs 05/09/10 - see web/e2e/README.md Step 5. Set separately since it's
+# read live from core\.env.local, not hand-typed here:
+#   $env:E2E_KEYCLOAK_CLIENT_SECRET = (Get-Content ..\core\.env.local | Select-String "^KEYCLOAK_CLIENT_SECRET=").ToString().Split("=",2)[1]
+
+$env:E2E_ANTHROPIC_API_KEY     = "sk-ant-...."
+$env:E2E_TWILIO_ACCOUNT_SID    = "AC...."
+$env:E2E_TWILIO_AUTH_TOKEN     = "...."                       # NOT the Account SID - see note below
+$env:E2E_TWILIO_WHATSAPP_FROM  = "whatsapp:+14155238886"       # Twilio's shared sandbox sender, or your own approved WhatsApp sender
+$env:E2E_TWILIO_WHATSAPP_TO    = "whatsapp:+919742424300"      # E.164 format - digits only after the +, no dashes/spaces
+
+# ---------------------------------------------------------------------------
+# Where to find the real Auth Token: Twilio Console -> Account -> API keys &
+# tokens -> "Auth Token" (click "View" to reveal it). It's a 32-character
+# hex string and does NOT start with "AC" - "AC..." is always the Account
+# SID. If your Auth Token and Account SID look identical, you've copied the
+# SID twice by mistake.
+# ---------------------------------------------------------------------------
+
+# Multi-modal knowledge-base ingestion samples (F3a/F3b/F3c/F3d) - PDF, DOCX,
+# and an OCR image were generated for you and already live in
+# web/e2e/sample-files/ (paths below are correct as-is, no edits needed for
+# these three). Audio/video need a real decodable speech clip, which cannot
+# be faked - see the two TODO lines below.
+$env:E2E_SAMPLE_PDF_PATH   = "$PSScriptRoot\sample-files\sample.pdf"
+$env:E2E_SAMPLE_DOCX_PATH  = "$PSScriptRoot\sample-files\sample.docx"
+$env:E2E_SAMPLE_IMAGE_PATH = "$PSScriptRoot\sample-files\sample-ocr.png"
+# TODO: point these at a real short clip of your own (a few seconds is
+# enough, e.g. a phone voice memo or a short screen recording with you
+# talking) - leave commented out to just skip these two specs instead:
+# $env:E2E_SAMPLE_AUDIO_PATH = "C:\path\to\a-few-seconds-of-speech.mp3"
+# $env:E2E_SAMPLE_VIDEO_PATH = "C:\path\to\a-few-seconds-with-speech.mp4"

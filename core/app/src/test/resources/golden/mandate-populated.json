@@ -1,0 +1,27 @@
+{
+  "id" : "00000000-0000-0000-0000-000000000001",
+  "agentId" : "00000000-0000-0000-0000-000000000001",
+  "grantedByUserId" : "grantedByUserId-value",
+  "scope" : "COLLECT",
+  "maxPerTxnPaise" : 42,
+  "maxDailyPaise" : 42,
+  "maxMonthlyPaise" : 42,
+  "allowedVpas" : [
+    "allowedVpas-1-value",
+    "allowedVpas-2"
+  ],
+  "allowedMerchantCategories" : [
+    "allowedMerchantCategories-1-value",
+    "allowedMerchantCategories-2"
+  ],
+  "approvalPolicy" : "ALWAYS",
+  "approvalThresholdPaise" : 42,
+  "validFrom" : "2026-09-30T10:15:30.123456789Z",
+  "validUntil" : "2026-09-30T10:15:30.123456789Z",
+  "status" : "ACTIVE",
+  "canonicalHashSha256" : "canonicalHashSha256-value",
+  "createdAt" : "2026-09-30T10:15:30.123456789Z",
+  "revokedAt" : "2026-09-30T10:15:30.123456789Z",
+  "revokedBy" : "revokedBy-value",
+  "revokeReason" : "revokeReason-value"
+}

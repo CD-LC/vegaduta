@@ -1,0 +1,5 @@
+{{ .Chart.Name }}: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }})
+{{- if .Values.ingress.enabled }}
+  URL: {{ include "vegaduta-lib.publicUrl" (dict "root" . "key" .Values.ingress.hostKey) }}
+{{- end }}
+  Public config (NEXT_PUBLIC_*) is injected at runtime; check: curl -s <URL> | grep -o 'window.__ENV=[^<]*'

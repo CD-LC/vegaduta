@@ -1,0 +1,51 @@
+# Line endings: every text file is stored with LF and checked out with LF on
+# every platform (scripts, Dockerfiles, YAML and shell snippets run on Linux:
+# CI runners, containers, Kubernetes, where a CR breaks shebangs and line
+# continuations). Git detects text vs binary; the list below makes the common
+# binary types explicit so they are never converted or diffed as text.
+#
+# The index is already LF. After changing this file, renormalize once:
+#   git add --renormalize .
+* text=auto eol=lf
+
+# Windows-only scripts stay CRLF.
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Extensionless files that must be treated as text.
+.githooks/*      text eol=lf
+scripts/vegaduta text eol=lf
+Dockerfile*      text eol=lf
+Makefile         text eol=lf
+
+# Binary files.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.avif      binary
+*.ico       binary
+*.icns      binary
+*.mp3       binary
+*.mp4       binary
+*.webm      binary
+*.wav       binary
+*.ogg       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.otf       binary
+*.eot       binary
+*.pdf       binary
+*.zip       binary
+*.gz        binary
+*.tgz       binary
+*.tar       binary
+*.jar       binary
+*.onnx      binary
+*.wasm      binary
+*.bin       binary
+*.jks       binary
+*.p12       binary

@@ -1,0 +1,21 @@
+# Explicit, human-reviewed exceptions to flyway-lint.sh's applied-migration
+# edit guard, for the one legitimate case that guard's static heuristic
+# ("existed at merge-base, now missing/changed = forbidden") can't
+# distinguish from a real edit: a pre-production version renumber where the
+# migration's actual DDL is untouched and nothing has ever run it for real
+# yet. Same role as the script's own `-- gated:contract` marker for
+# destructive DDL - this file IS the human sign-off, not something the
+# script verifies on its own. Adding a line here is a deliberate, reviewed
+# decision, not a way to route around a real edit - see flyway-lint.sh's
+# own comment on why it can't tell the difference automatically.
+#
+# Format: <old path relative to repo root> -> <new path relative to repo root>  # justification
+#
+# This is the mechanism for documented migration renumbers (e.g. the
+# V87->V91 false-positive). Add new lines here as
+# renumbers happen; each one should include what was verified and how, same
+# as the entry below.
+
+core/app/src/main/resources/db/migration/controlplane/V87__platform_operational_settings.sql -> core/app/src/main/resources/db/migration/controlplane/V91__platform_operational_settings.sql  # Pre-production renumber to resolve a real collision with tenant/V87__knowledge_chunks_fts.sql (which had already landed first, with tenant/V88-V90 built on top of it). DDL content verified unchanged - diffed the historical blob (git show f7374f0:<old path>) against the current V91 file on 2026-07-20; the only diff is the header comment documenting the rename itself, no SQL statements differ. Nothing has applied V87/V91 in a real environment yet.
+
+core/app/src/main/resources/db/migration/controlplane/V227__dynamic_pricing.sql -> core/app/src/main/resources/db/migration/controlplane/V233__dynamic_pricing.sql  # Pre-production renumber resolving a real collision with tenant/V227__custom_code_tool_secret.sql. The tenant file landed FIRST (ad2a4f40, 2026-09-12) and was deliberately claimed in AGENT-COORDINATION ("New work here is V227 (custom_code_tool_secret) and V228"); the controlplane pricing migration landed a day later (4f429474, 2026-09-13) on the same number without checking the shared namespace, which is what made static-gates fail 13 consecutive runs. Renumbered to V233 rather than V230-V232 because those three are reserved in AGENT-COORDINATION (1cb5a937) for the out-of-the-box parity wave. DDL verified unchanged on 2026-09-17: `git show 0485e5f9:<old path>` diffed against the new file is byte-identical after normalising CRLF (sha256 3f22471f4cc582e1... on both) - the 102-byte size difference is one CR per line from core.autocrlf, not a SQL edit. Nothing has applied V227 in a real environment: AGENT-COORDINATION records "V222/V223/V227 have still never run against a" real database, and production was last deployed 2026-09-10, three days before this migration existed.

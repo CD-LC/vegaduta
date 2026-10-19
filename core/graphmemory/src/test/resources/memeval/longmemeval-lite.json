@@ -1,0 +1,199 @@
+{
+  "name": "LongMemEval-lite (own fixtures)",
+  "note": "Own hand-written fixtures modelled on the LongMemEval ability categories. NOT the public LongMemEval benchmark; scores are not comparable to it. Facts are GOLD-EXTRACTED triples (the extractor LLM is not measured) and the question frame (entity/relation/direction/asOf session) is given, so only storage, update handling and retrieval are measured. 'say' lines are documentation only.",
+  "multi": ["SPEAKS", "HAS_PET", "LIKES", "VISITED", "READS", "ALLERGIC_TO", "FRIEND_OF"],
+  "cases": [
+    {"id":"ssr-01","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I just moved to Pune, I work at Acme and we adopted a dog."],"facts":[["User","LIVES_IN","Pune"],["User","WORKS_AT","Acme"],["User","HAS_PET","dog"]]}],
+      "q":{"text":"Where do I live?","ent":"User","rel":"LIVES_IN","kind":"lookup","exp":["Pune"]}},
+    {"id":"ssr-02","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["My manager is Priya, she also works at Acme."],"facts":[["User","MANAGER_OF_BY","Priya"],["Priya","WORKS_AT","Acme"]]}],
+      "q":{"text":"Who is my manager?","ent":"User","rel":"MANAGER_OF_BY","kind":"lookup","exp":["Priya"]}},
+    {"id":"ssr-03","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["My favorite color is teal and I like jazz."],"facts":[["User","FAVORITE_COLOR","teal"],["User","LIKES","jazz"]]}],
+      "q":{"text":"What is my favorite color?","ent":"User","rel":"FAVORITE_COLOR","kind":"lookup","exp":["teal"]}},
+    {"id":"ssr-04","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I drive a Honda City and live in Delhi."],"facts":[["User","DRIVES","Honda City"],["User","LIVES_IN","Delhi"]]}],
+      "q":{"text":"What car do I drive?","ent":"User","rel":"DRIVES","kind":"lookup","exp":["Honda City"]}},
+    {"id":"ssr-05","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["My friend Meera works at Infosys in Bengaluru."],"facts":[["Meera","WORKS_AT","Infosys"],["Meera","LIVES_IN","Bengaluru"],["User","FRIEND_OF","Meera"]]}],
+      "q":{"text":"Where does Meera work?","ent":"Meera","rel":"WORKS_AT","kind":"lookup","exp":["Infosys"]}},
+    {"id":"ssr-06","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I am a data engineer at Acme."],"facts":[["User","JOB_TITLE","data engineer"],["User","WORKS_AT","Acme"]]}],
+      "q":{"text":"What is my job title?","ent":"User","rel":"JOB_TITLE","kind":"lookup","exp":["data engineer"]}},
+    {"id":"ssr-07","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Dev's manager is me."],"facts":[["Dev","MANAGER_OF_BY","User"],["Dev","WORKS_AT","Acme"]]}],
+      "q":{"text":"Who has me as manager?","ent":"User","rel":"MANAGER_OF_BY","dir":"in","kind":"lookup","exp":["Dev"]}},
+    {"id":"ssr-08","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Sam lives in Goa; Samira lives in Kochi; Samuel lives in Leeds."],"facts":[["Sam","LIVES_IN","Goa"],["Samira","LIVES_IN","Kochi"],["Samuel","LIVES_IN","Leeds"]]}],
+      "q":{"text":"Where does Sam live?","ent":"Sam","rel":"LIVES_IN","kind":"lookup","exp":["Goa"]}},
+    {"id":"ssr-09","cat":"single_session_recall","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Long intro: I went to St Xavier's, I am 34, I like trekking, I live in Pune, I work at Acme, I drive a Honda City, I am vegetarian, my favorite color is teal."],"facts":[["User","SCHOOL","St Xavier's"],["User","AGE","34"],["User","LIKES","trekking"],["User","LIVES_IN","Pune"],["User","WORKS_AT","Acme"],["User","DRIVES","Honda City"],["User","DIET","vegetarian"],["User","FAVORITE_COLOR","teal"]]}],
+      "q":{"text":"Which school did I attend?","ent":"User","rel":"SCHOOL","kind":"lookup","exp":["St Xavier's"]}},
+
+    {"id":"msa-01","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I speak Hindi at home."],"facts":[["User","SPEAKS","Hindi"]]},
+      {"id":"s2","t":"2026-03-10","say":["At work I use English."],"facts":[["User","SPEAKS","English"]]},
+      {"id":"s3","t":"2026-05-20","say":["I am also learning Kannada."],"facts":[["User","SPEAKS","Kannada"]]}],
+      "q":{"text":"Which languages do I speak?","ent":"User","rel":"SPEAKS","kind":"list","exp":["Hindi","English","Kannada"]}},
+    {"id":"msa-02","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["We have a dog."],"facts":[["User","HAS_PET","dog"]]},
+      {"id":"s2","t":"2026-03-10","say":["We adopted a cat."],"facts":[["User","HAS_PET","cat"]]},
+      {"id":"s3","t":"2026-05-20","say":["And a parrot."],"facts":[["User","HAS_PET","parrot"]]}],
+      "q":{"text":"How many pets do I have?","ent":"User","rel":"HAS_PET","kind":"count","exp":["3"],"gold":["dog","cat","parrot"]}},
+    {"id":"msa-03","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Trip to Goa."],"facts":[["User","VISITED","Goa"]]},
+      {"id":"s2","t":"2026-03-10","say":["Trip to Jaipur."],"facts":[["User","VISITED","Jaipur"]]},
+      {"id":"s3","t":"2026-05-20","say":["Went to Goa again."],"facts":[["User","VISITED","Goa"]]},
+      {"id":"s4","t":"2026-07-02","say":["Then Kochi."],"facts":[["User","VISITED","Kochi"]]}],
+      "q":{"text":"Which places have I visited?","ent":"User","rel":"VISITED","kind":"list","exp":["Goa","Jaipur","Kochi"]}},
+    {"id":"msa-04","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Trip to Goa."],"facts":[["User","VISITED","Goa"]]},
+      {"id":"s2","t":"2026-03-10","say":["Trip to Jaipur."],"facts":[["User","VISITED","Jaipur"]]},
+      {"id":"s3","t":"2026-05-20","say":["Went to Goa again."],"facts":[["User","VISITED","goa"]]},
+      {"id":"s4","t":"2026-07-02","say":["Then Kochi."],"facts":[["User","VISITED","Kochi"]]}],
+      "q":{"text":"How many different places have I visited?","ent":"User","rel":"VISITED","kind":"count","exp":["3"],"gold":["Goa","Jaipur","Kochi"]}},
+    {"id":"msa-05","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I like tea."],"facts":[["User","LIKES","tea"]]},
+      {"id":"s2","t":"2026-03-10","say":["I like coffee too."],"facts":[["User","LIKES","coffee"]]},
+      {"id":"s3","t":"2026-05-20","say":["And pizza."],"facts":[["User","LIKES","pizza"]]}],
+      "q":{"text":"What do I like?","ent":"User","rel":"LIKES","kind":"list","exp":["tea","coffee","pizza"]}},
+    {"id":"msa-06","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Dev reports to me."],"facts":[["Dev","REPORTS_TO","User"]]},
+      {"id":"s2","t":"2026-03-10","say":["Asha reports to me."],"facts":[["Asha","REPORTS_TO","User"]]},
+      {"id":"s3","t":"2026-05-20","say":["Ravi joined my team."],"facts":[["Ravi","REPORTS_TO","User"]]}],
+      "q":{"text":"Who reports to me?","ent":"User","rel":"REPORTS_TO","dir":"in","kind":"list","exp":["Dev","Asha","Ravi"]}},
+    {"id":"msa-07","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Reading Dune and Neuromancer."],"facts":[["User","READS","Dune"],["User","READS","Neuromancer"]]},
+      {"id":"s2","t":"2026-03-10","say":["Finished those, now Hyperion."],"facts":[["User","READS","Hyperion"]]},
+      {"id":"s3","t":"2026-05-20","say":["Also Snow Crash."],"facts":[["User","READS","Snow Crash"]]}],
+      "q":{"text":"Which books have I read?","ent":"User","rel":"READS","kind":"list","exp":["Dune","Neuromancer","Hyperion","Snow Crash"]}},
+    {"id":"msa-08","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Meera is friends with Tara."],"facts":[["Meera","FRIEND_OF","Tara"]]},
+      {"id":"s2","t":"2026-03-10","say":["Meera also hangs out with Uma."],"facts":[["Meera","FRIEND_OF","Uma"]]}],
+      "q":{"text":"Who are Meera's friends?","ent":"Meera","rel":"FRIEND_OF","kind":"list","exp":["Tara","Uma"]}},
+    {"id":"msa-09","cat":"multi_session_aggregation","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I am allergic to peanuts."],"facts":[["User","ALLERGIC_TO","peanuts"]]},
+      {"id":"s2","t":"2026-03-10","say":["Turns out dust as well."],"facts":[["User","ALLERGIC_TO","dust"]]}],
+      "q":{"text":"How many things am I allergic to?","ent":"User","rel":"ALLERGIC_TO","kind":"count","exp":["2"],"gold":["peanuts","dust"]}},
+
+    {"id":"ku-01","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["I moved to Mumbai."],"facts":[["User","LIVES_IN","Mumbai"]]}],
+      "q":{"text":"Where do I live now?","ent":"User","rel":"LIVES_IN","kind":"lookup","exp":["Mumbai"],"stale":["Pune"]}},
+    {"id":"ku-02","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I work at Acme."],"facts":[["User","WORKS_AT","Acme"]]},
+      {"id":"s2","t":"2026-03-10","say":["Joined Globex."],"facts":[["User","WORKS_AT","Globex"]]},
+      {"id":"s3","t":"2026-05-20","say":["Now at Initech."],"facts":[["User","WORKS_AT","Initech"]]}],
+      "q":{"text":"Where do I work currently?","ent":"User","rel":"WORKS_AT","kind":"lookup","exp":["Initech"],"stale":["Acme","Globex"]}},
+    {"id":"ku-03","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["Moved to Mumbai."],"facts":[["User","LIVES_IN","Mumbai"]]},
+      {"id":"s3","t":"2026-05-20","say":["Moved back to Pune."],"facts":[["User","LIVES_IN","Pune"]]}],
+      "q":{"text":"Where do I live these days?","ent":"User","rel":"LIVES_IN","kind":"lookup","exp":["Pune"],"stale":["Mumbai"]}},
+    {"id":"ku-04","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["My manager is Raj."],"facts":[["User","MANAGER_OF_BY","Raj"]]},
+      {"id":"s2","t":"2026-03-10","say":["I got a new manager, Rahul."],"facts":[["User","MANAGER_OF_BY","Rahul"]]}],
+      "q":{"text":"Who is my manager?","ent":"User","rel":"MANAGER_OF_BY","kind":"lookup","exp":["Rahul"],"stale":["Raj"]}},
+    {"id":"ku-05","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I am vegetarian."],"facts":[["User","DIET","vegetarian"]]},
+      {"id":"s2","t":"2026-03-10","say":["Actually I eat meat again."],"facts":[["User","DIET","omnivore"]]}],
+      "q":{"text":"What is my diet?","ent":"User","rel":"DIET","kind":"lookup","exp":["omnivore"],"stale":["vegetarian"]}},
+    {"id":"ku-06","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I am an analyst; I like tea."],"facts":[["User","JOB_TITLE","analyst"],["User","LIKES","tea"]]},
+      {"id":"s2","t":"2026-03-10","say":["Promoted to senior analyst."],"facts":[["User","JOB_TITLE","senior analyst"]]},
+      {"id":"s3","t":"2026-05-20","say":["Now team lead."],"facts":[["User","JOB_TITLE","team lead"],["User","LIVES_IN","Pune"]]}],
+      "q":{"text":"What is my job title now?","ent":"User","rel":"JOB_TITLE","kind":"lookup","exp":["team lead"],"stale":["analyst","senior analyst"]}},
+    {"id":"ku-07","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Meera works at Infosys in Pune."],"facts":[["Meera","WORKS_AT","Infosys"],["Meera","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["Meera moved to TCS."],"facts":[["Meera","WORKS_AT","TCS"]]}],
+      "q":{"text":"Where does Meera work now?","ent":"Meera","rel":"WORKS_AT","kind":"lookup","exp":["TCS"],"stale":["Infosys"]}},
+    {"id":"ku-08","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune and work at Acme."],"facts":[["User","LIVES_IN","Pune"],["User","WORKS_AT","Acme"]]},
+      {"id":"s2","t":"2026-03-10","say":["Moved to Mumbai, still at Acme."],"facts":[["User","LIVES_IN","Mumbai"],["User","WORKS_AT","Acme"]]},
+      {"id":"s3","t":"2026-05-20","say":["Switched to Globex."],"facts":[["User","WORKS_AT","Globex"]]}],
+      "q":{"text":"Where do I work?","ent":"User","rel":"WORKS_AT","kind":"lookup","exp":["Globex"],"stale":["Acme"]}},
+    {"id":"ku-09","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["As I said, Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s3","t":"2026-05-20","say":["Moved to Mumbai."],"facts":[["User","LIVES_IN","Mumbai"]]}],
+      "q":{"text":"Where do I live?","ent":"User","rel":"LIVES_IN","kind":"lookup","exp":["Mumbai"],"stale":["Pune"]}},
+    {"id":"ku-10","cat":"knowledge_update","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I have an Android phone."],"facts":[["User","PHONE_OS","Android"]]},
+      {"id":"s2","t":"2026-03-10","say":["Switched to iPhone."],"facts":[["User","PHONE_OS","iOS"]]}],
+      "q":{"text":"Which phone OS do I use?","ent":"User","rel":"PHONE_OS","kind":"lookup","exp":["iOS"],"stale":["Android"]}},
+
+    {"id":"tr-01","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["Moved to Mumbai."],"facts":[["User","LIVES_IN","Mumbai"]]}],
+      "q":{"text":"Where did I live before I moved to Mumbai?","ent":"User","rel":"LIVES_IN","kind":"lookup","asof":"s1","exp":["Pune"],"stale":["Mumbai"]}},
+    {"id":"tr-02","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["My manager is Raj."],"facts":[["User","MANAGER_OF_BY","Raj"]]},
+      {"id":"s2","t":"2026-03-10","say":["Now it is Rahul."],"facts":[["User","MANAGER_OF_BY","Rahul"]]},
+      {"id":"s3","t":"2026-05-20","say":["Now it is Ravi."],"facts":[["User","MANAGER_OF_BY","Ravi"]]}],
+      "q":{"text":"Who was my manager when I first told you about my job?","ent":"User","rel":"MANAGER_OF_BY","kind":"lookup","asof":"s1","exp":["Raj"]}},
+    {"id":"tr-03","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I work at Acme."],"facts":[["User","WORKS_AT","Acme"]]},
+      {"id":"s2","t":"2026-03-10","say":["Joined Globex."],"facts":[["User","WORKS_AT","Globex"]]},
+      {"id":"s3","t":"2026-05-20","say":["Now Initech."],"facts":[["User","WORKS_AT","Initech"]]}],
+      "q":{"text":"Which company did I work for before Initech?","ent":"User","rel":"WORKS_AT","kind":"lookup","asof":"s2","exp":["Globex"],"stale":["Acme"]}},
+    {"id":"tr-04","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I am vegetarian."],"facts":[["User","DIET","vegetarian"]]},
+      {"id":"s2","t":"2026-03-10","say":["Went vegan."],"facts":[["User","DIET","vegan"]]},
+      {"id":"s3","t":"2026-05-20","say":["Eat everything now."],"facts":[["User","DIET","omnivore"]]}],
+      "q":{"text":"What was my diet before I became omnivore?","ent":"User","rel":"DIET","kind":"lookup","asof":"s2","exp":["vegan"],"stale":["vegetarian"]}},
+    {"id":"tr-05","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["Moved to Mumbai."],"facts":[["User","LIVES_IN","Mumbai"]]},
+      {"id":"s3","t":"2026-05-20","say":["Moved back to Pune."],"facts":[["User","LIVES_IN","Pune"]]}],
+      "q":{"text":"Where did I live in between my two stays in Pune?","ent":"User","rel":"LIVES_IN","kind":"lookup","asof":"s2","exp":["Mumbai"],"stale":["Pune"]}},
+    {"id":"tr-06","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I speak Hindi."],"facts":[["User","SPEAKS","Hindi"]]},
+      {"id":"s2","t":"2026-03-10","say":["And English."],"facts":[["User","SPEAKS","English"]]},
+      {"id":"s3","t":"2026-05-20","say":["And Kannada."],"facts":[["User","SPEAKS","Kannada"]]}],
+      "q":{"text":"Which languages did I speak before I learned Kannada?","ent":"User","rel":"SPEAKS","kind":"list","asof":"s2","exp":["Hindi","English"]}},
+    {"id":"tr-07","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Phone is Android."],"facts":[["User","PHONE_OS","Android"]]},
+      {"id":"s2","t":"2026-03-10","say":["Phone is iOS."],"facts":[["User","PHONE_OS","iOS"]]}],
+      "q":{"text":"Which phone OS did I use after the switch?","ent":"User","rel":"PHONE_OS","kind":"lookup","asof":"s2","exp":["iOS"],"stale":["Android"]}},
+    {"id":"tr-08","cat":"temporal_reasoning","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Meera works at Infosys."],"facts":[["Meera","WORKS_AT","Infosys"]]},
+      {"id":"s2","t":"2026-03-10","say":["Meera moved to TCS."],"facts":[["Meera","WORKS_AT","TCS"]]},
+      {"id":"s3","t":"2026-05-20","say":["Meera moved to Wipro."],"facts":[["Meera","WORKS_AT","Wipro"]]}],
+      "q":{"text":"Where did Meera work before Wipro?","ent":"Meera","rel":"WORKS_AT","kind":"lookup","asof":"s2","exp":["TCS"],"stale":["Infosys"]}},
+    {"id":"tr-09","cat":"temporal_reasoning","sessions":[
+      {"id":"s0","t":"2025-12-01","say":["Hello, I like jazz."],"facts":[["User","LIKES","jazz"]]},
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]}],
+      "q":{"text":"Where did I live before our first conversation about my home?","ent":"User","rel":"LIVES_IN","kind":"lookup","asof":"s0","abstain":true}},
+
+    {"id":"abs-01","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune and work at Acme."],"facts":[["User","LIVES_IN","Pune"],["User","WORKS_AT","Acme"]]}],
+      "q":{"text":"What is my phone number?","ent":"User","rel":"PHONE_NUMBER","kind":"lookup","abstain":true}},
+    {"id":"abs-02","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Meera lives in Bengaluru."],"facts":[["Meera","LIVES_IN","Bengaluru"]]}],
+      "q":{"text":"Where does Tara live?","ent":"Tara","rel":"LIVES_IN","kind":"lookup","abstain":true}},
+    {"id":"abs-03","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Samira lives in Kochi, Samuel in Leeds."],"facts":[["Samira","LIVES_IN","Kochi"],["Samuel","LIVES_IN","Leeds"]]}],
+      "q":{"text":"Where does Sam live?","ent":"Sam","rel":"LIVES_IN","kind":"lookup","abstain":true}},
+    {"id":"abs-04","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Meera works at Infosys."],"facts":[["Meera","WORKS_AT","Infosys"]]}],
+      "q":{"text":"Where do I work?","ent":"User","rel":"WORKS_AT","kind":"lookup","abstain":true}},
+    {"id":"abs-05","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["I live in Pune."],"facts":[["User","LIVES_IN","Pune"]]},
+      {"id":"s2","t":"2026-03-10","say":["Please forget that I live in Pune."],"forget":["I live in Pune"],"facts":[]}],
+      "q":{"text":"Where do I live?","ent":"User","rel":"LIVES_IN","kind":"lookup","abstain":true}},
+    {"id":"abs-06","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["We have a dog and I like tea."],"facts":[["User","HAS_PET","dog"],["User","LIKES","tea"]]},
+      {"id":"s2","t":"2026-03-10","say":["Forget that I have a dog."],"forget":["I have a dog"],"facts":[]}],
+      "q":{"text":"What pets do I have?","ent":"User","rel":"HAS_PET","kind":"list","abstain":true}},
+    {"id":"abs-07","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Hi! How are you?"],"facts":[]}],
+      "q":{"text":"Where do I live?","ent":"User","rel":"LIVES_IN","kind":"lookup","abstain":true}},
+    {"id":"abs-08","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Dev's manager is me."],"facts":[["Dev","MANAGER_OF_BY","User"]]}],
+      "q":{"text":"Who is my manager?","ent":"User","rel":"MANAGER_OF_BY","kind":"lookup","abstain":true}},
+    {"id":"abs-09","cat":"abstention","sessions":[
+      {"id":"s1","t":"2026-01-05","say":["Meera speaks Tamil and Hindi."],"facts":[["Meera","SPEAKS","Tamil"],["Meera","SPEAKS","Hindi"]]}],
+      "q":{"text":"Which languages do I speak?","ent":"User","rel":"SPEAKS","kind":"list","abstain":true}}
+  ]
+}

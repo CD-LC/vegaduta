@@ -1,0 +1,385 @@
+/* ==========================================================================
+ * Platform Maintenance - Users & Roles + Approvals (Human-in-the-Loop)
+ * (#474, Screens 8-10) - AdminUsersPanel.js / ApprovalsPanel.js rebuilt on
+ * these classes, pixel-matching design_handoff_axon/design_files/Admin
+ * Users.dc.html and Admin.dc.html. Unlike those two standalone mockup
+ * screens (each with their own 74px rail + 60px topbar + 216px CONSOLE
+ * sub-sidebar), both sections here live embedded inside the existing
+ * /admin/maintenance page's own AppShell - only the two mockups' *content*
+ * panels are ported (table, list+detail), not a second nested rail/topbar/
+ * sidebar (task #489 already removed the standalone admin sub-sidebar
+ * per direct feedback: "remove this section").
+ *
+ * "LAST ACTIVE" in the Users mockup has no backing field - AdminUserResponse
+ * (Keycloak-backed) never tracked a last-login timestamp - so that column
+ * renders "-" rather than a fabricated relative time, same "real or
+ * explicitly absent" posture as the admin SLA widget's "no data yet".
+ * ==========================================================================*/
+
+.ax-mnt-section {
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 20px;
+}
+
+.ax-mnt-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ax-mnt-title {
+  font-size: var(--fs-lede);
+  font-weight: 600;
+  color: var(--ax-text);
+  margin: 0;
+}
+
+.ax-mnt-sub {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  margin-top: 3px;
+}
+
+.ax-mnt-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* ---- Users & Roles table ------------------------------------------------ */
+
+.ax-mnt-table {
+  border: 1px solid var(--ax-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ax-panel);
+}
+
+.ax-mnt-row-grid {
+  display: grid;
+  grid-template-columns: 2.4fr 1.2fr 1fr 1.1fr 0.6fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.ax-mnt-table-head {
+  padding: 9px 16px;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--ax-border);
+}
+
+.ax-mnt-user-row {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--ax-border);
+  transition: background 0.15s ease;
+}
+
+.ax-mnt-user-row:last-child {
+  border-bottom: none;
+}
+
+.ax-mnt-user-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ax-mnt-user-row.ax-mnt-row-suspended {
+  opacity: 0.7;
+}
+
+.ax-mnt-member {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.ax-mnt-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: var(--fs-caption);
+  color: #05070d;
+  flex-shrink: 0;
+}
+
+.ax-mnt-member-text {
+  min-width: 0;
+}
+
+.ax-mnt-member-name {
+  font-size: var(--fs-meta);
+  color: var(--ax-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-mnt-member-email {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-mnt-role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  background: var(--ax-chip);
+  color: var(--ax-text);
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ax-mnt-role-pill-owner {
+  background: rgba(79, 227, 227, 0.12);
+  color: var(--ax-cyan);
+}
+
+.ax-mnt-role-pill-admin {
+  background: rgba(155, 125, 255, 0.14);
+  color: var(--ax-violet);
+  border-color: rgba(155, 125, 255, 0.3);
+}
+
+.ax-mnt-role-pill-none {
+  color: var(--ax-dim);
+  border-style: dashed;
+  border-color: var(--ax-border2);
+}
+
+.ax-mnt-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-caption);
+}
+
+.ax-mnt-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ax-mnt-status-active {
+  color: var(--ax-green);
+}
+.ax-mnt-status-active .ax-mnt-status-dot {
+  background: var(--ax-green);
+  box-shadow: 0 0 6px var(--ax-green);
+}
+
+.ax-mnt-status-suspended {
+  color: var(--ax-red);
+}
+.ax-mnt-status-suspended .ax-mnt-status-dot {
+  background: var(--ax-red);
+}
+
+.ax-mnt-lastactive {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-mnt-row-menu {
+  background: none;
+  border: none;
+  color: var(--ax-dim);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  justify-self: end;
+}
+
+.ax-mnt-row-menu:hover {
+  color: var(--ax-text);
+  background: var(--ax-chip);
+}
+
+.ax-mnt-roleedit {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ax-mnt-roleedit-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: var(--fs-caption);
+}
+
+.ax-mnt-roleedit-checks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ax-mnt-table-footer {
+  padding: 9px 16px;
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  border-top: 1px solid var(--ax-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Mobile pass (2026-07): this table's rows are a fixed-shape CSS grid
+ * (MEMBER/ROLE/STATUS/LAST ACTIVE/menu) - at phone widths there just
+ * isn't room to keep 5 columns legible without truncating the one column
+ * (member name+email) that actually needs the space. (The LLM call log
+ * that used to share this grid moved to /admin/billing as
+ * components/billing/LlmSpendSection, on the shadcn Table, 2026-09-24.) Rebuilding every row into
+ * stacked labelled cards would mean restructuring this component's
+ * markup; a horizontally-scrollable table gets the same "nothing
+ * clipped, nothing unreadable" outcome with a CSS-only change - min-width
+ * keeps each row at its natural desktop width so columns stay legible,
+ * and .ax-mnt-table (normally overflow:hidden, so its rounded corners
+ * clip the header/footer) switches to overflow-x:auto so that width can
+ * actually be scrolled to instead of just clipped off-screen. */
+@media (max-width: 640px) {
+  .ax-mnt-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ax-mnt-table-head,
+  .ax-mnt-user-row {
+    min-width: 560px;
+  }
+}
+
+/* ---- Pagination (shared across every list/table panel, PaginationControls.js) */
+
+.ax-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--ax-border);
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-pager-count {
+  white-space: nowrap;
+}
+
+.ax-pager-size {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.ax-pager-size-label {
+  color: var(--ax-dim);
+  margin-right: 2px;
+}
+
+.ax-pager-size-btn {
+  border: 1px solid var(--ax-border);
+  background: var(--ax-chip);
+  color: var(--ax-mid);
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-pager-size-btn:hover {
+  color: var(--ax-text);
+  border-color: var(--ax-violet);
+}
+
+.ax-pager-size-btn-active {
+  color: var(--ax-text);
+  background: rgba(109, 75, 216, 0.14);
+  border-color: var(--ax-violet);
+}
+
+.ax-pager-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ax-pager-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-chip);
+  color: var(--ax-mid);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-pager-nav-btn:hover:not(:disabled) {
+  color: var(--ax-text);
+  border-color: var(--ax-violet);
+}
+
+.ax-pager-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ax-pager-page {
+  white-space: nowrap;
+  min-width: 84px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .ax-pager {
+    justify-content: center;
+    text-align: center;
+  }
+  .ax-pager-size {
+    margin-left: 0;
+  }
+}

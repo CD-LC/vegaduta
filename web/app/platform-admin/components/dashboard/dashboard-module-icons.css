@@ -1,0 +1,175 @@
+.mc-bento-card-workflows .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-workflows .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px 1.5px rgba(255, 255, 255, 0.85);
+  offset-path: border-box;
+  animation: mc-icon-flow 3.2s linear infinite;
+}
+@keyframes mc-icon-flow {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+.mc-bento-card-agents .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-agents .mc-bento-icon::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  animation: mc-icon-halo 2.6s ease-in-out infinite;
+}
+@keyframes mc-icon-halo {
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0;
+  }
+}
+
+.mc-bento-card-knowledge .mc-bento-icon {
+  position: relative;
+  overflow: hidden;
+}
+.mc-bento-card-knowledge .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.7);
+  animation: mc-icon-scan 2.4s ease-in-out infinite;
+}
+@keyframes mc-icon-scan {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(2.6rem);
+    opacity: 0;
+  }
+}
+
+.mc-bento-card-providers .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-providers .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  bottom: 22%;
+  left: 50%;
+  width: 14px;
+  height: 10px;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  background: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.9) 0 3px, transparent 3px 6px);
+  animation: mc-icon-signal 1.8s ease-in-out infinite;
+}
+@keyframes mc-icon-signal {
+  0%,
+  100% {
+    transform: translateX(-50%) scaleY(0.4);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(-50%) scaleY(1);
+    opacity: 1;
+  }
+}
+
+.mc-bento-card-tools .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-tools .mc-bento-icon::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.75);
+  animation: mc-icon-turn 6s linear infinite;
+}
+@keyframes mc-icon-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mc-bento-card-quicktask .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-quicktask .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  animation: mc-icon-zap 2.2s ease-in-out infinite;
+}
+@keyframes mc-icon-zap {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 0.85;
+  }
+  8% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.6;
+  }
+  18%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.mc-bento-card-playground .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-playground .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  bottom: 15%;
+  right: 15%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px 1.5px rgba(255, 255, 255, 0.85);
+  animation: mc-icon-blink 1.1s steps(1, end) infinite;
+}
+@keyframes mc-icon-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}

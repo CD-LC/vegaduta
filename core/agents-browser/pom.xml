@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>agents-browser</artifactId>
+  <name>agents-browser</name>
+  <description>
+    Browser and web tools for agents: the governed headless-browser session
+    (com.agenticai.core.agents.tools.browseruse: browser_* tools, takeover,
+    profiles, recipes, TOTP) and the built-in web tools
+    (com.agenticai.core.agents.tools.web: fetch_web_page, http_request,
+    web_search providers, deep_research / verify_citations, web_task).
+    Split out of core/agents by ADR-0023; the Java packages are unchanged.
+
+    Direction: agents-browser depends on agents, never the reverse. Where
+    agents needs something from here it owns a port and this module
+    implements it: tools.WebToolPort (the web tool set the integration
+    resolver offers; BuiltInWebTools), tools.BrowserToolPort (the browser_*
+    tool families; browseruse.BrowserToolAdapter) and
+    capability.WebSearchAvailability (WebSearchProviderRegistry).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- ResearchTurnScope and X402PaymentService live in core/agents-tools
+         (ADR-0023). agents-tools never depends on agents-browser: it reaches
+         the browser and web tools through WebToolPort/BrowserToolPort in agents. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+    </dependency>
+    <!-- Declared explicitly for the "declare what you import" convention
+         core/agents/pom.xml follows; all already reachable through agents. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>secrets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>devices</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-client-chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <!-- Browser-use fallback tool (browser_navigate/click/type/read_page_text/
+         screenshot, tools.browseruse) - the Lindy "Computer Use" equivalent:
+         a real, governed headless-browser session an agent can drive step by
+         step when no API/integration exists for a task. Moved here from
+         core/agents with the only code that imports it (ADR-0023). web_task
+         (tools.web.WebTaskToolCallback) is a MANAGED-provider tool rather than
+         in-JVM Playwright; its javadoc explains why. Pinned, not latest - bump
+         deliberately together with the `playwright install chromium` step in
+         the deploy image, since the driver and the browser binary version
+         must match. -->
+    <dependency>
+      <groupId>com.microsoft.playwright</groupId>
+      <artifactId>playwright</artifactId>
+      <version>1.49.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

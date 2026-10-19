@@ -1,0 +1,104 @@
+apiVersion: v2
+name: vegaduta
+description: VegaDuta agentic-AI platform - umbrella chart (core API, jobs, worker, web consoles, ML sidecar, optional services and optional bundled dependencies).
+type: application
+version: 0.2.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.28.0-0"
+home: https://github.com/CD-LC/vegaduta
+icon: https://raw.githubusercontent.com/CD-LC/vegaduta/main/web/public/logo-mark.png
+sources:
+  - https://github.com/CD-LC/vegaduta
+keywords: [vegaduta, ai-agents, agentic, llm, spring-boot, nextjs]
+maintainers:
+  - name: VegaDuta maintainers
+    url: https://github.com/CD-LC/vegaduta
+annotations:
+  licenses: Apache-2.0
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/prerelease: "true"
+dependencies:
+  - name: vegaduta-lib
+    version: 0.2.0
+    repository: file://../vegaduta-lib
+  # --- application ---
+  - name: core
+    version: 0.2.0
+    repository: file://../core
+  - name: core-jobs
+    version: 0.2.0
+    repository: file://../core-jobs
+    condition: global.components.coreJobs
+  - name: core-ingest
+    version: 0.2.0
+    repository: file://../core-ingest
+    condition: global.components.coreIngest
+  - name: core-webhooks
+    version: 0.2.0
+    repository: file://../core-webhooks
+    condition: global.components.coreWebhooks
+  - name: core-intake
+    version: 0.2.0
+    repository: file://../core-intake
+    condition: global.components.coreIntake
+  - name: core-billing
+    version: 0.2.0
+    repository: file://../core-billing
+    condition: global.components.coreBilling
+  - name: core-worker
+    version: 0.2.0
+    repository: file://../core-worker
+    condition: global.temporal.enabled
+  - name: web
+    version: 0.2.0
+    repository: file://../web
+    condition: global.components.web
+  - name: sidecar
+    version: 0.2.0
+    repository: file://../sidecar
+    condition: global.components.sidecar
+  - name: code-intel
+    version: 0.2.0
+    repository: file://../code-intel
+    condition: global.components.codeIntel
+  - name: app-builder
+    version: 0.2.0
+    repository: file://../app-builder
+    condition: global.components.appBuilder
+  - name: rl-trainer
+    version: 0.2.0
+    repository: file://../rl-trainer
+    condition: global.components.rlTrainer
+  - name: tool-sandbox
+    version: 0.2.0
+    repository: file://../tool-sandbox
+    condition: global.components.toolSandbox
+  - name: mcp-stdio-runner
+    version: 0.2.0
+    repository: file://../mcp-stdio-runner
+    condition: global.components.mcpStdioRunner
+  - name: voice-agent
+    version: 0.2.0
+    repository: file://../voice-agent
+    condition: global.components.voiceAgent
+  # --- optional bundled dependencies (each can be replaced by your own, see global.*) ---
+  - name: postgres
+    version: 0.2.0
+    repository: file://../postgres
+    condition: postgres.enabled
+  - name: valkey
+    version: 0.2.0
+    repository: file://../valkey
+    condition: valkey.enabled
+  - name: ollama
+    version: 0.2.0
+    repository: file://../ollama
+    condition: ollama.enabled
+  - name: keycloak
+    version: 0.2.0
+    repository: file://../keycloak
+    condition: keycloak.enabled
+  - name: seaweedfs
+    version: 0.2.0
+    repository: file://../seaweedfs
+    condition: seaweedfs.enabled

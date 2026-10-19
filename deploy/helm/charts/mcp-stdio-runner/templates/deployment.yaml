@@ -1,0 +1,4 @@
+{{- include "mcp-stdio-runner.guard" . -}}
+{{- include "mcp-stdio-runner.variant" . -}}
+{{- $secretEnv := include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "MCP_STDIO_SIDECAR_SHARED_SECRET") | fromYamlArray -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" (dict) "secretEnv" $secretEnv) }}

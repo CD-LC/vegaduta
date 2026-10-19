@@ -1,0 +1,76 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "fixture", "version": "2" },
+  "paths": {
+    "/api/agents": {
+      "get": {
+        "operationId": "AgentController_list",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "offset", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "required": true, "schema": { "type": "string", "enum": ["ACTIVE", "PAUSED"] } }
+        ],
+        "responses": {
+          "200": { "description": "ok", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Agent" } } } } }
+        }
+      },
+      "post": {
+        "operationId": "AgentCrudController_create",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AgentRequest" } } } },
+        "responses": {
+          "201": { "description": "created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Agent" } } } }
+        }
+      }
+    },
+    "/api/agents/{agentId}": {
+      "get": {
+        "operationId": "AgentController_get",
+        "parameters": [{ "name": "agentId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "ok", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Agent" } } } }
+        }
+      }
+    },
+    "/api/agents/{agentId}/export": {
+      "get": {
+        "operationId": "AgentController_export",
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/api/notes": {
+      "post": {
+        "operationId": "NoteController_create",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "text": { "type": ["string", "null"] } } } } } },
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/api/new-thing": {
+      "get": { "operationId": "NewThingController_get", "responses": { "200": { "description": "ok" } } }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "temperature": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "createdAt": { "type": "string" }
+        },
+        "required": ["id"]
+      },
+      "AgentRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "model": { "type": "string" },
+          "maxTokens": { "type": "integer", "default": 0 },
+          "mode": { "type": "string", "enum": ["CHAT", "TASK", "VOICE"] },
+          "ownerId": { "type": "string" }
+        },
+        "required": ["name", "model", "maxTokens", "ownerId"]
+      }
+    }
+  }
+}

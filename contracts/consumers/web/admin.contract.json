@@ -1,0 +1,327 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-admin-issues",
+      "method": "GET",
+      "path": "/api/admin/issues",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-issues",
+      "method": "POST",
+      "path": "/api/admin/issues",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.category",
+          "$.message",
+          "$.title"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.id"
+        ]
+      }
+    },
+    {
+      "id": "post-api-admin-issues-id-acknowledge",
+      "method": "POST",
+      "path": "/api/admin/issues/{id}/acknowledge",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-issues-id-resolve",
+      "method": "POST",
+      "path": "/api/admin/issues/{id}/resolve",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-llm-usage-calls",
+      "method": "GET",
+      "path": "/api/admin/llm-usage/calls",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-llm-usage-calls-id-diagnose",
+      "method": "POST",
+      "path": "/api/admin/llm-usage/calls/{id}/diagnose",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-llm-usage-summary",
+      "method": "GET",
+      "path": "/api/admin/llm-usage/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-llm-usage-tasks-sessionId",
+      "method": "GET",
+      "path": "/api/admin/llm-usage/tasks/{sessionId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].completionTokens",
+          "$[*].errorMessage",
+          "$[*].estimatedCostUsd",
+          "$[*].id",
+          "$[*].latencyMs",
+          "$[*].model",
+          "$[*].promptTokens",
+          "$[*].providerName",
+          "$[*].sessionId",
+          "$[*].startedAt",
+          "$[*].success",
+          "$[*].totalTokens"
+        ]
+      }
+    },
+    {
+      "id": "get-api-admin-spend-reports-by-agent",
+      "method": "GET",
+      "path": "/api/admin/spend-reports/by-agent",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-spend-reports-by-day",
+      "method": "GET",
+      "path": "/api/admin/spend-reports/by-day",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-spend-reports-by-modality",
+      "method": "GET",
+      "path": "/api/admin/spend-reports/by-modality",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-spend-reports-by-model",
+      "method": "GET",
+      "path": "/api/admin/spend-reports/by-model",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-spend-reports-by-provider",
+      "method": "GET",
+      "path": "/api/admin/spend-reports/by-provider",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-spend-reports-summary",
+      "method": "GET",
+      "path": "/api/admin/spend-reports/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-templates-id-approve",
+      "method": "POST",
+      "path": "/api/admin/templates/{id}/approve",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-templates-id-reject",
+      "method": "POST",
+      "path": "/api/admin/templates/{id}/reject",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-templates-id-unverify",
+      "method": "POST",
+      "path": "/api/admin/templates/{id}/unverify",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-templates-id-verify",
+      "method": "POST",
+      "path": "/api/admin/templates/{id}/verify",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-admin-templates-id-withdraw",
+      "method": "POST",
+      "path": "/api/admin/templates/{id}/withdraw",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-templates-approved",
+      "method": "GET",
+      "path": "/api/admin/templates/approved",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-templates-pending",
+      "method": "GET",
+      "path": "/api/admin/templates/pending",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-admin-users",
+      "method": "GET",
+      "path": "/api/admin/users",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].enabled",
+          "$[*].id",
+          "$[*].roles",
+          "$[*].username"
+        ]
+      }
+    },
+    {
+      "id": "post-api-admin-users",
+      "method": "POST",
+      "path": "/api/admin/users",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.id",
+          "$.roles",
+          "$.username"
+        ]
+      }
+    },
+    {
+      "id": "put-api-admin-users-userId-enabled",
+      "method": "PUT",
+      "path": "/api/admin/users/{userId}/enabled",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.id",
+          "$.roles",
+          "$.username"
+        ]
+      }
+    },
+    {
+      "id": "post-api-admin-users-userId-invite-link",
+      "method": "POST",
+      "path": "/api/admin/users/{userId}/invite-link",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.id",
+          "$.roles",
+          "$.username"
+        ]
+      }
+    },
+    {
+      "id": "put-api-admin-users-userId-permissions",
+      "method": "PUT",
+      "path": "/api/admin/users/{userId}/permissions",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.permissions"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.id",
+          "$.roles",
+          "$.username"
+        ]
+      }
+    },
+    {
+      "id": "put-api-admin-users-userId-roles",
+      "method": "PUT",
+      "path": "/api/admin/users/{userId}/roles",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.roles"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.id",
+          "$.roles",
+          "$.username"
+        ]
+      }
+    }
+  ]
+}

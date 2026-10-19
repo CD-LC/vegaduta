@@ -1,0 +1,33 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-chat-turns-turnId",
+      "method": "GET",
+      "path": "/api/chat/turns/{turnId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-chat-turns-turnId-reply",
+      "method": "GET",
+      "path": "/api/chat/turns/{turnId}/reply",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-chat-turns-turnId-stream",
+      "method": "GET",
+      "path": "/api/chat/turns/{turnId}/stream",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

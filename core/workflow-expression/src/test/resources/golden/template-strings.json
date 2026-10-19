@@ -1,0 +1,78 @@
+[
+ {
+  "source": "WorkflowGraphGeneratorService.java",
+  "template": "\n            Expressions: node config text fields may embed {{ expression }} to read data from earlier\n            steps. The plain forms still work and are the right choice for simple cases: "
+ },
+ {
+  "source": "WorkflowGraphGeneratorService.java",
+  "template": " (UPPER_SNAKE_CASE) of every vault secret\n                referenced as {{secret.NAME}} in the graph;\n              "
+ },
+ {
+  "source": "WorkflowGraphGeneratorService.java",
+  "template": ". Do not use expressions for secrets:\n            keep the vault-reference form ({{secret.NAME}}) for API keys.\n            Built-in functions (call as fn(args) or x.fn(args)):\n            "
+ },
+ {
+  "source": "WorkflowGraphGeneratorService.java",
+  "template": "Bearer {{secret.MY_API_KEY}}"
+ },
+ {
+  "source": "video-episode-render-publish.json",
+  "template": "This episode has been approved by a human and the render is complete. Publish it using the youtube-publish tools, in this exact order, and stop if any step fails: (1) upload_video with the title, description, tags and video_url from the payload; (2) upload_captions with the srt from the payload and the videoId from step 1; (3) set_thumbnail with the thumbnail_url from the payload; (4) get_video_status to confirm the upload was not rejected; (5) schedule_publish at the publish_at in the payload. Report the video id and the scheduled time. Do not invent any metadata that is not in the payload. Payload: {{input}}"
+ },
+ {
+  "source": "video-episode-publish.json",
+  "template": "This episode has been approved by a human. Publish it using the youtube-publish tools, in this exact order, and stop if any step fails: (1) upload_video with the title, description, tags and video_url from the payload; (2) upload_captions with the srt from the payload and the videoId from step 1; (3) set_thumbnail with the thumbnail_url from the payload; (4) get_video_status to confirm the upload was not rejected; (5) schedule_publish at the publish_at in the payload. Report the video id and the scheduled time. Do not invent any metadata that is not in the payload. Payload: {{input}}"
+ },
+ {
+  "source": "video-episode-brief.json",
+  "template": "Write the production brief for an episode on this topic: {{input}}"
+ },
+ {
+  "source": "V223__real_world_action_agent_templates.sql",
+  "template": "You watch a fixed list of web pages and report what changed.\n\nEach run: fetch every page on the list, then compare against what you recorded last time using your memory tools. Record the new reading regardless of whether it changed - next run depends on it.\n\nReport ONLY movement:\n- What changed, from what to what, on which page.\n- When nothing changed, say exactly that in one line. Do not pad a quiet run into a report; a watcher that files a long update every run trains people to stop reading it.\n\nAccuracy rules:\n- Quote the figure as the page states it, with its currency and unit. Never normalise silently.\n- If a page fails to load or its layout changed so the figure is no longer where it was, say so plainly. A missing reading is a fact; a guessed one is a lie.\n- Never infer intent ('they are preparing a price war'). Report the observation and stop.\n\nIf a page needs a login, the credential belongs in the workspace vault and is referenced as {{secret.NAME}} in the tool or MCP configuration - never pasted into this chat, and never into your instructions."
+ },
+ {
+  "source": "V197__sdlc_modernization_pipeline_template.sql",
+  "template": "[PLACEHOLDER - not wired to real deploy infrastructure or CI. Intended to hand off to this repo's deploy scripts/pipeline once a human-gated infra integration exists.] Deploy request for: {{input}}"
+ },
+ {
+  "source": "WorkflowGraphGeneratorService.java",
+  "template": "], a[0], a[-1] (last element); method form x.fn(args) works\n              - arrow functions only as function arguments: items.filter(i => i.qty > 0)\n            A missing path yields an empty value, not an error. Text outside {{ }} stays literal. Only\n            these fields are evaluated: agent inputMapping.query, code template, http url / body /\n            header and query values, tool argsJson, output destinations (emailTo, fileName, ...),\n            bulk_email subject / body, crm_lead fields, and the condition "
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "s EMAIL contacts, or a typed\n    // list. Server-side it is throttled (`maxPerMinute`, bounded per run),\n    // checks the tenant suppression list, appends an unsubscribe link +\n    // List-Unsubscribe headers, optionally skips recipients who already\n    // replied (`skipIfReplied`), and returns per-recipient rows as its\n    // output. Replies/bounces arrive as email.reply_received / email.bounced\n    // events.\n    type: \"bulk_email\",\n    color: \"#be185d\",\n    icon: Mail,\n    category: \"Output\",\n    supported: true,\n    defaultConfig: {\n      recipientsSource: \"items\",\n      itemsField: \"\",\n      emailField: \"email\",\n      groupId: \"\",\n      staticRecipients: \"\",\n      subject: \"\",\n      body: \"\",\n      html: false,\n      replyTo: \"\",\n      maxPerMinute: 60,\n      maxRecipients: 100,\n      skipIfReplied: false,\n      includeUnsubscribe: true,\n    },\n  },\n  {\n    // \"CRM Lead\" - mirrored from WorkflowNodeType.CRM_LEAD (see\n    // WorkflowCrmLeadNodeHandler): upsert a lead by email, move its stage, or\n    // add a timeline activity in the built-in Leads CRM. Text fields take the\n    // same {{input}} / {{field}} templating as the HTTP node. Config form\n    // strings live in the \"crmLeadNode\" en.json namespace.\n    type: \"crm_lead\",\n    color: \"#b45309\",\n    icon: Target,\n    category: \"Output\",\n    supported: true,\n    defaultConfig: { action: \"upsert\", email: \"{{email}}\", name: \"{{name}}\", source: \"workflow\", stage: \"\", activityType: \"NOTE\" },\n  },\n];\n\n// Stable render order for palette section headers - Object grouping alone\n// doesn"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "s request body) are {{var}} templates rendered per\n  // recipient; `itemsField` is shared with loop/fan_out.\n  recipientsSource?: BulkEmailSource;\n  emailField?: string;\n  groupId?: string;\n  staticRecipients?: string;\n  subject?: string;\n  html?: boolean;\n  replyTo?: string;\n  maxPerMinute?: number;\n  maxRecipients?: number;\n  skipIfReplied?: boolean;\n  includeUnsubscribe?: boolean;\n  // crm_lead - built-in Leads CRM node (WorkflowCrmLeadNodeHandler). Every text\n  // value supports {{input}} / {{field}} templating. action: upsert | stage | activity.\n  action?: string;\n  leadId?: string;\n  email?: string;\n  name?: string;\n  phone?: string;\n  company?: string;\n  title?: string;\n  source?: string;\n  stage?: string;\n  score?: string;\n  value?: string;\n  tags?: string;\n  notes?: string;\n  note?: string;\n  owner?: string;\n  activityType?: string;\n  activityBody?: string;\n};\n\n// bulk_email recipient sources - mirrors BulkEmailNodeHandler"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "{{email}}"
+ },
+ {
+  "source": "WorkflowGraphGeneratorService.java",
+  "template": "{{fieldName}}"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "{{field}}"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "{{input_json}}"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "{{input}}"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "{{name}}"
+ },
+ {
+  "source": "nodeDefs.ts",
+  "template": "{{secret.NAME}}"
+ }
+]

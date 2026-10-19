@@ -1,0 +1,46 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-documentgen-documents",
+      "method": "GET",
+      "path": "/api/documentgen/documents",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.content",
+          "$.number",
+          "$.size",
+          "$.totalElements",
+          "$.totalPages"
+        ]
+      }
+    },
+    {
+      "id": "post-api-documentgen-documents",
+      "method": "POST",
+      "path": "/api/documentgen/documents",
+      "status": 202,
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.downloadUrl",
+          "$.filename",
+          "$.id",
+          "$.status",
+          "$.type"
+        ]
+      }
+    },
+    {
+      "id": "get-api-documentgen-documents-id",
+      "method": "GET",
+      "path": "/api/documentgen/documents/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

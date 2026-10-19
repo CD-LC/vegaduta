@@ -1,0 +1,41 @@
+{
+  "name": "Outreach Reply Listen",
+  "description": "Hourly companion to the Outreach Lead-Gen Pipeline: the listener agent polls the outreach mailbox via mcp__outreach__check_replies (read-only IMAP - nothing is marked read, deduped by Message-ID), classifies each reply's intent, and records it with mcp__outreach__record_reply_intent - which ends follow-ups for that prospect and permanently opts out unsubscribe/bounce inside the connector. Interested/question replies trigger one digest email to the operator. Requires the outreach MCP connector with OUTREACH_IMAP_* env and the 'Outreach Reply Listener' agent. Replace REPLACE_WITH_LISTENER_AGENT_ID before POSTing; then activate and PUT /api/workflows/{id}/schedule (e.g. cron '*/30 * * * *').",
+  "graph": {
+    "nodes": [
+      {
+        "id": "trigger-1",
+        "type": "trigger",
+        "position": { "x": 0, "y": 0 },
+        "data": {
+          "label": "Scheduled trigger (cron on the workflow, e.g. every 30 min)",
+          "config": {}
+        }
+      },
+      {
+        "id": "agent-listener",
+        "type": "agent",
+        "position": { "x": 280, "y": 0 },
+        "data": {
+          "label": "Listener: check replies, classify, record intents, escalate",
+          "config": {
+            "agentId": "REPLACE_WITH_LISTENER_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "output-log",
+        "type": "output",
+        "position": { "x": 560, "y": 0 },
+        "data": {
+          "label": "Intent counts for the run",
+          "config": { "channel": "log" }
+        }
+      }
+    ],
+    "edges": [
+      { "id": "e1", "source": "trigger-1", "target": "agent-listener", "sourceHandle": null, "targetHandle": null },
+      { "id": "e2", "source": "agent-listener", "target": "output-log", "sourceHandle": null, "targetHandle": null }
+    ]
+  }
+}

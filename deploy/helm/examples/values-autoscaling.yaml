@@ -1,0 +1,59 @@
+# Autoscale the API on what actually loads it: open HTTP requests per pod.
+#
+# Why not CPU alone: a chat turn spends almost all of its time waiting on model tokens, so a pod holding
+# 200 open SSE streams can sit at 10% CPU. The number of requests a pod is serving right now is the honest
+# signal, and Spring Boot already exports it:
+#
+#   http_server_requests_active_seconds_count   (a long-task timer; its count is the open requests)
+#
+# core/app's InFlightRequestsMetricContractTest pins that series name. It includes the short health and
+# Prometheus scrape requests, which only shifts the baseline by one or two.
+#
+# Pick ONE of the two routes below. Both need a Prometheus that scrapes core
+# (global.serviceMonitor.enabled=true with kube-prometheus-stack), and both keep the CPU target as a floor.
+# Rendered and validated only: no cluster in CI has run either route.
+#
+#   helm upgrade --install vegaduta deploy/helm/charts/vegaduta -f values.yaml \
+#     -f deploy/helm/examples/values-scale-out.yaml -f deploy/helm/examples/values-autoscaling.yaml
+
+core:
+  # ---- Route A: HPA on a Pods metric. Needs prometheus-adapter (or any custom.metrics.k8s.io provider).
+  # Adapter rule that publishes the series as "http_server_requests_active" per pod:
+  #
+  #   rules:
+  #     custom:
+  #       - seriesQuery: 'http_server_requests_active_seconds_count{namespace!="",pod!=""}'
+  #         resources:
+  #           overrides: { namespace: { resource: namespace }, pod: { resource: pod } }
+  #         name: { as: "http_server_requests_active" }
+  #         metricsQuery: 'sum(<<.Series>>{<<.LabelMatchers>>}) by (<<.GroupBy>>)'
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 80
+    metrics:
+      - type: Pods
+        pods:
+          metric:
+            name: http_server_requests_active
+          target:
+            type: AverageValue
+            averageValue: "40"   # open requests per pod before adding one; size from a load test (tests/load)
+
+  # ---- Route B: KEDA. Needs KEDA and Prometheus reachable from the KEDA operator. Use instead of Route A:
+  #   set hpa.enabled=false and keda.enabled=true (the chart refuses both).
+  # keda:
+  #   enabled: true
+  #   minReplicas: 2
+  #   maxReplicas: 8
+  #   triggers:
+  #     - type: prometheus
+  #       metricType: AverageValue          # the sum below is divided by the current replica count
+  #       metadata:
+  #         serverAddress: http://prometheus-operated.monitoring.svc:9090
+  #         query: sum(http_server_requests_active_seconds_count{namespace="vegaduta",pod=~"vegaduta-core-[a-z0-9]+-[a-z0-9]+"})
+  #         threshold: "40"
+  #     - type: cpu
+  #       metricType: Utilization
+  #       metadata: { value: "80" }

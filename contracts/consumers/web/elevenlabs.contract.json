@@ -1,0 +1,83 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-elevenlabs-audio",
+      "method": "GET",
+      "path": "/api/elevenlabs/audio",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-elevenlabs-audio-id",
+      "method": "GET",
+      "path": "/api/elevenlabs/audio/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-elevenlabs-credential",
+      "method": "DELETE",
+      "path": "/api/elevenlabs/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-elevenlabs-credential",
+      "method": "POST",
+      "path": "/api/elevenlabs/credential",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.apiKey"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-elevenlabs-credential-status",
+      "method": "GET",
+      "path": "/api/elevenlabs/credential/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-elevenlabs-voices",
+      "method": "GET",
+      "path": "/api/elevenlabs/voices",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-elevenlabs-voices",
+      "method": "POST",
+      "path": "/api/elevenlabs/voices",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-elevenlabs-voices-id",
+      "method": "DELETE",
+      "path": "/api/elevenlabs/voices/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

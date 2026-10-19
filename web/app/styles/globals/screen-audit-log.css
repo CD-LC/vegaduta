@@ -1,0 +1,292 @@
+/* ==========================================================================
+ * Admin / Audit log (#909) - pixel-match of design_handoff_axon's
+ * "Admin Audit.dc.html": title+subtitle+Export CSV header, a pill filter
+ * row (search / action type / actor / time range / live indicator), and a
+ * TIME · ACTOR · ACTION · TARGET · RESULT table with action-type and
+ * result colors lifted straight from the mock's inline styles. Reuses the
+ * existing --ax-* tokens (same palette source as the design file's own
+ * :root vars) and the .ax-mnt-table/.ax-mnt-avatar visual language already
+ * established for Maintenance's Users table, rather than inventing a
+ * second table style.
+ * ========================================================================== */
+
+.ax-adt-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ax-adt-title {
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  color: var(--ax-text);
+  margin: 0;
+}
+
+.ax-adt-sub {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  margin-top: 3px;
+}
+
+.ax-adt-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1px solid var(--ax-border);
+  border-radius: 9px;
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+  font-family: var(--font-mono), monospace;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ax-adt-export:hover:not(:disabled) {
+  background: var(--ax-chip);
+  border-color: var(--ax-border2);
+}
+
+.ax-adt-export:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- filter row ---------------------------------------------------------- */
+
+.ax-adt-filters {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.ax-adt-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid var(--ax-border);
+  border-radius: 9px;
+  width: 280px;
+  max-width: 100%;
+  color: var(--ax-dim);
+  font-size: var(--fs-caption);
+  font-family: var(--font-mono), monospace;
+  background: transparent;
+}
+
+.ax-adt-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ax-text);
+  font-size: var(--fs-caption);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-adt-search input::placeholder {
+  color: var(--ax-dim);
+}
+
+.ax-adt-pill-wrap {
+  position: relative;
+}
+
+.ax-adt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 13px;
+  border-radius: 100px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  cursor: pointer;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-chip);
+  color: var(--ax-mid);
+  white-space: nowrap;
+}
+
+.ax-adt-pill-active {
+  background: rgba(155, 125, 255, 0.12);
+  border-color: rgba(155, 125, 255, 0.28);
+  color: var(--ax-violet);
+}
+
+.ax-adt-pill-menu {
+  position: absolute;
+  left: 0;
+  top: 40px;
+  min-width: 190px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--ax-border);
+  border-radius: 11px;
+  background: var(--ax-rail);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+}
+
+.ax-adt-pill-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ax-adt-pill-option:hover {
+  background: var(--ax-chip);
+}
+
+.ax-adt-pill-option-active {
+  color: var(--ax-violet);
+}
+
+.ax-adt-live {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ax-adt-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ax-green);
+  box-shadow: 0 0 6px var(--ax-green);
+  animation: axPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes axPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---- table ---------------------------------------------------------------- */
+
+.ax-adt-table {
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.ax-adt-row-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr 1.5fr 2fr 0.7fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.ax-adt-table-head {
+  padding: 12px 20px;
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--ax-border2);
+}
+
+.ax-adt-row {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--ax-border2);
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+}
+
+.ax-adt-row:last-child {
+  border-bottom: none;
+}
+
+.ax-adt-time {
+  color: var(--ax-dim);
+}
+
+.ax-adt-actor {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ax-adt-actor-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: var(--fs-micro);
+  color: #05070d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.ax-adt-actor-name {
+  color: var(--ax-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-adt-target {
+  color: var(--ax-mid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-adt-result {
+  font-weight: 600;
+}
+
+.ax-adt-result-ok {
+  color: var(--ax-green);
+}
+.ax-adt-result-held {
+  color: var(--ax-amber);
+}
+.ax-adt-result-fail {
+  color: var(--ax-red);
+}
+
+.ax-adt-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ax-dim);
+  font-size: var(--fs-caption);
+}
+
+@media (max-width: 900px) {
+  .ax-adt-row-grid {
+    grid-template-columns: 0.8fr 1.1fr 1.3fr 0.6fr;
+  }
+  .ax-adt-row-grid > *:nth-child(4) {
+    display: none;
+  }
+}

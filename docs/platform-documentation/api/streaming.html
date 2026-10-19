@@ -1,0 +1,166 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Streaming: SSE &amp; AG-UI — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="api" data-page="streaming.html" data-doc="VD-API-003" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="overview.html">API Reference</a><span class="sep">/</span>Streaming: SSE &amp; AG-UI</div>
+<div class="doc-meta" data-auto></div>
+<h1>Streaming: SSE &amp; AG-UI</h1>
+
+<dl class="props">
+  <dt>Transport</dt><dd>Server-Sent Events (<code>text/event-stream</code>) over HTTPS POST/GET. No WebSocket endpoint is documented on this page.</dd>
+  <dt>Auth</dt><dd>Bearer JWT for the tenant-facing endpoints ( <a href="authentication.html">Authentication</a> ); share/demo streams use their own credentials.</dd>
+  <dt>Two wire formats</dt><dd>The legacy <em>chat stream</em> (in-band marker chunks) and the structured <em>AG-UI</em> stream. Both run the same turn through <code>AgentChatService</code>.</dd>
+</dl>
+
+<h2>SSE endpoints in core</h2>
+<table>
+  <thead><tr><th>Verb and path</th><th>Controller</th><th>Auth</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST /api/agents/{agentId}/chat</code></td><td><code>AgentController</code></td><td>JWT, agent <code>RUNNER</code></td><td>Streamed agent turn (token chunks).</td></tr>
+    <tr><td><code>POST /api/agents/{agentId}/agui/run</code></td><td><code>AgUiRunController</code></td><td>JWT, <code>RUNNER</code></td><td>AG-UI run (consumes <code>application/json</code>).</td></tr>
+    <tr><td><code>GET /api/agents/{agentId}/agui/runs/{runId}/events</code></td><td><code>AgUiRunController</code></td><td>JWT, <code>RUNNER</code></td><td>Rejoin a run after a dropped connection.</td></tr>
+    <tr><td><code>GET /api/agents/{agentId}/jobs/{jobId}/trace/stream</code></td><td><code>AgentJobObservabilityController</code></td><td>JWT, <code>VIEWER</code></td><td>Live trace of an autonomous job; closes when the job reaches a terminal state.</td></tr>
+    <tr><td><code>POST /api/share/agents/{shareId}/chat/stream</code></td><td><code>AgentShareController</code></td><td>None (share id)</td><td>Anonymous shared-agent chat; body <code>message</code> (max 2000 chars), optional <code>sessionKey</code>. 429 <code>rate_limited</code>, 410 <code>expired</code>, 422 <code>invalid</code>.</td></tr>
+    <tr><td><code>POST /api/share/agents/{shareId}/voice/turn</code>; <code>POST /api/voice/agents/{agentId}/turn</code></td><td><code>AgentShareVoiceController</code>; <code>VoiceCallController</code></td><td>Share id; JWT</td><td>Voice turn, multipart request, SSE response.</td></tr>
+    <tr><td><code>POST /api/quick-task/stream</code></td><td><code>QuickTaskController</code></td><td>JWT</td><td>Quick-task stream.</td></tr>
+    <tr><td><code>POST /api/briefs/plan</code></td><td><code>BriefController</code></td><td>JWT with <code>PERM_MANAGE_AGENTS</code> (catch-all <code>/api/briefs/**</code> matcher)</td><td>Brief planning stream.</td></tr>
+    <tr><td><code>POST /api/demo/studio/agents/{agentId}/mission</code>; <code>POST /api/demo/studio/workflows/{workflowId}/run</code></td><td><code>DemoStudioController</code></td><td><code>X-Demo-Token</code></td><td>Demo Agent Studio streams.</td></tr>
+  </tbody>
+</table>
+<p>
+  Workflow runs are <em>not</em> streamed: <code>POST /api/workflows/{id}/run</code> returns the run
+  (<code>WorkflowRunResponse</code>). With <code>"background": true</code> it returns the freshly persisted RUNNING row
+  and the client polls <code>GET /api/workflows/{id}/runs/{runId}</code> (see <a href="../functional/workflows.html">Workflow Engine</a>).
+  Request fields (<code>WorkflowRunRequest</code>): <code>input</code>, <code>requestedBy</code>, <code>clientRunId</code>,
+  <code>attachments</code>, <code>background</code>. The A2A <code>message/stream</code> method also answers with
+  <code>text/event-stream</code>; see <a href="developer-api.html">Developer API</a>.
+</p>
+
+<h2>Chat stream (<code>POST /api/agents/{agentId}/chat</code>)</h2>
+<h3>Request (<code>ChatRequest</code>)</h3>
+<table>
+  <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>message</code></td><td>string, required</td><td>Max 8000 characters (bean validation).</td></tr>
+    <tr><td><code>sessionId</code></td><td>string</td><td>Generated if omitted. May not start with <code>eval:</code> or <code>sim:</code> (400).</td></tr>
+    <tr><td><code>attachmentKey</code>, <code>attachmentMimeType</code>, <code>attachments</code>, <code>visionSessionId</code>, <code>turnRef</code></td><td>various</td><td>Attachment and vision context. Upload via <code>POST /api/agents/{agentId}/chat/attachments</code> (multipart).</td></tr>
+    <tr><td><code>forceFastDepth</code></td><td>boolean</td><td>Used by the voice bridge to force the FAST reasoning depth.</td></tr>
+    <tr><td><code>stepEvents</code></td><td>boolean</td><td>Opt in to tool-activity events on the stream.</td></tr>
+  </tbody>
+</table>
+<h3>Response framing</h3>
+<ul>
+  <li>Headers: <code>X-Session-Id</code> (the session id, exposed via CORS), <code>Cache-Control: no-cache</code>, <code>X-Accel-Buffering: no</code>.</li>
+  <li>Body is a <code>Flux&lt;String&gt;</code>: each chunk is written as its own SSE <code>data:</code> event. Spring adds <strong>no space</strong> after <code>data:</code>, so clients strip the prefix by fixed length, not by trimming.</li>
+  <li>An empty chunk can occur (provider empty delta, keepalive on buffered reasoning depths). Ignore it.</li>
+  <li>Multi-line chunks are split into several <code>data:</code> lines by the SSE writer.</li>
+</ul>
+<h3>In-band markers</h3>
+<table>
+  <thead><tr><th>Constant</th><th>Value</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>STREAM_ERROR_MARKER</code></td><td><code>@@AGENT_CHAT_STREAM_ERROR_9f2b1c@@</code></td><td>Chunk prefix; the rest is a failure message. Emitted only if the stream already wrote to the wire (status line committed). A failure before the first byte is a normal HTTP error instead (402, 503 and so on, via <code>GlobalExceptionHandler</code>).</td></tr>
+    <tr><td><code>STEP_EVENT_MARKER</code></td><td><code>@@AGENT_STEP_EVENT_4d81ba@@</code></td><td>Chunk prefix followed by single-line JSON step event (tool call, tool result, error, plan, guardrail, handoff, run start/finish). Emitted only when <code>stepEvents:true</code>.</td></tr>
+    <tr><td><code>INTERRUPTED_REPLY_MARKER</code></td><td><code>\n\n[reply interrupted]</code></td><td>Appended to a partially persisted reply when a turn is cancelled or the client disconnects (package-private constant in <code>AgentChatService</code>).</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-note">
+  <div class="callout-title">Why step events are opt-in</div>
+  Many consumers read this wire format without being able to opt out: the LiveKit voice bridge (would speak the
+  JSON aloud), omnichannel adapters (would paste it into customer messages), and IDE clients. So the trace is a
+  property of the request, never a default. The exact step-event JSON fields were not enumerated for this page:
+  not documented here; see <code>AgentStepEventEmitter</code>.
+</div>
+<h3>Run control</h3>
+<table>
+  <thead><tr><th>Verb and path</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST /api/agents/{agentId}/chat/sessions/{sessionId}/cancel</code></td><td>Requires <code>RUNNER</code>. Records a Redis flag polled by the running turn (about every 500 ms); replies <code>202</code> with a map containing <code>cancelRequested: true</code>. Works across replicas.</td></tr>
+    <tr><td><code>POST /api/agents/{agentId}/chat/sessions/{sessionId}/rewind</code></td><td>Body <code>SessionRewindRequest</code>; semantics not documented on this page.</td></tr>
+  </tbody>
+</table>
+
+<h2>AG-UI (<code>POST /api/agents/{agentId}/agui/run</code>)</h2>
+<p>
+  A protocol-shaped alternative that lets any AG-UI client (for example <code>@ag-ui/client</code>'s
+  <code>HttpAgent</code>, CopilotKit, or a hand-written SSE reader) drive an agent with no VegaDūta-specific
+  code. It is strictly additive: same authorization, session semantics, moderation, guardrails, metering and
+  persistence as <code>/chat</code>; <code>threadId</code> <em>is</em> the <code>sessionId</code>.
+</p>
+<h3>Request (<code>RunAgentInput</code>)</h3>
+<p>
+  Fields: <code>threadId</code>, <code>runId</code>, <code>parentRunId</code>, <code>state</code>, <code>messages[]</code>
+  (<code>id</code>, <code>role</code>, <code>content</code>, <code>toolCalls</code>, <code>toolCallId</code>, <code>name</code>),
+  <code>tools[]</code>, <code>context[]</code>, <code>forwardedProps</code>; unknown fields are ignored. The controller runs the
+  <em>last user message's text</em> (string content, or the joined <code>text</code> parts of an array). No user text: 400.
+  Over the controller's maximum message length: 400. Missing <code>threadId</code>/<code>runId</code> are generated as UUIDs.
+  In the controller code read for this page, only the last user message and the ids are passed to the turn; <code>tools</code> and <code>state</code> are not forwarded to it.
+</p>
+<h3>Event sequence</h3>
+<pre>RUN_STARTED{threadId,runId}
+STATE_SNAPSHOT{snapshot:{sessionId,agentId}}
+  TEXT_MESSAGE_START{messageId,role:"assistant"}
+  TEXT_MESSAGE_CONTENT{messageId,delta}            (one per non-empty token)
+  TEXT_MESSAGE_END{messageId}
+  TOOL_CALL_START{toolCallId,toolCallName,parentMessageId}
+  TOOL_CALL_ARGS{toolCallId,delta}                 (whole redacted args JSON as one delta)
+  TOOL_CALL_END{toolCallId}
+  TOOL_CALL_RESULT{messageId,toolCallId,content,role:"tool"}
+  CUSTOM{name:"plan"|"guardrail"|"handoff",value:{...}}
+RUN_FINISHED{threadId,runId}   or   RUN_ERROR{message,code}   (never both)</pre>
+<ul>
+  <li>Every event carries <code>type</code> and <code>timestamp</code>; null fields are omitted. Each SSE frame is one single-line JSON <code>data:</code> value with an <code>id:</code> equal to its sequence number.</li>
+  <li>Text after a tool call opens a <em>new</em> assistant message with a fresh <code>messageId</code>.</li>
+  <li>A tool exception surfaces as <code>TOOL_CALL_RESULT</code> (content says it failed), not <code>RUN_ERROR</code>; the run's terminal <code>RUN_ERROR</code> comes only from a real stream failure.</li>
+  <li>Not emitted: <code>STEP_STARTED/FINISHED</code>, <code>STATE_DELTA</code>, <code>MESSAGES_SNAPSHOT</code>, <code>RAW</code>. Clients must treat these as optional. The protobuf transport is not offered.</li>
+  <li>A <code>:keepalive</code> SSE comment is sent every 15 seconds of silence; SSE clients ignore comments.</li>
+  <li>Pre-stream failures (unknown agent or no access: 404, malformed body: 400, tenant kill switch, guardrail 422) are plain HTTP errors with no events. A request whose <code>Accept</code> cannot take <code>text/event-stream</code> gets 406.</li>
+</ul>
+<h3>Resume</h3>
+<p>
+  <code>GET /api/agents/{agentId}/agui/runs/{runId}/events</code> replays buffered events after a position, then attaches to the live
+  tail if the run executes on this pod. Position: <code>?after=&lt;seq&gt;</code> or the standard <code>Last-Event-ID</code> header
+  (<code>after</code> wins). If the run is on another pod or its live window passed you receive the buffered history and a clean
+  end of stream; poll again until the buffer contains <code>RUN_FINISHED</code> or <code>RUN_ERROR</code>.
+  Companion: <code>GET /api/agents/{agentId}/agui/tools</code> (JSON, <code>VIEWER</code>) lists the agent's tools as AG-UI
+  <code>Tool</code> objects (<code>name</code>, <code>description</code>, permissive <code>parameters</code> schema).
+</p>
+<pre class="mermaid">
+sequenceDiagram
+  participant U as AG-UI client
+  participant A as AgUiRunController
+  participant S as AgentChatService
+  participant B as Run buffer (Redis)
+  U->>A: POST /agui/run (Bearer JWT, Accept: text/event-stream)
+  A->>A: requireAccess RUNNER
+  A->>S: chat(..., stepEvents active)
+  S-->>A: tokens + step events
+  A->>B: record(event) returns seq
+  A-->>U: data: {RUN_STARTED} id: 1
+  A-->>U: data: {TEXT_MESSAGE_CONTENT} id: n
+  Note over U,A: connection drops
+  U->>A: GET /runs/{runId}/events?after=n
+  A->>B: readAfter(n)
+  A-->>U: buffered events, then live tail
+</pre>
+
+<h2>Client guidance</h2>
+<ul>
+  <li>Send <code>Accept: text/event-stream</code> and <code>Authorization: Bearer &lt;token&gt;</code> (browser <code>EventSource</code> cannot set the header; use <code>fetch</code> streaming).</li>
+  <li>Behind proxies keep idle timeouts above the 15 s keepalive; <code>X-Accel-Buffering: no</code> is already set on chat.</li>
+  <li>Reconnect AG-UI with <code>Last-Event-ID</code>. The legacy chat stream has no resume; cancel then re-ask.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatStreamController.java</code> — <code>chat</code>; <code>AgentChatSessionController.java</code> — <code>cancelChatTurn</code>; <code>core/agents/src/main/java/com/agenticai/core/agents/core/AgentController.java</code> — <code>STREAM_ERROR_MARKER</code>, <code>SESSION_ID_HEADER</code>.</li>
+  <li><code>core/agents/.../dto/ChatRequest.java</code>; <code>core/agents/.../tools/AgentStepEventEmitter.java</code> (<code>STEP_EVENT_MARKER</code>, framing rationale).</li>
+  <li><code>core/agents/.../agui/AgUiRunController.java</code>, <code>AgUiEvent.java</code>, <code>AgUiEventMapper.java</code>, <code>RunAgentInput.java</code>, <code>AgUiRunEventBuffer.java</code>.</li>
+  <li><code>core/agents/.../job/AgentJobObservabilityController.java</code>, <code>share/AgentShareController.java</code>, <code>demo/studio/DemoStudioController.java</code>; <code>core/voice/.../VoiceCallController.java</code>, <code>AgentShareVoiceController.java</code>; <code>core/app/.../quicktask/QuickTaskController.java</code>; <code>core/brief/.../BriefController.java</code>.</li>
+  <li><code>core/workflow/.../WorkflowController.java</code> and <code>dto/WorkflowRunRequest.java</code> — run and background-run.</li>
+  <li>Related: <a href="../functional/agents-runtime.html">Agents &amp; Agent Runtime</a>, <a href="developer-api.html">Developer API</a>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

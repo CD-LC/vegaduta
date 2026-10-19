@@ -1,0 +1,2 @@
+<!-- VegaDuta landing mark. Authored in this repo: a generic glyph in the brand's colour, never a reproduction of any registered logo. See web/app/components/demo-landing/BrandMark.tsx for the colour ledger. -->
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0FA8A0" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round" role="img" aria-hidden="true"><rect x="12.5" y="5" width="7" height="13" rx="3.5"/><path d="M8 15.5a8 8 0 0 0 16 0"/><path d="M16 23.5V27M11.5 27h9"/></svg>

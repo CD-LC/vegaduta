@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>reliability</artifactId>
+  <name>reliability</name>
+  <description>
+    Pure-arithmetic reliability estimators (BinomialReliability: unbiased pass@k and pass^k), shared by
+    core/quality (in-app eval runs, the promotion gate, and the standalone CI golden-dataset
+    harness in its eval package - merged from the former core/eval module) so the maths exists exactly once. True leaf: no dependency on any other core module and no Spring.
+    It keeps the package com.agenticai.core.quality.stats on purpose - the class used to live in core/quality
+    and every existing import stays valid (a split package across jars is fine on the plain classpath this
+    project uses; there is no JPMS).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

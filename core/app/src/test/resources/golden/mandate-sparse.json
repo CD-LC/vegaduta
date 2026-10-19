@@ -1,0 +1,21 @@
+{
+  "id" : null,
+  "agentId" : null,
+  "grantedByUserId" : null,
+  "scope" : null,
+  "maxPerTxnPaise" : 0,
+  "maxDailyPaise" : 0,
+  "maxMonthlyPaise" : 0,
+  "allowedVpas" : [ ],
+  "allowedMerchantCategories" : [ ],
+  "approvalPolicy" : null,
+  "approvalThresholdPaise" : null,
+  "validFrom" : null,
+  "validUntil" : null,
+  "status" : null,
+  "canonicalHashSha256" : null,
+  "createdAt" : null,
+  "revokedAt" : null,
+  "revokedBy" : null,
+  "revokeReason" : null
+}

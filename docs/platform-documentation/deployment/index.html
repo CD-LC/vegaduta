@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deployment Guide — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="deployment" data-page="index.html" data-doc="VD-DEP-000" data-status="verified" data-updated="2026-09-25">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Deployment</div>
+  <h1>Deployment Guide</h1>
+  <p class="lede">
+    VegaDūta is self-hosted. Every release publishes signed multi-arch images
+    and OCI Helm charts to GHCR; you deploy them with Docker Compose (Lite or
+    Full tier) or Helm on Kubernetes. This repository has no hosted-deploy
+    pipeline: nothing here deploys for you. Every rule below exists because
+    breaking it has caused an outage somewhere.
+  </p>
+
+  <div class="callout callout-danger">
+    <div class="callout-title">Non-negotiable rules — read before you touch anything</div>
+    <ol style="margin:6px 0 2px">
+      <li><strong>Do not power-cycle a stack people depend on to "fix" a hang.</strong>
+        A hard host reset is a power-yank of the tenant database, and it destroys the
+        evidence. Collect logs, container states and memory first. <code>docker compose
+        down -v</code> (or <code>scripts/vegaduta down --volumes</code>) deletes data.</li>
+      <li><strong>Pin versions.</strong> Set <code>VEGADUTA_VERSION</code> (Compose)
+        or the chart version (Helm) to a released version; <code>latest</code>
+        follows the newest release and a re-run can change what you run.</li>
+      <li><strong>Verify what you pulled.</strong> Images are signed with cosign
+        (keyless) and carry SPDX SBOM and SLSA provenance attestations; see
+        <a href="ci-cd-pipeline.html">CI/CD Pipelines</a> for the verify commands.</li>
+      <li><strong>Core deploys first.</strong> Core owns the Flyway migrations.
+        Order is: dependencies → <code>core</code> → verify healthy → then the
+        frontends that call it.</li>
+      <li><strong>No <code>localhost</code> in a browser-facing URL on a server.</strong>
+        A <code>PUBLIC_*</code> value that points at localhost sends other
+        users' browsers to their own machines and breaks sign-in.
+        <code>scripts/vegaduta doctor</code> checks this. Source builds
+        (<code>--build</code>) of <code>web</code> must be rebuilt after a
+        domain change so their fallback URLs change too.</li>
+      <li><strong><code>APP_ENCRYPTION_KEY</code> must be identical everywhere
+        core boots.</strong> A different key makes every stored credential
+        permanently undecryptable. Back up <code>deploy/compose/.env</code>
+        together with the data.</li>
+    </ol>
+  </div>
+
+  <h2>The deployment options</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Lite — Docker Compose <span class="badge badge-verified">supported</span></h4>
+      <p>5 containers (postgres, valkey, keycloak in dev mode, core, web); the
+      <code>rag</code> profile adds the sidecar. About 6 GB of Docker memory.
+      <code>scripts/vegaduta up --lite</code> (or <code>make up-lite</code>).
+      Config: <code>deploy/compose/lite.yml</code>.</p>
+    </div>
+    <div class="card">
+      <h4>Full — Docker Compose <span class="badge badge-verified">supported</span></h4>
+      <p>Adds web-admin, PgBouncer, SeaweedFS (S3), a Keycloak database, the sidecar
+      and opt-in profiles (events, temporal, jobs, observability, tracing, voice,
+      rl, code-intel, builder, sandbox).
+      <code>scripts/vegaduta up --full [--profile …]</code> (or <code>make up</code>).
+      Config: <code>deploy/compose/docker-compose.yml</code> + <code>deploy/compose/.env</code>.
+      <a class="card-link" href="compose-stack.html">Compose stack →</a></p>
+    </div>
+    <div class="card">
+      <h4>Kubernetes (Helm) <span class="badge badge-draft">preview</span></h4>
+      <p>Umbrella chart <code>vegaduta</code> from
+      <code>oci://ghcr.io/cd-lc/charts</code>; each component is also its own
+      chart. The charts lint, render and validate in CI, but per
+      <code>deploy/helm/README.md</code> they have not yet been run end to end
+      against published images. Dependencies are bundled or your own
+      (PostgreSQL, Valkey/Redis, S3, an OIDC issuer).</p>
+    </div>
+    <div class="card">
+      <h4>Local dev <span class="badge badge-verified">dev</span></h4>
+      <p>Direct processes (<code>mvn spring-boot:run</code>, <code>npm run dev</code>,
+      <code>uvicorn</code>) against the compose infra subset.
+      <a class="card-link" href="local-development.html">Local development →</a></p>
+    </div>
+  </div>
+
+  <h2>The deploy model, in five steps (Compose)</h2>
+  <table>
+    <thead><tr><th>#</th><th>Step</th><th>Command shape</th><th>Verify</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Generate secrets and start the stack</td>
+        <td><code>scripts/vegaduta up --full</code> (adds <code>--domain &lt;your-domain&gt;</code> on a server)</td>
+        <td>every service reports healthy</td></tr>
+      <tr><td>2</td><td>Check the environment</td>
+        <td><code>scripts/vegaduta doctor</code>, <code>scripts/vegaduta status</code></td>
+        <td>no localhost in public URLs; ports and disk fine</td></tr>
+      <tr><td>3</td><td>Upgrade to a release</td>
+        <td><code>scripts/vegaduta upgrade --version X.Y.Z</code> (backs up <code>.env</code>, pulls, recreates, waits for health)</td>
+        <td>services healthy; Flyway migrations applied at core start</td></tr>
+      <tr><td>4</td><td>Health-sweep the public endpoints</td>
+        <td><code>curl</code> <code>api/actuator/health</code>, <code>app</code>, <code>admin</code>, <code>auth/.well-known</code></td>
+        <td>all 200</td></tr>
+      <tr><td>5</td><td>Keep the previous version and a backup until verified</td>
+        <td>rollback = re-run with the previous <code>VEGADUTA_VERSION</code> (migrations are forward-only; restore the database backup if a migration must be undone)</td>
+        <td>previous version and backup recorded before you started</td></tr>
+    </tbody>
+  </table>
+  <p>On Kubernetes the equivalent is <code>helm upgrade</code> with a pinned chart version. Rollback detail: <a href="rollback-recovery.html">Rollback &amp; Recovery</a>.</p>
+
+  <h2>"I want to…" — decision table</h2>
+  <table>
+    <thead><tr><th>I want to…</th><th>Go to</th></tr></thead>
+    <tbody>
+      <tr><td>Install or upgrade</td><td><code>deploy/README.md</code>, <code>deploy/helm/README.md</code>, <code>docs/installation.md</code></td></tr>
+      <tr><td>Roll a deploy back</td><td><a href="rollback-recovery.html">Rollback &amp; Recovery</a></td></tr>
+      <tr><td>Understand what runs where</td><td><a href="../architecture/service-topology.html">Service Topology</a>, <a href="../appendix/ports-services.html">Ports &amp; Service Matrix</a></td></tr>
+      <tr><td>Know what CI and releases do</td><td><a href="ci-cd-pipeline.html">CI/CD Pipelines</a></td></tr>
+      <tr><td>Operate the Compose stack</td><td><a href="compose-stack.html">Compose stack</a></td></tr>
+      <tr><td>Run the platform on my machine</td><td><a href="local-development.html">Local Development Setup</a></td></tr>
+      <tr><td>Add/change a public hostname or TLS</td><td><a href="compose-stack.html#domain">Compose stack §Domain overlay</a> (Helm: your Ingress values)</td></tr>
+      <tr><td>Fix Keycloak — realm, clients, SMTP, social login</td><td><a href="keycloak-provisioning.html">Keycloak Provisioning</a></td></tr>
+      <tr><td>Migrate a database schema</td><td><a href="rollback-recovery.html">Rollback &amp; Recovery</a> (Flyway is forward-only; versions share one namespace across controlplane and tenant dirs)</td></tr>
+      <tr><td>Rotate a secret</td><td><a href="../security/secrets-management.html">Secrets &amp; Key Management</a></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">"Released" is not "running"</div>
+    Nothing deploys automatically. Never assume the code you are reading is the
+    code that is running: check the running image version (<code>scripts/vegaduta status</code>,
+    <code>docker compose ps</code>, or <code>kubectl get pods -o wide</code>) against
+    the release tag.
+  </div>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

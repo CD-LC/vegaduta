@@ -1,0 +1,203 @@
+/* ---- 4. Glass cards --------------------------------------------------------- */
+/* Any `bg-card` / `bg-card/NN` box and any ShadCN Card on a public page. */
+.vd-pub [class*="bg-card"],
+.vd-pub [data-slot="card"] {
+  background-color: rgba(255, 255, 255, 0.58);
+  background-image: none;
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: var(--glass-edge), 0 14px 44px -22px rgba(19, 19, 24, 0.22);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* Outlined-only panels (api-reference, changelog, status: `rounded-2xl border
+   border-border/60` with no bg-*) become the same frosted slab. */
+.vd-pub :is(div, section, article, li)[class*="rounded-2xl"][class*="border-border"]:not([class*="bg-"]),
+.vd-pub :is(div, section, article, li)[class*="rounded-xl"][class*="border-border"]:not([class*="bg-"]) {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: var(--glass-edge);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+:root[data-mode="dark"] .vd-pub :is(div, section, article, li)[class*="rounded-2xl"][class*="border-border"]:not([class*="bg-"]),
+:root[data-mode="dark"] .vd-pub :is(div, section, article, li)[class*="rounded-xl"][class*="border-border"]:not([class*="bg-"]) {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: none;
+}
+
+/* Gradient hero slabs (`bg-gradient-to-br from-primary/10 via-card to-card`)
+   keep a whisper of tint over the glass instead of the flat gradient. */
+.vd-pub [class*="bg-gradient-to"][class*="via-card"],
+.vd-pub [class*="bg-gradient-to"][class*="to-card"] {
+  background-image: linear-gradient(135deg, color-mix(in oklab, var(--accent-500) 9%, transparent), transparent 60%);
+}
+
+.vd-pub [class*="bg-card"]:is([class*="rounded-xl"], [class*="rounded-2xl"]),
+.vd-pub [data-slot="card"] {
+  border-radius: 18px;
+}
+
+.vd-pub [class*="bg-card"][class*="rounded-lg"] {
+  border-radius: 14px;
+}
+
+.vd-pub [class*="bg-card"][class*="rounded-full"] {
+  border-radius: 999px;
+}
+
+/* Nested cards: no double blur, just a quieter tint */
+.vd-pub [class*="bg-card"] [class*="bg-card"],
+.vd-pub [data-slot="card"] [class*="bg-card"] {
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 1px rgba(19, 19, 24, 0.05);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Sunken panels stay flat */
+.vd-pub [class*="bg-secondary"] {
+  background-color: rgba(19, 19, 24, 0.045);
+}
+
+.vd-pub [class*="bg-muted"] {
+  background-color: rgba(19, 19, 24, 0.04);
+}
+
+:root[data-mode="dark"] .vd-pub [class*="bg-card"],
+:root[data-mode="dark"] .vd-pub [data-slot="card"] {
+  background-color: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 44px -22px rgba(0, 0, 0, 0.6);
+}
+
+:root[data-mode="dark"] .vd-pub [class*="bg-card"] [class*="bg-card"],
+:root[data-mode="dark"] .vd-pub [data-slot="card"] [class*="bg-card"] {
+  background-color: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+:root[data-mode="dark"] .vd-pub [class*="bg-secondary"],
+:root[data-mode="dark"] .vd-pub [class*="bg-muted"] {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ---- 5. Pills ---------------------------------------------------------------- */
+/* CTAs written as raw anchors / buttons with `bg-primary` (the Button
+   component is already a pill via its own class list). */
+.vd-pub a.bg-primary,
+.vd-pub button.bg-primary,
+.vd-pub a.border.border-border:not([class*="rounded-xl"]):not([class*="rounded-2xl"]),
+.vd-pub button.border.border-border:not([class*="rounded-xl"]):not([class*="rounded-2xl"]) {
+  border-radius: 999px;
+}
+
+.vd-pub a.bg-primary,
+.vd-pub button.bg-primary {
+  box-shadow: none;
+  background-image: none;
+}
+
+/* Secondary / outline buttons: frosted */
+.vd-pub [data-slot="button"][class*="border-border"],
+.vd-pub [data-slot="button"][class*="bg-secondary"] {
+  background-color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(19, 19, 24, 0.08);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+
+.vd-pub [data-slot="button"][class*="border-border"]:hover,
+.vd-pub [data-slot="button"][class*="bg-secondary"]:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+:root[data-mode="dark"] .vd-pub [data-slot="button"][class*="border-border"],
+:root[data-mode="dark"] .vd-pub [data-slot="button"][class*="bg-secondary"] {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+:root[data-mode="dark"] .vd-pub [data-slot="button"][class*="border-border"]:hover,
+:root[data-mode="dark"] .vd-pub [data-slot="button"][class*="bg-secondary"]:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Form fields: soft pill inputs, tokenised focus ring */
+.vd-pub input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+.vd-pub select,
+.vd-pub textarea {
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.72);
+  border-color: rgba(19, 19, 24, 0.1);
+}
+
+.vd-pub input[type="search"],
+.vd-pub input[type="email"],
+.vd-pub input[type="text"]:not([class*="rounded-md"]):not([class*="rounded-lg"]) {
+  border-radius: 999px;
+}
+
+.vd-pub input:focus-visible,
+.vd-pub select:focus-visible,
+.vd-pub textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-500) 22%, transparent);
+}
+
+:root[data-mode="dark"] .vd-pub input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+:root[data-mode="dark"] .vd-pub select,
+:root[data-mode="dark"] .vd-pub textarea {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ---- 6. Tables (compare, api-reference) ------------------------------------ */
+.vd-pub [class*="overflow-x-auto"] {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.vd-pub table {
+  min-width: 100%;
+}
+
+.vd-pub th {
+  font-family: var(--font-dm-mono-loaded), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- 7. Phone layout guards --------------------------------------------------- */
+@media (max-width: 640px) {
+  .vd-pub h1 {
+    font-size: clamp(1.75rem, 1.2rem + 3.5vw, 2.25rem);
+  }
+
+  .vd-pub pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .vd-pub img,
+  .vd-pub svg:not([class*="size-"]):not([width]),
+  .vd-pub video,
+  .vd-pub iframe {
+    max-width: 100%;
+  }
+
+  .vd-pub [class*="whitespace-nowrap"]:not(button):not([data-slot="button"]):not(th):not(td):not(a) {
+    white-space: normal;
+  }
+}

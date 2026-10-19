@@ -1,0 +1,131 @@
+# voice-agent - LiveKit Agents worker (services/voice-agent/Dockerfile). It dials OUT to a
+# LiveKit server (bring your own: LiveKit Cloud or the official livekit/livekit-helm chart)
+# and needs global.livekit.internalUrl + global.livekit.existingSecret
+# (keys LIVEKIT_API_KEY, LIVEKIT_API_SECRET). No inbound traffic, no Service.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: voice
+
+image:
+  registry: ""
+  repository: voice-agent
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+# LiveKit workers drain active calls on SIGTERM.
+terminationGracePeriodSeconds: 330
+revisionHistoryLimit: 5
+# Health/metrics port used by the probes only.
+containerPort: 8081
+
+service:
+  enabled: false
+  type: ClusterIP
+  port: 8081
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+probes:
+  startup:
+    tcpSocket: { port: http }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 30
+  liveness:
+    tcpSocket: { port: http }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    tcpSocket: { port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+lifecycle:
+  preStop:
+    exec: { command: ["sleep", "5"] }
+
+resources:
+  requests: { cpu: 500m, memory: 1Gi }
+  limits: { memory: 2Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 512Mi }
+  - { name: home, mountPath: /home/voiceagent, sizeLimit: 512Mi }
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 70
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  allowFrom: []
+  allowEgressTo: [core, sidecar]
+  # LiveKit: signalling on global.livekit.internalUrl's port, RTC over TCP 7881 and the
+  # UDP range below, to any address except link-local (an in-cluster LiveKit is on a
+  # private address, which allowExternalEgress excludes). Match your LiveKit's
+  # rtc.port_range_start/end and rtc.tcp_port.
+  livekitEgress: true
+  livekitTcpPorts: [7881]
+  livekitUdpPortRanges:
+    - { from: 50000, to: 60000 }
+  # TTS/LLM providers (LiveKit Cloud signalling is wss:// on 443 too).
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: false
+
+env:
+  ELEVENLABS_VOICE_ID: 21m00Tcm4TlvDq8ikWAM
+  SARVAM_TARGET_LANGUAGE_CODE: en-IN
+  SARVAM_MODEL: "bulbul:v3"
+  VOICE_AGENT_TTS_PROVIDER: auto
+  PERCEPTION_MAX_ROOMS: "4"
+  PERCEPTION_MIN_FRAME_INTERVAL_S: "2.0"
+  HOME: /home/voiceagent
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

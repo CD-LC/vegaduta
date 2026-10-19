@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Build, Test &amp; Verify — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="development" data-page="build-and-test.html" data-doc="VD-DEV-002" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="getting-started.html">Developer Guide</a><span class="sep">/</span>Build, Test &amp; Verify</div>
+<div class="doc-meta" data-auto></div>
+<h1>Build, Test &amp; Verify</h1>
+
+<dl class="props">
+  <dt>Basis</dt><dd><code>README.md</code> §3, <code>CONTRIBUTING.md</code>, <code>web/package.json</code>, <code>web-admin/package.json</code>, <code>core/Dockerfile</code>, <code>Makefile</code>, <code>.github/workflows/*.yml</code>. Commands quoted from those files.</dd>
+  <dt>Principle</dt><dd>Be exact about verification state: <strong>compiled ≠ tested ≠ deployed-to-staging ≠ deployed-to-prod</strong>. "Merged" is not "deployed".</dd>
+</dl>
+
+<h2>1. Backend (<code>core/</code>)</h2>
+<pre><code>cd core &amp;&amp; mvn clean verify          # full build + tests (README)
+mvn -pl &lt;module&gt; test                # one module</code></pre>
+<ul>
+  <li>Use <code>mvn clean</code>, not a bare <code>mvn test</code>, after any Flyway rename: stale compiled migrations under <code>target/classes</code> shadow the real ones (README §3).</li>
+  <li>JDK: 21 is the compile target; maintainers build with JDK 24 (<code>CONTRIBUTING.md</code>). Run <strong>one Maven build at a time</strong> — parallel builds in one checkout fight over <code>target/</code>.</li>
+  <li><code>-am</code> builds dependencies, never dependents. For a signature change in a shared module, verify with the command the image build actually runs (<code>core/Dockerfile</code> runs <code>mvn -q -B -pl ${MODULE} -am -Dmaven.test.skip=true package</code>):
+    <pre><code>cd core &amp;&amp; mvn -o -pl app -am -Dmaven.test.skip=true package</code></pre></li>
+</ul>
+<table>
+  <thead><tr><th>Command</th><th>Answers</th></tr></thead>
+  <tbody>
+    <tr><td><code>mvn -pl app -am -Dmaven.test.skip=true package</code> (full reactor)</td><td>Does every dependent still compile against my changed signature?</td></tr>
+    <tr><td><code>mvn -pl &lt;mymodule&gt; test</code></td><td>Is my own change correct?</td></tr>
+    <tr><td>One full reactor build from a <em>clean</em> tree before shipping</td><td>Does what I am about to deploy build without uncommitted local work?</td></tr>
+  </tbody>
+</table>
+
+
+<h2>2. Frontends (<code>web/</code>, <code>web-admin/</code>)</h2>
+<table>
+  <thead><tr><th>Script</th><th>web</th><th>web-admin</th></tr></thead>
+  <tbody>
+    <tr><td><code>npm run dev</code></td><td><code>next dev -p 3000</code> (<code>predev</code> vendors WebLLM/Kokoro/Babel)</td><td><code>next dev -p 3001</code></td></tr>
+    <tr><td><code>npm run build</code></td><td><code>next build</code> (<code>prebuild</code> runs i18n route namespaces + vendor scripts)</td><td><code>next build</code></td></tr>
+    <tr><td><code>npm run lint</code></td><td><code>eslint .</code></td><td><code>eslint .</code></td></tr>
+    <tr><td><code>npm run typecheck</code></td><td><code>tsc --noEmit</code></td><td><code>tsc --noEmit</code></td></tr>
+    <tr><td><code>npm test</code></td><td><code>vitest run</code> (also <code>test:watch</code>)</td><td><code>vitest run</code> (also <code>test:watch</code>)</td></tr>
+    <tr><td>e2e</td><td><code>e2e</code>, <code>e2e:ui</code>, <code>e2e:report</code>, <code>e2e:showcase</code> (Playwright)</td><td>—</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-warning">
+  <div class="callout-title">tsc is not a sufficient gate</div>
+  While <code>tsconfig</code> is mid-strictness-ratchet (<code>strict: false</code>), <code>next build</code> is stricter than <code>npx tsc --noEmit</code> and has failed on code that passed tsc. Run <code>npm run build</code>, or accept that the image build is your first real compile.
+</div>
+
+<h2>3. Python services and other packages</h2>
+<ul>
+  <li><strong>sidecar</strong> — <code>services/sidecar/requirements-dev.txt</code> says to run the suite from <code>services/sidecar/</code> with <code>pytest tests/</code>.</li>
+  <li><strong>code-intel</strong>, <strong>app-builder</strong>, <strong>voice-agent</strong>, <strong>rl-trainer</strong> and <strong>tool-sandbox</strong> (all under <code>services/</code>) — each has its own tests; see their READMEs for the test entry point.</li>
+  <li><strong>Public-surface E2E</strong> (<code>tests/e2e/</code>, own package) — <code>npm test</code> (Playwright); it targets a real deployed domain, never <code>localhost</code>; base URL via <code>E2E_BASE_URL</code> (<code>tests/e2e/README.md</code>).</li>
+  <li><strong>Load tests</strong> (<code>tests/load/</code>) — k6 harness; read its README before running anything.</li>
+</ul>
+
+<h2>4. The merge gate (static gates)</h2>
+<p>Fast, no toolchain. Run before pushing; <code>make gates</code> runs all of them (<code>CONTRIBUTING.md</code>):</p>
+<pre><code>make gates          # everything below
+bash scripts/ci/flyway-lint.sh
+bash scripts/ci/entity-name-lint.sh
+bash scripts/ci/skip-expiry.sh
+sh   scripts/ci/check-file-size.sh
+bash scripts/ci/secret-scan.sh</code></pre>
+<p>Details of each gate live in <code>CONTRIBUTING.md</code> and on <a href="../testing/quality-gates.html">Quality Gates &amp; CI Checks</a>. The <code>.githooks/pre-push</code> hook runs the same scripts (see <a href="git-workflow.html">Git &amp; Contribution Workflow</a>).</p>
+
+<h2>5. Verification before a production core image</h2>
+<p>Rule: no production core deploy without a boot check. Build the reactor jar (<code>mvn -pl app -am -Dmaven.test.skip=true package</code>), boot it against a throwaway container of the release <code>postgres</code> image (<code>deploy/postgres</code>: pgvector + AGE), and confirm all migrations apply, Hibernate <code>validate</code> passes and <code>Started CoreApplication</code> appears. Rationale: duplicate-bean and constructor-injection failures have compiled and passed tests but crash-looped core at startup.</p>
+<p>Build images from a clean checkout, never a working tree with local edits: stray <code>.env*.local</code> files override build args (<code>make images</code> builds the Full-tier images from source). See the <a href="../deployment/index.html">Deployment Guide</a>.</p>
+
+<h2>6. CI</h2>
+<p>Eight workflows live in <code>.github/workflows/</code>: <code>ci.yml</code>, <code>static-gates.yml</code> (called from <code>ci.yml</code>), <code>codeql.yml</code>, <code>scorecard.yml</code>, <code>release.yml</code>, <code>e2e.yml</code>, <code>labeler.yml</code> and <code>stale.yml</code>. Pull requests run <code>CI</code> (summary check <code>CI OK</code>, which includes the static gates) and <code>CodeQL</code>; the local equivalents are:</p>
+<pre><code>make test      # core, web, web-admin, python
+make lint      # eslint + tsc, ruff, shellcheck
+make gates     # static gates + secret scan
+make compose-validate
+make helm-lint</code></pre>
+<p>See <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a> for triggers and jobs. Install the pre-push hook with <code>make hooks</code>.</p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>README.md</code> §3 Testing; <code>CONTRIBUTING.md</code> "Checks".</li>
+  <li><code>web/package.json</code>, <code>web-admin/package.json</code>, <code>tests/e2e/package.json</code>, <code>tests/e2e/README.md</code>, <code>services/sidecar/requirements-dev.txt</code>.</li>
+  <li><code>core/Dockerfile</code> line with <code>-Dmaven.test.skip=true package</code>.</li>
+  <li><code>Makefile</code>; <code>.github/workflows/ci.yml</code>, <code>static-gates.yml</code> (job lists); <code>.githooks/pre-push</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

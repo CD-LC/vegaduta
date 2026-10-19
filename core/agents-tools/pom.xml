@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>agents-tools</artifactId>
+  <name>agents-tools</name>
+  <description>
+    The agent tool layer: AgentToolProvider and the tool resolvers, tool
+    sources, the tool guard and governance chain, the MCP connection manager
+    (DynamicMcpConnectionManager and friends), the MCP registry, MCP Apps and
+    MCP review, and the built-in tools (code, openapi, script, messaging,
+    device, x402, e2b, commerce, search, audio, tables, capability,
+    documentgen, media), plus the data tables feature (com.agenticai.core.tables).
+    Split out of core/agents by ADR-0023; the Java packages are unchanged.
+
+    Direction: agents-tools depends on agents and agents-turn, never the reverse.
+    The kernel and the turn path reach tools through ports agents owns:
+    tools.AgentToolPort (implemented by AgentToolProvider), tools.ToolReplaySafety
+    (AgentToolGovernance) and the tools.ToolSearchToolNames constants. Shared
+    tool vocabulary the kernel and the turn path use directly stays in agents:
+    step events, the tool-call log, the step and effect journals, tool
+    classification and trifecta enforcement, the sandbox file registry and
+    sandbox client, and the ports other modules implement
+    (WebToolPort, BrowserToolPort, the messaging ports, ScheduleTaskToolFactory,
+    CodingTaskToolFactory).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- The tool resolvers delegate to AgentChatService, call the memory and hook
+         services and use context compaction, all in core/agents-turn (ADR-0023).
+         agents-turn never depends on agents-tools: the turn path reaches tools
+         through the kernel port tools.AgentToolPort. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Declared explicitly for the "declare what you import" convention
+         core/agents/pom.xml follows; all already reachable through agents. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agentspi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>secrets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sdlc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>documentgen</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>eventbus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>codeintel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>graphmemory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>mcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>devices</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-client-chat</artifactId>
+    </dependency>
+    <!-- DynamicMcpConnectionManager and the MCP transports (moved here from agents). -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-starter-mcp-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <!-- x402 outbound payments (tools/x402): secp256k1 ECDSA + Keccak-256 for
+         EIP-712/EIP-3009 transferWithAuthorization signing. Neither exists in
+         the JDK (secp256k1 was removed; SHA3-256 is NOT Keccak), so BC is the
+         standard choice. 1.80 (2024-12) - pinned, not latest. Moved here from
+         core/agents with tools.x402 (ADR-0023); nothing left in agents imports it. -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.80</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

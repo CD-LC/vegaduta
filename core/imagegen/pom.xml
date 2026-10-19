@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>imagegen</artifactId>
+  <name>imagegen</name>
+  <description>
+    Master-Roadmap-2026.md item #3 (image generation, Flux/GPT-Image) - a new
+    sibling module, same shape as "sarvam"/"google": a genuinely new
+    capability with its own entity/service/controller/tool-callback surface,
+    not bolted onto an existing module (see core/pom.xml's header comment for
+    the "modular monolith" reasoning this repeats every time).
+
+    Stage 1 (this module's only contents so far): OpenAI's Images API
+    (gpt-image-1 / dall-e-3, https://api.openai.com/v1/images/generations)
+    via a plain RestClient call - the same "no dedicated Spring AI starter,
+    call the REST endpoint directly" shape OpenRouterAgentChatClientFactory/
+    GrokAgentChatClientFactory use for chat, applied here to image generation
+    instead. Flux (via Replicate/fal.ai or similar) is a later addition, not
+    Stage 1 - OPENAI is already a fully wired BYOK ProviderName (see
+    OpenAIProviderValidator), so it needs zero new credential-storage plumbing:
+    the OpenAI API key a tenant already activated for chat is reused here via
+    ProviderCredentialResolver#resolveActiveKey(ProviderName.OPENAI).
+
+    Depends on: providers (ProviderCredentialResolver/ProviderName - reused
+    OpenAI BYOK key, no new credential table, unlike Sarvam's SARVAM branch
+    which needed one because Sarvam's key isn't in LlmProviderCredential;
+    OpenAI's already is). storage (FileStorageService - generated PNG/WebP
+    bytes are stored the same S3-compatible way SarvamGeneratedAudioService
+    stores synthesized WAV clips - see that class's javadoc for why: a tool
+    result can only return a JSON reference, never raw binary, so the bytes
+    always land in object storage first and get served back through this
+    module's own authenticated controller endpoint). No cycle: neither
+    providers nor storage depends on imagegen.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 4: the image and video generation agent tool
+         adapters (com.agenticai.core.imagegen.agenttools: GenerateImage/
+         GenerateVideo tool callbacks and tool sources, OrchestratorImageGenerator,
+         GeminiHostedImageModel, ImageGenGeneratedVideoReader) implement the
+         kernel's agentspi ports (core/agentspi), so they live here with the vendor and not in
+         core/agents. Arrow is vendor -> kernel SPI; agents must never depend back
+         on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agentspi</artifactId>
+    </dependency>
+    <!-- Test scope only: AppBuilderImageControllerTest exercises the kernel AppBuilderImageController. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- AppBuilderImageControllerTest exercises the app builder's image
+         endpoint (agents.appbuilder, in agents-studio since ADR-0023). Test
+         scope only; agents-studio does not depend on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-studio</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <!--
+      Demo-sandbox image generation (com.agenticai.core.imagegen.demo).
+      POST /api/demo/image has to see BOTH sides at once: the platform-hosted
+      pool credential (providers, above) and the demo session/limits/storage
+      package (tenancy). tenancy cannot be the host instead, because tenancy
+      does not - and should not - depend on providers.
+
+      Direction check: tenancy depends on admin/billing/security/storage and
+      NOT on imagegen, so this edge is acyclic. It is also the same call
+      core/agents already made for DemoChatController, which lives on the
+      agents side of the agents -> tenancy edge for exactly this reason (see
+      that class's javadoc); this module simply repeats it rather than
+      inverting an SPI to host one HTTP endpoint.
+    -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- HttpStatusMapped: this module's exceptions declare their own HTTP
+         mapping for the central exception handler (ADR-0011 rule a). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,506 @@
+/* Generic bordered card - reused for the upload panel and the recent-
+ * uploads activity list, same shape as the mockup's pipeline/file-table
+ * panels. */
+.ax-kb-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+:root[data-mode="light"] .ax-kb-card {
+  background: var(--ax-panel2);
+}
+
+.ax-kb-card-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.ax-kb-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ax-kb-upload-dropzone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px dashed var(--ax-border2);
+  background: transparent;
+  color: var(--ax-mid);
+  font-size: var(--fs-caption);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-kb-upload-dropzone:hover:not(:disabled) {
+  border-color: var(--ax-cyan);
+  color: var(--ax-text);
+}
+
+.ax-kb-upload-target {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-kb-activity-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.ax-kb-activity-row {
+  display: grid;
+  /* Stage 5 (KB multi-modal storage) added a 5th column for the per-file
+     download button - a fixed narrow track so it doesn't steal space from
+     the filename/status columns above, and stays visually aligned whether
+     or not a given row actually has a button (see the JSX's empty <span/>
+     fallback for rows with no stored original). */
+  grid-template-columns: 2.2fr 1fr 0.7fr 1.2fr 28px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 4px;
+  border-top: 1px solid var(--ax-border);
+  font-size: var(--fs-caption);
+}
+
+.ax-kb-activity-row:first-child {
+  border-top: none;
+}
+
+.ax-kb-file-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-kb-file-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8.5px;
+  font-family: var(--font-mono), monospace;
+  font-weight: 600;
+}
+
+.ax-kb-file-meta {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-kb-status {
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-kb-status-ready {
+  color: var(--ax-green);
+}
+
+.ax-kb-status-busy {
+  color: var(--ax-amber);
+}
+
+.ax-kb-status-failed {
+  color: var(--ax-red);
+}
+
+/* Stage 5 (KB multi-modal storage) - per-row download button for the
+   original uploaded file, only rendered when KnowledgeDocumentResponse's
+   hasOriginalFile is true (see KnowledgePanel.js). Matches the small
+   icon-button treatment used elsewhere in this file's cards (transparent
+   until hover, accent-cyan on hover) rather than introducing a new button
+   variant. */
+.ax-kb-file-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ax-dim);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ax-kb-file-download:hover:not(:disabled) {
+  background: var(--ax-chip);
+  border-color: var(--ax-border);
+  color: var(--ax-cyan);
+}
+
+.ax-kb-file-download:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Ingestion pipeline - real 4-stage aggregate view (task #543), replacing
+ * the honest-but-thin "recent uploads (this session)" placeholder that
+ * used to sit here (see the big comment above .ax-kb-topbar). Now that
+ * KnowledgeDocument exists (migration V45), every count under each stage
+ * label is a live tally of real KnowledgeDocumentStatus values for the
+ * selected collection - never a simulated percentage. Visual language
+ * matches the mockup's pipeline card (icon bubble + flowing dashed
+ * connector), but stages only animate/pulse when the live data says work
+ * is actually happening in them. */
+.ax-kb-pipeline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ax-kb-pipeline-stage {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+
+.ax-kb-pipeline-icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-subtitle);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Each stage gets its own real, fixed color (Upload=cyan, Extract=amber,
+ * Embed=violet, Index=green) so the four stages read as distinct steps at
+ * a glance, not four copies of the same bubble. :nth-of-type counts only
+ * sibling <div>s, so it lines up with Upload/Extract/Embed/Index even
+ * though a <span> connector sits between every pair of stage divs in the
+ * DOM. */
+.ax-kb-pipeline-stage:nth-of-type(1) .ax-kb-pipeline-icon {
+  background: rgba(79, 227, 227, 0.12);
+  border: 1px solid rgba(79, 227, 227, 0.28);
+  color: var(--ax-cyan);
+}
+
+.ax-kb-pipeline-stage:nth-of-type(2) .ax-kb-pipeline-icon {
+  background: rgba(245, 181, 68, 0.12);
+  border: 1px solid rgba(245, 181, 68, 0.3);
+  color: var(--ax-amber);
+}
+
+.ax-kb-pipeline-stage:nth-of-type(3) .ax-kb-pipeline-icon {
+  background: rgba(155, 125, 255, 0.14);
+  border: 1px solid rgba(155, 125, 255, 0.4);
+  color: var(--ax-violet);
+}
+
+.ax-kb-pipeline-stage:nth-of-type(4) .ax-kb-pipeline-icon {
+  background: rgba(70, 224, 160, 0.12);
+  border: 1px solid rgba(70, 224, 160, 0.3);
+  color: var(--ax-green);
+}
+
+/* Busy glow - real, not decorative: only present while pipelineStats.
+ * extracting/embedding is actually > 0 for the selected collection (see
+ * KnowledgePanel.js). Each busy stage pulses in its own stage color rather
+ * than one shared color, so Extract-busy reads as amber and Embed-busy
+ * reads as violet. */
+.ax-kb-pipeline-stage-busy:nth-of-type(2) .ax-kb-pipeline-icon {
+  animation: axKbIconGlowExtract 1.6s ease-in-out infinite;
+}
+
+.ax-kb-pipeline-stage-busy:nth-of-type(3) .ax-kb-pipeline-icon {
+  animation: axKbIconGlowEmbed 1.6s ease-in-out infinite;
+}
+
+@keyframes axKbIconGlowExtract {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 181, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 10px 3px rgba(245, 181, 68, 0.5);
+  }
+}
+
+@keyframes axKbIconGlowEmbed {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(155, 125, 255, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 10px 3px rgba(155, 125, 255, 0.45);
+  }
+}
+
+/* Whole-card glow - real, not decorative: only present while
+ * pipelineStats.active (or the client-side `uploading` flag) is true, see
+ * KnowledgePanel.js. Starts the moment a file is chosen, stops the instant
+ * every document for the collection reaches READY/FAILED - driven by the
+ * same poll that updates the stage counts, not a fixed-length CSS
+ * animation pretending to track progress. */
+.ax-kb-pipeline-glow {
+  animation: axKbCardGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes axKbCardGlow {
+  0%,
+  100% {
+    border-color: var(--ax-border);
+    box-shadow: none;
+  }
+  50% {
+    border-color: rgba(79, 227, 227, 0.5);
+    box-shadow: 0 0 16px 1px rgba(79, 227, 227, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-kb-pipeline-stage-busy:nth-of-type(2) .ax-kb-pipeline-icon {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(245, 181, 68, 0.5);
+  }
+
+  .ax-kb-pipeline-stage-busy:nth-of-type(3) .ax-kb-pipeline-icon {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(155, 125, 255, 0.45);
+  }
+
+  .ax-kb-pipeline-glow {
+    animation: none;
+    border-color: rgba(79, 227, 227, 0.5);
+  }
+}
+
+/* One-time stage sweep (task #544) - fires once per completed upload,
+ * regardless of how fast the backend finished. Fast synchronous uploads
+ * (.md/.pdf/etc.) can reach READY before the 4s poll ever samples an
+ * EXTRACTING/EMBEDDING row, so pipelineStats.active-driven glow above
+ * never gets a chance to show - this sweep is the honest substitute: it
+ * doesn't claim the file is "currently" in each stage (it may already be
+ * done), it's a completion acknowledgment that highlights, in order, the
+ * four real stages the file provably passed through server-side. Each
+ * stage flashes its own color (task #545) so the sweep itself reads as
+ * four distinct steps lighting up in sequence, not one color repeated
+ * four times. */
+.ax-kb-pipeline-sweep .ax-kb-pipeline-stage:nth-of-type(1) .ax-kb-pipeline-icon {
+  animation: axKbSweepUpload 0.45s ease-out;
+}
+
+.ax-kb-pipeline-sweep .ax-kb-pipeline-stage:nth-of-type(2) .ax-kb-pipeline-icon {
+  animation: axKbSweepExtract 0.45s ease-out 0.25s backwards;
+}
+
+.ax-kb-pipeline-sweep .ax-kb-pipeline-stage:nth-of-type(3) .ax-kb-pipeline-icon {
+  animation: axKbSweepEmbed 0.45s ease-out 0.5s backwards;
+}
+
+.ax-kb-pipeline-sweep .ax-kb-pipeline-stage:nth-of-type(4) .ax-kb-pipeline-icon {
+  animation: axKbSweepIndex 0.45s ease-out 0.75s backwards;
+}
+
+/* Connectors adopt the color of the stage they're flowing INTO - the
+ * connector before Extract flashes amber, before Embed flashes violet,
+ * before Index flashes green - so the sweep reads as color genuinely
+ * traveling down the pipeline rather than a flat cyan line. */
+.ax-kb-pipeline-sweep .ax-kb-pipeline-connector:nth-of-type(1) {
+  animation: axKbSweepConnectorExtract 0.3s ease-out 0.2s backwards;
+}
+
+.ax-kb-pipeline-sweep .ax-kb-pipeline-connector:nth-of-type(2) {
+  animation: axKbSweepConnectorEmbed 0.3s ease-out 0.45s backwards;
+}
+
+.ax-kb-pipeline-sweep .ax-kb-pipeline-connector:nth-of-type(3) {
+  animation: axKbSweepConnectorIndex 0.3s ease-out 0.7s backwards;
+}
+
+@keyframes axKbSweepUpload {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 227, 227, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(79, 227, 227, 0.55);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes axKbSweepExtract {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 181, 68, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(245, 181, 68, 0.6);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes axKbSweepEmbed {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(155, 125, 255, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(155, 125, 255, 0.6);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes axKbSweepIndex {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(70, 224, 160, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(70, 224, 160, 0.6);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes axKbSweepConnectorExtract {
+  0%,
+  100% {
+    background-image: linear-gradient(to right, var(--ax-border2) 50%, transparent 50%);
+  }
+  50% {
+    background-image: linear-gradient(to right, var(--ax-amber) 50%, transparent 50%);
+  }
+}
+
+@keyframes axKbSweepConnectorEmbed {
+  0%,
+  100% {
+    background-image: linear-gradient(to right, var(--ax-border2) 50%, transparent 50%);
+  }
+  50% {
+    background-image: linear-gradient(to right, var(--ax-violet) 50%, transparent 50%);
+  }
+}
+
+@keyframes axKbSweepConnectorIndex {
+  0%,
+  100% {
+    background-image: linear-gradient(to right, var(--ax-border2) 50%, transparent 50%);
+  }
+  50% {
+    background-image: linear-gradient(to right, var(--ax-green) 50%, transparent 50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-kb-pipeline-sweep .ax-kb-pipeline-stage .ax-kb-pipeline-icon {
+    animation: none;
+  }
+
+  .ax-kb-pipeline-sweep .ax-kb-pipeline-connector {
+    animation: none;
+  }
+}
+
+.ax-kb-pipeline-name {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  margin-top: 8px;
+  color: var(--ax-text);
+}
+
+.ax-kb-pipeline-sub {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-kb-pipeline-connector {
+  flex-shrink: 0;
+  width: 40px;
+  height: 2px;
+  background-image: linear-gradient(to right, var(--ax-border2) 50%, transparent 50%);
+  background-size: 8px 2px;
+}
+
+/* Live-flow connectors also adopt the destination stage's color (same
+ * mapping as the sweep above) instead of one flat cyan for every
+ * connector. */
+.ax-kb-pipeline-connector-active {
+  background-size: 8px 2px;
+  animation: axKbFlow 0.8s linear infinite;
+}
+
+.ax-kb-pipeline-connector:nth-of-type(1).ax-kb-pipeline-connector-active {
+  background-image: linear-gradient(to right, var(--ax-amber) 50%, transparent 50%);
+}
+
+.ax-kb-pipeline-connector:nth-of-type(2).ax-kb-pipeline-connector-active {
+  background-image: linear-gradient(to right, var(--ax-violet) 50%, transparent 50%);
+}
+
+.ax-kb-pipeline-connector:nth-of-type(3).ax-kb-pipeline-connector-active {
+  background-image: linear-gradient(to right, var(--ax-green) 50%, transparent 50%);
+}
+
+@keyframes axKbFlow {
+  to {
+    background-position: -16px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-kb-pipeline-connector-active {
+    animation: none;
+  }
+}
+
+.ax-kb-pipeline-failed {
+  margin-top: 12px;
+  font-size: var(--fs-label);
+  color: var(--ax-red);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-kb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 32px 20px;
+  border: 1px dashed var(--ax-border2);
+  border-radius: 14px;
+  color: var(--ax-mid);
+  font-size: var(--fs-caption);
+}

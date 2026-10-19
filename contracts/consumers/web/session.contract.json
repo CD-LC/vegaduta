@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-session-config",
+      "method": "GET",
+      "path": "/api/session/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

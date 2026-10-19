@@ -1,0 +1,91 @@
+{
+  "name": "Outreach Lead-Gen Pipeline",
+  "description": "Daily income pipeline: prospect -> copywrite -> dispatch -> report. The prospector agent turns the campaign brief (workflow input) into a JSON {\"prospects\":[...]} array of verified, directory-deduped contacts. fan_out runs the copywriter once per prospect (maxConcurrency 2); the merged array of {email, subject, text} drafts reaches the dispatcher, which sends each through mcp__outreach__send_email - every hard rule (verified sourceUrl, never-contact domains, permanent opt-outs, IST window, daily cap, min interval, max 3 touches, compliance footer) is enforced inside the connector, not the prompts. The reporter emails the funnel digest to the operator. Requires the outreach MCP connector registered with OUTREACH_SMTP_*/OUTREACH_IMAP_*/OUTREACH_CORE_* env, and the four agents created (see scripts/income-pipeline/bootstrap-pipeline.sh). Replace all REPLACE_WITH_*_AGENT_ID placeholders before POSTing; then PUT /api/workflows/{id} with status ACTIVE and PUT /api/workflows/{id}/schedule (e.g. cron '30 4 * * *' = 10:00 IST).",
+  "graph": {
+    "nodes": [
+      {
+        "id": "trigger-1",
+        "type": "trigger",
+        "position": { "x": 0, "y": 0 },
+        "data": {
+          "label": "Scheduled/manual trigger - input is the campaign brief (target audience)",
+          "config": {}
+        }
+      },
+      {
+        "id": "agent-prospector",
+        "type": "agent",
+        "position": { "x": 280, "y": 0 },
+        "data": {
+          "label": "Prospector: search, verify, dedupe, record",
+          "config": {
+            "agentId": "REPLACE_WITH_PROSPECTOR_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "fanout-prospects",
+        "type": "fan_out",
+        "position": { "x": 560, "y": 0 },
+        "data": {
+          "label": "One copywriter per prospect",
+          "config": {
+            "itemsField": "prospects",
+            "maxItems": 8,
+            "maxConcurrency": 2
+          }
+        }
+      },
+      {
+        "id": "agent-copywriter",
+        "type": "agent",
+        "position": { "x": 840, "y": 0 },
+        "data": {
+          "label": "Copywriter (runs once per prospect)",
+          "config": {
+            "agentId": "REPLACE_WITH_COPYWRITER_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "agent-dispatcher",
+        "type": "agent",
+        "position": { "x": 1120, "y": 0 },
+        "data": {
+          "label": "Dispatcher: follow-ups first, then gated sends",
+          "config": {
+            "agentId": "REPLACE_WITH_DISPATCHER_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "agent-reporter",
+        "type": "agent",
+        "position": { "x": 1400, "y": 0 },
+        "data": {
+          "label": "Reporter: funnel digest to operator",
+          "config": {
+            "agentId": "REPLACE_WITH_REPORTER_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "output-log",
+        "type": "output",
+        "position": { "x": 1680, "y": 0 },
+        "data": {
+          "label": "Run result (digest text)",
+          "config": { "channel": "log" }
+        }
+      }
+    ],
+    "edges": [
+      { "id": "e1", "source": "trigger-1", "target": "agent-prospector", "sourceHandle": null, "targetHandle": null },
+      { "id": "e2", "source": "agent-prospector", "target": "fanout-prospects", "sourceHandle": null, "targetHandle": null },
+      { "id": "e3", "source": "fanout-prospects", "target": "agent-copywriter", "sourceHandle": null, "targetHandle": null },
+      { "id": "e4", "source": "agent-copywriter", "target": "agent-dispatcher", "sourceHandle": null, "targetHandle": null },
+      { "id": "e5", "source": "agent-dispatcher", "target": "agent-reporter", "sourceHandle": null, "targetHandle": null },
+      { "id": "e6", "source": "agent-reporter", "target": "output-log", "sourceHandle": null, "targetHandle": null }
+    ]
+  }
+}

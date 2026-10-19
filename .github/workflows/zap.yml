@@ -1,0 +1,144 @@
+name: OWASP ZAP baseline
+
+# DAST baseline scan against the Lite compose stack built from this commit:
+# lite.yml boots postgres + valkey + keycloak + core + web, lite.build.yml
+# makes every first-party image build from source (same pattern as e2e.yml,
+# which runs the full stack). Unauthenticated, passive-only crawl of the web
+# console on http://localhost:3000.
+#
+# Findings surface in three places:
+#   * Security -> Code scanning   (report_json.json converted to SARIF by
+#                                  scripts/ci/zap-to-sarif.py, tool "OWASP ZAP")
+#   * the zap-report artifact     (JSON + Markdown + HTML + SARIF)
+#   * DefectDojo                  (when vars.DEFECTDOJO_URL +
+#                                  secrets.DEFECTDOJO_API_KEY are set)
+#
+# Report-only and weekly: a stack build plus a spider is too heavy for every
+# PR, and baseline findings are informational. `-I` keeps warnings from
+# failing the job; a hard scan error still fails it.
+
+on:
+  schedule:
+    - cron: "53 5 * * 3" # weekly, Wednesday 05:53 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zap:
+    name: ZAP baseline against the lite stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      security-events: write # upload SARIF to code scanning
+    env:
+      COMPOSE_ARGS: -f deploy/compose/lite.yml -f deploy/compose/lite.build.yml
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Generate throwaway env
+        run: |
+          # shellcheck disable=SC2086
+          bash scripts/ci/compose-ci-env.sh "$RUNNER_TEMP/ci.env" \
+            deploy/compose/lite.yml deploy/compose/lite.build.yml
+
+      - name: Boot the lite stack
+        run: |
+          # shellcheck disable=SC2086
+          docker compose $COMPOSE_ARGS --env-file "$RUNNER_TEMP/ci.env" up -d --build --wait --wait-timeout 600
+
+      - name: Health gate
+        run: bash scripts/ci/stack-health-gate.sh
+
+      # Baseline = spider + passive scan only (no active attacks). The action
+      # writes report_json.json / report_md.md / report_html.html into the
+      # workspace and also uploads them as the zap_scan artifact.
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: "http://localhost:3000"
+          # Report-only: warnings do not fail the job, and no GitHub issue is
+          # opened or updated (findings live in code scanning + DefectDojo).
+          cmd_options: "-I"
+          allow_issue_writing: false
+          artifact_name: zap_scan
+
+      - name: Convert report to SARIF
+        run: python3 scripts/ci/zap-to-sarif.py report_json.json zap.sarif
+
+      # Code scanning needs a public repository or GitHub Advanced Security
+      # (same check as codeql.yml): on a private repository without it the
+      # SARIF upload fails with "Resource not accessible by integration".
+      - name: Code scanning available
+        id: codescan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ADVANCED_SECURITY: ${{ vars.ADVANCED_SECURITY }}
+        run: |
+          visibility="$(gh api "repos/$REPO" --jq .visibility)"
+          if [ "$visibility" = public ] || [ "$ADVANCED_SECURITY" = true ]; then
+            echo "enabled=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >>"$GITHUB_OUTPUT"
+            echo "::notice::SARIF upload skipped: $visibility repository without Advanced Security (set ADVANCED_SECURITY=true if it is on)"
+          fi
+
+      - name: Upload SARIF to code scanning
+        if: steps.codescan.outputs.enabled == 'true'
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          sarif_file: zap.sarif
+          category: zap-baseline
+
+      # Optional aggregation sink: a down DefectDojo must not gate the run.
+      - name: Push results to DefectDojo
+        continue-on-error: true
+        env:
+          DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_ENGAGEMENT: zap-baseline
+          # Baseline coverage depends on what the spider happened to reach;
+          # a finding missing this week is not proof it was fixed.
+          DEFECTDOJO_CLOSE_OLD_FINDINGS: "false"
+        run: bash scripts/ci/defectdojo-import.sh "ZAP Scan" report_json.json
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: zap-report
+          path: |
+            report_json.json
+            report_md.md
+            report_html.html
+            zap.sarif
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Collect compose logs
+        if: failure()
+        run: |
+          # shellcheck disable=SC2086
+          docker compose $COMPOSE_ARGS --env-file "$RUNNER_TEMP/ci.env" logs --no-color > compose-logs.txt 2>&1 || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: zap-compose-logs
+          path: compose-logs.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Tear down
+        if: always()
+        run: |
+          # shellcheck disable=SC2086
+          docker compose $COMPOSE_ARGS --env-file "$RUNNER_TEMP/ci.env" down -v || true

@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ports &amp; Service Matrix — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="appendix" data-page="ports-services.html" data-doc="VD-APP-003" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="command-reference.html">Appendix</a><span class="sep">/</span>Ports &amp; Service Matrix</div>
+<div class="doc-meta" data-auto></div>
+<h1>Ports &amp; Service Matrix</h1>
+
+<p class="lede">Which service listens on which port, which Compose profile or Helm chart provides it, and whether it is
+reachable from outside. Three views: the Docker Compose stack, the public hostnames of a domain deployment, and the
+Dockerfile <code>EXPOSE</code> lines.</p>
+
+<dl class="props">
+  <dt>Compose</dt><dd><code>deploy/compose/docker-compose.yml</code> (Full) and <code>lite.yml</code> (Lite). See <a href="../deployment/compose-stack.html">Docker Compose Stack</a>.</dd>
+  <dt>Kubernetes</dt><dd><code>deploy/helm/charts/*</code>; container ports match the Compose ones, exposure is decided by your Ingress values.</dd>
+  <dt>Host binding</dt><dd>Compose publishes ports on <code>BIND_ADDR</code> (default <code>127.0.0.1</code>). Exceptions: LiveKit (<code>LIVEKIT_BIND_ADDR</code>) and Caddy in the domain overlay (<code>PUBLIC_BIND_ADDR</code>, default all interfaces).</dd>
+</dl>
+
+<p>Jump to: <a href="#compose">1. Compose</a> · <a href="#edge">2. Public hostnames</a> · <a href="#expose">3. Dockerfile EXPOSE</a></p>
+
+<h2 id="compose">1. Docker Compose stack</h2>
+<p>"Host" is the published mapping (<code>host : container</code>). "internal" means no <code>ports:</code> block — reachable only on the compose network by service name (e.g. <code>http://sidecar:8001</code>). Most host ports can be moved with the matching <code>*_HOST_PORT</code> variable.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Service</th><th>Image</th><th>Host : container</th><th>Profile</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>postgres</code></td><td><code>ghcr.io/cd-lc/postgres:16</code> (pgvector + AGE; <code>deploy/postgres</code>)</td><td>5432 : 5432</td><td>core set, Lite</td><td>App database.</td></tr>
+<tr><td><code>pgbouncer</code></td><td><code>edoburu/pgbouncer:v1.24.1-p1</code></td><td>internal (6432)</td><td>core set</td><td>Must stay session pooling (schema-per-tenant); see <a href="../decisions/adr-0002-schema-per-tenant.html">ADR-0002</a>.</td></tr>
+<tr><td><code>valkey</code></td><td><code>valkey/valkey:8.1-alpine</code></td><td>6379 : 6379</td><td>core set, Lite</td><td>Redis API.</td></tr>
+<tr><td><code>seaweedfs</code></td><td><code>chrislusf/seaweedfs:3.97</code></td><td>8333 : 8333</td><td>core set</td><td>S3 gateway; Lite uses local disk instead.</td></tr>
+<tr><td><code>keycloak-db</code></td><td><code>postgres:16-alpine</code></td><td>internal</td><td>core set</td><td>Keycloak's dedicated Postgres (Lite uses a dev-file store).</td></tr>
+<tr><td><code>keycloak</code></td><td><code>quay.io/keycloak/keycloak:26.0.7</code></td><td>8180 : 8080</td><td>core set, Lite</td><td>Issuer <code>http://localhost:8180/realms/agentic-ai</code> locally; admin console only on 127.0.0.1 in domain mode.</td></tr>
+<tr><td><code>sidecar</code></td><td><code>ghcr.io/cd-lc/sidecar</code></td><td>8001 : 8001</td><td>core set; Lite <code>rag</code></td><td>Embeddings, extraction, rerank, STT/TTS.</td></tr>
+<tr><td><code>core</code></td><td><code>ghcr.io/cd-lc/core</code></td><td>8080 : 8080</td><td>core set, Lite</td><td>API.</td></tr>
+<tr><td><code>web</code></td><td><code>ghcr.io/cd-lc/web</code></td><td>3000 : 3000</td><td>core set, Lite</td><td>Tenant console.</td></tr>
+<tr><td><code>web-admin</code></td><td><code>ghcr.io/cd-lc/web-admin</code></td><td>3001 : 3001</td><td>core set</td><td>Platform-operator console.</td></tr>
+<tr><td><code>core-worker</code>, <code>core-jobs</code></td><td><code>ghcr.io/cd-lc/core-worker</code>, <code>core-jobs</code></td><td>internal</td><td><code>temporal</code>, <code>jobs</code></td><td>Temporal worker; scheduled sweeps.</td></tr>
+<tr><td><code>temporal</code>, <code>temporal-ui</code>, <code>temporal-postgresql</code></td><td><code>temporalio/auto-setup:1.24.2</code>, <code>temporalio/ui:2.31.2</code>, <code>postgres:16-alpine</code></td><td>7233 : 7233; 8088 : 8080; internal</td><td><code>temporal</code></td><td></td></tr>
+<tr><td><code>redpanda</code></td><td><code>redpandadata/redpanda:v24.2.18</code></td><td>9092 : 9092</td><td><code>events</code></td><td>Kafka API (BSL-1.1, see <code>NOTICE</code>).</td></tr>
+<tr><td><code>prometheus</code>, <code>alertmanager</code>, <code>grafana</code>, <code>loki</code></td><td><code>prom/prometheus:v2.55.1</code>, <code>prom/alertmanager:v0.27.0</code>, <code>grafana/grafana:11.3.1</code>, <code>grafana/loki:3.2.1</code></td><td>9090; 9093; 3003 : 3000; 3100</td><td><code>observability</code></td><td><code>promtail</code> and <code>valkey-exporter</code> are internal.</td></tr>
+<tr><td><code>langfuse-web</code></td><td><code>langfuse/langfuse:3</code></td><td>3002 : 3000</td><td><code>tracing</code></td><td>Trace UI. <code>langfuse-worker</code>, <code>-postgres</code>, <code>-clickhouse</code>, <code>-valkey</code>, <code>-s3</code> are internal.</td></tr>
+<tr><td><code>livekit</code></td><td><code>livekit/livekit-server:v1.13.9</code></td><td>7880; 7881; 50000-50100/udp (default; <code>LIVEKIT_RTC_PORT_RANGE_START</code> / <code>_END</code> move it)</td><td><code>voice</code></td><td>Bound to <code>LIVEKIT_BIND_ADDR</code>; set it to <code>0.0.0.0</code> for remote callers.</td></tr>
+<tr><td><code>voice-agent</code></td><td><code>ghcr.io/cd-lc/voice-agent</code></td><td>internal</td><td><code>voice</code></td><td>Outbound-only LiveKit worker.</td></tr>
+<tr><td><code>code-intel</code></td><td><code>ghcr.io/cd-lc/code-intel</code></td><td>8090 : 8090</td><td><code>code-intel</code>, <code>builder</code></td><td></td></tr>
+<tr><td><code>code-intel-docker</code></td><td><code>docker:27-dind</code></td><td>internal</td><td><code>code-intel</code>, <code>builder</code></td><td>Privileged Docker-in-Docker executor.</td></tr>
+<tr><td><code>app-builder</code></td><td><code>ghcr.io/cd-lc/app-builder</code></td><td>8091 : 8091</td><td><code>builder</code></td><td></td></tr>
+<tr><td><code>tool-sandbox</code></td><td><code>ghcr.io/cd-lc/tool-sandbox</code></td><td>internal (8095)</td><td><code>sandbox</code></td><td>Core reaches it at <code>http://tool-sandbox:8095</code>.</td></tr>
+<tr><td><code>mcp-stdio-runner</code></td><td><code>ghcr.io/cd-lc/mcp-stdio-runner</code> (<code>-browser</code> variant)</td><td>internal (8097)</td><td><code>tools</code>, <code>browser</code>, <code>sandbox</code></td><td>Core reaches it at <code>mcp-stdio-runner:8097</code>.</td></tr>
+<tr><td><code>rl-trainer</code></td><td><code>ghcr.io/cd-lc/rl-trainer</code></td><td>8095 : 8095</td><td><code>rl</code></td><td>Same number as tool-sandbox's internal port, different container.</td></tr>
+<tr><td><code>caddy</code></td><td><code>caddy:2.11.7-alpine</code></td><td>80, 443 (tcp + udp)</td><td>domain overlay</td><td>Automatic Let's Encrypt; <code>CADDY_AUTO_HTTPS=off</code> with <code>CADDY_SITE_SCHEME=http://</code> behind your own TLS proxy or tunnel.</td></tr>
+</tbody></table></div>
+<p><strong>Overlays.</strong> <code>docker-compose.ci.yml</code> and <code>docker-compose.local-llm.yml</code> each publish <code>127.0.0.1:9101:9101</code> (the <code>deploy/mock-provider</code> OpenAI-compatible mock).</p>
+
+<h2 id="edge">2. Public hostnames (domain deployment)</h2>
+<p>With <code>scripts/vegaduta up --full --domain &lt;your-domain&gt;</code>, Caddy routes these hosts (<code>deploy/caddy/Caddyfile</code>). With Helm, the same names are set in your Ingress values.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Purpose</th><th>Host</th><th>Upstream</th></tr></thead>
+<tbody>
+<tr><td>Console</td><td><code>app.&lt;your-domain&gt;</code></td><td><code>web:3000</code></td></tr>
+<tr><td>Admin console</td><td><code>admin.&lt;your-domain&gt;</code></td><td><code>web-admin:3001</code></td></tr>
+<tr><td>API</td><td><code>api.&lt;your-domain&gt;</code></td><td><code>core:8080</code></td></tr>
+<tr><td>Keycloak</td><td><code>auth.&lt;your-domain&gt;</code> (realm <code>agentic-ai</code>)</td><td><code>keycloak:8080</code></td></tr>
+<tr><td>Code intelligence (optional)</td><td><code>codeintel.&lt;your-domain&gt;</code></td><td><code>code-intel:8090</code></td></tr>
+<tr><td>App builder (optional)</td><td><code>builder.&lt;your-domain&gt;</code></td><td><code>app-builder:8091</code></td></tr>
+<tr><td>LiveKit (optional)</td><td><code>livekit.&lt;your-domain&gt;</code></td><td><code>livekit:7880</code></td></tr>
+</tbody></table></div>
+<p>Keep sidecar, the databases, Langfuse, Temporal and the sandboxes internal. Never point a browser-facing or token-issuer URL at <code>localhost</code> on a server; internal compose DNS names such as <code>http://keycloak:8080</code> are the sanctioned exception. <code>scripts/vegaduta doctor</code> checks this.</p>
+
+<h2 id="expose">3. Dockerfile <code>EXPOSE</code></h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Dockerfile</th><th>EXPOSE</th><th>Base image (FROM)</th></tr></thead>
+<tbody>
+<tr><td><code>core/Dockerfile</code></td><td>8080</td><td><code>maven:3.9-eclipse-temurin-21</code> (build), <code>eclipse-temurin:21-jre-jammy</code></td></tr>
+<tr><td><code>web/Dockerfile</code></td><td>3000</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
+<tr><td><code>web-admin/Dockerfile</code></td><td>3001</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
+<tr><td><code>services/sidecar/Dockerfile</code></td><td>8001</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/code-intel/Dockerfile</code></td><td>8090</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/app-builder/Dockerfile</code></td><td>8091</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/tool-sandbox/Dockerfile</code></td><td>8095</td><td><code>eclipse-temurin:21-jdk-jammy</code>, <code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/rl-trainer/Dockerfile</code></td><td>8095</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/voice-agent/Dockerfile</code></td><td>8081</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/mcp-stdio-runner/Dockerfile</code></td><td>no <code>EXPOSE</code> line</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
+<tr><td><code>examples/mcp-servers/http-gateway/Dockerfile</code></td><td>8099</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
+<tr><td><code>deploy/mock-provider/Dockerfile</code></td><td>9101</td><td><code>python:3.12.14-slim</code></td></tr>
+<tr><td><code>deploy/postgres/Dockerfile</code></td><td>no <code>EXPOSE</code> line</td><td><code>${BASE_IMAGE}</code> (PostgreSQL 16)</td></tr>
+</tbody></table></div>
+
+<h2>Cross-references</h2>
+<ul>
+  <li>Runtime map and diagrams: <a href="../architecture/service-topology.html">Service Topology &amp; Runtime Map</a>.</li>
+  <li>Variables that carry these URLs: <a href="environment-variables.html">Environment Variable Reference</a>.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/compose/docker-compose.yml</code> (service list, <code>image:</code>, <code>ports:</code>, <code>profiles:</code>), <code>lite.yml</code>, <code>docker-compose.domain.yml</code>, <code>docker-compose.ci.yml</code>, <code>docker-compose.local-llm.yml</code></li>
+  <li>All <code>Dockerfile</code> files listed in section 3; <code>deploy/caddy/Caddyfile</code></li>
+  <li><code>deploy/README.md</code>, <code>deploy/helm/README.md</code></li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

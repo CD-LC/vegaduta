@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0007 Frontend Public Config — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0007-build-time-frontend-config.html" data-doc="VD-ADR-007" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0007 Frontend Public Config</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0007: Frontend public configuration — runtime first, never a baked localhost</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span> (revised: originally "baked at image build time")</dd>
+  <dt>Decided</dt><dd>August–September 2026; revised when release images became domain-independent</dd>
+  <dt>Deciders</dt><dd>Platform Engineering</dd>
+  <dt>Motivating failures</dt><dd>In the original hosted deployment: a sign-in outage caused by a tracked <code>.env.production.local</code> that baked the wrong origins; "Cookie not found" on signup because interim hostnames were baked before the final domain went live; a feature flag that was never passed to the build</dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  <code>web/</code> and <code>web-admin/</code> are Next.js apps. Next.js inlines
+  <code>NEXT_PUBLIC_*</code> values into the client bundle when they are present during
+  <code>next build</code>. Originally every origin (API, Keycloak, Code Intel, App Builder) and
+  feature switch was a build argument, so each environment needed its own image, and an
+  omitted argument silently baked a localhost default that broke sign-in on any real domain.
+  Published release images must instead work on any domain.
+</p>
+
+<h2>Decision</h2>
+<ul>
+  <li><strong>Public settings are read at runtime.</strong> Each app's <code>app/lib/env.ts</code> holds an allow-list of public keys; the root layout renders <code>window.__ENV</code> from the server's environment on each request, and every read goes through <code>getPublicEnv(key)</code>.</li>
+  <li><strong>Precedence:</strong> runtime environment, then a value baked at build time, then the code's local-development default. An empty string counts as unset.</li>
+  <li><strong>Build arguments stay optional and empty by default</strong> in <code>web/Dockerfile</code> and <code>web-admin/Dockerfile</code>. The Dockerfile comment states the rule: never default them to a localhost URL.</li>
+  <li><strong>Compose and Helm supply the values at runtime</strong> from <code>PUBLIC_*</code> (Compose) or chart values (Helm).</li>
+</ul>
+
+<h2>Alternatives considered</h2>
+<table>
+  <thead><tr><th>Option</th><th>Outcome</th></tr></thead>
+  <tbody>
+    <tr><td>Bake everything at build time (the original rule)</td><td>Replaced: one image per environment, and a missed argument fails silently.</td></tr>
+    <tr><td>A separate <code>/env.js</code> route</td><td>Rejected in favour of an inline script in the already-dynamic root layout: no extra blocking request (<code>web/docs/RUNTIME-CONFIG.md</code>).</td></tr>
+  </tbody>
+</table>
+
+<h2>Consequences</h2>
+<h3>Positive</h3>
+<ul>
+  <li>One published image works for localhost, a Compose domain deployment and Kubernetes.</li>
+  <li>Changing a domain or feature flag is a restart with new environment, not a rebuild.</li>
+</ul>
+<h3>Negative / costs</h3>
+<ul>
+  <li>A value that <em>is</em> baked at build time cannot be blanked at runtime (empty means unset). Do not bake environment-specific values into images you share.</li>
+  <li>Local dotenv files (<code>.env*.local</code>) in <code>web/</code> or <code>web-admin/</code> are read by <code>next build</code>; build images from a clean checkout.</li>
+</ul>
+<div class="callout callout-danger">
+  <div class="callout-title">Standing rule</div>
+  No browser-facing URL may be <code>localhost</code>/<code>127.0.0.1</code> on a server. Set the
+  <code>PUBLIC_*</code> values (Compose) or chart values (Helm) to the real public origins; <code>scripts/vegaduta doctor</code> checks this.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>web/docs/RUNTIME-CONFIG.md</code>; <code>web/app/lib/env.ts</code>.</li>
+  <li><code>web/Dockerfile</code>, <code>web-admin/Dockerfile</code> — optional <code>ARG</code>s, empty by default.</li>
+  <li><code>deploy/compose/docker-compose.yml</code> — web/web-admin runtime environment; <code>deploy/helm/README.md</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+</body></html>

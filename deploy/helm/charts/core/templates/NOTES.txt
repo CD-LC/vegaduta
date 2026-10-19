@@ -1,0 +1,12 @@
+{{- include "core.imageVariant" . -}}
+core API: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }})
+{{- if .Values.ingress.enabled }}
+  public URL : {{ include "vegaduta-lib.publicUrl" (dict "root" . "key" "api") }}
+{{- end }}
+  issuer     : {{ include "vegaduta-lib.oidc.issuer" . }}
+  database   : {{ include "vegaduta-lib.pg.host" . }}:{{ include "vegaduta-lib.pg.port" . }}/{{ include "vegaduta-lib.pg.database" . }}
+  app Secret : {{ include "vegaduta-lib.core.appSecretName" . }} (APP_ENCRYPTION_KEY - back it up; never change it)
+{{- if .Values.migrate.enabled }}
+  migrations : Job {{ include "vegaduta-lib.fullname" . }}-migrate runs post-install and pre-upgrade.
+{{- end }}
+Check: kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "vegaduta-lib.fullname" . }} --timeout=10m

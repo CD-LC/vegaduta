@@ -1,0 +1,268 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-data-tables",
+      "method": "GET",
+      "path": "/api/data-tables",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].columns",
+          "$[*].createdAt",
+          "$[*].description",
+          "$[*].id",
+          "$[*].name",
+          "$[*].rowCount",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-data-tables",
+      "method": "POST",
+      "path": "/api/data-tables",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.columns",
+          "$.createdAt",
+          "$.description",
+          "$.id",
+          "$.name",
+          "$.rowCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-data-tables-table",
+      "method": "DELETE",
+      "path": "/api/data-tables/{table}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-data-tables-table",
+      "method": "GET",
+      "path": "/api/data-tables/{table}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.columns",
+          "$.createdAt",
+          "$.description",
+          "$.id",
+          "$.name",
+          "$.rowCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "put-api-data-tables-table",
+      "method": "PUT",
+      "path": "/api/data-tables/{table}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.columns",
+          "$.createdAt",
+          "$.description",
+          "$.id",
+          "$.name",
+          "$.rowCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-data-tables-table-columns",
+      "method": "POST",
+      "path": "/api/data-tables/{table}/columns",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.name",
+          "$.type"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.columns",
+          "$.createdAt",
+          "$.description",
+          "$.id",
+          "$.name",
+          "$.rowCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-data-tables-table-columns-column",
+      "method": "DELETE",
+      "path": "/api/data-tables/{table}/columns/{column}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.columns",
+          "$.createdAt",
+          "$.description",
+          "$.id",
+          "$.name",
+          "$.rowCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "put-api-data-tables-table-columns-column",
+      "method": "PUT",
+      "path": "/api/data-tables/{table}/columns/{column}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.columns",
+          "$.createdAt",
+          "$.description",
+          "$.id",
+          "$.name",
+          "$.rowCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-data-tables-table-export.csv",
+      "method": "GET",
+      "path": "/api/data-tables/{table}/export.csv",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-data-tables-table-import",
+      "method": "POST",
+      "path": "/api/data-tables/{table}/import",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.errors",
+          "$.ignoredHeaders",
+          "$.inserted",
+          "$.skipped",
+          "$.table"
+        ]
+      }
+    },
+    {
+      "id": "get-api-data-tables-table-rows",
+      "method": "GET",
+      "path": "/api/data-tables/{table}/rows",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.items",
+          "$.limit",
+          "$.offset",
+          "$.total"
+        ]
+      }
+    },
+    {
+      "id": "post-api-data-tables-table-rows",
+      "method": "POST",
+      "path": "/api/data-tables/{table}/rows",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.values"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.data",
+          "$.id",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-data-tables-table-rows-rowId",
+      "method": "DELETE",
+      "path": "/api/data-tables/{table}/rows/{rowId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-data-tables-table-rows-rowId",
+      "method": "PUT",
+      "path": "/api/data-tables/{table}/rows/{rowId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.values"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.data",
+          "$.id",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-data-tables-table-rows-bulk",
+      "method": "POST",
+      "path": "/api/data-tables/{table}/rows/bulk",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.rows"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].data",
+          "$[*].id",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-data-tables-config",
+      "method": "GET",
+      "path": "/api/data-tables/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-data-tables-import",
+      "method": "POST",
+      "path": "/api/data-tables/import",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.errors",
+          "$.ignoredHeaders",
+          "$.inserted",
+          "$.skipped",
+          "$.table"
+        ]
+      }
+    }
+  ]
+}

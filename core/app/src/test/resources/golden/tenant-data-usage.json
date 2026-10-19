@@ -1,0 +1,42 @@
+{
+  "generatedAt" : "2026-09-30T10:15:30Z",
+  "tenantId" : "11111111-1111-1111-1111-111111111111",
+  "systems" : [
+    {
+      "id" : "postgres",
+      "name" : "Postgres",
+      "vendor" : "PostgreSQL",
+      "role" : "primary store",
+      "description" : "schema per tenant",
+      "isolationFact" : "isolated by schema",
+      "liveStat" : {
+        "label" : "rows",
+        "value" : 1234
+      },
+      "status" : "active"
+    },
+    {
+      "id" : "temporal",
+      "name" : "Temporal",
+      "vendor" : "Temporal",
+      "role" : "workflows",
+      "description" : "durable execution",
+      "isolationFact" : "namespace",
+      "liveStat" : null,
+      "status" : "available_not_engaged"
+    },
+    {
+      "id" : "redis",
+      "name" : "Redis",
+      "vendor" : "Valkey",
+      "role" : "cache",
+      "description" : "ephemeral",
+      "isolationFact" : "key prefix",
+      "liveStat" : {
+        "label" : "hit ratio",
+        "value" : 0.93
+      },
+      "status" : "active"
+    }
+  ]
+}

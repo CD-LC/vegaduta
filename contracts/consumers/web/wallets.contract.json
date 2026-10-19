@@ -1,0 +1,80 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-wallets",
+      "method": "GET",
+      "path": "/api/wallets",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-wallets",
+      "method": "POST",
+      "path": "/api/wallets",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.currency"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.balanceMinor",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.status",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-wallets-walletId",
+      "method": "GET",
+      "path": "/api/wallets/{walletId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-wallets-walletId-credit",
+      "method": "POST",
+      "path": "/api/wallets/{walletId}/credit",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.amountMinor",
+          "$.idempotencyKey",
+          "$.note"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.amountMinor",
+          "$.balanceAfter",
+          "$.createdAt",
+          "$.entryKind",
+          "$.id",
+          "$.idempotencyKey",
+          "$.walletId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-wallets-walletId-ledger",
+      "method": "GET",
+      "path": "/api/wallets/{walletId}/ledger",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

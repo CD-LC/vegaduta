@@ -1,0 +1,138 @@
+# Phase 0 Stage 3 - only loaded when the "security" Spring profile is active
+# (mvn spring-boot:run "-Dspring-boot.run.profiles=security" or combined with
+# other profiles, e.g. "mcp,knowledge,security"). See
+# Agentic-AI-Platform-Phase0-Build-Plan.md Stage 3 and SecurityConfig's
+# javadoc for why this is opt-in rather than always-on.
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Must match what Keycloak itself actually puts in a token's `iss`
+          # claim - with KC_HOSTNAME_STRICT pinning that to one fixed
+          # public-facing value (see deploy/compose/docker-compose.yml's
+          # keycloak service), that's the PUBLIC_AUTH_URL-based address
+          # regardless of which network path a caller used to reach
+          # Keycloak. SecurityConfig's jwtDecoder() bean validates JWTs
+          # against THIS value but fetches the actual signing keys from
+          # app.keycloak.jwk-set-uri below, which is NOT the same address
+          # inside Docker - see that property's comment for why the two
+          # must be allowed to differ.
+          #
+          # NO usable default on purpose (AGENTS.md rule 4: a token issuer never
+          # falls back to localhost). With the `security` profile active and
+          # KEYCLOAK_ISSUER_URI unset in keycloak mode (the default), start-up
+          # fails in SecurityConfig.jwtDecoder() - the intended, fail-closed
+          # outcome. The empty default exists only so that app.auth.mode=local,
+          # which has no Keycloak, can boot with this profile loaded. Compose
+          # (docker-compose.yml, lite.yml) and Helm always pass it, derived
+          # from PUBLIC_AUTH_URL; a bare `mvn spring-boot:run` must export it
+          # (e.g. KEYCLOAK_ISSUER_URI=http://localhost:8180/realms/agentic-ai
+          # for a Keycloak on the developer's own machine).
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:}
+
+app:
+  identity:
+    # Which identity provider backs the user-admin surface
+    # (IdentityUserAdminPort): the admin console's user list, tenant
+    # onboarding, account deletion, session revocation. keycloak
+    # (default) -> KeycloakAdminClient; auth0 -> Auth0UserAdminClient.
+    # Exactly one adapter bean exists per deployment. This setting only
+    # chooses the ADMIN adapter - token validation stays generic OIDC via
+    # issuer-uri / app.keycloak.jwk-set-uri / app.security.oidc.* below.
+    provider: ${IDENTITY_PROVIDER:${app.auth.mode:keycloak}}
+    auth0:
+      # The Auth0 tenant domain; a bare host or full https URL.
+      domain: ${AUTH0_DOMAIN:}
+      # A Machine-to-Machine application authorized against the Auth0
+      # Management API (client_credentials). Needed scopes:
+      # read:users, create:users, update:users, delete:users, read:roles,
+      # delete:sessions, delete:refresh_tokens. The application must ALSO
+      # have the database connection below enabled - Auth0's emailed
+      # password-reset endpoint (/dbconnections/change_password) refuses
+      # clients the connection is not linked to.
+      client-id: ${AUTH0_CLIENT_ID:}
+      client-secret: ${AUTH0_CLIENT_SECRET:}
+      # Database connection users are created on.
+      connection: ${AUTH0_CONNECTION:Username-Password-Authentication}
+      # Management API audience for the client_credentials grant;
+      # empty derives https://<domain>/api/v2/ from AUTH0_DOMAIN.
+      audience: ${AUTH0_AUDIENCE:}
+  keycloak:
+    # Where THIS SERVICE actually fetches Keycloak's public keys from -
+    # deliberately separate from issuer-uri above. In Docker, core reaches
+    # Keycloak over the compose network (keycloak:8080), but Keycloak's
+    # self-reported issuer is pinned to the public-facing localhost:8180
+    # (KC_HOSTNAME_STRICT) - a plain `issuer-uri`-only Spring Security setup
+    # (NimbusJwtDecoder.withIssuerLocation) fetches AND self-validates
+    # against the SAME address, so it can never satisfy both "reachable
+    # from inside this container" and "matches what Keycloak claims" at
+    # once. Confirmed failure mode without this split: every authenticated
+    # request 401'd with JwtDecoderInitializationException - "The Issuer
+    # ...localhost:8080... did not match the requested issuer
+    # ...keycloak:8080...". Defaults to deriving from issuer-uri (correct
+    # for non-Docker local dev, where issuer-uri IS directly reachable);
+    # deploy/docker-compose.yml overrides this to the internal address.
+    # The nested issuer has an empty default so this property still resolves under
+    # app.auth.mode=local (no Keycloak, KEYCLOAK_ISSUER_URI unset).
+    jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:${spring.security.oauth2.resourceserver.jwt.issuer-uri:}/protocol/openid-connect/certs}
+    # Optional comma-separated list of ADDITIONAL accepted token issuers, on
+    # top of issuer-uri above. Empty => single-issuer validation, unchanged.
+    # For multi-hostname deployments (KC_HOSTNAME_STRICT=false) where the same
+    # realm is reached over more than one public host, each host mints tokens
+    # carrying its own host in `iss`. Same realm => same signing keys, so the
+    # single jwk-set-uri above still validates every signature; only the `iss`
+    # check needs to accept the set. See SecurityConfig#jwtDecoder.
+    # e.g. KEYCLOAK_ADDITIONAL_ISSUERS=https://auth.example.com/realms/agentic-ai
+    additional-issuers: ${KEYCLOAK_ADDITIONAL_ISSUERS:}
+    # Keycloak's own base URL (not the realm-specific issuer-uri above) -
+    # used by KeycloakAdminClient to call the Admin REST API, which lives
+    # under /admin/realms/{realm}/... rather than /realms/{realm}/....
+    admin-base-url: ${KEYCLOAK_ADMIN_BASE_URL:http://localhost:8180}
+    realm: ${KEYCLOAK_REALM:agentic-ai}
+    # The confidential "agentic-ai-core" client from the realm export -
+    # its service account (serviceAccountsEnabled: true) is what
+    # KeycloakAdminClient authenticates as via a client_credentials grant.
+    # That service account needs the realm-management client's
+    # "manage-users" and "view-users" roles assigned in the Keycloak admin
+    # console before user-admin endpoints will work - not something a
+    # realm-export JSON can grant to itself at import time, so this is a
+    # one-time manual step (see README's Phase 0 Stage 3 section).
+    client-id: ${KEYCLOAK_CLIENT_ID:agentic-ai-core}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET:}
+  security:
+    oidc:
+      # Generic-OIDC claim mapping (OidcClaimMapping / JwtClaimPaths in
+      # core/security): which claims carry roles, the tenant id, and
+      # optionally scopes. The defaults reproduce the Keycloak token layout
+      # EXACTLY, so a Keycloak deployment sets nothing here; point issuer-uri
+      # at Auth0 / Microsoft Entra / Okta and remap these to that provider's
+      # claim names. Resolution is literal-first, then dot-path (see
+      # JwtClaimPaths): a name containing '/' or ':' is a single claim key
+      # (Auth0 namespaced claims like https://your-domain/roles), a dot-path
+      # walks nested claims (realm_access.roles), a plain name is a top-level
+      # claim. Every read site (TenantContextFilter,
+      # GranularPermissionConverter, ViewAsFilter, AuditingAccessDeniedHandler,
+      # TenantSchemaResolver, OnboardingController) shares this one property
+      # set, so a deployment remaps in exactly one place. Missing or malformed
+      # claims fail CLOSED - no authorities, no tenant.
+      #
+      #   Keycloak (default):  roles-claim-path=realm_access.roles
+      #   Microsoft Entra:     roles-claim-path=roles
+      #   Okta:                roles-claim-path=groups
+      #   Auth0:               roles-claim-path=https://<namespace>/roles
+      #
+      # roles-claim-path: where the roles list lives (must be a JSON array of
+      # role names; anything else maps to no roles).
+      roles-claim-path: ${OIDC_ROLES_CLAIM_PATH:realm_access.roles}
+      # tenant-claim: the claim carrying the tenant/schema id - what
+      # Keycloak's tenant_id user-attribute mapper emits. Used everywhere the
+      # token's tenant is read.
+      tenant-claim: ${OIDC_TENANT_CLAIM:tenant_id}
+      # scopes-claim: optional OAuth2 scope/permission claim (scope/scp as a
+      # space-delimited string, or a list claim like Auth0's permissions)
+      # emitted as SCOPE_* authorities. Empty (default) emits none, exactly as
+      # before. Token-asserted scopes never feed the stored-grant PERM_*
+      # namespace.
+      scopes-claim: ${OIDC_SCOPES_CLAIM:}

@@ -1,0 +1,39 @@
+-- platform_setting.value: VARCHAR(500) -> TEXT.
+--
+-- Why now: the plugin-distribution feature could never work. web-admin's
+-- "IDE & Browser Plugins" screen and clients/scripts/publish-artifacts.mjs
+-- both publish by PUTting the whole plugin catalog JSON into the
+-- `plugins.catalog` platform setting (PlatformController#updateSetting ->
+-- PlatformSettingsService#update). That document is ~2.5 KB with three
+-- plugins published, so every publish attempt died on
+--   ERROR: value too long for type character varying(500)
+-- surfaced to the caller as a bare 500. Confirmed 2026-09-17 against
+-- production: all three artifacts uploaded and stored fine, then the catalog
+-- PUT 500'd, leaving GET /api/plugins/catalog still reporting
+-- latestVersion: null for every plugin - i.e. the artifacts exist in object
+-- storage and nothing points at them. That ordering is deliberate in both
+-- callers (upload first, publish second), so the failure was consistent
+-- rather than half-published, and re-running after this migration completes
+-- the publish with no cleanup needed.
+--
+-- 500 was never a considered limit for this column - V91 created the table
+-- for two integer-valued signup rate-limit knobs, and the column has carried
+-- progressively larger JSON documents since (abuse thresholds, demo-sandbox
+-- controls, free-tier quotas, the edge model manifest). plugins.catalog is
+-- simply the first one to cross the line. TEXT removes the class of bug
+-- rather than moving the ceiling.
+--
+-- Safe for a zero-downtime deploy: PostgreSQL has treated varchar(n) -> text
+-- as a metadata-only change since 9.2 (no table rewrite, no scan, no
+-- verification pass), and the table holds a handful of rows regardless. The
+-- change is widening, so every existing row and every in-flight reader stays
+-- valid - an old core replica still writing <=500 chars is unaffected.
+--
+-- The matching entity change is PlatformSetting#value
+-- (core/tenancy), which must move to columnDefinition = "TEXT" in the same
+-- commit: core runs hibernate ddl-auto: validate, so leaving the annotation
+-- at length = 500 while the column is TEXT risks a startup-time schema
+-- validation failure - the one way this migration could take core down.
+
+ALTER TABLE control_plane.platform_setting
+    ALTER COLUMN value TYPE TEXT;

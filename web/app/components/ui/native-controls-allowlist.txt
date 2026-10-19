@@ -1,0 +1,23 @@
+# Files exempt from native-controls/no-native-controls (native <select>, window.confirm/prompt).
+# Ratchet: only remove lines (after migrating to components/ui/*); never add.
+app/build/studio/CollabPanel.tsx
+app/build/studio/DataPanel.tsx
+app/build/studio/StudioSurface.tsx
+app/build/studio/VersionDiff.tsx
+app/code-intel/SearchTab.tsx
+app/components/OpenApiToolSourcesPanel.tsx
+app/components/PaginationControls.tsx
+app/components/agents/lab/ForkDialog.tsx
+app/components/artifacts/ArtifactPane.tsx
+app/components/brief/CoachDrawer.tsx
+app/components/clips/ClipStudio.tsx
+app/components/clips/MotionPlusStudio.tsx
+app/components/codingTasks/CodingTaskForm.tsx
+app/components/enterprise-landing/LeadForm.tsx
+app/components/generative-ui/GenerativeUiRenderer.tsx
+app/components/sharing/TeammateAccessPanel.tsx
+app/components/sso/SsoConnectionForm.tsx
+app/components/studio/WorkflowCanvas.tsx
+app/components/workflow/nodeConfig/forms/AgentStructuredInput.tsx
+app/forms/[token]/page.tsx
+app/usage/BudgetTopUpCard.tsx

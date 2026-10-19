@@ -1,0 +1,95 @@
+name: installer
+
+# CI for the vegaduta-setup installer binary (installer/). Verifies it on
+# every change; on manual dispatch also cross-compiles the per-OS artifacts as
+# workflow artifacts so a build can be downloaded without cutting a release.
+# The release workflow (release.yml) attaches the same binaries to releases.
+
+on:
+  pull_request:
+    paths: ["installer/**", ".github/workflows/installer.yml"]
+  push:
+    branches: [main]
+    paths: ["installer/**", ".github/workflows/installer.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: installer/go.mod
+      - run: |
+          cd installer
+          gofmt -l . | tee /dev/stderr | grep . && exit 1 || true
+          go vet ./...
+          go test ./...
+          go build ./...
+
+  dist:
+    name: Build downloadable artifacts
+    needs: test
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: installer/go.mod
+      - name: Cross-compile
+        run: |
+          set -euo pipefail
+          cd installer
+          ver="dev-$(git rev-parse --short HEAD)"
+          ./package.sh linux --version "$ver"
+          ./package.sh windows --version "$ver"
+          # darwin tarballs: the .app/.dmg needs a macOS runner (dist-darwin
+          # below); the bare binaries still ship for terminal users.
+          for arch in amd64 arm64; do
+            out="vegaduta-setup-darwin-${arch}"
+            CGO_ENABLED=0 GOOS=darwin GOARCH="$arch" go build -trimpath \
+              -ldflags "-s -w -X main.buildVersion=$ver" -o "dist/$out" .
+            (cd dist && tar -czf "${out}.tar.gz" "$out" && rm "$out")
+          done
+          (cd dist && sha256sum vegaduta-setup-* | LC_ALL=C sort -k2 > SHA256SUMS)
+          ls -lh dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vegaduta-setup-dist
+          path: installer/dist/*
+          retention-days: 30
+
+  dist-darwin:
+    name: Build macOS .dmg
+    needs: test
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: installer/go.mod
+      - run: |
+          set -euo pipefail
+          cd installer
+          ./package.sh darwin --version "dev-$(git rev-parse --short HEAD)"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vegaduta-setup-dmg
+          path: installer/dist/*.dmg
+          retention-days: 30

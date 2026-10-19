@@ -1,0 +1,49 @@
+# Mock model server for platform-overhead load tests on a local kind stage.
+# Create the ConfigMap first: kubectl -n vegaduta create configmap mock-llm-code --from-file=server.js=tests/load/mock-llm/server.js
+# (--dry-run=client -o yaml | kubectl apply -f - to update it), then kubectl apply -f this file and restart the pod.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-llm
+  namespace: vegaduta
+  labels: {app: mock-llm}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: mock-llm}
+  template:
+    metadata:
+      labels: {app: mock-llm}
+    spec:
+      containers:
+        - name: mock-llm
+          image: node:22-alpine
+          imagePullPolicy: IfNotPresent
+          command: ["node", "/app/server.js"]
+          env:
+            - {name: FIRST_TOKEN_MS, value: "50"}
+            - {name: TOKEN_MS, value: "5"}
+            - {name: TOKENS, value: "20"}
+            # Slow profile for model mock-slow:latest (stop-mid-stream, reload-resume): ~18 s per reply.
+            - {name: SLOW_FIRST_TOKEN_MS, value: "300"}
+            - {name: SLOW_TOKEN_MS, value: "300"}
+            - {name: SLOW_TOKENS, value: "60"}
+          ports: [{containerPort: 11434}]
+          readinessProbe:
+            httpGet: {path: /healthz, port: 11434}
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: "1", memory: 256Mi}
+          volumeMounts: [{name: code, mountPath: /app}]
+      volumes:
+        - name: code
+          configMap: {name: mock-llm-code}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-llm
+  namespace: vegaduta
+spec:
+  selector: {app: mock-llm}
+  ports: [{port: 11434, targetPort: 11434}]

@@ -1,0 +1,6 @@
+# Local secrets and CLI state — never commit.
+.env
+.env.*
+!.env.example
+core.env
+.vegaduta-state

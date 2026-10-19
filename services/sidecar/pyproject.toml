@@ -1,0 +1,101 @@
+# Ruff (lint + format) config for the sidecar service. First lint/format
+# config this service has ever had (2026-08-17).
+#
+# WHY THIS FILE EXISTS AND WHAT IT IS NOT: this pyproject.toml carries ONLY
+# tool config. There is deliberately no [project]/[build-system] section -
+# the service is not a package (the Dockerfile pip-installs requirements.txt
+# and COPYs app/, it never builds or installs this directory), and adding
+# packaging metadata here would invite someone to `pip install .` a thing
+# that was never designed to be installed. The Dockerfile doesn't even COPY
+# this file, so it is completely inert for image builds.
+#
+# WHY PER-SERVICE CONFIG, NOT ONE SHARED ROOT FILE: the rule content below
+# is kept byte-identical with code-intel/pyproject.toml on purpose - the two
+# codebases are stylistically identical (same import discipline, same
+# `from __future__ import annotations` + modern generics, same raise-from
+# hygiene) and there is no case for them drifting. A single repo-root config
+# would express that better, but the repo root is shared, multi-agent-owned
+# territory (see CLAUDE.md scope rules) and the root would also pull
+# app-builder/, voice-agent/ and tools/ into scope on day one. If a root
+# config lands later, both service files should be deleted in that same
+# change, not left to shadow it (ruff uses the NEAREST config up the tree,
+# so these files would silently win over a root one).
+#
+# WHY ruff FOR BOTH LINT AND FORMAT: one tool, one config, one CI step.
+# ruff-format is black-compatible; the [tool.ruff.format] defaults match
+# this codebase's existing style (double quotes, 4-space indent). NOTE:
+# `ruff format` has not been run over the tree yet - adopting it is a
+# separate, whole-file-diff commit and should be its own change.
+#
+# WHY line-length = 100 (measured, not guessed): the house style is visibly
+# ~88 with occasional overflow. Measured across both services: 78 lines
+# exceed 88, 32 exceed 100, 9 exceed 120. At 88 the config would open with
+# a wall of violations; at 120 it would stop expressing the style at all.
+# 100 leaves this service exactly 15 violations (extraction.py 5, main.py 4,
+# embeddings.py 4, test_pipeline.py 2), all ordinary prose/string lines that
+# are genuinely splittable - one small cleanup commit, not a wall.
+#
+# WHY py312: the Dockerfile is python:3.12-slim. Local .venvs on dev
+# machines have been observed on cp311 - the image, not the laptop, is the
+# deployment truth, so lint against 3.12.
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E4/E7/E9/F is ruff's default set and where the defect-catching value is
+# (F401 unused imports, F811 redefinition, F841 dead locals). E501 must be
+# named explicitly because the default set omits it. I/UP/B/C4/RUF are the
+# cheap upgrades this codebase is already ~95% compliant with: import blocks
+# are isort-clean, generics are modern (str | None, list[str]), exception
+# chaining uses `raise ... from e` throughout, and there is not a single
+# non-ASCII character in either service (so RUF001-003 are silent).
+#
+# DELIBERATELY NOT SELECTED - each of these is a several-hundred-violation
+# wall that would fight this repo's documented conventions, not improve them:
+#   D (pydocstyle)  - the house convention is multi-paragraph narrative
+#                     docstrings explaining WHY (see CLAUDE.md); D205/D400/
+#                     D401 would flag essentially all of them.
+#   TRY             - TRY003 flags long exception messages; this codebase
+#                     deliberately writes long, actionable ones (see
+#                     embeddings.py's backpressure errors).
+#   BLE             - every `except Exception` here is intentional and
+#                     comment-justified (per-image OCR failures, provider
+#                     fallbacks).
+#   S (bandit)      - S101 would flag every assert in tests/.
+#   PL, PTH, ANN, ERA, EM, COM812/ISC001 - complexity/pathlib/annotation
+#                     churn with zero found defects, or formatter-conflicting.
+select = ["E4", "E7", "E9", "F", "E501", "I", "UP", "B", "C4", "RUF"]
+# B008 ("function call in default argument") is the canonical FastAPI false
+# positive: main.py:66's `x_internal_token: str = Header(default="")` is the
+# framework's documented idiom, not a shared-mutable-default bug. Evaluated
+# once per request by FastAPI's DI, not once at import.
+ignore = ["B008"]
+
+# No per-file-ignores needed here: tests/ are plain pytest (asserts are fine
+# because S is not selected), and conftest.py does its sys.path insert AFTER
+# its imports, so E402 never fires. Add ignores only when a rule is wrong
+# for a file, not to pre-empt rules that are already silent.
+
+[tool.ruff.format]
+# Defaults on purpose (double quotes, 4-space indent, magic trailing comma
+# respected) - they match the existing style, so a future `ruff format`
+# adoption produces the smallest possible diff.
+
+# mypy (added 2026-09-30, SVC-009/010 follow-up). NON-BLOCKING: nothing in CI
+# runs it yet, and the service as a whole is not annotation-complete (~200
+# findings under the strict flags). The override below holds the modules on
+# the security boundary - the SSRF guard/pinned fetch in render.py and the
+# shared-secret check in main.py - to the strict profile, which they pass:
+#   mypy app/render.py app/main.py
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["app.render", "app.main"]
+disallow_untyped_defs = true
+check_untyped_defs = true
+

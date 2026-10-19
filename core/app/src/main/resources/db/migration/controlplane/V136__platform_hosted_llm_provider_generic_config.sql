@@ -1,0 +1,34 @@
+-- "I need something generic like what we have in tenant - should be able to
+-- add any provider, and leave blank to select any best model from the
+-- provider" - direct platform-owner feedback, 2026-07-26.
+--
+-- Adds two admin-facing columns to the hosted (FREE-tier) LLM pool so a row
+-- can optionally be created from a known ProviderName (mirroring the tenant
+-- BYOK flow in core.providers.ProviderName) instead of always requiring a
+-- hand-typed base_url, and so a blank model at save time can mean "auto-pick
+-- the best currently-available model for this provider" instead of a hard
+-- validation failure.
+--
+-- provider_name: nullable, free-text mirror of the ProviderName enum name
+-- (e.g. "GEMINI", "GROK", "OPENROUTER", "OPENAI"). Nullable/optional so every
+-- already-configured row (Groq, Together AI, Cerebras, ... - entered via a
+-- raw base_url, no known ProviderName) keeps working unchanged; it is pure
+-- admin-facing/auto-fill metadata, same non-routing posture as `region`
+-- (see V85) - PlatformHostedLlmProviderService.resolveRequest is the only
+-- reader, and only at create/update time to derive base_url/completions_path
+-- and to drive auto-model-selection via ProviderModelCatalogService. The
+-- actual per-row chat routing in core.chat.HostedLlmChatClientFactory still
+-- reads base_url/model/completions_path exactly as before - untouched.
+--
+-- model_auto_selected: NOT NULL DEFAULT FALSE - true only for a row whose
+-- `model` value was chosen automatically (blank model + a known provider_name
+-- at save time) rather than hand-typed by the admin, so the admin UI can show
+-- an "(auto)" indicator and know it's safe to blank the model field again on
+-- a later edit to force re-selection (e.g. after a vendor deprecates the
+-- previously-picked model id - the exact "gemini-2.5-flash-lite / no longer
+-- available to new users" incident this feature answers).
+--
+-- control_plane-schema-qualified, same as the table it extends (see V58 / V85 / V122).
+ALTER TABLE control_plane.platform_hosted_llm_provider
+    ADD COLUMN provider_name VARCHAR(64),
+    ADD COLUMN model_auto_selected BOOLEAN NOT NULL DEFAULT FALSE;

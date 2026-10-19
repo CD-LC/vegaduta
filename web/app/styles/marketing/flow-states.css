@@ -1,0 +1,411 @@
+/* ---------------------------------------------------------------------------
+ * 11. FLOW MOTIF
+ * The visual signature of a workflow product: a dashed connector with a
+ * packet travelling along it, used to tie step/node cards together instead of
+ * the plain chevrons the page uses now. No SVG, so it works between any two
+ * elements in any layout.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-flowline {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  height: 1px;
+  background-image: linear-gradient(to right, var(--mkt-line-strong) 50%, transparent 50%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-flowline::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    margin-top: -2.5px;
+    border-radius: 999px;
+    background: var(--mkt-flow);
+    box-shadow: 0 0 8px var(--mkt-flow);
+    animation: mkt-packet 2.8s linear infinite;
+  }
+}
+
+@keyframes mkt-packet {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* Vertical variant, for the stepper on phones where the row wraps to a stack. */
+.marketing-root .mkt-flowline--v {
+  width: 1px;
+  min-width: 0;
+  min-height: 1.5rem;
+  background-image: linear-gradient(to bottom, var(--mkt-line-strong) 50%, transparent 50%);
+  background-size: 1px 8px;
+  background-repeat: repeat-y;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-flowline--v::after {
+    left: 50%;
+    top: 0;
+    margin-left: -2.5px;
+    margin-top: 0;
+    animation-name: mkt-packet-v;
+  }
+}
+
+@keyframes mkt-packet-v {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 12. BUTTON MICROSTATES — disabled, busy, pressed, current
+ * Section 5 defined base + hover + active and stopped there, which is the
+ * usual place a design system stops and the usual reason it reads unfinished:
+ * the moment a CTA is unavailable or in flight it falls back to whatever the
+ * global `button {}` rule in globals.css gives it, i.e. a card-coloured box.
+ *
+ * SPECIFICITY NOTE (this file is unlayered, so it has to be deliberate):
+ * every rule below is (0,3,0) or higher and sits after §5, so it beats
+ * `.marketing-root .mkt-btn-primary` (0,2,0) AND ties-then-wins against
+ * `.marketing-root .mkt-btn-primary:hover` (0,3,0) by source order.
+ * ------------------------------------------------------------------------ */
+
+/* Both spellings on purpose. `:disabled` is the real thing on a <button>;
+ * `[aria-disabled="true"]` is what an <a> CTA has to use, because an anchor
+ * cannot be disabled and removing its href takes it out of the tab order.
+ * The aria form stays focusable and keeps its tooltip — it just stops
+ * looking pressable. */
+.marketing-root .mkt-btn:disabled,
+.marketing-root .mkt-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  /* Flatten it: no gradient, no glow, no lift. A disabled control that still
+   * carries the primary button's halo reads as broken rather than as off. */
+  color: var(--mkt-ink-3);
+  background-color: var(--mkt-surface-sunken);
+  background-image: none;
+  border-color: var(--mkt-line);
+  box-shadow: none;
+  opacity: 0.62;
+  transform: none;
+}
+
+/* Kill the interactions individually rather than with `pointer-events: none` —
+ * that would also block the focus ring and any title tooltip, and it makes a
+ * disabled control invisible to a pointer-driven screen reader cursor. */
+.marketing-root .mkt-btn:disabled:hover,
+.marketing-root .mkt-btn[aria-disabled="true"]:hover,
+.marketing-root .mkt-btn:disabled:active,
+.marketing-root .mkt-btn[aria-disabled="true"]:active {
+  box-shadow: none;
+  transform: none;
+  background-image: none;
+  border-color: var(--mkt-line);
+}
+
+/* §5's shine sweep is defined at (0,3,1) inside a reduced-motion query; this
+ * is (0,4,1) so it wins from anywhere in the cascade. */
+.marketing-root .mkt-btn:disabled:hover::after,
+.marketing-root .mkt-btn[aria-disabled="true"]:hover::after {
+  animation: none;
+}
+
+/* BUSY / LOADING.
+ * Keyed off `aria-busy` first so the affordance cannot exist without the
+ * announcement — a spinner only a sighted visitor gets is the most common
+ * loading-state bug. `.is-busy` is the escape hatch for a control that
+ * already conveys the state some other way.
+ *
+ * The spinner is `::before`, which is free on `.mkt-btn` (§4's sheen is on
+ * `.mkt-card`, §5's shine is `.mkt-btn-primary::after`). Because `.mkt-btn`
+ * is an inline-flex container, ::before becomes a real flex item and picks up
+ * the existing 0.5rem gap — so the label does not shift sideways by a
+ * hand-tuned margin and nothing needs a wrapper span. */
+.marketing-root .mkt-btn[aria-busy="true"],
+.marketing-root .mkt-btn.is-busy {
+  cursor: progress;
+}
+
+.marketing-root .mkt-btn[aria-busy="true"]::before,
+.marketing-root .mkt-btn.is-busy::before {
+  content: "";
+  flex: none;
+  width: 0.875em;
+  height: 0.875em;
+  border-radius: 999px;
+  /* currentColor so one rule serves primary (white), secondary and ghost. */
+  border: 2px solid color-mix(in oklab, currentColor 30%, transparent);
+  border-top-color: currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-btn[aria-busy="true"]::before,
+  .marketing-root .mkt-btn.is-busy::before {
+    animation: mkt-spin 720ms linear infinite;
+  }
+}
+
+/* Without motion a frozen three-quarter ring reads as a rendering fault, so
+ * the gap closes and the ring breathes on opacity only — the accommodation
+ * reduced-motion actually asks for (no movement, not no feedback). */
+@media (prefers-reduced-motion: reduce) {
+  .marketing-root .mkt-btn[aria-busy="true"]::before,
+  .marketing-root .mkt-btn.is-busy::before {
+    border-color: currentColor;
+    animation: mkt-breathe 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes mkt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mkt-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* A busy button must not also sweep its shine on hover — two simultaneous
+ * "something is happening" signals cancel each other out. */
+.marketing-root .mkt-btn[aria-busy="true"]:hover::after,
+.marketing-root .mkt-btn.is-busy:hover::after {
+  animation: none;
+}
+
+/* PRESSED / CURRENT — the state a toggle or a segmented control needs and
+ * this set had no way to express, so call sites were hand-rolling a border
+ * colour. `aria-pressed` is the toggle, `aria-current` the nav/step marker,
+ * `data-state="active"` the Radix convention already used elsewhere in this
+ * app (Tabs, ToggleGroup).
+ *
+ * Deliberately NOT `:visited`: a CTA that changes colour once a visitor has
+ * clicked it reads as stale, and `:visited` cannot be styled beyond colour
+ * anyway. Prose links are where visited belongs (§14). */
+.marketing-root .mkt-btn[aria-pressed="true"],
+.marketing-root .mkt-btn[aria-current]:not([aria-current="false"]),
+.marketing-root .mkt-btn[data-state="active"] {
+  color: var(--mkt-ink);
+  background-color: color-mix(in oklab, var(--mkt-accent) 14%, var(--mkt-surface-raised));
+  background-image: none;
+  border-color: var(--mkt-line-strong);
+  /* Inset rather than raised: pressed means recessed. */
+  box-shadow: inset 0 1px 3px color-mix(in oklab, #000 14%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * 13. CARD MICROSTATES — press and selection
+ * §4 gave `.mkt-card--interactive` hover and focus-within and nothing else,
+ * so a card that is genuinely clickable gave no press feedback at all (the
+ * tell that a "card" is really a div), and a card that is the current choice
+ * in a set — a plan in the pricing grid, a tab in a picker — had no way to
+ * say so.
+ * ------------------------------------------------------------------------ */
+
+/* The press is intentionally NOT added to §4's transition list. Press
+ * feedback has to land on the same frame as the pointer-down or it reads as
+ * lag; the release is what §4's existing box-shadow transition smooths. */
+.marketing-root .mkt-card--interactive:active {
+  transform: translateY(1px);
+  box-shadow: var(--mkt-shadow-sm);
+  border-color: var(--mkt-line-strong);
+}
+
+/* SELECTED / CURRENT. Three hooks for one state, matching §12: the aria
+ * attributes for links and options, `data-selected` for a pure-JS picker, and
+ * an `.is-selected` escape hatch.
+ *
+ * The ::after rule ties §4's `:hover::after` at (0,3,1) and wins on source
+ * order, so the halo hover lends a card becomes permanent while it is the
+ * current one. */
+.marketing-root .mkt-card--interactive[aria-current]:not([aria-current="false"]),
+.marketing-root .mkt-card--interactive[aria-selected="true"],
+.marketing-root .mkt-card--interactive[data-selected="true"],
+.marketing-root .mkt-card--interactive.is-selected {
+  border-color: color-mix(in oklab, var(--mkt-accent) 58%, var(--mkt-line));
+  box-shadow: var(--mkt-shadow), var(--mkt-shadow-glow);
+}
+
+.marketing-root .mkt-card--interactive[aria-current]:not([aria-current="false"])::after,
+.marketing-root .mkt-card--interactive[aria-selected="true"]::after,
+.marketing-root .mkt-card--interactive[data-selected="true"]::after,
+.marketing-root .mkt-card--interactive.is-selected::after {
+  opacity: 1;
+}
+
+/* Colour is not allowed to be the only carrier of "this one is selected"
+ * (WCAG 1.4.1), so selection also gets a 2px accent rail on the inline-start
+ * edge. Drawn as an inset box-shadow on the card's own ::before — that pseudo
+ * already exists for the sheen and already inherits the radius, so this costs
+ * no extra element and cannot round-clip wrongly. */
+.marketing-root .mkt-card--interactive[aria-current]:not([aria-current="false"])::before,
+.marketing-root .mkt-card--interactive[aria-selected="true"]::before,
+.marketing-root .mkt-card--interactive[data-selected="true"]::before,
+.marketing-root .mkt-card--interactive.is-selected::before {
+  inset: 0;
+  height: auto;
+  background: none;
+  box-shadow: inset 2px 0 0 0 var(--mkt-accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * 14. INLINE LINKS IN PROSE
+ * There was no inline-link treatment anywhere in this system, so a link in a
+ * paragraph on /about, /compare or a docs hub rendered as plain inherited
+ * body text with a browser-default underline — indistinguishable from bold
+ * copy at a glance, and the one place on a marketing page where a visitor is
+ * actively looking for somewhere to go.
+ *
+ * OPT-IN ONLY, and that is the whole design. A bare `.marketing-root p a`
+ * rule would be unlayered and would therefore beat every Tailwind utility on
+ * every nav link, card link, footer link and button-shaped anchor on the
+ * funnel. `.mkt-prose` marks a block of real prose; `.mkt-link` marks a
+ * single link. Nothing gets styled that did not ask.
+ * ------------------------------------------------------------------------ */
+
+/* NOT bare `var(--mkt-accent)`. That resolves to --accent-500, which
+ * globals.css documents as a FILL step: in light mode it is #6d5bff, 4.27:1
+ * on --mkt-canvas (#f7f8fa) — under the 4.5:1 body-text floor. globals.css
+ * line ~252 names --accent-600 "the light-mode text-safe step". Mixing toward
+ * --mkt-ink instead of hard-coding 600 keeps one accent token and is
+ * self-correcting per theme: in light --mkt-ink is near-black so the link
+ * darkens (~5.3:1), in dark it is near-white so the link lightens. Same idiom
+ * §6's .mkt-pill--accent already uses for accent-coloured TEXT. */
+.marketing-root .mkt-link,
+.marketing-root .mkt-prose a:not([class]) {
+  color: color-mix(in oklab, var(--mkt-accent) 86%, var(--mkt-ink));
+  text-decoration-line: underline;
+  /* An underline should sit clear of the descenders, not through them. */
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in oklab, var(--mkt-accent) 42%, transparent);
+  text-decoration-skip-ink: auto;
+  border-radius: 2px;
+  transition:
+    color 140ms ease,
+    text-decoration-color 140ms ease;
+}
+
+.marketing-root .mkt-link:hover,
+.marketing-root .mkt-prose a:not([class]):hover {
+  /* Re-spaced against the new 86% resting tone so hover is still a visible
+   * step (it was 82%, which is now indistinguishable from rest). */
+  color: color-mix(in oklab, var(--mkt-accent) 60%, var(--mkt-ink));
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+.marketing-root .mkt-link:active,
+.marketing-root .mkt-prose a:not([class]):active {
+  color: color-mix(in oklab, var(--mkt-accent) 44%, var(--mkt-ink));
+}
+
+/* Visited belongs HERE and not on buttons (see §12). On a docs hub or a
+ * comparison index "I already read that one" is real information. Kept as a
+ * tone shift rather than the classic purple — a second hue would break the
+ * three-hue ceiling §1 sets. */
+.marketing-root .mkt-prose a:not([class]):visited {
+  color: color-mix(in oklab, var(--mkt-accent) 58%, var(--mkt-ink-2));
+}
+
+/* An anchor wrapping an image or an icon inside prose should not get a
+ * dangling underline under the box. */
+.marketing-root .mkt-prose a:not([class]):has(> img),
+.marketing-root .mkt-prose a:not([class]):has(> svg) {
+  text-decoration-line: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * 15. SKELETONS
+ * The landing lazy-loads eight bands and every one of their `loading:`
+ * fallbacks is a bare min-height div, so a slow connection sees the page
+ * height jump with nothing in the gap — which reads as a broken section, not
+ * as a loading one. These classes give that fallback a shape.
+ *
+ * Markup contract: a skeleton is decoration, so it carries aria-hidden and
+ * any announcement happens in a live region elsewhere.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--mkt-radius);
+  background: color-mix(in oklab, var(--mkt-ink) 5%, var(--mkt-surface-sunken));
+  /* Never a source of layout shift: a skeleton exists to hold space, so it
+   * must not be able to collapse to zero if a caller forgets a height. */
+  min-height: var(--mkt-skeleton-h, 1rem);
+}
+
+/* Band-sized placeholder. 420px is the height the landing's dynamic imports
+ * already reserve, so keeping it here means swapping in the real component
+ * causes no shift. */
+.marketing-root .mkt-skeleton--band {
+  --mkt-skeleton-h: 420px;
+  border-radius: var(--mkt-radius-lg);
+  /* A faint edge so it reads as "a section is arriving here" rather than as
+   * one grey slab dropped into the middle of the page. */
+  border: 1px solid color-mix(in oklab, var(--mkt-line) 60%, transparent);
+  background: color-mix(in oklab, var(--mkt-ink) 3%, var(--mkt-surface-sunken));
+}
+
+/* Line and title placeholders, for in-card use. */
+.marketing-root .mkt-skeleton--text {
+  --mkt-skeleton-h: 0.75rem;
+  border-radius: 999px;
+}
+
+.marketing-root .mkt-skeleton--title {
+  --mkt-skeleton-h: 1.125rem;
+  border-radius: 6px;
+}
+
+/* The sweep. A transform-animated overlay, NOT an animated background-position
+ * and NOT `animate-pulse` on the box itself — same reasoning as §2's note
+ * about blur() and stacked ping clones: this page already had paint-cost
+ * problems, and a transform on a compositor layer is the one version of this
+ * effect that costs nothing per frame. */
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--mkt-ink) 6%, transparent), transparent);
+    animation: mkt-sweep 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes mkt-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}

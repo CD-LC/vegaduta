@@ -1,0 +1,18 @@
+{
+  "id" : null,
+  "workflowId" : null,
+  "workflowName" : null,
+  "status" : null,
+  "requestedBy" : null,
+  "errorMessage" : null,
+  "trace" : [ ],
+  "startedAt" : null,
+  "completedAt" : null,
+  "outputFileName" : null,
+  "workflowVersion" : null,
+  "mode" : null,
+  "pinnedNodeCount" : 0,
+  "comment" : null,
+  "warningCount" : 0,
+  "cancelRequested" : false
+}

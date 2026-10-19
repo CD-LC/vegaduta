@@ -1,0 +1,42 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-audit-log",
+      "method": "GET",
+      "path": "/api/audit-log",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].actionType",
+          "$[*].actorId",
+          "$[*].createdAt",
+          "$[*].detail",
+          "$[*].id",
+          "$[*].outcome",
+          "$[*].targetId",
+          "$[*].targetType"
+        ]
+      }
+    },
+    {
+      "id": "get-api-audit-log-action-types",
+      "method": "GET",
+      "path": "/api/audit-log/action-types",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-audit-log-counts",
+      "method": "GET",
+      "path": "/api/audit-log/counts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+# Free, private, local inference: no API key, no cloud account.
+#
+# Added automatically by `scripts/vegaduta up --local-ai[=host]`. Do not
+# layer it by hand unless you also pass `--profile local-ai` (container mode).
+#
+# Two modes, same result (the platform pool - what FREE tenants use - points
+# at an Ollama and core registers it at startup; see docs/local-models.md):
+#
+#   container (default)  An `ollama` service in this stack; the model is pulled
+#                        on first start and kept in the `ollama-data` volume.
+#                        CPU only on Docker Desktop for Mac/Windows (containers
+#                        cannot reach the Apple GPU); NVIDIA GPUs are picked up
+#                        on Linux via docker-compose.local-ai.nvidia.yml.
+#   host                 Use an Ollama already running on this machine (the
+#                        best choice on Apple Silicon: native Metal speed).
+#                        Needs docker-compose.local-ai.host.yml.
+#
+# Security: Ollama has no authentication, so it publishes NO host port and only
+# joins the network core is on. Core may call it only because its exact
+# host:port is added to the outbound allow-list below (SsrfGuard otherwise
+# refuses every private address).
+services:
+  ollama:
+    profiles: [local-ai]
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.40.3}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    entrypoint: ["/bin/bash", "-c"]
+    # Serve, wait until the API answers, pull the model (a no-op once cached),
+    # then stay in the foreground. The healthcheck turns green only when the
+    # model is usable, so `up --wait` blocks until chat will actually work.
+    command:
+      - |
+        ollama serve &
+        pid=$$!
+        until ollama list >/dev/null 2>&1; do sleep 1; done
+        ollama pull "$$LOCAL_LLM_MODEL"
+        wait $$pid
+    environment:
+      LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-2}
+    volumes:
+      - ollama-data:/root/.ollama
+    mem_limit: ${OLLAMA_MEM_LIMIT:-8g}
+    healthcheck:
+      test: ["CMD-SHELL", "ollama show \"$$LOCAL_LLM_MODEL\" >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 360       # first start downloads the model (~3 GB for the default)
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  core:
+    environment:
+      APP_LOCAL_LLM_BOOTSTRAP_ENABLED: "true"
+      APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${LOCAL_LLM_BASE_URL:-http://ollama:11434}
+      APP_LOCAL_LLM_BOOTSTRAP_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
+      # Exactly the local model server, plus whatever the operator already allows.
+      APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${LOCAL_LLM_ALLOWED_HOST:-ollama:11434}${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:+,${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS}}
+
+volumes:
+  ollama-data:

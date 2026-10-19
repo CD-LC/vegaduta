@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-plugins-catalog",
+      "method": "GET",
+      "path": "/api/plugins/catalog",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

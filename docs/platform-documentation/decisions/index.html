@@ -1,0 +1,160 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR Index &amp; Process — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="index.html" data-doc="VD-ADR-000" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR Index &amp; Process</div>
+<div class="doc-meta" data-auto></div>
+<h1>Architecture Decision Records — Index &amp; Process</h1>
+<p class="lede">
+  An ADR is the permanent record of one consequential architecture choice: the
+  problem, the decision, the alternatives that lost, and the consequences —
+  including the incidents that motivated or followed it. This index
+  lists every ADR for the VegaDūta platform in the format of Michael Nygard's
+  <em>Documenting Architecture Decisions</em>.
+</p>
+
+<h2>ADR index</h2>
+<table>
+  <thead><tr><th>ADR</th><th>Title</th><th>Status</th><th>Decided</th><th>One-line decision</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><a href="adr-0001-modular-monolith.html">ADR-0001</a></td>
+      <td>Modular monolith over microservices</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-07</td>
+      <td>One Spring Boot deployable (<code>core/app</code>) assembled from a ~40-module Maven reactor; ports-and-adapters modules, scaled by shape, pool and replica; satellite services only for async, untrusted or other-runtime work (amended 2026-10-15).</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0002-schema-per-tenant.html">ADR-0002</a></td>
+      <td>Schema-per-tenant Postgres isolation</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-07</td>
+      <td>Tenant data isolated in a per-tenant Postgres schema via Hibernate multi-tenancy; <code>SET search_path</code> per checked-out connection.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0003-spring-ai-dynamic-clients.html">ADR-0003</a></td>
+      <td>Spring AI dynamic per-request ChatClients</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-07</td>
+      <td>All Spring AI provider auto-configurations excluded; <code>ChatClient</code>s built per request from decrypted BYOK credentials.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0004-hosted-container-runtime.html">ADR-0004</a></td>
+      <td>Container runtime for the original hosted deployment</td>
+      <td><span class="badge badge-staging">superseded for self-hosting</span></td>
+      <td>2026-09</td>
+      <td>Historical: the hosted instance used a managed container platform plus a VM. This repository ships Compose and Helm; the per-service runtime needs still apply.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0005-dual-issuer-keycloak.html">ADR-0005</a></td>
+      <td>Dual-issuer JWT validation</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-09</td>
+      <td>Core validates the issuer Keycloak stamps and accepts extra issuers via <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0006-managed-redis.html">ADR-0006</a></td>
+      <td>Managed Redis for the original hosted deployment</td>
+      <td><span class="badge badge-staging">superseded for self-hosting</span></td>
+      <td>2026-09</td>
+      <td>Historical: managed Redis on a private network. Self-hosters use the bundled Valkey or any Redis-API service on a private network.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0007-build-time-frontend-config.html">ADR-0007</a></td>
+      <td>Frontend public configuration</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-08</td>
+      <td>Public frontend settings (<code>NEXT_PUBLIC_*</code>) must never bake a localhost URL into a deployed image; build args are optional and the runtime environment decides.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0008-single-revision-deploys.html">ADR-0008</a></td>
+      <td>Immutable, verified, reversible deploys</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-09</td>
+      <td>Pinned versions, core before frontends, verify health, keep the previous version to roll back to. The hosted single-revision pipeline is historical.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0009-untrusted-code-sandboxing.html">ADR-0009</a></td>
+      <td>Untrusted code never runs inside core</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-07-27</td>
+      <td>Tenant-authored tools and third-party MCP STDIO packages execute in dedicated sandbox services (<code>tool-sandbox</code>, <code>mcp-stdio-runner</code>), never in <code>core</code>.</td>
+    </tr>
+    <tr>
+      <td><a href="adr-0010-secret-injection.html">ADR-0010</a></td>
+      <td>Secret injection model</td>
+      <td><span class="badge badge-verified">accepted</span></td>
+      <td>2026-09</td>
+      <td>Secrets reach services as environment from one source of truth per deployment: <code>deploy/compose/.env</code> or Kubernetes Secrets.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>When to write an ADR</h2>
+<p>Write one when a decision meets any of these tests:</p>
+<ul>
+  <li><strong>Hard to reverse.</strong> Data models, tenancy isolation, provider/hoster
+    choice, secret stores — anything whose undo cost is a migration, not a config edit.</li>
+  <li><strong>Crosses module or service boundaries.</strong> Contracts other modules or
+    satellite services depend on (e.g. "ChatClients are built per request", "secrets
+    resolve at revision creation").</li>
+  <li><strong>A real incident taught it.</strong> Most ADRs here exist because something
+    broke: the PgBouncer wrong-tenant routing (ADR-0002), the 401-everything issuer
+    mismatch (ADR-0005), the "Cookie not found" domain-cutover outage (ADR-0007). The record
+    exists so the next contributor doesn't have to re-learn it.</li>
+  <li><strong>A competent engineer would ask "why is it like this?"</strong> If the answer
+    is non-obvious and lives only in someone's memory or a closed chat, it is an ADR.</li>
+</ul>
+<p>Do <strong>not</strong> write an ADR for reversible implementation detail, library
+minor-version bumps, or anything already fully expressed by code + tests. Ops events
+belong in runbooks and postmortems; the ADR cites them, it does not replace them.</p>
+
+<h2>Lifecycle</h2>
+<table>
+  <thead><tr><th>State</th><th>Meaning</th><th>Badge on this site</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Proposed</strong></td><td>Written for review; not yet binding. An ADR should not sit here long — decide it or withdraw it.</td><td><span class="badge badge-draft">proposed</span></td></tr>
+    <tr><td><strong>Accepted</strong></td><td>Binding. Code, deploy files and docs that contradict it are bugs.</td><td><span class="badge badge-verified">accepted</span></td></tr>
+    <tr><td><strong>Deprecated</strong></td><td>No longer holds; kept for history with the reason recorded.</td><td><span class="badge badge-deprecated">deprecated</span></td></tr>
+    <tr><td><strong>Superseded</strong></td><td>Replaced by a newer ADR, which must be linked in both directions.</td><td><span class="badge badge-staging">superseded</span></td></tr>
+  </tbody>
+</table>
+<p>An accepted ADR is edited only to add dated clarifications or a supersession link —
+never silently rewritten. If the world changed, write the new ADR and mark the old one
+superseded; the diff between them is the history.</p>
+
+<h2>Format</h2>
+<p>Each ADR page follows the Nygard structure, extended with two sections this platform
+found it needs:</p>
+<dl class="props">
+  <dt>Status line</dt><dd>Lifecycle badge, decision date, deciders, supersession links.</dd>
+  <dt>Context</dt><dd>The problem and the forces: team size, cost, operational constraints, the incident at hand.</dd>
+  <dt>Decision</dt><dd>The choice, stated as a commitment in active voice.</dd>
+  <dt>Alternatives considered</dt><dd>A table of the options that lost and why — this is what makes the record a <em>decision</em> rather than a description.</dd>
+  <dt>Consequences</dt><dd>Positive and negative, honestly split — including consequences that only showed up later in real use.</dd>
+  <dt>Evidence &amp; references</dt><dd>Repository paths and commits the claims can be checked against.</dd>
+</dl>
+
+<h2>Using the template</h2>
+<p>There is no separate skeleton file — the newest ADR page <em>is</em> the template.
+To add one:</p>
+<ol>
+  <li>Copy <code>docs/platform-documentation/decisions/adr-0009-untrusted-code-sandboxing.html</code>
+    to <code>adr-NNNN-short-slug.html</code> with the next free number.</li>
+  <li>Update <code>&lt;body&gt;</code>'s <code>data-doc</code> (next <code>VD-ADR-0NN</code>),
+    <code>data-page</code> and <code>data-updated</code>; fill the Status/Context/Decision/
+    Alternatives/Consequences/Evidence sections.</li>
+  <li>Add a row to the index table above and a nav entry in
+    <code>assets/js/site.js</code> under the <code>decisions</code> section.</li>
+  <li>Number sequentially — ADR numbers are never reused, even if a record is withdrawn.</li>
+</ol>
+<div class="callout callout-note">
+  <div class="callout-title">Related process</div>
+  Proposals that need open review before they become decisions go through the RFC
+  process: see <a href="../rfc/index.html">RFC Index &amp; Process</a> and
+  <a href="../rfc/rfc-0000-template.html">RFC-0000 Template</a>.
+</div>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

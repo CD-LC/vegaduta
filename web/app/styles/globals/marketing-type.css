@@ -1,0 +1,370 @@
+/* ------------------------------------------------------------------ */
+/* Senses showcase — landing "every sense, plugged in" band (2026-08-12).
+ * CSS scroll-driven view() entry reveal for the six .sense-card tiles.
+ * Decorative only, so pure progressive enhancement per the scroll-driven-
+ * animations guidance: gated behind BOTH prefers-reduced-motion and the
+ * full-support @supports check (the `animation-range: entry` clause filters
+ * out partial implementations); no JS fallback on purpose — Firefox and
+ * reduced-motion visitors get the cards static, fully visible. Animates
+ * transform/opacity only (compositor-friendly). */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes sense-card-rise {
+      from {
+        opacity: 0;
+        transform: translateY(44px) scale(0.96);
+      }
+    }
+
+    .sense-card {
+      animation: sense-card-rise linear backwards;
+      animation-timeline: view();
+      animation-range: entry 10% entry 65%;
+    }
+  }
+}
+
+/* Marketing display face (2026-09-10, direct feedback: "UI is broken, fonts
+ * are broken" on the live landing, resolved to "modern sans throughout").
+ * Sora — public funnel headlines only, replacing Playfair Display, which
+ * held this role from 2026-08-14 (itself replacing Bricolage Grotesque).
+ * Playfair is a high-contrast SERIF; on this product's dark technical
+ * surface its headlines read as a mis-loaded font rather than an editorial
+ * choice. Sora is a geometric sans built for technical interfaces, so it
+ * sits with Geist body text instead of arguing with it. Applied via
+ * .marketing-root (the landing/unauth page wrapper) so every section's
+ * h1/h2 picks it up from one place; the console and all body/UI text stay
+ * Geist. The fallback stack is sans again — a failed font load should
+ * degrade to the house sans, not to Georgia. */
+.marketing-root {
+  /* Body copy on public pages: Inter ("industry standard", direct
+   * instruction 2026-08-12). The wordmark keeps Yatra One via .brand-name's
+   * own font-family (higher specificity + !important weight pin). */
+  font-family: var(--font-marketing-body), var(--font-geist-loaded), ui-sans-serif, sans-serif;
+}
+
+.marketing-root h1,
+.marketing-root h2,
+.marketing-display {
+  font-family: var(--font-marketing-display), var(--font-geist-loaded), ui-sans-serif, system-ui, sans-serif;
+  /* Back to the tight negative tracking a geometric sans wants at display
+   * sizes (the Bricolage-era value was -0.015em); `normal` existed only to
+   * give Playfair's ornate serif terminals room to breathe, and on Sora it
+   * left hero headlines looking loose and unset. */
+  letter-spacing: -0.018em;
+}
+
+/* Per-sense glyph animations for SensesShowcase's decorative card visuals.
+ * Time-based loops on transform/opacity only; all gated behind
+ * prefers-reduced-motion so sensitive visitors see the static glyph. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes sense-scan-sweep {
+    0%,
+    100% {
+      transform: translateX(-26px);
+    }
+    50% {
+      transform: translateX(26px);
+    }
+  }
+  .sense-glyph-scan {
+    animation: sense-scan-sweep 3.2s ease-in-out infinite;
+  }
+
+  @keyframes sense-wave-pulse {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  .sense-glyph-wave {
+    animation: sense-wave-pulse 2.4s ease-in-out infinite;
+  }
+  .sense-glyph-wave:nth-of-type(2) {
+    animation-delay: 0.3s;
+  }
+  .sense-glyph-wave:nth-of-type(3) {
+    animation-delay: 0.6s;
+  }
+
+  @keyframes sense-eq-bounce {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+  .sense-glyph-eq {
+    transform-origin: center bottom;
+    animation: sense-eq-bounce 1.6s ease-in-out infinite;
+  }
+
+  @keyframes sense-node-pulse {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(0.85);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  .sense-glyph-node {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: sense-node-pulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes sense-ring-expand {
+    from {
+      opacity: 0.7;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.15);
+    }
+  }
+  .sense-glyph-ring {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: sense-ring-expand 2.8s ease-out infinite;
+  }
+  .sense-glyph-ring:nth-of-type(2) {
+    animation-delay: 1.4s;
+  }
+
+  @keyframes sense-wing-drift {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-3px) rotate(-2deg);
+    }
+  }
+  .sense-glyph-wing {
+    transform-origin: left bottom;
+    transform-box: fill-box;
+    animation: sense-wing-drift 3.6s ease-in-out infinite;
+  }
+}
+
+/* ============================================================================
+ * MARKETING TYPE SCALE (2026-09-11)
+ * ----------------------------------------------------------------------------
+ * Why this block exists, and why it is UNLAYERED and placed last.
+ *
+ * The landing page had ~20 distinct font sizes and no shared scale: four
+ * different section-h2 patterns (24 / 30 / 36 / 44 / 48px for the same role),
+ * three sizes doing the eyebrow job with five different trackings, 34 uses of
+ * 10px text and 51 of 11px, and 12px as the single most-used size on the page
+ * (127 declarations) while 16px — every benchmark's default body — appeared 14
+ * times. Benchmarked against Linear, Vercel, Stripe, Notion, Anthropic and
+ * Figma: all of them run one scale, a hero between 48 and 86px, and bottom out
+ * at 11-13px reserved for uppercase micro-labels.
+ *
+ * UNLAYERED ON PURPOSE. The .marketing-root h1/h2 rule above (line ~16160) is
+ * also unlayered, and Tailwind v4's utilities live in `@layer utilities`.
+ * Unlayered CSS beats every layered utility regardless of specificity, which is
+ * why `tracking-tight` on the landing headings has silently done nothing for
+ * months — every heading was pinned at -0.018em no matter what the class said.
+ * Rather than fight that, these role classes own size + line-height + weight +
+ * tracking together, so a component applies ONE class per role and gets the
+ * whole spec. They are declared after the .marketing-root block so their
+ * letter-spacing wins over that block's blanket -0.018em.
+ *
+ * FONT WEIGHTS ARE REAL, NOT SYNTHESIZED. layout.tsx loads Sora at 600/700/800
+ * and Inter at 400/500/600. Nothing here asks for 900 (the old hero's
+ * `font-black`, which the browser faux-bolded from 800 — smeared stems) and
+ * nothing asks Inter for 700. If you add a weight here, add it to layout.tsx
+ * in the same commit.
+ *
+ * MIGRATION MAP for the rest of demo-landing/*.tsx — replace the ad-hoc
+ * Tailwind size stacks with these:
+ *   hero headline ............ .mkt-h1          (36 / 48 / 60px, 700)
+ *   section heading (h2) ..... .mkt-h2          (30 / 40px, 700)
+ *   eyebrow / uppercase kicker .mkt-eyebrow     (12px, 600, 0.16em)
+ *   hero lead paragraph ...... .mkt-lead        (18 / 20px, 400)
+ *   paragraph under an h2 .... .mkt-section-sub (16 / 18px, 400)
+ *   card title (h3) .......... .mkt-card-title  (18 / 20px, 600, Sora)
+ *   running body ............. .mkt-body        (16px, 400)
+ *   secondary / label text ... .mkt-small       (14px)
+ *   caption under a visual ... .mkt-caption     (12px, 500)
+ *   pill / chip / badge ...... .mkt-badge       (12px, 600, 0.16em, uppercase)
+ *   hero kicker / slogan ..... .mkt-kicker      (16px, 600)
+ *   the Hindi brand line ..... .mkt-brandline   (16px, 600 + tricolour stripe)
+ * 12px is the FLOOR. There is no 10px or 11px role. Anything currently on
+ * text-[10px] or text-[11px] belongs on .mkt-badge or .mkt-caption.
+ *
+ * FONT-WEIGHT IS DELIBERATELY SPLIT. The roles whose weight is part of their
+ * identity — .mkt-h1, .mkt-h2, .mkt-eyebrow, .mkt-badge, .mkt-card-title,
+ * .mkt-brandline — pin it here, so those cannot drift the way the section h2s
+ * did (they alternated 600 and 700 between adjacent sections for no reason).
+ * The text roles — .mkt-lead, .mkt-section-sub, .mkt-body, .mkt-small,
+ * .mkt-caption — deliberately do NOT set font-weight, because these rules are
+ * unlayered and would silently beat a `font-medium` / `font-semibold` utility
+ * sitting on the same element. Those roles take their weight from Tailwind as
+ * usual: 400 by default, font-medium for labels, font-semibold for emphasis.
+ * Never add font-weight to one of them without checking every call site first.
+ * ==========================================================================*/
+
+.marketing-root .mkt-h1 {
+  font-family: var(--font-marketing-display), var(--font-geist-loaded), ui-sans-serif, system-ui, sans-serif;
+  font-size: 2.25rem; /* 36px */
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+}
+
+@media (min-width: 640px) {
+  .marketing-root .mkt-h1 {
+    font-size: 3rem; /* 48px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .marketing-root .mkt-h1 {
+    font-size: 3.75rem; /* 60px */
+  }
+}
+
+.marketing-root .mkt-h2 {
+  font-family: var(--font-marketing-display), var(--font-geist-loaded), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+
+@media (min-width: 640px) {
+  .marketing-root .mkt-h2 {
+    font-size: 2.5rem; /* 40px */
+  }
+}
+
+.marketing-root .mkt-eyebrow {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.marketing-root .mkt-lead {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 640px) {
+  .marketing-root .mkt-lead {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
+.marketing-root .mkt-section-sub {
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  letter-spacing: normal;
+}
+
+@media (min-width: 640px) {
+  .marketing-root .mkt-section-sub {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+.marketing-root .mkt-card-title {
+  font-family: var(--font-marketing-display), var(--font-geist-loaded), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+@media (min-width: 640px) {
+  .marketing-root .mkt-card-title {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
+.marketing-root .mkt-body {
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  letter-spacing: normal;
+}
+
+.marketing-root .mkt-small {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.marketing-root .mkt-caption {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.marketing-root .mkt-badge {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* The Hindi brand line (देश का अपना AI एजेंट). Demoted out of display size in
+ * the 2026-09-11 hero rebuild — three display-size blocks each with their own
+ * gradient meant the hero had no focal point at all. It keeps its identity
+ * here through a tricolour stripe marker (::before) rather than a second
+ * gradient, so the hero has exactly ONE gradient accent: the h1. Devanagari
+ * needs a touch more leading than Latin at the same size, hence 1.45. */
+/* Same step as .mkt-brandline, no stripe — for the slogan that sits beside it
+ * in the hero kicker row. Split out so the tricolour marker below stays the
+ * brand line's alone. */
+.marketing-root .mkt-kicker {
+  font-size: 1rem; /* 16px */
+  line-height: 1.45;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.marketing-root .mkt-brandline {
+  font-size: 1rem; /* 16px */
+  line-height: 1.45;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.marketing-root .mkt-brandline::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 0.95em;
+  margin-inline-end: 0.55rem;
+  vertical-align: -0.12em;
+  border-radius: 999px;
+  /* Saffron / centre / green — the flag, as a 3px marker. Not a text
+   * gradient: the one gradient on this page sits on the h1. The middle band
+   * is currentColor at 35% rather than literal white, so it stays visible in
+   * both themes (white on a light background would vanish) and so the marker
+   * needs no theme-specific rule — currentColor already follows the .dark
+   * class the same way the text beside it does. */
+  background: linear-gradient(
+    to bottom,
+    #ff9933 0%,
+    #ff9933 33%,
+    color-mix(in srgb, currentColor 35%, transparent) 33%,
+    color-mix(in srgb, currentColor 35%, transparent) 66%,
+    #138808 66%,
+    #138808 100%
+  );
+}

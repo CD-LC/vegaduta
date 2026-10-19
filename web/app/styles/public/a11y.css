@@ -1,0 +1,28 @@
+/* ---- A11y pass 2026-09-24 (appended; see tokens.css section 11) ------ */
+/* Light: primary fills use the 600 stop so the white label is AA on every
+   accent (amber 500 was 2.39:1); hover steps to 700. Dark rules above keep 500. */
+:root:not(#_):not([data-mode="dark"]) .hire-scope .btn-primary,
+:root:not(#_):not([data-mode="dark"]) .vd-signup-complete button.primary {
+  background: var(--accent-600);
+}
+
+:root:not(#_):not([data-mode="dark"]) .hire-scope .btn-primary:hover,
+:root:not(#_):not([data-mode="dark"]) .vd-signup-complete button.primary:hover {
+  background: var(--accent-700);
+}
+
+/* Field focus: a solid two-ring shadow (page colour gap + accent) instead of
+   the 22% halo, so the indicator is >= 3:1 on any glass. */
+:root:not(#_) .vd-pub input:focus-visible,
+:root:not(#_) .vd-pub select:focus-visible,
+:root:not(#_) .vd-pub textarea:focus-visible {
+  border-color: var(--accent-600);
+  box-shadow: 0 0 0 2px var(--surface-page), 0 0 0 4px var(--accent-600);
+}
+
+:root:not(#_)[data-mode="dark"] .vd-pub input:focus-visible,
+:root:not(#_)[data-mode="dark"] .vd-pub select:focus-visible,
+:root:not(#_)[data-mode="dark"] .vd-pub textarea:focus-visible {
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 2px var(--surface-page), 0 0 0 4px var(--accent-500);
+}

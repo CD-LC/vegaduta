@@ -1,0 +1,3 @@
+{{- include "core.guards" . -}}
+{{- include "core.imageVariant" . -}}
+{{ include "vegaduta-lib.coreDeployment" (dict "root" . "role" "api") }}

@@ -1,0 +1,109 @@
+# Inbound MCP server hosting (core/mcpserver) - active only under the
+# "mcpserver" profile, same "isolate a new/risky feature behind an explicit
+# profile" posture application-mcp.yml already established for the OUTBOUND
+# MCP client side. See McpServerToolConfig's javadoc for exactly what is/
+# isn't gated by this profile.
+#
+#   mvn spring-boot:run -Dspring-boot.run.profiles=mcpserver
+#
+# Honesty note: spring.ai.mcp.server.* property names/defaults below are
+# reasoned from Spring AI 1.1.x's published streamable-HTTP server boot
+# starter docs (fetched during this build - see McpServerToolConfig's
+# javadoc). The mcp-endpoint path is pinned explicitly to /mcp here rather
+# than left to the starter's default specifically so this deployment's
+# actual endpoint path is a known, documented value - and so it matches the
+# /mcp/** matcher in SecurityConfig's mcpServerFilterChain and the /mcp/*
+# filter mapping in McpServerToolConfig exactly.
+#
+# The spring.autoconfigure.exclude entry that used to live here moved to
+# CoreApplication.java's @SpringBootApplication(exclude=...) list - see that
+# class's javadoc for the full, corrected 2026-08-15 finding on
+# ToolCallbackConverterAutoConfiguration (re-confirmed excluded: removing it
+# leaks the ENTIRE outbound "mcp" profile toolset - filesystem read/write/
+# delete, browser_run_code_unsafe, full remote browser control - to any
+# external caller holding a valid core/mcpserver grant key, not just the 5
+# curated tools this surface is supposed to expose). Kept in one place
+# (the Java annotation) rather than duplicated across both, since the
+# 2026-07-21 original had it in both and that duplication is exactly what let
+# a partial revert here look like a fix while the real, effective exclusion
+# was still the other one.
+spring:
+  ai:
+    mcp:
+      server:
+        name: vegaduta-mcp-server
+        version: 1.0.0
+        type: SYNC
+        # Confirmed live 2026-08-15 by decompiling the pinned
+        # spring-ai-autoconfigure-mcp-server-common-1.1.7.jar: without this,
+        # McpServerAutoConfiguration$EnabledStreamableServerCondition's
+        # @ConditionalOnProperty(prefix="spring.ai.mcp.server", name="protocol",
+        # havingValue="STREAMABLE", matchIfMissing=false) never matches - the
+        # compiled-in default is SSE - so
+        # McpServerStreamableHttpWebMvcAutoConfiguration never registers its
+        # POST /mcp route at all. Spring AI silently falls back to the SSE
+        # transport instead (GET /sse + POST /mcp/message), which nothing else
+        # in this build (SecurityConfig's mcpServerFilterChain matcher,
+        # McpApiKeyAuthFilter's /mcp/* URL pattern, the mcp-endpoint setting
+        # below) was written to serve - the symptom was a 404 "No endpoint
+        # matches this request" on POST /mcp even with a valid, authenticated
+        # grant key.
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+
+app:
+  mcpserver:
+    # Origin validation for /mcp (MCP Streamable HTTP: a present, invalid Origin gets 403). Requests with no
+    # Origin header (every non-browser MCP client) are unaffected. mode: enforce (default) | report (log only)
+    # | off. allowed: comma-separated exact origins, no wildcards, e.g. https://app.example.com.
+    origin:
+      mode: ${APP_MCPSERVER_ORIGIN_MODE:enforce}
+      allowed: ${APP_MCPSERVER_ORIGIN_ALLOWED:}
+    # OAuth 2.1 option next to the vmcp_ grant keys (which keep working). Default OFF. When on, the server
+    # publishes RFC 9728 Protected Resource Metadata and accepts access tokens issued for exactly
+    # `resource` by `issuer` (JWKS at jwk-set-uri). Every URL must be https. A token is linked to an
+    # existing grant through the `grant-claim` claim, so the agents/workflows it reaches are the grant's.
+    oauth:
+      enabled: ${APP_MCPSERVER_OAUTH_ENABLED:false}
+      resource: ${APP_MCPSERVER_OAUTH_RESOURCE:}
+      issuer: ${APP_MCPSERVER_OAUTH_ISSUER:}
+      authorization-servers: ${APP_MCPSERVER_OAUTH_AUTHORIZATION_SERVERS:}
+      jwk-set-uri: ${APP_MCPSERVER_OAUTH_JWK_SET_URI:}
+      tenant-claim: ${APP_MCPSERVER_OAUTH_TENANT_CLAIM:tenant_id}
+      grant-claim: ${APP_MCPSERVER_OAUTH_GRANT_CLAIM:mcp_grant_id}
+    rate-limit:
+      max-calls-per-minute: 60
+      # get_task polls (async-tasks) use their own bucket so waiting on a long task cannot
+      # exhaust the general budget above. Detected from the JSON-RPC body (<=16KB, length-declared).
+      max-task-polls-per-minute: ${APP_MCPSERVER_MAX_TASK_POLLS_PER_MINUTE:600}
+    # Task-style long-running agent calls over /mcp: start_agent_task returns a
+    # task_id at once, get_task polls it, cancel_task stops it (McpAgentTaskToolCallbacks).
+    # Default OFF - tools/list is unchanged until enabled. Records live in the A2A task
+    # store, so app.a2a.task-store (memory|redis) and app.a2a.task-ttl govern durability
+    # and expiry; use redis when more than one core replica serves /mcp.
+    async-tasks:
+      enabled: ${APP_MCPSERVER_ASYNC_TASKS_ENABLED:false}
+      # Max non-terminal tasks per tenant on ONE core replica (<=0 disables); start_agent_task
+      # returns a clear error beyond it. With N replicas the effective cap is N times this.
+      max-concurrent-per-tenant: ${APP_MCPSERVER_ASYNC_TASKS_MAX_PER_TENANT:4}
+  # "Agents and workflows as MCP tools" (core/mcpserver expose package): with enabled=true a caller's
+  # tools/list also carries one tool per agent/workflow that (a) an editor switched on ("Expose as
+  # MCP tool" in the console) AND (b) the caller's API-key grant lists. Default OFF - tools/list and
+  # tools/call are then byte-for-byte what they were. Key name is kebab-case (app.mcp-server) as
+  # specified for the feature; it sits next to, not inside, the older app.mcpserver block above.
+  mcp-server:
+    expose-agents:
+      enabled: ${APP_MCP_SERVER_EXPOSE_AGENTS_ENABLED:false}
+      # Longest an agent_* call may hold the request before it gives up.
+      agent-timeout-seconds: ${APP_MCP_SERVER_EXPOSE_AGENTS_AGENT_TIMEOUT_SECONDS:90}
+      # A workflow_* call waits this long, then returns status RUNNING + run_id (poll with get_run).
+      workflow-wait-seconds: ${APP_MCP_SERVER_EXPOSE_AGENTS_WORKFLOW_WAIT_SECONDS:45}
+      poll-interval-ms: ${APP_MCP_SERVER_EXPOSE_AGENTS_POLL_INTERVAL_MS:1000}
+      # Per-API-key cap on exposed-tool invocations (a real agent turn / workflow run), on top of
+      # app.mcpserver.rate-limit which counts every request.
+      max-invocations-per-minute: ${APP_MCP_SERVER_EXPOSE_AGENTS_MAX_INVOCATIONS_PER_MINUTE:30}
+      max-input-chars: ${APP_MCP_SERVER_EXPOSE_AGENTS_MAX_INPUT_CHARS:16000}
+      max-output-chars: ${APP_MCP_SERVER_EXPOSE_AGENTS_MAX_OUTPUT_CHARS:20000}
+      # Largest JSON-RPC request body inspected (and accepted) while the feature is on.
+      max-body-bytes: ${APP_MCP_SERVER_EXPOSE_AGENTS_MAX_BODY_BYTES:262144}

@@ -1,0 +1,38 @@
+# Allowlist for scripts/ci/entity-name-lint.sh.
+#
+# Format: "<kind> <key>  # reason". The reason comment is MANDATORY - the
+# script fails on any entry without one, because an unexplained suppression is
+# indistinguishable from a silenced bug (the exact state the gate exists to
+# prevent). Same role as flyway-lint-allowed-renames.txt: a deliberate,
+# human-reviewed override, not something the script verifies the safety of.
+#
+# Every entry below was verified on 2026-08-17 by reading each listed class's
+# method-level mappings: all are deliberate splits of ONE API surface across
+# several controller classes with fully DISJOINT method paths - a code-
+# organisation choice, not two modules colliding. The tree boots today, which
+# is Spring's own proof there is no full-path ambiguity in any of them.
+#
+# Known limitation, accepted deliberately: entries suppress by kind+key, so a
+# NEW controller joining an already-allowlisted base path is NOT re-flagged -
+# the reviewer adding it must re-verify method-path disjointness manually.
+# The alternative (pinning entries to file locations) would break the gate on
+# every rename/move, which in a repo this actively restructured costs more
+# than the manual re-check does.
+
+path /api                  # OnboardingController (POST /onboarding) + TenantSignupController (POST /signup) - two single-endpoint public-signup controllers in the SAME tenancy package that never grew a deeper base path; disjoint methods.
+path /api/agents           # AgentController (agent CRUD) + rl.RlFeedbackController (POST /{agentId}/turns/feedback) - RL feedback deliberately mounts under the agent resource it scores; the sub-path exists in no other controller.
+path /api/demo             # Five demo-surface controllers (chat/image/video/session/transcript-email) across agents+imagegen+tenancy - the public demo funnel is intentionally one URL surface split by feature module; sub-paths (/chat, /image, /video, /session, /history, /transcript-email) are disjoint.
+path /api/devices          # DeviceController (pairing/register/CRUD) + DeviceDataIngestionController (screen-state/notifications/app-usage/sms) + DeviceGatewayController (claim/poll/command results) - one device surface split by concern within the SAME devices module; disjoint methods.
+path /api/platform         # PlatformController (feature-flags/settings) + DemoSandboxController (demo-settings/demo-metrics) + app's PlatformHealthController (GET /health) - platform-admin surface split by concern; disjoint methods.
+path /api/share/workflows  # WorkflowShareController (share CRUD/run/report) + WorkflowShareVoiceController (POST /{shareId}/turn, multipart) - voice turn split out for its multipart handling; same module, disjoint methods.
+path /api/tenant           # TenantDataUsageController (GET /data-usage) + TenantUsageQuotaController (usage-quota/spend-protection) + tenancy's TenantDataController (data-export/data-deletion) - one tenant self-service surface split across app+tenancy; disjoint methods.
+path /api/tools/code       # CustomCodeToolController (tool CRUD/test) + CodeToolGenerationController (POST /generate, /validate) - generation split from CRUD in the SAME package; disjoint methods.
+path /webhook/twilio       # Four Twilio webhook controllers (sms/status/voice/whatsapp) in the SAME twilio package - one webhook base per provider, split per channel; disjoint sub-paths, all form-urlencoded POST.
+path /api/briefs           # BriefController (plan/CRUD/readiness) + BriefLifecycleController (apply/versions/trust/tune/rollback) + BriefProofController (ledger/rehearsals/experiments) - one brief resource split by lifecycle stage in the SAME brief package; mapped sub-paths verified disjoint 2026-09-29.
+path /api/edge             # agents.EdgeToolExecutionController (/tools, /tools/execute, /memory) + tenancy.EdgeAgentsConfigController (/config, /manifest*) - edge-agent runtime vs edge configuration; mapped sub-paths verified disjoint 2026-09-29.
+path /api/internal/app-builder  # AppBuilderCompletionController (/generate-files) + AppBuilderImageController (/generate-image): disjoint literal method paths (sync3, verified)
+path /api/public/apps  # StudioAppPublicController (/{slug}/...) + StudioAppDomainPublicController (/by-host, /domain-check): literal paths outrank the /{slug} pattern (sync3, verified)
+path /api/workflows  # WorkflowController + WorkflowPinController (/{workflowId}/pins, /{workflowId}/nodes/{nodeId}/pin): disjoint method paths (sync3, verified)
+path /api/agents/{agentId}/quality  # QualityController (/summary, /history, /statistics, /config) + EvalCredibilityController (/datasets/{id}/cases/{caseId}/grader, run bundle + jsonl exports, /datasets/seed-research, /judge-calibration): disjoint literal method paths (sync4, verified)
+path /api/completions  # FimCompletionController (POST /fim) + AgentTurnController (POST /agent-turn): IDE completion surface split by feature in the SAME chat package; disjoint literal method paths (sync5, verified)
+path /api/providers  # ProviderController (provider CRUD, /availability, /modalities, /{provider}/models, /platform-llm) + chat.TenantDefaultModelController (GET /default-model): literal path, no overlap with DELETE /{provider} or the two-segment /{provider}/models (sync5, verified)

@@ -1,0 +1,131 @@
+# mcp-stdio-runner - runs third-party MCP servers (npx/uvx packages) on behalf of core
+# (services/mcp-stdio-runner/Dockerfile, relay :8097, health :8098). Same hard rules as
+# tool-sandbox (runtimeClassName, one secret, no identity), except that egress to the
+# internet (80/443) and DNS are allowed on purpose: spawned servers install packages.
+# Nothing cluster-internal is reachable.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: sandbox
+
+image:
+  registry: ""
+  # -- `-browser` is appended when browser=true (services/mcp-stdio-runner/Dockerfile WITH_BROWSERS=true).
+  repository: mcp-stdio-runner
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+# -- true = run the browser variant (image repository + "-browser"): pinned Playwright Chromium,
+# @playwright/mcp chrome-for-testing and puppeteer Chrome for the puppeteer/playwright-vision MCP
+# servers. core needs no change - one runner address, capability chosen by the image. A 1Gi memory
+# limit is raised to 2Gi.
+browser: false
+
+runtimeClassName: ""
+requireRuntimeClass: true
+sandboxAllowedSecretKeys: [MCP_STDIO_SIDECAR_SHARED_SECRET]
+
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+terminationGracePeriodSeconds: 30
+revisionHistoryLimit: 5
+containerPort: 8097
+extraPorts:
+  - { name: health, containerPort: 8098 }
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8097
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+probes:
+  startup:
+    httpGet: { path: /health, port: health }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 30
+  liveness:
+    httpGet: { path: /health, port: health }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health, port: health }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits: { memory: 1Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 512Mi }
+  - { name: npm-cache, mountPath: /home/mcprunner/.npm, sizeLimit: 512Mi }
+  - { name: cache, mountPath: /home/mcprunner/.cache, sizeLimit: 512Mi }
+  - { name: config, mountPath: /home/mcprunner/.config, sizeLimit: 32Mi }
+  # Root of the static `filesystem` built-in when core relays it here (MCP_FILESYSTEM_ROOT).
+  - { name: mcp-data, mountPath: /app/mcp-data, sizeLimit: 256Mi }
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  enabled: true
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker]
+  allowEgressTo: []
+  allowDns: true
+  allowExternalEgress: true
+  externalEgressPorts: [443, 80]
+  globalExtraEgress: false
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: false
+
+env:
+  MCP_STDIO_RUNNER_PORT: "8097"
+  MCP_STDIO_RUNNER_HEALTH_PORT: "8098"
+  MCP_STDIO_RUNNER_KILL_GRACE_MS: "3000"
+  HOME: /home/mcprunner
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels:
+  vegaduta.io/egress: internet-only
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

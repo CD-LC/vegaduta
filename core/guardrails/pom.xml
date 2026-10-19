@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>guardrails</artifactId>
+  <name>guardrails</name>
+  <description>Stage A: tool step ceiling, allow-list, guardrail sanitization, GuardedToolCallback. Phase P6: content-moderation policy packs, external-safety-classifier seam, human review queue. Depends on: approval, audit, tenancy.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <!-- SEC-028: tenant-authored guardrail regexes are matched with RE2/J
+         (linear time, no catastrophic backtracking). Go License (BSD-3-style),
+         no transitive dependencies. -->
+    <dependency>
+      <groupId>com.google.re2j</groupId>
+      <artifactId>re2j</artifactId>
+      <version>1.6</version>
+    </dependency>
+    <!-- Phase P6 (content moderation): ModerationService writes each layer's
+         decision + firing policy through AuditLogService. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <!-- Phase P6: policy-pack config (enabled packs per tenant/plan, semantic
+         thresholds) is read at runtime through PlatformSettingsService; the
+         current tenant/actor is read from TenantContext (core/security, which
+         tenancy re-exports transitively). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- Spring AI API only (ChatClient/advisors/ToolCallback/ChatModel types).
+         Was spring-ai-starter-model-anthropic until 2026-09-28, but nothing in
+         this module imports org.springframework.ai.anthropic (grep-verified,
+         main + test); the provider starters and their auto-configs belong to
+         core/chat, which builds every ChatModel. -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-client-chat</artifactId>
+    </dependency>
+    <!-- Phase P6: ModerationReviewController (the new admin read/act surface),
+         its JPA-persisted review queue, request-body validation, and the
+         reviewer role check read from Authentication. All already reach this
+         module transitively via approval, declared directly here since P6
+         uses each one at this module's own compile time. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <!-- GuardedToolCallback's agent.tool.calls timer / agent.tool.errors counter. -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

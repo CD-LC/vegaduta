@@ -1,0 +1,518 @@
+@layer components {
+  /* --- Brand mark (Logo.js) --------------------------------------------- */
+
+  .brand-lockup {
+    @apply inline-flex items-center gap-2.5;
+  }
+
+  .brand-mark {
+    @apply shrink-0 drop-shadow-sm transition-transform duration-300 ease-out;
+  }
+
+  /* Plain CSS parent-hover instead of Tailwind's group/group-hover utility
+   * pair - this Tailwind v4 setup's @apply doesn't resolve the marker-only
+   * `group` utility ("Cannot apply unknown utility class `group`"), so a
+   * hand-written descendant selector is the portable fix rather than
+   * depending on @apply supporting it. */
+  .brand-lockup:hover .brand-mark {
+    transform: rotate(-6deg) scale(1.05);
+  }
+
+  /* "Vega" reads var(--foreground), not var(--text-primary), on purpose:
+   * --foreground is the shadcn token (shadcn-theme.css) that ALREADY splits
+   * into the two cases this wordmark needs -
+   *   - authenticated app (no `.dark` wrapper): :root maps
+   *     --foreground: var(--text-primary), so "Vega" still follows the
+   *     in-app light/dark theme toggle (data-mode) exactly as before.
+   *   - public dark funnel (landing/login/billing/signup/privacy/terms, all
+   *     wrapped in class="dark" per shadcn-theme.css's comment): `.dark`
+   *     HARDCODES --foreground to a near-white (#e9eaf2), independent of
+   *     data-mode/OS preference - so "Vega" is reliably white there even
+   *     for a visitor whose OS/localStorage theme preference is "light"
+   *     (data-mode defaults to light, and nothing on these pages ever sets
+   *     it to dark; --text-primary alone would have rendered near-black
+   *     text on this near-black canvas). */
+  .brand-name {
+    @apply tracking-tight text-[var(--foreground)];
+    /* Yatra One (see layout.tsx for the full choice/verification rationale).
+     * Wordmark only - body/UI type is untouched Geist. The Geist fallback
+     * chain keeps the lockup readable for the one paint before the
+     * self-hosted woff2 lands (display:swap). */
+    font-family:
+      var(--font-wordmark),
+      var(--font-sora),
+      var(--font-inter),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    /* !important, deliberately: several call sites (AppShell's rail link, the
+     * landing nav, the legal pages) put a Tailwind `font-semibold` utility on
+     * the SAME element, and utilities outrank this components layer. Yatra One
+     * ships a single 400 weight, so any bolder value makes the browser
+     * synthesize a faux bold that smears the brush terminals at the ~17px the
+     * topbar wordmark actually renders at. The face is already display-heavy;
+     * 400 is its intended weight. */
+    font-weight: 400 !important;
+  }
+
+  /* Two-tone wordmark, direct request 2026-07-25: "Vega" in the base brand
+     colour (white on dark, near-black on light - that's var(--foreground),
+     see the block above), "Dūta" in brand orange in BOTH themes. The wordmark
+     markup is `<span class="brand-name">Vega<span class="text-primary">Dūta</span></span>`
+     across the app; this recolours that accent span everywhere at once.
+     !important so it wins over Tailwind's layered .text-primary utility. */
+  .brand-name .text-primary,
+  .brand-name .brand-name-accent {
+    color: var(--brand-accent) !important;
+  }
+
+  /* Was a bg-clip-text gradient (--accent-gradient), which made Logo.tsx's
+     "Dūta" follow the THEME accent customizer instead of the brand orange -
+     i.e. the one lockup used on every auth/splash screen was the one place
+     that didn't match. Now a plain solid brand orange like every other
+     accent span. */
+  .brand-name-accent {
+    color: var(--brand-accent);
+  }
+
+  /* --- Animated brand mark (AnimatedBrandMark.js) + brand identity modal
+   * (BrandIdentityModal.js) -------------------------------------------
+   * "brand representation ... with animation in logo" + "on click of left
+   * logo it should display brand logo, let another be a home page link" -
+   * a wrapping button at each call site (AppShell's rail logo, the Genesis
+   * landing nav's brand mark) opens the modal below instead of navigating,
+   * since Home already has its own separate link at every one of those
+   * call sites.
+   *
+   * Direct feedback: "exact same pixel to pixel animation logo... nothing
+   * extra or no change" - the mark renders the real logo-mark.png
+   * unmodified (AnimatedBrandMark.js); motion lives entirely in this CSS,
+   * around the image (an ambient glow pulse behind it + a gentle float),
+   * never redrawing or altering the artwork itself. */
+  .vd-mark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vd-mark::before {
+    content: "";
+    position: absolute;
+    inset: -35%;
+    z-index: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, 0.4), rgba(79, 227, 227, 0.18) 55%, transparent 75%);
+    filter: blur(6px);
+    opacity: 0;
+  }
+
+  .vd-mark-idle::before {
+    animation: vdGlow 3.2s ease-in-out infinite;
+  }
+
+  /* Direct feedback ("increase the inner image of logo, such that its
+   * cleanly visible... Brand logo is not visible in that logo") - see
+   * AnimatedBrandMark.js's comment on this wrapper for why it's a separate
+   * element from .vd-mark itself (glow bleed vs. clipping don't mix on the
+   * same box). overflow:hidden here is what actually lets .vd-mark-img's
+   * scale() below bleed the artwork closer to the tile's edges instead of
+   * just floating unclipped past the visible tile. border-radius is a
+   * *approximate* match to whatever call-site tile shape sits behind this
+   * (.ax-rail-logo's rounded-[14px], the brand-identity button, etc.) -
+   * exact enough that the clipped corner is never visibly mismatched at the
+   * sizes this renders at (28-72px). */
+  .vd-mark-clip {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 0%;
+  }
+
+  .vd-mark-img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* The 1.22 zoom (kept modest deliberately) is what actually answers the
+     * feedback - logo-mark.png's own artwork is a wide/short winged emblem,
+     * so even after trimming its transparent canvas margin (see the PNG
+     * itself) it can only fill ~67% of a square box's height under plain
+     * object-fit:contain; that's the emblem's own proportions, not excess
+     * padding left to trim. Scaling it up and letting .vd-mark-clip's
+     * overflow:hidden crop the small resulting overflow (a few px of
+     * already-trimmed near-transparent edge, not the wings' silhouette)
+     * is the same "bleed the icon to its tile's edges" treatment any app
+     * icon uses, rather than shrinking to fit with dead space on every
+     * side. Baked into vdFloat's own keyframes below (not left as this
+     * static value) since a CSS animation's `transform` overwrites
+     * whatever static transform is set here on every frame - omitting the
+     * scale from the keyframes would silently drop it the moment the float
+     * animation starts. */
+    /* object-fit was missing entirely here - with explicit width/height
+     * attributes on the <img> (AnimatedBrandMark.js) plus width:100%/
+     * height:100% above but no object-fit, the browser's default
+     * (object-fit: fill) stretches the non-square 1013x740 source
+     * artwork to fit this square box, distorting it. contain preserves
+     * the artwork's real proportions and centers it - the fix for
+     * "still image is not fitting". */
+    object-fit: contain;
+    transform: scale(1.22);
+  }
+
+  /* Direct feedback ("still image is not fitting... remove entire backdrop
+   * and should not animate on hover... display it without any colour
+   * background and it should be equally distributed square size") - a
+   * plain, static variant for the rail logo specifically (AppShell.js
+   * passes idle={false} className="vd-mark-plain"), distinct from the
+   * default .vd-mark-idle treatment other call sites (the Genesis landing
+   * hero) still use. idle={false} already keeps .vd-mark::before's glow at
+   * its base opacity:0 (never animated to visible) and skips vdFloat
+   * entirely, so there's no colored backdrop and no motion at all. This
+   * override on top just undoes the shared scale(1.22) bleed-to-edges
+   * treatment so the emblem renders at its real proportions, evenly
+   * centered/padded within the square box (object-fit: contain, inherited
+   * from .vd-mark-img above) instead of cropped at the edges. */
+  .vd-mark-plain .vd-mark-img {
+    transform: none;
+  }
+
+  /* (The .vd-mark-monogram variant was removed 2026-07-25: the brand mark is
+   * always the winged /logo-mark.png emblem now — direct instruction, "our
+   * brand logo is always this one, not just V" — so AnimatedBrandMark no
+   * longer emits that class.) */
+
+  .vd-mark-idle .vd-mark-img {
+    animation: vdFloat 4.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vd-mark-idle::before,
+    .vd-mark-idle .vd-mark-img {
+      animation: none;
+    }
+  }
+
+  /* Rail emblem while the platform is working (backend calls or a streaming reply): the artwork goes
+     quiet grey and a soft band of blue drifts across it. No movement of the mark itself. */
+  .vd-rail-mark { position: relative; display: inline-flex; flex: none; }
+  .vd-rail-mark .vd-rail-img { transition: filter 0.3s ease, opacity 0.3s ease; }
+  .vd-rail-mark.vd-rail-busy .vd-rail-img { filter: grayscale(1) contrast(0.95); opacity: 0.62; }
+  .vd-rail-mark.vd-rail-busy::after {
+    content: "";
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(100deg, transparent 30%, var(--primary) 46%, var(--accent-500, var(--primary)) 54%, transparent 70%);
+    background-size: 300% 100%; background-position: 130% 0;
+    opacity: 0.85;
+    -webkit-mask: url(/logo-mark.png) center / contain no-repeat; mask: url(/logo-mark.png) center / contain no-repeat;
+    animation: vdRailSweep 1.8s ease-in-out infinite;
+  }
+  @keyframes vdRailSweep { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .vd-rail-mark.vd-rail-busy::after { animation: none; background-position: 50% 0; opacity: 0.5; }
+  }
+
+  .brand-modal-backdrop {
+    @apply fixed inset-0 z-[200] flex items-center justify-center p-6;
+    background: rgba(3, 5, 12, 0.72);
+    backdrop-filter: blur(6px);
+    /* .brand-scene is a fixed 1200x760 box (see below) - auto-scroll here
+       rather than clipping it on viewports smaller than that, without
+       adding any new responsive sizing to the scene itself. */
+    overflow: auto;
+  }
+
+  .brand-modal-card {
+    @apply relative flex w-full max-w-[380px] flex-col items-center gap-2 rounded-2xl px-8 py-10 text-center;
+    background: radial-gradient(120% 140% at 50% 0%, #131a30 0%, #070a16 70%);
+    border: 1px solid rgba(245, 166, 35, 0.25);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  }
+
+  /* z-10: the scene's spark canvas sits at z-index 3 and would otherwise paint
+     over this button, hiding the X (the "empty ring" the user saw). Lifted
+     above every scene layer, with a real border + brighter glyph so it reads
+     as an obvious, tappable close affordance on the dark scene. */
+  .brand-modal-close {
+    @apply absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full text-white/85 transition-colors;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(4px);
+  }
+
+  .brand-modal-close:hover {
+    @apply text-white;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .brand-modal-mark {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Unified 2026-07-25: these three wordmark variants used to paint a warm
+     gold gradient over the WHOLE lockup via background-clip:text, which meant
+     "Vega" wasn't white/black and "Dūta" wasn't orange on any surface that
+     used them (the brand modal, the Genesis landing nav, the old topbar).
+     They now render exactly like .brand-name - Yatra One, foreground "Vega",
+     orange "Dūta" - so there is one wordmark treatment, not four. */
+  .brand-modal-wordmark,
+  .gxa-brand-name,
+  .ax-topbar-brand-name {
+    font-family: var(--font-wordmark), var(--font-brand-display), var(--font-inter), sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    /* Pinned near-white rather than var(--foreground): all three of these sit
+       on surfaces with a HARDCODED dark background (.brand-modal-card's
+       #131a30→#070a16 radial, the Genesis landing's dark canvas), so they must
+       not follow the light/dark toggle — a light-theme user would otherwise
+       get near-black text on a near-black card. Same reasoning, and the same
+       value, as .ael-root .brand-name on the live landing. */
+    color: #e9eaf2;
+  }
+
+  .brand-modal-wordmark {
+    font-size: 1.9rem;
+    line-height: 1.15;
+  }
+
+  .brand-modal-wordmark-accent {
+    color: var(--brand-accent);
+  }
+
+  .brand-modal-devanagari {
+    font-family: var(--font-devanagari), sans-serif;
+    color: #f5c06b;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    margin-top: 0.15rem;
+  }
+
+  .brand-modal-chakra {
+    @apply flex w-full items-center gap-3;
+    margin: 0.9rem 0 0.7rem;
+  }
+
+  .brand-modal-chakra-line {
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.55));
+  }
+
+  .brand-modal-chakra-line + svg + .brand-modal-chakra-line {
+    background: linear-gradient(90deg, rgba(245, 166, 35, 0.55), transparent);
+  }
+
+  .brand-modal-subtitle {
+    color: #8fa0d8;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+  }
+
+  .brand-modal-tagline {
+    color: #d9b877;
+    font-style: italic;
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+  }
+
+  .brand-modal-meaning {
+    color: var(--text-faint, #6b7794);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  @keyframes vdFloat {
+    /* scale(1.22) carried through every frame - a CSS animation's own
+     * `transform` replaces the element's static one entirely on each frame,
+     * so leaving this as bare translateY() (as it was before) would silently
+     * drop .vd-mark-img's zoom the instant this animation starts (see that
+     * rule's comment in globals.css). */
+    0%,
+    100% {
+      transform: scale(1.22) translateY(0);
+    }
+    50% {
+      transform: scale(1.22) translateY(-2px);
+    }
+  }
+
+  @keyframes vdGlow {
+    0%,
+    100% {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+  }
+
+  /* Pixel-exact reproduction of the uploaded VegaDuta-Banner.html reference
+     scene, extracted verbatim from that file's own __bundler/template
+     payload (see BrandIdentityModal.js's header comment for how a
+     self-executing "bundled" HTML artifact - previously assumed unreadable
+     without a headless browser, historical task #843/#921 - turned out to
+     have its manifest and page template sitting in plain <script> tags,
+     extractable with a text parse). box sizing/gradient/shadow below are the
+     template's own values, not redesigned. overflow:auto on
+     .brand-modal-backdrop (not shown here, see that rule above) is the only
+     accommodation for viewports smaller than 1200x760 - the scene itself
+     keeps its authored fixed size rather than gaining new responsive
+     breakpoints it didn't have in the reference. */
+  .brand-scene {
+    position: relative;
+    width: 1200px;
+    height: 760px;
+    overflow: hidden;
+    border-radius: 26px;
+    /* Standardized onto the app's brand/display token (Geist) instead of a raw
+       system-ui stack, so this brand scene matches the rest of the display
+       typography. Falls back to system-ui if the font hasn't loaded. */
+    font-family: var(--font-brand-display), var(--font-inter), system-ui, sans-serif;
+    background: radial-gradient(120% 130% at 50% 34%, #141a3e 0%, #0b1130 42%, #070a1e 72%, #05060f 100%);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+    flex-shrink: 0;
+  }
+
+  @keyframes vgHalo {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+  }
+  @keyframes vgHalo2 {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: translate(-50%, -50%) scale(1.04);
+    }
+    50% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+  }
+  @keyframes vgHover {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-9px) rotate(-0.4deg);
+    }
+  }
+  @keyframes vgTrail {
+    0% {
+      opacity: 0;
+      transform: translateX(22px) scaleX(0.65);
+    }
+    32% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-40px) scaleX(1.2);
+    }
+  }
+  @keyframes vgNode {
+    0%,
+    100% {
+      opacity: 0.28;
+      transform: scale(0.82);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.28);
+    }
+  }
+  @keyframes vgRipple {
+    0% {
+      opacity: 0.55;
+      transform: scale(0.5);
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(2.6);
+    }
+  }
+  @keyframes vgEye {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(0.9);
+    }
+    50% {
+      opacity: 0.95;
+      transform: scale(1.18);
+    }
+  }
+  @keyframes vgSheen {
+    0% {
+      transform: translateX(-160%) skewX(-18deg);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.9;
+    }
+    40% {
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(320%) skewX(-18deg);
+      opacity: 0;
+    }
+  }
+
+  /* prefers-reduced-motion (2026-09-28 fix, carried over from web-admin's
+   * globals.css in the console merge): the brand-scene elements animate via
+   * inline `style.animation`, which a stylesheet can only beat with
+   * !important - deliberately narrow here. .vg-reveal (the logo wrapper's
+   * one-shot entrance fade) is excluded and given its end state directly:
+   * killing its animation without that would leave the logo permanently
+   * invisible under reduced-motion. */
+  @media (prefers-reduced-motion: reduce) {
+    .brand-scene *:not(.vg-reveal) {
+      animation: none !important;
+    }
+    .brand-scene .vg-reveal {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+  }
+  @keyframes vgSpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes vgSpinR {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+  @keyframes vgReveal {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}

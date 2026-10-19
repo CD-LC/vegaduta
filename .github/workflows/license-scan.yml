@@ -1,0 +1,104 @@
+name: License scan (ScanCode)
+
+# Verifies the vendored/redistributed trees carry only the licenses LICENSES/
+# and NOTICE claim they do. ScanCode detects license texts and copyright
+# holders inside the files themselves (including the name-table metadata in
+# the woff2 fonts); scripts/ci/license-drift-check.py then fails the run on
+# any SPDX id not in scripts/ci/license-allowlist.txt.
+#
+# This complements the dependency-review job in ci.yml, which gates package
+# dependencies on PRs: this scan covers the files we redistribute, not the
+# dependency graph.
+#
+# Findings surface in three places:
+#   * the job log / gate          (unlisted license ids fail the run)
+#   * the scancode-report artifact (full JSON report)
+#   * DefectDojo                  (when vars.DEFECTDOJO_URL +
+#                                  secrets.DEFECTDOJO_API_KEY are set)
+#
+# The scanned trees are the ones LICENSES/README.md enumerates; keep both in
+# sync when vendored content moves.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "web/app/lib/vendor/**"
+      - "web/app/fonts/**"
+      - "web/scripts/landing-media/fonts/**"
+      - "deploy/keycloak/themes/**"
+      - "LICENSES/**"
+      - "NOTICE"
+      - "scripts/ci/license-*"
+      - ".github/workflows/license-scan.yml"
+  schedule:
+    - cron: "41 4 * * 5" # weekly, Friday 04:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: license-scan-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  scan:
+    name: ScanCode on vendored files
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install ScanCode toolkit
+        # pluggy 1.7.0 broke plugincode's hookspec discovery ("did not find any
+        # 'pre_scan' hooks"); pin 1.6.x until scancode/plugincode catches up.
+        # Dependency triage on the floating transitive set: commoncode 33
+        # (floated in by >=32.3.0 on Python 3.10+) trips scancode 32.4.1's
+        # option validation (spurious --strip-root/--full-root conflict) while
+        # commoncode 32.3 dies on click 8.5's new secondary-flag check.
+        # 32.5.0 declares commoncode>=32.4.2 and click>=8.2 - the stack it
+        # was released and tested against.
+        run: pip install "scancode-toolkit==32.5.0" "pluggy==1.6.0"
+
+      - name: Scan vendored trees
+        run: |
+          # Only paths that exist: the vendored trees move as content is
+          # regrouped (e.g. web/public/vendor is generated/removed by the
+          # vendor-*.mjs scripts), and a missing dir fails scancode outright.
+          scan_paths=""
+          for d in web/public/vendor web/app/lib/vendor web/app/fonts \
+                   web/scripts/landing-media/fonts deploy/keycloak/themes; do
+            [ -d "$d" ] && scan_paths="$scan_paths $d"
+          done
+          scancode --license --copyright --info \
+            --json-pp scancode.json $scan_paths
+
+      - name: Allowlist gate
+        run: python3 scripts/ci/license-drift-check.py scancode.json scripts/ci/license-allowlist.txt
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: scancode-report
+          path: scancode.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # Optional aggregation sink: a down DefectDojo must not gate the run.
+      - name: Push results to DefectDojo
+        continue-on-error: true
+        env:
+          DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_ENGAGEMENT: license-scan
+          # File inventory changes with every vendored asset; a license clue
+          # absent this run is not proof of remediation.
+          DEFECTDOJO_CLOSE_OLD_FINDINGS: "false"
+        run: bash scripts/ci/defectdojo-import.sh "ScanCode Scan" scancode.json

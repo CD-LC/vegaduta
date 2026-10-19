@@ -1,0 +1,42 @@
+# =============================================================================
+# PERSONAL with core on the HOST JVM (scripts/vegaduta personal --native-core).
+#
+# Why: the core container's memory limit and Docker Desktop's VM overhead are the
+# biggest cost on an 8 GB laptop; the host JVM uses what it needs, and Ollama
+# (Metal on macOS) is already host-side. This overlay
+#   - turns the core container off (it joins a profile nothing enables),
+#   - lets web start without it (and makes web wait for the one-shot db-roles job, which
+#     is what lets `up --wait` accept that job's clean exit when core is not a service),
+#   - publishes Postgres and Valkey on 127.0.0.1 ONLY (never BIND_ADDR, so a LAN-facing
+#     console does not also expose the database); the host process connects there.
+# Layer it only on personal.yml.
+# =============================================================================
+services:
+  core:
+    profiles: ["container-core"]
+  web:
+    depends_on:
+      core:
+        condition: service_started
+        required: false
+      db-roles:
+        condition: service_completed_successfully
+    # The sign-in proxy inside the web container must reach the HOST JVM, not a "core" service.
+    # Docker Desktop (macOS, Windows) routes host.docker.internal to the host's loopback; Docker
+    # Engine on Linux maps it to the bridge gateway, where a core bound to 127.0.0.1 is not
+    # reachable (scripts/vegaduta doctor says so). Override with CORE_INTERNAL_URL in .env.
+    environment:
+      CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://host.docker.internal:${CORE_HOST_PORT:-8080}}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  postgres:
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+  valkey:
+    ports:
+      - "127.0.0.1:${VALKEY_HOST_PORT:-6379}:6379"
+  # --profile rag with a host core: the host JVM reaches the sidecar over loopback, not "sidecar:8001".
+  # Only exists in the rag profile; publishes nothing otherwise.
+  sidecar:
+    ports:
+      - "127.0.0.1:${SIDECAR_HOST_PORT:-8001}:8001"

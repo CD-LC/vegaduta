@@ -1,0 +1,5 @@
+code-intel: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }})
+{{- if .Values.ingress.enabled }}
+  URL: {{ include "vegaduta-lib.publicUrl" (dict "root" . "key" .Values.ingress.hostKey) }}
+{{- end }}
+  data volume: {{ .Values.persistence.size }} at /data (kept on uninstall)

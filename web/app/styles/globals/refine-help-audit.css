@@ -1,0 +1,349 @@
+/* ==========================================================================
+ * Help page scoped additions (2026-07-20 premium redesign, Help screen
+ * pass). Used only by app/help/page.tsx. Docs-style reading layout: a
+ * sticky "On this page" rail on wide screens, badge jump-pills below the
+ * header on narrow ones, beside one calm long-form article surface. The
+ * article is deliberately NOT a .panel - a reference page is a reading
+ * surface, so it skips the shared hover lift, dark-mode aura pulse and
+ * corner tick in favor of pure type hierarchy. Every color resolves
+ * through shared tokens; the only transition is a 150ms hover tint on
+ * rail links.
+ * ========================================================================== */
+
+.ax-help-head .ax-page-subtitle {
+  max-width: 640px;
+}
+
+.ax-help-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+.ax-help-toc {
+  display: none;
+}
+
+.ax-help-toc-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 1024px) {
+  .ax-help-layout {
+    grid-template-columns: 216px minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .ax-help-toc {
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ax-help-toc-mobile {
+    display: none;
+  }
+}
+
+.ax-help-toc-label {
+  margin: 0 0 8px;
+  padding-left: 10px;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ax-dim);
+}
+
+.ax-help-toc-link {
+  display: block;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+  color: var(--ax-mid);
+  text-decoration: none;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.ax-help-toc-link:hover {
+  background: var(--surface-hover);
+  color: var(--ax-text);
+}
+
+.ax-help-toc-pill {
+  text-decoration: none;
+}
+
+.ax-help-article {
+  max-width: 760px;
+  padding: 32px 40px;
+  border: 1px solid var(--hud-line);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-raised);
+}
+
+@media (max-width: 640px) {
+  .ax-help-article {
+    padding: 24px;
+  }
+}
+
+.ax-help-section {
+  scroll-margin-top: 88px;
+}
+
+.ax-help-section + .ax-help-section {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--hud-line);
+}
+
+.ax-help-section-title {
+  margin: 0 0 12px;
+  font-size: var(--fs-subtitle);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ax-text);
+}
+
+.ax-help-para {
+  margin: 0 0 12px;
+  max-width: 68ch;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--ax-mid);
+}
+
+.ax-help-para:last-child {
+  margin-bottom: 0;
+}
+
+.ax-help-para strong {
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+/* =========================================================================
+ * Audit Log premium pass (2026-07-20) - ADDITIONS ONLY, scoped under
+ * .ax-adt-panel (the root div AuditLogPanel.tsx now renders) so these
+ * rules layer over the base ax-adt classes above without editing them, and
+ * cannot collide with concurrent work on other screens. Every color
+ * resolves through tokens; new-system names (surface, radius, shadow,
+ * primary) are referenced with ax-token fallbacks so the screen renders
+ * correctly whether the foundation token pass lands before or after this.
+ * ========================================================================= */
+
+/* Header: tighter display type; Export CSV becomes a proper secondary
+ * button (card surface + raised shadow) instead of a bare mono outline -
+ * the table itself is the hero of this screen, not the button. */
+.ax-adt-panel .ax-adt-title {
+  font-size: var(--fs-h3);
+  letter-spacing: -0.01em;
+}
+
+.ax-adt-panel .ax-adt-sub {
+  font-size: var(--fs-meta);
+  margin-top: 4px;
+}
+
+.ax-adt-panel .ax-adt-export {
+  font-family: inherit;
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg, 10px);
+  border: 1px solid var(--surface-border-strong, var(--ax-border2));
+  background: var(--surface-card, var(--ax-panel2));
+  box-shadow: var(--shadow-raised, var(--ax-shadow-sm));
+  transition:
+    background 0.15s ease-out,
+    border-color 0.15s ease-out;
+}
+
+.ax-adt-panel .ax-adt-export:hover:not(:disabled) {
+  background: var(--surface-hover, var(--ax-chip));
+}
+
+/* Filter row: 8px rhythm, card-surface search field with a real focus
+ * ring (state feedback, 150ms ease-out). */
+.ax-adt-panel .ax-adt-filters {
+  gap: 8px;
+  margin: 24px 0 16px;
+}
+
+.ax-adt-panel .ax-adt-search {
+  padding: 8px 12px;
+  border-radius: var(--radius-lg, 10px);
+  border-color: var(--surface-border-strong, var(--ax-border2));
+  background: var(--surface-card, var(--ax-panel2));
+  transition:
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+
+.ax-adt-panel .ax-adt-search:focus-within {
+  border-color: var(--primary-500, var(--ax-violet));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-500, var(--ax-violet)) 15%, transparent);
+}
+
+/* Table: elevated card surface, sans column headers on a subtly inset
+ * strip (mono stays for the data itself), 8px-multiple row padding for
+ * Linear-grade density, and hover feedback so a dense log stays scannable. */
+.ax-adt-panel .ax-adt-table {
+  background: var(--surface-card, var(--ax-panel2));
+  border-radius: var(--radius-xl, 14px);
+  border-color: var(--surface-border, var(--ax-border));
+  box-shadow: var(--shadow-raised, var(--ax-shadow-sm));
+}
+
+.ax-adt-panel .ax-adt-row-grid {
+  gap: 16px;
+}
+
+.ax-adt-panel .ax-adt-table-head {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-faint, var(--ax-dim));
+  background: var(--surface-card-alt, var(--ax-chip));
+  border-bottom-color: var(--surface-border, var(--ax-border));
+}
+
+.ax-adt-panel .ax-adt-row {
+  padding: 8px 16px;
+  border-bottom-color: var(--surface-border, var(--ax-border));
+  transition: background 0.15s ease-out;
+}
+
+.ax-adt-panel .ax-adt-row:hover {
+  background: var(--surface-hover, var(--ax-chip));
+}
+
+/* RESULT column: colored text upgraded to tinted pill badges - reads at a
+ * glance in both modes without adding another hue system. The tint comes
+ * from the same token as the glyph via color-mix, so an unrecognized
+ * outcome (no modifier class) just renders as a plain quiet pill. */
+.ax-adt-panel .ax-adt-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--fs-label);
+}
+
+.ax-adt-panel .ax-adt-result-ok {
+  background: color-mix(in srgb, var(--ax-green) 12%, transparent);
+}
+
+.ax-adt-panel .ax-adt-result-held {
+  background: color-mix(in srgb, var(--ax-amber) 12%, transparent);
+}
+
+.ax-adt-panel .ax-adt-result-fail {
+  background: color-mix(in srgb, var(--ax-red) 12%, transparent);
+}
+
+/* Empty state: explanation plus a real next action. The clear-filters
+ * ghost button only renders when a filter is actually active (see
+ * AuditLogPanel.tsx), so a genuinely empty log explains itself instead. */
+.ax-adt-panel .ax-adt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 16px;
+  font-size: var(--fs-meta);
+  color: var(--text-muted, var(--ax-mid));
+}
+
+.ax-adt-clear-filters {
+  border: none;
+  background: transparent;
+  color: var(--primary-500, var(--ax-violet));
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+  transition: background 0.15s ease-out;
+}
+
+.ax-adt-clear-filters:hover {
+  background: var(--surface-hover, var(--ax-chip));
+}
+
+/* --- Select.tsx visual refinements (additive override block) ---------------
+ * Appended, unlayered on purpose: unlayered rules outrank the original
+ * "@layer components" select rules above, so that shared block stays
+ * untouched for the concurrently-running screen agents. Purely visual -
+ * same class names, same markup, same behavior at all ~13 call sites.
+ * 1) Popover elevation now comes from the shared --shadow-popover token
+ *    instead of a generic Tailwind shadow, matching every other floating
+ *    panel in the refreshed system.
+ * 2) The old popover-in keyframe is retired here: Select.tsx drives both
+ *    open and close through motion + AnimatePresence, so the keyframe only
+ *    double-animated the open.
+ * 3) Selected rows get a quiet accent tint so the current value is scannable
+ *    at a glance, and the keyboard highlight stays visible when it lands on
+ *    the selected row instead of being masked by it. */
+.select-popover {
+  border-radius: var(--radius-xl, 14px);
+  box-shadow: var(--shadow-popover, 0 8px 24px -8px rgba(10, 12, 18, 0.16));
+  animation: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Floating-panel z tier (2026-09-25, direct feedback: "menu items are
+   still transparent, drop downs are going background and getting
+   cuttoff"). Every one of these panels used to sit at z-30, which put
+   them UNDER the workflow canvas overlays (z-40/50), the floating dock
+   (z-600) and the nav orb (z-999) - a buried panel reads exactly like a
+   transparent one since the page bleeds through it. They now share a
+   single popover tier at 1000: above every page surface including the
+   dock and orb, below the LanguageSwitcher popover (1100) and the toast
+   stack (1200). The Select popover additionally renders via a
+   createPortal at document.body (see Select.tsx), so it also escapes
+   overflow clipping inside scrollable drawers - this z bump is what the
+   NON-portaled panels (theme picker, alerts, info tips) rely on. */
+.select-popover,
+.popover-panel,
+.wf-alerts-popover,
+.theme-picker-popover,
+.info-tip-panel,
+.info-tip-bubble,
+.ask-ai-popover,
+.setup-alert-popover,
+.lang-switcher-menu,
+.topnav-dropdown {
+  z-index: 1000;
+}
+
+.select-option {
+  border-radius: var(--radius-md, 6px);
+}
+
+.select-option-selected {
+  background: var(--accent-50);
+  color: var(--accent-600);
+}
+
+.select-option-selected.select-option-active {
+  background: var(--accent-100);
+}

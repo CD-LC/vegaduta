@@ -1,0 +1,140 @@
+# core-ingest - the knowledge-ingestion POOL of the jobs shape. It is the core-jobs image
+# (core/Dockerfile with MODULE=app-jobs) started with the `shape-jobs-ingest` profile, so it runs ONLY
+# the document ingestion and re-embedding pollers. The main core-jobs Deployment then runs with
+# `shape-jobs-core` and leaves those two pollers to this one. Pools split which pod runs a job, never
+# what runs (JobsPoolsCoverEveryJobTest). Switch: global.components.coreIngest (needs coreJobs).
+# No REST controllers; the HTTP port serves actuator health/metrics only.
+# Shares database, Valkey, S3, OIDC and the APP_ENCRYPTION_KEY Secret with core via `global`.
+#
+# Design: docs/architecture/ADR-0014-horizontal-scaling.md. Honest limit: the ingestion poll holds one
+# Postgres advisory lock for the whole queue walk, so more replicas add failover, not parallel ingestion.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: ingest
+# -- Selects the pool profile and the smaller DB pool in vegaduta-lib. Do not change.
+pool: ingest
+
+image:
+  registry: ""
+  # -- The core-jobs image (core/Dockerfile built with --build-arg MODULE=app-jobs). Tag must match the core API image.
+  repository: core-jobs
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+# -- Optional per-chart override; must equal global.core.appSecret.existingSecret when both are set.
+appSecret:
+  existingSecret: ""
+
+# -- 1. More replicas only with leaderElection=true, and they add failover only: both pollers hold a
+# Postgres advisory lock for the whole queue walk, so one pod works at a time (the
+# opt-in KNOWLEDGE_INGESTION_CLAIMING_ENABLED=true claims single ingestion jobs instead, but is not tested here with
+# more than one replica; the re-embed poller still locks).
+replicaCount: 1
+# -- Set true to run more than one replica for failover (both pollers are advisory-locked).
+leaderElection: false
+strategy:
+  type: Recreate
+terminationGracePeriodSeconds: 90
+revisionHistoryLimit: 5
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+javaToolOptions: "-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
+# -- Hikari overrides (default max 6, timeout 30 s): one poller works at a time, so a small pool is enough.
+hikari: {}
+
+probes:
+  startup:
+    httpGet: { path: /actuator/health/readiness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  # Liveness only has to catch a JVM that is really stuck, so it tolerates load: a busy pod (CPU saturation, long GC)
+  # answers late, and killing it makes the overload worse. 10 s timeout x 12 failures at a 10 s period = about 2
+  # minutes of continuous silence before a restart. Readiness stays quick so a busy pod leaves rotation first.
+  # deploy/helm/test-guards.sh fails if these regress.
+  liveness:
+    httpGet: { path: /actuator/health/liveness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 12
+  readiness:
+    httpGet: { path: /actuator/health/readiness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  # Document parsing and chunking hold whole files in memory: sized above core-jobs.
+  requests: { cpu: 500m, memory: 2Gi }
+  limits: { memory: 4Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 1Gi }
+  - { name: mcp-data, mountPath: /app/mcp-data, sizeLimit: 1Gi }
+  - { name: npm-cache, mountPath: /home/agentic/.npm, sizeLimit: 1Gi }
+  - { name: uv-cache, mountPath: /home/agentic/.cache/uv, sizeLimit: 1Gi }
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: false
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  path: /actuator/prometheus
+  interval: 30s
+
+networkPolicy:
+  allowFrom: []
+  allowEgressTo: [postgres, valkey, keycloak, seaweedfs, core, sidecar, code-intel, tool-sandbox, mcp-stdio-runner]
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  # -- Ports of the configured integrations (see core's values).
+  integrationEgress: true
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /actuator/health/readiness
+
+env: {}
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []
+
+# -- Argo CD sync wave of the Deployment: after the migrate Job (wave 0).
+argocd:
+  syncWave: "1"

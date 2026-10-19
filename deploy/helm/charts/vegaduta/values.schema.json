@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "VegaDuta umbrella chart values",
+  "type": "object",
+  "definitions": {
+    "image": {
+      "type": "object",
+      "properties": {
+        "registry": { "type": "string" },
+        "repository": { "type": "string" },
+        "tag": { "type": ["string", "number"] },
+        "digest": { "type": "string", "pattern": "^(|sha256:[a-f0-9]{64})$" },
+        "pullPolicy": { "type": "string", "enum": ["", "IfNotPresent", "Always", "Never"] }
+      }
+    },
+    "secretRef": { "type": "string", "description": "Name of an existing Secret in the release namespace" }
+  },
+  "required": ["global"],
+  "properties": {
+    "global": {
+      "type": "object",
+      "required": ["domain", "components", "postgresql", "valkey", "objectStorage", "oidc", "temporal"],
+      "properties": {
+        "allowGeneratedSecrets": { "type": "boolean" },
+        "imageRegistry": { "type": "string", "minLength": 1 },
+        "imageTag": { "type": ["string", "number"], "not": { "const": "latest" } },
+        "imagePullPolicy": { "type": "string", "enum": ["", "IfNotPresent", "Always", "Never"] },
+        "imagePullSecrets": { "type": "array" },
+        "domain": { "type": "string", "pattern": "^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)*[a-z0-9]([a-z0-9-]*[a-z0-9])?$|^$" },
+        "scheme": { "type": "string", "enum": ["https", "http"] },
+        "hosts": { "type": "object", "additionalProperties": { "type": "string" } },
+        "tls": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "clusterIssuer": { "type": "string" },
+            "secretName": { "type": "string" }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "className": { "type": "string" },
+            "annotations": { "type": "object" }
+          }
+        },
+        "gateway": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "parentRefs": { "type": "array", "items": { "type": "object", "required": ["name"] } },
+            "annotations": { "type": "object" }
+          }
+        },
+        "storageClass": { "type": "string" },
+        "networkPolicy": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "ingressControllerNamespace": { "type": "string" },
+            "ingressControllerPodLabels": { "type": "object" },
+            "monitoringNamespace": { "type": "string" },
+            "dnsNamespace": { "type": "string" },
+            "dnsPodLabels": { "type": "object" },
+            "privateCIDRs": { "type": "array", "items": { "type": "string" } },
+            "extraEgress": { "type": "array" },
+            "gatewayNamespace": { "type": "string" },
+            "gatewayPodLabels": { "type": "object" },
+            "monitoringPodLabels": { "type": "object" },
+            "coreEgress": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "smtp": { "type": "boolean" },
+                "otlp": { "type": "boolean" },
+                "ports": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } },
+                "cidrs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["cidr"],
+                    "properties": {
+                      "cidr": { "type": "string" },
+                      "ports": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "serviceMonitor": {
+          "type": "object",
+          "properties": { "enabled": { "type": "boolean" }, "labels": { "type": "object" } }
+        },
+        "tests": { "type": "object" },
+        "components": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "coreJobs": { "type": "boolean" },
+            "coreIngest": { "type": "boolean" },
+            "coreWebhooks": { "type": "boolean" },
+            "coreIntake": { "type": "boolean" },
+            "coreBilling": { "type": "boolean" },
+            "web": { "type": "boolean" },
+            "webAdmin": { "type": "boolean" },
+            "sidecar": { "type": "boolean" },
+            "codeIntel": { "type": "boolean" },
+            "appBuilder": { "type": "boolean" },
+            "rlTrainer": { "type": "boolean" },
+            "toolSandbox": { "type": "boolean" },
+            "mcpStdioRunner": { "type": "boolean" },
+            "voiceAgent": { "type": "boolean" }
+          }
+        },
+        "core": {
+          "type": "object",
+          "properties": {
+            "appSecret": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": { "existingSecret": { "$ref": "#/definitions/secretRef" } }
+            },
+            "springProfiles": { "type": "string", "minLength": 1 },
+            "mcpToolchain": { "enum": ["none", "full"] },
+            "extraEnv": {
+              "type": "object",
+              "propertyNames": { "not": { "enum": ["APP_ENCRYPTION_KEY", "APP_ENCRYPTION_KEY_PREVIOUS", "POSTGRES_PASSWORD", "REDIS_PASSWORD", "KEYCLOAK_CLIENT_SECRET", "STORAGE_SECRET_KEY", "SPRING_DATA_REDIS_PASSWORD", "SPRING_DATASOURCE_PASSWORD", "SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG", "STORAGE_AZURE_CONNECTION_STRING"] } }
+            },
+            "extraEnvFromSecrets": { "type": "array", "items": { "type": "string" } },
+            "extraAllowedOrigins": { "type": "array", "items": { "type": "string", "pattern": "^https?://" } }
+          }
+        },
+        "internalSecret": {
+          "type": "object",
+          "properties": { "existingSecret": { "$ref": "#/definitions/secretRef" } }
+        },
+        "postgresql": {
+          "type": "object",
+          "properties": {
+            "host": { "type": "string", "not": { "enum": ["localhost", "127.0.0.1"] } },
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+            "database": { "type": "string", "minLength": 1 },
+            "username": { "type": "string", "minLength": 1 },
+            "existingSecret": { "$ref": "#/definitions/secretRef" },
+            "passwordKey": { "type": "string", "minLength": 1 },
+            "auth": { "enum": ["password", "aws-iam", "azure-entra", "gcp-iam"] },
+            "sslMode": { "type": "string", "enum": ["", "disable", "allow", "prefer", "require", "verify-ca", "verify-full"] },
+            "age": { "type": "boolean" },
+            "maxConnections": { "type": "integer", "minimum": 0 },
+            "poolMode": { "const": "session", "description": "Schema-per-tenant needs session pooling; transaction pooling routes queries to the wrong tenant." }
+          }
+        },
+        "valkey": {
+          "type": "object",
+          "properties": {
+            "host": { "type": "string", "not": { "enum": ["localhost", "127.0.0.1"] } },
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+            "existingSecret": { "$ref": "#/definitions/secretRef" },
+            "passwordKey": { "type": "string" },
+            "tls": { "type": "boolean" },
+            "username": { "type": "string" }
+          }
+        },
+        "objectStorage": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["s3", "azure-blob", "local"] },
+            "credentials": { "type": "string", "enum": ["static", "default"] },
+            "azure": {
+              "type": "object",
+              "properties": {
+                "endpoint": { "type": "string", "pattern": "^(|https://.+)$" },
+                "existingSecret": { "$ref": "#/definitions/secretRef" },
+                "connectionStringKey": { "type": "string" }
+              }
+            },
+            "local": {
+              "type": "object",
+              "properties": {
+                "size": { "type": "string" },
+                "accessModes": { "type": "array", "items": { "type": "string", "enum": ["ReadWriteOnce", "ReadWriteMany", "ReadWriteOncePod"] } },
+                "storageClass": { "type": "string" },
+                "existingClaim": { "type": "string" }
+              }
+            },
+            "endpoint": { "type": "string", "pattern": "^(|https?://.+)$" },
+            "region": { "type": "string" },
+            "bucket": { "type": "string", "minLength": 3 },
+            "pathStyleAccess": { "type": "boolean" },
+            "existingSecret": { "$ref": "#/definitions/secretRef" },
+            "accessKeyIdKey": { "type": "string" },
+            "secretAccessKeyKey": { "type": "string" }
+          }
+        },
+        "oidc": {
+          "type": "object",
+          "properties": {
+            "issuerUrl": { "type": "string", "pattern": "^(|https?://.+)$" },
+            "realm": { "type": "string", "minLength": 1 },
+            "internalBaseUrl": { "type": "string", "pattern": "^(|https?://.+)$" },
+            "jwkSetUri": { "type": "string", "pattern": "^(|https?://.+)$" },
+            "adminBaseUrl": { "type": "string", "pattern": "^(|https?://.+)$" },
+            "additionalIssuers": { "type": "array", "items": { "type": "string", "pattern": "^https?://" } },
+            "clientId": { "type": "string", "minLength": 1 },
+            "existingSecret": { "$ref": "#/definitions/secretRef" },
+            "clientSecretKey": { "type": "string" },
+            "webClientId": { "type": "string" },
+            "adminClientId": { "type": "string" }
+          }
+        },
+        "temporal": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "target": { "type": "string", "pattern": "^(|[^/]+:[0-9]+)$" },
+            "namespace": { "type": "string" }
+          }
+        },
+        "kafka": {
+          "type": "object",
+          "properties": {
+            "bootstrapServers": { "type": "string" },
+            "securityProtocol": { "type": "string", "enum": ["", "PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] },
+            "saslMechanism": { "type": "string", "enum": ["", "PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"] },
+            "existingSecret": { "$ref": "#/definitions/secretRef" },
+            "saslJaasConfigKey": { "type": "string" }
+          }
+        },
+        "otel": {
+          "type": "object",
+          "properties": {
+            "tracesEndpoint": { "type": "string", "pattern": "^(|https?://.+)$" },
+            "samplingProbability": { "type": ["string", "number"] }
+          }
+        },
+        "livekit": {
+          "type": "object",
+          "properties": {
+            "url": { "type": "string", "pattern": "^(|wss?://.+)$" },
+            "internalUrl": { "type": "string", "pattern": "^(|wss?://.+)$" },
+            "existingSecret": { "$ref": "#/definitions/secretRef" }
+          }
+        }
+      }
+    },
+    "allowCoreImageSkew": { "type": "boolean" },
+    "postgres": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "instances": { "type": "integer", "minimum": 1 },
+        "image": { "$ref": "#/definitions/image" }
+      }
+    },
+    "valkey": { "type": "object", "required": ["enabled"], "properties": { "enabled": { "type": "boolean" } } },
+    "keycloak": { "type": "object", "required": ["enabled"], "properties": { "enabled": { "type": "boolean" } } },
+    "seaweedfs": { "type": "object", "required": ["enabled"], "properties": { "enabled": { "type": "boolean" } } },
+    "core": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 },
+        "migrate": { "type": "object", "properties": { "enabled": { "type": "boolean" } } }
+      }
+    },
+    "core-jobs": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "core-ingest": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "core-webhooks": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "core-intake": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "core-billing": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "core-worker": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "replicaCount": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

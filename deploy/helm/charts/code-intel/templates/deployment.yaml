@@ -1,0 +1,7 @@
+{{- include "code-intel.guard" . -}}
+{{- $env := dict
+  "CODE_INTEL_KEYCLOAK_ISSUER" (include "vegaduta-lib.oidc.issuer" .)
+  "CODE_INTEL_KEYCLOAK_JWKS_URL" (include "vegaduta-lib.oidc.jwkSetUri" .)
+  "CODE_INTEL_CORS_ORIGINS" (include "vegaduta-lib.publicUrl" (dict "root" . "key" "app")) -}}
+{{- $secretEnv := include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "CODE_INTEL_INTERNAL_TOKEN") | fromYamlArray -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" $env "secretEnv" $secretEnv) }}

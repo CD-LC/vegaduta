@@ -1,0 +1,225 @@
+openapi: 3.0.3
+info:
+  title: Availity HIPAA Transactions - Coverages and Payer List
+  version: 1.0.0
+  description: >-
+    Verified against Availity's live Demo plan on 2026-06-20. Endpoints in this
+    spec are confirmed reachable with the `healthcare-hipaa-transactions-demo`
+    product scope.
+
+    IMPORTANT: Availity retired `GET /v1/coverages` inquiry creation. Submit
+    eligibility checks with `POST /v1/coverages` and a URL-encoded form body.
+    `GET /v1/coverages` (recent-request search) is NOT exposed in this spec
+    because the demo subscription rejects it. `GET /v1/configurations` and
+    `GET /v1/claim-statuses` are likewise rejected by the demo subscription;
+    they become available on higher-tier subscriptions.
+
+    Demo plan returns canned scenario data - set X-Api-Mock-Scenario-ID to pick
+    a scenario (e.g. `Coverages-Complete-i`). No PHI is involved on demo plans.
+    Token endpoint: https://api.availity.com/v1/token (grant_type
+    client_credentials, form body). Tokens expire in 300 seconds.
+
+    Import settings:
+      Auth type:        OAuth 2.0 client credentials
+      Token URL:        https://api.availity.com/v1/token
+      Client ID:        Availity app "API Key"
+      Client secret:    Availity app "Secret"
+      Scope:            both scopes from My Apps > Approved Access > Client info
+                        (space-separated, e.g. `hipaa-945850E1 hipaa-945850E1-demo`)
+      Token body style: form
+servers:
+  - url: https://api.availity.com/availity
+paths:
+  /v1/coverages:
+    post:
+      operationId: availity_create_coverage_inquiry
+      summary: Check member eligibility and benefit coverage (X12 270)
+      description: >-
+        Submits an eligibility benefit inquiry (270/271) to the payer through
+        Availity. Send the request as URL-encoded form fields. On the demo plan,
+        set the X-Api-Mock-Scenario-ID header to `Coverages-Complete-i` for a
+        successful canned response. In real-time mode the response may be an
+        in-progress record - poll GET /v1/coverages/{id} until status is
+        Complete.
+      parameters:
+        - name: X-Api-Mock-Scenario-ID
+          in: header
+          required: false
+          schema:
+            type: string
+            default: Coverages-Complete-i
+          description: >-
+            Demo plan only. `Coverages-Complete-i` returns a complete coverage.
+            Omit on production subscriptions.
+        - name: X-Api-Mock-Response
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Demo plan only. Set to `true` to force a mock response.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [payerId, memberId, patientLastName]
+              properties:
+                payerId:
+                  type: string
+                  description: >-
+                    Availity payer ID for the health plan (from the
+                    availity-payer-list endpoint, e.g. `BCBSF`).
+                providerNpi:
+                  type: string
+                  description: Requesting provider's National Provider Identifier. Most plans require it.
+                providerTaxId:
+                  type: string
+                  description: Requesting provider's tax ID, as required by some plans.
+                providerLastName:
+                  type: string
+                  description: Requesting provider's last or organization name.
+                providerFirstName:
+                  type: string
+                  description: Requesting provider's first name.
+                memberId:
+                  type: string
+                  description: Patient's health plan member ID number.
+                patientLastName:
+                  type: string
+                patientFirstName:
+                  type: string
+                patientMiddleName:
+                  type: string
+                patientSuffix:
+                  type: string
+                patientGender:
+                  type: string
+                  description: M or F.
+                patientBirthDate:
+                  type: string
+                  description: Patient's date of birth.
+                patientState:
+                  type: string
+                  description: Two-character state abbreviation for the patient's residence.
+                groupNumber:
+                  type: string
+                  description: Patient's health plan group number.
+                subscriberRelationship:
+                  type: string
+                  description: >-
+                    Patient's relationship to subscriber when not the
+                    subscriber: 18 Self, 01 Spouse, 19 Child, G8 Other.
+                serviceType:
+                  type: string
+                  description: >-
+                    Service type code per the X12 270/271 TR3. `30` = Health
+                    Benefit Plan Coverage (most common).
+                procedureCode:
+                  type: string
+                  description: Procedure code for the coverage request.
+                placeOfService:
+                  type: string
+                  description: Place of service code, as required by some plans.
+                asOfDate:
+                  type: string
+                  description: Date of service to check coverage for.
+                fromDate:
+                  type: string
+                  description: Start of the coverage search period.
+                toDate:
+                  type: string
+                  description: End of the coverage search period.
+                cardIssueDate:
+                  type: string
+                  description: Issue date of the patient's health plan card.
+                medicaidId:
+                  type: string
+                  description: Patient's Medicaid ID number.
+                patientSSN:
+                  type: string
+                  description: Patient's Social Security Number.
+      responses:
+        '200':
+          description: Coverage inquiry response (demo plan returns canned data).
+        '401':
+          description: Unauthorized - token missing or expired.
+        '403':
+          description: Endpoint or scenario not allowed by this subscription.
+  /v1/coverages/{id}:
+    get:
+      operationId: availity_get_coverage_by_id
+      summary: Retrieve a specific coverage request by ID
+      description: >-
+        Retrieves details for a specific coverage inquiry. Replace {id} with
+        the id returned by POST /v1/coverages. Poll until `status` is
+        `Complete`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Coverage request ID returned by the inquiry POST.
+      responses:
+        '200':
+          description: Coverage record with benefit details.
+        '404':
+          description: Coverage not found or expired.
+  /v1/availity-payer-list:
+    get:
+      operationId: availity_list_payers
+      summary: List Availity payers and the transactions they support
+      description: >-
+        Returns Availity's payer directory (~1,400 payers) with supported
+        transactions and submission modes. Filter by `transactionType=270` to
+        find payers accepting API eligibility inquiries. The `availability`
+        field tells you whether the payer needs an Availity contract.
+      parameters:
+        - name: payerId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Availity-specific payer identifier.
+        - name: transactionType
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >-
+            EDI transaction code filter: 270 eligibility inquiry, 276 claim
+            status, 278I service review, 835 remittance, 837P/837I/837D claims.
+        - name: submissionMode
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'Portal, Batch, RealTime, or API.'
+        - name: availability
+          in: query
+          required: false
+          schema:
+            type: string
+          description: '`available` (no contract) or `contractrequired`.'
+        - name: enrollmentRequired
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 50
+      responses:
+        '200':
+          description: Paginated payer list.
+        '401':
+          description: Unauthorized - token missing or expired.

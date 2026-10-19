@@ -1,0 +1,2 @@
+{{- /* Everything except the Deployment (deployment.yaml), the migrate hook (migrate-job.yaml) and the test pod. */ -}}
+{{ include "vegaduta-lib.standardResources" . }}

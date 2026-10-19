@@ -1,0 +1,2 @@
+tool-sandbox: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) runtimeClass={{ .Values.runtimeClassName | default "NONE (evaluation only)" }}
+  Reachable only from core; no egress. Token: key TOOL_SANDBOX_INTERNAL_TOKEN of Secret {{ include "vegaduta-lib.internalSecretName" . }}

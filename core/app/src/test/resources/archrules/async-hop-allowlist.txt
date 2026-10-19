@@ -1,0 +1,73 @@
+# Async hops reviewed as tenant-safe without TenantScope / TenantScopedFlux / the
+# com.agenticai.core.security.concurrent factory (TenantAwareExecutors, TenantAwareSchedulers; ADR-0024).
+#
+# Every executor in core now comes from that factory (RawExecutorBanRulesTest), so most hops listed
+# here already carry the submitter's tenant; they stay listed because the hand-off goes through a field
+# typed ExecutorService/Executor, which this call-site rule cannot trace back to the factory.
+#
+# Read by AsyncHopTenantScopeRulesTest. One line per top-level class:
+#     fully.qualified.ClassName | why every unwrapped hop in this class is safe
+# A class belongs here only if each flagged hand-off in it (executor submit/execute/schedule,
+# CompletableFuture *Async stage, Reactor subscribeOn/publishOn/interval/delay, raw Thread.start,
+# @Async) either carries the tenant by hand (TenantContext set on the worker from data captured on the
+# originating thread, always restored or cleared in finally; or an explicit tenant id/schema passed as
+# data), or touches no tenant-schema table (control_plane-qualified SQL, Redis, HTTP, timers).
+# Do NOT add a class here to silence the test for new code: capture a TenantScope on the originating
+# thread and re-apply it on the worker. An entry whose class no longer has an unwrapped hop fails the
+# test; delete it. The entry exempts the whole class, so keep reasons specific and review a second hop
+# added to a listed class by hand.
+com.agenticai.core.agents.turn.BufferedTurnRunner | keep-alive Flux.interval emits empty chunks only; the turn itself is hopped in bufferedTurn() under TenantScope
+com.agenticai.core.agents.a2a.A2aClientService | body-read watchdog that closes an HTTP stream; no tenant state
+com.agenticai.core.agents.a2a.A2aTaskService | store.save is Redis/in-memory keyed by the task tenant id; runAsync sets the captured TenantContext on its fresh virtual thread and clears it in finally; the terminal audit callbacks use TenantScope in run()
+com.agenticai.core.agents.agui.AgUiRunController | keep-alive heartbeat Flux.interval only; the run buffer is keyed by an explicit tenantKey captured at request time
+com.agenticai.core.agents.coding.CodingTaskExecutor | run body gets a TenantContext snapshot taken on the request thread (CodingTaskService.runWorker sets it and clears it in finally); the store is Redis keyed by tenant id
+com.agenticai.core.agents.coding.CodingTaskService | heartbeat and reaper timers touch Redis and the in-memory sandbox registry only
+com.agenticai.core.agents.demo.studio.DemoStudioConnectorService | discovery task sets the caller TenantContext on its fresh virtual thread and clears it in finally
+com.agenticai.core.agents.demo.studio.DemoStudioController | Mono.delay used only as a timeout signal; no tenant work
+com.agenticai.core.agents.demo.studio.DemoStudioModerationService | anonymous sandbox classifier on the platform pool: no tenant data, and the request thread has no tenant either
+com.agenticai.core.agents.hooks.HookWebhookClient | SSRF DNS check only; no tenant state
+com.agenticai.core.agents.job.AgentJobExecutor | workers run AgentJobExecution.run(jobId, tenantId), which sets the tenant from data and clears it; the heartbeat tick sets and restores the tenant per job
+com.agenticai.core.agents.lab.AgentLabExecutor | run body gets a TenantContext snapshot taken on the request thread (AgentLabRunService.runWorker sets it, clears it in finally)
+com.agenticai.core.agents.loadtest.LoadTestChatModel | synthetic load-test model; no tenant state
+com.agenticai.core.agents.openai.OpenAiCompatCalls | keep-alive heartbeat only
+com.agenticai.core.agents.resumable.ResumableChatStreamService | detach timer and cancel paths re-apply the tenant captured at start() via TenantScope (cancelUnclaimed, onDetachTimeout); the buffer is keyed by an explicit tenant key
+com.agenticai.core.agents.spendcap.SpendCapService | alert claim is control_plane SQL; the sinks write through PlatformTenantAuditor.asTenant(schema)
+com.agenticai.core.agents.tools.AgentStepEventEmitter | heartbeat of empty step events only
+com.agenticai.core.agents.tools.browseruse.BrowserTakeoverController | stream pump forwards browser frames; the caller is read from TenantContext on the request thread
+com.agenticai.core.agents.tools.browseruse.BrowserTakeoverAudit | the audit task sets TenantContext.of(tenant, ..) from data on the audit thread and restores it in finally
+com.agenticai.core.agents.tools.browseruse.BrowserUseActionRunner | single Playwright thread of BrowserUseSessionManager (TenantAwareExecutors); owns browser state only, no tenant tables
+com.agenticai.core.agents.tools.e2b.SandboxFileRedisMirror | Redis writes keyed by an explicit tenant string
+com.agenticai.core.agents.tools.mcpapps.McpAppsService | MCP resources/read client call only; no tenant tables
+com.agenticai.core.agents.tools.mcpregistry.McpOrphanAdopter | sets TenantContext.of(schema, ..) from data on the pool thread and clears it in finally
+com.agenticai.core.agents.tools.mcpregistry.RedisMcpOwnershipGate | handle(command) sets TenantContext.of(command.tenant(), ..) and clears it in finally
+com.agenticai.core.agents.tools.web.HttpRequestExecutor | bounded body reader on a raw stream; no tenant state
+com.agenticai.core.agents.tools.web.WebPageFetcher | body watchdog that closes an HTTP stream; no tenant state
+com.agenticai.core.brief.BriefApplyService | worker sets the TenantContext captured on the request thread and clears it in finally
+com.agenticai.core.brief.BriefTrustWatcher | demotion worker takes the tenant id as data and sets and restores it itself (demoteForStrike)
+com.agenticai.core.chat.FimCompletionService | submitCall wraps the work in withTenantContext(capturedContext) (set, restore in finally), as does the post-deadline settlement
+com.agenticai.core.chat.StreamEndExecutor | every caller carries the tenant as data via TenantScope.of(..) inside the task; the pool clears TenantContext and AgentVersionPin after each task
+com.agenticai.core.documentgen.service.DocumentGenerationEventListener | @Async handler sets the tenant carried in the event as data before its first repository call and clears it in finally
+com.agenticai.core.eventbus.WorkflowEventOutboxRelay | the relay tick walks tenants with TenantSchemaIterator, which binds and clears each tenant
+com.agenticai.core.guardrails.procedures.ProcedureSessionCallsRedis | Redis writes keyed by an explicit tenant string
+com.agenticai.core.knowledge.KnowledgeIngestionJobRunner | heartbeat updates the claimed job in the schema-qualified table captured at claim time
+com.agenticai.core.mcp.McpConnectDispatcher | captures the TenantContext on the caller and sets and restores it on the executor thread
+com.agenticai.core.mcp.oauth.JdkMcpOAuthHttp | HTTP body read under a deadline; no tenant state
+com.agenticai.core.mcp.registry.OfficialMcpRegistryClient | public registry catalog refresh; no tenant state
+com.agenticai.core.omnichannel.demo.DemoWhatsAppWebhookController | demo sandbox bot: control_plane demo entities and its own demo-tenant context (inDemoTenantContext), no caller tenant
+com.agenticai.core.omnichannel.session.InboundChannelExecutor | a Permit snapshots the TenantContext when the slot is acquired and sets and restores it around the task
+com.agenticai.core.omnichannel.whatsappvoice.TimeBoundedRunner | captures the TenantContext on the caller, sets it on the pool thread and clears it in finally
+com.agenticai.core.platform.ops.PlatformVersionService | control-plane service version probes; no tenant state
+com.agenticai.core.platform.ops.ScheduledJobRegistryService | platform-admin run-now of an @Scheduled method; a scheduled job runs without a request tenant too and binds its own (TenantSchemaIterator)
+com.agenticai.core.platform.reliability.DependencyHealthService | platform dependency probes against control_plane and HTTP; no tenant state
+com.agenticai.core.platform.reliability.ProbeRunner | bounded probe execution; no tenant state
+com.agenticai.core.quality.dataset.EvalRunExecutor | run body gets tenantId, subject and roles as data and sets and clears TenantContext (EvalRunService.executeRun)
+com.agenticai.core.quality.grader.CodeGrader | CPU-bound regex evaluation under a timeout; no tenant state
+com.agenticai.core.quality.impl.JudgeCallGuard | captures the TenantContext on the caller, sets it on its own pool thread and clears it in finally
+com.agenticai.core.quality.simulation.SimulationRunExecutor | run body gets tenantId, subject and roles as data and sets and clears TenantContext (SimulationRunService.executeRun)
+com.agenticai.core.tenancy.AppUserLastSeenRecorder | control_plane-qualified JDBC statement; no tenant tables
+com.agenticai.core.tenancy.replica.BoundedRedisCall | time-bounded Redis call; no tenant state
+com.agenticai.core.workflow.AgentScheduleWorkflowRunner | worker sets TenantContext.of(tenantSchema, requestedBy) captured at submit and clears it in finally
+com.agenticai.core.workflow.WorkflowBackgroundRunService | captures the TenantContext on the caller, sets it on the pool thread and clears it in finally
+com.agenticai.core.workflow.ParallelBranchRunner | parallel branches set the tenant snapshot taken on the run thread and clear it in finally (moved out of WorkflowExecutionEngine unchanged)
+com.agenticai.core.workflow.stream.WorkflowRunStreamHub | heartbeat and eviction timers; the run poller re-applies the tenant captured by WorkflowController (set, clear in finally)
+com.agenticai.core.workflow.temporal.WorkflowNodeActivitiesImpl | the activity input carries tenantId, subject and roles; withTenantContext sets and restores them on the worker thread

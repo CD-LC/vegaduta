@@ -1,0 +1,101 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-public-apps-slug-ai-chat",
+      "method": "POST",
+      "path": "/api/public/apps/{slug}/ai/chat",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-public-apps-slug-auth-login",
+      "method": "POST",
+      "path": "/api/public/apps/{slug}/auth/login",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-public-apps-slug-auth-logout",
+      "method": "POST",
+      "path": "/api/public/apps/{slug}/auth/logout",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-public-apps-slug-auth-me",
+      "method": "GET",
+      "path": "/api/public/apps/{slug}/auth/me",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-public-apps-slug-auth-signup",
+      "method": "POST",
+      "path": "/api/public/apps/{slug}/auth/signup",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-public-apps-slug-call-alias",
+      "method": "POST",
+      "path": "/api/public/apps/{slug}/call/{alias}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-public-landing-event",
+      "method": "POST",
+      "path": "/api/public/landing-event",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.event"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-public-status",
+      "method": "GET",
+      "path": "/api/public/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-public-workflow-forms-token",
+      "method": "GET",
+      "path": "/api/public/workflow-forms/{token}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-public-workflow-forms-token",
+      "method": "POST",
+      "path": "/api/public/workflow-forms/{token}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+seaweedfs: S3 endpoint http://{{ include "vegaduta-lib.fullname" . }}:8333 ({{ include "vegaduta-lib.image" . }}), credentials in Secret {{ include "vegaduta-lib.fullname" . }}.
+  Single node, evaluation/small installs; use external S3 for production.

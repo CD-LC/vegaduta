@@ -1,0 +1,337 @@
+/* Right-side inspector */
+.ax-tl-inspector {
+  /* width comes from the grid track now (see .ax-tl-body) */
+  border-left: 1px solid var(--ax-border);
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+}
+
+@media (max-width: 1180px) {
+  .ax-tl-body {
+    grid-template-columns: 1fr;
+  }
+
+  .ax-tl-inspector {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--ax-border);
+    padding-top: 18px;
+    position: static;
+  }
+}
+
+.ax-tl-inspector-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ax-tl-inspector-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ax-tl-inspector-name {
+  font-size: var(--fs-lede);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-tl-inspector-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  margin-top: 2px;
+}
+
+.ax-tl-inspector-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ax-tl-inspector-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border);
+  /* Mobile pass (#1028) - this card is reused everywhere across /tools,
+   * /providers and /admin/channels to print a real credential/ID value
+   * verbatim (Twilio accountSid, an MCP server's connection error, an X
+   * clientId, a Meta phoneNumberId...). Those are long single unbroken
+   * tokens with no spaces, so the browser's default "don't break a word"
+   * behaviour lets them force this card - and the inspector column
+   * around it - wider than the viewport once the inspector drops to
+   * 100% width on a phone/tablet (see .ax-tl-inspector's own breakpoint
+   * above). overflow-wrap: anywhere is the standard fix for exactly this:
+   * only kicks in when a token genuinely can't fit, never affects normal
+   * wrapping prose text. */
+  overflow-wrap: anywhere;
+}
+
+.ax-tl-inspector-card-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+  margin-bottom: 11px;
+}
+
+.ax-tl-subtool-row {
+  display: flex;
+  gap: 9px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  padding: 3px 0;
+}
+
+.ax-tl-subtool-name {
+  color: var(--ax-cyan);
+}
+
+.ax-tl-subtool-mode {
+  color: var(--ax-dim);
+  margin-left: auto;
+}
+
+.ax-tl-subtool-mode-write {
+  color: var(--ax-amber);
+}
+
+.ax-tl-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: var(--fs-caption);
+  padding: 4px 0;
+  color: var(--ax-mid);
+}
+
+.ax-tl-detail-row strong {
+  color: var(--ax-text);
+  font-weight: 500;
+}
+
+.ax-tl-note {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.ax-tl-agent-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ax-tl-agent-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 100px;
+  background: rgba(124, 92, 255, 0.1);
+  border: 1px solid rgba(124, 92, 255, 0.24);
+  font-size: var(--fs-label);
+  color: var(--ax-text);
+}
+
+.ax-tl-agent-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--ax-violet), var(--ax-amber));
+  font-size: var(--fs-micro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #05070d;
+  font-weight: 700;
+}
+
+.ax-tl-inspector-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.ax-tl-inspector-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--ax-border2);
+  background: transparent;
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+  font-family: var(--font-mono), monospace;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-tl-inspector-btn:hover:not(:disabled) {
+  border-color: var(--ax-cyan);
+  color: var(--ax-cyan);
+}
+
+.ax-tl-inspector-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Was hardcoded #ff8a99/#ff5c72 (a pastel red tuned for dark backgrounds,
+ * no light-mode override) - swapped for the real light/dark-reactive
+ * --ax-red token, already contrast-verified in both modes. */
+.ax-tl-inspector-btn-danger {
+  border-color: var(--ax-red);
+  color: var(--ax-red);
+}
+
+.ax-tl-inspector-btn-danger:hover:not(:disabled) {
+  border-color: var(--ax-red);
+  color: var(--ax-red);
+}
+
+.ax-tl-inspector-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 32px 18px;
+  border: 1px dashed var(--ax-border2);
+  border-radius: 13px;
+  color: var(--ax-mid);
+  font-size: var(--fs-caption);
+}
+
+/* Add-server section (catalog browse + advanced/custom form), revealed by
+ * the topbar "+ Add MCP server" button or the grid's trailing tile - the
+ * existing catalog-card feature set (Ready/Needs-setup, YAML snippet, env
+ * vars, docs link) from the pre-AXON McpPanel, restyled onto these tokens
+ * rather than rebuilt. */
+.ax-tl-add-section {
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ax-tl-add-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ax-tl-add-title {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ax-text);
+  flex: 1;
+}
+
+.ax-tl-catalog-card {
+  padding: 14px 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ax-tl-catalog-card-badge {
+  font-size: var(--fs-micro);
+  font-family: var(--font-mono), monospace;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: rgba(70, 224, 160, 0.14);
+  color: var(--ax-green);
+}
+
+.ax-tl-catalog-card-badge-pending {
+  background: rgba(245, 181, 68, 0.14);
+  color: var(--ax-amber);
+}
+
+.ax-tl-catalog-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.ax-tl-yaml {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--ax-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-mid);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.ax-tl-form-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ax-tl-form-input {
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--ax-border2);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--ax-text);
+  font-size: var(--fs-caption);
+  min-width: 180px;
+}
+
+.ax-tl-form-input:focus {
+  outline: none;
+  border-color: var(--ax-cyan);
+}
+
+.ax-tl-alert {
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+}
+
+/* Was hardcoded color: #ff8a99 with no light-mode override (unlike the
+ * sibling .ax-tl-alert-success below, which already uses the reactive
+ * var(--ax-green)) - ~2:1 contrast in light mode. Swapped for var(--ax-red). */
+.ax-tl-alert-error {
+  background: rgba(255, 92, 114, 0.1);
+  border: 1px solid rgba(255, 92, 114, 0.3);
+  color: var(--ax-red);
+}
+
+.ax-tl-alert-success {
+  background: rgba(70, 224, 160, 0.1);
+  border: 1px solid rgba(70, 224, 160, 0.3);
+  color: var(--ax-green);
+}

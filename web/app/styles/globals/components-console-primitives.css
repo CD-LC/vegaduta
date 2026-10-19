@@ -1,0 +1,285 @@
+@layer components {
+  /* ===== Shared AXON console content primitives (PageHeader/KpiTile/
+   * Sparkline/FilterPills - app/components/ax/) - the recurring page-header
+   * + corner-bracket-KPI-row + card patterns every Pro screen repeats
+   * (Admin/Agents/Tools/Knowledge/Channels/Quick Task/Dashboard). ===== */
+  .ax-page-header {
+    @apply flex items-end justify-between gap-4 flex-wrap;
+  }
+
+  .ax-page-title {
+    @apply m-0 text-[30px] font-bold tracking-tight;
+    color: var(--ax-text);
+  }
+
+  .ax-page-subtitle {
+    @apply mt-1.5 text-[13.5px];
+    color: var(--ax-mid);
+  }
+
+  .ax-page-action {
+    @apply inline-flex items-center gap-2 rounded-xl border-0 px-5 py-3 text-[13.5px] font-semibold text-white no-underline cursor-pointer;
+    background: linear-gradient(135deg, var(--ax-cyan), var(--ax-accent2));
+    box-shadow: 0 10px 26px -10px var(--ax-glow);
+    transition: filter 0.2s ease;
+  }
+
+  .ax-page-action:hover {
+    filter: brightness(1.08);
+  }
+
+  .ax-kpi-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .ax-kpi-tile {
+    @apply relative overflow-hidden rounded-[18px] p-4;
+    border: 1px solid var(--ax-border);
+    background: var(--ax-panel);
+    box-shadow: var(--ax-shadow-sm);
+  }
+
+  .ax-kpi-tile:hover {
+    border-color: var(--ax-border2);
+  }
+
+  .ax-kpi-corner-h,
+  .ax-kpi-corner-v {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--kpi-color, var(--ax-cyan));
+  }
+
+  .ax-kpi-corner-h {
+    width: 26px;
+    height: 2px;
+  }
+
+  .ax-kpi-corner-v {
+    width: 2px;
+    height: 26px;
+  }
+
+  .ax-kpi-head {
+    @apply flex items-center justify-between;
+  }
+
+  .ax-kpi-label {
+    @apply text-[10px] tracking-wider;
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-dim);
+  }
+
+  .ax-kpi-trend {
+    @apply text-[10px];
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-kpi-value-row {
+    @apply mt-1.5 flex items-baseline gap-1.5;
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-kpi-value {
+    @apply text-[30px] font-semibold;
+  }
+
+  .ax-kpi-unit {
+    @apply text-[13px];
+    color: var(--ax-dim);
+  }
+
+  .ax-kpi-sub {
+    @apply mt-1.5 text-[10.5px];
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-dim);
+  }
+
+  .ax-filter-pills {
+    @apply flex flex-wrap gap-2.5;
+  }
+
+  .ax-filter-pill {
+    @apply cursor-pointer rounded-full border px-3.5 py-1.5 text-[12px];
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-dim);
+    border-color: var(--ax-border);
+    background: transparent;
+  }
+
+  .ax-filter-pill-active {
+    color: var(--ax-cyan);
+    border-color: color-mix(in srgb, var(--ax-cyan) 34%, transparent);
+    background: color-mix(in srgb, var(--ax-cyan) 16%, transparent);
+  }
+
+  .ax-card {
+    @apply relative rounded-[18px] p-5;
+    border: 1px solid var(--ax-border);
+    background: var(--ax-panel);
+    box-shadow: var(--ax-shadow-sm);
+  }
+
+  .ax-card-title {
+    @apply flex items-center justify-between text-[13px] font-semibold;
+    color: var(--ax-text);
+  }
+
+  .ax-card-title-mono {
+    @apply text-[11px] tracking-wider;
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-mid);
+  }
+
+  .ax-avatar {
+    @apply flex h-[33px] w-[33px] shrink-0 items-center justify-center rounded-[9px] text-[13px] font-semibold;
+    background-image: linear-gradient(135deg, var(--ax-violet), var(--ax-cyan));
+    color: #05070d;
+  }
+
+  @keyframes axPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ax-status-pill-dot {
+      animation: none;
+    }
+  }
+
+  /* ===== Mobile nav: hamburger toggle + off-canvas rail drawer ==========
+   * The fixed 74px .ax-rail + .ax-topbar (left:74px) above assumed a
+   * desktop-only viewport (an earlier comment on .app-content explicitly
+   * said so - "a dedicated mobile app is planned"). Below 900px the rail
+   * becomes a hidden, off-canvas drawer instead (slides in from the left,
+   * toggled by AppShell.js's mobileNavOpen state via the ax-rail-open
+   * class) so the console is actually usable on a phone/tablet without a
+   * second mobile-only nav component to keep in sync with RAIL_ITEMS. */
+  .ax-menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 1px solid var(--ax-border);
+    background: var(--ax-chip);
+    color: var(--ax-text);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .ax-rail-backdrop {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .ax-menu-toggle {
+      display: flex;
+    }
+
+    /* Off-canvas: same fixed full-height rail, just parked off the left
+     * edge until ax-rail-open is applied. Widened (240px) and re-laid-out
+     * below (icon+label side by side, not stacked) since a drawer reads as
+     * a normal nav list, not a condensed icon dock. */
+    .ax-rail {
+      width: 240px;
+      align-items: stretch;
+      padding: 1rem 0.75rem;
+      transform: translateX(-100%);
+      transition: transform 0.22s ease;
+      z-index: 50;
+      box-shadow: 12px 0 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .ax-rail-open {
+      transform: translateX(0);
+    }
+
+    .ax-rail-logo {
+      align-self: flex-start;
+      margin-left: 0.25rem;
+    }
+
+    .ax-rail-link {
+      width: 100%;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      min-height: 44px;
+    }
+
+    .ax-rail-icon {
+      height: 20px;
+      width: 20px;
+    }
+
+    .ax-rail-label {
+      @apply text-[13px] tracking-normal;
+      /* Desktop only shows labels on :hover (see .ax-rail:hover .ax-rail-label
+       * above) - the drawer has no hover state on touch, so it's open =
+       * fully labeled, always. */
+      opacity: 1;
+      transform: none;
+    }
+
+    .ax-rail-badge,
+    .ax-rail-indicator {
+      opacity: 1;
+    }
+
+    .ax-rail-dot {
+      display: none;
+    }
+
+    .ax-rail-admin {
+      margin-top: 0.25rem;
+    }
+
+    /* Dims/blocks the page behind the open drawer and closes it on tap -
+     * only rendered in the DOM at all while mobileNavOpen is true (see
+     * AppShell.js), so it costs nothing when the drawer is closed. */
+    .ax-rail-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(4, 6, 14, 0.55);
+      backdrop-filter: blur(2px);
+    }
+
+    /* No more room reserved for a permanent rail column - the drawer now
+     * floats above content instead of pushing it over. */
+    .ax-topbar {
+      left: 0;
+    }
+
+    .app-main {
+      margin-left: 0;
+    }
+
+    /* Longer org names/eyebrow text has no room to spare on a phone-width
+     * topbar once the hamburger button is added - drop both rather than
+     * let them force a horizontal scrollbar or collide with the controls
+     * on the right.  */
+    .ax-topbar-eyebrow,
+    .ax-topbar-org {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ax-rail {
+      transition: none;
+    }
+  }
+}

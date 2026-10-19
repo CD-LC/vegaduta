@@ -1,0 +1,547 @@
+/* ===== AXON Channels screen (#472, ChannelsPanel.js) =====================
+ * Pixel-match rebuild of design_handoff_axon/design_files/Channels.dc.html:
+ * left column reuses .ax-tl-grid/.ax-tl-section-label directly (identical
+ * 3-col-collapsing-to-2 layout to /tools), only the card's per-connection-
+ * state coloring below is genuinely new. Right rail reuses the entire
+ * .ax-tl-inspector/-head/-icon/-name/-status/-card/-card-label/-empty and
+ * .ax-tl-form-row/-form-input/-alert* families from /tools untouched - only
+ * the WhatsApp method tabs, QR-pairing visual, connected-checkmark, and
+ * inbound-log rows below are new to this screen. Keyframes axPulse
+ * (line ~2735) and axFadeIn (line ~5148) are reused as-is per this file's
+ * "same animation, not a near-duplicate" convention; axScanY and axPop are
+ * new (the mockup's own <style> block defines both, this matches its
+ * timings). */
+.ax-ch-card {
+  padding: 15px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--ax-border2);
+  border-radius: 13px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-ch-card:hover {
+  transform: translateY(-1px);
+}
+
+.ax-ch-card-selected {
+  box-shadow: 0 0 0 1px var(--ax-cyan);
+  border-color: var(--ax-cyan);
+}
+
+.ax-ch-card-connected {
+  background: rgba(70, 224, 160, 0.05);
+  border-color: rgba(70, 224, 160, 0.22);
+}
+
+.ax-ch-card-pending {
+  background: rgba(245, 181, 68, 0.05);
+  border-color: rgba(245, 181, 68, 0.28);
+}
+
+.ax-ch-card-needs-attention {
+  background: rgba(255, 92, 114, 0.05);
+  border-color: rgba(255, 92, 114, 0.28);
+}
+
+.ax-ch-card-not-connected {
+  background: rgba(255, 255, 255, 0.015);
+  border-style: dashed;
+  border-color: var(--ax-border2);
+  opacity: 0.85;
+}
+
+.ax-ch-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ax-ch-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  /* No hardcoded color here on purpose (was a fixed near-black #05070d,
+   * ~1.2:1 contrast against dark brand colors like X/Slack - effectively
+   * invisible). Text color now comes from CHANNEL_META's per-channel
+   * textColor (ChannelsPanel.tsx), applied inline, since the right choice
+   * (light text vs dark text) depends on how dark each brand color is. */
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-ch-card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ax-border2);
+}
+
+.ax-ch-card-dot-connected {
+  background: var(--ax-green);
+  box-shadow: 0 0 8px var(--ax-green);
+}
+
+.ax-ch-card-dot-pending {
+  background: var(--ax-amber);
+  box-shadow: 0 0 8px var(--ax-amber);
+  animation: axPulse 1.8s ease-in-out infinite;
+}
+
+.ax-ch-card-dot-needs-attention {
+  background: #ff5c72;
+  box-shadow: 0 0 8px #ff5c72;
+  animation: axPulse 1.4s ease-in-out infinite;
+}
+
+.ax-ch-card-dot-not-connected {
+  background: var(--ax-border2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-ch-card-dot-pending,
+  .ax-ch-card-dot-needs-attention {
+    animation: none;
+  }
+}
+
+.ax-ch-card-name {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-ch-card-detail {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-ch-card-sessions {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+/* Recent inbound log */
+.ax-ch-inbound {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ax-ch-inbound-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--ax-border);
+  font-size: var(--fs-caption);
+}
+
+.ax-ch-inbound-row:last-child {
+  border-bottom: none;
+}
+
+.ax-ch-inbound-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  /* Same fix as .ax-ch-card-icon above - text color comes from
+   * CHANNEL_META's per-channel textColor now, not a fixed near-black. */
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-ch-inbound-from {
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-text);
+  flex-shrink: 0;
+}
+
+.ax-ch-inbound-arrow {
+  flex: 1;
+  min-width: 0;
+  color: var(--ax-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-ch-inbound-status {
+  flex-shrink: 0;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  padding: 3px 9px;
+  border-radius: 100px;
+  background: rgba(245, 181, 68, 0.12);
+  color: var(--ax-amber);
+}
+
+.ax-ch-inbound-status-mapped {
+  background: rgba(70, 224, 160, 0.12);
+  color: var(--ax-green);
+}
+
+/* #590 follow-up ("wrong agent for telegram message sending") - reassign
+   one already-existing RECENT INBOUND conversation to a different agent. */
+.ax-ch-inbound-row-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.ax-ch-inbound-reassign-btn {
+  flex-shrink: 0;
+  font-size: var(--fs-micro);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-dim);
+  background: transparent;
+  border: 1px solid var(--ax-border);
+  border-radius: 100px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ax-ch-inbound-reassign-btn:hover {
+  color: var(--ax-text);
+  border-color: var(--ax-dim);
+}
+
+/* Pending-pairing approve/reject - the two buttons sit right where the
+   plain "awaiting approval" status text used to be, so this just needs to
+   keep them inline with a small gap. */
+.ax-ch-inbound-pairing-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* "print more information in inbound - for approval" - secondary line
+   under a still-unpaired row showing firstSeenAt + pairingCode, so an
+   admin has more than a masked number to decide approve/reject on. */
+.ax-ch-inbound-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 6px 36px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-dim);
+}
+
+.ax-ch-inbound-meta-sep {
+  opacity: 0.5;
+}
+
+/* "print some information like whats the message" - the actual inbound
+   text/subject (ChannelSession.lastMessagePreview), quoted under the row
+   so an admin doesn't have to guess intent from a phone number alone. */
+.ax-ch-inbound-message {
+  padding: 0 4px 6px 36px;
+  font-size: var(--fs-label);
+  color: var(--ax-text-dim, var(--ax-dim));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
+}
+
+.ax-ch-inbound-reassign {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 10px 36px;
+}
+
+/* Phone-width pass (#1028) - RECENT INBOUND isn't a literal <table> (see
+ * ChannelsPanel.js), it's a flex row of fixed-width pieces (channel badge,
+ * the sender's raw phone number/email in .ax-ch-inbound-from, an ellipsis-
+ * truncated "-> agent name" middle, and a status pill), which is exactly
+ * the pattern that breaks on a phone: .ax-ch-inbound-from and the status
+ * pill both set flex-shrink: 0 so they never truncate, and a long inbound
+ * phone number/email has nothing stopping it from just pushing the row
+ * (and the whole page under it) wider than the viewport. Below 640px this
+ * lets the row wrap instead - the sender identity gets its own full-width
+ * line (still truncated with an ellipsis if it's genuinely too long for
+ * one line, never spilling past the edge), and the "-> agent / status"
+ * piece and the approve/reject/reassign actions fall onto their own
+ * line(s) beneath it - reading like a stacked card per inbound message
+ * rather than a squeezed table row. */
+@media (max-width: 640px) {
+  .ax-ch-inbound-row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .ax-ch-inbound-from {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Same reasoning as .ax-ch-inbound-row above - the inline "reassign to a
+   * different agent" mini-form (Select + Save button) sits under a mapped
+   * row at a fixed 36px left indent (lining it up under the row's text,
+   * past the badge) with no wrap, so on a narrow phone the Select's own
+   * 12rem min-width plus the Save button can't both fit on the indented
+   * line and would otherwise force the row wider than the viewport. */
+  .ax-ch-inbound-reassign {
+    flex-wrap: wrap;
+    padding-left: 20px;
+  }
+
+  /* Approve/Reject/Reassign - already comfortably-sized text, but the
+   * compact desktop padding (3px 8px) leaves an effective tap target well
+   * under the ~40px this brief asks for once a finger, not a mouse
+   * pointer, is doing the tapping. Touching this rule for the mobile pass
+   * anyway, so bumping padding here costs nothing extra. */
+  .ax-ch-inbound-reassign-btn {
+    padding: 9px 14px;
+  }
+}
+
+/* WhatsApp connect method tabs */
+.ax-ch-method-tabs {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+}
+
+.ax-ch-method-tab {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border2);
+  color: var(--ax-mid);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-ch-method-tab:hover {
+  color: var(--ax-text);
+}
+
+.ax-ch-method-tab-active {
+  background: rgba(79, 227, 227, 0.12);
+  border-color: rgba(79, 227, 227, 0.28);
+  color: var(--ax-cyan);
+}
+
+/* QR pairing box - scan-line sweep matches Channels.dc.html's axScanY
+ * (top 4% -> 92% -> 4%) exactly. */
+.ax-ch-qr-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.ax-ch-qr-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--ax-border2);
+}
+
+.ax-ch-qr-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ax-ch-qr-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ax-dim);
+  font-size: var(--fs-caption);
+  font-family: var(--font-mono), monospace;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ax-ch-qr-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ax-cyan), transparent);
+  box-shadow: 0 0 8px var(--ax-cyan);
+  animation: axScanY 2.6s ease-in-out infinite;
+}
+
+@keyframes axScanY {
+  0%,
+  100% {
+    top: 4%;
+  }
+  50% {
+    top: 92%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-ch-qr-scanline {
+    animation: none;
+    top: 50%;
+  }
+}
+
+.ax-ch-waiting-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-amber);
+}
+
+.ax-ch-waiting-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ax-amber);
+  animation: axPulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-ch-waiting-dot {
+    animation: none;
+  }
+}
+
+.ax-ch-steps {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  line-height: 1.5;
+}
+
+/* Connected success state - axPop matches the mockup's checkmark pop
+ * (scale 0.6 -> 1.1 -> 1), plays once on mount rather than looping. */
+.ax-ch-connected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 20px 12px;
+}
+
+.ax-ch-connected-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(70, 224, 160, 0.14);
+  color: var(--ax-green);
+  animation: axPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes axPop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-ch-connected-badge {
+    animation: none;
+  }
+}
+
+.ax-ch-connected-title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ax-text);
+  margin-top: 4px;
+}
+
+.ax-ch-connected-sub {
+  font-size: var(--fs-caption);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+/* "ROUTE INBOUND TO" agent box - real default-agent picker + a static,
+ * honest note about the pairing-approval gate (see RouteBox in
+ * ChannelsPanel.js's doc comment for why this replaces the mockup's fake
+ * "Require human approval" toggle). */
+.ax-ch-route-box {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ax-ch-route-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+}
+
+.ax-ch-label {
+  display: block;
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  margin: 2px 0 -2px;
+  width: 100%;
+}

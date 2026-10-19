@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.vegaduta</groupId>
+    <artifactId>vegaduta-agent-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>vegaduta-agent-jdbc</artifactId>
+  <name>VegaDuta Agent SDK :: JDBC store</name>
+  <description>
+    Durable approval store, effect journal and audit sink on plain JDBC (PostgreSQL, H2). Ships
+    DDL as resources; the host application owns schema migration.
+  </description>
+
+  <properties>
+    <automatic.module.name>io.vegaduta.agent.jdbc</automatic.module.name>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vegaduta</groupId>
+      <artifactId>vegaduta-agent-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

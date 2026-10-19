@@ -1,0 +1,11 @@
+{
+  "name": "Static HTML",
+  "description": "Plain HTML + CSS, no build step — the simplest possible starter.",
+  "install": "",
+  "run": "python -m http.server 8000",
+  "build": "",
+  "test": "",
+  "port": 8000,
+  "image": "python:3.12-slim",
+  "preview_dir": "."
+}

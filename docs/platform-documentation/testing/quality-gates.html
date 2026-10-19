@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Quality Gates &amp; CI Checks — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="testing" data-page="quality-gates.html" data-doc="VD-TST-003" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="test-strategy.html">Testing &amp; Quality</a><span class="sep">/</span>Quality Gates &amp; CI Checks</div>
+<div class="doc-meta" data-auto></div>
+<h1>Quality Gates &amp; CI Checks</h1>
+<p class="lede">
+  Every gate defined in the repository: what it checks, which script or workflow implements it, and how it is
+  triggered. Strategy and layers are on <a href="test-strategy.html">Test Strategy</a>; the workflows themselves
+  are described on <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a>.
+</p>
+
+<div class="callout callout-note">
+  <div class="callout-title">What to require on pull requests</div>
+  <p style="margin:4px 0 0">
+    <code>CI OK</code> (the summary job of <code>ci.yml</code>) and <code>CodeQL OK</code> (<code>codeql.yml</code>) are the
+    required checks (<code>CONTRIBUTING.md</code>). <code>CI OK</code> covers the static gates (<code>static-gates.yml</code>, called
+    from <code>ci.yml</code>), the secret scan, DCO sign-off, dependency review and the docs link check. The same static gates run locally through
+    <code>make gates</code> and the <code>.githooks/pre-push</code> hook (enable with <code>make hooks</code>).
+  </p>
+</div>
+
+<h2>Static gates (<code>static-gates.yml</code>)</h2>
+<p>Called from <code>ci.yml</code> on pull requests and pushes to <code>main</code>, or by manual dispatch. Each script also runs from a shell:</p>
+<table>
+  <thead><tr><th>Gate</th><th>Script</th><th>What it enforces</th><th>Mode</th></tr></thead>
+  <tbody>
+    <tr><td>Flyway lint</td><td><code>scripts/ci/flyway-lint.sh</code></td><td>(a) no edit or renumber of a migration that already exists at the merge-base; (b) new migrations containing <code>DROP TABLE</code>, <code>DROP COLUMN</code> or <code>ALTER COLUMN ... SET NOT NULL</code> need a <code>-- gated:contract</code> marker; (c) no version number twice across <code>controlplane/</code> and <code>tenant/</code> (one shared namespace). Writes <code>scripts/ci/flyway.lock</code>, uploaded as the <code>flyway-lock</code> artifact. Escape hatches: <code>flyway-lint-allowed-renames.txt</code>, <code>flyway-lint-allowed-edits.txt</code>.</td><td>Blocking</td></tr>
+    <tr><td>Duplicate bean / entity names</td><td><code>UniqueBeanNamesTest</code> (core/app, run by <code>mvn verify</code>; <code>make spring-wiring</code>)</td><td>Duplicate Spring bean names (scanned components, Spring Data repositories, unconditional <code>@Bean</code> methods, named with Spring's own generator) and JPA entity names across core modules (a class of failure that passes compile and unit tests but fails at Spring context start).</td><td>Blocking</td></tr>
+    <tr><td>Injectable constructor</td><td><code>InjectableConstructorTest</code> (core/app, run by <code>mvn verify</code>; <code>make spring-wiring</code>)</td><td>A Spring component with several constructors and none marked <code>@Autowired</code> ("No default constructor found" at startup), a <code>@ConfigurationProperties</code> class Boot cannot bind, and a no-arg constructor that silently shadows a <code>@Value</code> one.</td><td>Blocking</td></tr>
+    <tr><td>Namespace lint</td><td><code>scripts/ci/entity-name-lint.sh</code></td><td>Entity, table, bean and controller base-path collisions; allowlist in <code>entity-name-lint-allowlist.txt</code>.</td><td>Blocking</td></tr>
+    <tr><td>Expired test-skip check</td><td><code>scripts/ci/skip-expiry.sh</code></td><td>Any <code>test.fixme</code>, <code>@Disabled</code> or <code>.skip</code> that carries an <code>expires:YYYY-MM-DD</code> token fails once the date has passed; environment-gated skips are exempt.</td><td>Blocking</td></tr>
+    <tr><td>File-size ratchet</td><td><code>scripts/ci/check-file-size.sh</code></td><td>Hard cap of 700 lines: no new tracked source file over 665 lines, i.e. over the cap or within 5% of it (override <code>FILE_SIZE_CAP</code>, <code>FILE_SIZE_NEAR_CAP_PCT</code>); no file in <code>scripts/ci/file-size-baseline.txt</code> may grow, and a change may not add a path to the baseline (compared with the merge-base). Never raise a baseline to go green; <code>--update</code> regenerates it after a split.</td><td>Ratchet</td></tr>
+    <tr><td>Module-size ratchet</td><td><code>scripts/ci/check-module-size.sh</code></td><td>ADR-0023: at most 300 main <code>.java</code> files per <code>core/*</code> module (override <code>MODULE_SIZE_MAX</code>) and no classes directly in <code>com.agenticai.core.agents</code>; modules and the root package already over are listed in <code>scripts/ci/module-size-baseline.txt</code>, may not grow, and a change may not add an entry (compared with the merge-base). <code>--update</code> lowers the baseline after a split.</td><td>Ratchet</td></tr>
+    <tr><td>Secret scan</td><td><code>scripts/ci/secret-scan.sh</code></td><td>gitleaks over commits added since the base ref (a separate <code>Secret scan</code> job), not full history.</td><td>Blocking</td></tr>
+  </tbody>
+</table>
+<p>The pre-push hook runs the full static-gate suite when pushing to <code>main</code>, Flyway lint alone for other pushes that touch <code>core/app/src/main/resources/db/migration</code>, and gitleaks (when installed) on every push. <code>git push --no-verify</code> bypasses it.</p>
+
+<h2>Build and test jobs (<code>ci.yml</code>)</h2>
+<p>Path-filtered; the <code>CI OK</code> job aggregates them. Details are on <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a>.</p>
+<table>
+  <thead><tr><th>Job</th><th>Local equivalent</th><th>Mode</th></tr></thead>
+  <tbody>
+    <tr><td><code>core</code> (Maven verify, JDK 21, Postgres with pgvector + AGE)</td><td><code>make test-core</code></td><td>Blocking</td></tr>
+    <tr><td><code>web</code>, <code>web-admin</code> (lint, typecheck, test, build)</td><td><code>make test-web</code>, <code>make test-web-admin</code>, <code>make lint</code></td><td>Blocking</td></tr>
+    <tr><td><code>python</code> (ruff, sidecar pytest, code-intel harness)</td><td><code>make test-python</code>, <code>make lint</code></td><td>Blocking</td></tr>
+    <tr><td><code>python-extra</code> (app-builder, tool-sandbox, voice-agent)</td><td>&mdash;</td><td>Blocking</td></tr>
+    <tr><td><code>node-services</code> (mcp-stdio-runner, example MCP servers)</td><td>&mdash;</td><td>Blocking (http-gateway example advisory)</td></tr>
+    <tr><td><code>shellcheck</code>, <code>hadolint</code></td><td><code>make shellcheck</code></td><td>Blocking</td></tr>
+    <tr><td><code>compose</code> (<code>docker compose config</code>)</td><td><code>make compose-validate</code></td><td>Blocking</td></tr>
+    <tr><td><code>helm</code> (lint, template, kubeconform, render guards)</td><td><code>make helm-lint</code></td><td>Blocking</td></tr>
+  </tbody>
+</table>
+
+<h2>Other workflows</h2>
+<table>
+  <thead><tr><th>Workflow</th><th>What it runs</th><th>Trigger</th></tr></thead>
+  <tbody>
+    <tr><td><code>codeql.yml</code></td><td>CodeQL SAST for java-kotlin, javascript-typescript and python</td><td>Pull request, push, weekly, dispatch</td></tr>
+    <tr><td><code>scorecard.yml</code></td><td>OpenSSF Scorecard</td><td>Weekly, push, dispatch</td></tr>
+    <tr><td><code>e2e.yml</code></td><td>Playwright suite in <code>tests/e2e</code> against the compose stack built from the commit; see <a href="e2e-suites.html">E2E Suites</a></td><td>Nightly, dispatch</td></tr>
+  </tbody>
+</table>
+
+<h2>Running the gates yourself</h2>
+<pre><code>make gates            # all static gates
+make hooks            # install the pre-push hook
+make lint             # eslint + tsc, ruff, shellcheck
+make test             # core, web, web-admin, python
+make compose-validate
+make helm-lint</code></pre>
+<div class="callout callout-note">
+  <div class="callout-title">Not documented in the repository</div>
+  <p style="margin:4px 0 0">Required-status-check configuration on GitHub, current pass/fail status of any workflow, and coverage figures are not recorded in the repository.</p>
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>.github/workflows/static-gates.yml</code>, <code>ci.yml</code>, <code>codeql.yml</code>, <code>scorecard.yml</code>, <code>e2e.yml</code>.</li>
+  <li><code>scripts/ci/flyway-lint.sh</code>,<code>entity-name-lint.sh</code>, <code>skip-expiry.sh</code>, <code>check-file-size.sh</code>, <code>secret-scan.sh</code>.</li>
+  <li><code>Makefile</code>, <code>CONTRIBUTING.md</code>, <code>.githooks/pre-push</code>.</li>
+</ul>
+<p>Related: <a href="test-strategy.html">Test Strategy</a> &middot; <a href="e2e-suites.html">E2E Suites</a> &middot; <a href="../decisions/adr-0002-schema-per-tenant.html">ADR-0002</a></p>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

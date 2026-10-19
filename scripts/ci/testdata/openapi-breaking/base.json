@@ -1,0 +1,81 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "fixture", "version": "1" },
+  "paths": {
+    "/api/agents": {
+      "get": {
+        "operationId": "AgentController_list",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ACTIVE", "PAUSED", "ARCHIVED"] } }
+        ],
+        "responses": {
+          "200": { "description": "ok", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Agent" } } } } }
+        }
+      },
+      "post": {
+        "operationId": "AgentController_create",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AgentRequest" } } } },
+        "responses": {
+          "200": { "description": "ok", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Agent" } } } }
+        }
+      }
+    },
+    "/api/agents/{id}": {
+      "get": {
+        "operationId": "AgentController_get",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "ok", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Agent" } } } }
+        }
+      },
+      "delete": {
+        "operationId": "AgentController_delete",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "204": { "description": "gone" } }
+      }
+    },
+    "/api/agents/{id}/export": {
+      "get": {
+        "operationId": "AgentController_export",
+        "responses": {
+          "200": { "description": "ok", "content": { "application/json": { "schema": { "type": "object", "properties": { "yaml": { "type": "string" } } } } } }
+        }
+      }
+    },
+    "/api/legacy": {
+      "get": { "operationId": "LegacyController_get", "responses": { "200": { "description": "ok" } } }
+    },
+    "/api/notes": {
+      "post": {
+        "operationId": "NoteController_create",
+        "requestBody": { "required": false, "content": { "application/json": { "schema": { "type": "object", "properties": { "text": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "ok" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "temperature": { "type": "number" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["id"]
+      },
+      "AgentRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "model": { "type": "string" },
+          "maxTokens": { "type": "integer" },
+          "mode": { "type": "string", "enum": ["CHAT", "TASK"] }
+        },
+        "required": ["name"]
+      }
+    }
+  }
+}

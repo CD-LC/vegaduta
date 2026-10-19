@@ -1,0 +1,13 @@
+# `--local-ai=host`: core reaches an Ollama running on the Docker host.
+# Linux needs this explicit mapping (Docker Desktop provides the name itself).
+#
+# The base local-ai.yml registers the pool against the `ollama` compose
+# service; in host mode that service does not exist, so the bootstrap URL and
+# the SSRF allow-list are repointed at host.docker.internal here.
+services:
+  core:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${LOCAL_LLM_BASE_URL:-http://host.docker.internal:11434}
+      APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${LOCAL_LLM_ALLOWED_HOST:-host.docker.internal:11434}${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:+,${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS}}

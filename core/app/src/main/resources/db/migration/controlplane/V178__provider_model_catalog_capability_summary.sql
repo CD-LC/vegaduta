@@ -1,0 +1,22 @@
+-- capabilitySummary (direct feedback: the model picker showed bare model ids
+-- with zero capability info). Nullable, no default: ModelCapabilitySummaryGenerationService
+-- (core/chat) backfills it lazily, one cheap LLM call per catalog model,
+-- triggered by ProviderModelCatalogService's existing daily refresh job and
+-- the admin model-catalog/refresh-now endpoint - see that service's javadoc.
+-- Left null until generated on purpose: ProviderModelResponse.from() already
+-- covers a null/blank value with a deterministic template built from the
+-- other columns on this table (context_window, supports_*_input), so the
+-- API-facing field is never empty even for a row this migration just added
+-- the column to, or one V66/V67's replace-not-merge refresh re-inserts
+-- before generation catches up.
+--
+-- Lives in control_plane (not tenant) because provider_model_catalog itself
+-- does (see V66/V67) - model availability/capabilities are platform-wide,
+-- not tenant-scoped. V175/V176/V177 were already taken in the tenant
+-- migration directory (per-node workflow triggers, notifications, documentgen
+-- jobs) by the time this was written - Flyway's version numbering is a
+-- single shared namespace across both the controlplane and tenant
+-- directories (one Flyway bean scans both), so this migration takes the next
+-- free number, V178, rather than reusing any of them.
+ALTER TABLE control_plane.provider_model_catalog
+    ADD COLUMN capability_summary TEXT;

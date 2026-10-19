@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+#
+# pre-push: run the static gates locally, before anything leaves this machine.
+#
+# Server-side enforcement is the CI "Static gates" workflow plus branch
+# protection. This hook catches the same problems earlier, in particular a
+# duplicate Flyway version across the controlplane/ and tenant/ folders, which
+# is a hard boot failure for every core instance and is easy to create with a
+# local merge that never goes through a pull request.
+#
+# WHAT IT RUNS
+#   Pushing to main  -> the full static-gates suite (same scripts as CI)
+#   Anything else    -> Flyway lint only, and only when the pushed range
+#                       touches a migration. Keeps the common case fast.
+#   Every push       -> gitleaks over the new commits, when gitleaks is installed.
+#
+# These call the CI scripts; they are not second implementations.
+#
+# INSTALL
+#   make hooks            (or: git config core.hooksPath .githooks)
+#
+# BYPASS, when you genuinely must
+#   git push --no-verify
+
+set -uo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "${REPO_ROOT}" || exit 1
+
+ZERO="0000000000000000000000000000000000000000"
+MIGRATION_PATH="core/app/src/main/resources/db/migration"
+
+pushing_to_main=0
+touches_migration=0
+
+# stdin: <local ref> <local oid> <remote ref> <remote oid>
+while read -r _local_ref local_oid remote_ref remote_oid; do
+  [[ "${local_oid}" == "${ZERO}" ]] && continue          # branch deletion
+  [[ "${remote_ref}" == "refs/heads/main" ]] && pushing_to_main=1
+
+  if [[ "${remote_oid}" == "${ZERO}" ]]; then
+    base="$(git merge-base "${local_oid}" main 2>/dev/null || true)"
+    [[ -z "${base}" ]] && { touches_migration=1; continue; }
+    range="${base}..${local_oid}"
+  else
+    range="${remote_oid}..${local_oid}"
+  fi
+  if git diff --name-only "${range}" -- "${MIGRATION_PATH}" 2>/dev/null | grep -q .; then
+    touches_migration=1
+  fi
+done
+
+fail=0
+run_gate() {
+  local label="$1" script="$2"
+  [[ -f "${script}" ]] || { echo "pre-push: SKIP ${label} (${script} not present)"; return 0; }
+  if bash "${script}" >/dev/null 2>&1; then
+    echo "pre-push: OK   ${label}"
+  else
+    echo "pre-push: FAIL ${label}" >&2
+    echo "         re-run to see why:  bash ${script}" >&2
+    fail=1
+  fi
+}
+
+scan_secrets() {
+  if command -v gitleaks >/dev/null 2>&1; then
+    run_gate "Secret scan (new commits)" "scripts/ci/secret-scan.sh"
+  else
+    echo "pre-push: SKIP Secret scan (gitleaks not installed - see CONTRIBUTING.md)"
+  fi
+}
+
+if [[ "${pushing_to_main}" -eq 1 ]]; then
+  echo "pre-push: pushing to main - running the full static-gates suite"
+  run_gate "Flyway migration lint"      "scripts/ci/flyway-lint.sh"
+  run_gate "Entity/bean/path namespace" "scripts/ci/entity-name-lint.sh"
+  run_gate "Expired test-skip check"    "scripts/ci/skip-expiry.sh"
+  run_gate "File-size ratchet"          "scripts/ci/check-file-size.sh"
+  scan_secrets
+elif [[ "${touches_migration}" -eq 1 ]]; then
+  echo "pre-push: migrations changed - running Flyway lint"
+  run_gate "Flyway migration lint" "scripts/ci/flyway-lint.sh"
+  scan_secrets
+else
+  scan_secrets
+fi
+
+if [[ "${fail}" -ne 0 ]]; then
+  cat >&2 <<'MSG'
+
+pre-push: BLOCKED - a static gate failed.
+
+  If it was the Flyway lint: a duplicate version across controlplane/ and
+  tenant/ is not two migrations. It is a hard boot failure for every core
+  instance:
+
+      FlywayException: Found more than one migration with version N
+
+  Renumber the NEW file to the next version free across BOTH folders. Do not
+  renumber a migration that has already been applied anywhere - Flyway would
+  see it as unapplied and run it a second time.
+
+MSG
+  exit 1
+fi
+
+echo "pre-push: static gates OK"
+exit 0

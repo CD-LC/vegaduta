@@ -1,0 +1,7 @@
+{
+  "name": "@activepieces/piece-fake",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TEST FIXTURE ONLY - a hand-written stand-in with the same runtime shape as a createPiece() result. Not an Activepieces package and not distributed.",
+  "main": "./src/index.js"
+}

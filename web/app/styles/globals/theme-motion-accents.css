@@ -1,0 +1,220 @@
+/* Rebuild & Strict Audit Spec §5 / DESIGN-SYSTEM.md §3 - "page-to-page
+ * transitions must be very smooth." Native View Transitions API: content
+ * cross-fades+lifts, chrome (rail/topbar, see their view-transition-name
+ * rules above) stays put. Degrades to nothing on browsers without support
+ * (Motion's enter animation on .app-content, already wired in AppShell.js/
+ * AdminShell.js, is the fallback layer for those). */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.38s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+::view-transition-old(root) {
+  animation-name: ax-vt-out;
+}
+::view-transition-new(root) {
+  animation-name: ax-vt-in;
+}
+@keyframes ax-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes ax-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* Aurora depth layer (2026-08-12) - see the @layer components section for
+ * the full contract. Registered so the conic ring's angle interpolates as a
+ * real <angle> instead of snapping between keyframes. */
+@property --aurora-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes aurora-ring-spin {
+  to {
+    --aurora-angle: 360deg;
+  }
+}
+
+/* Sub-pixel-per-frame drift - transform only, alternating, deliberately
+ * slow enough to read as living light rather than movement. */
+@keyframes aurora-drift-a {
+  to {
+    transform: translate3d(-6vw, 8vh, 0) scale(1.12);
+  }
+}
+
+@keyframes aurora-drift-b {
+  to {
+    transform: translate3d(7vw, -6vh, 0) scale(1.08);
+  }
+}
+
+/* AXON landing page animations (from design_handoff_axon) */
+@keyframes axPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+@keyframes axFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes axMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes axReveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root[data-accent="emerald"] {
+  --accent-50: #ecfdf5;
+  --accent-100: #d1fae5;
+  --accent-200: #a7f3d0;
+  --accent-400: #34d399;
+  --accent-500: #10b981;
+  --accent-600: #059669;
+  --accent-700: #047857;
+  --accent-gradient: linear-gradient(135deg, #10b981 0%, #14b8a6 55%, #047857 100%);
+  --accent-glow: rgb(16 185 129 / 35%);
+}
+
+:root[data-accent="rose"] {
+  --accent-50: #fff1f2;
+  --accent-100: #ffe4e6;
+  --accent-200: #fecdd3;
+  --accent-400: #fb7185;
+  --accent-500: #f43f5e;
+  --accent-600: #e11d48;
+  --accent-700: #be123c;
+  --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 55%, #be123c 100%);
+  --accent-glow: rgb(244 63 94 / 35%);
+}
+
+:root[data-accent="amber"] {
+  --accent-50: #fffbeb;
+  --accent-100: #fef3c7;
+  --accent-200: #fde68a;
+  --accent-400: #fbbf24;
+  --accent-500: #f59e0b;
+  --accent-600: #d97706;
+  --accent-700: #b45309;
+  --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #f97316 55%, #b45309 100%);
+  --accent-glow: rgb(245 158 11 / 35%);
+}
+
+:root[data-accent="sky"] {
+  --accent-50: #f0f9ff;
+  --accent-100: #e0f2fe;
+  --accent-200: #bae6fd;
+  --accent-400: #38bdf8;
+  --accent-500: #0ea5e9;
+  --accent-600: #0284c7;
+  --accent-700: #0369a1;
+  --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #6366f1 55%, #0369a1 100%);
+  --accent-glow: rgb(14 165 233 / 35%);
+}
+
+:root[data-accent="slate"] {
+  --accent-50: #f8fafc;
+  --accent-100: #f1f5f9;
+  --accent-200: #e2e8f0;
+  --accent-400: #94a3b8;
+  --accent-500: #64748b;
+  --accent-600: #475569;
+  --accent-700: #334155;
+  --accent-gradient: linear-gradient(135deg, #475569 0%, #334155 55%, #1e293b 100%);
+  --accent-glow: rgb(71 85 105 / 35%);
+}
+
+/* Dark-mode overrides for the five non-default theme-customizer palettes
+ * above - direct bug report: a non-indigo accent (e.g. Rose) combined with
+ * dark mode made "selected" plan-cards render invisible text. Root cause:
+ * each :root[data-accent="X"] block above only ever defined ONE set of
+ * --accent-50/100/200/glow values - light-mode pastels (e.g. rose's
+ * --accent-50: #fff1f2, near-white) - and those unconditionally overrode
+ * the dark-mode :root[data-mode="dark"] block's own translucent
+ * --accent-50 (rgba(...,0.08), meant to stay dark-appropriate). .plan-card-
+ * selected then painted a near-white background under near-white
+ * (--text-primary) dark-mode text - invisible on invisible.
+ *
+ * Fix: a same-hue translucent set per palette, mirroring the pattern the
+ * default indigo dark-mode block above already uses (rgba of the palette's
+ * own --accent-500, alpha-scaled 0.08/0.14/0.22/0.35) - so every accent
+ * choice gets a real dark-mode-appropriate tint instead of a light pastel
+ * leaking through. Two-attribute selector ([data-mode="dark"][data-accent=
+ * "X"]) outranks the single-attribute light-mode block above regardless of
+ * source order, so this doesn't depend on being declared after it - it's
+ * kept after only for readability, next to the palette it overrides. */
+:root[data-mode="dark"][data-accent="emerald"] {
+  --accent-50: rgba(16, 185, 129, 0.08);
+  --accent-100: rgba(16, 185, 129, 0.14);
+  --accent-200: rgba(16, 185, 129, 0.22);
+  --accent-glow: rgba(16, 185, 129, 0.35);
+}
+
+:root[data-mode="dark"][data-accent="rose"] {
+  --accent-50: rgba(244, 63, 94, 0.08);
+  --accent-100: rgba(244, 63, 94, 0.14);
+  --accent-200: rgba(244, 63, 94, 0.22);
+  --accent-glow: rgba(244, 63, 94, 0.35);
+}
+
+:root[data-mode="dark"][data-accent="amber"] {
+  --accent-50: rgba(245, 158, 11, 0.08);
+  --accent-100: rgba(245, 158, 11, 0.14);
+  --accent-200: rgba(245, 158, 11, 0.22);
+  --accent-glow: rgba(245, 158, 11, 0.35);
+}
+
+:root[data-mode="dark"][data-accent="sky"] {
+  --accent-50: rgba(14, 165, 233, 0.08);
+  --accent-100: rgba(14, 165, 233, 0.14);
+  --accent-200: rgba(14, 165, 233, 0.22);
+  --accent-glow: rgba(14, 165, 233, 0.35);
+}
+
+:root[data-mode="dark"][data-accent="slate"] {
+  --accent-50: rgba(100, 116, 139, 0.1);
+  --accent-100: rgba(100, 116, 139, 0.16);
+  --accent-200: rgba(100, 116, 139, 0.26);
+  --accent-glow: rgba(100, 116, 139, 0.35);
+}

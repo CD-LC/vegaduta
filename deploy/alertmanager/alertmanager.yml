@@ -1,0 +1,153 @@
+# Alerting infrastructure pass (2026-07). Before this file existed, this
+# platform had zero Alertmanagers deployed anywhere - Prometheus's
+# rule_files: block was empty (so nothing ever fired) AND even a fired
+# alert would have had nowhere to go (no `alerting:` target configured,
+# see ../prometheus/prometheus.yml). This closes both gaps: real rules now
+# live in ../prometheus/rules/vegaduta-alerts.yml, and this file is what
+# receives them once they fire and decides who/what gets told.
+#
+# Mounted read-only into the alertmanager container at
+# /etc/alertmanager/alertmanager.yml (see docker-compose.yml's alertmanager
+# service). IMPORTANT, unlike docker-compose.yml/deploy/.env: Alertmanager's
+# own config format does NOT support ${VAR}-style environment variable
+# interpolation - every value below is a literal string Alertmanager parses
+# as-is. Option (b) from this header's original follow-up note is now
+# IMPLEMENTED (reliability pass, 2026-07-29): docker-compose.yml wraps the
+# alertmanager container's entrypoint with a sed pass that substitutes the
+# literal `${PLATFORM_ALERTS_WEBHOOK_SECRET}` placeholder below from the
+# container's environment into a templated copy at /tmp/alertmanager.yml,
+# and starts Alertmanager against THAT copy - this mounted file itself is
+# never parsed by Alertmanager directly anymore and stays secret-free.
+# Consequence: `${...}` below is a sed placeholder for the compose wrapper,
+# NOT native Alertmanager interpolation - if you ever run Alertmanager
+# against this file directly (outside compose), the token is the literal
+# placeholder string and every delivery will 401.
+
+global:
+  # How long a resolved alert is still considered "resolved" for
+  # deduplication purposes before Alertmanager forgets about it entirely.
+  resolve_timeout: 5m
+
+route:
+  # Every alert with no more specific route below falls through to this
+  # receiver - the generic webhook. group_by collapses multiple alerts that
+  # share the same alertname into one notification instead of one message
+  # per label combination (e.g. one "HighLlmCallErrorRate" notification
+  # covering every affected tenant/provider pair, not N separate pages).
+  receiver: platform-webhook
+  group_by: ['alertname', 'severity']
+  # Wait this long after the first alert in a group fires before sending the
+  # first notification, in case more alerts join the same group right away.
+  group_wait: 30s
+  # Wait this long before sending a notification about new alerts added to
+  # an already-notified group.
+  group_interval: 5m
+  # Re-send a still-firing alert this often even with nothing new - the
+  # "someone should still be reminded this is unresolved" cadence. 4h is a
+  # deliberate middle ground for a single-tenant/early-stage deployment
+  # (frequent enough that a real page doesn't quietly age off screen tonight,
+  # rare enough not to become noise); tighten for `critical`-severity routes
+  # once a real on-call rotation exists (see the commented `routes:` example
+  # below).
+  repeat_interval: 4h
+
+  # Example of routing `critical` severity to its own, more aggressive
+  # cadence once a real paging channel (PagerDuty, see receivers below)
+  # is wired in - left commented out since there is no real PagerDuty
+  # integration key in this repo today (see receivers: below).
+  # routes:
+  #   - matchers:
+  #       - severity = "critical"
+  #     receiver: platform-pagerduty
+  #     repeat_interval: 1h
+
+receivers:
+  # The ONE receiver wired to something real today: PlatformAlertWebhookController
+  # (core/platform - POST /webhook/alerts/alertmanager), which persists every
+  # alert as a control_plane.platform_alert_webhook_event row and logs it
+  # (WARN for firing, INFO for resolved) - see that controller/service's
+  # javadoc. This makes alerting EXIST and FIRE CORRECTLY end-to-end; it does
+  # NOT by itself page a human being (nobody is watching core's logs or this
+  # table 24/7) - that needs a real Slack/PagerDuty/email receiver added
+  # below, which needs real credentials nobody has supplied to this repo yet.
+  - name: platform-webhook
+    webhook_configs:
+      - url: http://core:8080/webhook/alerts/alertmanager
+        send_resolved: true
+        http_config:
+          authorization:
+            type: Bearer
+            # Substituted at container start from PLATFORM_ALERTS_WEBHOOK_SECRET
+            # in deploy/.env by the compose entrypoint wrapper (see this
+            # file's header + docker-compose.yml's alertmanager service) -
+            # NOT native Alertmanager interpolation, which doesn't exist.
+            # Generate the value with `openssl rand -base64 32`; core reads
+            # the same env var into app.platform.alerts.webhook-secret
+            # (application.yml), and PlatformAlertWebhookController fails
+            # closed (401/503) until both sides carry the same real value.
+            credentials: "${PLATFORM_ALERTS_WEBHOOK_SECRET}"
+    # OPTIONAL email fan-out (ops hardening 2026-08-07) - every `#EMAIL#`
+    # line below is a plain comment to Alertmanager's parser until the
+    # compose entrypoint wrapper strips the tag, which it does ONLY when
+    # BOTH ALERT_EMAIL_TO and ALERT_SMTP_HOST are set in deploy/.env (see
+    # docker-compose.yml's alertmanager service). With either unset, the
+    # templated config Alertmanager actually parses is semantically
+    # identical to before this block existed: webhook-only, no routing or
+    # grouping change. Adding email_configs to THIS receiver (rather than a
+    # second receiver + sub-route) is deliberate - one receiver, two
+    # channels, so email inherits exactly the webhook's grouping/repeat
+    # cadence instead of maintaining a parallel routing tree. The `${...}`
+    # tokens are sed placeholders, same contract as the credentials line
+    # above - NOT native interpolation. An empty ALERT_SMTP_USER after
+    # substitution means "no SMTP auth" (valid for unauthenticated relays);
+    # ALERT_SMTP_PORT defaults to 587 and ALERT_SMTP_FROM to
+    # alertmanager@localhost in the wrapper, so only TO + HOST are
+    # mandatory to turn this on.
+    #EMAIL#email_configs:
+    #EMAIL#  - to: "${ALERT_EMAIL_TO}"
+    #EMAIL#    from: "${ALERT_SMTP_FROM}"
+    #EMAIL#    smarthost: "${ALERT_SMTP_HOST}:${ALERT_SMTP_PORT}"
+    #EMAIL#    auth_username: "${ALERT_SMTP_USER}"
+    #EMAIL#    auth_password: "${ALERT_SMTP_PASSWORD}"
+    #EMAIL#    send_resolved: true
+
+  # --- Real notification channels: NOT configured, no credentials exist in
+  # this repo. Uncomment and fill in once an operator supplies them (and add
+  # the matching `routes:` entry above, or change route.receiver, to actually
+  # use one of these instead of/alongside platform-webhook). This is the
+  # single biggest gap between "alerting exists and fires correctly" (what
+  # this pass delivers) and "someone actually gets paged" (what still needs
+  # a human to do) - see this feature's rollout report for the full list.
+  #
+  # - name: platform-slack
+  #   slack_configs:
+  #     - api_url: "https://hooks.slack.com/services/REPLACE/WITH/REAL_WEBHOOK"
+  #       channel: "#vegaduta-alerts"
+  #       send_resolved: true
+  #       title: '{{ .CommonLabels.alertname }}'
+  #       text: '{{ .CommonAnnotations.summary }}'
+  #
+  # - name: platform-pagerduty
+  #   pagerduty_configs:
+  #     - service_key: "REPLACE_WITH_REAL_PAGERDUTY_INTEGRATION_KEY"
+  #       send_resolved: true
+  #
+  # (The old `platform-email` stub that sat here is gone - email is no
+  # longer a fill-in-by-hand example but a real, env-driven channel: set
+  # ALERT_EMAIL_TO + ALERT_SMTP_* in deploy/.env and the `#EMAIL#` lines on
+  # platform-webhook above activate. Slack/PagerDuty remain manual stubs.)
+
+# Mutes a lower-severity alert while a related higher-severity one for the
+# same alertname is already firing - e.g. don't also notify "warning" HTTP
+# 5xx-rate noise while "critical" core-down is already paging for the same
+# root cause. Not yet exercised by any two rules in vegaduta-alerts.yml
+# today (most alerts there are independent failure modes, not a
+# warning/critical pair on the same signal) - kept here as real, working
+# config rather than a stub, ready for the moment a rule pair like that
+# exists.
+inhibit_rules:
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ['alertname']

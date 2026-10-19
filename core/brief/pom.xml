@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>brief</artifactId>
+  <name>brief</name>
+  <description>
+    Earned Autonomy foundation: the Brief - one declarative manifest (docs/plans/brief-schema.v1.json)
+    for a whole solution (agents, workflows, tools, MCP servers, knowledge, secrets, channels, eval set,
+    narrative, trust). This module plans a Brief from a prompt (BriefPlannerService), validates it
+    (BriefValidator), reports what is missing before anything is created (BriefReadinessService), and
+    persists it with versions (brief, brief_version, brief_apply_step, brief_binding, brief_trust_event
+    in the tenant schema, migration V341). Apply, tune, rehearsal, trust and the proof ledger are later
+    layers on top of these tables. Depends on: workflow (graph generator + OrchestratorService#validate),
+    agents (AssistService, AgentService), secrets, mcp, knowledge, omnichannel, security, audit.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Briefs use AssistService and experiments in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Envoy tool ports use the custom-code and OpenAPI tool services (ADR-0023). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>secrets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>mcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>omnichannel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Apply engine + trust ladder: approval policy, procedures, eval datasets/gate, provider resolution. -->
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>quality</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <!-- LlmJson delegates to chat's StructuredOutput helper (shared model-reply
+         JSON extraction). Already on the classpath transitively via agents;
+         declared directly per the explicit-declare-what-you-import convention. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <!-- BriefRateLimiter - the platform's standard Redis INCR+EXPIRE limiter (same as core/templates). -->
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

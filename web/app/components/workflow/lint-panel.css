@@ -1,0 +1,296 @@
+/* Lint side panel (opened from the lint chip). Theme tokens only, with the
+ * same fallback chains as workflow-lint.css so light and dark both read.
+ * Severity is carried by icon + word + group heading, never colour alone. */
+.wf-lintp {
+  --wf-lintp-bg: var(--ax-panel, var(--surface-card, var(--hud-panel)));
+  --wf-lintp-ink: var(--ax-text, var(--text-primary));
+  --wf-lintp-dim: var(--ax-dim, var(--text-muted));
+  --wf-lintp-line: var(--ax-border, var(--surface-border-strong));
+  --wf-lintp-focus: var(--ax-accent, var(--ax-cyan, var(--hud-cyan)));
+  --wf-lintp-err: var(--ax-red, var(--hud-magenta));
+  --wf-lintp-warn: var(--ax-amber, var(--hud-warn));
+  --wf-lintp-info: var(--ax-sky, var(--ax-cyan, var(--hud-cyan)));
+
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(70vh, 520px);
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid var(--wf-lintp-line);
+  background: var(--wf-lintp-bg);
+  color: var(--wf-lintp-ink);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--wf-lintp-ink) 18%, transparent);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.wf-lintp:focus {
+  outline: none;
+}
+
+.wf-lintp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 6px 12px;
+}
+
+.wf-lintp-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wf-lintp-title strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.wf-lintp-sum {
+  color: var(--wf-lintp-dim);
+  font-size: 11px;
+}
+
+.wf-lintp-icon,
+.wf-lintp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--wf-lintp-line);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: none;
+  font: inherit;
+}
+
+.wf-lintp-icon {
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-color: transparent;
+  border-radius: 8px;
+}
+
+.wf-lintp-icon:hover,
+.wf-lintp-btn:hover {
+  background: color-mix(in srgb, var(--wf-lintp-ink) 8%, transparent);
+}
+
+.wf-lintp-status:empty {
+  display: none;
+}
+
+.wf-lintp-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 12px 6px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--wf-lintp-ink) 6%, transparent);
+  color: var(--wf-lintp-dim);
+  font-size: 11px;
+}
+
+.wf-lintp-spin {
+  animation: wf-lintp-spin 0.9s linear infinite;
+}
+
+@keyframes wf-lintp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wf-lintp-empty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 12px 12px;
+  color: var(--wf-lintp-dim);
+}
+
+.wf-lintp-empty svg {
+  color: var(--ax-green, var(--hud-ok));
+}
+
+.wf-lintp-body {
+  overflow: auto;
+  padding: 0 6px 8px;
+  overscroll-behavior: contain;
+}
+
+.wf-lintp-group {
+  --wf-lintp-c: var(--wf-lintp-warn);
+  margin-top: 4px;
+}
+
+.wf-lintp-group[data-severity="error"] {
+  --wf-lintp-c: var(--wf-lintp-err);
+}
+
+.wf-lintp-group[data-severity="info"] {
+  --wf-lintp-c: var(--wf-lintp-info);
+}
+
+.wf-lintp-gh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 6px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wf-lintp-dim);
+}
+
+.wf-lintp-gh svg {
+  color: var(--wf-lintp-c);
+}
+
+.wf-lintp-count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--wf-lintp-c) 16%, transparent);
+  color: var(--wf-lintp-ink);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.wf-lintp-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wf-lintp-row {
+  padding: 7px 8px;
+  border-radius: 8px;
+  border-left: 2px solid var(--wf-lintp-c);
+  margin: 2px 0;
+}
+
+.wf-lintp-row:hover {
+  background: color-mix(in srgb, var(--wf-lintp-ink) 5%, transparent);
+}
+
+.wf-lintp-row:focus-visible,
+.wf-lintp-icon:focus-visible,
+.wf-lintp-btn:focus-visible,
+.wf-lintp-input:focus-visible {
+  outline: 2px solid var(--wf-lintp-focus);
+  outline-offset: 1px;
+}
+
+.wf-lintp-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wf-lintp-sev-ic {
+  flex: none;
+  margin-top: 2px;
+  color: var(--wf-lintp-c);
+}
+
+.wf-lintp-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wf-lintp-where {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wf-lintp-msg {
+  color: var(--wf-lintp-dim);
+  overflow-wrap: anywhere;
+}
+
+.wf-lintp-actions,
+.wf-lintp-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0 21px;
+}
+
+.wf-lintp-btn {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.wf-lintp-btn[data-primary="true"] {
+  border-color: color-mix(in srgb, var(--wf-lintp-c, var(--wf-lintp-focus)) 55%, var(--wf-lintp-line));
+  background: color-mix(in srgb, var(--wf-lintp-c, var(--wf-lintp-focus)) 12%, transparent);
+}
+
+.wf-lintp-input {
+  flex: 1 1 120px;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--wf-lintp-line);
+  background: var(--ax-bg, var(--wf-lintp-bg));
+  color: inherit;
+  font: inherit;
+}
+
+.wf-lintp-input[aria-invalid="true"] {
+  border-color: var(--wf-lintp-err);
+}
+
+.wf-lintp-err {
+  flex-basis: 100%;
+  /* Hue pulled toward the ink: raw --ax-red is ~4.2:1 on white at 11px. */
+  color: color-mix(in srgb, var(--wf-lintp-err) 68%, var(--wf-lintp-ink));
+  font-size: 11px;
+}
+
+.wf-lintp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 480px) {
+  .wf-lintp {
+    width: calc(100vw - 32px);
+    max-height: 60vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-lintp-spin {
+    animation: none;
+  }
+}
+
+/* Lint chip tone when only suggestions (server "info") remain. */
+.wf-lint-chip[data-severity="info"] {
+  --wf-lint-c: var(--ax-cyan, var(--hud-cyan));
+}

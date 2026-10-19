@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RFC-0000 Template — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="rfc" data-page="rfc-0000-template.html" data-doc="VD-RFC-0000" data-status="unverified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">RFC Process</a><span class="sep">/</span>RFC-0000 Template</div>
+<div class="doc-meta" data-auto></div>
+<h1>RFC-NNNN: [Short title of the proposal]</h1>
+
+<div class="callout callout-note">
+  <div class="callout-title">How to use this page</div>
+  Copy this file to <code>rfc-NNNN-short-slug.html</code>. In the copy, update <code>&lt;title&gt;</code>, the breadcrumb,
+  the <code>&lt;h1&gt;</code>, and the <code>&lt;body&gt;</code> attributes <code>data-doc</code> (<code>VD-RFC-NNNN</code>),
+  <code>data-page</code>, <code>data-status</code> and <code>data-updated</code>. Delete every instruction in square
+  brackets and this callout. Steps and lifecycle are on the <a href="index.html">RFC Index &amp; Process</a> page.
+  This page is a template: it makes no claims about the platform.
+</div>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-draft">draft</span> [draft | open | accepted | rejected | withdrawn | implemented]</dd>
+  <dt>Author(s)</dt><dd>[Name or GitHub handle]</dd>
+  <dt>Owner of affected area</dt><dd>[Who must approve. Use the owner from <code>.github/CODEOWNERS</code>]</dd>
+  <dt>Opened</dt><dd>[YYYY-MM-DD]</dd>
+  <dt>Review deadline</dt><dd>[YYYY-MM-DD]</dd>
+  <dt>Decision</dt><dd>[Date, decider, and link to the ADR if one results. "Pending" until then]</dd>
+  <dt>Scopes touched</dt><dd>[Folders or services. Link the tracking issue]</dd>
+</dl>
+
+<h2>Summary</h2>
+<p>[One paragraph. What is proposed and what changes for a user or operator when it ships. A reader who stops here should still know whether this affects them.]</p>
+
+<h2>Motivation</h2>
+<p>[The problem, in observable terms. Include incident references, log or metric evidence, and user impact. Cite repo paths or docs for every claim about how the system works today; mark anything you have not verified as unverified.]</p>
+<ul>
+  <li>[Goal 1]</li>
+  <li>[Goal 2]</li>
+  <li>[Explicit non-goals: what this proposal deliberately does not try to solve]</li>
+</ul>
+
+<h2>Detailed design</h2>
+<p>[Enough detail that another engineer could implement it and a reviewer could find the flaws.]</p>
+<h3>Current behaviour</h3>
+<p>[What the code or infrastructure does now, with repo-relative paths.]</p>
+<h3>Proposed behaviour</h3>
+<p>[Components, data model or schema changes (note that Flyway versions share one namespace across controlplane and tenant), API contracts, configuration, and failure modes.]</p>
+<pre class="mermaid">
+flowchart LR
+  A[Current component] --> B[Proposed component]
+</pre>
+<h3>Environment and configuration impact</h3>
+<p>[Which environments (production, staging, local) are affected. New env vars, secrets (names only, never values), and whether any value is baked at build time.]</p>
+
+<h2>Alternatives</h2>
+<table>
+  <thead><tr><th>Option</th><th>Pros</th><th>Cons</th><th>Why not chosen</th></tr></thead>
+  <tbody>
+    <tr><td>Do nothing</td><td>[ ]</td><td>[ ]</td><td>[ ]</td></tr>
+    <tr><td>[Alternative A]</td><td>[ ]</td><td>[ ]</td><td>[ ]</td></tr>
+  </tbody>
+</table>
+
+<h2>Risks</h2>
+<table>
+  <thead><tr><th>Risk</th><th>Likelihood / impact</th><th>Mitigation</th></tr></thead>
+  <tbody>
+    <tr><td>[Security, data loss, tenant isolation, cost, latency, migration]</td><td>[ ]</td><td>[ ]</td></tr>
+  </tbody>
+</table>
+
+<h2>Rollout</h2>
+<ol>
+  <li>[Build and test steps, and how each is verified. Keep "compiled", "tested", "deployed to staging" and "deployed to production" separate.]</li>
+  <li>[Order of deployment across services and any migration preflight.]</li>
+  <li>[Feature flag or default-off strategy.]</li>
+  <li><strong>Rollback:</strong> [How to undo it without stopping or power-cycling production.]</li>
+</ol>
+
+<h2>Open questions</h2>
+<ul>
+  <li>[Question, and who is expected to answer it]</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li>[Repo-relative path or document supporting each factual claim above]</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

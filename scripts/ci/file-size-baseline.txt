@@ -1,0 +1,13 @@
+# File-size baseline for scripts/ci/check-file-size.sh (hard cap 700 lines;
+# files above 665, i.e. within 5% of the cap, fail unless listed here).
+#
+# This list must ONLY SHRINK. Never add a path or raise a count to make a build
+# pass: split the file instead. The gate fails when a path appears here that
+# was not here at the merge-base with the base branch.
+#
+# Regenerated 2026-10-16 when the cap dropped from 1000 to 700 lines. About 176
+# of these entries are being split in parallel right now; as each lands, run
+# `sh scripts/ci/check-file-size.sh --update` to lower or drop its entry.
+#
+# Format: "<path> <max lines>". The "# cap:" line below is written by --update.
+# cap: 700 near-cap-pct: 5 threshold: 665

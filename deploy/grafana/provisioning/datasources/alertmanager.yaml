@@ -1,0 +1,27 @@
+# Alerting infrastructure pass (2026-07) - Grafana's own datasource
+# auto-provisioning mechanism (same posture as the sibling loki.yaml/
+# prometheus.yaml here), wiring up the new alertmanager compose service
+# (docker-compose.yml) as a queryable Grafana datasource. This is what lets
+# vegaduta-alerts-overview.json's native "Alert list" panel show real,
+# currently-firing alerts straight from Alertmanager instead of Grafana's
+# own (separate, unused here - this platform's rules live in Prometheus, not
+# Grafana-managed alerting) unified alerting store.
+apiVersion: 1
+
+datasources:
+  - name: Alertmanager
+    # Stable handle, same "fixed uid so provisioned dashboards can reference
+    # it independent of Grafana's own generated ids" reasoning loki.yaml/
+    # prometheus.yaml already documented for their own uids.
+    uid: alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    isDefault: false
+    editable: true
+    jsonData:
+      # This stack runs prom/alertmanager (see docker-compose.yml), not
+      # Grafana Mimir's Alertmanager - "prometheus" is the correct
+      # implementation value for that.
+      implementation: prometheus
+      handleGrafanaManagedAlerts: false

@@ -1,0 +1,495 @@
+/* Auth pages (login / signup / signup-complete) layout + styling for the
+   paper-and-ink theme. Owned by the auth-simplify pass. Imported after
+   console.css, so it wins ties.
+
+   2026-09-24 - one centred column instead of the 50/50 brand-panel + form
+   grid. Maintainer feedback (production /signup at 1800px): "so much gap in register page,
+   research and simplify" / "content width is not working in auth pages".
+   Reference shape (Linear, Vercel, Stripe, Notion, Resend sign-up pages):
+   a single ~28rem column, brand mark + short title at the top, the form in
+   one card with one primary pill CTA, a one-line legal/trust note and a
+   "have an account? sign in" switch under the card. Everything here is
+   scoped to .vd-auth so nothing leaks into the console or the landing.
+
+   Layers it sits on: globals.css .auth-card (components layer: p-8, max-w-md,
+   fade-in-up) and tokens.css section 9 (glass card, pill fields, pill
+   buttons) + section 17b (.auth-main max-width 75rem, .auth-card 32rem).
+   This file is unlayered and later, so the geometry below wins; the glass
+   recipe and the pill fields are kept as they are. */
+
+/* ---- 1. Page: flat column, no side panel ---------------------------------- */
+.auth-main.vd-auth {
+  position: relative; /* anchors the phone-width controls (section 5) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  /* top gutter clears the fixed language/theme controls */
+  padding: 4.5rem 1rem 2rem;
+  overflow-x: clip;
+}
+
+/* auto block margins centre the column on tall viewports and, unlike
+   justify-content:center, collapse to 0 when the card is taller than the
+   viewport - so the top of a long form is never pushed off-screen. */
+.vd-auth__col {
+  width: 100%;
+  max-width: 28rem;
+  margin-block: auto;
+}
+
+/* Fixed top-right cluster: language + theme. Both used to be positioned
+   independently (one fixed, one absolute) and overlapped below md. */
+.vd-auth__controls {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---- 2. Strip: brand lockup + title + one sentence ------------------------- */
+.vd-auth__strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.vd-auth__brand {
+  display: inline-flex;
+  text-decoration: none !important;
+  margin-bottom: 1.25rem;
+}
+
+.vd-auth__eyebrow {
+  font-family: var(--font-code);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  margin: 0 0 0.5rem;
+}
+
+.vd-auth__title {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  color: var(--text-primary);
+}
+
+.vd-auth__accent {
+  color: var(--accent-text);
+}
+
+.vd-auth__subtitle {
+  margin: 0.5rem 0 0;
+  max-width: 26rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* Sign in / Sign up tabs: a fixed-width segmented pill under the title
+   (it used to sit inside the card, above the step indicator). */
+.vd-auth__switcher {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.vd-auth__switcher [role="tablist"] {
+  width: 14rem;
+  background: rgba(19, 19, 24, 0.05);
+  border-color: transparent;
+}
+
+:root[data-mode="dark"] .vd-auth__switcher [role="tablist"] {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ---- 3. Card ----------------------------------------------------------------- */
+.vd-auth .auth-card.vd-auth__card {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1.5rem;
+  gap: 1.25rem;
+}
+
+/* The step indicator wraps on narrow phones instead of pushing the card
+   past the viewport (three labels + two connectors is ~420px unwrapped). */
+.vd-auth__steps {
+  flex-wrap: wrap;
+  row-gap: 0.375rem;
+}
+
+.vd-auth__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vd-auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.vd-auth__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+}
+
+.vd-auth__field {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.vd-auth__field [data-slot="label"] {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 30rem) {
+  .vd-auth__field--half {
+    grid-column: span 1;
+  }
+}
+
+/* Three short check lines (the old brand-panel checklist) */
+.vd-auth__points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vd-auth__points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.vd-auth__points svg {
+  margin-top: 0.125rem;
+  color: var(--accent-text);
+}
+
+/* One-line summary / legal-style notes */
+.vd-auth__summary {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.vd-auth__summary--left {
+  text-align: left;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.vd-auth__summary-hl {
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.vd-auth__summary a {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+.vd-auth__hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* "What's included" disclosure: the long out-of-the-box list, the 24h
+   edit-window note and the three proofs live here, closed by default. */
+.vd-auth__more {
+  border-radius: 14px;
+  background: rgba(19, 19, 24, 0.035);
+  border: 1px solid rgba(19, 19, 24, 0.06);
+}
+
+:root[data-mode="dark"] .vd-auth__more {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.vd-auth__more summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
+  font-family: var(--font-code);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-radius: 14px;
+}
+
+.vd-auth__more summary::-webkit-details-marker {
+  display: none;
+}
+
+.vd-auth__more summary svg {
+  transition: transform 160ms ease;
+  color: var(--text-muted);
+}
+
+.vd-auth__more[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.vd-auth__more summary:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: -2px;
+}
+
+.vd-auth__more-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.875rem 0.875rem;
+}
+
+.vd-auth__label {
+  margin: 0;
+  font-family: var(--font-code);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vd-auth__note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.vd-auth__proofs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vd-auth__proofs li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.vd-auth__proofs li strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.vd-auth__proofs svg {
+  margin-top: 0.1875rem;
+  color: var(--accent-text);
+}
+
+/* Consent: two plain checkbox rows */
+.vd-auth__consent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.125rem;
+}
+
+.vd-auth__consent label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.vd-auth__consent--muted {
+  color: var(--text-muted) !important;
+}
+
+.vd-auth__consent input[type="checkbox"] {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1875rem;
+  accent-color: var(--accent-600);
+}
+
+:root[data-mode="dark"] .vd-auth__consent input[type="checkbox"] {
+  accent-color: var(--accent-500);
+}
+
+.vd-auth__consent a {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+.vd-auth__consent a:hover {
+  text-decoration: underline;
+}
+
+/* Status notice (workspace provisioned / payment next) */
+.vd-auth__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--accent-500) 9%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent-500) 24%, transparent);
+}
+
+.vd-auth__notice svg {
+  margin-top: 0.1875rem;
+  color: var(--accent-text);
+}
+
+.vd-auth__notice--success {
+  background: color-mix(in oklab, #0f7a4d 9%, transparent);
+  border-color: color-mix(in oklab, #0f7a4d 26%, transparent);
+}
+
+.vd-auth__notice--success svg {
+  color: #0f7a4d;
+}
+
+:root[data-mode="dark"] .vd-auth__notice--success svg {
+  color: #4ade80;
+}
+
+/* ---- 4. Under the card: switch line + trust line --------------------------- */
+.vd-auth__switch {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.vd-auth__switch a,
+.vd-auth__switch button {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--accent-text);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.vd-auth__switch a:hover,
+.vd-auth__switch button:hover {
+  text-decoration: underline;
+  background: none;
+}
+
+.vd-auth__switch button:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.vd-auth__trust {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.vd-auth__trust svg {
+  flex: none;
+  color: var(--accent-text);
+}
+
+/* ---- 5. Phones ------------------------------------------------------------- */
+@media (max-width: 40rem) {
+  .auth-main.vd-auth {
+    padding: 4.25rem 1rem 1.5rem;
+  }
+
+  /* In flow (absolute in <main>) rather than fixed: on a phone the long
+     details form scrolls under the controls, and a fixed pair would sit on
+     top of the brand lockup / form while it does. */
+  .vd-auth__controls {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .vd-auth .auth-card.vd-auth__card {
+    padding: 1.25rem;
+  }
+
+  .vd-auth__title {
+    font-size: 1.5rem;
+  }
+
+  .vd-auth__subtitle {
+    font-size: 0.875rem;
+  }
+
+  /* three step labels without connectors fit a 343px card */
+  .vd-auth__steps .h-px {
+    display: none;
+  }
+}

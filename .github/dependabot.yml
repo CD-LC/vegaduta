@@ -1,0 +1,294 @@
+# Weekly, grouped dependency updates. Minor and patch updates arrive as one PR
+# per ecosystem group; major updates stay separate so each gets a real review.
+#
+# Cooldown: a new release is only proposed once it has been public for a few
+# days (7 for minor/patch, 14 for majors), which keeps freshly published -
+# and occasionally freshly compromised or yanked - versions out. Security
+# updates are NOT subject to cooldown, grouping or the PR limits: Dependabot
+# opens them as soon as an advisory is published.
+#
+# Labels used below must exist in the repository (docs/maintainers/repo-setup.md).
+version: 2
+
+updates:
+  # core/ - Maven reactor (one parent pom.xml)
+  - package-ecosystem: maven
+    directory: /core
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 10
+    labels: [dependencies, area/core]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      spring:
+        patterns: ["org.springframework*", "io.micrometer*"]
+        update-types: [minor, patch]
+      maven-minor-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # sdk/java/ - the Agent SDK Maven reactor (own parent, Java 17)
+  - package-ecosystem: maven
+    directory: /sdk/java
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    labels: [dependencies, area/sdk]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      sdk-minor-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # examples/sdk/governed-tools - consumes the SDK like a user would
+  - package-ecosystem: maven
+    directory: /examples/sdk/governed-tools
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 3
+    labels: [dependencies, area/examples]
+    commit-message:
+      prefix: "build(deps)"
+    ignore:
+      # Tracks the SDK reactor in this repository, not a published release.
+      - dependency-name: "io.vegaduta:*"
+
+  # Documentation site (mkdocs, docs/requirements.txt)
+  - package-ecosystem: pip
+    directory: /docs
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 3
+    labels: [dependencies, documentation]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      docs-pip:
+        patterns: ["*"]
+
+  # Next.js consoles
+  - package-ecosystem: npm
+    directories: [/web]
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 10
+    labels: [dependencies, area/web]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]
+
+  # Example MCP servers and the e2e suite
+  - package-ecosystem: npm
+    directories:
+      - /tests/e2e
+      - /examples/mcp-servers/http-gateway
+      - /examples/mcp-servers/home-assistant
+      - /services/piece-host
+      - /sdk/typescript
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      npm-tooling-minor-patch:
+        update-types: [minor, patch]
+
+  # App Builder project templates: the starting package.json / requirements
+  # of generated apps. Monthly, one grouped PR; nothing here runs in our images.
+  - package-ecosystem: npm
+    directories:
+      - /services/app-builder/templates/astro-site
+      - /services/app-builder/templates/capacitor-app
+      - /services/app-builder/templates/node-react
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 3
+    labels: [dependencies, area/services]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      app-builder-templates-npm:
+        patterns: ["*"]
+
+  # Python services
+  - package-ecosystem: pip
+    directories:
+      - /services/sidecar
+      - /services/code-intel
+      - /services/app-builder
+      - /services/tool-sandbox
+      - /services/voice-agent
+      - /services/rl-trainer
+      - /sdk/python
+      - /sdk/python-agent
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 10
+    labels: [dependencies, area/services]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      pip-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: pip
+    directories:
+      - /services/app-builder/templates/python-fastapi
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 3
+    labels: [dependencies, area/services]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      app-builder-templates-pip:
+        patterns: ["*"]
+
+  # Base images, one entry per Dockerfile directory
+  - package-ecosystem: docker
+    directories:
+      - /core
+      - /web
+      - /deploy/postgres
+      - /deploy/mock-provider
+      - /services/sidecar
+      - /services/code-intel
+      - /services/app-builder
+      - /services/tool-sandbox
+      - /services/mcp-stdio-runner
+      - /services/voice-agent
+      - /services/rl-trainer
+      - /services/piece-host
+      - /examples/mcp-servers/http-gateway
+      - /core/sdlc/e2b-template
+      - /infra/keycloak/phase1-realm
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    labels: [dependencies, area/deploy]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      base-images:
+        update-types: [minor, patch]
+
+  # Third-party images referenced by the Compose files (valkey, keycloak,
+  # seaweedfs, temporal, ...)
+  - package-ecosystem: docker-compose
+    directories: [/deploy/compose]
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    labels: [dependencies, area/deploy]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      compose-images:
+        update-types: [minor, patch]
+
+  # Helm chart dependencies (the umbrella chart's subcharts)
+  - package-ecosystem: helm
+    directories: ["/deploy/helm/charts/*"]
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    labels: [dependencies, area/deploy]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      helm-minor-patch:
+        update-types: [minor, patch]
+
+  # Dev container features
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 3
+    labels: [dependencies]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      devcontainer:
+        patterns: ["*"]
+
+  # Terraform provider versions in the reusable modules
+  - package-ecosystem: terraform
+    directories: ["/infra/terraform/modules/*"]
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    labels: [dependencies, area/infra]
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      terraform-minor-patch:
+        update-types: [minor, patch]
+
+  # Workflow actions (pinned by SHA; Dependabot updates the SHA and the comment)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    labels: [dependencies, area/ci]
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      actions:
+        patterns: ["*"]

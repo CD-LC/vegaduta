@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>app-config</artifactId>
+  <name>app-config</name>
+  <description>
+    Shared Spring configuration resources for every executable assembly
+    (application.yml + the application-*.yml profile files, moved here from
+    the app module when app-worker landed - a repackaged Spring Boot jar
+    cannot be a Maven dependency, so "the worker gets the same config" is
+    only possible if config lives in a normal library jar both assemblies
+    depend on). Also carries the EnvironmentPostProcessors
+    (spring.factories: JVM-timezone pin, Windows MCP command defaults) that
+    must run before any bean exists in EVERY entry point, not just the API
+    server's. Edit config here once - app and app-worker both pick it up.
+  </description>
+
+  <dependencies>
+    <!-- The postprocessors touch Spring Boot's EnvironmentPostProcessor API;
+         nothing else is needed - every real dependency belongs to the
+         modules that consume this config, not to the config itself. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+    </dependency>
+  </dependencies>
+</project>

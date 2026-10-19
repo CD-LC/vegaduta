@@ -1,0 +1,6 @@
+# Undocumented configuration properties (ADR-0019, architecture bet 13).
+#
+# Properties that exist in core/ but are not mentioned in docs/ or .env.example.
+# THIS FILE CAN ONLY SHRINK. A new property must be documented in docs/configuration.md instead
+# of being added here. Delete a line once its property is documented or removed.
+

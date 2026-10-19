@@ -1,0 +1,2 @@
+{{- include "core-intake.guards" . -}}
+{{ include "vegaduta-lib.coreDeployment" (dict "root" . "role" "jobs") }}

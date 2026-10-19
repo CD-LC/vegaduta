@@ -1,0 +1,45 @@
+{
+  "consumer": "sdk-python-agent",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "audit-log-list",
+      "method": "GET",
+      "path": "/api/audit-log",
+      "status": 200,
+      "request": { "requiredFields": [] },
+      "response": {
+        "requiredFields": [
+          "$[*].id",
+          "$[*].actorId",
+          "$[*].actionType",
+          "$[*].targetType",
+          "$[*].targetId",
+          "$[*].outcome",
+          "$[*].detail",
+          "$[*].createdAt"
+        ]
+      }
+    },
+    {
+      "id": "approval-get",
+      "method": "GET",
+      "path": "/api/approvals/{id}",
+      "status": 200,
+      "request": { "requiredFields": [] },
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.actionType",
+          "$.summary",
+          "$.status",
+          "$.requestedBy",
+          "$.decidedBy",
+          "$.createdAt",
+          "$.decidedAt",
+          "$.payload"
+        ]
+      }
+    }
+  ]
+}

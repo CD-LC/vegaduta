@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/outbound/approval-callback.schema.json",
+  "title": "Approval request/callback (outbound)",
+  "description": "Source: core/approval/src/main/java/com/agenticai/core/approval/dto/ApprovalRequestResponse.java, read directly (2026-07-19) - a Java record, fields in declaration order. ApprovalStatus enum values inlined from core/approval/ApprovalStatus.java (read directly, same date; note EXECUTION_FAILED is overloaded to also mean 'will retry' when nextRetryAt is non-null, per that enum's own comment - this schema does not attempt to encode that cross-field relationship, just documents it here). This is what GET /api/approvals/** returns (ApprovalRequestResponse.from(ApprovalRequest)), not the JPA entity.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "actionType": { "type": "string" },
+    "summary": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "APPROVED", "REJECTED", "EXECUTION_FAILED", "DEAD_LETTERED"]
+    },
+    "requestedBy": { "type": "string" },
+    "decidedBy": { "type": ["string", "null"] },
+    "rejectionReason": { "type": ["string", "null"] },
+    "executionError": { "type": ["string", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "decidedAt": { "type": ["string", "null"], "format": "date-time" },
+    "retryCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Autonomy/Guardrails Strategy Stage C. How many retries this action has been through so far."
+    },
+    "nextRetryAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Non-null iff status=EXECUTION_FAILED AND a retry is actually scheduled (per ApprovalStatus's own enum comment) - null for every other status, and for EXECUTION_FAILED rows that exhausted retries or were never retryable."
+    },
+    "payload": {
+      "type": ["string", "null"],
+      "description": "Raw JSON text (not re-parsed server-side - the frontend pretty-prints it), genuinely nullable per this field's own javadoc: older rows predating a given action type's payload shape, or an action type that never set one, come back null."
+    }
+  },
+  "required": [
+    "id", "actionType", "summary", "status", "requestedBy",
+    "createdAt", "retryCount"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,6 @@
+{
+  "timestamp" : "<now>",
+  "status" : 400,
+  "error" : "name must not be blank",
+  "code" : "X"
+}

@@ -1,0 +1,108 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "delete-api-sdlc-credential",
+      "method": "DELETE",
+      "path": "/api/sdlc/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-sdlc-credential",
+      "method": "POST",
+      "path": "/api/sdlc/credential",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.apiKey"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-sdlc-credential-code-execution-template",
+      "method": "PUT",
+      "path": "/api/sdlc/credential/code-execution-template",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.templateId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-sdlc-credential-status",
+      "method": "GET",
+      "path": "/api/sdlc/credential/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-sdlc-sandbox",
+      "method": "GET",
+      "path": "/api/sdlc/sandbox",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-sdlc-sandbox",
+      "method": "POST",
+      "path": "/api/sdlc/sandbox",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.envVars",
+          "$.metadata",
+          "$.templateId",
+          "$.timeoutSeconds"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-sdlc-sandbox-sandboxId",
+      "method": "DELETE",
+      "path": "/api/sdlc/sandbox/{sandboxId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-sdlc-sandbox-run-code",
+      "method": "POST",
+      "path": "/api/sdlc/sandbox/run-code",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.code",
+          "$.language",
+          "$.timeoutSeconds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.exitCode",
+          "$.stderr",
+          "$.stdout",
+          "$.timedOut"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{{- /* Public routing (INF-011): only the application realm and static resources are
+  exposed on auth.<domain>. The admin console (/admin) and the master realm (admin
+  logins, /realms/master) are NOT routed; serve them on a private hostname with
+  admin.consoleUrl (KC_HOSTNAME_ADMIN), or set ingress.paths explicitly. */ -}}
+{{- $v := deepCopy .Values -}}
+{{- if not ($v.ingress | default dict).paths -}}
+{{- $realm := include "vegaduta-lib.oidc.realm" . -}}
+{{- $_ := set $v.ingress "paths" (list (dict "path" (printf "/realms/%s" $realm) "pathType" "Prefix") (dict "path" "/resources" "pathType" "Prefix")) -}}
+{{- end -}}
+{{ include "vegaduta-lib.standardResources" (dict "Values" $v "Chart" .Chart "Release" .Release "Capabilities" .Capabilities "Template" .Template "Files" .Files) }}
+---
+{{- /* Headless Service for JGroups discovery (KC_CACHE_STACK=kubernetes). */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vegaduta-lib.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - { name: jgroups, port: 7800, targetPort: jgroups }
+  selector:
+    {{- include "vegaduta-lib.selectorLabels" . | nindent 4 }}

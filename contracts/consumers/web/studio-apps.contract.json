@@ -1,0 +1,165 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-studio-apps",
+      "method": "GET",
+      "path": "/api/studio-apps",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-studio-apps-appId",
+      "method": "DELETE",
+      "path": "/api/studio-apps/{appId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-studio-apps-appId",
+      "method": "GET",
+      "path": "/api/studio-apps/{appId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-apps-appId-disable",
+      "method": "POST",
+      "path": "/api/studio-apps/{appId}/disable",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-studio-apps-appId-domains",
+      "method": "GET",
+      "path": "/api/studio-apps/{appId}/domains",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].dns",
+          "$[*].hostname",
+          "$[*].id",
+          "$[*].lastError",
+          "$[*].status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-studio-apps-appId-domains",
+      "method": "POST",
+      "path": "/api/studio-apps/{appId}/domains",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.hostname"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.dns",
+          "$.hostname",
+          "$.id",
+          "$.lastError",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-studio-apps-appId-domains-domainId",
+      "method": "DELETE",
+      "path": "/api/studio-apps/{appId}/domains/{domainId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-apps-appId-domains-domainId-verify",
+      "method": "POST",
+      "path": "/api/studio-apps/{appId}/domains/{domainId}/verify",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.dns",
+          "$.hostname",
+          "$.id",
+          "$.lastError",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-studio-apps-appId-enable",
+      "method": "POST",
+      "path": "/api/studio-apps/{appId}/enable",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-studio-apps-appId-users",
+      "method": "GET",
+      "path": "/api/studio-apps/{appId}/users",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-studio-apps-appId-users-userId",
+      "method": "DELETE",
+      "path": "/api/studio-apps/{appId}/users/{userId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-apps-appId-users-userId-disable",
+      "method": "POST",
+      "path": "/api/studio-apps/{appId}/users/{userId}/disable",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-apps-appId-users-userId-enable",
+      "method": "POST",
+      "path": "/api/studio-apps/{appId}/users/{userId}/enable",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-apps-publish",
+      "method": "POST",
+      "path": "/api/studio-apps/publish",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.authMode"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.appId",
+          "$.publicUrl",
+          "$.publishedVersion",
+          "$.slug"
+        ]
+      }
+    }
+  ]
+}

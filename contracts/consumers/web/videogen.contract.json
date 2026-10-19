@@ -1,0 +1,50 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-videogen-generate",
+      "method": "POST",
+      "path": "/api/videogen/generate",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.durationSeconds",
+          "$.imageBase64",
+          "$.imageMimeType",
+          "$.prompt"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-videogen-jobs",
+      "method": "GET",
+      "path": "/api/videogen/jobs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-videogen-jobs-id",
+      "method": "GET",
+      "path": "/api/videogen/jobs/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-videogen-videos-id",
+      "method": "GET",
+      "path": "/api/videogen/videos/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

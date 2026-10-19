@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Backup &amp; Restore — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="operations" data-page="backup-restore.html" data-doc="VD-OPS-004" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="observability.html">Operations</a><span class="sep">/</span>Backup &amp; Restore</div>
+<div class="doc-meta" data-auto></div>
+<h1>Backup &amp; Restore</h1>
+<p class="lede">
+  What to back up in a self-hosted install, how to do it with Docker Compose, and what
+  to use on Kubernetes. Nothing is backed up automatically: schedule it yourself and
+  prove it with a restore drill.
+</p>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Back up the secrets with the data</div>
+  Back up <code>deploy/compose/.env</code> (or your Kubernetes Secrets) <strong>together with</strong>
+  the database. <code>APP_ENCRYPTION_KEY</code> decrypts every stored provider key and channel
+  secret; a database without it is not restorable in any useful sense.
+</div>
+
+<h2>What to back up</h2>
+<table>
+  <thead><tr><th>Data</th><th>Where it lives</th><th>Needed?</th></tr></thead>
+  <tbody>
+    <tr><td>Platform database (all <code>tenant_*</code> schemas and the control plane)</td><td><code>postgres</code> service, <code>postgres-data</code> volume</td><td>Yes — irreplaceable</td></tr>
+    <tr><td>Keycloak (realm, users, credentials, clients)</td><td>Full: <code>keycloak-db</code>; Lite: <code>keycloak-data</code> volume</td><td>Yes</td></tr>
+    <tr><td>Files (uploads, generated artifacts)</td><td>Full: <code>seaweedfs-data</code> volume or your S3 bucket; Lite: <code>core-storage</code> volume</td><td>Yes</td></tr>
+    <tr><td>Secrets</td><td><code>deploy/compose/.env</code></td><td>Yes</td></tr>
+    <tr><td>Valkey, Temporal history, Langfuse, Prometheus/Loki</td><td>their own volumes</td><td>Optional — rebuildable or disposable</td></tr>
+  </tbody>
+</table>
+
+<h2>Compose: back up</h2>
+<pre><code>C="scripts/vegaduta compose"
+$C exec -T postgres pg_dumpall -U agentic | gzip &gt; vegaduta-db-$(date +%F).sql.gz
+$C exec -T keycloak-db pg_dump -U keycloak keycloak | gzip &gt; vegaduta-keycloak-$(date +%F).sql.gz   # Full tier
+# Lite: Keycloak lives in the keycloak-data volume — stop keycloak and archive it:
+docker run --rm -v vegaduta-lite_keycloak-data:/d -v "$PWD":/b alpine tar czf /b/keycloak-data.tgz -C /d .
+cp deploy/compose/.env vegaduta-env-$(date +%F).bak</code></pre>
+<p>Also archive the <code>core-storage</code> (Lite) or <code>seaweedfs-data</code> (Full) volume, or back up your external S3 bucket. Copy backups off the host; a disk failure otherwise takes the database and its backups together.</p>
+
+<h2>Compose: restore</h2>
+<ol>
+  <li>On a fresh host, check out the same release and put the backed-up <code>deploy/compose/.env</code> in place (same <code>APP_ENCRYPTION_KEY</code>).</li>
+  <li>Start only the databases: <code>scripts/vegaduta compose up -d postgres keycloak-db</code>.</li>
+  <li>Restore: <code>gunzip -c vegaduta-db-&lt;date&gt;.sql.gz | scripts/vegaduta compose exec -T postgres psql -U agentic -d postgres</code>, and the Keycloak dump into <code>keycloak-db</code> (or the <code>keycloak-data</code> archive for Lite).</li>
+  <li>Restore the file volume or bucket, then <code>scripts/vegaduta up</code> with the same flags as before.</li>
+</ol>
+<div class="callout callout-warning">
+  <div class="callout-title">Restore into the right Postgres image</div>
+  Restoring into a stock <code>postgres:16</code> image silently loses every pgvector column.
+  Restore into the release <code>postgres</code> image (<code>deploy/postgres</code>: PostgreSQL 16 with
+  pgvector and Apache AGE), which is what the <code>postgres</code> service already runs.
+</div>
+
+<h2>Restore drill</h2>
+<p>Run one after setting up backups and after every major upgrade: restore the latest dump into a throwaway container of the release <code>postgres</code> image and check that at least one <code>tenant_%</code> schema exists and the control-plane tables are queryable. Windows hosts can use the helper scripts in <code>scripts/backup/</code> (<code>pg-backup.ps1</code> with rotation, <code>register-backup-task.ps1</code> for a nightly scheduled task, <code>verify-restore.ps1</code> for the drill); read their headers first.</p>
+
+<h2>Kubernetes</h2>
+<ul>
+  <li>Bundled PostgreSQL is a CloudNativePG <code>Cluster</code>: configure its backup (object storage, scheduled backups) per the CNPG documentation. With external PostgreSQL, use your provider's backups and point-in-time recovery.</li>
+  <li>Back up the Secret named by <code>global.core.appSecret.existingSecret</code> (or the generated <code>&lt;release&gt;-core-app</code>) with the database.</li>
+  <li>Bundled Keycloak and SeaweedFS keep data on their PVCs; back those up with your volume snapshot tooling, or use external services.</li>
+</ul>
+
+<h2>Upgrades and rollbacks</h2>
+<p><code>scripts/vegaduta upgrade</code> backs up <code>.env</code> but not the database. Take a database backup before every upgrade: Flyway migrations are forward-only, so a restore is the only way to undo one. See <a href="../deployment/rollback-recovery.html">Rollback &amp; Recovery</a>.</p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/README.md</code> (Backup, Upgrade, Lite → full), <code>deploy/helm/README.md</code>.</li>
+  <li><code>deploy/compose/docker-compose.yml</code>, <code>lite.yml</code> (volumes); <code>scripts/backup/</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+</body></html>

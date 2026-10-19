@@ -1,0 +1,819 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-tenant-ai-model-preferences",
+      "method": "GET",
+      "path": "/api/tenant/ai-model-preferences",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].featureKey"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tenant-ai-model-preferences-featureKey",
+      "method": "DELETE",
+      "path": "/api/tenant/ai-model-preferences/{featureKey}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].featureKey"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tenant-ai-model-preferences-featureKey",
+      "method": "PUT",
+      "path": "/api/tenant/ai-model-preferences/{featureKey}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.model",
+          "$.providerName"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$[*].featureKey"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-api-keys",
+      "method": "GET",
+      "path": "/api/tenant/api-keys",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].createdBy",
+          "$[*].enabled",
+          "$[*].expired",
+          "$[*].expiresAt",
+          "$[*].id",
+          "$[*].keyPrefix",
+          "$[*].lastUsedAt",
+          "$[*].name",
+          "$[*].permissions",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-api-keys",
+      "method": "POST",
+      "path": "/api/tenant/api-keys",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.key"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tenant-api-keys-id",
+      "method": "DELETE",
+      "path": "/api/tenant/api-keys/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-tenant-api-keys-id",
+      "method": "PATCH",
+      "path": "/api/tenant/api-keys/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.createdBy",
+          "$.enabled",
+          "$.expired",
+          "$.expiresAt",
+          "$.id",
+          "$.keyPrefix",
+          "$.lastUsedAt",
+          "$.name",
+          "$.permissions",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-api-keys-id-rotate",
+      "method": "POST",
+      "path": "/api/tenant/api-keys/{id}/rotate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.key"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tenant-billing-profile",
+      "method": "PUT",
+      "path": "/api/tenant/billing-profile",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-tenant-branding-logo",
+      "method": "DELETE",
+      "path": "/api/tenant/branding/logo",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tenant-branding-logo",
+      "method": "POST",
+      "path": "/api/tenant/branding/logo",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tenant-data-deletion",
+      "method": "POST",
+      "path": "/api/tenant/data-deletion",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.confirmOrgName"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tenant-data-export",
+      "method": "POST",
+      "path": "/api/tenant/data-export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-data-usage",
+      "method": "GET",
+      "path": "/api/tenant/data-usage",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.generatedAt",
+          "$.systems",
+          "$.tenantId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-feature-flags-key-evaluate",
+      "method": "GET",
+      "path": "/api/tenant/feature-flags/{key}/evaluate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.key",
+          "$.variant"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-invoices",
+      "method": "GET",
+      "path": "/api/tenant/invoices",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-invoices-id-html",
+      "method": "GET",
+      "path": "/api/tenant/invoices/{id}/html",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-llm-gateway-content-policy",
+      "method": "GET",
+      "path": "/api/tenant/llm-gateway/content-policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tenant-llm-gateway-content-policy",
+      "method": "PUT",
+      "path": "/api/tenant/llm-gateway/content-policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-privacy-audit-export",
+      "method": "GET",
+      "path": "/api/tenant/privacy/audit-export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-privacy-consent-policies-agentId",
+      "method": "GET",
+      "path": "/api/tenant/privacy/consent-policies/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tenant-privacy-consent-policies-agentId",
+      "method": "PUT",
+      "path": "/api/tenant/privacy/consent-policies/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.defaultLanguage",
+          "$.enabled",
+          "$.eraseOnWithdrawal",
+          "$.instructions",
+          "$.keywords",
+          "$.noticeVersion",
+          "$.notices",
+          "$.purpose",
+          "$.updatedAt",
+          "$.updatedBy"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-privacy-consent-records",
+      "method": "GET",
+      "path": "/api/tenant/privacy/consent-records",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].channel",
+          "$[*].decidedAt",
+          "$[*].decision",
+          "$[*].externalId",
+          "$[*].id",
+          "$[*].noticeLanguage",
+          "$[*].noticeSha256",
+          "$[*].noticeVersion",
+          "$[*].purpose"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-privacy-contacts-erase",
+      "method": "POST",
+      "path": "/api/tenant/privacy/contacts/erase",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.channel",
+          "$.complete",
+          "$.consentProofKept",
+          "$.erased",
+          "$.erasedAt",
+          "$.failures",
+          "$.notReached",
+          "$.subjectMasked"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-privacy-contacts-export",
+      "method": "POST",
+      "path": "/api/tenant/privacy/contacts/export",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.channel",
+          "$.data",
+          "$.generatedAt",
+          "$.notIncluded",
+          "$.subjectMasked"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-privacy-purposes-agents-id",
+      "method": "GET",
+      "path": "/api/tenant/privacy/purposes/agents/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tenant-privacy-purposes-agents-id",
+      "method": "PUT",
+      "path": "/api/tenant/privacy/purposes/agents/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.purposes"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-privacy-purposes-knowledge-collections-id",
+      "method": "GET",
+      "path": "/api/tenant/privacy/purposes/knowledge-collections/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tenant-privacy-purposes-knowledge-collections-id",
+      "method": "PUT",
+      "path": "/api/tenant/privacy/purposes/knowledge-collections/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.purposes"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-privacy-retention-policies",
+      "method": "GET",
+      "path": "/api/tenant/privacy/retention-policies",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].channel",
+          "$[*].dataClass",
+          "$[*].enabled",
+          "$[*].retentionDays",
+          "$[*].updatedAt",
+          "$[*].updatedBy"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tenant-privacy-retention-policies",
+      "method": "PUT",
+      "path": "/api/tenant/privacy/retention-policies",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.rule",
+          "$.warnings"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-referral",
+      "method": "GET",
+      "path": "/api/tenant/referral",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tenant-referral-redeem",
+      "method": "POST",
+      "path": "/api/tenant/referral/redeem",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.code"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-agents",
+      "method": "GET",
+      "path": "/api/tenant/roi/agents",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agents",
+          "$.from",
+          "$.includeAssumedResolutions",
+          "$.roiBasis",
+          "$.to"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-agents.csv",
+      "method": "GET",
+      "path": "/api/tenant/roi/agents.csv",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-agents-agentId-assumptions",
+      "method": "GET",
+      "path": "/api/tenant/roi/agents/{agentId}/assumptions",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.basis",
+          "$.minutesSavedPerResolution",
+          "$.updatedAt",
+          "$.valueCurrency",
+          "$.valuePerResolution"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tenant-roi-agents-agentId-assumptions",
+      "method": "PUT",
+      "path": "/api/tenant/roi/agents/{agentId}/assumptions",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.basis",
+          "$.minutesSavedPerResolution",
+          "$.updatedAt",
+          "$.valueCurrency",
+          "$.valuePerResolution"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-agents-agentId-baseline",
+      "method": "GET",
+      "path": "/api/tenant/roi/agents/{agentId}/baseline",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.avgHandlingMinutes",
+          "$.avgValuePerConversion",
+          "$.baselinePeriod",
+          "$.enteredAt",
+          "$.enteredBy",
+          "$.jobType",
+          "$.missedRate",
+          "$.monthlyVolume",
+          "$.source",
+          "$.valueCurrency"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tenant-roi-agents-agentId-baseline",
+      "method": "PUT",
+      "path": "/api/tenant/roi/agents/{agentId}/baseline",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.avgHandlingMinutes",
+          "$.avgValuePerConversion",
+          "$.baselinePeriod",
+          "$.enteredAt",
+          "$.enteredBy",
+          "$.jobType",
+          "$.missedRate",
+          "$.monthlyVolume",
+          "$.source",
+          "$.valueCurrency"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-agents-agentId-pilot-report",
+      "method": "GET",
+      "path": "/api/tenant/roi/agents/{agentId}/pilot-report",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-budget",
+      "method": "GET",
+      "path": "/api/tenant/roi/budget",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.alertsFired",
+          "$.capConfigured",
+          "$.capUsd",
+          "$.monthStart",
+          "$.percentUsed",
+          "$.plan",
+          "$.spendBasis",
+          "$.spentUsd"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-demo",
+      "method": "GET",
+      "path": "/api/tenant/roi/demo",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.demo",
+          "$.label"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-roi-prices",
+      "method": "GET",
+      "path": "/api/tenant/roi/prices",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.currency",
+          "$.prices",
+          "$.unpricedModels"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-roi-prices",
+      "method": "POST",
+      "path": "/api/tenant/roi/prices",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.cacheReadPerMillion",
+          "$.cacheWritePerMillion",
+          "$.effectiveFrom",
+          "$.id",
+          "$.inputPerMillion",
+          "$.modelPrefix",
+          "$.note",
+          "$.outputPerMillion",
+          "$.providerName",
+          "$.setAt",
+          "$.setBy"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-settings",
+      "method": "GET",
+      "path": "/api/tenant/settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tenant-settings",
+      "method": "PUT",
+      "path": "/api/tenant/settings",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.brandDisplayName",
+          "$.brandLogoUrl",
+          "$.experienceMode",
+          "$.usePlatformLlm"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-spend-cap",
+      "method": "GET",
+      "path": "/api/tenant/spend-cap",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-spend-protection",
+      "method": "GET",
+      "path": "/api/tenant/spend-protection",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.approvalGates",
+          "$.cacheWindowDays",
+          "$.caching",
+          "$.costAwareRouting",
+          "$.generatedAt",
+          "$.toolSchemaMinimization"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tenant-sso",
+      "method": "DELETE",
+      "path": "/api/tenant/sso",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-sso",
+      "method": "GET",
+      "path": "/api/tenant/sso",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.alias",
+          "$.brokerRedirectUri",
+          "$.clientSecretSet",
+          "$.configured",
+          "$.displayName",
+          "$.providerType",
+          "$.realmEnabled"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tenant-sso",
+      "method": "PUT",
+      "path": "/api/tenant/sso",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.alias",
+          "$.brokerRedirectUri",
+          "$.clientSecretSet",
+          "$.configured",
+          "$.displayName",
+          "$.providerType",
+          "$.realmEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-sso-scim-tokens",
+      "method": "GET",
+      "path": "/api/tenant/sso/scim-tokens",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].id",
+          "$[*].label",
+          "$[*].lastUsedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-sso-scim-tokens",
+      "method": "POST",
+      "path": "/api/tenant/sso/scim-tokens",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.label"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.label",
+          "$.token"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tenant-sso-scim-tokens-id",
+      "method": "DELETE",
+      "path": "/api/tenant/sso/scim-tokens/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-subscription",
+      "method": "GET",
+      "path": "/api/tenant/subscription",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tenant-subscription-cancel",
+      "method": "POST",
+      "path": "/api/tenant/subscription/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tenant-trial-claim",
+      "method": "POST",
+      "path": "/api/tenant/trial/claim",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.trigger"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.granted"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-trial-status",
+      "method": "GET",
+      "path": "/api/tenant/trial/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.claimed",
+          "$.eligible"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tenant-upgrade",
+      "method": "POST",
+      "path": "/api/tenant/upgrade",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.targetPlan"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.checkoutUrl",
+          "$.gatewayPublicKey",
+          "$.gatewaySubscriptionId",
+          "$.targetPlan"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tenant-upgrade-options",
+      "method": "GET",
+      "path": "/api/tenant/upgrade/options",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tenant-usage-quota",
+      "method": "GET",
+      "path": "/api/tenant/usage-quota",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.plan",
+          "$.tokensMonthlyLimit",
+          "$.tokensUsedMonth",
+          "$.usesPlatformPool"
+        ]
+      }
+    }
+  ]
+}

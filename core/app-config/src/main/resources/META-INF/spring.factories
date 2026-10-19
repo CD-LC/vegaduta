@@ -1,0 +1,26 @@
+# EnvironmentPostProcessors - each must run before any bean is created, in
+# every entry point (main(), mvn spring-boot:run, @SpringBootTest); see each
+# class's javadoc. EnvironmentPostProcessor is the only extension point that's
+# actually guaranteed to fire that early, regardless of which of those three
+# ways SpringApplication.run() got called.
+#   - TimeZoneEnvironmentPostProcessor: pins JVM timezone before DataSource/Flyway.
+#   - McpWindowsCommandEnvironmentPostProcessor: defaults MCP_*_COMMAND to
+#     npx.cmd on Windows so application-mcp.yml's static stdio servers spawn
+#     (npx vs npx.cmd / CreateProcess error=2) before McpClientAutoConfiguration
+#     reads those commands.
+#   - AuthModeEnvironmentPostProcessor: a blank or padded app.auth.mode means what an unset
+#     one means (keycloak), so @ConditionalOnProperty on the mode behaves the same as the default.
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.agenticai.core.TimeZoneEnvironmentPostProcessor,\
+com.agenticai.core.McpWindowsCommandEnvironmentPostProcessor,\
+com.agenticai.core.MigrateOnlyEnvironmentPostProcessor,\
+com.agenticai.core.startup.StartupWarmupEnvironmentPostProcessor,\
+com.agenticai.core.AuthModeEnvironmentPostProcessor
+
+# Cold-start lane (2026-10-04), both inert unless app.startup.profiling.enabled=true:
+#   - StartupProfilingInitializer installs Spring's BufferingApplicationStartup before the context refreshes.
+#   - StartupProfilingReporter logs the slowest start-up steps (and optionally dumps the timeline JSON) at readiness.
+org.springframework.context.ApplicationContextInitializer=\
+com.agenticai.core.startup.StartupProfilingInitializer
+org.springframework.context.ApplicationListener=\
+com.agenticai.core.startup.StartupProfilingReporter

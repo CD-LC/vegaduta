@@ -1,0 +1,14 @@
+# Minimal globals that let every chart render on its own (used by validate.sh for
+# `helm lint --strict` of the individual charts). Not an install example.
+global:
+  domain: example.com
+  # Offline lint render: generated secrets would change on every render (see the umbrella values).
+  allowGeneratedSecrets: true
+  temporal:
+    enabled: true
+    target: temporal-frontend.temporal.svc.cluster.local:7233
+  livekit:
+    url: wss://livekit.example.com
+    internalUrl: ws://livekit.livekit.svc.cluster.local:7880
+    existingSecret: livekit-api
+runtimeClassName: kata

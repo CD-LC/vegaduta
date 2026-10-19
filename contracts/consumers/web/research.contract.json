@@ -1,0 +1,163 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-research-runs",
+      "method": "GET",
+      "path": "/api/research/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].agentName",
+          "$[*].approvalDeadlineAt",
+          "$[*].createdAt",
+          "$[*].errorCode",
+          "$[*].finishedAt",
+          "$[*].goalPreview",
+          "$[*].id",
+          "$[*].parkedAt",
+          "$[*].progressNote",
+          "$[*].startedAt",
+          "$[*].status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-research-runs",
+      "method": "POST",
+      "path": "/api/research/runs",
+      "status": 202,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.approvalDeadlineAt",
+          "$.cancelRequested",
+          "$.costUsd",
+          "$.createdAt",
+          "$.deadlineAt",
+          "$.errorCode",
+          "$.errorMessage",
+          "$.finishedAt",
+          "$.goal",
+          "$.id",
+          "$.maxTurns",
+          "$.origin",
+          "$.originRef",
+          "$.parkCount",
+          "$.parkedAt",
+          "$.progressNote",
+          "$.progressUpdatedAt",
+          "$.requestedBy",
+          "$.resultJson",
+          "$.resultText",
+          "$.scheduleId",
+          "$.scheduleOccurrenceAt",
+          "$.schemaAttempts",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.terminal",
+          "$.timeoutSeconds",
+          "$.turnsUsed"
+        ]
+      }
+    },
+    {
+      "id": "get-api-research-runs-jobId",
+      "method": "GET",
+      "path": "/api/research/runs/{jobId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.approvalDeadlineAt",
+          "$.cancelRequested",
+          "$.costUsd",
+          "$.createdAt",
+          "$.deadlineAt",
+          "$.errorCode",
+          "$.errorMessage",
+          "$.finishedAt",
+          "$.goal",
+          "$.id",
+          "$.maxTurns",
+          "$.origin",
+          "$.originRef",
+          "$.parkCount",
+          "$.parkedAt",
+          "$.progressNote",
+          "$.progressUpdatedAt",
+          "$.requestedBy",
+          "$.resultJson",
+          "$.resultText",
+          "$.scheduleId",
+          "$.scheduleOccurrenceAt",
+          "$.schemaAttempts",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.terminal",
+          "$.timeoutSeconds",
+          "$.turnsUsed"
+        ]
+      }
+    },
+    {
+      "id": "post-api-research-runs-jobId-cancel",
+      "method": "POST",
+      "path": "/api/research/runs/{jobId}/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.approvalDeadlineAt",
+          "$.cancelRequested",
+          "$.costUsd",
+          "$.createdAt",
+          "$.deadlineAt",
+          "$.errorCode",
+          "$.errorMessage",
+          "$.finishedAt",
+          "$.goal",
+          "$.id",
+          "$.maxTurns",
+          "$.origin",
+          "$.originRef",
+          "$.parkCount",
+          "$.parkedAt",
+          "$.progressNote",
+          "$.progressUpdatedAt",
+          "$.requestedBy",
+          "$.resultJson",
+          "$.resultText",
+          "$.scheduleId",
+          "$.scheduleOccurrenceAt",
+          "$.schemaAttempts",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.terminal",
+          "$.timeoutSeconds",
+          "$.turnsUsed"
+        ]
+      }
+    },
+    {
+      "id": "get-api-research-status",
+      "method": "GET",
+      "path": "/api/research/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.limits",
+          "$.remainingToday",
+          "$.runsEnabled",
+          "$.searchConfigured"
+        ]
+      }
+    }
+  ]
+}

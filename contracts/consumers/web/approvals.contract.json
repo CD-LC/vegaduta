@@ -1,0 +1,68 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-approvals",
+      "method": "GET",
+      "path": "/api/approvals",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-approvals-id",
+      "method": "GET",
+      "path": "/api/approvals/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-approvals-id-approve",
+      "method": "POST",
+      "path": "/api/approvals/{id}/approve",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.decidedBy",
+          "$.formValues"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-approvals-id-reject",
+      "method": "POST",
+      "path": "/api/approvals/{id}/reject",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.decidedBy",
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-approvals-policy-actionType",
+      "method": "PUT",
+      "path": "/api/approvals/policy/{actionType}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.requiresApproval"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

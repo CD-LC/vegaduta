@@ -1,0 +1,12 @@
+-- Performance follow-up ("about improving the overall performance"):
+-- tool_call_log had an index on agent_id (V1) but none on session_id,
+-- despite being queried by session in several places - QuickTaskService's
+-- per-task detail view (GET /api/quick-task/{taskId}, ToolCallLogService's
+-- session-scoped finder from #573/#609), and the Quick Task live-trace SSE
+-- polling loop, both filtering WHERE session_id = ?. Without this index
+-- every one of those reads was a full sequential scan of the whole table
+-- for every tenant schema - the gap only grows as more tool calls
+-- accumulate, and there was no matching gap on llm_call_log (V52 already
+-- indexes it), so this closes an inconsistency as much as it adds a new
+-- index.
+CREATE INDEX idx_tool_call_log_session_id ON tool_call_log (session_id);

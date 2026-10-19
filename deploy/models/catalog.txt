@@ -1,0 +1,1 @@
+../../core/providers/src/main/resources/local-models/catalog.txt

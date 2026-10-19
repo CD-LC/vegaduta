@@ -1,0 +1,22 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-ambient-digest",
+      "method": "GET",
+      "path": "/api/ambient/digest",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentNotifications",
+          "$.jobs",
+          "$.pendingApprovals",
+          "$.sentinelOutcomes",
+          "$.sentinelScheduleCount",
+          "$.since"
+        ]
+      }
+    }
+  ]
+}

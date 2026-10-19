@@ -1,0 +1,11 @@
+-- Direct feedback: "in agents there should be simple and manual tuning
+-- selection - in simple it automatically selects the temp, tokens, p based
+-- on the given system prompt - manual will allow users to select the
+-- generation control". See TuningMode's javadoc.
+--
+-- DEFAULT 'MANUAL' backfills every pre-existing agent to exactly today's
+-- behavior: its temperature/top_p/max_tokens are values someone set
+-- directly (at creation or via PATCH .../generation-params), and stay that
+-- way until they explicitly opt into SIMPLE mode - no agent's generation
+-- behavior silently changes on deploy.
+ALTER TABLE agent ADD COLUMN tuning_mode VARCHAR(16) NOT NULL DEFAULT 'MANUAL';

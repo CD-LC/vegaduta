@@ -1,0 +1,6 @@
+dependencies:
+- name: vegaduta-lib
+  repository: file://../vegaduta-lib
+  version: 0.2.0
+digest: sha256:df1909deb263950c1b6114bbe81ead4000ab7248018388e686480a0f78ebff76
+generated: "2026-09-29T03:21:13.126345181Z"

@@ -1,0 +1,148 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-commerce-mandates",
+      "method": "GET",
+      "path": "/api/commerce/mandates",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-commerce-mandates-cartId-authorize",
+      "method": "POST",
+      "path": "/api/commerce/mandates/{cartId}/authorize",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.kind",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-commerce-mandates-cartId-capture",
+      "method": "POST",
+      "path": "/api/commerce/mandates/{cartId}/capture",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.kind",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-commerce-mandates-cartId-refund",
+      "method": "POST",
+      "path": "/api/commerce/mandates/{cartId}/refund",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.kind",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-commerce-mandates-id",
+      "method": "GET",
+      "path": "/api/commerce/mandates/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-commerce-mandates-id-events",
+      "method": "GET",
+      "path": "/api/commerce/mandates/{id}/events",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-commerce-mandates-id-revoke",
+      "method": "POST",
+      "path": "/api/commerce/mandates/{id}/revoke",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.kind",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-commerce-mandates-intentId-cart",
+      "method": "POST",
+      "path": "/api/commerce/mandates/{intentId}/cart",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.kind",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-commerce-mandates-intentId-carts",
+      "method": "GET",
+      "path": "/api/commerce/mandates/{intentId}/carts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-commerce-mandates-intent",
+      "method": "POST",
+      "path": "/api/commerce/mandates/intent",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.id",
+          "$.kind",
+          "$.status"
+        ]
+      }
+    }
+  ]
+}

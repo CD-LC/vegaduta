@@ -1,0 +1,11 @@
+-- Audit trail counterpart of agent.created_by (V151): the subject of the
+-- caller who made the most recent config change. Written by
+-- AgentService#saveVersioned on every config-mutating save, so version rows
+-- (which carry the change summary) can be tied back to an actor without a
+-- join through access logs.
+--
+-- Nullable, no backfill - NULL means "predates this column or last written by
+-- a caller with no request context", exactly like created_by's own legacy
+-- semantics. The column is deliberately plain VARCHAR holding the Keycloak
+-- subject string, same type as created_by.
+ALTER TABLE agent ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);

@@ -1,0 +1,4 @@
+keycloak: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }})
+  Issuer     : {{ include "vegaduta-lib.oidc.issuer" . }}
+  Admin login: kubectl -n {{ .Release.Namespace }} get secret {{ include "keycloak.adminSecretName" . }} -o jsonpath='{.data.password}' | base64 -d
+  Grant yourself platform-admin: realm {{ include "vegaduta-lib.oidc.realm" . }} > Users > <you> > Role mapping > platform-admin

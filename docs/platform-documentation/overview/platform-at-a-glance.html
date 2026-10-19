@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platform at a Glance — VegaDūta Docs</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="overview" data-page="platform-at-a-glance.html" data-doc="VD-OV-002" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Overview<span class="sep">/</span>Platform at a Glance</div>
+  <div class="doc-meta" data-auto></div>
+  <h1>Platform at a Glance</h1>
+  <p class="lede">
+    One page for the shape of the whole system: who talks to it, where the
+    requests land, what runs where when you self-host it, and the two design
+    facts that explain most of the surprises engineers hit on day one.
+  </p>
+
+  <h2>System context</h2>
+  <pre class="mermaid">
+flowchart TB
+    subgraph users["Users &amp; channels"]
+        TU["Tenant users (web console)"]
+        PA["Platform operators (web-admin)"]
+        EU["Channel end-users (WhatsApp, Telegram, email, voice)"]
+        EX["External agents &amp; API clients (REST, MCP, A2A)"]
+    end
+
+    EDGE["Caddy (Compose domain overlay) or Kubernetes Ingress"]
+
+    subgraph app["Application services"]
+        WEB["web :3000 (tenant console)"]
+        WADM["web-admin :3001"]
+        KC["keycloak :8080 (realm agentic-ai)"]
+        CORE["core :8080 (modular monolith)"]
+        CI["code-intel :8090 (optional)"]
+        AB["app-builder :8091 (optional)"]
+        SC["sidecar :8001 (internal)"]
+    end
+
+    subgraph opt["Opt-in services (Compose profiles / Helm values)"]
+        RP["redpanda :9092"]
+        TMP["temporal :7233 + temporal-ui"]
+        LK["livekit + voice-agent"]
+        TS["tool-sandbox :8095"]
+        MCPR["mcp-stdio-runner :8097"]
+        LF["langfuse (tracing)"]
+    end
+
+    subgraph data["Data"]
+        PG[("PostgreSQL 16 + pgvector + AGE (schema-per-tenant)")]
+        RD[("Valkey (Redis API)")]
+        S3["SeaweedFS or any S3 API"]
+    end
+
+    LLM["LLM providers (tenant BYOK or operator-configured pool)"]
+
+    TU --&gt; EDGE
+    PA --&gt; EDGE
+    EU --&gt; EDGE
+    EX --&gt; EDGE
+    EDGE --&gt; WEB
+    EDGE --&gt; WADM
+    EDGE --&gt; KC
+    EDGE --&gt; CORE
+    EDGE --&gt; CI
+    EDGE --&gt; AB
+    WEB --&gt; CORE
+    CORE --&gt; PG
+    CORE --&gt; RD
+    CORE --&gt; S3
+    CORE --&gt; SC
+    CORE --&gt; RP
+    CORE --&gt; TMP
+    CORE --&gt; MCPR
+    CORE --&gt; TS
+    CORE --&gt; LK
+    CORE --&gt; LLM
+    CORE --&gt; LF
+  </pre>
+  <p style="font-size:12.5px;color:var(--ink-3)">
+    Figure 1 — system context for a self-hosted install. Locally every service is
+    reached on a <code>localhost</code> port; with a domain, Caddy (Compose) or your
+    Ingress (Helm) terminates TLS for <code>app.</code>, <code>admin.</code>,
+    <code>api.</code> and <code>auth.</code> on <code>&lt;your-domain&gt;</code>.
+  </p>
+
+  <h2>Layers</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Components</th><th>Stack</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Edge</strong></td><td>None locally; Caddy with automatic Let's Encrypt in the Compose domain overlay; Ingress or Gateway API with Helm</td><td>Caddy 2.8, your ingress controller</td></tr>
+      <tr><td><strong>Frontends</strong></td><td><code>web</code> tenant console + public site, <code>web-admin</code> platform-operator console</td><td>Next.js (SSR)</td></tr>
+      <tr><td><strong>API / core</strong></td><td><code>core/app</code> — the modular monolith; ~193 REST controllers, SSE/AG-UI streaming, webhooks, inbound MCP server, A2A agent card</td><td>Spring Boot 3.4, Java 21, 42 Maven modules</td></tr>
+      <tr><td><strong>Satellite services</strong></td><td>sidecar (knowledge/ML), code-intel (codebase RAG), app-builder, mcp-stdio-runner, voice-agent, tool-sandbox, rl-trainer — all under <code>services/</code></td><td>Python FastAPI, Node, LiveKit</td></tr>
+      <tr><td><strong>Data &amp; infrastructure</strong></td><td>PostgreSQL 16 + pgvector + Apache AGE (schema-per-tenant), PgBouncer (session mode), Valkey, Redpanda, Temporal, Keycloak 26, SeaweedFS, Langfuse</td><td>Bundled containers or your managed equivalents</td></tr>
+      <tr><td><strong>External providers</strong></td><td>~14 LLM providers via tenant BYOK or an operator-configured platform pool; Sarvam/ElevenLabs for Indic voice; optional payment gateways (off by default)</td><td>HTTP APIs</td></tr>
+      <tr><td><strong>Observability</strong></td><td>Prometheus, Grafana, Loki, Promtail, Alertmanager (profile <code>observability</code>); Langfuse LLM tracing (profile <code>tracing</code>)</td><td>Grafana stack, Langfuse</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The two architectural facts that explain most surprises</h2>
+
+  <div class="callout callout-note">
+    <div class="callout-title">1 · Schema-per-tenant</div>
+    <p style="margin:4px 0">
+      Every tenant is a Postgres <em>schema</em>, resolved from the request's
+      tenant context via <code>SET search_path</code>. Shared platform state lives
+      in the control-plane schema. The hard consequence:
+      <strong>PgBouncer must run in session pooling mode</strong> — transaction
+      pooling hands a connection mid-session to another tenant's search_path and
+      reads the wrong tenant's data. The Full Compose tier runs PgBouncer as the
+      <code>pgbouncer</code> service on port 6432, configured for session pooling.
+    </p>
+  </div>
+
+  <div class="callout callout-note">
+    <div class="callout-title">2 · One Flyway version namespace</div>
+    <p style="margin:4px 0">
+      Migrations live in two directories —
+      <code>core/app/src/main/resources/db/migration/controlplane/</code>
+      (shared, once) and <code>…/tenant/</code> (per schema) — but they are
+      validated as a <strong>single version space</strong>. A
+      <code>controlplane/V227</code> and a <code>tenant/V227</code> collide even
+      though the folders differ. Before picking a number, check the maximum in
+      both folders; <code>scripts/ci/flyway-lint.sh</code> is the CI gate that
+      catches collisions.
+    </p>
+  </div>
+
+  <h2>Technology stack</h2>
+  <table>
+    <thead><tr><th>Concern</th><th>Choice</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Backend runtime</td><td>Java 21, Spring Boot 3.4, Maven multi-module (42 modules, one JAR)</td><td><code>core/</code></td></tr>
+      <tr><td>Async/runtime split</td><td>Same modules, three assemblies: <code>app</code> (API), <code>app-worker</code> (Temporal), <code>app-jobs</code> (scheduled sweeps); <code>shape-api</code>/<code>shape-jobs</code> Spring profiles</td><td><code>core/app*</code></td></tr>
+      <tr><td>Frontends</td><td>Next.js (SSR); public settings from the runtime environment or optional build args</td><td><code>web/</code>, <code>web-admin/</code></td></tr>
+      <tr><td>Python services</td><td>FastAPI on Python 3.12 — embeddings/OCR/rerank/transcription, codebase RAG, app generation</td><td><code>services/sidecar/</code>, <code>services/code-intel/</code>, <code>services/app-builder/</code></td></tr>
+      <tr><td>Primary datastore</td><td>PostgreSQL 16 + pgvector + Apache AGE; schema-per-tenant</td><td><code>deploy/postgres/</code> image, CNPG in Helm</td></tr>
+      <tr><td>Connection pooling</td><td>PgBouncer, session mode</td><td>Compose <code>pgbouncer:6432</code></td></tr>
+      <tr><td>Cache / quotas</td><td>Valkey (Redis API)</td><td>Compose <code>valkey:6379</code></td></tr>
+      <tr><td>Eventing</td><td>Redpanda (Kafka API), opt-in; DB outbox relays in core</td><td>profile <code>events</code></td></tr>
+      <tr><td>Durable workflows</td><td>Temporal server + UI; <code>app-worker</code> assembly</td><td>profile <code>temporal</code></td></tr>
+      <tr><td>Identity</td><td>Keycloak 26, realm <code>agentic-ai</code>, dual-issuer JWT validation</td><td><code>deploy/keycloak/</code></td></tr>
+      <tr><td>Object storage</td><td>SeaweedFS S3 gateway (Full), local disk (Lite), or any S3 API</td><td><code>STORAGE_*</code></td></tr>
+      <tr><td>LLM access</td><td>Spring AI dynamic ChatClients; ~14 providers BYOK + optional operator pool; decision model for cost routing</td><td><code>core/providers</code>, <code>core/chat</code></td></tr>
+      <tr><td>LLM observability</td><td>Langfuse (profile <code>tracing</code>); every call also writes <code>llm_call_log</code> in the tenant schema</td><td>internal</td></tr>
+      <tr><td>Untrusted code</td><td>MCP STDIO packages spawn on <code>mcp-stdio-runner</code>; tenant code executes in <code>tool-sandbox</code> — never inside core</td><td><code>:8097</code>, <code>:8095</code></td></tr>
+      <tr><td>Deploys</td><td>Signed multi-arch images and OCI Helm charts on GHCR from <code>release.yml</code>; <code>scripts/vegaduta</code> for Compose</td><td><code>deploy/</code>, <code>.github/workflows/</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Request path, in two sentences</h2>
+  <p>
+    A browser hits Caddy or your Ingress → <code>web</code> (server-rendered);
+    the page's client JS then calls <code>api.&lt;your-domain&gt;</code> (or
+    <code>localhost:8080</code>) → <code>core:8080</code> → PgBouncer → Postgres.
+    An agent turn inside core runs guardrails → tool resolution (MCP / custom code /
+    built-ins) → the tenant's BYOK provider or the platform pool →
+    <code>LlmMetricsAdvisor</code>, which writes an <code>llm_call_log</code>
+    row and emits an OTLP span to Langfuse when tracing is on.
+  </p>
+
+  <div class="callout callout-success">
+    <div class="callout-title">Go deeper</div>
+    <p style="margin:4px 0 0">
+      <a href="../architecture/system-architecture.html">System Architecture</a> —
+      the layered internals of the monolith and its satellites ·
+      <a href="../architecture/service-topology.html">Service Topology</a> — the
+      runtime map, service by service ·
+      <a href="glossary.html">Glossary</a> — every term used above.
+    </p>
+  </div>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body>
+</html>

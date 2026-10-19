@@ -1,0 +1,28 @@
+# Free local model on the kind stage: a bundled Ollama plus core's pool bootstrap.
+#
+#   helm upgrade vegaduta deploy/helm/charts/vegaduta -n vegaduta --reuse-values \
+#     -f ~/vegaduta-values-kind-memory.yaml -f deploy/kind/values-kind-ollama.yaml
+#
+# WARNING (measured 2026-10-14): on the 16 GB Docker VM the stack already requests ~12.3 GiB,
+# and adding this 3 GiB request pushed the node to 95% requested. Loading the 2B model then
+# drove the VM into swap, restarted Postgres, Valkey, SeaweedFS and mock-llm, and a core
+# rolling restart could not schedule its surge pod. Enable it only on a VM with >= 8 GiB free
+# (raise Docker's memory, or drop other pools), or use the Ollama on the host instead:
+# base URL http://host.docker.internal:11434 and no in-cluster pod.
+# Never roll core with this on at 16 GB: delete its pods one at a time.
+# The bootstrap registers the model once, as the FREE pool row, ahead of any existing row.
+ollama:
+  enabled: true
+  model: qwen3.5:2b
+  persistence:
+    size: 10Gi
+  resources:
+    requests: { cpu: 500m, memory: 3Gi }
+    limits: { memory: 4Gi }
+core:
+  env:
+    APP_LOCAL_LLM_BOOTSTRAP_ENABLED: "true"
+    APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: http://vegaduta-ollama:11434
+    APP_LOCAL_LLM_BOOTSTRAP_MODEL: qwen3.5:2b
+    # Keep the mock-llm entry the stage already allows.
+    APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: mock-llm:11434,vegaduta-ollama:11434

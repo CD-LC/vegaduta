@@ -1,0 +1,2 @@
+core-webhooks: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) - runs only outbound webhook delivery and the workflow event outbox relay, actuator only.
+  app Secret : {{ include "vegaduta-lib.core.appSecretName" . }} (must be the same Secret core uses)

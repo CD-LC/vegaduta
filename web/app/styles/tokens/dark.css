@@ -1,0 +1,205 @@
+/* ---- 12. Dark "ink" counterpart of the paper + glass theme --------------- */
+/* Same geometry, same fonts, same glass, on near-black. Browser chrome
+   (scrollbars, form controls) follows via color-scheme on the root. */
+:root:not([data-mode="dark"]) {
+  color-scheme: light;
+}
+:root[data-mode="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-mode="dark"] {
+  --surface-page: #0e0e12;
+  --surface-card: rgba(255, 255, 255, 0.045);
+  --surface-card-alt: rgba(255, 255, 255, 0.03);
+  --surface-sunken: #09090c;
+  --surface-raised: #1a1a21; /* opaque: popovers, menus */
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-border-strong: rgba(255, 255, 255, 0.16);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.08);
+
+  --text-primary: #f4f4f6;
+  --text-secondary: #c3c3cc;
+  --text-muted: #9a9aa6;
+  --text-faint: #8c8c98;
+  --text-disabled: #4b4b56;
+
+  --ax-bg: var(--surface-page);
+  --ax-bg2: #131318;
+  --hud-line: rgba(255, 255, 255, 0.1);
+  --glass-surface: rgba(255, 255, 255, 0.04);
+  --glass-edge: 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 16px 40px -20px rgba(0, 0, 0, 0.7);
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-popover: 0 16px 40px -12px rgba(0, 0, 0, 0.7);
+
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius: 0.875rem;
+}
+
+:root[data-mode="dark"] .marketing-root {
+  --mkt-canvas: var(--surface-page);
+  --mkt-surface: rgba(255, 255, 255, 0.05);
+  --mkt-surface-raised: rgba(255, 255, 255, 0.08);
+  --mkt-surface-sunken: rgba(0, 0, 0, 0.35);
+  --mkt-line: rgba(255, 255, 255, 0.09);
+  --mkt-line-strong: rgba(255, 255, 255, 0.2);
+  --mkt-ink: #f4f4f6;
+  --mkt-ink-2: #c3c3cc;
+  --mkt-ink-3: #8f8f9b;
+  --mkt-glow-a: color-mix(in oklab, var(--accent-500) 24%, transparent);
+  --mkt-glow-b: color-mix(in oklab, #1b9fbb 12%, transparent);
+  --mkt-glow-c: color-mix(in oklab, #f97316 9%, transparent);
+  --mkt-grid: transparent;
+  --mkt-sheen: transparent;
+  --mkt-halo: transparent;
+  --mkt-shadow-sm: none;
+  --mkt-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.7);
+  --mkt-shadow-lg: 0 40px 90px -40px rgba(0, 0, 0, 0.85);
+  --mkt-shadow-glow: none;
+  --mkt-radius: 18px;
+  --mkt-radius-lg: 24px;
+  --mkt-radius-sm: 12px;
+}
+
+:root[data-mode="dark"] .mkt-grain,
+:root[data-mode="dark"] .mkt-canvas-bg::after {
+  display: none;
+}
+
+:root[data-mode="dark"] .mkt-canvas-bg::before {
+  inset: -10% -10% -10%;
+  background:
+    radial-gradient(50% 40% at 50% 0%, var(--mkt-glow-a) 0%, transparent 70%),
+    radial-gradient(38% 34% at 96% 28%, var(--mkt-glow-b) 0%, transparent 72%),
+    radial-gradient(34% 30% at 4% 46%, var(--mkt-glow-c) 0%, transparent 74%),
+    radial-gradient(44% 36% at 84% 78%, var(--mkt-glow-a) 0%, transparent 72%);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-card {
+  background: var(--mkt-surface);
+  border: 1px solid var(--mkt-line);
+  box-shadow: var(--glass-edge), var(--mkt-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-card--raised {
+  background: var(--mkt-surface-raised);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-card--interactive:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-nav {
+  background: rgba(14, 14, 18, 0.45);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-nav.is-stuck {
+  background: rgba(14, 14, 18, 0.7);
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-btn-primary {
+  color: #0e0e12;
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-btn-primary:hover {
+  background-color: var(--accent-400);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.11);
+}
+
+:root[data-mode="dark"] .eyebrow {
+  color: var(--text-muted);
+}
+
+/* Auth pages, dark */
+:root[data-mode="dark"] .auth-main {
+  background:
+    radial-gradient(46% 38% at 22% 8%, color-mix(in oklab, var(--accent-500) 22%, transparent) 0%, transparent 70%),
+    radial-gradient(36% 32% at 88% 92%, color-mix(in oklab, #1b9fbb 12%, transparent) 0%, transparent 72%),
+    var(--surface-page);
+}
+
+:root[data-mode="dark"] .auth-panel {
+  background: rgba(255, 255, 255, 0.025);
+  border-right-color: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+:root[data-mode="dark"] .auth-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow:
+    var(--glass-edge),
+    0 40px 100px -40px rgba(0, 0, 0, 0.9);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+}
+
+:root[data-mode="dark"] .auth-card input:not([type="checkbox"]):not([type="radio"]) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+/* Console, dark */
+:root[data-mode="dark"] [data-slot="card"]:not(.auth-card) {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    var(--glass-edge),
+    0 16px 40px -24px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+:root[data-mode="dark"] header.sticky {
+  background: rgba(14, 14, 18, 0.55) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+}
+
+:root[data-mode="dark"] nav[class*="group/rail"] {
+  background-color: rgba(14, 14, 18, 0.6) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+:root[data-mode="dark"] .app-aurora {
+  display: block;
+  opacity: 0.7;
+}
+
+:root[data-mode="dark"] .btn-glossy {
+  background-image: none;
+  box-shadow: none;
+}

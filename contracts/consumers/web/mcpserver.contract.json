@@ -1,0 +1,137 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-mcpserver-exposure-kind-resourceId",
+      "method": "GET",
+      "path": "/api/mcpserver/exposure/{kind}/{resourceId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-mcpserver-exposure-kind-resourceId",
+      "method": "PUT",
+      "path": "/api/mcpserver/exposure/{kind}/{resourceId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.exposed"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mcpserver-grants",
+      "method": "GET",
+      "path": "/api/mcpserver/grants",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].apiKeyDisplayPrefix",
+          "$[*].createdAt",
+          "$[*].enabled",
+          "$[*].exposedAgentIds",
+          "$[*].exposedKnowledgeCollectionIds",
+          "$[*].exposedWorkflowIds",
+          "$[*].id",
+          "$[*].lastUsedAt",
+          "$[*].name"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcpserver-grants",
+      "method": "POST",
+      "path": "/api/mcpserver/grants",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.grant",
+          "$.rawApiKey"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-mcpserver-grants-id",
+      "method": "DELETE",
+      "path": "/api/mcpserver/grants/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-mcpserver-grants-id",
+      "method": "PATCH",
+      "path": "/api/mcpserver/grants/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.apiKeyDisplayPrefix",
+          "$.createdAt",
+          "$.enabled",
+          "$.exposedAgentIds",
+          "$.exposedKnowledgeCollectionIds",
+          "$.exposedWorkflowIds",
+          "$.id",
+          "$.lastUsedAt",
+          "$.name"
+        ]
+      }
+    },
+    {
+      "id": "put-api-mcpserver-grants-id",
+      "method": "PUT",
+      "path": "/api/mcpserver/grants/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.apiKeyDisplayPrefix",
+          "$.createdAt",
+          "$.enabled",
+          "$.exposedAgentIds",
+          "$.exposedKnowledgeCollectionIds",
+          "$.exposedWorkflowIds",
+          "$.id",
+          "$.lastUsedAt",
+          "$.name"
+        ]
+      }
+    },
+    {
+      "id": "post-api-mcpserver-grants-id-rotate",
+      "method": "POST",
+      "path": "/api/mcpserver/grants/{id}/rotate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.grant",
+          "$.rawApiKey"
+        ]
+      }
+    },
+    {
+      "id": "get-api-mcpserver-grants-auth-options",
+      "method": "GET",
+      "path": "/api/mcpserver/grants/auth-options",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.grantKeys",
+          "$.oauth",
+          "$.origin"
+        ]
+      }
+    }
+  ]
+}

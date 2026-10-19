@@ -1,0 +1,20 @@
+-- "still extract phone numbers are not visible" follow-up (#602's fix was
+-- incomplete). Root cause: ChannelSession.externalId is set ONCE at
+-- creation and used both to key the session lookup (channel + external_id
+-- unique constraint) AND, until now, as the ONLY display value. WhatsApp's
+-- LID privacy feature means a contact's first message can arrive without
+-- key.senderPn attached (only key.remoteJid, an opaque "<digits>@lid" -
+-- see channels/whatsapp-qr/src/server.js's resolveSenderNumber javadoc) -
+-- that LID gets frozen in as external_id forever, since resolveOrCreate
+-- looks sessions up by exact external_id match and later messages that DO
+-- carry senderPn would, under the old single-value approach, resolve to a
+-- DIFFERENT string and silently create a second, fragmented session for
+-- the same real-world contact instead of ever fixing the display.
+--
+-- Fix: external_id keeps meaning "stable routing identity" (always
+-- remoteJid, never senderPn) so a contact's session/pairing/agent binding
+-- can never fragment. resolved_phone_number is new, separate, display-only
+-- metadata - set opportunistically whenever a message DOES carry senderPn,
+-- left null otherwise. The Channels screen's RECENT INBOUND shows
+-- resolved_phone_number when present, external_id as a fallback.
+ALTER TABLE channel_session ADD COLUMN resolved_phone_number VARCHAR(64);

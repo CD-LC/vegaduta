@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Observability: Logs, Metrics, Traces — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="operations" data-page="observability.html" data-doc="VD-OPS-001" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Operations<span class="sep">/</span>Observability</div>
+  <div class="doc-meta" data-auto></div>
+  <h1>Observability: Logs, Metrics &amp; Traces</h1>
+  <p class="lede">
+    Every signal the platform emits, where it lands in a self-hosted install, and
+    how to read it. The Compose stack ships an opt-in Prometheus / Grafana / Loki /
+    Promtail / Alertmanager set (profile <code>observability</code>) and Langfuse for
+    per-LLM-call traces (profile <code>tracing</code>). On Kubernetes the charts emit
+    Prometheus Operator objects and export traces to your OpenTelemetry endpoint.
+  </p>
+
+  <h2>Where each signal lives</h2>
+  <table>
+    <thead><tr><th>Signal</th><th>Store</th><th>Read it with</th></tr></thead>
+    <tbody>
+      <tr><td>Container stdout/stderr</td><td>Docker logs; Loki (via Promtail) with profile <code>observability</code>, retention 14 days (<code>deploy/loki/loki-config.yaml</code>)</td><td><code>scripts/vegaduta logs core</code>; Grafana Explore</td></tr>
+      <tr><td>Metrics</td><td>Prometheus, retention <code>PROMETHEUS_RETENTION</code> (default 15d); scrapes <code>core:8080/actuator/prometheus</code>, <code>valkey-exporter</code>, Temporal, SeaweedFS</td><td>Grafana dashboards in <code>deploy/grafana/provisioning/dashboards</code></td></tr>
+      <tr><td>Alerts</td><td>Prometheus rules in <code>deploy/prometheus/rules/</code> (shared with Helm), routed by Alertmanager</td><td>Alertmanager on <code>127.0.0.1:9093</code>; core stores webhook alerts (below)</td></tr>
+      <tr><td>LLM traces, prompts, tokens, latency</td><td>Langfuse (own Postgres + ClickHouse), profile <code>tracing</code></td><td>Langfuse UI on <code>127.0.0.1:3002</code></td></tr>
+      <tr><td>Durable app records — <code>llm_call_log</code>, audit, MCP registrations, jobs</td><td>Postgres (per-tenant schema)</td><td><code>psql</code> via <code>scripts/vegaduta compose exec postgres</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-warning">
+    <div class="callout-title">Blind spots — read before concluding "nothing happened"</div>
+    <ul style="margin:6px 0 2px">
+      <li>Prompt/completion text is deliberately not in app logs. It is in Langfuse, sampled (default 10&nbsp;%).</li>
+      <li>Secrets are redacted in MCP failure messages before logging — a blank-looking credential in an error is the redaction, not an empty config.</li>
+      <li>Browser-side errors never reach the server; use the browser console.</li>
+    </ul>
+  </div>
+
+  <h2>Reading a core log line</h2>
+  <p>Core's console pattern (<code>application.yml</code>):</p>
+<pre><code>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] [req=%X{requestId:-} tenant=%X{tenantId:-} user=%X{userId:-}] %logger{36} - %msg%n</code></pre>
+  <ul>
+    <li><code>req=</code> — request id; grep it to pull every line one request touched.</li>
+    <li><code>tenant=</code> — the tenant schema; empty means platform-level work or a background job that iterates tenants.</li>
+    <li><code>[thread]</code> — <code>tomcat-handler-*</code> is a real request, <code>scheduling-*</code> a scheduled job, <code>mcp-*</code> MCP connection management.</li>
+  </ul>
+<pre><code>scripts/vegaduta status                               # service state + health
+scripts/vegaduta logs core                            # follow one service
+scripts/vegaduta compose logs --since 30m core | grep -i error
+scripts/vegaduta compose logs core | grep -E 'Migrating schema|Successfully applied'   # Flyway progress</code></pre>
+  <p>Container exit code <code>137</code> is usually an OOM kill (core runs with <code>-XX:+ExitOnOutOfMemoryError</code> and exits rather than thrash); raise <code>CORE_MEM_LIMIT</code> or check <code>scripts/vegaduta doctor</code>. <code>143</code> is a normal stop.</p>
+
+  <h2>Metrics and alerts</h2>
+  <p>
+    Enable with <code>scripts/vegaduta up --full --profile observability</code>. Grafana is on
+    <code>127.0.0.1:3003</code> (admin password <code>GRAFANA_ADMIN_PASSWORD</code> in
+    <code>deploy/compose/.env</code>) with dashboards for operations, LLM business metrics,
+    alerts overview and user activity. Prometheus scrapes core over the internal compose
+    network, so blocking <code>/actuator</code> at your edge does not break monitoring.
+  </p>
+  <p>
+    Rule files: <code>vegaduta-alerts.yml</code> (core down/absent, LLM error rate, Hikari pool
+    exhaustion, JVM heap/GC, 5xx rate, workflow outbox backlog, Redis down/memory, governance
+    fail-open, job-lock anomalies), <code>vegaduta-platform-business-metrics.yml</code> and
+    <code>vegaduta-latency-recording.yml</code>. Alertmanager's one wired receiver is a webhook to
+    core (<code>POST /webhook/alerts/alertmanager</code>, bearer <code>PLATFORM_ALERTS_WEBHOOK_SECRET</code>),
+    which stores each alert in the control plane. Optional email via <code>ALERT_EMAIL_TO</code> +
+    <code>ALERT_SMTP_*</code>; add Slack or PagerDuty receivers in <code>deploy/alertmanager/alertmanager.yml</code>
+    for real paging.
+  </p>
+
+  <h2>Health endpoints</h2>
+<pre><code>curl -s http://localhost:8080/actuator/health            # aggregate
+curl -s http://localhost:8080/actuator/health/liveness   # is the JVM alive
+curl -s http://localhost:8080/actuator/health/readiness  # can it serve (DB, Redis, tenant migrations)
+curl -s http://localhost:8090/health                     # code-intel (profile code-intel)
+curl -s http://localhost:8091/health                     # app-builder (profile builder)</code></pre>
+  <p>
+    Exposed actuator endpoints are exactly <code>health</code>, <code>info</code> and
+    <code>prometheus</code>. The mail health indicator is disabled on purpose (an unconfigured
+    SMTP would drag the aggregate to DOWN); enable it with
+    <code>MANAGEMENT_HEALTH_MAIL_ENABLED=true</code> only where SMTP is always on.
+  </p>
+  <div class="callout callout-warning">
+    <div class="callout-title">Keep core's port behind a proxy</div>
+    Core permits <code>/actuator/prometheus</code> without a JWT so Prometheus can scrape it.
+    <code>ActuatorEdgeGuardFilter</code> returns 404 for that path when the request carries a proxy
+    forwarding header (as every request through Caddy or an Ingress does), unless it presents the
+    optional scrape token. So never publish core's port 8080 to the internet directly (Compose binds it
+    to <code>127.0.0.1</code> by default); an edge rule blocking <code>/actuator/*</code> except
+    <code>/actuator/health</code> is still good defence in depth. See
+    <a href="../security/threat-model.html">Threat Model</a>.
+  </div>
+
+  <h2>Langfuse LLM tracing</h2>
+<pre><code>OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = http://langfuse-web:3000/api/public/otel/v1/traces
+LANGFUSE_OTEL_AUTH_HEADER          = &lt;Basic …&gt;   (secret, from deploy/compose/.env)
+TRACING_SAMPLING_PROBABILITY       = 0.1           (10% sampling)</code></pre>
+  <ul>
+    <li>A missing trace may simply not have been sampled. Set <code>TRACING_SAMPLING_PROBABILITY=1.0</code> temporarily when chasing a bug, then put it back.</li>
+    <li>The join key: <code>llm_call_log.trace_id</code> is the Langfuse trace id — SQL gives cost/error detail, Langfuse gives the prompt and tool calls.</li>
+    <li>It fails silently. A wrong endpoint or stale auth header drops spans while the platform keeps working — absence of traces is not evidence of absence of calls.</li>
+  </ul>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Further reading</div>
+    <p style="margin:4px 0 0">
+      Setup detail: <code>deploy/prometheus/</code>, <code>deploy/grafana/</code>, <code>deploy/loki/</code>,
+      <code>deploy/promtail/</code>, <code>deploy/alertmanager/</code>. Related:
+      <a href="backup-restore.html">Backup &amp; Restore</a> ·
+      <a href="../deployment/compose-stack.html">Docker Compose Stack</a> ·
+      <a href="../security/threat-model.html">Threat Model</a>.
+    </p>
+  </div>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Human-reviewed exceptions to flyway-lint.sh's applied-migration EDIT guard.
+#
+# Sibling of flyway-lint-allowed-renames.txt, and the same discipline applies:
+# this file IS the sign-off, not something the script verifies. The guard's
+# static heuristic ("this file's blob changed since the merge base") cannot
+# tell a dangerous edit of a LIVE migration from a safe correction to one that
+# has provably never run in any environment. Only a human can.
+#
+# Format: <path relative to repo root> <resulting blob sha>  # justification
+#
+# The blob sha is a deliberate pin: a line authorises ONE specific content
+# hash. It cannot decay into "this file may always change" - the next edit to
+# the same file needs its own reviewed line. Get the sha with:
+#   git hash-object <path>
+#
+# Before adding a line, establish that the migration has never been applied:
+#   - when did the file first appear (git log --diff-filter=A)?
+#   - has anything deployed since then?
+# If either answer is uncertain, do NOT add a line. Write a new migration.
+
+core/app/src/main/resources/db/migration/controlplane/V233__dynamic_pricing.sql b80a042100093cdf333bac9564e6986f76a3606a  # Pre-production correction of a migration that could NEVER have applied, landed as f5e27b3a. Two independent defects: (1) `pricing_source VARCHAR(32) NOT NULL DEFAULT 'static'` violated the table's own chk_pricing_source CHECK, which permits only provider_api/provider_catalog/static_fallback/admin_override/conservative - so the ALTER TABLE would fail on any non-empty table; corrected to 'static_fallback'. (2) The overrides index used `WHERE expires_at IS NULL OR expires_at > NOW()`, which Postgres rejects outright ("functions in index predicate must be marked IMMUTABLE") - NOW() is STABLE, and an index whose membership shifts with wall-clock time can never stay consistent; the predicate was dropped and the expiry filter belongs in the query. Never applied anywhere: the file first appeared 2026-09-17 (a076a339, itself a renumber of V227), and the last production deploy was 2026-09-10 - deploy-azure.yml has never had a successful run (25/25 failed at azure/login, no credentials configured), so nothing built from this tree has ever reached a database. Shipping the broken V233 and stacking a fixup on top would have left a migration in history that fails on a fresh environment.
+core/app/src/main/resources/db/migration/controlplane/V281__resolution_pricing_settings.sql f4e72b330e447fcf63423583555d355a777ade0f  # schema-qualify control_plane.platform_setting; first shipped in ff96df5f (post-deploys a28ce6b1), and its only statement fails on every Postgres (unqualified name -> public.platform_setting missing) so it provably never applied anywhere
+core/app/src/main/resources/db/migration/tenant/V357__ip_blacklist.sql 3d06634daa5a28e8e0fb9b7ec5183dd0e7c1fa7b  # never applied: file appeared in f083aa66 (2026-09-26, undeployed — prod core a616c385 predates it) and CANNOT apply — its partial-index predicate fails on Postgres at execution; this edit removes the illegal WHERE expires_at > CURRENT_TIMESTAMP
+core/app/src/main/resources/db/migration/tenant/V358__user_blacklist_and_challenge_nonces.sql c853d35aeb889b7aac17491e508d19523347abbe  # same provenance and same illegal predicate as V357; never applied anywhere
+core/app/src/main/resources/db/migration/tenant/V342__agent_workflow_versioning.sql c18c9acbc84d9c9c8bf31829991262c0c3df1e98  # 2nd pin (replaces 0d341abf CHAR->VARCHAR fix): `config_json::bytea`/`graph_json::bytea` casts fail with 22P02 on any row whose JSON contains backslash escapes; switched to byte-exact convert_to(col,'UTF8'). APPLIED schemas (staging public 2026-09-27, likely prod public+tenants under fa41ffbc) need a one-time checksum repair: `flyway repair` or UPDATE flyway_schema_history checksum WHERE version='342'. Schemas where it failed (staging demo_shared) get clean application on next migrate. Identical hash output where it already ran - no data drift.

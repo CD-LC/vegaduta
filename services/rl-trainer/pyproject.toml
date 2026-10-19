@@ -1,0 +1,53 @@
+# Tool config for the rl-trainer service (lint, tests, types). First such
+# config this service has had (2026-09-30).
+#
+# WHY THIS FILE EXISTS AND WHAT IT IS NOT: this pyproject.toml carries ONLY
+# tool config. There is deliberately no [project]/[build-system] section -
+# the service is not a package (the Dockerfile pip-installs requirements.txt
+# and COPYs app/, it never builds or installs this directory), and adding
+# packaging metadata here would invite someone to `pip install .` a thing
+# that was never designed to be installed. The Dockerfile doesn't COPY this
+# file, so it is completely inert for image builds.
+#
+# WHY THE RUFF RULES MATCH sidecar/pyproject.toml EXACTLY: rl-trainer is
+# written in the same house style as sidecar/code-intel (same import
+# discipline, `from __future__ import annotations` + modern generics,
+# raise-from hygiene) and was measured clean against that exact rule set
+# with ruff 0.12.4 (the CI version) before this file landed - zero pre-
+# existing violations, so there is no reason for it to drift. See
+# sidecar/pyproject.toml for the per-rule rationale (why line-length 100,
+# why D/TRY/BLE/S/PL/ANN are deliberately NOT selected). If a repo-root
+# ruff config lands later, delete this [tool.ruff*] block in that same
+# change - ruff uses the NEAREST config, so this file would silently win.
+#
+# WHY py312: the Dockerfile is python:3.12-slim. Lint against the image,
+# not whatever interpreter a dev laptop happens to have.
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "E501", "I", "UP", "B", "C4", "RUF"]
+# B008 is the canonical FastAPI false positive (`Depends(...)` /
+# `Header(...)` in a default argument is the framework's DI idiom).
+ignore = ["B008"]
+
+[tool.ruff.format]
+# Defaults on purpose - they match the existing style.
+
+[tool.pytest.ini_options]
+# Plain pytest suite (tests/). Offline and deterministic: the Anthropic
+# client is faked at the SDK seam, JWTs are signed with a locally generated
+# RSA key, and no test needs a GPU, torch, or the network.
+# Install: pip install -r requirements.txt -r requirements-dev.txt
+testpaths = ["tests"]
+
+[tool.mypy]
+# NON-BLOCKING / advisory: nothing in CI runs mypy against this service
+# today. The security-sensitive module (app/auth.py) is kept clean under
+# --disallow-untyped-defs --check-untyped-defs; the rest of app/ is not yet
+# fully annotated. ignore_missing_imports so a checker venv without the
+# service's runtime deps (PyJWT, anthropic) still runs cleanly.
+python_version = "3.12"
+ignore_missing_imports = true

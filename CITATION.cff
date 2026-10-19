@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use VegaDūta in your research or work, please cite it as below."
+title: "VegaDūta: an open-source multi-tenant platform for AI agents and workflows"
+type: software
+authors:
+  - name: "The VegaDūta Authors"
+repository-code: "https://github.com/CD-LC/vegaduta"
+url: "https://github.com/CD-LC/vegaduta"
+license: Apache-2.0
+abstract: >-
+  VegaDūta is a self-hostable, multi-tenant platform for building AI agents,
+  orchestrating them in workflows with human approval, grounding them in
+  tenant data, and connecting them to messaging channels. It supports the
+  Model Context Protocol (client and server), Agent2Agent, AG-UI and
+  OpenTelemetry.
+keywords:
+  - ai-agents
+  - agentic-ai
+  - model-context-protocol
+  - a2a
+  - workflow
+  - rag
+  - multi-tenant

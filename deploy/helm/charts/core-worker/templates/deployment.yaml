@@ -1,0 +1,4 @@
+{{- if not (include "vegaduta-lib.temporal.enabled" .) -}}
+{{- fail "core-worker is the Temporal worker: it needs global.temporal.enabled=true and global.temporal.target (the umbrella only deploys it when Temporal is on)" -}}
+{{- end -}}
+{{ include "vegaduta-lib.coreDeployment" (dict "root" . "role" "worker") }}

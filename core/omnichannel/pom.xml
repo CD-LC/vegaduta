@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>omnichannel</artifactId>
+  <name>omnichannel</name>
+  <description>Twilio WhatsApp adapter, channel sessions/pairing, webhook signature validation. Depends on: agents, approval, audit, chat, crypto, security, tenancy.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Channel webhooks run turns through AgentChatService in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <!-- Wave-2 idempotency pass: InboundMessageDedupService reports its
+         Redis fail-open branch to GovernanceDegradationSignal (core.chat's
+         gateway package - see that class's javadoc for why it lives there).
+         chat was already on this module's compile classpath transitively
+         (agents -> chat), but a class we now reference by name deserves a
+         declared edge. No cycle: chat depends only on providers/security/
+         tenancy, none of which reach omnichannel. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <!-- #474 follow-up ("I want to know when an auto-reply failed to
+         deliver") - TwilioStatusCallbackController records a delivery
+         failure via AuditLogService, the same audit trail the console's
+         existing Audit Log / Live Audit Tail screens already read from. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <!-- V242 inbound safety scan - InboundSafetyScanService evaluates
+         ContentGuardrailEngine's JAILBREAK detector at the resolveOrCreate
+         chokepoint. guardrails depends on approval/audit/tenancy only - no
+         dependency back on omnichannel, so no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- Interactive Workflow Designer PRD, Phase 0 - WorkflowEventPublisher,
+         called from TwilioWebhookController. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>eventbus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- AXON Channels screen (#472) - ChannelStatusController surfaces real
+         Mobile SDK (devices module) counts alongside every other channel. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>devices</artifactId>
+    </dependency>
+    <!-- SpeechTextNormalizer: TwiML <Say> is a text-to-speech instruction, so
+         both the inbound Conversation Relay fallback (TwilioVoiceWebhookController)
+         and the outbound Quick Task call (VoiceCallService) must normalize the
+         LLM/workflow text before speaking it. Leaf module, JDK-only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>speech</artifactId>
+    </dependency>
+    <!-- Test only: WhatsAppVoiceNoteServiceTest uses SarvamIndicLanguages. It
+         used to arrive transitively through agents; agents no longer depends
+         on sarvam (ADR-0011), and kernel main code must not import it. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sarvam</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <!--
+      Version confirmed via Maven Central at write time (12.1.1) - double-check
+      https://central.sonatype.com/artifact/com.twilio.sdk/twilio for anything
+      newer, same caveat as the original core/pom.xml.
+    -->
+    <dependency>
+      <groupId>com.twilio.sdk</groupId>
+      <artifactId>twilio</artifactId>
+      <version>12.1.1</version>
+    </dependency>
+    <!-- Email/IMAP channel (#472) - JavaMailSender for outbound replies
+         (EmailChannelAdapter) and jakarta.mail's Store/Folder IMAP client for
+         inbound polling (EmailInboundPollingJob/EmailCredentialService). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <!-- Contacts XLSX import (V238, /admin/contacts) - WorkbookFactory reads
+         the uploaded sheet. Version matched to core/documentgen's pin (the
+         only other POI consumer in the reactor) so the build carries one
+         POI, not two. -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.3.0</version>
+    </dependency>
+    <!-- Master Roadmap 2026 item #17 (real-time voice agents) -
+         VoiceRelayWebSocketHandler bridges Twilio Conversation Relay's
+         WebSocket protocol to AgentChatService. reactor-core (Flux) is
+         already transitively available here via the agents dependency
+         above - TwilioWebhookController already consumes
+         AgentChatService.chat()'s Flux<String> in this same module. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

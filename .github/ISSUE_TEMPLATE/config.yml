@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (private)
+    url: https://github.com/CD-LC/vegaduta/security/advisories/new
+    about: Report vulnerabilities privately through GitHub Security Advisories. See SECURITY.md.
+  - name: Questions and ideas (GitHub Discussions)
+    url: https://github.com/CD-LC/vegaduta/discussions
+    about: Ask how to do something, share what you built, or discuss an idea before opening an issue.
+  - name: Documentation
+    url: https://github.com/CD-LC/vegaduta/tree/main/docs
+    about: Getting started, installation, configuration and extension guides.

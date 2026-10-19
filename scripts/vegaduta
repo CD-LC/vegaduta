@@ -1,0 +1,1803 @@
+#!/usr/bin/env bash
+# =============================================================================
+# vegaduta — install / run / operate a self-hosted VegaDūta with Docker Compose
+#
+#   scripts/vegaduta up [--lite|--full] [--profile NAME]... [--build] [--domain D]
+#                       [--local-ai[=container|host]] [--local-model TAG] [--cloud] [--search] [--dry-run]
+#   scripts/vegaduta personal [--native-core] [--build] [--local-ai[=container|host]] [--local-model TAG]
+#                       [--cloud] [--no-search] [--no-tools] [--browser] [--dry-run]
+#                       (one-person laptop mode: postgres + valkey + core + web, no Keycloak; docs: deploy/compose/personal.yml)
+#   scripts/vegaduta down [--volumes]
+#   scripts/vegaduta status
+#   scripts/vegaduta logs [SERVICE] [--no-follow]
+#   scripts/vegaduta doctor
+#   scripts/vegaduta secrets [--domain D]
+#   scripts/vegaduta backup [DIR]            (database(s) + files + .env, 0600)
+#   scripts/vegaduta restore DIR             (database(s) from a backup; asks first)
+#   scripts/vegaduta upgrade [--version X.Y.Z] [--no-backup]
+#   scripts/vegaduta restart [SERVICE]       (personal: restart core; prints a fresh first-run setup link)
+#   scripts/vegaduta make-admin USERNAME_OR_EMAIL
+#   scripts/vegaduta models [list|pull TAG|rm TAG]   (local model catalog; Ollama)
+#   scripts/vegaduta seed-demo [--tenant NAME] [--remove] [--yes]   (fictional "Example" data for the pilot report)
+#   scripts/vegaduta projects [PATH]      (personal: show, or switch, the folder on this computer the Assistant works in)
+#   scripts/vegaduta compose ARGS...      (raw docker compose with the right files)
+#
+# Environment: VEGADUTA_ENV_FILE (default deploy/compose/.env).
+# Windows (PowerShell): scripts/vegaduta.ps1 has the same commands.
+# =============================================================================
+set -euo pipefail
+# Everything this script writes (.env, .env.bak.*, backups, state) holds or
+# sits next to secrets: owner-only from the start (INF-003).
+umask 077
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+COMPOSE_DIR="$REPO_ROOT/deploy/compose"
+ENV_FILE="${VEGADUTA_ENV_FILE:-$COMPOSE_DIR/.env}"
+ENV_EXAMPLE="$COMPOSE_DIR/.env.example"
+STATE_FILE="${VEGADUTA_STATE_FILE:-$COMPOSE_DIR/.vegaduta-state}"
+
+# Every secret the stack can need. `secrets` fills the empty ones.
+# format NAME:KIND  (hex16|hex32|b64|fernet|lfpk|lfsk)
+SECRET_SPECS="
+POSTGRES_PASSWORD:hex16
+POSTGRES_APP_PASSWORD:hex16
+VALKEY_PASSWORD:hex16
+APP_ENCRYPTION_KEY:b64
+PLATFORM_MASTER_KEY:b64
+KEYCLOAK_ADMIN_PASSWORD:hex16
+KEYCLOAK_CLIENT_SECRET:hex32
+KEYCLOAK_DB_PASSWORD:hex16
+STORAGE_ACCESS_KEY:hex16
+STORAGE_SECRET_KEY:hex32
+SIDECAR_SHARED_SECRET:hex32
+CODE_INTEL_INTERNAL_TOKEN:hex32
+TOOL_SANDBOX_INTERNAL_TOKEN:hex32
+MCP_STDIO_SIDECAR_SHARED_SECRET:hex32
+WORKSPACE_RUNNER_SECRET:hex32
+APP_BUILDER_CORE_SERVICE_TOKEN:hex32
+APP_BUILDER_ENCRYPTION_KEY:fernet
+RL_TRAINER_INTERNAL_TOKEN:hex32
+PLATFORM_ALERTS_WEBHOOK_SECRET:b64
+TEMPORAL_DB_PASSWORD:hex16
+LIVEKIT_API_KEY:hex16
+LIVEKIT_API_SECRET:b64
+GRAFANA_ADMIN_PASSWORD:hex16
+LANGFUSE_POSTGRES_PASSWORD:hex16
+LANGFUSE_CLICKHOUSE_PASSWORD:hex16
+LANGFUSE_REDIS_AUTH:hex16
+LANGFUSE_S3_SECRET_KEY:hex32
+LANGFUSE_SALT:hex32
+LANGFUSE_ENCRYPTION_KEY:hex32
+LANGFUSE_NEXTAUTH_SECRET:hex32
+LANGFUSE_INIT_PROJECT_PUBLIC_KEY:lfpk
+LANGFUSE_INIT_PROJECT_SECRET_KEY:lfsk
+LANGFUSE_INIT_USER_PASSWORD:hex16
+SEARXNG_SECRET:hex32
+"
+ALL_PROFILES="temporal events jobs observability tracing voice rl code-intel builder sandbox tools browser"
+
+# ------------------------------------------------------------------ helpers
+if [ -t 1 ]; then C_B=$'\033[1m'; C_G=$'\033[32m'; C_Y=$'\033[33m'; C_R=$'\033[31m'; C_C=$'\033[36m'; C_0=$'\033[0m'
+else C_B=; C_G=; C_Y=; C_R=; C_C=; C_0=; fi
+say()  { printf '%s==>%s %s\n' "$C_C" "$C_0" "$*"; }
+ok()   { printf '  %s[ok]%s   %s\n' "$C_G" "$C_0" "$*"; }
+warn() { printf '  %s[warn]%s %s\n' "$C_Y" "$C_0" "$*"; WARNINGS=$((WARNINGS + 1)); }
+bad()  { printf '  %s[fail]%s %s\n' "$C_R" "$C_0" "$*"; FAILURES=$((FAILURES + 1)); }
+die()  { printf '%sERROR:%s %s\n' "$C_R" "$C_0" "$*" >&2; exit 1; }
+WARNINGS=0; FAILURES=0
+
+# get_env KEY -> value from the env file ("" if absent). Tolerates CRLF and quotes.
+get_env() {
+  [ -f "$ENV_FILE" ] || { printf ''; return; }
+  awk -v k="$1" 'BEGIN{FS="="} { sub(/\r$/, "") } $1==k { sub(/^[^=]*=/, ""); v=$0 } END{ print v }' "$ENV_FILE" \
+    | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"
+}
+
+# set_env KEY VALUE [force] — writes KEY=VALUE. Without "force" an existing
+# non-empty value is NEVER replaced.
+set_env() {
+  local key="$1" val="$2" force="${3:-}" cur
+  cur="$(get_env "$key")"
+  if [ -n "$cur" ] && [ "$force" != "force" ]; then return 0; fi
+  if grep -q "^${key}=" "$ENV_FILE"; then
+    # umask 077 makes the temp file 0600; mv keeps that mode. chmod anyway in
+    # case the file system ignores the umask.
+    KEY="$key" VAL="$val" awk 'BEGIN{k=ENVIRON["KEY"]; v=ENVIRON["VAL"]}
+      { line=$0; sub(/\r$/, "", line); if (index(line, k"=")==1) print k"="v; else print line }' \
+      "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+  else
+    printf '%s=%s\n' "$key" "$val" >> "$ENV_FILE"
+  fi
+  chmod 600 "$ENV_FILE" 2>/dev/null || true
+}
+
+# The release this checkout / tarball ships: the release workflow stamps
+# VEGADUTA_VERSION into .env.example. Empty in a plain git checkout.
+shipped_version() {
+  [ -f "$ENV_EXAMPLE" ] || return 0
+  awk -F= '/^VEGADUTA_VERSION=/{ sub(/\r$/, ""); v=$2 } END{ print v }' "$ENV_EXAMPLE"
+}
+
+# resolve_version: every image tag comes from VEGADUTA_VERSION (no `latest`
+# default). With --build and no version, images are built and tagged `local`.
+resolve_version() {
+  local v; v="$(get_env VEGADUTA_VERSION)"
+  if [ -n "$v" ]; then export VEGADUTA_VERSION="$v"; return 0; fi
+  if [ "$BUILD" = 1 ]; then export VEGADUTA_VERSION=local; return 0; fi
+  die "VEGADUTA_VERSION is empty in $ENV_FILE. Set it to a published release (see https://github.com/CD-LC/vegaduta/releases), e.g. scripts/vegaduta upgrade --version 1.2.3, or build from source with --build."
+}
+
+rand_hex() { # rand_hex BYTES
+  if command -v openssl >/dev/null 2>&1; then openssl rand -hex "$1"
+  else head -c "$1" /dev/urandom | od -An -tx1 | tr -d ' \n'; fi
+}
+rand_b64() { # 32 random bytes, standard base64 (44 chars)
+  if command -v openssl >/dev/null 2>&1; then openssl rand -base64 32 | tr -d '\n'
+  else head -c 32 /dev/urandom | base64 | tr -d '\n'; fi
+}
+gen_secret() {
+  case "$1" in
+    hex16) rand_hex 16 ;;
+    hex32) rand_hex 32 ;;
+    b64) rand_b64 ;;
+    fernet) rand_b64 | tr '+/' '-_' ;;  # urlsafe base64 of 32 bytes = Fernet key
+    lfpk) printf 'pk-lf-%s' "$(rand_hex 16)" ;;
+    lfsk) printf 'sk-lf-%s' "$(rand_hex 16)" ;;
+    *) die "unknown secret kind $1" ;;
+  esac
+}
+
+is_local_url() { case "$1" in *localhost*|*127.0.0.1*|*'[::1]'*) return 0 ;; *) return 1 ;; esac; }
+
+# ------------------------------------------------------------------ secrets
+cmd_secrets() {
+  local domain=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --domain) domain="${2:?--domain needs a value}"; shift 2 ;;
+      --domain=*) domain="${1#*=}"; shift ;;
+      *) die "secrets: unknown option $1" ;;
+    esac
+  done
+  if [ ! -f "$ENV_FILE" ]; then
+    [ -f "$ENV_EXAMPLE" ] || die "missing $ENV_EXAMPLE"
+    install -m 600 "$ENV_EXAMPLE" "$ENV_FILE" 2>/dev/null || cp "$ENV_EXAMPLE" "$ENV_FILE"
+    say "Created $ENV_FILE from .env.example"
+  fi
+  # Also repairs a .env left world-readable by older versions of this script.
+  chmod 600 "$ENV_FILE" 2>/dev/null || true
+  # Pin the release these compose files belong to (never overrides a value).
+  local shipped; shipped="$(shipped_version)"
+  [ -n "$shipped" ] && set_env VEGADUTA_VERSION "$shipped"
+  local filled=0 spec name kind
+  for spec in $SECRET_SPECS; do
+    name="${spec%%:*}"; kind="${spec#*:}"
+    if [ -z "$(get_env "$name")" ]; then
+      set_env "$name" "$(gen_secret "$kind")"; filled=$((filled + 1))
+    fi
+  done
+  # Derived: Langfuse OTLP auth header for core = Basic base64(pk:sk).
+  if [ -z "$(get_env LANGFUSE_OTEL_AUTH_HEADER)" ]; then
+    local pair
+    pair="$(get_env LANGFUSE_INIT_PROJECT_PUBLIC_KEY):$(get_env LANGFUSE_INIT_PROJECT_SECRET_KEY)"
+    set_env LANGFUSE_OTEL_AUTH_HEADER "Basic $(printf '%s' "$pair" | base64 | tr -d '\n')"
+  fi
+  if [ -n "$domain" ]; then
+    set_env BASE_DOMAIN "$domain" force
+    set_env PUBLIC_APP_URL "https://app.$domain" force
+    set_env PUBLIC_ADMIN_URL "https://admin.$domain" force
+    set_env PUBLIC_API_URL "https://api.$domain" force
+    set_env PUBLIC_AUTH_URL "https://auth.$domain" force
+    set_env PUBLIC_CODE_INTEL_URL "https://codeintel.$domain" force
+    set_env PUBLIC_BUILDER_URL "https://builder.$domain" force
+    set_env PUBLIC_LIVEKIT_URL "wss://livekit.$domain" force
+    say "Public URLs set for https://*.$domain"
+  fi
+  if [ "$filled" -gt 0 ]; then
+    say "Generated $filled secret(s) in $ENV_FILE (existing values untouched)."
+    printf '    %sBack up this file.%s APP_ENCRYPTION_KEY must never change after first start:\n' "$C_B" "$C_0"
+    printf '    every stored provider key / channel secret is encrypted with it.\n'
+  else
+    say "All secrets already present in $ENV_FILE — nothing changed."
+  fi
+}
+
+# ------------------------------------------------------------ compose args
+TIER=""; PROFILES=""; BUILD=0; COMPOSE_ARGS=(); LOCAL_AI=""; LOCAL_MODEL=""; MODEL_CHOICE_DONE=0; SEARCH=""; TOOLS=""; BROWSER=""; SEARCH_EXPLICIT=0; TOOLS_EXPLICIT=0; BROWSER_EXPLICIT=0; PERSONAL_FRESH=0; DRY_RUN=0; NATIVE_CORE=0; CLOUD=""; MODEL_NOT_PULLED=0; EMBED_NOT_PULLED=0
+
+load_state() {
+  if [ -z "$TIER" ] && [ -f "$STATE_FILE" ]; then
+    TIER="$(sed -n 's/^tier=//p' "$STATE_FILE")"
+    [ -n "$PROFILES" ] || PROFILES="$(sed -n 's/^profiles=//p' "$STATE_FILE")"
+    [ "$BUILD" = 1 ] || BUILD="$(sed -n 's/^build=//p' "$STATE_FILE")"
+    [ -n "$LOCAL_AI" ] || LOCAL_AI="$(sed -n 's/^local_ai=//p' "$STATE_FILE")"
+    [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(sed -n 's/^local_model=//p' "$STATE_FILE")"
+    [ -n "$SEARCH" ] || SEARCH="$(sed -n 's/^search=//p' "$STATE_FILE")"
+    [ -n "$TOOLS" ] || TOOLS="$(sed -n 's/^tools=//p' "$STATE_FILE")"
+    [ -n "$BROWSER" ] || BROWSER="$(sed -n 's/^browser=//p' "$STATE_FILE")"
+    [ "$NATIVE_CORE" = 1 ] || NATIVE_CORE="$(sed -n 's/^native_core=//p' "$STATE_FILE")"
+    [ -n "$CLOUD" ] || CLOUD="$(sed -n 's/^cloud=//p' "$STATE_FILE")"
+  fi
+  TIER="${TIER:-lite}"; BUILD="${BUILD:-0}"; NATIVE_CORE="${NATIVE_CORE:-0}"
+}
+save_state() {
+  local prev=""
+  [ -f "$STATE_FILE" ] && prev="$(sed -n 's/^previous_version=//p' "$STATE_FILE")"
+  # cloud=1: the user said --cloud; a plain re-run must not second-guess it (a local model chosen later clears it).
+  local cloud="${CLOUD:-0}"; [ -n "$LOCAL_AI" ] && cloud=0
+  printf 'tier=%s\nprofiles=%s\nbuild=%s\nlocal_ai=%s\nlocal_model=%s\nsearch=%s\nnative_core=%s\ncloud=%s\nprevious_version=%s\ntools=%s\nbrowser=%s\n' "$TIER" "$PROFILES" "$BUILD" "$LOCAL_AI" "$LOCAL_MODEL" "$SEARCH" "$NATIVE_CORE" "$cloud" "${PREVIOUS_VERSION:-$prev}" "$TOOLS" "$BROWSER" > "$STATE_FILE"
+}
+
+add_profile() { case " $PROFILES " in *" $1 "*) ;; *) PROFILES="${PROFILES:+$PROFILES }$1" ;; esac; }
+
+# Expand implied profiles and export the matching core feature switches.
+resolve_profiles() {
+  local p extra=""
+  for p in $(get_env COMPOSE_PROFILES | tr ',' ' '); do add_profile "$p"; done
+  case " $PROFILES " in *" jobs "*) add_profile temporal ;; esac
+  case " $PROFILES " in *" temporal "*) add_profile events ;; esac
+  case " $PROFILES " in *" builder "*) add_profile code-intel ;; esac
+  for p in $PROFILES; do
+    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; lite: rag; personal: rag workspace)" ;; esac
+  done
+  if [ "$TIER" = personal ]; then
+    # personal has no Kafka/Temporal/Keycloak services: only `rag`, `workspace` and `tools` select anything.
+    # Say so instead of silently ignoring (COMPOSE_PROFILES in a shared .env may name others).
+    for p in $PROFILES; do
+      case "$p" in rag|workspace|tools|browser) ;; *) warn "profile '$p' is not available in personal mode and is ignored" ;; esac
+    done
+    # `tools` (the MCP runner) is a choice like web search: it lives in TOOLS and the state file, not in PROFILES,
+    # so a caller that passes its own --profile list (the Setup app) cannot drop it. An explicit
+    # `--profile tools` turns it on.
+    case " $PROFILES " in
+      *" tools "*) TOOLS=1; PROFILES="$(printf ' %s ' "$PROFILES" | sed 's/ tools / /g; s/^ *//; s/ *$//')" ;;
+    esac
+    # `browser` (the agent's own browser, services/browser-runner) is an opt-in choice kept in BROWSER and the
+    # state file for the same reason. It needs a containerised core: a host JVM keeps its own Chromium path.
+    case " $PROFILES " in
+      *" browser "*) BROWSER=1; PROFILES="$(printf ' %s ' "$PROFILES" | sed 's/ browser / /g; s/^ *//; s/ *$//')" ;;
+    esac
+    if [ "$BROWSER" = 1 ] && [ "$NATIVE_CORE" = 1 ]; then
+      warn "--browser needs the container core and is ignored with --native-core (a host JVM drives its own Chromium)"
+      BROWSER=0
+    fi
+    # STDIO MCP servers run in the mcp-stdio-runner container; core relays to it. A host JVM (--native-core)
+    # keeps its own `os` sandbox and launchers, and does not use the runner.
+    if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then export MCP_STDIO_SIDECAR_ENABLED=true; fi
+    case " $PROFILES " in
+      *" workspace "*)
+        # The Assistant's build terminal: the workspace-runner container plus the projects folder,
+        # mounted into it and into core (docs/personal-mode.md "Build projects with the Assistant").
+        local projects; projects="$(get_env VEGADUTA_PROJECTS_DIR)"; projects="${projects:-$HOME/VegaDuta-Projects}"
+        mkdir -p "$projects"
+        export VEGADUTA_PROJECTS_DIR="$projects"
+        export APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL="${APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL:-http://workspace-runner:8090}" ;;
+    esac
+    return 0
+  fi
+  if [ "$TIER" = lite ]; then return 0; fi
+  case " $PROFILES " in *" events "*) extra=",workflow" ;; esac
+  case " $PROFILES " in *" temporal "*) extra=",workflow,temporal"; export WORKFLOW_EXECUTION_ENGINE=temporal ;; esac
+  [ -n "$extra" ] && [ -z "$(get_env CORE_PROFILES_EXTRA)" ] && export CORE_PROFILES_EXTRA="$extra"
+  case " $PROFILES " in *" code-intel "*) export CODE_INTEL_ENABLED=true ;; esac
+  case " $PROFILES " in *" sandbox "*) export TOOL_SANDBOX_ENABLED=true ;; esac
+  # mcp-stdio-runner (sandbox/tools/browser): STDIO MCP servers - tenant ones
+  # and the `mcp` profile's built-ins - run there, not in the slim core image.
+  case " $PROFILES " in
+    *" sandbox "*|*" tools "*|*" browser "*)
+      export MCP_STDIO_SIDECAR_ENABLED=true
+      [ -z "$(get_env CORE_MCP_PROFILE)" ] && export CORE_MCP_PROFILE=",mcp" ;;
+  esac
+  case " $PROFILES " in
+    *" browser "*)
+      export MCP_STDIO_RUNNER_VARIANT=-browser MCP_STDIO_RUNNER_WITH_BROWSERS=true
+      [ -z "$(get_env MCP_STDIO_RUNNER_MEM_LIMIT)" ] && export MCP_STDIO_RUNNER_MEM_LIMIT=2g ;;
+  esac
+  return 0
+}
+
+# Free web search for agents (SearXNG, docs/configuration.md "Web search"): layers the overlay
+# and points core at it. Nothing leaves the private network except SearXNG's own queries.
+search_args() {
+  [ "$SEARCH" = 1 ] || return 0
+  COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.search.yml")
+  # lite.yml leaves core on the implicit default network; the overlay would replace it (see the file).
+  { [ "$TIER" = lite ] || [ "$TIER" = personal ]; } && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.search.lite.yml")
+  COMPOSE_ARGS+=(--profile search)
+  export WEB_SEARCH_PROVIDER="${WEB_SEARCH_PROVIDER:-searxng}"
+  if [ "$TIER" = personal ] && [ "$NATIVE_CORE" = 1 ]; then
+    # The host JVM is not on search-net: SearXNG is published on loopback for it.
+    COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.search.native.yml")
+    export WEB_SEARCH_SEARXNG_BASE_URL="${WEB_SEARCH_SEARXNG_BASE_URL:-http://127.0.0.1:$(get_env SEARXNG_HOST_PORT | grep . || echo 8888)}"
+  else
+    export WEB_SEARCH_SEARXNG_BASE_URL="${WEB_SEARCH_SEARXNG_BASE_URL:-http://searxng:8080}"
+  fi
+}
+
+# The MCP runner (personal mode, profile `tools`): the container STDIO MCP servers run in. Not for a host
+# JVM, which spawns them itself under the OS sandbox.
+tools_args() {
+  [ "$TIER" = personal ] && [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ] || return 0
+  COMPOSE_ARGS+=(--profile tools)
+}
+
+# The agent's own browser (personal mode, `--browser`): a Playwright server in its own container that core
+# attaches to (deploy/compose/browser.yml). Opt-in; not for a host JVM.
+browser_args() {
+  [ "$TIER" = personal ] && [ "$BROWSER" = 1 ] && [ "$NATIVE_CORE" != 1 ] || return 0
+  COMPOSE_ARGS+=(-f "$COMPOSE_DIR/browser.yml" --profile browser)
+}
+
+# Field N of a tag's row in the shared model catalog (deploy/models/catalog.txt:
+# tag|family|download GB|RAM GB wanted|tools|note|parameters B|context K|VRAM GB|licence|thinking|best for),
+# or nothing when unlisted. The first six columns are fixed in place.
+catalog_field() {
+  awk -F'|' -v t="$1" -v n="$2" '$1==t {gsub(/^ +| +$/,"",$n); print $n; exit}' "$MODELS_CATALOG" 2>/dev/null
+}
+
+# Free local inference (docs/local-models.md). Layers the overlay and exports
+# the three values it interpolates; an explicit value in .env wins.
+local_ai_args() {
+  [ -n "$LOCAL_AI" ] || return 0
+  [ -n "$LOCAL_MODEL" ] && export LOCAL_LLM_MODEL="$LOCAL_MODEL"
+  COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.yml")
+  if [ "$LOCAL_AI" = host ]; then
+    COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.host.yml")
+    export LOCAL_LLM_BASE_URL="${LOCAL_LLM_BASE_URL:-http://host.docker.internal:11434}"
+    export LOCAL_LLM_ALLOWED_HOST="${LOCAL_LLM_ALLOWED_HOST:-host.docker.internal:11434}"
+  else
+    [ "$TIER" = full ] && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.full.yml")
+    if [ "$(uname -s)" = Linux ] && docker info --format '{{json .Runtimes}}' 2>/dev/null | grep -q nvidia; then
+      COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.nvidia.yml")
+    fi
+    COMPOSE_ARGS+=(--profile local-ai)
+    # A personal install always lets core reach the machine's own Ollama
+    # (personal.yml allow-lists host.docker.internal:11434 for the console's
+    # local-model wizard); the overlay would otherwise narrow the allow-list
+    # to just the container. Keep the host entry alongside.
+    if [ "$TIER" = personal ]; then
+      local allow; allow="$(get_env APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS)"
+      case ",$allow," in *,host.docker.internal:11434,*) ;; *) allow="host.docker.internal:11434${allow:+,$allow}" ;; esac
+      export APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS="$allow"
+    fi
+    # The container's memory cap follows the model the install picked: the 8g
+    # default cannot hold gpt-oss:20b, so a bigger catalog row raises it. An
+    # explicit OLLAMA_MEM_LIMIT (environment or .env) always wins, and the cap
+    # is only ever raised, never lowered.
+    if [ -z "${OLLAMA_MEM_LIMIT:-}" ] && [ -z "$(get_env OLLAMA_MEM_LIMIT)" ]; then
+      local want; want="$(catalog_field "${LOCAL_LLM_MODEL:-qwen3.5:4b}" 4)"; want="${want%.*}"
+      case "$want" in ''|*[!0-9]*) ;; *) [ "$want" -gt 8 ] && export OLLAMA_MEM_LIMIT="${want}g" ;; esac
+    fi
+    # A host JVM reaches the Ollama container only through a loopback-published port.
+    if [ "$TIER" = personal ] && [ "$NATIVE_CORE" = 1 ]; then COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.native.yml"); fi
+  fi
+}
+
+build_compose_args() {
+  COMPOSE_ARGS=(--project-directory "$COMPOSE_DIR" --env-file "$ENV_FILE")
+  # The compose files require VEGADUTA_VERSION. `up`/`upgrade` resolve it for
+  # real (resolve_version); read-only commands (status, logs, down, backup)
+  # only need a syntactically valid value when .env has none yet.
+  if [ -z "${VEGADUTA_VERSION:-}" ] && [ -z "$(get_env VEGADUTA_VERSION)" ]; then export VEGADUTA_VERSION=unset; fi
+  local domain; domain="$(get_env BASE_DOMAIN)"
+  if [ "$TIER" = personal ]; then
+    COMPOSE_ARGS+=(-f "$COMPOSE_DIR/personal.yml")
+    [ "$BUILD" = 1 ] && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/personal.build.yml")
+    [ "$NATIVE_CORE" = 1 ] && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/personal.native.yml")
+  elif [ "$TIER" = lite ]; then
+    COMPOSE_ARGS+=(-f "$COMPOSE_DIR/lite.yml")
+    [ "$BUILD" = 1 ] && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/lite.build.yml")
+  else
+    COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.yml")
+    [ "$BUILD" = 1 ] && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.build.yml")
+    if [ -n "$domain" ]; then
+      COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.domain.yml")
+      # Build-time fallbacks for NEXT_PUBLIC_* follow the domain too.
+      export PUBLIC_APP_URL="https://app.$domain" PUBLIC_ADMIN_URL="https://admin.$domain" \
+             PUBLIC_API_URL="https://api.$domain" PUBLIC_AUTH_URL="https://auth.$domain" \
+             PUBLIC_CODE_INTEL_URL="https://codeintel.$domain" PUBLIC_BUILDER_URL="https://builder.$domain" \
+             PUBLIC_LIVEKIT_URL="wss://livekit.$domain"
+    fi
+  fi
+  local_ai_args
+  search_args
+  tools_args
+  browser_args
+  local p
+  for p in $PROFILES; do COMPOSE_ARGS+=(--profile "$p"); done
+  # COMPOSE_PROFILES from .env is already folded into PROFILES.
+  export COMPOSE_PROFILES=
+}
+
+dc() { docker compose "${COMPOSE_ARGS[@]}" "$@"; }
+
+# ------------------------------------------------------------------- doctor
+version_ge() { # version_ge A B  -> A >= B
+  [ "$(printf '%s\n%s\n' "$2" "$1" | sort -t. -k1,1n -k2,2n -k3,3n | head -1)" = "$2" ]
+}
+port_in_use() {
+  (exec 3<>"/dev/tcp/127.0.0.1/$1") >/dev/null 2>&1
+}
+
+# Local-model readiness: what doctor tells you before `up` so the first chat
+# does not fail on a model nobody pulled (docs/local-models.md).
+host_ollama_models() { # prints pulled model tags, one per line; non-zero if unreachable
+  local body
+  body="$(curl -fsS --max-time 3 "${1:-http://127.0.0.1:11434}/api/tags" 2>/dev/null)" || return 1
+  printf '%s' "$body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//; s/"$//'
+}
+
+local_ai_doctor() {
+  local model; model="${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL)}"; model="${model:-qwen3.5:4b}"
+  case "$LOCAL_AI" in
+    host)
+      local tags
+      if tags="$(host_ollama_models)"; then
+        ok "Ollama reachable on this machine (127.0.0.1:11434)"
+        if printf '%s\n' "$tags" | grep -qx "$model"; then ok "model '$model' is pulled"
+        else warn "model '$model' is not pulled yet — run: ollama pull $model"; fi
+        if printf '%s\n' "$tags" | grep -q "^${EMBED_MODEL}\(:\|$\)"; then ok "embedding model '$EMBED_MODEL' is pulled (documents and agent memory)"
+        else warn "embedding model '$EMBED_MODEL' is not pulled — documents and agent memory need it when no sidecar runs: ollama pull $EMBED_MODEL"; fi
+        [ "$(uname -s)" = Linux ] && warn "Linux: Ollama must listen beyond loopback for containers to reach it (OLLAMA_HOST=0.0.0.0, firewall it from the network)"
+      else
+        bad "--local-ai=host but nothing answers on 127.0.0.1:11434 — install Ollama (https://ollama.com/download) and start it, or use --local-ai (container)"
+      fi ;;
+    container)
+      local dl want
+      dl="$(catalog_field "$model" 3)"; dl="${dl:-3}"
+      want="$(catalog_field "$model" 4)"; want="${want%.*}"; [ -n "$want" ] || want=8
+      ok "local model: container 'ollama' will pull '$model' on first start (~${dl} GB; needs a few minutes)"
+      if [ "$(uname -s)" = Darwin ]; then
+        warn "Docker on macOS cannot use the Apple GPU: the container is CPU-only. For native speed install Ollama and use --local-ai=host"
+      fi
+      [ "${mem_gb:-0}" -lt "$want" ] && warn "Docker has ${mem_gb:-?} GB RAM; '$model' wants about $want GB (raise Docker's memory or pick a smaller tag - scripts/vegaduta models list)" ;;
+    *)
+      if host_ollama_models >/dev/null 2>&1; then
+        ok "Ollama detected on this machine — run with --local-ai=host to use it for the free platform pool"
+      fi ;;
+  esac
+}
+
+cmd_doctor() {
+  load_state; resolve_profiles; build_compose_args
+  WARNINGS=0; FAILURES=0
+  if [ "$TIER" = personal ]; then personal_doctor; return; fi
+  say "Checking prerequisites (tier: $TIER${PROFILES:+, profiles: $PROFILES})"
+  if ! command -v docker >/dev/null 2>&1; then bad "docker not found — install Docker Engine or Docker Desktop"; return 1; fi
+  if docker info >/dev/null 2>&1; then ok "Docker daemon reachable ($(docker version --format '{{.Server.Version}}' 2>/dev/null))"
+  else bad "Docker daemon not running / not reachable"; return 1; fi
+  local cv; cv="$(docker compose version --short 2>/dev/null | sed 's/^v//')"
+  if [ -z "$cv" ]; then bad "docker compose v2 plugin not found"
+  elif version_ge "$cv" 2.24.0; then ok "docker compose $cv"
+  else bad "docker compose $cv is too old (need >= 2.24.0)"; fi
+
+  local mem_b mem_gb need_gb=6 disk_need=15
+  [ "$TIER" = full ] && { need_gb=12; disk_need=40; }
+  mem_b="$(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0)"
+  mem_gb=$((mem_b / 1024 / 1024 / 1024))
+  if [ "$mem_gb" -ge "$need_gb" ]; then ok "Docker memory ${mem_gb} GB (>= ${need_gb} GB for $TIER)"
+  else warn "Docker has ${mem_gb} GB RAM; $TIER wants >= ${need_gb} GB (raise Docker Desktop's memory limit)"; fi
+  local_ai_doctor
+  local disk_kb disk_gb
+  disk_kb="$(df -Pk "$REPO_ROOT" 2>/dev/null | awk 'NR==2{print $4}')"
+  disk_gb=$(( ${disk_kb:-0} / 1024 / 1024 ))
+  if [ "$disk_gb" -ge "$disk_need" ]; then ok "Free disk ${disk_gb} GB"
+  else warn "Only ${disk_gb} GB free disk; $TIER wants >= ${disk_need} GB for images + data"; fi
+
+  if [ -f "$ENV_FILE" ]; then ok ".env present ($ENV_FILE)"
+  else bad ".env missing — run: scripts/vegaduta secrets"; return 1; fi
+  local spec name missing=""
+  for spec in $SECRET_SPECS; do
+    name="${spec%%:*}"; [ -n "$(get_env "$name")" ] || missing="$missing $name"
+  done
+  if [ -z "$missing" ]; then ok "All secrets set"
+  else bad "Empty secrets:$missing — run: scripts/vegaduta secrets"; fi
+  local key; key="$(get_env APP_ENCRYPTION_KEY)"
+  local keylen; keylen="$(printf '%s' "$key" | base64 -d 2>/dev/null | wc -c | tr -d ' ')"
+  if [ "${keylen:-0}" -ge 32 ]; then ok "APP_ENCRYPTION_KEY decodes to ${keylen} bytes"
+  else bad "APP_ENCRYPTION_KEY must be base64 of >= 32 bytes (openssl rand -base64 32). If data already exists, restore the ORIGINAL key instead."; fi
+  # Older .env.example files shipped CADDY_AUTO_HTTPS=on, which is not a Caddy auto_https value
+  # (Caddy refuses to start). Empty means automatic HTTPS, which is what "on" meant.
+  case "$(get_env CADDY_AUTO_HTTPS | tr 'A-Z' 'a-z')" in
+    on|true|yes|1)
+      set_env CADDY_AUTO_HTTPS "" force
+      warn "CADDY_AUTO_HTTPS=on in .env is not a valid Caddy value; reset to empty (automatic HTTPS)" ;;
+  esac
+  grep -Eq '=(changeme|minioadmin|CHANGE_ME.*)$' "$ENV_FILE" && warn "Placeholder values (changeme/minioadmin) still in .env"
+  local perms; perms="$(stat -c '%a' "$ENV_FILE" 2>/dev/null || stat -f '%Lp' "$ENV_FILE" 2>/dev/null || echo '')"
+  case "$perms" in
+    ''|600|400) ok ".env is owner-only (${perms:-unknown})" ;;
+    *) chmod 600 "$ENV_FILE" 2>/dev/null && ok ".env was mode $perms - fixed to 600" || bad ".env is mode $perms (readable by other users) - run: chmod 600 $ENV_FILE" ;;
+  esac
+  local ver shipped; ver="$(get_env VEGADUTA_VERSION)"; shipped="$(shipped_version)"
+  if [ -z "$ver" ]; then
+    if [ "$BUILD" = 1 ]; then ok "VEGADUTA_VERSION empty: images build from source as :local"
+    else bad "VEGADUTA_VERSION is empty - set a release (scripts/vegaduta upgrade --version X.Y.Z) or use --build"; fi
+  elif [ "$ver" = latest ]; then warn "VEGADUTA_VERSION=latest floats: compose files and images can drift apart. Pin a release: scripts/vegaduta upgrade --version X.Y.Z"
+  elif [ -n "$shipped" ] && [ "$ver" != "$shipped" ]; then warn "Images pinned to $ver but these compose files are from $shipped - run: scripts/vegaduta upgrade --version $shipped"
+  else ok "Release $ver"; fi
+  local papp psu; papp="$(get_env POSTGRES_APP_USER)"; psu="$(get_env POSTGRES_USER)"
+  if [ -n "$papp" ] && [ "$papp" = "${psu:-agentic}" ]; then warn "POSTGRES_APP_USER equals the superuser: core runs with full database superuser rights"; fi
+
+  local domain; domain="$(get_env BASE_DOMAIN)"
+  if [ -n "$domain" ]; then
+    if [ "$TIER" = lite ]; then warn "BASE_DOMAIN is set but lite mode ignores it (use --full for a server install)"; fi
+    local v bad_urls=""
+    for v in PUBLIC_APP_URL PUBLIC_ADMIN_URL PUBLIC_API_URL PUBLIC_AUTH_URL PUBLIC_LIVEKIT_URL; do
+      is_local_url "$(get_env "$v")" && bad_urls="$bad_urls $v"
+    done
+    if [ -n "$bad_urls" ]; then bad "BASE_DOMAIN=$domain but still localhost:$bad_urls — run: scripts/vegaduta secrets --domain $domain"
+    else ok "Public URLs use $domain"; fi
+    # Internet-facing Keycloak must run in production mode (the domain overlay
+    # pins `start`; refuse a .env that asks for dev mode anyway).
+    if [ "$(get_env KEYCLOAK_START_COMMAND)" = start-dev ]; then
+      bad "KEYCLOAK_START_COMMAND=start-dev with BASE_DOMAIN set: Keycloak dev mode must never face the internet - remove that line"
+    else ok "Keycloak runs in production mode (start)"; fi
+    [ "$(get_env KC_VERIFY_EMAIL)" = true ] || warn "KC_VERIFY_EMAIL is off: anyone can sign up with an address they do not own. Configure KEYCLOAK_SMTP_* and set KC_VERIFY_EMAIL=true (applies to a fresh realm import; for an existing realm toggle Realm settings -> Login -> Verify email)"
+    if command -v getent >/dev/null 2>&1; then
+      if getent hosts "app.$domain" >/dev/null 2>&1; then ok "DNS app.$domain resolves"
+      else warn "DNS app.$domain does not resolve yet (Let's Encrypt will fail)"; fi
+    fi
+  else
+    ok "Local mode (no BASE_DOMAIN): URLs on localhost"
+  fi
+
+  # Untrusted-code isolation (compose cannot filter egress per network).
+  case " $PROFILES " in
+    *" sandbox "*)
+      if [ "$(get_env TOOL_SANDBOX_RUNTIME)" != runsc ]; then
+        warn "tool-sandbox runs tenant code on runc (shared kernel). With gVisor installed set TOOL_SANDBOX_RUNTIME=runsc"
+      fi ;;
+  esac
+  case " $PROFILES " in
+    *" sandbox "*|*" tools "*|*" browser "*|*" code-intel "*)
+      if [ "$(uname -s 2>/dev/null)" = Linux ]; then
+        warn "tenant-controlled code can reach the host network: on a cloud VM block the metadata endpoint and private ranges for its bridges, e.g. (as root, after 'up'):
+         for n in mcp-stdio-net code-exec-egress; do B=br-\$(docker network inspect -f '{{printf \"%.12s\" .Id}}' \${COMPOSE_PROJECT_NAME:-vegaduta}_\$n) || continue
+           for d in 169.254.0.0/16 168.63.129.16/32 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16; do iptables -I DOCKER-USER -i \$B ! -o \$B -d \$d -j DROP; done; done"
+      fi ;;
+  esac
+  if [ -n "$(dc ps -q 2>/dev/null)" ]; then
+    ok "Stack already running — skipping port checks"
+  else
+    # The ports the stack will actually publish: *_HOST_PORT from .env, else the default.
+    # (This used to check the defaults only, so moving a service to another port - the very
+    # fix this check's own error message suggests - could never make it pass.)
+    hp() { local v; v="$(get_env "$1")"; printf '%s' "${v:-$2}"; }
+    local ports p busy=""
+    ports="$(hp WEB_HOST_PORT 3000) $(hp CORE_HOST_PORT 8080) $(hp KEYCLOAK_HOST_PORT 8180) $(hp POSTGRES_HOST_PORT 5432) $(hp VALKEY_HOST_PORT 6379)"
+    [ "$TIER" = full ] && ports="$ports $(hp SIDECAR_HOST_PORT 8001) 8333"
+    case " $PROFILES " in *" temporal "*) ports="$ports 7233 8088" ;; esac
+    case " $PROFILES " in *" observability "*) ports="$ports 3003 9090" ;; esac
+    [ -n "$domain" ] && [ "$TIER" = full ] && ports="$ports 80 443"
+    for p in $ports; do if port_in_use "$p"; then busy="$busy $p"; fi; done
+    if [ -z "$busy" ]; then ok "Ports free: $ports"
+    else bad "Ports already in use:$busy (stop the other service or change the *_HOST_PORT values in .env)"; fi
+  fi
+  if [ "$FAILURES" -gt 0 ]; then printf '%s%d problem(s), %d warning(s).%s\n' "$C_R" "$FAILURES" "$WARNINGS" "$C_0"; return 1; fi
+  printf '%sLooks good%s (%d warning(s)).\n' "$C_G" "$C_0" "$WARNINGS"
+}
+
+# ----------------------------------------------------------------------- up
+# After `up` with a local model: measure whether it can really call tools, so a
+# first-time user learns now (not from a broken first agent) and is told what to
+# do. Never fails the install; the probe is one short request.
+# Offers `ollama pull TAG` on a terminal (the user answers; nothing is downloaded unasked) and
+# returns 0 when the model is there afterwards.
+pull_missing_model() {
+  local tag="$1" a=""
+  if [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ]; then
+    printf "Model '%s' is not pulled on this machine yet. Pull it now? [Y/n]: " "$tag"; read -r a || a=n
+    case "$a" in n|N|no|NO) return 1 ;; esac
+    if command -v ollama >/dev/null 2>&1; then ollama pull "$tag" && return 0
+    else curl -fsS --max-time 3600 -X POST "http://127.0.0.1:11434/api/pull" -d "{\"model\":\"$tag\",\"stream\":false}" >/dev/null && return 0; fi
+  fi
+  return 1
+}
+
+verify_local_agent_model() {
+  [ -n "$LOCAL_AI" ] || return 0
+  local model grade alt
+  model="${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL)}"; model="${model:-qwen3.5:4b}"
+  if [ "$LOCAL_AI" = host ]; then
+    # A model nobody pulled answers 404 to every request; say so instead of a misleading probe error.
+    local tags; tags="$(host_ollama_models || true)"
+    if [ -n "$tags" ] && ! printf '%s\n' "$tags" | grep -qx "$model"; then
+      MODEL_NOT_PULLED=1
+      pull_missing_model "$model" || { warn "model '$model' is NOT pulled on this machine: the first chat will fail until you run: ollama pull $model"; return 0; }
+      MODEL_NOT_PULLED=0
+    fi
+    if [ -n "$tags" ] && ! printf '%s\n' "$tags" | grep -q "^${EMBED_MODEL}\(:\|$\)"; then
+      EMBED_NOT_PULLED=1
+      pull_missing_model "$EMBED_MODEL" && EMBED_NOT_PULLED=0
+    fi
+  fi
+  say "Checking that '$model' can run agents (tool calls)..."
+  grade="$(probe_tool_grade "$LOCAL_AI" "$model" || true)"
+  # The catalog records what full agent prompts showed; a short probe can be kinder.
+  [ "$grade" = structured ] && grep -q "^${model}|.*|chat only|" "$MODELS_CATALOG" && grade="chat only"
+  case "$grade" in
+    structured) ok "'$model' makes structured tool calls: agents with tools will work" ;;
+    text) warn "'$model' writes tool calls as text. Core recovers them, but expect slower, less reliable agents (docs/local-models.md)" ;;
+    'chat only')
+      alt="$(recommended_local_model)"
+      warn "'$model' cannot call tools: chat only. Agents with tools will not work. Try: scripts/vegaduta models pull $alt" ;;
+    *) say "Could not measure tool calls for '$model'; core measures it again when the pool row is saved." ;;
+  esac
+}
+
+parse_tier_flags() {
+  REST=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --lite) TIER=lite; shift ;;
+      --full) TIER=full; shift ;;
+      --personal) TIER=personal; shift ;;
+      --native-core) NATIVE_CORE=1; shift ;;
+      --container-core) NATIVE_CORE=0; shift ;;
+      --profile) add_profile "${2:?--profile needs a name}"; shift 2 ;;
+      --profile=*) add_profile "${1#*=}"; shift ;;
+      --build) BUILD=1; shift ;;
+      --local-ai) LOCAL_AI=container; shift ;;
+      --local-ai=container|--local-ai=host) LOCAL_AI="${1#*=}"; shift ;;
+      --local-ai=*) die "--local-ai takes 'container' (default) or 'host'" ;;
+      --local-model) LOCAL_MODEL="${2:?--local-model needs a model tag, e.g. qwen3.5:4b}"; shift 2 ;;
+      --local-model=*) LOCAL_MODEL="${1#*=}"; shift ;;
+      --cloud) MODEL_CHOICE_DONE=1; CLOUD=1; shift ;;
+      --search) SEARCH=1; SEARCH_EXPLICIT=1; shift ;;
+      --no-search) SEARCH=0; SEARCH_EXPLICIT=1; shift ;;
+      --no-tools) TOOLS=0; TOOLS_EXPLICIT=1; shift ;;
+      --browser) BROWSER=1; BROWSER_EXPLICIT=1; shift ;;
+      --no-browser) BROWSER=0; BROWSER_EXPLICIT=1; shift ;;
+      --dry-run) DRY_RUN=1; shift ;;
+      --domain) DOMAIN_ARG="${2:?--domain needs a value}"; shift 2 ;;
+      --domain=*) DOMAIN_ARG="${1#*=}"; shift ;;
+      *) REST+=("$1"); shift ;;
+    esac
+  done
+}
+
+print_urls() {
+  local app api auth admin
+  app="${PUBLIC_APP_URL:-$(get_env PUBLIC_APP_URL)}"; app="${app:-http://localhost:3000}"
+  api="${PUBLIC_API_URL:-$(get_env PUBLIC_API_URL)}"; api="${api:-http://localhost:8080}"
+  auth="${PUBLIC_AUTH_URL:-$(get_env PUBLIC_AUTH_URL)}"; auth="${auth:-http://localhost:8180}"
+  admin="${PUBLIC_ADMIN_URL:-$(get_env PUBLIC_ADMIN_URL)}"; admin="${admin:-http://localhost:3000}"
+  cat <<EOF
+
+${C_B}VegaDūta is up${C_0} ($TIER${PROFILES:+; profiles: $PROFILES})
+
+  Console          $app
+  API              $api
+  Identity (Keycloak) $auth
+EOF
+  [ "$TIER" = full ] && printf '  Platform admin   %s\n' "$admin/platform-admin"
+  case " $PROFILES " in *" temporal "*) printf '  Temporal UI      http://localhost:8088\n' ;; esac
+  case " $PROFILES " in *" observability "*) printf '  Grafana          http://localhost:3003  (admin / GRAFANA_ADMIN_PASSWORD)\n' ;; esac
+  case " $PROFILES " in *" tracing "*) printf '  Langfuse         http://localhost:3002\n' ;; esac
+  case "$LOCAL_AI" in
+    host|container) printf '  Local model      %s via %s (free platform pool)\n' "${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL | grep . || echo qwen3.5:4b)}" "$LOCAL_AI Ollama" ;;
+  esac
+  cat <<EOF
+
+${C_B}First login${C_0}
+  1. Open $app and choose "Sign up" — the first account creates your
+     organisation and becomes its tenant admin.
+  2. Make that account a platform operator (cross-tenant admin console):
+       scripts/vegaduta make-admin you@example.com
+  3. Create your first agent. With --local-ai the free local model is already
+     registered as the platform pool; otherwise add a provider key
+     (Settings -> Providers). No key and no GPU? Open /edge to run a model
+     in the browser instead (docs/local-models.md).
+  Keycloak admin console: http://localhost:$(get_env KEYCLOAK_HOST_PORT | grep . || echo 8180)/admin
+     user '$(get_env KEYCLOAK_ADMIN | grep . || echo admin)', password = KEYCLOAK_ADMIN_PASSWORD in $ENV_FILE
+
+  status: scripts/vegaduta status    logs: scripts/vegaduta logs core    stop: scripts/vegaduta down
+  lost or expired setup link: scripts/vegaduta restart
+EOF
+}
+
+reconcile_keycloak() {
+  say "Reconciling Keycloak realm (idempotent)"
+  local realm; realm="$(get_env KEYCLOAK_REALM)"
+  # Values travel in the ENVIRONMENT of the docker process (`-e NAME` without
+  # a value inherits it), never in argv, so the SMTP password and IdP client
+  # secrets do not show up in `ps` / /proc/*/cmdline on the host (INF-022).
+  # shellcheck disable=SC2030,SC2031  # exported only into this subshell
+  (
+    export REALM="${realm:-agentic-ai}"
+    SH="$(get_env KEYCLOAK_SMTP_HOST)"; SP="$(get_env KEYCLOAK_SMTP_PORT | grep . || echo 587)"
+    SF="$(get_env KEYCLOAK_SMTP_FROM)"; SD="$(get_env KEYCLOAK_SMTP_FROM_DISPLAY)"
+    SU="$(get_env KEYCLOAK_SMTP_USER)"; SW="$(get_env KEYCLOAK_SMTP_PASSWORD)"
+    ST="$(get_env KEYCLOAK_SMTP_STARTTLS | grep . || echo true)"
+    GGID="$(get_env GOOGLE_CLIENT_ID)"; GGSEC="$(get_env GOOGLE_CLIENT_SECRET)"
+    GHID="$(get_env GITHUB_CLIENT_ID)"; GHSEC="$(get_env GITHUB_CLIENT_SECRET)"
+    MSID="$(get_env MICROSOFT_CLIENT_ID)"; MSSEC="$(get_env MICROSOFT_CLIENT_SECRET)"
+    export SH SP SF SD SU SW ST GGID GGSEC GHID GHSEC MSID MSSEC
+    dc exec -T -e REALM -e SH -e SP -e SF -e SD -e SU -e SW -e ST \
+      -e GGID -e GGSEC -e GHID -e GHSEC -e MSID -e MSSEC \
+      keycloak bash -s < "$REPO_ROOT/deploy/keycloak/reconcile-realm.kcadm.sh"
+  ) || warn "Keycloak reconcile failed — re-run: scripts/vegaduta compose exec keycloak ... (see deploy/keycloak/reconcile-keycloak.sh)"
+}
+
+# First-run model choice (docs/local-models.md). A fresh interactive install
+# (`up` and `personal` alike) asks once how agents get their model; the answer
+# lands in the state file, so later runs and upgrades never ask again. Skipped
+# when a flag already decided it (--local-ai, --local-model, --cloud), when a
+# state file exists, or when there is no terminal (CI, scripts): those keep the
+# cloud-key default.
+recommended_local_model() { # RAM in GB on this machine -> catalog tag
+  local gb=0
+  case "$(uname -s)" in
+    Darwin) gb=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 )) ;;
+    Linux) gb=$(( $(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0) / 1048576 )) ;;
+  esac
+  # The ladder lives in the shared catalog ("#ladder|minGB|tag" lines, also read by core);
+  # the built-in rungs below are only the fallback when the file is missing.
+  local min tag
+  if [ -r "$MODELS_CATALOG" ]; then
+    while IFS='|' read -r mark min tag; do
+      [ "$mark" = "#ladder" ] || continue
+      case "$min" in ''|*[!0-9]*) continue ;; esac
+      [ -n "$tag" ] && [ "$gb" -ge "$min" ] && { echo "$tag"; return 0; }
+    done < "$MODELS_CATALOG"
+  fi
+  if   [ "$gb" -ge 32 ]; then echo gpt-oss:20b
+  elif [ "$gb" -ge 24 ]; then echo qwen3.5:9b
+  elif [ "$gb" -ge 12 ]; then echo qwen3.5:4b
+  else echo qwen3.5:2b; fi
+}
+
+ask_search() {
+  [ -z "$SEARCH" ] || return 0
+  local a
+  printf 'Give agents free web search (a private SearXNG container, no API key)? [Y/n]: '; read -r a
+  # A "no" on a personal install is remembered as 0: its default is on, so empty would read as "never asked".
+  case "${a:-y}" in n|N|no) if [ "$TIER" = personal ]; then SEARCH=0; fi ;; *) SEARCH=1 ;; esac
+}
+
+choose_model_source() {
+  [ -z "$LOCAL_AI" ] && [ -z "$LOCAL_MODEL" ] && [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  [ -f "$STATE_FILE" ] && return 0
+  [ -t 0 ] && [ -t 1 ] || return 0
+  local rec mode ans
+  rec="$(recommended_local_model)"
+  if host_ollama_models >/dev/null 2>&1 || { [ "$(uname -s)" = Darwin ] && command -v ollama >/dev/null 2>&1; }; then
+    mode=host
+  else
+    mode=container
+  fi
+  printf '\n%sWhich model should power your agents?%s\n' "$C_B" "$C_0"
+  printf '  1) Open-weights model on this machine: free, private, no API key  %s(recommended: %s via %s Ollama)%s\n' "$C_C" "$rec" "$mode" "$C_0"
+  printf '  2) A cloud provider (OpenAI, Anthropic, ...): add your key in the console after sign-up\n'
+  printf '  3) Pick a different local model\n'
+  printf 'Choice [1]: '; read -r ans
+  case "${ans:-1}" in
+    1) LOCAL_AI="$mode"; LOCAL_MODEL="$rec"; ask_search ;;
+    2) # An explicit "cloud provider" is a real answer too: save it so a later
+       # run (a `personal` re-run detecting a freshly installed Ollama, for
+       # example) does not second-guess it.
+       CLOUD=1; MODEL_CHOICE_DONE=1 ;;
+    3) local tag
+       printf 'Available (scripts/vegaduta models list shows sizes):\n'
+       grep -v '^#' "$MODELS_CATALOG" | grep . | awk -F'|' '{printf "  %-16s ~%s GB download, %s GB RAM, tools: %s\n", $1, $3, $4, $5}'
+       printf 'Model tag [%s]: ' "$rec"; read -r tag
+       LOCAL_AI="$mode"; LOCAL_MODEL="${tag:-$rec}"; ask_search ;;
+    *) ;;
+  esac
+}
+
+cmd_up() {
+  DOMAIN_ARG=""
+  parse_tier_flags "$@"
+  [ -n "$TIER" ] || { load_state; }
+  # A remembered personal install: `up` means "start the personal stack" (flags already parsed).
+  if [ "$TIER" = personal ]; then personal_up; return; fi
+  choose_model_source
+  [ -f "$ENV_FILE" ] || true
+  cmd_secrets ${DOMAIN_ARG:+--domain "$DOMAIN_ARG"}
+  resolve_profiles
+  resolve_version
+  build_compose_args
+  if [ "$DRY_RUN" = 1 ]; then
+    # What `up` would do, without Docker: the choices, the state they leave and the compose command.
+    # Used by tests/install; also a safe way to see what a flag combination does.
+    save_state
+    printf 'plan: tier=%s profiles=%s local_ai=%s local_model=%s search=%s\n' \
+      "$TIER" "${PROFILES:-none}" "${LOCAL_AI:-none}" "${LOCAL_MODEL:-default}" "${SEARCH:-0}"
+    printf 'plan: docker compose %s up -d\n' "${COMPOSE_ARGS[*]}"
+    exit 0
+  fi
+  cmd_doctor || die "fix the problems above, then re-run. (scripts/vegaduta doctor)"
+  save_state
+  local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-900}")
+  [ "$BUILD" = 1 ] && up_args+=(--build)
+  say "Starting ($TIER) — first start pulls/builds images and runs migrations; this can take several minutes"
+  if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
+    dc ps
+    die "some services did not become healthy. Inspect with: scripts/vegaduta logs <service>"
+  fi
+  reconcile_keycloak
+  verify_local_agent_model
+  print_urls
+}
+
+cmd_down() {
+  load_state; resolve_profiles; build_compose_args
+  local vol=0 yes=0 a
+  for a in "$@"; do case "$a" in --volumes|-v) vol=1 ;; --yes|-y) yes=1 ;; *) die "down: unknown option $a" ;; esac; done
+  # Include every profile so profiled services are stopped too.
+  local p; for p in $ALL_PROFILES rag; do COMPOSE_ARGS+=(--profile "$p"); done
+  if [ "$vol" = 1 ]; then
+    if [ "$yes" != 1 ]; then
+      printf '%sThis DELETES all data volumes of this %s install (database, users, files).%s\nType "delete my data" to continue: ' "$C_R" "$TIER" "$C_0"
+      local ans; read -r ans
+      [ "$ans" = "delete my data" ] || die "aborted"
+    fi
+    # A host-JVM core goes first: it must not be writing to a database that is about to go away.
+    if [ "$TIER" = personal ]; then personal_stop_native; fi
+    dc down --volumes --remove-orphans
+  else
+    if [ "$TIER" = personal ]; then personal_stop_native; fi
+    dc down --remove-orphans
+  fi
+}
+
+cmd_status() {
+  load_state; resolve_profiles; build_compose_args
+  say "Tier: $TIER${PROFILES:+  profiles: $PROFILES}"
+  dc ps --format 'table {{.Service}}\t{{.State}}\t{{.Health}}\t{{.Ports}}'
+  if [ "$TIER" = personal ] && [ "$NATIVE_CORE" = 1 ]; then personal_native_status; fi
+}
+
+cmd_logs() {
+  load_state; resolve_profiles; build_compose_args
+  local follow=(-f) args=() a
+  for a in "$@"; do case "$a" in --no-follow) follow=() ;; *) args+=("$a") ;; esac; done
+  dc logs --tail "${VEGADUTA_LOG_TAIL:-200}" ${follow[@]+"${follow[@]}"} ${args[@]+"${args[@]}"}
+}
+
+# ------------------------------------------------------------- backup/restore
+# backup [DIR]: pg_dump (custom format) of the app database and, on the full
+# stack, the Keycloak database; a tar of the uploaded-files volume; and a copy
+# of .env (APP_ENCRYPTION_KEY - without it the database backup is useless).
+# Everything is written owner-only (umask 077). Prints the backup directory.
+BACKUP_DIR_RESULT=""
+cmd_backup() {
+  load_state; resolve_profiles; build_compose_args
+  local dir="${1:-$COMPOSE_DIR/backups/$(date +%Y%m%d-%H%M%S)}"
+  mkdir -p "$dir"; chmod 700 "$dir" 2>/dev/null || true
+  [ -n "$(dc ps -q postgres 2>/dev/null)" ] || die "backup: postgres is not running (scripts/vegaduta up first)"
+  say "Backing up to $dir"
+  # Superuser dump over the container's local socket; nothing on argv but names.
+  # shellcheck disable=SC2016  # expands inside the container
+  dc exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$dir/app-db.dump" \
+    || die "backup: pg_dump of the app database failed"
+  [ -s "$dir/app-db.dump" ] || die "backup: app-db.dump is empty"
+  ok "app database  -> app-db.dump ($(du -h "$dir/app-db.dump" | cut -f1))"
+  if [ "$TIER" = full ] && [ -n "$(dc ps -q keycloak-db 2>/dev/null)" ]; then
+    # shellcheck disable=SC2016
+    dc exec -T keycloak-db sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$dir/keycloak-db.dump" \
+      || die "backup: pg_dump of the Keycloak database failed"
+    ok "keycloak db   -> keycloak-db.dump"
+  fi
+  # Uploaded files: SeaweedFS data (full) or core's local storage (lite).
+  local svc path cid img
+  if [ "$TIER" = full ]; then svc=seaweedfs; path=/data; else svc=core; path=/data/storage; fi
+  cid="$(dc ps -q "$svc" 2>/dev/null | head -1)"
+  img="$(docker inspect -f '{{.Config.Image}}' "$(dc ps -q postgres | head -1)")"
+  if [ "$TIER" = personal ] && [ "$NATIVE_CORE" = 1 ]; then
+    # Host-JVM core: its files are a plain directory, not a container volume.
+    if [ -d "$PERSONAL_HOME/storage" ] && tar -C "$PERSONAL_HOME/storage" -czf "$dir/files.tar.gz" . 2>/dev/null; then
+      ok "files         -> files.tar.gz (from $PERSONAL_HOME/storage)"
+    else warn "could not archive $PERSONAL_HOME/storage (back that directory up yourself)"; fi
+  elif [ -n "$cid" ] && [ -z "$(get_env STORAGE_ENDPOINT)" ]; then
+    docker run --rm --volumes-from "$cid:ro" --entrypoint tar "$img" -C "$path" -czf - . > "$dir/files.tar.gz" \
+      && ok "files         -> files.tar.gz" || warn "could not archive $svc:$path (back that volume up yourself)"
+  else
+    warn "files: external S3 (STORAGE_ENDPOINT) or $svc not running - back up your bucket separately"
+  fi
+  [ "$TIER" = lite ] && warn "lite: Keycloak users live in the keycloak-data volume (dev-file store); back it up with the stack stopped"
+  install -m 600 "$ENV_FILE" "$dir/env" 2>/dev/null || { cp "$ENV_FILE" "$dir/env"; chmod 600 "$dir/env"; }
+  printf 'version=%s\ntier=%s\ncreated=%s\n' "$(get_env VEGADUTA_VERSION)" "$TIER" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$dir/MANIFEST"
+  ok ".env          -> env (0600; holds APP_ENCRYPTION_KEY - store it like a password)"
+  BACKUP_DIR_RESULT="$dir"
+  say "Backup complete: $dir   (restore: scripts/vegaduta restore $dir)"
+}
+
+# restore DIR: replace the app (and Keycloak) database with the dumps in DIR.
+# Stops the services that write to them, restores, starts everything again.
+cmd_restore() {
+  local dir="${1:?usage: scripts/vegaduta restore BACKUP_DIR}" yes="${2:-}"
+  [ -s "$dir/app-db.dump" ] || die "restore: $dir/app-db.dump not found"
+  load_state; resolve_profiles; build_compose_args
+  if [ -f "$dir/env" ] && [ "$(awk -F= '/^APP_ENCRYPTION_KEY=/{print $2}' "$dir/env")" != "$(get_env APP_ENCRYPTION_KEY)" ]; then
+    warn "APP_ENCRYPTION_KEY in $dir/env differs from $ENV_FILE - restore that .env too (cp $dir/env $ENV_FILE), or stored secrets will not decrypt"
+  fi
+  if [ "$yes" != --yes ]; then
+    printf '%sThis REPLACES the current database(s) with %s.%s\nType "restore" to continue: ' "$C_R" "$dir" "$C_0"
+    local ans; read -r ans; [ "$ans" = restore ] || die "aborted"
+  fi
+  local writers="core core-worker core-jobs web keycloak pgbouncer"
+  if [ "$TIER" = personal ]; then personal_stop_native; fi
+  # shellcheck disable=SC2086
+  dc stop $writers 2>/dev/null || true
+  dc up -d --wait postgres
+  # shellcheck disable=SC2016
+  dc exec -T postgres sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --exit-on-error' < "$dir/app-db.dump" \
+    || die "restore: pg_restore of the app database failed (the stack is left stopped; see the error above)"
+  ok "app database restored"
+  if [ -s "$dir/keycloak-db.dump" ] && [ "$TIER" = full ]; then
+    dc up -d --wait keycloak-db
+    # shellcheck disable=SC2016
+    dc exec -T keycloak-db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --exit-on-error' < "$dir/keycloak-db.dump" \
+      || die "restore: pg_restore of the Keycloak database failed"
+    ok "Keycloak database restored"
+  fi
+  [ -s "$dir/files.tar.gz" ] && warn "files.tar.gz is not restored automatically: extract it into the $([ "$TIER" = full ] && echo seaweedfs-data || echo core-storage) volume with the stack stopped"
+  # db-roles re-adopts the restored objects for the app role on the next up.
+  cmd_up
+}
+
+# fetch_release VERSION: download the release tarball, verify it against the
+# release's SHA256SUMS (and the Sigstore bundle of SHA256SUMS when cosign is
+# installed), and unpack it over this install. Local files that are not in the
+# tarball (.env, core.env, backups, state) are untouched. Same checks as install.sh.
+fetch_release() {
+  local ver="$1" repo="${VEGADUTA_REPO:-CD-LC/vegaduta}" tmp base name want got
+  base="https://github.com/$repo/releases/download/v$ver"; name="vegaduta-$ver.tar.gz"
+  tmp="$(mktemp -d "${TMPDIR:-/tmp}/vegaduta-upgrade.XXXXXX")"
+  _get() {
+    if command -v curl >/dev/null 2>&1; then curl -fsSL --proto '=https' --tlsv1.2 --retry 3 "$1" -o "$2"
+    else wget -q --https-only -O "$2" "$1"; fi
+  }
+  say "Downloading release v$ver"
+  _get "$base/$name" "$tmp/$name" || { rm -rf "$tmp"; die "download failed: $base/$name"; }
+  _get "$base/SHA256SUMS" "$tmp/SHA256SUMS" || { rm -rf "$tmp"; die "download failed: $base/SHA256SUMS (refusing an unverified upgrade)"; }
+  if command -v cosign >/dev/null 2>&1; then
+    if _get "$base/SHA256SUMS.sigstore.json" "$tmp/SHA256SUMS.sigstore.json" 2>/dev/null; then
+      cosign verify-blob "$tmp/SHA256SUMS" --bundle "$tmp/SHA256SUMS.sigstore.json" \
+        --certificate-identity-regexp "^https://github\\.com/$repo/\\.github/workflows/release\\.yml@refs/tags/v" \
+        --certificate-oidc-issuer https://token.actions.githubusercontent.com >/dev/null 2>&1 \
+        || { rm -rf "$tmp"; die "cosign could NOT verify SHA256SUMS of v$ver - not upgrading"; }
+      ok "SHA256SUMS signature verified (Sigstore)"
+    else
+      [ "${VEGADUTA_REQUIRE_SIGNATURE:-0}" = 1 ] && { rm -rf "$tmp"; die "v$ver has no SHA256SUMS.sigstore.json"; }
+      warn "v$ver publishes no signature bundle; checking SHA-256 only"
+    fi
+  elif [ "${VEGADUTA_REQUIRE_SIGNATURE:-0}" = 1 ]; then
+    rm -rf "$tmp"; die "VEGADUTA_REQUIRE_SIGNATURE=1 but cosign is not installed"
+  fi
+  want="$(awk -v n="$name" '$2==n || $2=="./"n || $2=="*"n {print $1; exit}' "$tmp/SHA256SUMS")"
+  [ -n "$want" ] || { rm -rf "$tmp"; die "SHA256SUMS has no entry for $name"; }
+  if command -v sha256sum >/dev/null 2>&1; then got="$(sha256sum "$tmp/$name" | awk '{print $1}')"
+  else got="$(shasum -a 256 "$tmp/$name" | awk '{print $1}')"; fi
+  [ "$got" = "$want" ] || { rm -rf "$tmp"; die "checksum mismatch for $name (expected $want, got $got) - not upgrading"; }
+  ok "SHA-256 of $name verified"
+  # tar unlinks and recreates files, so the copy of this script bash is
+  # executing right now stays intact. umask 022 for the unpack: the configs
+  # are bind-mounted into containers running as other uids.
+  (umask 022 && tar -xzf "$tmp/$name" -C "$REPO_ROOT" --strip-components=1 --no-same-owner) \
+    || { rm -rf "$tmp"; die "could not unpack $name"; }
+  rm -rf "$tmp"
+  ok "Compose files, realm and scripts updated to v$ver"
+}
+
+cmd_upgrade() {
+  load_state
+  local ver="" backup=1
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --version) ver="${2:?}"; shift 2 ;;
+      --version=*) ver="${1#*=}"; shift ;;
+      --no-backup) backup=0; shift ;;
+      --continued) backup=2; shift ;;   # internal: re-exec after fetch_release
+      *) die "upgrade: unknown option $1" ;;
+    esac
+  done
+  [ -f "$ENV_FILE" ] || die "no $ENV_FILE — install first (scripts/vegaduta up)"
+  local from; from="$(get_env VEGADUTA_VERSION)"
+  [ -n "$ver" ] || ver="$(shipped_version)"
+  [ -n "$ver" ] || ver="$from"
+  [ -n "$ver" ] || die "upgrade: no target version - pass --version X.Y.Z"
+  resolve_profiles; build_compose_args
+  # 1. Backup first; abort the upgrade when it fails (migrations are one-way).
+  [ -n "${VEGADUTA_UPGRADE_BACKUP:-}" ] && BACKUP_DIR_RESULT="$VEGADUTA_UPGRADE_BACKUP"
+  if [ "$backup" = 2 ]; then
+    : # continued after fetch_release; the backup was taken before the download
+  elif [ "$backup" = 1 ]; then
+    if [ -n "$(dc ps -q postgres 2>/dev/null)" ]; then
+      cmd_backup || die "upgrade aborted: backup failed (fix it, or re-run with --no-backup at your own risk)"
+    else
+      die "upgrade aborted: postgres is not running, so no backup can be taken. Start the stack (scripts/vegaduta up) or pass --no-backup."
+    fi
+  else
+    warn "--no-backup: upgrading without a database backup"
+  fi
+  # 2. Compose files of the target release (tarball installs; a git checkout
+  # switches with `git checkout vX.Y.Z` instead), then continue with them.
+  if [ ! -e "$REPO_ROOT/.git" ] && [ -n "$ver" ] && [ "$ver" != "$(shipped_version)" ] && [ "$ver" != local ]; then
+    fetch_release "$ver"
+    VEGADUTA_UPGRADE_BACKUP="$BACKUP_DIR_RESULT" exec bash "$REPO_ROOT/scripts/vegaduta" upgrade --version "$ver" --no-backup --continued
+  elif [ -e "$REPO_ROOT/.git" ] && [ -n "$(shipped_version)" ] && [ "$ver" != "$(shipped_version)" ]; then
+    warn "git checkout: compose files are from $(shipped_version); run 'git checkout v$ver' so files and images match"
+  fi
+  install -m 600 "$ENV_FILE" "$ENV_FILE.bak.$(date +%Y%m%d%H%M%S)" 2>/dev/null \
+    || { cp "$ENV_FILE" "$ENV_FILE.bak.$(date +%Y%m%d%H%M%S)"; chmod 600 "$ENV_FILE".bak.* 2>/dev/null || true; }
+  set_env VEGADUTA_VERSION "$ver" force
+  PREVIOUS_VERSION="$from"; save_state
+  cmd_secrets   # adds secrets introduced by the new version, never changes old ones
+  resolve_version
+  resolve_profiles; build_compose_args
+  say "Upgrading ${from:-?} -> $ver"
+  if [ "$BUILD" = 1 ]; then dc build --pull
+  else dc pull --ignore-buildable; fi
+  if ! dc up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-900}"; then
+    cat >&2 <<EOF
+${C_R}Upgrade to $ver did not become healthy.${C_0} Inspect: scripts/vegaduta logs core
+Roll back (database migrations are forward-only, so restore the backup too):
+  scripts/vegaduta upgrade --version ${from:-<previous>} --no-backup
+  scripts/vegaduta restore ${BACKUP_DIR_RESULT:-<backup dir>}
+EOF
+    exit 1
+  fi
+  reconcile_keycloak
+  say "Upgrade complete ($ver). Database migrations ran on core start."
+  if [ -n "$BACKUP_DIR_RESULT" ]; then printf '    Pre-upgrade backup: %s (restore: scripts/vegaduta restore %s)\n' "$BACKUP_DIR_RESULT" "$BACKUP_DIR_RESULT"; fi
+}
+
+cmd_make_admin() {
+  local user="${1:?usage: scripts/vegaduta make-admin USERNAME_OR_EMAIL}"
+  load_state
+  if [ "$TIER" = personal ]; then
+    die "make-admin grants a Keycloak role and a personal install has no Keycloak. To let the owner use the platform-admin pages, add APP_AUTH_LOCAL_OWNER_EXTRA_ROLES=platform-admin to deploy/compose/core.env and restart core (docs/personal-mode.md)"
+  fi
+  resolve_profiles; build_compose_args
+  local realm; realm="$(get_env KEYCLOAK_REALM)"
+  # Accepts a username or an e-mail address. The single-quoted script expands
+  # inside the container, not here.
+  # shellcheck disable=SC2016
+  # kcadm has no stdin/env option for the admin password, so it is on kcadm's
+  # argv INSIDE the container for the second the login takes; nothing secret
+  # is on the host command line.
+  if dc exec -T -e TARGET_USER="$user" -e REALM="${realm:-agentic-ai}" keycloak bash -c '
+    set -e
+    K=/opt/keycloak/bin/kcadm.sh
+    $K config credentials --server http://localhost:8080 --realm master --user "$KEYCLOAK_ADMIN" --password "$KEYCLOAK_ADMIN_PASSWORD" >/dev/null
+    ID=$($K get users -r "$REALM" -q "username=$TARGET_USER" -q exact=true --fields id --format csv --noquotes | head -1)
+    [ -n "$ID" ] || ID=$($K get users -r "$REALM" -q "email=$TARGET_USER" -q exact=true --fields id --format csv --noquotes | head -1)
+    [ -n "$ID" ] || { echo "no such user: $TARGET_USER" >&2; exit 1; }
+    $K add-roles -r "$REALM" --uid "$ID" --rolename platform-admin'; then
+    say "Granted platform-admin to $user (sign out and back in)."
+  else
+    die "could not grant the role — has '$user' signed up yet?"
+  fi
+}
+
+# ---------------------------------------------------------------- seed-demo
+# Fills ONE empty tenant with clearly fictional "Example" data (agents, conversations, outcomes, prices, a baseline) so
+# the Cost & ROI page and the pilot report can be shown without a real customer. The tenant must already exist (sign it
+# up like any other, default name "Example Demo"); a tenant that already holds agents, calls or resolutions is refused.
+# The Cost & ROI page, the Insights page and every pilot report print an "Example" watermark for a seeded tenant.
+# --remove refuses a tenant that was not seeded and deletes only what the seed wrote.
+cmd_seed_demo() {
+  local tenant="Example Demo" remove=0 yes=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --tenant) tenant="${2:?--tenant needs a name}"; shift ;;
+      --remove) remove=1 ;;
+      --yes|-y) yes=1 ;;
+      *) die "seed-demo: unknown option $1" ;;
+    esac
+    shift
+  done
+  load_state; resolve_profiles; build_compose_args
+  local sql="$REPO_ROOT/scripts/demo/seed-demo.sql"
+  [ "$remove" = 1 ] && sql="$REPO_ROOT/scripts/demo/seed-demo-remove.sql"
+  [ -f "$sql" ] || die "missing $sql"
+  local schema
+  # The tenant name travels as a psql variable (:'n'), never spliced into the SQL text.
+  # shellcheck disable=SC2016
+  schema="$(printf '%s\n' "SELECT schema_name FROM control_plane.tenant WHERE name = :'n' AND status = 'ACTIVE';" \
+    | dc exec -T -e N="$tenant" postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -v ON_ERROR_STOP=1 -v n="$N" -f -' 2>/dev/null \
+    | head -1 | tr -d '\r')" || true
+  [ -n "$schema" ] || die "no active tenant named '$tenant'. Sign it up first (the console sign-up page), then re-run; or pass --tenant NAME."
+  case "$schema" in *[!a-z0-9_]*|"") die "unexpected schema name '$schema'" ;; esac
+  if [ "$yes" != 1 ]; then
+    if [ "$remove" = 1 ]; then say "This removes the Example data from tenant '$tenant' (schema $schema)."
+    else say "This writes fictional Example data into tenant '$tenant' (schema $schema). It refuses a tenant with real data."; fi
+    printf 'Continue? [y/N] '; local a; read -r a; case "$a" in y|Y|yes) ;; *) die "aborted" ;; esac
+  fi
+  # shellcheck disable=SC2016
+  dc exec -T -e SCHEMA="$schema" postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -1 -v schema="$SCHEMA" -f -' < "$sql" >/dev/null \
+    || die "seed-demo failed (nothing was changed). Is the tenant empty? See the message above."
+  if [ "$remove" = 1 ]; then ok "Example data removed from '$tenant'."
+  else ok "Example data written to '$tenant'. Sign in as that tenant: Cost & ROI, Insights and the pilot report now carry an Example watermark."; fi
+}
+
+# ------------------------------------------------------------------- models
+# Local model catalog (deploy/models/catalog.txt, a link to the one file core also reads
+# from its classpath, core/providers/src/main/resources/local-models/catalog.txt, so the
+# console's GET /api/local-models/recommendation and this command share one list) over the Ollama this install
+# uses: the compose `ollama` container (--local-ai) or the one on this machine
+# (--local-ai=host, or detected). Installing a model only puts the weights there;
+# pointing the platform pool at it is Platform Admin -> LLM providers (the
+# startup bootstrap never edits a row that already exists).
+MODELS_CATALOG="$REPO_ROOT/deploy/models/catalog.txt"
+# Not in the catalog on purpose: that file is also core's chat-model list (the console wizard).
+EMBED_MODEL="${VEGADUTA_EMBED_MODEL:-nomic-embed-text}"
+
+ollama_mode() { # echoes container|host; non-zero when no Ollama is available
+  load_state
+  case "$LOCAL_AI" in
+    container|host) printf '%s' "$LOCAL_AI"; return 0 ;;
+  esac
+  host_ollama_models >/dev/null 2>&1 && { printf host; return 0; }
+  return 1
+}
+
+ollama_run() { # ollama_run MODE ARGS... : run the ollama CLI in the right place
+  local mode="$1"; shift
+  if [ "$mode" = container ]; then
+    resolve_profiles; build_compose_args
+    dc exec -T ollama ollama "$@"
+  else
+    command -v ollama >/dev/null 2>&1 || die "ollama is not installed on this machine (https://ollama.com/download)"
+    ollama "$@"
+  fi
+}
+
+# How a model makes tool calls (docs/local-models.md, "Tool calls from small models"):
+# prints structured | text | chat only | unknown. Mirrors core's HostedToolCallGradeProbe:
+# Ollama's /api/show capabilities without "tools" is "chat only" with no model call;
+# otherwise one two-tool chat request, graded by whether tool_calls came back structured,
+# as text ({, [, <tool_call>, <function=, ``` first) or not at all. In container mode the
+# Ollama port is not published to this machine, so only `ollama show` is consulted there.
+probe_tool_grade() { # probe_tool_grade MODE TAG
+  local mode="$1" tag="$2" url=http://127.0.0.1:11434 show caps reply content
+  if [ "$mode" = container ]; then
+    resolve_profiles; build_compose_args
+    show="$(dc exec -T ollama ollama show "$tag" 2>/dev/null)" || { printf unknown; return 1; }
+    if printf '%s' "$show" | grep -qi 'capabilities'; then
+      printf '%s' "$show" | grep -qiw tools && printf structured || printf 'chat only'
+    else printf unknown; fi
+    return 0
+  fi
+  show="$(curl -fsS --max-time 5 "$url/api/show" -d "{\"model\":\"$tag\"}" 2>/dev/null)" || { printf unknown; return 1; }
+  caps="$(printf '%s' "$show" | grep -o '"capabilities":\[[^]]*\]')"
+  if [ -n "$caps" ] && ! printf '%s' "$caps" | grep -q '"tools"'; then printf 'chat only'; return 0; fi
+  reply="$(curl -fsS --max-time 240 "$url/v1/chat/completions" -H 'Content-Type: application/json' -d '{
+    "model":"'"$tag"'","stream":false,"temperature":0,"max_tokens":200,
+    "messages":[{"role":"system","content":"You can call tools. When a tool answers the question, call it instead of answering yourself."},
+                {"role":"user","content":"What is the weather in Paris right now?"}],
+    "tools":[{"type":"function","function":{"name":"get_weather","description":"Current weather for a city.","parameters":{"type":"object","properties":{"city":{"type":"string","description":"City name, e.g. Paris"}},"required":["city"]}}},
+             {"type":"function","function":{"name":"get_time","description":"Current time in a time zone.","parameters":{"type":"object","properties":{"timezone":{"type":"string","description":"IANA time zone, e.g. Europe/Paris"}},"required":["timezone"]}}}],
+    "tool_choice":"auto"}' 2>/dev/null)" || { printf unknown; return 1; }
+  if printf '%s' "$reply" | grep -q '"tool_calls":\[{'; then printf structured; return 0; fi
+  content="$(printf '%s' "$reply" | grep -o '"content":"[^"\\]*' | head -1 | sed 's/"content":"//; s/^[[:space:]]*//')"
+  case "$content" in
+    '{'*|'['*|'<tool_call>'*|'<function='*|'```'*) printf text ;;
+    *) printf 'chat only' ;;
+  esac
+}
+
+installed_models() { # installed_models MODE
+  if [ "$1" = container ]; then
+    resolve_profiles; build_compose_args
+    dc exec -T ollama ollama list 2>/dev/null | awk 'NR>1 {print $1}'
+  else
+    host_ollama_models
+  fi
+}
+
+cmd_models() {
+  local sub="${1:-list}"; [ $# -gt 0 ] && shift
+  local mode
+  mode="$(ollama_mode)" || die "no local Ollama: start the stack with 'up --local-ai' (container) or '--local-ai=host', or install Ollama from https://ollama.com/download"
+  case "$sub" in
+    list|ls)
+      local have tag fam gb ram tools note mark
+      have="$(installed_models "$mode" || true)"
+      say "Ollama: $mode    default: ${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL | grep . || echo qwen3.5:4b)}"
+      printf '  %-3s %-16s %-9s %-8s %-8s %-11s %s\n' "" TAG FAMILY DOWNLOAD RAM TOOLS NOTE
+      # Columns 7+ (parameters, context, VRAM, licence, thinking, best for) feed the console's
+      # detail card; the CLI list shows the first six.
+      while IFS='|' read -r tag fam gb ram tools note _details; do
+        case "$tag" in ''|'#'*) continue ;; esac
+        mark=" "; printf '%s\n' "$have" | grep -qx "$tag" && mark="*"
+        printf '  %-3s %-16s %-9s %-8s %-8s %-11s %s\n' "$mark" "$tag" "$fam" "~${gb} GB" "${ram} GB" "$tools" "$note"
+      done < "$MODELS_CATALOG"
+      printf '\n  * = installed.  Install: scripts/vegaduta models pull TAG\n'
+      printf '  TOOLS: structured = agents work; text = tool calls recovered from text (slower); chat only = no tool use\n'
+      printf '%s\n' "$have" | grep -v '^$' | while read -r tag; do
+        grep -q "^${tag}|" "$MODELS_CATALOG" || printf '  * %s (installed, not in the catalog)\n' "$tag"
+      done ;;
+    pull|install)
+      local tag="${1:?models pull needs a model tag, e.g. qwen3.5:4b}"
+      grep -q "^${tag}|" "$MODELS_CATALOG" || warn "'$tag' is not in the catalog (deploy/models/catalog.txt); pulling it anyway"
+      ollama_run "$mode" pull "$tag"
+      ok "'$tag' is installed. To use it for the free pool: Platform Admin -> LLM providers (base URL as for the existing Ollama row, model '$tag')."
+      local grade expected
+      say "Probing how '$tag' makes tool calls (one short request; a cold model can take a minute)..."
+      grade="$(probe_tool_grade "$mode" "$tag" || true)"
+      expected="$(grep "^${tag}|" "$MODELS_CATALOG" | cut -d'|' -f5)"
+      case "$grade" in
+        structured) ok "tool calls: structured - agents with tools work on this model" ;;
+        text) warn "tool calls: text - the model writes tool calls as text; core recovers them, expect slower and less reliable tool use (docs/local-models.md)" ;;
+        'chat only') warn "tool calls: none - chat only. Agents with tools will not work on '$tag'; keep a tools-capable row in the pool (models list, TOOLS column)" ;;
+        *) warn "tool calls: could not be measured ($grade). Core measures it again when the pool row is saved." ;;
+      esac
+      [ -n "$expected" ] && [ "$grade" != unknown ] && [ "$grade" != "$expected" ] && say "note: the catalog lists '$expected' for '$tag' (observed with full agent prompts and tool sets); this short probe measured '$grade'" ;;
+    rm|remove)
+      local tag="${1:?models rm needs a model tag}"
+      ollama_run "$mode" rm "$tag" ;;
+    *) die "models: unknown subcommand '$sub' (list, pull TAG, rm TAG)" ;;
+  esac
+}
+
+# ----------------------------------------------------------------- personal
+# `personal`: one person, one laptop. postgres + valkey + core + web with no
+# Keycloak (deploy/compose/personal.yml, Spring profile `personal`). With
+# --native-core the core runs as a host JVM instead of a container, which
+# is the lightest option and keeps Ollama (Metal on macOS) and core on the same side.
+# It reuses the shared helpers above (secrets, state, local-AI overlays) and adds nothing
+# to `up --lite` / `up --full`.
+PERSONAL_HOME="${VEGADUTA_PERSONAL_HOME:-${HOME:-/tmp}/.vegaduta/personal}"
+PERSONAL_PID_FILE="$PERSONAL_HOME/core.pid"
+PERSONAL_LOG_FILE="$PERSONAL_HOME/core.log"
+
+env_or() { local v; v="$(get_env "$1")"; printf '%s' "${v:-$2}"; }
+
+host_ram_gb() {
+  case "$(uname -s)" in
+    Darwin) echo $(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 )) ;;
+    Linux) echo $(( $(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0) / 1048576 )) ;;
+    *) echo 0 ;;
+  esac
+}
+
+# The host's accelerator for the console's hardware panel: "apple" on Apple Silicon, "nvidia:NAME:GB"
+# with an NVIDIA driver, else nothing. Core in a container cannot see either.
+host_accelerator() {
+  case "$(uname -s)/$(uname -m)" in
+    Darwin/arm64) printf 'apple'; return 0 ;;
+  esac
+  if command -v nvidia-smi >/dev/null 2>&1; then
+    local line name mib
+    line="$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>/dev/null | head -n 1 || true)"
+    name="${line%,*}"; mib="${line##*,}"; mib="${mib//[!0-9]/}"
+    if [ -n "$name" ] && [ -n "$mib" ]; then printf 'nvidia:%s:%s' "${name%"${name##*[![:space:]]}"}" "$(( (mib + 512) / 1024 ))"; fi
+  fi
+  return 0
+}
+
+# Prints the path of a Java >= 21 launcher (JAVA_HOME first, then PATH); non-zero when there is none.
+personal_find_java() {
+  local j v
+  for j in "${JAVA_HOME:+$JAVA_HOME/bin/java}" java; do
+    [ -n "$j" ] || continue
+    command -v "$j" >/dev/null 2>&1 || continue
+    v="$("$j" -version 2>&1 | sed -n '1s/.*version "\([0-9][0-9]*\).*/\1/p')"
+    if [ "${v:-0}" -ge 21 ] 2>/dev/null; then command -v "$j"; return 0; fi
+  done
+  return 1
+}
+
+personal_core_pid() { # prints the PID of OUR host core, or nothing
+  local pid cmd
+  [ -f "$PERSONAL_PID_FILE" ] || return 0
+  pid="$(cat "$PERSONAL_PID_FILE" 2>/dev/null || true)"
+  case "$pid" in ''|*[!0-9]*) return 0 ;; esac
+  cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
+  # Only a live java process started from our jar directory counts (PIDs get reused).
+  case "$cmd" in *java*"$PERSONAL_HOME"*|*java*"/core/app/target/"*|*java*"${VEGADUTA_CORE_JAR:-@none@}"*) printf '%s' "$pid" ;; esac
+}
+
+personal_native_status() {
+  local pid; pid="$(personal_core_pid)"
+  if [ -n "$pid" ]; then printf '  core (host JVM)  running, pid %s, log %s\n' "$pid" "$PERSONAL_LOG_FILE"
+  else printf '  core (host JVM)  not running (scripts/vegaduta personal --native-core)\n'; fi
+}
+
+# Stops only the process recorded in our PID file (never a pattern kill).
+personal_stop_native() {
+  local pid i
+  pid="$(personal_core_pid)"
+  if [ -z "$pid" ]; then rm -f "$PERSONAL_PID_FILE" 2>/dev/null || true; return 0; fi
+  say "Stopping the host core (pid $pid)"
+  kill -TERM "$pid" 2>/dev/null || true
+  for i in $(seq 1 45); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+  if kill -0 "$pid" 2>/dev/null; then warn "core did not stop in 45s; sending SIGKILL to pid $pid"; kill -KILL "$pid" 2>/dev/null || true; fi
+  rm -f "$PERSONAL_PID_FILE"
+  [ -d "$PERSONAL_HOME/storage" ] && printf '  files kept in %s (remove it yourself to delete them)\n' "$PERSONAL_HOME/storage"
+  return 0
+}
+
+personal_doctor() {
+  say "Checking prerequisites (tier: personal$([ "$NATIVE_CORE" = 1 ] && echo ', native core')${PROFILES:+, profiles: $PROFILES})"
+  if ! command -v docker >/dev/null 2>&1; then bad "docker not found: install Docker Engine or Docker Desktop"; return 1; fi
+  if docker info >/dev/null 2>&1; then ok "Docker daemon reachable ($(docker version --format '{{.Server.Version}}' 2>/dev/null))"
+  else bad "Docker daemon not running / not reachable"; return 1; fi
+  local cv; cv="$(docker compose version --short 2>/dev/null | sed 's/^v//')"
+  if [ -z "$cv" ]; then bad "docker compose v2 plugin not found"
+  elif version_ge "$cv" 2.24.0; then ok "docker compose $cv"
+  else bad "docker compose $cv is too old (need >= 2.24.0)"; fi
+
+  # RAM: containers add up to ~2.4 GB of limits (about 0.9 GB without the core container) plus
+  # the Docker VM; a local model needs its own memory on top (catalog: scripts/vegaduta models list).
+  local mem_gb host_gb need_docker=4
+  mem_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1024 / 1024 / 1024 ))
+  host_gb="$(host_ram_gb)"
+  [ "$NATIVE_CORE" = 1 ] && need_docker=2
+  if [ "$mem_gb" -ge "$need_docker" ]; then ok "Docker memory ${mem_gb} GB (>= ${need_docker} GB)"
+  else warn "Docker has ${mem_gb} GB RAM; personal wants >= ${need_docker} GB (raise Docker Desktop's memory limit)"; fi
+  if [ "$host_gb" -gt 0 ] && [ "$host_gb" -lt 8 ] && [ -n "$LOCAL_AI" ]; then
+    warn "this machine has ${host_gb} GB RAM: a local model plus the stack is tight; prefer a small model (qwen3.5:2b) or a cloud key"
+  fi
+
+  if [ "$NATIVE_CORE" = 1 ]; then
+    local j; j="$(personal_find_java || true)"
+    if [ -n "$j" ]; then ok "Java >= 21 for the host core: $j"
+    else bad "--native-core needs a JDK/JRE 21 or newer on PATH (or JAVA_HOME); none found"; fi
+    # The console container signs you in through a proxy that must reach the host JVM. Docker Desktop
+    # (macOS, Windows) routes host.docker.internal to the host's loopback; Docker Engine on Linux maps
+    # it to the bridge gateway, so a core bound to 127.0.0.1 cannot be reached from the web container.
+    if [ "$(uname -s)" = Linux ]; then
+      case "$(env_or BIND_ADDR 127.0.0.1)" in
+        127.*|localhost|::1) warn "Linux with --native-core: the web container cannot reach a core bound to $(env_or BIND_ADDR 127.0.0.1), so sign-in answers 'could not reach the server'. Use the container core (drop --native-core), or set BIND_ADDR=0.0.0.0 in .env behind a firewall" ;;
+      esac
+    fi
+    case " $PROFILES " in *" rag "*) ok "--profile rag with a host core: the sidecar is published on 127.0.0.1:$(env_or SIDECAR_HOST_PORT 8001)" ;; esac
+  fi
+  local disk_kb disk_gb
+  disk_kb="$(df -Pk "$REPO_ROOT" 2>/dev/null | awk 'NR==2{print $4}')"
+  disk_gb=$(( ${disk_kb:-0} / 1024 / 1024 ))
+  if [ "$disk_gb" -ge 8 ]; then ok "Free disk ${disk_gb} GB"
+  else warn "Only ${disk_gb} GB free disk; personal wants >= 8 GB for images + data"; fi
+  local_ai_doctor
+
+  if [ -f "$ENV_FILE" ]; then ok ".env present ($ENV_FILE)"
+  else bad ".env missing: run scripts/vegaduta secrets"; return 1; fi
+  local name missing=""
+  for name in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD VALKEY_PASSWORD APP_ENCRYPTION_KEY; do
+    [ -n "$(get_env "$name")" ] || missing="$missing $name"
+  done
+  case " $PROFILES " in *" rag "*) [ -n "$(get_env SIDECAR_SHARED_SECRET)" ] || missing="$missing SIDECAR_SHARED_SECRET" ;; esac
+  if [ -z "$missing" ]; then ok "Required secrets set"
+  else bad "Empty secrets:$missing: run scripts/vegaduta secrets"; fi
+  local keylen; keylen="$(printf '%s' "$(get_env APP_ENCRYPTION_KEY)" | base64 -d 2>/dev/null | wc -c | tr -d ' ')"
+  if [ "${keylen:-0}" -ge 32 ]; then ok "APP_ENCRYPTION_KEY decodes to ${keylen} bytes"
+  else bad "APP_ENCRYPTION_KEY must be base64 of >= 32 bytes (openssl rand -base64 32). If data already exists, restore the ORIGINAL key instead."; fi
+  local perms; perms="$(stat -c '%a' "$ENV_FILE" 2>/dev/null || stat -f '%Lp' "$ENV_FILE" 2>/dev/null || echo '')"
+  case "$perms" in
+    ''|600|400) ok ".env is owner-only (${perms:-unknown})" ;;
+    *) if chmod 600 "$ENV_FILE" 2>/dev/null; then ok ".env was mode $perms - fixed to 600"
+       else bad ".env is mode $perms (readable by other users) - run: chmod 600 $ENV_FILE"; fi ;;
+  esac
+  local ver; ver="$(get_env VEGADUTA_VERSION)"
+  if [ -z "$ver" ]; then
+    if [ "$BUILD" = 1 ]; then ok "VEGADUTA_VERSION empty: images build from source as :local"
+    else bad "VEGADUTA_VERSION is empty: set a release (scripts/vegaduta upgrade --version X.Y.Z) or use --build"; fi
+  else ok "Release $ver"; fi
+
+  if [ -n "$(dc ps -q 2>/dev/null)" ] || [ -n "$(personal_core_pid)" ]; then
+    ok "Stack already running: skipping port checks"
+  else
+    hp() { local v; v="$(get_env "$1")"; printf '%s' "${v:-$2}"; }
+    local ports p busy=""
+    ports="$(hp WEB_HOST_PORT 3000) $(hp CORE_HOST_PORT 8080)"
+    [ "$NATIVE_CORE" = 1 ] && ports="$ports $(hp POSTGRES_HOST_PORT 5432) $(hp VALKEY_HOST_PORT 6379)"
+    for p in $ports; do if port_in_use "$p"; then busy="$busy $p"; fi; done
+    if [ -z "$busy" ]; then ok "Ports free: $ports"
+    else bad "Ports already in use:$busy (stop the other service or change the *_HOST_PORT values in .env)"; fi
+  fi
+  if [ "$FAILURES" -gt 0 ]; then printf '%s%d problem(s), %d warning(s).%s\n' "$C_R" "$FAILURES" "$WARNINGS" "$C_0"; return 1; fi
+  printf '%sLooks good%s (%d warning(s)).\n' "$C_G" "$C_0" "$WARNINGS"
+}
+
+# With nothing chosen, a personal install uses an Ollama that is already running on this machine
+# (free and private); --cloud opts out. Never starts or pulls anything.
+personal_default_model() {
+  [ -z "$LOCAL_AI" ] && [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  # An earlier run that said --cloud stays cloud. Any other earlier run (no Ollama then) looks
+  # again: that is how an Ollama installed afterwards gets picked up by a plain `personal`.
+  if [ "${CLOUD:-0}" = 1 ]; then return 0; fi
+  host_ollama_models >/dev/null 2>&1 || return 0
+  LOCAL_AI=host
+  [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model)"
+  say "Ollama found on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
+}
+
+# The core jar for --native-core: VEGADUTA_CORE_JAR, else built from source (--build), else the
+# one inside the core image of this release (so a release install needs only a JDK, not Maven).
+personal_core_jar() {
+  local jar img cid dest
+  if [ -n "${VEGADUTA_CORE_JAR:-}" ]; then
+    [ -f "$VEGADUTA_CORE_JAR" ] || die "VEGADUTA_CORE_JAR=$VEGADUTA_CORE_JAR does not exist"
+    printf '%s' "$VEGADUTA_CORE_JAR"; return 0
+  fi
+  img="${VEGADUTA_REGISTRY:-$(get_env VEGADUTA_REGISTRY)}"; img="${img:-ghcr.io/cd-lc}/core:${VEGADUTA_VERSION}"
+  if [ "$BUILD" = 1 ]; then
+    if command -v mvn >/dev/null 2>&1; then
+      say "Building the core jar with Maven (a few minutes)" >&2
+      (cd "$REPO_ROOT/core" && mvn -B -ntp -q -DskipTests -pl app -am package) >&2 || die "core build failed"
+      jar="$(find "$REPO_ROOT/core/app/target" -maxdepth 1 -name '*.jar' ! -name '*.original' ! -name '*-sources.jar' 2>/dev/null | head -1)"
+      [ -n "$jar" ] || die "no jar under core/app/target after the build"
+      printf '%s' "$jar"; return 0
+    fi
+    say "No Maven on PATH: building the core image instead" >&2
+    docker build -f "$REPO_ROOT/core/Dockerfile" -t "$img" "$REPO_ROOT/core" >&2 || die "core image build failed"
+  fi
+  dest="$PERSONAL_HOME/jars/app-${VEGADUTA_VERSION}.jar"
+  if [ ! -s "$dest" ] || [ "$BUILD" = 1 ]; then
+    mkdir -p "$PERSONAL_HOME/jars"
+    if [ "$BUILD" != 1 ]; then
+      say "Fetching the core jar from $img" >&2
+      docker pull "$img" >&2 || die "could not pull $img (or set VEGADUTA_CORE_JAR=/path/to/app.jar)"
+    fi
+    cid="$(docker create "$img")" || die "docker create $img failed"
+    docker cp "$cid:/app/app.jar" "$dest.tmp" >&2 || { docker rm "$cid" >/dev/null 2>&1; die "could not copy /app/app.jar out of $img"; }
+    docker rm "$cid" >/dev/null 2>&1 || true
+    mv "$dest.tmp" "$dest"
+  fi
+  printf '%s' "$dest"
+}
+
+personal_start_native() {
+  local java jar pid i app db_user db_pass heap
+  java="$(personal_find_java)" || die "--native-core needs Java 21 or newer"
+  pid="$(personal_core_pid)"
+  if [ -n "$pid" ]; then ok "host core already running (pid $pid)"; return 0; fi
+  mkdir -p "$PERSONAL_HOME/storage"
+  # Uploaded files and the core log are private to this user (the jar download below lands here too).
+  chmod 700 "$PERSONAL_HOME" "$PERSONAL_HOME/storage" 2>/dev/null || true
+  jar="$(personal_core_jar)"
+  app="${PUBLIC_APP_URL:-$(get_env PUBLIC_APP_URL)}"; app="${app:-http://localhost:3000}"
+  db_user="$(get_env POSTGRES_APP_USER)"; db_user="${db_user:-vegaduta_app}"
+  db_pass="$(get_env POSTGRES_APP_PASSWORD)"
+  heap="${VEGADUTA_CORE_HEAP:-$(env_or VEGADUTA_CORE_HEAP 1g)}"
+  # A fresh log per start: the first-run link and old errors of earlier runs must not look current.
+  if [ -s "$PERSONAL_LOG_FILE" ]; then mv -f "$PERSONAL_LOG_FILE" "$PERSONAL_LOG_FILE.1" 2>/dev/null || true; fi
+  say "Starting core on the host JVM (log: $PERSONAL_LOG_FILE)"
+  # Values go in the process ENVIRONMENT, never argv (secrets stay out of `ps`).
+  local db_port db_name redis_port redis_pass enc_key master_key sc_secret llm_model
+  local mail_host mail_user mail_pass core_port bind_addr probe_host java_extra profiles line key allowed_private deny_read
+  core_port="$(env_or CORE_HOST_PORT 8080)"
+  # The container publishes on BIND_ADDR (loopback by default); the host JVM must not listen wider.
+  bind_addr="$(env_or BIND_ADDR 127.0.0.1)"
+  probe_host="$bind_addr"; [ "$bind_addr" = 0.0.0.0 ] && probe_host=127.0.0.1
+  java_extra="${PERSONAL_JAVA_OPTS_EXTRA:-$(get_env PERSONAL_JAVA_OPTS_EXTRA)}"
+  profiles="${PERSONAL_SPRING_PROFILES:-$(env_or PERSONAL_SPRING_PROFILES security,knowledge,graph-memory,personal)}"
+  db_port="$(env_or POSTGRES_HOST_PORT 5432)"; db_name="$(env_or POSTGRES_DB agentic_ai)"
+  redis_port="$(env_or VALKEY_HOST_PORT 6379)"; redis_pass="$(get_env VALKEY_PASSWORD)"
+  enc_key="$(get_env APP_ENCRYPTION_KEY)"; master_key="$(get_env PLATFORM_MASTER_KEY)"
+  sc_secret="$(get_env SIDECAR_SHARED_SECRET)"; llm_model="${LOCAL_MODEL:-$(env_or LOCAL_LLM_MODEL qwen3.5:4b)}"
+  mail_host="$(get_env SMTP_HOST)"; mail_user="$(get_env SMTP_USERNAME)"; mail_pass="$(get_env SMTP_PASSWORD)"
+  (
+    # core.env holds the user's overrides for the container core (APP_AUTH_MODE, ...); apply it
+    # first, as compose does, so everything below wins. Read as data: no shell evaluation.
+    if [ -f "$COMPOSE_DIR/core.env" ]; then
+      while IFS= read -r line || [ -n "$line" ]; do
+        line="${line%$'\r'}"
+        case "$line" in ''|'#'*) continue ;; esac
+        key="${line%%=*}"
+        case "$key" in ''|*[!A-Za-z0-9_]*|[0-9]*) continue ;; esac
+        export "$key=${line#*=}"
+      done < "$COMPOSE_DIR/core.env"
+    fi
+    export SPRING_PROFILES_ACTIVE="$profiles"
+    export SERVER_PORT="$core_port" SERVER_ADDRESS="$bind_addr"
+    export DB_HOST=127.0.0.1 DB_PORT="$db_port" POSTGRES_DB="$db_name" POSTGRES_USER="$db_user" POSTGRES_PASSWORD="$db_pass"
+    export REDIS_HOST=127.0.0.1 REDIS_PORT="$redis_port" REDIS_PASSWORD="$redis_pass"
+    export APP_ENCRYPTION_KEY="$enc_key" PLATFORM_MASTER_KEY="$master_key"
+    export APP_WEB_PUBLIC_URL="$app" APP_WEB_ALLOWED_ORIGINS="$app,http://localhost:3000,http://127.0.0.1:3000"
+    export APP_STORAGE_TYPE=local APP_STORAGE_LOCAL_PATH="$PERSONAL_HOME/storage"
+    export MCP_STDIO_SIDECAR_ENABLED=false MANAGEMENT_HEALTH_MAIL_ENABLED=false MANAGEMENT_TRACING_ENABLED=false
+    # The sidecar container publishes this loopback port (personal.native.yml); only used with --profile rag.
+    export SIDECAR_BASE_URL="${SIDECAR_BASE_URL:-http://127.0.0.1:$(env_or SIDECAR_HOST_PORT 8001)}" SIDECAR_SHARED_SECRET="$sc_secret"
+    case " $PROFILES " in *" rag "*) export APP_SIDECAR_ENABLED=true ;; esac
+    # The STDIO MCP sandbox is a deny-list over a readable filesystem: hide this install's own secrets
+    # (.env, core.env, state) from the servers it launches.
+    deny_read="$COMPOSE_DIR"
+    for line in "$(dirname "$ENV_FILE")" "$(dirname "$STATE_FILE")"; do
+      case ",$deny_read," in *",$line,"*) ;; *) deny_read="$deny_read,$line" ;; esac
+    done
+    export VEGADUTA_MCP_DENY_READ="${VEGADUTA_MCP_DENY_READ:+$VEGADUTA_MCP_DENY_READ,}$deny_read"
+    allowed_private="${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:-}"
+    if [ -n "$LOCAL_AI" ]; then
+      # Ollama is on this machine: core reaches it directly (the SSRF guard needs the host:port allow-listed).
+      export APP_LOCAL_LLM_BOOTSTRAP_ENABLED=true APP_LOCAL_LLM_BOOTSTRAP_MODEL="$llm_model"
+      export APP_LOCAL_LLM_BOOTSTRAP_BASE_URL="${LOCAL_LLM_BASE_URL_NATIVE:-http://127.0.0.1:11434}"
+      allowed_private="127.0.0.1:11434${allowed_private:+,$allowed_private}"
+    fi
+    if [ "$SEARCH" = 1 ]; then
+      allowed_private="${WEB_SEARCH_SEARXNG_BASE_URL#*://}${allowed_private:+,$allowed_private}"
+    fi
+    [ -z "$allowed_private" ] || export APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS="$allowed_private"
+    export SPRING_MAIL_HOST="$mail_host" SPRING_MAIL_USERNAME="$mail_user" SPRING_MAIL_PASSWORD="$mail_pass"
+    # shellcheck disable=SC2086  # PERSONAL_JAVA_OPTS_EXTRA is a flag list
+    exec nohup "$java" -Xms128m "-Xmx$heap" -XX:+UseSerialGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 \
+      -XX:MaxMetaspaceSize=256m -XX:+ExitOnOutOfMemoryError -Djava.net.preferIPv4Stack=true \
+      $java_extra -jar "$jar" >> "$PERSONAL_LOG_FILE" 2>&1 < /dev/null
+  ) &
+  echo $! > "$PERSONAL_PID_FILE"
+  pid="$!"
+  for i in $(seq 1 "${VEGADUTA_WAIT_TIMEOUT:-900}"); do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      tail -n 25 "$PERSONAL_LOG_FILE" >&2 || true
+      die "host core exited during start-up (full log: $PERSONAL_LOG_FILE)"
+    fi
+    if curl -fsS --max-time 3 "http://$probe_host:$core_port/actuator/health/readiness" >/dev/null 2>&1; then
+      ok "host core is ready (${i}s, pid $pid)"; return 0
+    fi
+    sleep 1
+  done
+  die "host core did not become ready in ${VEGADUTA_WAIT_TIMEOUT:-900}s (log: $PERSONAL_LOG_FILE)"
+}
+
+# The pending first-run setup link, or nothing. Core keeps it in first-run-setup.txt and deletes the
+# file once the owner has set a password, so a finished or expired setup never prints a dead link
+# (the log is append-only and still holds every old one).
+personal_setup_link() {
+  local text line expires now
+  if [ "$NATIVE_CORE" = 1 ]; then
+    text="$(cat "${APP_AUTH_LOCAL_DATA_DIR:-${HOME:-/tmp}/.vegaduta/auth}/first-run-setup.txt" 2>/dev/null || true)"
+  else
+    text="$(dc exec -T core cat /data/storage/.auth/first-run-setup.txt 2>/dev/null || true)"
+  fi
+  line="$(printf '%s\n' "$text" | grep -o 'https\{0,1\}://[^ ]*/login?setup=[A-Za-z0-9_-]*' | tail -n 1 || true)"
+  [ -n "$line" ] || return 0
+  expires="$(printf '%s\n' "$text" | sed -n 's/.*expires \([0-9T:-]\{19\}\).*/\1/p' | head -n 1)"
+  now="$(date -u +%Y-%m-%dT%H:%M:%S)"
+  if [ -n "$expires" ] && [ "$now" \> "$expires" ]; then
+    printf '%s' "(expired: run scripts/vegaduta restart to get a new link)"
+  else
+    printf '%s' "$line"
+  fi
+}
+
+# The sign-in address of the one owner account (core's default unless core.env overrides it).
+personal_owner_email() {
+  local v=""
+  [ -f "$COMPOSE_DIR/core.env" ] && v="$(sed -n 's/^APP_AUTH_LOCAL_OWNER_EMAIL=//p' "$COMPOSE_DIR/core.env" | tail -n 1)"
+  printf '%s' "${v:-owner@vegaduta.local}"
+}
+
+personal_print_urls() {
+  local app api setup owner
+  app="${PUBLIC_APP_URL:-$(get_env PUBLIC_APP_URL)}"; app="${app:-http://localhost:3000}"
+  api="${PUBLIC_API_URL:-$(get_env PUBLIC_API_URL)}"; api="${api:-http://localhost:8080}"
+  # Core prints a one-time first-run link (<console>/login?setup=...) to its log until the owner
+  # has chosen a password. Show it when it is there; after setup there is none and you just sign in.
+  setup="$(personal_setup_link)"
+  owner="$(personal_owner_email)"
+  cat <<EOF
+
+${C_B}VegaDūta (personal) is up${C_0}$([ "$NATIVE_CORE" = 1 ] && printf ' (core on the host JVM)')
+
+  Console          $app
+  API              $api
+  First-run setup  ${setup:-already done: sign in at the console (no pending link)}
+  Sign in as       $owner
+EOF
+  case "$LOCAL_AI" in
+    host|container)
+      if [ "$MODEL_NOT_PULLED" = 1 ]; then
+        printf '  Local model      %s via %s Ollama: NOT PULLED YET. Run: ollama pull %s\n' "${LOCAL_MODEL:-qwen3.5:4b}" "$LOCAL_AI" "${LOCAL_MODEL:-qwen3.5:4b}"
+      else
+        printf '  Local model      %s via %s Ollama (free platform pool)\n' "${LOCAL_MODEL:-qwen3.5:4b}" "$LOCAL_AI"
+      fi
+      if [ "$EMBED_NOT_PULLED" = 1 ]; then
+        printf '  Embeddings       model %s NOT PULLED YET (documents and memory need it). Run: ollama pull %s\n' "$EMBED_MODEL" "$EMBED_MODEL"
+      fi ;;
+    *) printf '  Model            none yet: add a provider key in the console (Settings -> Providers), or install Ollama and run: scripts/vegaduta personal --local-ai=host\n' ;;
+  esac
+  if [ "$SEARCH" = 1 ]; then
+    printf '  Web search       on (a private SearXNG container, no API key). Turn off: scripts/vegaduta personal --no-search\n'
+  fi
+  if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then
+    printf '  Connectors       MCP runner on; fetch and time are on the Tools page. Turn off: scripts/vegaduta personal --no-tools\n'
+  fi
+  if [ "$BROWSER" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then
+    printf '  Browser          on (a Chromium in its own container; the Assistant'"'"'s Browser button opens it). Turn off: scripts/vegaduta personal --no-browser\n'
+  fi
+  cat <<EOF
+
+  1. First run: open the setup link above and choose your password (the account lives in this install, not on a server). Afterwards, sign in at the console.
+  2. Create your first agent; with a local model it is already registered as the free pool.
+
+  status: scripts/vegaduta status    logs: scripts/vegaduta logs core    stop: scripts/vegaduta down
+  $([ "$NATIVE_CORE" = 1 ] && printf 'core log: %s' "$PERSONAL_LOG_FILE")
+EOF
+}
+
+# `restart [core]`: restart core so it issues a fresh first-run setup link, then show it. Containers:
+# `compose restart core`; host JVM: stop and start our own process.
+cmd_restart() {
+  load_state; resolve_profiles; build_compose_args
+  if [ "$TIER" = personal ] && [ "$NATIVE_CORE" = 1 ]; then
+    personal_stop_native
+    resolve_version
+    personal_start_native
+  else
+    dc restart "${1:-core}"
+  fi
+  if [ "$TIER" = personal ]; then
+    local link; link="$(personal_setup_link)"
+    printf '\n  First-run setup  %s\n  Sign in as       %s\n' "${link:-already done: sign in at the console (no pending link)}" "$(personal_owner_email)"
+  fi
+}
+
+# personal_sync_public_urls: the console and API URLs a browser uses follow the ports in .env. The copy of
+# .env.example pins PUBLIC_APP_URL / PUBLIC_API_URL to the default ports, so changing WEB_HOST_PORT or
+# CORE_HOST_PORT (the fix doctor suggests for a busy port) left the console talking to the wrong address.
+# Only the auto-generated http://localhost:<port> form is rewritten; a --domain install's https URLs stay.
+personal_sync_public_urls() {
+  local web_port core_port cur
+  web_port="$(env_or WEB_HOST_PORT 3000)"; core_port="$(env_or CORE_HOST_PORT 8080)"
+  cur="$(get_env PUBLIC_APP_URL)"
+  case "$cur" in ""|http://localhost:[0-9]*) [ "$cur" = "http://localhost:$web_port" ] || set_env PUBLIC_APP_URL "http://localhost:$web_port" force ;; esac
+  cur="$(get_env PUBLIC_API_URL)"
+  case "$cur" in ""|http://localhost:[0-9]*) [ "$cur" = "http://localhost:$core_port" ] || set_env PUBLIC_API_URL "http://localhost:$core_port" force ;; esac
+}
+
+# Day-one defaults of a FRESH personal install (no state file yet): private web search (SearXNG, no API key) and
+# the MCP runner (STDIO connectors; the starter set is registered on the first start) are on unless declined.
+# Decline with --no-search / --no-tools (remembered in the state file) or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 in
+# .env or the environment (1 forces them on). A command-line flag beats the environment, which beats the
+# remembered answer. An install that predates these defaults keeps what it has: with no remembered answer it is
+# left as it was until --search / --profile tools asks for them.
+personal_apply_defaults() {
+  local v
+  if [ "$SEARCH_EXPLICIT" != 1 ]; then
+    v="${VEGADUTA_SEARCH:-$(get_env VEGADUTA_SEARCH)}"
+    case "$v" in 0|off|false|no) SEARCH=0 ;; 1|on|true|yes) SEARCH=1 ;; esac
+  fi
+  if [ "$TOOLS_EXPLICIT" != 1 ]; then
+    v="${VEGADUTA_TOOLS:-$(get_env VEGADUTA_TOOLS)}"
+    case "$v" in 0|off|false|no) TOOLS=0 ;; 1|on|true|yes) TOOLS=1 ;; esac
+  fi
+  if [ "$BROWSER_EXPLICIT" != 1 ]; then
+    v="${VEGADUTA_BROWSER:-$(get_env VEGADUTA_BROWSER)}"
+    case "$v" in 0|off|false|no) BROWSER=0 ;; 1|on|true|yes) BROWSER=1 ;; esac
+  fi
+  if [ "$PERSONAL_FRESH" = 1 ]; then
+    [ -n "$SEARCH" ] || SEARCH=1
+    [ -n "$TOOLS" ] || TOOLS=1
+  fi
+}
+
+personal_up() {
+  TIER=personal
+  # Same first-run question as `up`: a personal install gets to pick a local
+  # model too - host Ollama when one is running, the Docker container
+  # otherwise, or any catalog tag (gpt-oss, deepseek-r1, ...). Non-interactive
+  # runs and re-runs skip it; the fallback below then adopts a host Ollama.
+  choose_model_source
+  personal_default_model
+  if [ -n "$LOCAL_MODEL" ] && [ -z "$LOCAL_AI" ]; then
+    warn "--local-model '$LOCAL_MODEL' has no effect: there is no local AI. Use --local-ai=host (Ollama on this machine) or --local-ai (a container)"
+  fi
+  personal_apply_defaults
+  cmd_secrets
+  resolve_profiles
+  resolve_version
+  # With the rag profile the sidecar exists, so core must use it (the personal profile defaults it off).
+  case " $PROFILES " in *" rag "*) export APP_SIDECAR_ENABLED=true ;; esac
+  # A containerised core measures its own cgroup, not this computer: tell it what the host is.
+  # Persist to .env too - exported for this run is not enough; a later `compose` call
+  # (restart, doctor from another shell, the wizard) must see the same numbers, or the
+  # memory budget and the hardware panel silently fall back to "0"/none.
+  if [ "$NATIVE_CORE" != 1 ]; then
+    [ -n "${HOST_RAM_GB:-}" ] || HOST_RAM_GB="$(host_ram_gb)"
+    [ -n "${HOST_ACCELERATOR:-}" ] || HOST_ACCELERATOR="$(host_accelerator)"
+    export HOST_RAM_GB HOST_ACCELERATOR
+    set_env HOST_RAM_GB "$HOST_RAM_GB" force
+    set_env HOST_ACCELERATOR "$HOST_ACCELERATOR" force
+  fi
+  build_compose_args
+  if [ "$DRY_RUN" = 1 ]; then
+    save_state
+    printf 'plan: tier=personal native_core=%s profiles=%s local_ai=%s local_model=%s search=%s tools=%s browser=%s\n' \
+      "$NATIVE_CORE" "${PROFILES:-none}" "${LOCAL_AI:-none}" "${LOCAL_MODEL:-default}" "${SEARCH:-0}" "${TOOLS:-0}" "${BROWSER:-0}"
+    printf 'plan: docker compose %s up -d\n' "${COMPOSE_ARGS[*]}"
+    return 0
+  fi
+  personal_sync_public_urls
+  cmd_doctor || die "fix the problems above, then re-run. (scripts/vegaduta doctor --personal)"
+  save_state
+  local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-900}")
+  [ "$BUILD" = 1 ] && up_args+=(--build)
+  say "Starting (personal) - first start pulls/builds images and runs migrations; this can take several minutes"
+  if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
+    dc ps
+    die "some services did not become healthy. Inspect with: scripts/vegaduta logs <service>"
+  fi
+  # `up` does not stop the container of a profile that is now off: take the MCP runner down when it was
+  # switched off (--no-tools) or core moved to the host JVM, so it does not sit on 768 MB for nothing.
+  if [ "$TOOLS" != 1 ] || [ "$NATIVE_CORE" = 1 ]; then
+    dc --profile tools rm -sf mcp-stdio-runner >/dev/null 2>&1 || true
+  fi
+  # Same for the browser add-on once --no-browser (or the host JVM) takes it out of the compose files.
+  if [ "$BROWSER" != 1 ] || [ "$NATIVE_CORE" = 1 ]; then
+    docker compose "${COMPOSE_ARGS[@]}" -f "$COMPOSE_DIR/browser.yml" --profile browser rm -sf browser-runner >/dev/null 2>&1 || true
+  fi
+  if [ "$NATIVE_CORE" = 1 ]; then personal_start_native; fi
+  verify_local_agent_model
+  personal_print_urls
+}
+
+cmd_personal() {
+  local sub="up" prev_tier
+  case "${1:-}" in
+    up|down|stop|status|logs) sub="$1"; shift ;;
+  esac
+  # Remembered choices (local model, search, native core) from an earlier run; a state file left
+  # by lite/full contributes only the model and search choices, never its profiles or build flag.
+  [ -f "$STATE_FILE" ] || PERSONAL_FRESH=1
+  TIER=""; load_state; prev_tier="$TIER"; TIER=personal
+  if [ "$prev_tier" != personal ]; then PROFILES=""; NATIVE_CORE=0; BUILD=0; fi
+  case "$sub" in
+    down|stop) cmd_down "$@"; return ;;
+    status) cmd_status; return ;;
+    logs)
+      if [ "$NATIVE_CORE" = 1 ] && [ "${1:-}" = core ] && [ -f "$PERSONAL_LOG_FILE" ]; then
+        tail -n "${VEGADUTA_LOG_TAIL:-200}" -f "$PERSONAL_LOG_FILE"; return
+      fi
+      cmd_logs "$@"; return ;;
+  esac
+  DOMAIN_ARG=""
+  parse_tier_flags "$@"
+  TIER=personal
+  personal_up
+}
+
+# projects [PATH]: the folder on this computer the Assistant's build terminal can see (personal mode,
+# --profile workspace). Without PATH it prints the current one. With PATH it points
+# VEGADUTA_PROJECTS_DIR there and recreates core and the workspace-runner so both mount it; the
+# Assistant then lists its sub-folders as projects, can run, test and preview them in the sandbox,
+# and sees nothing else of the disk. Refuses a folder that is the whole disk, home, or a system folder.
+cmd_projects() {
+  local cur dir; cur="$(get_env VEGADUTA_PROJECTS_DIR)"; cur="${cur:-$HOME/VegaDuta-Projects}"
+  if [ $# -eq 0 ]; then printf '%s\n' "$cur"; return 0; fi
+  dir="${1/#\~/$HOME}"
+  [ -d "$dir" ] || die "'$1' is not a folder on this computer"
+  dir="$(cd "$dir" && pwd -P)"
+  case "$dir" in
+    /|"$HOME"|/Users|/home|/etc|/var|/usr|/bin|/sbin|/System|/Library|/private|/opt|/tmp)
+      die "'$dir' is too broad: pick a folder that holds only the projects you want the Assistant to work on" ;;
+  esac
+  set_env VEGADUTA_PROJECTS_DIR "$dir" force
+  say "Projects folder is now $dir"
+  TIER=personal; load_state; TIER=personal; resolve_profiles; build_compose_args
+  dc up -d --no-deps workspace-perms core workspace-runner || die "could not restart core and the workspace runner"
+  say "Done. Open the Assistant and attach one of its folders."
+}
+
+usage() { sed -n '3,24p' "$0" | sed 's/^# \{0,1\}//'; }
+
+main() {
+  local cmd="${1:-help}"; [ $# -gt 0 ] && shift
+  case "$cmd" in
+    up) cmd_up "$@" ;;
+    down|stop) cmd_down "$@" ;;
+    status|ps) cmd_status ;;
+    logs) cmd_logs "$@" ;;
+    doctor) TIER=""; parse_tier_flags "$@"; cmd_doctor ;;
+    secrets) cmd_secrets "$@" ;;
+    backup) cmd_backup "$@" ;;
+    restore) cmd_restore "$@" ;;
+    upgrade) cmd_upgrade "$@" ;;
+    make-admin) cmd_make_admin "$@" ;;
+    restart) cmd_restart "$@" ;;
+    models|model) cmd_models "$@" ;;
+    seed-demo) cmd_seed_demo "$@" ;;
+    projects) cmd_projects "$@" ;;
+    personal) cmd_personal "$@" ;;
+    compose) load_state; resolve_profiles; build_compose_args; dc "$@" ;;
+    help|-h|--help) usage ;;
+    *) usage; die "unknown command: $cmd" ;;
+  esac
+}
+main "$@"

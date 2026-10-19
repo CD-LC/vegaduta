@@ -1,0 +1,282 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-browser-automation-capabilities",
+      "method": "GET",
+      "path": "/api/browser/automation/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-browser-profiles",
+      "method": "GET",
+      "path": "/api/browser/profiles",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-browser-profiles",
+      "method": "POST",
+      "path": "/api/browser/profiles",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.allowedDomains",
+          "$.attachedAgentIds",
+          "$.createdAt",
+          "$.expired",
+          "$.expiresAt",
+          "$.hasState",
+          "$.id",
+          "$.lastSavedAt",
+          "$.lastUsedAt",
+          "$.name",
+          "$.ownedByMe",
+          "$.scope",
+          "$.stateBytes",
+          "$.stateEntries",
+          "$.ttlDays"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-browser-profiles-id",
+      "method": "DELETE",
+      "path": "/api/browser/profiles/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-browser-profiles-id",
+      "method": "PATCH",
+      "path": "/api/browser/profiles/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.allowedDomains",
+          "$.attachedAgentIds",
+          "$.createdAt",
+          "$.expired",
+          "$.expiresAt",
+          "$.hasState",
+          "$.id",
+          "$.lastSavedAt",
+          "$.lastUsedAt",
+          "$.name",
+          "$.ownedByMe",
+          "$.scope",
+          "$.stateBytes",
+          "$.stateEntries",
+          "$.ttlDays"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-browser-profiles-id-agents-agentId",
+      "method": "DELETE",
+      "path": "/api/browser/profiles/{id}/agents/{agentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-browser-profiles-id-agents-agentId",
+      "method": "PUT",
+      "path": "/api/browser/profiles/{id}/agents/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.allowedDomains",
+          "$.attachedAgentIds",
+          "$.createdAt",
+          "$.expired",
+          "$.expiresAt",
+          "$.hasState",
+          "$.id",
+          "$.lastSavedAt",
+          "$.lastUsedAt",
+          "$.name",
+          "$.ownedByMe",
+          "$.scope",
+          "$.stateBytes",
+          "$.stateEntries",
+          "$.ttlDays"
+        ]
+      }
+    },
+    {
+      "id": "post-api-browser-profiles-id-clear-state",
+      "method": "POST",
+      "path": "/api/browser/profiles/{id}/clear-state",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-browser-recipes",
+      "method": "GET",
+      "path": "/api/browser/recipes",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-browser-recipes-id",
+      "method": "DELETE",
+      "path": "/api/browser/recipes/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-browser-recipes-id",
+      "method": "GET",
+      "path": "/api/browser/recipes/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.spec",
+          "$.summary",
+          "$.warnings"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-browser-recipes-id",
+      "method": "PATCH",
+      "path": "/api/browser/recipes/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.allowedDomains",
+          "$.createdAt",
+          "$.description",
+          "$.failCount",
+          "$.id",
+          "$.lastFailure",
+          "$.lastRunAt",
+          "$.name",
+          "$.parameters",
+          "$.runCount",
+          "$.stepCount",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-browser-recipes-from-run",
+      "method": "POST",
+      "path": "/api/browser/recipes/from-run",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.spec",
+          "$.summary",
+          "$.warnings"
+        ]
+      }
+    },
+    {
+      "id": "post-api-browser-takeover-id-begin",
+      "method": "POST",
+      "path": "/api/browser/takeover/{id}/begin",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-browser-takeover-id-cancel",
+      "method": "POST",
+      "path": "/api/browser/takeover/{id}/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-browser-takeover-id-hand-back",
+      "method": "POST",
+      "path": "/api/browser/takeover/{id}/hand-back",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-browser-takeover-id-input",
+      "method": "POST",
+      "path": "/api/browser/takeover/{id}/input",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-browser-takeover-id-stream",
+      "method": "GET",
+      "path": "/api/browser/takeover/{id}/stream",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-browser-takeover-id-token",
+      "method": "POST",
+      "path": "/api/browser/takeover/{id}/token",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-browser-takeover-capabilities",
+      "method": "GET",
+      "path": "/api/browser/takeover/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-browser-takeover-pause",
+      "method": "POST",
+      "path": "/api/browser/takeover/pause",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.kind",
+          "$.reason",
+          "$.sessionId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-browser-takeover-status",
+      "method": "GET",
+      "path": "/api/browser/takeover/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

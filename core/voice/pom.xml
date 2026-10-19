@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>voice</artifactId>
+  <name>voice</name>
+  <description>
+    Self-hosted in-app voice/video calling (Phase 1 of the self-reliance
+    initiative - browser-to-agent WebRTC via a self-hosted LiveKit server,
+    zero PSTN, zero Twilio dependency; NOT related to core/omnichannel/twilio,
+    which stays telephony-only and untouched).
+
+    New leaf-ish module rather than folding into "agents": token issuance is
+    a genuinely separate concern (signs a LiveKit access token, no LLM/agent
+    logic of its own) and this module deliberately depends ON agents/sarvam/
+    elevenlabs (to drive the STT -&gt; AgentChatService -&gt; TTS turn pipeline),
+    not the reverse - putting it in "agents" would risk agents depending back
+    on a brand-new provider integration for a capability most tenants won't
+    use yet. Same one-directional-addition shape as eventbus/graphmemory/
+    devices (see core/pom.xml's module-order comment).
+
+    LiveKit access tokens are signed here directly via Nimbus JOSE+JWT
+    (com.nimbusds:nimbus-jose-jwt) per LiveKit's documented HS256 JWT token
+    spec, rather than pulling in LiveKit's own server SDK - nimbus-jose-jwt is
+    already a transitive, compile-scope dependency of every module that
+    depends on "security" (spring-boot-starter-oauth2-resource-server -&gt;
+    spring-security-oauth2-jose -&gt; nimbus-jose-jwt), so this adds zero new
+    third-party surface.
+
+    Depends on: security (TenantContext), tenancy (schema-per-tenant, no
+    persistence of its own today but keeps this module's dependency shape
+    consistent with every sibling provider-integration module), agents
+    (AgentService for tenant-scoped agent lookup, AgentChatService for the
+    text turn), sarvam (SarvamSpeechToTextClient - STT leg), elevenlabs
+    (ElevenLabsClient/ElevenLabsVoiceService - TTS leg, reusing the existing
+    voice-cloning integration exactly as the build brief specified).
+
+    storage (StorageProperties) was added for LiveKitEgressService - LiveKit's
+    Egress API uploads directly to an S3-compatible endpoint via its own
+    S3Upload config in the Egress request, so this module reuses the app's
+    existing StorageProperties (bucket/credentials/endpoint) rather than
+    inventing a second, parallel S3 config surface just for call recordings.
+    spring-boot-starter-data-jpa/postgresql were added for VoiceCallRecording
+    (a small tenant-schema table tracking each recording's egress id/object
+    key) - both are already transitive via tenancy, declared explicitly here
+    anyway for the same self-documenting-module reason omnichannel does the
+    same for its own JPA entities.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Voice turns call AgentChatService and agent shares in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Test scope only (ADR-0011): voice main code reaches the speech vendors
+         through the kernel speech.call ports; VoiceCallControllerTest wires the
+         real Sarvam and ElevenLabs adapters. Distributions declare both
+         vendor modules directly. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sarvam</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>elevenlabs</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- SpeechTextNormalizer: the TTS clients normalize their own input, but
+         this module ALSO returns a speech-ready copy of the reply text
+         (VoiceTurnResponse#speechText) for the browser Web Speech API
+         fallback, so it needs the normalizer directly rather than only
+         transitively through elevenlabs/sarvam. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>speech</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <!-- Realtime speech-to-speech (P2 product-completeness): the realtime
+         providers resolve the tenant's BYOK Gemini/OpenAI key through
+         ProviderCredentialResolver; EncryptionService mints the relay
+         admission ticket. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <!-- VoiceCallRoomRegistry: who each call room was issued to. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <!-- RealtimeVoiceWebSocketHandler: the browser↔provider audio relay. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+    </dependency>
+    <!-- SpeakRequest's @Size cap and VoiceCallController#speak's @Valid (the
+         2026-07-29 ReDoS remediation). Already reaches this module transitively
+         via agents, declared explicitly for the same self-documenting-module
+         reason data-jpa/postgresql are declared above. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

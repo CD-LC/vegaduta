@@ -1,0 +1,433 @@
+/* ---- 4. Controls: pills, toggles, sliders, chips --------------------------- */
+.ax-pager-size-btn,
+.ax-pager-nav-btn,
+.ax-slider-save,
+.ax-wflist-icon-btn,
+.ax-tl-card-phase,
+.ax-wflist-limit-pill,
+.ax-agent-chip,
+.ax-agent-chip-dashed {
+  border-radius: 999px;
+}
+
+.ax-pager {
+  color: var(--text-muted);
+  border-top-color: var(--surface-border);
+}
+
+.ax-pager-size-btn {
+  background: transparent;
+  border-color: var(--surface-border-strong);
+  color: var(--text-secondary);
+}
+
+.ax-pager-size-btn:hover,
+.ax-pager-nav-btn:hover {
+  border-color: var(--accent-500);
+  color: var(--text-primary);
+}
+
+.ax-pager-size-btn-active {
+  background: color-mix(in oklab, var(--accent-500) 12%, transparent);
+  border-color: var(--accent-500);
+  color: var(--accent-600);
+}
+
+:root[data-mode="dark"] .ax-pager-size-btn-active {
+  color: var(--accent-500);
+}
+
+/* Toggles: the white-on-white puck was invisible on paper */
+.ax-toggle {
+  background: color-mix(in oklab, var(--text-primary) 14%, transparent);
+}
+
+.ax-toggle::after {
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(19, 19, 24, 0.25);
+}
+
+.ax-toggle-on,
+.ax-toggle-violet.ax-toggle-on {
+  background: var(--accent-500);
+}
+
+.ax-toggle-on::after,
+.ax-toggle-violet.ax-toggle-on::after {
+  background: #ffffff;
+}
+
+:root[data-mode="dark"] .ax-toggle {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+:root[data-mode="dark"] .ax-toggle-on,
+:root[data-mode="dark"] .ax-toggle-violet.ax-toggle-on {
+  background: var(--accent-500);
+}
+
+:root[data-mode="dark"] .ax-toggle-on::after {
+  background: #0e0e12;
+}
+
+/* Sliders: one accent fill, ink thumb, no glow */
+/* Longhands on purpose: the fill percentage is an inline custom property
+   (HudSlider) and an out-of-range value used to invalidate the whole
+   `background` shorthand, leaving the track unpainted. */
+.ax-slider {
+  background-color: var(--ax-track);
+  background-image: linear-gradient(90deg, var(--accent-500), var(--accent-500));
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: max(0%, var(--ax-slider-fill, 50%)) 100%;
+}
+
+.ax-slider::-webkit-slider-thumb {
+  background: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--surface-raised);
+}
+
+.ax-slider::-moz-range-thumb {
+  background: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--surface-raised);
+}
+
+.ax-slider::-moz-range-progress {
+  background: var(--accent-500);
+}
+
+.ax-slider-head-value,
+.ax-slider-save,
+.ax-wflist-intro strong,
+.ax-agent-chip-dashed:hover {
+  color: var(--accent-600);
+}
+
+:root[data-mode="dark"] .ax-slider-head-value,
+:root[data-mode="dark"] .ax-slider-save,
+:root[data-mode="dark"] .ax-agent-chip-dashed:hover {
+  color: var(--accent-500);
+}
+
+.ax-slider-save {
+  border-color: color-mix(in oklab, var(--accent-500) 40%, transparent);
+}
+
+.ax-slider-save:hover,
+.ax-wflist-icon-btn:hover {
+  background: color-mix(in oklab, var(--accent-500) 10%, transparent);
+  border-color: var(--accent-500);
+  color: var(--accent-600);
+}
+
+/* Chips: the cyan-tinted "on" state becomes an accent tint */
+.ax-agent-chip,
+.ax-agent-tool-card-on,
+.ax-tl-card-phase {
+  background: color-mix(in oklab, var(--accent-500) 10%, transparent);
+  border-color: color-mix(in oklab, var(--accent-500) 30%, transparent);
+  color: var(--text-primary);
+}
+
+.ax-agent-chip-dashed {
+  border-color: var(--surface-border-strong);
+  color: var(--text-secondary);
+}
+
+.ax-agent-chip-dashed:hover {
+  border-color: var(--accent-500);
+}
+
+.ax-agent-tool-card {
+  background: color-mix(in oklab, var(--text-primary) 3%, transparent);
+  border-color: var(--surface-border);
+}
+
+.ax-agent-tool-icon-on {
+  background: color-mix(in oklab, var(--accent-500) 15%, transparent);
+  color: var(--accent-600);
+}
+
+.ax-wflist-input:focus,
+.ax-wflist-icon-btn:focus-visible,
+.ax-tl-card:focus-visible {
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-500) 22%, transparent);
+  outline: none;
+}
+
+/* Errors / limits keep their semantic hue but lose the neon */
+.ax-kb-error,
+.ax-wflist-error,
+.ax-wflist-limit-banner,
+.ax-wflist-limit-pill {
+  box-shadow: none;
+}
+
+/* ---- 5. Header + rail stay pinned; phone-width chrome ---------------------- */
+/* `header.sticky` is already sticky/top-0 with glass (tier-1 §10). The
+   right-hand cluster (mode toggle · on-device chip · language · tour) is a
+   fixed-width flex item, so at 375px it pushed the whole page 130px wider
+   than the viewport. Below sm the two optional chips step out of the header
+   (both remain reachable: the chip from /edge, the tour from the help
+   menu) and the header clips instead of scrolling the page. */
+header.sticky {
+  overflow-x: clip;
+  min-width: 0;
+}
+
+header.sticky > * {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  header.sticky {
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  /* tour button, the on-device chip (the div.relative just before the
+     language switcher; it has no class of its own) and the language label */
+  header.sticky .hud-tour-reopen,
+  header.sticky div.relative:has(+ .lang-switcher),
+  header.sticky .lang-switcher-trigger > span {
+    display: none;
+  }
+
+  header.sticky .lang-switcher-trigger {
+    padding-inline: 0.4rem;
+  }
+}
+
+/* Overflow-driven compact levels (AppShell's topbar fit observer sets
+   data-compact on the header by measuring the row's real required width,
+   so this engages at whatever point the controls actually stop fitting -
+   the org name, token counter and session countdown all have variable
+   width, and no fixed breakpoint can predict the crowding point). Level 1
+   drops the word labels down to their icons; level 2 steps the optional
+   chips out of the row entirely (the edge chip stays reachable at /edge,
+   the tour panel via the page guide and /help). */
+header.sticky[data-measuring] > * {
+  flex-shrink: 0;
+}
+
+header.sticky[data-compact="1"] .topbar-label,
+header.sticky[data-compact="2"] .topbar-label {
+  display: none;
+}
+
+header.sticky[data-compact="1"] .lang-switcher-trigger,
+header.sticky[data-compact="2"] .lang-switcher-trigger {
+  padding-inline: 0.45rem;
+}
+
+header.sticky[data-compact="2"] .topbar-collapsible {
+  display: none;
+}
+
+/* Below lg the rail is an off-canvas drawer (AppShell: -translate-x-full →
+   lg:translate-x-0). Only its surface is touched here: same glass as the
+   header so the drawer reads as part of the chrome when it slides in. */
+:root:not([data-mode="dark"]) nav[class*="group/rail"] {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+}
+
+/* ---- 6. Page header: actions wrap instead of pushing the page wide --------- */
+.ax-page-header > div:last-child {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  min-width: 0;
+}
+
+.ax-page-header h1 {
+  overflow-wrap: anywhere;
+}
+
+.ax-page-header {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Pages often hand PageHeader a single wrapper div of buttons; it must wrap
+   as well, or it alone is 800px wide on a phone. */
+.ax-page-header > div:last-child > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .ax-page-header > div:last-child {
+    justify-content: flex-start;
+  }
+
+  /* A flex-wrap row whose text column is `min-w-0 flex-1` (banners, list
+     rows) squeezes that column to a few characters before the trailing
+     badge wraps; give the column a real basis so the badge drops down. */
+  main .flex-wrap > .min-w-0.flex-1 {
+    flex-basis: 12rem;
+  }
+
+  .ax-page-header > div:last-child > .relative,
+  .ax-page-header > div:last-child > .relative > input {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* ---- 7. Tables scroll inside their container, never the page -------------- */
+main,
+main [data-slot="card"],
+main [data-slot="card-content"],
+main [data-slot="tabs-content"] {
+  min-width: 0;
+}
+
+main [data-slot="table-container"],
+main .ax-mnt-table,
+main .overflow-x-auto {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+main table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+main th {
+  font-family: var(--font-dm-mono-loaded), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ---- 8. Phone-width layout fixes ------------------------------------------- */
+@media (max-width: 639px) {
+  /* Backstop: a stray wide element clips inside the content column instead
+     of making the whole page pan. Real overflow (tables) still scrolls
+     inside its own container per §7 because that container is narrower. */
+  main {
+    overflow-x: clip;
+  }
+
+  /* Knowledge ingestion pipeline: four stages + connectors on one row
+     could not fit 343px; two per row. */
+  main .flex.items-stretch.gap-2 {
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+  }
+
+  main .flex.items-stretch.gap-2 > .flex.flex-1.items-start.gap-2 {
+    flex: 1 1 42%;
+    min-width: 0;
+  }
+
+  /* Toolbars built as `flex shrink-0 items-center gap-2` (badge + button
+     rows under a search field) wrap instead of overhanging the card. */
+  main .flex.shrink-0.items-center.gap-2 {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  /* Long example / suggestion chips (quick task) wrap their label instead
+     of overhanging the card; only inside wrapping rows, so toolbars keep
+     their single-line buttons. A toggle switch is a <button> too but has a
+     fixed pill size: stretching it to 2.25rem turns it into an oval. */
+  main .flex-wrap > button:not([role="switch"]),
+  main .flex-wrap > [data-slot="button"] {
+    max-width: 100%;
+    height: auto;
+    min-height: 2.25rem;
+    white-space: normal;
+    text-align: left;
+  }
+
+  /* Status pills never run past their card */
+  main .state-pill {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Admin overview: single column, then the HUD counters two-up */
+  .ax-admin-ovw-dash,
+  .ax-admin-ovw-row1,
+  .ax-admin-ovw-row3 {
+    grid-template-columns: 1fr;
+  }
+
+  .ax-admin-ovw-row1 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ax-tl-grid,
+  .ax-bill-plan-grid,
+  .ax-bill-ticket-grid,
+  .ax-wflist-grid,
+  .mcp-grid,
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ax-pager {
+    padding-inline: 0.75rem;
+    justify-content: center;
+  }
+
+  .ax-pager-size {
+    margin-left: 0;
+  }
+}
+
+/* Reduced motion: the legacy screens' pulses and drifts stay off */
+@media (prefers-reduced-motion: reduce) {
+  .ax-run-shimmer,
+  .ax-feed-row,
+  .mc-hud-card {
+    animation: none !important;
+  }
+}
+
+/* ---- A11y pass 2026-09-24 (appended; see tokens.css section 11) ------ */
+/* Light: accent-as-text and the "on" toggle fill use the 600 stop (AA on
+   white / under a white knob); the dark rules above keep the 500 tint. */
+:root:not([data-mode="dark"]) {
+  --hud-cyan: var(--accent-600);
+}
+
+:root:not([data-mode="dark"]) .mc-greeting-accent {
+  color: var(--accent-600);
+}
+
+:root:not([data-mode="dark"]) .ax-toggle-on,
+:root:not([data-mode="dark"]) .ax-toggle-violet.ax-toggle-on {
+  background: var(--accent-600);
+}
+
+/* Field / card focus: solid two-ring shadow instead of the 22% halo. */
+:root:not([data-mode="dark"]) .ax-wflist-input:focus,
+:root:not([data-mode="dark"]) .ax-wflist-icon-btn:focus-visible,
+:root:not([data-mode="dark"]) .ax-tl-card:focus-visible {
+  border-color: var(--accent-600);
+  box-shadow:
+    0 0 0 2px var(--surface-page),
+    0 0 0 4px var(--accent-600);
+}
+
+:root[data-mode="dark"] .ax-wflist-input:focus,
+:root[data-mode="dark"] .ax-wflist-icon-btn:focus-visible,
+:root[data-mode="dark"] .ax-tl-card:focus-visible {
+  border-color: var(--accent-500);
+  box-shadow:
+    0 0 0 2px var(--surface-page),
+    0 0 0 4px var(--accent-500);
+}

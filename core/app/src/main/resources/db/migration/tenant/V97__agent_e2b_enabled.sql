@@ -1,0 +1,20 @@
+-- Master Roadmap 2026 item #14 fast-follow (#1071 - "E2B: agent tool-callback
+-- + frontend UI"). Stage 1 (#849) built E2B credential storage + a manual
+-- REST surface (E2bSandboxController) for a tenant-admin to exercise the
+-- integration directly; this column is what actually lets an AGENT reach it,
+-- same "off by default, explicit per-agent opt-in" shape sarvam_enabled/
+-- knowledge_base_enabled already established - see Agent.java's field
+-- javadoc and AgentToolProvider#resolveE2bTools.
+--
+-- Renumbered from V96 to V97 (#1071 follow-up) - a concurrent agent session
+-- claimed V96 for db/migration/controlplane/V96__tenant_data_residency_and_erasure.sql
+-- (Master Roadmap #22, GDPR/data-residency). core/app/src/main/resources/application.yml's
+-- flyway.locations merges controlplane/ and tenant/ into one migration
+-- stream, so two files both claiming V96 across either directory collide -
+-- this file yields the slot since the controlplane one landed first.
+--
+-- DEFAULT false backfills every pre-existing agent to "not attached" - no
+-- agent's behavior silently changes on deploy; a tenant-admin has to
+-- explicitly attach E2B code execution to each agent that should get it,
+-- same as they would for Sarvam or the knowledge base tool.
+ALTER TABLE agent ADD COLUMN e2b_enabled BOOLEAN NOT NULL DEFAULT false;

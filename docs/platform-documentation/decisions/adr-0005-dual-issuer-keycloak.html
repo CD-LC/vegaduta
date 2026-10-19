@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0005 Dual-Issuer JWT — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0005-dual-issuer-keycloak.html" data-doc="VD-ADR-005" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0005 Dual-Issuer JWT</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0005: Issuer validation separated from key fetching, with additional issuers</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span></dd>
+  <dt>Decided</dt><dd>September 2026</dd>
+  <dt>Deciders</dt><dd>Platform Engineering</dd>
+  <dt>Motivating failure</dt><dd>A host move of the original hosted deployment: every authenticated API call returned 401 while browser logins appeared to work</dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  Keycloak pins its hostname (<code>KC_HOSTNAME</code>), so every token it issues
+  carries the <em>public</em> issuer, e.g.
+  <code>iss = https://auth.&lt;your-domain&gt;/realms/agentic-ai</code> (or
+  <code>http://localhost:8180/realms/agentic-ai</code> locally). Core, however, reaches
+  Keycloak on an internal name — compose DNS <code>http://keycloak:8080</code> or an
+  in-cluster Service — never through the public edge.
+</p>
+<p>
+  Spring's default <code>withIssuerLocation(issuerUri)</code> auto-configuration
+  conflates two things: where to <em>fetch the JWKS</em> and <em>which issuer to
+  validate tokens against</em>. Point it at the internal host and every real token is
+  rejected; point it at the public hostname and core must hairpin through the public
+  edge, where a CDN or WAF may block non-browser clients.
+</p>
+<p>
+  When the hosted deployment moved hosts, core's issuer was set to an internal
+  address with no additional issuer. Result: <strong>every authenticated API call
+  returned 401 while browser logins appeared to work</strong> — the browser talks to
+  Keycloak directly and never exercises core's issuer check.
+</p>
+
+<h2>Decision</h2>
+<ul>
+  <li>"Where JWKS comes from" (<code>KEYCLOAK_JWK_SET_URI</code>, e.g.
+    <code>http://keycloak:8080/realms/agentic-ai/protocol/openid-connect/certs</code>) is
+    separated from "which issuer to validate". The auto-configured decoder that fetches
+    JWKS from <code>issuer-uri</code> is not used.</li>
+  <li>Core accepts a <strong>set of issuers</strong>: <code>KEYCLOAK_ISSUER_URI</code> plus
+    the comma-separated <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>
+    (<code>app.keycloak.additional-issuers</code>), assembled in <code>SecurityConfig</code>.</li>
+  <li>Compose sets <code>KEYCLOAK_ISSUER_URI</code> from <code>PUBLIC_AUTH_URL</code>, the same
+    value Keycloak uses for <code>KC_HOSTNAME</code>, so the two cannot drift. code-intel,
+    app-builder and rl-trainer validate the same issuer.</li>
+  <li>Signature + issuer is not the whole check: an authorized-party
+    (<code>azp</code>) allow-list is enforced too.</li>
+</ul>
+
+<div class="mermaid">
+sequenceDiagram
+  participant B as Browser
+  participant K as Keycloak (auth.your-domain)
+  participant C as core
+  B->>K: OIDC login
+  K-->>B: JWT iss = PUBLIC_AUTH_URL/realms/agentic-ai
+  B->>C: API call + JWT
+  C->>C: JWKS via http://keycloak:8080 (internal)
+  C->>C: accept iss in { KEYCLOAK_ISSUER_URI, KEYCLOAK_ADDITIONAL_ISSUERS }
+</div>
+
+<h2>Alternatives considered</h2>
+<table>
+  <thead><tr><th>Option</th><th>Why it lost</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Single issuer, JWKS from the issuer URL</strong></td><td>Forces core's key fetch through the public edge and makes every token validation depend on it.</td></tr>
+    <tr><td><strong>Unpin Keycloak's hostname</strong> (let <code>iss</code> follow the request URL)</td><td>Tokens would carry whichever hostname was hit, breaking validation consistency — contrary to Keycloak's own production guidance.</td></tr>
+  </tbody>
+</table>
+
+<h2>Consequences</h2>
+<h3>Positive</h3>
+<ul>
+  <li>Core validates real tokens without reaching the public edge; the same pattern works locally, with the Compose domain overlay and on Kubernetes.</li>
+  <li>A domain change is survivable: list the old issuer in <code>KEYCLOAK_ADDITIONAL_ISSUERS</code> while existing tokens expire.</li>
+</ul>
+<h3>Negative / costs</h3>
+<ul>
+  <li>Each extra accepted issuer widens the acceptance surface slightly; mitigated by the <code>azp</code> check. Remove old issuers after a migration.</li>
+  <li>A mismatch produces a misleading symptom (logins work, APIs 401). That is why it is an ADR.</li>
+</ul>
+<div class="callout callout-danger">
+  <div class="callout-title">Standing rule</div>
+  The issuer core accepts must include exactly the URL Keycloak stamps
+  (<code>PUBLIC_AUTH_URL/realms/agentic-ai</code>). Add any other issuer — such as the
+  old one during a domain change — to <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>. Keep the
+  JWKS URL internal. Symptom to remember: browser logins look fine while every API call fails.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/security/.../SecurityConfig.java</code> — issuer vs JWKS separation, additional issuers, the <code>azp</code> check.</li>
+  <li><code>deploy/compose/docker-compose.yml</code>, <code>lite.yml</code>, <code>docker-compose.domain.yml</code> — <code>KEYCLOAK_ISSUER_URI</code>, <code>KEYCLOAK_JWK_SET_URI</code>, <code>KC_HOSTNAME</code>.</li>
+  <li><code>deploy/README.md</code> — "Issuer consistency".</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

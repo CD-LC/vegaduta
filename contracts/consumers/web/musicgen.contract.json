@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-musicgen-tracks-id",
+      "method": "GET",
+      "path": "/api/musicgen/tracks/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

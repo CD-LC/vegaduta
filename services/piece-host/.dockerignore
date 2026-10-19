@@ -1,0 +1,12 @@
+node_modules
+pieces
+test
+.git
+*.md
+Dockerfile
+.dockerignore
+# Never ship local secrets or keys into the build context.
+.env
+.env.*
+*.pem
+*.key

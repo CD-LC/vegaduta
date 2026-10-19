@@ -1,0 +1,1293 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-platform-abuse-monitor-anomalies",
+      "method": "GET",
+      "path": "/api/platform/abuse-monitor/anomalies",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-abuse-monitor-config",
+      "method": "GET",
+      "path": "/api/platform/abuse-monitor/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-abuse-monitor-scores",
+      "method": "GET",
+      "path": "/api/platform/abuse-monitor/scores",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-abuse-monitor-scores-tenantId",
+      "method": "GET",
+      "path": "/api/platform/abuse-monitor/scores/{tenantId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-abuse-monitor-scores-tenantId-userId",
+      "method": "GET",
+      "path": "/api/platform/abuse-monitor/scores/{tenantId}/{userId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-abuse-monitor-throttle-tenantId-userId-clear",
+      "method": "POST",
+      "path": "/api/platform/abuse-monitor/throttle/{tenantId}/{userId}/clear",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-abuse-monitor-throttle-tenantId-clear",
+      "method": "POST",
+      "path": "/api/platform/abuse-monitor/throttle/{tenantId}/clear",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-abuse-monitor-throttled",
+      "method": "GET",
+      "path": "/api/platform/abuse-monitor/throttled",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-activity",
+      "method": "GET",
+      "path": "/api/platform/activity",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-ai-reports",
+      "method": "GET",
+      "path": "/api/platform/ai-reports",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-platform-ai-reports-id",
+      "method": "PATCH",
+      "path": "/api/platform/ai-reports/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reviewNote",
+          "$.status"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-alerts-fallback-status",
+      "method": "GET",
+      "path": "/api/platform/alerts/fallback-status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-alerts-fallback-threshold",
+      "method": "PUT",
+      "path": "/api/platform/alerts/fallback-threshold",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.threshold"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-announcement",
+      "method": "GET",
+      "path": "/api/platform/announcement",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-announcement",
+      "method": "PUT",
+      "path": "/api/platform/announcement",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-audit-search",
+      "method": "GET",
+      "path": "/api/platform/audit/search",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-billing-comp-grants",
+      "method": "GET",
+      "path": "/api/platform/billing/comp-grants",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-billing-invoices",
+      "method": "GET",
+      "path": "/api/platform/billing/invoices",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-billing-subscriptions",
+      "method": "GET",
+      "path": "/api/platform/billing/subscriptions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-billing-summary",
+      "method": "GET",
+      "path": "/api/platform/billing/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-chat-generation-settings",
+      "method": "GET",
+      "path": "/api/platform/chat-generation-settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-chat-generation-settings",
+      "method": "PUT",
+      "path": "/api/platform/chat-generation-settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-demo-metrics",
+      "method": "GET",
+      "path": "/api/platform/demo-metrics",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-demo-sandboxes",
+      "method": "GET",
+      "path": "/api/platform/demo-sandboxes",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-demo-sandboxes-reclaim",
+      "method": "POST",
+      "path": "/api/platform/demo-sandboxes/reclaim",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.confirm"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-demo-settings",
+      "method": "GET",
+      "path": "/api/platform/demo-settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-demo-settings",
+      "method": "PUT",
+      "path": "/api/platform/demo-settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-email-suppressions",
+      "method": "GET",
+      "path": "/api/platform/email/suppressions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-platform-email-suppressions-email",
+      "method": "DELETE",
+      "path": "/api/platform/email/suppressions/{email}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-feature-flags",
+      "method": "GET",
+      "path": "/api/platform/feature-flags",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-platform-feature-flags-key",
+      "method": "DELETE",
+      "path": "/api/platform/feature-flags/{key}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-feature-flags-key",
+      "method": "PUT",
+      "path": "/api/platform/feature-flags/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-feature-flags-key-assignments",
+      "method": "GET",
+      "path": "/api/platform/feature-flags/{key}/assignments",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-fleet-health",
+      "method": "GET",
+      "path": "/api/platform/fleet/health",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-free-tier-quota",
+      "method": "GET",
+      "path": "/api/platform/free-tier-quota",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-free-tier-quota",
+      "method": "PUT",
+      "path": "/api/platform/free-tier-quota",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-health",
+      "method": "GET",
+      "path": "/api/platform/health",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-health-dependencies",
+      "method": "GET",
+      "path": "/api/platform/health/dependencies",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-hosted-llm-cost",
+      "method": "GET",
+      "path": "/api/platform/hosted-llm-cost",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-hosted-llm-cost-budget",
+      "method": "PUT",
+      "path": "/api/platform/hosted-llm-cost/budget",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.budgetUsd"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-hosted-llm-cost-by-day",
+      "method": "GET",
+      "path": "/api/platform/hosted-llm-cost/by-day",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-hosted-llm-providers",
+      "method": "GET",
+      "path": "/api/platform/hosted-llm-providers",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-hosted-llm-providers",
+      "method": "POST",
+      "path": "/api/platform/hosted-llm-providers",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-platform-hosted-llm-providers-id",
+      "method": "DELETE",
+      "path": "/api/platform/hosted-llm-providers/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-hosted-llm-providers-id",
+      "method": "PUT",
+      "path": "/api/platform/hosted-llm-providers/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-hosted-llm-providers-discover-models",
+      "method": "POST",
+      "path": "/api/platform/hosted-llm-providers/discover-models",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.baseUrl",
+          "$.completionsPath"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-hosted-llm-providers-settings",
+      "method": "GET",
+      "path": "/api/platform/hosted-llm-providers/settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-hosted-llm-providers-settings",
+      "method": "PUT",
+      "path": "/api/platform/hosted-llm-providers/settings",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-impersonation",
+      "method": "GET",
+      "path": "/api/platform/impersonation",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-impersonation",
+      "method": "POST",
+      "path": "/api/platform/impersonation",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-platform-impersonation-id",
+      "method": "DELETE",
+      "path": "/api/platform/impersonation/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-issues",
+      "method": "GET",
+      "path": "/api/platform/issues",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-issues-open-count",
+      "method": "GET",
+      "path": "/api/platform/issues/open-count",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-jobs",
+      "method": "GET",
+      "path": "/api/platform/jobs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-jobs-id-run",
+      "method": "POST",
+      "path": "/api/platform/jobs/{id}/run",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-kill-switch",
+      "method": "GET",
+      "path": "/api/platform/kill-switch",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-kill-switch-resume",
+      "method": "POST",
+      "path": "/api/platform/kill-switch/resume",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-kill-switch-stop",
+      "method": "POST",
+      "path": "/api/platform/kill-switch/stop",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-landing-metrics",
+      "method": "GET",
+      "path": "/api/platform/landing-metrics",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-llm-tasks",
+      "method": "GET",
+      "path": "/api/platform/llm-tasks",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-llm-tasks-task",
+      "method": "PUT",
+      "path": "/api/platform/llm-tasks/{task}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-llm-usage",
+      "method": "GET",
+      "path": "/api/platform/llm-usage",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-maintenance",
+      "method": "GET",
+      "path": "/api/platform/maintenance",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-maintenance",
+      "method": "PUT",
+      "path": "/api/platform/maintenance",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-mcp-review-tenantId-id-approve",
+      "method": "POST",
+      "path": "/api/platform/mcp-review/{tenantId}/{id}/approve",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-mcp-review-tenantId-id-reject",
+      "method": "POST",
+      "path": "/api/platform/mcp-review/{tenantId}/{id}/reject",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-mcp-review-pending",
+      "method": "GET",
+      "path": "/api/platform/mcp-review/pending",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-metrics-north-star",
+      "method": "GET",
+      "path": "/api/platform/metrics/north-star",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-migrations",
+      "method": "GET",
+      "path": "/api/platform/migrations",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-model-catalog-refresh-now",
+      "method": "POST",
+      "path": "/api/platform/model-catalog/refresh-now",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-moderation-blocklists",
+      "method": "GET",
+      "path": "/api/platform/moderation/blocklists",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-moderation-blocklists",
+      "method": "PUT",
+      "path": "/api/platform/moderation/blocklists",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-moderation-policy-packs",
+      "method": "GET",
+      "path": "/api/platform/moderation/policy-packs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-moderation-policy-packs",
+      "method": "PUT",
+      "path": "/api/platform/moderation/policy-packs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-moderation-review-queue",
+      "method": "GET",
+      "path": "/api/platform/moderation/review-queue",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-moderation-review-queue-id-decision",
+      "method": "POST",
+      "path": "/api/platform/moderation/review-queue/{id}/decision",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-moderation-thresholds",
+      "method": "GET",
+      "path": "/api/platform/moderation/thresholds",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-moderation-thresholds",
+      "method": "PUT",
+      "path": "/api/platform/moderation/thresholds",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-newsletter",
+      "method": "POST",
+      "path": "/api/platform/newsletter",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-newsletter-recipients",
+      "method": "GET",
+      "path": "/api/platform/newsletter/recipients",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-per-user-budget",
+      "method": "GET",
+      "path": "/api/platform/per-user-budget",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-per-user-budget",
+      "method": "PUT",
+      "path": "/api/platform/per-user-budget",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-plan-limits",
+      "method": "GET",
+      "path": "/api/platform/plan-limits",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-plan-limits-plan",
+      "method": "PUT",
+      "path": "/api/platform/plan-limits/{plan}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-plugins-artifacts",
+      "method": "POST",
+      "path": "/api/platform/plugins/artifacts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-promos-unlimited-14d",
+      "method": "POST",
+      "path": "/api/platform/promos/unlimited-14d",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-rate-control-circuit-breakers",
+      "method": "GET",
+      "path": "/api/platform/rate-control/circuit-breakers",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-rate-control-circuit-breakers-reset",
+      "method": "POST",
+      "path": "/api/platform/rate-control/circuit-breakers/reset",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tenantId",
+          "$.tool"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-security-outbound-policy",
+      "method": "GET",
+      "path": "/api/platform/security/outbound-policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-settings",
+      "method": "GET",
+      "path": "/api/platform/settings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-settings-key",
+      "method": "PUT",
+      "path": "/api/platform/settings/{key}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.value"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-slo",
+      "method": "GET",
+      "path": "/api/platform/slo",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-smart-ai",
+      "method": "GET",
+      "path": "/api/platform/smart-ai",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-smart-ai",
+      "method": "PUT",
+      "path": "/api/platform/smart-ai",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-smart-ai-features-key",
+      "method": "GET",
+      "path": "/api/platform/smart-ai/features/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-smart-ai-features-key",
+      "method": "PUT",
+      "path": "/api/platform/smart-ai/features/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-spend-by-day",
+      "method": "GET",
+      "path": "/api/platform/spend/by-day",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-spend-by-model",
+      "method": "GET",
+      "path": "/api/platform/spend/by-model",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-spend-by-provider",
+      "method": "GET",
+      "path": "/api/platform/spend/by-provider",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-spend-by-tenant",
+      "method": "GET",
+      "path": "/api/platform/spend/by-tenant",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-spend-export.csv",
+      "method": "GET",
+      "path": "/api/platform/spend/export.csv",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-spend-summary",
+      "method": "GET",
+      "path": "/api/platform/spend/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tenant-counts",
+      "method": "GET",
+      "path": "/api/platform/tenant-counts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tenant-detail",
+      "method": "GET",
+      "path": "/api/platform/tenant-detail",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tenant-detail-tenantId",
+      "method": "GET",
+      "path": "/api/platform/tenant-detail/{tenantId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tenants",
+      "method": "GET",
+      "path": "/api/platform/tenants",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-platform-tenants-tenantId",
+      "method": "DELETE",
+      "path": "/api/platform/tenants/{tenantId}",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.confirmTenantName"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-tenants-tenantId-data-residency",
+      "method": "PUT",
+      "path": "/api/platform/tenants/{tenantId}/data-residency",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.region"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-tenants-tenantId-emergency-resume",
+      "method": "POST",
+      "path": "/api/platform/tenants/{tenantId}/emergency-resume",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-tenants-tenantId-emergency-stop",
+      "method": "POST",
+      "path": "/api/platform/tenants/{tenantId}/emergency-stop",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-tenants-tenantId-logout-all",
+      "method": "POST",
+      "path": "/api/platform/tenants/{tenantId}/logout-all",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-tenants-tenantId-plan",
+      "method": "PUT",
+      "path": "/api/platform/tenants/{tenantId}/plan",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.plan"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tenants-tenantId-spend-cap",
+      "method": "GET",
+      "path": "/api/platform/tenants/{tenantId}/spend-cap",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-tenants-tenantId-spend-cap",
+      "method": "PUT",
+      "path": "/api/platform/tenants/{tenantId}/spend-cap",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-tenants-tenantId-usage-quota-reset",
+      "method": "POST",
+      "path": "/api/platform/tenants/{tenantId}/usage-quota/reset",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tool-credentials",
+      "method": "GET",
+      "path": "/api/platform/tool-credentials",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-platform-tool-credentials-toolKey",
+      "method": "DELETE",
+      "path": "/api/platform/tool-credentials/{toolKey}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-tool-credentials-toolKey",
+      "method": "POST",
+      "path": "/api/platform/tool-credentials/{toolKey}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.extraConfig"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-tool-credentials-toolKey-status",
+      "method": "GET",
+      "path": "/api/platform/tool-credentials/{toolKey}/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-traces",
+      "method": "GET",
+      "path": "/api/platform/traces",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-traces-id",
+      "method": "GET",
+      "path": "/api/platform/traces/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-traces-metrics",
+      "method": "GET",
+      "path": "/api/platform/traces/metrics",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-translation-job",
+      "method": "GET",
+      "path": "/api/platform/translation-job",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-translation-job",
+      "method": "PUT",
+      "path": "/api/platform/translation-job",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-translation-job-run-now",
+      "method": "POST",
+      "path": "/api/platform/translation-job/run-now",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-users",
+      "method": "GET",
+      "path": "/api/platform/users",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-users-keycloakUserId-logout",
+      "method": "POST",
+      "path": "/api/platform/users/{keycloakUserId}/logout",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-users-userId",
+      "method": "GET",
+      "path": "/api/platform/users/{userId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-users-userId-enabled",
+      "method": "PUT",
+      "path": "/api/platform/users/{userId}/enabled",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-platform-users-userId-password-reset-email",
+      "method": "POST",
+      "path": "/api/platform/users/{userId}/password-reset-email",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-platform-users-userId-roles",
+      "method": "PUT",
+      "path": "/api/platform/users/{userId}/roles",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.roles"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-version",
+      "method": "GET",
+      "path": "/api/platform/version",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-platform-web-search-providers",
+      "method": "GET",
+      "path": "/api/platform/web-search/providers",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

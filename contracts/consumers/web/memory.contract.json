@@ -1,0 +1,161 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "delete-api-memory",
+      "method": "DELETE",
+      "path": "/api/memory",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentFacts",
+          "$.graphEntities",
+          "$.graphErased",
+          "$.sharedAndBlocks"
+        ]
+      }
+    },
+    {
+      "id": "get-api-memory",
+      "method": "GET",
+      "path": "/api/memory",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.available",
+          "$.blocks",
+          "$.blocksEnabled",
+          "$.facts",
+          "$.limits"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-memory-blocks-label",
+      "method": "DELETE",
+      "path": "/api/memory/blocks/{label}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-memory-blocks-label",
+      "method": "PUT",
+      "path": "/api/memory/blocks/{label}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.content"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-memory-export",
+      "method": "GET",
+      "path": "/api/memory/export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-memory-facts",
+      "method": "POST",
+      "path": "/api/memory/facts",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-memory-facts-scope-id",
+      "method": "DELETE",
+      "path": "/api/memory/facts/{scope}/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-memory-facts-scope-id",
+      "method": "PATCH",
+      "path": "/api/memory/facts/{scope}/{id}",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.content"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-memory-facts-scope-id-source",
+      "method": "GET",
+      "path": "/api/memory/facts/{scope}/{id}/source",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.learnedAt",
+          "$.matched",
+          "$.sessionId"
+        ]
+      }
+    },
+    {
+      "id": "post-api-memory-import",
+      "method": "POST",
+      "path": "/api/memory/import",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.facts",
+          "$.source"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.saved",
+          "$.skipped"
+        ]
+      }
+    },
+    {
+      "id": "get-api-memory-import-limits",
+      "method": "GET",
+      "path": "/api/memory/import/limits",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.maxChars",
+          "$.maxFacts"
+        ]
+      }
+    },
+    {
+      "id": "post-api-memory-import-preview",
+      "method": "POST",
+      "path": "/api/memory/import/preview",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.sourceHint",
+          "$.text"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.facts",
+          "$.stats"
+        ]
+      }
+    }
+  ]
+}

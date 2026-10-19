@@ -1,0 +1,41 @@
+# Local-dev override that adds B9-PR1's mock-provider (deploy/mock-provider)
+# to a normal local `docker compose -f docker-compose.yml up` stack, the
+# same way docker-compose.ci.yml already does for the full-stack CI job.
+#
+# Why this is a SEPARATE override file rather than adding mock-provider to
+# the base docker-compose.yml directly: docker-compose.ci.yml's own header
+# comment already establishes the reasoning ("core has no generic 'provider
+# base URL' env var - the only runtime-configurable base URL is the
+# control_plane.platform_hosted_llm_provider.base_url DATA row") and keeps
+# mock-provider opt-in rather than something every local dev stack starts
+# by default. This file mirrors that same opt-in shape for local dev
+# instead of just CI - bringing mock-provider up alone does nothing until
+# a control_plane.platform_hosted_llm_provider row actually points at it
+# (register it with POST /api/platform/hosted-llm-providers as a platform-admin;
+# for a real local model use the Ollama startup bootstrap instead, see
+# seed/README.md "Local Ollama as the FREE pool").
+#
+# Usage (from the repo root):
+#   docker compose -f deploy/compose/docker-compose.yml -f deploy/compose/docker-compose.local-llm.yml up -d
+#
+# See seed/README.md's "Local dev: unblocking FREE-tier agent creation"
+# section for the full why/how.
+services:
+  mock-provider:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    build:
+      context: ../mock-provider
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:9101:9101"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9101/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks: [agent-io, app]

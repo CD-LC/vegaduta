@@ -1,0 +1,237 @@
+/* ---- 15. Brand lockup: the ORIGINAL emblem + two-colour wordmark ------- */
+/* Direct instruction 2026-09-24: the logo is the raster winged man-in-helmet
+   (public/logo-mark.png) in its own colours, everywhere, and the wordmark is
+   always two colours: "Vega" in ink, "Duta" in the brand orange. Nothing here
+   may follow the rotating accent. */
+.brand-name {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+}
+
+.brand-name .text-primary,
+.brand-name .brand-name-accent {
+  color: var(--brand-accent, #f97316) !important;
+}
+
+.brand-mark,
+.vd-mark-img {
+  filter: none !important;
+}
+
+/* Standard screens (404 / error) share one centred glass slab */
+.std-screen {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: max(1.5rem, env(safe-area-inset-top)) 1rem max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.std-screen__card {
+  width: min(100%, 34rem);
+  border-radius: 24px;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  box-shadow:
+    var(--glass-edge),
+    0 34px 90px -34px rgba(19, 19, 24, 0.3);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  text-align: center;
+}
+
+:root[data-mode="dark"] .std-screen__card {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    var(--glass-edge),
+    0 40px 100px -40px rgba(0, 0, 0, 0.9);
+}
+
+.std-screen__code {
+  font-family: var(--font-dm-mono-loaded), ui-monospace, monospace;
+  font-size: clamp(3.5rem, 2rem + 6vw, 6rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--accent-text);
+}
+
+.std-screen h1 {
+  margin-top: 0.75rem;
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.125rem);
+  letter-spacing: -0.035em;
+}
+
+.std-screen p {
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.std-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.std-screen__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none !important;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.std-screen__btn--primary {
+  background: var(--accent-500);
+  color: var(--accent-fg);
+}
+.std-screen__btn--primary:hover {
+  background: var(--accent-600);
+  color: var(--accent-fg);
+}
+:root:not([data-mode="dark"]) .std-screen__btn--primary {
+  background: var(--accent-600);
+}
+:root:not([data-mode="dark"]) .std-screen__btn--primary:hover {
+  background: var(--accent-700);
+}
+:root[data-mode="dark"] .std-screen__btn--primary {
+  color: #0e0e12;
+}
+.std-screen__btn--secondary {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(19, 19, 24, 0.1);
+  color: var(--text-primary);
+}
+:root[data-mode="dark"] .std-screen__btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ---- 16. Menus and navigation: readable, near-opaque ---------------------- */
+/* Direct instruction 2026-09-24: "ensure menu items are properly displayed,
+   not too transparent". Glass stays on content cards; anything you NAVIGATE
+   with (console rail, sticky headers, landing nav, dropdowns, popovers,
+   listboxes, the mobile sheet) sits on a near-solid surface so labels never
+   compete with what scrolls underneath. */
+:root:not([data-mode="dark"]) nav[class*="group/rail"] {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  border-right-color: rgba(19, 19, 24, 0.08);
+}
+
+:root[data-mode="dark"] nav[class*="group/rail"] {
+  background-color: rgba(18, 18, 23, 0.96) !important;
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+:root:not([data-mode="dark"]) header.sticky {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+:root[data-mode="dark"] header.sticky {
+  background: rgba(18, 18, 23, 0.92) !important;
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-nav,
+:root:not([data-mode="dark"]) .marketing-root .mkt-nav.is-stuck {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-nav,
+:root[data-mode="dark"] .marketing-root .mkt-nav.is-stuck {
+  background: rgba(18, 18, 23, 0.92);
+}
+
+/* Rail / nav labels: full ink, never the muted step. Filled shadcn Buttons
+   (data-slot="button", e.g. the nav "Create free account" CTA) are excluded:
+   their label is --primary-foreground, which is ink in dark mode where the
+   accent 500 is a light tint (QA-02: white on #38bdf8 was 1.95:1). */
+nav[class*="group/rail"] a,
+nav[class*="group/rail"] button,
+.mkt-nav nav a:not([data-slot="button"]),
+.mkt-nav nav button:not([data-slot="button"]) {
+  color: var(--text-primary);
+}
+
+.mkt-nav [data-slot="button"].bg-primary {
+  color: var(--primary-foreground);
+}
+
+nav[class*="group/rail"] a[aria-current="page"] {
+  color: var(--accent-text, var(--accent-600));
+}
+
+/* Floating menus are always solid */
+[data-radix-popper-content-wrapper] > *,
+[role="menu"],
+[role="listbox"],
+[role="dialog"]:not(.auth-card),
+.theme-picker-popover,
+[data-slot="popover-content"],
+[data-slot="dropdown-menu-content"],
+[data-slot="select-content"],
+[data-slot="sheet-content"] {
+  background-color: var(--surface-raised) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: var(--shadow-popover) !important;
+}
+
+:root:not([data-mode="dark"]) {
+  --surface-raised: #ffffff;
+}
+
+:root[data-mode="dark"] {
+  --surface-raised: #1c1c23;
+}
+
+/* ---- 17. Consistency pass (2026-09-24, post-deploy feedback) --------------- */
+/* (a) Console font size = the dev preview the design was approved on. The
+   81.25% console density made prod read smaller and tighter than the review
+   build; both now render at the 16px base, same widths, same type scale. */
+html[data-density="console"] {
+  font-size: 100% !important;
+}
+
+/* (b) Auth pages: content width. The 50/50 full-bleed grid left the form as a
+   448px island in a 720px column on wide screens. Contain the pair in the
+   same 1200px reading width the rest of the product uses, widen the card to
+   32rem, and give both columns the same inner gutter. */
+.auth-main {
+  max-width: 75rem;
+  margin-inline: auto;
+}
+
+.auth-main .auth-card {
+  max-width: 32rem;
+}
+
+.auth-main > div:not(.auth-panel):not(.fixed) > div,
+.auth-main > div:not(.auth-panel):not(.fixed) > [class*="max-w-md"] {
+  max-width: 32rem !important;
+}
+
+.auth-panel {
+  border-right: 0;
+}
+
+/* (c) Very light colour washes: halve the mesh strength so pages read as
+   paper with a hint of colour, never a tinted page. */
+:root:not([data-mode="dark"]) {
+  --mesh-a: color-mix(in oklab, var(--accent-500) 12%, transparent);
+  --mesh-b: color-mix(in oklab, var(--accent-400) 7%, transparent);
+  --mesh-c: color-mix(in oklab, #1b9fbb 5%, transparent);
+  --mesh-d: transparent;
+  --surface-page: color-mix(in oklab, #f7f7f9 97%, var(--accent-500));
+}

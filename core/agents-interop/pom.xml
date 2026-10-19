@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>agents-interop</artifactId>
+  <name>agents-interop</name>
+  <description>
+    Agent interoperability surfaces: the A2A server and outbound client
+    (com.agenticai.core.agents.a2a), AG-UI runs (agents.agui), the
+    OpenAI-compatible Chat Completions and Open Responses endpoints
+    (agents.openai), agent-to-agent collaboration tools (agents.collab), Crew
+    specialist hand-off (agents.crew) and the agent directory
+    (agents.directory). Split out of core/agents by ADR-0023; the Java packages
+    are unchanged.
+
+    Direction: agents-interop depends on agents, never the reverse. Where agents
+    needs something from here it owns a port and this module implements it:
+    A2aRemoteAgentToolSource (the a2a_call_agent tool, implemented by
+    A2aClientService), CollaboratorToolFactory (ask_agent_* and the team tool,
+    implemented by DefaultCollaboratorToolFactory) and SpecialistHandoffService
+    (implemented by SpecialistHandoffServiceImpl, bean name unchanged). Shared
+    vocabulary stays in agents: A2aProperties, A2aConfiguration,
+    A2aCardSigningService, A2aPublicBaseUrl, RunBudget, RunBudgetCaps,
+    SwarmVerifierConfig, HandoffChain, HandoffStatus, SpecialistCandidate.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- A2A, AG-UI, OpenAI compat, delegation and hand-off call AgentChatService in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Declared explicitly for the "declare what you import" convention
+         core/agents/pom.xml follows; all already reachable through agents. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-budget</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <!-- A2aTaskStore mirrors task records to Redis when app.a2a.task-store=redis. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-client-chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,41 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-system-status",
+      "method": "GET",
+      "path": "/api/system/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.overallStatus"
+        ]
+      }
+    },
+    {
+      "id": "get-api-system-status-live",
+      "method": "GET",
+      "path": "/api/system/status/live",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-system-status-llm-telemetry",
+      "method": "GET",
+      "path": "/api/system/status/llm-telemetry",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.callsLast24h",
+          "$.conversationsToday",
+          "$.costPerConversationTodayUsd",
+          "$.costTodayUsd",
+          "$.modelSplitLast24h"
+        ]
+      }
+    }
+  ]
+}

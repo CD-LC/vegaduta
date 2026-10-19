@@ -1,0 +1,182 @@
+# =============================================================================
+# defectdojo.yml — OPTIONAL findings dashboard (DefectDojo, maintainer tooling)
+# -----------------------------------------------------------------------------
+# One dashboard that aggregates every scanner's reports — Trivy, ZAP, grype,
+# ScanCode — pushed by CI via scripts/ci/defectdojo-import.sh, with
+# deduplication and mitigated/reopened tracking across runs. Standalone file:
+# not part of the product stack, own compose project, own volumes; nothing
+# else references it.
+#
+#   1. Set secrets in deploy/compose/.env (or the shell):
+#        DD_ADMIN_PASSWORD=<openssl rand -base64 24>
+#        DD_SECRET_KEY=<openssl rand -hex 32>
+#        DD_CREDENTIAL_AES_256_KEY=<openssl rand -hex 32>
+#        DD_DATABASE_PASSWORD=<openssl rand -base64 24>
+#   2. docker compose -f deploy/compose/defectdojo.yml \
+#        --env-file deploy/compose/.env up -d --wait
+#   3. Open http://localhost:8082, log in as `admin`, then user menu ->
+#      "API v2 Key" for the token CI pushes with.
+#   4. In the GitHub repo: vars.DEFECTDOJO_URL=http://<host>:<port> and
+#      secrets.DEFECTDOJO_API_KEY=<token>. Every scanner workflow skips the
+#      push while these are unset.
+#
+# SonarQube findings are NOT pushed by CI: configure a SonarQube tool under
+# the product's Tool Configuration once and DefectDojo's "SonarQube API
+# Import" pulls them itself.
+#
+# Services mirror upstream django-DefectDojo's docker-compose.yml
+# (nginx + uwsgi + celerybeat + celeryworker + initializer + postgres +
+# valkey). cap_drop is deliberately not applied: the entrypoints gosu into the
+# app user, which needs SETUID/SETGID.
+# =============================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-vegaduta-defectdojo}
+
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-nnp: &nnp
+  security_opt:
+    - no-new-privileges:true
+
+# Shared DefectDojo application env, merged into every django service below.
+# The database URL embeds DD_DATABASE_PASSWORD, so it is built once here.
+x-dd-env: &dd-env
+  DD_DATABASE_URL: postgresql://defectdojo:${DD_DATABASE_PASSWORD:?set DD_DATABASE_PASSWORD}@postgres:5432/defectdojo
+  DD_CELERY_BROKER_URL: redis://valkey:6379/0
+  DD_CACHE_URL: redis://valkey:6379/1
+  DD_SECRET_KEY: ${DD_SECRET_KEY:?set DD_SECRET_KEY (openssl rand -hex 32)}
+  DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:?set DD_CREDENTIAL_AES_256_KEY (openssl rand -hex 32)}
+  DD_DATABASE_READINESS_TIMEOUT: "60"
+
+services:
+  postgres:
+    image: postgres:16.10-alpine
+    <<: [*restart, *logging, *nnp]
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: defectdojo
+      POSTGRES_USER: defectdojo
+      POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD:?set DD_DATABASE_PASSWORD}
+    volumes:
+      - defectdojo-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U defectdojo -d defectdojo"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  valkey:
+    image: valkey/valkey:8.1-alpine
+    <<: [*restart, *logging, *nnp]
+    volumes:
+      - defectdojo-redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # One-shot: runs migrations and creates the admin user, then exits. uwsgi,
+  # celerybeat and celeryworker wait for it (service_completed_successfully).
+  initializer:
+    image: ${DD_IMAGE_REGISTRY:-registry.defectdojo.com}/defectdojo/defectdojo-django:${DD_VERSION:-3.4.100}
+    <<: [*logging, *nnp]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/wait-for-it.sh", "postgres:5432", "--", "/entrypoint-initializer.sh"]
+    environment:
+      <<: *dd-env
+      DD_INITIALIZE: "true"
+      DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:?set DD_ADMIN_PASSWORD}
+      DD_ADMIN_MAIL: ${DD_ADMIN_MAIL:-admin@defectdojo.local}
+      DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
+      DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-User}
+
+  uwsgi:
+    image: ${DD_IMAGE_REGISTRY:-registry.defectdojo.com}/defectdojo/defectdojo-django:${DD_VERSION:-3.4.100}
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      initializer:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    entrypoint: ["/wait-for-it.sh", "postgres:5432", "-t", "60", "--", "/entrypoint-uwsgi.sh"]
+    environment:
+      <<: *dd-env
+      DD_DEBUG: "False"
+      DD_DJANGO_METRICS_ENABLED: "False"
+      DD_SITE_URL: ${DD_SITE_URL:-http://localhost:8082}
+      DD_CSRF_TRUSTED_ORIGINS: ${DD_CSRF_TRUSTED_ORIGINS:-http://localhost:8082}
+      # The dashboard holds every scanner's findings: bind to localhost by
+      # default, widen only via DD_ALLOWED_HOSTS when it is served properly.
+      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-localhost,127.0.0.1}
+    volumes:
+      - defectdojo-media:/app/media
+
+  celerybeat:
+    image: ${DD_IMAGE_REGISTRY:-registry.defectdojo.com}/defectdojo/defectdojo-django:${DD_VERSION:-3.4.100}
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      initializer:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    entrypoint: ["/wait-for-it.sh", "postgres:5432", "-t", "60", "--", "/entrypoint-celery-beat.sh"]
+    environment:
+      <<: *dd-env
+
+  celeryworker:
+    image: ${DD_IMAGE_REGISTRY:-registry.defectdojo.com}/defectdojo/defectdojo-django:${DD_VERSION:-3.4.100}
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      initializer:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    entrypoint: ["/wait-for-it.sh", "postgres:5432", "-t", "60", "--", "/entrypoint-celery-worker.sh"]
+    environment:
+      <<: *dd-env
+    volumes:
+      - defectdojo-media:/app/media
+
+  nginx:
+    image: ${DD_IMAGE_REGISTRY:-registry.defectdojo.com}/defectdojo/defectdojo-nginx:${DD_VERSION:-3.4.100}
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      uwsgi:
+        condition: service_started
+    environment:
+      NGINX_METRICS_ENABLED: "false"
+      DD_UWSGI_HOST: uwsgi
+      DD_UWSGI_PORT: "3031"
+    volumes:
+      - defectdojo-media:/usr/share/nginx/html/media:ro
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${DD_HOST_PORT:-8082}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/login?next=/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+volumes:
+  defectdojo-postgres: {}
+  defectdojo-media: {}
+  defectdojo-redis: {}

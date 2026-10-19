@@ -1,0 +1,4 @@
+{{- include "core.imageVariant" . -}}
+{{- if .Values.migrate.enabled }}
+{{ include "vegaduta-lib.migrateJob" . }}
+{{- end }}

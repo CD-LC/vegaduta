@@ -1,0 +1,241 @@
+/* ---- Notices tray (edit lock, triggers) ------------------------------------ */
+
+.ax-wf-studio > .ax-wf-notices {
+  position: absolute;
+  z-index: 14;
+  top: var(--wf-top);
+  left: calc(var(--wf-left) + var(--wf-gap));
+  right: calc(var(--wf-right) + var(--wf-gap));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.ax-wf-studio > .ax-wf-notices:empty,
+.ax-wf-studio > .ax-wf-notices > .ax-wf-trigger-strip:empty {
+  display: none;
+}
+
+.ax-wf-studio > .ax-wf-notices > * {
+  pointer-events: auto;
+  max-width: min(760px, 100%);
+  margin: 0;
+  padding: 6px;
+  border-radius: 14px;
+}
+
+.ax-wf-studio > .ax-wf-notices > .mb-2 {
+  width: auto;
+}
+
+/* ---- Canvas overlays follow the free area between the panels ----------- */
+
+/* Console eyebrow spec (PageHeader): mono, uppercase, 0.16em, primary. */
+.ax-wf-studio .ax-wf-canvas-title {
+  top: calc(var(--wf-top) + 6px);
+  left: calc(var(--wf-left) + var(--wf-gap) + 6px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--primary);
+  transition: left 0.22s var(--wf-ease);
+}
+
+.ax-wf-studio .wf-lint {
+  top: calc(var(--wf-top) + 2px);
+  right: calc(var(--wf-right) + var(--wf-gap));
+  transition: right 0.22s var(--wf-ease);
+}
+
+.ax-wf-studio .wf-toolbar {
+  left: calc(50% + (var(--wf-left) - var(--wf-right)) / 2);
+  bottom: 14px;
+  max-width: calc(100% - var(--wf-left) - var(--wf-right) - 2 * var(--wf-gap));
+  border-radius: 14px;
+  transition: left 0.22s var(--wf-ease);
+}
+
+/* Narrow free area: shed what has a keyboard shortcut (Ctrl+C/V/D) and the
+   Runs label, so the toolbar fits instead of scrolling sideways. */
+.ax-wf-studio[data-free="narrow"]
+  .wf-toolbar
+  :is([aria-label^="Copy selection"], [aria-label^="Paste"], [aria-label^="Duplicate selection"]),
+.ax-wf-studio[data-free="narrow"] .wf-toolbar [data-runs-toggle] > span {
+  display: none;
+}
+
+/* ...and the separator that opened the now-hidden copy group. */
+.ax-wf-studio[data-free="narrow"] .wf-toolbar .wf-toolbar-sep:has(+ [aria-label^="Copy selection"]) {
+  display: none;
+}
+
+.ax-wf-studio .ax-wf-describe-bar {
+  position: absolute;
+  z-index: 8;
+  bottom: 66px;
+  left: calc(50% + (var(--wf-left) - var(--wf-right)) / 2);
+  translate: -50% 0;
+  width: min(640px, calc(100% - var(--wf-left) - var(--wf-right) - 4 * var(--wf-gap)));
+  padding: 8px 8px 8px 14px;
+  border-radius: 14px;
+  transition:
+    left 0.22s var(--wf-ease),
+    width 0.22s var(--wf-ease),
+    box-shadow 0.15s ease;
+}
+
+/* "What this workflow does": in the studio the canvas column is absolutely positioned, so a static panel used to paint
+ * straight over the graph (and slide behind the palette). Dock it as a floating glass card directly above the
+ * describe bar, on the same centre line and width, scrolling inside itself. */
+.ax-wf-studio .ax-wf-plan-panel {
+  position: absolute;
+  z-index: 9;
+  bottom: 132px;
+  left: calc(50% + (var(--wf-left) - var(--wf-right)) / 2);
+  translate: -50% 0;
+  width: min(640px, calc(100% - var(--wf-left) - var(--wf-right) - 4 * var(--wf-gap)));
+  max-height: min(40vh, 18rem);
+  border-radius: 14px;
+  background: var(--wf-glass-strong, var(--wf-glass));
+  -webkit-backdrop-filter: var(--wf-glass-blur);
+  backdrop-filter: var(--wf-glass-blur);
+  border: 1px solid var(--wf-glass-border);
+  box-shadow: var(--wf-glass-shadow);
+  transition:
+    left 0.22s var(--wf-ease),
+    width 0.22s var(--wf-ease);
+}
+
+.ax-wf-studio .ax-wf-describe-bar:focus-within {
+  box-shadow:
+    var(--wf-glass-shadow),
+    0 0 0 3px color-mix(in oklab, var(--primary, #6d5efc) 28%, transparent);
+}
+
+/* React Flow's own corner panels (minimap, add-node, empty hint). */
+.ax-wf-studio .react-flow__panel.right {
+  right: var(--wf-right);
+  transition: right 0.22s var(--wf-ease);
+}
+
+.ax-wf-studio .react-flow__panel.left {
+  left: var(--wf-left);
+  transition: left 0.22s var(--wf-ease);
+}
+
+.ax-wf-studio .react-flow__panel.top {
+  top: var(--wf-top);
+}
+
+.ax-wf-studio .react-flow__panel.top.center,
+.ax-wf-studio .react-flow__panel.bottom.center {
+  left: calc(50% + (var(--wf-left) - var(--wf-right)) / 2);
+}
+
+/* The bottom edge belongs to the toolbar and the AI bar; the minimap moves
+   to the top-right (under the lint chip) and "Add node" to the top-left
+   (under the graph title), so nothing stacks on anything. */
+.ax-wf-studio .react-flow__panel.react-flow__minimap {
+  top: calc(var(--wf-top) + 40px);
+  bottom: auto;
+  border-radius: 12px;
+  overflow: hidden;
+  opacity: 0.85;
+  transition:
+    right 0.22s var(--wf-ease),
+    opacity 0.2s ease;
+}
+
+.ax-wf-studio .react-flow__panel.react-flow__minimap:hover {
+  opacity: 1;
+}
+
+.ax-wf-studio .react-flow__panel.bottom.left {
+  top: calc(var(--wf-top) + 26px);
+  bottom: auto;
+}
+
+/* ---- Observe mode ------------------------------------------------------------ */
+
+.ax-wf-studio .ax-wf-canvas-col > .rob-banner {
+  position: absolute;
+  z-index: 15;
+  top: var(--wf-top);
+  left: calc(var(--wf-left) + var(--wf-gap));
+  right: calc(var(--wf-right) + var(--wf-gap));
+  margin: 0;
+}
+
+.ax-wf-studio .wfx-lensbar {
+  top: calc(var(--wf-top) + 56px);
+  left: calc(50% + (var(--wf-left) - var(--wf-right)) / 2);
+}
+
+.ax-wf-studio .rob-rail-slot {
+  position: absolute;
+  z-index: 16;
+  top: calc(var(--wf-top) + 56px);
+  right: calc(var(--wf-right) + var(--wf-gap));
+  bottom: calc(var(--wf-gap) + 208px);
+}
+
+.ax-wf-studio .ax-wf-canvas-col > .rob-dock,
+.ax-wf-studio .ax-wf-canvas-col > .rob-dock-empty {
+  position: absolute;
+  z-index: 16;
+  left: calc(var(--wf-left) + var(--wf-gap));
+  right: calc(var(--wf-right) + var(--wf-gap));
+  bottom: var(--wf-gap);
+  /* .rfr sets width:100% of the column, which would override left/right. */
+  width: auto;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* The run banner owns the top-left while observing. */
+.ax-wf-studio:has(.ax-wf-canvas-col > .rob-banner) .ax-wf-canvas-title {
+  display: none;
+}
+
+.ax-wf-studio:has(.ax-wf-canvas-col > .rob-dock) .wf-toolbar {
+  bottom: calc(var(--wf-gap) + 214px);
+}
+
+/* ---- Palette content on console conventions -------------------------------- */
+
+/* The legacy .wf-pal-search input rule is unlayered and would beat the
+   shadcn Input's utilities - restate the Input look here. */
+.ax-wf-studio .wf-pal-search {
+  background: transparent;
+  padding-top: 2px;
+}
+
+.ax-wf-studio .wf-pal-search input {
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--secondary) 40%, transparent);
+  color: var(--foreground);
+  font-size: 12px;
+}
+
+.ax-wf-studio .wf-pal-search input:focus-visible {
+  outline: none;
+  border-color: var(--ring, var(--primary));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, var(--primary)) 25%, transparent);
+}
+
+/* Category headers = the console's field-label style. */
+.ax-wf-studio .wf-pal-cat {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.ax-wf-studio .wf-pal-cat:hover {
+  color: var(--foreground);
+}

@@ -1,0 +1,43 @@
+/* A <fieldset> defaults to min-width: min-content, so a wide child (a long
+ * sentence, a two-column checkbox grid) pushes it past its parent card - seen as
+ * the Collaborators block sticking out of the agent workbench section. */
+fieldset {
+  min-width: 0;
+}
+
+/* ONE TYPEFACE FOR EVERY FORM CONTROL (brand directive 2026-10-08: "make all fonts
+ * standard, matching across platform"). Inputs, textareas and selects use the UI
+ * sans (Geist) with the same system fallback chain as the body, and PLACEHOLDERS
+ * are always the UI sans - a hint such as "Describe a change, for example..." must
+ * never render in a typewriter face, even in a field whose typed VALUE is code or an
+ * ID. Opt a field back into monospace by giving it a class that contains "mono" or
+ * "code" (Tailwind's font-mono qualifies) or by setting data-mono; only the typed
+ * value then stays mono, the placeholder does not. !important because several
+ * component classes (.ax-wf-describe-input, .ax-search, .ax-tl-search-input ...)
+ * set a mono family on the control itself. */
+input:not([class*="mono"]):not([class*="code"]):not([data-mono]),
+textarea:not([class*="mono"]):not([class*="code"]):not([data-mono]),
+select:not([class*="mono"]):not([class*="code"]):not([data-mono]),
+.ax-adt-search input {
+  font-family:
+    var(--font-inter),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+}
+::placeholder {
+  font-family:
+    var(--font-inter),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+  letter-spacing: normal !important;
+}

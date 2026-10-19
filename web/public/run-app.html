@@ -1,0 +1,543 @@
+<!doctype html>
+<!--
+  Phone app runner for apps built in /build's Phone app studio.
+
+  Two ways an app arrives:
+  - #app=<packed>  : the whole app (deflate-raw, base64url) rides in the URL
+                     fragment, which never reaches any server. Serverless.
+  - #a=<slug>      : a PUBLISHED app - this page fetches its manifest + HTML
+                     from /api/public/apps/{slug} (a short, stable link the
+                     owner controls and can republish or take offline), plus
+                     the app's own end-user sign-in and hosted-AI block.
+
+  Either way the app runs in a sandboxed iframe with an opaque origin (no
+  allow-same-origin): it cannot read this site's cookies, tokens or storage,
+  cannot navigate the top page, and runs inside /app-frame.html under a
+  no-network CSP response header. Because a user-made app shows up under our
+  hostname, a permanent banner OUTSIDE the frame says it is user-made, and
+  password fields are disabled inside the app. End-user sign-in - when the
+  builder turned it on - is drawn by THIS page (the overlay below), so the
+  password never crosses into the sandbox.
+
+  Mirrors the storage/error harness in web/app/build/studio/runtime.ts and
+  the vdCall bridge in StudioSurface.tsx - keep them in step.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d0f17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Apps">
+<link rel="manifest" href="/run-app.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>My Apps · VegaDūta</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0d0f17;color:#ecebf5;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#bar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:#0d0f17;border-bottom:1px solid #22243a;font-size:11px;color:#a3a3bd;min-height:34px}
+#bar b{color:#f97316;font-weight:700}
+#bar .sp{flex:1;min-width:0;line-height:1.35}
+#bar button{border:0;background:#22243a;color:#ecebf5;border-radius:999px;padding:6px 12px;font:600 12px inherit;cursor:pointer;white-space:nowrap}
+#frame{position:fixed;left:0;right:0;bottom:0;border:0;width:100%;background:#fff}
+#lib{padding:calc(56px + env(safe-area-inset-top)) 18px 40px;max-width:560px;margin:0 auto;display:none}
+#lib h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+#lib p.sub{color:#a3a3bd;font-size:14px;margin:4px 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.app{background:#191b26;border:1px solid #22243a;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.app .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;font-weight:800;color:#fff}
+.app b{font-size:14px}
+.app small{color:#8a8aa3;font-size:11px}
+.app .del{align-self:flex-end;border:0;background:none;color:#8a8aa3;font-size:12px;cursor:pointer;padding:4px}
+.tip{margin-top:22px;background:#191b26;border:1px solid #22243a;border-radius:16px;padding:14px;font-size:13px;color:#c9c9dc;line-height:1.5}
+.tip b{color:#fff}
+.empty{color:#8a8aa3;font-size:14px;padding:24px 0}
+a{color:#f97316}
+#err{display:none;padding:80px 20px;text-align:center;color:#c9c9dc}
+/* Host-rendered sign-in overlay - outside the sandbox, owned by this page. */
+#auth{position:fixed;inset:0;z-index:20;background:rgba(8,9,15,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}
+#auth[hidden]{display:none}
+#auth .card{width:100%;max-width:340px;background:#191b26;border:1px solid #2a2d45;border-radius:18px;padding:20px;box-shadow:0 18px 60px rgba(0,0,0,.5)}
+#auth h2{font-size:17px;font-weight:800;letter-spacing:-.01em}
+#auth .sub{color:#a3a3bd;font-size:12px;margin:4px 0 14px;line-height:1.45}
+#auth input{width:100%;border:1px solid #2a2d45;border-radius:10px;background:#0d0f17;color:#ecebf5;padding:10px 12px;font:inherit;font-size:14px;margin-bottom:8px}
+#auth input:focus{outline:none;border-color:#f97316}
+#auth .go{width:100%;border:0;border-radius:10px;background:#f97316;color:#fff;font:700 14px inherit;padding:11px;cursor:pointer;margin-top:4px}
+#auth .go:disabled{opacity:.55}
+#auth .err{color:#f87171;font-size:12px;min-height:16px;margin:2px 0 4px}
+#auth .swap,#auth .skip{border:0;background:none;color:#a3a3bd;font:500 12px inherit;cursor:pointer;display:block;margin:10px auto 0}
+#auth .swap{color:#f97316}
+#auth .who{display:flex;align-items:center;gap:6px;color:#8a8aa3;font-size:11px}
+#auth .who b{color:#ecebf5}
+</style>
+</head>
+<body>
+<div id="bar" role="banner">
+  <span class="sp">User-made app, not by VegaDūta. <b>Never enter passwords in it.</b></span>
+  <button id="authBtn" type="button" hidden>Sign in</button>
+  <button id="libBtn" type="button">My apps</button>
+</div>
+<iframe id="frame" title="App" sandbox="allow-scripts allow-forms allow-modals allow-popups" hidden></iframe>
+<main id="lib">
+  <h1>My Apps</h1>
+  <p class="sub">Apps you opened from a VegaDūta share link. They're saved on this phone only.</p>
+  <div class="grid" id="grid"></div>
+  <div class="tip" id="tip"></div>
+  <p class="sub" style="margin-top:18px">Make your own at <a href="/build" target="_top">VegaDūta Build</a>, free, with AI that can run on your device.</p>
+</main>
+<div id="auth" hidden>
+  <div class="card">
+    <div class="who"><b id="authApp"></b><span>· its own account, not a VegaDūta login</span></div>
+    <h2 id="authTitle" style="margin-top:10px">Sign in</h2>
+    <p class="sub" id="authSub">The app maker gets this account - VegaDūta runs the sign-in for them.</p>
+    <input id="authName" placeholder="Your name" autocomplete="name" hidden>
+    <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+    <input id="authPass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
+    <p class="err" id="authErr"></p>
+    <button class="go" id="authGo" type="button">Sign in</button>
+    <button class="swap" id="authSwap" type="button">New here? Create an account</button>
+    <button class="skip" id="authSkip" type="button">Not now</button>
+  </div>
+</div>
+<div id="err"></div>
+<script>
+(function () {
+  "use strict";
+  var LIB_KEY = "vd.apps.library.v1";
+  var MAX_APPS = 30;
+  var frame = document.getElementById("frame");
+  var libEl = document.getElementById("lib");
+  var authEl = document.getElementById("auth");
+  var authBtn = document.getElementById("authBtn");
+  var current = null;
+  var API_BASE = location.origin.replace("://app.", "://api.");
+  var API_OK = API_BASE !== location.origin;
+
+  function loadLib() { try { var l = JSON.parse(localStorage.getItem(LIB_KEY)); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
+  function saveLib(l) {
+    l = l.slice(0, MAX_APPS);
+    for (var i = 0; i < 6; i++) {
+      try { localStorage.setItem(LIB_KEY, JSON.stringify(l)); return; } catch (e) { l = l.slice(0, Math.max(1, l.length - 3)); }
+    }
+  }
+  function hashId(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+  function b64urlToBytes(s) {
+    var b64 = s.replace(/-/g, "+").replace(/_/g, "/"); while (b64.length % 4) b64 += "=";
+    var bin = atob(b64), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function unpack(packed) {
+    var stream = new Blob([b64urlToBytes(packed)]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Response(stream).text();
+  }
+  function params() {
+    var out = {}; location.hash.replace(/^#/, "").split("&").forEach(function (kv) {
+      var i = kv.indexOf("="); if (i > 0) out[kv.slice(0, i)] = kv.slice(i + 1);
+    }); return out;
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  // No network, no form posts, no external scripts: a shared app runs fully
+  // offline, and a phishing page has nowhere to send what it collects. That
+  // policy is a RESPONSE HEADER on /app-frame.html (proxy.js), and the storage
+  // shim + password guard are installed by that page - nothing is spliced
+  // into the app's own HTML any more (security review SEC-020).
+  var APP_FRAME_SRC = "/app-frame.html";
+  var pendingRender = null; // {html, seed} for the frame load in flight
+
+  // ---- End-user auth: the session token lives HERE (host origin), never in
+  // the app. It's attached as a Bearer header on the calls the app asks for.
+  function authKey(slug) { return "vd.appauth:" + slug; }
+  function readAuth(slug) {
+    try { var v = JSON.parse(localStorage.getItem(authKey(slug))); return v && v.token ? v : null; } catch (e) { return null; }
+  }
+  function writeAuth(slug, v) {
+    try { if (v) localStorage.setItem(authKey(slug), JSON.stringify(v)); else localStorage.removeItem(authKey(slug)); } catch (e) {}
+  }
+  function appApi(slug, path, body, token) {
+    var h = { "Content-Type": "application/json" };
+    if (token) h.Authorization = "Bearer " + token;
+    return fetch(API_BASE + "/api/public/apps/" + encodeURIComponent(slug) + path, {
+      method: body === undefined ? "GET" : "POST",
+      headers: h,
+      body: body === undefined ? undefined : JSON.stringify(body)
+    }).then(function (r) { return r.json().catch(function () { return null; }).then(function (j) { return { status: r.status, ok: r.ok, body: j }; }); });
+  }
+  // Server sends {id,email,displayName}; the in-app contract is {id,email,name}.
+  function normUser(u) {
+    if (!u || typeof u !== "object") return null;
+    return { id: u.id, email: u.email, name: u.name || u.displayName };
+  }
+
+  // ---- Sign-in overlay state ----
+  var authMode = "signin";
+  var authWaiters = {};   // slug -> [resolve,...]
+  var authOpenFor = null; // slug the overlay currently serves
+
+  function paintAuthBtn() {
+    var slug = current && current.slug;
+    var hasAuth = !!(slug && current.authMode && current.authMode !== "NONE");
+    authBtn.hidden = !hasAuth;
+    if (!hasAuth) return;
+    var a = readAuth(slug);
+    authBtn.textContent = a && a.user ? (a.user.name || a.user.email || "Account") : "Sign in";
+  }
+
+  function resolveAuth(slug, user) {
+    var ws = authWaiters[slug] || [];
+    delete authWaiters[slug];
+    ws.forEach(function (r) { r(user); });
+    authEl.hidden = true;
+    authOpenFor = null;
+    paintAuthBtn();
+  }
+
+  function requestSignIn(slug) {
+    return new Promise(function (resolve) {
+      (authWaiters[slug] = authWaiters[slug] || []).push(resolve);
+      openAuth(slug);
+    });
+  }
+
+  function openAuth(slug) {
+    authOpenFor = slug;
+    authMode = "signin";
+    document.getElementById("authApp").textContent = current ? current.name : "This app";
+    document.getElementById("authTitle").textContent = "Sign in";
+    document.getElementById("authName").hidden = true;
+    document.getElementById("authErr").textContent = "";
+    document.getElementById("authGo").textContent = "Sign in";
+    document.getElementById("authSwap").textContent = "New here? Create an account";
+    document.getElementById("authSkip").style.display = current && current.authMode === "REQUIRED" ? "none" : "block";
+    authEl.hidden = false;
+    document.getElementById("authEmail").focus();
+  }
+
+  document.getElementById("authSwap").addEventListener("click", function () {
+    authMode = authMode === "signin" ? "signup" : "signin";
+    var up = authMode === "signup";
+    document.getElementById("authTitle").textContent = up ? "Create your account" : "Sign in";
+    document.getElementById("authName").hidden = !up;
+    document.getElementById("authGo").textContent = up ? "Create account" : "Sign in";
+    document.getElementById("authSwap").textContent = up ? "Have an account? Sign in" : "New here? Create an account";
+    document.getElementById("authErr").textContent = "";
+  });
+  document.getElementById("authSkip").addEventListener("click", function () {
+    if (authOpenFor) resolveAuth(authOpenFor, null);
+  });
+  authBtn.addEventListener("click", function () {
+    if (!current || !current.slug) return;
+    var a = readAuth(current.slug);
+    if (a) { writeAuth(current.slug, null); void appApi(current.slug, "/auth/logout", {}).catch(function () {}); paintAuthBtn(); }
+    else openAuth(current.slug);
+  });
+  document.getElementById("authGo").addEventListener("click", submitAuth);
+  document.getElementById("authPass").addEventListener("keydown", function (e) { if (e.key === "Enter") submitAuth(); });
+
+  function submitAuth() {
+    var slug = authOpenFor;
+    if (!slug) return;
+    var email = document.getElementById("authEmail").value.trim();
+    var pass = document.getElementById("authPass").value;
+    var name = document.getElementById("authName").value.trim();
+    var errEl = document.getElementById("authErr");
+    var go = document.getElementById("authGo");
+    if (!email || !pass) { errEl.textContent = "Enter your email and password."; return; }
+    go.disabled = true; errEl.textContent = "";
+    var body = authMode === "signup" ? { email: email, password: pass, name: name } : { email: email, password: pass };
+    appApi(slug, authMode === "signup" ? "/auth/signup" : "/auth/login", body)
+      .then(function (r) {
+        if (!r.ok || !r.body || !r.body.token) {
+          var c = r.body && r.body.error;
+          errEl.textContent =
+            c === "invalid_credentials" ? "Wrong email or password." :
+            c === "email_taken" ? "That email already has an account - sign in instead." :
+            c === "weak_password" ? "Use at least 8 characters for the password." :
+            c === "bad_email" ? "That doesn't look like an email address." :
+            c === "rate_limited" ? "Too many tries - wait a minute." :
+            "Couldn't reach the sign-in service.";
+          return;
+        }
+        var u = normUser(r.body.user);
+        writeAuth(slug, { token: r.body.token, user: u });
+        resolveAuth(slug, u);
+      })
+      .catch(function () { errEl.textContent = "Couldn't reach the sign-in service."; })
+      .then(function () { go.disabled = false; });
+  }
+
+  function show(app) {
+    current = app;
+    libEl.style.display = "none";
+    document.title = app.name + " · My Apps";
+    frame.hidden = false;
+    pendingRender = { html: app.html, seed: app.data || {} };
+    frame.src = APP_FRAME_SRC;
+    layout();
+    paintAuthBtn();
+    // "Sign in to open" apps show the gate up front - the overlay is ours, so
+    // the password never enters the sandboxed app.
+    if (app.slug && app.authMode === "REQUIRED" && !readAuth(app.slug)) {
+      openAuth(app.slug);
+    }
+  }
+  function layout() {
+    var bar = document.getElementById("bar").getBoundingClientRect().height;
+    frame.style.top = bar + "px";
+    frame.style.height = (window.innerHeight - bar) + "px";
+  }
+  window.addEventListener("resize", layout);
+
+  // app-frame.html handshake: hand the app over exactly once per load, so a
+  // frame that navigates itself cannot ask for the document a second time.
+  window.addEventListener("message", function (e) {
+    if (e.source !== frame.contentWindow) return;
+    var d = e.data;
+    if (!d || d.vdSandbox !== "ready" || !pendingRender) return;
+    var job = pendingRender;
+    pendingRender = null;
+    try { frame.contentWindow.postMessage({ vdSandbox: "render", html: job.html, seed: job.seed }, "*"); } catch (e2) {}
+  });
+
+  window.addEventListener("message", function (e) {
+    if (e.source !== frame.contentWindow || !current) return;
+    var d = e.data;
+    if (!d || d.vdStudio !== "storage" || typeof d.data !== "object") return;
+    if (JSON.stringify(d.data).length > 200000) return;
+    var lib = loadLib();
+    for (var i = 0; i < lib.length; i++) if (lib[i].id === current.id) { lib[i].data = d.data; current.data = d.data; }
+    saveLib(lib);
+  });
+
+  // Connected-services bridge. The app stays networkless (its CSP still says
+  // connect-src 'none') - it posts vdCall here and THIS page calls the API
+  // from the allowlisted app.* origin. Two surfaces:
+  //   kind agent|workflow : the legacy public share endpoints (shareId is the
+  //                          credential, per-IP rate-limited).
+  //   kind call|ai|auth   : the published-app endpoints under
+  //                          /api/public/apps/{slug} - end-user Bearer token
+  //                          attached HERE, never inside the app.
+  // Mirrors the handler in StudioSurface.tsx - keep them in step.
+  window.addEventListener("message", function (e) {
+    if (e.source !== frame.contentWindow) return;
+    var d = e.data;
+    if (!d || d.vdStudio !== "vdCall" || typeof d.q !== "number") return;
+    var reply = function (res) {
+      var m = { vdStudio: "vdReply", q: d.q, ok: !!res.ok };
+      if (res.text !== undefined) m.text = String(res.text);
+      if (res.user !== undefined) m.user = res.user;
+      try { frame.contentWindow.postMessage(m, "*"); } catch (e2) {}
+    };
+    if (!API_OK) { reply({ ok: false, text: "Connections need the hosted app - open it via its VegaDūta link." }); return; }
+
+    if (d.kind === "agent" || d.kind === "workflow") {
+      if (typeof d.id !== "string") return;
+      var wf = d.kind === "workflow";
+      fetch(API_BASE + "/api/share/" + (wf ? "workflows" : "agents") + "/" + encodeURIComponent(d.id) + (wf ? "/run" : "/chat"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: String(d.msg || "") })
+      }).then(function (r) {
+        return r.json().catch(function () { return null; }).then(function (j) {
+          var text = (j && j.reply) || (j && j.resultText) || (j && j.errorMessage ? "It reported: " + j.errorMessage : null) || ("The service answered HTTP " + r.status + ".");
+          reply({ ok: r.ok, text: text });
+        });
+      }).catch(function () { reply({ ok: false, text: "Couldn't reach the platform API." }); });
+      return;
+    }
+
+    // Only ever the slug of the app THIS page opened. The app's own message is
+    // untrusted: honouring a d.slug let any shared app act with the visitor's
+    // sign-in for a different published app (security review SEC-011). Apps
+    // opened from a #app= fragment have no slug, so call/ai/auth are refused.
+    var slug = (current && current.slug) || "";
+
+    // One call/ai turn; on sign_in_required, open the overlay once and retry.
+    function callAuthed(path, body) {
+      function attempt() {
+        var a = readAuth(slug);
+        return appApi(slug, path, body, a && a.token);
+      }
+      return attempt().then(function (r) {
+        if (r.status === 401 && r.body && r.body.error === "sign_in_required") {
+          return requestSignIn(slug).then(function (u) { return u ? attempt() : r; });
+        }
+        return r;
+      });
+    }
+
+    if (d.kind === "call" || d.kind === "ai") {
+      if (!slug) { reply({ ok: false, text: "This part needs the published app - publish it in the studio first." }); return; }
+      var path = d.kind === "call" ? "/call/" + encodeURIComponent(String(d.alias || "")) : "/ai/chat";
+      var body = d.kind === "call"
+        ? { input: String(d.input || ""), data: d.data && typeof d.data === "object" ? d.data : {} }
+        : { prompt: String(d.prompt || "") };
+      callAuthed(path, body)
+        .then(function (r) {
+          var j = r.body;
+          if (r.ok && j && typeof j.text === "string") { reply({ ok: true, text: j.text }); return; }
+          var err = (j && (j.message || j.error)) || ("HTTP " + r.status);
+          reply({ ok: false, text: err === "sign_in_required" ? "This part needs you signed in." : String(err) });
+        })
+        .catch(function () { reply({ ok: false, text: "Couldn't reach the platform API." }); });
+      return;
+    }
+
+    if (d.kind === "auth") {
+      if (!slug) { reply({ ok: false, text: "Publish the app to turn on sign-in.", user: null }); return; }
+      var action = String(d.action || "user");
+      if (action === "signOut") {
+        writeAuth(slug, null);
+        void appApi(slug, "/auth/logout", {}).catch(function () {});
+        paintAuthBtn();
+        reply({ ok: true, user: null });
+        return;
+      }
+      var stored = readAuth(slug);
+      if (action === "user") {
+        if (!stored) { reply({ ok: true, user: null }); return; }
+        appApi(slug, "/auth/me", undefined, stored.token).then(function (r) {
+          if (r.ok && r.body && r.body.user) { reply({ ok: true, user: normUser(r.body.user) }); return; }
+          writeAuth(slug, null); paintAuthBtn();
+          reply({ ok: true, user: null });
+        }).catch(function () { reply({ ok: true, user: null }); });
+        return;
+      }
+      // signIn / require / signUp - reuse a live session if one exists.
+      if (stored) {
+        appApi(slug, "/auth/me", undefined, stored.token).then(function (r) {
+          if (r.ok && r.body && r.body.user) { reply({ ok: true, user: normUser(r.body.user) }); return; }
+          writeAuth(slug, null); paintAuthBtn();
+          requestSignIn(slug).then(function (u) { reply(u ? { ok: true, user: u } : { ok: false, text: "Sign-in was cancelled.", user: null }); });
+        }).catch(function () {
+          requestSignIn(slug).then(function (u) { reply(u ? { ok: true, user: u } : { ok: false, text: "Sign-in was cancelled.", user: null }); });
+        });
+        return;
+      }
+      requestSignIn(slug).then(function (u) { reply(u ? { ok: true, user: u } : { ok: false, text: "Sign-in was cancelled.", user: null }); });
+      return;
+    }
+  });
+
+  // Tile colour + readable text on it (white or near-black by WCAG contrast),
+  // mirroring onColor() in studio/theme.ts so light tiles never get white text.
+  function colorFor(id) {
+    var hues = [16, 262, 158, 199, 340, 45, 120];
+    var h = hues[parseInt(id, 36) % hues.length], l = 0.55;
+    var a = 0.8 * Math.min(l, 1 - l);
+    var ch = [0, 8, 4].map(function (n) {
+      var k = (n + h / 30) % 12;
+      var c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    var lum = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+    var fg = 1.05 / (lum + 0.05) >= (lum + 0.05) / 0.0556 ? "#ffffff" : "#111111";
+    return "background:hsl(" + h + " 80% 55%);color:" + fg;
+  }
+
+  function showLibrary() {
+    current = null;
+    frame.hidden = true;
+    pendingRender = null;
+    frame.removeAttribute("src");
+    authEl.hidden = true;
+    authBtn.hidden = true;
+    libEl.style.display = "block";
+    document.title = "My Apps · VegaDūta";
+    if (location.hash) history.replaceState(null, "", location.pathname);
+    var lib = loadLib();
+    var grid = document.getElementById("grid");
+    grid.innerHTML = lib.length ? lib.map(function (a) {
+      return "<div class=\"app\" data-open=\"" + esc(a.id) + "\"><span class=\"ic\" style=\"" + colorFor(a.id) + "\">" + esc((a.name || "A").trim().charAt(0).toUpperCase()) + "</span><b>" + esc(a.name) + "</b><small>Saved " + new Date(a.savedAt).toLocaleDateString() + "</small><button class=\"del\" data-del=\"" + esc(a.id) + "\">Remove</button></div>";
+    }).join("") : "<p class=\"empty\">No apps yet. Open a share link from the Phone app studio and it will appear here.</p>";
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    document.getElementById("tip").innerHTML = ios
+      ? "<b>Keep your apps on the home screen:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. Each app works offline."
+      : "<b>Keep your apps on the home screen:</b> open the browser menu (⋮) and tap <b>Add to Home screen</b> or <b>Install app</b>. Each app works offline.";
+  }
+
+  document.getElementById("grid").addEventListener("click", function (e) {
+    var del = e.target.closest("[data-del]");
+    if (del) {
+      e.stopPropagation();
+      if (confirm("Remove this app and its data from this phone?")) { saveLib(loadLib().filter(function (a) { return a.id !== del.getAttribute("data-del"); })); showLibrary(); }
+      return;
+    }
+    var open = e.target.closest("[data-open]");
+    if (!open) return;
+    var id = open.getAttribute("data-open");
+    var app = loadLib().filter(function (a) { return a.id === id; })[0];
+    if (app) {
+      // Published apps keep their #a= URL so reopening picks up republishes.
+      history.replaceState(null, "", app.slug ? "#a=" + app.slug : "#id=" + id);
+      show(app);
+    }
+  });
+  document.getElementById("libBtn").addEventListener("click", showLibrary);
+
+  function fail(msg) {
+    var el = document.getElementById("err");
+    el.style.display = "block"; el.textContent = msg;
+  }
+
+  function boot() {
+    var p = params();
+    if (p.app) {
+      if (typeof DecompressionStream === "undefined") return fail("This browser is too old to open shared apps. Please update it and try again.");
+      unpack(p.app).then(function (html) {
+        var name = "My app";
+        try { name = decodeURIComponent(p.n || "") || name; } catch (e) {}
+        var id = hashId(html);
+        var lib = loadLib();
+        var existing = lib.filter(function (a) { return a.id === id; })[0];
+        var app = existing || { id: id, name: name.slice(0, 60), html: html, data: {}, savedAt: Date.now() };
+        lib = [app].concat(lib.filter(function (a) { return a.id !== id; }));
+        saveLib(lib);
+        // Short, stable URL from here on - what "Add to Home Screen" keeps.
+        history.replaceState(null, "", "#id=" + id);
+        show(app);
+      }).catch(function () { fail("This link looks damaged. Ask for the link again, and make sure it was copied in full."); });
+      return;
+    }
+    if (p.a) {
+      // Published app: fetch the live manifest (fresh on every open - a
+      // republish reaches people on their next visit).
+      if (!API_OK) return fail("Published apps need the hosted VegaDūta site - open this link on it.");
+      appApi(p.a, "").then(function (r) {
+        if (!r.ok || !r.body || typeof r.body.html !== "string") {
+          fail("This app isn't available - it may have been taken offline.");
+          return;
+        }
+        var m = r.body;
+        var id = "pub:" + p.a;
+        var lib = loadLib();
+        var existing = lib.filter(function (x) { return x.id === id; })[0];
+        var app = {
+          id: id, name: String(m.name || "My app").slice(0, 60), html: m.html,
+          data: existing ? existing.data : {}, savedAt: Date.now(),
+          slug: p.a, authMode: m.authMode || "NONE", aiEnabled: !!m.aiEnabled, version: m.version || 1
+        };
+        lib = [app].concat(lib.filter(function (x) { return x.id !== id; }));
+        saveLib(lib);
+        show(app);
+      }).catch(function () { fail("Couldn't reach the app service - check your connection and try again."); });
+      return;
+    }
+    if (p.id) {
+      var app = loadLib().filter(function (a) { return a.id === p.id; })[0];
+      if (app) return show(app);
+    }
+    showLibrary();
+  }
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/run-app-sw.js", { scope: "/run-app.html" }).catch(function () {});
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

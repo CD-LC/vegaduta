@@ -1,0 +1,122 @@
+# rl-trainer - services/rl-trainer/Dockerfile (:8095). Internal only; core is the caller
+# (RL_TRAINER_INTERNAL_TOKEN from the shared internal Secret). The LLM key is optional:
+# without it the LLM endpoints answer 503 (stub-only).
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: rl-trainer
+
+image:
+  registry: ""
+  repository: rl-trainer
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+# -- Optional Secret holding ANTHROPIC_API_KEY.
+llmSecret:
+  existingSecret: ""
+  key: ANTHROPIC_API_KEY
+
+singleReplica: true
+singleReplicaReason: "training state lives on one ReadWriteOnce volume"
+replicaCount: 1
+strategy:
+  type: Recreate
+terminationGracePeriodSeconds: 30
+revisionHistoryLimit: 5
+containerPort: 8095
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8095
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+probes:
+  startup:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 20
+  liveness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits: { memory: 1Gi }
+
+podSecurityContext:
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 256Mi }
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: ""
+  accessModes: [ReadWriteOnce]
+  mountPath: /data
+  existingClaim: ""
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker]
+  allowEgressTo: [keycloak]
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /health
+
+env:
+  RL_TRAINER_AUTH_MODE: internal
+  RL_TRAINER_DATA_DIR: /data
+  RL_TRAINER_LLM_MODEL: claude-sonnet-5
+  RL_TRAINER_CORS_ORIGINS: ""
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-onboarding",
+      "method": "POST",
+      "path": "/api/onboarding",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

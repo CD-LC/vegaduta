@@ -1,0 +1,244 @@
+/* Dedicated /admin/audit-tail page (#553) - the small Admin Overview card
+ * has to clip at a fixed height, but a page whose entire purpose is "view
+ * the full tail" shouldn't. Same row markup/animation, just scrollable
+ * instead of hidden, with room for far more than 12 rows and each row
+ * wrapping instead of truncating on narrow viewports. */
+.ax-feed-full {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 4px 20px 20px;
+  font-size: var(--fs-caption);
+  gap: 6px;
+}
+
+.ax-feed-full .ax-feed-row {
+  white-space: normal;
+  word-break: break-word;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+
+.ax-feed-full .ax-feed-row:hover {
+  background: var(--ax-chip);
+}
+
+.ax-feed-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  white-space: nowrap;
+  opacity: 0;
+  animation: axFadeIn 0.3s forwards;
+}
+
+.ax-feed-time {
+  color: var(--ax-dim);
+  flex-shrink: 0;
+}
+
+.ax-feed-tag {
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: pre;
+}
+
+.ax-feed-msg {
+  color: var(--ax-mid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ax-approvals-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--ax-border2);
+  background: linear-gradient(135deg, rgba(245, 181, 68, 0.1), transparent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ax-approvals-num {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-amber);
+}
+
+.ax-approvals-title {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-approvals-sub {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+}
+
+.ax-approvals-cta {
+  padding: 6px 11px;
+  border: 1px solid rgba(245, 181, 68, 0.4);
+  border-radius: 8px;
+  font-size: var(--fs-label);
+  color: var(--ax-amber);
+  font-family: var(--font-mono), monospace;
+  text-decoration: none;
+}
+
+/* Mobile pass (2026-07): row 3 of the dashboard (agent activity | workflow
+ * runs) used to carry its "1.5fr 1fr" split as an inline style directly on
+ * the div in page.js, which no plain class selector here could out-rank
+ * (inline styles beat class specificity outright, short of !important).
+ * Moved the grid declaration into this class instead so the ordinary
+ * max-width:900px breakpoint - the same one .ax-dash itself collapses at -
+ * can stack these two panels full-width on tablet/phone like everything
+ * else in the grid, without an !important escape hatch. */
+.ax-panel2-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 15px;
+}
+
+@media (max-width: 900px) {
+  .ax-panel2-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-panel2-block {
+  padding: 15px 18px;
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ax-panel2-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ax-panel2-head-title {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-panel2-head-sub {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 22px;
+  flex: 1;
+}
+
+@media (max-width: 700px) {
+  .ax-activity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.ax-activity-name {
+  flex: 1;
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+}
+
+.ax-activity-bar {
+  width: 70px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ax-track);
+  overflow: hidden;
+}
+
+.ax-activity-bar-fill {
+  height: 100%;
+}
+
+.ax-activity-score {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  width: 30px;
+}
+
+.ax-runs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+}
+
+.ax-run-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--ax-chip);
+  color: var(--ax-text);
+}
+
+.ax-run-row-running {
+  background: rgba(124, 92, 255, 0.07);
+  border: 1px solid rgba(124, 92, 255, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+.ax-run-shimmer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 26%;
+  background: linear-gradient(90deg, transparent, rgba(124, 92, 255, 0.28), transparent);
+  animation: axRun 1.8s linear infinite;
+}
+
+.ax-run-name {
+  flex: 1;
+  z-index: 1;
+  position: relative;
+}
+
+@keyframes axFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes axRun {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-feed-row {
+    animation: none;
+    opacity: 1;
+  }
+  .ax-run-shimmer {
+    animation: none;
+  }
+}

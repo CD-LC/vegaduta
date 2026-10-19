@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary — VegaDūta Docs</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="overview" data-page="glossary.html" data-doc="VD-OV-003" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Overview<span class="sep">/</span>Glossary</div>
+  <div class="doc-meta" data-auto></div>
+  <h1>Glossary &amp; Terminology</h1>
+  <p class="lede">
+    The terms used across this documentation set, defined as they are used on
+    this platform — not generically. Where a term is a public standard, the
+    definition names the standard; where it is VegaDūta-specific, the
+    definition names the code or config that implements it.
+  </p>
+
+  <h2>Product and tenancy</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Agent</strong></td>
+        <td>A configured AI worker owned by a tenant: a role (system prompt), a model, an allow-list of tools, optional knowledge collections, and channel bindings. Defined by the <code>agent</code> table in each tenant schema (<code>core/agents</code>, <code>Agent.java</code>). Agents carry per-instance tuning knobs — <code>reasoning_depth</code>, cost routing, collaborator lists — settable after creation via <code>PATCH /api/agents/{id}/…</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Tenant</strong></td>
+        <td>One customer workspace. Registered in <code>control_plane.tenant</code> in the <code>public</code> schema; all of the tenant's data lives in its own Postgres schema. The request's tenant context (<code>TenantContext</code>) is derived from the JWT and selects the schema.</td>
+      </tr>
+      <tr>
+        <td><strong>Schema-per-tenant</strong></td>
+        <td>The isolation model: each tenant gets its own Postgres schema — its own full set of tables — inside one shared database. Isolation is enforced by <code>SET search_path</code> on the pooled connection, which is why <strong>PgBouncer must run in session mode</strong>: transaction pooling reassigns connections mid-session and a query can land in the wrong tenant's schema. See <a href="../architecture/data-architecture.html">Data Architecture</a>.</td>
+      </tr>
+      <tr>
+        <td><strong>Control plane</strong></td>
+        <td>The shared, non-tenant state in the <code>public</code> schema — the tenant registry, plans, platform settings — migrated by the <code>db/migration/controlplane/</code> Flyway directory, once, rather than per schema.</td>
+      </tr>
+      <tr>
+        <td><strong>Persona</strong></td>
+        <td>A role-shaped user of the platform: tenant admin, tenant member (<code>agent-builder</code> / <code>delegated-user</code>), end-customer (embeds), platform admin, API consumer / external agent, and channel end-user. Realm roles in Keycloak map to the authenticated subset.</td>
+      </tr>
+      <tr>
+        <td><strong>FREE mode</strong></td>
+        <td>A platform-wide positioning flag (<code>platform.free-mode.enabled=true</code>, seeded by migration V237; <code>NEXT_PUBLIC_FREE_MODE=1</code> / <code>WEB_FREE_MODE</code> for the console). Every tenant resolves as the top tier for <em>feature</em> gates while the platform-pool anti-abuse caps stay enforced; the web UI swaps pricing surfaces for open-source copy. Plan/billing surfaces stay hidden unless <code>NEXT_PUBLIC_BILLING_ENABLED=1</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Agents, LLMs and knowledge</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>BYOK — bring your own key</strong></td>
+        <td>A tenant supplies its own API credentials for an LLM provider. Keys are validated at entry and stored encrypted with <code>APP_ENCRYPTION_KEY</code> in the tenant schema; every agent on the account can then use that provider's models. ~14 providers are supported.</td>
+      </tr>
+      <tr>
+        <td><strong>Hosted (platform) pool</strong></td>
+        <td>The operator-provided model option for tenants without a BYOK key; the operator configures which providers and credentials back it (for example the <code>VERTEX_POOL_*</code> slots). Usage is metered into <code>llm_call_log</code> and capped by the anti-abuse limiter — which stays on even under FREE mode.</td>
+      </tr>
+      <tr>
+        <td><strong>Jev</strong></td>
+        <td>TypeSafe's decision model, integrated as a cheap calibrated yes/no call (<code>noul</code>) rather than a chat model. Used today as a second opinion for cost routing: a deterministic heuristic decides if a turn is "simple"; only a heuristic <em>not-simple</em> is offered to Jev, which can rescue it to the agent's economy model above a confidence threshold (default 0.75). Tenants can bring their own TypeSafe key (<code>/api/jev/credential</code>), set a per-tenant policy (<code>jev_policy</code>, V334), or try it in a bounded playground. Implementation: <code>core/agents/.../decision/JevDecisionService.java</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Reasoning depth</strong></td>
+        <td>A per-agent enum (<code>agent.reasoning_depth</code>, <code>ReasoningDepth.java</code>) controlling how much verification a turn gets — a pipeline knob, not a sampling knob. <code>FAST</code> = no extra pass (default, unchanged legacy behavior). <code>CAREFUL</code> = one self-consistency re-check of the final answer. <code>RIGOROUS</code> = CAREFUL plus Reflexion self-critique plus an independent verifier call before every tool executes — the right default for side-effecting agents. <code>PLANNED</code> = a cheap planning call decomposes the request into an ordered step list before the tool loop; not currently combinable with CAREFUL/RIGOROUS passes in one turn.</td>
+      </tr>
+      <tr>
+        <td><strong>Guardrail</strong></td>
+        <td>A platform-layer check applied outside the model on what goes in and what comes out — profanity, jailbreak/prompt-injection, PII, policy violations, toxicity, custom rules — enforced by <code>core/guardrails</code> (e.g. <code>GuardedToolCallback</code>, <code>ChatGuardrailGate</code>), with flagged content sent to a review queue. Enforced by the system, not requested in the prompt.</td>
+      </tr>
+      <tr>
+        <td><strong>Approval gate</strong></td>
+        <td>Human-in-the-loop control: a workflow node type and a gate in front of sensitive agent tool calls. The run pauses until a person approves or rejects; the decision is written to the audit log (<code>core/approval</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>RRF — Reciprocal Rank Fusion</strong></td>
+        <td>The rank-merge rule used by knowledge search: hybrid retrieval runs a vector (pgvector) list and a keyword list, then fuses them by summing <code>1/(k + rank)</code> per list with <code>k = 60</code> (Cormack et al.). A reranker may refine the fused shortlist; if reranking is unavailable the RRF order stands. Implementation: <code>core/knowledge/.../KnowledgeSearchService.java</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>llm_call_log</strong></td>
+        <td>The per-tenant table every LLM call writes (via <code>LlmMetricsAdvisor</code>): provider, model, latency, tokens, estimated cost, success/exception. Parallel to the OTLP span sent to Langfuse.</td>
+      </tr>
+      <tr>
+        <td><strong>Kill switch</strong></td>
+        <td>An emergency off. Exists at tenant scope (suspend one tenant's agents) and platform scope (web-admin); part of the built-in governance layer alongside autonomy tiers.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Integration and protocols</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>MCP — outbound (client)</strong></td>
+        <td>Core acts as an MCP <em>client</em>: tenants register MCP servers in a dynamic connector registry (<code>core/mcp</code>) over STDIO, SSE or streamable HTTP, and their tools become available to agents. STDIO packages (<code>npx …</code>, <code>uvx …</code>) are spawned on <code>mcp-stdio-runner</code> — a separate Node service — because untrusted code never runs inside core.</td>
+      </tr>
+      <tr>
+        <td><strong>MCP — inbound (server)</strong></td>
+        <td>Core also <em>exposes</em> an MCP server (the <code>mcpserver</code> Spring profile): external MCP clients — Claude, an IDE — can list and call a tenant's agents and workflows and search its knowledge base, subject to the same auth.</td>
+      </tr>
+      <tr>
+        <td><strong>AG-UI</strong></td>
+        <td>The Agent–User Interaction protocol: an open, event-based standard for streaming an agent's messages, tool calls and state changes to a front end. Implemented by <code>AgUiRunController</code> / <code>AgUiEventMapper</code> in <code>core/agents/agui</code>; one of the three agent connections alongside MCP (to tools) and A2A (to agents).</td>
+      </tr>
+      <tr>
+        <td><strong>A2A</strong></td>
+        <td>The Agent-to-Agent protocol (v1.0): lets agents on other platforms discover and call agents built here. The platform publishes an agent card at <code>api.example.com/.well-known/agent-card.json</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Channel</strong></td>
+        <td>A messaging surface an agent answers on — ~10 types: WhatsApp, Telegram, Slack, Discord, Messenger, Instagram, X, Email, Teams, Voice — plus web embeds. Implemented in <code>core/omnichannel</code>; <code>voice-agent</code> is the LiveKit worker.</td>
+      </tr>
+      <tr>
+        <td><strong>Sidecar</strong></td>
+        <td>Ambiguous on this platform; both uses are real: (1) <code>sidecar/</code> — the Python FastAPI knowledge/ML service on port 8001 (chunking, embeddings, OCR, reranking, transcription); (2) a helper container deployed next to a service (for example a connection pooler). Context disambiguates.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Deployment and operations</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Worktree build rule</strong></td>
+        <td>Images you deploy should be built from a clean, detached <code>git worktree</code> at the target SHA — <code>git worktree add --detach</code>, build there, <code>git worktree remove --force</code> after. A Docker build context includes whatever is on disk, including uncommitted work and stray <code>.env*.local</code> files. Released images from <code>release.yml</code> are built in CI from the tag.</td>
+      </tr>
+      <tr>
+        <td><strong><code>NEXT_PUBLIC_*</code> bake</strong></td>
+        <td>Next.js inlines a <code>NEXT_PUBLIC_*</code> value into the browser bundle when it is set at <em>build</em> time. The Dockerfiles leave these build args empty by default so the runtime environment decides; a value you do bake (especially <code>localhost</code>) can only be changed by rebuilding. See <a href="../decisions/adr-0007-build-time-frontend-config.html">ADR-0007</a>.</td>
+      </tr>
+      <tr>
+        <td><strong><code>APP_ENCRYPTION_KEY</code></strong></td>
+        <td>The single symmetric key encrypting every stored provider credential and channel secret. It must be <strong>identical everywhere core boots</strong> — <code>deploy/compose/.env</code>, <code>core/.env.local</code>, your Kubernetes Secret. A mismatch makes all stored credentials undecryptable — a classic failure during host migrations and restores. Rotation requires a decrypt/re-encrypt migration.</td>
+      </tr>
+      <tr>
+        <td><strong>Dual issuer</strong></td>
+        <td>Core validates JWTs against a primary issuer <em>plus</em> <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>. Required because Keycloak pins its hostname: every token carries <code>iss=&lt;PUBLIC_AUTH_URL&gt;/realms/agentic-ai</code> regardless of which URL minted it. If core does not accept that exact issuer, every authenticated call 401s. Add the old issuer here during a domain change.</td>
+      </tr>
+      <tr>
+        <td><strong>shape-api / shape-jobs / app-worker</strong></td>
+        <td>The runtime split of the one core image: <code>shape-api</code> is a Spring profile for interactive-serving pods that skips ~30 scheduled beans/listeners; <code>shape-jobs</code> is the profile for pods that own those sweeps (queue pollers, outbox relays, cron tickers); <code>app-worker</code> is a separate Temporal-worker assembly (no <code>@EnableScheduling</code>). Unset, everything runs in the single JVM as before.</td>
+      </tr>
+      <tr>
+        <td><strong>Flyway version namespace</strong></td>
+        <td>Both migration directories — <code>db/migration/controlplane/</code> (80 files) and <code>db/migration/tenant/</code> (139 files) — share <em>one</em> version space. <code>controlplane/V227</code> and <code>tenant/V227</code> collide. Reserve numbers by checking maxima in both folders; <code>scripts/ci/flyway-lint.sh</code> gates it in CI. File counts are approximate and grow over time.</td>
+      </tr>
+      <tr>
+        <td><strong>Compose profile</strong></td>
+        <td>A named opt-in group of services in <code>deploy/compose/docker-compose.yml</code> (<code>events</code>, <code>temporal</code>, <code>jobs</code>, <code>observability</code>, <code>tracing</code>, <code>voice</code>, <code>rl</code>, <code>code-intel</code>, <code>builder</code>, <code>sandbox</code>, <code>tools</code>, <code>browser</code>). <code>scripts/vegaduta up --full --profile x</code> also sets the core flags each profile needs.</td>
+      </tr>
+      <tr>
+        <td><strong>Verified / unverified</strong></td>
+        <td>The ops convention carried through this documentation: <span class="badge badge-verified">verified</span> = checked against the repository on the stated date; <span class="badge badge-unverified">unverified</span> = believed, not re-checked — a lead, not a fact.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Related pages</div>
+    <p style="margin:4px 0 0">
+      <a href="platform-at-a-glance.html">Platform at a Glance</a> for
+      the system picture · <a href="../appendix/environment-variables.html">Environment
+      Variable Reference</a> for the full variable list.
+    </p>
+  </div>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body>
+</html>

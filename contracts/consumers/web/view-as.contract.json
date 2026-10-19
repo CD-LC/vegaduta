@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-view-as-session",
+      "method": "GET",
+      "path": "/api/view-as/session",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

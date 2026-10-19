@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0002 Schema-per-Tenant — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0002-schema-per-tenant.html" data-doc="VD-ADR-002" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0002 Schema-per-Tenant</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0002: Tenant isolation by Postgres schema per tenant</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span></dd>
+  <dt>Decided</dt><dd>2026-07 (Phase 0 Stage 4)</dd>
+  <dt>Deciders</dt><dd>Platform Engineering</dd>
+  <dt>Motivating failures</dt><dd>PgBouncer wrong-schema routing (fixed July 2026); a Flyway version-collision outage (July 2026)</dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  Every tenant's application data — agents, workflows, chat history, knowledge
+  metadata — must be isolated from every other tenant's, auditable for GDPR
+  erasure, and cheap to provision (a signup creates a tenant in seconds). The
+  realistic options were a discriminator column on shared tables, a database per
+  tenant, or a schema per tenant inside one database.
+</p>
+<p>
+  Two forces shaped the choice. First, GDPR-focused research for this platform
+  specifically recommends schema/database-per-tenant because right-to-erasure and
+  per-tenant data residency become mechanically simple — drop a schema, or route a
+  tenant's schema to an EU cluster at provisioning time
+  (<code>TenantProvisioningService</code> is the exact seam). Second, connection
+  economics: database-per-tenant needs a pool per tenant; schema-per-tenant can
+  reuse the app's single pooled <code>DataSource</code> — which the
+  <code>SchemaMultiTenantConnectionProvider</code> javadoc calls "the whole point
+  of choosing schema-based over database-based multi-tenancy."
+</p>
+
+<h2>Decision</h2>
+<p>
+  Tenant isolation is a <strong>Postgres schema per tenant</strong>, implemented as
+  Hibernate multi-tenancy:
+</p>
+<ul>
+  <li><code>TenantContextFilter</code> (<code>core/security</code>) reads the JWT's
+    <code>tenant_id</code> claim and populates the thread-local
+    <code>TenantContext</code>. An authenticated token with <em>no</em>
+    <code>tenant_id</code> is rejected outright (the one legitimate exception:
+    platform-level callers that are tenant-less by design).</li>
+  <li><code>TenantSchemaResolver</code> (<code>core/tenancy</code>) implements
+    Hibernate's <code>CurrentTenantIdentifierResolver</code>, returning the schema
+    name for the current request, or <code>public</code> when no context exists.</li>
+  <li><code>SchemaMultiTenantConnectionProvider</code> (<code>core/tenancy</code>)
+    implements <code>MultiTenantConnectionProvider</code>: every checked-out
+    connection gets <code>connection.setSchema(tenant)</code>, which the Postgres
+    JDBC driver implements as <code>SET search_path</code>. On release the schema
+    is reset to <code>public</code> before the connection returns to the pool, so
+    a pooled connection can never carry a stale tenant into the next request.</li>
+  <li>Flyway runs two migration directories —
+    <code>db/migration/controlplane</code> (shared, once, into
+    <code>public.flyway_schema_history</code>) and <code>db/migration/tenant</code>
+    (replayed <strong>per schema</strong>; a tenant created later replays the whole
+    tenant chain — see <code>ExistingTenantSchemaMigrationRunner</code>).</li>
+</ul>
+
+<div class="mermaid">
+flowchart LR
+  req["Request + JWT"] --> filter["TenantContextFilter<br/>reads tenant_id claim"]
+  filter --> ctx["TenantContext (ThreadLocal)"]
+  ctx --> res["TenantSchemaResolver"]
+  res --> prov["SchemaMultiTenantConnectionProvider<br/>setSchema → SET search_path"]
+  prov --> pool["Shared DataSource<br/>via PgBouncer (session mode)"]
+  pool --> pg[("Postgres: public / control_plane / &lt;tenant&gt; / &lt;tenant&gt;_kg")]
+</div>
+
+<h2>Alternatives considered</h2>
+<table>
+  <thead><tr><th>Option</th><th>Why it lost</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Discriminator column on shared tables</strong></td>
+      <td>Every query and every new table has to remember the predicate forever; one missed <code>WHERE tenant_id=…</code> is a silent cross-tenant leak. Erasure is row-by-row surgery, not a dropped schema.</td>
+    </tr>
+    <tr>
+      <td><strong>Database per tenant</strong></td>
+      <td>Needs a connection pool per tenant and per-database provisioning/migration orchestration; at tens-to-hundreds of tenants it exhausts <code>max_connections</code> and operations. Offers stronger isolation than was needed at this scale.</td>
+    </tr>
+    <tr>
+      <td><strong>Schema-qualified SQL, no session state</strong></td>
+      <td>Would make transaction pooling safe (removing the PgBouncer constraint below), but requires every statement to carry the schema — incompatible with Hibernate's model without abandoning its multi-tenancy support. Recorded in <code>SchemaMultiTenantConnectionProvider</code>'s javadoc as the real escape hatch if session pooling ever becomes the constraint.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Consequences</h2>
+<h3>Positive</h3>
+<ul>
+  <li>Erasure and residency are mechanical: a tenant's data is one schema (plus
+    its <code>_kg</code> Apache AGE graph schema), provably enumerable — a
+    cross-cloud migration verified tenant restores "table- and row-exact" per
+    schema.</li>
+  <li>Provisioning is cheap — a schema plus a tenant-Flyway replay.</li>
+  <li>The <code>public</code> fallback means pre-multi-tenancy data required no
+    migration (V1 baseline never specified a schema).</li>
+  <li>The silent-fallback hazard is instrumented, not invisible:
+    <code>TenantSchemaResolver</code> counts every public-schema fallback
+    (<code>tenant_context_public_fallback_total</code>, tagged by resolution path
+    and caller) and can fail closed via
+    <code>app.tenancy.fail-on-missing-context</code> — added (F-14)
+    after approval-policy checks silently read <code>public</code> and a
+    tenant-admin's "require approval" setting was never enforced.</li>
+</ul>
+<h3>Negative / costs</h3>
+<ul>
+  <li><strong>PgBouncer MUST run session pooling.</strong> <code>SET search_path</code>
+    is session state in its own implicit transaction; transaction pooling rebinds
+    each transaction to a different server connection, so the
+    <code>SET</code> and its queries can land on different backends. Measured on
+    this stack while PgBouncer was in transaction mode:
+    <strong>41 of 60 concurrent clients got the wrong schema, 21 of them another
+    tenant's</strong>. The Compose <code>pgbouncer</code> service is therefore pinned to
+    <code>POOL_MODE=session</code>, and any external pooler you put in front of Postgres
+    must use session pooling too.</li>
+  <li><strong>Flyway replays per schema.</strong> Tenant migrations run once per
+    tenant schema, on demand — they must stay idempotent-safe and fast, and a new
+    tenant created years later replays the entire chain.</li>
+  <li><strong>One version namespace across both folders.</strong>
+    <code>controlplane/</code> and <code>tenant/</code> are separate directories
+    but a single Flyway version space: a <code>V156</code> collision (two
+    implementations of the same version) once took a hosted instance down ~40 minutes
+    via a checksum mismatch. <code>scripts/ci/flyway-lint.sh</code> now
+    gates collisions and renames of applied migrations.</li>
+  <li>Async/background work must propagate <code>TenantContext</code> explicitly
+    (<code>TenantContextPropagatingToolCallback</code> pattern); threads that
+    don't, silently resolve to <code>public</code> — the F-14 class of bug.</li>
+</ul>
+<div class="callout callout-danger">
+  <div class="callout-title">Operating rule</div>
+  If queries are hitting the wrong tenant's data, suspect PgBouncer left in
+  transaction pooling first — it must be <code>POOL_MODE=session</code>. Getting
+  transaction pooling back means dropping session-scoped <code>search_path</code>
+  altogether, not tuning the proxy.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/tenancy/.../SchemaMultiTenantConnectionProvider.java</code> — provider + the session-pooling mandate and the 41/60 measurement in its javadoc.</li>
+  <li><code>core/tenancy/.../TenantSchemaResolver.java</code> — resolver, <code>public</code> fallback, F-14 instrumentation.</li>
+  <li><code>core/security/.../TenantContextFilter.java</code> — <code>tenant_id</code> claim → <code>TenantContext</code>; rejection of claim-less JWTs.</li>
+  <li><code>README.md</code> §1 "Two architectural facts" — PgBouncer session mode and the shared Flyway namespace stated as platform invariants.</li>
+  <li><code>scripts/ci/flyway-lint.sh</code> — shared-namespace collision and applied-migration rename gate.</li>
+  <li><code>deploy/compose/docker-compose.yml</code> — pgbouncer <code>POOL_MODE</code> comment.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

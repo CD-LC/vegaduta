@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>sdlc</artifactId>
+  <name>sdlc</name>
+  <description>
+    SDLC automation sandbox (#849 - SDLC automation build plan, "sandboxed
+    code-execution options for SDLC agent" research item #839). A new sibling
+    module, not a rewrite of anything existing - same shape as "sarvam"/
+    "google": scaffold first (credential storage + a thin REST client over
+    the sandbox provider's own API), agent-facing tool callbacks in a later
+    stage once this foundation is proven, exactly the staged approach the
+    SDLC automation scoping doc (#837) laid out.
+
+    Provider: E2B (https://api.e2b.app), chosen in research item #839 for
+    its purpose-built "ephemeral VM per code-execution request" model over
+    a hand-rolled Docker-in-Docker approach - see E2bSandboxClient's javadoc
+    for the exact confirmed API surface and its one deliberately-unimplemented
+    gap (command execution).
+
+    Stage 1 (this module's initial contents): module scaffold + encrypted
+    credential storage (E2bCredential/E2bCredentialRepository/
+    E2bCredentialService/E2bApiException/E2bCredentialController) plus a
+    real REST client for the two confirmed simple-REST E2B endpoints -
+    create sandbox and kill sandbox (E2bSandboxClient) - wrapped by a thin
+    SdlcSandboxService/SdlcSandboxController. Command/process execution
+    inside a running sandbox is NOT implemented here: E2B's own API reference
+    documents Sandboxes/Templates/Tags/Volumes as plain REST but Process
+    (command execution) is served by envd, the per-sandbox agent, over its
+    own RPC protocol on the sandbox's dedicated host - not something this
+    scaffold can respond to with any confidence when the sandbox this codebase
+    runs in has no working compiler to test such a client against. See
+    E2bSandboxClient's javadoc for the honest, undodged statement of that gap.
+
+    Credential model: per-tenant BYOK, schema-scoped like SarvamCredential/
+    TwilioCredential/GoogleCredential - no tenant_id column needed,
+    schema-per-tenant multi-tenancy already isolates it. Depends on: crypto
+    (EncryptionService for the stored key), security (TenantContext, not used
+    directly in Stage 1 but kept for parity with every sibling module in this
+    position), tenancy (kept for the same reason).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- SsrfGuard for git remote URLs (security.net) and ResilienceGuard around E2B calls (tenancy). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

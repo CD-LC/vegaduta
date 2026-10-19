@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>VegaDūta widget — demo harness</title>
+<!--
+  Same-origin test harness for the embeddable chat widget.
+
+  Served from web/public/, so it lives on the app. host itself - which
+  means it works TODAY, before the X-Frame-Options edge fix documented in
+  README.md lands (XFO "SAMEORIGIN" permits same-origin framing). That makes
+  this page the way to verify the whole loader -> iframe -> /api/share/agents
+  chain end to end without touching a third-party site.
+
+  It deliberately looks like a generic marketing page, not like VegaDūta:
+  the point is to see the widget the way a customer's visitor would - sitting
+  on top of somebody else's typography, colours, and a bare `button {}` reset
+  chosen specifically to probe the shadow root's style isolation.
+
+  Usage: /widget/demo.html?shareId=<id>  (plus optional accent, position,
+  greeting, title, theme, autoOpen - mirrored into the loader's data-*
+  attributes). The form below just rebuilds the URL; the loader is
+  single-load-per-page, so reconfiguration is a reload by design.
+-->
+<style>
+  /* Hostile-ish host styles ON PURPOSE - if the launcher inherits any of
+     this, the shadow-root isolation in the loader has regressed. */
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f6f3ec;
+    color: #3d3a33;
+    text-transform: none;
+    line-height: 1.7;
+  }
+  button { padding: 18px 30px; border: 3px dashed #b00; text-transform: uppercase; }
+  header { background: #2e4636; color: #f6f3ec; padding: 48px 24px; }
+  header h1 { margin: 0 0 8px; font-size: 34px; font-weight: 400; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 24px 96px; }
+  fieldset { border: 1px solid #cfc8b8; padding: 16px; margin: 24px 0; }
+  legend { padding: 0 8px; }
+  label { display: block; margin: 10px 0 2px; font-size: 14px; }
+  input, select { font: inherit; width: 100%; max-width: 420px; box-sizing: border-box; padding: 6px 8px; }
+  .note { font-size: 13px; color: #6b6656; }
+  code { background: #ece7da; padding: 1px 5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Acme Gardening Supply Co.</h1>
+  <p>A pretend customer website, for testing the VegaDūta chat widget.</p>
+</header>
+<main>
+  <p>
+    This page stands in for a customer's own site. If a share id was passed,
+    the chat launcher should be floating in the corner right now — styled by
+    its own shadow root, untouched by this page's deliberately ugly
+    <code>button</code> reset, and vice versa.
+  </p>
+
+  <form id="cfg" method="get">
+    <fieldset>
+      <legend>Widget configuration (reloads the page — the loader is single-load by design)</legend>
+      <label for="shareId">Share id (required — from the agent's Share panel)</label>
+      <input id="shareId" name="shareId" placeholder="e.g. Xk3pQ9v2LmN8rT5wYb1c" required />
+      <label for="accent">Accent colour</label>
+      <input id="accent" name="accent" placeholder="#0f766e" />
+      <label for="position">Position</label>
+      <select id="position" name="position">
+        <option value="">bottom-right (default)</option>
+        <option value="bottom-left">bottom-left</option>
+      </select>
+      <label for="greeting">Greeting</label>
+      <input id="greeting" name="greeting" placeholder="Hi! Ask me anything about our plants." />
+      <label for="title">Panel title</label>
+      <input id="title" name="title" placeholder="Garden helper" />
+      <label for="theme">Theme</label>
+      <select id="theme" name="theme">
+        <option value="">auto (default)</option>
+        <option value="light">light</option>
+        <option value="dark">dark</option>
+      </select>
+      <label><input type="checkbox" name="autoOpen" value="1" style="width:auto" /> auto-open on load</label>
+      <p><button type="submit">Apply &amp; reload</button></p>
+    </fieldset>
+  </form>
+
+  <p class="note" id="status">No share id yet — fill the form above.</p>
+  <p class="note">
+    Also test the JS API from devtools: <code>VegaDutaWidget.open()</code>,
+    <code>.close()</code>, <code>.toggle()</code>, <code>.isOpen()</code>,
+    <code>.destroy()</code>.
+  </p>
+</main>
+<script>
+  // Reads the form values back out of the query string and injects the real
+  // loader tag with matching data-* attributes - exactly the tag a customer
+  // would paste, pointed at THIS page's own origin (same-origin framing is
+  // what lets the demo work before the XFO edge fix in README.md).
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+
+    // Re-fill the form so the current config is visible/editable.
+    ["shareId", "accent", "greeting", "title"].forEach(function (name) {
+      var el = document.getElementById(name);
+      if (el && params.get(name)) el.value = params.get(name);
+    });
+    ["position", "theme"].forEach(function (name) {
+      var el = document.getElementById(name);
+      if (el && params.get(name)) el.value = params.get(name);
+    });
+    if (params.get("autoOpen")) {
+      document.querySelector('input[name="autoOpen"]').checked = true;
+    }
+
+    var shareId = params.get("shareId");
+    var status = document.getElementById("status");
+    if (!shareId) return;
+
+    var script = document.createElement("script");
+    script.src = "/widget/vegaduta-widget.js"; // same-origin; loader derives its origin from this
+    script.defer = true;
+    script.setAttribute("data-share-id", shareId);
+    if (params.get("accent")) script.setAttribute("data-accent", params.get("accent"));
+    if (params.get("position")) script.setAttribute("data-position", params.get("position"));
+    if (params.get("greeting")) script.setAttribute("data-greeting", params.get("greeting"));
+    if (params.get("title")) script.setAttribute("data-title", params.get("title"));
+    if (params.get("theme")) script.setAttribute("data-theme", params.get("theme"));
+    if (params.get("autoOpen")) script.setAttribute("data-auto-open", "true");
+    document.body.appendChild(script);
+    status.textContent = "Widget loaded for share id “" + shareId + "” — look for the launcher bubble.";
+  })();
+</script>
+</body>
+</html>

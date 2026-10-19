@@ -1,0 +1,17 @@
+# Add Prometheus Operator scraping on top of values-kind.yaml (kube-prometheus-stack in `monitoring`):
+#
+#   helm upgrade --install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace \
+#     --set alertmanager.enabled=false --set prometheus.prometheusSpec.retention=2d \
+#     --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
+#     --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false
+#   helm install vegaduta deploy/helm/charts/vegaduta -n vegaduta \
+#     -f deploy/kind/values-kind.yaml -f deploy/kind/values-kind-observability.yaml
+#
+# Grafana: kubectl -n monitoring port-forward svc/monitoring-grafana 3300:80  (user admin; password in the
+# monitoring-grafana Secret). Needs about 16 GiB of Docker memory with the app and the monitoring stack.
+global:
+  serviceMonitor:
+    enabled: true
+  networkPolicy:
+    # Required whenever a ServiceMonitor is on (the chart refuses to render otherwise).
+    monitoringNamespace: monitoring

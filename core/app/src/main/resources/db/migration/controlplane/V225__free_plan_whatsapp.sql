@@ -1,0 +1,42 @@
+-- V225 — WhatsApp becomes a free-plan channel (2026-09-12)
+--
+-- Direct product decision from Punee: "lets make whatsapp also free".
+--
+-- WHY THIS COSTS THE PLATFORM NOTHING. Every WhatsApp path in this codebase is
+-- bring-your-own-credential, so Meta's per-conversation charges are billed to
+-- the tenant, never to us:
+--   * Meta Cloud API  -> MetaWhatsAppCredentialService.activate() stores the
+--                        TENANT's access token + app secret.
+--   * Twilio          -> TwilioCredentialService, the tenant's own account.
+--   * QR / Baileys    -> the tenant's own phone number, no Meta billing at all.
+-- This flag was therefore only ever a commercial gate, not a cost control. If a
+-- SHARED platform WhatsApp number is ever offered, that is a different feature
+-- and it needs metering built first — there is none today (no per-conversation
+-- counter exists anywhere in core).
+--
+-- WHAT ACTUALLY CHANGES. Less than the copy implied. `whatsapp_allowed` is
+-- enforced in exactly ONE place — MetaWhatsAppCredentialService.java:69-74 —
+-- which covers the Meta Cloud API path and Embedded Signup. The QR/Baileys
+-- path (WhatsAppQrController) and the Twilio path have NEVER carried a plan
+-- check, so a FREE tenant could already connect WhatsApp by scanning a QR code.
+-- This migration closes the gap between what the product did and what the
+-- pricing page claimed, rather than opening a genuinely new capability.
+--
+-- FREE STAYS A REAL, PERMANENT PLAN. This is not part of the 3-month
+-- complimentary UNLIMITED grant that new tenants receive at signup (see
+-- TenantProvisioningService). This row change is unconditional and does not
+-- expire, so when that grant reverts, WhatsApp stays. The landing/pricing
+-- promise that Free is "a real plan, not a trial - no card, no clock" remains
+-- true, which is the whole reason this is a plan_limits edit and not a
+-- time-boxed promo.
+--
+-- CACHE: PlanLimitsService caches `plan-limits:{PLAN}` in Redis with NO TTL,
+-- evicted only by an admin save through PUT /api/platform/plan-limits. A
+-- migration writes straight past that cache, so on deploy either re-save the
+-- FREE row in web-admin or evict `plan-limits:FREE` by hand, otherwise running
+-- replicas keep serving whatsapp_allowed=false until they restart.
+-- (The separate `tenant:plan:{id}` key has a 5-minute TTL and needs nothing.)
+
+UPDATE control_plane.plan_limits
+   SET whatsapp_allowed = TRUE
+ WHERE plan = 'FREE';

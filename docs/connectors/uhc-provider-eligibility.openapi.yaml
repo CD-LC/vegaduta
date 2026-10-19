@@ -1,0 +1,61 @@
+# UnitedHealthcare Provider API - Eligibility (apimarketplace.uhcprovider.com)
+#
+# COMMUNITY-RECONSTRUCTED SPEC: UHC's provider APIs are documented behind the
+# UHCprovider.com API Marketplace (requires a OneHealthcare ID / provider
+# account). This file captures the published surface (host api.uhcprovider.com,
+# POST /eligibility/v1/real-time) so the connector can be wired the moment
+# credentials exist - but verify paths and field names against the marketplace
+# documentation before relying on it, and prefer the official spec if UHC
+# publishes one for your subscription.
+#
+#   name:      UnitedHealthcare
+#   baseUrl:   https://api.uhcprovider.com
+#   authType:  OAUTH2_CLIENT_CREDENTIALS
+#   tokenUrl:  per your UHC API Marketplace subscription (OAuth2 client_credentials)
+#   style:     FORM (UHC's gateway follows the standard OAuth2 form shape)
+#
+# NOTE: UHC's *Interoperability* APIs (api.uhc.com/fhir/R4) are member-facing
+# (OAuth2 + OIDC + member consent, CMS Patient Access) - NOT usable for a
+# provider-side eligibility demo. This file targets the provider marketplace.
+
+openapi: 3.0.0
+info:
+  title: UnitedHealthcare Provider Eligibility API
+  version: "1.0"
+  description: >-
+    Real-time eligibility and benefit verification for UnitedHealthcare
+    members: coverage details, deductibles, copays and benefit limits for a
+    service type and date of service.
+servers:
+  - url: https://api.uhcprovider.com
+paths:
+  /eligibility/v1/real-time:
+    post:
+      operationId: checkEligibility
+      summary: UnitedHealthcare real-time eligibility check
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [memberId, dateOfBirth, npi]
+              properties:
+                memberId: { type: string, description: UHC member id from the insurance card. }
+                dateOfBirth: { type: string, description: Member date of birth, CCYY-MM-DD. }
+                npi: { type: string, description: 10-digit rendering/billing provider NPI. }
+                serviceType: { type: string, description: "X12 service-type code, e.g. \"30\"." }
+                dateOfService: { type: string, description: CCYY-MM-DD }
+                firstName: { type: string }
+                lastName: { type: string }
+      responses:
+        "200":
+          description: Eligibility verification result - coverage, deductibles, copays, benefit limits.
+        "400":
+          description: Bad request - invalid input.
+        "401":
+          description: Unauthorized - invalid or expired token.
+        "404":
+          description: Member not found.
+        "429":
+          description: Too many requests.

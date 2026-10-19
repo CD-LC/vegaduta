@@ -1,0 +1,127 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CI/CD Pipelines — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="deployment" data-page="ci-cd-pipeline.html" data-doc="VD-DEP-003" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Deployment</a><span class="sep">/</span>CI/CD Pipelines</div>
+<div class="doc-meta" data-auto></div>
+<h1>CI/CD Pipelines</h1>
+<p class="lede">
+  Eight GitHub Actions workflows live in <code>.github/workflows/</code>. Pull
+  requests are gated by <strong>CI</strong>, whose summary job <code>CI OK</code> also
+  covers the static gates, secret scan, DCO sign-off, dependency review and docs link
+  check; CodeQL reports separately. Tagging <code>vX.Y.Z</code> runs
+  <strong>Release</strong>, which publishes signed multi-arch images and Helm
+  charts to GHCR. There is no hosted deploy pipeline in this repository:
+  deployment is yours, using Docker Compose or the Helm charts (see the
+  <a href="index.html">Deployment Guide</a>).
+</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Source of truth</div>
+  Triggers and job names below were read from the workflow files. If this page
+  and a workflow file disagree, the file wins.
+</div>
+
+<dl class="props">
+  <dt>Required checks</dt><dd><code>CI OK</code> (the <code>ci-ok</code> job in <code>ci.yml</code>) and <code>CodeQL OK</code> (<code>codeql.yml</code>); see <code>CONTRIBUTING.md</code></dd>
+  <dt>Registry</dt><dd>GHCR (<code>ghcr.io/&lt;owner&gt;</code>), images and OCI Helm charts, published only by <code>release.yml</code></dd>
+  <dt>Supply chain</dt><dd>cosign keyless signatures, SPDX SBOM attestations, SLSA build provenance</dd>
+  <dt>Local equivalents</dt><dd><code>make test</code>, <code>make lint</code>, <code>make gates</code>, <code>make compose-validate</code>, <code>make helm-lint</code>, <code>make sbom</code></dd>
+</dl>
+
+<h2>All workflows</h2>
+<table>
+  <thead><tr><th>File</th><th>Trigger</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>ci.yml</code> (CI)</td><td>pull request; push to <code>main</code>; dispatch</td><td>Path-filtered build and test (below). Concurrency cancels superseded runs on pull requests.</td></tr>
+    <tr><td><code>static-gates.yml</code></td><td>called by <code>ci.yml</code> (<code>workflow_call</code>); dispatch</td><td>Job <code>Static gates</code>: Flyway migration lint (uploads the checksum lock), duplicate bean/entity name guard, entity/table/bean/path namespace lint, expired test-skip check, file-size ratchet. Job <code>Secret scan</code>: gitleaks over new commits.</td></tr>
+    <tr><td><code>codeql.yml</code></td><td>pull request; push; weekly (Monday 04:27 UTC); dispatch</td><td>CodeQL SAST for java-kotlin, javascript-typescript and python, build-mode none.</td></tr>
+    <tr><td><code>scorecard.yml</code></td><td>weekly (Tuesday 05:41 UTC); push; dispatch</td><td>OpenSSF Scorecard analysis; SARIF uploaded.</td></tr>
+    <tr><td><code>release.yml</code></td><td>tag <code>v*.*.*</code>; dispatch with an existing <code>tag</code></td><td>Publishes images, charts, SBOMs and the source tarball (below).</td></tr>
+    <tr><td><code>e2e.yml</code></td><td>nightly (03:17 UTC); dispatch</td><td>Builds the compose stack from the commit (full stack + build + CI overlays with a mock OpenAI-compatible provider), waits for health, runs the Playwright suite in <code>tests/e2e</code>. Dispatch inputs choose compose files, profiles and specs.</td></tr>
+    <tr><td><code>labeler.yml</code></td><td>pull request target (opened, synchronize, reopened)</td><td>Applies labels with <code>actions/labeler</code>.</td></tr>
+    <tr><td><code>stale.yml</code></td><td>daily (06:33 UTC); dispatch</td><td>Marks issues and PRs stale after 60 days, closes 14 days later; exempts pinned, security, roadmap and similar labels, and draft PRs.</td></tr>
+  </tbody>
+</table>
+
+<h2>CI — job graph</h2>
+<pre class="mermaid">
+flowchart LR
+  A[changes: path filter] --> B[core / web / web-admin / python / node-services]
+  A --> C[shellcheck / hadolint / compose / helm]
+  A --> E[static-gates / dco / dependency-review / docs-links]
+  B --> D[CI OK]
+  C --> D
+  E --> D
+</pre>
+
+<table>
+  <thead><tr><th>Job</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>changes</code></td><td>Uses <code>dorny/paths-filter</code> to decide which areas changed (core, web, web-admin, python services, node services, shell, docker, compose, helm). A change to <code>ci.yml</code> or <code>scripts/ci/</code> triggers everything.</td></tr>
+    <tr><td><code>core</code></td><td>Maven verify on JDK 21 against Postgres with pgvector and Apache AGE; uploads test reports.</td></tr>
+    <tr><td><code>web</code>, <code>web-admin</code></td><td>Node 22: lint, typecheck, test, build.</td></tr>
+    <tr><td><code>python</code></td><td>ruff; sidecar pytest (CPU-only torch); code-intel script harness (not pytest).</td></tr>
+    <tr><td><code>python-extra</code></td><td>Other Python services (app-builder, tool-sandbox, voice-agent), one matrix leg each; part of <code>CI OK</code>.</td></tr>
+    <tr><td><code>node-services</code></td><td>mcp-stdio-runner (<code>node:test</code>), the home-assistant example MCP server; http-gateway is advisory.</td></tr>
+    <tr><td><code>shellcheck</code>, <code>hadolint</code></td><td>Shell scripts at severity error; Dockerfile lint.</td></tr>
+    <tr><td><code>compose</code></td><td><code>docker compose config</code> on the files in <code>deploy/compose</code>.</td></tr>
+    <tr><td><code>helm</code></td><td>helm lint, template and kubeconform via <code>scripts/ci/helm-validate.sh</code>, plus render-guard negative tests when <code>deploy/helm/test-guards.sh</code> exists.</td></tr>
+    <tr><td><code>static-gates</code></td><td>Runs <code>static-gates.yml</code> as a reusable workflow (static gates and gitleaks secret scan).</td></tr>
+    <tr><td><code>dco</code>, <code>dependency-review</code></td><td>DCO sign-off check on the commits; dependency review of the pull request.</td></tr>
+    <tr><td><code>docs-links</code></td><td>lychee in offline mode (with fragments) over <code>*.md</code>, <code>docs/**/*.md</code> and <code>docs/**/*.html</code> — this handbook included.</td></tr>
+    <tr><td><code>CI OK</code></td><td>Aggregates the job results above (areas with no changes are skipped). This is the single check to require in branch protection.</td></tr>
+  </tbody>
+</table>
+
+<h2>Release — what a tag produces</h2>
+<pre class="mermaid">
+flowchart LR
+  P[prepare] --> B[build per image x arch]
+  B --> M[publish: multi-arch manifest, sign, SBOM, provenance]
+  P --> C[charts: package, push OCI, sign]
+  M --> R[GitHub Release]
+  C --> R
+</pre>
+<ul>
+  <li><strong>Images.</strong> Built natively on amd64 and arm64, merged into one multi-arch manifest per image under <code>ghcr.io/&lt;owner&gt;</code>: core, core-worker, core-jobs, web, web-admin, sidecar, code-intel, app-builder, tool-sandbox, mcp-stdio-runner, voice-agent, rl-trainer, postgres, and a CloudNativePG operand variant (<code>postgres:16-pgvector-age-&lt;version&gt;</code>). Versions containing <code>-</code> are prereleases and do not move <code>latest</code>.</li>
+  <li><strong>Signing.</strong> Each manifest is signed with cosign keyless (GitHub OIDC, Sigstore Fulcio and Rekor).</li>
+  <li><strong>SBOM and provenance.</strong> An SPDX JSON SBOM (syft) is attested per image, and SLSA build provenance is attached.</li>
+  <li><strong>Helm charts.</strong> Packaged by <code>scripts/ci/helm-package.sh</code>, pushed to <code>oci://ghcr.io/&lt;owner&gt;/charts</code>, signed, with provenance.</li>
+  <li><strong>GitHub Release.</strong> Attaches the SBOMs, chart archives, and the source tarball <code>vegaduta.tar.gz</code> (with <code>SHA256SUMS</code>) that <code>install.sh</code> downloads.</li>
+</ul>
+<pre>cosign verify ghcr.io/&lt;owner&gt;/core:&lt;version&gt; \
+  --certificate-identity-regexp '^https://github.com/&lt;owner&gt;/&lt;repo&gt;/\.github/workflows/release\.yml@refs/tags/v' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+gh attestation verify oci://ghcr.io/&lt;owner&gt;/core:&lt;version&gt; --repo &lt;owner&gt;/&lt;repo&gt;</pre>
+
+<h2>Running the same checks locally</h2>
+<table>
+  <thead><tr><th>CI job</th><th>Local command</th></tr></thead>
+  <tbody>
+    <tr><td>Static gates and secret scan</td><td><code>make gates</code> (enable the pre-push hook with <code>make hooks</code>)</td></tr>
+    <tr><td>core, web, web-admin, python tests</td><td><code>make test</code> (or <code>make test-core</code>, <code>test-web</code>, <code>test-web-admin</code>, <code>test-python</code>)</td></tr>
+    <tr><td>Lint, typecheck, ruff, shellcheck</td><td><code>make lint</code></td></tr>
+    <tr><td>compose validation</td><td><code>make compose-validate</code></td></tr>
+    <tr><td>helm validation</td><td><code>make helm-lint</code></td></tr>
+    <tr><td>Source SBOM</td><td><code>make sbom</code> (writes <code>dist/sbom-source.spdx.json</code>)</td></tr>
+  </tbody>
+</table>
+
+<h2>Not covered by any pipeline</h2>
+<ul>
+  <li><strong>Deploying.</strong> No workflow deploys to any environment. You run Compose or Helm against your own infrastructure.</li>
+  <li><strong>Database migrations.</strong> Flyway runs inside <code>core</code> at startup; <code>flyway-lint.sh</code> catches shared-namespace collisions and edits to applied migrations, not runtime conflicts.</li>
+  <li><strong>Translations.</strong> Message catalogs can be regenerated by maintainers; no workflow does it.</li>
+</ul>
+<p>Related: <a href="index.html">Deployment Guide</a> · <a href="rollback-recovery.html">Rollback &amp; Recovery</a> · <a href="../testing/quality-gates.html">Quality Gates</a></p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>.github/workflows/ci.yml</code>, <code>static-gates.yml</code>, <code>codeql.yml</code>, <code>scorecard.yml</code>, <code>release.yml</code>, <code>e2e.yml</code>, <code>labeler.yml</code>, <code>stale.yml</code> — triggers and job names.</li>
+  <li><code>Makefile</code>, <code>CONTRIBUTING.md</code>, <code>scripts/ci/</code> — local equivalents and gate scripts.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

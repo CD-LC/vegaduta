@@ -1,0 +1,2 @@
+core-worker: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) polling Temporal at {{ .Values.global.temporal.target }} (namespace {{ .Values.global.temporal.namespace | default "default" }}).
+  app Secret : {{ include "vegaduta-lib.core.appSecretName" . }} (must be the same Secret core uses)

@@ -1,0 +1,533 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-demo-channels",
+      "method": "GET",
+      "path": "/api/demo/channels",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-demo-channels-telegram",
+      "method": "DELETE",
+      "path": "/api/demo/channels/telegram",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-channels-telegram-pair",
+      "method": "POST",
+      "path": "/api/demo/channels/telegram/pair",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-demo-channels-whatsapp",
+      "method": "DELETE",
+      "path": "/api/demo/channels/whatsapp",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-channels-whatsapp-pair",
+      "method": "POST",
+      "path": "/api/demo/channels/whatsapp/pair",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-channels-whatsapp-preview",
+      "method": "POST",
+      "path": "/api/demo/channels/whatsapp/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-chat",
+      "method": "POST",
+      "path": "/api/demo/chat",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.businessName",
+          "$.message",
+          "$.sessionId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-history",
+      "method": "GET",
+      "path": "/api/demo/history",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-image",
+      "method": "POST",
+      "path": "/api/demo/image",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.prompt"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-magic-workflowId-preview",
+      "method": "POST",
+      "path": "/api/demo/magic/{workflowId}/preview",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.values"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-magic-workflowId-publish",
+      "method": "POST",
+      "path": "/api/demo/magic/{workflowId}/publish",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-magic-plan",
+      "method": "POST",
+      "path": "/api/demo/magic/plan",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.link",
+          "$.prompt"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-magic-run-shareId",
+      "method": "GET",
+      "path": "/api/demo/magic/run/{shareId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-magic-run-shareId",
+      "method": "POST",
+      "path": "/api/demo/magic/run/{shareId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.values"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-music",
+      "method": "POST",
+      "path": "/api/demo/music",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.prompt"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-music-status",
+      "method": "GET",
+      "path": "/api/demo/music/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-session",
+      "method": "GET",
+      "path": "/api/demo/session",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-session",
+      "method": "POST",
+      "path": "/api/demo/session",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-session-event",
+      "method": "POST",
+      "path": "/api/demo/session/event",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.event"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-session-reset",
+      "method": "POST",
+      "path": "/api/demo/session/reset",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-session-share",
+      "method": "POST",
+      "path": "/api/demo/session/share",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-share-shareId",
+      "method": "GET",
+      "path": "/api/demo/share/{shareId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-share-shareId-chat",
+      "method": "POST",
+      "path": "/api/demo/share/{shareId}/chat",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.message"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-share-shareId-report",
+      "method": "POST",
+      "path": "/api/demo/share/{shareId}/report",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-agents",
+      "method": "GET",
+      "path": "/api/demo/studio/agents",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-agents",
+      "method": "POST",
+      "path": "/api/demo/studio/agents",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-demo-studio-agents-agentId",
+      "method": "DELETE",
+      "path": "/api/demo/studio/agents/{agentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-demo-studio-agents-agentId",
+      "method": "PATCH",
+      "path": "/api/demo/studio/agents/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-agents-agentId-connectors",
+      "method": "GET",
+      "path": "/api/demo/studio/agents/{agentId}/connectors",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-agents-agentId-connectors",
+      "method": "POST",
+      "path": "/api/demo/studio/agents/{agentId}/connectors",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.name"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-demo-studio-agents-agentId-connectors-server",
+      "method": "DELETE",
+      "path": "/api/demo/studio/agents/{agentId}/connectors/{server}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-agents-agentId-documents",
+      "method": "GET",
+      "path": "/api/demo/studio/agents/{agentId}/documents",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-agents-agentId-documents",
+      "method": "POST",
+      "path": "/api/demo/studio/agents/{agentId}/documents",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-demo-studio-agents-agentId-documents-documentId",
+      "method": "DELETE",
+      "path": "/api/demo/studio/agents/{agentId}/documents/{documentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-agents-agentId-documents-text",
+      "method": "POST",
+      "path": "/api/demo/studio/agents/{agentId}/documents/text",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.text",
+          "$.title"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-agents-agentId-live",
+      "method": "POST",
+      "path": "/api/demo/studio/agents/{agentId}/live",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-agents-agentId-mission",
+      "method": "POST",
+      "path": "/api/demo/studio/agents/{agentId}/mission",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-mcp-search",
+      "method": "GET",
+      "path": "/api/demo/studio/mcp/search",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-palette",
+      "method": "GET",
+      "path": "/api/demo/studio/palette",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-runs-runId-decision",
+      "method": "POST",
+      "path": "/api/demo/studio/runs/{runId}/decision",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.approved"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-status",
+      "method": "GET",
+      "path": "/api/demo/studio/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-workflows",
+      "method": "GET",
+      "path": "/api/demo/studio/workflows",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-workflows",
+      "method": "POST",
+      "path": "/api/demo/studio/workflows",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.definition",
+          "$.name"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-demo-studio-workflows-workflowId",
+      "method": "DELETE",
+      "path": "/api/demo/studio/workflows/{workflowId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-demo-studio-workflows-workflowId",
+      "method": "PUT",
+      "path": "/api/demo/studio/workflows/{workflowId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.definition",
+          "$.name"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-studio-workflows-workflowId-run",
+      "method": "POST",
+      "path": "/api/demo/studio/workflows/{workflowId}/run",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-demo-studio-workflows-workflowId-runs",
+      "method": "GET",
+      "path": "/api/demo/studio/workflows/{workflowId}/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-transcript-email",
+      "method": "POST",
+      "path": "/api/demo/transcript-email",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.email"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-demo-video",
+      "method": "POST",
+      "path": "/api/demo/video",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.prompt"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

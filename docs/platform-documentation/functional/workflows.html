@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workflow Engine — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="functional" data-page="workflows.html" data-doc="VD-FN-002" data-status="verified" data-updated="2026-09-25" data-owner="Product Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <nav class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Functional</a><span class="sep">/</span>Workflow Engine</nav>
+
+  <h1>Workflow Engine</h1>
+  <p class="lede">
+    Workflows orchestrate agents, deterministic steps and human checkpoints
+    as a versioned graph. A <strong>definition</strong> is the edited
+    artifact; a <strong>run</strong> is one durable execution of a version.
+    The engine lives in <code>core/workflow</code> and offers two execution
+    modes behind one definition format.
+  </p>
+
+  <div class="figure">
+    <div class="mermaid">
+stateDiagram-v2
+  [*] --&gt; DRAFT: definition saved (canvas, autosave)
+  DRAFT --&gt; VERSIONED: publish (immutable version)
+  VERSIONED --&gt; RUNNING: trigger (manual / webhook / schedule / channel)
+  RUNNING --&gt; WAITING_APPROVAL: approval node or gated step
+  WAITING_APPROVAL --&gt; RUNNING: approve → resume (WorkflowApprovalResumeException path)
+  WAITING_APPROVAL --&gt; FAILED: reject
+  RUNNING --&gt; FAILED: node error edge exhausted
+  RUNNING --&gt; COMPLETED
+  FAILED --&gt; RUNNING: run recovery job
+    </div>
+    <div class="figure-caption">Workflow definition and run lifecycle.</div>
+  </div>
+
+  <h2>FR-WF-01 · Definitions, runs &amp; the two engines</h2>
+  <p>
+    A definition is a node graph (nodes + edges + per-node payload). Runs are
+    executed by one of two engines, selected by the
+    <code>app.workflow.execution-engine</code> setting:
+  </p>
+  <table>
+    <thead><tr><th>Engine</th><th>Implementation</th><th>When to use</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Synchronous engine</strong></td>
+        <td><code>WorkflowExecutionEngine</code> / <code>OrchestratorService</code> — in-process execution inside <code>core/app</code>.</td>
+        <td>Default; simple deployments, short-lived runs, staging.</td>
+      </tr>
+      <tr>
+        <td><strong>Temporal durable engine</strong></td>
+        <td><code>TemporalWorkflowExecutionEngine</code> + <code>WorkflowRunWorkflowImpl</code> — runs are Temporal workflows with replay durability.</td>
+        <td>Long-running runs, crash-proof human-in-the-loop pauses, production durability.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Both engines honour the same definition format, node catalogue and
+    approval semantics; the choice is operational, not a different feature
+    set. See <a href="../decisions/index.html">ADR index</a> for the Temporal
+    adoption context.
+  </p>
+
+  <h2>FR-WF-02 · Node catalogue (18 types)</h2>
+  <p>
+    The node executor (<code>WorkflowNodeExecutor</code>) dispatches on node
+    type. The catalogue:
+  </p>
+  <table>
+    <thead><tr><th>Node type</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td><code>agent_call</code></td><td>Invoke an agent with a prompt/input mapping; result becomes node output.</td></tr>
+      <tr><td><code>condition</code></td><td>Branch on an expression over run context.</td></tr>
+      <tr><td><code>loop</code></td><td>Iterate a sub-graph over a collection or until a condition.</td></tr>
+      <tr><td><code>parallel fan-out</code></td><td>Execute a fixed set of branches concurrently and join.</td></tr>
+      <tr><td><code>dynamic fan-out</code></td><td>Spawn one branch per element of a runtime-computed list.</td></tr>
+      <tr><td><code>device control</code></td><td>Dispatch an action to a paired external device client (see <code>core/devices</code>; no device client ships in this repository).</td></tr>
+      <tr><td><code>human_input</code></td><td>Pause for structured human input (<code>WorkflowInputRequestService</code>) and resume with the answer.</td></tr>
+      <tr><td><code>sub_flow</code></td><td>Invoke another workflow definition as a node.</td></tr>
+      <tr><td><code>supervisor</code></td><td>A supervising step that reviews/steers agent output within the run.</td></tr>
+      <tr><td><code>voice_menu / DTMF</code></td><td>Voice-call menu node — plays prompts, collects DTMF input on the voice channel (<code>WorkflowVoiceMenuRequestService</code>).</td></tr>
+      <tr><td>Approval node</td><td>Pause the run on the approval inbox; optional <code>adminOnly</code> payload restricts who can decide.</td></tr>
+      <tr><td>Webhook trigger</td><td>Starts a run from an inbound webhook event.</td></tr>
+      <tr><td>Schedule trigger</td><td>Starts runs on a cron schedule.</td></tr>
+      <tr><td>Channel trigger</td><td>Starts a run from an inbound channel message (<code>WorkflowTriggerChannel</code>).</td></tr>
+      <tr><td>Channel send / output</td><td>Reply to the origin channel or send to a target (<code>output/*Service</code> per channel).</td></tr>
+      <tr><td>Data/transform node</td><td>Map, extract or reshape context between steps.</td></tr>
+      <tr><td>HTTP / tool node</td><td>Call an external API or platform tool deterministically.</td></tr>
+      <tr><td>Terminal / response node</td><td>Conclude the run with a structured result.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-note">
+    <div class="callout-title">Catalogue note</div>
+    <p style="margin:4px 0 0">Trigger and terminal nodes count toward the 18-type catalogue. The authoritative list is the dispatch in <code>core/workflow/.../WorkflowNodeExecutor.java</code>; names above are functional labels, not wire enums.</p>
+  </div>
+
+  <h2>FR-WF-03 · Versions &amp; run diff</h2>
+  <p>
+    Publishing a definition creates an immutable version; runs pin to the
+    version they started on. Run diff (migration <code>V273</code>) compares
+    two runs — or a run against its version — to show which nodes executed,
+    what each produced, and where executions diverged. This is the debugging
+    primitive for "why did this run behave differently".
+  </p>
+
+  <h2>FR-WF-04 · Error handling: per-node error edges &amp; retry</h2>
+  <p>
+    A node can declare an <strong>error edge</strong>: instead of failing the
+    run, a failing node routes to a handler branch. Retry policy is per-node
+    (attempt count, backoff). If retries exhaust and no error edge exists,
+    the run fails and becomes eligible for the recovery job (FR-WF-09).
+  </p>
+
+  <h2>FR-WF-05 · Triggers</h2>
+  <p>
+    Runs start from four trigger surfaces: manual launch from the canvas/API,
+    <strong>webhook</strong> trigger nodes (external systems POST in),
+    <strong>schedule</strong> trigger nodes (cron), and <strong>channel</strong>
+    trigger nodes (an inbound WhatsApp/Telegram/etc. message starts a run —
+    see <a href="channels-omnichannel.html">VD-FN-003</a> for inbound routing).
+    Webhook event types are catalogued in
+    <code>core/eventbus/.../WebhookEventCatalog.java</code>.
+  </p>
+
+  <h2>FR-WF-06 · Sharing &amp; import/export</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-WF-06.1</td><td>Workflow share links let a recipient view/clone a definition.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-WF-06.2</td><td><code>generate-graph</code> (<code>WorkflowGraphGeneratorService</code>) drafts a workflow graph from a natural-language description.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-WF-06.3</td><td>Diagram and PDF export of the definition graph for documentation and review.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-WF-07 · Canvas UX</h2>
+  <p>
+    The web-admin canvas is the authoring surface: drag nodes, wire edges,
+    configure per-node payloads. <strong>Undo</strong> and
+    <strong>autosave</strong> make editing safe — drafts persist without an
+    explicit save and publish is a separate, deliberate action that mints a
+    version.
+  </p>
+
+  <h2>FR-WF-08 · Approval pause / resume</h2>
+  <p>
+    When a run reaches an approval node (or a gated action inside it), the
+    engine raises <code>WorkflowApprovalResumeException</code> — the mechanism
+    that parks the run with its full context. The approval appears in the
+    tenant's approval inbox; on approve, the run resumes from the parked node
+    with the decision recorded; on reject, it fails. Approver authorization
+    follows the rules in <a href="governance-guardrails.html">VD-FN-006</a>
+    (adminOnly payloads and tool-call approvals are tenant-admin only).
+  </p>
+
+  <h2>FR-WF-09 · Run recovery job</h2>
+  <p>
+    A scheduled recovery job sweeps for runs stranded by crashes or
+    restarts and re-drives them — the synchronous-engine counterpart to
+    Temporal's built-in replay. Together they guarantee a run is never lost
+    between "triggered" and "terminal state".
+  </p>
+
+  <h2>Cross-references</h2>
+  <ul>
+    <li><a href="agents-runtime.html">VD-FN-001</a> — agent_call nodes invoke agents specified there.</li>
+    <li><a href="channels-omnichannel.html">VD-FN-003</a> — channel triggers and channel output nodes.</li>
+    <li><a href="governance-guardrails.html">VD-FN-006</a> — approval inbox, policies, audit.</li>
+    <li><a href="../api/webhooks.html">API: Webhooks</a> — inbound webhook contracts.</li>
+    <li><a href="../deployment/compose-stack.html">Docker Compose Stack</a> — enabling the <code>temporal</code> engine (profile <code>temporal</code>).</li>
+  </ul>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

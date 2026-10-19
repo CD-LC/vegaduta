@@ -1,0 +1,1 @@
+ollama: {{ include "vegaduta-lib.fullname" . }}:11434 ({{ include "vegaduta-lib.image" . }}), model {{ .Values.model }} pulled on first start into the data volume.

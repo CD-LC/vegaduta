@@ -1,0 +1,29 @@
+# "shape-jobs-ingest" profile - a jobs pool that runs ONLY the heavy knowledge pollers (document
+# extraction, chunking, embedding calls, re-embedding), so a large upload never competes with agent jobs
+# and workflow schedules for heap, CPU or database connections. Activate it AFTER "shape-jobs".
+# Pair the main jobs pool with "shape-jobs-core", or it would run these pollers too.
+#
+# By default the ingestion poll holds ONE Postgres advisory lock ("knowledge-ingestion-poll") for the whole
+# queue walk, so extra pods in this pool add failover and isolation, not parallel ingestion. Set
+# KNOWLEDGE_INGESTION_CLAIMING_ENABLED=true for per-job claiming: pods can ingest different jobs at once
+# (docs/architecture/ADR-0014 lists what is and is not tested). The re-embed poller still takes its lock.
+#
+# How it works: skip every product @Scheduled bean (com.agenticai.core.*), keep the pollers this pool owns.
+# Nothing else of the product ticks here, so this pod does not sweep agent jobs, workflows or webhooks.
+
+app:
+  scheduling:
+    skip-bean-classes:
+      - com.agenticai.core.*
+    keep-bean-classes:
+      - com.agenticai.core.knowledge.KnowledgeIngestionJobRunner
+      - com.agenticai.core.knowledge.KnowledgeReembedJobRunner
+    # Boot-time sweeps owned by other pools or by the api shape (the union of shape-api's and shape-jobs'
+    # lists). Run here, AgentJobBootReconciliation would re-queue agent jobs this pool cannot run.
+    skip-listener-classes:
+      - com.agenticai.core.agents.job.durability.AgentJobBootReconciliation
+      - com.agenticai.core.agents.quota.DailyQuotaResetScheduler
+      - com.agenticai.core.quality.dataset.EvalRunExecutor
+      - com.agenticai.core.quality.simulation.SimulationRunExecutor
+      - com.agenticai.core.omnichannel.demo.DemoTelegramBot
+      - com.agenticai.core.providers.LocalLlmPoolBootstrap

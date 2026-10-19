@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-section="overview" data-page="index.html">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <h1>VegaDūta Platform Documentation</h1>
+  <p class="lede">
+    The complete engineering reference for the VegaDūta agentic-AI platform —
+    from the Spring AI LLM layer through the modular monolith, the satellite
+    services, and self-hosting with Docker Compose or Helm. Compiled from the
+    repository source, Compose files and Helm charts.
+  </p>
+
+  <div class="card-grid">
+    <div class="card"><div class="card-kpi">42</div><h4>Maven modules</h4><p>One Spring Boot 3.4 deployable (<code>core/app</code>) plus dedicated worker/jobs assemblies</p></div>
+    <div class="card"><div class="card-kpi">14</div><h4>LLM providers</h4><p>BYOK + platform-hosted pool + on-device edge tier, all behind Spring AI ChatClients</p></div>
+    <div class="card"><div class="card-kpi">3</div><h4>Ways to run it</h4><p>Compose Lite (5 containers), Compose Full (10 core, up to 36 with profiles), or Helm on Kubernetes</p></div>
+    <div class="card"><div class="card-kpi">10</div><h4>Channel types</h4><p>WhatsApp, Telegram, Slack, Discord, Messenger, Instagram, X, Email, Teams, Voice</p></div>
+  </div>
+
+  <h2>Deployment options</h2>
+  <table>
+    <thead><tr><th>Option</th><th>What you get</th><th>Config lives in</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Compose Lite</strong></td>
+        <td>Agents, chat, knowledge, graph memory on one machine (<code>scripts/vegaduta up --lite</code>)</td>
+        <td><code>deploy/compose/lite.yml</code> + <code>deploy/compose/.env</code></td>
+        <td><span class="badge badge-live">supported</span></td>
+      </tr>
+      <tr>
+        <td><strong>Compose Full</strong></td>
+        <td>Everything, with opt-in profiles; optional public HTTPS on your domain via Caddy (<code>--domain</code>)</td>
+        <td><code>deploy/compose/docker-compose*.yml</code> + <code>deploy/compose/.env</code></td>
+        <td><span class="badge badge-live">supported</span></td>
+      </tr>
+      <tr>
+        <td><strong>Kubernetes (Helm)</strong></td>
+        <td>Umbrella chart; bundled or bring-your-own Postgres, Valkey, S3, OIDC</td>
+        <td><code>deploy/helm/</code></td>
+        <td><span class="badge badge-draft">preview</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Documentation map</h2>
+  <table>
+    <thead><tr><th>Section</th><th>Contents</th><th>Start with</th></tr></thead>
+    <tbody>
+      <tr><td><strong>00 · Overview</strong></td><td>What the platform is, who uses it, terminology</td><td><a href="overview/platform-at-a-glance.html">Platform at a Glance</a></td></tr>
+      <tr><td><strong>01 · Architecture</strong></td><td>Layered system design, the 42-module core, the Spring AI / LLM layer, data and identity architecture</td><td><a href="architecture/system-architecture.html">System Architecture</a></td></tr>
+      <tr><td><strong>02 · Decisions</strong></td><td>Architecture Decision Records — every consequential choice and the problem that motivated it</td><td><a href="decisions/index.html">ADR Index</a></td></tr>
+      <tr><td><strong>03 · Functional</strong></td><td>Personas and functional specification by domain: agents, workflows, channels, knowledge, governance</td><td><a href="functional/index.html">Functional Overview</a></td></tr>
+      <tr><td><strong>04 · API</strong></td><td>REST surface, JWT auth, SSE/AG-UI streaming, webhooks, developer API</td><td><a href="api/overview.html">API Overview</a></td></tr>
+      <tr><td><strong>05 · Deployment</strong></td><td>Compose and Helm, CI/CD, local development, Keycloak, rollback</td><td><a href="deployment/index.html">Deployment Guide</a></td></tr>
+      <tr><td><strong>06 · Operations</strong></td><td>Observability (Prometheus, Grafana, Loki, Langfuse), backups</td><td><a href="operations/observability.html">Observability</a></td></tr>
+      <tr><td><strong>07 · Security</strong></td><td>Security architecture, secrets and key management, compliance posture, threat model</td><td><a href="security/security-architecture.html">Security Architecture</a></td></tr>
+      <tr><td><strong>08 · Development</strong></td><td>Getting started, build/test, repository map, conventions, contribution workflow</td><td><a href="development/getting-started.html">Getting Started</a></td></tr>
+      <tr><td><strong>09 · RFC</strong></td><td>Request-for-comments process and template for proposals</td><td><a href="rfc/index.html">RFC Index</a></td></tr>
+      <tr><td><strong>10 · Testing</strong></td><td>Test strategy, the three Playwright suites, quality gates</td><td><a href="testing/test-strategy.html">Test Strategy</a></td></tr>
+      <tr><td><strong>11 · Appendix</strong></td><td>Every command A–Z, environment variables, ports/services matrix</td><td><a href="appendix/command-reference.html">Command Reference</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2>How to read the verification markers</h2>
+  <p>These pages distinguish what was <em>checked</em> against the code from
+  what is <em>assumed</em>. Throughout this documentation set:</p>
+  <table>
+    <thead><tr><th>Marker</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-verified">verified</span></td><td>Checked against the repository on the stated date</td></tr>
+      <tr><td><span class="badge badge-unverified">unverified</span></td><td>Believed true but not re-checked — treat as a lead, not a fact</td></tr>
+      <tr><td><span class="badge badge-live">live</span> / <span class="badge badge-live">reference</span></td><td>A supported deployment path</td></tr>
+      <tr><td><span class="badge badge-draft">draft</span></td><td>Authored but never deployed/applied — aspirational, not real</td></tr>
+      <tr><td><span class="badge badge-deprecated">retired</span></td><td>Was real, no longer is — kept for history</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-danger">
+    <div class="callout-title">Non-negotiable operating rules</div>
+    <ol style="margin:6px 0 2px">
+      <li>Back up <code>deploy/compose/.env</code> (or your Kubernetes Secrets) together with the data. <code>APP_ENCRYPTION_KEY</code> must be identical everywhere core boots, or every stored credential becomes undecryptable.</li>
+      <li>Never point a browser-facing or token-issuer URL (<code>PUBLIC_*</code>) at <code>localhost</code> on a server. Never bake a localhost <code>NEXT_PUBLIC_*</code> into an image you deploy.</li>
+      <li>The issuer core validates must match the one Keycloak stamps; extra issuers go in <code>KEYCLOAK_ADDITIONAL_ISSUERS</code> — otherwise every token 401s.</li>
+      <li>A hung service is evidence to collect (logs, container state, memory) before you restart anything; <code>docker compose down -v</code> deletes data.</li>
+      <li>Pin <code>VEGADUTA_VERSION</code>; read the release notes before <code>scripts/vegaduta upgrade</code>.</li>
+    </ol>
+  </div>
+
+  <h2>Conventions used across every page</h2>
+  <ul>
+    <li>Every page carries a document ID (<code>VD-XX-NNN</code>), a status badge, and a last-verified date.</li>
+    <li>Commands are copy-paste runnable; <code>&lt;angle-bracket&gt;</code> values must be substituted.</li>
+    <li>Source file paths reference the repository root, e.g. <code>core/chat/pom.xml</code>.</li>
+    <li>Diagrams use Mermaid — an internet connection is required to render them (they degrade to readable source otherwise).</li>
+  </ul>
+
+</div>
+</main>
+<script src="assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

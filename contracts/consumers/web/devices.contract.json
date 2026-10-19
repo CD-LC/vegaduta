@@ -1,0 +1,57 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-devices",
+      "method": "GET",
+      "path": "/api/devices",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-devices-deviceId",
+      "method": "DELETE",
+      "path": "/api/devices/{deviceId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-devices-deviceId-commands",
+      "method": "GET",
+      "path": "/api/devices/{deviceId}/commands",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-devices-deviceId-commands",
+      "method": "POST",
+      "path": "/api/devices/{deviceId}/commands",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.commandType",
+          "$.payload"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-devices-pairing-code",
+      "method": "POST",
+      "path": "/api/devices/pairing-code",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

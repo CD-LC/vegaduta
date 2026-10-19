@@ -1,0 +1,150 @@
+/* ============================================================================
+ * TIER 1 — "paper & ink" token layer (2026-09-24, redesign/vd-tier1)
+ * ----------------------------------------------------------------------------
+ * One typeface (Plus Jakarta Sans) + one mono (DM Mono), a flat off-white
+ * page, near-black ink, ONE accent (the existing brand indigo, unchanged),
+ * pill buttons, mono uppercase eyebrows, tight display tracking, no aurora /
+ * grain / glow / sheen in light mode — then a GLASS finish on top (direct
+ * instruction 2026-09-24: "i want glass finishing"): frosted translucent
+ * cards / nav / pills / secondary buttons over soft colour washes.
+ *
+ * Imported LAST from layout.tsx and deliberately UNLAYERED so it wins ties
+ * against globals.css's :root tokens, the @layer base/components rules, and
+ * marketing-system.css. It only REDEFINES tokens and a handful of role rules;
+ * nothing structural changes, so every e2e selector still resolves.
+ *
+ * Dark mode is left exactly as it was — every override here is scoped to
+ * light (`:root:not([data-mode="dark"])`) except the font aliases.
+ * ==========================================================================*/
+
+/* Continued in styles/tokens/*.css. styles/tokensStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+/* ---- 1. Fonts (both modes) ------------------------------------------------ */
+:root {
+  --font-inter: var(--font-jakarta-loaded);
+  --font-sora: var(--font-jakarta-loaded);
+  --font-brand-display: var(--font-jakarta-loaded);
+  --font-marketing-display: var(--font-jakarta-loaded);
+  --font-marketing-body: var(--font-jakarta-loaded);
+  --font-mono: var(--font-dm-mono-loaded);
+  --font-jetbrains-mono: var(--font-dm-mono-loaded);
+  --ls-normal: 0;
+  --ls-tight: -0.03em;
+  /* Two families only: --font-ui (sans) and --font-code (mono, for code, ids and tool names). */
+  --font-ui: var(--font-jakarta-loaded), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-code: var(--font-dm-mono-loaded), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---- 2. Light "paper" surfaces + ink ------------------------------------- */
+:root:not([data-mode="dark"]) {
+  --surface-page: #f3f3f4;
+  --surface-card: #ffffff;
+  --surface-card-alt: #f7f7f8;
+  --surface-sunken: #ebebed;
+  --surface-raised: #ffffff;
+  --surface-border: #e6e6e9;
+  --surface-border-strong: #d6d6db;
+  --surface-hover: #ededf0;
+  --border: #e6e6e9;
+
+  --text-primary: #131318;
+  --text-secondary: #4a4a54;
+  --text-muted: #66666f;
+  --text-faint: #5f5f68;
+
+  /* Flat page — no radial mesh, no aurora */
+  --ax-bg: var(--surface-page);
+  --ax-bg2: #ebebed;
+  --hud-line: rgba(19, 19, 24, 0.1);
+  --glass-surface: rgba(19, 19, 24, 0.03);
+
+  --shadow-card: 0 1px 2px rgba(19, 19, 24, 0.04);
+  --shadow-card-hover: 0 10px 28px -14px rgba(19, 19, 24, 0.16);
+  --shadow-raised: 0 1px 2px rgba(19, 19, 24, 0.05);
+  --shadow-popover: 0 12px 32px -12px rgba(19, 19, 24, 0.18);
+
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius: 0.875rem; /* shadcn */
+
+  /* One accent: console nav active colour follows the brand indigo instead
+     of the separate marketing violet. */
+  --brand-violet: var(--accent-500);
+
+  /* Glass tokens (read by marketing, auth and console rules alike) */
+  --glass-blur: 16px;
+  --glass-edge: 0 0 0 1px rgba(19, 19, 24, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ---- 3. Type roles (both modes) ------------------------------------------ */
+body {
+  font-family:
+    var(--font-jakarta-loaded),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* In the base layer (not unlayered) so font-bold / font-medium / font-black
+   utilities on individual headings still win; source order still beats
+   globals.css's own @layer base h1-h3 rule. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family:
+      var(--font-jakarta-loaded),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+}
+
+/* Mono uppercase eyebrow with a small accent square (Rilo's "LAUNCHING SOON") */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-code);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--accent-500);
+  flex: none;
+}
+
+/* ---- 4. Buttons: pills, flat ---------------------------------------------- */
+/* Plain <button>s that set no radius of their own become pills; anything
+   that names a rounded-* utility keeps it (tabs, segmented controls, icons). */
+button:not([class*="rounded"]) {
+  border-radius: 999px;
+}
+
+button:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.btn-glossy {
+  background-image: none;
+  box-shadow: none;
+}

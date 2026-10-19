@@ -1,0 +1,167 @@
+name: Static gates
+
+# Fast, toolchain-free checks (git + grep + coreutils; seconds per run) that run
+# on every pull request and every push to main. Each step calls a script in
+# scripts/ci/, so `make gates` runs the same checks locally.
+#
+#   flyway-lint           applied-migration edit guard, destructive-DDL marker,
+#                         and duplicate versions across controlplane/ + tenant/
+#                         (they share ONE Flyway version namespace)
+#   entity-name-lint      entity, table, bean and controller base-path namespace
+#                         (exact duplicate bean/entity names and the two-constructor
+#                         crash are core/app tests, UniqueBeanNamesTest and
+#                         InjectableConstructorTest, run by the core job's mvn verify)
+#   skip-expiry           test skips carrying an expired `expires:` token
+#   check-file-size       ratchet: 700-line hard cap, fails over 665 (5% margin);
+#                         baseline only shrinks
+#   check-module-size     ratchet (ADR-0023): at most 300 main files per core/*
+#                         module, no classes in com.agenticai.core.agents;
+#                         baseline only shrinks
+#   openapi-breaking     docs/api/openapi.json against the merge base: removed
+#                         paths/operations/response properties, renamed operationIds,
+#                         newly required inputs, narrowed enums, changed types
+#                         (escape hatch: scripts/ci/openapi-breaking-allowlist.txt)
+#   docs-link-check       relative links and #anchors in README, CONTRIBUTING and docs/
+#                         (offline; ci.yml also runs lychee over the same files)
+#                         must stay byte-identical
+#   internal-reference-lint
+#                         ratchet: no new internal-planning jargon in source or docs
+#                         (phrases listed in the script); the baseline only shrinks
+#   no-telemetry-check    no analytics / tracking / crash-report hosts or SDKs in web, core,
+#                         services (empty allow-list)
+#   check-values-docs     deploy/helm VALUES.md lists every umbrella values.yaml key
+#   secret-scan           gitleaks over the commits being added (the whole
+#                         history on a first push, force-push or manual run)
+#
+# Called from ci.yml (job `static-gates`), so its result is part of the single
+# required `CI OK` check. It has no pull_request/push trigger of its own, which
+# would run it twice. A manual run scans the full history.
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Static gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # flyway-lint needs history to compute a merge-base with the PR base.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Flyway migration lint
+        run: bash scripts/ci/flyway-lint.sh
+
+      - name: Upload Flyway checksum lock
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flyway-lock
+          path: scripts/ci/flyway.lock
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Entity / table / bean / path namespace lint
+        if: always()
+        run: bash scripts/ci/entity-name-lint.sh
+
+      - name: Expired test-skip check
+        if: always()
+        run: bash scripts/ci/skip-expiry.sh
+
+      - name: File-size ratchet
+        if: always()
+        run: sh scripts/ci/check-file-size.sh
+
+      - name: Module-size ratchet
+        if: always()
+        run: sh scripts/ci/check-module-size.sh
+
+      - name: core/Dockerfile copies every module pom
+        if: always()
+        run: sh scripts/ci/dockerfile-poms.sh
+
+      # Generated documents must match their sources (ADR-0011 module graph,
+      # the SDKs under sdk/ from docs/api/openapi.json, the ownership tables in
+      # docs/deploy/DEPLOYMENT-SHAPES.md from the @Scheduled sources + shape profiles).
+      - name: Module graph is current
+        if: always()
+        run: python3 core/tools/module-graph/gen_module_graph.py --check
+
+      - name: SDKs match docs/api/openapi.json
+        if: always()
+        run: node sdk/generate.mjs --check
+
+      # PR: the merge base with the PR base (GITHUB_BASE_REF). Push: the push's
+      # "before" sha; the script ignores an all-zeros sha and falls back to main.
+      - name: OpenAPI breaking-change gate tests
+        if: always()
+        run: node --test scripts/ci/openapi-breaking.test.mjs
+
+      - name: No breaking change to docs/api/openapi.json
+        if: always()
+        env:
+          OPENAPI_BREAKING_BASE_REF: ${{ github.event_name == 'push' && github.event.before || '' }}
+        run: node scripts/ci/openapi-breaking.mjs
+
+      - name: Deployment-shapes generator tests
+        if: always()
+        run: python3 scripts/docs/test_gen_shapes.py
+
+      - name: Deployment-shapes ownership tables are current
+        if: always()
+        run: python3 scripts/docs/gen-shapes.py --check
+
+      - name: Standards conformance table is current
+        if: always()
+        run: python3 scripts/ci/conformance-report.py --check
+
+      - name: Installer end-to-end test (flags, first-run question, state, compose merge)
+        if: always()
+        run: bash tests/install/vegaduta-install.test.sh
+      - name: Docs links and anchors
+        if: always()
+        run: bash scripts/ci/docs-link-check.sh
+      - name: Internal planning jargon ratchet
+        run: bash scripts/ci/internal-reference-lint.sh
+      - name: No telemetry
+        run: bash scripts/ci/no-telemetry-check.sh
+      - name: Lint self-tests
+        run: bash scripts/ci/test-internal-reference-lint.sh
+      - name: Helm VALUES.md lists every umbrella value
+        if: always()
+        run: python3 deploy/helm/scripts/check-values-docs.py
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.24"
+          cache: false
+      # Built from source through the Go module proxy, whose checksum database
+      # verifies the download: no third-party action and no unpinned binary.
+      - name: Install gitleaks
+        run: go install github.com/zricethezav/gitleaks/v8@v8.30.1
+      # PR: the commits since the base branch. Push: the commits since the
+      # push's "before" sha. The script falls back to the whole history when
+      # that base is all zeros (first push / new branch) or no longer exists
+      # (force-push); SECRET_SCAN_FULL forces it for force-pushes and manual runs.
+      - name: Scan commits
+        env:
+          SECRET_SCAN_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before || '' }}
+          SECRET_SCAN_FULL: ${{ (github.event_name == 'workflow_dispatch' || github.event.forced) && '1' || '0' }}
+        run: bash scripts/ci/secret-scan.sh

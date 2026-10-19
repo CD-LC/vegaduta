@@ -1,0 +1,1438 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "VegaDuta event API",
+    "version": "0.1.0",
+    "description": "Event surfaces of the VegaDuta platform: Server-Sent Event streams, outbound webhooks and the voice relay WebSocket. Generated from docs/api/openapi.json and contracts/ by scripts/docs/asyncapi.mjs; do not edit by hand.",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    }
+  },
+  "servers": {
+    "api": {
+      "host": "{host}",
+      "protocol": "https",
+      "description": "Your deployment's API origin.",
+      "variables": {
+        "host": {
+          "default": "api.example.com",
+          "description": "Host (and port) of your VegaDuta API."
+        }
+      }
+    }
+  },
+  "defaultContentType": "application/json",
+  "channels": {
+    "AgentController_chat": {
+      "address": "/api/agents/{agentId}/chat",
+      "title": "Chat",
+      "description": "POST /api/agents/{agentId}/chat answered as text/event-stream. Run one chat turn and stream the reply as Server-Sent Events: each event's data is the next text chunk. Send the same sessionId to continue a conversation; the server keeps the memory. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        }
+      },
+      "messages": {
+        "AgentController_chat_chunk": {
+          "$ref": "#/components/messages/AgentController_chat_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "AgentJobObservabilityController_traceStream": {
+      "address": "/api/agents/{agentId}/jobs/{jobId}/trace/stream",
+      "title": "Trace stream",
+      "description": "GET /api/agents/{agentId}/jobs/{jobId}/trace/stream answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        },
+        "jobId": {
+          "description": "Path variable jobId."
+        }
+      },
+      "messages": {
+        "AgentJobObservabilityController_traceStream_chunk": {
+          "$ref": "#/components/messages/AgentJobObservabilityController_traceStream_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      }
+    },
+    "AgUiRunController_events": {
+      "address": "/api/agents/{agentId}/agui/runs/{runId}/events",
+      "title": "Events",
+      "description": "GET /api/agents/{agentId}/agui/runs/{runId}/events answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        },
+        "runId": {
+          "description": "Path variable runId."
+        }
+      },
+      "messages": {
+        "AgUiRunController_events_chunk": {
+          "$ref": "#/components/messages/AgUiRunController_events_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      }
+    },
+    "AgUiRunController_run": {
+      "address": "/api/agents/{agentId}/agui/run",
+      "title": "Run",
+      "description": "POST /api/agents/{agentId}/agui/run answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        }
+      },
+      "messages": {
+        "AgUiRunController_run_chunk": {
+          "$ref": "#/components/messages/AgUiRunController_run_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "BrowserTakeoverController_stream": {
+      "address": "/api/browser/takeover/{id}/stream",
+      "title": "Stream",
+      "description": "GET /api/browser/takeover/{id}/stream answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "id": {
+          "description": "Path variable id."
+        }
+      },
+      "messages": {
+        "BrowserTakeoverController_stream_chunk": {
+          "$ref": "#/components/messages/BrowserTakeoverController_stream_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      }
+    },
+    "ChatBranchController_edit": {
+      "address": "/api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/edit",
+      "title": "Edit",
+      "description": "POST /api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/edit answered as text/event-stream. Replace the text of an earlier user message on a new branch and stream the new reply; the original branch is kept. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        },
+        "sessionId": {
+          "description": "Path variable sessionId."
+        },
+        "messageId": {
+          "description": "Path variable messageId."
+        }
+      },
+      "messages": {
+        "ChatBranchController_edit_chunk": {
+          "$ref": "#/components/messages/ChatBranchController_edit_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "ChatBranchController_regenerate": {
+      "address": "/api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/regenerate",
+      "title": "Regenerate",
+      "description": "POST /api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/regenerate answered as text/event-stream. Produce another answer to the same user message and stream it; the previous answer is kept as a sibling. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        },
+        "sessionId": {
+          "description": "Path variable sessionId."
+        },
+        "messageId": {
+          "description": "Path variable messageId."
+        }
+      },
+      "messages": {
+        "ChatBranchController_regenerate_chunk": {
+          "$ref": "#/components/messages/ChatBranchController_regenerate_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "DemoStudioController_mission": {
+      "address": "/api/demo/studio/agents/{agentId}/mission",
+      "title": "Mission",
+      "description": "POST /api/demo/studio/agents/{agentId}/mission answered as text/event-stream. Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        }
+      },
+      "messages": {
+        "DemoStudioController_mission_chunk": {
+          "$ref": "#/components/messages/DemoStudioController_mission_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "DemoStudioController_runWorkflow": {
+      "address": "/api/demo/studio/workflows/{workflowId}/run",
+      "title": "Run workflow",
+      "description": "POST /api/demo/studio/workflows/{workflowId}/run answered as text/event-stream. Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "workflowId": {
+          "description": "Path variable workflowId."
+        }
+      },
+      "messages": {
+        "DemoStudioController_runWorkflow_chunk": {
+          "$ref": "#/components/messages/DemoStudioController_runWorkflow_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "QuickTaskController_runStream": {
+      "address": "/api/quick-task/stream",
+      "title": "Run stream",
+      "description": "POST /api/quick-task/stream answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "messages": {
+        "QuickTaskController_runStream_chunk": {
+          "$ref": "#/components/messages/QuickTaskController_runStream_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "ResumableChatTurnController_stream": {
+      "address": "/api/chat/turns/{turnId}/stream",
+      "title": "Stream",
+      "description": "GET /api/chat/turns/{turnId}/stream answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "turnId": {
+          "description": "Path variable turnId."
+        }
+      },
+      "messages": {
+        "ResumableChatTurnController_stream_chunk": {
+          "$ref": "#/components/messages/ResumableChatTurnController_stream_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      }
+    },
+    "VoiceCallController_turn": {
+      "address": "/api/voice/agents/{agentId}/turn",
+      "title": "Turn",
+      "description": "POST /api/voice/agents/{agentId}/turn answered as text/event-stream. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "agentId": {
+          "description": "Path variable agentId."
+        }
+      },
+      "messages": {
+        "VoiceCallController_turn_chunk": {
+          "$ref": "#/components/messages/VoiceCallController_turn_chunk"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "voiceRelay": {
+      "address": "/webhook/twilio/voice-relay",
+      "title": "Twilio Conversation Relay",
+      "description": "WebSocket opened by Twilio for a voice call. Message schemas are derived from VoiceRelayWebSocketHandler; see contracts/README.md.",
+      "messages": {
+        "voiceRelay_dtmf": {
+          "$ref": "#/components/messages/voiceRelay_dtmf"
+        },
+        "voiceRelay_error": {
+          "$ref": "#/components/messages/voiceRelay_error"
+        },
+        "voiceRelay_interrupt": {
+          "$ref": "#/components/messages/voiceRelay_interrupt"
+        },
+        "voiceRelay_prompt": {
+          "$ref": "#/components/messages/voiceRelay_prompt"
+        },
+        "voiceRelay_setup": {
+          "$ref": "#/components/messages/voiceRelay_setup"
+        }
+      },
+      "bindings": {
+        "ws": {}
+      }
+    },
+    "webhook_workflowEvent": {
+      "address": null,
+      "title": "Tenant webhook subscription URL",
+      "description": "POSTed to the URL of each matching subscription (/api/webhooks). Any 2xx acknowledges; anything else is retried.",
+      "messages": {
+        "webhook_workflowEvent": {
+          "$ref": "#/components/messages/webhook_workflowEvent"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "POST"
+        }
+      }
+    },
+    "WorkflowController_runEvents": {
+      "address": "/api/workflows/{workflowId}/runs/{runId}/events",
+      "title": "Run events",
+      "description": "GET /api/workflows/{workflowId}/runs/{runId}/events answered as text/event-stream. Live run progress as Server-Sent Events named snapshot, run.*, node.* and error; each data is {seq, type, nodeId, ts, data}. Reconnect with Last-Event-ID to resume after the last seq seen. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.",
+      "parameters": {
+        "workflowId": {
+          "description": "Path variable workflowId."
+        },
+        "runId": {
+          "description": "Path variable runId."
+        }
+      },
+      "messages": {
+        "workflowRun_snapshot": {
+          "$ref": "#/components/messages/workflowRun_snapshot"
+        },
+        "workflowRun_run_started": {
+          "$ref": "#/components/messages/workflowRun_run_started"
+        },
+        "workflowRun_run_resumed": {
+          "$ref": "#/components/messages/workflowRun_run_resumed"
+        },
+        "workflowRun_run_awaiting": {
+          "$ref": "#/components/messages/workflowRun_run_awaiting"
+        },
+        "workflowRun_run_finished": {
+          "$ref": "#/components/messages/workflowRun_run_finished"
+        },
+        "workflowRun_node_started": {
+          "$ref": "#/components/messages/workflowRun_node_started"
+        },
+        "workflowRun_node_completed": {
+          "$ref": "#/components/messages/workflowRun_node_completed"
+        },
+        "workflowRun_node_token": {
+          "$ref": "#/components/messages/workflowRun_node_token"
+        },
+        "workflowRun_node_tool_call": {
+          "$ref": "#/components/messages/workflowRun_node_tool_call"
+        },
+        "workflowRun_node_tool_result": {
+          "$ref": "#/components/messages/workflowRun_node_tool_result"
+        },
+        "workflowRun_node_tool_error": {
+          "$ref": "#/components/messages/workflowRun_node_tool_error"
+        },
+        "workflowRun_node_agent_event": {
+          "$ref": "#/components/messages/workflowRun_node_agent_event"
+        },
+        "workflowRun_error": {
+          "$ref": "#/components/messages/workflowRun_error"
+        }
+      },
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      }
+    }
+  },
+  "operations": {
+    "AgentController_chat": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/AgentController_chat"
+      },
+      "summary": "Stream from AgentController_chat",
+      "messages": [
+        {
+          "$ref": "#/channels/AgentController_chat/messages/AgentController_chat_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "AgentJobObservabilityController_traceStream": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/AgentJobObservabilityController_traceStream"
+      },
+      "summary": "Stream from AgentJobObservabilityController_traceStream",
+      "messages": [
+        {
+          "$ref": "#/channels/AgentJobObservabilityController_traceStream/messages/AgentJobObservabilityController_traceStream_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "AgUiRunController_events": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/AgUiRunController_events"
+      },
+      "summary": "Stream from AgUiRunController_events",
+      "messages": [
+        {
+          "$ref": "#/channels/AgUiRunController_events/messages/AgUiRunController_events_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "AgUiRunController_run": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/AgUiRunController_run"
+      },
+      "summary": "Stream from AgUiRunController_run",
+      "messages": [
+        {
+          "$ref": "#/channels/AgUiRunController_run/messages/AgUiRunController_run_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "BrowserTakeoverController_stream": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/BrowserTakeoverController_stream"
+      },
+      "summary": "Stream from BrowserTakeoverController_stream",
+      "messages": [
+        {
+          "$ref": "#/channels/BrowserTakeoverController_stream/messages/BrowserTakeoverController_stream_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "ChatBranchController_edit": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ChatBranchController_edit"
+      },
+      "summary": "Stream from ChatBranchController_edit",
+      "messages": [
+        {
+          "$ref": "#/channels/ChatBranchController_edit/messages/ChatBranchController_edit_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "ChatBranchController_regenerate": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ChatBranchController_regenerate"
+      },
+      "summary": "Stream from ChatBranchController_regenerate",
+      "messages": [
+        {
+          "$ref": "#/channels/ChatBranchController_regenerate/messages/ChatBranchController_regenerate_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "deliver_workflowEvent": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/webhook_workflowEvent"
+      },
+      "summary": "Platform event delivered to a webhook subscription",
+      "messages": [
+        {
+          "$ref": "#/channels/webhook_workflowEvent/messages/webhook_workflowEvent"
+        }
+      ]
+    },
+    "DemoStudioController_mission": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/DemoStudioController_mission"
+      },
+      "summary": "Stream from DemoStudioController_mission",
+      "messages": [
+        {
+          "$ref": "#/channels/DemoStudioController_mission/messages/DemoStudioController_mission_chunk"
+        }
+      ]
+    },
+    "DemoStudioController_runWorkflow": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/DemoStudioController_runWorkflow"
+      },
+      "summary": "Stream from DemoStudioController_runWorkflow",
+      "messages": [
+        {
+          "$ref": "#/channels/DemoStudioController_runWorkflow/messages/DemoStudioController_runWorkflow_chunk"
+        }
+      ]
+    },
+    "QuickTaskController_runStream": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/QuickTaskController_runStream"
+      },
+      "summary": "Stream from QuickTaskController_runStream",
+      "messages": [
+        {
+          "$ref": "#/channels/QuickTaskController_runStream/messages/QuickTaskController_runStream_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "ResumableChatTurnController_stream": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ResumableChatTurnController_stream"
+      },
+      "summary": "Stream from ResumableChatTurnController_stream",
+      "messages": [
+        {
+          "$ref": "#/channels/ResumableChatTurnController_stream/messages/ResumableChatTurnController_stream_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "VoiceCallController_turn": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/VoiceCallController_turn"
+      },
+      "summary": "Stream from VoiceCallController_turn",
+      "messages": [
+        {
+          "$ref": "#/channels/VoiceCallController_turn/messages/VoiceCallController_turn_chunk"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    },
+    "voiceRelayReceive": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/voiceRelay"
+      },
+      "summary": "Messages Twilio sends during a call",
+      "messages": [
+        {
+          "$ref": "#/channels/voiceRelay/messages/voiceRelay_dtmf"
+        },
+        {
+          "$ref": "#/channels/voiceRelay/messages/voiceRelay_error"
+        },
+        {
+          "$ref": "#/channels/voiceRelay/messages/voiceRelay_interrupt"
+        },
+        {
+          "$ref": "#/channels/voiceRelay/messages/voiceRelay_prompt"
+        },
+        {
+          "$ref": "#/channels/voiceRelay/messages/voiceRelay_setup"
+        }
+      ]
+    },
+    "WorkflowController_runEvents": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/WorkflowController_runEvents"
+      },
+      "summary": "Stream from WorkflowController_runEvents",
+      "messages": [
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_snapshot"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_run_started"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_run_resumed"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_run_awaiting"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_run_finished"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_started"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_completed"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_token"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_tool_call"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_tool_result"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_tool_error"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_node_agent_event"
+        },
+        {
+          "$ref": "#/channels/WorkflowController_runEvents/messages/workflowRun_error"
+        }
+      ],
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/bearerAuth"
+        }
+      ]
+    }
+  },
+  "components": {
+    "messages": {
+      "AgentController_chat_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "AgentJobObservabilityController_traceStream_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "AgUiRunController_events_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "AgUiRunController_run_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "BrowserTakeoverController_stream_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "ChatBranchController_edit_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "ChatBranchController_regenerate_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "DemoStudioController_mission_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "DemoStudioController_runWorkflow_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "QuickTaskController_runStream_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "ResumableChatTurnController_stream_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "VoiceCallController_turn_chunk": {
+        "name": "message",
+        "summary": "One Server-Sent Event; data carries the next chunk.",
+        "contentType": "text/plain",
+        "payload": {
+          "type": "string",
+          "description": "One chunk of the streamed reply."
+        }
+      },
+      "voiceRelay_dtmf": {
+        "name": "dtmf",
+        "summary": "Twilio Conversation Relay - dtmf message",
+        "contentType": "application/json",
+        "payload": {
+          "title": "Twilio Conversation Relay - dtmf message",
+          "description": "Source: VoiceRelayWebSocketHandler.java#handleDtmf, read directly (2026-07-19). Master Roadmap 2026 item #17 fast-follow. A digit with no VoiceDtmfMappingService match is a silent no-op by design (ifPresent, no else branch) - not an error. B4 (voice-safety) owns DTMF ACTIONS; this handler and this schema only cover parsing/menu-routing, not action dispatch.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "dtmf"
+            },
+            "digit": {
+              "type": "string",
+              "description": "A blank digit is a no-op (handler returns early if digit.isBlank()). Real Twilio DTMF digits are single characters (0-9, *, #) but the handler does not itself constrain length/charset beyond blank-check, so this schema doesn't either - it schemas what the handler enforces, not what Twilio's docs say it will send."
+            }
+          },
+          "required": [
+            "type",
+            "digit"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "voiceRelay_error": {
+        "name": "error",
+        "summary": "Twilio Conversation Relay - error message",
+        "contentType": "application/json",
+        "payload": {
+          "title": "Twilio Conversation Relay - error message",
+          "description": "Source: VoiceRelayWebSocketHandler.java#handleTextMessage, read directly (2026-07-19). case \"error\" -> log.warn(..., node.path(\"description\").asText(\"\")) - logged only, no state transition, no reply sent. Included for corpus completeness (the replay test asserts this doesn't throw), not because the handler does anything interesting with it.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "error"
+            },
+            "description": {
+              "type": "string",
+              "description": "Free text. Missing/blank defaults to empty string via asText(\"\") - not a failure mode."
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "voiceRelay_interrupt": {
+        "name": "interrupt",
+        "summary": "Twilio Conversation Relay - interrupt message",
+        "contentType": "application/json",
+        "payload": {
+          "title": "Twilio Conversation Relay - interrupt message",
+          "description": "Source: VoiceRelayWebSocketHandler.java#handleTextMessage, read directly (2026-07-19). case \"interrupt\" -> disposeActive(session) reads zero fields off the message node - there is nothing beyond 'type' to validate. Kept as its own schema file (rather than folded into the README) purely so the fixture corpus has one schema per handled message type, matching the directory's own convention.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "interrupt"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "voiceRelay_prompt": {
+        "name": "prompt",
+        "summary": "Twilio Conversation Relay - prompt message",
+        "contentType": "application/json",
+        "payload": {
+          "title": "Twilio Conversation Relay - prompt message",
+          "description": "Source: VoiceRelayWebSocketHandler.java#handlePrompt, read directly (2026-07-19). The handler only acts when last=true AND voicePrompt is non-blank (node.path('last').asBoolean(false), node.path('voicePrompt').asText('')) - a partial/interim transcript (last=false) is a documented no-op, not an error, so this schema treats last=false as equally valid, just inert.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "prompt"
+            },
+            "last": {
+              "type": "boolean",
+              "description": "Only last=true triggers AgentChatService#chat. last=false (interim transcript) is silently ignored by design - not a failure mode."
+            },
+            "voicePrompt": {
+              "type": "string",
+              "description": "The caller's utterance. A blank string with last=true is also a silent no-op (handler returns early) - not an error."
+            }
+          },
+          "required": [
+            "type",
+            "last",
+            "voicePrompt"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "voiceRelay_setup": {
+        "name": "setup",
+        "summary": "Twilio Conversation Relay - setup message",
+        "contentType": "application/json",
+        "payload": {
+          "title": "Twilio Conversation Relay - setup message",
+          "description": "Source: core/omnichannel/.../twilio/VoiceRelayWebSocketHandler.java#handleSetup, read directly (2026-07-19). Only the three fields the handler actually calls node.path(...) on are required here; Twilio's real 'setup' message carries more fields (e.g. direction, customParameters) that this handler never reads and this schema does not constrain.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "setup"
+            },
+            "accountSid": {
+              "type": "string",
+              "description": "Resolved via TenantResolutionService.resolveTenantSchema(TWILIO, accountSid); falls back to the DEFAULT_SCHEMA if unresolved, so an empty/unknown value does not itself fail setup - it degrades to the default tenant."
+            },
+            "callSid": {
+              "type": "string",
+              "description": "Stored in session attributes and used only for logging/correlation - never parsed for structure."
+            },
+            "from": {
+              "type": "string",
+              "description": "The caller's phone number - used as ChannelSessionService.resolveOrCreate's externalId (VOICE channel), same pairing-gate semantics as every other channel."
+            }
+          },
+          "required": [
+            "type",
+            "accountSid",
+            "callSid",
+            "from"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "webhook_workflowEvent": {
+        "name": "workflowEvent",
+        "summary": "Platform event delivered to a webhook subscription",
+        "description": "POSTed to each enabled subscription whose event filter matches. The body is the WorkflowEvent envelope; payload is event-type specific. The test delivery (webhook.test) carries only eventType, tenantId, timestamp and payload. Documented event types: channel.whatsapp.message.received: Inbound WhatsApp message reached the platform. channel.sms.message.received: Inbound SMS reached the platform. channel.messenger.message.received: Inbound Facebook Messenger message. channel.instagram.message.received: Inbound Instagram DM. channel.slack.message.received: Inbound Slack message. channel.discord.message.received: Inbound Discord message. channel.x.message.received: Inbound X (Twitter) DM. channel.telegram.message.received: Inbound Telegram message. channel.email.message.received: Inbound email. channel.teams.message.received: Inbound Microsoft Teams message. workflow.run.started: A workflow run began executing. workflow.run.completed: A workflow run finished successfully. workflow.run.failed: A workflow run failed. workflow.run.cancelled: A workflow run was cancelled. workflow.run.resumed: A paused workflow run resumed. workflow.node.completed: A single workflow node finished (carries nodeId). workflow.output.emitted: A workflow's OUTPUT node produced a result. approval.requested: An action entered the human-approval queue. approval.resolved: An approval request was approved or rejected. approval.execution.recorded: An approved action's execution reached a terminal state. document.generation.completed: A document-generation job finished (COMPLETE or FAILED). agent.message.completed: An agent finished and persisted a reply (payload: agentId, sessionId, answerChars, answerExcerpt, source). webhook.test: Synthetic event sent by the Test button / POST .../test.",
+        "contentType": "application/json",
+        "headers": {
+          "type": "object",
+          "properties": {
+            "X-VegaDuta-Event": {
+              "type": "string",
+              "description": "The event type of this delivery.",
+              "examples": [
+                "channel.whatsapp.message.received",
+                "channel.sms.message.received",
+                "channel.messenger.message.received",
+                "channel.instagram.message.received",
+                "channel.slack.message.received",
+                "channel.discord.message.received",
+                "channel.x.message.received",
+                "channel.telegram.message.received",
+                "channel.email.message.received",
+                "channel.teams.message.received",
+                "workflow.run.started",
+                "workflow.run.completed",
+                "workflow.run.failed",
+                "workflow.run.cancelled",
+                "workflow.run.resumed",
+                "workflow.node.completed",
+                "workflow.output.emitted",
+                "approval.requested",
+                "approval.resolved",
+                "approval.execution.recorded",
+                "document.generation.completed",
+                "agent.message.completed",
+                "webhook.test"
+              ]
+            },
+            "X-VegaDuta-Delivery": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Delivery id, stable across retries of the same delivery. Deliveries are at-least-once: store it and ignore a repeat."
+            },
+            "X-VegaDuta-Signature": {
+              "type": "string",
+              "pattern": "^t=\\d+,v1=[0-9a-f]{64}$",
+              "description": "t=<unix seconds>,v1=<hex HMAC-SHA256 of \"<t>.<raw body>\" keyed with the subscription secret (whsec_...)>. Recompute it over the raw bytes, compare in constant time, and reject a t older than a few minutes to stop replays."
+            }
+          },
+          "required": [
+            "X-VegaDuta-Event",
+            "X-VegaDuta-Delivery",
+            "X-VegaDuta-Signature"
+          ]
+        },
+        "payload": {
+          "$ref": "#/components/schemas/WorkflowEvent"
+        }
+      },
+      "workflowRun_error": {
+        "name": "error",
+        "title": "error",
+        "summary": "The stream itself failed; the client should reconnect with Last-Event-ID.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "error"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_agent_event": {
+        "name": "node.agent_event",
+        "title": "node.agent_event",
+        "summary": "Another agent step event.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.agent_event"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_completed": {
+        "name": "node.completed",
+        "title": "node.completed",
+        "summary": "A node finished.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.completed"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_started": {
+        "name": "node.started",
+        "title": "node.started",
+        "summary": "A node began.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.started"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_token": {
+        "name": "node.token",
+        "title": "node.token",
+        "summary": "A streamed text chunk from an agent or LLM node.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.token"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_tool_call": {
+        "name": "node.tool_call",
+        "title": "node.tool_call",
+        "summary": "A node's agent called a tool.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.tool_call"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_tool_error": {
+        "name": "node.tool_error",
+        "title": "node.tool_error",
+        "summary": "A tool failed.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.tool_error"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_node_tool_result": {
+        "name": "node.tool_result",
+        "title": "node.tool_result",
+        "summary": "A tool returned.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "node.tool_result"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_run_awaiting": {
+        "name": "run.awaiting",
+        "title": "run.awaiting",
+        "summary": "The run paused for input or approval.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "run.awaiting"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_run_finished": {
+        "name": "run.finished",
+        "title": "run.finished",
+        "summary": "The run reached a terminal status.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "run.finished"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_run_resumed": {
+        "name": "run.resumed",
+        "title": "run.resumed",
+        "summary": "A paused run resumed.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "run.resumed"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_run_started": {
+        "name": "run.started",
+        "title": "run.started",
+        "summary": "The run began.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "run.started"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "workflowRun_snapshot": {
+        "name": "snapshot",
+        "title": "snapshot",
+        "summary": "Sent first on (re)connect: the run's state so far.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seq": {
+              "type": "integer",
+              "description": "Event id; send the last one seen as Last-Event-ID to resume."
+            },
+            "type": {
+              "type": "string",
+              "const": "snapshot"
+            },
+            "nodeId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ts": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "WorkflowEvent": {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "workflowId": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "version"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT or vdak_ tenant API key"
+      }
+    }
+  }
+}

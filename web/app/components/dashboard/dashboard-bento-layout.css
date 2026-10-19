@@ -1,0 +1,156 @@
+/* Corner-bracket reticle REMOVED per the nova reskin brief: "REMOVE the
+ * corner-bracket ('braces') hover effect everywhere. Hover = lift + accent
+ * glow only." page.js still renders the SVG markup (removing that too is a
+ * separate, purely-cosmetic JSX cleanup with no behavioral upside); this
+ * just keeps it permanently hidden so hover falls back to exactly
+ * .mc-bento-card:hover above - lift (transform) + accent glow (box-shadow) -
+ * with nothing else layered on top. */
+.mc-bento-corners {
+  display: none;
+}
+
+.mc-bento-card-primary {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+@media (min-width: 900px) {
+  .mc-bento-card-primary {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+.mc-bento-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mc-bento-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.7rem;
+  color: #fff;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.mc-bento-card:hover .mc-bento-icon {
+  transform: scale(1.08) rotate(-3deg);
+}
+
+.mc-bento-card-primary .mc-bento-icon {
+  width: 2.85rem;
+  height: 2.85rem;
+}
+
+.mc-bento-count {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.mc-bento-body h3 {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-sora), sans-serif;
+  font-size: var(--fs-lede);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mc-bento-card-primary .mc-bento-body h3 {
+  font-size: var(--fs-h3);
+}
+
+.mc-bento-body p {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.mc-bento-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--accent-600);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.mc-bento-card:hover .mc-bento-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 900px) {
+  .mc-bento {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(132px, auto);
+  }
+  .mc-bento-card-primary {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .mc-hero {
+    padding: 1.75rem 1.35rem;
+    min-height: 300px;
+  }
+  .mc-bento {
+    grid-template-columns: 1fr;
+  }
+  .mc-bento-card,
+  .mc-bento-card-primary {
+    grid-column: span 1;
+    grid-row: span 1;
+    height: auto;
+    min-height: 116px;
+  }
+}
+
+/* Every continuous/looping animation added to this page (the hero
+ * scanline sweep, the ambient grid drift, each HUD card's breathing glow,
+ * each bento card's rotating+breathing reactor rim, every live pulse dot,
+ * plus the pre-existing hero eyebrow dot this file never had a
+ * reduced-motion override for) stops here in one place - same posture as
+ * every other animated component in this app (AmbientNetwork, LivingNucleus,
+ * GlobalCursorFX, FloatingNavOrb): a person who's asked their OS for less
+ * motion gets a completely still page, not a "calmer" version of the same
+ * loops. Hover transitions (lift, border, icon rotate, arrow reveal, corner
+ * brackets) are left alone - those are one-shot, user-initiated, and never
+ * loop. */
+@media (prefers-reduced-motion: reduce) {
+  .mc-hero::before,
+  .mc-eyebrow-dot,
+  .mc-bento::before,
+  .mc-hud-card::before,
+  .mc-hud-card::after,
+  .mc-bento-card-workflows .mc-bento-icon::after,
+  .mc-bento-card-agents .mc-bento-icon::before,
+  .mc-bento-card-knowledge .mc-bento-icon::after,
+  .mc-bento-card-providers .mc-bento-icon::after,
+  .mc-bento-card-tools .mc-bento-icon::before,
+  .mc-bento-card-quicktask .mc-bento-icon::after,
+  .mc-bento-card-playground .mc-bento-icon::after {
+    animation: none;
+  }
+}

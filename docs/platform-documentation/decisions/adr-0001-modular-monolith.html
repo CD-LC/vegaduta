@@ -1,0 +1,178 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0001 Modular Monolith — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0001-modular-monolith.html" data-doc="VD-ADR-001" data-status="verified" data-updated="2026-10-15" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0001 Modular Monolith</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0001: Modular monolith over microservices</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span></dd>
+  <dt>Decided</dt><dd>2026-07</dd>
+  <dt>Deciders</dt><dd>Platform Engineering</dd>
+  <dt>Amended</dt><dd>2026-10-15: the ~7-service decomposition target is withdrawn; the target architecture below replaces it</dd>
+  <dt>Related</dt><dd><a href="../../architecture/ADR-0014-horizontal-scaling.md">ADR-0014 horizontal scaling</a>, <a href="../../architecture/overview.md">Architecture overview</a>, <a href="../../architecture/STRUCTURAL-AUDIT-2026-10-14.md">Structural audit</a>; see <code>shape-api</code> / <code>shape-jobs</code> in the <a href="../overview/glossary.html">Glossary</a></dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  The platform spans agent runtime, chat, workflow execution, billing, tenancy,
+  channels and governance — domains that share transactions constantly. A chat turn
+  touches guardrails, knowledge retrieval, usage metering and audit inside one
+  request; tenant provisioning writes across the control plane and a fresh tenant
+  schema in one shot.
+</p>
+<p>
+  The team is very small. Every
+  additional deployable would carry its own pipeline, on-call surface, schema
+  coordination and observability wiring. The platform needed clean internal
+  boundaries for a future decomposition, but could not afford to pay the
+  microservices operating tax up front.
+</p>
+
+<h2>Decision</h2>
+<p>
+  The backend ships as <strong>one Spring Boot 3.4 deployable,
+  <code>core/app</code></strong>, assembled from a ~40-module Maven reactor
+  (<code>core/pom.xml</code>; the platform overview counts the satellite assemblies
+  for a headline figure of 42). Contracts are enforced by Maven module boundaries:
+  each module is its own artifact with explicit dependencies — <code>audit</code>,
+  <code>billing</code>, <code>crypto</code>, <code>secrets</code>,
+  <code>storage</code>, <code>speech</code>, <code>mcp</code>, <code>mcpserver</code>,
+  <code>security</code>, <code>admin</code>, <code>sharing</code>,
+  <code>providers</code>, <code>tenancy</code>, <code>chat</code>,
+  <code>eventbus</code>, <code>approval</code>, <code>knowledge</code>,
+  <code>guardrails</code>, <code>google</code>, <code>sarvam</code>,
+  <code>imagegen</code>, <code>elevenlabs</code>, <code>sdlc</code>,
+  <code>eval</code>, <code>graphmemory</code>, <code>codeintel</code>,
+  <code>documentgen</code>, <code>agents</code>, <code>quality</code>,
+  <code>voice</code>, <code>omnichannel</code>, <code>devices</code>,
+  <code>workflow</code>, <code>platform</code>, <code>rl</code>,
+  <code>templates</code>, <code>app-config</code> — plus the three deployable
+  assemblies <code>app</code>, <code>app-worker</code> and
+  <code>app-jobs</code>. Several modules are additionally gated behind Spring
+  profiles (<code>security</code>, <code>knowledge</code>, <code>workflow</code>,
+  <code>graph-memory</code>, <code>temporal</code>), which is how a deployment can
+  shed a capability without forking the codebase.
+</p>
+<p>
+  This is a documented decision, not an accident of growth. The monolith is the
+  target architecture, not a waypoint on the way to microservices.
+</p>
+
+<h2 id="target-architecture">Target architecture (amended 2026-10-15)</h2>
+<p>
+  An earlier internal plan named a capability-grouped split into ~7 services
+  (<code>identity-gateway</code>, <code>agent-runtime</code>,
+  <code>workflow-engine</code>, <code>knowledge-service</code>,
+  <code>omnichannel-gateway</code>, <code>integrations-service</code>,
+  <code>platform-admin</code>) under a strangler-fig migration. That target is
+  withdrawn. Most of those services would sit on the agent-turn path (auth,
+  guardrails, tools, retrieval, the LLM call, metering, audit), where a network hop
+  adds latency to every turn and a new partial-failure mode to every stream
+  (AGENTS.md rule 6). No work had started on it.
+</p>
+<p>The target is a <strong>modular monolith with satellite services</strong>:</p>
+<ol>
+  <li><strong>One codebase, one image, several shapes.</strong> <code>api</code>,
+    <code>jobs</code> (and its pools), <code>worker</code> and <code>migrate</code>
+    run the same modules, selected by Spring profile.</li>
+  <li><strong>Ports and adapters inside each module.</strong> A module exposes a
+    service interface and DTOs; its repositories, entities and vendor adapters stay
+    behind that port. Other modules and controllers call the port, never its
+    repositories. Maven module edges and the frozen ArchUnit baselines
+    (<code>StructureRulesTest</code>, <code>ModuleBoundaryRulesTest</code>) enforce
+    this, and the baselines only shrink.</li>
+  <li><strong>Scale by workload class and replica, not by module</strong>
+    (<a href="../../architecture/ADR-0014-horizontal-scaling.md">ADR-0014</a>), in this order:
+    more <code>api</code> replicas; job pools for background work (ingest, webhooks,
+    intake, billing); cells (a full stack per tenant group) when one cluster is
+    saturated.</li>
+  <li><strong>Extract a satellite service only when one of these holds:</strong>
+    the work is asynchronous or background; it runs untrusted code that needs
+    isolation; it needs a different runtime (Python ML, Node); or it must fail or
+    scale independently and is off the turn path. Being a separate "domain" is not
+    a reason. <code>services/sidecar</code>, <code>services/code-intel</code>,
+    <code>services/tool-sandbox</code> and <code>services/mcp-stdio-runner</code>
+    are the existing examples.</li>
+  <li><strong>Extracting a service needs its own ADR</strong> that names which
+    criterion it meets, the port it replaces, and how the turn path stays
+    in-process.</li>
+</ol>
+
+<div class="mermaid">
+flowchart LR
+  subgraph reactor["core/ — Maven reactor (~40 modules)"]
+    tenancy["tenancy"] & security["security"] & chat["chat"] & workflow["workflow"] & billing["billing"]
+  end
+  reactor --> app["core/app — the one deployable JAR"]
+  reactor -.-> worker["core/app-worker"] & jobs["core/app-jobs"]
+  app --> pg[("Postgres — schema-per-tenant")]
+</div>
+
+<h2>Alternatives considered</h2>
+<table>
+  <thead><tr><th>Option</th><th>Why it lost</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Microservices from day one</strong></td>
+      <td>~20 module-sized services would mean ~20 pipelines, databases and on-call surfaces for a team measured in single digits — and distributed transactions across agent/chat/workflow/billing where the monolith today just commits. Rejected as unaffordable, not merely unnecessary.</td>
+    </tr>
+    <tr>
+      <td><strong>One microservice per Maven module</strong></td>
+      <td>The wrong granularity: services too small to justify their own deployment and on-call.</td>
+    </tr>
+    <tr>
+      <td><strong>Capability-grouped services (~7) via strangler fig</strong></td>
+      <td>Adopted as the eventual target in 2026-07, withdrawn 2026-10-15. Most of the groups (<code>agent-runtime</code>, <code>identity-gateway</code>, <code>knowledge-service</code>, <code>integrations-service</code>) are called inside an agent turn, so splitting them puts network hops on the hot path. ADR-0014 meets the scaling need with shapes, pools, replicas and cells instead.</td>
+    </tr>
+    <tr>
+      <td><strong>Unstructured monolith</strong> (one module, packages only)</td>
+      <td>Package-private boundaries are unenforced and rot immediately under multi-agent development. Maven module boundaries are compiler-enforced contracts, and they keep a satellite extraction cheap when one of the criteria above is met.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Consequences</h2>
+<h3>Positive</h3>
+<ul>
+  <li>One deploy, one Flyway chain, one healthcheck path — the whole operational
+    surface fits a single <code>core</code> container (Compose) or Deployment (Helm).</li>
+  <li>Cross-domain operations (chat → guardrails → billing → audit) are ordinary
+    transactions, not saga choreography.</li>
+  <li>Module boundaries are real: the reactor enforces them at compile time and
+    ArchUnit baselines keep them from regressing. Heavy work that needs its own
+    scaling curve already has a home without a split: knowledge ingestion runs in the
+    <code>core-ingest</code> pool and delegates ML to the Python sidecar.</li>
+  <li>Spring profiles give a partial "which capabilities run" dial without
+    splitting the deployable (e.g. <code>workflow</code> was dropped from
+    <code>SPRING_PROFILES_ACTIVE</code> in some deployments).</li>
+</ul>
+<h3>Negative / costs</h3>
+<ul>
+  <li>Scaling is per shape and pool, not per module: the <code>api</code> shape scales
+    as a whole, and a workload that needs a different runtime or isolation must
+    still become a satellite service, which is why <code>services/sidecar/</code>,
+    <code>services/code-intel/</code> and the sandboxes run outside the monolith.</li>
+  <li>One bad bean can take the whole platform down — a real failure mode seen
+    when <code>TemporalConfig#temporalActivityExecutor</code> (an
+    <code>ExecutorService</code>) made Boot's auto-configured
+    <code>applicationTaskExecutor</code> back off and the app failed to boot;
+    fixed by declaring the bean explicitly in <code>CoreApplication</code>.</li>
+  <li>A signature change in a shared module is only safe when verified by the
+    full reactor build the Dockerfile runs (<code>mvn -pl app -am package</code>),
+    not by <code>-pl</code> on the touched modules — learned after a stale
+    caller in <code>core/app/.../quicktask/</code> surfaced only inside the image build.</li>
+  <li>Cold start is heavy (about a minute of Spring + Flyway boot on a hosted instance), so scale-to-zero is not practical; first boot of a fresh database takes longer (all migrations).</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>README.md</code> §1 — "A <strong>modular monolith</strong>, not microservices — a deliberate, documented decision."</li>
+  <li><code>core/pom.xml</code> — the module list; <code>core/app</code> as the assembly.</li>
+  <li><code>core/app-worker</code>, <code>core/app-jobs</code> — the sibling assemblies from the same codebase.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

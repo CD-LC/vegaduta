@@ -1,0 +1,304 @@
+@layer components {
+  /* Console-wide living background - AmbientLayer.js, replacing the old
+   * Three.js particle network with the exact two-layer ambient system the
+   * nova reskin brief specifies: DARK mode gets a single throttled <canvas>
+   * glyph-rain (matching hud-dashboard-v2-themed.html's #stream exactly -
+   * ~30fps via a frame-skip counter, paused on visibilitychange, one static
+   * frame drawn instead under prefers-reduced-motion) plus each panel's own
+   * colour-matched aura (.panel::after, see above); LIGHT mode swaps the
+   * rain off entirely for a faint drifting CSS blueprint grid (transform-
+   * only drift, zero glow) - "theme selection must change BOTH the palette
+   * AND the ambient animation." AmbientLayer watches <html data-mode> via
+   * MutationObserver so the theme picker swaps the running layer live,
+   * with no remount. */
+  .app-shell-canvas {
+    @apply pointer-events-none fixed inset-0 z-0;
+  }
+
+  .app-shell-canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #hud-glyph-rain {
+    @apply pointer-events-none fixed inset-0 z-0;
+    opacity: 0.3;
+  }
+
+  /* Faint drifting blueprint grid - LIGHT mode's ambient layer, in place of
+   * the glyph rain. Pure CSS: two repeating linear-gradients drifting via
+   * transform (Law 1: transform/opacity only), oversized (-20% inset) so
+   * the drift never reveals an edge. */
+  .hud-blueprint-grid {
+    @apply pointer-events-none fixed z-0;
+    inset: -20%;
+    opacity: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 39px, var(--hud-line) 39px 40px),
+      repeating-linear-gradient(90deg, transparent 0 39px, var(--hud-line) 39px 40px);
+    animation: hud-blueprint-drift 26s linear infinite;
+  }
+
+  :root[data-mode="light"] .hud-blueprint-grid,
+  :root:not([data-mode="dark"]) .hud-blueprint-grid {
+    opacity: 1;
+  }
+
+  @keyframes hud-blueprint-drift {
+    to {
+      transform: translate(40px, 40px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hud-blueprint-grid {
+      animation: none;
+    }
+  }
+
+  /* Vignette - DARK mode only, keeps center content legible over the rain;
+   * static gradient, zero animation cost either way. */
+  .hud-vignette {
+    @apply pointer-events-none fixed inset-0 z-0;
+    opacity: 0;
+  }
+
+  :root[data-mode="dark"] .hud-vignette {
+    opacity: 1;
+    background: radial-gradient(
+      1000px 720px at 50% 30%,
+      transparent 0%,
+      rgba(5, 6, 15, 0.55) 70%,
+      rgba(5, 6, 15, 0.82) 100%
+    );
+  }
+
+  /* Scanline texture - both themes, purely static (repeating-linear-gradient
+   * drawn once, mix-blend-mode multiply) so it costs nothing per frame. */
+  .hud-scanlines {
+    @apply pointer-events-none fixed inset-0;
+    z-index: 1;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.08) 2px 3px);
+    mix-blend-mode: multiply;
+  }
+
+  :root[data-mode="dark"] .hud-scanlines {
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.14) 2px 3px);
+  }
+
+  .app-sidebar {
+    @apply relative z-10 hidden shrink-0 flex-col border-r px-3 py-5 backdrop-blur-md md:flex;
+    width: 232px;
+    background: var(--surface-card);
+    border-color: var(--surface-border);
+  }
+
+  :root[data-mode="dark"] .app-sidebar {
+    background: color-mix(in srgb, var(--surface-card) 70%, transparent);
+    border-color: var(--glass-border);
+  }
+
+  .app-sidebar-brand {
+    @apply flex items-center px-2;
+  }
+
+  /* Sidebar "header" block - brand + (if loaded) a plan chip, closed off by
+   * a hairline divider before the nav starts. Direct response to "the
+   * sidebar needs something above and below the links, not just a flat
+   * list" - this is the above; .app-sidebar-footer below is the below. */
+  .app-sidebar-plan-chip {
+    @apply mt-3 flex items-center gap-1.5 rounded-full border border-[var(--surface-border)] bg-[var(--surface-hover)] px-2.5 py-1 text-[11px] font-medium text-[var(--text-secondary)];
+    width: fit-content;
+  }
+
+  .app-sidebar-plan-chip-dot {
+    @apply h-1 w-1 rounded-full bg-[var(--text-faint)];
+  }
+
+  .app-sidebar-divider {
+    @apply my-4 h-px bg-[var(--surface-border)];
+  }
+
+  /* Sidebar "footer" block - who's logged in + sign out, pinned to the
+   * bottom by .app-nav's flex-1 above it eating the remaining space. Turns
+   * the sidebar into a proper header/body/footer composition instead of
+   * nav links dumped straight under the logo. */
+  .app-sidebar-footer {
+    @apply mt-4 flex items-center gap-2.5 border-t border-[var(--surface-border)] pt-3;
+  }
+
+  .app-avatar {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-white;
+    background-image: var(--accent-gradient);
+  }
+
+  /* Topbar cluster (AppShell.js) - brand + plan chip + account/logout that
+   * used to anchor the top/bottom of the now-removed .app-sidebar. Reuses
+   * .app-sidebar-plan-chip/.app-avatar/.app-sidebar-logout as-is (same
+   * look), these three rules just handle the topbar-specific layout. */
+  .app-topbar-brand {
+    @apply flex shrink-0 items-center no-underline transition-transform;
+  }
+
+  .app-topbar-brand:hover {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 8px var(--hud-cyan, var(--accent-600)));
+  }
+
+  .app-topbar-plan-chip {
+    @apply mt-0;
+  }
+
+  /* Organisation name - HUD mono label, deliberately plainer than the brand
+   * logo next to it (this is metadata, not identity) and truncated rather
+   * than wrapped, so a long org name never pushes the title/actions off
+   * the topbar on a narrow viewport. */
+  .app-topbar-org {
+    @apply max-w-[9rem] shrink truncate text-[0.72rem] font-semibold uppercase tracking-wider text-[var(--hud-text-dim)] sm:max-w-[14rem];
+    font-family: var(--font-mono), monospace;
+  }
+
+  .app-topbar-account {
+    @apply flex shrink-0 items-center gap-1.5 border-l border-[var(--surface-border)] pl-2.5;
+  }
+
+  .app-avatar-sm {
+    @apply h-7 w-7 text-[11px];
+  }
+
+  .app-sidebar-user-info {
+    @apply min-w-0 flex-1;
+  }
+
+  .app-sidebar-user-name {
+    @apply truncate text-[13px] font-medium text-[var(--text-primary)];
+  }
+
+  .app-sidebar-user-role {
+    @apply truncate text-[11px] text-[var(--text-faint)];
+  }
+
+  /* Direct feedback: "make that sign-off button with proper logo - so that
+   * user can understand its a logout button." Two real bugs here, both from
+   * the same root cause: this button still carried the PRE-AXON token names
+   * (--text-faint/--surface-hover) from before the topbar itself was
+   * rebuilt on the --ax-* AXON palette (see .ax-topbar's `background:
+   * var(--ax-bar)` above) - --text-faint's dark-mode value (#64748b) reads
+   * as a near-invisible icon against that AXON bar, which is exactly why
+   * the LogOut glyph looked blank/missing in the screenshot, and its hover
+   * state didn't match any other AXON control's hover language either.
+   * Rebuilt on the same --ax-* tokens every other topbar icon control uses
+   * (.ax-theme-opt/.ax-search): --ax-dim for a clearly-visible resting
+   * icon, and on hover/focus a chip background plus --ax-red - red is
+   * reserved for exactly this one "leave/destructive-adjacent" action
+   * app-wide, never used for a purely neutral hover elsewhere, so the color
+   * itself reinforces what the button does for a sighted user, and
+   * title/aria-label already carry the same "Sign out" meaning for a
+   * screen-reader user (see AppShell.js). */
+  .app-sidebar-logout {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition;
+    color: var(--ax-dim, var(--text-faint));
+  }
+
+  .app-sidebar-logout:hover,
+  .app-sidebar-logout:focus-visible {
+    background: var(--ax-chip, var(--surface-hover));
+    color: var(--ax-red, #ff5c72);
+  }
+
+  .app-nav {
+    @apply flex flex-1 flex-col gap-5 overflow-y-auto;
+  }
+
+  .app-nav-heading {
+    @apply mb-1.5 px-2 text-[10.5px] font-semibold uppercase tracking-wide text-[var(--text-faint)];
+  }
+
+  /* Collapsible group heading (Build/Connect/Administration) - a full-width
+   * button rather than a static label, since the whole point is that
+   * clicking it shows/hides that group's links (see AppShell.js's
+   * "openSections" state). Chevron rotates to communicate open/closed
+   * without needing a second icon swap. */
+  .app-nav-heading-toggle {
+    @apply flex w-full cursor-pointer items-center justify-between border-0 bg-transparent transition;
+    @apply hover:text-[var(--text-secondary)];
+  }
+
+  .app-nav-chevron {
+    @apply text-[var(--text-faint)] transition-transform duration-150;
+  }
+
+  .app-nav-heading-open .app-nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Icon + label together (dual coding) so a link can be recognized by
+   * shape alone once someone's used the app a few times, not just read -
+   * faster wayfinding on repeat visits than text-only nav. */
+  .app-nav-link {
+    @apply mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-[var(--text-secondary)] no-underline transition;
+    @apply hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)];
+  }
+
+  .app-nav-icon {
+    @apply shrink-0 text-[var(--text-faint)];
+  }
+
+  /* Current-location highlighting - answers "where am I" at a glance
+   * without reading every label, the single biggest orientation aid a
+   * persistent sidebar can offer. */
+  .app-nav-link-active {
+    @apply bg-[var(--accent-50)] text-[var(--accent-700)];
+  }
+
+  :root[data-mode="dark"] .app-nav-link-active {
+    background: var(--glass-surface);
+    box-shadow: inset 0 0 0 1px var(--glass-border);
+    color: var(--text-primary);
+  }
+
+  .app-nav-link-active .app-nav-icon {
+    @apply text-[var(--accent-600)];
+  }
+
+  /* NOT background-clip:text here - .app-nav-icon is an <svg> (lucide-react),
+   * which renders via stroke/fill, not text glyphs, so a text-clip gradient
+   * would just make the icon invisible. A solid bright accent hue gives the
+   * same "this one's lit up" cue without that bug. */
+  :root[data-mode="dark"] .app-nav-link-active .app-nav-icon {
+    color: var(--accent-cyan);
+  }
+
+  /* Mobile nav - .app-sidebar (the persistent desktop rail above) is
+   * `hidden md:flex`, so below md there was previously no way to navigate
+   * at all. This is the off-canvas equivalent, toggled by .app-nav-toggle
+   * in the topbar; both are hidden at md+ via the md:hidden utility class
+   * applied directly in AppShell.js so exactly one nav mechanism exists at
+   * any given screen width. */
+  .app-nav-toggle {
+    @apply flex items-center justify-center rounded-lg border border-[var(--surface-border)] bg-[var(--surface-card)] px-2.5 py-2 text-[var(--text-secondary)] shadow-sm;
+  }
+
+  .app-nav-backdrop {
+    @apply fixed inset-0 z-30;
+    background-color: var(--overlay);
+  }
+
+  .app-sidebar-mobile {
+    @apply fixed inset-y-0 left-0 z-40 flex w-[240px] -translate-x-full flex-col border-r border-[var(--surface-border)] bg-[var(--surface-card)] px-3 py-4 shadow-xl backdrop-blur-md transition-transform duration-200 ease-out;
+  }
+
+  :root[data-mode="dark"] .app-sidebar-mobile {
+    background: color-mix(in srgb, var(--surface-card) 85%, transparent);
+    border-color: var(--glass-border);
+  }
+
+  .app-sidebar-mobile-open {
+    @apply translate-x-0;
+  }
+
+  .app-sidebar-mobile-header {
+    @apply mb-4 flex items-center justify-between px-1;
+  }
+}

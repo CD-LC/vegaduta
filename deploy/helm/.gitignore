@@ -1,0 +1,5 @@
+# Built by `helm dependency build` (each service chart depends on file://../vegaduta-lib).
+# The vendored charts/ dir is NOT committed; Chart.lock IS committed (Argo CD only runs
+# `helm dependency build` for a chart when a Chart.lock is present).
+charts/*/charts/
+*.tgz

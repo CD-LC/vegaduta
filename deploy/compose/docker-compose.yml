@@ -1,0 +1,1492 @@
+# =============================================================================
+# VegaDūta — FULL self-hosted stack (Docker Compose)
+#
+#   ./scripts/vegaduta up --full                       # recommended (health-gated, prints URLs)
+#   docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env up -d
+#
+# A bare `up` starts the CORE set:
+#   postgres, pgbouncer, valkey, keycloak(+keycloak-db), seaweedfs (S3),
+#   sidecar (RAG/ML), core, web (platform-admin merged in at /platform-admin)
+#
+# Everything else is opt-in with Compose profiles (`--profile <name>`, or
+# COMPOSE_PROFILES=a,b in .env). See deploy/README.md for the table.
+#   temporal       temporal + temporal-postgresql + temporal-ui + core-worker
+#                  (implies `events`; set WORKFLOW_EXECUTION_ENGINE=temporal and
+#                  CORE_PROFILES_EXTRA=,workflow,temporal — the CLI does this)
+#   events         redpanda (Kafka API; Redpanda is BSL-licensed, see NOTICE)
+#                  (set CORE_PROFILES_EXTRA=,workflow — the CLI does this)
+#   jobs           core-jobs (background sweeps/pollers; implies temporal)
+#   observability  prometheus, grafana, loki, promtail, alertmanager, valkey-exporter
+#   tracing        langfuse (web+worker) + its postgres/clickhouse/valkey/S3
+#   voice          livekit + voice-agent
+#   rl             rl-trainer
+#   code-intel     code-intel + its docker-in-docker executor (CODE_INTEL_ENABLED=true)
+#   builder        app-builder (pulls in code-intel)
+#   sandbox        tool-sandbox + mcp-stdio-runner
+#                  (TOOL_SANDBOX_ENABLED=true, MCP_STDIO_SIDECAR_ENABLED=true,
+#                  CORE_MCP_PROFILE=,mcp)
+#   tools          mcp-stdio-runner only: STDIO MCP servers (tenant-registered
+#                  AND the built-in filesystem/memory/sequential-thinking) run
+#                  there, since the default core image has no Node/uv/browsers
+#                  (MCP_STDIO_SIDECAR_ENABLED=true, CORE_MCP_PROFILE=,mcp)
+#   browser        like `tools`, with the mcp-stdio-runner-browser image
+#                  (Playwright Chromium + puppeteer Chrome for the puppeteer /
+#                  playwright-vision built-ins; also set
+#                  MCP_STDIO_RUNNER_VARIANT=-browser, MCP_STDIO_RUNNER_MEM_LIMIT=2g)
+#                  `scripts/vegaduta up --profile tools|browser` sets all of the
+#                  above; with raw compose put them in .env yourself, e.g.
+#                    COMPOSE_PROFILES=tools
+#                    MCP_STDIO_SIDECAR_ENABLED=true
+#                    CORE_MCP_PROFILE=,mcp
+#
+# core image: ghcr.io/cd-lc/core is SLIM (no MCP toolchain). To spawn STDIO
+# MCP servers inside core instead of the runner, use core-full:
+# CORE_IMAGE_VARIANT=-full and CORE_MCP_PROFILE=,mcp (core-worker/core-jobs
+# are published slim only). See docs/configuration.md "Essential vs
+# plug-and-play services".
+#
+# Images default to ghcr.io/cd-lc/<name>:${VEGADUTA_VERSION}. To build
+# from source instead add `-f deploy/compose/docker-compose.build.yml`.
+# Put this behind a real domain with `-f deploy/compose/docker-compose.domain.yml`.
+#
+# All host ports bind to ${BIND_ADDR:-127.0.0.1}. Internal service-to-service
+# URLs (http://keycloak:8080, http://core:8080, ...) are compose DNS names and
+# are intentionally NOT public URLs. Browser-facing URLs come from PUBLIC_*.
+# =============================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-vegaduta}
+
+x-restart: &restart
+  restart: unless-stopped
+
+# Bounded container logs. Docker's json-file driver is unbounded by default and
+# has filled the host disk before; 3 x 10 MB per container caps it.
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+# Container hardening (INF-030). `hardened` = every Linux capability dropped
+# and no privilege gain through setuid binaries: used by the first-party
+# services, which all run as a non-root user. `nnp` = no-new-privileges only,
+# for third-party images whose entrypoints still start as root and drop
+# privileges themselves (postgres, keycloak, ...). The JVM and Next.js
+# services also run with a read-only root filesystem (tmpfs for scratch),
+# matching the Helm charts.
+x-hardened: &hardened
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+
+x-nnp: &nnp
+  security_opt:
+    - no-new-privileges:true
+
+# Read-only root FS for core/core-worker/core-jobs (uid 999 = `agentic`); the
+# writable paths mirror deploy/helm/charts/core/values.yaml emptyDirs.
+x-core-fs: &core-fs
+  read_only: true
+  tmpfs:
+    - /tmp:size=1g,mode=1777
+    - /home/agentic/.npm:size=1g,uid=999,gid=999,mode=0700
+    - /home/agentic/.cache/uv:size=1g,uid=999,gid=999,mode=0700
+    - /home/agentic/.vegaduta:size=1g,uid=999,gid=999,mode=0700
+
+# Read-only root FS for web (uid 999 = `nextjs`).
+x-web-fs: &web-fs
+  read_only: true
+  tmpfs:
+    - /tmp:size=256m,mode=1777
+    - /app/.next/cache:size=512m,uid=999,gid=999,mode=0700
+    - /home/nextjs:size=64m,uid=999,gid=999,mode=0700
+
+# Environment shared by core, core-worker and core-jobs. One definition so the
+# three JVM deployables can never disagree on DB/Keycloak/encryption settings.
+x-core-env: &core-env
+  # preferIPv4Stack: Docker Desktop's embedded DNS can answer AAAA for compose
+  # names with no IPv6 route. Set here (not in the image) so IPv6-only
+  # Kubernetes clusters are unaffected; override JAVA_TOOL_OPTIONS in core.env.
+  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -Djava.net.preferIPv4Stack=true"
+  # Datasource via PgBouncer (session pooling — schema-per-tenant requires it).
+  # core logs in as the least-privileged POSTGRES_APP_USER (owner of the
+  # database, NOT a superuser), prepared by the one-shot `db-roles` service.
+  DB_HOST: pgbouncer
+  DB_PORT: 6432
+  POSTGRES_DB: ${POSTGRES_DB:-agentic_ai}
+  POSTGRES_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+  POSTGRES_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+  # Valkey speaks the Redis protocol; core's property names stay REDIS_*.
+  REDIS_HOST: valkey
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+  # NEVER change after first boot: every stored provider key / channel secret
+  # is encrypted with it and becomes undecryptable under a different key.
+  APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
+  PLATFORM_MASTER_KEY: ${PLATFORM_MASTER_KEY:-}
+  # Issuer = the PUBLIC auth URL tokens carry (Keycloak's KC_HOSTNAME below).
+  # Signing keys + admin API are fetched over the internal compose name.
+  KEYCLOAK_ISSUER_URI: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
+  KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+  # Private hosts tenant-configured outbound calls may reach (e.g. ollama:11434).
+  APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:-}
+  # Optional allow-list for tenant-configured outbound URLs (host or *.suffix, comma-separated); empty = no restriction.
+  APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST: ${APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST:-}
+  # Optional: register a local Ollama / OpenAI-compatible server as the FREE-tier pool at
+  # startup (api shape only; see docs/configuration.md "Local LLM pool bootstrap").
+  APP_LOCAL_LLM_BOOTSTRAP_ENABLED: ${APP_LOCAL_LLM_BOOTSTRAP_ENABLED:-false}
+  APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${APP_LOCAL_LLM_BOOTSTRAP_BASE_URL:-http://ollama:11434}
+  APP_LOCAL_LLM_BOOTSTRAP_MODEL: ${APP_LOCAL_LLM_BOOTSTRAP_MODEL:-qwen3.5:4b}
+  APP_LOCAL_LLM_BOOTSTRAP_LABEL: ${APP_LOCAL_LLM_BOOTSTRAP_LABEL:-Local model (Ollama)}
+  APP_LOCAL_LLM_BOOTSTRAP_API_KEY: ${APP_LOCAL_LLM_BOOTSTRAP_API_KEY-ollama}
+  KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/${KEYCLOAK_REALM:-agentic-ai}/protocol/openid-connect/certs
+  KEYCLOAK_ADMIN_BASE_URL: http://keycloak:8080
+  KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
+  KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-agentic-ai-core}
+  KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:?run scripts/vegaduta secrets}
+  APP_WEB_PUBLIC_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+  APP_WEB_ALLOWED_ORIGINS: ${PUBLIC_APP_URL:-http://localhost:3000},${PUBLIC_ADMIN_URL:-http://localhost:3001},http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+  # Object storage: bundled SeaweedFS by default; point STORAGE_ENDPOINT at
+  # any S3-compatible service (AWS S3, R2, Ceph, Garage, ...) to bring your own.
+  STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:-http://seaweedfs:8333}
+  STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+  STORAGE_BUCKET: ${STORAGE_BUCKET:-vegaduta}
+  STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?run scripts/vegaduta secrets}
+  STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?run scripts/vegaduta secrets}
+  STORAGE_PATH_STYLE_ACCESS: ${STORAGE_PATH_STYLE_ACCESS:-true}
+  SIDECAR_BASE_URL: http://sidecar:8001
+  SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+  # Base profiles + whatever the enabled compose profiles need (the CLI sets
+  # CORE_PROFILES_EXTRA, e.g. ",workflow,temporal"). `workflow` needs Kafka.
+  # CORE_MCP_PROFILE=",mcp" turns on the static STDIO MCP built-ins
+  # (application-mcp.yml) - only with the runner (profiles tools/browser/
+  # sandbox; the CLI sets it) or the core-full image; the slim image refuses
+  # to start with `mcp` and no runner (McpStdioLauncherPreflight).
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-security,knowledge,graph-memory,mcpserver${CORE_MCP_PROFILE:-}}${CORE_PROFILES_EXTRA:-}
+  WORKFLOW_EXECUTION_ENGINE: ${WORKFLOW_EXECUTION_ENGINE:-legacy}
+  TEMPORAL_TARGET: temporal:7233
+  WORKFLOW_KAFKA_BOOTSTRAP_SERVERS: redpanda:9093
+  CODE_INTEL_ENABLED: ${CODE_INTEL_ENABLED:-false}
+  CODE_INTEL_BASE_URL: http://code-intel:8090
+  CODE_INTEL_INTERNAL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:-}
+  TOOL_SANDBOX_ENABLED: ${TOOL_SANDBOX_ENABLED:-false}
+  TOOL_SANDBOX_BASE_URL: http://tool-sandbox:8095
+  TOOL_SANDBOX_INTERNAL_TOKEN: ${TOOL_SANDBOX_INTERNAL_TOKEN:-}
+  # "Six for everyone" feature flags. All ship dark (false in application.yml);
+  # set any of them to true in deploy/compose/.env. Several need an external
+  # prerequisite to do real work (search API key, E2B account + template,
+  # Meta-approved WhatsApp templates) and show an honest "unavailable" state
+  # until it exists. See docs/configuration.md.
+  APP_TUTOR_ENABLED: ${APP_TUTOR_ENABLED:-false}
+  APP_TUTOR_REMINDERS_ENABLED: ${APP_TUTOR_REMINDERS_ENABLED:-false}
+  RESEARCH_DEEP_ENABLED: ${RESEARCH_DEEP_ENABLED:-false}
+  RESEARCH_RUNS_ENABLED: ${RESEARCH_RUNS_ENABLED:-false}
+  APP_SANDBOX_DATA_ANALYSIS_ENABLED: ${APP_SANDBOX_DATA_ANALYSIS_ENABLED:-false}
+  APP_SANDBOX_PLATFORM_E2B_ENABLED: ${APP_SANDBOX_PLATFORM_E2B_ENABLED:-false}
+  WHATSAPP_TEMPLATES_ENABLED: ${WHATSAPP_TEMPLATES_ENABLED:-false}
+  WORKFLOW_DRAFT_SIMULATE_SENDS: ${WORKFLOW_DRAFT_SIMULATE_SENDS:-false}
+  GRAPH_MEMORY_USER_FORGET_SYNC_ENABLED: ${GRAPH_MEMORY_USER_FORGET_SYNC_ENABLED:-false}
+  # true = STDIO MCP servers (dynamic AND the static built-ins) run in the
+  # isolated mcp-stdio-runner (profiles tools/browser/sandbox); with the
+  # runner absent they refuse to start (fail closed). false = spawned inside
+  # the core container - needs the core-full image (single-user only).
+  MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
+  MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
+  MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+  APP_BUILDER_CORE_SERVICE_TOKEN: ${APP_BUILDER_CORE_SERVICE_TOKEN:-}
+  PLATFORM_ALERTS_WEBHOOK_SECRET: ${PLATFORM_ALERTS_WEBHOOK_SECRET:-}
+  # Voice (profile `voice`). LIVEKIT_URL is BROWSER-facing.
+  LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+  LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+  LIVEKIT_URL: ${PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
+  # Tracing (profile `tracing`) — off unless TRACING_SAMPLING_PROBABILITY > 0.
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://langfuse-web:3000/api/public/otel/v1/traces
+  LANGFUSE_OTEL_AUTH_HEADER: ${LANGFUSE_OTEL_AUTH_HEADER:-}
+  TRACING_SAMPLING_PROBABILITY: ${TRACING_SAMPLING_PROBABILITY:-0.0}
+  # Outbound mail (optional). Unset = email features log and skip.
+  SPRING_MAIL_HOST: ${SMTP_HOST:-}
+  SPRING_MAIL_PORT: ${SMTP_PORT:-587}
+  SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+  SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+  SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-true}
+  SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-true}
+  MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+  LOGGING_STRUCTURED_FORMAT_CONSOLE: ${CORE_LOG_FORMAT:-ecs}
+
+# Optional extra settings for the core JVMs (any Spring property as an env
+# var, e.g. GOOGLE_OAUTH_CLIENT_ID, VERTEX_ENABLED, billing keys). Absent = fine.
+x-core-extra-env: &core-extra-env
+  env_file:
+    - path: ./core.env
+      required: false
+
+x-core-health: &core-health
+  healthcheck:
+    test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health/readiness"]
+    interval: 15s
+    timeout: 5s
+    retries: 10
+    start_period: 180s
+
+services:
+  # ---------------------------------------------------------------- data tier
+  postgres:
+    # PostgreSQL 16 + pgvector + Apache AGE (deploy/postgres/Dockerfile).
+    # Tag follows the release (the release workflow publishes postgres:<version>).
+    image: ${VEGADUTA_POSTGRES_IMAGE:-${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/postgres:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}}
+    <<: [*restart, *logging, *nnp]
+    # shared_preload_libraries=age: AGE is loaded in every backend, so the
+    # non-superuser app role never needs `LOAD 'age'` (superuser-only unless
+    # the path is $libdir/plugins/age; the image links it there too).
+    command: ["postgres", "-c", "shared_preload_libraries=age", "-c", "max_connections=${POSTGRES_MAX_CONNECTIONS:-200}"]
+    environment:
+      # POSTGRES_USER is the bootstrap SUPERUSER: used only by db-roles, backups
+      # and you (scripts/vegaduta compose exec postgres psql). core uses
+      # POSTGRES_APP_USER.
+      POSTGRES_USER: ${POSTGRES_USER:-agentic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_ai}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: ${POSTGRES_MEM_LIMIT:-1g}
+    networks: [data-tier]
+
+  db-roles:
+    # One-shot, idempotent, runs on every `up`: creates/updates the
+    # least-privileged login core uses (POSTGRES_APP_USER), makes it the
+    # database owner, installs pgvector + AGE, and adopts objects an older
+    # install created as the superuser. See deploy/postgres/ensure-app-role.sh.
+    image: ${VEGADUTA_POSTGRES_IMAGE:-${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/postgres:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}}
+    <<: [*logging, *hardened]
+    restart: "no"
+    user: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["sh", "/ensure-app-role.sh"]
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-agentic}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      PGDATABASE: ${POSTGRES_DB:-agentic_ai}
+      APP_DB_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+      APP_DB_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+    volumes:
+      - ../postgres/ensure-app-role.sh:/ensure-app-role.sh:ro
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    networks: [data-tier]
+
+  pgbouncer:
+    # MUST stay POOL_MODE=session: schema-per-tenant sets search_path per
+    # session; transaction pooling routes queries to the wrong tenant schema.
+    # Only the app role is in its userlist (no superuser through the pooler).
+    image: edoburu/pgbouncer:v1.26.0-p0
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-roles:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-agentic_ai}
+      DB_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+      DB_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+      LISTEN_PORT: 6432
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 200
+      DEFAULT_POOL_SIZE: 25
+      SERVER_RESET_QUERY: DISCARD ALL
+      AUTH_TYPE: scram-sha-256
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432 -U $${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    networks: [data-tier]
+
+  valkey:
+    # Valkey (BSD-3) — drop-in Redis-protocol replacement. The password is
+    # templated into a config file at start so it never sits in argv.
+    image: valkey/valkey:8.1.10-alpine
+    <<: [*restart, *logging, *nnp]
+    command:
+      - sh
+      - -c
+      - printf 'requirepass %s\nappendonly yes\n' "$$VALKEY_PASSWORD" > /tmp/valkey.conf && exec valkey-server /tmp/valkey.conf
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${VALKEY_HOST_PORT:-6379}:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a \"$$VALKEY_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: ${VALKEY_MEM_LIMIT:-256m}
+    networks: [data-tier]
+
+  seaweedfs:
+    # SeaweedFS (Apache-2.0) single-node master+volume+filer+S3 gateway. The
+    # S3 identity is generated from STORAGE_ACCESS_KEY/SECRET at start; core
+    # creates STORAGE_BUCKET itself on boot. To use external S3 instead, set
+    # STORAGE_ENDPOINT and stop this service (`docker compose stop seaweedfs`).
+    image: chrislusf/seaweedfs:4.48
+    <<: [*restart, *logging, *nnp]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        printf '{"identities":[{"name":"vegaduta","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' "$$STORAGE_ACCESS_KEY" "$$STORAGE_SECRET_KEY" > /tmp/s3.json
+        exec weed server -dir=/data -ip=seaweedfs -ip.bind=0.0.0.0 -volume.max=0 -master.volumeSizeLimitMB=1024 -metricsPort=9327 -s3 -s3.port=8333 -s3.config=/tmp/s3.json
+    environment:
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?run scripts/vegaduta secrets}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?run scripts/vegaduta secrets}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${SEAWEEDFS_S3_HOST_PORT:-8333}:8333"
+    volumes:
+      - seaweedfs-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9333/cluster/status && wget -q -S -O /dev/null http://127.0.0.1:8333/ 2>&1 | grep -q 'HTTP/'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${SEAWEEDFS_MEM_LIMIT:-512m}
+    # NOT on `observability`: weed server also listens on the unauthenticated
+    # master (9333), volume (8080) and filer (8888) APIs, and that network holds
+    # Grafana, Loki, Langfuse and friends - a compromise of any of them must not
+    # read or write tenant files past S3 auth. Prometheus scrapes :9327 over a
+    # dedicated two-member network instead.
+    networks: [data-tier, seaweedfs-metrics]
+
+  keycloak-db:
+    image: postgres:16.15-alpine
+    <<: [*restart, *logging, *nnp]
+    environment:
+      POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?run scripts/vegaduta secrets}
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [data-tier]
+
+  keycloak:
+    # Same Keycloak release as deploy/helm/charts/keycloak (one version line).
+    image: quay.io/keycloak/keycloak:26.7.5
+    <<: [*restart, *logging, *nnp]
+    # Production mode (`start`) against keycloak-db, HTTP only inside the
+    # compose network / on the loopback port; TLS is terminated by Caddy in
+    # the domain overlay, which pins `start` (start-dev is refused there by
+    # `scripts/vegaduta doctor`). KEYCLOAK_START_COMMAND=start-dev is only for
+    # local debugging (theme hot-reload); lite always uses start-dev.
+    command: ["${KEYCLOAK_START_COMMAND:-start}", "--import-realm"]
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    environment: &keycloak-env
+      # Keycloak 26 bootstrap admin (master realm). KEYCLOAK_ADMIN* stay set
+      # because the CLI's kcadm scripts (make-admin, realm reconcile) read them.
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?run scripts/vegaduta secrets}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?run scripts/vegaduta secrets}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?run scripts/vegaduta secrets}
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_ENABLED: "true"
+      # Hostname v2: the issuer every token carries is PUBLIC_AUTH_URL; calls
+      # from inside the compose network (keycloak:8080) keep a dynamic backchannel.
+      KC_HOSTNAME: ${PUBLIC_AUTH_URL:-http://localhost:8180}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      # Values consumed by the realm template's ${env.*} placeholders
+      # (deploy/keycloak/agentic-ai-realm.json) at first import.
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:?run scripts/vegaduta secrets}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      PUBLIC_ADMIN_URL: ${PUBLIC_ADMIN_URL:-http://localhost:3000}
+      KC_VERIFY_EMAIL: ${KC_VERIFY_EMAIL:-false}
+      # Password grant on the confidential core client: off (first import only).
+      # The CI overlay turns it on for the Playwright/smoke logins.
+      KC_CORE_DIRECT_GRANTS: ${KC_CORE_DIRECT_GRANTS:-false}
+      THEME_PRIVACY_URL: ${THEME_PRIVACY_URL:-https://github.com/CD-LC/vegaduta/blob/main/SECURITY.md}
+      THEME_TERMS_URL: ${THEME_TERMS_URL:-https://github.com/CD-LC/vegaduta/blob/main/LICENSE}
+      THEME_HELP_URL: ${THEME_HELP_URL:-https://github.com/CD-LC/vegaduta}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${KEYCLOAK_HOST_PORT:-8180}:8080"
+    volumes:
+      - ../keycloak/agentic-ai-realm.json:/opt/keycloak/data/import/agentic-ai-realm.json:ro
+      - ../keycloak/themes/agentic-ai:/opt/keycloak/themes/agentic-ai:ro
+    healthcheck: &keycloak-health
+      # No curl in the image; bash /dev/tcp against the management port (9000).
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${KEYCLOAK_MEM_LIMIT:-1g}
+    networks: [data-tier, agent-io, app]
+
+  # -------------------------------------------------------------- app tier
+  sidecar:
+    # Python ML/ingestion sidecar: chunk / embed / rerank / transcribe / render.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/sidecar:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened]
+    environment:
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      SIDECAR_AUTH_REQUIRED: "true"
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
+      RENDER_WORKSPACE_DIR: /app/workspace
+      RENDER_THREADS: ${RENDER_THREADS:-1}
+      RENDER_CALLBACK_ALLOWED_HOSTS: core
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${SIDECAR_HOST_PORT:-8001}:8001"
+    volumes:
+      - sidecar-workspace:/app/workspace
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${SIDECAR_MEM_LIMIT:-3g}
+    networks: [agent-io]
+
+  core:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core${CORE_IMAGE_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened, *core-fs, *core-extra-env, *core-health]
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+      sidecar:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+        required: false
+      temporal:
+        condition: service_started
+        required: false
+    environment:
+      <<: *core-env
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${CORE_HOST_PORT:-8080}:8080"
+    volumes:
+      - core-mcp-data:/app/mcp-data
+      - ../../examples/mcp-servers:/opt/mcp-servers:ro
+    deploy:
+      resources:
+        limits:
+          memory: ${CORE_MEM_LIMIT:-4g}
+    networks: [data-tier, app, agent-io, observability, sandbox-net, mcp-stdio-net]
+
+  web:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/web:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened, *web-fs]
+    depends_on:
+      core:
+        condition: service_healthy
+        restart: true
+    # NEXT_PUBLIC_* are read at RUNTIME (window.__ENV) with the build-time
+    # value as fallback, so one published image works for any domain.
+    environment: &web-env
+      NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+      NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
+      NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
+      NEXT_PUBLIC_BILLING_ENABLED: ${WEB_BILLING_ENABLED:-}
+      NEXT_PUBLIC_SITE_MODE: ${WEB_SITE_MODE:-}
+      NEXT_PUBLIC_DOCS_URL: ${WEB_DOCS_URL:-}
+      NEXT_PUBLIC_COMMERCIAL_URL: ${WEB_COMMERCIAL_URL:-}
+      NEXT_PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_CODE_INTEL_URL: ${PUBLIC_CODE_INTEL_URL:-}
+      NEXT_PUBLIC_APP_BUILDER_URL: ${PUBLIC_BUILDER_URL:-}
+      NEXT_PUBLIC_ACADEMY_URL: ${WEB_ACADEMY_URL:-}
+      NEXT_PUBLIC_CONTACT_EMAIL: ${WEB_CONTACT_EMAIL:-}
+      NEXT_PUBLIC_EDGE_AGENTS: ${WEB_EDGE_AGENTS:-}
+      NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-}
+      NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+      NEXT_PUBLIC_MCP_APPS: ${WEB_MCP_APPS:-}
+      NEXT_PUBLIC_ARTIFACTS: ${WEB_ARTIFACTS:-}
+      NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS: ${WEB_TRUSTED_IMAGE_HOSTS:-}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${WEB_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: ${WEB_MEM_LIMIT:-768m}
+    networks: [app]
+  # The platform-admin console merged into web (/platform-admin) - there is
+  # no longer a separate web-admin service.
+
+  # ------------------------------------------------ profile: temporal / jobs
+  core-worker:
+    # Dedicated Temporal workflow worker (same reactor, MODULE=app-worker).
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core-worker:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["temporal", "jobs"]
+    <<: [*restart, *logging, *hardened, *core-fs, *core-extra-env, *core-health]
+    depends_on:
+      core:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      <<: *core-env
+      WORKER_HTTP_PORT: "8080"
+      WORKFLOW_EXECUTION_ENGINE: temporal
+      APP_WORKFLOW_TEMPORAL_WORKER_ENABLED: "true"
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-security,knowledge,graph-memory,mcpserver${CORE_MCP_PROFILE:-}},workflow,temporal,worker
+    volumes:
+      - ../../examples/mcp-servers:/opt/mcp-servers:ro
+    deploy:
+      resources:
+        limits:
+          memory: ${CORE_WORKER_MEM_LIMIT:-2g}
+    networks: [data-tier, agent-io, observability, sandbox-net, mcp-stdio-net]
+
+  core-jobs:
+    # Background sweeps/pollers (MODULE=app-jobs), no public REST surface.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core-jobs:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["jobs"]
+    <<: [*restart, *logging, *hardened, *core-fs, *core-extra-env, *core-health]
+    depends_on:
+      core:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      <<: *core-env
+      JOBS_HTTP_PORT: "8080"
+      WORKFLOW_EXECUTION_ENGINE: temporal
+      APP_WORKFLOW_TEMPORAL_WORKER_ENABLED: "false"
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-security,knowledge,graph-memory,mcpserver${CORE_MCP_PROFILE:-}},workflow,temporal,shape-jobs,jobs
+    deploy:
+      resources:
+        limits:
+          memory: ${CORE_JOBS_MEM_LIMIT:-1536m}
+    networks: [data-tier, agent-io, observability, mcp-stdio-net]
+
+  temporal-postgresql:
+    image: postgres:16.15-alpine
+    profiles: ["temporal", "jobs"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      POSTGRES_USER: ${TEMPORAL_DB_USER:-temporal}
+      POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD:?run scripts/vegaduta secrets}
+    volumes:
+      - temporal-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [agent-io]
+
+  temporal:
+    # auto-setup migrates its schema, creates the `default` namespace, then
+    # serves every Temporal role in one process. Temporal documents it as a
+    # development image: it is used here only because this profile is a
+    # single-node convenience. For production workflows run Temporal
+    # separately (temporalio/server + its schema tool, or Temporal Cloud) and
+    # point core at it with TEMPORAL_TARGET in core.env; Helm already expects a
+    # bring-your-own Temporal (global.temporal.target).
+    image: temporalio/auto-setup:1.29.7
+    profiles: ["temporal", "jobs"]
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      temporal-postgresql:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: ${TEMPORAL_DB_USER:-temporal}
+      POSTGRES_PWD: ${TEMPORAL_DB_PASSWORD:?run scripts/vegaduta secrets}
+      POSTGRES_SEEDS: temporal-postgresql
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+    volumes:
+      - ../temporal/dynamicconfig:/etc/temporal/config/dynamicconfig:ro
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:7233:7233"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z $$(hostname -i) 7233"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    networks: [agent-io]
+
+  temporal-ui:
+    image: temporalio/ui:2.55.0
+    profiles: ["temporal", "jobs"]
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      - temporal
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: ${PUBLIC_APP_URL:-http://localhost:3000}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:8088:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    networks: [agent-io]
+
+  # ------------------------------------------------------ profile: events
+  redpanda:
+    # Kafka-API event backbone for the `workflow` Spring profile. Redpanda is
+    # BSL-1.1 (see NOTICE); any Kafka-compatible broker works via
+    # WORKFLOW_KAFKA_BOOTSTRAP_SERVERS in core.env.
+    image: redpandadata/redpanda:v26.2.4
+    profiles: ["events", "temporal", "jobs"]
+    <<: [*restart, *logging, *nnp]
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=512M
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9093,external://0.0.0.0:9092
+      - --advertise-kafka-addr=internal://redpanda:9093,external://localhost:9092
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:9092:9092"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -Eq 'Healthy:.+true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    networks: [agent-io]
+
+  # ------------------------------------------------ profile: observability
+  valkey-exporter:
+    image: oliver006/redis_exporter:v1.93.0
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      valkey:
+        condition: service_healthy
+    environment:
+      REDIS_ADDR: redis://valkey:6379
+      REDIS_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+    healthcheck:
+      test: ["CMD", "/redis_exporter", "--version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    networks: [data-tier, observability]
+
+  loki:
+    image: grafana/loki:3.6.17
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ../loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:3100:3100"
+    # No healthcheck: the image is distroless (no shell, wget or curl), so any CMD-SHELL probe fails
+    # forever. Grafana and Promtail retry their Loki connection, so they only need it started.
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    networks: [observability]
+
+  docker-socket-proxy:
+    # Promtail discovers containers and reads their logs through this proxy,
+    # never through the raw socket: a read-only bind of docker.sock still
+    # grants the whole Docker API (= root on the host). Only GET on
+    # /containers, /events, /_ping and /version is allowed (POST=0), and the
+    # proxy sits on an internal network shared with promtail alone.
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      CONTAINERS: 1
+      EVENTS: 1
+      PING: 1
+      VERSION: 1
+      POST: 0
+      IMAGES: 0
+      NETWORKS: 0
+      VOLUMES: 0
+      EXEC: 0
+      INFO: 0
+      SERVICES: 0
+      TASKS: 0
+      NODES: 0
+      SECRETS: 0
+      CONFIGS: 0
+      SYSTEM: 0
+      BUILD: 0
+      AUTH: 0
+      PLUGINS: 0
+      SWARM: 0
+      DISTRIBUTION: 0
+      SESSION: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    networks: [docker-api]
+
+  promtail:
+    # Discovers containers through docker-socket-proxy (read-only API subset)
+    # and ships their stdout to Loki. Promtail is in maintenance mode upstream
+    # (Grafana Alloy replaces it); it still works with Loki 3.x.
+    image: grafana/promtail:3.6.11
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      loki:
+        condition: service_started
+      docker-socket-proxy:
+        condition: service_started
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    volumes:
+      - ../promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - promtail-positions:/var/lib/promtail
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9080' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    networks: [observability, docker-api]
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:9090:9090"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    networks: [observability, seaweedfs-metrics]
+
+  alertmanager:
+    # The mounted config has no env interpolation; the webhook secret (and the
+    # optional SMTP block, activated only when ALERT_EMAIL_TO+ALERT_SMTP_HOST
+    # are set) are templated into /tmp at start.
+    image: prom/alertmanager:v0.28.1
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        sed 's|$${PLATFORM_ALERTS_WEBHOOK_SECRET}|'"$$PLATFORM_ALERTS_WEBHOOK_SECRET"'|g'
+        /etc/alertmanager/alertmanager.yml > /tmp/alertmanager.yml
+        && if [ -n "$$ALERT_EMAIL_TO" ] && [ -n "$$ALERT_SMTP_HOST" ]; then
+        sed -i
+        -e 's|#EMAIL#||'
+        -e 's|$${ALERT_EMAIL_TO}|'"$$ALERT_EMAIL_TO"'|g'
+        -e 's|$${ALERT_SMTP_FROM}|'"$${ALERT_SMTP_FROM:-alertmanager@localhost}"'|g'
+        -e 's|$${ALERT_SMTP_HOST}|'"$$ALERT_SMTP_HOST"'|g'
+        -e 's|$${ALERT_SMTP_PORT}|'"$${ALERT_SMTP_PORT:-587}"'|g'
+        -e 's|$${ALERT_SMTP_USER}|'"$$ALERT_SMTP_USER"'|g'
+        -e 's|$${ALERT_SMTP_PASSWORD}|'"$$ALERT_SMTP_PASSWORD"'|g'
+        /tmp/alertmanager.yml; fi
+        && exec /bin/alertmanager
+        --config.file=/tmp/alertmanager.yml
+        --storage.path=/alertmanager
+    environment:
+      PLATFORM_ALERTS_WEBHOOK_SECRET: ${PLATFORM_ALERTS_WEBHOOK_SECRET:?run scripts/vegaduta secrets}
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-}
+      ALERT_SMTP_HOST: ${ALERT_SMTP_HOST:-}
+      ALERT_SMTP_PORT: ${ALERT_SMTP_PORT:-}
+      ALERT_SMTP_FROM: ${ALERT_SMTP_FROM:-}
+      ALERT_SMTP_USER: ${ALERT_SMTP_USER:-}
+      ALERT_SMTP_PASSWORD: ${ALERT_SMTP_PASSWORD:-}
+    volumes:
+      - ../alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:9093:9093"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9093/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    networks: [observability]
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    profiles: ["observability"]
+    <<: [*restart, *logging, *nnp]
+    depends_on:
+      loki:
+        condition: service_started
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?run scripts/vegaduta secrets}
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      LANGFUSE_HOST: ${PUBLIC_LANGFUSE_URL:-http://localhost:3002}
+      LANGFUSE_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID:-vegaduta-core}
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:3003:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [observability]
+
+  # ------------------------------------------------------ profile: tracing
+  # Self-hosted Langfuse v3 (MIT). Its own Postgres/ClickHouse/Valkey/S3 —
+  # never shared with the app's data tier. Timezones MUST be UTC.
+  langfuse-postgres:
+    image: postgres:17.11-alpine
+    profiles: ["tracing"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      POSTGRES_USER: ${LANGFUSE_POSTGRES_USER:-langfuse}
+      POSTGRES_PASSWORD: ${LANGFUSE_POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      POSTGRES_DB: ${LANGFUSE_POSTGRES_DB:-langfuse}
+      TZ: UTC
+      PGTZ: UTC
+    volumes:
+      - langfuse-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [observability]
+
+  langfuse-clickhouse:
+    image: clickhouse/clickhouse-server:26.8.23.6
+    profiles: ["tracing"]
+    <<: [*restart, *logging, *nnp]
+    user: "101:101"
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: ${LANGFUSE_CLICKHOUSE_USER:-clickhouse}
+      CLICKHOUSE_PASSWORD: ${LANGFUSE_CLICKHOUSE_PASSWORD:?run scripts/vegaduta secrets}
+      TZ: UTC
+    volumes:
+      - langfuse-clickhouse-data:/var/lib/clickhouse
+      - langfuse-clickhouse-logs:/var/log/clickhouse-server
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+    networks: [observability]
+
+  langfuse-valkey:
+    image: valkey/valkey:8.1.10-alpine
+    profiles: ["tracing"]
+    <<: [*restart, *logging, *nnp]
+    command:
+      - sh
+      - -c
+      - printf 'requirepass %s\nmaxmemory-policy noeviction\n' "$$LANGFUSE_REDIS_AUTH" > /tmp/valkey.conf && exec valkey-server /tmp/valkey.conf
+    environment:
+      LANGFUSE_REDIS_AUTH: ${LANGFUSE_REDIS_AUTH:?run scripts/vegaduta secrets}
+    volumes:
+      - langfuse-valkey-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a \"$$LANGFUSE_REDIS_AUTH\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [observability]
+
+  langfuse-s3:
+    image: chrislusf/seaweedfs:4.48
+    profiles: ["tracing"]
+    <<: [*restart, *logging, *nnp]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        printf '{"identities":[{"name":"langfuse","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' "$$LANGFUSE_S3_ACCESS_KEY" "$$LANGFUSE_S3_SECRET_KEY" > /tmp/s3.json
+        weed server -dir=/data -ip=langfuse-s3 -ip.bind=0.0.0.0 -volume.max=0 -master.volumeSizeLimitMB=512 -s3 -s3.port=8333 -s3.config=/tmp/s3.json &
+        # Langfuse never creates its bucket; create it once (bounded, idempotent).
+        for i in $$(seq 1 90); do
+          if echo "s3.bucket.list" | weed shell -master=localhost:9333 2>/dev/null | grep -q langfuse; then break; fi
+          echo "s3.bucket.create -name langfuse" | weed shell -master=localhost:9333 >/dev/null 2>&1
+          sleep 2
+        done
+        wait
+    environment:
+      LANGFUSE_S3_ACCESS_KEY: ${LANGFUSE_S3_ACCESS_KEY:-langfuse}
+      LANGFUSE_S3_SECRET_KEY: ${LANGFUSE_S3_SECRET_KEY:?run scripts/vegaduta secrets}
+    volumes:
+      - langfuse-s3-data:/data
+    healthcheck:
+      # Healthy only once the bucket exists.
+      test: ["CMD-SHELL", "echo s3.bucket.list | weed shell -master=localhost:9333 2>/dev/null | grep -q langfuse"]
+      interval: 10s
+      # `weed shell` starts a JVM-sized Go client; 5 s timed out (and the probe was OOM-killed) on a busy host.
+      timeout: 20s
+      retries: 20
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    networks: [observability]
+
+  langfuse-worker:
+    image: langfuse/langfuse-worker:4.56.0
+    profiles: ["tracing"]
+    <<: [*restart, *logging, *nnp]
+    depends_on: &langfuse-depends-on
+      langfuse-postgres:
+        condition: service_healthy
+      langfuse-clickhouse:
+        condition: service_healthy
+      langfuse-valkey:
+        condition: service_healthy
+      langfuse-s3:
+        condition: service_healthy
+    environment: &langfuse-app-env
+      # Langfuse listens on $HOSTNAME (the container IP by default); bind all interfaces so the
+      # 127.0.0.1 healthcheck connects. langfuse-web sets the same below.
+      HOSTNAME: "0.0.0.0"
+      DATABASE_URL: postgresql://${LANGFUSE_POSTGRES_USER:-langfuse}:${LANGFUSE_POSTGRES_PASSWORD:?run scripts/vegaduta secrets}@langfuse-postgres:5432/${LANGFUSE_POSTGRES_DB:-langfuse}
+      SALT: ${LANGFUSE_SALT:?run scripts/vegaduta secrets}
+      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
+      CLICKHOUSE_MIGRATION_URL: clickhouse://langfuse-clickhouse:9000
+      CLICKHOUSE_URL: http://langfuse-clickhouse:8123
+      CLICKHOUSE_USER: ${LANGFUSE_CLICKHOUSE_USER:-clickhouse}
+      CLICKHOUSE_PASSWORD: ${LANGFUSE_CLICKHOUSE_PASSWORD:?run scripts/vegaduta secrets}
+      CLICKHOUSE_CLUSTER_ENABLED: "false"
+      REDIS_HOST: langfuse-valkey
+      REDIS_PORT: 6379
+      REDIS_AUTH: ${LANGFUSE_REDIS_AUTH:?run scripts/vegaduta secrets}
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: us-east-1
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${LANGFUSE_S3_ACCESS_KEY:-langfuse}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${LANGFUSE_S3_SECRET_KEY:?run scripts/vegaduta secrets}
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://langfuse-s3:8333
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: langfuse
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: us-east-1
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${LANGFUSE_S3_ACCESS_KEY:-langfuse}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${LANGFUSE_S3_SECRET_KEY:?run scripts/vegaduta secrets}
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://langfuse-s3:8333
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+      TELEMETRY_ENABLED: "false"
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    # Langfuse v4: 503 when the event-propagation job stops making progress.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null 'http://127.0.0.1:3030/api/health?failIfEventPropagationStuck=true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks: [observability]
+
+  langfuse-web:
+    image: langfuse/langfuse:4.56.0
+    profiles: ["tracing"]
+    <<: [*restart, *logging, *nnp]
+    depends_on: *langfuse-depends-on
+    environment:
+      <<: *langfuse-app-env
+      HOSTNAME: 0.0.0.0
+      # Langfuse 4 web needs more than Node's default heap (sized from the container limit, ~380 MB at
+      # 768m): it crash-looped with "JavaScript heap out of memory" on start. Keep this below the limit.
+      NODE_OPTIONS: --max-old-space-size=1280
+      NEXTAUTH_URL: ${PUBLIC_LANGFUSE_URL:-http://localhost:3002}
+      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:?run scripts/vegaduta secrets}
+      # Bootstraps one org/project/API-keypair so core can export traces with
+      # LANGFUSE_OTEL_AUTH_HEADER = "Basic base64(public:secret)" (the CLI derives it).
+      LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID:-vegaduta}
+      LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-VegaDuta}
+      LANGFUSE_INIT_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID:-vegaduta-core}
+      LANGFUSE_INIT_PROJECT_NAME: ${LANGFUSE_INIT_PROJECT_NAME:-core}
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_INIT_PROJECT_PUBLIC_KEY:?run scripts/vegaduta secrets}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_INIT_PROJECT_SECRET_KEY:?run scripts/vegaduta secrets}
+      LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_INIT_USER_EMAIL:-}
+      LANGFUSE_INIT_USER_NAME: ${LANGFUSE_INIT_USER_NAME:-}
+      LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:3002:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/public/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+    networks: [observability]
+
+  # -------------------------------------------------------- profile: voice
+  livekit:
+    # Self-hosted WebRTC SFU (Apache-2.0). Media needs UDP LIVEKIT_RTC_PORT_RANGE_START-_END
+    # (default 50000-50100; move it if another process on the host, e.g. adb, holds a port in it) and a
+    # reachable public IP; see deploy/livekit/livekit.yaml for TURN.
+    image: livekit/livekit-server:v1.13.9
+    profiles: ["voice"]
+    <<: [*restart, *logging, *nnp]
+    command: --config /etc/livekit.yaml
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}"
+      # Host and container ports must match for WebRTC (ICE candidates carry the container's port).
+      LIVEKIT_RTC_PORT_RANGE_START: ${LIVEKIT_RTC_PORT_RANGE_START:-50000}
+      LIVEKIT_RTC_PORT_RANGE_END: ${LIVEKIT_RTC_PORT_RANGE_END:-50100}
+    volumes:
+      - ../livekit/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:7880:7880"
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:7881:7881"
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:${LIVEKIT_RTC_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_PORT_RANGE_END:-50100}:${LIVEKIT_RTC_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_PORT_RANGE_END:-50100}/udp"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7880/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    networks: [agent-io]
+
+  voice-agent:
+    # LiveKit Agents worker: STT -> core chat -> TTS. Outbound-only.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/voice-agent:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["voice"]
+    <<: [*restart, *logging, *hardened]
+    depends_on:
+      livekit:
+        condition: service_healthy
+      core:
+        condition: service_healthy
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}
+      LIVEKIT_URL: ws://livekit:7880
+      CORE_API_BASE_URL: http://core:8080
+      SIDECAR_BASE_URL: http://sidecar:8001
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
+      VOICE_AGENT_TTS_PROVIDER: ${VOICE_AGENT_TTS_PROVIDER:-auto}
+      PERCEPTION_MAX_ROOMS: ${PERCEPTION_MAX_ROOMS:-4}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket; socket.create_connection(('127.0.0.1', 8081), 3)\" || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    networks: [agent-io]
+
+  # ----------------------------------------------------------- profile: rl
+  rl-trainer:
+    # Offline preference / prompt optimisation for core/rl. Internal-token auth.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/rl-trainer:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["rl"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      RL_TRAINER_AUTH_MODE: internal
+      RL_TRAINER_INTERNAL_TOKEN: ${RL_TRAINER_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      RL_TRAINER_LLM_MODEL: ${RL_TRAINER_LLM_MODEL:-claude-sonnet-4-5}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RL_TRAINER_KEYCLOAK_ISSUER: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      RL_TRAINER_KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+      RL_TRAINER_KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/${KEYCLOAK_REALM:-agentic-ai}/protocol/openid-connect/certs
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:8095:8095"
+    volumes:
+      - rl-trainer-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    networks: [agent-io]
+
+  # --------------------------------------------- profile: code-intel / builder
+  code-intel:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/code-intel:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["code-intel", "builder"]
+    <<: [*restart, *logging, *hardened]
+    init: true   # reaps orphaned git grandchildren
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      code-intel-docker:
+        condition: service_healthy
+    environment:
+      CODE_INTEL_AUTH_MODE: keycloak
+      CODE_INTEL_INTERNAL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      CODE_INTEL_GIT_TOKEN: ${CODE_INTEL_GIT_TOKEN:-}
+      HF_HOME: /data/.hf
+      HF_HUB_CACHE: /data/.hf/hub
+      FASTEMBED_CACHE_PATH: /data/.fastembed
+      CODE_INTEL_KEYCLOAK_ISSUER: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      CODE_INTEL_KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+      CODE_INTEL_KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/${KEYCLOAK_REALM:-agentic-ai}/protocol/openid-connect/certs
+      CODE_INTEL_EMBEDDER: ${CODE_INTEL_EMBEDDER:-fastembed}
+      CODE_INTEL_ALLOW_CONTEXT_SCRIPTS: "false"
+      CODE_INTEL_ALLOW_EXEC: ${CODE_INTEL_ALLOW_EXEC:-false}
+      CODE_INTEL_EXEC_TIMEOUT: ${CODE_INTEL_EXEC_TIMEOUT:-300}
+      # Tenant commands only ever run in the dind sidecar, never in-process.
+      CODE_INTEL_RUN_MODE: docker
+      CODE_INTEL_DOCKER_IMAGE: ${CODE_INTEL_DOCKER_IMAGE:-node:22-bookworm}
+      # Plain TCP, but only on `code-exec` (internal; members: code-intel and
+      # code-intel-docker). No other service can reach the daemon.
+      DOCKER_HOST: tcp://code-intel-docker:2375
+      CODE_INTEL_CORS_ORIGINS: ${PUBLIC_APP_URL:-http://localhost:3000}
+      CODE_INTEL_EXPOSE_DOCS: "false"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:8090:8090"
+    volumes:
+      - code-intel-data:/data
+      - app-builder-data:/app-builder-data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: ${CODE_INTEL_MEM_LIMIT:-4g}
+    networks: [agent-io, code-exec]
+
+  code-intel-docker:
+    # Throwaway Docker daemon for code-intel's sandboxed exec — NOT the host
+    # socket. It is privileged (inherent to docker-in-docker), so its API is
+    # root on this host: it listens only on `code-exec`, an internal network
+    # whose sole other member is code-intel, and reaches the internet (image
+    # pulls, tenant `npm install`) through `code-exec-egress`, which nothing
+    # else joins. The daemon is NOT on agent-io: sidecar, livekit, voice-agent,
+    # keycloak, temporal, ... cannot reach it.
+    # Still plaintext TCP: code-intel's docker client does not load TLS client
+    # certs yet. Once it does, switch to DOCKER_TLS_CERTDIR=/certs and
+    # tcp://code-intel-docker:2376 with a shared read-only client-cert volume.
+    image: docker:29.9.0-dind
+    profiles: ["code-intel", "builder"]
+    <<: [*restart, *logging]
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command: ["--host=tcp://0.0.0.0:2375"]
+    # The only service without a memory ceiling was the one running tenant
+    # `npm install`s and code: bound it, and its process count, so a tenant
+    # workload cannot take the host down with it.
+    deploy:
+      resources:
+        limits:
+          memory: ${CODE_INTEL_DOCKER_MEM_LIMIT:-4g}
+          pids: ${CODE_INTEL_DOCKER_PIDS_LIMIT:-2048}
+    volumes:
+      - code-intel-docker-data:/var/lib/docker
+      - code-intel-data:/data   # same path as code-intel so bind mounts resolve
+    healthcheck:
+      test: ["CMD", "docker", "-H", "tcp://127.0.0.1:2375", "info"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks: [code-exec, code-exec-egress]
+
+  app-builder:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/app-builder:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["builder"]
+    <<: [*restart, *logging, *hardened]
+    depends_on:
+      code-intel:
+        condition: service_healthy
+        restart: true
+    environment:
+      APP_BUILDER_AUTH_MODE: keycloak
+      APP_BUILDER_INTERNAL_TOKEN: ${APP_BUILDER_INTERNAL_TOKEN:-}
+      APP_BUILDER_KEYCLOAK_ISSUER: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      APP_BUILDER_KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+      APP_BUILDER_KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/${KEYCLOAK_REALM:-agentic-ai}/protocol/openid-connect/certs
+      APP_BUILDER_CORS_ORIGINS: ${PUBLIC_APP_URL:-http://localhost:3000}
+      APP_BUILDER_EXPOSE_DOCS: "false"
+      APP_BUILDER_CODE_INTEL_URL: http://code-intel:8090
+      APP_BUILDER_CODE_INTEL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      APP_BUILDER_CORE_BASE_URL: http://core:8080
+      APP_BUILDER_CORE_SERVICE_TOKEN: ${APP_BUILDER_CORE_SERVICE_TOKEN:?run scripts/vegaduta secrets}
+      APP_BUILDER_CORE_TIMEOUT: ${APP_BUILDER_CORE_TIMEOUT:-120}
+      APP_BUILDER_ADMIN_DATABASE_URL: ""
+      APP_BUILDER_CADDY_ADMIN_URL: ""
+      APP_BUILDER_CODE_INTEL_REPO_PREFIX: /app-builder-data
+      # Fernet key for tenant GitHub PATs. Rotating it forces reconnects.
+      APP_BUILDER_ENCRYPTION_KEY: ${APP_BUILDER_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
+      APP_BUILDER_LOCAL_PREVIEW_ENABLED: "false"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:8091:8091"
+    volumes:
+      - app-builder-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8091/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    networks: [agent-io, app]
+
+  # ------------------------------------------------------ profile: sandbox
+  tool-sandbox:
+    # Runs tenant-authored Java/Python tools. No platform credentials, an
+    # `internal` network shared only with core, all caps dropped except the
+    # three needed to drop privileges and signal the dropped uid.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/tool-sandbox:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["sandbox"]
+    <<: [*restart, *logging]
+    environment:
+      TOOL_SANDBOX_INTERNAL_TOKEN: ${TOOL_SANDBOX_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      TOOL_SANDBOX_MAX_CONCURRENT: ${TOOL_SANDBOX_MAX_CONCURRENT:-4}
+      TOOL_SANDBOX_MAX_TIMEOUT_MS: ${TOOL_SANDBOX_MAX_TIMEOUT_MS:-15000}
+      TOOL_SANDBOX_MAX_MEMORY_MB: ${TOOL_SANDBOX_MAX_MEMORY_MB:-512}
+      TOOL_SANDBOX_REQUIRE_PRIVILEGE_DROP: "true"
+      TOOL_SANDBOX_SECCOMP: ${TOOL_SANDBOX_SECCOMP:-false}
+    # runc shares the host kernel with tenant code. Install gVisor and set
+    # TOOL_SANDBOX_RUNTIME=runsc for a user-space kernel (doctor warns on runc).
+    runtime: ${TOOL_SANDBOX_RUNTIME:-runc}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID, KILL]
+    tmpfs:
+      - /var/sandbox/work:mode=711,uid=0,gid=0,noexec,nosuid,nodev,size=256m
+      - /var/sandbox/cache:mode=755,uid=0,gid=0,noexec,nosuid,nodev,size=256m
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${TOOL_SANDBOX_MEM_LIMIT:-2g}
+          pids: 512
+    networks: [sandbox-net]
+
+  mcp-stdio-runner:
+    # Spawns STDIO MCP servers (tenant-chosen `npx`/`uvx` packages and the
+    # built-ins) away from core's secrets. One service, one address for core:
+    # MCP_STDIO_RUNNER_VARIANT=-browser swaps in the browser image (profile
+    # `browser`; the CLI sets it).
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/mcp-stdio-runner${MCP_STDIO_RUNNER_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["sandbox", "tools", "browser"]
+    <<: [*restart, *logging]
+    environment:
+      MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+    volumes:
+      - ../../examples/mcp-servers:/opt/mcp-servers:ro
+      - outreach-data:/var/lib/outreach
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8098/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:../../services/mcp-stdio-runner/seccomp-profile.json
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits:
+          memory: ${MCP_STDIO_RUNNER_MEM_LIMIT:-1g}
+          pids: 256
+    networks: [mcp-stdio-net]
+
+volumes:
+  postgres-data:
+  valkey-data:
+  seaweedfs-data:
+  keycloak-db-data:
+  sidecar-workspace:
+  core-mcp-data:
+  temporal-db-data:
+  redpanda-data:
+  loki-data:
+  promtail-positions:
+  prometheus-data:
+  alertmanager-data:
+  grafana-data:
+  langfuse-postgres-data:
+  langfuse-clickhouse-data:
+  langfuse-clickhouse-logs:
+  langfuse-valkey-data:
+  langfuse-s3-data:
+  rl-trainer-data:
+  code-intel-data:
+  code-intel-docker-data:
+  app-builder-data:
+  outreach-data:
+
+# Segmented networks: a compromise of one group cannot reach another except
+# through a service that legitimately bridges both (core, keycloak).
+networks:
+  data-tier: {}        # postgres, pgbouncer, valkey, seaweedfs, keycloak-db (+core, keycloak)
+  observability: {}    # prometheus/grafana/loki/langfuse (+core for OTLP/scrape)
+  app: {}              # web (incl. platform-admin), core (+keycloak, app-builder, caddy)
+  agent-io: {}         # sidecar, temporal, redpanda, livekit, code-intel, ... (+core)
+  sandbox-net:
+    internal: true     # core <-> tool-sandbox only; no egress at all
+  # core <-> mcp-stdio-runner; needs egress to npm/pypi. Tenant-chosen MCP servers
+  # run here, so on a cloud VM block the metadata endpoint and private ranges for
+  # this bridge (and code-exec-egress) in the host firewall - Docker has no
+  # per-network egress filter. `scripts/vegaduta doctor` prints the rules:
+  #   B=br-$(docker network inspect -f '{{printf "%.12s" .Id}}' <project>_mcp-stdio-net)
+  #   iptables -I DOCKER-USER -i $B ! -o $B -d 169.254.0.0/16 -j DROP   # + 168.63.129.16, 10/8, 172.16/12, 192.168/16
+  mcp-stdio-net: {}
+  code-exec:
+    internal: true     # code-intel <-> code-intel-docker (the dind API) only
+  code-exec-egress: {} # code-intel-docker's own outbound; no other member
+  docker-api:
+    internal: true     # promtail <-> docker-socket-proxy only
+  seaweedfs-metrics:
+    internal: true     # prometheus <-> seaweedfs :9327 only (keeps weed's open internal ports off observability)

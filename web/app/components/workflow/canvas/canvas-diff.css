@@ -1,0 +1,13 @@
+/* Version-diff "Show on canvas" overlay. Classes come from diffDecorations.ts. */
+.react-flow__node.wf-diff-added .wfx-node {
+  outline: 2px solid var(--ax-green, var(--hud-ok, #22c55e));
+  outline-offset: 2px;
+}
+.react-flow__node.wf-diff-changed .wfx-node {
+  outline: 2px dashed var(--ax-amber, var(--hud-warn, #f59e0b));
+  outline-offset: 2px;
+}
+.react-flow__edge.wf-diff-added .react-flow__edge-path {
+  stroke: var(--ax-green, var(--hud-ok, #22c55e));
+  stroke-width: 3;
+}

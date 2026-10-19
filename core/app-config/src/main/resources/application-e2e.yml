@@ -1,0 +1,26 @@
+# "e2e" Spring profile - a genuine feature flag, same pattern as the
+# existing security/knowledge/mcp profiles (opt-in, additive, zero effect
+# unless explicitly activated). NOT for production or even a shared
+# dev/staging environment - activate it only when running the Playwright
+# suite (web/e2e/) locally, to relax constraints that exist specifically to
+# stop abuse from a single source doing exactly what an E2E run legitimately
+# needs to do many times in a row: sign up dozens of throwaway tenants in
+# one sitting.
+#
+# Usage (PowerShell):
+#   .\run-core.ps1 -Profiles "security,knowledge,mcp,e2e"
+#
+# This file only needs to override values that differ from application.yml's
+# defaults - Spring Boot merges application-e2e.yml on top of application.yml
+# for whichever profiles are active, it doesn't replace it.
+app:
+  signup:
+    rate-limit:
+      # Default is 5/hour/IP (application.yml) - a full default E2E run signs
+      # up roughly 25-40 tenants from one machine, so this needs to be well
+      # above that. 1000 is deliberately generous rather than precisely
+      # tuned - the point is "stop being the bottleneck," not "match the
+      # suite's exact signup count," since that count changes as specs are
+      # added.
+      max-attempts: 1000
+      window-minutes: 5

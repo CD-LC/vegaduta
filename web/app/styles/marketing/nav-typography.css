@@ -1,0 +1,305 @@
+/* ---------------------------------------------------------------------------
+ * 7. MARQUEE RAIL
+ * The "works with everything" proof strip — the one element every integration
+ * platform ships and this page did not have. Duplicate the track in markup,
+ * mark the copy aria-hidden; the animation translates exactly -50%.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-marquee {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marketing-root .mkt-marquee__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: var(--mkt-marquee-gap, 2.5rem);
+  padding-block: 0.25rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-marquee__track {
+    animation: mkt-scroll var(--mkt-marquee-duration, 46s) linear infinite;
+  }
+  .marketing-root .mkt-marquee:hover .mkt-marquee__track,
+  .marketing-root .mkt-marquee:focus-within .mkt-marquee__track,
+  .marketing-root .mkt-marquee[data-paused="true"] .mkt-marquee__track {
+    animation-play-state: paused;
+  }
+  .marketing-root .mkt-marquee__track--reverse {
+    animation-direction: reverse;
+  }
+}
+
+/* Without motion the track must not rest at a half-off-screen position, so it
+ * collapses to a normal scrollable row. */
+@media (prefers-reduced-motion: reduce) {
+  .marketing-root .mkt-marquee {
+    overflow-x: auto;
+  }
+  .marketing-root .mkt-marquee__track {
+    animation: none;
+  }
+}
+
+@keyframes mkt-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* RTL (ar/ur/ks/sd — `dir` is set on <html>): the overflowing track is
+ * anchored to the RIGHT edge, so the second copy sits to the left. Sliding
+ * -50% would walk into empty space; +50% walks into the duplicate and the
+ * loop stays seamless. Only the name changes — duration, pause-on-hover and
+ * the reduced-motion collapse above still apply. (2026-09-17, hero marquee) */
+@media (prefers-reduced-motion: no-preference) {
+  [dir="rtl"] .marketing-root .mkt-marquee__track {
+    animation-name: mkt-scroll-rtl;
+  }
+}
+
+@keyframes mkt-scroll-rtl {
+  to {
+    transform: translateX(50%);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 8. SCROLL REVEAL
+ * Pure CSS, no IntersectionObserver, no JS bundle cost. Progressive
+ * enhancement in the strict sense: with no support (or reduced motion) the
+ * element is simply already visible. There is no JS that might fail to run
+ * and leave content at opacity 0 — the classic scroll-library failure that
+ * hides a whole page from a crawler or a slow phone.
+ * ------------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes mkt-rise {
+      from {
+        opacity: 0;
+        transform: translateY(26px);
+      }
+    }
+
+    .marketing-root .mkt-reveal {
+      animation: mkt-rise linear backwards;
+      animation-timeline: view();
+      animation-range: entry 4% cover 26%;
+    }
+
+    /* Stagger a grid's children without hand-numbering delays: each child gets
+     * its own view timeline, so they resolve in scroll order for free. */
+    .marketing-root .mkt-reveal-group > * {
+      animation: mkt-rise linear backwards;
+      animation-timeline: view();
+      animation-range: entry 2% cover 22%;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 9. NAV
+ * A header that condenses on scroll. `.is-stuck` is toggled by the shell from
+ * a sentinel IntersectionObserver — no scroll listener, no layout thrash.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid transparent;
+  background: color-mix(in oklab, var(--mkt-canvas) 62%, transparent);
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+@supports (backdrop-filter: blur(4px)) {
+  .marketing-root .mkt-nav {
+    backdrop-filter: blur(14px) saturate(150%);
+  }
+}
+
+.marketing-root .mkt-nav.is-stuck {
+  background: color-mix(in oklab, var(--mkt-canvas) 86%, transparent);
+  border-bottom-color: var(--mkt-line);
+  box-shadow: var(--mkt-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+ * 10. TYPOGRAPHY EXTENSIONS
+ * The 2026-09-11 scale stays exactly as it is (roles, weights, tracking).
+ * This adds the roles it was missing and fixes the one thing it could not:
+ * the hero headline did not scale between its 640px and 1024px steps, so on a
+ * 900px tablet it rendered at the 48px phone size against a 900px measure.
+ * ------------------------------------------------------------------------ */
+
+/* DISPLAY SIZING — corrected 2026-09-12 after direct feedback: "fonts are
+ * big, so cheap".
+ *
+ * The first pass of this file set the hero ceiling at 72px and the section
+ * heading at 44px. That was wrong, and predictably so: oversized display type
+ * is the single strongest visual tell of a template. The pages this product
+ * is measured against are all markedly SMALLER at the top end —
+ * Linear ~56px, Stripe ~54px, Vercel ~48-56px, Anthropic ~48px — and they buy
+ * their presence from whitespace, tracking and restraint instead of from
+ * size. A 72px headline does not read as confident, it reads as a headline
+ * compensating.
+ *
+ * So the ceiling comes down to 52px and the curve is gentler (1.9vw rather
+ * than 3.6vw), which also fixes a second-order problem: at 3.6vw the headline
+ * grew faster than its measure, so on a wide monitor it hit the ceiling while
+ * the column beside it stayed the same width.
+ *
+ * Tracking tightens as size grows, which is how display type is actually cut:
+ * -0.028em was applied uniformly before, so the 36px phone rendering was
+ * over-tightened and the 72px desktop one under-tightened. */
+.marketing-root .mkt-h1 {
+  font-size: clamp(2rem, 1.5rem + 1.9vw, 3.25rem); /* 32 → 52px */
+  line-height: 1.08;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+@media (min-width: 1024px) {
+  .marketing-root .mkt-h1 {
+    letter-spacing: -0.028em;
+  }
+}
+
+.marketing-root .mkt-h2 {
+  font-size: clamp(1.5rem, 1.25rem + 1.05vw, 2rem); /* 24 → 32px */
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+
+/* The role the scale was missing: a heading BETWEEN section-h2 and
+ * card-title. Bands were reaching for `text-2xl font-semibold` ad hoc. */
+.marketing-root .mkt-h3 {
+  font-family: var(--font-marketing-display), var(--font-geist-loaded), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+}
+
+/* Card titles came down a step with everything else — an 18/20px title inside
+ * a 14px card body was a 1.43 ratio, tighter than the page's own scale. */
+.marketing-root .mkt-card-title {
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.35;
+  letter-spacing: -0.011em;
+}
+
+.marketing-root .mkt-lead {
+  font-size: clamp(1rem, 0.95rem + 0.22vw, 1.125rem); /* 16 → 18px */
+  line-height: 1.55;
+}
+
+.marketing-root .mkt-section-sub {
+  font-size: 1rem; /* 16px at every width — 18px sub under a 32px h2 crowded it */
+  line-height: 1.6;
+}
+
+/* Whitespace does the work the type size was doing. Premium pages are not
+ * denser than this one, they are emptier: the band rhythm goes up as the type
+ * comes down, and the header cluster gets a real gap under it. */
+.marketing-root {
+  --mkt-band-y: 5rem;
+  --mkt-band-y-lg: 7.5rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-root {
+    --mkt-band-y: 7rem;
+    --mkt-band-y-lg: 10rem;
+  }
+}
+
+.marketing-root .mkt-head {
+  gap: 1rem;
+}
+
+/* MONO MICRO-LABELS — the change with the largest identity payoff.
+ * Every technical-product page this competes with sets its uppercase kickers,
+ * counts and telemetry labels in mono; it is the cheapest single signal that
+ * a page belongs to a developer product rather than a template. Geist Mono is
+ * already loaded app-wide, so this costs zero additional font weight, and it
+ * lands on the EXISTING .mkt-eyebrow / .mkt-badge roles so every current call
+ * site picks it up with no component edit. */
+.marketing-root .mkt-eyebrow,
+.marketing-root .mkt-badge,
+.marketing-root .mkt-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-feature-settings:
+    "tnum" 1,
+    "zero" 1;
+  letter-spacing: 0.12em;
+}
+
+.marketing-root .mkt-eyebrow {
+  color: var(--mkt-ink-2);
+}
+
+/* Tabular figures wherever a number is a fact rather than prose — stat tiles
+ * stop jittering as they count, and columns of counts actually line up. */
+.marketing-root .mkt-num {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ONE gradient-text treatment for the whole funnel. The hero currently runs a
+ * four-stop violet→teal→green sweep across four wrapped lines, which reads as
+ * a rainbow rather than an accent; this is a two-stop brand ramp with a hard
+ * fallback colour for any engine that drops background-clip. */
+/* Restrained 2026-09-12 with the display sizes, same feedback ("so cheap").
+ *
+ * This was a full violet -> cyan sweep, i.e. a hue traverse of roughly 120
+ * degrees across a single clause. At 72px across four wrapped lines that is
+ * not an accent, it is a rainbow, and a multi-hue headline gradient is the
+ * second-strongest template tell after oversized type — every free template
+ * ships one, and none of Linear, Stripe, Vercel or Anthropic do.
+ *
+ * What replaces it is a TONAL ramp: the same brand accent, shifted about 18%
+ * toward the flow hue at the far end. It reads as light falling across the
+ * words rather than as colour doing a trick, and it still gives the clause
+ * the lift the solid colour alone would not. The flow cyan keeps its job
+ * elsewhere (flow lines, live dots) where a distinct hue is the point. */
+.marketing-root .mkt-gradient-text {
+  color: var(--mkt-accent);
+  background-image: linear-gradient(
+    100deg,
+    var(--mkt-accent) 0%,
+    color-mix(in oklab, var(--mkt-accent) 82%, var(--mkt-flow)) 100%
+  );
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .marketing-root .mkt-gradient-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Descenders in Sora at display size clip against the text box without
+     * this — a `g` loses its tail on WebKit. */
+    padding-block-end: 0.06em;
+  }
+}
+
+.marketing-root .mkt-ink-2 {
+  color: var(--mkt-ink-2);
+}
+.marketing-root .mkt-ink-3 {
+  color: var(--mkt-ink-3);
+}
+
+.marketing-root ::selection {
+  background: color-mix(in oklab, var(--mkt-accent) 32%, transparent);
+  color: var(--mkt-ink);
+}

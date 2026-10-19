@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "headers": {
+      "X-Razorpay-Event-Id": "evt_fixture_malformed_0000000001",
+      "X-Razorpay-Signature": "7f8dc2db6589b6c9f01199580487d617d8032f55129d05be7b2ef15385b1b801"
+    },
+    "note": "DELIBERATELY MALFORMED - required by B9-PR4's own acceptance criteria ('a deliberately malformed fixture fails the schema test'). payload.subscription.entity is missing its 'id' field entirely, violating _envelope.schema.json's required:[\"id\"] constraint. The contract test must assert this fixture's body FAILS schema validation, not that it passes - if a future edit accidentally makes this fixture valid again, that assertion (not just 'does it parse') is what catches it."
+  },
+  "body": {
+    "entity": "event",
+    "account_id": "acc_fixture0000000001",
+    "event": "subscription.activated",
+    "contains": [
+      "subscription"
+    ],
+    "payload": {
+      "subscription": {
+        "entity": {
+          "plan_id": "plan_fixture_premium_monthly",
+          "status": "active"
+        }
+      }
+    },
+    "created_at": 1753000200
+  }
+}

@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Service Topology &amp; Runtime Map — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="architecture" data-page="service-topology.html" data-doc="VD-AR-007" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>Service Topology &amp; Runtime Map</div>
+<div class="doc-meta" data-auto></div>
+<h1>Service Topology &amp; Runtime Map</h1>
+<p class="lede">Every runtime service this repository ships, how it is placed by Docker Compose (Lite and Full tiers) and by the Helm charts, how the pieces reach each other, which are stateful, and which are pinned to one replica.</p>
+
+<div class="callout callout-note">
+  <div class="callout-title">What "verified" means on this page</div>
+  Facts are read from the declared configuration: <code>deploy/compose/*.yml</code>, <code>deploy/helm/charts/*/values.yaml</code> and <code>deploy/README.md</code>. Your running stack reflects the profiles and values you chose; check it with <code>scripts/vegaduta status</code> or <code>kubectl get pods</code>.
+</div>
+
+<dl class="props">
+  <dt>Compose</dt><dd><code>deploy/compose/lite.yml</code> (Lite) and <code>deploy/compose/docker-compose.yml</code> (Full, with profiles); <code>docker-compose.domain.yml</code> adds Caddy and public URLs</dd>
+  <dt>Kubernetes</dt><dd>Umbrella chart <code>deploy/helm/charts/vegaduta</code>; each dependency bundled or bring-your-own (preview)</dd>
+  <dt>Related</dt><dd><a href="system-architecture.html">System Architecture</a> · <a href="../deployment/compose-stack.html">Docker Compose stack</a> · <a href="../appendix/ports-services.html">Ports &amp; Service Matrix</a></dd>
+</dl>
+
+<h2>1. Runtime map</h2>
+<pre class="mermaid">
+flowchart LR
+  U["Browser / API clients"] --> EDGE["Caddy (domain overlay) or Ingress"]
+  subgraph APP["app tier"]
+    WEB["web 3000"]
+    WADM["web-admin 3001"]
+    KC["keycloak 8080"]
+    CORE["core 8080"]
+    AB["app-builder 8091 (builder)"]
+    CI["code-intel 8090 (code-intel)"]
+  end
+  subgraph AGENT["agent-io / sandboxes"]
+    SC["sidecar 8001"]
+    TMP["temporal 7233 (temporal)"]
+    RP["redpanda 9092 (events)"]
+    LK["livekit + voice-agent (voice)"]
+    TS["tool-sandbox 8095 (sandbox)"]
+    MCP["mcp-stdio-runner 8097 (tools)"]
+  end
+  subgraph DATA["data tier"]
+    PGB["pgbouncer 6432"]
+    PG[("postgres 5432 pgvector + AGE")]
+    VK[("valkey 6379")]
+    S3["seaweedfs S3 8333"]
+    KDB[("keycloak-db")]
+  end
+  EDGE --> WEB
+  EDGE --> WADM
+  EDGE --> KC
+  EDGE --> CORE
+  EDGE --> CI
+  EDGE --> AB
+  CORE --> PGB --> PG
+  CORE --> VK
+  CORE --> S3
+  CORE --> SC
+  CORE --> TMP
+  CORE --> RP
+  CORE --> LK
+  CORE --> TS
+  CORE --> MCP
+  KC --> KDB
+  AB --> CI
+  AB --> CORE
+</pre>
+<p>Browsers call <code>core</code>, <code>keycloak</code>, <code>code-intel</code> and <code>app-builder</code> directly at their public hostnames; <code>web</code> and <code>web-admin</code> do not proxy API calls for the browser (see <a href="../decisions/adr-0007-build-time-frontend-config.html">ADR-0007</a> for how the URLs reach the client bundle). Profile names are shown in parentheses; services without one are in the Full core set.</p>
+
+<h2>2. Service matrix</h2>
+<p>Host ports are bound to <code>127.0.0.1</code> (<code>BIND_ADDR</code>) unless noted and can be changed with the <code>*_HOST_PORT</code> variables. The Full compose file defines 37 services.</p>
+<table>
+  <thead><tr><th>Service</th><th>Container port</th><th>Host port (Compose)</th><th>Lite</th><th>Full (profile)</th><th>Helm chart</th></tr></thead>
+  <tbody>
+    <tr><td>core</td><td>8080</td><td>8080</td><td>yes</td><td>core set</td><td><code>core</code> (+ migrate Job)</td></tr>
+    <tr><td>web</td><td>3000</td><td>3000</td><td>yes</td><td>core set</td><td><code>web</code></td></tr>
+    <tr><td>web-admin</td><td>3001</td><td>3001</td><td>—</td><td>core set</td><td><code>web-admin</code></td></tr>
+    <tr><td>keycloak</td><td>8080</td><td>8180</td><td>yes (dev-file store)</td><td>core set (+ <code>keycloak-db</code>)</td><td><code>keycloak</code> (bundled) or any OIDC issuer</td></tr>
+    <tr><td>postgres (pgvector + AGE)</td><td>5432</td><td>5432</td><td>yes</td><td>core set (+ <code>pgbouncer</code> 6432, <code>db-roles</code>)</td><td><code>postgres</code> (CloudNativePG) or external</td></tr>
+    <tr><td>valkey</td><td>6379</td><td>6379</td><td>yes</td><td>core set</td><td><code>valkey</code> or external Redis API</td></tr>
+    <tr><td>seaweedfs (S3)</td><td>8333</td><td>8333</td><td>— (local disk)</td><td>core set</td><td><code>seaweedfs</code> or external S3</td></tr>
+    <tr><td>sidecar</td><td>8001</td><td>8001</td><td>profile <code>rag</code></td><td>core set</td><td><code>sidecar</code></td></tr>
+    <tr><td>core-worker / core-jobs</td><td>—</td><td>none</td><td>—</td><td><code>temporal</code> / <code>jobs</code></td><td><code>core-worker</code> / <code>core-jobs</code></td></tr>
+    <tr><td>temporal, temporal-ui, temporal-postgresql</td><td>7233, 8080</td><td>7233, 8088</td><td>—</td><td><code>temporal</code></td><td>external Temporal (<code>global.temporal</code>)</td></tr>
+    <tr><td>redpanda (Kafka API)</td><td>9092</td><td>9092</td><td>—</td><td><code>events</code></td><td>external Kafka</td></tr>
+    <tr><td>prometheus, grafana, loki, promtail, alertmanager, valkey-exporter</td><td>9090, 3000, 3100, —, 9093, —</td><td>9090, 3003, 3100, —, 9093, —</td><td>—</td><td><code>observability</code></td><td>Prometheus Operator objects (rules shared with Compose)</td></tr>
+    <tr><td>langfuse web/worker + postgres, clickhouse, valkey, S3</td><td>3000</td><td>3002 (web)</td><td>—</td><td><code>tracing</code></td><td>your OpenTelemetry endpoint</td></tr>
+    <tr><td>livekit, voice-agent</td><td>7880/7881, UDP 50000-50100</td><td>same (<code>LIVEKIT_BIND_ADDR</code>)</td><td>—</td><td><code>voice</code></td><td><code>voice-agent</code></td></tr>
+    <tr><td>code-intel (+ code-intel-docker, privileged)</td><td>8090</td><td>8090</td><td>—</td><td><code>code-intel</code></td><td><code>code-intel</code></td></tr>
+    <tr><td>app-builder</td><td>8091</td><td>8091</td><td>—</td><td><code>builder</code></td><td><code>app-builder</code></td></tr>
+    <tr><td>tool-sandbox</td><td>8095</td><td>none</td><td>—</td><td><code>sandbox</code></td><td><code>tool-sandbox</code></td></tr>
+    <tr><td>mcp-stdio-runner</td><td>8097</td><td>none</td><td>—</td><td><code>tools</code> / <code>browser</code> / <code>sandbox</code></td><td><code>mcp-stdio-runner</code></td></tr>
+    <tr><td>rl-trainer</td><td>8095</td><td>8095</td><td>—</td><td><code>rl</code></td><td><code>rl-trainer</code></td></tr>
+    <tr><td>caddy (edge)</td><td>80, 443</td><td>80, 443 on <code>PUBLIC_BIND_ADDR</code> (default all interfaces)</td><td>—</td><td>domain overlay</td><td>your Ingress / Gateway</td></tr>
+  </tbody>
+</table>
+
+<h2>3. How services find each other</h2>
+<table>
+  <thead><tr><th>Path</th><th>Compose</th><th>Helm</th></tr></thead>
+  <tbody>
+    <tr><td>Browser to any app</td><td><code>localhost</code> ports, or with the domain overlay the subdomains <code>app.</code>, <code>admin.</code>, <code>api.</code>, <code>auth.</code> (plus <code>codeintel.</code>, <code>builder.</code>, <code>livekit.</code>) on <code>BASE_DOMAIN</code>, routed by Caddy</td><td>Ingress (or Gateway API) hostnames from values</td></tr>
+    <tr><td>core to sidecar, S3, sandboxes, Temporal, Kafka</td><td>Compose DNS (<code>sidecar</code>, <code>seaweedfs</code>, <code>tool-sandbox:8095</code>, <code>mcp-stdio-runner:8097</code>, <code>temporal</code>, <code>redpanda</code>)</td><td>Kubernetes Services, or the external endpoints you configure</td></tr>
+    <tr><td>core to Postgres</td><td><code>pgbouncer:6432</code> (Full, session pooling) or <code>postgres:5432</code> (Lite)</td><td>CNPG or external Postgres</td></tr>
+    <tr><td>JWT validation</td><td>Issuer <code>PUBLIC_AUTH_URL/realms/agentic-ai</code>; keys fetched from <code>http://keycloak:8080</code>; <code>KEYCLOAK_ADDITIONAL_ISSUERS</code> for extra issuers — see <a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a></td><td>Same rule; any OIDC issuer</td></tr>
+    <tr><td>Traces</td><td>core to <code>langfuse-web</code> on the <code>observability</code> network (profile <code>tracing</code>)</td><td>your OTLP endpoint</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Stateful services and replica pinning</h2>
+<table>
+  <thead><tr><th>Service</th><th>State</th><th>Constraint</th></tr></thead>
+  <tbody>
+    <tr><td>postgres</td><td>All tenant and control-plane data; schema-per-tenant</td><td>PgBouncer must stay in session mode because tenants are selected via <code>search_path</code></td></tr>
+    <tr><td>keycloak</td><td>Realm, users, clients (<code>keycloak-db</code> in Full, <code>keycloak-data</code> volume in Lite)</td><td>The realm JSON is imported only once; the live realm is the source of truth afterwards</td></tr>
+    <tr><td>core (API)</td><td>Stateless apart from Postgres, Valkey and object storage</td><td>Helm <code>core.replicaCount</code> must stay 1 until every <code>replicaReadiness</code> flag is true (render fails otherwise); rollouts use <code>maxUnavailable: 0</code></td></tr>
+    <tr><td>core-jobs</td><td>None of its own</td><td>Exactly one replica unless leader election is enabled (not every sweep is proven safe to run twice)</td></tr>
+    <tr><td>seaweedfs</td><td><code>seaweedfs-data</code> volume</td><td>Single node in the bundled setup</td></tr>
+  </tbody>
+</table>
+
+<h2>5. Compose network segmentation</h2>
+<p>The Full compose file uses six bridge networks: <code>data-tier</code> (postgres, pgbouncer, valkey, seaweedfs, keycloak-db, plus keycloak and core), <code>observability</code> (Langfuse, Loki, Promtail, Grafana, Prometheus, Alertmanager, valkey-exporter, seaweedfs, core), <code>app</code> (web, web-admin, keycloak, app-builder, core), <code>agent-io</code> (sidecar, code-intel, app-builder, livekit, voice-agent, redpanda, temporal*, rl-trainer, plus keycloak and core), <code>sandbox-net</code> (tool-sandbox, core) and <code>mcp-stdio-net</code> (mcp-stdio-runner, core). The Helm charts render per-component <code>NetworkPolicy</code> objects instead.</p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/README.md</code> — tiers, profiles, essential vs plug-and-play services.</li>
+  <li><code>deploy/compose/docker-compose.yml</code>, <code>lite.yml</code>, <code>docker-compose.domain.yml</code> — services, ports, networks, volumes.</li>
+  <li><code>deploy/helm/README.md</code>, <code>deploy/helm/charts/core/values.yaml</code>, <code>charts/core-jobs/values.yaml</code> — replica guards.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

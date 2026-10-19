@@ -1,0 +1,24 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-model-pricing",
+      "method": "POST",
+      "path": "/api/model-pricing",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.modelIds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$[*].inputPerMillionUsd",
+          "$[*].modelId",
+          "$[*].outputPerMillionUsd"
+        ]
+      }
+    }
+  ]
+}

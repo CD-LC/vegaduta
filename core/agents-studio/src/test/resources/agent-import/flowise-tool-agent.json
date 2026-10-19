@@ -1,0 +1,49 @@
+{
+  "description": "An agent designed to use tools and LLM with function calling capability to provide responses",
+  "nodes": [
+    {
+      "id": "calculator_1", "type": "customNode", "position": { "x": 800, "y": 72 },
+      "data": { "id": "calculator_1", "label": "Calculator", "name": "calculator", "type": "Calculator", "category": "Tools", "inputs": {} }
+    },
+    {
+      "id": "serpAPI_0", "type": "customNode", "position": { "x": 400, "y": 72 },
+      "data": { "id": "serpAPI_0", "label": "Serp API", "name": "serpAPI", "type": "SerpAPI", "category": "Tools",
+                "credential": "5e0c2c0e-aaaa-bbbb-cccc-111122223333", "inputs": {} }
+    },
+    {
+      "id": "customTool_0", "type": "customNode", "position": { "x": 400, "y": 300 },
+      "data": { "id": "customTool_0", "label": "Custom Tool", "name": "customTool", "type": "CustomTool", "category": "Tools", "inputs": { "selectedTool": "tool-uuid" } }
+    },
+    {
+      "id": "bufferMemory_1", "type": "customNode", "position": { "x": 0, "y": 0 },
+      "data": { "id": "bufferMemory_1", "label": "Buffer Memory", "name": "bufferMemory", "type": "BufferMemory", "category": "Memory",
+                "inputs": { "sessionId": "", "memoryKey": "chat_history" } }
+    },
+    {
+      "id": "chatOpenAI_0", "type": "customNode", "position": { "x": 0, "y": 200 },
+      "data": { "id": "chatOpenAI_0", "label": "ChatOpenAI", "name": "chatOpenAI", "type": "ChatOpenAI", "category": "Chat Models",
+                "credential": "11111111-2222-3333-4444-555555555555",
+                "inputs": { "modelName": "gpt-4o-mini", "temperature": 0.9, "streaming": true, "maxTokens": "", "topP": "", "openAIApiKey": "sk-should-never-be-read" } }
+    },
+    {
+      "id": "stickyNote_0", "type": "stickyNote", "position": { "x": 0, "y": 0 },
+      "data": { "id": "stickyNote_0", "label": "Sticky Note", "name": "stickyNote", "type": "StickyNote", "category": "Utilities", "inputs": { "note": "LLM has to be function calling compatible" } }
+    },
+    {
+      "id": "toolAgent_0", "type": "customNode", "position": { "x": 1200, "y": 100 },
+      "data": { "id": "toolAgent_0", "label": "Tool Agent", "name": "toolAgent", "type": "AgentExecutor", "category": "Agents",
+                "inputs": {
+                  "tools": ["{{calculator_1.data.instance}}", "{{serpAPI_0.data.instance}}"],
+                  "memory": "{{bufferMemory_1.data.instance}}",
+                  "model": "{{chatOpenAI_0.data.instance}}",
+                  "chatPromptTemplate": "",
+                  "systemMessage": "You are a helpful research assistant. Use tools when needed and cite sources.",
+                  "maxIterations": ""
+                } }
+    }
+  ],
+  "edges": [
+    { "source": "calculator_1", "target": "toolAgent_0", "type": "buttonedge", "id": "e1" },
+    { "source": "chatOpenAI_0", "target": "toolAgent_0", "type": "buttonedge", "id": "e2" }
+  ]
+}

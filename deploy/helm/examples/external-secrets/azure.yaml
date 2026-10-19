@@ -1,0 +1,157 @@
+# External Secrets Operator -> Azure Key Vault. Produces the Secrets that values-azure.yaml reads
+# (names and keys are the chart's contract, see "Secrets the charts read" in deploy/helm/README.md).
+#
+#   kubectl apply -f azure.yaml -n vegaduta
+#
+# STATUS: schema-checked with kubeconform -ignore-missing-schemas (the External Secrets CRDs are not in
+# the schema catalog used, so these documents were NOT validated against the CRD). Not applied to a
+# cluster; ESO and Azure were not contacted. Vault URL, ids and secret names are placeholders.
+#
+# Key Vault secret names allow only letters, digits and hyphens, so each value is its own Key Vault
+# secret (create them first; values are yours, never commit them):
+#   vegaduta-app-encryption-key      openssl rand -base64 32
+#   vegaduta-sidecar-shared-secret, vegaduta-mcp-stdio-sidecar-shared-secret, vegaduta-code-intel-token,
+#   vegaduta-tool-sandbox-token, vegaduta-app-builder-service-token, vegaduta-app-builder-encryption-key,
+#   vegaduta-rl-trainer-token        random tokens
+#   vegaduta-postgres-password, vegaduta-redis-key, vegaduta-oidc-client-secret
+#   vegaduta-kafka-jaas              only with Event Hubs (the full JAAS line, see the last document)
+#
+# ESO version: these use apiVersion external-secrets.io/v1, which only recent External Secrets Operator
+# releases serve (older ones serve v1beta1 only; check `kubectl api-resources --api-group=external-secrets.io`).
+# On an older ESO change every apiVersion to external-secrets.io/v1beta1. Neither version was run here.
+#
+# Auth: Azure Workload Identity for ESO. The ServiceAccount below is annotated with the client id of a
+# managed identity that has the "Key Vault Secrets User" role on the vault, with a federated credential for
+# system:serviceaccount:vegaduta:external-secrets-vegaduta (see the ESO Azure Key Vault documentation for
+# the exact workload identity requirements of your ESO version).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-secrets-vegaduta
+  namespace: vegaduta
+  annotations:
+    azure.workload.identity/client-id: 00000000-0000-0000-0000-000000000000
+    azure.workload.identity/tenant-id: 00000000-0000-0000-0000-000000000000   # your Entra tenant id
+---
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: azure-key-vault
+  namespace: vegaduta
+spec:
+  provider:
+    azurekv:
+      authType: WorkloadIdentity
+      tenantId: 00000000-0000-0000-0000-000000000000    # your Entra tenant id; some ESO versions require it
+      vaultUrl: https://vegaduta-kv.vault.azure.net
+      serviceAccountRef:
+        name: external-secrets-vegaduta
+---
+# APP_ENCRYPTION_KEY: one Secret for core, core-jobs, core-worker and the migrate Job.
+# creationPolicy: Orphan is what keeps this Secret when the ExternalSecret is deleted (kubectl delete -f,
+# a GitOps prune): with the default Owner the Secret carries an ownerReference to the ExternalSecret and
+# Kubernetes garbage-collects it. deletionPolicy: Retain is a different thing: it keeps the Secret when the
+# value disappears from the store. Both are set here because losing this value makes every encrypted
+# credential in the database unreadable (AGENTS.md rule 5). Orphan also means that deleting the ExternalSecret
+# leaves a Secret nobody refreshes. Rotate with APP_ENCRYPTION_KEY_PREVIOUS (see the production checklist),
+# never by overwriting the stored value. Behaviour per the ESO documentation; not run against ESO here.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-core-app
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target:
+    name: vegaduta-core-app                       # = global.core.appSecret.existingSecret
+    creationPolicy: Orphan
+    deletionPolicy: Retain
+  data:
+    - { secretKey: APP_ENCRYPTION_KEY, remoteRef: { key: secret/vegaduta-app-encryption-key } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-internal
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target:
+    name: vegaduta-internal                       # = global.internalSecret.existingSecret
+    creationPolicy: Orphan
+    deletionPolicy: Retain
+  data:
+    - { secretKey: SIDECAR_SHARED_SECRET,           remoteRef: { key: secret/vegaduta-sidecar-shared-secret } }
+    - { secretKey: MCP_STDIO_SIDECAR_SHARED_SECRET, remoteRef: { key: secret/vegaduta-mcp-stdio-sidecar-shared-secret } }
+    - { secretKey: CODE_INTEL_INTERNAL_TOKEN,       remoteRef: { key: secret/vegaduta-code-intel-token } }
+    - { secretKey: TOOL_SANDBOX_INTERNAL_TOKEN,     remoteRef: { key: secret/vegaduta-tool-sandbox-token } }
+    - { secretKey: APP_BUILDER_CORE_SERVICE_TOKEN,  remoteRef: { key: secret/vegaduta-app-builder-service-token } }
+    - { secretKey: APP_BUILDER_ENCRYPTION_KEY,      remoteRef: { key: secret/vegaduta-app-builder-encryption-key } }
+    - { secretKey: RL_TRAINER_INTERNAL_TOKEN,       remoteRef: { key: secret/vegaduta-rl-trainer-token } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-postgres
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target: { name: vegaduta-postgres, creationPolicy: Owner }     # = global.postgresql.existingSecret
+  data:
+    - { secretKey: password, remoteRef: { key: secret/vegaduta-postgres-password } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-valkey
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target: { name: vegaduta-valkey, creationPolicy: Owner }       # = global.valkey.existingSecret
+  data:
+    - { secretKey: password, remoteRef: { key: secret/vegaduta-redis-key } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-oidc
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target: { name: vegaduta-oidc, creationPolicy: Owner }         # = global.oidc.existingSecret
+  data:
+    - { secretKey: clientSecret, remoteRef: { key: secret/vegaduta-oidc-client-secret } }
+---
+# Event Hubs Kafka endpoint only (values-azure.yaml, global.kafka.existingSecret). The stored value is
+# the full JAAS line with the namespace connection string as the password:
+#   org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://...";
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-kafka
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target: { name: vegaduta-kafka, creationPolicy: Owner }        # = global.kafka.existingSecret
+  data:
+    - { secretKey: saslJaasConfig, remoteRef: { key: secret/vegaduta-kafka-jaas } }
+---
+# Blob connection string, only with objectStorage.credentials=static (the workload identity setup needs none).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-blob
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: azure-key-vault }
+  target: { name: vegaduta-blob, creationPolicy: Owner }         # = global.objectStorage.azure.existingSecret
+  data:
+    - { secretKey: connectionString, remoteRef: { key: secret/vegaduta-blob-connection-string } }

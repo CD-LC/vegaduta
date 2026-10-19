@@ -1,0 +1,179 @@
+@layer components {
+  /* ONE header row - brand -> page info -> menu -> status -> theme toggle,
+   * exactly the brief's order, all inside this single sticky bar (fixes the
+   * old two-bar stack; see the .topnav-items comment above for the bug this
+   * replaces). `flex-wrap` is the narrow-viewport fallback: below the width
+   * where everything fits on one line, the row wraps to a second line
+   * instead of clipping or scrolling anything. */
+  .app-topbar {
+    @apply sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[var(--surface-border)] px-6 py-3 backdrop-blur;
+    background-color: color-mix(in srgb, var(--surface-card) 90%, transparent);
+  }
+
+  :root[data-mode="dark"] .app-topbar {
+    background-color: color-mix(in srgb, var(--surface-page) 55%, transparent);
+    border-color: var(--glass-border);
+  }
+
+  /* Same transform-only wipe .panel used to carry on its own top edge - one
+   * shared "this instrument is alive" cue on the header every page shares
+   * instead of duplicated per-panel (panels get the solid accent border +
+   * dark-mode aura instead, see .panel::after above). */
+  .app-topbar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--hud-cyan), var(--hud-violet), transparent);
+    transform-origin: left center;
+    animation: hud-header-scan 4s ease-in-out infinite;
+  }
+
+  @keyframes hud-header-scan {
+    0% {
+      transform: scaleX(0.15);
+      opacity: 0.55;
+    }
+    50% {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scaleX(0.15);
+      opacity: 0.55;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-topbar::before {
+      animation: none;
+    }
+  }
+
+  /* "Page info" breadcrumb - the reference's small mono kicker line next to
+   * the brand, reusing the existing eyebrow/h1 pair (same DOM/text, so
+   * nothing that reads the page's <h1> breaks) just laid out and sized to
+   * sit inline in a single header row instead of stacked as a big page
+   * title. */
+  .app-topbar-title {
+    @apply flex shrink-0 items-baseline gap-1.5 border-l pl-3;
+    border-color: var(--hud-line);
+  }
+
+  .app-topbar-eyebrow {
+    @apply m-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--accent-500)];
+    font-family: var(--font-mono), monospace;
+  }
+
+  .app-topbar-title h1 {
+    @apply m-0 text-[13px] font-semibold text-[var(--text-primary)];
+    font-family: var(--font-mono), monospace;
+    letter-spacing: 0.2px;
+  }
+
+  /* Unused since primary nav moved to the floating bottom dock (see
+   * .bottom-dock below, and BottomDock.js) - kept only so nothing else in
+   * this file needs renumbering if TopNav.js is ever reintroduced. */
+  .app-topbar-nav {
+    @apply flex min-w-0 flex-1 items-center;
+  }
+
+  /* Right-hand cluster - status + theme + language + account, pinned to the
+   * end of the row via margin-left:auto so it stays right-aligned even as
+   * the row wraps. */
+  .app-topbar-controls {
+    @apply ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2;
+  }
+
+  /* pb-28 (not the old pb-16) - reserves room at the foot of every page for
+   * the floating bottom dock (.bottom-dock, fixed/out-of-flow) so it never
+   * overlaps the last bit of real content, on top of the scrolling polish
+   * pass ("reduce unnecessary page movement, smoother dashboard experience"). */
+  /* Direct feedback: "complete page width is not being used, only 40% of
+   * screen used... use the entire screen." The old max-w-5xl (1024px) cap
+   * here was the single choke point - every page renders through this one
+   * class (see AppShell.js), so removing the cap here fixes it everywhere
+   * at once, same "one shared rule, zero per-page changes" philosophy this
+   * class has always followed. A separate desktop-only web console (a
+   * dedicated mobile app is planned) means there's no longer a reason to
+   * hold back width for a phone-sized viewport that doesn't render this
+   * layout at all. Generous responsive side padding (clamp) instead of a
+   * fixed px-6 - content still breathes on an ultrawide monitor without
+   * artificially narrowing the container itself. */
+  .app-content {
+    @apply mx-auto w-full max-w-none flex-1 pb-12;
+    /* pt-6 (24px) plus the topbar's own 60px height, since .ax-topbar is
+     * now `position: fixed` and no longer reserves its own space in
+     * document flow (see .ax-topbar's comment above). */
+    padding-top: calc(60px + 1.5rem);
+    padding-left: clamp(1.25rem, 2.5vw, 3rem);
+    padding-right: clamp(1.25rem, 2.5vw, 3rem);
+    view-transition-name: ax-chrome-content;
+  }
+
+  /* Kept as aliases (no longer functionally different from .app-content
+   * now that full width is the default everywhere) purely so existing
+   * `wide`/`bleed` props on AppShell callers don't need to be touched. */
+  .app-content-wide {
+    @apply max-w-none;
+  }
+
+  .app-content-bleed {
+    @apply flex max-w-none flex-col px-4 pb-24;
+    padding-top: calc(60px + 1rem);
+  }
+
+  /* The 96px (pb-24) bottom padding above exists for a normally-scrolling
+   * bleed page (e.g. Admin Overview's dashboard grid) that needs room to
+   * clear the floating bottom dock. The workflow canvas is the other
+   * consumer of `bleed`, but it's a height-locked flex column, not a
+   * scrolling page (see .ax-wf-shell's min-height above it) - 96px of
+   * trailing padding after an already-fitted canvas was exactly the "so
+   * much gap[]" at the bottom of the screen direct feedback called out.
+   * Scoped to only the workflow route via :has() so Admin Overview's own
+   * bottom padding is untouched. */
+  .app-content-bleed:has(.ax-wf-shell) {
+    padding-bottom: 1rem;
+  }
+
+  /* Page-to-page transition - AppShell.js keys <main> on the current
+   * pathname, so React unmounts/remounts this element on every navigation
+   * and this animation replays each time, instead of the new page just
+   * snapping into place. Deliberately CSS-only (no animation library) -
+   * this is a one-shot mount animation, exactly what @keyframes already
+   * does well elsewhere in this file (fade-in-up on .panel/.auth-card). */
+  .app-page-transition {
+    animation: page-transition-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes page-transition-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Simple/Technical global toggle (UiModeProvider.js) - a compact
+   * segmented control, same visual family as .theme-mode-row's three-way
+   * light/dark/system switch below, so the topbar doesn't accumulate three
+   * visually different toggle styles. */
+  .ui-mode-toggle {
+    @apply flex items-center gap-0.5 rounded-full border border-[var(--surface-border)] bg-[var(--surface-hover)] p-0.5;
+  }
+
+  .ui-mode-toggle-btn {
+    @apply flex items-center gap-1.5 rounded-full border-0 bg-transparent px-2.5 py-1.5 text-xs font-medium text-[var(--text-faint)] shadow-none transition;
+    @apply hover:text-[var(--text-secondary)];
+  }
+
+  .ui-mode-toggle-btn-active {
+    @apply bg-[var(--surface-card)] text-[var(--accent-600)] shadow-sm;
+  }
+}

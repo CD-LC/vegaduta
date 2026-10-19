@@ -1,0 +1,24 @@
+# "shape-jobs-pool" profile - a NAMED pool of the jobs shape (webhooks, intake, billing; see
+# application-shape-jobs.yml `app.scheduling.pools`). Activate it AFTER "shape-jobs" and name the pool with
+# app.scheduling.pool (env APP_SCHEDULING_POOL). SchedulingPools then skips every product @Scheduled bean
+# (com.agenticai.core.*) except the classes of that pool and its app.scheduling.pool-lifecycle entry (the
+# per-JVM MCP/browser/sandbox sweeps, for a pool whose jobs run agent turns: intake), so nothing else ticks here.
+# The "ingest" pool predates this profile and keeps its own (application-shape-jobs-ingest.yml).
+#
+# This file owns the boot-time sweeps listed below: the pool owns none, so it skips the api shape's and the
+# jobs shape's (the same list as shape-jobs-ingest). Run here, AgentJobBootReconciliation would re-queue agent
+# jobs this pod cannot run. JobsPoolsCoverEveryJobTest keeps this list equal to that union. Boot listeners NOT
+# listed (DynamicMcpConnectionManager.reconnectEnabledOnStartup, SandboxArtifactRetention.onReady,
+# OfficialMcpRegistryClient.warmOnStartup) still run on every pool pod at boot.
+#
+# Honest limit: pollers are advisory-locked, so extra pods in a pool add failover and isolation, not parallelism.
+
+app:
+  scheduling:
+    skip-listener-classes:
+      - com.agenticai.core.agents.job.durability.AgentJobBootReconciliation
+      - com.agenticai.core.agents.quota.DailyQuotaResetScheduler
+      - com.agenticai.core.quality.dataset.EvalRunExecutor
+      - com.agenticai.core.quality.simulation.SimulationRunExecutor
+      - com.agenticai.core.omnichannel.demo.DemoTelegramBot
+      - com.agenticai.core.providers.LocalLlmPoolBootstrap

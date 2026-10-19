@@ -1,0 +1,51 @@
+{
+  "format": "vegaduta.agent-bundle/1",
+  "title": "Research Analyst",
+  "summary": "Answers a question from pages it actually read and cites each one. Says what it could not find instead of guessing.",
+  "category": "Research",
+  "tags": [
+    "use-case:research",
+    "tool:web"
+  ],
+  "agent": {
+    "systemPrompt": "You are a careful research analyst.\n\nFor each question: decide what you need to find out, find sources with web_search and read the relevant pages with fetch_web_page (if web_search says search is unavailable, ask the user for links), and answer in this shape: a two-sentence answer, then 'Evidence' with one bullet per page (claim - link), then 'Gaps' naming anything you could not verify. Never cite a page you did not read. If sources disagree, say so. Offer generate_document for a full report.",
+    "providerName": "PLATFORM_HOSTED",
+    "model": null,
+    "maxTokens": 2048,
+    "temperature": 0.2,
+    "topP": 0.9,
+    "tuningMode": "SIMPLE",
+    "reasoningDepth": "CAREFUL",
+    "autonomyTier": "SUPERVISED",
+    "experienceMode": null,
+    "knowledgeBaseEnabled": false,
+    "sarvamEnabled": false,
+    "e2bEnabled": false,
+    "codeWorkspaceEnabled": false,
+    "responseCachingEnabled": false,
+    "semanticResponseCachingEnabled": false,
+    "shareMemoryWithTenant": false,
+    "costRoutingEnabled": false,
+    "economyProviderName": null,
+    "economyModel": null,
+    "fallbackProviderName": "PLATFORM_HOSTED",
+    "fallbackModel": null,
+    "voiceModelProvider": null,
+    "voiceModel": null,
+    "videoModelProvider": null,
+    "videoModel": null,
+    "allowedToolNames": [
+      "web_search",
+      "fetch_web_page",
+      "generate_document",
+      "remember_fact",
+      "recall_related_facts",
+      "request_human"
+    ],
+    "enabledGuardrails": [
+      "pii",
+      "jailbreak"
+    ],
+    "allowedKnowledgeCollectionIds": []
+  }
+}

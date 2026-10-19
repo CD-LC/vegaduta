@@ -1,0 +1,78 @@
+# WhatsApp QR channel: link YOUR OWN WhatsApp number to VegaDūta as a
+# companion device (WhatsApp multi-device, via services/whatsapp-qr + Baileys).
+#
+#   docker compose -f deploy/compose/personal.yml -f deploy/compose/whatsapp-qr.yml \
+#     --env-file deploy/compose/.env --profile whatsapp-qr up -d
+#
+# (same overlay on lite.yml or docker-compose.yml; build the image once with
+# `docker compose -f <base> -f deploy/compose/whatsapp-qr.yml build whatsapp-qr`)
+#
+# This is NOT part of any default stack: the `whatsapp-qr` profile keeps it out
+# of a plain `up`. It is the only WhatsApp path that works on a personal
+# install, because the bridge dials OUT to WhatsApp - no public webhook, no
+# tunnel, no Meta Business account. If a tenant also configures Meta Cloud API
+# or Twilio, those still win for sends (precedence 10/20 vs this channel's 30).
+#
+# What it runs: services/whatsapp-qr, a small Node service holding the linked-
+# device session. The WhatsApp credentials live in the `whatsapp-qr-data`
+# volume - back it up and never share it: it IS the linked device.
+#
+# Security:
+#   - Every call needs `Authorization: Bearer $WHATSAPP_QR_BRIDGE_SECRET`. The
+#     service publishes no host port and joins only the network core is on.
+#   - Core refuses private addresses (SsrfGuard) and needs the bridge pointed
+#     at it. Set BOTH in .env (or deploy/compose/core.env):
+#         WHATSAPP_QR_BRIDGE_SECRET=<openssl rand -hex 32>   (bridge + core)
+#         APP_WHATSAPPQR_BRIDGE_URL=http://whatsapp-qr:8080  (core)
+#         APP_WHATSAPPQR_BRIDGE_SECRET=<same value>          (core)
+#     and add whatsapp-qr:8080 to APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS
+#     (comma-separated with anything already there, e.g. host.docker.internal:11434).
+#   - Know the trade-off before enabling: linked-device sessions are the
+#     WhatsApp Web surface, not the Business Platform. Meta does not bless
+#     third-party clients; an account can in principle be flagged. Pairing/
+#     group-inbound still goes through the same approval gates as every other
+#     channel. See docs/channels/whatsapp-qr.md.
+services:
+  whatsapp-qr:
+    profiles: [whatsapp-qr]
+    # Built from this repo (docker compose ... build whatsapp-qr); the image line
+    # names the result so a published tag can replace it later.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/whatsapp-qr:${VEGADUTA_VERSION:-local}
+    build: ../../services/whatsapp-qr
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    environment:
+      WHATSAPP_BRIDGE_SECRET: ${WHATSAPP_QR_BRIDGE_SECRET:?set WHATSAPP_QR_BRIDGE_SECRET in .env (openssl rand -hex 32)}
+      WHATSAPP_BRIDGE_DATA_DIR: /data
+    volumes:
+      - whatsapp-qr-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: ${WHATSAPP_QR_MEM_LIMIT:-384m}
+
+
+  # Core learns where the bridge is from this same overlay, so one secret in .env is enough
+  # (APP_WHATSAPPQR_BRIDGE_URL / _SECRET in .env still win). The outbound policy must also allow
+  # the bridge's private address: add whatsapp-qr:8080 to APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS
+  # in .env (docs/personal-mode.md, "WhatsApp QR"); without it core says so in Channels and stops polling.
+  core:
+    environment:
+      APP_WHATSAPPQR_BRIDGE_URL: ${APP_WHATSAPPQR_BRIDGE_URL:-http://whatsapp-qr:8080}
+      APP_WHATSAPPQR_BRIDGE_SECRET: ${APP_WHATSAPPQR_BRIDGE_SECRET:-${WHATSAPP_QR_BRIDGE_SECRET:-}}
+
+volumes:
+  whatsapp-qr-data:

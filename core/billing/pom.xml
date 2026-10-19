@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>billing</artifactId>
+  <name>billing</name>
+  <description>Billing gateway abstraction (Razorpay) + GST invoicing. Depends only on core/security (TenantContext), itself a leaf.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <!-- GST invoicing (audit D6): TenantContext for the tenant-scoped
+         /api/tenant/invoices + /api/tenant/billing-profile controllers.
+         security is itself a leaf module, so billing stays cycle-free
+         (tenancy -> billing -> security). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- Email (A1 - D1/D2): spring-boot-starter-mail for receipt/dunning emails.
+         Email is optional (ObjectProvider<JavaMailSender>) so mail-less
+         deployments still boot (same pattern as NewsletterService). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <!-- GST invoicing persistence: plain JdbcTemplate against fully-qualified
+         control_plane tables (same pattern as NewsletterService) - no JPA
+         entity, so no entity-scan coupling with core/tenancy's Tenant. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <!-- Bean validation on the catalog/feed request records (commerce). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <!--
+      Version confirmed via razorpay/razorpay-java's README at write time
+      (1.4.9) - double-check https://mvnrepository.com/artifact/com.razorpay/razorpay-java
+      for anything newer, same caveat as the original core/pom.xml.
+    -->
+    <dependency>
+      <groupId>com.razorpay</groupId>
+      <artifactId>razorpay-java</artifactId>
+      <version>1.4.9</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

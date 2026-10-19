@@ -1,0 +1,75 @@
+-- Autonomous Agents PR-5 (NON-BLOCKING HUMAN-IN-THE-LOOP) - approval parking.
+--
+-- A job that trips a human approval gate no longer holds a worker thread while
+-- it waits. It transitions RUNNING -> AWAITING_APPROVAL, releases its worker,
+-- and is resumed (or timed out, or failed on a rejection) by the approval sweep
+-- in core/agents' job/approval package.
+--
+-- WHY THIS MIGRATION ADDS NO COLUMNS
+-- -----------------------------------
+-- V207 already shipped every column parking needs - parked_at,
+-- approval_deadline_at, park_count and resume_reason were written into
+-- agent_job's DDL at the time, explicitly labelled "written by the deferred
+-- approval-parking PR. Present now for the same reason." That PR is this one,
+-- and the columns are exactly right, so there is nothing to ALTER.
+--
+-- What parking DOES need is for its two reads to be indexed, because both are
+-- issued by a background tick that walks EVERY tenant schema:
+--
+--   1. Park detection asks approval_request "is there a PENDING request whose
+--      requested_by is this job's agent/session label?" on the worker thread,
+--      after every single turn of every job. approval_request has had indexes
+--      on (status) and (action_type) since V3 and none at all on requested_by,
+--      so that question was a sequential scan of a table that grows with every
+--      gated action a tenant has ever taken.
+--
+--   2. The approval sweep asks agent_job "which parked jobs are past their
+--      approval deadline?". V207's idx_agent_job_live does NOT serve this: it
+--      is indexed on deadline_at (the EXECUTION deadline), while a parked job's
+--      execution deadline is deliberately left stale and the column that
+--      matters is approval_deadline_at.
+--
+-- VERSION NUMBER
+-- ---------------
+-- application.yml's flyway.locations merges controlplane/ and tenant/ into ONE
+-- version stream, so a number is free only when it is free in BOTH folders. See
+-- docs/ZERO-DOWNTIME-DEPLOY-RULES.md for the 2026-07-31 production outage a
+-- duplicate V156 caused - a collision here is an OUTAGE, not a merge conflict.
+-- Checked at authoring time: tenant/'s highest is V209 (agent job output +
+-- progress), controlplane/'s highest is V206. V210 is claimed by the sibling
+-- event-triggers PR in this same fan-out and V211 was reserved for this one.
+--
+-- WHY TENANT AND NOT CONTROLPLANE
+-- --------------------------------
+-- Both tables are already tenant-schema: agent_job by V207, approval_request by
+-- V3. This migration only adds indexes to them, so it has to live wherever they
+-- do. The underlying placement argument is V207's own and still holds - a job
+-- and the approvals it stopped on are tenant activity and must vanish with the
+-- tenant's schema on erasure; putting either in the control plane would be a
+-- right-to-erasure defect.
+
+-- Read by AgentJobApprovalLookup#findByRequestedByAndStatusOrderByCreatedAtAsc,
+-- which is called once per finished turn (park detection) and up to twice per
+-- parked job per sweep tick. requested_by first because it is the selective
+-- column: the label is unique to one job, whereas status has five values across
+-- the whole table.
+CREATE INDEX idx_approval_request_requested_by_status
+    ON approval_request (requested_by, status);
+
+-- Read by AgentJobRepository#findByStatusAndApprovalDeadlineAtBefore. Partial,
+-- matching the shape V207 established with idx_agent_job_live, because parked
+-- rows are a vanishing fraction of the table once a tenant has any history.
+--
+-- Honest caveat, same one idx_agent_job_live carries: Hibernate binds `status`
+-- as a parameter, and Postgres can only prove a partial index's predicate holds
+-- when it builds a CUSTOM plan (which it does for the first executions of a
+-- prepared statement, and often afterwards) - not for a generic plan. The index
+-- is still correct and still used in the common case; it is simply not a
+-- guarantee for every plan Postgres might choose.
+--
+-- No CONCURRENTLY: Flyway runs each migration inside a transaction, and
+-- CREATE INDEX CONCURRENTLY cannot run in one. Same as every other index in
+-- this folder.
+CREATE INDEX idx_agent_job_approval_deadline
+    ON agent_job (approval_deadline_at)
+    WHERE status = 'AWAITING_APPROVAL';

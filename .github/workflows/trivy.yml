@@ -1,0 +1,111 @@
+name: Trivy (fs scan)
+
+# Filesystem scan of the whole repository: dependency CVEs (SCA) and IaC
+# misconfiguration (Dockerfiles, Helm charts, Terraform, compose files) in one
+# pass. Secrets are left out on purpose -- the gitleaks gate in
+# static-gates.yml already scans them, and license scanning lives in
+# license-scan.yml.
+#
+# Findings surface in three places:
+#   * Security -> Code scanning   (SARIF upload below, tool "Trivy")
+#   * the trivy-report artifact   (SARIF + JSON, for local diffing)
+#   * DefectDojo                  (when vars.DEFECTDOJO_URL +
+#                                  secrets.DEFECTDOJO_API_KEY are set)
+#
+# Report-only: nothing here fails the run. To gate on severity later, set
+# exit-code: "1" and severity: "CRITICAL" on the scan steps. Triage goes in a
+# .trivyignore at the repository root.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "23 4 * * 4" # weekly, Thursday 04:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trivy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  scan:
+    name: trivy fs (vuln + misconfig)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # upload SARIF to code scanning
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Trivy fs scan (SARIF -> code scanning)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: vuln,misconfig
+          format: sarif
+          output: trivy.sarif
+
+      # Same scan as JSON: the DefectDojo "Trivy Scan" parser reads the
+      # native report, which carries more detail than the SARIF view.
+      - name: Trivy fs scan (JSON -> artifact + DefectDojo)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: vuln,misconfig
+          format: json
+          output: trivy.json
+
+      # Code scanning needs a public repository or GitHub Advanced Security
+      # (same check as codeql.yml): on a private repository without it the
+      # SARIF upload fails with "Resource not accessible by integration".
+      - name: Code scanning available
+        id: codescan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ADVANCED_SECURITY: ${{ vars.ADVANCED_SECURITY }}
+        run: |
+          visibility="$(gh api "repos/$REPO" --jq .visibility)"
+          if [ "$visibility" = public ] || [ "$ADVANCED_SECURITY" = true ]; then
+            echo "enabled=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >>"$GITHUB_OUTPUT"
+            echo "::notice::SARIF upload skipped: $visibility repository without Advanced Security (set ADVANCED_SECURITY=true if it is on)"
+          fi
+
+      # On pull_request the token only gets security-events:write for
+      # same-repo PRs; a fork's read-only token would fail the upload.
+      - name: Upload SARIF to code scanning
+        if: steps.codescan.outputs.enabled == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-fs
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: trivy-report
+          path: |
+            trivy.sarif
+            trivy.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # DefectDojo is an optional aggregation sink: a down or misconfigured
+      # server must not gate the run -- findings are still in code scanning
+      # and the artifact.
+      - name: Push results to DefectDojo
+        continue-on-error: true
+        env:
+          DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_ENGAGEMENT: trivy-fs
+        run: bash scripts/ci/defectdojo-import.sh "Trivy Scan" trivy.json

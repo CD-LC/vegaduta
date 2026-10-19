@@ -1,0 +1,189 @@
+/* --- Agent templates gallery (agents/templates/page.tsx) --------------
+ * This gallery is reached directly from the AXON-redesigned Agents screen
+ * (AgentWorkbench.tsx) via a "Templates" link, so it borrows that screen's
+ * card/badge language (var(--ax-panel)/--ax-border/--ax-cyan) instead of
+ * the older .mcp-card/.muted skin, so navigating here isn't a visual
+ * downgrade mid-flow. */
+.ax-tpl-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-panel);
+  padding: 16px 18px;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.ax-tpl-card:hover {
+  border-color: color-mix(in srgb, var(--ax-cyan) 34%, var(--ax-border));
+  transform: translateY(-2px);
+}
+
+.ax-tpl-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(79, 227, 227, 0.15);
+  color: var(--ax-cyan);
+  flex-shrink: 0;
+}
+
+.ax-tpl-card-title {
+  margin: 10px 0 0;
+  font-size: var(--fs-lede);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-tpl-card-description {
+  margin: 4px 0 0;
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  color: var(--ax-mid);
+}
+
+/* Toggle pill - real <button role="switch">, not a decorative div, so it's
+ * keyboard/screen-reader operable like every other control in this app. */
+.ax-toggle {
+  position: relative;
+  width: 30px;
+  height: 17px;
+  border-radius: 100px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.ax-toggle::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--ax-dim);
+  transition:
+    left 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-toggle-on {
+  background: rgba(79, 227, 227, 0.4);
+}
+
+.ax-toggle-on::after {
+  left: 15px;
+  background: var(--ax-text);
+}
+
+.ax-toggle-lg {
+  width: 34px;
+  height: 19px;
+}
+
+.ax-toggle-lg::after {
+  width: 15px;
+  height: 15px;
+}
+
+.ax-toggle-lg.ax-toggle-on::after {
+  left: 17px;
+}
+
+.ax-toggle-violet.ax-toggle-on {
+  background: rgba(124, 92, 255, 0.4);
+}
+
+.ax-toggle-violet.ax-toggle-on::after {
+  background: var(--ax-violet);
+}
+
+/* Professional tool selector - replaces a flat <input type="checkbox"> list
+ * with grouped toggle rows + search, direct feedback: "the tools manual and
+ * automatic selection UI looks unprofessional - make it professional - give
+ * it as selector or a toggle instead of a button". See ToolAccessEditor in
+ * AgentsPanel.js. */
+.ax-tool-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.ax-tool-selector-search {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.ax-tool-selector-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.ax-tool-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ax-tool-selector-group-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ax-dim, var(--text-faint));
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid var(--ax-border, rgba(255, 255, 255, 0.08));
+}
+
+.ax-tool-selector-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.3rem 0.35rem;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+
+.ax-tool-selector-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ax-tool-selector-row .ax-toggle {
+  margin-top: 0.15rem;
+}
+
+.ax-tool-selector-row-text {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.ax-tool-selector-row-desc {
+  font-size: 0.74rem;
+  margin-top: 0.1rem;
+}
+
+.ax-agent-autoselect {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--fs-label);
+  color: var(--ax-violet);
+  font-family: var(--font-mono), monospace;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

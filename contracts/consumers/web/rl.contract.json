@@ -1,0 +1,81 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-rl-agents-agentId-export-trajectories",
+      "method": "GET",
+      "path": "/api/rl/agents/{agentId}/export/trajectories",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-rl-agents-agentId-policies",
+      "method": "GET",
+      "path": "/api/rl/agents/{agentId}/policies",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-rl-agents-agentId-policies-dimension",
+      "method": "PUT",
+      "path": "/api/rl/agents/{agentId}/policies/{dimension}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.dimension",
+          "$.enabled",
+          "$.explorationRate"
+        ]
+      }
+    },
+    {
+      "id": "get-api-rl-agents-agentId-policies-dimension-arms",
+      "method": "GET",
+      "path": "/api/rl/agents/{agentId}/policies/{dimension}/arms",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-rl-agents-agentId-policies-dimension-arms",
+      "method": "POST",
+      "path": "/api/rl/agents/{agentId}/policies/{dimension}/arms",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.alpha",
+          "$.armConfigJson",
+          "$.armKey",
+          "$.beta",
+          "$.contextBucket",
+          "$.id",
+          "$.pulls"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-rl-agents-agentId-policies-dimension-arms-armId",
+      "method": "DELETE",
+      "path": "/api/rl/agents/{agentId}/policies/{dimension}/arms/{armId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-rl-agents-agentId-summary",
+      "method": "GET",
+      "path": "/api/rl/agents/{agentId}/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

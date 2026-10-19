@@ -1,0 +1,93 @@
+{{- $name := include "vegaduta-lib.fullname" . -}}
+{{- $g := .Values.global | default dict -}}
+{{- $p := .Values.persistence -}}
+{{- $sc := $p.storageClass | default $g.storageClass -}}
+{{- $pw := include "vegaduta-lib.stableRandom" (dict "root" . "secret" $name "key" "password" "length" 32) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+  annotations:
+    {{- include "vegaduta-lib.keepAnnotations" . | nindent 4 }}
+type: Opaque
+stringData:
+  password: {{ $pw | quote }}
+  valkey.conf: |
+    bind * -::*
+    port 6379
+    protected-mode yes
+    requirepass {{ $pw }}
+    dir /data
+    appendonly {{ ternary "yes" "no" $p.enabled }}
+    appendfsync everysec
+    {{- with .Values.maxmemory }}
+    maxmemory {{ . }}
+    {{- end }}
+    {{- .Values.extraConfig | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - { name: http, port: 6379, targetPort: http }
+  selector:
+    {{- include "vegaduta-lib.selectorLabels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ $name }}-headless
+  selector:
+    matchLabels:
+      {{- include "vegaduta-lib.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ printf "%s%s" .Values.extraConfig (toString $p.enabled) | sha256sum | trunc 16 }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "vegaduta-lib.labels" . | nindent 8 }}
+    spec:
+      {{- $v := deepCopy .Values -}}
+      {{- $_ := set $v "persistence" (dict "enabled" false) -}}
+      {{- $_ := set $v "topologySpread" (dict "enabled" false) -}}
+      {{- $_ := set $v "extraVolumes" (list (dict "name" "config" "secret" (dict "secretName" $name "items" (list (dict "key" "valkey.conf" "path" "valkey.conf")))) ) -}}
+      {{- $mounts := list (dict "name" "config" "mountPath" "/etc/valkey" "readOnly" true) -}}
+      {{- if $p.enabled }}{{ $mounts = append $mounts (dict "name" "data" "mountPath" "/data") }}{{ else }}{{ $_ := set $v "emptyDirs" (append $v.emptyDirs (dict "name" "data" "mountPath" "/data" "sizeLimit" "1Gi")) }}{{ end -}}
+      {{- $_ := set $v "extraVolumeMounts" $mounts -}}
+      {{- $_ := set $v "args" (list "/etc/valkey/valkey.conf") -}}
+      {{- $ctx := dict "Values" $v "Chart" .Chart "Release" .Release "Capabilities" .Capabilities "Template" .Template -}}
+      {{- $auth := list (dict "name" "REDISCLI_AUTH" "secretName" $name "key" "password") (dict "name" "VALKEYCLI_AUTH" "secretName" $name "key" "password") -}}
+      {{- include "vegaduta-lib.podSpec" (dict "root" $ctx "command" (list "valkey-server") "secretEnv" $auth) | nindent 6 }}
+  {{- if $p.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "vegaduta-lib.selectorLabels" . | nindent 10 }}
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- if $sc }}
+        storageClassName: {{ $sc | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $p.size | quote }}
+  {{- end }}

@@ -1,0 +1,424 @@
+# VegaDuta-specific Prometheus alerting rules (alerting infrastructure pass,
+# 2026-07). Loaded via ../prometheus.yml's `rule_files: - /etc/prometheus/rules/*.yml`
+# and evaluated every `global.evaluation_interval` (15s), firing into
+# Alertmanager (../../alertmanager/alertmanager.yml) once a condition holds
+# for its `for:` duration.
+#
+# READ BEFORE ADDING TO THIS FILE - metric provenance matters here more than
+# usual, because two of these groups reference metric names that do NOT
+# exist in this codebase yet (see each group's header comment for the exact
+# status). Every metric name below was either (a) grepped for directly in
+# this repo's own Micrometer/Actuator usage and confirmed real, or (b) is
+# flagged as DEPENDS ON <thing> NOT YET LANDED - a deliberate bet on another
+# concurrent workstream's metric name rather than an invention. If a rule in
+# group (b) never fires no matter how bad things get, check whether that
+# dependency actually shipped before assuming the rule itself is broken.
+#
+# KNOWN-INERT GROUPS, at a glance (reliability pass, 2026-07-29 - each is
+# already flagged in its own header below, collected here so nobody has to
+# read all seven to know which rules can actually fire today):
+#   - Group 1 (vegaduta-llm-health):   INERT - llm_calls_total /
+#     llm_call_errors_total / llm_budget_rejections_total are predicted
+#     names for Micrometer instrumentation that has NOT landed in
+#     core/chat's LlmMetricsAdvisor.
+#   - Group 5 (vegaduta-kafka-outbox): INERT - no Micrometer gauge exists
+#     for the outbox counts; SystemStatusController only exposes them via
+#     REST.
+# Everything else (Group 0 availability, Group 2 HikariCP, Group 3 JVM,
+# Group 4 HTTP 5xx, Group 6 Redis via the redis-exporter service that has
+# since landed in docker-compose.yml, Group 8 Wave-1 reliability) references
+# metrics that are real today.
+
+groups:
+  # ---------------------------------------------------------------------
+  # Group 0: core availability - the "is core even up" rule this file was
+  # missing entirely. Real TODAY: `up` is Prometheus's own per-target
+  # scrape-success metric (1/0 per scrape), no app instrumentation needed;
+  # job="core" matches ../prometheus.yml's `job_name: core`. This group
+  # matters because every other rule here is rate/ratio-based over core's
+  # OWN metrics: if core is down, those series simply stop, the rules have
+  # no samples, and nothing ever fires - exactly the gap the 2026-07-29
+  # outage review found (core dead, zero alerts). Two rules, deliberately
+  # both:
+  #   - CoreDown fires when the scrape target exists but is unreachable
+  #     (the normal "core crashed / container stuck" case).
+  #   - CoreAbsent uses absent() for the sneakier case CoreDown can NOT
+  #     see: no up{job="core"} series exists at all (scrape config
+  #     regressed, job renamed, Prometheus can't resolve the target) -
+  #     `== 0` over a nonexistent series matches nothing and stays silent.
+  # ---------------------------------------------------------------------
+  - name: vegaduta-availability
+    rules:
+      - alert: CoreDown
+        expr: up{job="core"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "core is down - Prometheus has failed to scrape it for 2 minutes"
+          description: >-
+            Prometheus cannot reach core:8080/actuator/prometheus. The whole
+            platform is effectively down for tenants (web/academy all
+            depend on core). Check `docker ps -a` for the agentic-core
+            container's state - and remember the 2026-07-29 incident: dependent
+            services stuck in `Created` (never started) don't show up in a
+            plain `docker ps`. `docker compose logs core --tail 200` for the
+            crash reason. Note every OTHER core-metric alert in this file goes
+            silent while this fires - absence of 5xx alerts is not good news
+            here.
+      - alert: CoreAbsent
+        # absent() returns a synthetic series when NO up{job="core"} series
+        # exists - the failure mode `up == 0` cannot detect (see this
+        # group's header). 5m rather than 2m: a Prometheus restart briefly
+        # has no series for any target, and this shouldn't page for that.
+        expr: absent(up{job="core"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No up{job=\"core\"} series exists - core is not being scraped at all"
+          description: >-
+            Prometheus has no scrape series for core whatsoever. Either
+            prometheus.yml's `job_name: core` scrape config was removed/renamed,
+            the prometheus container is running a stale config, or service
+            discovery/DNS for core:8080 is broken. This is a monitoring-is-blind
+            condition, not necessarily a core outage - but while it holds, no
+            core alert in this file can fire, so treat it with the same urgency.
+  # ---------------------------------------------------------------------
+  # Group 1: LLM call health, per tenant/provider. DEPENDS ON a concurrent
+  # workstream adding Micrometer instrumentation to
+  # core/chat/src/main/java/com/agenticai/core/chat/LlmMetricsAdvisor.java -
+  # confirmed NOT landed in this worktree as of this pass (LlmMetricsAdvisor
+  # today only reports to the in-memory LlmCallMetricsService and the durable
+  # LlmCallLog table/LlmCallLogService, neither of which is a Micrometer
+  # meter, so nothing under core/chat currently emits to /actuator/prometheus
+  # tagged by tenant/provider/model). The metric names below
+  # (`llm_calls_total`, `llm_call_errors_total`, `llm_budget_rejections_total`)
+  # are this pass's best-effort prediction of Spring Boot's Prometheus
+  # naming convention for Micrometer counters named `llm.calls`/
+  # `llm.call.errors`/`llm.budget.rejections` (dots become underscores, a
+  # `_total` suffix is added to counters) - verify the real name against
+  # whatever that other work actually ships before trusting these rules blind.
+  # ---------------------------------------------------------------------
+  - name: vegaduta-llm-health
+    rules:
+      - alert: HighLlmCallErrorRate
+        # Counter increments per LLM call outcome, tagged at minimum by
+        # tenant/provider/model/status - see LlmMetricsAdvisor's existing
+        # per-call adviseCall/adviseStream success/failure branches, which is
+        # exactly where this counter would be incremented if/when it lands.
+        expr: |
+          (
+            sum by (tenant, provider) (rate(llm_call_errors_total[10m]))
+            /
+            sum by (tenant, provider) (rate(llm_calls_total[10m]))
+          ) > 0.20
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM call error rate above 20% for tenant {{ $labels.tenant }} / provider {{ $labels.provider }}"
+          description: >-
+            {{ $labels.tenant }}'s calls to {{ $labels.provider }} have been failing at
+            {{ $value | humanizePercentage }} over the last 10 minutes. Check that
+            tenant's provider API key validity and the provider's own status page
+            first - a shared-key/provider outage will show up here across many
+            tenants at once, a single bad BYOK key will show up as one tenant only.
+      - alert: LlmBudgetRejectionRateSpike
+        # PerUserBudgetTrackingAdvisor (core/agents) is the real call site
+        # this would instrument - it already computes per-(tenant,user,
+        # modality,model) spend and rejects over-budget calls before they
+        # reach the provider; `reason` would distinguish a per-user dollar
+        # cap from a tenant-plan cap, etc.
+        expr: |
+          sum by (tenant) (rate(llm_budget_rejections_total[15m])) > 1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Budget/rate-limit rejections spiking for tenant {{ $labels.tenant }}"
+          description: >-
+            Tenant {{ $labels.tenant }} is having LLM calls rejected for budget/rate-limit
+            reasons at {{ $value | humanize }}/sec sustained over 15 minutes. This is
+            usually either a runaway agent loop on that tenant's side (check their
+            Agent Reliability page for a stuck fallback loop) or a legitimately
+            heavy user who needs their plan/budget raised - not itself a platform
+            outage, but worth a look before the tenant files a "my agent stopped
+            responding" ticket.
+
+  # ---------------------------------------------------------------------
+  # Group 2: HikariCP connection pool. Real TODAY, independent of any other
+  # workstream - `hikaricp_connections_*` are Spring Boot's own
+  # auto-configured Micrometer binder metrics for the DataSource (see
+  # core/app/pom.xml's micrometer-registry-prometheus dependency +
+  # SystemStatusController's own HikariPoolMXBean usage, which reads the
+  # exact same live pool these metrics describe). Verified present at
+  # /actuator/prometheus on any core instance that has ever served a request
+  # against Postgres/PgBouncer.
+  # ---------------------------------------------------------------------
+  - name: vegaduta-hikaricp
+    rules:
+      - alert: HikariPoolConnectionsExhausted
+        # Summed by pool rather than filtered to a hardcoded pool name -
+        # core never sets spring.datasource.hikari.pool-name explicitly (see
+        # application.yml), so the label value is whatever HikariCP's own
+        # default naming assigns at runtime; this stays correct regardless.
+        expr: |
+          sum by (pool) (hikaricp_connections_active)
+          >=
+          sum by (pool) (hikaricp_connections_max)
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "core's HikariCP pool '{{ $labels.pool }}' is fully saturated (active == max)"
+          description: >-
+            Every connection in core's HikariCP pool has been in use for at least 2
+            minutes straight. New DB-backed requests are now queueing behind
+            hikaricp_connections_pending instead of running - expect rising HTTP
+            latency/timeouts platform-wide. Likely causes: a slow/locking query
+            holding connections open, PgBouncer itself under strain (check its own
+            container), or genuine traffic beyond what maximum-pool-size was sized
+            for. Check `hikaricp_connections_pending` on the same dashboard before
+            assuming it's just load - a nonzero pending count with active < max
+            would instead point at a pool-sizing/PgBouncer routing bug, not
+            exhaustion.
+      - alert: HikariPoolConnectionsPendingHigh
+        expr: sum by (pool) (hikaricp_connections_pending) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Threads are queueing for a HikariCP connection (pending > 5 for 5m)"
+          description: >-
+            {{ $value }} threads have been waiting on core's HikariCP pool for a
+            connection for 5+ minutes. This is the early-warning version of
+            HikariPoolConnectionsExhausted - worth a look now, before it escalates
+            into active requests actually timing out.
+
+  # ---------------------------------------------------------------------
+  # Group 3: JVM heap / GC. Real TODAY - standard Micrometer JVM metrics,
+  # auto-registered by spring-boot-starter-actuator regardless of any
+  # app-specific code (already used by
+  # deploy/grafana/provisioning/dashboards/vegaduta-observability.json's
+  # "JVM heap used" panel, same metric family).
+  # ---------------------------------------------------------------------
+  - name: vegaduta-jvm
+    rules:
+      - alert: JvmHeapPressureHigh
+        expr: |
+          sum(jvm_memory_used_bytes{area="heap"}) / sum(jvm_memory_max_bytes{area="heap"}) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "core's JVM heap usage above 85% for 10 minutes"
+          description: >-
+            Heap is at {{ $value | humanizePercentage }} of its configured max and has
+            stayed there for 10 minutes (not just a post-GC spike). Check
+            JvmGcTimeHigh alongside this one - heap pressure with rising GC time
+            together usually means an actual memory leak or genuinely undersized
+            -Xmx for current traffic, not a transient allocation burst that a full
+            GC will clear on its own.
+      - alert: JvmGcTimeHigh
+        # jvm_gc_pause_seconds is a Timer (histogram) - _sum/_count give the
+        # standard Micrometer rate-of-time-spent-in-GC computation.
+        expr: |
+          sum(rate(jvm_gc_pause_seconds_sum[5m])) / sum(rate(jvm_gc_pause_seconds_count[5m])) > 0
+          and
+          sum(rate(jvm_gc_pause_seconds_sum[5m])) > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "core is spending more than 25% of wall-clock time in GC"
+          description: >-
+            The JVM has spent {{ $value | humanizePercentage }} of the last 5 minutes
+            paused in garbage collection, sustained for 10 minutes straight. This is
+            the classic "app is technically up but every request is slow" failure
+            mode - correlate with JvmHeapPressureHigh and HTTP p95 latency on the
+            same dashboard before restarting anything.
+
+  # ---------------------------------------------------------------------
+  # Group 4: core HTTP 5xx rate. Real TODAY - standard Spring Boot Actuator
+  # http.server.requests metric (same metric family the existing
+  # vegaduta-observability.json dashboard's "HTTP request rate"/"HTTP p95
+  # latency" panels already chart).
+  # ---------------------------------------------------------------------
+  - name: vegaduta-http
+    rules:
+      - alert: CoreHttp5xxRateElevated
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "core's HTTP 5xx rate above 5% for 5 minutes"
+          description: >-
+            {{ $value | humanizePercentage }} of all HTTP responses from core have been
+            5xx over the last 5 minutes. Check core's own logs
+            (`docker compose logs core --tail 200` or the Loki "Recent errors" panel
+            on vegaduta-observability.json) for the actual exception - this rule
+            fires on the aggregate rate across every endpoint, it does not by itself
+            say which one.
+
+  # ---------------------------------------------------------------------
+  # Group 5: Kafka/Redpanda workflow-event outbox backlog/DLQ. GAP, not
+  # wired today - SystemStatusController (core/app) already computes both
+  # numbers LIVE for the admin dashboard's Kafka/Queue tile
+  # (outboxRepository.countByPublishedAtIsNullAndRetryCountLessThan/
+  # GreaterThanEqual, see that controller's kafkaQueue()), but only exposes
+  # them via GET /api/system/status - there is no Micrometer Gauge
+  # registered anywhere in core/eventbus or core/app for these counts, so
+  # nothing named `workflow_event_outbox_pending`/`_dead_lettered` exists at
+  # /actuator/prometheus today. This rule is written against the metric name
+  # a real fix would plausibly use (a Gauge registered from
+  # WorkflowEventOutboxRepository's own counts, same shape as the REST
+  # endpoint), but it CANNOT fire until that gauge is actually added -
+  # tracked as a real follow-up, not implemented in this pass (adding
+  # scheduled-poll Gauges into core/eventbus felt like a bigger, more
+  # invasive change than this alerting-focused pass should make unreviewed,
+  # especially with another concurrent agent also touching
+  # docker-compose.yml/prometheus.yml right now).
+  # ---------------------------------------------------------------------
+  - name: vegaduta-kafka-outbox
+    rules:
+      - alert: WorkflowEventOutboxBacklogGrowing
+        expr: workflow_event_outbox_pending > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Workflow event outbox backlog above 100 pending rows for 10 minutes"
+          description: >-
+            {{ $value }} workflow_event_outbox rows have been waiting to publish to
+            Redpanda for 10+ minutes. Check WorkflowEventOutboxRelay's own poll loop
+            is actually running (it polls every 5s per its own javadoc) and that
+            Redpanda itself is reachable - GET /api/system/status's kafka section
+            has the same numbers today if this metric isn't live yet.
+      - alert: WorkflowEventDeadLetterBuildup
+        expr: workflow_event_outbox_dead_lettered > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $value }} workflow events have exhausted retries and dead-lettered"
+          description: >-
+            At least one workflow_event_outbox row has hit
+            WorkflowEventOutboxRelay.MAX_RETRIES and stopped retrying entirely -
+            that event will NEVER publish without manual intervention. Each of these
+            also already raises its own PlatformIssue (IssueSource.EVENT_OUTBOX) in
+            the affected tenant's own Issues portal - cross-check there for which
+            tenant/event.
+
+  # ---------------------------------------------------------------------
+  # Group 6: Redis. DEPENDS ON the redis-exporter service/scrape job a
+  # concurrent agent is adding to docker-compose.yml/prometheus.yml in
+  # parallel with this pass (see this task's own coordination note) - not
+  # present in this worktree as of this rule file being written. Metric
+  # names below are oliver006/redis_exporter's own standard, documented
+  # names (https://github.com/oliver006/redis_exporter#exported-metrics),
+  # not invented here - verify the scrape job's `job_name` lines up with
+  # nothing extra needed on this side once that lands, since these metrics
+  # carry no job-specific labels that would need matching.
+  # ---------------------------------------------------------------------
+  - name: vegaduta-redis
+    rules:
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is unreachable from redis-exporter"
+          description: >-
+            redis_up has been 0 for 2 minutes - core's rate-limiting and session
+            caching both degrade (not fail outright, see SystemStatusController's
+            overallStatus: DB down is CRITICAL, Redis down is DEGRADED) without
+            Redis. Check the agentic-redis container is running and reachable on
+            the compose network.
+      - alert: RedisMemoryHigh
+        expr: |
+          redis_memory_used_bytes / redis_memory_max_bytes > 0.90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage above 90% of maxmemory"
+          description: >-
+            Redis is at {{ $value | humanizePercentage }} of its configured maxmemory
+            limit. Once it hits the configured eviction policy's threshold, keys
+            start getting evicted (or writes start failing, depending on policy) -
+            check what's actually consuming memory (session cache growth? a runaway
+            key without a TTL?) before it gets there.
+
+  # ---------------------------------------------------------------------
+  # Group 8: Wave-1 reliability signals (rewriting_story branch, 2026-08).
+  # Real TODAY, unlike Groups 1/5 - both metric names were verified against
+  # the code that registers them on this same branch, not predicted:
+  #   - governance_fail_open_total: GovernanceDegradationSignal.METRIC_NAME
+  #     (core/chat gateway), tagged by `component`. Incremented every time a
+  #     Redis-backed governance seam (LlmGatewayRateLimiterService,
+  #     ToolCircuitBreakerService, dedup, and siblings) skips a check it
+  #     could not perform. Registered with the `_total` suffix already in
+  #     the name; Micrometer's Prometheus naming convention does not double
+  #     it, so the exposition name matches this expr verbatim.
+  #   - job_lock_skipped (-> job_lock_skipped_total in exposition, counter
+  #     suffix added by Micrometer): WorkflowEventOutboxRelay and other
+  #     PgAdvisoryJobLock-guarded schedulers, tagged by `job` (the lock
+  #     name, e.g. "workflow-event-outbox-relay"). LABEL GOTCHA: `job` is
+  #     also Prometheus's own per-target scrape label, and prometheus.yml
+  #     sets no honor_labels, so on collision the app's tag is renamed to
+  #     `exported_job` at scrape time - which is why the expr/labels below
+  #     say exported_job, not job. Don't "fix" that back.
+  # ---------------------------------------------------------------------
+  - name: vegaduta-wave1-reliability
+    rules:
+      - alert: GovernanceFailOpenActive
+        # Any nonzero fail-open rate sustained for 5m means governance
+        # enforcement is degraded RIGHT NOW - a single Redis blip disables
+        # rate limits, circuit breakers and inbound dedup all at once, and
+        # this counter is the one place that becomes visible. Grouped by
+        # component so the alert names which seam is skipping checks.
+        expr: |
+          sum by (component) (rate(governance_fail_open_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis-backed governance failing open — rate limits/breakers/dedup degraded (component {{ $labels.component }})"
+          description: >-
+            Governance component '{{ $labels.component }}' has been failing open at
+            {{ $value | humanize }}/sec for 5+ minutes - its checks are being
+            SKIPPED, not enforced, so tenants are effectively unthrottled on that
+            seam. Almost always Redis: check the RedisDown alert / agentic-redis
+            container first. Each occurrence also logs a rate-limited WARN from
+            GovernanceDegradationSignal in core's logs with the underlying cause.
+      - alert: JobLockSkippedOnSingleInstance
+        # increase() over 30m rather than rate(): skips are discrete,
+        # per-tick events (one per scheduler tick that lost the advisory
+        # lock), and a raw count reads better than a tiny per-second rate.
+        # info, not warning - with >1 core instance this is the lock doing
+        # exactly its job; it's only interesting on a single-instance
+        # deployment (this stack today), where a skip means either a stuck
+        # lock holder or an unnoticed second instance.
+        expr: |
+          sum by (exported_job) (increase(job_lock_skipped_total[30m])) > 0
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "scheduler tick skipped by advisory lock — expected only with >1 core instance (job {{ $labels.exported_job }})"
+          description: >-
+            Scheduled job '{{ $labels.exported_job }}' skipped
+            {{ $value | humanize }} tick(s) in the last 30 minutes because another
+            holder owned its pg_try_advisory_lock. Harmless (by design) if you are
+            actually running multiple core instances; on today's single-instance
+            stack it means either a crashed/hung session still holding the lock
+            (check pg_locks) or a second core container you did not know about
+            (`docker ps | grep core`).

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>platform</artifactId>
+  <name>platform</name>
+  <description>Platform-wide (cross-tenant) "Ecosystem Maintenance" API for the super-admin: platform LLM task-routing config, translation job reference settings, subscription plan overrides, platform-wide observability (issues/LLM usage/activity), and cross-tenant health/business metrics aggregation. Gated by SecurityConfig's /api/platform/** -> ROLE_platform-admin rule. Depends on: tenancy (Tenant/TenantRepository/TenantSchemaIterator), security (TenantContext), providers (ProviderName), crypto (EncryptionService), agents (AgentRepository), workflow (WorkflowDefinitionRepository), audit (PlatformIssueRepository/AuditLogRepository - both leaf, no dependency back on platform), chat (LlmCallLogRepository - depends only on providers/security, no dependency back on platform).</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>admin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Platform admin reads session memory (agents.memory) in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <!-- Platform-admin "delete tenant completely" control (2026-08-07) -
+         CodeIntelClient (per-tenant
+         index/graph/workspace cleanup). Neither omnichannel nor codeintel
+         depends back on platform, so this is safe - core/tenancy could not
+         take these two dependencies itself since core/omnichannel already
+         depends on core/tenancy (the reverse would be circular). -->
+    <!-- (JAVA-036/035) The omnichannel edge was removed: nothing in platform
+         imports it (dependency:analyze "declared but unused"). guardrails IS
+         used directly (19 imports) and was only reachable transitively, so it
+         is declared explicitly instead. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>codeintel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <!-- Newsletter/Broadcast feature (NewsletterService) - JavaMailSender,
+         autoconfigured from spring.mail.* (see KEYCLOAK_SMTP_* in
+         deploy/.env for the SMTP account this is meant to be pointed at;
+         wiring spring.mail.* itself is a separate integration step, not
+         this module's concern). No version pinned - managed by the
+         spring-boot-starter-parent BOM like every other Spring Boot
+         starter in this file. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

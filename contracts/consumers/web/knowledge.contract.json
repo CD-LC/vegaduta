@@ -1,0 +1,270 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-knowledge-collectionId-eval",
+      "method": "POST",
+      "path": "/api/knowledge/{collectionId}/eval",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.childChunksInCollection",
+          "$.collectionId",
+          "$.k",
+          "$.notes",
+          "$.parentChunksInCollection",
+          "$.questions",
+          "$.results",
+          "$.truncated"
+        ]
+      }
+    },
+    {
+      "id": "get-api-knowledge-collections",
+      "method": "GET",
+      "path": "/api/knowledge/collections",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].chunkCount",
+          "$[*].chunkOverlap",
+          "$[*].chunkSize",
+          "$[*].createdAt",
+          "$[*].description",
+          "$[*].embeddingModel",
+          "$[*].embeddingStatus",
+          "$[*].fileCount",
+          "$[*].id",
+          "$[*].isDefault",
+          "$[*].name",
+          "$[*].parentCollectionId",
+          "$[*].textSearchConfig",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-knowledge-collections",
+      "method": "POST",
+      "path": "/api/knowledge/collections",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.chunkCount",
+          "$.chunkOverlap",
+          "$.chunkSize",
+          "$.createdAt",
+          "$.description",
+          "$.embeddingModel",
+          "$.embeddingStatus",
+          "$.fileCount",
+          "$.id",
+          "$.isDefault",
+          "$.name",
+          "$.parentCollectionId",
+          "$.textSearchConfig",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-knowledge-collections-collectionId",
+      "method": "DELETE",
+      "path": "/api/knowledge/collections/{collectionId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-knowledge-collections-collectionId",
+      "method": "PUT",
+      "path": "/api/knowledge/collections/{collectionId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.chunkCount",
+          "$.chunkOverlap",
+          "$.chunkSize",
+          "$.createdAt",
+          "$.description",
+          "$.embeddingModel",
+          "$.embeddingStatus",
+          "$.fileCount",
+          "$.id",
+          "$.isDefault",
+          "$.name",
+          "$.parentCollectionId",
+          "$.textSearchConfig",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-knowledge-collections-collectionId-documents",
+      "method": "GET",
+      "path": "/api/knowledge/collections/{collectionId}/documents",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-knowledge-collections-collectionId-retrieval-settings",
+      "method": "GET",
+      "path": "/api/knowledge/collections/{collectionId}/retrieval-settings",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.childTokens",
+          "$.fusionEnabled",
+          "$.parentChildAvailable",
+          "$.parentChildEnabled",
+          "$.parentChunkCount",
+          "$.parentTokens",
+          "$.queryRewriteMode",
+          "$.schemaReady"
+        ]
+      }
+    },
+    {
+      "id": "put-api-knowledge-collections-collectionId-retrieval-settings",
+      "method": "PUT",
+      "path": "/api/knowledge/collections/{collectionId}/retrieval-settings",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.childTokens",
+          "$.fusionEnabled",
+          "$.parentChildAvailable",
+          "$.parentChildEnabled",
+          "$.parentChunkCount",
+          "$.parentTokens",
+          "$.queryRewriteMode",
+          "$.schemaReady"
+        ]
+      }
+    },
+    {
+      "id": "get-api-knowledge-collections-embedding-models",
+      "method": "GET",
+      "path": "/api/knowledge/collections/embedding-models",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].key",
+          "$[*].label"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-knowledge-documents-documentId",
+      "method": "DELETE",
+      "path": "/api/knowledge/documents/{documentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-knowledge-documents-documentId-file",
+      "method": "GET",
+      "path": "/api/knowledge/documents/{documentId}/file",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-knowledge-jobs-jobId",
+      "method": "GET",
+      "path": "/api/knowledge/jobs/{jobId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-knowledge-ocr-provider",
+      "method": "DELETE",
+      "path": "/api/knowledge/ocr-provider",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-knowledge-ocr-provider",
+      "method": "POST",
+      "path": "/api/knowledge/ocr-provider",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.provider"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-knowledge-ocr-provider-status",
+      "method": "GET",
+      "path": "/api/knowledge/ocr-provider/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.provider"
+        ]
+      }
+    },
+    {
+      "id": "post-api-knowledge-search",
+      "method": "POST",
+      "path": "/api/knowledge/search",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.collectionIds",
+          "$.query",
+          "$.topK"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-knowledge-stats",
+      "method": "GET",
+      "path": "/api/knowledge/stats",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-knowledge-upload",
+      "method": "POST",
+      "path": "/api/knowledge/upload",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.chunkCount",
+          "$.documentId"
+        ]
+      }
+    },
+    {
+      "id": "post-api-knowledge-upload-audio",
+      "method": "POST",
+      "path": "/api/knowledge/upload-audio",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

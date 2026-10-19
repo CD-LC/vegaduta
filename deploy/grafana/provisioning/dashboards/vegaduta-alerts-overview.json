@@ -1,0 +1,301 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false },
+        "content": "Single pane of glass for on-call: what's actively firing (from real Alertmanager, via the new `Alertmanager` datasource), plus the raw metrics behind the alert rules most likely to page (`deploy/prometheus/rules/vegaduta-alerts.yml`). If the **Active Alerts** panel below shows nothing despite something clearly being wrong, check `docker compose logs alertmanager` and confirm the `Alertmanager` datasource (provisioned in `deploy/grafana/provisioning/datasources/alertmanager.yaml`) is reachable - the exact Grafana JSON wiring for an *external* Alertmanager into the native Alert list panel varies by Grafana version and was not verified against a live instance in this pass; the **Alerts (Prometheus ALERTS metric)** table below queries the same data a guaranteed-correct way (Prometheus's own synthetic `ALERTS{alertstate=...}` series) as a fallback that needs no panel-schema guessing.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.3.1",
+      "title": "How to read this dashboard",
+      "type": "text"
+    },
+    {
+      "datasource": { "type": "alertmanager", "uid": "alertmanager" },
+      "description": "Native Grafana panel querying the real Alertmanager (docker-compose.yml's alertmanager service) directly for currently firing/pending alerts - best-effort wiring, see the notice above if it renders empty.",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 3 },
+      "id": 2,
+      "options": {
+        "alertInstanceLabelFilter": "",
+        "alertName": "",
+        "dashboardAlerts": false,
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 40,
+        "sortOrder": 1,
+        "stateFilter": { "error": true, "firing": true, "noData": false, "normal": false, "pending": true },
+        "viewMode": "list"
+      },
+      "pluginVersion": "11.3.1",
+      "title": "Active Alerts (Alertmanager)",
+      "type": "alertlist"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Guaranteed-correct fallback/companion to the panel on the left - Prometheus's own synthetic ALERTS series, populated the instant a rule in vegaduta-alerts.yml starts firing or pending, independent of Alertmanager delivery.",
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] } },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "alertstate" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "firing": { "color": "red", "index": 0, "text": "FIRING" } } },
+                  { "type": "value", "options": { "pending": { "color": "yellow", "index": 1, "text": "PENDING" } } }
+                ]
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 3 },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "severity" }]
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "editorMode": "code",
+          "expr": "ALERTS{alertstate=~\"firing|pending\"}",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Alerts (Prometheus ALERTS metric) - fallback view",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "id": 4,
+      "panels": [],
+      "title": "Most critical raw metrics (vegaduta-alerts.yml groups 2-4)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "HikariCP pool saturation - matches HikariPoolConnectionsExhausted (critical at active>=max).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.7 },
+              { "color": "red", "value": 0.95 }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 14 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "editorMode": "code",
+          "expr": "sum(hikaricp_connections_active) / sum(hikaricp_connections_max)",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "HikariCP pool utilization",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "JVM heap pressure - matches JvmHeapPressureHigh (warning at 85%).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.7 },
+              { "color": "red", "value": 0.85 }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 14 },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "editorMode": "code",
+          "expr": "sum(jvm_memory_used_bytes{area=\"heap\"}) / sum(jvm_memory_max_bytes{area=\"heap\"})",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "JVM heap utilization",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "core HTTP 5xx rate - matches CoreHttp5xxRateElevated (critical at 5%).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 14 },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "editorMode": "code",
+          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count[5m]))",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "core HTTP 5xx rate",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Workflow event outbox backlog - matches WorkflowEventOutboxBacklogGrowing. DEPENDS on a Micrometer gauge (workflow_event_outbox_pending) not yet exported - see vegaduta-alerts.yml group 5's header comment. Will show \"No data\" until that gauge exists; GET /api/system/status has the live number today.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 100 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 14 },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "editorMode": "code",
+          "expr": "workflow_event_outbox_pending",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Workflow event outbox pending (NOT YET EXPORTED - see description)",
+      "type": "stat"
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["vegaduta", "alerts"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "VegaDūta — Alerts Overview",
+  "uid": "vegaduta-alerts-overview",
+  "version": 1,
+  "weekStart": ""
+}

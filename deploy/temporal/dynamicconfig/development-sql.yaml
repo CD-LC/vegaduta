@@ -1,0 +1,13 @@
+# Temporal dynamic config for local-dev, mounted into the temporalio/auto-setup
+# container at /etc/temporal/config/dynamicconfig/development-sql.yaml (see the
+# `temporal` service's DYNAMIC_CONFIG_FILE_PATH + volume mount in
+# docker-compose.yml). The auto-setup:1.24.2 image does NOT ship this file at
+# that path, so without this mount Temporal crashes at boot with
+# "stat config/dynamicconfig/development-sql.yaml: no such file or directory".
+# Contents are Temporal's own standard local-dev defaults.
+limit.maxIDLength:
+  - value: 255
+    constraints: {}
+system.forceSearchAttributesCacheRefreshOnRead:
+  - value: true # Dev setup only - do not enable in production.
+    constraints: {}

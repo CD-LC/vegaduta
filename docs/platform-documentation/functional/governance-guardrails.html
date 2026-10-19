@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Governance, Guardrails &amp; Approvals — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="functional" data-page="governance-guardrails.html" data-doc="VD-FN-006" data-status="verified" data-updated="2026-09-25" data-owner="Product Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <nav class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Functional</a><span class="sep">/</span>Governance, Guardrails &amp; Approvals</nav>
+
+  <h1>Governance, Guardrails &amp; Approvals</h1>
+  <p class="lede">
+    Governance is the layer between "the model decided to" and "the platform
+    did". Every tool call passes through a staged guard pipeline, gated
+    actions park in an approval inbox, tenant policy shapes what needs a
+    human, and every decision lands in the audit log. Modules:
+    <code>core/guardrails</code> and <code>core/approval</code>.
+  </p>
+
+  <div class="figure">
+    <div class="mermaid">
+flowchart TD
+  TC["Tool call proposed by model"] --&gt; S1["1 · Step ceiling<br/>max steps per turn?"]
+  S1 --&gt;|ok| S2["2 · RIGOROUS verify<br/>ToolCallVerifierService (if depth=RIGOROUS)"]
+  S1 --&gt;|exceeded| DENY1["Deny / stop turn"]
+  S2 --&gt;|plausible| S3["3 · HITL gate<br/>HumanApprovalGateService"]
+  S2 --&gt;|rejected| DENY2["Call refused"]
+  S3 --&gt;|auto-allowed| S4["4 · Output validation"]
+  S3 --&gt;|parked| INBOX["Approval inbox<br/>(tenant-admin decides)"]
+  INBOX --&gt;|approve| S4
+  INBOX --&gt;|reject| DENY3["Call refused · audited"]
+  S4 --&gt; S5["5 · Sanitization<br/>redact/escape output"]
+  S5 --&gt; EXEC["Tool executes"]
+  EXEC --&gt; AUD["Audit log + tool_call_log"]
+    </div>
+    <div class="figure-caption"><code>GuardedToolCallback</code>: the five-stage pipeline every tool call traverses.</div>
+  </div>
+
+  <h2>FR-GOV-01 · GuardedToolCallback pipeline</h2>
+  <p>
+    <code>GuardedToolCallback</code>
+    (<code>core/guardrails/.../GuardedToolCallback.java</code>) wraps every
+    tool — built-in, integration, MCP — in the same five stages:
+  </p>
+  <table>
+    <thead><tr><th>Stage</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Step ceiling</td><td>Caps the number of tool calls a single turn may make; stops runaway loops.</td></tr>
+      <tr><td>2 · RIGOROUS verify</td><td>For agents at <code>ReasoningDepth.RIGOROUS</code>, an independent verifier call (<code>ToolCallVerifierService</code>) checks the call plausibly matches the user's ask before it may run.</td></tr>
+      <tr><td>3 · HITL gate</td><td><code>HumanApprovalGateService</code> decides — from tool classification, tenant policy and jev thresholds — whether the call executes, is refused, or parks on the approval inbox.</td></tr>
+      <tr><td>4 · Output validation</td><td>Checks the tool's result shape/content before it re-enters the model context.</td></tr>
+      <tr><td>5 · Sanitization</td><td>Redacts/escapes output so tool results cannot smuggle instructions or leak secrets back into the prompt.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-GOV-02 · Approval inbox &amp; policies</h2>
+  <p>
+    Gated actions are durable <code>ApprovalRequest</code> rows served by
+    <code>ApprovalController</code> at <code>/api/approvals</code>. Tenants
+    tune gating via approval policies (<code>PUT
+    /api/approvals/policy</code>, <code>ApprovalPolicyService</code>) — which
+    action types auto-allow, which require sign-off, which are admin-only.
+  </p>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-GOV-02.1</td><td>Inbox lists pending requests; approve/reject resolves them and resumes the parked run/job.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-GOV-02.2</td><td><strong>Admin-only classes</strong>: gated agent tool calls (<code>mcp_tool.*</code> action types) and <code>adminOnly</code> payloads are decidable by tenant-admin only; unparseable payloads default-deny; a requester cannot approve their own request (self-approval check).</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-GOV-02.3</td><td><strong>Approval replay grants</strong>: an approval can carry a recorded replay envelope so the exact approved tool input executes — not a re-asked model call.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-GOV-02.4</td><td><strong>Retry job</strong>: a scheduled job re-drives approved-but-unexecuted actions, so approvals never strand.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-GOV-02.5</td><td><strong>Channel-send approvals</strong>: outbound channel messages can be gated so a human reviews what an agent says to a customer before it sends (VOICE is the deliberate exception — a live call cannot wait).</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-GOV-03 · Content moderation</h2>
+  <p>
+    <strong>Moderation packs</strong> screen content against configurable
+    rule sets; flagged items queue in a <strong>human review queue</strong>
+    for a moderator decision. Tenant guardrail rules
+    (<code>TenantGuardrailRuleEvaluator</code>,
+    <code>CustomRuleContentGuardrail</code>) let a tenant define its own
+    blocked/escalated content classes on top of platform packs.
+  </p>
+
+  <h2>FR-GOV-04 · Procedures / SOP layer</h2>
+  <p>
+    Procedures (migration <code>V270__procedures.sql</code>) are tenant-defined
+    standard operating procedures <strong>enforced at the tool
+    boundary</strong>: <code>ProcedureGuardEvaluator</code> and
+    <code>ProcedureGuardKind</code> check a proposed tool call against the SOP
+    (e.g. "refunds above ₹X require a human", "never email outside the
+    allow-list domain") inside the guard pipeline, not as prompt instructions
+    the model can ignore.
+  </p>
+
+  <h2>FR-GOV-05 · Audit log</h2>
+  <p>
+    Approval decisions, gated executions, policy changes and administrative
+    actions write audit records — the evidentiary trail for "who let the
+    agent do that". See <a href="../security/compliance-posture.html">Security:
+    Compliance Posture</a> for retention posture.
+  </p>
+
+  <h2>FR-GOV-06 · Kill switches &amp; tenant controls</h2>
+  <table>
+    <thead><tr><th>Control</th><th>Scope</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Tenant kill switch</td><td>One tenant</td><td>Halts agent execution for that tenant without touching the platform.</td></tr>
+      <tr><td>Platform kill switch</td><td>Global</td><td>Platform-admin emergency stop of agentic execution.</td></tr>
+      <tr><td>Guardrail rules</td><td>Per tenant</td><td>Custom blocked/escalated content and action classes.</td></tr>
+      <tr><td>Allow-lists</td><td>Per tenant</td><td>Whitelisted tools/domains/recipients exempted from or required for gating.</td></tr>
+      <tr><td>Autonomy tiers</td><td>Per tenant / per agent (jev threshold)</td><td>Graduated autonomy — from "approve everything" to "auto-allow within policy".</td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-GOV-07 · Compliance program</h2>
+  <p>
+    The software carries no compliance certification. The controls it implements, and
+    how they map to SOC 2 and ISO/IEC 42001, are summarised on
+    <a href="../security/compliance-posture.html">Compliance Posture</a>; compliance is a
+    property of each deployment and its operator.
+  </p>
+  <div class="callout callout-warning">
+    <div class="callout-title">Unverified claim class</div>
+    <p style="margin:4px 0 0">"SOC 2" / "ISO 42001" anywhere in product copy refers to the assessment document's control mapping — no audit has been performed. Do not present either as attained.</p>
+  </div>
+
+  <h2>Cross-references</h2>
+  <ul>
+    <li><a href="agents-runtime.html">VD-FN-001</a> — reasoning depths and the tool surface the pipeline guards.</li>
+    <li><a href="workflows.html">VD-FN-002</a> — approval nodes and run pause/resume.</li>
+    <li><a href="channels-omnichannel.html">VD-FN-003</a> — channel-send approvals and the VOICE exception.</li>
+    <li><a href="../security/security-architecture.html">Security Architecture</a> — RBAC (<code>PERM_MANAGE_APPROVALS</code>), threat model.</li>
+    <li><a href="../api/overview.html">API Overview</a> — <code>/api/approvals</code> endpoints.</li>
+  </ul>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

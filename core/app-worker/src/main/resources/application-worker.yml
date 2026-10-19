@@ -1,0 +1,44 @@
+# "worker" profile - activate alongside the deployable's normal profiles
+# (e.g. SPRING_PROFILES_ACTIVE=security,knowledge,workflow,graph-memory,mcp,temporal,worker).
+#
+# Everything here is also a WorkerApplication setDefaultProperties default
+# (env still wins either way) - this file documents the worker contract in
+# config form and is the place worker-only overrides belong.
+
+spring:
+  flyway:
+    # Schema migration is the control-plane deployable's job - never let a
+    # worker replica race per-tenant Flyway locks on boot.
+    enabled: false
+
+app:
+  tenancy:
+    migrate-on-boot: false
+  signal:
+    receive:
+      # Signal has no webhook, so the API shape pulls messages (SignalReceiveService). This
+      # deployable must not run a second receiver on the same number.
+      enabled: false
+  scheduling:
+    # One-shot startup registration of the local LLM pool row; the api shape owns it.
+    skip-listener-classes:
+      - com.agenticai.core.providers.LocalLlmPoolBootstrap
+  workflow:
+    temporal:
+      # This deployable IS the worker - it polls the task queue. API pods
+      # run with worker-enabled=false once this service exists so an API
+      # replica never silently splits executions with the real workers.
+      worker-enabled: true
+
+server:
+  # Actuator-only HTTP surface (health probes + prometheus). Offset from
+  # the API server's 8080 so a local `mvn spring-boot:run` of both doesn't
+  # collide; inside a container each service has its own network namespace
+  # anyway - compose/K8s map or ignore this as they see fit.
+  port: ${WORKER_HTTP_PORT:8095}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true

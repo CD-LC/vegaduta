@@ -1,0 +1,411 @@
+/* ---- Run inspector (376px, Steps / Raw trace / History) ---------------- */
+.ax-wf-inspector {
+  width: 320px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ax-border);
+  border-radius: 16px;
+  background: var(--ax-panel);
+  overflow: hidden;
+}
+
+.ax-wf-inspector-header {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--ax-border);
+  flex-shrink: 0;
+}
+
+.ax-wf-run-id {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-wf-run-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+}
+
+.ax-wf-run-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.ax-wf-run-status-running {
+  color: var(--ax-violet);
+}
+
+.ax-wf-run-status-running .ax-wf-run-status-dot {
+  animation: axWfPulse 1.4s infinite;
+}
+
+.ax-wf-run-status-ok,
+.ax-wf-run-status-completed {
+  color: var(--ax-green);
+}
+
+.ax-wf-run-status-failed,
+.ax-wf-run-status-error {
+  color: var(--ax-red);
+}
+
+.ax-wf-run-status-awaiting_approval {
+  color: var(--ax-amber);
+}
+
+@keyframes axWfPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.ax-wf-run-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+}
+
+.ax-wf-progress {
+  height: 6px;
+  border-radius: 4px;
+  background: var(--ax-track);
+  overflow: hidden;
+  margin-top: 9px;
+}
+
+.ax-wf-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ax-violet), var(--ax-cyan));
+  transition: width 0.4s ease;
+}
+
+.ax-wf-tab-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+}
+
+.ax-wf-empty {
+  color: var(--ax-dim);
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+}
+
+.ax-wf-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ax-wf-step-row {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+.ax-wf-step-running {
+  border: 1px solid rgba(155, 125, 255, 0.28);
+  background: rgba(155, 125, 255, 0.06);
+  border-radius: 11px;
+  padding: 10px 11px;
+}
+
+.ax-wf-step-running .ax-wf-step-row {
+  padding: 0;
+}
+
+.ax-wf-step-pending {
+  opacity: 0.55;
+}
+
+.ax-wf-step-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ax-wf-step-dot-ok {
+  background: var(--ax-green);
+  color: #05070d;
+}
+
+.ax-wf-step-dot-error {
+  background: var(--ax-red);
+  color: #05070d;
+}
+
+/* Draft run served this node from its pin: success hue with a dashed edge, same cue as the canvas pin chip. */
+.ax-wf-step-dot-pinned {
+  background: var(--ax-green);
+  color: #05070d;
+  outline: 1px dashed var(--ax-green);
+  outline-offset: 1px;
+}
+
+.ax-wf-step-dot-skipped {
+  background: var(--ax-mid);
+  color: #05070d;
+}
+
+.ax-wf-step-dot-awaiting_approval {
+  background: var(--ax-amber);
+  color: #05070d;
+}
+
+/* Stop Run - a cancelled node/run reads as neutral "stopped", not a failure
+ * (that's what --ax-red is for) - reuses --ax-dim, the same muted tone
+ * .ax-wf-history-time already uses for secondary/inactive text. */
+.ax-wf-step-dot-cancelled {
+  background: var(--ax-dim);
+  color: #05070d;
+}
+
+.ax-wf-step-dot-running {
+  border: 2px solid var(--ax-violet);
+  border-top-color: transparent;
+  animation: axWfSpin 0.8s linear infinite;
+}
+
+.ax-wf-step-dot-pending {
+  border: 1.5px solid var(--ax-border2);
+}
+
+.ax-wf-step-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-wf-step-label {
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+}
+
+.ax-wf-step-running .ax-wf-step-label {
+  /* Was a hardcoded pale lavender (#c9bcff) tuned for a dark panel only -
+   * on the light-mode Run Inspector panel (near-white --ax-panel) that
+   * washed out to near-illegible. --ax-violet is already theme-adaptive
+   * (darker violet in light mode, same lavender-violet in dark mode), so
+   * this now reads correctly in both. */
+  color: var(--ax-violet);
+  font-weight: 600;
+}
+
+.ax-wf-step-sub {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  margin-top: 1px;
+}
+
+.ax-wf-step-running .ax-wf-step-sub {
+  color: var(--ax-violet);
+}
+
+.ax-wf-step-loglines {
+  margin-top: 8px;
+  padding: 8px 9px;
+  border-radius: 8px;
+  background: rgba(4, 6, 12, 0.6);
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+:root[data-mode="light"] .ax-wf-step-loglines {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+/* Raw trace tab - a flattened, terminal-style transcript of every real
+ * logLine from every trace entry (WorkflowCanvas.js flattens runResult.trace
+ * into this list; nothing here is invented or summarized further). */
+.ax-wf-raw-log {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+}
+
+.ax-wf-raw-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--ax-border);
+}
+
+.ax-wf-raw-line:last-child {
+  border-bottom: none;
+}
+
+.ax-wf-raw-node {
+  flex-shrink: 0;
+  width: 5.5rem;
+  color: var(--ax-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ax-wf-raw-msg {
+  min-width: 0;
+  color: var(--ax-mid);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+}
+
+.ax-wf-raw-line-muted .ax-wf-raw-msg {
+  color: var(--ax-dim);
+  font-style: italic;
+}
+
+.ax-wf-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ax-wf-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--ax-border);
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-wf-history-row:hover {
+  border-color: var(--ax-cyan);
+  background: var(--ax-panel2);
+}
+
+.ax-wf-history-id {
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-text);
+}
+
+.ax-wf-history-status {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-micro);
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: var(--ax-chip);
+}
+
+.ax-wf-history-row-ok .ax-wf-history-status,
+.ax-wf-history-row-completed .ax-wf-history-status {
+  color: var(--ax-green);
+}
+
+.ax-wf-history-row-failed .ax-wf-history-status,
+.ax-wf-history-row-error .ax-wf-history-status {
+  color: var(--ax-red);
+}
+
+.ax-wf-history-row-awaiting_approval .ax-wf-history-status {
+  color: var(--ax-amber);
+}
+
+/* Stop Run (WorkflowRunStatus.CANCELLED) - neutral "stopped" tone, same
+ * reasoning as .ax-wf-step-dot-cancelled above: distinct from both the
+ * success (green) and failure (red) tones, not just an unstyled fallthrough. */
+.ax-wf-history-row-cancelled .ax-wf-history-status {
+  color: var(--ax-dim);
+}
+
+/* WorkflowRunStatus.RUNNING - the run-level status enum (RUNNING/COMPLETED/
+ * FAILED/AWAITING_APPROVAL, see WorkflowRunStatus.java) is distinct from
+ * the per-node trace status enum (OK/ERROR/SKIPPED/AWAITING_APPROVAL) that
+ * .ax-wf-step-dot-* above maps - both History rows (here) and this Steps
+ * dot legend get fed real values from each enum respectively, so both sets
+ * of classes need to exist even though the enums don't fully overlap. */
+.ax-wf-history-row-running .ax-wf-history-status {
+  color: var(--ax-violet);
+}
+
+.ax-wf-history-time {
+  margin-left: auto;
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  flex-shrink: 0;
+}
+
+/* Mobile responsiveness pass (2026-07): .ax-wf-history-row/.ax-wf-run-meta
+ * are shared verbatim between the narrow 360px run inspector rail inside
+ * WorkflowCanvas.js and two full-page routes that reuse the exact same
+ * classes at full page width - /workflows/[id]/runs (history list) and
+ * /workflows/[id]/runs/[runId] (run detail, .ax-wf-run-meta's started/
+ * finished timestamps). Both rows are non-wrapping flexboxes with a
+ * margin-left:auto-pushed trailing element (history's id+status+time; run
+ * detail's dot·label / timestamp·timestamp pairs) - fine at desktop widths,
+ * but a phone-locale timestamp plus " · triggeredBy" easily exceeds a
+ * 360-390px viewport's remaining space once the leading run-id/dot already
+ * ate their share, which would force the row (and therefore the page) to
+ * overflow horizontally rather than reflow. Letting these wrap only below
+ * 480px keeps the desktop/tablet single-line look intact while giving the
+ * trailing timestamp its own line on phones instead of being clipped or
+ * pushing the page wider than the viewport. */
+@media (max-width: 480px) {
+  .ax-wf-history-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .ax-wf-history-time {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+  .ax-wf-run-meta {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+}
+
+.ax-wf-inspector-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ax-border);
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-wf-shell .wf-node,
+  .ax-wf-shell .wf-node-running,
+  .ax-wf-node-status-spinner,
+  .ax-wf-step-dot-running,
+  .ax-wf-run-status-running .ax-wf-run-status-dot {
+    animation: none !important;
+  }
+}

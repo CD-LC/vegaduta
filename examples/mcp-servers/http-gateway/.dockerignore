@@ -1,0 +1,14 @@
+# Only used if someone builds with THIS directory as context (the supported
+# build uses the repo root + Dockerfile.dockerignore alongside). Keep secrets
+# and local output out either way (INF-017).
+node_modules
+test
+.git
+*.log
+.env
+.env.*
+!.env*.example
+*.pem
+*.key
+secrets/
+coverage

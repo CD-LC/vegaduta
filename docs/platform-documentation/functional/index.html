@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functional Overview &amp; Personas — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="functional" data-page="index.html" data-doc="VD-FN-000" data-status="verified" data-updated="2026-09-25" data-owner="Product Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <nav class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Functional</a><span class="sep">/</span>Overview &amp; Personas</nav>
+
+  <h1>Functional Overview &amp; Personas</h1>
+  <p class="lede">
+    What the VegaDūta platform does, for whom. This section is the functional
+    specification for the product surface: each domain page enumerates
+    capabilities as numbered feature requirements (<code>FR-xxx-nn</code>),
+    states which personas they serve, and marks every item with a status badge
+    so the reader can distinguish shipping software from roadmap.
+  </p>
+
+  <h2>What the platform does</h2>
+  <p>
+    VegaDūta is a multi-tenant agentic-AI platform. A tenant (a customer
+    organisation) configures AI <strong>agents</strong> — each with its own
+    model, provider credentials or platform-hosted pool access, tools, skills,
+    memory, reasoning depth and guardrail posture — then exposes those agents
+    to end users through <strong>omnichannel messaging</strong> (WhatsApp,
+    Telegram, Slack, Email, Voice and five more), through <strong>embedded
+    chat surfaces</strong> and share links, through <strong>workflows</strong>
+    that orchestrate agents alongside deterministic steps, and through
+    <strong>autonomous jobs</strong> that run agents on schedules and event
+    triggers. Knowledge bases give agents grounded retrieval; usage is metered
+    per call; the governance layer wraps every side-effecting tool call in
+    verification, approval and audit machinery. External clients reach the same
+    core through the developer API, A2A and MCP.
+  </p>
+  <div class="callout callout-note" id="billing">
+    <div class="callout-title">Billing and plans are off by default</div>
+    <p style="margin:4px 0 0">
+      Billing and plan gating (<code>core/billing</code>, <code>core/payments</code>,
+      <code>plan_limits</code>, an optional Razorpay gateway) exist for operators who run a
+      paid hosted service. For self-hosters they are off: the consoles hide plan and billing
+      surfaces unless <code>NEXT_PUBLIC_BILLING_ENABLED=1</code> (<code>WEB_BILLING_ENABLED</code>
+      in Compose), and FREE mode resolves every tenant as the top tier for feature gates.
+      Where the pages below mention a plan gate, it only matters if you turn billing on.
+    </p>
+  </div>
+
+  <div class="figure">
+    <div class="mermaid">
+flowchart LR
+  subgraph Personas
+    TA["tenant-admin"]
+    AB["agent-builder"]
+    EU["end-customer / channel end-user"]
+    PA["platform-admin"]
+    API["API consumer / external agent"]
+  end
+  subgraph Surfaces
+    WA["web-admin console"]
+    WEB["web end-user app"]
+    CH["10 channel types"]
+    DEV["developer API · A2A · MCP"]
+  end
+  CORE["core/app — Spring Boot modular monolith"]
+  TA --&gt; WA
+  AB --&gt; WA
+  EU --&gt; WEB
+  EU --&gt; CH
+  PA --&gt; WA
+  API --&gt; DEV
+  WA --&gt; CORE
+  WEB --&gt; CORE
+  CH --&gt; CORE
+  DEV --&gt; CORE
+    </div>
+    <div class="figure-caption">Personas reach the same core runtime through different surfaces.</div>
+  </div>
+
+  <h2>Persona directory</h2>
+  <p>
+    Each persona below maps to a real surface in the repository. "Where they
+    live" names the deployable or module the persona's experience is served
+    from; "what they do" summarises the functional scope detailed in the
+    domain pages.
+  </p>
+  <table>
+    <thead><tr><th>Persona</th><th>Where they live</th><th>What they do</th><th>Primary spec</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>tenant-admin</strong></td>
+        <td><code>web</code> tenant console (<code>app.&lt;your-domain&gt;</code>), tenant-scoped APIs</td>
+        <td>Owns the tenant: invites and roles users, wires channel credentials, approves gated actions in the approval inbox, sets guardrail rules, allow-lists and approval policies, reviews the audit log.</td>
+        <td><a href="governance-guardrails.html">VD-FN-006</a></td>
+      </tr>
+      <tr>
+        <td><strong>agent-builder</strong></td>
+        <td><code>web</code> agent workbench, workflow canvas, knowledge pages</td>
+        <td>Creates and versions agents, attaches tools/skills/memory, tunes reasoning depth, designs workflows on the canvas, curates knowledge collections, runs A/B experiments.</td>
+        <td><a href="agents-runtime.html">VD-FN-001</a>, <a href="workflows.html">VD-FN-002</a>, <a href="knowledge-rag.html">VD-FN-004</a></td>
+      </tr>
+      <tr>
+        <td><strong>delegated-user</strong></td>
+        <td><code>web</code> tenant console, approval inbox subset</td>
+        <td>A non-admin tenant member who chats with the tenant's agents, runs workflows they're entitled to, and can approve non-admin-only requests. Cannot approve gated tool calls (tenant-admin only).</td>
+        <td><a href="agents-runtime.html">VD-FN-001</a>, <a href="governance-guardrails.html">VD-FN-006</a></td>
+      </tr>
+      <tr>
+        <td><strong>end-customer</strong></td>
+        <td>Public share links, embedded chat widgets, public ACP commerce feed</td>
+        <td>An unauthenticated or lightly-identified visitor who talks to a shared/embedded agent, or buys through an agent's checkout surface. No console access.</td>
+        <td><a href="agents-runtime.html">VD-FN-001</a></td>
+      </tr>
+      <tr>
+        <td><strong>platform-admin</strong></td>
+        <td><code>web-admin</code> platform console (<code>admin.&lt;your-domain&gt;</code>), control-plane APIs</td>
+        <td>Operates the platform itself (realm role <code>platform-admin</code>, granted with <code>scripts/vegaduta make-admin</code>): manages the platform LLM provider pool, flips FREE MODE and the platform kill switch, oversees moderation queues across tenants, edits <code>plan_limits</code> if billing is on.</td>
+        <td><a href="governance-guardrails.html">VD-FN-006</a></td>
+      </tr>
+      <tr>
+        <td><strong>API consumer / external agent</strong></td>
+        <td>REST developer API, A2A agent cards, AG-UI run endpoints, MCP server</td>
+        <td>Programmatic callers — other software or other agents — that invoke agents, runs and workflows over authenticated HTTP/A2A/MCP without using a human UI.</td>
+        <td><a href="agents-runtime.html">VD-FN-001</a>, <a href="../api/developer-api.html">API: developer surface</a></td>
+      </tr>
+      <tr>
+        <td><strong>channel end-user</strong></td>
+        <td>WhatsApp, Messenger, Instagram, Slack, Discord, X, Telegram, Email, Teams, Voice</td>
+        <td>Messages or calls a tenant's connected number/account and converses with the routed agent. Goes through pairing, session resolution and (optionally) human handoff to an operator.</td>
+        <td><a href="channels-omnichannel.html">VD-FN-003</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Capability map</h2>
+  <table>
+    <thead><tr><th>Domain page</th><th>Doc ID</th><th>Scope</th></tr></thead>
+    <tbody>
+      <tr><td><a href="agents-runtime.html">Agents &amp; Agent Runtime</a></td><td><code>VD-FN-001</code></td><td>Agent lifecycle, skills, reasoning depths, tools, memory, sharing, A2A/AG-UI, autonomous jobs, vision, crews, edge agents</td></tr>
+      <tr><td><a href="workflows.html">Workflow Engine</a></td><td><code>VD-FN-002</code></td><td>Definitions and runs, the 18 node types, synchronous + Temporal engines, versioning/diff, triggers, approvals, recovery</td></tr>
+      <tr><td><a href="channels-omnichannel.html">Channels &amp; Omnichannel</a></td><td><code>VD-FN-003</code></td><td>The 10 channel types, contacts/routing, pairing and operator inboxes, health, credentials, channel plan gates</td></tr>
+      <tr><td><a href="knowledge-rag.html">Knowledge Base &amp; RAG</a></td><td><code>VD-FN-004</code></td><td>Collections/documents, ingestion and connectors, hybrid search + reranker, agent knowledge tools, graph memory</td></tr>
+      <tr><td><a href="governance-guardrails.html">Governance, Guardrails &amp; Approvals</a></td><td><code>VD-FN-006</code></td><td>Guarded tool pipeline, approval inbox and policies, moderation, Procedures/SOP, audit, kill switches, autonomy tiers</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Feature status conventions</h2>
+  <p>
+    Functional items in this section carry one of three statuses, distinct
+    from the site-wide verification badges (which describe whether a doc page
+    was re-checked, not whether a feature shipped):
+  </p>
+  <table>
+    <thead><tr><th>Status</th><th>Meaning</th><th>How to recognise it</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-live">live</span></td>
+        <td>Implemented and enabled by default (or by the Compose profile / flag named on the page).</td>
+        <td>Default for items in this section unless marked otherwise.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-staging">on-main</span></td>
+        <td>Merged to <code>main</code> and present in the repository, but not yet in a tagged release or not verified end to end — treat as "merged, not necessarily released".</td>
+        <td>Stated inline where release state was not re-verified.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-draft">draft</span></td>
+        <td>Authored but never shipped or verified. Aspirational, not real.</td>
+        <td>Always called out in a warning callout.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Plan-gated features are marked with an info callout naming the
+    <code>plan_limits</code> flag or tier that controls them (see
+    <a href="#billing">Billing and plans are off by default</a>). Requirements that were
+    verified against source rather than a running deployment cite the file or
+    migration that proves them, e.g. <code>core/agents/.../ReasoningDepth.java</code>
+    or <code>V270__procedures.sql</code>.
+  </p>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Relationship to other sections</div>
+    <p style="margin:4px 0 0">
+      Functional pages describe <em>what</em> exists and <em>who</em> uses it.
+      For <em>how</em> it is built see
+      <a href="../architecture/system-architecture.html">System Architecture</a>;
+      for the exact REST surface see <a href="../api/overview.html">API Overview</a>;
+      for how to enable optional services see the <a href="../deployment/index.html">Deployment Guide</a>.
+    </p>
+  </div>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

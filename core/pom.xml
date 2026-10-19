@@ -1,0 +1,847 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.16</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.agenticai</groupId>
+  <artifactId>core</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <!--
+    Modular monolith conversion (see Agentic-AI-Platform-Microservices-Architecture.md
+    Section 6 and the "modular monolith first" decision): this POM is now a pure
+    aggregator/BOM - packaging=pom, no source of its own. Every package that used to
+    live directly under core/src/main/java/com/agenticai/core/<pkg> now lives in its
+    own Maven module below, with hard dependency boundaries between them (Maven itself
+    now enforces that e.g. "providers" can never accidentally start importing
+    "omnichannel" classes - a compile error, not just a code-review nit).
+
+    Module dependency order (leaves first - a module only appears after everything it
+    depends on): audit, billing, crypto, mcp, security -> admin, providers -> tenancy,
+    chat -> eventbus -> approval, knowledge -> guardrails -> agents (agents+tools
+    merged - see below) -> omnichannel -> app (assembles everything into the one
+    deployable jar, same as before; still one process, one `mvn spring-boot:run`, now
+    run from core/app).
+
+    eventbus (added for the Interactive Workflow Designer PRD, Phase 0): depends only
+    on tenancy (for TenantSchemaIterator). omnichannel depends on it directly to
+    publish trigger events from TwilioWebhookController; nothing in eventbus depends
+    on omnichannel, agents, or approval, so this stays a one-directional addition -
+    no existing module's dependency graph changed.
+
+    graphmemory (added after google): depends
+    only on tenancy (TenantSchemaResolver - same per-tenant-schema pattern
+    AgentMemorySchemaSupport already uses for pgvector, applied here to Apache AGE
+    instead). agents depends on it directly (RememberFactToolCallback/GraphRecallToolCallback);
+    nothing in graphmemory depends on agents, so - same shape as eventbus/devices - this
+    is a one-directional addition.
+
+    devices (Mobile SDK backend, added after omnichannel): depends only on tenancy
+    (ExternalAccountProvider/TenantResolutionService/ChannelAccountLink - the same
+    cross-tenant lookup omnichannel's Twilio webhook and workflow's webhook trigger
+    already use, reused here rather than reinvented) and security (TenantContext).
+    workflow depends on it directly for the "Device Control" node
+    (WorkflowExecutionEngine#executeDeviceControlNode); nothing in devices depends
+    on workflow, so - same shape as eventbus - this is a one-directional addition.
+
+    agents+tools merged into one module, not two: AgentToolProvider (originally in
+    "tools") needs the Agent entity (in "agents") to read its knowledgeBaseEnabled/
+    allowed-tools config, and AgentChatService (in "agents") needs AgentToolProvider
+    (in "tools") to build the toolset for the LLM call - a genuine circular
+    dependency at the class level, confirmed by grepping cross-package imports
+    before this split, not a guess. Maven modules cannot have circular dependencies,
+    and splitting the classes apart to break the cycle would be a real code change,
+    not just a file move - out of scope for "relocate, don't rewrite". Keeping them
+    in one module (still called "agents") is the safe, no-behavior-change choice.
+
+    sarvam -> providers, elevenlabs -> providers (ADR-0011 phase 2, 2026-09-29):
+    until then providers depended on sarvam and elevenlabs (the kernel hosted their
+    TTS/STT adapters and a hard-coded ProviderName.SARVAM credential branch). The
+    arrow is now inverted: the vendor modules implement providers' SPIs
+    (TextToSpeechProvider, SpeechToTextProvider, ExternalProviderCredentialSource),
+    discovered by type. providers has no vendor dependency; ModuleBoundaryRulesTest
+    in app enforces it.
+
+    storage (Simple/Manual Tuning + Model Dropdown + File Upload build, Stage 3,
+    added after crypto): FileStorageService, an S3-API object-storage abstraction
+    (MinIO locally, swappable to AWS S3/Cloudflare R2 in prod via config only -
+    see that module's pom.xml description). Leaf, no dependency on any other core
+    module. sarvam depends on it directly (SarvamGeneratedAudioService, migrating
+    off base64-in-Postgres); nothing in storage depends on sarvam.
+
+    speech (SpeechTextNormalizer, added 2026-07-29 alongside storage): the one
+    place raw agent/LLM text is rewritten into something a TTS engine should
+    actually say out loud (markdown/HTML/emoji/control characters stripped,
+    bare URLs spoken as "a link", whitespace collapsed into sentence pauses) -
+    the fix for "voice reads all the special characters". A true leaf like
+    crypto/storage: JDK-only static functions, zero dependency on any other
+    core module. It is its own module rather than living inside one of the two
+    TTS integrations because elevenlabs (ElevenLabsClient#textToSpeech) and
+    sarvam (SarvamTextToSpeechClient#synthesize) both need it and neither
+    depends on the other - their only shared ancestors were
+    crypto/security/tenancy/storage, none of which is a sane home for text
+    processing, and duplicating it into both would let the two speech surfaces
+    drift apart. elevenlabs and sarvam depend on it; nothing depends on them
+    from here, so this is a one-directional addition like eventbus/devices.
+
+    sdlc (SDLC automation build plan, #849 - E2B sandbox integration scaffold,
+    added after sarvam): E2bCredential BYOK storage + E2bSandboxClient (create/
+    list/kill sandbox via E2B's REST API). Leaf-shaped like sarvam itself -
+    depends only on crypto/security/tenancy, nothing else in core depends on
+    it yet (no agent tool callback built on top of it in this scaffold pass -
+    see that module's pom.xml description for the staged plan).
+
+    voice (self-hosted in-app voice/video calling, Phase 1 of the self-reliance
+    initiative, added after agents): LiveKit access-token issuance plus a
+    push-to-talk STT->AgentChatService->TTS turn pipeline. Depends on agents
+    (AgentService/AgentChatService), sarvam (speech-to-text leg), and
+    elevenlabs (text-to-speech leg, reusing the existing voice-cloning
+    integration) - a one-directional addition exactly like eventbus/
+    graphmemory/devices above: nothing in agents/sarvam/elevenlabs depends on
+    voice. Deliberately independent of core/omnichannel/twilio (100%
+    Twilio-dependent PSTN bridge) - see voice's own pom.xml description.
+
+    "common" (GlobalExceptionHandler, WebConfig) isn't its own module: grepping
+    showed nothing depends on it, and it depends on nearly everything (the
+    exception handler has an @ExceptionHandler for almost every module's custom
+    exceptions) - it's cross-cutting glue, not shared low-level code, so it lives
+    in "app" alongside CoreApplication and the resources (application*.yml, Flyway
+    migrations).
+
+    sharing (cross-user resource sharing foundation, added after admin): a new
+    resource_grant table + ResourceAccessService for letting an Agent/Workflow
+    owner grant specific teammates RUNNER/VIEWER/EDITOR access, and the
+    anti-enumeration 404-on-denial contract that goes with it. Depends on
+    security (TenantContext), audit (AuditLogService), and admin
+    (KeycloakAdminClient, for same-tenant grantee validation - the narrower
+    dependency target than pulling in tenancy, mirroring exactly what admin's
+    own UserAdminController already needs it for). Deliberately has ZERO
+    dependency on agents or workflow - neither Agent nor WorkflowDefinition has
+    an owner column yet (that's the next workstream's job), so this module
+    can't look either entity up directly; its ShareController instead resolves
+    a resource's owner through a small ResourceOwnerLookup SPI (defined in this
+    module, with no implementation yet) that agents/workflow will implement
+    once they add the column - dependency inversion, not a forward reference.
+    agents and workflow will depend ON this module in that follow-up, not the
+    other way around, so listing "sharing" here right after "admin" (which it
+    depends on) keeps the reactor's natural build order intact without
+    reordering anything downstream.
+  -->
+  <name>core</name>
+  <description>Agentic AI Platform - Spring AI orchestration core (modular monolith aggregator)</description>
+  <packaging>pom</packaging>
+  <url>https://github.com/CD-LC/vegaduta</url>
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/CD-LC/vegaduta</url>
+    <connection>scm:git:https://github.com/CD-LC/vegaduta.git</connection>
+  </scm>
+
+  <modules>
+    <module>json</module>
+    <module>audit</module>
+    <module>billing</module>
+    <module>crypto</module>
+    <module>crypto-kms</module>
+    <module>secrets</module>
+    <module>storage</module>
+    <module>speech</module>
+    <module>mcp</module>
+    <module>mcpserver</module>
+    <module>security</module>
+    <module>agentspi</module>
+    <module>admin</module>
+    <module>sharing</module>
+    <module>providers</module>
+    <module>dbauth</module>
+    <module>tenancy</module>
+    <module>chat</module>
+    <module>eventbus</module>
+    <module>approval</module>
+    <!-- E1 Agentic UPI Payments - needs billing's Razorpay client, approval's
+         gate, eventbus's outbox and tenancy's schema iterator, so it sits
+         right after approval in compile order. Nothing depends back on it
+         except agents (tool wiring) and the app aggregators. -->
+    <module>payments</module>
+    <module>knowledge</module>
+    <module>guardrails</module>
+    <module>google</module>
+    <module>sarvam</module>
+    <module>imagegen</module>
+    <module>elevenlabs</module>
+    <module>sdlc</module>
+    <module>reliability</module>
+    <module>graphmemory</module>
+    <module>codeintel</module>
+    <module>documentgen</module>
+    <!-- Per-user budgets and tenant spend caps, cut out of agents (see
+         docs/architecture/agents-decomposition/budgets.md). agents depends on it;
+         it never depends on agents. -->
+    <module>agents-budget</module>
+    <module>agents</module>
+    <module>agents-turn</module>
+    <module>agents-tools</module>
+    <module>agents-browser</module>
+    <module>agents-jobs</module>
+    <module>agents-chatport</module>
+    <module>agents-interop</module>
+    <module>agents-studio</module>
+    <module>quality</module>
+    <module>voice</module>
+    <module>omnichannel</module>
+    <module>omnichannel-social</module>
+    <module>devices</module>
+    <module>workflow-expression</module>
+    <module>workflow</module>
+    <module>workflow-portability</module>
+    <module>platform</module>
+    <module>rl</module>
+    <module>templates</module>
+    <module>brief</module>
+    <module>app-config</module>
+    <module>app</module>
+    <module>app-worker</module>
+    <module>app-jobs</module>
+  </modules>
+
+  <properties>
+    <!-- Java 21 (LTS). Raised from 17 to unlock virtual threads (Project Loom,
+         stable since 21) for this heavily I/O-bound app - see
+         spring.threads.virtual.enabled in application.yml and AgentChatService's
+         preTurnExecutor. Spring Boot 3.4.x fully supports 21. Compiles on the
+         JDK 24 already installed here (release 21 <= 24) and on the temurin-21
+         build/runtime images (Dockerfile) and CI toolchains. Build JDK must be
+         21+ - local builds whose JAVA_HOME still points at a 17 JDK need it
+         repointed at 21+ (a 21+ JDK is already installed). -->
+    <java.version>21</java.version>
+    <spring-ai.version>1.1.8</spring-ai.version>
+    <!-- Reproducible builds (JAVA-037): a fixed timestamp for every jar entry, so
+         the same source always yields byte-identical jars (maven-jar-plugin and
+         spring-boot-maven-plugin both honour it). Bump only when cutting a
+         release if a human-meaningful date is wanted; any constant works. -->
+    <project.build.outputTimestamp>2026-09-30T00:00:00Z</project.build.outputTimestamp>
+    <!-- JaCoCo agent argLine, filled in by jacoco:prepare-agent. Must be defined
+         (empty) so surefire's ${jacocoArgLine} resolves when the agent is skipped. -->
+    <jacocoArgLine></jacocoArgLine>
+    <jacoco.version>0.8.13</jacoco.version>
+    <spotless.version>2.44.4</spotless.version>
+    <google-java-format.version>1.25.2</google-java-format.version>
+    <!-- Git ref Spotless ratchets against. CI fetches origin/main (fetch-depth 0);
+         a clone without that remote can pass -Dspotless.ratchet.ref=main (or HEAD). -->
+    <spotless.ratchet.ref>origin/main</spotless.ratchet.ref>
+    <archunit.version>1.4.1</archunit.version>
+    <!-- JSpecify nullness annotations (@NullMarked/@Nullable). Compile-scope,
+         annotation-only jar; the NullAway pilot in -Pstatic-analysis checks
+         only packages marked @NullMarked. -->
+    <jspecify.version>1.0.0</jspecify.version>
+    <!-- Google Application Default Credentials: core/providers (Vertex AI) and core/dbauth (Cloud SQL IAM login)
+         must use the same one. Managed in dependencyManagement below. -->
+    <google-auth.version>1.33.0</google-auth.version>
+    <webauthn4j.version>0.31.11.RELEASE</webauthn4j.version>
+    <!-- testcontainers.version override removed in P1a (ADR-0012): Boot 3.5.16 manages
+         Testcontainers 1.21.4 itself (the first 1.x that speaks to Docker Engine 29). -->
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.auth</groupId>
+        <artifactId>google-auth-library-oauth2-http</artifactId>
+        <version>${google-auth.version}</version>
+      </dependency>
+      <!-- Pin commons-io: twilio-sdk (core/omnichannel) pulls 2.14.0 and, being the nearest declaration, shadows the
+           2.16+ that Apache POI 5.3.0 (core/documentgen) calls into (BoundedInputStream.builder()). Reading any
+           .xlsx/.docx then throws NoSuchMethodError at runtime. 2.17.0 satisfies both. -->
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.17.0</version>
+      </dependency>
+      <!-- Pin jackson-annotations 2.22: webauthn4j 0.31.x (passkeys, core/admin) parses with Jackson 3.2
+           (tools.jackson), which calls JsonTypeInfo.Value.getWriteTypeIdForDefaultImpl(), a method added in
+           annotations 2.22. Spring Boot's BOM manages 2.21, so without this pin the first passkey parse throws
+           NoSuchMethodError. Annotations are backward compatible, so the 2.21 databind/core the rest of the
+           reactor uses keeps working against 2.22. -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.22</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-bom</artifactId>
+        <version>${spring-ai.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Pin okhttp: spring-ai-google-genai (core/chat's
+           GeminiAgentChatClientFactory) transitively pulls com.google.genai:
+           google-genai, whose ApiClient.createHttpClient() calls
+           OkHttpClient.Builder.connectTimeout(java.time.Duration) - an
+           overload that only exists from OkHttp 4.0.0 onward. With no
+           explicit okhttp version pinned anywhere in this reactor, Maven's
+           nearest-wins mediation was letting some OTHER transitive
+           dependency's older (pre-4.0, Duration-overload-less) okhttp shadow
+           the one google-genai actually needs, producing a runtime
+           NoSuchMethodError the first time a Gemini-backed call is made
+           (reproduced via WorkflowController.generateGraph's AI workflow
+           generator, but this would hit any Gemini call path). Explicit
+           dependencyManagement entries win regardless of tree depth, so this
+           fixes it no matter which dependency was actually "nearest". 4.12.0
+           matches the version already used in mobile-app/mobile-sdk's
+           Android modules elsewhere in this repo. -->
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>4.12.0</version>
+      </dependency>
+
+      <!-- Inter-module versions, so every module can depend on a sibling
+           without repeating ${project.version} everywhere. -->
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>audit</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>secrets</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>billing</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>payments</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>crypto</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>crypto-kms</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>json</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>storage</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>dbauth</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>speech</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>mcp</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>mcpserver</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>security</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>admin</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>sharing</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>providers</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>tenancy</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>chat</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>rl</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>eventbus</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>approval</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>knowledge</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>codeintel</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>documentgen</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>guardrails</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>google</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>sarvam</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>imagegen</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>elevenlabs</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>sdlc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>reliability</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>graphmemory</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agentspi</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-budget</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-turn</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-tools</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-jobs</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-browser</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-chatport</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-interop</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-studio</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>quality</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>voice</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>omnichannel</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>omnichannel-social</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>devices</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>workflow-expression</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>workflow</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>workflow-portability</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>platform</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>templates</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>brief</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>app-config</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!-- ADR-0011 phase 1: module-boundary rules (test scope only, used by
+           core/app's archrules tests). Pinned here so every module that
+           adds architecture tests later gets the same version. -->
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <!-- Java 21 migration: the build now REQUIRES a JDK 21+ (release 21 can't
+           be produced by the JDK 17 this project used to pin to). On modern
+           JDKs (21/24/25), Mockito/ByteBuddy's dynamic self-attach plus CDS
+           sharing caused RANDOM per-run surefire fork crashes ("Unable to
+           create test class 'X'", a different module each run) - flaky, not a
+           code bug. These flags are the documented mitigation: allow the agent
+           self-attach explicitly (silences the warning that becomes a hard
+           error in newer JDKs) and disable class-data sharing (the source of the
+           fork instability). IgnoreUnrecognizedVMOptions keeps this safe across
+           every JDK 21+ variant even if one drops an option. Declared in
+           <plugins> (not <pluginManagement>) so every child module inherits it
+           for its own test forks. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>@{jacocoArgLine} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+        </configuration>
+      </plugin>
+
+      <!-- Formatting (manual / CI only): NOT bound to any lifecycle phase; run
+           "mvn spotless:check" (or spotless:apply). ratchetFrom limits it to
+           files changed relative to origin/main so untouched code is never
+           flagged. Existing code is 4-space indented with ASCII-sorted,
+           ungrouped imports = google-java-format AOSP style. -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <ratchetFrom>${spotless.ratchet.ref}</ratchetFrom>
+          <java>
+            <includes>
+              <include>src/main/java/**/*.java</include>
+              <include>src/test/java/**/*.java</include>
+            </includes>
+            <googleJavaFormat>
+              <version>${google-java-format.version}</version>
+              <style>AOSP</style>
+            </googleJavaFormat>
+          </java>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- Opt-in: keeping JaCoCo out of the default lifecycle means offline/CI builds
+       never need the plugin resolved (prepare-agent runs at initialize and broke
+       offline compiles when the plugin was not cached). Use: mvn -Pcoverage verify -->
+  <profiles>
+    <!-- Build-hygiene gates (maven-enforcer-plugin; version managed by the Boot
+         parent). Active automatically in CI (GitHub Actions sets CI=true) and on
+         demand with -Penforce. Kept out of the default local build only because
+         the enforcer rule jars are not in every developer's offline ~/.m2, and
+         `mvn -o` must keep working. Hard rules: JDK 21+, Maven 3.9+, no
+         duplicate dependency declarations in a POM. dependencyConvergence is
+         WARN-only (fail=false): Spring AI and the cloud SDK trees do not converge
+         today; tighten once the report is clean. -->
+    <profile>
+      <id>enforce</id>
+      <activation>
+        <property>
+          <name>env.CI</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-build-hygiene</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireJavaVersion>
+                      <version>[21,)</version>
+                    </requireJavaVersion>
+                    <requireMavenVersion>
+                      <version>[3.9,)</version>
+                    </requireMavenVersion>
+                    <banDuplicatePomDependencyVersions/>
+                  </rules>
+                </configuration>
+              </execution>
+              <execution>
+                <id>warn-dependency-convergence</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <fail>false</fail>
+                  <rules>
+                    <dependencyConvergence/>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- Static analysis (OPT-IN via -Pstatic-analysis; CI runs it as its own
+         step). Error Prone runs as a javac plugin with EVERY check demoted to a
+         warning (-XepAllErrorsAsWarnings), so the general check set can never
+         fail the build - see docs/engineering/ERROR-PRONE-BASELINE.md for the
+         baseline histogram. The one exception is the NullAway pilot:
+         OnlyNullMarked=true restricts NullAway to packages carrying
+         @org.jspecify.annotations.NullMarked (package-info.java), and inside
+         those packages a finding is an ERROR. Unmarked code is not checked at
+         all, so marking a package is the (only) way to opt it in.
+         fork=true + the -J add-exports/add-opens flags are the Error Prone
+         Maven setup for JDK 16+ without a .mvn/jvm.config (keeps the default
+         build untouched). -XDaddTypeAnnotationsToSymbol=true is required when
+         the compiling JDK is 21 (CI) and a harmless no-op on 22+.
+         Test sources get Error Prone but not NullAway (test classes share the
+         pilot packages' names and would inherit @NullMarked). -->
+    <profile>
+      <id>static-analysis</id>
+      <properties>
+        <error-prone.version>2.50.0</error-prone.version>
+        <nullaway.version>0.14.2</nullaway.version>
+        <errorprone.common.args>-Xplugin:ErrorProne -XepAllErrorsAsWarnings -XepDisableWarningsInGeneratedCode -XepExcludedPaths:.*[\\/]target[\\/]generated-(test-)?sources[\\/].*</errorprone.common.args>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <fork>true</fork>
+              <showWarnings>true</showWarnings>
+              <annotationProcessorPaths combine.children="append">
+                <path>
+                  <groupId>com.google.errorprone</groupId>
+                  <artifactId>error_prone_core</artifactId>
+                  <version>${error-prone.version}</version>
+                </path>
+                <path>
+                  <groupId>com.uber.nullaway</groupId>
+                  <artifactId>nullaway</artifactId>
+                  <version>${nullaway.version}</version>
+                </path>
+              </annotationProcessorPaths>
+            </configuration>
+            <executions>
+              <execution>
+                <id>default-compile</id>
+                <configuration>
+                  <compilerArgs>
+                    <arg>-XDcompilePolicy=simple</arg>
+                    <arg>--should-stop=ifError=FLOW</arg>
+                    <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+                    <arg>-Xmaxwarns</arg>
+                    <arg>100000</arg>
+                    <arg>${errorprone.common.args} -Xep:NullAway:ERROR -XepOpt:NullAway:OnlyNullMarked=true -XepOpt:NullAway:JSpecifyMode=false</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                    <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                    <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                  </compilerArgs>
+                </configuration>
+              </execution>
+              <execution>
+                <id>default-testCompile</id>
+                <configuration>
+                  <compilerArgs>
+                    <arg>-XDcompilePolicy=simple</arg>
+                    <arg>--should-stop=ifError=FLOW</arg>
+                    <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+                    <arg>-Xmaxwarns</arg>
+                    <arg>100000</arg>
+                    <arg>${errorprone.common.args} -Xep:NullAway:OFF</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                    <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                    <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                    <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                  </compilerArgs>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>coverage</id>
+      <build>
+        <plugins>
+          <!-- Coverage (WARN-ONLY, OPT-IN via -Pcoverage): records coverage and writes target/site/jacoco
+               per module, but enforces nothing. The agent argLine goes to
+               ${jacocoArgLine} (not the default "argLine") so it composes with the
+               surefire argLine above instead of being overridden by it.
+               To turn on a coverage threshold later, add a third execution:
+                 <execution><id>check</id><goals><goal>check</goal></goals>
+                   <configuration><rules><rule><element>BUNDLE</element>
+                     <limits><limit><counter>LINE</counter><value>COVEREDRATIO</value>
+                       <minimum>0.50</minimum></limit></limits></rule></rules>
+                   </configuration></execution>
+               (bound to verify by default); raise the minimum gradually. -->
+            <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <configuration>
+              <propertyName>jacocoArgLine</propertyName>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

@@ -1,0 +1,89 @@
+# List-paging conformance allowlist (ADR-0019, architecture bet 13).
+#
+# One line per 'METHOD path': list-returning GET operations in docs/api/openapi.json that
+# still have no limit/offset/page/size/cursor query parameter.
+#
+# THIS FILE CAN ONLY SHRINK. Do not add a line to make a build pass: add paging instead.
+# ListPagingConformanceTest also fails when a line here is now paged (or the route is gone),
+# so delete the line in the same change that adds paging.
+# Print current violations: -Dconformance.print=true
+GET /api/admin/llm-usage/summary
+GET /api/admin/llm-usage/tasks/{sessionId}
+GET /api/admin/spend-reports/by-agent
+GET /api/admin/spend-reports/by-day
+GET /api/admin/spend-reports/by-modality
+GET /api/admin/spend-reports/by-model
+GET /api/admin/spend-reports/by-provider
+GET /api/admin/users
+GET /api/agents/specialties/tags
+GET /api/agents/{agentId}/agui/tools
+GET /api/agents/{agentId}/available-tools
+GET /api/agents/{agentId}/capabilities
+GET /api/agents/{agentId}/jobs/{jobId}/progress
+GET /api/agents/{agentId}/jobs/{jobId}/trace
+GET /api/agents/{agentId}/memories
+GET /api/agents/{agentId}/procedures
+GET /api/agents/{agentId}/prompt/versions
+GET /api/agents/{agentId}/quality/datasets
+GET /api/agents/{agentId}/quality/judge-calibration-sets
+GET /api/agents/{agentId}/quality/simulations/personas
+GET /api/agents/{agentId}/quality/simulations/sessions
+GET /api/agents/{agentId}/quality/simulations/sessions/{sessionId}/runs
+GET /api/agents/{agentId}/sessions/{sessionId}/llm-requests
+GET /api/agents/{agentId}/sessions/{sessionId}/llm-usage
+GET /api/agents/{agentId}/tool-calls
+GET /api/audit-log/action-types
+GET /api/briefs/{id}/rehearsals
+GET /api/capabilities
+GET /api/channels/whatsapp-compliance/tasks
+GET /api/chat-import/chats
+GET /api/commerce/mandates
+GET /api/commerce/mandates/{id}/events
+GET /api/commerce/mandates/{intentId}/carts
+GET /api/demo/studio/agents
+GET /api/demo/studio/agents/{agentId}/connectors
+GET /api/demo/studio/agents/{agentId}/documents
+GET /api/demo/studio/workflows
+GET /api/demo/studio/workflows/{workflowId}/runs
+GET /api/dev/v1/agents
+GET /api/dev/v1/workflows
+GET /api/edge/manifest/registry
+GET /api/elevenlabs/voices
+GET /api/mcp/registry
+GET /api/mcp/registry/catalog
+GET /api/mcp/tool-pins
+GET /api/mcpserver/grants
+GET /api/mcpserver/grants/{id}/tool-calls
+GET /api/model-pricing
+GET /api/payments/mandates
+GET /api/payments/mandates/spend
+GET /api/platform/feature-flags
+GET /api/platform/feature-flags/{key}/assignments
+GET /api/platform/hosted-llm-cost/by-day
+GET /api/platform/hosted-llm-providers
+GET /api/platform/jobs
+GET /api/platform/llm-tasks
+GET /api/platform/llm-usage
+GET /api/platform/mcp-review/pending
+GET /api/platform/newsletter/recipients
+GET /api/platform/plan-limits
+GET /api/platform/settings
+GET /api/platform/tenant-detail
+GET /api/platform/tenants
+GET /api/platform/tool-credentials
+GET /api/rl/agents/{agentId}/policies
+GET /api/rl/agents/{agentId}/policies/{dimension}/arms
+GET /api/secrets
+GET /api/studio-apps
+GET /api/tenant/ai-model-preferences
+GET /api/tenant/invoices
+GET /api/tenant/privacy/consent-records
+GET /api/tenant/privacy/purposes/agents/{id}
+GET /api/tenant/privacy/purposes/knowledge-collections/{id}
+GET /api/tenant/privacy/retention-policies
+GET /api/tenant/sso/scim-tokens
+GET /api/wallets
+GET /api/workflow-expression-functions
+GET /api/workflows
+GET /api/workflows/{workflowId}/runs/{runId}/llm-requests
+GET /api/{resourceKind}/{resourceId}/grants

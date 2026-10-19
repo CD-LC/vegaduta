@@ -1,0 +1,149 @@
+{{- if .Values.reconcile.enabled }}
+{{- $name := include "vegaduta-lib.fullname" . -}}
+{{- $o := (.Values.global | default dict).oidc | default dict -}}
+{{- $realm := include "vegaduta-lib.oidc.realm" . -}}
+{{- $core := $o.clientId | default "agentic-ai-core" -}}
+{{- $smtp := .Values.realm.smtp -}}
+{{- $hook := dict "helm.sh/hook" "post-install,post-upgrade" "helm.sh/hook-delete-policy" "before-hook-creation,hook-succeeded" -}}
+{{- $gn := (.Values.global | default dict).networkPolicy | default dict -}}
+{{- $npOn := $gn.enabled -}}
+{{- if hasKey .Values.networkPolicy "enabled" }}{{ $npOn = .Values.networkPolicy.enabled }}{{ end -}}
+{{- if $npOn }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-reconcile
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml (merge (dict "helm.sh/hook-weight" "-5") $hook) | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: keycloak-reconcile
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $gn.dnsNamespace | default "kube-system" }}
+          podSelector:
+            matchLabels:
+              {{- toYaml ($gn.dnsPodLabels | default (dict "k8s-app" "kube-dns")) | nindent 14 }}
+      ports:
+        - { port: 53, protocol: UDP }
+        - { port: 53, protocol: TCP }
+    - to:
+        - {{- include "vegaduta-lib.siblingPeer" (dict "root" . "name" "keycloak") | nindent 10 }}
+      ports:
+        - { port: 8080, protocol: TCP }
+---
+{{- end }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}-reconcile
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labelsWith" (dict "root" . "labels" (dict "app.kubernetes.io/component" "identity-reconcile")) | nindent 4 }}
+  annotations:
+    {{- toYaml (merge (dict "helm.sh/hook-weight" "0") $hook) | nindent 4 }}
+spec:
+  backoffLimit: {{ .Values.reconcile.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.reconcile.activeDeadlineSeconds }}
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: keycloak-reconcile
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/part-of: vegaduta
+        app.kubernetes.io/component: identity-reconcile
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "vegaduta-lib.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        {{- include "vegaduta-lib.podSecurityContext" . | nindent 8 }}
+      {{- include "vegaduta-lib.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: reconcile
+          image: {{ include "vegaduta-lib.image" . | quote }}
+          imagePullPolicy: {{ include "vegaduta-lib.imagePullPolicy" . }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              K="/opt/keycloak/bin/kcadm.sh"
+              C="--config /tmp/kcadm.config"
+              ok=""
+              for i in $(seq 1 80); do
+                if $K config credentials $C --server "$KC_URL" --realm master --user "$ADMIN_USER" --password "$ADMIN_PASSWORD" >/dev/null 2>&1; then ok=1; break; fi
+                echo "waiting for Keycloak at $KC_URL ($i)"; sleep 10
+              done
+              [ -n "$ok" ] || { echo "Keycloak never became reachable"; exit 1; }
+              $K get "realms/$REALM" $C >/dev/null
+              # tenant_id must persist (core writes it via the Admin API) but must NEVER be user-editable:
+              # ENABLED would let a user set their own tenant_id through the Account API.
+              $K update users/profile -r "$REALM" $C -s unmanagedAttributePolicy=ADMIN_EDIT
+              echo "[1/5] unmanagedAttributePolicy=ADMIN_EDIT"
+              CID=$($K get clients -r "$REALM" $C -q "clientId=$CORE_CLIENT" --fields id --format csv --noquotes)
+              $K update "clients/$CID" -r "$REALM" $C -s "secret=$CORE_SECRET"
+              echo "[2/5] $CORE_CLIENT secret synced"
+              # Least privilege (same list as the realm import): never realm-admin.
+              for role in view-users query-users manage-users query-groups view-realm view-identity-providers manage-identity-providers; do
+                $K add-roles -r "$REALM" $C --uusername "service-account-$CORE_CLIENT" --cclientid realm-management --rolename "$role" || true
+              done
+              $K remove-roles -r "$REALM" $C --uusername "service-account-$CORE_CLIENT" --cclientid realm-management --rolename realm-admin >/dev/null 2>&1 || true
+              echo "[3/5] least-privilege realm-management roles on service-account-$CORE_CLIENT (realm-admin removed)"
+              $K update authentication/required-actions/VERIFY_PROFILE -r "$REALM" $C -s enabled=false || true
+              $K update "realms/$REALM" $C -s "registrationAllowed=$REGISTRATION"
+              echo "[4/5] VERIFY_PROFILE off, registrationAllowed=$REGISTRATION"
+              if [ -n "${SMTP_HOST:-}" ]; then
+                $K update "realms/$REALM" $C \
+                  -s "smtpServer.host=$SMTP_HOST" -s "smtpServer.port=$SMTP_PORT" -s "smtpServer.from=$SMTP_FROM" \
+                  -s "smtpServer.fromDisplayName=$SMTP_FROM_DISPLAY" -s "smtpServer.auth=true" -s "smtpServer.user=$SMTP_USER" \
+                  -s "smtpServer.password=${SMTP_PASSWORD:-}" -s "smtpServer.starttls=$SMTP_STARTTLS" -s "smtpServer.ssl=false"
+                echo "[5/5] SMTP configured ($SMTP_HOST:$SMTP_PORT)"
+              else
+                echo "[5/5] SMTP skipped (keycloak.realm.smtp.host not set)"
+              fi
+          env:
+            - { name: HOME, value: /tmp }
+            - { name: KC_URL, value: {{ printf "http://%s:8080" $name | quote }} }
+            - { name: REALM, value: {{ $realm | quote }} }
+            - { name: CORE_CLIENT, value: {{ $core | quote }} }
+            - { name: REGISTRATION, value: {{ .Values.realm.registrationAllowed | toString | quote }} }
+            - name: ADMIN_USER
+              valueFrom: { secretKeyRef: { name: {{ include "keycloak.adminSecretName" . }}, key: username } }
+            - name: ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "keycloak.adminSecretName" . }}, key: password } }
+            - name: CORE_SECRET
+              valueFrom: { secretKeyRef: { name: {{ include "vegaduta-lib.oidc.secretName" . }}, key: {{ $o.clientSecretKey | default "clientSecret" }} } }
+            {{- if $smtp.host }}
+            - { name: SMTP_HOST, value: {{ $smtp.host | quote }} }
+            - { name: SMTP_PORT, value: {{ $smtp.port | toString | quote }} }
+            - { name: SMTP_FROM, value: {{ $smtp.from | quote }} }
+            - { name: SMTP_FROM_DISPLAY, value: {{ $smtp.fromDisplayName | quote }} }
+            - { name: SMTP_USER, value: {{ $smtp.user | quote }} }
+            - { name: SMTP_STARTTLS, value: {{ $smtp.starttls | toString | quote }} }
+            {{- with $smtp.existingSecret }}
+            - name: SMTP_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ . }}, key: password } }
+            {{- end }}
+            {{- end }}
+          resources:
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { memory: 512Mi }
+          securityContext:
+            {{- include "vegaduta-lib.securityContext" . | nindent 12 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }
+{{- end }}

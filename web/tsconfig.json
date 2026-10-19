@@ -1,0 +1,72 @@
+{
+  // Strictness ratchet — step 1 of 3 (2026-08-17): "noImplicitAny" is ON.
+  // Chosen because web/docs/TYPESCRIPT-STRICTNESS.md shows the lib/ + big-component tree
+  // was already hand-annotated for it, so it is the cheapest real flag to land:
+  // measured 681 errors project-wide at flip time (vs 2432 for full "strict",
+  // which is why "strict" stays false for now). Errors are being burned down by
+  // parallel sessions; run `npm run typecheck` to see the current count.
+  //   Step 1b (2026-09-29): the free strict-family + lint-grade flags below.
+  //   Next step (2): "strictNullChecks": true — this is where latent
+  //   null/undefined bugs surface; enable only once step 1 is at 0 errors.
+  //   Final step (3): "strict": true, then delete this ladder comment.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": true,
+    // Ratchet step 2026-09-29 - every strict-family / lint-grade flag that was
+    // cheap and behaviour-neutral to land (measurements + next steps in
+    // docs/TYPESCRIPT-STRICTNESS.md). Fixes were: 3 callback signatures
+    // (strictFunctionTypes), 142 `return;` -> `return undefined;` / explicit
+    // returns (noImplicitReturns), 10 unused params (noUnusedParameters).
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    // 2026-09-29 (second pass): catch variables are `unknown` - read them via
+    // app/lib/errors.ts (errorMessage/errorName/errorStatus/errorField), never
+    // `as Error`. noUnusedLocals: dead imports/locals removed; use a `_`
+    // prefix or an array hole for deliberately-unused destructured values.
+    "useUnknownInCatchVariables": true,
+    "noUnusedLocals": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    // `**` never matches dot-directories, so the .well-known routes must be
+    // listed explicitly or neither tsc nor typescript-eslint sees them.
+    "app/.well-known/**/*.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  // 2026-08-17: dropped the old "**/*.test.ts(x)" + "vitest.setup.ts" excludes.
+  // They predate the vitest devDeps landing (tests would not type-check before
+  // install) and had made the test suites the least-checked code in the repo.
+  // Re-including them cost only 6 errors at flip time — no reason to keep the
+  // suites unchecked.
+  "exclude": ["node_modules", ".next"]
+}

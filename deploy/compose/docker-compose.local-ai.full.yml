@@ -1,0 +1,5 @@
+# Full tier only: the full stack segments traffic into named networks, so
+# Ollama joins `app` (where core lives) and nothing else.
+services:
+  ollama:
+    networks: [app]

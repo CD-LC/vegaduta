@@ -1,0 +1,59 @@
+# Grafana's own datasource
+# auto-provisioning mechanism (mounted read-only into
+# /etc/grafana/provisioning/datasources, see docker-compose.yml's grafana
+# service), so Loki is already wired up and queryable the moment Grafana
+# boots - no manual "Add data source" click-through, same "don't make the
+# person run an extra manual setup step" posture LANGFUSE_INIT_* and
+# S3FileStorageService#ensureBucketExists already use elsewhere in this
+# project.
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    # Stable handle provisioned dashboards can reference by, independent of
+    # Grafana's own generated ids (mirrors the "prometheus" uid its sibling
+    # prometheus.yaml sets for the same reason).
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    editable: true
+    jsonData:
+      # Matches loki-config.yaml's own retention_period (336h = 14 days) -
+      # purely informational for Grafana's UI, doesn't change Loki's actual
+      # retention enforcement.
+      maxLines: 1000
+      # Infra audit (2026-07-27) - Loki -> Langfuse trace correlation. `core`'s
+      # micrometer-tracing-bridge-otel dependency (see core/app/pom.xml) means
+      # Spring Boot's structured (ECS) console logging - already turned on for
+      # the containerized path via LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs, see
+      # docker-compose.yml's `core` service - automatically adds "traceId"/
+      # "spanId" fields to every JSON log line whenever a span is active,
+      # alongside the requestId/tenantId/userId MDC fields
+      # RequestCorrelationFilter/TenantContextFilter already populate (see
+      # application.yml's logging.pattern.console comment) - these two come
+      # from Boot's own structured-logging correlation-id support, not MDC.
+      # Only lines with a real (non-empty) traceId ever match this regex, so a
+      # log line recorded while tracing is off (management.tracing.sampling.
+      # probability defaults to 0.0 - see application.yml) simply gets no link,
+      # not a broken one. The target URL follows Langfuse's own documented
+      # trace-URL shape (https://langfuse.com/docs/observability/features/url:
+      # "/project/{projectId}/traces/{traceId}") - LANGFUSE_HOST/
+      # LANGFUSE_PROJECT_ID are resolved by Grafana's own provisioning-file
+      # ${VAR} substitution from the `grafana` service's environment (see
+      # docker-compose.yml), NOT by Loki/Promtail. VERIFY LIVE: this traceId/
+      # spanId flat-field naming (vs. ECS's own dotted "trace.id"/"span.id"
+      # convention other fields here use) is Spring Boot's documented
+      # structured-logging behavior as of 3.4, but wasn't independently
+      # re-confirmed against a live `core` log line for this change - if the
+      # actual field differs, adjust matcherRegex below to match.
+      derivedFields:
+        # No datasourceUid - this is an external link (a plain URL Grafana
+        # renders as a clickable button, not a jump to another Grafana
+        # datasource/panel), so that field is omitted entirely rather than
+        # left blank.
+        - matcherRegex: '"traceId":"(\w+)"'
+          name: traceId
+          url: '${LANGFUSE_HOST}/project/${LANGFUSE_PROJECT_ID}/traces/${__value.raw}'
+          urlDisplayLabel: "View trace in Langfuse"

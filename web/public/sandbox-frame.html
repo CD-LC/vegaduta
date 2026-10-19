@@ -1,0 +1,40 @@
+<!doctype html>
+<!--
+  Host document for App Builder previews (app/build/SandboxFrame.tsx).
+
+  Previews used to be <iframe srcdoc>. A srcdoc document inherits the
+  embedding page's Content-Security-Policy, so once the console enforces a
+  nonce-based policy every inline script of a generated app would be blocked.
+  This file is served with its OWN policy instead (proxy.js,
+  SANDBOX_FRAME_PATH), and is always embedded with a sandbox attribute that
+  omits allow-same-origin, so it runs in an opaque origin: generated code can
+  never read the console's cookies, storage or tokens.
+
+  Protocol: this page posts {vdSandbox:"ready"} to its parent; the parent
+  answers {vdSandbox:"render", html}; the page writes that HTML over itself
+  and posts {vdSandbox:"loaded"}. Only the direct parent is listened to.
+-->
+<html>
+<head><meta charset="utf-8"><meta name="robots" content="noindex"></head>
+<body>
+<script>
+(function () {
+  var done = false;
+  function onMessage(e) {
+    if (done || e.source !== window.parent) return;
+    var d = e.data;
+    if (!d || d.vdSandbox !== "render" || typeof d.html !== "string") return;
+    done = true;
+    window.removeEventListener("message", onMessage);
+    var parentWin = window.parent;
+    document.open();
+    document.write(d.html);
+    document.close();
+    parentWin.postMessage({ vdSandbox: "loaded" }, "*");
+  }
+  window.addEventListener("message", onMessage);
+  window.parent.postMessage({ vdSandbox: "ready" }, "*");
+})();
+</script>
+</body>
+</html>

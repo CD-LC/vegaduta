@@ -1,0 +1,52 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-notifications",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].body",
+          "$[*].category",
+          "$[*].createdAt",
+          "$[*].id",
+          "$[*].link",
+          "$[*].read",
+          "$[*].relatedIssueId",
+          "$[*].severity",
+          "$[*].title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-notifications-id-read",
+      "method": "POST",
+      "path": "/api/notifications/{id}/read",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-notifications-read-all",
+      "method": "POST",
+      "path": "/api/notifications/read-all",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-notifications-unread-count",
+      "method": "GET",
+      "path": "/api/notifications/unread-count",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

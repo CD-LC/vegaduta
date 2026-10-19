@@ -1,0 +1,310 @@
+/* Two INDEPENDENT dark signals exist in this app and always have: the console
+ * sets :root[data-mode="dark"], while the ShadCN public funnel
+ * (landing/login/billing/signup + channels admin) sets the `.dark` class —
+ * neither implies the other (see shadcn-theme.css's :root block, which had to
+ * restate AA overrides for exactly this reason).
+ *
+ * Before the 2026-07-29 redesign that was survivable, because .dark carried
+ * its own hardcoded palette and simply never read --surface-*. Now that
+ * shadcn-theme.css's .dark derives from this ladder, a `.dark` page WITHOUT
+ * data-mode would resolve --surface-page to the LIGHT #f7f8fa — a white "dark
+ * mode". Verified in-browser that this is exactly what happened before this
+ * selector was widened. Both signals must therefore yield the same tokens.
+ *
+ * The `.dark` half is deliberately NOT written as `:root.dark`: the funnel
+ * applies the class to a CONTAINER, not to <html> (e.g. ui-kit/page.tsx's
+ * `<div className="dark min-h-screen ...">`), so a :root-anchored selector
+ * would silently miss every real usage and leave those subtrees on light
+ * surfaces. As a bare class it scopes correctly at any nesting depth and
+ * descendants inherit. */
+:root[data-mode="dark"],
+.dark {
+  /* Elevation redesign (2026-07-29) - replaces the Stage 1 "near-black"
+   * ladder, which measured as the direct cause of the "too dark, flat,
+   * monochromatic" read: base sat at L*=2.47 (effectively black, below the
+   * #0E-#1A floor every current dark-mode guide converges on), consecutive
+   * steps were only ~1.5-2.4 L* apart, and chroma was 4-9/255 - i.e. grey.
+   *
+   * The replacement is a cool-slate ramp (hue ~230) with (a) the base lifted
+   * out of near-black, (b) wider, more even L* steps so elevation is legible
+   * without shadows - which don't read on dark surfaces, so lightness IS the
+   * depth cue - and (c) chroma raised to 10-31 so the neutrals read as a
+   * deliberate slate, not an absence of colour. Two new rungs are added at
+   * the ends: --surface-sunken for genuinely recessed wells and
+   * --surface-raised for popovers/emphasis, so components stop overloading
+   * card/card-alt to mean three different depths.
+   *
+   * Ladder (L* / chroma), derived + verified rather than eyeballed:
+   *   sunken    #080a10   2.77 /  8
+   *   page      #0d0f17   4.42 / 10
+   *   card-alt  #12151f   6.90 / 13   (well, relative to card)
+   *   card      #171b28   9.95 / 17
+   *   raised    #1d2231  13.39 / 20
+   *   hover     #232839  16.36 / 22
+   * Every --text-* token below stays AA (>=4.5:1) on every rung; the worst
+   * case is text-muted at 4.60:1 on hover. */
+  --surface-sunken: #080a10;
+  --surface-page: #0d0f17;
+  --surface-card: #171b28;
+  --surface-card-alt: #12151f;
+  --surface-raised: #1d2231;
+  --surface-border: #2b3145;
+  --surface-border-strong: #3a4159;
+  --surface-hover: #232839;
+  --text-primary: #f3f4f6;
+  --text-secondary: #a4a9b8;
+  --text-muted: #8b90a0; /* 5.39:1 vs card, 4.60:1 vs hover */
+
+  /* WCAG AA overrides for the AUTHENTICATED dark theme (data-mode=dark does
+     NOT trigger the shadcn `.dark` class, so without these it would inherit
+     the light-theme shadcn values from :root):
+       - primary button: white on the dark-accent violet (#8a7bff) is 3.30:1;
+         dark text (#0a0a12) on it is 5.97:1.
+       - destructive: the light #cc2130 would be near-invisible on a dark
+         surface, so use the lighter #f2617a (6.4:1 as error text on the dark
+         canvas), with dark button text (#0a0a12 on #f2617a = 6.19:1). */
+  --primary-foreground: #0a0a12;
+  --destructive: #f2617a;
+  --destructive-foreground: #0a0a12;
+  /* Lifted from #7d8494 alongside the elevation ramp above: on the new,
+   * slightly lighter --surface-hover it measured 3.91:1, which would have
+   * been a silent AA regression on hover rows. #8b93a3 restores AA on every
+   * rung (4.74:1 worst case, vs card 5.56:1, vs page 6.19:1). */
+  --text-faint: #8b93a3;
+  --text-disabled: #454955; /* decorative only - exempt from AA */
+  --overlay: rgb(0 0 0 / 70%);
+  --border: #22252f;
+  --danger: #fca5a5; /* dark counterpart for the two inline-style consumers - the light rose-700 only reaches 2.9:1 on the new dark card */
+  /* Glass-card surface (opt-in via .glass-card, see @layer components below)
+   * - same technique as marketing.css's .mkt-glass-card: translucent white
+   * over the near-black page background plus a backdrop blur, so panels
+   * that adopt it read as frosted glass rather than a flat dark rectangle. */
+  --glass-surface: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.09);
+
+  /* Aurora depth layer, dark values (see the :root block for the contract).
+   * Dark shadows lean on the inset top-highlight + deep falloff pattern the
+   * AXON --ax-shadow-* tokens already established; the sheen drops to a 7%
+   * white so the pointer highlight reads as sheen, not a flashlight; the
+   * aurora hues run slightly stronger because a dark canvas swallows tint. */
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.28), 0 10px 32px -14px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 2px 4px rgba(0, 0, 0, 0.3), 0 18px 48px -18px rgba(0, 0, 0, 0.62);
+  --sheen: rgba(255, 255, 255, 0.07);
+  /* Dark gloss: light catches the top of the pane and falls off - the classic
+   * glass read, and the counterpart of the light block's bottom shade. */
+  --gloss-surface: linear-gradient(180deg, rgb(255 255 255 / 4.5%) 0%, rgb(255 255 255 / 0%) 36%);
+  --aurora-a: color-mix(in srgb, var(--accent-500) 13%, transparent);
+  --aurora-b: color-mix(in srgb, var(--accent-cyan) 10%, transparent);
+
+  /* Dark-mode success/danger - low-opacity tinted background instead of a
+   * near-white pastel, bright enough text to stay readable on the dark
+   * surface. Same hues as light mode (still unmistakably "green"/"red"),
+   * just recalibrated for a dark background instead of a white one. */
+  --success-bg: rgb(52 211 153 / 12%);
+  --success-border: rgb(52 211 153 / 35%);
+  --success-text: #6ee7b7; /* emerald-300 */
+  --danger-bg: rgb(248 113 113 / 12%);
+  --danger-border: rgb(248 113 113 / 35%);
+  --danger-text: #fca5a5; /* rose-300 */
+  --warning: #fbbf24;
+  --warning-bg: rgb(251 191 36 / 12%);
+  --warning-border: rgb(251 191 36 / 35%);
+  --warning-text: #fcd34d;
+  --info: #60a5fa;
+  --info-bg: rgb(96 165 250 / 12%);
+  --info-border: rgb(96 165 250 / 35%);
+  --info-text: #93c5fd;
+
+  /* Accent palette, dark-mode values - previously MISSING entirely (the
+   * light-mode indigo values leaked into dark mode unchanged, which is why
+   * dark-mode buttons/badges/focus-rings stayed indigo instead of getting
+   * brighter for a dark background). AXON's bright dark-mode cyan/violet
+   * (matches --ax-cyan/--ax-violet dark values exactly), same reasoning as
+   * the light-mode block above. */
+  --accent-cyan: #3fe6cf;
+  --accent-50: rgba(138, 123, 255, 0.08);
+  --accent-100: rgba(138, 123, 255, 0.14);
+  --accent-200: rgba(138, 123, 255, 0.22);
+  --accent-400: #9b8eff;
+  --accent-500: #8a7bff; /* 5.57:1 vs card - dark text-safe step */
+  --accent-600: #7b6aff; /* 4.68:1 vs card */
+  --accent-700: #6d5bff; /* pressed fills - white text on it is 4.57:1 */
+  --accent-gradient: linear-gradient(120deg, #8a7bff 0%, #3fe6cf 100%);
+  --accent-glow: rgba(138, 123, 255, 0.35);
+  --accent-glow-cyan: rgba(63, 230, 207, 0.3);
+
+  /* ------------------------------------------------------------------
+   * CATEGORY hues - identity for agent types, nav groups, and icon chips.
+   *
+   * Six hues, each >=36 apart on the colour wheel (verified; the previous
+   * ad-hoc set had cyan/teal 2 apart and green/cyan 16 apart, which is why
+   * icon colours never actually read as distinct categories). Every one is
+   * AA on EVERY rung of the surface ladder - worst case is `comms` at
+   * 5.92:1 on --surface-hover.
+   *
+   * IMPORTANT - colour is the secondary cue, never the only one. Simulating
+   * protanopia collapses `assistant` and `comms` to a perceptual distance of
+   * 6.7 (deuteranopia 18.4), so
+   * a category MUST also carry its own icon/glyph. The .cat-chip utility
+   * below exists to enforce that pairing at the component level.
+   *
+   * These intentionally overlap some --state-* hues (data/cyan vs running,
+   * automation used to share amber with warning - it is violet now). They are
+   * disambiguated by FORM, not hue:
+   * a category always renders as an icon chip with a soft wash; a state
+   * always renders as a small dot/pill, and animates when live. */
+  --cat-assistant: #a99bff; /* h248 - conversational / general agents */
+  --cat-comms: #5ba8ff; /* h212 - channels, messaging, delivery */
+  --cat-data: #3fe6cf; /* h172 - knowledge, retrieval, storage */
+  --cat-analysis: #8fe36a; /* h102 - evals, reporting, quality */
+  --cat-automation: #d9a3ff; /* h283 - workflows, triggers, schedules (violet, was amber) */
+  --cat-creative: #ff8fbf; /* h334 - image/voice/video generation */
+
+  /* ------------------------------------------------------------------
+   * STATE hues - execution/lifecycle status. Distinct from --cat-* above:
+   * these answer "what is it doing right now", not "what kind of thing is
+   * it". Paired with .state-dot / .state-pill, which add the motion and
+   * shape that make them readable independently of hue. */
+  --state-running: #3fe6cf;
+  --state-success: #45dda0;
+  --state-warning: #ffb24d;
+  --state-error: #ff6b81;
+  --state-idle: #94a0bb;
+  --state-queued: #a99bff;
+
+  /* Upgrade / premium CTA accent - see the light block for why this is its own
+   * namespace rather than a reuse of --state-warning, and for the deliberate
+   * hue-proximity exception. 7.13:1 worst case across the dark ladder. */
+  --upgrade: #ff9d5c;
+
+  /* HUD chrome, dark-mode values - the literal ORBITAL reference palette
+   * (see hud-dashboard-reference.html's :root: --panel/-2, --cyan, --violet,
+   * --magenta, --ok, --warn, --dim, --line), reused verbatim so dark mode
+   * matches that brief exactly, not just "in spirit." */
+  --hud-cyan: #3fe6cf;
+  --hud-violet: #8a7bff;
+  --hud-magenta: #ff3d9a;
+  --hud-ok: #46e0a0;
+  --hud-warn: #f5b544;
+  --hud-panel: #12141b;
+  --hud-panel-alt: #191c25;
+  --hud-line: rgba(255, 255, 255, 0.08);
+  --hud-text-dim: #7f8898; /* 5.15:1 vs hud-panel */
+
+  /* AXON design-handoff tokens, dark-theme values - see the :root block
+   * above for why these are a separate namespace from --surface-*, and for
+   * why --ax-cyan/-amber deviate from the spec's exact hex (light-mode
+   * WCAG reasoning doesn't apply here - dark-mode contrast headroom is
+   * generous, so every accent below is the spec's literal value). */
+  --ax-bg: var(
+    --surface-page
+  ); /* was a radial-gradient mesh; now a flat, theme-reactive solid color per direct feedback */
+  --ax-rail: var(
+    --surface-card
+  ); /* was translucent rgba(8,9,12,0.6) + backdrop-blur, letting page content/glow blobs bleed through the nav - now a solid opaque surface per direct feedback */
+  /* Re-based onto the elevation ladder (2026-07-29). These had drifted:
+   * --ax-bar still hardcoded the retired #08090c near-black, and --ax-panel
+   * was a 3.5% white wash — the same "card that isn't visually a card"
+   * problem the ShadCN .dark block had. Going opaque here follows the
+   * precedent already set on --ax-rail directly above, which was moved off
+   * translucency for the same reason on product-owner feedback.
+   * --ax-bar keeps SOME translucency on purpose (it is a sticky topbar over
+   * scrolling content) but is now far more opaque, so text on it stays
+   * legible instead of compositing with whatever scrolls beneath. */
+  --ax-bar: color-mix(in srgb, var(--surface-card) 88%, transparent);
+  --ax-panel: var(--surface-card);
+  /* NOTE: left as-is deliberately. In light mode --ax-panel2 is WHITE, i.e.
+   * one level ABOVE --ax-panel; in dark it composites darker, i.e. one level
+   * BELOW. That cross-theme inversion predates this redesign and flipping it
+   * blind would silently restyle every well that relies on it, so it is
+   * recorded rather than "fixed" here. */
+  --ax-panel2: rgba(18, 20, 27, 0.72);
+  --ax-border: var(--surface-border);
+  --ax-border2: var(--surface-border-strong);
+  --ax-text: #f3f4f6;
+  --ax-mid: #a4a9b8;
+  --ax-dim: #7d8494; /* 4.91:1 vs panel-composited bg */
+  --ax-cyan: #3fe6cf;
+  --ax-accent2: #7bd0ff;
+  --ax-violet: #8a7bff;
+  --ax-violetd: #7b6aff;
+  --ax-green: #45dda0;
+  --ax-amber: #ffb24d;
+  --ax-red: #ff6b81;
+  --ax-sky: #5ba8ff;
+  --ax-spectral: #c48bff;
+  --ax-google-blue: #8ab4f8;
+  --ax-google-blue-bg: rgba(66, 133, 244, 0.18);
+  --ax-glow: color-mix(in srgb, var(--ax-cyan) 55%, transparent);
+  --ax-track: rgba(255, 255, 255, 0.09);
+  --ax-chip: rgba(255, 255, 255, 0.03);
+  /* Every AXON Pro screen relies on a real box-shadow (not just glow) in
+   * dark mode too - the spec's own --shadow token - so this now resolves to
+   * that instead of "none". Older, non-AXON dark-mode components that were
+   * relying on the previous "none" (using glow alone as their depth cue)
+   * are unaffected in practice: they layer this alongside their own glow
+   * rule and an inset highlight + soft black falloff reads as extra depth,
+   * not a conflicting flat shadow. */
+  --ax-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.24);
+  --ax-shadow-md: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-popover: 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 24px 64px -16px rgba(0, 0, 0, 0.55);
+
+  /* AXON landing page design tokens (from design_handoff_axon) */
+  --ax-bg: #05060f;
+  --ax-bg2: #080a1c;
+  --ax-panel-bg: rgba(255, 255, 255, 0.035);
+  --ax-panel-border: rgba(255, 255, 255, 0.08);
+
+  /* Dock inverse chrome, flipped for dark mode - see the :root block above
+   * for why this exists. Dark mode's dock gets the LIGHT panel/text values
+   * instead. */
+  --dock-panel: #ffffff;
+  --dock-line: rgba(86, 67, 230, 0.22);
+  --dock-text-faint: #64748b;
+  --dock-text-primary: #0f172a;
+  /* Tuned for contrast against --dock-panel (white here) - richer/darker
+   * than the dark-mode page's own --hud-cyan/--hud-violet, which would be
+   * too light to read against a white dock. */
+  --dock-scan-1: #0891b2;
+  --dock-scan-2: #5643e6;
+
+  /* Admin sub-sidebar, dark-mode values - matches Admin.dc.html's own
+   * hardcoded dark hexes (background:rgba(124,92,255,0.16), border:
+   * rgba(124,92,255,0.34), text:#c9bcff) instead of the light-mode
+   * approximation above. */
+  --admin-nav-active-bg: rgba(138, 123, 255, 0.16);
+  --admin-nav-active-border: rgba(138, 123, 255, 0.34);
+  --admin-nav-active-text: #c3b9ff;
+  --admin-nav-dot: #2b2f3b;
+
+  /* Per-panel accent families, DARK values - reused verbatim from
+   * hud-dashboard-v2-themed.html's body.dark .p-* block. */
+  --p-cyan-tone: #0c2230;
+  --p-cyan-acc: #39e6ff;
+  --p-teal-tone: #0b2a26;
+  --p-teal-acc: #3fe0c0;
+  --p-violet-tone: #1a1440;
+  --p-violet-acc: #a76bff;
+  --p-amber-tone: #2a2012;
+  --p-amber-acc: #ffce6a;
+  --p-blue-tone: #0c1430;
+  --p-blue-acc: #6b93ff;
+  --p-magenta-tone: #2a1030;
+  --p-magenta-acc: #ff6ab0;
+  /* Dock accent overrides, dark-mode counterpart - see the light :root
+   * block's comment above for the full explanation. Dark mode's dock panel
+   * is WHITE (--dock-panel: #ffffff below), so these reuse the light
+   * block's --p-*-acc values, darkened slightly further where the literal
+   * light value (tuned for a pale --p-*-tone background, not flat white)
+   * still fell short of 4.5:1 against pure white (cyan/teal/amber). */
+  --dock-acc-cyan: #097c9d;
+  --dock-acc-teal: #0a8177;
+  --dock-acc-violet: #7a3aed;
+  --dock-acc-amber: #9e6612;
+  --dock-acc-blue: #2b57ff;
+  --dock-acc-magenta: #c0269a;
+}

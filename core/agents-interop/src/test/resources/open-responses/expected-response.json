@@ -1,0 +1,40 @@
+{
+  "id": "RESP",
+  "object": "response",
+  "created_at": 0,
+  "completed_at": 0,
+  "status": "completed",
+  "error": null,
+  "incomplete_details": null,
+  "instructions": "You are terse.",
+  "max_output_tokens": null,
+  "model": "11111111-2222-3333-4444-555555555555",
+  "output": [
+    {
+      "id": "MSG",
+      "type": "message",
+      "status": "completed",
+      "role": "assistant",
+      "content": [{"type": "output_text", "text": "12 (4 x 3)", "annotations": []}]
+    }
+  ],
+  "parallel_tool_calls": false,
+  "previous_response_id": null,
+  "store": false,
+  "temperature": null,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": null,
+  "truncation": "disabled",
+  "text": {"format": {"type": "text"}},
+  "background": false,
+  "usage": {
+    "input_tokens": 35,
+    "input_tokens_details": {"cached_tokens": 0},
+    "output_tokens": 3,
+    "output_tokens_details": {"reasoning_tokens": 0},
+    "total_tokens": 38
+  },
+  "user": null,
+  "metadata": {"trace": "abc"}
+}

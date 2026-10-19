@@ -1,0 +1,11 @@
+{
+  "name": "Astro Website",
+  "description": "A fast static website (Astro) — blogs, marketing pages, docs. Builds to plain HTML/CSS, ideal for the free GitHub Pages preview.",
+  "install": "npm install",
+  "run": "npm run dev -- --host 0.0.0.0 --port 4321",
+  "build": "npm run build",
+  "test": "",
+  "port": 4321,
+  "image": "node:22-bookworm",
+  "preview_dir": "dist"
+}

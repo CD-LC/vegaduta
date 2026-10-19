@@ -1,0 +1,125 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rollback &amp; Recovery — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="deployment" data-page="rollback-recovery.html" data-doc="VD-DEP-010" data-status="unverified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Deployment</a><span class="sep">/</span>Rollback &amp; Recovery</div>
+<div class="doc-meta" data-auto></div>
+<h1>Rollback &amp; Recovery</h1>
+<p class="lede">
+  Rolling back is a <strong>version swap back to the previous release</strong>,
+  not a restart. This page collects the rollback paths for the Compose and Helm
+  deployments, the database recovery pointers, and the list of things that must
+  not be done. Commands are quoted from repo docs; none were executed here.
+</p>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Do not power-cycle a live stack to "fix" a hang</div>
+  A host reset is a power-yank of the tenant database, and it destroys
+  the evidence of why the system hung. Avoid host reboots, instance resets and
+  <code>docker compose down</code> on a stack people depend on unless you have decided to
+  take it offline. Collect evidence first, then decide.
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Unverified page</div>
+  The rollback recipes below follow <code>deploy/README.md</code> and <code>deploy/helm/README.md</code>; they were not run during authoring.
+  The Helm charts are a preview and have not been run end to end against published images.
+</div>
+
+<dl class="props">
+  <dt>Rollback target</dt><dd>The version (<code>VEGADUTA_VERSION</code> or chart version) recorded <em>before</em> the upgrade. Never rely on <code>latest</code></dd>
+  <dt>Compose upgrade</dt><dd><code>scripts/vegaduta upgrade --version X.Y.Z</code> backs up <code>.env</code>, pulls, recreates and waits for health</dd>
+  <dt>Helm upgrade</dt><dd><code>helm upgrade</code> with a pinned chart version; <code>helm history</code> / <code>helm rollback</code> apply</dd>
+</dl>
+
+<h2>First: collect evidence, do not touch</h2>
+<pre>scripts/vegaduta status              # service state + health
+scripts/vegaduta logs core           # follow one service
+scripts/vegaduta doctor              # docker/compose versions, RAM, disk, ports, secrets, URLs
+
+D=example.com   # your BASE_DOMAIN; locally use the localhost ports instead
+for u in https://api.$D/actuator/health https://app.$D/ \
+         https://auth.$D/realms/agentic-ai/.well-known/openid-configuration \
+         https://admin.$D/; do
+  echo "$(curl -s -o /dev/null -w '%{http_code}' -m 20 "$u")  $u"; done</pre>
+<p>Then ask what changed (upgrade, config edit, secret rotation, realm import). An escalation bundle should contain: environment, HTTP codes, running image versions, last change, 20 log lines, what you ruled out.</p>
+
+<h2>Which rollback do I need?</h2>
+<table>
+  <thead><tr><th>Situation</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td>An upgrade made things worse</td><td>Version swap back to the recorded previous release (below)</td></tr>
+    <tr><td>core never becomes healthy after an upgrade</td><td>Read its logs for the cause (a Spring context-start failure or a Flyway error is typical). Version swap back if it is not a quick config fix</td></tr>
+    <tr><td>Config is wrong (env var, redirect URI, switch)</td><td>Fix <code>deploy/compose/.env</code> or Helm values and recreate the affected service; check the issuer settings still match <code>PUBLIC_AUTH_URL</code></td></tr>
+    <tr><td>Stored credentials suddenly undecryptable</td><td><code>APP_ENCRYPTION_KEY</code> mismatch: restore the key the data was written with (from your backup of <code>.env</code> or secret store), never re-encrypt</td></tr>
+    <tr><td>Migration went wrong</td><td>Rolling the image back does not roll the schema back. See "Migrations" below</td></tr>
+    <tr><td>Data lost or corrupted</td><td>Database restore path below (human decision)</td></tr>
+  </tbody>
+</table>
+
+<h2>Version rollback</h2>
+<h3>Compose</h3>
+<pre>scripts/vegaduta upgrade --version &lt;previous-version&gt;</pre>
+<p>The previous version must still be pullable from GHCR (release images are signed and versioned). If only a frontend changed, roll only that image back and leave core alone. Verify with <code>scripts/vegaduta status</code> and the health sweep above before believing any 200. For images built from source (<code>--build</code>), keep the previous image tagged before rebuilding, for example <code>docker tag &lt;image&gt;:latest &lt;image&gt;:prev</code>, otherwise there is nothing to return to.</p>
+<h3>Helm</h3>
+<pre>helm history vegaduta -n vegaduta
+helm rollback vegaduta &lt;revision&gt; -n vegaduta</pre>
+<p>Or re-run <code>helm upgrade</code> with the previous pinned chart version. Note that the migration hook Job has already run for the newer version; see below.</p>
+
+<h2>Config, secrets and Keycloak</h2>
+<ul>
+  <li><strong>Secrets.</strong> Keep the previous value of every rotated secret written down until the new one is verified. For <code>APP_ENCRYPTION_KEY</code>, always retain the previous value as the rollback.</li>
+  <li><strong>Keycloak.</strong> Do not re-import a realm to "roll back": import is a no-op on an existing realm, and re-importing the committed JSON on a live realm can disable the social IdPs, locking out federated users who have no password. Back up first and use live updates; see <a href="keycloak-provisioning.html">Keycloak Provisioning</a>.</li>
+</ul>
+
+<h2>Migrations: the image rolls back, the schema does not</h2>
+<p>
+  Flyway runs inside <code>core</code> at startup (on Helm, in a migration hook Job); there is no down path. Plan for it in the release, not
+  in the rollback: expand, migrate, contract (never ship destructive DDL in the same release as the code that stops using the old column), and never edit an applied
+  migration (checksum mismatch). A duplicate version number makes core crash-loop; the only repair is a
+  human-run edit of <code>public.flyway_schema_history</code> after taking a backup, which is not a routine step. Flyway versions share one namespace across the
+  <code>controlplane/</code> and <code>tenant/</code> directories; <code>scripts/ci/flyway-lint.sh</code> (part of <code>make gates</code>) guards this before merge. Read the release notes before upgrading.
+</p>
+
+<h2>Database recovery pointers</h2>
+<table>
+  <thead><tr><th>What</th><th>How</th></tr></thead>
+  <tbody>
+    <tr><td>Postgres (Compose)</td><td><code>scripts/vegaduta compose exec -T postgres pg_dumpall -U agentic | gzip &gt; dump.sql.gz</code>; restore with <code>gunzip -c dump.sql.gz | scripts/vegaduta compose exec -T postgres psql -U agentic -d postgres</code> (<code>deploy/README.md</code>)</td></tr>
+    <tr><td>Keycloak database (Full)</td><td><code>pg_dump</code> of <code>keycloak-db</code>; in Lite, Keycloak lives in the <code>keycloak-data</code> volume</td></tr>
+    <tr><td>Files</td><td>The <code>core-storage</code> (Lite) or <code>seaweedfs-data</code> (Full) volume, or your external S3 bucket</td></tr>
+    <tr><td>Windows scheduled backups</td><td><code>scripts/backup/pg-backup.ps1</code>, <code>register-backup-task.ps1</code>, <code>verify-restore.ps1</code></td></tr>
+    <tr><td>Kubernetes</td><td>Your managed PostgreSQL's backups, or the CloudNativePG cluster's backup configuration if you use the bundled chart</td></tr>
+  </tbody>
+</table>
+<ul>
+  <li>Restoring into a stock <code>postgres:16</code> image silently loses pgvector columns; restore into an image with pgvector and Apache AGE (the release <code>postgres</code> image).</li>
+  <li>After any restore, <code>APP_ENCRYPTION_KEY</code> must be the key the data was written with, or every stored provider key and channel secret is undecryptable. Back up <code>deploy/compose/.env</code> together with the data.</li>
+</ul>
+<p>Full detail: <a href="../operations/backup-restore.html">Backup &amp; Restore</a>.</p>
+
+<h2>What NOT to do</h2>
+<table>
+  <thead><tr><th>Do not</th><th>Because</th></tr></thead>
+  <tbody>
+    <tr><td>Reset or reboot the host, or <code>docker compose down</code>, on a stack people depend on while diagnosing</td><td>A reset power-yanks the database and destroys the evidence needed to diagnose the stall</td></tr>
+    <tr><td>Restart or reboot to "see if it helps" while collecting evidence</td><td>Same rule; gather logs, container states and memory first</td></tr>
+    <tr><td>Track <code>latest</code> on a deployment you depend on</td><td>A re-run can silently change the running version; pin a release</td></tr>
+    <tr><td>Re-encrypt data under a new <code>APP_ENCRYPTION_KEY</code> to "fix" decryption</td><td>The plaintext is gone; point back at the original key</td></tr>
+    <tr><td>Edit an applied Flyway migration, or edit <code>flyway_schema_history</code> unattended</td><td>Checksum failure; any repair must be human-run with a backup</td></tr>
+    <tr><td>Re-import the Keycloak realm JSON into a live realm</td><td>No-op for existing realms; can disable social login where it does import</td></tr>
+    <tr><td><code>docker image prune -a</code> before the new version is verified</td><td>Keep a rollback image until the upgrade is verified</td></tr>
+  </tbody>
+</table>
+
+<p>Related: <a href="index.html">Deployment Guide</a> · <a href="ci-cd-pipeline.html">CI/CD Pipelines</a> · <a href="../operations/observability.html">Observability</a> · <a href="../decisions/adr-0008-single-revision-deploys.html">ADR-0008</a></p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/README.md</code> (operations, backup, upgrade); <code>deploy/helm/README.md</code>; <code>docs/installation.md</code>.</li>
+  <li><code>scripts/backup/</code>; <code>scripts/ci/flyway-lint.sh</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

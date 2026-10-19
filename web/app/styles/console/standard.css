@@ -1,0 +1,291 @@
+/* ---- 9. ONE standard for the console (consistency audit 2026-09-24) ------- */
+/* Tokens in tokens.css §18. Content column 80rem with a 1.5rem gutter
+   (AppShell wrote px-4 / sm:px-6 / lg:px-8, so the gutter grew to 2rem on a
+   laptop while every public page sat at 1.5rem), one heading scale
+   (30 / 18 / 16px from sm), card padding 1.25rem phone / 1.5rem desktop, and
+   the same 12px floor as everywhere else. `nav[class*="group/rail"] ~ div
+   main` is the AppShell content column, so a public page's <main> is never
+   caught by these. */
+nav[class*="group/rail"] ~ div main.px-4 {
+  padding-inline: var(--gutter);
+}
+
+nav[class*="group/rail"] ~ div main > .max-w-7xl {
+  max-width: var(--w-console);
+}
+
+/* Headings. PageHeader's h1 already runs 24 -> 30px; card and section titles
+   stop drifting between 14 and 16px. A heading that names its own display
+   step (text-xl and up) is a deliberate hero and keeps it. */
+.ax-page-header h1 {
+  font-size: var(--type-console-h1);
+  line-height: 1.15;
+}
+
+nav[class*="group/rail"]
+  ~ div
+  main
+  h2:not([class*="text-xl"]):not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]) {
+  font-size: var(--type-console-h2);
+  line-height: 1.3;
+}
+
+nav[class*="group/rail"]
+  ~ div
+  main
+  :is(h3, h4, [data-slot="card-title"]):not([class*="text-xs"]):not([class*="text-sm"]):not([class*="text-lg"]):not([class*="text-xl"]):not(
+    [class*="text-2xl"]
+  ):not([class*="text-3xl"]) {
+  font-size: var(--type-console-h3);
+  line-height: 1.35;
+}
+
+/* Cards: the compact list cards (p-3 = 12px) were the "congested" ones.
+   Every card that names a padding step below the standard moves up to it;
+   the default ShadCN recipe (py-6 + px-6 slots) already matches 1.5rem. */
+nav[class*="group/rail"] ~ div main [data-slot="card"]:is(.p-2, .p-2\.5, .p-3, .p-3\.5, .p-4, .p-5) {
+  padding: var(--card-pad);
+}
+
+nav[class*="group/rail"] ~ div main [data-slot="card"]:is(.px-2, .px-3, .px-4, .px-5) {
+  padding-inline: var(--card-pad);
+}
+
+nav[class*="group/rail"] ~ div main [data-slot="card"]:is(.py-2, .py-3, .py-4, .py-5) {
+  padding-block: var(--card-pad);
+}
+
+nav[class*="group/rail"]
+  ~ div
+  main
+  :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]):is(.px-2, .px-3, .px-4, .px-5) {
+  padding-inline: var(--card-pad);
+}
+
+/* Legacy AXON tables: 10px / 12px cell padding floor, 12px header type. */
+main .ax-mnt-table :is(th, td) {
+  padding: 0.625rem 0.75rem;
+}
+
+main th {
+  font-size: var(--type-caption);
+}
+
+/* Section eyebrows on the legacy panels join the 12px floor. */
+.mc-eyebrow,
+.ax-mnt-sub,
+.ax-tl-card-sub,
+.ax-feed-time,
+.ax-feed-tag,
+.ax-wflist-meta,
+.ax-tl-card-phase,
+.ax-agent-sub {
+  font-size: var(--type-caption);
+}
+
+/* Status chips on the legacy panels: soft tints, one ink per state. */
+.ax-agent-chip,
+.ax-agent-tool-card-on,
+.ax-tl-card-phase,
+.ax-wflist-limit-pill {
+  background: var(--tint-accent-bg);
+  border-color: var(--tint-accent-line);
+  color: var(--tint-accent-fg);
+}
+
+/* Legacy 12px floor (generated from globals.css: every .ax-* / .hud-* /
+   .mc-* rule that set 9-11.5px; 12px is the floor everywhere). */
+.ax-activity-score,
+.ax-admin-navbadge,
+.ax-admin-navcount,
+.ax-admin-sla-label,
+.ax-admin-sla-unit,
+.ax-adt-actor-avatar,
+.ax-adt-live,
+.ax-adt-panel .ax-adt-result,
+.ax-adt-panel .ax-adt-table-head,
+.ax-adt-pill,
+.ax-adt-table-head,
+.ax-agent-autoselect,
+.ax-agent-badge,
+.ax-agent-card-action,
+.ax-agent-card-label,
+.ax-agent-failure-row-head,
+.ax-agent-readonly-note,
+.ax-agent-stat-tile-label,
+.ax-agent-tool-sub,
+.ax-approvals-cta,
+.ax-approvals-sub,
+.ax-ch-card-detail,
+.ax-ch-card-icon,
+.ax-ch-card-sessions,
+.ax-ch-inbound-badge,
+.ax-ch-inbound-message,
+.ax-ch-inbound-meta,
+.ax-ch-inbound-reassign-btn,
+.ax-ch-inbound-status,
+.ax-ch-label,
+.ax-ch-method-tabs,
+.ax-ch-route-label,
+.ax-ch-waiting-row,
+.ax-core-center-lbl,
+.ax-core-kicker,
+.ax-core-stat-lbl,
+.ax-core-sub,
+.ax-event-live,
+.ax-event-title,
+.ax-feed,
+.ax-help-toc-label,
+.ax-int-scope-chip,
+.ax-int-scopes-label,
+.ax-kb-avatar-chip,
+.ax-kb-card-label,
+.ax-kb-collection-tag,
+.ax-kb-exposed-label,
+.ax-kb-file-meta,
+.ax-kb-form-field label,
+.ax-kb-form-hint,
+.ax-kb-pipeline-failed,
+.ax-kb-pipeline-sub,
+.ax-kb-result-source,
+.ax-kb-scope-chip,
+.ax-kb-score-value,
+.ax-kb-search-label,
+.ax-kb-search-stats,
+.ax-kb-search-sub,
+.ax-kb-sidebar-label,
+.ax-kb-status,
+.ax-kb-upload-target,
+.ax-latency-lbl,
+.ax-mnt-appr-audit,
+.ax-mnt-appr-badge,
+.ax-mnt-appr-block-label,
+.ax-mnt-appr-card-meta,
+.ax-mnt-appr-card-sub,
+.ax-mnt-appr-code,
+.ax-mnt-appr-detail-meta,
+.ax-mnt-appr-listhead-label,
+.ax-mnt-lastactive,
+.ax-mnt-member-email,
+.ax-mnt-role-pill,
+.ax-mnt-sub,
+.ax-mnt-table-footer,
+.ax-mnt-table-head,
+.ax-pager,
+.ax-pager-size-btn,
+.ax-panel2-head-sub,
+.ax-pg-agent-avatar,
+.ax-pg-agent-meta,
+.ax-pg-agent-name,
+.ax-pg-attach-chip,
+.ax-pg-attach-preview,
+.ax-pg-error,
+.ax-pg-hint,
+.ax-pg-live-sub,
+.ax-pg-metrics,
+.ax-pg-msg-meta,
+.ax-pg-reset,
+.ax-pg-trace-row,
+.ax-qt-attach-chip,
+.ax-qt-channel-pill,
+.ax-qt-chip-dashed,
+.ax-qt-detail-label,
+.ax-qt-eyebrow,
+.ax-qt-history-link,
+.ax-qt-idchip-label,
+.ax-qt-plan-row-label,
+.ax-qt-plan-row-sub,
+.ax-qt-result-badge,
+.ax-qt-trace-io,
+.ax-qt-trace-label,
+.ax-qt-trace-live,
+.ax-qt-trace-ms,
+.ax-qth-status,
+.ax-qth-taskid,
+.ax-routing-legend,
+.ax-runs-list,
+.ax-slider-head,
+.ax-slider-save,
+.ax-tile-label,
+.ax-tile-sub,
+.ax-tl-agent-avatar,
+.ax-tl-agent-chip,
+.ax-tl-banner-status,
+.ax-tl-card-add-sub,
+.ax-tl-card-desc,
+.ax-tl-card-meta,
+.ax-tl-card-phase,
+.ax-tl-catalog-card-badge,
+.ax-tl-inspector-card-label,
+.ax-tl-inspector-status,
+.ax-tl-note,
+.ax-tl-section-label,
+.ax-tl-yaml,
+.ax-tool-selector-group-label,
+.ax-tool-selector-row-desc,
+.ax-wf-canvas-title,
+.ax-wf-describe-btn,
+.ax-wf-history-row,
+.ax-wf-history-status,
+.ax-wf-history-time,
+.ax-wf-node-kind,
+.ax-wf-node-status,
+.ax-wf-palette-heading,
+.ax-wf-raw-log,
+.ax-wf-run-meta,
+.ax-wf-run-status,
+.ax-wf-shell .wf-node-subtitle,
+.ax-wf-step-dot,
+.ax-wf-step-loglines,
+.ax-wf-step-sub,
+.ax-wf-tour-count,
+.ax-wf-tour-hud,
+.ax-wf-tour-narrate-desc,
+.ax-wf-tour-narrate-kind,
+.ax-wf-tour-seg,
+.ax-wflist-limit-pill,
+.ax-wflist-meta,
+.axh-activity-model,
+.axw-card-action,
+.hud-toast-kind,
+.hud-tour-eyebrow {
+  font-size: var(--type-caption);
+}
+
+/* ---- Agent workbench: collapsed-section summary (QA-05, 2026-09-24) ----- */
+/* The one-line "what is set" echo in a CollapsibleSection header (Device &
+   routing, Generation tuning, Transcription, Reasoning & autonomy) only earns
+   its place while the section is closed; the open body says the same thing
+   in full. Item[data-state] > header row > actions slot > summary. */
+[data-state="open"] > div > div > .agent-section-summary {
+  display: none;
+}
+
+/* ---- 10. /admin overview on Card + tokens (qa-console QA-02 / QA-04) ------- */
+/* admin/page.tsx no longer passes `bleed` and builds its tiles on the ShadCN
+   Card, so it inherits the console column, gutter and card padding from §9.
+   The two rules below are the only page-specific ones: HudCounter's
+   .mc-hud-value is a display:block hero number (dashboard.css) and has to
+   inherit the tile's mono size instead, and the live audit tail's ERR
+   bucket is painted inline as --ax-red (AdminEventTail.tsx:50) - a failed
+   audit entry is a state to read, not a destructive action, so it takes
+   the neutral ink; OK keeps the ok ink. Attribute-on-style selectors
+   because the colour is an inline style, hence the !important. */
+.adm-ovw .mc-hud-value {
+  display: inline;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+}
+
+.adm-ovw .mc-hud-value-empty {
+  color: var(--text-muted);
+}
+
+.ax-feed-tag[style*="--ax-red"] {
+  color: var(--tint-neutral-fg) !important;
+}
+
+.ax-feed-tag[style*="--ax-green"] {
+  color: var(--tint-ok-fg) !important;
+}

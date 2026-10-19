@@ -1,0 +1,26 @@
+name: Security vulnerability
+description: Do NOT file vulnerabilities as public issues. Use this form only to find the private reporting channel.
+labels: [security]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Please do not describe a vulnerability in a public issue.**
+
+        Report it privately through GitHub: open the repository's **Security** tab and choose
+        **Report a vulnerability** (GitHub private vulnerability reporting). If you cannot use GitHub,
+        follow the email instructions in [SECURITY.md](https://github.com/CD-LC/vegaduta/blob/main/SECURITY.md).
+
+        Maintainers will close any public issue that contains vulnerability details.
+  - type: checkboxes
+    id: ack
+    attributes:
+      label: Acknowledgement
+      options:
+        - label: I understand that vulnerability details belong in a private advisory, not in this issue.
+          required: true
+  - type: textarea
+    id: request
+    attributes:
+      label: Non-sensitive question
+      description: For example, a question about the supported-versions policy. No exploit details.

@@ -1,0 +1,79 @@
+{
+  "name": "Deep Research - Plan, Search, Synthesize",
+  "description": "Long-horizon research archetype on the workflow engine. A planner agent decomposes the inbound research question into sub-questions and replies with a JSON object {\"questions\": [...]} (fan_out's itemsField). The fan_out node runs one researcher agent per sub-question concurrently (maxConcurrency at a time); give the researcher web_search/fetch_web_page tools so it gathers sources, quotes them, and returns findings plus URLs. The synthesizer agent receives the merged JSON array of all branch findings (item order preserved) and writes one cited report. Read-only end to end - no writes, no approvals, output goes to the log channel. Replace all three REPLACE_WITH_A_REAL_AGENT_ID placeholders before POSTing; the researcher agent must actually have web tools assigned or branches will return 'no sources found'.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "trigger-1",
+        "type": "trigger",
+        "position": { "x": 0, "y": 0 },
+        "data": {
+          "label": "Manual trigger - input is the research question",
+          "config": {}
+        }
+      },
+      {
+        "id": "agent-planner",
+        "type": "agent",
+        "position": { "x": 280, "y": 0 },
+        "data": {
+          "label": "Research planner",
+          "config": {
+            "agentId": "REPLACE_WITH_A_REAL_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "fanout-questions",
+        "type": "fan_out",
+        "position": { "x": 560, "y": 0 },
+        "data": {
+          "label": "One researcher per sub-question",
+          "config": {
+            "itemsField": "questions",
+            "maxItems": 10,
+            "maxConcurrency": 5
+          }
+        }
+      },
+      {
+        "id": "agent-researcher",
+        "type": "agent",
+        "position": { "x": 840, "y": 0 },
+        "data": {
+          "label": "Researcher (runs once per sub-question)",
+          "config": {
+            "agentId": "REPLACE_WITH_A_REAL_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "agent-synthesizer",
+        "type": "agent",
+        "position": { "x": 1120, "y": 0 },
+        "data": {
+          "label": "Synthesis writer",
+          "config": {
+            "agentId": "REPLACE_WITH_A_REAL_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "output-report",
+        "type": "output",
+        "position": { "x": 1400, "y": 0 },
+        "data": {
+          "label": "Cited research report",
+          "config": { "channel": "log" }
+        }
+      }
+    ],
+    "edges": [
+      { "id": "e1", "source": "trigger-1", "target": "agent-planner", "sourceHandle": null, "targetHandle": null },
+      { "id": "e2", "source": "agent-planner", "target": "fanout-questions", "sourceHandle": null, "targetHandle": null },
+      { "id": "e3", "source": "fanout-questions", "target": "agent-researcher", "sourceHandle": null, "targetHandle": null },
+      { "id": "e4", "source": "agent-researcher", "target": "agent-synthesizer", "sourceHandle": null, "targetHandle": null },
+      { "id": "e5", "source": "agent-synthesizer", "target": "output-report", "sourceHandle": null, "targetHandle": null }
+    ]
+  }
+}

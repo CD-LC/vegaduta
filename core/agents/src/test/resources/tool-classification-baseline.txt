@@ -1,0 +1,13 @@
+# Tool names registered by a ToolCallback that have no built-in classification yet.
+# Only shrinks: classify the tool, then delete its line.
+call_agent
+call_workflow
+cancel_task
+get_task
+improve_skill
+list_my_agents
+list_my_workflows
+propose_skill
+request_upi_collect
+search_knowledge
+start_agent_task

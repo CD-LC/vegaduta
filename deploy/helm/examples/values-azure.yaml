@@ -1,0 +1,127 @@
+# VegaDuta on Azure (AKS) with managed services: Azure Database for PostgreSQL Flexible Server,
+# Azure Cache for Redis, Blob Storage through Azure Workload Identity, optional Event Hubs (Kafka endpoint).
+#
+#   helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta -n vegaduta --create-namespace \
+#     -f values-azure.yaml -f my-overrides.yaml
+#
+# STATUS: rendered and schema-validated only (deploy/helm/test-guards.sh). Not installed on a real AKS
+# cluster; no Azure service was contacted. The Blob backend was integration-tested against the Azurite
+# emulator with a connection string; workload identity (DefaultAzureCredential) has not been run against
+# a real Azure account. Every host, GUID and CIDR below is a placeholder.
+# Every existingSecret must exist before `helm install`: external-secrets/azure.yaml creates them from
+# Azure Key Vault with the External Secrets Operator.
+global:
+  domain: example.com
+  imageTag: "0.1.0"
+
+  ingress:
+    className: nginx
+  tls:
+    clusterIssuer: letsencrypt-prod
+  networkPolicy:
+    enabled: true
+    ingressControllerNamespace: ingress-nginx
+    # No extraEgress is needed for the managed data services: the chart derives egress for the configured
+    # PostgreSQL, Valkey, object-storage and Kafka ports to any address except link-local 169.254.0.0/16, so
+    # private-range endpoints are reachable (rendered and checked in test-guards.sh). To narrow egress to your
+    # data subnets instead, set networkPolicy.integrationEgress=false on core, core-jobs and core-worker and add
+    # your own scoped extraEgress rules.
+
+  core:
+    appSecret:
+      existingSecret: vegaduta-core-app       # key APP_ENCRYPTION_KEY
+  internalSecret:
+    existingSecret: vegaduta-internal
+
+  # --- Azure Database for PostgreSQL Flexible Server 16 ------------------------------------------
+  # Allow-list the extension (azure.extensions = VECTOR) and CREATE EXTENSION vector. Apache AGE exists on
+  # Flexible Server but needs azure.extensions plus shared_preload_libraries and a supported version and
+  # region: leave age=false unless you have set that up. Do not enable built-in PgBouncer in transaction
+  # mode (session mode only).
+  postgresql:
+    host: vegaduta.postgres.database.azure.com
+    port: 5432
+    database: vegaduta
+    username: vegaduta
+    existingSecret: vegaduta-postgres         # key password (password auth; Entra auth is not supported yet)
+    sslMode: require                          # Flexible Server enforces TLS by default
+    age: false
+
+  # --- Azure Cache for Redis: TLS port 6380 ------------------------------------------------------
+  valkey:
+    host: vegaduta.redis.cache.windows.net
+    port: 6380
+    tls: true
+    existingSecret: vegaduta-valkey           # key password = the access key (non-clustered tiers only)
+
+  # --- Blob Storage with Azure Workload Identity: no keys in the cluster --------------------------
+  objectStorage:
+    type: azure-blob
+    credentials: default                      # DefaultAzureCredential -> workload identity
+    azure:
+      endpoint: https://vegaduta123.blob.core.windows.net
+    bucket: vegaduta                          # the blob container name
+    # Connection string instead (portable fallback): credentials: static and
+    # azure.existingSecret: vegaduta-blob (key connectionString).
+
+  # --- Event Hubs through its Kafka endpoint (optional; Standard tier or above) ------------------
+  # Uncomment, and add the kafka entry of external-secrets/azure.yaml. Event Hubs topics are event hubs:
+  # create them first. The chart derives the egress rule for the bootstrap port (9093) itself, private addresses included.
+  # kafka:
+  #   bootstrapServers: vegaduta-ns.servicebus.windows.net:9093
+  #   securityProtocol: SASL_SSL
+  #   saslMechanism: PLAIN
+  #   existingSecret: vegaduta-kafka          # key saslJaasConfig = PlainLoginModule required
+  #                                           #   username="$ConnectionString" password="<connection string>";
+
+  # --- Identity provider: an EXTERNAL KEYCLOAK (see values-external.yaml for the other keys) ----------
+  # Not any OIDC issuer: today signup, user and SSO management call the Keycloak Admin API and tokens carry
+  # Keycloak-shaped claims (realm_access.roles, tenant_id), see the Identity row of the ADR. Point this at a
+  # Keycloak you run (the bundled chart is off in this file) that has the agentic-ai realm and the
+  # agentic-ai-core client imported (charts/keycloak ships the realm import). Cognito, Entra ID and Google
+  # Identity cannot be used for provisioning yet.
+  oidc:
+    issuerUrl: https://sso.example.com/realms/agentic-ai
+    internalBaseUrl: https://sso.example.com
+    realm: agentic-ai
+    clientId: agentic-ai-core
+    existingSecret: vegaduta-oidc             # key clientSecret
+
+# --- Azure Workload Identity ---------------------------------------------------------------------
+# REPLACE the all-zero client id below with your managed identity's client id: nothing in the chart or the tests
+# catches the placeholder, and a wrong id only fails at DefaultAzureCredential time, on the first storage call.
+# 1. A user-assigned managed identity with "Storage Blob Data Contributor" on the storage account.
+# 2. A federated credential on it for the subject system:serviceaccount:vegaduta:<ServiceAccount name>
+#    (issuer = the cluster's OIDC issuer URL), one per ServiceAccount below (<release>-core,
+#    <release>-core-jobs, <release>-core-worker).
+# 3. The ServiceAccount annotation (client id) AND the pod label azure.workload.identity/use: "true";
+#    the webhook injects the token only into labelled pods. The migrate Job uses core's ServiceAccount
+#    but never touches storage, so it needs no label.
+core:
+  serviceAccount:
+    annotations:
+      azure.workload.identity/client-id: 00000000-0000-0000-0000-000000000000
+  podLabels:
+    azure.workload.identity/use: "true"
+core-jobs:
+  serviceAccount:
+    annotations:
+      azure.workload.identity/client-id: 00000000-0000-0000-0000-000000000000
+  podLabels:
+    azure.workload.identity/use: "true"
+core-worker:
+  serviceAccount:
+    annotations:
+      azure.workload.identity/client-id: 00000000-0000-0000-0000-000000000000
+  podLabels:
+    azure.workload.identity/use: "true"
+
+# Everything above is managed: no bundled dependency runs.
+postgres:
+  enabled: false
+valkey:
+  enabled: false
+keycloak:
+  enabled: false
+seaweedfs:
+  enabled: false

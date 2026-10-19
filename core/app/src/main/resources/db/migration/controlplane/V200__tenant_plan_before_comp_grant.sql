@@ -1,0 +1,21 @@
+-- Comp-grant revert-target fix (see Tenant#grantComplimentaryPlan /
+-- #revertComplimentaryGrant javadoc). Until now CompGrantExpiryReverter
+-- always dropped an expired comp grant to FREE, which is correct for the
+-- three existing callers (Academy scholarship, event trial, referral - all
+-- only ever grant to a tenant that was already on FREE) but wrong for a
+-- comp grant issued to a tenant that was already a paying PREMIUM customer:
+-- it would revert them to FREE instead of back to PREMIUM.
+--
+-- plan_before_comp_grant records the tenant's plan at the moment its FIRST
+-- live comp grant was issued (not overwritten by a later re-grant/refresh
+-- while a grant is already active - see #grantComplimentaryPlan), so the
+-- reverter can restore the true pre-grant plan instead of assuming FREE.
+-- Null for every existing row (including tenants with an already-active
+-- comp grant from before this column existed) - the reverter falls back to
+-- FREE when null, preserving today's behavior for those in-flight grants.
+--
+-- Version 200: controlplane/ and tenant/ share one combined Flyway version
+-- sequence (see V114's header comment) - 200 is the first free slot past
+-- both folders' highest version at the time.
+ALTER TABLE control_plane.tenant
+    ADD COLUMN plan_before_comp_grant VARCHAR(32);

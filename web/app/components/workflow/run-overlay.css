@@ -1,0 +1,82 @@
+/* Run overlays drawn ON the graph while observing a run: replay progress on
+ * nodes (upcoming / never reached / inspected), visit counts, and the pulse
+ * that travels along an edge while its target executes. Theme tokens only. */
+
+/* Replay marks fade the CHROME (border, surface, icon, glyph, ports), never
+ * the words: the chip text ("Upcoming" / "Not run") is what says what the
+ * mark means, so title, body and chips stay at full --wfx-text / --wfx-muted
+ * contrast. The dashed border carries "unreached" without colour. */
+.wfx-node[data-replay] {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.25s ease;
+}
+.wfx-node[data-replay] .wfx-icon,
+.wfx-node[data-replay] .wfx-glyph,
+.wfx-node[data-replay] .wfx-port,
+.wfx-node[data-replay] .wfx-lens-badge {
+  transition: opacity 0.25s ease, filter 0.25s ease;
+}
+/* Not reached YET at this playhead position. */
+.wfx-node[data-replay="ahead"] {
+  --wfx-border: color-mix(in srgb, var(--ax-border2, var(--surface-border-strong)) 55%, transparent);
+  --wfx-accent: var(--wfx-muted);
+  box-shadow: none;
+}
+.wfx-node[data-replay="ahead"] .wfx-icon,
+.wfx-node[data-replay="ahead"] .wfx-glyph,
+.wfx-node[data-replay="ahead"] .wfx-port {
+  opacity: 0.5;
+  filter: saturate(0.5);
+}
+/* The run ended without ever reaching it (a branch not taken). */
+.wfx-node[data-replay="unreached"] {
+  --wfx-bg: color-mix(in srgb, var(--surface-card, var(--hud-panel)) 88%, var(--wfx-muted));
+  --wfx-border: color-mix(in srgb, var(--ax-border2, var(--surface-border-strong)) 70%, transparent);
+  --wfx-accent: var(--wfx-muted);
+  border-style: dashed;
+  box-shadow: none;
+}
+.wfx-node[data-replay="unreached"] .wfx-icon,
+.wfx-node[data-replay="unreached"] .wfx-glyph,
+.wfx-node[data-replay="unreached"] .wfx-port {
+  opacity: 0.4;
+  filter: grayscale(0.8);
+}
+.wfx-node[data-replay]:hover .wfx-icon,
+.wfx-node[data-replay]:hover .wfx-glyph,
+.wfx-node[data-replay]:focus-within .wfx-icon,
+.wfx-node[data-replay]:focus-within .wfx-glyph {
+  opacity: 1;
+  filter: none;
+}
+
+.wfx-node[data-inspected="true"] {
+  outline: 2px solid var(--ax-accent2, var(--ax-cyan, var(--hud-cyan)));
+  outline-offset: 4px;
+}
+
+.wfx-chip.wfx-chip-visits {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Edge pulse: a dot riding the path from source to target. */
+.wf-edge-pulse {
+  fill: var(--wf-edge-color, var(--hud-violet));
+  filter: drop-shadow(0 0 3px var(--wf-edge-color, var(--hud-violet)));
+  pointer-events: none;
+}
+
+.wf-edge-passes {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wfx-node[data-replay],
+  .wfx-node[data-replay] .wfx-icon,
+  .wfx-node[data-replay] .wfx-glyph,
+  .wfx-node[data-replay] .wfx-port,
+  .wfx-node[data-replay] .wfx-lens-badge { transition: none; }
+  /* The dashed flowing stroke already shows direction without motion. */
+  .wf-edge-pulse { display: none; }
+}

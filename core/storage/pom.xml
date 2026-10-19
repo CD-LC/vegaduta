@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>storage</artifactId>
+  <name>storage</name>
+  <description>
+    FileStorageService: an S3-API object storage abstraction (Stage 3 of the
+    Simple/Manual + Model Dropdown + File Upload build - see the July 2026
+    direct feedback "come up with strategy where to store all these video and
+    which is the best platform"). Talks to whatever S3-compatible endpoint
+    app.storage.endpoint points at via the AWS SDK v2 S3Client - MinIO
+    (self-hosted, deploy/docker-compose.yml's "minio" service) for local dev
+    and CI, swappable to AWS S3 or Cloudflare R2 in production purely via the
+    three app.storage.* config properties (endpoint/access-key/secret-key) -
+    no code change, no different jar. S3 API chosen over a vendor-specific
+    SDK deliberately: every one of the three target backends (MinIO, S3, R2)
+    speaks it natively, so this is genuinely "write once, point anywhere",
+    not a MinIO-specific integration with S3/R2 as an afterthought.
+
+    Leaf module - no dependency on any other core module (parallels crypto's
+    "leaf, no dependency on any other core module" shape). SarvamGeneratedAudio
+    (core/sarvam) is the first caller, migrating off base64-in-Postgres;
+    Stage 4 (chat file upload) and Stage 5 (KB multi-modal storage) are
+    expected to depend on this module next.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <!-- Storage-layer tenant isolation (infra audit fix, 2026-07-27) -
+         S3FileStorageService reads TenantContext.current() to transparently
+         scope new object keys per tenant and to defense-in-depth-check
+         get()/delete() calls against the caller's own tenant. security is a
+         leaf module (no dependency on any other core module, per its own
+         pom.xml description), so depending on it here does not create a
+         cycle - storage stays a near-leaf, one hop deeper than before. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+    </dependency>
+    <!-- Required by DefaultCredentialsProvider for EKS IRSA / web identity: the SDK loads the STS credentials
+         factory by reflection and otherwise answers "the 'sts' service module must be on the class path", then
+         falls through to credentials the pod does not have. -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>sts</artifactId>
+    </dependency>
+    <!-- Azure Blob Storage backend (app.storage.type=azure-blob): Azure has no S3 API. -->
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob</artifactId>
+      <exclusions>
+        <!-- Its default Netty HTTP client drags in netty-tcnative-boringssl-static for five platforms
+             (tens of MB). The JDK HttpClient implementation below needs nothing extra. -->
+        <exclusion>
+          <groupId>com.azure</groupId>
+          <artifactId>azure-core-http-netty</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-core-http-jdk-httpclient</artifactId>
+    </dependency>
+    <!-- DefaultAzureCredential (workload identity, managed identity, az login) so Azure needs no stored
+         account key. Same Netty exclusion as above; its MSAL client uses the JDK HTTP stack. -->
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-identity</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.azure</groupId>
+          <artifactId>azure-core-http-netty</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- @NullMarked/@Nullable for the NullAway pilot (-Pstatic-analysis). -->
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Azure SDK BOM - keeps azure-storage-blob and azure-core on matching versions. -->
+      <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-sdk-bom</artifactId>
+        <version>1.3.8</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- AWS SDK v2 BOM - keeps the s3 artifact above and its transitive
+           AWS dependencies (auth, regions, http-client, etc.) on matching
+           versions, the same "import one BOM, stop hand-pinning versions"
+           approach core/pom.xml already uses for spring-ai-bom. -->
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>2.28.29</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

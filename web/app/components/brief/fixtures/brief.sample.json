@@ -1,0 +1,127 @@
+{
+  "briefVersion": 1,
+  "title": "Unpaid-invoice follow-up and order-status desk",
+  "goal": "Chase unpaid invoices on WhatsApp every morning, politely at first and firmer after a week, and answer customers who ask where their order is in English or Hindi.",
+  "locale": "en",
+  "trust": {
+    "rung": "UNDER_WATCH",
+    "irreversible": ["w1.n4"],
+    "humanMustDecide": []
+  },
+  "agents": [
+    {
+      "ref": "a1",
+      "name": "Collections follow-up",
+      "description": "Drafts a short, polite payment reminder for each overdue invoice.",
+      "systemPrompt": "You write payment reminders for a small business. Be polite in the first reminder and firmer after seven days overdue. Always state the invoice number, amount and due date. Never threaten, never invent a due date, and never promise a discount.",
+      "reasoningDepth": "CAREFUL",
+      "tuningMode": "SIMPLE",
+      "generation": { "temperature": 0.3, "maxTokens": 400 },
+      "toolAllowList": [],
+      "knowledgeRefs": ["k1"],
+      "procedureRefs": ["p1"],
+      "guardrails": [{ "kind": "NO_THREATS" }]
+    },
+    {
+      "ref": "a2",
+      "name": "Order-status desk",
+      "description": "Answers where-is-my-order questions in English or Hindi.",
+      "systemPrompt": "You answer order-status questions for a small business. Reply in the language the customer wrote in (English or Hindi). Only state what the order system tells you; if you cannot find the order, say so and offer to pass it to a person.",
+      "reasoningDepth": "FAST",
+      "tuningMode": "SIMPLE",
+      "generation": { "temperature": 0.2, "maxTokens": 300 },
+      "toolAllowList": ["mcp:m1/*"],
+      "knowledgeRefs": ["k1"]
+    }
+  ],
+  "procedures": [
+    {
+      "ref": "p1",
+      "name": "Escalating reminder ladder",
+      "steps": [
+        "Day 1 overdue: friendly reminder with the invoice attached.",
+        "Day 7 overdue: firmer reminder, ask for a payment date.",
+        "Day 14 overdue: stop and hand the customer to a person."
+      ],
+      "source": "USER_GOAL"
+    }
+  ],
+  "workflows": [
+    {
+      "ref": "w1",
+      "name": "Morning invoice chase",
+      "graph": {
+        "nodes": [
+          { "id": "n1", "type": "trigger", "position": { "x": 0, "y": 40 }, "data": { "label": "Every morning, 9:30", "config": { "channel": null } } },
+          {
+            "id": "n2",
+            "type": "http",
+            "position": { "x": 220, "y": 40 },
+            "data": {
+              "label": "Fetch overdue invoices",
+              "config": { "method": "GET", "url": "https://api.example-accounts.in/v1/invoices?status=overdue", "headers": { "Authorization": "Bearer {{secret.TALLY_API_KEY}}" } }
+            }
+          },
+          { "id": "n3", "type": "agent", "position": { "x": 440, "y": 40 }, "data": { "label": "Draft the reminder", "config": { "agentId": "a1", "knowledgeRefs": ["k1"] } } },
+          { "id": "n4", "type": "output", "position": { "x": 660, "y": 40 }, "data": { "label": "Send on WhatsApp", "config": { "channel": "whatsapp" } } }
+        ],
+        "edges": [
+          { "id": "e1", "source": "n1", "target": "n2" },
+          { "id": "e2", "source": "n2", "target": "n3" },
+          { "id": "e3", "source": "n3", "target": "n4" }
+        ]
+      },
+      "triggers": [{ "kind": "SCHEDULE", "cron": "30 9 * * *" }],
+      "sampleInput": "Invoice INV-2041, Sharma Traders, 18,500 rupees, 9 days overdue."
+    }
+  ],
+  "mcpServers": [
+    { "ref": "m1", "registryId": "whatsapp-business", "name": "WhatsApp Business", "env": { "WHATSAPP_TOKEN": { "secretRef": "s2" } } }
+  ],
+  "knowledge": [
+    {
+      "ref": "k1",
+      "name": "Customer ledger notes and payment terms",
+      "sources": [{ "kind": "UPLOAD_LATER", "hint": "Upload your payment-terms sheet and any customer-specific arrangements." }]
+    }
+  ],
+  "secrets": [
+    { "ref": "s1", "name": "TALLY_API_KEY", "scope": "TENANT", "why": "Lets the follow-up read your overdue invoices. Read-only.", "obtainAt": "Your accounting software, under API access." },
+    { "ref": "s2", "name": "WHATSAPP_TOKEN", "scope": "TENANT", "why": "Lets the envoy send WhatsApp messages from your business number.", "obtainAt": "Meta Business Manager, under your WhatsApp Business account." }
+  ],
+  "channels": [{ "ref": "c1", "kind": "WHATSAPP", "bindTo": "a2", "optional": true }],
+  "evalSet": {
+    "targetAgent": "a1",
+    "cases": [
+      { "input": "Invoice INV-2041, 18,500 rupees, 1 day overdue.", "rubric": "Polite, states invoice number, amount and due date, no threat." },
+      { "input": "Invoice INV-1990, 42,000 rupees, 8 days overdue.", "rubric": "Firmer tone, asks for a payment date, still no threat." },
+      { "input": "Invoice INV-1804, 9,000 rupees, 15 days overdue.", "rubric": "Declines to send another reminder and hands over to a person." },
+      { "input": "Customer says they already paid last week.", "rubric": "Apologises, asks for the payment reference, does not insist." }
+    ],
+    "gate": { "minScore": 0.8 }
+  },
+  "rehearsal": {
+    "personas": [
+      { "name": "Busy shop owner", "traits": ["short replies", "replies in Hindi"], "opening": "Bhai, kal bhej dunga." },
+      { "name": "Disputes the amount", "traits": ["sceptical", "asks for proof"], "opening": "This amount is wrong." }
+    ]
+  },
+  "narrative": {
+    "whyAgentic": "Each reminder has to read the customer's history and pick the right tone, which a fixed template cannot do. A person should still approve the first messages until you trust the wording.",
+    "perNode": {
+      "a1": { "why": "Writes each reminder in the right tone for how overdue the invoice is.", "tune": "If reminders sound too soft or too stern, edit the system prompt in the Workbench.", "proof": "The eval set below scores tone on four sample invoices." },
+      "a2": { "why": "Answers order-status questions so you do not have to.", "tune": "If it answers in the wrong language, tighten the language line in the system prompt.", "proof": "Rehearse it as the busy shop owner persona and read the transcript." },
+      "w1": { "why": "Runs the chase every morning so nobody has to remember.", "tune": "Change the schedule on the trigger node in the workflow editor.", "proof": "Run it now with the sample invoice and read what would be sent." },
+      "w1.n1": { "why": "Starts the chase once a day.", "tune": "Edit the schedule on this node.", "proof": "The workflow shows a run every morning." },
+      "w1.n2": { "why": "Reads the list of overdue invoices from your accounts.", "tune": "Change the URL or the status filter on this node.", "proof": "The trace shows the invoices it found." },
+      "w1.n3": { "why": "Hands each overdue invoice to the collections agent.", "tune": "Pick a different agent on this node.", "proof": "The trace shows the drafted message." },
+      "w1.n4": { "why": "Sending a message to a customer cannot be taken back, so it asks you first.", "tune": "Edit the message channel on this node.", "proof": "Each send shows up in your approvals queue." },
+      "m1": { "why": "Connects the envoy to WhatsApp Business.", "tune": "Reconnect it from the MCP tools page if messages stop.", "proof": "A test message arrives on your own number." },
+      "k1": { "why": "Holds your payment terms so the wording matches what you agreed.", "tune": "Upload a newer terms sheet from the Knowledge page.", "proof": "Answers quote your terms rather than guessing." },
+      "s1": { "why": "The key to read your overdue invoices.", "tune": "Rotate it on the Secrets page.", "proof": "The fetch step returns invoices instead of an error." },
+      "s2": { "why": "The key to send from your WhatsApp number.", "tune": "Rotate it on the Secrets page.", "proof": "The connector shows as connected." },
+      "p1": { "why": "Your own escalation ladder, written down so the agent follows it.", "tune": "Edit the steps in the procedure.", "proof": "The day-14 case in the eval set stops and hands over." },
+      "c1": { "why": "Lets customers ask about orders directly on WhatsApp.", "tune": "Bind it to a different agent from the Channels page.", "proof": "A message from your own number gets a reply." }
+    }
+  }
+}

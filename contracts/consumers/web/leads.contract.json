@@ -1,0 +1,144 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-leads",
+      "method": "GET",
+      "path": "/api/leads",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.items",
+          "$.page",
+          "$.size",
+          "$.total"
+        ]
+      }
+    },
+    {
+      "id": "post-api-leads",
+      "method": "POST",
+      "path": "/api/leads",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.score",
+          "$.stage"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-leads-id",
+      "method": "DELETE",
+      "path": "/api/leads/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-leads-id",
+      "method": "PUT",
+      "path": "/api/leads/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.score",
+          "$.stage"
+        ]
+      }
+    },
+    {
+      "id": "get-api-leads-id-activities",
+      "method": "GET",
+      "path": "/api/leads/{id}/activities",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].id",
+          "$[*].leadId",
+          "$[*].type"
+        ]
+      }
+    },
+    {
+      "id": "post-api-leads-id-activities",
+      "method": "POST",
+      "path": "/api/leads/{id}/activities",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.body",
+          "$.type"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.id",
+          "$.leadId",
+          "$.type"
+        ]
+      }
+    },
+    {
+      "id": "post-api-leads-id-stage",
+      "method": "POST",
+      "path": "/api/leads/{id}/stage",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.note",
+          "$.stage"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.score",
+          "$.stage"
+        ]
+      }
+    },
+    {
+      "id": "get-api-leads-export.csv",
+      "method": "GET",
+      "path": "/api/leads/export.csv",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-leads-import",
+      "method": "POST",
+      "path": "/api/leads/import",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.created",
+          "$.errors",
+          "$.skipped",
+          "$.updated"
+        ]
+      }
+    },
+    {
+      "id": "get-api-leads-pipeline",
+      "method": "GET",
+      "path": "/api/leads/pipeline",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].count",
+          "$[*].stage",
+          "$[*].value"
+        ]
+      }
+    }
+  ]
+}

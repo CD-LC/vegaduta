@@ -1,0 +1,21 @@
+{{- $g := .Values.global | default dict -}}
+{{- /* Public config is read at RUNTIME by the app (web/docs/RUNTIME-CONFIG.md): one image works on any domain. */ -}}
+{{- $o := $g.oidc | default dict -}}
+{{- $env := include "vegaduta-lib.webPublicEnv" (dict "root" . "clientId" ($o.webClientId | default "agentic-ai-web")) | fromYaml -}}
+{{- $site := include "vegaduta-lib.publicUrl" (dict "root" . "key" (.Values.ingress.hostKey | default "app")) -}}
+{{- $_ := set $env "NEXT_PUBLIC_SITE_URL" $site -}}
+{{- $_ := set $env "SITE_URL" $site -}}
+{{- $_ := set $env "PORT" (toString .Values.containerPort) -}}
+{{- if include "vegaduta-lib.component" (dict "root" . "key" "codeIntel") }}
+{{- $_ := set $env "NEXT_PUBLIC_CODE_INTEL_URL" (include "vegaduta-lib.publicUrl" (dict "root" . "key" "codeintel")) -}}
+{{- end }}
+{{- if include "vegaduta-lib.component" (dict "root" . "key" "appBuilder") }}
+{{- $_ := set $env "NEXT_PUBLIC_APP_BUILDER_URL" (include "vegaduta-lib.publicUrl" (dict "root" . "key" "builder")) -}}
+{{- end }}
+{{- /* The merged platform-admin console (was web-admin) keeps its old
+  admin.<domain> host via ingress.extraHostKeys; proxy.js redirects paths
+  on that host under /platform-admin. */ -}}
+{{- if has "admin" (.Values.ingress.extraHostKeys | default list) }}
+{{- $_ := set $env "PLATFORM_ADMIN_HOST" (include "vegaduta-lib.publicHost" (dict "root" . "key" "admin")) -}}
+{{- end }}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" $env) }}

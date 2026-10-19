@@ -1,0 +1,794 @@
+name: CI
+
+# Build, test and lint every component on pull requests and pushes to main.
+# A `changes` job computes path filters so a docs-only or web-only change does
+# not wait on the Maven reactor. The `ci-ok` job at the bottom ("CI OK") is
+# the single check to mark as required in branch protection
+# (docs/maintainers/branch-protection.md): it fails when any job that ran
+# failed or was cancelled, and passes when the rest were skipped by the path
+# filters. It also covers the static gates and secret scan (static-gates.yml,
+# called below), the DCO sign-off check, dependency review and the docs link
+# check. CodeQL reports separately as "CodeQL OK" (codeql.yml).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  JAVA_VERSION: "21"
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # check out the repository
+      pull-requests: read # list the pull request's changed files
+    outputs:
+      core: ${{ steps.filter.outputs.core }}
+      sdk: ${{ steps.filter.outputs.sdk }}
+      sdk-clients: ${{ steps.filter.outputs.sdk-clients }}
+      web: ${{ steps.filter.outputs.web }}
+      python: ${{ steps.filter.outputs.python }}
+      node-services: ${{ steps.filter.outputs.node-services }}
+      shell: ${{ steps.filter.outputs.shell }}
+      docker: ${{ steps.filter.outputs.docker }}
+      compose: ${{ steps.filter.outputs.compose }}
+      helm: ${{ steps.filter.outputs.helm }}
+      docs: ${{ steps.filter.outputs.docs }}
+    # Path filtering only applies to pull requests: every downstream job runs
+    # unconditionally on push and workflow_dispatch (`|| github.event_name !=
+    # 'pull_request'`), so the filter is skipped there and the outputs stay
+    # empty. On push, paths-filter diffs against `github.event.before`, which
+    # a shallow checkout does not contain; with persist-credentials: false its
+    # `git fetch` of that SHA has no auth and fails ("could not read
+    # Username"), failing this job and skipping all of CI. On pull requests
+    # paths-filter lists the changed files through the API instead of git.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request'
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          filters: |
+            ci: &ci
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/static-gates.yml'
+              - 'scripts/ci/**'
+              - 'Makefile'
+              - '.devcontainer/**'
+            core:
+              - *ci
+              - 'core/**'
+              - 'deploy/postgres/**'
+              # ConsumerContractVerificationTest and OpenApiSpecFreshnessTest (ADR-0025)
+              - 'contracts/consumers/**'
+              - 'docs/api/openapi.json'
+            sdk:
+              - *ci
+              - 'sdk/java/**'
+              - 'examples/sdk/**'
+            sdk-clients:
+              - *ci
+              - 'sdk/generate.mjs'
+              - 'sdk/lib/**'
+              - 'sdk/test/**'
+              - 'sdk/README.md'
+              - 'sdk/typescript/**'
+              - 'sdk/python/**'
+              - 'sdk/python-agent/**'
+              - 'contracts/**'
+              - 'docs/api/openapi.json'
+              # contracts/consumers/tools/spec-status-drift.json cites this controller
+              - 'core/agents/src/main/java/com/agenticai/core/agents/core/AgentController.java'
+            web:
+              - *ci
+              - 'web/**'
+              - 'contracts/consumers/web/**'
+              - 'docs/api/openapi.json'
+            python:
+              - *ci
+              - 'services/sidecar/**'
+              - 'services/code-intel/**'
+              - 'services/app-builder/**'
+              - 'services/tool-sandbox/**'
+              - 'services/voice-agent/**'
+              - 'services/rl-trainer/**'
+            node-services:
+              - *ci
+              - 'services/mcp-stdio-runner/**'
+              - 'services/piece-host/**'
+              - 'examples/mcp-servers/**'
+            shell:
+              - *ci
+              - '**/*.sh'
+              - '.githooks/**'
+            docker:
+              - *ci
+              - '**/Dockerfile*'
+            compose:
+              - *ci
+              - 'deploy/compose/**'
+              - 'deploy/docker-compose*.yml'
+            helm:
+              - *ci
+              - 'deploy/helm/**'
+            docs:
+              - *ci
+              - '*.md'
+              - 'docs/**'
+
+  core:
+    name: core (Maven verify, JDK 21)
+    needs: changes
+    if: needs.changes.outputs.core == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Full history so origin/main exists for Spotless's ratchetFrom.
+          fetch-depth: 0
+
+      # core/pom.xml sets <java.version>21</java.version>, so any JDK >= 21 builds
+      # it. CI uses exactly the release the images ship with (core/Dockerfile:
+      # maven:3.9-eclipse-temurin-21 -> eclipse-temurin:21-jre). Newer JDKs (the
+      # maintainers also build with 24) work too; the surefire argLine in
+      # core/pom.xml carries the flags JDK 24 needs for Mockito self-attach.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      # Formatting gate, ratcheted: only Java files that differ from origin/main
+      # are checked (google-java-format AOSP; fix with `mvn spotless:apply`).
+      - name: spotless check (changed files)
+        working-directory: core
+        run: mvn -B -ntp spotless:check
+
+      # Error Prone + NullAway (core/pom.xml -Pstatic-analysis). Every Error
+      # Prone check is a WARNING, so the general findings never fail this step;
+      # they are counted into the job summary (baseline:
+      # docs/engineering/ERROR-PRONE-BASELINE.md). The step IS blocking for the
+      # NullAway pilot: a nullness error inside a @NullMarked package (crypto,
+      # storage, providers.modality today) fails the compile.
+      - name: static analysis (Error Prone warnings, NullAway pilot)
+        working-directory: core
+        run: |
+          set -o pipefail
+          mvn -B -ntp -T 1C -P static-analysis -DskipTests compile | tee "$RUNNER_TEMP/static-analysis.log"
+          {
+            echo "### Error Prone warnings by check"
+            echo '```'
+            grep -oE '^\[WARNING\] [^ ]+\.java:\[[0-9]+,[0-9]+\] \[[A-Za-z]+\]' "$RUNNER_TEMP/static-analysis.log" \
+              | sort -u | grep -oE '\[[A-Za-z]+\]$' | sort | uniq -c | sort -rn || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # The context-boot test (CoreApplicationTests) needs Postgres with pgvector
+      # AND Apache AGE; a plain postgres service container would fail Flyway on
+      # the first migration that needs either extension. Build the same image
+      # the compose stack uses and the release publishes.
+      - name: Start Postgres (pgvector + Apache AGE)
+        run: |
+          # The base image from Docker's mirror of its official images on Amazon ECR Public, by the
+          # same digest the Dockerfile pins: anonymous Docker Hub pulls from shared runners get
+          # rate-limited (429). The digest stays defined once, in the Dockerfile.
+          base="$(sed -n 's/^ARG BASE_IMAGE=//p' deploy/postgres/Dockerfile)"
+          case "$base" in *@sha256:*) ;; *) echo "::error::BASE_IMAGE is not digest-pinned: $base"; exit 1 ;; esac
+          docker build --build-arg BASE_IMAGE="public.ecr.aws/docker/library/$base" \
+            -t vegaduta-postgres:ci deploy/postgres
+          docker run -d --name pg -p 5432:5432 \
+            -e POSTGRES_USER=agentic -e POSTGRES_PASSWORD=changeme -e POSTGRES_DB=agentic_ai \
+            --health-cmd "pg_isready -U agentic -d agentic_ai" --health-interval 5s --health-retries 30 \
+            vegaduta-postgres:ci
+          for _ in $(seq 1 60); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' pg)" = healthy ] && exit 0
+            sleep 2
+          done
+          docker logs pg
+          exit 1
+
+      # Throwaway CI-only key (base64 of 32 random bytes), minted per run:
+      # EncryptionService refuses to start without one, nothing encrypted with
+      # it leaves this job, and a literal key in the workflow would be a key in
+      # the repository (AGENTS.md rule 10) even if it never guarded anything.
+      - name: Mint a per-run APP_ENCRYPTION_KEY
+        run: echo "APP_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
+      - name: mvn verify
+        working-directory: core
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          POSTGRES_DB: agentic_ai
+          POSTGRES_USER: agentic
+          POSTGRES_PASSWORD: changeme
+        # -Pcoverage records JaCoCo coverage and writes per-module reports.
+        # Report only: no threshold is enforced. The enforce profile (build
+        # hygiene rules) activates on its own because CI=true.
+        # -Pit adds core/app's Testcontainers suite (failsafe, after the unit
+        # tests; docs/engineering/INTEGRATION-TESTS.md): migrations from empty
+        # plus per-tenant schemas, a full context boot with the deployed
+        # profile set, and the pgvector search path. It reuses the image built
+        # above instead of rebuilding deploy/postgres per run, and starts its
+        # own containers on random ports (the pg container above is untouched).
+        run: mvn -B -ntp -Pcoverage,it verify -Dvegaduta.test.postgres.image=vegaduta-postgres:ci
+
+      # The integration suite above boots a Spring test context. This boots the packaged jar
+      # (the artifact the image ships) against the same Postgres image and Redis, waits for
+      # readiness and probes routes that must answer 401. It reuses the jar `verify` just built.
+      # Advisory for now: it has run locally but not yet on a runner. Remove continue-on-error
+      # once it has been green on main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
+      - name: Boot check (packaged jar, Postgres + Redis)
+        continue-on-error: true
+        env:
+          BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
+        run: bash scripts/ci/boot-check.sh --skip-build --keep-log
+
+      - name: Upload coverage report
+        if: success() || failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: core-coverage
+          path: core/**/target/site/jacoco/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: core-test-reports
+          path: |
+            core/**/target/surefire-reports/**
+            core/**/target/failsafe-reports/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+  sdk:
+    name: sdk/java (Maven verify, JDK 17)
+    needs: changes
+    if: needs.changes.outputs.sdk == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The SDK's floor is Java 17 (sdk/java/pom.xml <maven.compiler.release>), so CI builds
+      # it on exactly 17: anything that compiles here compiles for every consumer.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # google-java-format needs a JDK 21 javac (current JDK 17 updates changed the
+      # internals it uses), so the formatting gate runs on 21 and the build on 17.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: spotless check (whole tree, Google style; JDK 21)
+        working-directory: sdk/java
+        run: mvn -B -ntp spotless:check
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: mvn verify (tests, javadoc, sources, SBOM)
+        working-directory: sdk/java
+        run: mvn -B -ntp verify
+
+      # Reproducible-build gate: two clean builds must produce byte-identical jars
+      # (project.build.outputTimestamp in sdk/java/pom.xml). Javadoc jars are excluded:
+      # they embed the generator version only, but are not part of the promise.
+      - name: Reproducible build check
+        working-directory: sdk/java
+        run: |
+          set -euo pipefail
+          sha256sum */target/*-SNAPSHOT.jar */target/*-sources.jar | sort > /tmp/build-1.sha256
+          mvn -B -ntp -q -DskipTests clean package
+          sha256sum */target/*-SNAPSHOT.jar */target/*-sources.jar | sort > /tmp/build-2.sha256
+          diff /tmp/build-1.sha256 /tmp/build-2.sha256
+
+      # The examples consume the SDK the way a user does: from the local repository.
+      - name: Example applications compile against the SDK
+        run: |
+          mvn -B -ntp -q -f sdk/java/pom.xml -DskipTests install
+          mvn -B -ntp -q -f examples/sdk/governed-tools/pom.xml -DskipTests package
+          mvn -B -ntp -q -f examples/sdk/refund-agent/java/pom.xml -DskipTests package
+
+      # The demos must run, not only compile — they are the governance story users see.
+      - name: Refund-agent example runs (Java and Python)
+        run: |
+          mvn -B -ntp -q -f examples/sdk/refund-agent/java/pom.xml exec:java -Dexec.mainClass=io.vegaduta.examples.refund.WithoutSdk
+          mvn -B -ntp -q -f examples/sdk/refund-agent/java/pom.xml exec:java -Dexec.mainClass=io.vegaduta.examples.refund.WithSdk
+          python3 -m pip install -q sdk/python-agent
+          python3 examples/sdk/refund-agent/python/without_sdk.py > /dev/null
+          python3 examples/sdk/refund-agent/python/with_sdk.py > /dev/null
+
+      - name: Upload SBOMs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sdk-sbom
+          path: sdk/java/*/target/*-cyclonedx.json
+          if-no-files-found: ignore
+
+  web:
+    name: web (lint, typecheck, test, build)
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Depth 2: on a PR, HEAD is the merge commit and HEAD^1 the base, which
+          # is all the changed-files format gate needs.
+          fetch-depth: 2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      # Ratchet: only files this PR adds or modifies must match .prettierrc.json
+      # (fix with `npx prettier@3.9.9 --write <file>`). Untouched files are not checked.
+      - name: prettier --check (changed files)
+        if: github.event_name == 'pull_request'
+        run: |
+          mapfile -t files < <(git diff --name-only --relative --diff-filter=ACMR HEAD^1 HEAD -- . | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|css)$' || true)
+          if [ "${#files[@]}" -eq 0 ]; then echo "No changed files to check."; exit 0; fi
+          npx --yes prettier@3.9.9 --check --ignore-unknown "${files[@]}"
+      # Type-aware lint holds a full TS program for the app; peak heap is close
+      # to Node's ~2 GB default on the runner, so give it headroom.
+      - run: npm run lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+      - run: npm run typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      # Consumer-driven contract (ADR-0025): contracts/consumers/web must equal a
+      # regeneration from web/app + docs/api/openapi.json. The vitest
+      # app/lib/api/consumerContract.test.ts (in npm test) names the call sites.
+      - name: web consumer contract is current
+        run: node scripts/api-contract.mjs --check
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  python:
+    name: Python (sidecar pytest, code-intel harness, ruff)
+    needs: changes
+    if: needs.changes.outputs.python == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Depth 2 so the changed-files ruff gate can diff HEAD^1..HEAD on a PR.
+          fetch-depth: 2
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          # Matches the python:3.12-slim base of every service image.
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            services/sidecar/requirements.lock
+            services/sidecar/requirements-dev.txt
+            services/code-intel/requirements.lock
+
+      # Ruff config lives in each service's pyproject.toml (sidecar, code-intel);
+      # the other services use ruff's defaults. Blocking gate = lint + format of
+      # the .py files this PR adds or modifies, in any service. The whole-tree
+      # run below is advisory until the existing findings are burned down.
+      - name: Install ruff
+        run: pip install ruff==0.12.4
+      - name: Ruff lint + format (changed files)
+        if: github.event_name == 'pull_request'
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR HEAD^1 HEAD -- services | grep -E '\.py$' || true)
+          if [ "${#files[@]}" -eq 0 ]; then echo "No changed Python files."; exit 0; fi
+          ruff check --force-exclude "${files[@]}"
+          ruff format --check --force-exclude "${files[@]}"
+      - name: Ruff whole tree (all services, advisory)
+        continue-on-error: true
+        run: ruff check services/sidecar services/code-intel services/app-builder services/voice-agent services/rl-trainer services/tool-sandbox
+
+      # The same hash-locked install as the sidecar Dockerfile: the torch
+      # block of requirements.lock first, --no-deps, from the CPU-only index,
+      # then the whole lock from PyPI with --require-hashes (torch is already
+      # satisfied). The tests never load a model, but the app modules import
+      # sentence-transformers / faster-whisper at module level.
+      # requirements-dev.txt (pytest) has no lock - it is never installed into
+      # an image - so it is the one unhashed install here, after the lock.
+      - name: sidecar deps (hash-locked, CPU-only torch; then dev deps)
+        working-directory: services/sidecar
+        run: |
+          python -c "import re; t = open('requirements.lock').read(); open('${RUNNER_TEMP}/torch.lock', 'w').write(re.search(r'^torch==.*?(?=^\S|\Z)', t, re.M | re.S).group(0))"
+          pip install --require-hashes --no-deps \
+            --index-url https://download.pytorch.org/whl/cpu -r "${RUNNER_TEMP}/torch.lock"
+          pip install --require-hashes -r requirements.lock
+          pip install -r requirements-dev.txt
+      - name: sidecar tests (pytest)
+        working-directory: services/sidecar
+        run: python -m pytest tests/ -q
+
+      # Installed after the sidecar suite on purpose: both services pin
+      # overlapping libraries (fastapi, pydantic, httpx) independently. Same
+      # hash-locked file as the image; its tests need nothing beyond it.
+      - name: code-intel deps (hash-locked)
+        working-directory: services/code-intel
+        run: pip install --require-hashes -r requirements.lock
+
+      # NOT pytest. code-intel/tests are framework-free scripts on a hand-rolled
+      # check() harness that reports failures only through main()'s exit code;
+      # pytest would error on collection or pass vacuously. Invoke each module
+      # and rely on its exit code.
+      - name: code-intel tests (script harness, not pytest)
+        working-directory: services/code-intel
+        run: |
+          for m in test_auth test_service test_guardrails test_agent \
+                   test_approval_reconcile test_exec_and_mcp \
+                   test_gitops_auth_token test_gitops_confinement \
+                   test_run_modes test_store_search; do
+            python -m "tests.$m" || exit 1
+          done
+
+  python-locks:
+    # requirements.lock is what every service image installs (--require-hashes);
+    # requirements.txt is what a human edits. Regenerate every lock with the
+    # same script maintainers use and fail on any drift, so a bumped pin (or
+    # a hand-edited lock) cannot ship an image that differs from the diff.
+    name: Python requirements.lock up to date
+    needs: changes
+    if: needs.changes.outputs.python == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.0"
+          enable-cache: false
+      - name: Regenerate every lock
+        run: bash services/lock-requirements.sh
+      - name: Fail on lock drift
+        run: |
+          if ! git diff --exit-code -- services/*/requirements.lock; then
+            echo "::error::requirements.lock is out of date - run services/lock-requirements.sh and commit the result"
+            exit 1
+          fi
+
+  python-extra:
+    # The other Python services' suites. Blocking through ci-ok (they were
+    # advisory until they went green).
+    name: Python ${{ matrix.service }}
+    needs: changes
+    if: needs.changes.outputs.python == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # Static commands, passed to the step through env (not interpolated
+        # into the script).
+        include:
+          - service: app-builder
+            # Script harness (each test module has a __main__ entry point).
+            test: for f in tests/test_*.py; do python -m "tests.$(basename "$f" .py)" || exit 1; done
+          - service: tool-sandbox
+            test: pip install pytest==8.3.2 && python -m pytest tests/ -q
+          - service: voice-agent
+            test: python -m pytest tests/ -q
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install
+        working-directory: services/${{ matrix.service }}
+        run: |
+          pip install -r requirements.txt
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Test
+        working-directory: services/${{ matrix.service }}
+        env:
+          TEST_CMD: ${{ matrix.test }}
+        run: bash -c "$TEST_CMD"
+
+  node-services:
+    name: Node services (mcp-stdio-runner, piece-host, example MCP servers)
+    needs: changes
+    if: needs.changes.outputs.node-services == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: mcp-stdio-runner (node:test)
+        working-directory: services/mcp-stdio-runner
+        run: node --test server.test.js
+      # Zero runtime dependencies; the tests need no npm install.
+      - name: piece-host (node:test)
+        working-directory: services/piece-host
+        run: npm test
+      - name: examples/mcp-servers/home-assistant
+        working-directory: examples/mcp-servers/home-assistant
+        run: npm test
+      # Advisory: its end-to-end suite drives connector packages that are not
+      # part of this repository (office-ally and others), so most cases fail
+      # here. Make it blocking once it ships with a self-contained fixture.
+      - name: examples/mcp-servers/http-gateway (advisory)
+        continue-on-error: true
+        working-directory: examples/mcp-servers/http-gateway
+        run: npm test
+
+  # The generated REST clients (sdk/typescript, sdk/python) and the Python Agent
+  # SDK, with their consumer contracts (contracts/consumers/sdk-*). The drift
+  # guard `node sdk/generate.mjs --check` is a static gate; this job runs the
+  # tests: generator + TS runtime + README examples against the contract
+  # (node:test, needs Node 22.18+ for .ts type stripping), the Python client
+  # (unittest) and python-agent (pytest + ruff, incl. contracts/outbound).
+  sdk-clients:
+    name: SDK clients and consumer contracts (TypeScript, Python, python-agent)
+    needs: changes
+    if: needs.changes.outputs.sdk-clients == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Generated SDKs match docs/api/openapi.json
+        run: node sdk/generate.mjs --check
+      - name: Generator, TS runtime and sdk-typescript consumer contract (node:test)
+        run: node --test sdk/test/*.test.mjs
+      - name: Python client and sdk-python consumer contract (unittest)
+        working-directory: sdk/python
+        run: python -m unittest discover -s tests
+      - name: python-agent tests, incl. sdk-python-agent consumer contract (pytest)
+        working-directory: sdk/python-agent
+        run: |
+          pip install -e '.[dev]'
+          python -m pytest tests/ -q
+      - name: python-agent lint (ruff)
+        working-directory: sdk/python-agent
+        run: ruff check vegaduta_agent tests
+
+  shellcheck:
+    name: shellcheck
+    needs: changes
+    if: needs.changes.outputs.shell == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Error severity for now (ratchet: tighten to warning once the tree is
+      # clean). shellcheck is preinstalled on ubuntu-latest.
+      - name: shellcheck (severity=error)
+        run: |
+          shellcheck --version
+          { git ls-files -z -- '*.sh' '*.bash'; git ls-files -z -- '.githooks/*'; } \
+            | xargs -0 -r shellcheck --severity=error --format=gcc
+
+  hadolint:
+    name: hadolint
+    needs: changes
+    if: needs.changes.outputs.docker == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
+        with:
+          dockerfile: Dockerfile
+          recursive: true
+          # Error-level findings fail the job; warnings are reported only.
+          failure-threshold: error
+
+  compose:
+    name: docker compose config
+    needs: changes
+    if: needs.changes.outputs.compose == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate compose files
+        run: bash scripts/ci/compose-validate.sh
+
+  helm:
+    name: helm lint + template + kubeconform
+    needs: changes
+    if: needs.changes.outputs.helm == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.22.0
+      # Delegates to deploy/helm/validate.sh when present: per-chart lint,
+      # umbrella scenarios, rendered-manifest rules (no Bitnami, no :latest, no
+      # localhost URLs, one APP_ENCRYPTION_KEY secret) and kubeconform against
+      # Kubernetes 1.31 plus CRD schemas (CNPG, Gateway API, ServiceMonitor).
+      # helm and kubeconform run from containers.
+      - name: Validate charts
+        env:
+          KUBECONFORM_VERSION: v0.7.0
+        run: bash scripts/ci/helm-validate.sh
+      - name: Render-guard negative tests
+        run: |
+          if [ -f deploy/helm/test-guards.sh ]; then bash deploy/helm/test-guards.sh; else echo "no deploy/helm/test-guards.sh"; fi
+
+  # Flyway lint, bean/entity namespace lints, skip expiry, file-size ratchet and
+  # the gitleaks secret scan. Runs on every event (no path filter).
+  static-gates:
+    name: Static gates
+    uses: ./.github/workflows/static-gates.yml
+    permissions:
+      contents: read
+
+  # Developer Certificate of Origin: every non-merge commit in the pull request
+  # carries a "Signed-off-by:" trailer with the commit author's email
+  # (`git commit -s`). See CONTRIBUTING.md.
+  dco:
+    name: DCO sign-off
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check Signed-off-by trailers
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          bad=0
+          while read -r sha; do
+            email="$(git log -1 --format=%ae "$sha")"
+            if git log -1 --format=%B "$sha" | grep -i '^Signed-off-by: ' | grep -qiF "<${email}>"; then
+              echo "ok      ${sha:0:12} $(git log -1 --format=%s "$sha")"
+            else
+              echo "::error::commit ${sha:0:12} has no 'Signed-off-by:' trailer for its author <${email}>"
+              bad=1
+            fi
+          done < <(git rev-list --no-merges "${BASE_SHA}..${HEAD_SHA}")
+          if [ "$bad" -ne 0 ]; then
+            echo "Sign off every commit: git rebase --signoff ${BASE_SHA:0:12} && git push --force-with-lease"
+            exit 1
+          fi
+
+  # Blocks a pull request that adds a dependency with a known high/critical
+  # vulnerability, or one under a license incompatible with shipping the
+  # runtime as Apache-2.0. Uses the GitHub dependency graph; nothing installed.
+  # (Needs the dependency graph, i.e. a public repository or GitHub Advanced
+  # Security on a private one.)
+  dependency-review:
+    name: Dependency review
+    # Dependency review needs a public repository or GitHub Advanced Security;
+    # on a private repository without it the action fails with "not supported
+    # on this repository". Skipped there (a skip counts as passed in CI OK).
+    # Runs again on its own once the repository is public; with Advanced
+    # Security on a private repository, set the repository variable
+    # ADVANCED_SECURITY=true.
+    if: >-
+      github.event_name == 'pull_request' &&
+      (github.event.repository.visibility == 'public' || vars.ADVANCED_SECURITY == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          # Strong copyleft and source-available licenses cannot ship inside an
+          # Apache-2.0 runtime. Separate-process services (see NOTICE) are not
+          # package dependencies and are not affected.
+          deny-licenses: AGPL-1.0-only, AGPL-1.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, GPL-2.0-only, GPL-2.0-or-later, GPL-3.0-only, GPL-3.0-or-later, SSPL-1.0, BUSL-1.1
+          show-openssf-scorecard: true
+          warn-on-openssf-scorecard-level: 3
+
+  # Relative links and anchors in the top-level *.md files and docs/. Offline:
+  # no network requests, so an external site being down never fails a PR.
+  docs-links:
+    name: docs links (lychee, offline)
+    needs: changes
+    if: needs.changes.outputs.docs == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The release binary from GitHub, checksum-pinned, rather than the Docker Hub image:
+      # anonymous Docker Hub pulls from shared runners get rate-limited.
+      - name: lychee --offline
+        env:
+          LYCHEE_VERSION: "0.24.2"
+          LYCHEE_SHA256: 1f4e0ef7f6554a6ed33dd7ac144fb2e1bbed98598e7af973042fc5cd43951c9a
+        run: |
+          archive="$RUNNER_TEMP/lychee.tar.gz"
+          curl -fsSL --retry 3 -o "$archive" \
+            "https://github.com/lycheeverse/lychee/releases/download/lychee-v${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${LYCHEE_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "$archive" -C "$RUNNER_TEMP" --strip-components=1 lychee-x86_64-unknown-linux-gnu/lychee
+          "$RUNNER_TEMP/lychee" --offline --no-progress --include-fragments \
+            './*.md' 'docs/**/*.md' 'docs/**/*.html'
+
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: [changes, core, sdk, sdk-clients, web, python, python-locks, python-extra, node-services, shellcheck, hadolint, compose, helm, static-gates, dco, dependency-review, docs-links]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          failed="$(echo "$RESULTS" | jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")')"
+          if [ -n "$failed" ]; then
+            echo "::error::failed jobs: $failed"
+            exit 1
+          fi

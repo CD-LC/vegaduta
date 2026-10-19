@@ -1,0 +1,316 @@
+/* Run flight recorder dock (RunFlightRecorder.tsx).
+ * Colours are theme tokens only: the AXON set flips with :root[data-mode],
+ * and every var() carries a HUD / system-colour fallback so the dock still
+ * renders if it is mounted outside the canvas scope. Status is always
+ * shape + icon + text as well as colour. */
+
+/* Continued in run-recorder-{timeline,overlays}.css. runRecorderStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+.rfr {
+  --rfr-ok: var(--wfx-ok, var(--ax-green, var(--hud-ok, CanvasText)));
+  --rfr-err: var(--wfx-err, var(--ax-red, var(--hud-magenta, CanvasText)));
+  --rfr-warn: var(--wfx-warn, var(--ax-amber, var(--hud-warn, CanvasText)));
+  --rfr-run: var(--wfx-run, var(--ax-cyan, var(--hud-cyan, Highlight)));
+  --rfr-muted: var(--ax-dim, var(--hud-text-dim, GrayText));
+  --rfr-mid: var(--ax-mid, var(--hud-text-dim, GrayText));
+  --rfr-text: var(--ax-text, var(--text-primary, CanvasText));
+  --rfr-panel: var(--ax-panel, var(--hud-panel, Canvas));
+  /* --ax-panel2 is translucent in dark mode; sticky/floating layers need a solid surface. */
+  --rfr-solid: var(--surface-card, var(--hud-panel, Canvas));
+  --rfr-border: var(--ax-border, var(--surface-border, GrayText));
+  --rfr-border2: var(--ax-border2, var(--surface-border-strong, GrayText));
+  --rfr-chip: var(--ax-chip, var(--surface-hover, transparent));
+  --rfr-focus: var(--ax-accent2, var(--ax-cyan, Highlight));
+  --rfr-head: var(--ax-violet, var(--hud-violet, Highlight));
+  --rfr-label-w: 112px;
+  --rfr-h: 188px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  height: var(--rfr-h);
+  border-top: 1px solid var(--rfr-border2);
+  background: var(--rfr-panel);
+  color: var(--rfr-text);
+  font-size: 12px;
+  box-shadow: 0 -8px 28px color-mix(in srgb, var(--rfr-text) 8%, transparent);
+  backdrop-filter: blur(10px);
+  /* No overflow clip: the hover tip may rise above the dock. The body clips itself. */
+  overflow: visible;
+  isolation: isolate;
+}
+
+.rfr:focus-visible {
+  outline: 2px solid var(--rfr-focus);
+  outline-offset: -2px;
+}
+
+.rfr[data-collapsed="true"] {
+  height: 40px;
+}
+
+/* Resize grip on the top edge */
+.rfr-grip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 4;
+  width: 56px;
+  height: 10px;
+  transform: translateX(-50%);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.rfr-grip::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 14px;
+  right: 14px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--rfr-border2);
+}
+
+.rfr-grip:hover::before,
+.rfr-grip:focus-visible::before {
+  background: var(--rfr-focus);
+}
+
+.rfr-grip:focus-visible {
+  outline: none;
+}
+
+/* ---- Header bar ---- */
+.rfr-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 40px;
+  height: 40px;
+  min-width: 0;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--rfr-border);
+}
+
+.rfr[data-collapsed="true"] .rfr-bar {
+  border-bottom: 0;
+}
+
+.rfr-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rfr-mid);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+
+.rfr-btn:hover {
+  background: var(--rfr-chip);
+  color: var(--rfr-text);
+}
+
+.rfr-btn:focus-visible,
+.rfr-chip:focus-visible,
+.rfr-bar-visit:focus-visible,
+.rfr-head-knob:focus-visible {
+  outline: 2px solid var(--rfr-focus);
+  outline-offset: 1px;
+}
+
+.rfr-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.rfr-play {
+  border-color: var(--rfr-border2);
+  color: var(--rfr-text);
+}
+
+.rfr-play[aria-pressed="true"] {
+  border-color: var(--rfr-run);
+  color: var(--rfr-run);
+  background: color-mix(in srgb, var(--rfr-run) 12%, transparent);
+}
+
+.rfr-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rfr-mid);
+}
+
+.rfr-rec {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rfr-err);
+}
+
+.rfr[data-live="true"] .rfr-rec {
+  animation: rfr-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes rfr-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.rfr-speeds {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  border: 1px solid var(--rfr-border);
+}
+
+.rfr-chip {
+  height: 22px;
+  min-width: 30px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--rfr-mid);
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.rfr-chip:hover {
+  color: var(--rfr-text);
+}
+
+.rfr-chip[aria-checked="true"] {
+  border-color: var(--rfr-focus);
+  color: var(--rfr-text);
+  background: color-mix(in srgb, var(--rfr-focus) 14%, transparent);
+  font-weight: 600;
+}
+
+.rfr-clock {
+  flex: 0 0 auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--rfr-text);
+  white-space: nowrap;
+}
+
+.rfr-clock span {
+  color: var(--rfr-muted);
+}
+
+.rfr-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rfr-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--rfr-mid);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.rfr-meta-item {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rfr-pill {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--rfr-tone) 55%, transparent);
+  background: color-mix(in srgb, var(--rfr-tone) 13%, transparent);
+  color: var(--rfr-text);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.rfr-pill svg {
+  flex: none;
+  color: var(--rfr-tone);
+}
+
+/* The pill yields before it clips: "Awaiting approval" is the state the live
+ * approval flow parks in, and it used to be cut mid-word with no ellipsis. */
+.rfr-pill {
+  flex-shrink: 1;
+  min-width: 0;
+}
+.rfr-pill-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Mini strip (collapsed view): whole run at a glance ---- */
+.rfr-mini {
+  position: relative;
+  flex: 1 1 80px;
+  min-width: 48px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--rfr-chip);
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.rfr-mini-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 2px;
+  background: color-mix(in srgb, var(--rfr-tone) 70%, transparent);
+}
+
+.rfr-mini-head {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--rfr-head);
+}

@@ -1,0 +1,106 @@
+@keyframes ri-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.985);
+  }
+}
+@keyframes ri-sheet {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes ri-tape {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+}
+@keyframes ri-sweep {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes ri-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes ri-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- phones: bottom sheet, anchor ignored ----
+ * The sheet docks to the bottom of the CANVAS STAGE, not the viewport: the
+ * flight recorder dock sits below the stage, so it stays tappable (step
+ * through bars with the sheet open), and the sheet takes at most about half
+ * the stage so the inspected node - panned into the band above it by
+ * useObserveActions.focusNode - keeps its outline in view. */
+@media (max-width: 639.98px) {
+  .wfx-ri,
+  .wfx-ri[data-anchored] {
+    position: absolute;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: min(var(--ri-sheet-frac, 55%), 50dvh);
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+    animation-name: ri-sheet;
+  }
+  .wfx-ri .ri-notch {
+    display: none;
+  }
+  .ri-grip {
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: 8px auto 0;
+    border-radius: 999px;
+    background: var(--ri-border);
+  }
+  .ri-head {
+    padding-top: 8px;
+  }
+  .ri-iconbtn {
+    width: 34px;
+    height: 34px;
+  }
+  .ri-iconbtn.ri-sm {
+    width: 30px;
+    height: 30px;
+  }
+  .ri-keys {
+    display: none;
+  }
+  .ri-foot {
+    justify-content: flex-end;
+  }
+  .ri-loglist,
+  .ri-json,
+  .ri-raw {
+    max-height: 30dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wfx-ri,
+  .ri-body,
+  .ri-spin,
+  .ri-live::before,
+  .wfx-ri[data-status="running"] .ri-stripe {
+    animation: none;
+  }
+  .ri-chev {
+    transition: none;
+  }
+  .wfx-ri[data-status="running"] .ri-stripe {
+    background: var(--ri-run);
+  }
+}

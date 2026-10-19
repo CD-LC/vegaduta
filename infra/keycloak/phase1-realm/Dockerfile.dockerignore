@@ -1,0 +1,13 @@
+# Per-Dockerfile ignore (BuildKit: <Dockerfile>.dockerignore overrides the root
+# .dockerignore for this build). The image builds from the REPO ROOT, so
+# allow-list exactly the two paths the Dockerfile COPYs - this is what stops
+# `az acr build ... .` uploading the whole repo (INF-017).
+*
+!infra/keycloak/phase1-realm/agentic-ai-realm.json
+!deploy/keycloak/themes/agentic-ai
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/secrets
+**/*.log

@@ -1,0 +1,308 @@
+/* ---- 18. ONE standard: widths, type scale, rhythm, colour rules ----------- */
+/* Consistency + congestion audit (2026-09-24, post-deploy feedback: "so many
+   inconsistency compared to dev server ... right width - right colours,
+   always use very light colours ... still so many congested UI"). Measured
+   against prod and the dev server at 1440 / 1280 / 375 in both modes:
+   public containers ran max-w-6xl with 16 / 24 / 32px gutters at random,
+   landing bands sat at 7rem / 10rem, console content used a 2rem gutter, cards
+   ran 12 / 20 / 24px padding, 11px text was the second most common size in
+   the console (32 nodes on /agents), 9-11px appeared on the landing, and
+   decorative rose / pink / orange utilities survived in ten components.
+   The tokens below are the single source; public.css §10 and
+   console.css §9 apply them to their surfaces. */
+:root {
+  --w-public: 72rem; /* public reading width (= max-w-6xl) */
+  --w-console: 80rem; /* console content (= max-w-7xl) */
+  --w-auth: 32rem; /* auth card */
+  --gutter: 1rem; /* side gutter, phone */
+  --section-y: 4rem; /* section rhythm, phone */
+  --card-pad: 1.25rem; /* card padding, phone */
+
+  --type-display: clamp(2.5rem, 1.4rem + 3.8vw, 4.75rem); /* landing hero only */
+  --type-h1: clamp(1.875rem, 1.5rem + 1.25vw, 2.25rem); /* 30 -> 36px */
+  --type-h2: clamp(1.375rem, 1.2rem + 0.6vw, 1.5rem); /* 22 -> 24px */
+  --type-h3: 1.125rem; /* 18px */
+  --type-body: 1rem;
+  --type-small: 0.875rem;
+  /* 12px is the FLOOR everywhere - but this token is itself rem-relative, so
+   * html[data-density="console"]'s 81.25% root rescale (globals.css) quietly
+   * dropped it to ~9.75px rendered, under its own stated floor (icons-brand
+   * audit follow-up). max() guarantees the literal 12px regardless of root
+   * font-size, while still tracking the rem value at the normal 16px root. */
+  --type-caption: max(0.75rem, 12px);
+
+  --type-console-h1: 1.5rem; /* 24px phone, 30px from sm (the dev preview) */
+  --type-console-h2: 1.125rem;
+  --type-console-h3: 1rem;
+  --type-console-body: 0.875rem;
+
+  /* Status tints: soft washes + a readable ink, never a saturated fill.
+     ok = emerald, warn = amber, neutral = slate, danger = red (destructive
+     only), accent = the live accent. */
+  --tint-ok-bg: color-mix(in oklab, #10b981 12%, transparent);
+  --tint-ok-line: color-mix(in oklab, #10b981 30%, transparent);
+  --tint-ok-fg: #047857;
+  --tint-warn-bg: color-mix(in oklab, #f59e0b 14%, transparent);
+  --tint-warn-line: color-mix(in oklab, #f59e0b 34%, transparent);
+  --tint-warn-fg: #9a5b08;
+  --tint-neutral-bg: color-mix(in oklab, #64748b 10%, transparent);
+  --tint-neutral-line: color-mix(in oklab, #64748b 26%, transparent);
+  --tint-neutral-fg: #4a4a54;
+  --tint-danger-bg: color-mix(in oklab, #e11d48 10%, transparent);
+  --tint-danger-line: color-mix(in oklab, #e11d48 28%, transparent);
+  --tint-danger-fg: #b91c1c;
+  --tint-accent-bg: color-mix(in oklab, var(--accent-500) 12%, transparent);
+  --tint-accent-line: color-mix(in oklab, var(--accent-500) 30%, transparent);
+  --tint-accent-fg: var(--accent-text);
+
+  /* Category hue "creative" was a pink (#be2a76); pink is off the palette. */
+  --cat-creative: #7326b8;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 1.5rem;
+    --section-y: 6rem;
+    --card-pad: 1.5rem;
+    --type-console-h1: 1.875rem;
+  }
+}
+
+:root[data-mode="dark"] {
+  --tint-ok-fg: #45dda0;
+  --tint-warn-fg: #ffb24d;
+  --tint-neutral-fg: #9a9aa6;
+  --tint-danger-fg: #ff6b81;
+  --cat-creative: #caa6f7;
+}
+
+/* (a) Type floor: every sub-12px utility and legacy label size steps up to
+   the caption size. Tailwind's arbitrary-value classes are literal class
+   names, so the escaped selectors below match them exactly. */
+.text-\[9px\],
+.text-\[10px\],
+.text-\[11px\],
+.text-\[0\.6rem\],
+.text-\[0\.625rem\],
+.text-\[0\.65rem\],
+.text-\[0\.68rem\],
+.text-\[0\.6875rem\],
+.text-\[0\.7rem\],
+.text-\[0\.72rem\],
+.eyebrow,
+.state-pill,
+.ax-feed,
+.ax-runs-list,
+.ax-agent-autoselect,
+.ax-pg-agent-name,
+.ax-pg-error,
+.ax-tool-selector-group-label,
+.hud-toast-kind,
+.hud-tour-eyebrow,
+.lang-choice-count,
+.lang-choice-cell-index,
+.lang-choice-cell-code {
+  font-size: var(--type-caption);
+}
+
+/* (b) Status chips: soft tints, not saturated fills. The Badge `default`
+   variant painted the solid accent and `destructive` a solid red. */
+[data-slot="badge"].bg-primary {
+  background-color: var(--tint-accent-bg);
+  border-color: var(--tint-accent-line);
+  color: var(--tint-accent-fg);
+}
+
+[data-slot="badge"].bg-destructive {
+  background-color: var(--tint-danger-bg);
+  border-color: var(--tint-danger-line);
+  color: var(--tint-danger-fg);
+}
+
+/* Raw Tailwind solid fills used as chips (spans / divs carrying text). Dots,
+   meters and bars (size-*, h-1/2/3, w-1/2, h-full) and buttons are left as
+   they are - a dot needs its full hue to read at 8px. */
+:is(span, div, p, li):is(.bg-emerald-400, .bg-emerald-500, .bg-emerald-600, .bg-green-500):not([class*="size-"]):not(
+    [class*="h-1"]
+  ):not([class*="h-2"]):not([class*="h-3"]):not([class*="h-full"]):not([class*="w-1"]):not([class*="w-2"]):not(:empty) {
+  background-color: var(--tint-ok-bg);
+  color: var(--tint-ok-fg);
+}
+
+:is(span, div, p, li):is(.bg-amber-400, .bg-amber-500, .bg-amber-600, .bg-yellow-500):not([class*="size-"]):not(
+    [class*="h-1"]
+  ):not([class*="h-2"]):not([class*="h-3"]):not([class*="h-full"]):not([class*="w-1"]):not([class*="w-2"]):not(:empty) {
+  background-color: var(--tint-warn-bg);
+  color: var(--tint-warn-fg);
+}
+
+:is(span, div, p, li):is(.bg-red-500, .bg-red-600):not([class*="size-"]):not([class*="h-1"]):not([class*="h-2"]):not(
+    [class*="h-3"]
+  ):not([class*="h-full"]):not([class*="w-1"]):not([class*="w-2"]):not(:empty) {
+  background-color: var(--tint-danger-bg);
+  color: var(--tint-danger-fg);
+}
+
+:is(span, div, p, li):is(.bg-blue-500, .bg-sky-500, .bg-indigo-500, .bg-violet-500):not([class*="size-"]):not(
+    [class*="h-1"]
+  ):not([class*="h-2"]):not([class*="h-3"]):not([class*="h-full"]):not([class*="w-1"]):not([class*="w-2"]):not(:empty) {
+  background-color: var(--tint-accent-bg);
+  color: var(--tint-accent-fg);
+}
+
+/* (c) No red / pink / orange except true destructive actions. The remaining
+   rose / pink / orange / fuchsia utilities are decorative (file-type icons,
+   stat chips, gradient text, section washes) and fold onto the live accent.
+   `text-destructive`, `bg-destructive`, the --state-error token and the
+   plain red-* utilities on real error states are untouched. */
+.text-rose-500,
+.text-rose-600,
+.text-rose-700,
+.text-pink-400,
+.text-pink-500,
+.text-orange-400,
+.text-orange-500,
+.text-fuchsia-500 {
+  color: var(--accent-text);
+}
+
+.bg-rose-500\/10,
+.bg-rose-500\/20,
+.bg-rose-500\/\[0\.07\],
+.bg-pink-500\/10,
+.bg-orange-500\/10 {
+  background-color: var(--tint-accent-bg);
+}
+
+.border-rose-500\/25 {
+  border-color: var(--tint-accent-line);
+}
+
+.bg-rose-500 {
+  background-color: var(--accent-500);
+}
+
+.from-rose-500 {
+  --tw-gradient-from: var(--accent-500);
+}
+.from-rose-500\/\[0\.04\] {
+  --tw-gradient-from: transparent;
+}
+.via-fuchsia-500 {
+  --tw-gradient-via: var(--accent-400);
+}
+.to-fuchsia-600,
+.to-orange-600 {
+  --tw-gradient-to: var(--accent-600);
+}
+.to-fuchsia-500\/10,
+.to-orange-500\/10 {
+  --tw-gradient-to: var(--tint-accent-bg);
+}
+.to-orange-50 {
+  --tw-gradient-to: var(--accent-50);
+}
+
+/* "Live" dots on the landing were red; live is green. */
+.marketing-root .bg-red-500,
+.marketing-root .bg-red-400\/70 {
+  background-color: var(--state-success, #10b981);
+}
+
+/* (d) Tap targets: 36px minimum on a pointer, 40px on touch or a phone
+   width. Inline glyph buttons (size-4/5/6, h-4/5/6) that sit inside chips
+   are the one exception - a 40px close icon inside a 24px chip breaks the
+   chip. Exact class matches on purpose: every Button carries
+   `[&_svg:not([class*='size-'])]:size-4` in its class string, so a substring
+   test would exempt them all. .info-tip-trigger/.hud-toast-close are two
+   more compact glyph buttons this same substring test can't see (their
+   height comes from their own component-layer rule, not a literal size-N or
+   h-N utility on the element) - min-height forced them into a tall oval
+   instead of the compact circle they're designed as (controls audit
+   follow-up); both already set an explicit >=24px hit area of their own. */
+[data-slot="button"]:not(.size-4):not(.size-5):not(.size-6):not(.h-4):not(.h-5):not(.h-6),
+button:not([data-slot]):not(.size-4):not(.size-5):not(.size-6):not(.h-4):not(.h-5):not(.h-6):not(.lang-choice-cell):not(
+    [role="tab"]
+  ):not([role="option"]):not(.info-tip-trigger):not(.hud-toast-close) {
+  min-height: 2.25rem;
+}
+
+[data-slot="button"]:is(.size-7, .size-8, .size-9) {
+  min-width: 2.25rem;
+}
+
+@media (pointer: coarse), (max-width: 640px) {
+  [data-slot="button"]:not(.size-4):not(.size-5):not(.size-6):not(.h-4):not(.h-5):not(.h-6),
+  button:not([data-slot]):not(.size-4):not(.size-5):not(.size-6):not(.h-4):not(.h-5):not(.h-6):not(
+      .lang-choice-cell
+    ):not([role="tab"]):not([role="option"]):not(.info-tip-trigger):not(.hud-toast-close),
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not(
+      [type="hidden"]
+    ) {
+    min-height: 2.5rem;
+  }
+
+  [data-slot="button"]:is(.size-7, .size-8, .size-9) {
+    min-width: 2.5rem;
+  }
+
+  /* Text links in navigation and footers (the landing has ~65 of them under
+     40px at phone width) become 40px rows; public.css §2 already does
+     this for .vd-pub pages. */
+  .marketing-root :is(nav, footer, li) a[href]:not(.brand-name):not([class*="size-"]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+  }
+}
+
+/* (e) Toolbars and control rows never sit closer than 8px. Only rows whose
+   children are controls are touched, so icon+label pairs keep gap-1.5. */
+:is(.gap-0\.5, .gap-1, .gap-1\.5):has(
+  > :is(button, [data-slot="button"], a[href], input, select)
+    + :is(button, [data-slot="button"], a[href], input, select)
+) {
+  gap: 0.5rem;
+}
+
+/* (f) Table cells: a 4-8px vertical padding reads as congested; 10px floor. */
+td:is([class*="py-1"], [class*="py-2"]),
+th:is([class*="py-1"], [class*="py-2"]) {
+  padding-block: 0.625rem;
+}
+
+th:is([class*="h-8"], [class*="h-9"]) {
+  height: 2.5rem;
+}
+
+/* (g) Auth: the card and its column share the one auth width. */
+.auth-main [class*="max-w-md"] {
+  max-width: var(--w-auth);
+}
+
+/* ------------------------------------------------------------------------
+ * Perf pass (2026-09-24): no backdrop blur on repeated card surfaces.
+ * The redesign put backdrop-filter on every card/pill/secondary button - 95
+ * live blurred layers on the landing page alone. Each one forces the browser
+ * to re-composite and re-blur the pixels behind it on every scroll frame,
+ * which is what made pages feel laggy on mid-range machines. Cards keep their
+ * translucent fill and border, so they still read as glass; only the blur is
+ * dropped. The few large, fixed chrome surfaces (nav bar, sticky headers, rail,
+ * auth panel) keep it - one layer each, not one per card.
+ * ---------------------------------------------------------------------- */
+:root:not(#_) .marketing-root .mkt-card,
+:root:not(#_) .marketing-root .mkt-pill,
+:root:not(#_) .marketing-root .mkt-btn-secondary,
+:root:not(#_) .glass-card,
+:root:not(#_) [data-slot="card"],
+:root:not(#_) .std-screen__card,
+:root:not(#_) .vd-pub [data-slot="card"],
+:root:not(#_) .vd-pub [data-slot="button"][class*="bg-secondary"],
+:root:not(#_) .vd-pub :is(div, section, article, li)[class*="rounded-xl"][class*="border-border"],
+:root:not(#_) .hire-scope .cand,
+:root:not(#_) .hire-scope .btn-ghost,
+:root:not(#_) .mc-bento-card {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}

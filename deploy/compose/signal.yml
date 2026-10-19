@@ -1,0 +1,64 @@
+# Signal channel: a signal-cli REST API next to the Lite stack.
+#
+#   docker compose -f deploy/compose/lite.yml -f deploy/compose/signal.yml \
+#     --env-file deploy/compose/.env --profile signal up -d
+#
+# This is NOT part of any default stack. The `signal` profile keeps it out of a
+# plain `up`, and the file holds only this one service, so core is untouched.
+#
+# What it runs: bbernhard/signal-cli-rest-api, the REST/websocket wrapper around
+# signal-cli that VegaDūta talks to (docs/channels/signal.md). The Signal account
+# state (keys, linked-device registration) lives in the `signal-cli-config`
+# volume: back it up, and never share it, it IS the account.
+#
+# Security:
+#   - signal-cli-rest-api has NO authentication. It publishes no host port and
+#     joins only the network core is on (Compose's default network in Lite).
+#   - Core refuses private addresses (SsrfGuard). Allow exactly this service by
+#     adding it to the operator allow-list in deploy/compose/.env:
+#         APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS=signal-cli:8080
+#     (comma-separated with anything already there, e.g. ollama:11434).
+#   - Full stack: core is on the `app` network, not `default`. Add
+#     `networks: [app]` to this service in an override file you keep with your
+#     deployment.
+#
+# Registering or linking a number (once). The API is not published, so reach it
+# from inside the network. Link an existing phone (recommended, keeps the phone):
+#     docker compose -f deploy/compose/lite.yml -f deploy/compose/signal.yml \
+#       --profile signal run --rm --no-deps -p 127.0.0.1:8080:8080 signal-cli
+#   then open http://127.0.0.1:8080/v1/qrcodelink?device_name=vegaduta in a
+#   browser and scan it in Signal > Settings > Linked devices. Stop that run
+#   (Ctrl-C) and `up` the service normally. Registering a fresh number instead:
+#   POST /v1/register/<number>, then /v1/register/<number>/verify/<code>.
+#   Use a number you control; do not link a phone you do not want the agent to
+#   speak as.
+#
+# MODE=json-rpc keeps signal-cli resident and pushes messages over a websocket
+# (fast, lower CPU). VegaDūta detects the mode from /v1/about by itself; set
+# SIGNAL_CLI_MODE=normal to poll instead.
+services:
+  signal-cli:
+    profiles: [signal]
+    # Pin the tag you have tested; this default has not been run by the authors of this file.
+    image: ${SIGNAL_CLI_IMAGE:-bbernhard/signal-cli-rest-api:0.96}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      MODE: ${SIGNAL_CLI_MODE:-json-rpc}
+    volumes:
+      - signal-cli-config:/home/.local/share/signal-cli
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/v1/about >/dev/null || wget -qO- http://127.0.0.1:8080/v1/about >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  signal-cli-config:

@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Git &amp; Contribution Workflow — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="development" data-page="git-workflow.html" data-doc="VD-DEV-005" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="getting-started.html">Developer Guide</a><span class="sep">/</span>Git &amp; Contribution Workflow</div>
+<div class="doc-meta" data-auto></div>
+<h1>Git &amp; Contribution Workflow</h1>
+
+<dl class="props">
+  <dt>Basis</dt><dd><code>CONTRIBUTING.md</code>, <code>.github/PULL_REQUEST_TEMPLATE.md</code>, <code>.github/CODEOWNERS</code>, <code>.githooks/pre-push</code>, <code>scripts/dev/install-git-hooks.sh</code>.</dd>
+  <dt>License</dt><dd>Apache-2.0; contributions accepted under the Developer Certificate of Origin.</dd>
+</dl>
+
+<h2>1. The normal path (CONTRIBUTING.md)</h2>
+<ol>
+  <li>Open an issue first for anything bigger than a bug fix.</li>
+  <li>Branch from <code>main</code>, keep the change focused, include tests.</li>
+  <li>Commit messages follow Conventional Commits, <code>type(scope): summary</code>, scope being the module or app — e.g. <code>feat(knowledge): add web-crawl connector</code>, <code>fix(tenancy): ...</code>, <code>docs: ...</code>.</li>
+  <li>Sign off every commit (DCO): <code>git commit -s -m "fix(tenancy): ..."</code>.</li>
+  <li>Open a pull request using the template and say exactly how you verified it.</li>
+</ol>
+<p>The PR template asks for: what and why; how it was verified; and a checklist — commits signed off, new Flyway migration has a unique version across <code>controlplane/</code> and <code>tenant/</code> (<code>bash scripts/ci/flyway-lint.sh</code>), no secrets/tokens/personal data, docs or <code>.env.example</code> updated if behaviour or configuration changed. <code>CODEOWNERS</code> assigns default ownership and requires explicit maintainer review for migrations, <code>core/crypto/</code>, <code>core/security/</code>, <code>.github/</code> and <code>scripts/ci/</code>. Security issues go through <code>SECURITY.md</code>, never a public issue.</p>
+
+<h2>2. Git hooks</h2>
+<pre><code>make hooks                                 # once per clone; sets core.hooksPath = .githooks (or: bash scripts/dev/install-git-hooks.sh)
+git config --unset core.hooksPath          # uninstall</code></pre>
+<p>Hooks live in the tracked <code>.githooks/</code> directory, because <code>.git/hooks</code> is local and untracked. <code>.githooks/pre-push</code> reads the pushed refs and runs:</p>
+<table>
+  <thead><tr><th>Push target</th><th>Checks run</th></tr></thead>
+  <tbody>
+    <tr><td><code>main</code></td><td>The full static-gates suite: Flyway lint, bean/entity name guards, expired test-skip check, plan-price and file-size ratchets — plus the secret scan.</td></tr>
+    <tr><td>Any other branch touching <code>core/app/src/main/resources/db/migration</code></td><td>Flyway lint, plus the secret scan.</td></tr>
+    <tr><td>Anything else</td><td>Secret scan only. It is skipped with a message when <code>gitleaks</code> is not installed.</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-danger">
+  <div class="callout-title">Why the hook exists</div>
+  A Flyway version collision that reaches <code>main</code> through a local merge fires no <code>pull_request</code> event, so CI never sees it, and it stops every core instance at boot. The hook is local enforcement that catches this before the push; it protects only clones where it is installed, so also require the <code>CI OK</code> and <code>Static gates</code> checks with branch protection. <code>git push --no-verify</code> bypasses it — never use it on a migration change.
+</div>
+
+<h2>3. Working with worktrees</h2>
+<ul>
+  <li><strong>Keep your main checkout clean.</strong> Use <code>git worktree add</code> for parallel branches instead of switching branches in a tree with uncommitted work.</li>
+  <li><strong>Commit by pathspec</strong> when a tree holds unrelated edits: stage and commit explicit files (<code>git commit -- &lt;paths&gt;</code>) so unrelated work is not swept in.</li>
+  <li><strong><code>git push</code> has no pathspec.</strong> It publishes the whole branch. Before pushing, run <code>git log --oneline origin/main..HEAD</code> and read every line; to publish only up to a given commit use <code>git push origin &lt;sha&gt;:&lt;branch&gt;</code>.</li>
+  <li><strong>Deploy from a clean worktree</strong>: <code>git worktree add --detach "$SCRATCH/prod-deploy" &lt;sha&gt;</code>, confirm <code>git status --short</code> is empty and the only <code>.env*</code> in <code>web/</code> is <code>.env.local.example</code>, build, then <code>git worktree remove --force</code>.</li>
+  <li><strong>Flyway numbers</strong>: when several branches add migrations in parallel, agree version ranges up front (e.g. in the tracking issue) — the namespace is shared across <code>controlplane/</code> and <code>tenant/</code>.</li>
+</ul>
+
+<h2>4. Merge, CI and deploy — what "done" means</h2>
+<ul>
+  <li>Pull requests run <code>CI</code> (summary check <code>CI OK</code>, which includes the static gates) and <code>CodeQL</code>; a maintainer reviews every PR and <code>CodeQL</code> must also be green (<code>CONTRIBUTING.md</code>). Reproduce locally with <code>make gates</code>, <code>make test</code> and <code>make lint</code>.</li>
+  <li>Releases: pushing a tag <code>vX.Y.Z</code> runs <code>release.yml</code>, which publishes signed multi-arch images and OCI Helm charts to GHCR, SPDX SBOMs, SLSA provenance and the <code>vegaduta.tar.gz</code> source tarball. No workflow deploys anywhere; you deploy with Compose or Helm. See <a href="../deployment/index.html">Deployment Guide</a> and <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a>.</li>
+  <li><strong>Merged is not deployed.</strong> Record verification state exactly (compiled, unit-tested, staging, prod) in the PR.</li>
+  <li>Never run instance/revision <code>reset|stop|delete</code> or <code>docker compose down</code> on production or a shared staging stack.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>CONTRIBUTING.md</code> — license/DCO, "Making a change", "Checks".</li>
+  <li><code>.github/PULL_REQUEST_TEMPLATE.md</code>, <code>.github/CODEOWNERS</code>.</li>
+  <li><code>.githooks/pre-push</code>, <code>scripts/dev/install-git-hooks.sh</code> (headers).</li>
+  <li><code>Makefile</code>; <code>.github/workflows/static-gates.yml</code>, <code>ci.yml</code>, <code>release.yml</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

@@ -1,0 +1,21 @@
+{
+  "type" : "urn:vegaduta:problem:vision-plan-locked",
+  "title" : "Forbidden",
+  "status" : 403,
+  "detail" : "Live vision needs a paid plan.",
+  "instance" : "/api/agents/abc",
+  "timestamp" : "<now>",
+  "error" : "Live vision needs a paid plan.",
+  "code" : "VISION_PLAN_LOCKED",
+  "upstreamStatus" : null,
+  "budget" : 12.50,
+  "errors" : [
+    {
+      "field" : "name",
+      "message" : "must not be blank"
+    }
+  ],
+  "retryable" : false,
+  "requestId" : "req-123",
+  "traceId" : "trace-456"
+}

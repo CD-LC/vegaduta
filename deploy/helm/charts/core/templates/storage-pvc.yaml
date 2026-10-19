@@ -1,0 +1,31 @@
+{{- /* Shared file store for global.objectStorage.type=local (mounted by core, core-jobs,
+  core-worker and the migrate Job at /data/storage). Kept on uninstall. */ -}}
+{{- if include "vegaduta-lib.storage.local" . }}
+{{- $g := .Values.global | default dict -}}
+{{- $l := ($g.objectStorage | default dict).local | default dict -}}
+{{- $modes := $l.accessModes | default (list "ReadWriteMany") -}}
+{{- $multi := or (gt (int .Values.replicaCount) 1) (include "vegaduta-lib.autoscaled" .) (include "vegaduta-lib.component" (dict "root" . "key" "coreJobs")) (include "vegaduta-lib.temporal.enabled" .) -}}
+{{- if and $multi (not (has "ReadWriteMany" $modes)) -}}
+{{- fail "global.objectStorage.type=local with more than one core-family pod (core-jobs, core-worker or >1 API replica) needs global.objectStorage.local.accessModes=[ReadWriteMany] (an RWX StorageClass such as NFS/CephFS/EFS/Azure Files), or use S3" -}}
+{{- end -}}
+{{- if not $l.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "vegaduta-lib.storage.claimName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labelsWith" (dict "root" . "labels" (dict "app.kubernetes.io/component" "storage")) | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    {{- toYaml $modes | nindent 4 }}
+  {{- with ($l.storageClass | default $g.storageClass) }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $l.size | default "20Gi" | quote }}
+{{- end }}
+{{- end }}

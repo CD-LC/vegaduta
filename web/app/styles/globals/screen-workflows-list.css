@@ -1,0 +1,285 @@
+/* =========================================================================
+ * Workflows LIST page (WorkflowDesignerPanel.js, mounted at /workflows) -
+ * distinct from the /workflows/[id] canvas rebuilt above. This screen had
+ * no AXON design-handoff file of its own (13-file set only covered the
+ * canvas), so it's pattern-matched against the already-completed AXON
+ * screens instead: the mono-label/chip-badge/bordered-card language from
+ * Screen 3 (.ax-agent-card/.ax-agent-badge) and the status-chip/button
+ * language the canvas screen established above, rather than
+ * the pre-AXON .panel/.workflow-grid/.workflow-card/.icon-btn classes this
+ * page used previously - those read against a completely different (Tier
+ * 1/2/3, see DESIGN-TOKEN-SYSTEM-AUDIT.md) token system, which is the exact
+ * "hover colors don't match the template" mismatch flagged earlier. */
+.ax-wflist-intro {
+  margin: 0 0 16px;
+  max-width: 620px;
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+  color: var(--ax-mid);
+}
+
+.ax-wflist-intro a {
+  color: var(--ax-cyan);
+  text-decoration: none;
+}
+
+.ax-wflist-intro a:hover,
+.ax-wflist-intro a:focus-visible {
+  text-decoration: underline;
+}
+
+.ax-wflist-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 2px 2px 16px;
+}
+
+.ax-wflist-count {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  color: var(--ax-dim);
+  letter-spacing: 0.02em;
+}
+
+.ax-wflist-count strong {
+  color: var(--ax-text);
+  font-weight: 600;
+}
+
+/* Reuses the canvas screen's own status-chip language
+ * so "limit reached" reads as the same kind of signal as a run's ACTIVE/
+ * IDLE state elsewhere in the app, rather than inventing a new pill style
+ * for one banner. */
+.ax-wflist-limit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  border: 1px solid rgba(255, 176, 32, 0.4);
+  background: rgba(255, 176, 32, 0.08);
+  color: var(--ax-amber);
+}
+
+.ax-wflist-error {
+  margin-bottom: 14px;
+  padding: 11px 15px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 92, 114, 0.3);
+  background: rgba(255, 92, 114, 0.08);
+  color: var(--ax-red);
+  font-size: var(--fs-meta);
+  white-space: pre-wrap;
+}
+
+.ax-wflist-limit-banner {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 176, 32, 0.3);
+  background: rgba(255, 176, 32, 0.06);
+  color: var(--ax-text);
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+}
+
+/* Create-workflow form: same bordered-card-with-mono-label shell as
+ * .ax-agent-card, so "create" reads as one more AXON panel rather than a
+ * leftover plain HTML form. */
+.ax-wflist-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.ax-wflist-input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 9px;
+  padding: 9px 12px;
+  color: var(--ax-text);
+  font-size: var(--fs-meta);
+  font-family: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ax-wflist-input::placeholder {
+  color: var(--ax-dim);
+}
+
+.ax-wflist-input:focus {
+  outline: none;
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 0 3px rgba(79, 227, 227, 0.18);
+}
+
+:root[data-mode="light"] .ax-wflist-input:focus {
+  box-shadow: 0 0 0 3px rgba(10, 145, 172, 0.16);
+}
+
+/* Card grid: auto-fit so it genuinely fills whatever width the full-bleed
+ * content area gives it (matches the app-wide "always responsive" mandate)
+ * rather than a fixed 3-column layout that leaves dead space on wide
+ * screens or crowds on narrow ones. */
+.ax-wflist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.ax-wflist-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--ax-text);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.ax-wflist-card:hover {
+  border-color: var(--ax-border2);
+  transform: translateY(-2px);
+}
+
+.ax-wflist-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ax-wflist-name {
+  font-size: var(--fs-lede);
+  font-weight: 600;
+  color: var(--ax-text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.ax-wflist-desc {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  line-height: 1.55;
+}
+
+.ax-wflist-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  letter-spacing: 0.01em;
+}
+
+.ax-wflist-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--ax-border);
+}
+
+/* Icon-only action buttons - same visual family as the canvas's old .ax-wf-btn (mono,
+ * bordered, cyan-on-hover) but square, matching the earlier direct feedback
+ * ("icons instead of big buttons") this page already implemented once, now
+ * carried over onto AXON tokens instead of the old .icon-btn class. */
+.ax-wflist-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid var(--ax-border2);
+  background: transparent;
+  color: var(--ax-mid);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-wflist-icon-btn:hover:not(:disabled) {
+  border-color: var(--ax-cyan);
+  color: var(--ax-cyan);
+  background: rgba(79, 227, 227, 0.08);
+}
+
+.ax-wflist-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ax-wflist-icon-btn-danger:hover:not(:disabled) {
+  border-color: var(--ax-red);
+  color: var(--ax-red);
+  background: rgba(255, 92, 114, 0.08);
+}
+
+.ax-wflist-icon-btn:focus-visible {
+  outline: none;
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 0 3px rgba(79, 227, 227, 0.18);
+}
+
+/* Bespoke AXON empty-state (dashed well) rather than the shared
+ * EmptyState.js component, which still reads pre-AXON surface/accent
+ * tokens - keeps this newly-rebuilt screen from reintroducing the exact
+ * token mismatch the accessibility audit flagged elsewhere. */
+.ax-wflist-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 48px 24px;
+  border: 1px dashed var(--ax-border2);
+  border-radius: 16px;
+  background: var(--ax-panel);
+}
+
+.ax-wflist-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(124, 92, 255, 0.1);
+  color: var(--ax-violet);
+}
+
+.ax-wflist-empty-title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-wflist-empty-hint {
+  max-width: 380px;
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  line-height: 1.55;
+}

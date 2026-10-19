@@ -1,0 +1,148 @@
+@layer base {
+  html {
+    /* Scrolling/layout polish (#346) - "improve the overall scrolling
+     * experience... current scrollbar and page behavior do not feel
+     * polished." Smooth in-page anchor/programmatic scrolling everywhere,
+     * disabled under prefers-reduced-motion below since a forced scroll
+     * animation is exactly the kind of motion that setting asks to skip. */
+    scroll-behavior: smooth;
+  }
+
+  /* Console typography density (direct feedback: "decrease the font size
+   * across the application according to industry standards and human
+   * psychology which makes best" / "make all text small and professional...
+   * make text smaller and standard across app") - scoped to the logged-in
+   * console via [data-density="console"] (set by layout.tsx's
+   * NO_FLASH_DENSITY_SCRIPT / AuthProvider, see their comments) rather than
+   * bare `html` (2026-08-03 correction): applying this sitewide also
+   * shrank the PUBLIC marketing landing page's content width to 936px -
+   * below the ~1140-1200px industry-standard container - and every touch
+   * target on it by the same ~19%, for a page whose whole job is a casual
+   * first impression, not the "trained user staring at data for hours"
+   * case this density was designed for.
+   *
+   * Every text-sm/text-lg/text-[Nrem] utility and most spacing utilities in
+   * this app (Tailwind's default scale, still in effect here) are rem-
+   * based, so one root font-size change is the correct, minimal lever - it
+   * uniformly rescales every already-existing size instead of hunting down
+   * text-2xl/text-3xl/etc across dozens of console files one at a time, and
+   * it can never introduce a mismatched one-off size the rest of the
+   * console doesn't share.
+   *
+   * 81.25% of the 16px browser default = a 13px effective base. This is
+   * the same body-text size dense, professional information tools settle
+   * on once their audience is trained users staring at data for hours, not
+   * casual readers skimming a page once - GitHub, Linear, Vercel's
+   * dashboard, and Stripe's dashboard all ship a ~13-14px base rather than
+   * the 16-18px a marketing/content site uses. The human-factors reasoning:
+   * legibility research treats 16px as the floor for comfortable casual
+   * reading at arm's length, but a dense console trades a little of that
+   * margin for information density on purpose - so long as it doesn't
+   * cross the ~12px point where legibility measurably drops. 13px sits
+   * safely above that floor while meaningfully shrinking every panel, tile,
+   * and list on screen at once (spacing utilities like p-4/gap-4 are
+   * rem-based too, so this also tightens layout density, not just text). */
+  html[data-density="console"] {
+    font-size: 81.25%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply text-[var(--text-primary)] antialiased transition-colors duration-200;
+    /* AXON's own background (design_handoff_axon's `--bg`): a radial glow
+     * from top-center fading to near-black, not the flat `--surface-page`
+     * solid this used to paint. Direct feedback: "background... colour of
+     * panel not matching" - --surface-page (#05070d flat) was close in tone
+     * but missing the gradient depth every .dc.html mockup actually has. */
+    background: var(--ax-bg);
+    /* One platform-wide font (see the :root alias above) - system-font
+     * fallback list kept after it in case the self-hosted file ever fails
+     * to load, same safety net this rule always had. */
+    font-family:
+      var(--font-inter),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+  }
+
+  /* Thin, HUD-toned scrollbar everywhere (#346) - replaces each browser's
+   * chunky default track/thumb with something that matches the instrument
+   * aesthetic instead of looking like an un-styled leftover. Firefox via the
+   * standard property, WebKit/Blink (Chrome/Edge/Safari) via the
+   * pseudo-elements just below - between the two, every supported browser
+   * gets a themed scrollbar, not just one engine. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--hud-line) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--hud-line);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--hud-cyan);
+    background-clip: padding-box;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
+    font-family:
+      var(--font-sora),
+      var(--font-inter),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+  }
+
+  /* Direct feedback: "always highlight and animate the links and menu" -
+   * every plain inline link (hint text, "Browse MCP marketplace ->", etc.)
+   * gets a real animated underline reveal instead of the browser's instant
+   * hover:underline snap. text-decoration-color (not background-image) is
+   * the mechanism deliberately: it's animatable on its own, and every
+   * button/pill/nav-style anchor elsewhere in this file already sets its
+   * own `no-underline` (text-decoration-line: none), which fully suppresses
+   * this regardless of the color/thickness set here - so this only ever
+   * touches genuine prose-style links, no risk of it bleeding into
+   * .cross-link/.btn-link-primary/.dock-link/.app-topbar-brand. */
+  a {
+    @apply text-[var(--accent-600)] underline-offset-2;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1.5px;
+    transition:
+      text-decoration-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.15s ease;
+  }
+
+  a:hover,
+  a:focus-visible {
+    color: var(--hud-cyan, var(--accent-600));
+    text-decoration-color: currentColor;
+  }
+}

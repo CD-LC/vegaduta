@@ -1,0 +1,131 @@
+package com.agenticai.core.chat;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+
+class ToolResultClearingTest {
+
+    private static String body(int n) {
+        return "x".repeat(n);
+    }
+
+    private static ToolResponseMessage round(String tool, String data) {
+        return ToolResponseMessage.builder()
+            .responses(List.of(new ToolResponseMessage.ToolResponse("id-" + tool, tool, data)))
+            .build();
+    }
+
+    private static List<Message> history(int rounds, int size) {
+        List<Message> h = new ArrayList<>();
+        h.add(new UserMessage("go"));
+        for (int i = 1; i <= rounds; i++) {
+            h.add(new AssistantMessage("call " + i));
+            h.add(round("t" + i, body(size)));
+        }
+        return h;
+    }
+
+    private static String data(List<Message> h, int index) {
+        return ((ToolResponseMessage) h.get(index)).getResponses().get(0).responseData();
+    }
+
+    @Test
+    void belowThresholdIsUntouched() {
+        List<Message> h = history(5, 100);
+        assertSame(h, new ToolResultClearing(true, 24_000, 3).apply(h));
+    }
+
+    @Test
+    void disabledIsUntouched() {
+        List<Message> h = history(6, 10_000);
+        assertSame(h, new ToolResultClearing(false, 100, 3).apply(h));
+    }
+
+    @Test
+    void clearsOlderBeyondLastNAndKeepsLatest() {
+        List<Message> h = history(6, 10_000);
+        List<Message> out = new ToolResultClearing(true, 24_000, 3).apply(h);
+        // tool messages at indices 2,4,6,8,10,12 -> first three cleared
+        assertEquals("[tool result cleared to save context: t1 10000 chars; re-call if needed]", data(out, 2));
+        assertTrue(data(out, 4).startsWith("[tool result cleared"));
+        assertTrue(data(out, 6).startsWith("[tool result cleared"));
+        assertEquals(10_000, data(out, 8).length());
+        assertEquals(10_000, data(out, 10).length());
+        assertEquals(10_000, data(out, 12).length());
+        assertEquals(h.size(), out.size());
+        // input not mutated
+        assertEquals(10_000, data(h, 2).length());
+    }
+
+    @Test
+    void latestRoundIsNeverClearedEvenWithKeepZero() {
+        List<Message> h = history(3, 20_000);
+        List<Message> out = new ToolResultClearing(true, 24_000, 0).apply(h);
+        assertTrue(data(out, 2).startsWith("[tool result cleared"));
+        assertTrue(data(out, 4).startsWith("[tool result cleared"));
+        assertEquals(20_000, data(out, 6).length());
+    }
+
+    @Test
+    void isIdempotent() {
+        List<Message> once = new ToolResultClearing(true, 24_000, 3).apply(history(6, 10_000));
+        List<Message> twice = new ToolResultClearing(true, 24_000, 3).apply(once);
+        assertSame(once, twice);
+    }
+
+    @Test
+    void ignoresResultsFromEarlierTurns() {
+        List<Message> h = new ArrayList<>();
+        h.add(new UserMessage("old"));
+        h.add(round("old_tool", body(50_000)));
+        h.add(new UserMessage("new"));
+        h.addAll(history(2, 100).subList(1, 5));
+        List<Message> out = new ToolResultClearing(true, 24_000, 1).apply(h);
+        assertSame(h, out);
+    }
+
+    @Test
+    void keepsBudgetExhaustedMarker() {
+        List<Message> h = new ArrayList<>();
+        h.add(new UserMessage("go"));
+        h.add(round("a", "{\"error\":\"tool_budget_exhausted\"}" + body(30_000)));
+        h.add(round("b", body(10)));
+        h.add(round("c", body(10)));
+        List<Message> out = new ToolResultClearing(true, 24_000, 1).apply(h);
+        assertTrue(data(out, 1).contains("tool_budget_exhausted"));
+    }
+
+    @Test
+    void aLongOutputThatOnlyOpensWithAPlaceholderMarkerIsStillCleared() {
+        // A hostile tool could start its output with the marker to exempt itself from the budget; only a
+        // short, genuinely placeholder-sized text counts as already cleared.
+        List<Message> h = new ArrayList<>();
+        h.add(new UserMessage("go"));
+        h.add(round("a", ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX + "," + body(30_000)));
+        h.add(round("b", body(10)));
+        h.add(round("c", body(10)));
+        List<Message> out = new ToolResultClearing(true, 24_000, 1).apply(h);
+        assertTrue(data(out, 1).startsWith("[tool result cleared"), data(out, 1));
+    }
+
+    @Test
+    void aShortRealPlaceholderIsLeftAlone() {
+        String placeholder = ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX + ",\"tool\":\"a\"}";
+        List<Message> h = new ArrayList<>();
+        h.add(new UserMessage("go"));
+        h.add(round("a", placeholder));
+        h.add(round("b", body(30_000)));
+        h.add(round("c", body(10)));
+        List<Message> out = new ToolResultClearing(true, 24_000, 1).apply(h);
+        assertEquals(placeholder, data(out, 1));
+    }
+}

@@ -1,0 +1,112 @@
+# Every optional component and integration switched on (render/validation coverage;
+# also a starting point for a "full" install). Bundled dependencies stay on.
+global:
+  domain: example.com
+  imageTag: "0.1.0"
+  tls:
+    clusterIssuer: letsencrypt-prod
+  gateway:
+    enabled: true
+    parentRefs:
+      - name: public
+        namespace: gateway-system
+        sectionName: https
+  networkPolicy:
+    enabled: true
+    monitoringNamespace: monitoring
+    # Namespace of the Gateway's data-plane pods (required with gateway + NetworkPolicies).
+    gatewayNamespace: envoy-gateway-system
+    extraEgress:
+      # Scoped: only the core family talks to Temporal (valkey/seaweedfs/keycloak do not get it).
+      - components: [core, core-worker, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-migrate]
+        to: [{ ipBlock: { cidr: 10.20.0.0/16 } }]
+        ports: [{ port: 7233, protocol: TCP }]
+    coreEgress:
+      smtp: true
+  serviceMonitor:
+    enabled: true
+    labels: { release: kube-prometheus-stack }
+  components:
+    coreJobs: true
+    web: true
+    # webAdmin is dead: the platform-admin console merged into web
+    # (/platform-admin on the admin.<domain> host). The key stays for compat.
+    webAdmin: false
+    sidecar: true
+    codeIntel: true
+    appBuilder: true
+    rlTrainer: true
+    toolSandbox: true
+    mcpStdioRunner: true
+    voiceAgent: true
+  temporal:
+    enabled: true
+    target: temporal-frontend.temporal.svc.cluster.local:7233
+    namespace: vegaduta
+  kafka:
+    bootstrapServers: kafka-bootstrap.kafka.svc.cluster.local:9092
+  otel:
+    tracesEndpoint: http://otel-collector.observability.svc.cluster.local:4318/v1/traces
+    samplingProbability: "0.1"
+  livekit:
+    url: wss://livekit.example.com
+    internalUrl: ws://livekit.livekit.svc.cluster.local:7880
+    existingSecret: livekit-api
+
+postgres:
+  instances: 3
+  scheduledBackup:
+    enabled: true
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore:
+      destinationPath: s3://vegaduta-backups/postgres
+      endpointURL: https://s3.eu-west-1.amazonaws.com
+      s3Credentials:
+        accessKeyId: { name: pg-backup-s3, key: accessKeyId }
+        secretAccessKey: { name: pg-backup-s3, key: secretAccessKey }
+
+keycloak:
+  replicaCount: 2
+  realm:
+    smtp:
+      host: smtp.example.com
+      from: noreply@example.com
+      user: noreply@example.com
+      existingSecret: keycloak-smtp
+
+core:
+  replicaCount: 2
+  replicaReadiness:
+    a2aTaskStoreRedis: true
+    abuseThrottleRedis: true
+    mcpRegistryRedis: true
+    a2aSigningKeysPinned: true
+    # The other replicaReadiness flags default to true; they are listed in charts/core/values.yaml.
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+
+core-worker:
+  replicaCount: 2
+
+web:
+  hpa:
+    enabled: true
+
+rl-trainer:
+  llmSecret:
+    existingSecret: rl-trainer-llm
+
+tool-sandbox:
+  runtimeClassName: kata
+  nodeSelector: { vegaduta.io/pool: sandbox }
+  tolerations:
+    - { key: vegaduta.io/sandbox, operator: Equal, value: "true", effect: NoSchedule }
+
+mcp-stdio-runner:
+  runtimeClassName: kata
+  nodeSelector: { vegaduta.io/pool: sandbox }
+  tolerations:
+    - { key: vegaduta.io/sandbox, operator: Equal, value: "true", effect: NoSchedule }

@@ -1,0 +1,123 @@
+# =============================================================================
+# Public-domain overlay: HTTPS via Caddy + every browser-facing URL derived
+# from BASE_DOMAIN. Nothing here is specific to any hosted deployment.
+#
+#   BASE_DOMAIN=example.com ACME_EMAIL=ops@example.com   (in deploy/compose/.env)
+#   ./scripts/vegaduta up --full            # the CLI adds this overlay when BASE_DOMAIN is set
+#   docker compose -f deploy/compose/docker-compose.yml \
+#                  -f deploy/compose/docker-compose.domain.yml up -d
+#
+# DNS: app., admin., api., auth. (+ codeintel., builder., livekit. if those
+# profiles are on) must resolve to this host, and so should the bare domain and www.
+# (served as a redirect to app.; Caddy requests certificates for them too in Let's
+# Encrypt mode). Ports 80/443 must be free.
+#
+# Issuer consistency: Keycloak advertises https://auth.$BASE_DOMAIN as its
+# issuer (KC_HOSTNAME), and core/code-intel/app-builder validate exactly that.
+# Tokens minted before a domain change carry the old issuer; if you must accept
+# both during a migration, list the old one in KEYCLOAK_ADDITIONAL_ISSUERS.
+# =============================================================================
+services:
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN:?set BASE_DOMAIN in deploy/compose/.env}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+      CADDY_EMAIL_DIRECTIVE: ${ACME_EMAIL:+email ${ACME_EMAIL}}
+      CADDY_AUTO_HTTPS_DIRECTIVE: ${CADDY_AUTO_HTTPS:+auto_https ${CADDY_AUTO_HTTPS}}
+      CADDY_SITE_SCHEME: ${CADDY_SITE_SCHEME:-}
+    ports:
+      - "${PUBLIC_BIND_ADDR:-0.0.0.0}:80:80"
+      - "${PUBLIC_BIND_ADDR:-0.0.0.0}:443:443"
+      - "${PUBLIC_BIND_ADDR:-0.0.0.0}:443:443/udp"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [app, agent-io]
+
+  keycloak:
+    # Production mode on the internet, always: `start` (theme/cache on, strict
+    # hostname, no dev defaults) regardless of KEYCLOAK_START_COMMAND. TLS is
+    # terminated by Caddy; Keycloak speaks HTTP on the private network only
+    # and trusts Caddy's X-Forwarded-* headers.
+    command: ["start", "--import-realm"]
+    environment:
+      KC_HOSTNAME: https://auth.${BASE_DOMAIN}
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      # Admin console + master realm stay on the loopback port (Caddy 404s
+      # /admin and /realms/master publicly); reach them with an SSH tunnel:
+      # ssh -L 8180:127.0.0.1:8180 host
+      KC_HOSTNAME_ADMIN: http://localhost:${KEYCLOAK_HOST_PORT:-8180}
+      PUBLIC_APP_URL: https://app.${BASE_DOMAIN}
+      PUBLIC_ADMIN_URL: https://admin.${BASE_DOMAIN}
+
+  core:
+    environment: &core-domain-env
+      KEYCLOAK_ISSUER_URI: https://auth.${BASE_DOMAIN}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      APP_WEB_PUBLIC_URL: https://app.${BASE_DOMAIN}
+      APP_WEB_ALLOWED_ORIGINS: https://app.${BASE_DOMAIN},https://admin.${BASE_DOMAIN}
+      LIVEKIT_URL: wss://livekit.${BASE_DOMAIN}
+
+  core-worker:
+    environment: *core-domain-env
+
+  core-jobs:
+    environment: *core-domain-env
+
+  web:
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: https://api.${BASE_DOMAIN}
+      NEXT_PUBLIC_KEYCLOAK_URL: https://auth.${BASE_DOMAIN}
+      NEXT_PUBLIC_APP_URL: https://app.${BASE_DOMAIN}
+      # Merged platform-admin console: admin.<domain> hits this service and
+      # proxy.js redirects its paths under /platform-admin.
+      PLATFORM_ADMIN_HOST: admin.${BASE_DOMAIN}
+      NEXT_PUBLIC_CODE_INTEL_URL: https://codeintel.${BASE_DOMAIN}
+      NEXT_PUBLIC_APP_BUILDER_URL: https://builder.${BASE_DOMAIN}
+
+  code-intel:
+    environment:
+      CODE_INTEL_KEYCLOAK_ISSUER: https://auth.${BASE_DOMAIN}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      CODE_INTEL_KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+      CODE_INTEL_CORS_ORIGINS: https://app.${BASE_DOMAIN}
+
+  app-builder:
+    environment:
+      APP_BUILDER_KEYCLOAK_ISSUER: https://auth.${BASE_DOMAIN}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      APP_BUILDER_KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+      APP_BUILDER_CORS_ORIGINS: https://app.${BASE_DOMAIN}
+
+  rl-trainer:
+    environment:
+      RL_TRAINER_KEYCLOAK_ISSUER: https://auth.${BASE_DOMAIN}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      RL_TRAINER_KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+
+  temporal-ui:
+    environment:
+      TEMPORAL_CORS_ORIGINS: https://app.${BASE_DOMAIN}
+
+volumes:
+  caddy-data:
+  caddy-config:

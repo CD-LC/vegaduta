@@ -1,0 +1,28 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-directory-agents",
+      "method": "GET",
+      "path": "/api/directory/agents",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-directory-agents-agentId",
+      "method": "GET",
+      "path": "/api/directory/agents/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.capabilities",
+          "$.status"
+        ]
+      }
+    }
+  ]
+}

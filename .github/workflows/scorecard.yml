@@ -1,0 +1,74 @@
+name: OpenSSF Scorecard
+
+# Supply-chain security posture (https://scorecard.dev). Results are published
+# to the OpenSSF API (which backs the README badge) and uploaded to GitHub code
+# scanning. Scorecard's publish step verifies this workflow's shape, so keep it
+# minimal: read-all at the top, only the approved actions, no env/defaults.
+
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: "41 5 * * 2" # weekly, Tuesday 05:41 UTC
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  # Scorecard needs a public repository: on a private one the default token
+  # cannot run its GraphQL queries ("Resource not accessible by integration"),
+  # and results can be neither published nor uploaded. Checked through the API
+  # rather than github.event.repository, which scheduled runs do not carry.
+  # This job holds no id-token permission (Scorecard's publish check requires
+  # that of every job but the analysis job).
+  public:
+    name: Repository is public
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # read the repository's visibility
+    outputs:
+      public: ${{ steps.check.outputs.public }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          visibility="$(gh api "repos/$REPO" --jq .visibility)"
+          if [ "$visibility" = public ]; then
+            echo "public=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "public=false" >>"$GITHUB_OUTPUT"
+            echo "::notice::Scorecard skipped: $visibility repository"
+          fi
+
+  analysis:
+    name: Scorecard analysis
+    needs: public
+    if: needs.public.outputs.public == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      security-events: write # upload SARIF to code scanning
+      id-token: write # publish results to the OpenSSF API
+      contents: read # check out the repository
+      actions: read # read workflow definitions and runs
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: scorecard-sarif
+          path: results.sarif
+          retention-days: 5
+      - uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          sarif_file: results.sarif

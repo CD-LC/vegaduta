@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Getting Started — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="development" data-page="getting-started.html" data-doc="VD-DEV-001" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="getting-started.html">Developer Guide</a><span class="sep">/</span>Getting Started</div>
+<div class="doc-meta" data-auto></div>
+<h1>Getting Started</h1>
+
+<dl class="props">
+  <dt>Audience</dt><dd>A new contributor setting up a clone</dd>
+  <dt>Basis</dt><dd>Read from <code>README.md</code>, <code>CONTRIBUTING.md</code>, <code>scripts/dev-up.sh</code>, <code>scripts/run-core-local.sh</code>, <code>.devcontainer/</code>. Commands are quoted from those files.</dd>
+  <dt>Next</dt><dd><a href="build-and-test.html">Build, Test &amp; Verify</a> · <a href="repository-map.html">Repository Map</a> · <a href="../deployment/local-development.html">Local Development Setup</a></dd>
+</dl>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Local URLs are labelled local</div>
+  The <code>localhost</code> addresses on this page are the local-development exception. Never use
+  <code>localhost</code>/<code>127.0.0.1</code> in any browser-facing or token-issuer URL of a deployed
+  environment, and never reuse a local <code>deploy/compose/.env</code> for a deployment.
+</div>
+
+<h2>1. Prerequisites</h2>
+<table>
+  <thead><tr><th>Tool</th><th>Version</th><th>Used by</th></tr></thead>
+  <tbody>
+    <tr><td>JDK</td><td>21 is the compile target (<code>java.version</code> in <code>core/pom.xml</code>); <code>CONTRIBUTING.md</code> says maintainers build with 24.</td><td><code>core/</code></td></tr>
+    <tr><td>Maven</td><td>3.9+</td><td><code>core/</code> (Spring Boot parent 3.4.4)</td></tr>
+    <tr><td>Node.js</td><td>20 or 22 (<code>CONTRIBUTING.md</code>; README says 20+)</td><td><code>web/</code>, <code>web-admin/</code></td></tr>
+    <tr><td>Python</td><td>3.11+ in <code>CONTRIBUTING.md</code>; README says 3.12+</td><td><code>services/sidecar/</code>, <code>services/code-intel/</code></td></tr>
+    <tr><td>Docker + Compose</td><td>recent</td><td>full stack in <code>deploy/</code></td></tr>
+    <tr><td>gitleaks</td><td>8.18+</td><td>secret scan in the pre-push hook</td></tr>
+  </tbody>
+</table>
+
+<h2>2. Fastest paths</h2>
+<ul>
+  <li><strong>Devcontainer / Codespaces</strong> — <code>.devcontainer/</code> (<code>devcontainer.json</code>, <code>post-create.sh</code>): installs git hooks, runs <code>scripts/dev-up.sh</code> (generates <code>deploy/compose/.env</code>, starts Postgres, Valkey and Keycloak) and warms <code>npm ci</code> + <code>mvn compile</code>.</li>
+  <li><strong>Just run it</strong> — <code>scripts/vegaduta up --lite</code> (add <code>--build</code> to build from source), or <code>install.sh</code>, which downloads the latest release tarball and runs the same command (<code>docs/getting-started.md</code>).</li>
+  <li><strong><code>scripts/dev-up.sh</code></strong> (Linux/macOS/WSL/Git Bash; <code>scripts/vegaduta.ps1</code> is the Windows-native helper).</li>
+</ul>
+<pre><code>bash scripts/dev-up.sh            # infra only: postgres, valkey, keycloak (lite compose)
+bash scripts/dev-up.sh --app      # the Lite stack built from source
+bash scripts/dev-up.sh --all      # Full stack + main profiles, from source (heavy)
+bash scripts/dev-up.sh --env-only # just write deploy/compose/.env</code></pre>
+
+<h2>3. Manual bring-up</h2>
+<pre><code>scripts/vegaduta secrets      # writes deploy/compose/.env with random secrets (never overwrites)
+docker compose -f deploy/compose/lite.yml -f deploy/compose/lite.build.yml --env-file deploy/compose/.env up -d --build --wait</code></pre>
+<p>The compose files refuse to start without the required secrets (<code>${...:?}</code>), including <code>APP_ENCRYPTION_KEY</code> and <code>KEYCLOAK_CLIENT_SECRET</code>; <code>scripts/vegaduta secrets</code> generates them. Run the realm reconcile afterwards (<code>deploy/keycloak/reconcile-keycloak.sh</code>; <code>scripts/vegaduta up</code> does it for you).</p>
+<div class="callout callout-warning">
+  <div class="callout-title">APP_ENCRYPTION_KEY</div>
+  Must be identical everywhere core boots (<code>deploy/compose/.env</code>, a locally run core, your Kubernetes Secret). A different key makes every stored provider key and channel secret undecryptable. This page deliberately lists names only, never values.
+</div>
+
+<h2>4. One service at a time</h2>
+<pre><code>bash scripts/dev-up.sh                          # postgres, valkey, keycloak
+
+cd core &amp;&amp; mvn -pl app -am spring-boot:run     # or: ./scripts/run-core-local.sh
+cd web &amp;&amp; npm ci &amp;&amp; npm run dev               # web (port 3000)
+cd web-admin &amp;&amp; npm ci &amp;&amp; npm run dev         # web-admin (port 3001)
+cd services/sidecar &amp;&amp; uvicorn app.main:app --reload --port 8001
+cd services/code-intel &amp;&amp; pip install -r requirements.txt &amp;&amp; CODE_INTEL_AUTH_MODE=none uvicorn app.main:app --port 8090</code></pre>
+<p>Spring Boot does not read <code>.env</code> files; a bare <code>mvn spring-boot:run</code> dies on a missing <code>APP_ENCRYPTION_KEY</code>. Export the values listed in the header of <code>scripts/dev-up.sh</code> first. <code>scripts/run-core-local.sh</code> does the export for you but reads <code>deploy/.env</code>, not <code>deploy/compose/.env</code>, and runs Maven offline (<code>-o</code>), so it needs a populated local cache.</p>
+
+<h2>5. Local ports (local only)</h2>
+<p><code>core</code> 8080, <code>web</code> 3000, <code>web-admin</code> 3001, <code>sidecar</code> 8001, <code>code-intel</code> 8090, Keycloak 8180, Postgres 5432, Valkey 6379, SeaweedFS S3 8333, Temporal UI 8088, Langfuse 3002, Grafana 3003. The full matrix is on <a href="../appendix/ports-services.html">Ports &amp; Service Matrix</a>.</p>
+
+<h2>6. First-day checklist</h2>
+<ol>
+  <li>Read <code>CONTRIBUTING.md</code> (short) — licensing and DCO sign-off, how changes get in, the checks. See <a href="conventions.html">Conventions &amp; Standards</a>.</li>
+  <li>Install the git hooks once: <code>bash scripts/dev/install-git-hooks.sh</code> (see <a href="git-workflow.html">Git &amp; Contribution Workflow</a>).</li>
+  <li>Find the folder you will work in on the <a href="repository-map.html">Repository Map</a>.</li>
+  <li>Run the merge gate locally before pushing — <a href="build-and-test.html">Build, Test &amp; Verify</a>.</li>
+</ol>
+
+<h2>7. Known traps at setup time</h2>
+<ul>
+  <li><strong>Never bake <code>localhost</code> into a deployed web image.</strong> The consoles read <code>NEXT_PUBLIC_*</code> at runtime; a value passed at build time becomes a baked fallback. Leave the build args empty for images you deploy (<a href="../decisions/adr-0007-build-time-frontend-config.html">ADR-0007</a>).</li>
+  <li><strong>Do not run <code>npm install</code> while other processes run <code>npx</code> in the same project</strong> — the two race and roll back.</li>
+  <li><strong>One Maven build at a time</strong>; parallel builds in one checkout fight over <code>target/</code> (<code>CONTRIBUTING.md</code>).</li>
+  <li>If a build hits a real dependency or compile error, fix the cause rather than routing around it with <code>--force</code> or <code>--legacy-peer-deps</code> (README §2).</li>
+  <li>The Next.js version in <code>web/</code> has breaking changes relative to older releases; read the guide bundled in <code>node_modules/next/dist/docs/</code> before writing code.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>README.md</code> §2 Running it locally, §3 Testing.</li>
+  <li><code>CONTRIBUTING.md</code> — Local setup table and steps.</li>
+  <li><code>scripts/dev-up.sh</code>, <code>scripts/run-core-local.sh</code> (headers), <code>.devcontainer/</code>.</li>
+  <li><code>core/pom.xml</code> — <code>java.version</code> 21, Spring Boot parent 3.4.4.</li>
+  <li><code>services/code-intel/README.md</code> (uvicorn line).</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

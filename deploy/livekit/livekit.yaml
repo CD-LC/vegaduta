@@ -1,0 +1,24 @@
+# LiveKit server config for the `voice` compose profile. API keys come from
+# the LIVEKIT_KEYS env var (set from LIVEKIT_API_KEY/SECRET), never this file.
+#
+# Media: WebRTC needs UDP 50000-50100 (and TCP 7881 fallback) reachable from
+# browsers. On a single machine the loopback defaults work; on a server set
+# LIVEKIT_BIND_ADDR=0.0.0.0, open those ports, and serve signaling at
+# wss://livekit.<BASE_DOMAIN> (the domain overlay's Caddy does this).
+#
+# TURN (for clients behind strict NAT/firewalls): uncomment the block below,
+# point a DNS name at this host, and publish 5349/tcp in the livekit service.
+port: 7880
+rtc:
+  tcp_port: 7881
+  # The UDP media range is set by LIVEKIT_RTC_PORT_RANGE_START / _END (deploy/compose, default 50000-50100), which
+  # also publish the same host ports; a value here would override them.
+  # Discover the public IP via STUN; set false on an isolated LAN.
+  use_external_ip: true
+# turn:
+#   enabled: true
+#   domain: turn.example.com
+#   tls_port: 5349
+#   external_tls: true
+logging:
+  level: info

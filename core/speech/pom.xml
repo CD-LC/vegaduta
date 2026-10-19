@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>speech</artifactId>
+  <name>speech</name>
+  <description>
+    SpeechTextNormalizer - the one place raw LLM/agent text is turned into
+    something a text-to-speech engine should actually SAY out loud (strip
+    markdown/HTML/emoji/control characters, turn bare URLs into "a link",
+    collapse whitespace into sentence pauses).
+
+    Its own module, and a true leaf (zero dependency on any other core module,
+    JDK-only, pure static functions - same shape as "crypto" and "storage"),
+    because the two text-to-speech clients that need it live in modules that
+    do NOT depend on each other: elevenlabs (ElevenLabsClient#textToSpeech)
+    and sarvam (SarvamTextToSpeechClient#synthesize). Their only shared
+    ancestors before this module were crypto/security/tenancy/storage, none of
+    which is a sane home for text processing, and duplicating the normalizer
+    into both would guarantee the two speech surfaces drift apart. Nothing in
+    this module depends on anything, so it slots into the reactor ahead of
+    everything else exactly like crypto does.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,231 @@
+# Documentation site, built from docs/ and published to GitHub Pages by
+# .github/workflows/docs.yml. Local preview: `make docs-serve` (creates a venv
+# from docs/requirements.txt). The Markdown under docs/ stays readable on GitHub
+# without this file; nothing here is required to read the docs.
+site_name: VegaDūta documentation
+site_description: Open-source platform for building, governing and running AI agents, and the Java Agent SDK.
+site_url: https://cdandlc.github.io/vegaduta/
+repo_url: https://github.com/CD-LC/vegaduta
+repo_name: vegaduta
+edit_uri: edit/main/docs/
+copyright: Apache-2.0. Where a page disagrees with the code, the code wins.
+
+docs_dir: docs
+site_dir: site
+exclude_docs: |
+  requirements.txt
+  plans/adr/README.md
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+
+plugins:
+  - search
+
+# scripts/docs/mkdocs_hooks.py: embeds files from outside docs/ (a line `--8<-- "sdk/java/README.md"`)
+# and rewrites relative links that leave docs/ to their GitHub URLs, so the Markdown stays
+# correct on GitHub and on this site.
+hooks:
+  - scripts/docs/mkdocs_hooks.py
+
+validation:
+  nav:
+    omitted_files: ignore
+
+nav:
+  - Home: README.md
+  - Get started:
+      - Getting started: getting-started.md
+      - Installation: installation.md
+      - Personal mode (one person, one laptop): personal-mode.md
+      - Free local models: local-models.md
+      - Share an agent as a file: agent-bundles.md
+      - SMS conversations: sms-channel.md
+      - Signal: channels/signal.md
+      - WhatsApp QR: channels/whatsapp-qr.md
+      - WhatsApp policy limits: channels/whatsapp-policy.md
+      - Matrix: matrix-channel.md
+      - iMessage (BlueBubbles): imessage-channel.md
+      - Edge relay: edge-relay.md
+      - Cost and ROI: cost-and-roi.md
+      - Running a 30-day pilot: pilots/README.md
+      - Pilot case-study template: pilots/case-study-template.md
+      - Configuration: configuration.md
+      - Site modes and public pages: site-modes.md
+  - Console guide:
+      - Overview and sidebar: console/README.md
+      - Assistant: console/assistant.md
+      - Shared controls and the UI preview: console/ui-components.md
+      - Build: console/build.md
+      - Library: console/library.md
+      - Inbox and people: console/inbox-and-people.md
+      - AI and engine: console/ai-and-engine.md
+      - Configuration: console/configuration.md
+      - Add-ons: console/add-ons.md
+      - Test and monitor: console/test-and-monitor.md
+      - Cost and ROI (screen): console/cost-and-roi.md
+      - Notifications: console/notifications.md
+      - Plans and billing: console/plans-and-billing.md
+      - Help and resources: console/help-and-resources.md
+      - Administration: console/administration.md
+      - Data and privacy: console/data-and-privacy.md
+      - Single sign-on and SCIM: console/single-sign-on.md
+      - Platform admin: console/platform-admin.md
+      - Lists and paging: console/lists-and-paging.md
+      - Roles and permissions: console/roles-and-permissions.md
+  - Build:
+      - Extending the platform: extending.md
+      - Workflow DSL: api/workflow-dsl-v1.md
+      - API and OpenAPI: api/README.md
+      - List endpoint paging: api/LIST-ENDPOINT-PAGING.md
+      - API deprecation policy: api/DEPRECATION.md
+      - Standards conformance: api/conformance.md
+      - MCP registry: core/mcp/REGISTERING-A-CUSTOM-MCP-SERVER.md
+      - Connector specs: connectors/README.md
+      - Google Calendar booking and Sheets: connectors/google-calendar-sheets.md
+  - SDKs and dependencies:
+      - Overview: sdk/README.md
+      - Java Agent SDK: sdk/java-agent-sdk.md
+      - Java Agent SDK example: sdk/java-agent-sdk-example.md
+      - Java Agent SDK adoption playbook: sdk/adoption-playbook.md
+      - Java Agent SDK positioning: sdk/positioning.md
+      - Refund-agent example (Python and Java): sdk/refund-agent-example.md
+      - Python Agent SDK: sdk/python-agent-sdk.md
+      - Java Agent SDK compliance mapping: sdk/compliance-mapping.md
+      - Java Agent SDK security review pack: sdk/security-review-pack.md
+      - TypeScript and Python clients: sdk/clients.md
+  - Plugins and apps:
+      - Plugins, apps and mobile: plugins-and-apps.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Repository structure: repository-structure.md
+      - Core module graph: architecture/core-module-graph.md
+      - Agents module decomposition:
+          - Module map: architecture/agents-decomposition/README.md
+          - Budgets and spend caps: architecture/agents-decomposition/budgets.md
+          - Chat import/export: architecture/agents-decomposition/chatport.md
+      - Guardrails: architecture/GUARDRAILS-AND-INTEGRATION.md
+      - Content filtering: architecture/GUARDRAILS-CONTENT-FILTERING.md
+      - Provider modalities: architecture/MULTI-PROVIDER-MODALITY-ARCHITECTURE.md
+      - LLM latency and model selection: architecture/LLM-LATENCY-AND-MODEL-SELECTION.md
+      - Hot-path performance: architecture/HOT-PATH-PERFORMANCE.md
+      - Architecture bets (proposed): architecture/ARCHITECTURE-BETS-2026-10.md
+      - Tenant sweep cost: architecture/TENANT-SWEEP-COST.md
+      - Consumer secrets vault: architecture/CONSUMER-SECRETS-VAULT-2026-09-11.md
+      - Kubernetes architecture: architecture/kubernetes.md
+      - Deployment shapes and pools: deploy/DEPLOYMENT-SHAPES.md
+      - Cloud portability: architecture/ADR-cloud-portability.md
+      - Structural audit (2026-10-14): architecture/STRUCTURAL-AUDIT-2026-10-14.md
+      - MCP specification alignment: architecture/mcp-spec-alignment.md
+      - A2A conformance: architecture/a2a-conformance.md
+      - Personal assistant surface (2026-10-17): architecture/PERSONAL-ASSISTANT-SURFACE-2026-10-17.md
+      - MCP STDIO sandboxing design: architecture/MCP-STDIO-SANDBOXING-DESIGN.md
+      - AI for everyone (gap analysis, 2026-10-14): architecture/AI-FOR-EVERYONE-2026-10-14.md
+      - Out of the box, personal install (gap analysis, 2026-10-19): architecture/OUT-OF-THE-BOX-PERSONAL-2026-10-19.md
+      - Personal install audit (2026-10-19): architecture/PERSONAL-INSTALL-AUDIT-2026-10-19.md
+      - Technical audit (2026-10-19): architecture/TECHNICAL-AUDIT-2026-10-19.md
+      - Archive (historical notes): architecture/archive/README.md
+      - Decisions:
+          - ADR-0011 Provider plugins: architecture/ADR-0011-provider-plugins.md
+          - ADR-0012 Spring Boot 4 / Spring AI 2: architecture/ADR-0012-spring-ai-2-boot-4.md
+          - ADR-0013 Embeddable Agent SDK: architecture/ADR-0013-embeddable-agent-sdk.md
+          - ADR-0014 Horizontal scaling: architecture/ADR-0014-horizontal-scaling.md
+          - ADR-0015 Hybrid tenancy (proposed): architecture/ADR-0015-hybrid-tenancy.md
+          - ADR-0016 search_path round trips: architecture/ADR-0016-search-path-round-trips.md
+          - ADR-0017 Connections, replicas and cells: architecture/ADR-0017-connections-replicas-cells.md
+          - ADR-0018 Ad Studio (proposed): architecture/ADR-0018-ad-studio.md
+          - ADR-0019 Conformance by construction: architecture/ADR-0019-conformance-by-construction.md
+          - ADR-0020 Turn journal: architecture/ADR-0020-turn-journal.md
+          - ADR-0021 Turn inspector: architecture/ADR-0021-turn-inspector.md
+          - ADR-0023 Agents module decomposition: architecture/ADR-0023-agents-module-decomposition.md
+          - ADR-0024 Tenant-aware executors: architecture/ADR-0024-tenant-aware-executors.md
+          - ADR-0022 Explicit turn context: architecture/ADR-0022-explicit-turn-context.md
+          - ADR-0025 Consumer-driven contracts: architecture/ADR-0025-consumer-driven-contracts.md
+          - ADR-0026 API styles and GraphQL: architecture/ADR-0026-api-styles-and-graphql.md
+          - Ad Studio research, October 2026: architecture/ad-studio-research-2026-10.md
+          - MCP generic OAuth: architecture/ADR-mcp-generic-oauth.md
+          - Agent job durability: architecture/ADR-AGENT-JOB-DURABILITY-2026-08-17.md
+          - ADR index: adr/README.md
+          - ADR-0001 to ADR-0010 (handbook): platform-documentation/decisions/index.html
+      - Plans:
+          - A2A outbound client: plans/adr/a2a-outbound-client.md
+          - Coding agent harness: plans/adr/coding-agent-harness.md
+          - Late-interaction retrieval: plans/adr/late-interaction-retrieval.md
+          - MCP Apps UI resources: plans/adr/mcp-apps-ui-resources.md
+          - OS-level sandbox for custom tools: plans/adr/os-level-sandbox-custom-tools.md
+          - Stateless MCP: plans/adr/stateless-mcp.md
+          - Step journal and resumable jobs: plans/adr/step-journal-resumable-jobs.md
+          - Swarm goal verifier: plans/adr/swarm-goal-verifier.md
+          - Verifier-escalated router: plans/adr/verifier-escalated-router.md
+      - Platform handbook (HTML): platform-documentation/index.html
+  - Operations:
+      - Overview: operations/README.md
+      - Local stack guide: operations/local-stack-guide.md
+      - Hosting behind a Cloudflare Tunnel: operations/tunnel-hosting.md
+      - Key rotation: operations/key-rotation.md
+      - Personal data breach runbook: operations/breach-runbook.md
+      - Stage E2E improvements: operations/stage-e2e-improvements.md
+  - Security:
+      - Security model (taint, sandbox, pairing): security-model.md
+      - DPDP obligations and controls: compliance/dpdp-obligations.md
+      - Authorization: security/authorization.md
+      - OWASP agentic-AI mapping: security/owasp-mapping.md
+      - Scan reports and dashboards: security/scanning.md
+  - Engineering:
+      - Flyway versioning: engineering/FLYWAY-VERSIONING.md
+      - Integration tests: engineering/INTEGRATION-TESTS.md
+      - Characterisation tests: engineering/CHARACTERISATION-TESTS.md
+      - Security hardening: engineering/SECURITY-HARDENING.md
+      - Open UI gaps: engineering/UI-GAPS-OPEN.md
+      - Big files split plan: engineering/BIG-FILES-SPLIT-PLAN.md
+      - Agent brief, next phase: engineering/AGENT-BRIEF-NEXT-PHASE.md
+      - Configuration reference (generated): engineering/CONFIG-REFERENCE.generated.md
+      - Console i18n parity: engineering/I18N.md
+      - Error Prone baseline: engineering/ERROR-PRONE-BASELINE.md
+      - Standards audit: engineering/STANDARDS-AUDIT.md
+  - Maintainers:
+      - Repository setup: maintainers/repo-setup.md
+      - Branch protection: maintainers/branch-protection.md
+      - Releasing: maintainers/releasing.md
+      - Releasing the Java Agent SDK: maintainers/releasing-sdk.md
+      - Publishing these docs: maintainers/docs-site.md

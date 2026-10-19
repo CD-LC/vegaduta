@@ -1,0 +1,115 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-chat-import",
+      "method": "POST",
+      "path": "/api/chat-import",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.chats",
+          "$.imported",
+          "$.skipped"
+        ]
+      }
+    },
+    {
+      "id": "get-api-chat-import-chats",
+      "method": "GET",
+      "path": "/api/chat-import/chats",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].id",
+          "$[*].messageCount",
+          "$[*].source",
+          "$[*].title",
+          "$[*].truncated"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-chat-import-chats-id",
+      "method": "DELETE",
+      "path": "/api/chat-import/chats/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-chat-import-chats-id",
+      "method": "GET",
+      "path": "/api/chat-import/chats/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-chat-import-chats-id-export",
+      "method": "GET",
+      "path": "/api/chat-import/chats/{id}/export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-chat-import-export",
+      "method": "GET",
+      "path": "/api/chat-import/export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-chat-import-features",
+      "method": "GET",
+      "path": "/api/chat-import/features",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.exportEnabled",
+          "$.importEnabled",
+          "$.maxBytes",
+          "$.maxImportConversations"
+        ]
+      }
+    },
+    {
+      "id": "post-api-chat-import-memory-candidates",
+      "method": "POST",
+      "path": "/api/chat-import/memory-candidates",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.chatIds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.facts",
+          "$.stats"
+        ]
+      }
+    },
+    {
+      "id": "post-api-chat-import-preview",
+      "method": "POST",
+      "path": "/api/chat-import/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.capacity",
+          "$.conversations",
+          "$.source",
+          "$.stats"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{{- include "mcp-stdio-runner.variant" . -}}
+mcp-stdio-runner: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) runtimeClass={{ .Values.runtimeClassName | default "NONE (evaluation only)" }}
+  Reachable only from core; egress internet 80/443 + DNS only.
+  Variant: {{ ternary "browser (Playwright Chromium + puppeteer Chrome)" "standard (no browsers)" (not (empty .Values.browser)) }}.

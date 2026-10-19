@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/twilio-conversation-relay/setup.schema.json",
+  "title": "Twilio Conversation Relay - setup message",
+  "description": "Source: core/omnichannel/.../twilio/VoiceRelayWebSocketHandler.java#handleSetup, read directly (2026-07-19). Only the three fields the handler actually calls node.path(...) on are required here; Twilio's real 'setup' message carries more fields (e.g. direction, customParameters) that this handler never reads and this schema does not constrain.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "setup" },
+    "accountSid": {
+      "type": "string",
+      "description": "Resolved via TenantResolutionService.resolveTenantSchema(TWILIO, accountSid); falls back to the DEFAULT_SCHEMA if unresolved, so an empty/unknown value does not itself fail setup - it degrades to the default tenant."
+    },
+    "callSid": {
+      "type": "string",
+      "description": "Stored in session attributes and used only for logging/correlation - never parsed for structure."
+    },
+    "from": {
+      "type": "string",
+      "description": "The caller's phone number - used as ChannelSessionService.resolveOrCreate's externalId (VOICE channel), same pairing-gate semantics as every other channel."
+    }
+  },
+  "required": ["type", "accountSid", "callSid", "from"],
+  "additionalProperties": true
+}

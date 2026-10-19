@@ -1,0 +1,4 @@
+{
+  "type": "info",
+  "token": "some-future-message-type-this-handler-does-not-know-about-yet"
+}

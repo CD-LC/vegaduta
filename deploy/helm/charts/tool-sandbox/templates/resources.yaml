@@ -1,0 +1,1 @@
+{{ include "vegaduta-lib.standardResources" . }}

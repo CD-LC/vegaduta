@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>mcp</artifactId>
+  <name>mcp</name>
+  <description>MCP server registry (DB-backed metadata: name/type/enabled/dynamic connection config). Depends on core/crypto (for encrypting stored server credentials at rest) and core/security (read-only TenantLimits/TenantPlan/TenantContext for plan-gating how many connectors a tenant may register - 2026-07-27 billing audit) - still no dependency on any other core module (both crypto and security are themselves leaves).</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <!-- #424/dynamic-MCP-servers: encrypts a registration's env vars
+         (API keys, tokens, connection strings) at rest with the same
+         AES-256-GCM primitive every other BYOK credential in this schema
+         already uses - see McpServerRegistration's javadoc. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- Vault reference expansion: an MCP server's env/header values may carry
+         {{secret.NAME}}, resolved at connect time in McpRegistryService#dynamicConfigFor
+         so both the stdio env chokepoint and remoteHeaders() get real values. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>secrets</artifactId>
+    </dependency>
+    <!-- Read-only TenantLimits/TenantPlan/TenantContext/TenantLimitExceededException -
+         same cross-module read core/agents' AgentService already does for its
+         maxAgents plan-gate. The actual TenantLimits bean is implemented in
+         core/tenancy (wired by the app at runtime); this module only needs the
+         interface, so no dependency on tenancy itself - avoids a cycle since
+         core/agents (which mcp has no dependency on) is what depends on both
+         mcp and tenancy. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <!-- oauth/RedisMcpOAuthSharedStore: Valkey-backed OAuth state/token store for
+         multi-replica (app.mcp.oauth.store, ADR-0014 section 5). Same artifact
+         core/security already declares; the StringRedisTemplate bean itself is
+         resolved optionally at runtime. -->
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

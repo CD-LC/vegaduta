@@ -1,0 +1,248 @@
+/* Canvas chrome: floating toolbar, shortcuts sheet, palette search/collapse.
+ * Tokens fall back to the AXON set so both data-mode values render correctly. */
+
+/* `hidden` still lets focus()/scrollIntoView scroll the zone. When the run
+ * dock opens the zone shrinks under the focused Runs button, the browser
+ * scrolled it ~180px, and the whole flow pane slid up out of view. `clip`
+ * cannot be scrolled at all. */
+.ax-wf-canvas-zone {
+  overflow: clip;
+}
+
+.wf-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--ax-border2, var(--surface-border-strong, currentColor));
+  background: var(--ax-panel, var(--surface-1, Canvas));
+  color: var(--ax-mid, var(--text-2, CanvasText));
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.wf-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 4px;
+  background: var(--ax-border, var(--surface-border, currentColor));
+}
+
+.wf-tb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.wf-tb-btn:hover {
+  background: var(--ax-border, var(--surface-border, transparent));
+  color: var(--ax-text, var(--text-1, CanvasText));
+}
+
+.wf-tb-btn:focus-visible,
+.wf-pal-item:focus-visible,
+.wf-pal-cat:focus-visible {
+  outline: 2px solid var(--ax-accent2, var(--ax-cyan, Highlight));
+  outline-offset: 1px;
+}
+
+/* Pressed state is icon + border, never colour alone (aria-pressed also set). */
+.wf-tb-btn[aria-pressed="true"] {
+  border-color: var(--ax-accent2, var(--ax-cyan, Highlight));
+  color: var(--ax-accent2, var(--ax-cyan, Highlight));
+  background: color-mix(in srgb, var(--ax-accent2, Highlight) 12%, transparent);
+}
+
+.wf-tb-readout {
+  min-width: 44px;
+  text-align: center;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.wf-shortcuts-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--ax-bg, Canvas) 55%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.wf-shortcuts {
+  width: 100%;
+  max-width: 420px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--ax-border2, var(--surface-border-strong, currentColor));
+  background: var(--ax-panel, var(--surface-1, Canvas));
+  color: var(--ax-text, var(--text-1, CanvasText));
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+
+.wf-shortcuts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wf-shortcuts dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 16px;
+  font-size: 12px;
+  align-items: center;
+}
+
+.wf-shortcuts dt {
+  color: var(--ax-mid, var(--text-2, inherit));
+}
+
+.wf-shortcuts dd {
+  margin: 0;
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.wf-kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--ax-border2, var(--surface-border-strong, currentColor));
+  background: var(--ax-border, transparent);
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+/* Palette */
+.wf-pal-search {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  background: var(--ax-panel, var(--surface-1, Canvas));
+}
+
+.wf-pal-search input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--ax-border2, var(--surface-border-strong, currentColor));
+  background: transparent;
+  color: var(--ax-text, var(--text-1, inherit));
+  font-size: 12px;
+}
+
+.wf-pal-search input:focus-visible {
+  outline: 2px solid var(--ax-accent2, var(--ax-cyan, Highlight));
+  outline-offset: 1px;
+}
+
+.wf-pal-cat {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  margin: 12px 0 6px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ax-mid, var(--text-2, inherit));
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wf-pal-cat svg {
+  transition: transform 0.15s;
+}
+
+.wf-pal-cat[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+
+.wf-pal-item {
+  width: 100%;
+  background: transparent;
+  text-align: left;
+}
+
+/* Command palette recents marker */
+.wf-cmd-group {
+  padding: 6px 10px 2px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ax-mid, var(--text-2, inherit));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-tb-btn,
+  .wf-pal-cat svg {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .wf-toolbar {
+    bottom: 64px;
+  }
+  /* The 168x108 minimap would sit under the lifted toolbar on phones. */
+  .react-flow__minimap {
+    display: none;
+  }
+}
+
+/* History rows open the run in the canvas replay, so they are buttons now;
+ * match the link rows they replaced. */
+button.ax-wf-history-row {
+  width: 100%;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.ax-wf-history-row:focus-visible {
+  outline: 2px solid var(--ax-accent2, var(--ax-accent, currentColor));
+  outline-offset: 2px;
+}

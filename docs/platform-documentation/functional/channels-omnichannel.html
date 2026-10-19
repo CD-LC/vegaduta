@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Channels &amp; Omnichannel — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="functional" data-page="channels-omnichannel.html" data-doc="VD-FN-003" data-status="verified" data-updated="2026-09-25" data-owner="Product Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <nav class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Functional</a><span class="sep">/</span>Channels &amp; Omnichannel</nav>
+
+  <h1>Channels &amp; Omnichannel</h1>
+  <p class="lede">
+    The omnichannel layer (<code>core/omnichannel</code>) lets a tenant's
+    agents converse with end-users over ten messaging and voice channel
+    types. All channels share one inbound pipeline — pairing, session
+    resolution, agent routing, reply delivery — so adding a channel is an
+    adapter, not a new subsystem (<code>ChannelType</code> javadoc documents
+    this "add a case" design).
+  </p>
+
+  <div class="figure">
+    <div class="mermaid">
+flowchart LR
+  subgraph Channels
+    WA["WhatsApp"] &amp; TG["Telegram"] &amp; EM["Email"] &amp; VO["Voice"] &amp; OT["Messenger · Instagram · Slack · Discord · X · Teams"]
+  end
+  Channels --&gt; WH["Channel webhook / poller / gateway"]
+  WH --&gt; DD["Inbound dedup<br/>(InboundMessageDedupService)"]
+  DD --&gt; SESS["Session resolve + pairing gate<br/>(ChannelSessionService)"]
+  SESS --&gt; ROUTE["Default-agent routing<br/>(ChannelDefaultAgent)"]
+  ROUTE --&gt; AGT["Agent chat turn"]
+  AGT --&gt; OUT["Channel reply (adapter send)"]
+  AGT -.handoff.-&gt; OP["Operator inbox<br/>(human take-over)"]
+    </div>
+    <div class="figure-caption">Every channel funnels into the same session → route → agent → reply pipeline.</div>
+  </div>
+
+  <h2>FR-CH-01 · Channel type catalogue</h2>
+  <table>
+    <thead><tr><th>ChannelType</th><th>Transport / onboarding</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>WHATSAPP</code></td>
+        <td>Two official onboarding paths: Meta Cloud API (including <strong>Embedded Signup</strong>) and the <strong>Twilio</strong> path (<code>TwilioWhatsAppChannelAdapter</code>).</td>
+        <td>The flagship channel; subject to the <code>whatsapp_allowed</code> plan gate.</td>
+      </tr>
+      <tr>
+        <td><code>MESSENGER</code></td>
+        <td>Meta webhook + page credentials.</td>
+        <td>First channel added after WhatsApp; proved the channel-agnostic pipeline.</td>
+      </tr>
+      <tr>
+        <td><code>INSTAGRAM</code></td>
+        <td>Meta webhook + credentials.</td>
+        <td>Same machinery as Messenger.</td>
+      </tr>
+      <tr>
+        <td><code>SLACK</code></td>
+        <td>Slack app credentials; events webhook.</td>
+        <td>Workspace-scoped sessions.</td>
+      </tr>
+      <tr>
+        <td><code>DISCORD</code></td>
+        <td>Via the dedicated <strong>gateway service</strong> (Discord requires a persistent gateway connection, so it lives outside <code>core/app</code>).</td>
+        <td>See <a href="../architecture/service-topology.html">Service Topology</a>.</td>
+      </tr>
+      <tr>
+        <td><code>X</code></td>
+        <td>X/Twitter API credentials.</td>
+        <td>Mentions/DM ingress.</td>
+      </tr>
+      <tr>
+        <td><code>TELEGRAM</code></td>
+        <td>Bot token; webhook (<code>TelegramWebhookController</code>) + <code>TelegramApiClient</code> sends.</td>
+        <td>Supports workflow triggers and agent events on the same webhook.</td>
+      </tr>
+      <tr>
+        <td><code>EMAIL</code></td>
+        <td>IMAP inbound polling (<code>EmailInboundPollingJob</code>) + SMTP outbound.</td>
+        <td>Tenant supplies mailbox credentials.</td>
+      </tr>
+      <tr>
+        <td><code>TEAMS</code></td>
+        <td>Tenant's own Microsoft Bot Framework (Azure Bot) registration; JWT-signed activities at <code>/webhook/teams/{appId}</code> (migration <code>V240</code>).</td>
+        <td>Replies via Bot Framework connector; per-conversation service URLs stored in <code>teams_conversation_route</code>.</td>
+      </tr>
+      <tr>
+        <td><code>VOICE</code></td>
+        <td>Two paths: <strong>LiveKit browser calls</strong> (in-app voice) and <strong>Twilio voice relay</strong> (<code>TwilioVoiceWebhookController</code> + <code>VoiceRelayWebSocketHandler</code>).</td>
+        <td>Voice replies are spoken live over the WebSocket bridge — they bypass the async approval queue by design (a live call cannot wait mid-conversation). <code>external_id</code> is the caller's number so memory persists call to call.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>FR-CH-02 · Contacts, groups &amp; routing</h2>
+  <p>
+    Inbound identities resolve to contacts; contacts can be grouped and routed
+    to different default agents per channel or per account
+    (<code>ChannelDefaultAgent</code>). A channel session
+    (<code>ChannelSession</code>) keys on <code>external_id</code> — the
+    sender's channel-native identity — so a returning WhatsApp sender or
+    voice caller resumes their conversation and memory.
+  </p>
+
+  <h2>FR-CH-03 · Pairing inbox</h2>
+  <p>
+    First-time senders land in the <strong>pending-pairings inbox</strong>
+    (<code>ChannelPairingController</code>) — a pairing gate that holds a new
+    contact until a tenant member approves the pairing. This is the
+    anti-abuse boundary between "a stranger messaged the number" and "an
+    agent consumes LLM budget replying to them".
+  </p>
+
+  <h2>FR-CH-04 · Operator human-handoff inbox</h2>
+  <p>
+    <code>OperatorInboxService</code> provides human handoff: a conversation
+    can be flagged to a human operator, who replies through the same channel
+    adapter while the agent stands down. Handoff works across all channel
+    types uniformly.
+  </p>
+
+  <h2>FR-CH-05 · Universal disconnect</h2>
+  <p>
+    Any channel connection can be severed from one disconnect surface —
+    credentials are revoked, webhooks/pollers stand down, and sessions on
+    that account stop routing. One operation regardless of adapter.
+  </p>
+
+  <h2>FR-CH-06 · Health checks &amp; credentials</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-CH-06.1</td><td>Per-channel health checks report connection state (<code>ChannelStatusController</code>) — credentials valid, webhook live, poller running.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-CH-06.2</td><td>Credentials are per-channel and per-account, stored encrypted (see <a href="../security/secrets-management.html">Secrets Management</a>); each channel family has its own credential service (e.g. <code>MetaWhatsAppCredentialService</code>, <code>TelegramCredentialService</code>).</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-CH-06.3</td><td>Inbound deduplication (<code>InboundMessageDedupService</code>) drops retried/duplicated webhook deliveries so one user message never produces two agent turns.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-CH-07 · Plan gates</h2>
+  <div class="callout callout-note">
+    <div class="callout-title">Plan gate: whatsapp_allowed</div>
+    <p style="margin:4px 0 0">
+      WhatsApp connectivity is plan-gated by the <code>whatsapp_allowed</code>
+      flag in <code>control_plane.plan_limits</code> (FREE access was tuned by
+      migration <code>V225__free_plan_whatsapp.sql</code> — check current
+      rows for exact tier behaviour). Other channels are not individually
+      gated. Plan gates apply only when billing is on (see <a href="index.html#billing">Functional Overview</a>).
+    </p>
+  </div>
+
+  <h2>Cross-references</h2>
+  <ul>
+    <li><a href="../architecture/channels-integrations.html">Architecture: Channels &amp; Integrations</a> — adapter topology and the Discord gateway service.</li>
+    <li><a href="../api/webhooks.html">API: Webhooks</a> — inbound webhook contracts and signature handling.</li>
+    <li><a href="governance-guardrails.html">VD-FN-006</a> — channel-send approvals and moderation on outbound replies.</li>
+    <li><a href="workflows.html">VD-FN-002</a> — channel trigger nodes and channel output.</li>
+  </ul>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{{ include "vegaduta-lib.docs" (list
+  (include "vegaduta-lib.serviceAccount" .)
+  (include "vegaduta-lib.service" .)
+  (include "vegaduta-lib.pdb" .)
+  (include "vegaduta-lib.networkPolicy" .)
+) }}

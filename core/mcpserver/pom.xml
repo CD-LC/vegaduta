@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>mcpserver</artifactId>
+  <name>mcpserver</name>
+  <description>
+    INBOUND MCP server hosting: lets an external MCP client (Claude Desktop,
+    another agent framework, a customer's own tooling) connect INTO this
+    platform and call a tenant-admin-curated set of this tenant's own Agents
+    (and, schema-wise, Workflows - see McpServerAccessGrant's javadoc for what
+    is/isn't wired yet) as real MCP tools.
+
+    Deliberately its own module rather than folding into core/mcp: core/mcp's
+    own pom.xml description states it has "still no dependency on any other
+    core module" by design (it is the OUTBOUND registry - this platform
+    connecting OUT to external MCP servers like GitHub/Slack/Home-Assistant).
+    This module is the mirror-image direction (an external caller connecting
+    IN) and unavoidably needs agents (to actually invoke AgentChatService#chat),
+    security (TenantContext), and tenancy (TenantResolutionService, the
+    "resolve tenant schema from an unauthenticated bearer secret" bootstrap
+    WorkflowWebhookController already established) - adding any of that to
+    core/mcp would break its documented zero-dependency invariant for every
+    existing consumer of that module.
+
+    Depends on: agents, workflow, knowledge, security, tenancy, audit, chat.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <!-- AgentChatService#chat is the actual invocation target for the
+         call_agent MCP tool - the same chokepoint a normal web-console/
+         omnichannel chat turn goes through, so this externally-triggered
+         turn gets the identical GuardedToolCallback/approval/guardrail
+         pipeline AgentToolProvider.resolveToolsFor already applies inside
+         chat() to whatever tools the target agent itself uses. AgentService
+         is used to validate that an admin's chosen agent ids are real, and
+         to list an exposed agent's name for the list_my_agents tool. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- The MCP server chat tool calls AgentChatService in core/agents-turn (ADR-0023). No cycle: agents-turn depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- A2aTaskService (the MCP agent-task tools) and OpenAiCompatCallerScope (API-key auth for
+         the OpenAI-compatible endpoints) live in agents-interop (ADR-0023). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-interop</artifactId>
+    </dependency>
+    <!-- WorkflowService#run is the actual invocation target for the call_workflow MCP tool -
+         the same synchronous entry point the canvas's own "Run" button, the REST
+         POST /api/workflows/{id}/run endpoint, and the WORKFLOW node type (a workflow calling
+         another workflow) all go through - see McpCallWorkflowToolCallback's javadoc. Also used
+         to resolve a workflow's name/status for the list_my_workflows tool. workflow does NOT
+         depend on this module (or on mcpserver), so this is a one-directional addition, same
+         shape as the existing agents dependency above. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow</artifactId>
+    </dependency>
+    <!-- KnowledgeSearchService#search is the actual invocation target for the search_knowledge
+         MCP tool - the same hybrid (vector + keyword, RRF-fused) search entry point
+         core/knowledge's own internal KnowledgeSearchToolCallback uses for in-process agent tool
+         calls, so there is no parallel search implementation. KnowledgeSearchService is
+         @Profile("knowledge")-gated, so McpServerToolConfig injects it via ObjectProvider and
+         only advertises search_knowledge when that profile is also active - see that class's
+         javadoc for why an unconditional dependency here would repeat this build's own
+         "conditionally-present bean took down the whole app" lesson. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <!-- TenantContext - the exact same per-request holder TenantContextFilter
+         populates from a JWT for normal requests; McpApiKeyAuthFilter (this
+         module) populates it by hand from a resolved API key instead, same
+         "no parallel tenant-resolution logic" posture WorkflowWebhookController
+         already uses for its own no-JWT inbound path. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- TenantResolutionService/ExternalAccountProvider/ChannelAccountLink -
+         the established "resolve which tenant schema owns this bearer secret,
+         BEFORE any tenant-schema query is possible" bootstrap, already used
+         by WorkflowWebhookController for its shared-secret webhook token.
+         This module registers a new ExternalAccountProvider.MCP_SERVER_KEY
+         link (keyed by the SHA-256 hash of a generated API key, never the
+         raw key - see McpApiKeyHasher's javadoc) the same way TWILIO/
+         WORKFLOW_WEBHOOK/etc. already do. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- Data-governance audit fix (2026-07-20): AuditLogService is the
+         established, already-widely-depended-on (agents/approval/workflow/
+         omnichannel/admin/...) "the only way anything in this codebase writes
+         to audit_log_entry" append-only trail. McpServerAccessGrantService#revoke
+         hard-deletes the McpServerAccessGrant row itself (it must, to stop the
+         key resolving), which would otherwise destroy all forensic history -
+         who created/rotated/revoked this grant and when, and which agents it
+         exposed - the instant a grant is revoked. Recording lifecycle events
+         here preserves that history independently of the grant row's lifetime. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- GovernanceDegradationSignal (core.chat gateway package) - makes
+         McpServerRateLimiter's fail-open branches observable in the shared
+         governance_fail_open_total metric instead of only a log line. Already
+         on this module's classpath transitively (agents depends on chat -
+         that class's own javadoc documents the direction); declared
+         explicitly because compiling against a transitive dependency is how
+         a later "agents no longer needs chat" cleanup silently breaks this
+         module. chat depends only on providers/security/tenancy (verified in
+         its pom), never on mcpserver, so no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <!-- McpServerRateLimiter: Redis-backed fixed-window limiter, the same
+         shape core/chat's LlmGatewayRateLimiterService already uses (plain
+         INCR + conditional EXPIRE, fail-open if Redis is unreachable) -
+         this new inbound surface is platform-facing/public and needs its
+         own abuse throttle independent of that gateway's. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <!-- Spring AI's own MCP server hosting starter (pinned via the parent
+         spring-ai-bom, spring-ai.version 1.1.7) - builds directly on
+         ToolCallback, the exact interface every tool callback in this
+         codebase (SearchCodeToolCallback, KnowledgeSearchToolCallback, ...)
+         already implements. Streamable-HTTP chosen over the older SSE
+         transport since it is the current (2025 protocol revision) MCP
+         transport most external clients (Claude Desktop included) speak
+         going forward - see McpServerToolConfig's javadoc for the honest
+         "verified vs. general-knowledge" note on this starter's exact API
+         surface. -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

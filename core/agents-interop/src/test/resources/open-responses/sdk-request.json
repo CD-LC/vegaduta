@@ -1,0 +1,17 @@
+{
+  "model": "11111111-2222-3333-4444-555555555555",
+  "instructions": "You are terse.",
+  "input": [
+    {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "What is 2+2?"}]},
+    {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "4", "annotations": []}]},
+    {"role": "user", "content": "And times three?"}
+  ],
+  "temperature": 0.2,
+  "max_output_tokens": 256,
+  "metadata": {"trace": "abc"},
+  "store": false,
+  "user": "sdk-user-1",
+  "reasoning": {"effort": "low"},
+  "text": {"format": {"type": "text"}},
+  "stream": false
+}

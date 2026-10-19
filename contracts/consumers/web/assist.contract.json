@@ -1,0 +1,38 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-assist-code-edit",
+      "method": "POST",
+      "path": "/api/assist/code-edit",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.prompt",
+          "$.system"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-assist-draft",
+      "method": "POST",
+      "path": "/api/assist/draft",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.fieldLabel",
+          "$.instruction"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.suggestion"
+        ]
+      }
+    }
+  ]
+}

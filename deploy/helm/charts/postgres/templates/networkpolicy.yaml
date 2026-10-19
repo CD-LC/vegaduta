@@ -1,0 +1,37 @@
+{{- /* Ingress-only policy: CloudNativePG instance pods need egress to the Kubernetes
+  API, to each other (replication) and to backup storage, which cannot be expressed
+  portably. The umbrella's namespace default-deny excludes these pods for that reason. */ -}}
+{{- $gn := (.Values.global | default dict).networkPolicy | default dict -}}
+{{- if $gn.enabled }}
+{{- $root := . -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vegaduta-lib.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: {{ include "vegaduta-lib.fullname" . }}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        {{- range .Values.networkPolicy.allowFrom }}
+        - {{- include "vegaduta-lib.siblingPeer" (dict "root" $root "name" .) | nindent 10 }}
+        {{- end }}
+      ports:
+        - { port: 5432, protocol: TCP }
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: {{ include "vegaduta-lib.fullname" . }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.operatorNamespace }}
+      ports:
+        - { port: 8000, protocol: TCP }
+        - { port: 5432, protocol: TCP }
+{{- end }}

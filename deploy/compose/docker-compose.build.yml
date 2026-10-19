@@ -1,0 +1,72 @@
+# =============================================================================
+# Build-from-source overlay for the FULL stack. Tags each result with the same
+# image name the base file uses, so `up` runs what you just built.
+#
+#   ./scripts/vegaduta up --full --build
+#   docker compose -f deploy/compose/docker-compose.yml \
+#                  -f deploy/compose/docker-compose.build.yml build
+#
+# NEXT_PUBLIC_* build args are only the FALLBACK baked into the bundle; the
+# running web read the runtime NEXT_PUBLIC_* env from the base file.
+# Paths are relative to this file (deploy/compose/).
+# =============================================================================
+x-web-args: &web-args
+  NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+  NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
+  NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
+
+services:
+  postgres:
+    build: ../postgres
+  db-roles:
+    # Same image as postgres (it runs psql); built, never pulled, with --build.
+    build: ../postgres
+  sidecar:
+    build: ../../services/sidecar
+  core:
+    build:
+      context: ../../core
+      args:
+        MODULE: app
+        # none (slim, default) | full (in-core Node/uv/browsers). Building
+        # `full` locally? Also set CORE_IMAGE_VARIANT=-full so the tag matches.
+        MCP_TOOLCHAIN: ${CORE_MCP_TOOLCHAIN:-none}
+  core-worker:
+    build:
+      context: ../../core
+      args:
+        MODULE: app-worker
+  core-jobs:
+    build:
+      context: ../../core
+      args:
+        MODULE: app-jobs
+  web:
+    build:
+      context: ../../web
+      args:
+        <<: *web-args
+        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
+        NEXT_PUBLIC_CODE_INTEL_URL: ${PUBLIC_CODE_INTEL_URL:-}
+        NEXT_PUBLIC_APP_BUILDER_URL: ${PUBLIC_BUILDER_URL:-}
+        NEXT_PUBLIC_EDGE_AGENTS: ${WEB_EDGE_AGENTS:-}
+        NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-}
+        NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+  voice-agent:
+    build: ../../services/voice-agent
+  rl-trainer:
+    build: ../../services/rl-trainer
+  code-intel:
+    build: ../../services/code-intel
+  app-builder:
+    build: ../../services/app-builder
+  tool-sandbox:
+    build: ../../services/tool-sandbox
+  mcp-stdio-runner:
+    # Builds the variant the base file will run: plain, or with
+    # MCP_STDIO_RUNNER_WITH_BROWSERS=true + MCP_STDIO_RUNNER_VARIANT=-browser the
+    # browser image (the CLI sets both for `--profile browser`).
+    build:
+      context: ../../services/mcp-stdio-runner
+      args:
+        WITH_BROWSERS: ${MCP_STDIO_RUNNER_WITH_BROWSERS:-false}

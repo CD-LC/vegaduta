@@ -1,0 +1,18 @@
+apiVersion: v2
+name: keycloak
+description: Bundled Keycloak (official quay.io/keycloak/keycloak image) with the VegaDuta realm import and a post-install reconcile Job.
+type: application
+version: 0.2.0
+appVersion: "26.7.5"
+home: https://github.com/CD-LC/vegaduta
+sources:
+  - https://github.com/keycloak/keycloak
+maintainers:
+  - name: VegaDuta maintainers
+    url: https://github.com/CD-LC/vegaduta
+annotations:
+  licenses: Apache-2.0
+dependencies:
+  - name: vegaduta-lib
+    version: 0.2.0
+    repository: file://../vegaduta-lib

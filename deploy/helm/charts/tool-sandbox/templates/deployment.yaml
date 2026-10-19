@@ -1,0 +1,9 @@
+{{- include "tool-sandbox.guard" . -}}
+{{- $secretEnv := include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "TOOL_SANDBOX_INTERNAL_TOKEN") | fromYamlArray -}}
+{{- /* emptyDirs are 0777; restore 0711 (work) / 0755 (cache) so run uid 5001 cannot list other tenants' dirs. */ -}}
+{{- $init := dict "name" "harden-sandbox-dirs" "image" (include "vegaduta-lib.image" .) "imagePullPolicy" (include "vegaduta-lib.imagePullPolicy" .)
+  "command" (list "sh" "-c" "chmod 0711 /var/sandbox/work && chmod 0755 /var/sandbox/cache")
+  "volumeMounts" (list (dict "name" "sandbox-work" "mountPath" "/var/sandbox/work") (dict "name" "sandbox-cache" "mountPath" "/var/sandbox/cache"))
+  "resources" (dict "requests" (dict "cpu" "10m" "memory" "16Mi") "limits" (dict "memory" "64Mi"))
+  "securityContext" (dict "runAsUser" 0 "runAsNonRoot" false "allowPrivilegeEscalation" false "readOnlyRootFilesystem" true "capabilities" (dict "drop" (list "ALL")) "seccompProfile" (dict "type" "RuntimeDefault")) -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" (dict) "secretEnv" $secretEnv "initContainers" (list $init)) }}

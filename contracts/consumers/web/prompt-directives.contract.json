@@ -1,0 +1,46 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-prompt-directives",
+      "method": "GET",
+      "path": "/api/prompt-directives",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.assembledPreview",
+          "$.customInstructions",
+          "$.directives"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-prompt-directives-key",
+      "method": "DELETE",
+      "path": "/api/prompt-directives/{key}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-prompt-directives-key",
+      "method": "PUT",
+      "path": "/api/prompt-directives/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-prompt-directives-custom-instructions",
+      "method": "PUT",
+      "path": "/api/prompt-directives/custom-instructions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+# Path -> label map for .github/workflows/labeler.yml (actions/labeler v5+ syntax).
+area/core:
+  - changed-files:
+      - any-glob-to-any-file: ["core/**"]
+area/migrations:
+  - changed-files:
+      - any-glob-to-any-file: ["core/app/src/main/resources/db/migration/**"]
+area/web:
+  - changed-files:
+      - any-glob-to-any-file: ["web/**"]
+area/services:
+  - changed-files:
+      - any-glob-to-any-file: ["services/**"]
+area/deploy:
+  - changed-files:
+      - any-glob-to-any-file: ["deploy/**", "scripts/vegaduta", "install.sh"]
+area/helm:
+  - changed-files:
+      - any-glob-to-any-file: ["deploy/helm/**"]
+area/infra:
+  - changed-files:
+      - any-glob-to-any-file: ["infra/**"]
+area/ci:
+  - changed-files:
+      - any-glob-to-any-file: [".github/**", "scripts/ci/**", ".githooks/**"]
+area/sdk:
+  - changed-files:
+      - any-glob-to-any-file: ["sdk/**"]
+area/examples:
+  - changed-files:
+      - any-glob-to-any-file: ["examples/**"]
+area/tests:
+  - changed-files:
+      - any-glob-to-any-file: ["tests/**"]
+area/contracts:
+  - changed-files:
+      - any-glob-to-any-file: ["contracts/**"]
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "**/*.md"]

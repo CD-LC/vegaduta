@@ -1,0 +1,23 @@
+-- Closes a known gap: RunCodeWorkspaceApprovalExecutor (code-intel's
+-- run_in_code_workspace approval flow) approved a run and executed it, but
+-- discarded the actual result - the tenant-admin who clicked "approve" had
+-- no way to ever see the command's stdout/stderr/exit code, making the
+-- approval close to useless in practice. execution_result carries a
+-- bounded (~32KB per stream, truncated) text summary of what actually
+-- happened, written by the executor itself right after the run completes
+-- (covers both a genuinely successful run and a run that executed but
+-- exited non-zero - see CodeWorkspaceResultParser's javadoc for why the
+-- latter is a normal outcome, not a thrown executor failure).
+--
+-- Nullable, same posture as execution_error (V3) and payload_json: only
+-- action types whose executor actually calls the new
+-- ApprovalRequest#recordExecutionResult ever populate this - every other
+-- row (channel sends, apply_code_workspace, etc) simply leaves it null.
+--
+-- V105 - checked both db/migration/tenant (max V104, agent_code_workspace/
+-- mcp_server_access_grant) and db/migration/controlplane (max V101,
+-- plan_limits) before picking this number, since Flyway version numbers
+-- are shared/compared across both directories and a collision there has
+-- broken a startup once already this session.
+ALTER TABLE approval_request
+    ADD COLUMN execution_result TEXT;

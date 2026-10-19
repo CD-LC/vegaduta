@@ -1,0 +1,91 @@
+/* Lint chip pinned to the top-right of the canvas column. Colours come from
+ * theme tokens (with fallbacks) so it reads in light and dark modes; severity
+ * is always carried by an icon and a word, never colour alone. */
+.wf-lint {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.wf-lint-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--wf-lint-c, var(--ax-amber, currentColor));
+  background: color-mix(in srgb, var(--wf-lint-c, var(--ax-amber, currentColor)) 14%, var(--ax-panel, var(--ax-bg, canvas)));
+  color: var(--ax-text, inherit);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.wf-lint-chip[data-severity="warn"] {
+  --wf-lint-c: var(--ax-amber, var(--hud-warn));
+}
+
+.wf-lint-chip[data-severity="error"] {
+  --wf-lint-c: var(--ax-red, var(--hud-magenta));
+}
+
+.wf-lint-chip:focus-visible,
+.wf-lint-item:focus-visible {
+  outline: 2px solid var(--ax-accent, var(--hud-cyan));
+  outline-offset: 2px;
+}
+
+.wf-lint-pop {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  width: min(340px, calc(100vw - 48px));
+  max-height: 260px;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-panel, var(--ax-bg, canvas));
+  color: var(--ax-text, inherit);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--ax-text, black) 18%, transparent);
+}
+
+.wf-lint-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.wf-lint-item svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.wf-lint-item:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ax-text, currentColor) 8%, transparent);
+}
+
+.wf-lint-item:disabled {
+  cursor: default;
+}
+
+.wf-lint-sev {
+  font-weight: 600;
+}

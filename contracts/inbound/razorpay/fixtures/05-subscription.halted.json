@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "headers": {
+      "X-Razorpay-Event-Id": "evt_fixture_halted_0000000001",
+      "X-Razorpay-Signature": "9416cc290698b30dfce3014734a1a263b0c48d913d1575c992c1e60bac12698b"
+    },
+    "note": "_meta is fixture-corpus metadata, not part of the body Razorpay sends - see contracts/README.md's Razorpay section. Schema validation runs against the body only (everything except _meta)."
+  },
+  "body": {
+    "entity": "event",
+    "account_id": "acc_fixture0000000001",
+    "event": "subscription.halted",
+    "contains": [
+      "subscription"
+    ],
+    "payload": {
+      "subscription": {
+        "entity": {
+          "id": "sub_fixture00000005",
+          "plan_id": "plan_fixture_premium_monthly",
+          "status": "halted",
+          "current_start": 1753000000,
+          "current_end": 1755678400,
+          "charge_at": 1755678400,
+          "total_count": 120,
+          "paid_count": 3,
+          "notes": {
+            "agentic_ai_tenant_id": "00000000-0000-4000-8000-0000000000f2"
+          }
+        }
+      }
+    },
+    "created_at": 1753000000
+  }
+}

@@ -1,0 +1,89 @@
+# =============================================================================
+# docker-compose.search.yml  -  OPTIONAL self-hosted web search (SearXNG)
+# -----------------------------------------------------------------------------
+# A free-to-run backend for the web_search / deep_research tools, so agents can
+# search without a paid search-API key. SearXNG is a metasearch engine you run;
+# it queries public search engines itself. Nothing starts unless the compose
+# profile `search` is enabled.
+#
+# Usage (from the repo root):
+#   1. In deploy/compose/.env set:
+#        SEARXNG_SECRET=<output of: openssl rand -hex 32>
+#        WEB_SEARCH_PROVIDER=searxng       # or keep brave and use SearXNG as the fallback:
+#        WEB_SEARCH_FALLBACK=searxng       #   WEB_SEARCH_PROVIDER=brave
+#        WEB_SEARCH_SEARXNG_BASE_URL=http://searxng:8080
+#   2. docker compose -f deploy/compose/docker-compose.yml \
+#        -f deploy/compose/docker-compose.search.yml --profile search up -d searxng core
+#
+# Including this file WITHOUT `--profile search` starts nothing new and changes
+# no behaviour: every WEB_SEARCH_* value below defaults to the base behaviour
+# (brave, no fallback) and core merely joins an empty extra network.
+#
+# Safety posture
+#   * No `ports:` - SearXNG is reachable only as http://searxng:8080 from core
+#     over its own network `search-net`. Never publish it or route it through
+#     the public proxy: an open instance is an open proxy.
+#   * `search-net` is not `internal` (SearXNG must reach the public engines),
+#     but only core and searxng are members, so SearXNG has no route to
+#     Postgres, Valkey, Keycloak or any other platform service.
+#   * The limiter / bot-detection is off (deploy/searxng/settings.yml) because
+#     the only client is core on a private network; that is also why no
+#     Valkey is needed here.
+# See docs/configuration.md ("Web search").
+# =============================================================================
+services:
+  searxng:
+    image: ${SEARXNG_IMAGE:-searxng/searxng:2026.10.9-f4822b3fc}
+    profiles: ["search"]
+    restart: unless-stopped
+    environment:
+      # Required by SearXNG at startup (it refuses the placeholder key).
+      # `scripts/vegaduta secrets` generates it (SECRET_SPECS).
+      SEARXNG_SECRET: ${SEARXNG_SECRET:?run scripts/vegaduta secrets}
+    volumes:
+      # settings.yml: json output enabled, limiter off, not a public instance.
+      # Read-only: nothing in the image needs to write its own config.
+      - ../searxng:/etc/searxng:ro
+    expose:
+      - "8080"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${SEARXNG_MEM_LIMIT:-512m}
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    networks:
+      - search-net
+
+  core:
+    environment:
+      # Every default is the base behaviour (application.yml app.web-search.*).
+      WEB_SEARCH_PROVIDER: ${WEB_SEARCH_PROVIDER:-brave}
+      WEB_SEARCH_FALLBACK: ${WEB_SEARCH_FALLBACK:-}
+      WEB_SEARCH_SEARXNG_BASE_URL: ${WEB_SEARCH_SEARXNG_BASE_URL:-}
+      WEB_SEARCH_SEARXNG_CATEGORIES: ${WEB_SEARCH_SEARXNG_CATEGORIES:-general}
+      WEB_SEARCH_SEARXNG_ENGINES: ${WEB_SEARCH_SEARXNG_ENGINES:-}
+      WEB_SEARCH_SEARXNG_LANGUAGE: ${WEB_SEARCH_SEARXNG_LANGUAGE:-}
+    networks:
+      - search-net
+
+networks:
+  search-net:
+    driver: bridge

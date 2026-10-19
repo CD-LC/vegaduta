@@ -1,0 +1,450 @@
+/* =========================================================================
+ * Screen 7 - Tools & MCP (design_handoff_axon/design_files/Tools.dc.html,
+ * task #546). McpPanel.js + tools/page.js - a left tools grid (built-ins +
+ * connected Google Workspace tools + registered MCP servers + an "add new"
+ * tile) plus a right-side inspector for whatever card is selected.
+ *
+ * Direct feedback: "pixel to pixel replacement according to template."
+ * Followed for every element the real McpRegistryController/
+ * McpCatalogService/GoogleOAuthService/AgentController backend can actually
+ * back up (confirmed by direct source read before writing any of this, same
+ * discipline as every other AXON screen). Deliberate departures from the
+ * mockup, each one because the field genuinely doesn't exist server-side:
+ *   1. Call count / success % / latency p50 in the mockup's "USAGE · LAST
+ *      24H" panel - there is no per-tool or per-MCP-server usage
+ *      aggregation anywhere in the backend (ToolCallLog is a raw per-call
+ *      row, not an aggregate; LlmCallMetricsService's pattern was never
+ *      replicated for tools). Replaced with a real "SERVER DETAILS" panel
+ *      (type, enabled state, registered/updated timestamps) for MCP
+ *      servers, and a real static sub-action table (see GoogleDrive/Gmail/
+ *      Calendar/SheetsToolCallback) for Google Workspace entries.
+ *   2. "TOOLS EXPOSED · 6" with named sub-tools (drive.list, drive.read...)
+ *      - real and kept for Google Workspace (the four ToolCallbacks really
+ *      do multiplex those named actions with real read/write semantics).
+ *      For generic MCP servers there's no structured sub-tool list
+ *      anywhere (Spring AI discovers a server's real tool names live, per
+ *      chat turn, via McpSyncClient.listTools() - see
+ *      AgentToolProvider#listAvailableToolsFor's javadoc) - shown honestly
+ *      as a note pointing at the Agents page's live per-agent tool picker
+ *      instead of a fabricated list.
+ *   3. "11 enabled / 40+ available" - real counts computed from
+ *      BUILT_IN_TOOLS.length + (Google connected ? 4 : 0) + registered
+ *      servers' actual enabled flags, against BUILT_IN_TOOLS.length + 4 +
+ *      the real catalog size (14, McpCatalogService) - never a rounded-up
+ *      placeholder.
+ *   4. "connected · OAuth" live status - real only for Google
+ *      (GoogleOAuthService's connection record has a real status/
+ *      connectedEmail). Generic MCP servers have no live health check, so
+ *      their status line reads "registered · enabled/disabled" instead.
+ *   5. "AVAILABLE TO AGENTS" avatar row - real cross-reference (same
+ *      derivation KnowledgePanel.js uses for exposedAgents) only for
+ *      Google Workspace, since google_drive/google_gmail/google_calendar/
+ *      google_sheets are the one place this file is certain of the exact
+ *      literal tool name agents' allowedToolNames would contain. For
+ *      built-ins and MCP servers, shown as a real link to the Agents
+ *      page's own live tool picker (AgentWorkbench.js) instead of a
+ *      count this file can't verify is accurate.
+ *   6. Category tabs - real, but relabeled from the mockup's All/Built-in/
+ *      Google Workspace/Data/Custom MCP to All/Built-in/Google Workspace/
+ *      MCP Servers/Custom, since "Data" isn't a field the catalog carries
+ *      and would have arbitrarily excluded real registered servers like
+ *      github/slack. "Custom" = registered servers whose name doesn't
+ *      match any catalog entry (i.e. added via the manual/Advanced form).
+ *   7. The auto-select banner's toggle - real feature
+ *      (ToolRelevanceSelector), but it's a global Spring property
+ *      (app.tools.auto-selection.enabled), not a per-tenant/per-agent
+ *      persisted setting with an API to flip - shown as a real, disabled
+ *      status pill ("platform default - always on") rather than a toggle
+ *      that would silently do nothing when clicked. */
+.ax-tl-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 2px 2px 16px;
+}
+
+.ax-tl-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  color: var(--ax-dim);
+}
+
+.ax-tl-breadcrumb strong {
+  color: var(--ax-text);
+  font-weight: 600;
+}
+
+.ax-tl-spacer {
+  flex: 1;
+}
+
+.ax-tl-search-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px;
+  border: 1px solid var(--ax-border2);
+  border-radius: 9px;
+  width: 240px;
+  color: var(--ax-dim);
+  transition: border-color 0.15s ease;
+}
+
+.ax-tl-search-row:focus-within {
+  border-color: var(--ax-cyan);
+}
+
+.ax-tl-search-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  color: var(--ax-text);
+  font-size: var(--fs-caption);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-tl-search-input:focus {
+  outline: none;
+}
+
+.ax-tl-search-input::placeholder {
+  color: var(--ax-dim);
+}
+
+/* Two-pane layout as a real CSS grid (was flex): a hard `minmax(0, 1fr)`
+ * content track next to a fixed inspector track. Flex let the inner card
+ * grid's min-content spill past the main column and render *under* the
+ * sticky inspector (the "not aligned / overlapping" report); explicit grid
+ * tracks make each column a hard boundary the content can't escape. */
+.ax-tl-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.ax-tl-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* --- Platform-matching palette (Tools / Integrations) -------------------
+ * Swap the loud AXON cyan/violet chrome for the app's shadcn tokens so this
+ * screen reads as the same product as the sidebar, buttons and every other
+ * redesigned surface (`--primary` is that shared indigo), and the card grid
+ * is calmer on the eyes: neutral resting cards, accent reserved for hover /
+ * selection. Scoped under .ax-tl-body so ProvidersPanel — which reuses
+ * .ax-tl-card on its own separate layout — is intentionally left alone. */
+.ax-tl-body .ax-tl-card:not(.ax-tl-card-disabled) {
+  background: var(--card);
+  border-color: var(--border);
+}
+.ax-tl-body .ax-tl-card:not(.ax-tl-card-disabled):hover {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+}
+.ax-tl-body .ax-tl-card-selected,
+.ax-tl-body .ax-tl-card-selected:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+  background: color-mix(in srgb, var(--primary) 7%, var(--card));
+}
+.ax-tl-body .ax-tl-tab:hover {
+  color: var(--foreground);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+.ax-tl-body .ax-tl-tab-active {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 32%, transparent);
+  color: var(--primary);
+}
+.ax-tl-body .ax-tl-banner {
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+  border-color: color-mix(in srgb, var(--primary) 24%, transparent);
+}
+.ax-tl-body .ax-tl-banner-icon {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  color: var(--primary);
+}
+.ax-tl-body .ax-tl-banner-status {
+  color: var(--primary);
+}
+.ax-tl-body .ax-tl-inspector-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+/* Auto-select banner */
+.ax-tl-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(124, 92, 255, 0.12), rgba(79, 227, 227, 0.06));
+  border: 1px solid rgba(124, 92, 255, 0.24);
+}
+
+.ax-tl-banner-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: rgba(124, 92, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ax-violet);
+  flex-shrink: 0;
+}
+
+.ax-tl-banner-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-tl-banner-title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-tl-banner-sub {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.ax-tl-banner-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--fs-label);
+  color: var(--ax-violet);
+  font-family: var(--font-mono), monospace;
+  flex-shrink: 0;
+}
+
+/* Category tabs */
+.ax-tl-tabs {
+  display: flex;
+  gap: 9px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  flex-wrap: wrap;
+}
+
+.ax-tl-tab {
+  padding: 7px 14px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border2);
+  color: var(--ax-mid);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-tl-tab:hover {
+  color: var(--ax-text);
+  border-color: var(--ax-cyan);
+}
+
+.ax-tl-tab-active {
+  background: rgba(79, 227, 227, 0.12);
+  border-color: rgba(79, 227, 227, 0.28);
+  color: var(--ax-cyan);
+}
+
+.ax-tl-section-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.ax-tl-grid {
+  display: grid;
+  /* minmax(0, 1fr) — NOT bare 1fr. Bare 1fr resolves to minmax(auto, 1fr),
+   * whose `auto` floor is each card's min-content; a nowrap card title
+   * (e.g. "Long-term memory (remember_fact)") then forces its track wider
+   * than an even share, overflowing the whole grid past the content column.
+   * A 0 floor lets every track shrink evenly so titles truncate instead. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1180px) {
+  .ax-tl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phone-width pass (#1028, mobile responsiveness reversal) - this grid is
+ * shared by /tools (McpPanel + UserToolScriptsPanel), /providers
+ * (ProvidersPanel) and /admin/channels (ChannelsPanel's connection cards),
+ * so one rule here fixes all three surfaces. Two columns still "fits" at a
+ * 360-430px phone width without literally overflowing (card text truncates/
+ * wraps rather than clipping), but each column is only ~150px - the
+ * icon+title+meta head and the description text below it get so cramped
+ * they're hard to read and the card stops being a comfortable tap target.
+ * One column matches how every other card grid in this file already
+ * collapses on a phone. */
+@media (max-width: 640px) {
+  .ax-tl-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-tl-card {
+  padding: 15px 16px;
+  background: rgba(79, 227, 227, 0.05);
+  border: 1px solid rgba(79, 227, 227, 0.22);
+  border-radius: 13px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.ax-tl-card:hover {
+  border-color: var(--ax-cyan);
+  transform: translateY(-1px);
+}
+
+.ax-tl-card-selected {
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 0 1px var(--ax-cyan);
+}
+
+.ax-tl-card-disabled {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--ax-border2);
+  opacity: 0.75;
+}
+
+.ax-tl-card-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.ax-tl-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ax-tl-card-title-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-tl-card-title {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ax-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-tl-card-meta {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  margin-top: 1px;
+}
+
+.ax-tl-card-desc {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  margin-top: 10px;
+  line-height: 1.45;
+}
+
+/* Transitional per-card state badge (MCP-UX follow-up, 2026-07-26) - shown
+ * on the grid tile itself for the ~seconds after Add/Activate/Connect/Enable
+ * is clicked (adding/connecting/enabling), then testing (amber, once a real
+ * connection attempt is in flight server-side) until the next refetch shows
+ * the steady-state dot + ReadinessBadge. Primary feedback per the product
+ * owner's ask; the global success/error alert banners above the grid stay
+ * as a secondary confirmation. */
+.ax-tl-card-phase {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  width: fit-content;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-cyan);
+  background: color-mix(in srgb, var(--ax-cyan) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ax-cyan) 30%, transparent);
+}
+
+.ax-tl-card-phase-testing {
+  color: var(--ax-amber);
+  background: color-mix(in srgb, var(--ax-amber) 12%, transparent);
+  border-color: color-mix(in srgb, var(--ax-amber) 30%, transparent);
+}
+
+.ax-tl-card-add {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 118px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.ax-tl-card-add:hover {
+  border-color: var(--ax-cyan);
+}
+
+.ax-tl-card-add-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ax-dim);
+}
+
+.ax-tl-card-add-label {
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+  margin-top: 9px;
+}
+
+.ax-tl-card-add-sub {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  margin-top: 2px;
+}

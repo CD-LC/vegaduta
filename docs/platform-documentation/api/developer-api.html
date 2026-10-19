@@ -1,0 +1,155 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Developer API &amp; MCP Server — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="api" data-page="developer-api.html" data-doc="VD-API-005" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="overview.html">API Reference</a><span class="sep">/</span>Developer API &amp; MCP Server</div>
+<div class="doc-meta" data-auto></div>
+<h1>Developer API &amp; MCP Server</h1>
+
+<dl class="props">
+  <dt>Surfaces</dt><dd>(1) Plain REST <code>/api/dev/v1/**</code>; (2) inbound MCP server <code>/mcp</code>; (3) A2A agent-to-agent cards and JSON-RPC. All external programmatic entry points other than the normal JWT API.</dd>
+  <dt>Credential</dt><dd>A tenant-scoped API key, <code>Authorization: Bearer vmcp_&lt;key&gt;</code>, issued from <code>/api/mcpserver/grants</code>. A2A uses the normal Keycloak JWT instead.</dd>
+  <dt>Module</dt><dd><code>core/mcpserver</code>, active only with the Spring profile <code>mcpserver</code>. Without it these routes do not exist.</dd>
+</dl>
+
+<h2>API keys ("grants")</h2>
+<p>
+  A grant is a named key plus the exact agents, workflows and knowledge collections it may touch. One key system serves both the
+  MCP server and the REST developer API. Management is <code>McpServerAccessController</code>, base <code>/api/mcpserver/grants</code>,
+  authenticated with a normal Keycloak JWT.
+</p>
+<table>
+  <thead><tr><th>Verb and path</th><th>Gate</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST /api/mcpserver/grants</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>Create. Body: <code>name</code> (required), <code>exposedAgentIds[]</code>, <code>exposedWorkflowIds[]</code>, <code>exposedKnowledgeCollectionIds[]</code>. 201 with <code>{grant, rawApiKey}</code>. The raw key is shown once.</td></tr>
+    <tr><td><code>GET /api/mcpserver/grants</code></td><td>authenticated</td><td>List grants: <code>id, name, apiKeyDisplayPrefix, enabled, exposed*Ids, createdAt, updatedAt, lastUsedAt</code>. Never the key.</td></tr>
+    <tr><td><code>PUT /api/mcpserver/grants/{id}</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>Replace the exposed id sets.</td></tr>
+    <tr><td><code>PATCH /api/mcpserver/grants/{id}</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>Body <code>{"enabled": true|false}</code>.</td></tr>
+    <tr><td><code>POST /api/mcpserver/grants/{id}/rotate</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>New key for the same grant; the old key stops working immediately. Returns <code>{grant, rawApiKey}</code>.</td></tr>
+    <tr><td><code>DELETE /api/mcpserver/grants/{id}</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>Revoke; 204.</td></tr>
+    <tr><td><code>GET /api/mcpserver/grants/{id}/tool-calls</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td><td>Tool-call log attributed to that grant (agentId, sessionId, toolName, toolInput, toolOutput, errorMessage, startedAt, completedAt); newest first. Contains raw inputs and outputs.</td></tr>
+  </tbody>
+</table>
+<p>Keys have the prefix <code>vmcp_</code> and are stored hashed (<code>McpApiKeyHasher</code>). Treat them like passwords; never commit or paste them.</p>
+
+<h3>How a key is authenticated</h3>
+<pre class="mermaid">
+sequenceDiagram
+  participant C as Caller
+  participant F as McpApiKeyAuthFilter
+  participant G as Grant service
+  participant H as Handler (/mcp or /api/dev/v1)
+  C->>F: Authorization: Bearer vmcp_...
+  F->>G: resolve tenant schema from key
+  G-->>F: schema (else 401 "Invalid API key.")
+  F->>G: load grant in tenant, check hash and enabled
+  F->>F: rate limit per grant (429 when exceeded)
+  F->>H: TenantContext + McpCallerContext(exposed ids)
+  H->>H: id in exposed set? else 403
+</pre>
+<ul>
+  <li>Missing or malformed header: <code>401</code>, body <code>{"error":"Missing or malformed Authorization: Bearer &lt;api-key&gt; header."}</code>. Unknown, disabled or deleted key: <code>401 Invalid API key.</code></li>
+  <li>Rate limit: fixed one-minute window per grant, default <code>app.mcpserver.rate-limit.max-calls-per-minute=60</code>; exceeding returns <code>429</code> <code>Rate limit exceeded - try again shortly.</code> The limiter fails open to an in-process limit if Redis is unreachable.</li>
+  <li>The filter is registered for <code>/mcp/*</code> and <code>/api/dev/*</code> only. Those paths sit on a dedicated Spring Security chain with no JWT processing, otherwise a <code>vmcp_</code> key is rejected as a malformed JWT (<a href="authentication.html">Authentication</a>).</li>
+  <li>Every call is audit-logged under actor <code>dev-api:&lt;grantId&gt;</code> (action <code>mcp.grant.dev_api_call</code> for the REST surface); the synthetic role is <code>ROLE_mcp-external</code>.</li>
+</ul>
+
+<h2>Developer REST API (<code>/api/dev/v1</code>)</h2>
+<p><code>DeveloperApiController</code>. Plain JSON in and out, callable with any HTTP client. Base: <code>https://api.example.com/api/dev/v1</code>.</p>
+<table>
+  <thead><tr><th>Verb and path</th><th>Request</th><th>Response</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /agents</code></td><td>none</td><td>200: array of <code>{id, name}</code> for the agents the key exposes.</td></tr>
+    <tr><td><code>GET /workflows</code></td><td>none</td><td>200: array of <code>{id, name}</code>.</td></tr>
+    <tr><td><code>POST /agents/{agentId}/chat</code></td><td><code>{message (required), sessionId?}</code></td><td>200 <code>{reply, sessionId}</code>: the full reply, <em>not</em> streamed (chunks are joined server-side). Omitted <code>sessionId</code> generates <code>dev-api-&lt;grantId&gt;-&lt;uuid&gt;</code>. Reuse it to continue a conversation.</td></tr>
+    <tr><td><code>POST /workflows/{workflowId}/run</code></td><td>optional <code>{input?}</code> (string)</td><td>200 <code>WorkflowRunResponse</code> (same shape as the JWT workflow API). Synchronous.</td></tr>
+    <tr><td><code>GET /workflows/{workflowId}/runs/{runId}</code></td><td>none</td><td>200 <code>WorkflowRunResponse</code>; 404 if the run does not belong to that workflow.</td></tr>
+  </tbody>
+</table>
+<h3>Status codes (from the controller)</h3>
+<table>
+  <thead><tr><th>Code</th><th>When</th></tr></thead>
+  <tbody>
+    <tr><td>401 / 429</td><td>Key problems / rate limit (filter, above).</td></tr>
+    <tr><td>403</td><td>Agent or workflow id is outside the key's exposed set. Body <code>{"error": "..."}</code>.</td></tr>
+    <tr><td>422</td><td>Chat <code>message</code> missing or blank.</td></tr>
+    <tr><td>404</td><td>Run not found for that workflow.</td></tr>
+    <tr><td>502</td><td>Agent call, workflow run or run-status read threw; body <code>{"error": "Agent call failed: ..."}</code> and similar.</td></tr>
+  </tbody>
+</table>
+<pre><code>curl -X POST https://api.example.com/api/dev/v1/agents/&lt;agentId&gt;/chat \
+  -H "Authorization: Bearer vmcp_&lt;key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello","sessionId":"my-session-1"}'</code></pre>
+<p>
+  Streaming is not available on this surface; for token streaming use the JWT endpoint
+  (<a href="streaming.html">Streaming</a>). Rate limits other than the per-grant window above, and any per-plan quotas on developer
+  keys, are not documented in the repository.
+</p>
+
+<h2>MCP server (<code>/mcp</code>)</h2>
+<p>
+  Configuration (<code>core/app-config/.../application-mcpserver.yml</code>): server name <code>vegaduta-mcp-server</code>, version
+  <code>1.0.0</code>, type <code>SYNC</code>, protocol <code>STREAMABLE</code> HTTP, endpoint <code>/mcp</code>. Use any MCP client that supports
+  streamable HTTP with the <code>Authorization: Bearer vmcp_&lt;key&gt;</code> header. The older SSE transport (<code>GET /sse</code>) is not
+  what this deployment serves.
+</p>
+<p>
+  The advertised tool list is fixed and global (an application-scoped bean), so per-tenant curation is enforced inside each tool
+  via the key's exposed sets. A tenant's agents are therefore never listed to another tenant's key.
+</p>
+<table>
+  <thead><tr><th>Tool</th><th>Inputs</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr><td><code>list_my_agents</code></td><td>none</td><td>Agents the key exposes.</td></tr>
+    <tr><td><code>call_agent</code></td><td><code>agent_id</code> (required), <code>message</code> (required), <code>session_id</code></td><td>Sends a message and returns the reply; reuse <code>session_id</code> for follow-ups.</td></tr>
+    <tr><td><code>list_my_workflows</code></td><td>none</td><td>Workflows the key exposes.</td></tr>
+    <tr><td><code>call_workflow</code></td><td><code>workflow_id</code> (required), <code>input</code></td><td>Runs a workflow.</td></tr>
+    <tr><td><code>search_knowledge</code></td><td><code>query</code> (required), <code>top_k</code> (default 5, capped at 20)</td><td>Searches the exposed knowledge collections.</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-note">
+  <div class="callout-title">Outbound MCP is separate</div>
+  Connecting VegaDūta agents to <em>other</em> MCP servers is the client side, managed at <code>/api/mcp/registry</code> (<code>McpRegistryController</code>,
+  writes need <code>PERM_MANAGE_INTEGRATIONS</code>). Security posture is summarised on <a href="../security/threat-model.html">Threat Model</a>.
+</div>
+
+<h2>A2A (Agent2Agent)</h2>
+<table>
+  <thead><tr><th>Verb and path</th><th>Auth</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /.well-known/agent-card.json</code> (legacy alias <code>/.well-known/agent.json</code>)</td><td>none</td><td>Platform Agent Card (<code>A2aAgentCardController</code>); cached 5 minutes; carries no tenant data.</td></tr>
+    <tr><td><code>GET /.well-known/jwks.json</code></td><td>none</td><td>Ed25519 public key(s) for card signatures; empty key set when signing is off.</td></tr>
+    <tr><td><code>GET /api/agents/{agentId}/a2a/agent-card.json</code></td><td>JWT, agent <code>RUNNER</code></td><td>Per-agent card; <code>no-store</code>.</td></tr>
+    <tr><td><code>POST /api/a2a</code></td><td>JWT</td><td>JSON-RPC 2.0 platform endpoint; target agent from <code>params.metadata.agentId</code> or <code>params.message.metadata.agentId</code>.</td></tr>
+    <tr><td><code>POST /api/agents/{agentId}/a2a</code></td><td>JWT</td><td>Agent-scoped JSON-RPC endpoint.</td></tr>
+  </tbody>
+</table>
+<ul>
+  <li>Methods (either name accepted): <code>SendMessage</code> / <code>message/send</code>, <code>SendStreamingMessage</code> / <code>message/stream</code> (answers as <code>text/event-stream</code>), <code>GetTask</code> / <code>tasks/get</code>, <code>CancelTask</code> / <code>tasks/cancel</code>. Anything else is method-not-found.</li>
+  <li>Request header <code>A2A-Version</code> chooses the response dialect only. Body must be a JSON object with <code>jsonrpc: "2.0"</code> and a <code>method</code>.</li>
+  <li>Failures are HTTP 200 with a JSON-RPC <code>error</code> member, per the binding.</li>
+  <li>Controller is on when <code>app.a2a.enabled</code> is true (default true). The card's <code>skills</code> list is deliberately empty.</li>
+</ul>
+
+<h2>Other developer-facing surfaces</h2>
+<ul>
+  <li>Outbound event webhooks and signature verification: <a href="webhooks.html">Webhooks &amp; Callbacks</a>.</li>
+  <li>AG-UI runs for third-party front ends: <a href="streaming.html">Streaming</a>.</li>
+  <li>IDE and browser clients use the normal JWT API (client id <code>agentic-ai-ide</code> is in the allowed-<code>azp</code> list). Such clients are not part of this repository.</li>
+  <li>The public marketing-side API reference is <code>web/app/api-reference/page.tsx</code> (curated, not generated).</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/mcpserver/src/main/java/com/agenticai/core/mcpserver/DeveloperApiController.java</code> — all five <code>/api/dev/v1</code> routes, DTO records, status codes.</li>
+  <li><code>.../McpServerAccessController.java</code> and <code>dto/*</code> — grant lifecycle and shapes; <code>McpApiKeyAuthFilter.java</code>, <code>McpApiKeyHasher.java</code> (<code>vmcp_</code>), <code>McpServerRateLimiter.java</code>, <code>McpServerToolConfig.java</code>, <code>tools/*ToolCallback.java</code> (tool names and input schemas).</li>
+  <li><code>core/app-config/src/main/resources/application-mcpserver.yml</code> — server name, protocol, endpoint, rate-limit default.</li>
+  <li><code>core/security/.../SecurityConfig.java</code> — <code>mcpServerFilterChain</code>, grant-route gates.</li>
+  <li><code>core/agents/.../a2a/A2aAgentCardController.java</code>, <code>A2aJsonRpcController.java</code>, <code>A2aVersion.java</code>.</li>
+  <li><a href="../security/threat-model.html">Threat Model</a>; <a href="../functional/agents-runtime.html">Agents &amp; Agent Runtime</a> (FR-AGT-09).</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

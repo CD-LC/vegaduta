@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>tenancy</artifactId>
+  <name>tenancy</name>
+  <description>Tenant/AppUser, schema-per-tenant Hibernate multi-tenancy, signup/provisioning, Flyway migration-per-schema. Depends on: admin (Keycloak user provisioning), billing (checkout on signup), security (TenantContext), storage (Master Roadmap 2026 item #22's tenant-data-export object storage).</description>
+
+  <dependencies>
+    <!-- HealthIndicator API for TenantMigrationReadinessIndicator. Provided: each app shape
+         (core, core-jobs, core-worker) brings spring-boot-starter-actuator at runtime. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-actuator</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>admin</artifactId>
+    </dependency>
+    <!-- TenantApiKeyService writes audit rows; reachable transitively via
+         admin, declared directly per this repo's
+         explicit-declare-what-you-import convention. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>billing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- Master Roadmap 2026 item #22 (GDPR/data-residency basics, §G) -
+         TenantDataExportService writes the export it builds to
+         FileStorageService (same S3-compatible object storage
+         SarvamGeneratedAudioService/KnowledgeDocumentService already use),
+         rather than inventing a second storage mechanism for one more kind
+         of file. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <!-- app.datasource.auth: token-based DB login (AWS IAM / Azure Entra / Cloud SQL IAM). tenancy owns the
+         Flyway + schema-per-tenant DataSource use, so every app shape (api, jobs, worker, migrate) gets it here. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>dbauth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- SignupRateLimiter: Redis-backed INCR+EXPIRE per-IP signup throttle. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <!-- Demo sandbox (tenancy/demo) - DemoSessionExpiryJob's pre-expiry
+         reminder needs the JavaMailSender API at compile time. Injected via
+         ObjectProvider, so the bean being absent (spring.mail.host unset) is
+         a supported runtime state, not a startup failure - identical
+         treatment and identical reasoning to platform/NewsletterService,
+         which declares this same starter for the same reason. No version
+         pinned - managed by the spring-boot-starter-parent BOM. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <!--
+      Flyway migrations themselves (db/migration/controlplane, db/migration/tenant)
+      stay in the "app" module's resources classpath - Flyway discovers them by
+      classpath location, not by which jar declares the flyway-core dependency, and
+      TenantSchemaMigrator/ExistingTenantSchemaMigrationRunner (here) need the
+      Flyway *API* at compile time regardless of where the .sql files physically live.
+    -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
+    <!-- F-14 (2026-08-07) - TenantSchemaResolver counts every public-schema
+         fallback (tenant.context.public.fallback). Reachable transitively,
+         but declared directly per this repo's explicit-declare-what-you-import
+         convention (same note as core/agents' micrometer entry). Version
+         managed by the parent BOM. -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

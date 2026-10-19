@@ -1,0 +1,9 @@
+/* TEAM */
+VegaDūta — AI staff, not software.
+Team: VegaDūta contributors (open source, Apache-2.0)
+
+/* SITE */
+Last update: 2026-10-03
+Language: English, Hindi, and 27 other Indian languages
+Standards: HTML5, CSS3, JSON-LD
+Components: Next.js, React, Tailwind CSS

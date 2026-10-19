@@ -1,0 +1,56 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-sarvam-audio",
+      "method": "GET",
+      "path": "/api/sarvam/audio",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-sarvam-audio-id",
+      "method": "GET",
+      "path": "/api/sarvam/audio/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-sarvam-credential",
+      "method": "DELETE",
+      "path": "/api/sarvam/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-sarvam-credential",
+      "method": "POST",
+      "path": "/api/sarvam/credential",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.apiKey"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-sarvam-credential-status",
+      "method": "GET",
+      "path": "/api/sarvam/credential/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,491 @@
+/* =========================================================================
+ * Screen 3 - Agents + Playground (design_handoff_axon/design_files/
+ * Agents.dc.html) - a build-and-test screen: left config panel (identity,
+ * persona/system prompt, model & generation sliders, knowledge collections,
+ * tools/MCP grid), right 492px live Playground pane. Same --ax-* tokens as
+ * the Dashboard rebuild above, own ax-agent- and ax-pg- prefixes since this
+ * is a different screen's component tree. */
+
+.ax-agent-shell {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .ax-agent-shell {
+    flex-direction: column;
+  }
+}
+
+.ax-agent-config {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ax-agent-card {
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--ax-text);
+}
+
+.ax-agent-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 11px;
+}
+
+.ax-agent-card-label {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+}
+
+.ax-agent-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-label);
+  color: var(--ax-violet);
+  font-family: var(--font-mono), monospace;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.ax-agent-card-action:hover {
+  color: var(--ax-cyan);
+}
+
+/* Identity */
+.ax-agent-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ax-agent-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--ax-cyan), var(--ax-violetd));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #05070d;
+  flex-shrink: 0;
+  box-shadow: 0 0 22px rgba(79, 227, 227, 0.35);
+}
+
+.ax-agent-identity-main {
+  flex: 1;
+  min-width: 160px;
+}
+
+.ax-agent-name {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-agent-name-input {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--ax-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--ax-border);
+  padding: 0 0 2px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.ax-agent-name-input:focus {
+  outline: none;
+  border-bottom-color: var(--ax-cyan);
+}
+
+.ax-agent-sub {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  margin-top: 2px;
+}
+
+.ax-agent-badges {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.ax-agent-badge {
+  padding: 5px 11px;
+  border-radius: 100px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  background: var(--ax-chip);
+  border: 1px solid var(--ax-border);
+  color: var(--ax-mid);
+}
+
+.ax-agent-badge-cyan {
+  background: rgba(79, 227, 227, 0.12);
+  border-color: rgba(79, 227, 227, 0.28);
+  color: var(--ax-cyan);
+}
+
+.ax-agent-badge-violet {
+  background: rgba(124, 92, 255, 0.1);
+  border-color: rgba(124, 92, 255, 0.28);
+  color: var(--ax-violet);
+}
+
+/* Persona / system prompt */
+.ax-agent-prompt-text {
+  font-size: var(--fs-meta);
+  line-height: 1.65;
+  color: var(--ax-mid);
+  white-space: pre-wrap;
+}
+
+.ax-agent-prompt-textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+  color: var(--ax-text);
+  background: transparent;
+  border: 1px solid var(--ax-border);
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-family: inherit;
+}
+
+.ax-agent-prompt-textarea:focus {
+  outline: none;
+  border-color: var(--ax-cyan);
+}
+
+.ax-agent-readonly-note {
+  margin-top: 8px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-dim);
+}
+
+/* Model & generation */
+.ax-agent-model-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(124, 92, 255, 0.28);
+  background: rgba(124, 92, 255, 0.1);
+  font-size: var(--fs-caption);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-violet);
+}
+
+.ax-agent-gen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 14px;
+}
+
+@media (max-width: 720px) {
+  .ax-agent-gen-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-slider-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  margin-bottom: 7px;
+}
+
+.ax-slider-head-label {
+  color: var(--ax-mid);
+}
+
+.ax-slider-head-value {
+  color: var(--ax-cyan);
+}
+
+/* Native range input, restyled to the design's thin gradient track + glow
+ * thumb - kept a real <input type="range"> (not a decorative div) so drag,
+ * keyboard, and touch interaction all work for free. */
+.ax-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, var(--ax-cyan), var(--ax-violetd)) 0 / var(--ax-slider-fill, 50%) 100% no-repeat,
+    var(--ax-track);
+  cursor: pointer;
+}
+
+.ax-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--ax-text);
+  box-shadow: 0 0 8px rgba(79, 227, 227, 0.6);
+  margin-top: 0;
+  border: none;
+}
+
+.ax-slider::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--ax-text);
+  box-shadow: 0 0 8px rgba(79, 227, 227, 0.6);
+  border: none;
+}
+
+.ax-slider::-moz-range-track {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ax-track);
+}
+
+.ax-slider::-moz-range-progress {
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--ax-cyan), var(--ax-violetd));
+}
+
+.ax-slider-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-cyan);
+  background: none;
+  border: 1px solid rgba(79, 227, 227, 0.28);
+  border-radius: 100px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.ax-slider-save:hover {
+  background: rgba(79, 227, 227, 0.1);
+}
+
+/* Knowledge collection chips */
+.ax-agent-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.ax-agent-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  background: rgba(79, 227, 227, 0.08);
+  border: 1px solid rgba(79, 227, 227, 0.24);
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+}
+
+.ax-agent-chip-icon {
+  color: var(--ax-cyan);
+}
+
+.ax-agent-chip-dashed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  border: 1px dashed var(--ax-border);
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  background: none;
+  cursor: pointer;
+}
+
+.ax-agent-chip-dashed:hover {
+  border-color: var(--ax-cyan);
+  color: var(--ax-cyan);
+}
+
+/* Task #959 - per-agent reliability panel: a small stat-tile row (avg
+ * response time / success rate / total calls) plus a compact recent-failure
+ * list, styled to match the existing .ax-agent-gen-grid / .ax-agent-chip
+ * lineage rather than inventing a new visual language for this one card. */
+.ax-agent-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .ax-agent-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-agent-stat-tile {
+  background: var(--ax-chip);
+  border: 1px solid var(--ax-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.ax-agent-stat-tile-label {
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.06em;
+  color: var(--ax-mid);
+}
+
+.ax-agent-stat-tile-value {
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  color: var(--ax-text);
+  margin-top: 4px;
+}
+
+.ax-agent-stat-tile-value-muted {
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  color: var(--ax-mid);
+}
+
+.ax-agent-failure-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.ax-agent-failure-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: rgba(255, 99, 99, 0.07);
+  border: 1px solid rgba(255, 99, 99, 0.22);
+}
+
+.ax-agent-failure-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-mid);
+}
+
+.ax-agent-failure-row-message {
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tools / MCP grid */
+.ax-agent-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+@media (max-width: 720px) {
+  .ax-agent-tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-agent-tool-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--ax-border);
+}
+
+.ax-agent-tool-card-on {
+  background: rgba(79, 227, 227, 0.06);
+  border-color: rgba(79, 227, 227, 0.2);
+}
+
+.ax-agent-tool-card-warn {
+  background: rgba(245, 181, 68, 0.05);
+  border-color: rgba(245, 181, 68, 0.22);
+}
+
+.ax-agent-tool-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ax-mid);
+  flex-shrink: 0;
+}
+
+.ax-agent-tool-icon-on {
+  background: rgba(79, 227, 227, 0.15);
+  color: var(--ax-cyan);
+}
+
+.ax-agent-tool-icon-warn {
+  background: rgba(245, 181, 68, 0.15);
+  color: var(--ax-amber);
+}
+
+.ax-agent-tool-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-agent-tool-name {
+  font-size: var(--fs-caption);
+  color: var(--ax-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ax-agent-tool-sub {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-agent-tool-sub-warn {
+  color: var(--ax-amber);
+}

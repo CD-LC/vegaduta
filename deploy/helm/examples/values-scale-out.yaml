@@ -1,0 +1,33 @@
+# Run the API on several replicas, and keep the rest of the stack safe for it.
+# Design and the reasoning behind every line: docs/architecture/ADR-0014-horizontal-scaling.md.
+# Combine with values-autoscaling.yaml to let the replica count follow load instead of staying fixed.
+#
+#   helm upgrade --install vegaduta deploy/helm/charts/vegaduta -f values.yaml \
+#     -f deploy/helm/examples/values-scale-out.yaml
+#
+# Before you use it:
+#  * Valkey must be reachable by every pod and survive a restart (an external managed Valkey/Redis, or the
+#    bundled one with persistence). Every per-pod store moves to it.
+#  * Create the A2A signing key pair in the app Secret (APP_A2A_SIGNING_PRIVATE_KEY / _PUBLIC_KEY). The
+#    flag below is your statement that you did; core refuses to start with replicaStrict if the key is missing.
+#  * Check the database connection budget: the chart refuses a combination that could open more connections
+#    than the server allows (postgres.parameters.max_connections, or global.postgresql.maxConnections).
+
+core:
+  replicaCount: 3
+  # Boot fails on a fatal multi-replica finding instead of only logging it.
+  replicaStrict: true
+  replicaReadiness:
+    a2aTaskStoreRedis: true
+    abuseThrottleRedis: true
+    mcpRegistryRedis: true
+    a2aSigningKeysPinned: true
+  # Long agent turns: 10s preStop + 300s drain + 20s margin. A pod that is removed (rollout, scale-in,
+  # node drain) lets the chat streams already open on it finish for up to the drain window.
+  terminationGracePeriodSeconds: 330
+
+global:
+  core:
+    extraEnv:
+      APP_SHUTDOWN_DRAIN_SECONDS: "300"
+      APP_SHUTDOWN_CONTAINER_GRACE_SECONDS: "330"

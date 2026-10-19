@@ -1,0 +1,69 @@
+# "lite" Spring profile - single-node / self-hosted install with the fewest
+# moving parts. Opt-in and additive like every other profile here: nothing in
+# this file applies unless `lite` is in SPRING_PROFILES_ACTIVE.
+#
+# Intended profile set (no `workflow`, so no Kafka/Redpanda is needed):
+#   SPRING_PROFILES_ACTIVE=security,knowledge,graph-memory,lite
+#
+# What lite changes vs. the default profile set:
+#   - tracing off (no OTLP collector / Langfuse needed)
+#   - file storage on the local filesystem instead of MinIO/S3
+#   - short Redis command timeout so a missing/slow Redis degrades fast
+#   - workflows run on the in-process (legacy) engine; no Temporal
+#   - the mail and telegram settings that normally ship inside the
+#     `workflow` profile are copied here, so email/telegram outputs and
+#     channels keep working without activating `workflow`
+#
+# Every value stays env-overridable; the env var names are unchanged from
+# the files these blocks were copied from.
+#
+# Embeddings without the Python sidecar are a separate opt-in that also works
+# in lite: APP_EMBEDDINGS_PROVIDER=openai-compatible (see
+# application-knowledge.yml's app.embeddings block).
+
+management:
+  tracing:
+    enabled: false
+    sampling:
+      probability: 0.0
+  otlp:
+    tracing:
+      export:
+        enabled: false
+
+app:
+  storage:
+    type: ${APP_STORAGE_TYPE:local}
+    local:
+      path: ${APP_STORAGE_LOCAL_PATH:/data/storage}
+  workflow:
+    execution-engine: legacy
+  # Copied (not moved) from application-workflow.yml - keep the two in sync.
+  telegram:
+    bot-token: ${TELEGRAM_BOT_TOKEN:}
+    webhook-base-url: ${TELEGRAM_WEBHOOK_BASE_URL:}
+    # No public URL on a laptop or office server: receive messages by long polling.
+    # Ignored when a webhook base URL is set. Run in ONE process per bot.
+    polling:
+      enabled: ${TELEGRAM_POLLING_ENABLED:true}
+  mail:
+    from: ${WORKFLOW_MAIL_FROM:workflows@agentic-ai.local}
+
+spring:
+  data:
+    redis:
+      timeout: 2s
+  # Copied (not moved) from application-workflow.yml - keep the two in sync.
+  # Leave SMTP_HOST unset to leave the email channel unconfigured; every
+  # consumer checks spring.mail.host and skips gracefully.
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

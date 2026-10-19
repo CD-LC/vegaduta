@@ -1,0 +1,227 @@
+/* Observe-mode chrome around the canvas (banner, stage, rail slot, story,
+ * dock placeholder). Theme tokens only: --ax-* first, --hud-* fallback, so
+ * both :root[data-mode] values render without literals. */
+
+.rob-banner,
+.rob-story,
+.rob-dock-empty {
+  --rob-text: var(--ax-text, var(--text-primary));
+  --rob-mid: var(--ax-mid, var(--text-muted));
+  --rob-dim: var(--ax-dim, var(--hud-text-dim));
+  --rob-border: var(--ax-border, var(--surface-border));
+  --rob-border2: var(--ax-border2, var(--surface-border-strong));
+  --rob-panel: var(--ax-panel, var(--surface-card, var(--hud-panel)));
+  --rob-accent: var(--ax-accent2, var(--ax-cyan, var(--hud-cyan)));
+  --rob-ok: var(--ax-green, var(--hud-ok));
+  --rob-err: var(--ax-red, var(--hud-magenta));
+  --rob-warn: var(--ax-amber, var(--hud-warn));
+  --rob-live: var(--ax-cyan, var(--hud-cyan));
+}
+
+/* --- banner ------------------------------------------------------------- */
+.rob-banner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  min-width: 0;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--rob-border2);
+  border-left: 3px solid var(--rob-accent);
+  border-radius: 12px;
+  background: var(--rob-panel);
+  color: var(--rob-text);
+  font-size: 12.5px;
+}
+.rob-banner[data-tone="live"] { border-left-color: var(--rob-live); }
+.rob-banner[data-tone="failed"] { border-left-color: var(--rob-err); }
+.rob-banner[data-tone="completed"] { border-left-color: var(--rob-ok); }
+.rob-banner[data-tone="paused"],
+.rob-banner[data-tone="awaiting"] { border-left-color: var(--rob-warn); }
+
+.rob-banner-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; min-width: 0; }
+.rob-banner[data-tone="live"] .rob-banner-state { color: var(--rob-live); }
+.rob-banner[data-tone="failed"] .rob-banner-state { color: var(--rob-err); }
+.rob-banner-title { color: var(--rob-text); }
+.rob-banner-meta { display: inline-flex; align-items: center; gap: 10px; color: var(--rob-mid); min-width: 0; }
+.rob-mono { font-family: var(--font-mono), monospace; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.rob-banner-spacer { flex: 1; }
+
+.rob-compare {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 4px 1px 8px;
+  border-radius: 999px;
+  border: 1px dashed var(--ax-violet, var(--hud-violet));
+  color: var(--rob-mid);
+  font-size: 11.5px;
+}
+.rob-compare strong { color: var(--rob-text); font-weight: 600; }
+
+.rob-btn,
+.rob-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--rob-border2);
+  background: transparent;
+  color: var(--rob-text);
+  cursor: pointer;
+  font: inherit;
+}
+.rob-btn { height: 28px; padding: 0 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+.rob-icon-btn { width: 20px; height: 20px; justify-content: center; border-radius: 50%; border-color: transparent; color: var(--rob-mid); }
+.rob-btn:hover,
+.rob-icon-btn:hover { background: var(--ax-chip, var(--surface-hover)); }
+.rob-btn-primary { border-color: var(--rob-accent); color: var(--rob-accent); }
+.rob-btn:focus-visible,
+.rob-icon-btn:focus-visible,
+.rob-story-head:focus-visible,
+.rob-story-line:focus-visible {
+  outline: 2px solid var(--rob-accent);
+  outline-offset: 2px;
+}
+
+.rob-live-icon { animation: robPulse 1.4s ease-in-out infinite; }
+@keyframes robPulse {
+  50% { opacity: 0.35; }
+}
+
+/* --- stage: canvas zone + rail side by side ------------------------------ */
+.rob-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  gap: 10px;
+}
+.rob-rail-slot {
+  flex: none;
+  display: flex;
+  min-height: 0;
+  max-height: 100%;
+}
+.rob-rail-slot .rh-rail { border-radius: 14px; overflow: hidden; border: 1px solid var(--ax-border, var(--surface-border)); }
+.rob-rail-slot .rh-panel { border-left: 0; }
+
+@media (max-width: 767px) {
+  /* The rail becomes a "Runs" pill whose popover drops over the canvas. */
+  .rob-rail-slot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 12;
+  }
+  .rob-rail-slot .rh-rail { overflow: visible; border: 0; border-radius: 0; }
+  /* Clear the pill so the floating lens bar never sits under it. */
+  .rob-stage .wfx-lensbar { top: 50px; }
+}
+
+/* --- run story (inside the rail) ------------------------------------------ */
+.rob-story {
+  flex-shrink: 0;
+  border-top: 1px solid var(--rob-border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 45%;
+}
+.rob-story[data-open="true"] { flex: 0 1 45%; }
+.rob-story-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--rob-text);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.rob-story-head > svg:first-child { color: var(--rob-accent); flex: none; }
+.rob-story-title { font-weight: 650; flex: none; }
+.rob-story-preview {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rob-mid);
+  font-size: 11.5px;
+}
+.rob-story-chev { margin-left: auto; flex: none; color: var(--rob-dim); transition: transform 0.15s ease; }
+.rob-story[data-open="true"] .rob-story-chev { transform: rotate(180deg); }
+
+.rob-story-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px 10px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.rob-story-list li { position: relative; }
+.rob-story-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rob-dim);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+button.rob-story-line { cursor: pointer; }
+button.rob-story-line:hover { background: var(--ax-chip, var(--surface-hover)); }
+.rob-story-list li[data-told="true"] .rob-story-line { color: var(--rob-text); }
+.rob-story-list li[aria-current="step"] .rob-story-line {
+  background: color-mix(in srgb, var(--rob-accent) 10%, transparent);
+  box-shadow: inset 2px 0 0 var(--rob-accent);
+}
+.rob-story-ico { flex: none; margin-top: 3px; }
+.rob-story-list li[data-tone="good"] .rob-story-ico { color: var(--rob-ok); }
+.rob-story-list li[data-tone="warn"] .rob-story-ico { color: var(--rob-warn); }
+.rob-story-list li[data-tone="bad"] .rob-story-ico { color: var(--rob-err); }
+.rob-story-list li[data-tone="neutral"] .rob-story-ico { color: var(--rob-dim); }
+
+.rob-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- dock placeholder ------------------------------------------------------ */
+.rob-dock,
+.rob-dock-empty { flex-shrink: 0; }
+.rob-dock-empty {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px dashed var(--rob-border2);
+  border-radius: 12px;
+  background: var(--rob-panel);
+  color: var(--rob-mid);
+  font-size: 12.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rob-live-icon { animation: none; }
+  .rob-story-chev,
+  .rob-story-line { transition: none; }
+}

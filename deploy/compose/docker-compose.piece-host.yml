@@ -1,0 +1,60 @@
+# =============================================================================
+# docker-compose.piece-host.yml  -  OPT-IN overlay: Activepieces community
+#                                   pieces (services/piece-host) inside the
+#                                   sandboxed mcp-stdio-runner
+# -----------------------------------------------------------------------------
+# Default off. Nothing here applies unless this file is named on the command
+# line; a plain `docker compose up` keeps the stock mcp-stdio-runner image.
+#
+# What it does
+#   1. builds a Node 24 copy of the stock mcp-stdio-runner image (service
+#      `mcp-stdio-runner-node24`, via the NODE_IMAGE build arg - piece-host
+#      needs Node >= 22 and its Dockerfile refuses an older base on purpose)
+#      and layers `services/piece-host/Dockerfile --target runner` onto it;
+#   2. swaps that image in as the `mcp-stdio-runner` service. Everything else
+#      about the service (secret, seccomp profile, cap_drop ALL, no ports,
+#      mcp-stdio-net, limits, profiles) is inherited from docker-compose.yml;
+#   3. passes the core flags that make the piece-* catalog entries appear.
+#
+# Usage (from the repo root; the runner runs under the tools/browser/sandbox
+# profiles, see docker-compose.yml)
+#   F="-f deploy/compose/docker-compose.yml -f deploy/compose/docker-compose.piece-host.yml"
+#   docker compose $F build mcp-stdio-runner-node24      # step 1: Node 24 runner base
+#   docker compose $F --profile tools build mcp-stdio-runner   # step 2: layer piece-host
+#   MCP_PIECE_HOST_ENABLED=true MCP_STDIO_SIDECAR_ENABLED=true \
+#     docker compose $F --profile tools up -d core mcp-stdio-runner
+#
+# Credentials are NOT configured here. Each piece registration carries its own
+# PIECE_AUTH_* env, supplied by the tenant through core's connect form and
+# encrypted by core; the runner's own environment stays secret-free.
+# See services/piece-host/README.md.
+# =============================================================================
+
+services:
+  # Build-only helper: the stock runner Dockerfile on a Node 24 base. Its
+  # profile is never activated, so `up` never starts it; `build` builds it
+  # only when it is named explicitly (step 1 above).
+  mcp-stdio-runner-node24:
+    profiles: ["piece-host-build-only"]
+    image: vegaduta-mcp-stdio-runner-node24:local
+    build:
+      context: ../../services/mcp-stdio-runner
+      args:
+        NODE_IMAGE: ${PIECE_HOST_NODE_IMAGE:-node:24.20.0-bookworm-slim}
+
+  mcp-stdio-runner:
+    image: vegaduta-mcp-stdio-runner-pieces:local
+    build:
+      context: ../../services/piece-host
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        RUNNER_IMAGE: vegaduta-mcp-stdio-runner-node24:local
+
+  core:
+    environment:
+      # Adds the piece-* entries to the MCP catalog. Useful only with the
+      # image above AND MCP_STDIO_SIDECAR_ENABLED=true plus a real
+      # MCP_STDIO_SIDECAR_SHARED_SECRET.
+      MCP_PIECE_HOST_ENABLED: ${MCP_PIECE_HOST_ENABLED:-false}
+      MCP_PIECE_HOST_ENTRYPOINT: ${MCP_PIECE_HOST_ENTRYPOINT:-/opt/piece-host/server.js}

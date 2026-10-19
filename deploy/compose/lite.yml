@@ -1,0 +1,333 @@
+# =============================================================================
+# VegaDūta LITE — minimal local mode (5 containers, sized for an 8 GB laptop)
+#
+#   ./scripts/vegaduta up --lite            # recommended
+#   docker compose -f deploy/compose/lite.yml --env-file deploy/compose/.env up -d --wait
+#
+#   postgres  PostgreSQL 16 + pgvector + Apache AGE
+#   valkey    Redis-protocol cache (BSD-3)
+#   keycloak  identity, dev-file store (no separate DB), realm auto-imported
+#   core      single Spring Boot process; profiles security,knowledge,
+#             graph-memory,lite (no `workflow` => no Kafka/Temporal needed);
+#             files on a local volume instead of S3
+#   web       Next.js console
+#
+# Optional:  --profile rag   adds the Python sidecar (document ingestion,
+#                            embeddings, rerank, transcription)
+#
+# Upgrading to the full stack keeps the Postgres volume only if you reuse
+# the same COMPOSE_PROJECT_NAME; Keycloak users (dev-file) and local files do
+# NOT migrate automatically — see deploy/README.md.
+# =============================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-vegaduta-lite}
+
+x-restart: &restart
+  restart: unless-stopped
+
+# Bounded container logs. Docker's json-file driver is unbounded by default and
+# has filled the host disk before; 3 x 10 MB per container caps it.
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+# Hardening (same meaning as in docker-compose.yml).
+x-hardened: &hardened
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+
+x-nnp: &nnp
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  postgres:
+    image: ${VEGADUTA_POSTGRES_IMAGE:-${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/postgres:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}}
+    <<: [*restart, *logging, *nnp]
+    # shared_preload_libraries=age: see docker-compose.yml (non-superuser AGE).
+    command: ["postgres", "-c", "shared_preload_libraries=age", "-c", "max_connections=100", "-c", "shared_buffers=128MB"]
+    environment:
+      # Bootstrap SUPERUSER (db-roles, backups, you). core uses POSTGRES_APP_USER.
+      POSTGRES_USER: ${POSTGRES_USER:-agentic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_ai}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  db-roles:
+    # One-shot, idempotent: the least-privileged login core uses. See
+    # deploy/postgres/ensure-app-role.sh and docker-compose.yml.
+    image: ${VEGADUTA_POSTGRES_IMAGE:-${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/postgres:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}}
+    <<: [*logging, *hardened]
+    restart: "no"
+    user: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["sh", "/ensure-app-role.sh"]
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-agentic}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      PGDATABASE: ${POSTGRES_DB:-agentic_ai}
+      APP_DB_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+      APP_DB_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+    volumes:
+      - ../postgres/ensure-app-role.sh:/ensure-app-role.sh:ro
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+
+  valkey:
+    image: valkey/valkey:8.1.10-alpine
+    <<: [*restart, *logging, *nnp]
+    command:
+      - sh
+      - -c
+      - printf 'requirepass %s\nmaxmemory 96mb\nmaxmemory-policy allkeys-lru\n' "$$VALKEY_PASSWORD" > /tmp/valkey.conf && exec valkey-server /tmp/valkey.conf
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${VALKEY_HOST_PORT:-6379}:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a \"$$VALKEY_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.5
+    <<: [*restart, *logging, *nnp]
+    # No KC_DB => Keycloak's embedded dev-file store, persisted in the volume.
+    # start-dev is for this single-machine localhost mode ONLY; anything
+    # reachable from other machines uses the full stack + domain overlay
+    # (production-mode `start` against its own PostgreSQL).
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?run scripts/vegaduta secrets}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?run scripts/vegaduta secrets}
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME: ${PUBLIC_AUTH_URL:-http://localhost:8180}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      JAVA_OPTS_KC_HEAP: "-XX:MaxRAMPercentage=65"
+      # Consumed by the realm template's ${env.*} placeholders on first import.
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:?run scripts/vegaduta secrets}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      PUBLIC_ADMIN_URL: ${PUBLIC_ADMIN_URL:-http://localhost:3000}
+      KC_VERIFY_EMAIL: ${KC_VERIFY_EMAIL:-false}
+      # Password grant on the confidential core client: off (first import only).
+      # The CI overlay turns it on for the Playwright/smoke logins.
+      KC_CORE_DIRECT_GRANTS: ${KC_CORE_DIRECT_GRANTS:-false}
+      THEME_PRIVACY_URL: ${THEME_PRIVACY_URL:-https://github.com/CD-LC/vegaduta/blob/main/SECURITY.md}
+      THEME_TERMS_URL: ${THEME_TERMS_URL:-https://github.com/CD-LC/vegaduta/blob/main/LICENSE}
+      THEME_HELP_URL: ${THEME_HELP_URL:-https://github.com/CD-LC/vegaduta}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${KEYCLOAK_HOST_PORT:-8180}:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ../keycloak/agentic-ai-realm.json:/opt/keycloak/data/import/agentic-ai-realm.json:ro
+      - ../keycloak/themes/agentic-ai:/opt/keycloak/themes/agentic-ai:ro
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+
+  core:
+    # Slim image by default (no Node/uv/browsers). CORE_IMAGE_VARIANT=-full
+    # selects core-full, needed only if you add ",mcp" to LITE_SPRING_PROFILES.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core${CORE_IMAGE_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened]
+    # Read-only root FS; writable paths mirror the Helm core chart.
+    read_only: true
+    tmpfs:
+      - /tmp:size=1g,mode=1777
+      - /home/agentic/.npm:size=1g,uid=999,gid=999,mode=0700
+      - /home/agentic/.cache/uv:size=1g,uid=999,gid=999,mode=0700
+      - /home/agentic/.vegaduta:size=1g,uid=999,gid=999,mode=0700
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-roles:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      sidecar:
+        condition: service_healthy
+        required: false
+    env_file:
+      - path: ./core.env
+        required: false
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -XX:+UseSerialGC -Djava.net.preferIPv4Stack=true"
+      SPRING_PROFILES_ACTIVE: ${LITE_SPRING_PROFILES:-security,knowledge,graph-memory,lite}${CORE_PROFILES_EXTRA:-}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_ai}
+      # Least-privileged login (database owner, not a superuser); see db-roles.
+      POSTGRES_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+      POSTGRES_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+      REDIS_HOST: valkey
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+      # NEVER change after first boot (stored secrets become undecryptable).
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
+      PLATFORM_MASTER_KEY: ${PLATFORM_MASTER_KEY:-}
+      KEYCLOAK_ISSUER_URI: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
+      KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+      # Lite has no SMTP, so a required "verify your email" step would end the first sign-up on
+      # "Failed to send email". Set KEYCLOAK_REQUIRE_EMAIL_VERIFICATION=true once Keycloak can send mail.
+      APP_KEYCLOAK_REQUIRE_EMAIL_VERIFICATION: ${KEYCLOAK_REQUIRE_EMAIL_VERIFICATION:-false}
+      # Private hosts tenant-configured outbound calls may reach (e.g. ollama:11434).
+      APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:-}
+      # Optional: register a local Ollama / OpenAI-compatible server as the FREE-tier pool at
+      # startup (api shape only; see docs/configuration.md "Local LLM pool bootstrap").
+      APP_LOCAL_LLM_BOOTSTRAP_ENABLED: ${APP_LOCAL_LLM_BOOTSTRAP_ENABLED:-false}
+      APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${APP_LOCAL_LLM_BOOTSTRAP_BASE_URL:-http://ollama:11434}
+      APP_LOCAL_LLM_BOOTSTRAP_MODEL: ${APP_LOCAL_LLM_BOOTSTRAP_MODEL:-qwen3.5:4b}
+      APP_LOCAL_LLM_BOOTSTRAP_LABEL: ${APP_LOCAL_LLM_BOOTSTRAP_LABEL:-Local model (Ollama)}
+      APP_LOCAL_LLM_BOOTSTRAP_API_KEY: ${APP_LOCAL_LLM_BOOTSTRAP_API_KEY-ollama}
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/${KEYCLOAK_REALM:-agentic-ai}/protocol/openid-connect/certs
+      KEYCLOAK_ADMIN_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
+      KEYCLOAK_CLIENT_ID: agentic-ai-core
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:?run scripts/vegaduta secrets}
+      APP_WEB_PUBLIC_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      APP_WEB_ALLOWED_ORIGINS: ${PUBLIC_APP_URL:-http://localhost:3000},http://localhost:3000,http://127.0.0.1:3000
+      # Local-disk file storage (application-lite.yml: app.storage.type=local).
+      APP_STORAGE_TYPE: local
+      APP_STORAGE_LOCAL_PATH: /data/storage
+      SIDECAR_BASE_URL: http://sidecar:8001
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:-}
+      # Single-user laptop mode: STDIO MCP servers spawn inside core (needs
+      # the core-full image - the slim one has no npx and core says so at
+      # startup if the `mcp` profile is on).
+      MCP_STDIO_SIDECAR_ENABLED: "false"
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+      LIVEKIT_URL: ${PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+      MANAGEMENT_TRACING_ENABLED: "false"
+      SPRING_MAIL_HOST: ${SMTP_HOST:-}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${CORE_HOST_PORT:-8080}:8080"
+    volumes:
+      - core-storage:/data/storage
+      - core-mcp-data:/app/mcp-data
+      - ../../examples/mcp-servers:/opt/mcp-servers:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          memory: ${CORE_MEM_LIMIT:-2g}
+
+  web:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/web:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened]
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+      - /app/.next/cache:size=512m,uid=999,gid=999,mode=0700
+      - /home/nextjs:size=64m,uid=999,gid=999,mode=0700
+    depends_on:
+      core:
+        condition: service_healthy
+        restart: true
+    # Runtime NEXT_PUBLIC_* (window.__ENV) with build-time fallback.
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+      NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
+      NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
+      NEXT_PUBLIC_BILLING_ENABLED: ${WEB_BILLING_ENABLED:-}
+      NEXT_PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_CODE_INTEL_URL: ""
+      NEXT_PUBLIC_APP_BUILDER_URL: ""
+      NEXT_PUBLIC_EDGE_AGENTS: ${WEB_EDGE_AGENTS:-}
+      NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-lite}
+      NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${WEB_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  # ----------------------------------------------------------- profile: rag
+  sidecar:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/sidecar:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["rag"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      SIDECAR_AUTH_REQUIRED: "true"
+      RENDER_THREADS: "1"
+      RENDER_CALLBACK_ALLOWED_HOSTS: core
+    volumes:
+      - sidecar-workspace:/app/workspace
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${SIDECAR_MEM_LIMIT:-2g}
+
+volumes:
+  postgres-data:
+  valkey-data:
+  keycloak-data:
+  core-storage:
+  core-mcp-data:
+  sidecar-workspace:
+
+# One network: Compose's default "<project>_default".

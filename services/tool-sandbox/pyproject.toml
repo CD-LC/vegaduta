@@ -1,0 +1,64 @@
+# Tool config for the tool-sandbox service: pytest, ruff and mypy. First
+# config of this kind the service has had (2026-09-30, SVC-015).
+#
+# WHAT THIS FILE IS NOT: there is deliberately no [project]/[build-system]
+# section - the service is not a package (the Dockerfile pip-installs
+# requirements.lock and COPYs app/ + harness/, it never builds or installs
+# this directory), and packaging metadata here would invite someone to
+# `pip install .` a thing that was never designed to be installed. The
+# Dockerfile does not COPY this file, so it is inert for image builds.
+#
+# WHY THE RUFF RULE SET IS sidecar's: services/sidecar/pyproject.toml documents
+# the reasoning (E4/E7/E9/F defaults + E501 + the cheap I/UP/B/C4/RUF upgrades,
+# and why D/TRY/BLE/S/PL/ANN are not selected). The rule content below is kept
+# identical so the Python services do not drift; change it there first. Same
+# caveat as there: if a repo-root ruff config lands, delete this [tool.ruff]
+# block in that change - ruff uses the NEAREST config, so it would shadow a
+# root one silently.
+#
+# WHY py312: the Dockerfile's runtime is python:3.12.x-slim-bookworm. Dev
+# machines have been observed on cp311 - the image, not the laptop, is the
+# deployment truth.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "E501", "I", "UP", "B", "C4", "RUF"]
+# B008: FastAPI's `Header(default="")` / `Depends(...)` in defaults is the
+# framework's documented idiom, not a shared-mutable-default bug.
+ignore = ["B008"]
+# The only deviation from sidecar's lint block, and it selects nothing: this
+# service's `# noqa: S603/S102/BLE001` comments are deliberate bandit-style
+# justifications at the exec/subprocess/catch-all sites. Declaring S and BLE
+# external keeps RUF100 from deleting them as "unused".
+external = ["S", "BLE"]
+
+[tool.ruff.format]
+# Defaults on purpose (double quotes, 4-space indent). `ruff format` has not
+# been run over this tree; adopting it is its own whole-file-diff change.
+
+# mypy - NON-BLOCKING / advisory. Nothing in CI runs it yet. The modules that
+# carry the security boundary (app/policy.py, app/pyvalidate.py, app/proc.py
+# and app/main.py's auth check) are kept clean under the strict flags below,
+# checked with:
+#   mypy --disallow-untyped-defs --check-untyped-defs \
+#        app/policy.py app/pyvalidate.py app/proc.py app/main.py
+# The remaining modules have not been annotated to that standard yet, so the
+# strict flags are per-module rather than global.
+[tool.mypy]
+python_version = "3.12"
+# The service only ever runs on Linux; without this, mypy on a Windows dev box
+# reports os.killpg / os.geteuid / signal.SIGKILL as missing.
+platform = "linux"
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["app.policy", "app.pyvalidate", "app.proc", "app.main"]
+disallow_untyped_defs = true
+check_untyped_defs = true

@@ -1,0 +1,13 @@
+{
+  "name": "desktop-agent",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Loopback desktop-control agent for VegaDuta personal installs (screenshot, UI tree, click/type, open, notify, clipboard).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {}
+}

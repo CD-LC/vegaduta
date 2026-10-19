@@ -1,0 +1,38 @@
+# "jobs" profile - activate alongside the deployable's normal profiles and the
+# ready-made "shape-jobs" set from app-config
+# (e.g. SPRING_PROFILES_ACTIVE=security,knowledge,workflow,graph-memory,mcpserver,mcp,temporal,shape-jobs,jobs).
+#
+# The Flyway / migrate-on-boot / temporal-worker settings are also
+# JobsApplication setDefaultProperties defaults (env still wins either way);
+# this file documents the contract in config form.
+
+spring:
+  flyway:
+    # One migrator only - never race per-tenant Flyway locks from a jobs pod.
+    enabled: false
+
+app:
+  tenancy:
+    migrate-on-boot: false
+  signal:
+    receive:
+      # Signal has no webhook, so the API shape pulls messages (SignalReceiveService). This
+      # deployable must not run a second receiver on the same number.
+      enabled: false
+  workflow:
+    temporal:
+      # Polling the Temporal task queue is the app-worker deployable's job.
+      worker-enabled: false
+
+server:
+  # Actuator-only HTTP surface (health probes + prometheus); there are no
+  # controllers in this deployable. Offset from api's 8080 and app-worker's
+  # 8095 so local `mvn spring-boot:run` of all three doesn't collide. Inside a
+  # container compose sets JOBS_HTTP_PORT=8080 so the image HEALTHCHECK works.
+  port: ${JOBS_HTTP_PORT:8096}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true

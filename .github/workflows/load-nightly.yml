@@ -1,0 +1,181 @@
+name: Load gate (32-user chat benchmark on kind)
+
+# Nightly latency gate. Builds core, core-jobs, web, sidecar and the CNPG Postgres image from this commit, brings up a
+# throwaway kind cluster with the Helm chart (deploy/kind/values-kind.yaml + tests/load/kind/values-loadtest.yaml +
+# tests/load/kind/values-gate.yaml) and the in-cluster mock model (tests/load/mock-llm; no provider keys, no model
+# cost), provisions a load-test tenant, then runs the 32-user chat benchmark (tests/load/scripts/turn-overhead.js)
+# with k6 thresholds. The job FAILS when the p95 of a whole turn exceeds p95_ms or more than max_failed_rate of
+# turns fail. How the default thresholds were picked: tests/load/README.md, "Load-test gate".
+#
+# Runner sizing: the kind stage needs about 16 GB of memory. GitHub's standard ubuntu-latest runner has 16 GB and
+# 4 vCPUs on PUBLIC repositories only; private repositories get a smaller standard runner and need a larger-runner
+# label (input `runner`, or the repository variable LOAD_GATE_RUNNER for the nightly schedule).
+#
+# Local equivalent against an existing kind stage: make load-gate (tests/load/kind/gate.sh).
+
+on:
+  schedule:
+    - cron: "41 2 * * *" # nightly 02:41 UTC (before e2e.yml at 03:17)
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: Runner label (the kind stage needs ~16 GB; ubuntu-latest has that on public repositories only)
+        required: false
+        default: ubuntu-latest
+      p95_ms:
+        description: Fail when p95 of a whole chat turn (ms) is at or above this
+        required: false
+        default: "2000"
+      max_failed_rate:
+        description: Fail when the failed-turn rate is above this (0.01 = 1%)
+        required: false
+        default: "0.01"
+      ttft_p95_ms:
+        description: Optional extra gate on p95 time to first token (ms); empty = off
+        required: false
+        default: ""
+      vus:
+        description: Concurrent users
+        required: false
+        default: "32"
+      duration:
+        description: Measured run length (after a 20 s warmup)
+        required: false
+        default: "60s"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  load-gate:
+    name: 32-user chat benchmark with a p95 gate
+    runs-on: ${{ inputs.runner || vars.LOAD_GATE_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 150
+    env:
+      # Inputs on a manual run, repository variables on the schedule, then the defaults.
+      GATE_P95_MS: ${{ inputs.p95_ms || vars.LOAD_GATE_P95_MS || '2000' }}
+      GATE_MAX_FAILED_RATE: ${{ inputs.max_failed_rate || vars.LOAD_GATE_MAX_FAILED_RATE || '0.01' }}
+      GATE_TTFT_P95_MS: ${{ inputs.ttft_p95_ms || vars.LOAD_GATE_TTFT_P95_MS || '' }}
+      VUS: ${{ inputs.vus || '32' }}
+      DURATION: ${{ inputs.duration || '60s' }}
+      IMAGE_TAG: ci-${{ github.sha }}
+      KIND_VERSION: v0.27.0
+      K6_IMAGE: grafana/k6:1.0.0
+      OUT_DIR: load-gate-out
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Runner resources
+        run: |
+          nproc; free -g; df -h /
+          mem_gb=$(free -g | awk '/^Mem:/{print $2}')
+          if [ "$mem_gb" -lt 14 ]; then
+            echo "::warning::runner has ${mem_gb} GB of memory; the kind stage needs about 16 GB (set the runner input or LOAD_GATE_RUNNER)"
+          fi
+
+      # The images, the kind node image and the Maven build inside core/Dockerfile need more disk than a standard
+      # runner has free. These preinstalled toolchains are not used by this job.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /usr/share/swift || true
+          docker system prune -af >/dev/null || true
+          df -h /
+
+      - name: Build images from this commit
+        run: |
+          set -euo pipefail
+          reg=ghcr.io/cd-lc
+          docker build -f core/Dockerfile --build-arg MODULE=app -t "$reg/core:$IMAGE_TAG" core
+          docker build -f core/Dockerfile --build-arg MODULE=app-jobs -t "$reg/core-jobs:$IMAGE_TAG" core
+          docker build -f web/Dockerfile -t "$reg/web:$IMAGE_TAG" web
+          # The sidecar stays on: every turn embeds the user message through it (memory recall), a real blocking
+          # call and the one HOT-PATH-PERFORMANCE.md 4a regression this benchmark caught. Only the default
+          # embedding model is baked (BAKE_EXTRA_MODELS=false) to save disk; a mock-model turn uses no other.
+          docker build -f services/sidecar/Dockerfile --build-arg BAKE_EXTRA_MODELS=false -t "$reg/sidecar:$IMAGE_TAG" services/sidecar
+          # The CNPG operand variant, exactly as release.yml builds postgres-cnpg (base digest kept in one place).
+          base=$(grep -o 'BASE_IMAGE=ghcr.io/cloudnative-pg/postgresql:[^"]*' .github/workflows/release.yml | head -1 | cut -d= -f2-)
+          case "$base" in *@sha256:*) ;; *) echo "::error::CNPG base image not found or not digest-pinned in release.yml"; exit 1 ;; esac
+          docker build --build-arg BASE_IMAGE="$base" --build-arg FINAL_USER=26 -t "$reg/postgres:$IMAGE_TAG" deploy/postgres
+          docker builder prune -af >/dev/null || true
+          docker images "$reg/*"
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.22.0
+
+      - name: Install kind
+        run: |
+          set -euo pipefail
+          base="https://github.com/kubernetes-sigs/kind/releases/download/$KIND_VERSION"
+          curl -fsSLo "$RUNNER_TEMP/kind" "$base/kind-linux-amd64"
+          curl -fsSLo "$RUNNER_TEMP/kind.sha256" "$base/kind-linux-amd64.sha256sum"
+          (cd "$RUNNER_TEMP" && echo "$(cut -d' ' -f1 kind.sha256)  kind" | sha256sum -c -)
+          sudo install -m 0755 "$RUNNER_TEMP/kind" /usr/local/bin/kind
+          kind version; kubectl version --client
+
+      - name: Bring up the kind stage
+        run: bash tests/load/kind/gate-stage.sh
+
+      - name: Provision the load-test tenant and mock-model agent
+        env:
+          GATE_ENV: ${{ runner.temp }}/gate.env
+          STAGE_ENV: ${{ runner.temp }}/stage.env
+        run: bash tests/load/kind/gate-provision.sh
+
+      - name: Run the load gate
+        env:
+          GATE_ENV: ${{ runner.temp }}/gate.env
+        run: |
+          set -euo pipefail
+          set -a
+          # shellcheck disable=SC1090
+          . "$GATE_ENV"
+          set +a
+          rc=0
+          bash tests/load/kind/gate.sh || rc=$?
+          {
+            echo "### Load gate: ${VUS} users, ${DURATION}"
+            echo
+            echo "Thresholds: p95 turn < ${GATE_P95_MS} ms, failed rate <= ${GATE_MAX_FAILED_RATE}${GATE_TTFT_P95_MS:+, p95 TTFT < ${GATE_TTFT_P95_MS} ms}. k6 exit code ${rc}."
+            echo
+            echo '```json'
+            cat "$OUT_DIR/result.json" 2>/dev/null || echo '{"error": "no result.json (k6 did not finish)"}'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+
+      - name: Collect pod logs
+        if: always()
+        run: |
+          mkdir -p "$OUT_DIR/logs"
+          if ! kind get clusters 2>/dev/null | grep -qx vegaduta; then echo "no cluster"; exit 0; fi
+          k="kubectl --context kind-vegaduta"
+          $k get pods -A -o wide > "$OUT_DIR/logs/pods.txt" 2>&1 || true
+          $k get events -A --sort-by=.lastTimestamp > "$OUT_DIR/logs/events.txt" 2>&1 || true
+          $k top pods -A > "$OUT_DIR/logs/top.txt" 2>&1 || true
+          for p in $($k -n vegaduta get pods -o name 2>/dev/null); do
+            n=${p#pod/}
+            $k -n vegaduta logs "$p" --all-containers --tail=5000 > "$OUT_DIR/logs/$n.log" 2>&1 || true
+            $k -n vegaduta logs "$p" --all-containers --previous --tail=2000 > "$OUT_DIR/logs/$n.previous.log" 2>/dev/null || rm -f "$OUT_DIR/logs/$n.previous.log"
+          done
+          $k -n ingress-nginx logs deploy/ingress-nginx-controller --tail=5000 > "$OUT_DIR/logs/ingress-nginx.log" 2>&1 || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: load-gate-${{ github.run_id }}
+          # result.json (compact result + per-threshold pass/fail), k6-summary.json (full k6 summary), logs/.
+          # gate.env and stage.env hold generated passwords and live in RUNNER_TEMP, never in this directory.
+          path: ${{ env.OUT_DIR }}/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Tear down
+        if: always()
+        run: kind delete cluster --name vegaduta || true

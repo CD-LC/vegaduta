@@ -1,0 +1,33 @@
+# Minimal SearXNG settings for use as the platform's web_search backend.
+# Mounted at /etc/searxng/settings.yml by deploy/docker-compose.search.yml.
+# Reference: https://docs.searxng.org/admin/settings/index.html
+#
+# use_default_settings keeps every upstream default (engines, categories, ...) and
+# only the keys below are overridden. The secret key is NOT set here: it comes from
+# the SEARXNG_SECRET environment variable (see the compose file).
+use_default_settings: true
+
+general:
+  instance_name: "VegaDuta search"
+  debug: false
+  enable_metrics: false
+
+search:
+  # 0 = none, 1 = moderate, 2 = strict.
+  safe_search: 1
+  autocomplete: ""
+  # The platform calls /search?format=json. SearXNG answers 403 for any format not
+  # listed here, so `json` MUST stay in this list.
+  formats:
+    - html
+    - json
+
+server:
+  bind_address: "0.0.0.0"
+  port: 8080
+  # The only client is the core container on a private network, so the bot-detection
+  # limiter stays off (it would also need a Valkey/Redis instance). Never expose this
+  # instance publicly with the limiter off.
+  limiter: false
+  public_instance: false
+  image_proxy: false

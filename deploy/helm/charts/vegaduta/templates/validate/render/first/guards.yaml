@@ -1,0 +1,4 @@
+{{- /* Umbrella guards. This file is nested deliberately: Helm renders templates deepest
+  path first, so at this depth the umbrella's checks run BEFORE any subchart template
+  and a configuration mistake is reported with the umbrella's (clearer) message. */ -}}
+{{- include "vegaduta.guards" . -}}

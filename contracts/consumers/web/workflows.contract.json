@@ -1,0 +1,998 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-workflows",
+      "method": "GET",
+      "path": "/api/workflows",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].costRoutingEnabled",
+          "$[*].createdAt",
+          "$[*].description",
+          "$[*].economyModel",
+          "$[*].economyProviderName",
+          "$[*].editable",
+          "$[*].graph",
+          "$[*].id",
+          "$[*].maxRetryAttempts",
+          "$[*].maxStepsPerRun",
+          "$[*].name",
+          "$[*].reasoningDepth",
+          "$[*].status",
+          "$[*].stepCachingEnabled",
+          "$[*].stepTimeoutSeconds",
+          "$[*].tuningMode",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows",
+      "method": "POST",
+      "path": "/api/workflows",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "put-api-workflows-workflowId",
+      "method": "PUT",
+      "path": "/api/workflows/{workflowId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-comments",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/comments",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-comments",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/comments",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-comments-commentId",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/comments/{commentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-workflows-workflowId-comments-commentId",
+      "method": "PATCH",
+      "path": "/api/workflows/{workflowId}/comments/{commentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-workflows-workflowId-cost-routing",
+      "method": "PATCH",
+      "path": "/api/workflows/{workflowId}/cost-routing",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-diagram",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/diagram",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.format",
+          "$.source",
+          "$.workflowId",
+          "$.workflowName"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-diagram-pdf",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/diagram/pdf",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-duplicate",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/duplicate",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-eval-summary",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/eval-summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-workflows-workflowId-execution-limits",
+      "method": "PATCH",
+      "path": "/api/workflows/{workflowId}/execution-limits",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.stepTimeoutSeconds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-export",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-expressions-evaluate",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/expressions/evaluate",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-expressions-lint",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/expressions/lint",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.items"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-generate-graph",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/generate-graph",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.graph",
+          "$.notes"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-lint",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/lint",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-nodes-nodeId-pin",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/pin",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-workflows-workflowId-nodes-nodeId-pin",
+      "method": "PUT",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/pin",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-nodes-nodeId-poll-trigger",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/poll-trigger",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.consecutiveFailures",
+          "$.enabled",
+          "$.headersConfigured",
+          "$.idPath",
+          "$.intervalSeconds",
+          "$.itemsPath",
+          "$.lastPolledAt",
+          "$.lastStatus",
+          "$.method",
+          "$.nextPollAt",
+          "$.nodeId",
+          "$.seedOnEnable",
+          "$.url"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-nodes-nodeId-poll-trigger",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/poll-trigger",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.consecutiveFailures",
+          "$.enabled",
+          "$.headersConfigured",
+          "$.idPath",
+          "$.intervalSeconds",
+          "$.itemsPath",
+          "$.lastPolledAt",
+          "$.lastStatus",
+          "$.method",
+          "$.nextPollAt",
+          "$.nodeId",
+          "$.seedOnEnable",
+          "$.url"
+        ]
+      }
+    },
+    {
+      "id": "put-api-workflows-workflowId-nodes-nodeId-poll-trigger",
+      "method": "PUT",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/poll-trigger",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.consecutiveFailures",
+          "$.enabled",
+          "$.headersConfigured",
+          "$.idPath",
+          "$.intervalSeconds",
+          "$.itemsPath",
+          "$.lastPolledAt",
+          "$.lastStatus",
+          "$.method",
+          "$.nextPollAt",
+          "$.nodeId",
+          "$.seedOnEnable",
+          "$.url"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-nodes-nodeId-test",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/test",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-nodes-nodeId-trigger-channel",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/trigger-channel",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.channel",
+          "$.oidcTriggerPath",
+          "$.webhookAuthMode"
+        ]
+      }
+    },
+    {
+      "id": "put-api-workflows-workflowId-nodes-nodeId-trigger-channel",
+      "method": "PUT",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/trigger-channel",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.channel",
+          "$.webhookAuthMode"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.channel",
+          "$.oidcTriggerPath",
+          "$.webhookAuthMode"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-nodes-nodeId-upstream-schema",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/upstream-schema",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-nodes-nodeId-webhook",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/webhook",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-nodes-nodeId-webhook",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/webhook",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-nodes-nodeId-webhook",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/webhook",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-nodes-nodeId-webhook-signature",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/webhook/signature",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.mode",
+          "$.nodeId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-nodes-nodeId-webhook-signature",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/webhook/signature",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.mode",
+          "$.nodeId"
+        ]
+      }
+    },
+    {
+      "id": "put-api-workflows-workflowId-nodes-nodeId-webhook-signature",
+      "method": "PUT",
+      "path": "/api/workflows/{workflowId}/nodes/{nodeId}/webhook/signature",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.mode",
+          "$.secret"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.mode",
+          "$.nodeId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-pins",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/pins",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-workflows-workflowId-reasoning-depth",
+      "method": "PATCH",
+      "path": "/api/workflows/{workflowId}/reasoning-depth",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reasoningDepth"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-run",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/run",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.background",
+          "$.clientRunId",
+          "$.input",
+          "$.mode",
+          "$.requestedBy",
+          "$.simulateSends"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.completedAt",
+          "$.errorMessage",
+          "$.id",
+          "$.outputFileName",
+          "$.requestedBy",
+          "$.startedAt",
+          "$.status",
+          "$.trace",
+          "$.workflowId",
+          "$.workflowName",
+          "$.workflowVersion"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-runs",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].completedAt",
+          "$[*].errorMessage",
+          "$[*].id",
+          "$[*].outputFileName",
+          "$[*].requestedBy",
+          "$[*].startedAt",
+          "$[*].status",
+          "$[*].trace",
+          "$[*].workflowId",
+          "$[*].workflowName",
+          "$[*].workflowVersion"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-runs-runId",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/runs/{runId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.completedAt",
+          "$.errorMessage",
+          "$.id",
+          "$.outputFileName",
+          "$.requestedBy",
+          "$.startedAt",
+          "$.status",
+          "$.trace",
+          "$.workflowId",
+          "$.workflowName",
+          "$.workflowVersion"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-runs-runId-cancel",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/runs/{runId}/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.completedAt",
+          "$.errorMessage",
+          "$.id",
+          "$.outputFileName",
+          "$.requestedBy",
+          "$.startedAt",
+          "$.status",
+          "$.trace",
+          "$.workflowId",
+          "$.workflowName",
+          "$.workflowVersion"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-runs-runId-download",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/runs/{runId}/download",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-runs-runId-llm-requests",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/runs/{runId}/llm-requests",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].at",
+          "$[*].id",
+          "$[*].messages",
+          "$[*].tools"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-runs-runId-pause",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/runs/{runId}/pause",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.completedAt",
+          "$.errorMessage",
+          "$.id",
+          "$.outputFileName",
+          "$.requestedBy",
+          "$.startedAt",
+          "$.status",
+          "$.trace",
+          "$.workflowId",
+          "$.workflowName",
+          "$.workflowVersion"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-runs-runId-resume",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/runs/{runId}/resume",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-schedule",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/schedule",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.cron",
+          "$.enabled",
+          "$.nextRunAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-schedule",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/schedule",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.cron",
+          "$.enabled",
+          "$.nextRunAt"
+        ]
+      }
+    },
+    {
+      "id": "put-api-workflows-workflowId-schedule",
+      "method": "PUT",
+      "path": "/api/workflows/{workflowId}/schedule",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.cron"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.cron",
+          "$.enabled",
+          "$.nextRunAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-workflows-workflowId-share",
+      "method": "DELETE",
+      "path": "/api/workflows/{workflowId}/share",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-share",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/share",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.active",
+          "$.reportCount",
+          "$.shareId",
+          "$.shareUrl",
+          "$.viewerCount"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-share",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/share",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.active",
+          "$.reportCount",
+          "$.shareId",
+          "$.shareUrl",
+          "$.viewerCount"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-workflows-workflowId-step-caching",
+      "method": "PATCH",
+      "path": "/api/workflows/{workflowId}/step-caching",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-workflows-workflowId-tuning-mode",
+      "method": "PATCH",
+      "path": "/api/workflows/{workflowId}/tuning-mode",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tuningMode"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.costRoutingEnabled",
+          "$.createdAt",
+          "$.description",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.editable",
+          "$.graph",
+          "$.id",
+          "$.maxRetryAttempts",
+          "$.maxStepsPerRun",
+          "$.name",
+          "$.reasoningDepth",
+          "$.status",
+          "$.stepCachingEnabled",
+          "$.stepTimeoutSeconds",
+          "$.tuningMode",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-validate",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/validate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.errors",
+          "$.valid"
+        ]
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-versions",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/versions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-versions",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/versions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-versions-versionNumber-promote",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/versions/{versionNumber}/promote",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.label"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-versions-versionNumber-restore",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/versions/{versionNumber}/restore",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-workflowId-versions-diff",
+      "method": "GET",
+      "path": "/api/workflows/{workflowId}/versions/diff",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-workflowId-versions-rollback",
+      "method": "POST",
+      "path": "/api/workflows/{workflowId}/versions/rollback",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-import",
+      "method": "POST",
+      "path": "/api/workflows/import",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-import-preview",
+      "method": "POST",
+      "path": "/api/workflows/import/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-workflows-input-requests",
+      "method": "GET",
+      "path": "/api/workflows/input-requests",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-workflows-input-requests-id-submit",
+      "method": "POST",
+      "path": "/api/workflows/input-requests/{id}/submit",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.values"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+/* ---- 6. Marketing surface (light) ---------------------------------------- */
+:root:not([data-mode="dark"]) .marketing-root {
+  --mkt-canvas: var(--surface-page);
+  --mkt-surface: rgba(255, 255, 255, 0.58);
+  --mkt-surface-raised: rgba(255, 255, 255, 0.78);
+  --mkt-surface-sunken: #ebebed;
+  --mkt-line: rgba(255, 255, 255, 0.85);
+  --mkt-line-strong: rgba(19, 19, 24, 0.14);
+  --mkt-ink: #131318;
+  --mkt-ink-2: #4a4a54;
+  --mkt-ink-3: #74747d;
+  /* Soft colour washes behind the glass (the blur needs something to catch) */
+  --mkt-glow-a: color-mix(in oklab, var(--accent-500) 18%, transparent);
+  --mkt-glow-b: color-mix(in oklab, #1b9fbb 10%, transparent);
+  --mkt-glow-c: color-mix(in oklab, #f97316 8%, transparent);
+  --mkt-grid: transparent;
+  --mkt-sheen: transparent;
+  --mkt-halo: transparent;
+  --mkt-shadow-sm: none;
+  --mkt-shadow: 0 10px 28px -14px rgba(19, 19, 24, 0.14);
+  --mkt-shadow-lg: 0 30px 70px -30px rgba(19, 19, 24, 0.22);
+  --mkt-shadow-glow: none;
+  --mkt-radius: 18px;
+  --mkt-radius-lg: 24px;
+  --mkt-radius-sm: 12px;
+}
+
+:root:not([data-mode="dark"]) .mkt-grain,
+:root:not([data-mode="dark"]) .mkt-canvas-bg::after {
+  display: none;
+}
+
+/* The wash covers the whole page, not just the top third, so every glass
+   card down the page sits on a little colour. */
+:root:not([data-mode="dark"]) .mkt-canvas-bg::before {
+  inset: -10% -10% -10%;
+  background:
+    radial-gradient(50% 40% at 50% 0%, var(--mkt-glow-a) 0%, transparent 70%),
+    radial-gradient(38% 34% at 96% 28%, var(--mkt-glow-b) 0%, transparent 72%),
+    radial-gradient(34% 30% at 4% 46%, var(--mkt-glow-c) 0%, transparent 74%),
+    radial-gradient(44% 36% at 84% 78%, var(--mkt-glow-a) 0%, transparent 72%),
+    radial-gradient(36% 30% at 12% 96%, var(--mkt-glow-b) 0%, transparent 74%);
+}
+
+.marketing-root .mkt-card::before {
+  display: none;
+}
+
+/* ---- 7. Glass finish (light) --------------------------------------------- */
+:root:not([data-mode="dark"]) .marketing-root .mkt-card {
+  background: var(--mkt-surface);
+  border: 1px solid var(--mkt-line);
+  box-shadow:
+    var(--glass-edge),
+    0 14px 44px -22px rgba(19, 19, 24, 0.22);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-card--raised {
+  background: var(--mkt-surface-raised);
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-card--sunken {
+  background: rgba(19, 19, 24, 0.035);
+  border-color: rgba(19, 19, 24, 0.05);
+  box-shadow: none;
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-card--interactive:hover {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    var(--glass-edge),
+    0 24px 60px -24px rgba(19, 19, 24, 0.28);
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-pill {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(19, 19, 24, 0.06);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-nav {
+  background: rgba(255, 255, 255, 0.35);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-nav.is-stuck {
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom-color: rgba(19, 19, 24, 0.06);
+}
+
+/* Console (post-auth) surfaces: cards go frosted, popovers stay opaque so
+   text never shows through a menu. */
+:root:not([data-mode="dark"]) {
+  --surface-card: rgba(255, 255, 255, 0.66);
+  --surface-raised: #ffffff;
+}
+
+:root:not([data-mode="dark"]) .app-aurora {
+  display: block;
+  opacity: 0.55;
+}
+
+:root:not([data-mode="dark"]) nav[class*="group/rail"],
+:root:not([data-mode="dark"]) .panel,
+:root:not([data-mode="dark"]) .glass-card {
+  -webkit-backdrop-filter: blur(var(--glass-blur, 16px)) saturate(160%);
+  backdrop-filter: blur(var(--glass-blur, 16px)) saturate(160%);
+}
+
+.marketing-root .mkt-nav.is-stuck {
+  box-shadow: none;
+}
+
+/* Buttons: solid accent, no gradient, no glow, no shine sweep */
+.marketing-root .mkt-btn {
+  padding: 0.625rem 1.125rem;
+  font-size: 0.875rem;
+  letter-spacing: -0.01em;
+}
+
+.marketing-root .mkt-btn-lg {
+  padding: 0.8125rem 1.5rem;
+  font-size: 0.9375rem;
+}
+
+.marketing-root .mkt-btn-primary {
+  background-image: none;
+  box-shadow: none;
+}
+
+.marketing-root .mkt-btn-primary:hover {
+  background-color: var(--accent-600);
+  box-shadow: none;
+}
+
+/* Light: white on the 500 stop fails AA for amber/emerald/coral/teal/sky, so
+   the fill is the 600 stop (all eight >= 4.5:1) and hover steps to 700.
+   Dark keeps 500 (a light tint under ink, see section 12). */
+:root:not([data-mode="dark"]) .marketing-root .mkt-btn-primary {
+  background-color: var(--accent-600);
+}
+
+:root:not([data-mode="dark"]) .marketing-root .mkt-btn-primary:hover {
+  background-color: var(--accent-700);
+}
+
+.marketing-root .mkt-btn-primary::after {
+  display: none;
+}
+
+.marketing-root .mkt-btn-secondary {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(19, 19, 24, 0.08);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+
+.marketing-root .mkt-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(19, 19, 24, 0.14);
+}
+
+/* Display type: big, 600, tight */
+.marketing-root h1,
+.marketing-root h2,
+.marketing-display {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.marketing-root .mkt-h1 {
+  font-size: clamp(2.5rem, 1.4rem + 3.8vw, 4.75rem); /* 40 → 76px */
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .marketing-root .mkt-h1 {
+    letter-spacing: -0.04em;
+  }
+}
+
+.marketing-root .mkt-h2 {
+  font-size: clamp(1.875rem, 1.3rem + 1.9vw, 3rem); /* 30 → 48px */
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+.marketing-root .mkt-h3 {
+  letter-spacing: -0.02em;
+}
+
+.marketing-root .mkt-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  line-height: 1.6;
+}
+
+.marketing-root .mkt-eyebrow,
+.marketing-root .mkt-badge,
+.marketing-root .mkt-mono {
+  font-family: var(--font-dm-mono-loaded), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.marketing-root .mkt-gradient-text {
+  background-image: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  color: var(--accent-text);
+}
+
+/* ---- 8. Header always stays (direct instruction 2026-09-24) -------------- */
+/* `.mkt-nav` is position:sticky, but the landing's <main> carries Tailwind's
+   `overflow-x-hidden`, and any non-visible overflow makes that ancestor the
+   sticky containing block — so the header scrolled away with the page.
+   `overflow-x: clip` clips exactly the same horizontal bleed WITHOUT creating
+   a scroll container, so the header pins to the viewport again. */
+.marketing-root {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.marketing-root .mkt-nav {
+  position: sticky;
+  top: 0;
+}

@@ -1,0 +1,20 @@
+{
+  "name": "vegaduta-e2e",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "description": "Self-contained Playwright E2E suite for the VegaDuta public web surface (landing, signup, legal, auth handoff). Independent of web/'s dependency tree on purpose - see README.md.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "test:prod": "playwright test -c playwright.prod.config.ts",
+    "test:prod:chromium": "playwright test -c playwright.prod.config.ts --project=chromium",
+    "test:prod:headed": "playwright test -c playwright.prod.config.ts --headed",
+    "report:prod": "playwright show-report playwright-report-prod",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

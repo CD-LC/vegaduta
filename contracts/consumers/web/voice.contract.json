@@ -1,0 +1,41 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-voice-agents-agentId-speak",
+      "method": "POST",
+      "path": "/api/voice/agents/{agentId}/speak",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.text"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-voice-agents-agentId-token",
+      "method": "POST",
+      "path": "/api/voice/agents/{agentId}/token",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.token",
+          "$.url"
+        ]
+      }
+    },
+    {
+      "id": "post-api-voice-agents-agentId-turn",
+      "method": "POST",
+      "path": "/api/voice/agents/{agentId}/turn",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

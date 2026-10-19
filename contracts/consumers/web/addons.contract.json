@@ -1,0 +1,42 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-addons",
+      "method": "GET",
+      "path": "/api/addons",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-addons-id",
+      "method": "GET",
+      "path": "/api/addons/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-addons-id-disable",
+      "method": "POST",
+      "path": "/api/addons/{id}/disable",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-addons-id-enable",
+      "method": "POST",
+      "path": "/api/addons/{id}/enable",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-quick-task",
+      "method": "POST",
+      "path": "/api/quick-task",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.channel",
+          "$.message"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-quick-task-taskId",
+      "method": "GET",
+      "path": "/api/quick-task/{taskId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.channel",
+          "$.completedAt",
+          "$.deliveryNote",
+          "$.errorMessage",
+          "$.requestMessage",
+          "$.resultText",
+          "$.startedAt",
+          "$.status",
+          "$.taskId",
+          "$.toolCalls"
+        ]
+      }
+    },
+    {
+      "id": "post-api-quick-task-preview",
+      "method": "POST",
+      "path": "/api/quick-task/preview",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.message"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-quick-task-recent",
+      "method": "GET",
+      "path": "/api/quick-task/recent",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].channel",
+          "$[*].requestMessage",
+          "$[*].startedAt",
+          "$[*].status",
+          "$[*].taskId"
+        ]
+      }
+    },
+    {
+      "id": "post-api-quick-task-stream",
+      "method": "POST",
+      "path": "/api/quick-task/stream",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.channel",
+          "$.message"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

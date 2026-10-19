@@ -1,0 +1,288 @@
+/* Mission Control dashboard - scoped stylesheet imported only by page.js,
+ * same "isolated per-experience CSS file" pattern marketing.css uses,
+ * rather than dumping another few hundred lines into the shared
+ * globals.css for a redesign that (for now) only touches this one page.
+ *
+ * The hero panel (.mc-hero) is a fixed dark "screen" regardless of the
+ * console's own light/dark theme toggle - like an instrument panel that's
+ * backlit dark no matter how bright the room is. This sidesteps the real
+ * problem with the first redesign attempt (additive-blended WebGL glow
+ * nodes go nearly invisible against a white light-mode background) and
+ * reinforces the "you're looking into a live system" framing the brief
+ * asked for. Everything below the hero (the bento module grid) still
+ * follows the console's normal light/dark tokens from globals.css.
+ *
+ * Straight copy of web/app/components/dashboard/dashboard.css (see that
+ * file for the full history) - this app only actually uses the
+ * `.mc-status-*`/`.mc-hud-panel`/`.mc-platform-*` rules (SystemStatusPanel.js
+ * on this page's own Ecosystem Maintenance screen), but the whole file is
+ * copied verbatim rather than trimmed - same "one shared source of truth,
+ * no partial fork" posture globals.css itself already follows in this app.
+ * This file was missed when SystemStatusPanel.js was first ported here
+ * (#695) - the COMPONENT was copied but its own dedicated stylesheet
+ * never was, and nothing imported it, so every `.mc-*` class it renders
+ * fell back to completely unstyled browser defaults (a bare unstyled list
+ * plus a full-size unstyled corner-bracket SVG that `.mc-status-corners {
+ * display: none; }` below would otherwise hide).
+ */
+
+/* Continued in dashboard-*.css. dashboardStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+.mc-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  min-height: 360px;
+  padding: 2.5rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: radial-gradient(120% 140% at 15% 0%, #10192e 0%, #05070d 55%, #030509 100%);
+  margin-bottom: 1.75rem;
+  isolation: isolate;
+}
+
+.mc-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.mc-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrim so headline text stays legible over the constellation regardless of
+ * where the nodes happen to drift - a flat gradient rather than a blur,
+ * since blurring would soften the WebGL scene itself. */
+.mc-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(3, 5, 9, 0.92) 0%, rgba(3, 5, 9, 0.35) 55%, rgba(3, 5, 9, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* Ambient scanline sweep - one more "this is a live instrument, not a
+ * screenshot" cue on top of AgentConstellation's WebGL scene, for the rare
+ * fallback case (WebGL unavailable / reduced-motion) where that canvas
+ * never mounts and the hero would otherwise be a static gradient.
+ *
+ * Originally animated background-position, which looked identical but was
+ * wrong: animating background-position repaints the element's background
+ * layer on every frame (it's a paint-triggering property, not a compositor
+ * one), so a "free" ambient loop was quietly costing a full-hero repaint
+ * 60x/sec. Rebuilt as a narrow beam element that's translated with
+ * transform instead - the browser can run the whole loop on the compositor
+ * thread, same as a WebGL layer, with zero layout/paint per frame. The beam
+ * is 45% wide and travels across a 240%-wide excursion so it clears both
+ * edges of the hero with room to spare before looping. Sits between the
+ * canvas (z-index 0) and the scrim (z-index 1, same stacking level but
+ * painted after in source order) so it reads as a faint pass of light
+ * under the darkening gradient, never competing with headline legibility. */
+.mc-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -45%;
+  width: 45%;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.05) 40%,
+    rgba(0, 229, 255, 0.09) 50%,
+    rgba(0, 229, 255, 0.05) 60%,
+    transparent 100%
+  );
+  transform: translate3d(0, 0, 0);
+  animation: mc-scanline-sweep 7s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes mc-scanline-sweep {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(240%, 0, 0);
+  }
+}
+
+.mc-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.mc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #00e5ff;
+}
+
+.mc-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 8px 2px rgba(0, 229, 255, 0.7);
+  animation: mc-pulse 2s ease-in-out infinite;
+}
+
+@keyframes mc-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+.mc-greeting {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-sora), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-size: clamp(1.9rem, 4.2vw, 3.1rem);
+  color: #f8fafc;
+}
+
+.mc-greeting-accent {
+  background-image: linear-gradient(120deg, #00e5ff 0%, #4f46e5 50%, #7c3aed 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.mc-subline {
+  margin: 0 0 1.75rem;
+  max-width: 46ch;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.mc-hud-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mc-hud-card {
+  position: relative;
+  min-width: 132px;
+  padding: 0.85rem 1.1rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.mc-hud-card::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.16) 0%, transparent 65%);
+  opacity: 0;
+  animation: mc-card-breathe 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.mc-hud-card:nth-child(2)::before {
+  animation-delay: 0.7s;
+}
+.mc-hud-card:nth-child(3)::before {
+  animation-delay: 1.5s;
+}
+.mc-hud-card:nth-child(4)::before {
+  animation-delay: 2.3s;
+}
+
+@keyframes mc-card-breathe {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.mc-hud-card::after {
+  content: "";
+  position: absolute;
+  top: 0.6rem;
+  right: 0.65rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 6px 1.5px rgba(0, 229, 255, 0.65);
+  animation: mc-pulse 2.4s ease-in-out infinite;
+}
+
+.mc-hud-card:nth-child(2)::after {
+  animation-delay: 0.4s;
+}
+.mc-hud-card:nth-child(3)::after {
+  animation-delay: 0.8s;
+}
+.mc-hud-card:nth-child(4)::after {
+  animation-delay: 1.2s;
+}
+
+.mc-hud-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 229, 255, 0.5);
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.mc-hud-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+}
+
+.mc-hud-value {
+  display: block;
+  font-family: var(--font-sora), monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  background-image: linear-gradient(120deg, #00e5ff 0%, #a5b4fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.mc-hud-value-empty {
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: #475569;
+}

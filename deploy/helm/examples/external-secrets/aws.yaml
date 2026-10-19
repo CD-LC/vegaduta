@@ -1,0 +1,143 @@
+# External Secrets Operator -> AWS Secrets Manager. Produces the Secrets that values-aws.yaml reads
+# (names and keys are the chart's contract, see "Secrets the charts read" in deploy/helm/README.md).
+#
+#   kubectl apply -f aws.yaml -n vegaduta
+#
+# STATUS: schema-checked with kubeconform -ignore-missing-schemas (the External Secrets CRDs are not in
+# the schema catalog used, so these documents were NOT validated against the CRD). Not applied to a
+# cluster; ESO and AWS were not contacted. Account ids, regions and secret names are placeholders.
+#
+# Secrets Manager layout assumed (create them first; values are yours, never commit them):
+#   vegaduta/core-app    JSON {"APP_ENCRYPTION_KEY": "<openssl rand -base64 32>"}
+#   vegaduta/internal    JSON with the 7 keys listed in the ExternalSecret below (random tokens)
+#   vegaduta/postgres    JSON {"password": "..."}        (the RDS master or app user's password)
+#   vegaduta/valkey      JSON {"password": "..."}        (the ElastiCache AUTH token)
+#   vegaduta/oidc        JSON {"clientSecret": "..."}
+#   vegaduta/kafka       JSON {"saslJaasConfig": "..."}  (only with MSK, see the last document)
+#
+# ESO version: these use apiVersion external-secrets.io/v1, which only recent External Secrets Operator
+# releases serve (older ones serve v1beta1 only; check `kubectl api-resources --api-group=external-secrets.io`).
+# On an older ESO change every apiVersion to external-secrets.io/v1beta1. Neither version was run here.
+#
+# Auth: the ServiceAccount "external-secrets-vegaduta" created below (in the vegaduta namespace) carries an
+# IRSA role that can secretsmanager:GetSecretValue on
+# arn:aws:secretsmanager:eu-west-1:123456789012:secret:vegaduta/*. The role's trust policy must name
+# system:serviceaccount:vegaduta:external-secrets-vegaduta. Replace the role ARN (a placeholder).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-secrets-vegaduta
+  namespace: vegaduta
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/vegaduta-eso-read
+---
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: aws-secrets-manager
+  namespace: vegaduta
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: eu-west-1
+      auth:
+        jwt:
+          serviceAccountRef:
+            name: external-secrets-vegaduta       # the ServiceAccount above (same namespace)
+---
+# APP_ENCRYPTION_KEY: one Secret for core, core-jobs, core-worker and the migrate Job.
+# creationPolicy: Orphan is what keeps this Secret when the ExternalSecret is deleted (kubectl delete -f,
+# a GitOps prune): with the default Owner the Secret carries an ownerReference to the ExternalSecret and
+# Kubernetes garbage-collects it. deletionPolicy: Retain is a different thing: it keeps the Secret when the
+# value disappears from the store. Both are set here because losing this value makes every encrypted
+# credential in the database unreadable (AGENTS.md rule 5). Orphan also means that deleting the ExternalSecret
+# leaves a Secret nobody refreshes. Rotate with APP_ENCRYPTION_KEY_PREVIOUS (see the production checklist),
+# never by overwriting the stored value. Behaviour per the ESO documentation; not run against ESO here.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-core-app
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: aws-secrets-manager }
+  target:
+    name: vegaduta-core-app                       # = global.core.appSecret.existingSecret
+    creationPolicy: Orphan
+    deletionPolicy: Retain
+  data:
+    - secretKey: APP_ENCRYPTION_KEY
+      remoteRef: { key: vegaduta/core-app, property: APP_ENCRYPTION_KEY }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-internal
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: aws-secrets-manager }
+  target:
+    name: vegaduta-internal                       # = global.internalSecret.existingSecret
+    creationPolicy: Orphan
+    deletionPolicy: Retain
+  data:
+    - { secretKey: SIDECAR_SHARED_SECRET,            remoteRef: { key: vegaduta/internal, property: SIDECAR_SHARED_SECRET } }
+    - { secretKey: MCP_STDIO_SIDECAR_SHARED_SECRET,  remoteRef: { key: vegaduta/internal, property: MCP_STDIO_SIDECAR_SHARED_SECRET } }
+    - { secretKey: CODE_INTEL_INTERNAL_TOKEN,        remoteRef: { key: vegaduta/internal, property: CODE_INTEL_INTERNAL_TOKEN } }
+    - { secretKey: TOOL_SANDBOX_INTERNAL_TOKEN,      remoteRef: { key: vegaduta/internal, property: TOOL_SANDBOX_INTERNAL_TOKEN } }
+    - { secretKey: APP_BUILDER_CORE_SERVICE_TOKEN,   remoteRef: { key: vegaduta/internal, property: APP_BUILDER_CORE_SERVICE_TOKEN } }
+    - { secretKey: APP_BUILDER_ENCRYPTION_KEY,       remoteRef: { key: vegaduta/internal, property: APP_BUILDER_ENCRYPTION_KEY } }
+    - { secretKey: RL_TRAINER_INTERNAL_TOKEN,        remoteRef: { key: vegaduta/internal, property: RL_TRAINER_INTERNAL_TOKEN } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-postgres
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: aws-secrets-manager }
+  target: { name: vegaduta-postgres, creationPolicy: Owner }     # = global.postgresql.existingSecret
+  data:
+    - { secretKey: password, remoteRef: { key: vegaduta/postgres, property: password } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-valkey
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: aws-secrets-manager }
+  target: { name: vegaduta-valkey, creationPolicy: Owner }       # = global.valkey.existingSecret
+  data:
+    - { secretKey: password, remoteRef: { key: vegaduta/valkey, property: password } }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-oidc
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: aws-secrets-manager }
+  target: { name: vegaduta-oidc, creationPolicy: Owner }         # = global.oidc.existingSecret
+  data:
+    - { secretKey: clientSecret, remoteRef: { key: vegaduta/oidc, property: clientSecret } }
+---
+# MSK SASL/SCRAM only (values-aws.yaml, global.kafka.existingSecret). The stored value is the full JAAS line:
+#   org.apache.kafka.common.security.scram.ScramLoginModule required username="<user>" password="<password>";
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vegaduta-kafka
+  namespace: vegaduta
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { kind: SecretStore, name: aws-secrets-manager }
+  target: { name: vegaduta-kafka, creationPolicy: Owner }        # = global.kafka.existingSecret
+  data:
+    - { secretKey: saslJaasConfig, remoteRef: { key: vegaduta/kafka, property: saslJaasConfig } }

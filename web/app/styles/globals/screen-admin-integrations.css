@@ -1,0 +1,205 @@
+/* ==========================================================================
+ * Integrations (#474 follow-up) - no design_handoff_axon mockup exists for
+ * this screen (confirmed: the 14-file handoff only covers Admin Overview/
+ * Users/Approvals/Audit - "Integrations" is only ever a sub-sidebar nav
+ * label inside those, never its own screen). Per direct confirmation, this
+ * is a best-effort port onto the same AXON tokens/classes/component idioms
+ * every other rebuilt screen uses (hero card, chip rows, mono meta text) -
+ * not a literal pixel spec, since none exists to be pixel-perfect against.
+ * ========================================================================== */
+
+.ax-int-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.ax-int-card {
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  padding: 22px 24px;
+}
+
+.ax-int-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ax-int-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--ax-cyan), var(--ax-violet));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #05070d;
+  flex-shrink: 0;
+}
+
+.ax-int-title {
+  font-size: var(--fs-lede);
+  font-weight: 600;
+  color: var(--ax-text);
+  margin-bottom: 4px;
+}
+
+.ax-int-desc {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  line-height: 1.5;
+  max-width: 520px;
+}
+
+.ax-int-account-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ax-border);
+}
+
+.ax-int-avatar {
+  display: flex;
+  height: 36px;
+  width: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  /* Was hardcoded #7c5cff/#4fe3e3 (a DARK-mode-only literal - #4fe3e3 is
+   * --accent-cyan/--hud-cyan's dark value verbatim) instead of the same
+   * mode-aware --ax-violet/--ax-cyan pair .ax-int-icon above already uses -
+   * never repainted in light mode and didn't match its own sibling icon. */
+  background-image: linear-gradient(135deg, var(--ax-violet), var(--ax-cyan));
+  color: #05070d;
+}
+
+.ax-int-account-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* Default flex-item min-width is "auto" (== its content's min-content
+   * size), not 0 - harmless for the wrapped .ax-int-desc sentence above
+   * (any of its words can break the line), but the connected Google
+   * account's own email address right below is one unbroken string with
+   * no natural wrap point, so without this the .ax-int-account-row flex
+   * row would rather overflow past a phone's viewport edge than let this
+   * column shrink. */
+  min-width: 0;
+}
+
+.ax-int-account-email {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ax-text);
+  font-family: var(--font-mono), monospace;
+  /* overflow-wrap: anywhere - the actual fix for the unbroken-string
+   * overflow described above: let a too-long email address wrap mid-word
+   * instead of forcing the row wider than its container. */
+  overflow-wrap: anywhere;
+}
+
+.ax-int-scopes-label {
+  margin-top: 20px;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ax-dim);
+  text-transform: uppercase;
+}
+
+.ax-int-scopes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ax-int-scope-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--ax-border2);
+  background: transparent;
+  color: var(--ax-mid);
+  font-size: var(--fs-label);
+}
+
+.ax-int-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Admin Integrations screen (admin/integrations/page.tsx) - removed
+ * (2026-07-26 ShadCN redesign): GoogleIntegrationPanel now renders its own
+ * Card/Badge/Button/Alert layout directly, so the `.ax-intg-screen` scoping
+ * wrapper and the rules that targeted it are gone. The base `.ax-int-*`
+ * classes above stay - the workflow-runs pages still reuse them. */
+
+/* ==========================================================================
+ * Admin Billing & Usage page (admin/billing/page.js, #968) - like the Admin
+ * Overview page, this screen is built almost entirely from inline styles
+ * (ported 1:1 off Billing.dc.html), so the three fixed-shape grids that
+ * actually decide its layout - plan/usage side-by-side, the three empty
+ * payment/contact/tax cards, and the ticket-form category+subject row -
+ * get the same treatment as admin/page.js's .ax-admin-ovw-* classes: pull
+ * just grid-template-columns out into a real class so a mobile @media rule
+ * can reach it, leave every other inline style (colors, padding, gradients)
+ * untouched. Desktop values below match the inline props they replaced. */
+.ax-bill-plan-grid {
+  grid-template-columns: 1.15fr 1fr;
+}
+
+.ax-bill-empty-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.ax-bill-ticket-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  /* Plan card + usage-bars card side by side needs ~500px combined to
+   * read comfortably (plan card alone has a price, a blurb paragraph, and
+   * an upgrade button) - single column below tablet width. */
+  .ax-bill-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Three empty-state cards (Payment method / Billing contact / Tax) at
+   * repeat(3, 1fr) leave each one well under 120px wide on a phone, not
+   * enough room for the icon + uppercase title on one line. Two per row
+   * first, since three genuinely needs closer to tablet width. */
+  .ax-bill-empty-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  /* At true phone width even 2 empty-state cards get tight once the
+   * uppercase title wraps - drop to one column, matching the two-stage
+   * 3-then-2-then-1 progression already used by .ax-telemetry-row/
+   * .ax-admin-ovw-row1 elsewhere in this file. */
+  .ax-bill-empty-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Support-ticket form's category dropdown + subject input: 1fr 1fr
+   * leaves each field roughly half the phone's width, not enough for the
+   * dropdown's option text or the subject placeholder to stay readable -
+   * stack them like the rest of this codebase's forms already do below
+   * 640px. */
+  .ax-bill-ticket-grid {
+    grid-template-columns: 1fr;
+  }
+}

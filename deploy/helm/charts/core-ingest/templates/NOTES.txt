@@ -1,0 +1,2 @@
+core-ingest: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) - runs only the knowledge ingestion and re-embedding pollers, actuator only.
+  app Secret : {{ include "vegaduta-lib.core.appSecretName" . }} (must be the same Secret core uses)

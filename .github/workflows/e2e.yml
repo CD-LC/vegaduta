@@ -1,0 +1,128 @@
+name: E2E (Playwright on the compose stack)
+
+# Builds the full compose stack from this commit (docker-compose.yml +
+# docker-compose.build.yml + the CI overlay, which adds an OpenAI-compatible
+# mock provider and trims memory for hosted runners), waits for it to be
+# healthy, then runs the Playwright suite in tests/e2e against it. Nightly and
+# on demand only: a stack build plus a browser run is too heavy for every PR.
+# A manual run can pick other files (e.g. the lite tier: deploy/compose/lite.yml
+# deploy/compose/lite.build.yml) and extra profiles (e.g. temporal).
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # nightly 03:17 UTC
+  workflow_dispatch:
+    inputs:
+      compose_files:
+        description: Space-separated compose files (default full stack + build + ci overlays)
+        required: false
+        default: ""
+      profiles:
+        description: Comma-separated compose profiles to enable (e.g. temporal)
+        required: false
+        default: ""
+      specs:
+        description: Playwright spec files or --grep arguments
+        required: false
+        default: "tests/landing.spec.ts tests/legal.spec.ts tests/signup.spec.ts tests/accessibility-smoke.spec.ts"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright against the compose stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      E2E_BASE_URL: http://localhost:3000
+      # The CI overlay's mock provider echoes the message; tests/bundles-connect-chat.spec.ts asserts it.
+      E2E_MOCK_PROVIDER: "1"
+      COMPOSE_PROFILES: ${{ github.event.inputs.profiles }}
+      DEFAULT_SPECS: "tests/landing.spec.ts tests/legal.spec.ts tests/signup.spec.ts tests/accessibility-smoke.spec.ts"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve compose files
+        id: files
+        env:
+          INPUT_FILES: ${{ github.event.inputs.compose_files }}
+        run: |
+          files="$INPUT_FILES"
+          if [ -z "$files" ]; then
+            files="deploy/compose/docker-compose.yml deploy/compose/docker-compose.build.yml deploy/compose/docker-compose.ci.yml"
+          fi
+          for f in $files; do [ -f "$f" ] || { echo "::error::$f not found"; exit 1; }; done
+          args=""; for f in $files; do args="$args -f $f"; done
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          echo "args=$args" >> "$GITHUB_OUTPUT"
+
+      - name: Generate throwaway env
+        env:
+          FILES: ${{ steps.files.outputs.files }}
+        run: |
+          # shellcheck disable=SC2086
+          bash scripts/ci/compose-ci-env.sh "$RUNNER_TEMP/ci.env" $FILES
+
+      - name: Boot the stack
+        env:
+          ARGS: ${{ steps.files.outputs.args }}
+        run: |
+          # shellcheck disable=SC2086
+          docker compose $ARGS --env-file "$RUNNER_TEMP/ci.env" up -d --build --wait --wait-timeout 600
+
+      - name: Health gate
+        run: bash scripts/ci/stack-health-gate.sh
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install Playwright
+        working-directory: tests/e2e
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright
+        working-directory: tests/e2e
+        env:
+          SPECS: ${{ github.event.inputs.specs }}
+        run: |
+          # shellcheck disable=SC2086
+          npx playwright test --project=chromium ${SPECS:-$DEFAULT_SPECS}
+
+      - name: Collect compose logs
+        if: failure()
+        env:
+          ARGS: ${{ steps.files.outputs.args }}
+        run: |
+          # shellcheck disable=SC2086
+          docker compose $ARGS --env-file "$RUNNER_TEMP/ci.env" logs --no-color > compose-logs.txt 2>&1 || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: e2e-results
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+            compose-logs.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Tear down
+        if: always()
+        env:
+          ARGS: ${{ steps.files.outputs.args }}
+        run: |
+          # shellcheck disable=SC2086
+          docker compose $ARGS --env-file "$RUNNER_TEMP/ci.env" down -v || true

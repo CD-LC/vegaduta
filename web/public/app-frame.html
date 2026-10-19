@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  Host document for SHARED/PUBLISHED user apps opened through run-app.html.
+
+  Security review SEC-020 (2026-09-30): the app's no-network CSP and the
+  password guard used to be spliced into the app's HTML at the first "<head"
+  match, which the app itself controls ("<!--<head>-->", a script before
+  <head>, ...), so both could be skipped. Now:
+    - the CSP is a RESPONSE HEADER on this file (proxy.js, APP_FRAME_CSP):
+      default-src 'none', connect-src 'none', form-action 'none'. Nothing in
+      the app's HTML can loosen a header policy.
+    - the storage shim and the password guard are installed by THIS page,
+      before and after the app document is written, not spliced into it.
+    - run-app.html embeds this file sandboxed WITHOUT allow-same-origin, so it
+      runs in an opaque origin: no access to run-app's storage or tokens.
+  Protocol: posts {vdSandbox:"ready"} to the parent; accepts ONE
+  {vdSandbox:"render", html, seed} from the parent; writes it; posts
+  {vdSandbox:"loaded"}.
+-->
+<html>
+<head><meta charset="utf-8"><meta name="robots" content="noindex"></head>
+<body>
+<script>
+(function () {
+  var P = window.parent;
+  var done = false;
+  function installStorage(seed) {
+    var mem = {};
+    if (seed && typeof seed === "object") {
+      for (var k in seed) if (Object.prototype.hasOwnProperty.call(seed, k)) mem[k] = String(seed[k]);
+    }
+    var t = null;
+    function sync() {
+      clearTimeout(t);
+      t = setTimeout(function () { try { P.postMessage({ vdStudio: "storage", data: mem }, "*"); } catch (e) {} }, 150);
+    }
+    var store = {
+      getItem: function (k) { k = String(k); return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+      setItem: function (k, v) { mem[String(k)] = String(v); sync(); },
+      removeItem: function (k) { delete mem[String(k)]; sync(); },
+      clear: function () { mem = {}; sync(); },
+      key: function (i) { return Object.keys(mem)[i] || null; }
+    };
+    Object.defineProperty(store, "length", { get: function () { return Object.keys(mem).length; } });
+    try { Object.defineProperty(window, "localStorage", { value: store, configurable: false }); } catch (e) {}
+  }
+  function guard(root) {
+    var n = (root || document).querySelectorAll("input[type=password]");
+    for (var i = 0; i < n.length; i++) {
+      n[i].disabled = true; n[i].type = "text"; n[i].value = "";
+      n[i].placeholder = "Password fields are disabled in shared apps";
+    }
+  }
+  function onMessage(e) {
+    if (done || e.source !== P) return;
+    var d = e.data;
+    if (!d || d.vdSandbox !== "render" || typeof d.html !== "string") return;
+    done = true;
+    window.removeEventListener("message", onMessage);
+    installStorage(d.seed);
+    document.open();
+    document.write(d.html);
+    document.close();
+    guard();
+    new MutationObserver(function () { guard(); })
+      .observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["type"] });
+    P.postMessage({ vdSandbox: "loaded" }, "*");
+  }
+  window.addEventListener("message", onMessage);
+  P.postMessage({ vdSandbox: "ready" }, "*");
+})();
+</script>
+</body>
+</html>

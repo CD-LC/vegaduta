@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/twilio-conversation-relay/interrupt.schema.json",
+  "title": "Twilio Conversation Relay - interrupt message",
+  "description": "Source: VoiceRelayWebSocketHandler.java#handleTextMessage, read directly (2026-07-19). case \"interrupt\" -> disposeActive(session) reads zero fields off the message node - there is nothing beyond 'type' to validate. Kept as its own schema file (rather than folded into the README) purely so the fixture corpus has one schema per handled message type, matching the directory's own convention.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "interrupt" }
+  },
+  "required": ["type"],
+  "additionalProperties": true
+}

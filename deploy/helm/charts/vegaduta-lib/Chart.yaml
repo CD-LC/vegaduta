@@ -1,0 +1,14 @@
+apiVersion: v2
+name: vegaduta-lib
+description: Shared Helm library for the VegaDuta charts (naming, labels, workload, networking and core-family templates).
+type: library
+version: 0.2.0
+appVersion: "0.1.0"
+home: https://github.com/CD-LC/vegaduta
+sources:
+  - https://github.com/CD-LC/vegaduta/tree/main/deploy/helm/charts/vegaduta-lib
+maintainers:
+  - name: VegaDuta maintainers
+    url: https://github.com/CD-LC/vegaduta
+annotations:
+  licenses: Apache-2.0

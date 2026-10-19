@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/razorpay/subscription.updated.schema.json",
+  "title": "Razorpay webhook - subscription.updated",
+  "description": "Extends _envelope.schema.json. Source: RazorpayGatewayClient.java#mapEventType, case \"subscription.updated\" -> BillingEventType.SUBSCRIPTION_UPDATED (read directly, 2026-07-19).",
+  "allOf": [{ "$ref": "./_envelope.schema.json" }],
+  "properties": {
+    "event": { "const": "subscription.updated" }
+  }
+}

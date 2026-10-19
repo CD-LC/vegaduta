@@ -1,0 +1,313 @@
+/* Public / unauthenticated page fixes for the paper-and-ink + glass theme.
+   Owned by the public-pages sweep. Imported after tokens.css.
+
+   Every rule is scoped to `.vd-pub`, the class hook carried by the root
+   element of each public page (about, compare, glossary, why-vegaduta, the
+   four SEO hubs, docs, billing, status, api-reference, changelog, templates /
+   plugins chrome, earn, hire, try, code, terms, privacy, ui-kit, the share
+   viewers and /signup/complete). The landing, /login, /signup and the
+   console are NOT hooked and are untouched by this file.
+
+   Light rules are bare; dark rules sit under `:root[data-mode="dark"]`.
+   This sheet is unlayered, so a bare `.vd-pub …` rule beats any Tailwind
+   utility on the same element (they live in @layer utilities). Where a page's
+   own global stylesheet (hire-landing.css, signup.css) also fights unlayered,
+   the selectors below carry `:root:not(#_)` for an id's worth of specificity. */
+
+/* Continued in styles/public/*.css. styles/publicStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+/* ---- 1. Page root: paper, ink, one typeface, no horizontal scroll ---------- */
+.vd-pub {
+  /* Real height of the sticky `.vd-pub > nav` bar below, so anything else
+     sticky on the page (e.g. WorkflowRecipesClient's filter bar/rail) can
+     offset itself with calc(var(--pub-nav-h) + …) instead of a guessed
+     Tailwind top-* value that drifts out of sync with the nav's actual size. */
+  --pub-nav-h: 72px;
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  overflow-y: visible;
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  font-family:
+    var(--font-jakarta-loaded),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+/* Soft colour washes behind the glass (same recipe as the landing's
+   .mkt-canvas-bg) — fixed so every card down the page sits on a little
+   colour. Replaces the single primary blob the pages used to render. */
+.vd-pub::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(50% 40% at 50% 0%, color-mix(in oklab, var(--accent-500) 18%, transparent) 0%, transparent 70%),
+    radial-gradient(38% 34% at 96% 28%, color-mix(in oklab, #1b9fbb 10%, transparent) 0%, transparent 72%),
+    radial-gradient(34% 30% at 4% 46%, color-mix(in oklab, #f97316 8%, transparent) 0%, transparent 74%),
+    radial-gradient(44% 36% at 84% 78%, color-mix(in oklab, var(--accent-500) 18%, transparent) 0%, transparent 72%),
+    radial-gradient(36% 30% at 12% 96%, color-mix(in oklab, #1b9fbb 10%, transparent) 0%, transparent 74%);
+}
+
+:root[data-mode="dark"] .vd-pub::before {
+  background:
+    radial-gradient(50% 40% at 50% 0%, color-mix(in oklab, var(--accent-500) 16%, transparent) 0%, transparent 70%),
+    radial-gradient(38% 34% at 96% 28%, color-mix(in oklab, #1b9fbb 9%, transparent) 0%, transparent 72%),
+    radial-gradient(34% 30% at 4% 46%, color-mix(in oklab, #f97316 6%, transparent) 0%, transparent 74%),
+    radial-gradient(44% 36% at 84% 78%, color-mix(in oklab, var(--accent-500) 14%, transparent) 0%, transparent 72%);
+}
+
+/* The old fixed primary blob(s) each page rendered under itself. */
+.vd-pub > [aria-hidden][class*="fixed"][class*="-z-10"] {
+  display: none;
+}
+
+/* ---- 2. Sticky glass top bar ---------------------------------------------- */
+/* Pages whose chrome is a bare <nav> row (docs, billing, status, templates,
+   plugins, api-reference, changelog, whatsapp calculator) get it pinned with
+   a full-bleed frosted backdrop. The nav keeps its max-width container; the
+   ::before paints edge to edge behind it. */
+.vd-pub > nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.vd-pub > nav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  /* Near-opaque like the landing's .mkt-nav (0.88 light / 0.92 dark):
+     body copy must never bleed through a navigation surface (QA-07). */
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(19, 19, 24, 0.06);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+}
+
+:root[data-mode="dark"] .vd-pub > nav::before {
+  background: color-mix(in oklab, var(--surface-page) 90%, transparent);
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Pages that already carry a sticky <header> (earn, try, code, share viewers,
+   hire) — same glass, both modes. vd-tier1 covers light `header.sticky`;
+   this adds the dark counterpart and keeps the sticky position pinned. */
+.vd-pub header.sticky {
+  position: sticky;
+  top: 0;
+}
+
+:root[data-mode="dark"] .vd-pub header.sticky {
+  background: color-mix(in oklab, var(--surface-page) 90%, transparent) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+}
+
+/* Phone: the bare <nav> row used to wrap into a 130–180px block, then was
+   collapsed to a single line whose link/CTA row scrolled horizontally — which
+   pushed "Sign in" and "Start free" off-screen behind a 20px fade (QA-01:
+   strip 196px wide, 493px of content). At 375px the brand (135px) and the
+   two CTAs (~190px) alone fill the 343px row, so no one-line layout can hold
+   them plus the text links. Layout now (pure CSS, markup unchanged):
+
+     row 1  brand ........................ [Sign in] [Start free]
+     row 2  Home  Pricing  API  Status
+
+   The link/CTA <div> becomes `display: contents` so its children are the
+   nav's own flex items; flex `order` puts the two CTAs (the only <button>
+   and the /signup anchor) on the brand row, pinned right, and a
+   full-width nav::after breaks the line before the text links. Nothing
+   scrolls, nothing clips, and the bar is ~100px instead of 130-180. */
+@media (max-width: 640px) {
+  .vd-pub {
+    --pub-nav-h: 100px;
+  }
+
+  .vd-pub > nav {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.25rem 0.375rem;
+    padding-block: 0.5rem;
+  }
+
+  .vd-pub > nav > a:first-child {
+    flex: none;
+    order: 0;
+  }
+
+  .vd-pub > nav > div {
+    display: contents;
+  }
+
+  .vd-pub > nav > div > * {
+    flex: none;
+    order: 4;
+  }
+
+  /* Row 1: the CTAs. "Sign in" is the only <button> (it calls auth.login);
+     "Start free" is the /signup anchor. */
+  .vd-pub > nav > div > button {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .vd-pub > nav > div > a[href="/signup"] {
+    order: 2;
+  }
+
+  .vd-pub > nav:not(:has(> div > button)) > div > a[href="/signup"] {
+    margin-left: auto;
+  }
+
+  /* Line break between the CTA row and the link row. */
+  .vd-pub > nav::after {
+    content: "";
+    order: 3;
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  /* Compact sizes so brand + both CTAs fit a 360px phone with slack for
+     translated labels, and four text links fit one row (docs is the widest:
+     Home / Pricing / API / Status). The CTAs drop their decorative arrow /
+     login glyphs on phones (each costs ~22px on a row that has none to
+     spare); the text links keep their icons. */
+  .vd-pub > nav > div > [data-slot="button"] {
+    font-size: 0.8125rem;
+    padding-inline: 0.625rem;
+  }
+
+  .vd-pub > nav > div > a[href="/signup"] {
+    padding-inline: 0.875rem;
+  }
+
+  .vd-pub > nav > div > :is(button, a[href="/signup"]) > svg {
+    display: none;
+  }
+
+  /* Text links sit flush with the gutter, one step quieter. */
+  .vd-pub > nav > div > a[data-slot="button"]:not([href="/signup"]) {
+    padding-inline: 0.5rem;
+  }
+
+  .vd-pub > nav > div > a[data-slot="button"]:not([href="/signup"]):first-child {
+    margin-left: -0.5rem;
+  }
+
+  .vd-pub > nav [data-slot="button"],
+  .vd-pub header.sticky [data-slot="button"],
+  .vd-pub > nav > a,
+  .vd-pub header.sticky a[href] {
+    min-height: 2.5rem;
+  }
+
+  /* Sticky <header> pages (earn, try, code, share viewers): buttons
+     tighten so brand + two CTAs fit 375px without spilling. */
+  .vd-pub header.sticky [data-slot="button"] {
+    padding-inline: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .vd-pub header.sticky nav,
+  .vd-pub header.sticky > div {
+    gap: 0.5rem;
+  }
+
+  .vd-pub header.sticky nav > div,
+  .vd-pub header.sticky > div > div {
+    min-width: 0;
+  }
+
+  /* Tap targets: every button / chip / list link is at least 40px tall */
+  .vd-pub button:not([class*="size-"]):not([class*="h-4"]):not([class*="h-5"]):not([class*="h-6"]),
+  .vd-pub [data-slot="button"],
+  .vd-pub select,
+  .vd-pub input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]) {
+    min-height: 2.5rem;
+  }
+
+  .vd-pub :is(nav, li, footer, header, aside) a[href]:not(.brand-name):not([class*="size-"]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+  }
+
+  .vd-pub :is(nav, li, footer, header, aside) a[href][class*="flex"]:not(.brand-name) {
+    display: inline-flex;
+  }
+
+  .vd-pub :is(nav, li, footer, header, aside) a[href][class*="block"]:not(.brand-name) {
+    display: flex;
+  }
+
+  /* In-page jump pills (docs TOC, recipe industries) */
+  .vd-pub a[href^="#"][class*="rounded-full"],
+  .vd-pub a[href*="#"][class*="rounded-full"] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding-inline: 0.875rem;
+  }
+}
+
+/* Form inputs on phones must be >=16px or iOS Safari zooms in on focus.
+   The shared shadcn Input/Textarea default to text-sm (14px); override for
+   any public page's form fields (whatsapp-cost-calculator, workflow recipes
+   search, etc). */
+@media (max-width: 640px) {
+  .vd-pub :is(input, select, textarea) {
+    font-size: 1rem;
+  }
+}
+
+/* The brand lockup (emblem + two-colour wordmark) stays visible at EVERY
+   width — direct instruction 2026-09-24. */
+
+/* ---- 3. Type roles ---------------------------------------------------------- */
+.vd-pub h1,
+.vd-pub h2,
+.vd-pub h3 {
+  font-family:
+    var(--font-jakarta-loaded),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.vd-pub h1 {
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+}
+
+/* Mono uppercase eyebrows / badges (Tailwind `uppercase tracking-[…]`) */
+.vd-pub [class*="uppercase"] {
+  font-family: var(--font-code);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.vd-pub code,
+.vd-pub pre,
+.vd-pub kbd,
+.vd-pub .font-mono {
+  font-family: var(--font-code);
+}

@@ -1,0 +1,126 @@
+VegaDūta
+Copyright 2026 The VegaDūta Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+Full texts of every license named below are in LICENSES/, and
+LICENSES/README.md maps each bundled third-party file to its license.
+
+==============================================================================
+Third-party software and assets included in this repository or copied into
+the release images
+==============================================================================
+
+Each component keeps its own license and copyright notice.
+
+Fonts (SIL Open Font License 1.1, LICENSES/OFL-1.1.txt)
+
+  - Geist, Geist Mono
+    Copyright 2024 The Geist Project Authors (https://github.com/vercel/geist-font)
+    deploy/keycloak/themes/agentic-ai/account/resources/fonts/geist*.woff2;
+    web/app/fonts/geist*.woff2; web-admin/app/fonts/geist*.woff2
+  - Yatra One
+    Copyright 2014 The Yatra Project Authors
+    deploy/keycloak/themes/agentic-ai/account/resources/fonts/yatra-one*.woff2;
+    web/app/fonts/yatra-one.woff2; web-admin/app/fonts/yatra-one.woff2
+  - Inter
+    Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
+    web/scripts/landing-media/fonts/Inter-*.woff2
+  - JetBrains Mono
+    Copyright 2020 The JetBrains Mono Project Authors
+    (https://github.com/JetBrains/JetBrainsMono)
+    web/scripts/landing-media/fonts/JetBrainsMono-*.woff2
+  - Noto Sans Devanagari
+    Copyright 2022 The Noto Project Authors (https://github.com/notofonts/devanagari)
+    web/scripts/landing-media/fonts/NotoSansDevanagari-*.woff2;
+    web/app/fonts/noto-sans-devanagari.woff2
+  - Sora
+    Copyright 2019 The Sora Project Authors (https://github.com/sora-xor/sora-font)
+    web/scripts/landing-media/fonts/Sora-*.woff2
+  - DM Mono
+    Copyright 2020 The DM Mono Project Authors (https://www.github.com/googlefonts/dm-mono)
+    web/app/fonts/dm-mono-*.woff2
+  - Plus Jakarta Sans
+    Copyright 2020 The Plus Jakarta Sans Project Authors
+    (https://github.com/tokotype/PlusJakartaSans)
+    web/app/fonts/plus-jakarta-sans.woff2
+
+JavaScript copied into the web image at build time (web/scripts/vendor-*.mjs
+copy these from their npm packages into web/public/vendor/)
+
+  - @mlc-ai/web-llm (Apache-2.0)                  -> web/public/vendor/web-llm.js
+  - kokoro-js (Apache-2.0), web build, which bundles @huggingface/transformers
+    (Apache-2.0) and onnxruntime-web (MIT, Copyright (c) Microsoft Corporation)
+                                                  -> web/public/vendor/kokoro.web.js
+  - @babel/standalone (MIT, Copyright (c) 2014-present Sebastian McKenzie and
+    other contributors)                           -> web/public/vendor/babel.min.js
+
+JavaScript vendored in this repository
+
+  - qrcode-generator 1.4.4 (MIT), Copyright (c) 2009 Kazuhiko Arase
+    web/app/lib/vendor/qrcode-generator.js (license header retained).
+    "QR Code" is a registered trademark of DENSO WAVE INCORPORATED.
+
+Activepieces community pieces (MIT, LICENSES/MIT.txt)
+
+  - Copyright (c) 2020-2024 Activepieces Inc. (https://github.com/activepieces/activepieces)
+    The opt-in piece-host image (services/piece-host/Dockerfile) installs the
+    @activepieces/piece-* packages pinned in services/piece-host/pieces.txt,
+    and @activepieces/pieces-framework, from npm, and keeps each package's own
+    LICENSE file in the image. No Activepieces source is copied into this
+    repository, and none of its separately licensed ee/ code is installed.
+
+Every image also contains the open-source dependencies declared in its
+package manifests (core/pom.xml, web/package.json, web-admin/package.json,
+services/*/requirements*) and the operating-system packages of its base
+image. The SPDX SBOM attached to every release image lists them with their
+licenses.
+
+==============================================================================
+Trademarks
+==============================================================================
+
+The provider, channel and tool logos in web/public/logos/ (for example
+Anthropic, OpenAI, Google, AWS, Microsoft, Meta, Mistral, DeepSeek, xAI,
+Groq, OpenRouter, Ollama, Sarvam, ElevenLabs, E2B, WhatsApp, Instagram,
+Messenger, Slack, Discord, Telegram and X) are trademarks of their respective
+owners. They are used only to identify the services the platform connects
+to; their use does not imply endorsement, and they are not covered by this
+project's Apache-2.0 license.
+
+==============================================================================
+Separate-process components (not included, not linked)
+==============================================================================
+
+The Compose files and Helm charts run these servers from their upstream
+images as separate processes. They are not part of this source or of the
+VegaDūta images, and each is licensed under its own terms.
+
+Default components:
+
+  - PostgreSQL (PostgreSQL License), with pgvector (PostgreSQL License) and
+    Apache AGE (Apache-2.0), built into the postgres image from their
+    upstream sources by deploy/postgres/Dockerfile
+  - Valkey (BSD-3-Clause)          cache and rate limiting
+  - Keycloak (Apache-2.0)          identity provider
+  - SeaweedFS (Apache-2.0)         S3-compatible object storage (Full tier)
+  - PgBouncer (ISC)                connection pooling (Full tier)
+
+Optional, by Compose profile:
+
+  - Redpanda (Business Source License 1.1)          `events`, `temporal`, `jobs`
+  - Temporal server and UI (MIT)                    `temporal`, `jobs`
+  - Grafana, Loki, Promtail (AGPL-3.0)              `observability`
+  - Prometheus (Apache-2.0), redis_exporter (MIT)   `observability`
+  - Langfuse (MIT; its image also contains separately licensed enterprise
+    code that stays inactive without a license key), ClickHouse (Apache-2.0)
+                                                    `tracing`
+  - LiveKit server (Apache-2.0)                     `voice`
+  - SearXNG (AGPL-3.0)                              `search`
+                                         (deploy/compose/docker-compose.search.yml)
+
+Replaceable alternatives mentioned in the docs:
+
+  - MinIO (AGPL-3.0): any S3-compatible object store works; SeaweedFS is the
+    default.
+  - Redis 7.4+ (RSALv2/SSPLv1): Valkey is the default and a drop-in
+    replacement.

@@ -1,0 +1,85 @@
+{
+  "name": "Research tasks starter set (multi-hop, verifiable)",
+  "description": "A small starter set of BrowseComp/GAIA-style research questions: each needs two or more lookups chained together and has ONE short, stable, checkable answer, graded by a deterministic code grader (no LLM judge needed). These are original questions in the style of those benchmarks - not items copied from BrowseComp or GAIA - and are far too few and too easy to rank models; use them to check that an agent with search/browse tools can chain lookups, and as a template for your own tasks. Run with tool execution enabled.",
+  "passThreshold": 0.7,
+  "toolExecutionEnabled": true,
+  "tasks": [
+    {
+      "id": "rt-01",
+      "question": "The 1998 FIFA World Cup final was played in a stadium in the host country's capital region. Which river flows through that country's capital city?",
+      "answer": "Seine",
+      "grader": {"type": "regex", "pattern": "\\bseine\\b", "ignoreCase": true}
+    },
+    {
+      "id": "rt-02",
+      "question": "William Herschel discovered a planet in 1781. What is the atomic number of the chemical element that was named after that planet?",
+      "answer": "92",
+      "grader": {"type": "regex", "pattern": "\\b92\\b"}
+    },
+    {
+      "id": "rt-03",
+      "question": "Who was President of the United States when the Panama Canal officially opened to traffic in 1914? Give the president's surname.",
+      "answer": "Wilson",
+      "grader": {"type": "regex", "pattern": "\\bwilson\\b", "ignoreCase": true}
+    },
+    {
+      "id": "rt-04",
+      "question": "The Colombian author of the novel 'One Hundred Years of Solitude' won the Nobel Prize in Literature. In which year?",
+      "answer": "1982",
+      "grader": {"type": "regex", "pattern": "\\b1982\\b"}
+    },
+    {
+      "id": "rt-05",
+      "question": "The Canadian city of Moncton is in a province whose capital is a different, smaller city. What is that capital?",
+      "answer": "Fredericton",
+      "grader": {"type": "regex", "pattern": "\\bfredericton\\b", "ignoreCase": true}
+    },
+    {
+      "id": "rt-06",
+      "question": "Albert Einstein was awarded his doctorate in 1905 by a university in Switzerland. In what year was that university founded?",
+      "answer": "1833",
+      "grader": {"type": "regex", "pattern": "\\b1833\\b"}
+    },
+    {
+      "id": "rt-07",
+      "question": "Take the number of the Apollo mission that first landed humans on the Moon. What is the chemical symbol of the element with that atomic number?",
+      "answer": "Na",
+      "grader": {"type": "regex", "pattern": "\\bNa\\b|(?i:\\bsodium\\b)"}
+    },
+    {
+      "id": "rt-08",
+      "question": "The lead singer of the band that recorded 'Bohemian Rhapsody' was born in a place that is now part of which present-day country?",
+      "answer": "Tanzania",
+      "grader": {"type": "regex", "pattern": "\\btanzania\\b", "ignoreCase": true}
+    },
+    {
+      "id": "rt-09",
+      "question": "In which city is the Nobel Peace Prize awarded each year at a ceremony, as opposed to the other Nobel prizes which are awarded in Stockholm?",
+      "answer": "Oslo",
+      "grader": {"type": "regex", "pattern": "\\boslo\\b", "ignoreCase": true}
+    },
+    {
+      "id": "rt-10",
+      "question": "Reply with ONLY a JSON object with the keys \"country\" and \"capital\" for the country whose national flag is a red disc on a white field.",
+      "answer": "{\"country\":\"Japan\",\"capital\":\"Tokyo\"}",
+      "grader": {
+        "type": "json_schema",
+        "schema": {
+          "type": "object",
+          "required": ["country", "capital"],
+          "additionalProperties": false,
+          "properties": {
+            "country": {"type": "string", "enum": ["Japan"]},
+            "capital": {"type": "string", "enum": ["Tokyo"]}
+          }
+        }
+      }
+    },
+    {
+      "id": "rt-11",
+      "question": "What is the only even prime number? Reply with just the number and nothing else.",
+      "answer": "2",
+      "grader": {"type": "exact", "value": "2", "trim": true}
+    }
+  ]
+}

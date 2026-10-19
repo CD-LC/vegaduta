@@ -1,0 +1,535 @@
+/* =========================================================================
+ * Screen 4 - Quick Task (design_handoff_axon/design_files/Quick Task.dc.html,
+ * re-supplied by the user this session since the original handoff set is no
+ * longer in the workspace). SimpleTaskRunner.js's content only - AppShell
+ * already provides the 74px rail + 60px topbar the mockup draws by hand.
+ *
+ * Direct feedback: "exact pixel to pixel replacement." Followed for every
+ * visual element the real backend can actually back up (header copy, input
+ * card, attach-a-file, agent/tool detection preview, channel + Run). The
+ * mockup's "RECURRING JOB DETECTED" plan card - trigger detection, a
+ * numbered multi-step plan, a token/runtime estimate, and a "Save as
+ * workflow" action - has no backend behind it anywhere in QuickTaskService/
+ * QuickTaskController (confirmed by direct source read): preview only ever
+ * returns an agent name and a flat tool list, run is single-shot with no
+ * persistence or schedule concept. Building that section verbatim would be
+ * fabricated UI - showing a fake "detected: every morning" trigger for a
+ * feature that cannot detect it. Instead the same card language (bordered
+ * panel, icon rows, mono labels) renders the REAL preview/confirm data this
+ * screen has always had, so the visual system matches pixel-for-pixel and
+ * the content stays honest. */
+.ax-qt-shell {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px 48px;
+}
+
+/* Ambient glow (mockup's axGlow-animated radial blob behind the header) -
+ * purely decorative, so it's safe to reproduce exactly including the pulse. */
+.ax-qt-glow {
+  position: absolute;
+  left: 50%;
+  top: 40px;
+  width: 620px;
+  height: 620px;
+  max-width: 90vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 92, 255, 0.16), rgba(79, 227, 227, 0.05) 45%, transparent 70%);
+  filter: blur(6px);
+  transform: translateX(-50%);
+  animation: axQtGlow 7s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes axQtGlow {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.12);
+    opacity: 0.8;
+  }
+}
+
+@keyframes axQtDots {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-qt-glow,
+  .ax-qt-dot {
+    animation: none !important;
+  }
+}
+
+.ax-qt-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 860px;
+  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ax-qt-header {
+  text-align: center;
+}
+
+.ax-qt-eyebrow {
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.24em;
+  color: var(--ax-violet);
+}
+
+.ax-qt-title {
+  margin: 8px 0 0;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ax-text);
+}
+
+.ax-qt-subtitle {
+  margin: 8px auto 0;
+  max-width: 560px;
+  font-size: var(--fs-lede);
+  line-height: 1.55;
+  color: var(--ax-mid);
+}
+
+/* Input card - violet glass panel with the glow the mockup gives it. */
+.ax-qt-inputcard {
+  margin-top: 28px;
+  border: 1px solid rgba(124, 92, 255, 0.28);
+  background: rgba(14, 18, 34, 0.72);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 0 40px rgba(124, 92, 255, 0.12);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ax-qt-inputcard:focus-within {
+  border-color: var(--ax-violet);
+  box-shadow:
+    0 0 40px rgba(124, 92, 255, 0.2),
+    0 0 0 3px rgba(155, 125, 255, 0.18);
+}
+
+:root[data-mode="light"] .ax-qt-inputcard {
+  /* Rebuild spec §4 rule 7: large accent glows read as smudges on white -
+   * opaque white card + crisp violet-tinted border + var(--ax-shadow-sm)
+   * instead of the dark theme's 40px violet glow. */
+  background: #ffffff;
+  border-color: var(--ax-border);
+  box-shadow: var(--ax-shadow-sm);
+}
+
+:root[data-mode="light"] .ax-qt-inputcard:focus-within {
+  border-color: var(--ax-violet);
+  box-shadow:
+    var(--ax-shadow-md),
+    0 0 0 3px rgba(109, 75, 216, 0.15);
+}
+
+.ax-qt-textarea {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  border: none;
+  background: transparent;
+  color: var(--ax-text);
+  font: inherit;
+  font-size: var(--fs-subtitle);
+  line-height: 1.55;
+  padding: 0;
+}
+
+.ax-qt-textarea:focus {
+  outline: none;
+}
+
+.ax-qt-textarea::placeholder {
+  color: var(--ax-dim);
+}
+
+.ax-qt-inputfoot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ax-border);
+}
+
+.ax-qt-spacer {
+  flex: 1;
+}
+
+/* Dashed pill chip - shared shape for the real "attach a file" action and
+ * the static "knowledge included automatically" note beside it. */
+.ax-qt-chip-dashed {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  border-radius: 8px;
+  border: 1px dashed var(--ax-border2);
+  background: transparent;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-mid);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-qt-chip-dashed:hover:not(:disabled) {
+  border-color: var(--ax-cyan);
+  color: var(--ax-text);
+}
+
+.ax-qt-chip-dashed:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Non-interactive variant (the "knowledge included automatically" note -
+ * there's no per-request knowledge toggle in QuickTaskService today, only
+ * the agent's own always-on collection access, so this reads as informative
+ * text rather than a clickable control the mockup implied). */
+.ax-qt-chip-static {
+  cursor: default;
+}
+
+.ax-qt-attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 100px;
+  font-size: var(--fs-label);
+  color: var(--ax-green);
+  background: rgba(70, 224, 160, 0.1);
+  border: 1px solid rgba(70, 224, 160, 0.28);
+}
+
+/* Example chips - real quick-fill affordances (click fills the textarea with
+ * that exact string), not decoration; copy kept to things the real single-
+ * shot agent run can do (summarize/draft/translate), not the mockup's
+ * scheduling example, which this feature can't actually do. */
+.ax-qt-examples {
+  display: flex;
+  gap: 9px;
+  margin-top: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ax-qt-example-chip {
+  padding: 7px 13px;
+  border-radius: 100px;
+  background: var(--ax-chip);
+  border: 1px solid var(--ax-border);
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-qt-example-chip:hover:not(:disabled) {
+  border-color: var(--ax-cyan);
+  color: var(--ax-text);
+}
+
+.ax-qt-example-chip-featured {
+  background: rgba(124, 92, 255, 0.1);
+  border-color: rgba(124, 92, 255, 0.24);
+  color: var(--ax-violet);
+}
+
+/* Analyzing indicator - maps directly to previewBusy, the real dry-run
+ * request already in flight, not a scripted delay like the mockup's demo. */
+.ax-qt-analyzing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  color: var(--ax-violet);
+}
+
+.ax-qt-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.ax-qt-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ax-violet);
+  animation: axQtDots 1.2s infinite;
+}
+
+.ax-qt-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.ax-qt-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Plan card - same bordered-panel-with-icon-rows language as the mockup's
+ * plan card, populated with the real preview/confirm/result data instead of
+ * the fabricated trigger+step-plan content. */
+.ax-qt-plan {
+  margin-top: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ax-border);
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+
+:root[data-mode="light"] .ax-qt-plan {
+  background: var(--ax-panel);
+}
+
+.ax-qt-plan-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ax-qt-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: 100px;
+  background: rgba(124, 92, 255, 0.12);
+  border: 1px solid rgba(124, 92, 255, 0.3);
+  font-size: var(--fs-caption);
+  color: var(--ax-violet);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-qt-plan-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ax-violet);
+  box-shadow: 0 0 8px var(--ax-violet);
+}
+
+.ax-qt-plan-lead {
+  font-size: var(--fs-meta);
+  color: var(--ax-mid);
+}
+
+.ax-qt-plan-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ax-border);
+}
+
+.ax-qt-plan-row:last-of-type {
+  border-bottom: none;
+}
+
+.ax-qt-plan-row-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-lede);
+  background: rgba(79, 227, 227, 0.14);
+  border: 1px solid rgba(79, 227, 227, 0.3);
+  color: var(--ax-cyan);
+}
+
+.ax-qt-plan-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-qt-plan-row-title {
+  font-size: var(--fs-meta);
+  color: var(--ax-text);
+}
+
+.ax-qt-plan-row-sub {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  margin-top: 2px;
+}
+
+.ax-qt-plan-row-label {
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  white-space: nowrap;
+}
+
+/* Channel picker, restyled as pill chips inline with the delivery row
+ * instead of the old full-width `.qt-channel-btn` bank - same interaction
+ * (pick WhatsApp/SMS/Call), tighter footprint matching this card's row
+ * layout. */
+.ax-qt-channel-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ax-qt-channel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 100px;
+  border: 1px solid var(--ax-border2);
+  background: transparent;
+  color: var(--ax-mid);
+  font-size: var(--fs-label);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-qt-channel-pill:hover:not(:disabled) {
+  border-color: var(--ax-cyan);
+  color: var(--ax-text);
+}
+
+.ax-qt-channel-pill-active {
+  border-color: var(--ax-cyan);
+  background: rgba(79, 227, 227, 0.12);
+  color: var(--ax-cyan);
+}
+
+.ax-qt-plan-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  margin-top: 4px;
+  border-top: 1px solid var(--ax-border);
+}
+
+/* Phone capture + error/result cards - same bordered-panel language as the
+ * plan card above, so every state this screen can be in reads as one
+ * consistent AXON surface instead of mismatched box styles. */
+.ax-qt-phonecard {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-panel);
+}
+
+.ax-qt-phonecard label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+}
+
+.ax-qt-phone-input {
+  flex: 1;
+  min-width: 180px;
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 9px;
+  padding: 9px 12px;
+  color: var(--ax-text);
+  font-size: var(--fs-meta);
+  font-family: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ax-qt-phone-input:focus {
+  outline: none;
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 0 3px rgba(79, 227, 227, 0.18);
+}
+
+.ax-qt-error {
+  margin-top: 22px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 92, 114, 0.3);
+  background: rgba(255, 92, 114, 0.08);
+  color: var(--ax-red);
+  font-size: var(--fs-meta);
+  white-space: pre-wrap;
+}
+
+.ax-qt-result {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(70, 224, 160, 0.3);
+  background: rgba(70, 224, 160, 0.06);
+}
+
+.ax-qt-result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 100px;
+  font-size: var(--fs-label);
+  font-family: var(--font-mono), monospace;
+  border: 1px solid rgba(70, 224, 160, 0.3);
+  background: rgba(70, 224, 160, 0.1);
+  color: var(--ax-green);
+  margin-bottom: 12px;
+}
+
+.ax-qt-result-text {
+  margin: 0 0 8px;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--ax-text);
+  white-space: pre-wrap;
+}
+
+.ax-qt-result-delivery {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+}

@@ -1,0 +1,30 @@
+# Build context hygiene (INF-017). Never ship secrets, VCS metadata or local
+# build/test output into the image build.
+node_modules
+.next
+.git
+.gitignore
+*.log
+npm-debug.log*
+
+# Secrets / local env. Runtime config comes from the container env
+# (app/lib/env.ts); nothing in the build reads a .env file.
+.env
+.env.*
+!.env*.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# Test / tooling output
+coverage
+playwright-report
+test-results
+blob-report
+.vercel
+.turbo
+*.tsbuildinfo
+Dockerfile
+.dockerignore

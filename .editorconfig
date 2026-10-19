@@ -1,0 +1,30 @@
+# EditorConfig baseline. The repo has no .gitattributes; Windows checkouts use
+# core.autocrlf=true (index is LF, working tree CRLF). `end_of_line = lf` is the
+# committed form; Prettier uses endOfLine "auto" so it does not fight either.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.java]
+indent_size = 4
+
+[*.{kt,kts,gradle}]
+indent_size = 4
+
+[*.{ts,tsx,js,jsx,mjs,cjs,json,yml,yaml,css}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
+
+[Makefile]
+indent_style = tab

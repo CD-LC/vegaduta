@@ -1,0 +1,81 @@
+### deepseek
+POST https://api.deepseek.com/v1/chat/completions
+  Authorization: Bearer sk-ds
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"deepseek-chat","presence_penalty":0.3,"seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### groq
+POST https://api.groq.com/openai/v1/chat/completions
+  Authorization: Bearer sk-groq
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"llama-3.3-70b-versatile","presence_penalty":0.3,"seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### grok
+POST https://api.x.ai/v1/chat/completions
+  Authorization: Bearer sk-grok
+  Content-Type: application/json
+  body: {"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"grok-4","stream":false,"temperature":0.7,"top_p":0.9}
+### meta
+POST https://api.meta.ai/v1/chat/completions
+  Authorization: Bearer sk-meta
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"muse-spark","presence_penalty":0.3,"seed":7,"stream":false,"temperature":0.7,"top_p":0.9}
+### mistral
+POST https://api.mistral.ai/v1/chat/completions
+  Authorization: Bearer sk-mi
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"mistral-large","presence_penalty":0.3,"prompt_cache_key":"bd739125e25a0a67f5fbfd8459a8bf92","stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### openai
+POST https://api.openai.com/v1/chat/completions
+  Authorization: Bearer sk-oa
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"gpt-4o","presence_penalty":0.3,"prompt_cache_key":"6031fbbe53b78219d9e561b3096bde96","seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### openai-reasoning
+POST https://api.openai.com/v1/chat/completions
+  Authorization: Bearer sk-oa
+  Content-Type: application/json
+  body: {"max_completion_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"gpt-5","prompt_cache_key":"6031fbbe53b78219d9e561b3096bde96","seed":7,"stream":false}
+### openrouter
+POST https://openrouter.ai/api/v1/chat/completions
+  Authorization: Bearer sk-or
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"openai/gpt-4o","presence_penalty":0.3,"seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### sarvam
+POST https://api.sarvam.ai/v1/chat/completions
+  api-subscription-key: sk-sv
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":4096,"messages":[{"content":"hi","role":"user"}],"model":"sarvam-m","presence_penalty":0.3,"seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### azure
+POST https://res.openai.azure.com/openai/deployments/dep1/chat/completions?api-version=2024-10-21
+  api-key: az-key
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"gpt-4o","presence_penalty":0.3,"prompt_cache_key":"927675c0a8ab71d1eac2871e0927332a","seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### ollama-key
+POST http://ollama.example:11434/v1/chat/completions
+  Authorization: Bearer olk
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"llama3","options":{"num_ctx":32768},"presence_penalty":0.3,"seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### ollama-nokey
+POST http://ollama.example:11434/v1/chat/completions
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"llama3","options":{"num_ctx":32768},"presence_penalty":0.3,"seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### hosted-default-path
+POST https://api.together.xyz/v1/chat/completions
+  Authorization: Bearer hosted-key
+  Content-Type: application/json
+  body: {"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"llama-x","stream":false,"temperature":0.7,"top_p":0.9}
+### hosted-custom-path
+POST https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
+  Authorization: Bearer gk
+  Content-Type: application/json
+  body: {"frequency_penalty":0.4,"max_tokens":512,"messages":[{"content":"hi","role":"user"}],"model":"gemini-2.5-flash","presence_penalty":0.3,"reasoning_effort":"low","seed":7,"stop":["END"],"stream":false,"temperature":0.7,"top_p":0.9}
+### anthropic-temp
+POST https://api.anthropic.com/v1/messages
+  x-api-key: sk-an
+  anthropic-version: 2023-06-01
+  Content-Type: application/json
+  body: {"max_tokens":512,"messages":[{"content":[{"text":"hi","type":"text"}],"role":"user"}],"model":"claude-sonnet-4","stop_sequences":["END"],"stream":false,"temperature":0.7,"top_k":40}
+### anthropic-topp
+POST https://api.anthropic.com/v1/messages
+  x-api-key: sk-an
+  anthropic-version: 2023-06-01
+  Content-Type: application/json
+  body: {"max_tokens":512,"messages":[{"content":[{"text":"hi","type":"text"}],"role":"user"}],"model":"claude-sonnet-5","stream":false,"top_p":0.8}

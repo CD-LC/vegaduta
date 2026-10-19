@@ -1,0 +1,9 @@
+# Dev/test-only dependencies - NOT installed into the app-builder image (the
+# Dockerfile installs requirements.txt only). Install locally with:
+#   pip install -r requirements.txt -r requirements-dev.txt
+#
+# The tests themselves are a framework-free script harness and need nothing
+# beyond requirements.txt (CI: `python -m tests.<name>` per module). pytest
+# is only for the optional adapter, tests/pytest_adapter.py, which runs
+# every harness module and asserts exit 0:  python -m pytest -q
+pytest==9.1.1

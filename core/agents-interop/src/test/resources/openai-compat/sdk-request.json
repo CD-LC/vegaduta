@@ -1,0 +1,15 @@
+{
+  "model": "11111111-2222-3333-4444-555555555555",
+  "messages": [
+    {"role": "system", "content": "You are terse."},
+    {"role": "user", "content": "What is 2+2?"},
+    {"role": "assistant", "content": "4"},
+    {"role": "user", "content": [{"type": "text", "text": "And times three?"}]}
+  ],
+  "temperature": 0.2,
+  "max_tokens": 256,
+  "user": "sdk-user-1",
+  "stream": false,
+  "stream_options": {"include_usage": true},
+  "tools": [{"type": "function", "function": {"name": "ignored", "parameters": {}}}]
+}

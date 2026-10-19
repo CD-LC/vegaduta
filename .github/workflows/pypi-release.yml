@@ -1,0 +1,173 @@
+name: Python SDK release
+
+# Releases the Python Agent SDK (sdk/python-agent, package `vegaduta-agent`) for
+# a tag `pysdk-v1.2.3` (or `pysdk-v1.2.3-rc.1`). Run it from the Actions tab with
+# "Use workflow from" set to that TAG; a branch is refused. Independent of the
+# platform release (release.yml) and the Java SDK release (sdk-release.yml,
+# `sdk-v*` tags).
+#
+#   1. verify    the tag equals the version in sdk/python-agent/pyproject.toml,
+#                pytest and ruff pass
+#   2. build     sdist + wheel with SHA256SUMS, SLSA provenance attested
+#   3. release   a GitHub Release with the files attached (pre-release for -rc)
+#   4. pypi      only when the repository variable SDK_PUBLISH_PYPI is "true":
+#                publishes to PyPI via trusted publishing (no stored token -
+#                configure the `pypi` environment and the PyPI project's
+#                "GitHub Actions" trusted publisher entry first:
+#                workflow pypi-release.yml, environment pypi)
+
+# Tag-dispatch only, deliberately: a release is a signed, human-initiated act.
+# Choose the `pysdk-v*.*.*` TAG in "Use workflow from"; to fire on tag pushes
+# instead, add `push: tags: ["pysdk-v*.*.*"]` here.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pysdk-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  SDK_DIR: sdk/python-agent
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: Require a tag ref
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/pysdk-v*) ;;
+            *) echo "::error::run this workflow on a pysdk-v* tag (Use workflow from: Tags), not $GITHUB_REF"; exit 1 ;;
+          esac
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Tag must equal the pyproject version
+        id: version
+        working-directory: sdk/python-agent
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#pysdk-v}"
+          pkg_version="$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+          if [ "$tag_version" != "$pkg_version" ]; then
+            echo "::error::tag says $tag_version but sdk/python-agent/pyproject.toml says $pkg_version (set it there and in vegaduta_agent/__init__.py)"
+            exit 1
+          fi
+          init_version="$(python -c "import vegaduta_agent; print(vegaduta_agent.__version__)" 2>/dev/null || true)"
+          if [ -n "$init_version" ] && [ "$init_version" != "$tag_version" ]; then
+            echo "::error::vegaduta_agent.__version__ says $init_version but the tag says $tag_version"
+            exit 1
+          fi
+          case "$tag_version" in *rc*|*a*|*b*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;; *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;; esac
+          echo "version=$tag_version" >> "$GITHUB_OUTPUT"
+      - name: Install and test
+        working-directory: sdk/python-agent
+        run: |
+          set -euo pipefail
+          python -m pip install -q -e '.[dev]'
+          python -m pytest tests/ -q
+          ruff check vegaduta_agent tests
+          ruff format --check vegaduta_agent tests
+
+  build:
+    name: Build release files
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # sign the provenance attestation
+      attestations: write # store it
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        working-directory: sdk/python-agent
+        run: |
+          set -euo pipefail
+          python -m pip install -q build
+          python -m build
+      - name: Collect files and checksums
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp sdk/python-agent/dist/vegaduta_agent-*.tar.gz dist/
+          cp sdk/python-agent/dist/vegaduta_agent-*.whl dist/
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -l dist
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: "dist/*"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pysdk-release-files
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the release and upload files
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pysdk-release-files
+          path: dist
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.verify.outputs.version }}
+          PRERELEASE: ${{ needs.verify.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          flags=()
+          [ "$PRERELEASE" = "true" ] && flags+=(--prerelease)
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
+              --title "Python Agent SDK $VERSION" \
+              --notes "Python Agent SDK $VERSION (vegaduta-agent on PyPI). Verify with \`sha256sum -c SHA256SUMS\` and \`gh attestation verify <file> --repo $GITHUB_REPOSITORY\`." \
+              "${flags[@]}"
+          fi
+
+  pypi:
+    name: PyPI (trusted publishing)
+    needs: [verify, release]
+    # Off until a maintainer has created the PyPI project, added this workflow as
+    # a trusted publisher on it, and created the `pypi` GitHub environment.
+    if: vars.SDK_PUBLISH_PYPI == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      id-token: write # the trusted-publisher OIDC token; no API token is stored
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pysdk-release-files
+          path: dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          packages-dir: dist
+          skip-existing: true

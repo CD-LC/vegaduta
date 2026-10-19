@@ -1,0 +1,113 @@
+/* Eval/health chip in a node footer. Tokens only; the % text and verdict word
+ * carry the meaning, the ring colour is a secondary cue. */
+.wfx-evalb {
+  --wfx-evalb-ok: var(--wfx-ok, var(--ax-green, var(--hud-ok)));
+  --wfx-evalb-warn: var(--wfx-warn, var(--ax-amber, var(--hud-warn)));
+  --wfx-evalb-bad: var(--wfx-err, var(--ax-red, var(--hud-magenta)));
+  --wfx-evalb-ink: var(--wfx-text, var(--ax-text, var(--text-primary)));
+  --wfx-evalb-dim: var(--wfx-muted, var(--ax-dim, var(--text-muted)));
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--wfx-evalb-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.wfx-evalb-rate {
+  --wfx-evalb-c: var(--wfx-evalb-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+  padding: 0 5px 0 3px;
+  border-radius: 999px;
+  background: var(--wfx-chip-bg, color-mix(in srgb, var(--wfx-evalb-ink) 7%, transparent));
+}
+
+.wfx-evalb-rate[data-band="ok"] {
+  --wfx-evalb-c: var(--wfx-evalb-ok);
+}
+
+.wfx-evalb-rate[data-band="warn"] {
+  --wfx-evalb-c: var(--wfx-evalb-warn);
+}
+
+.wfx-evalb-rate[data-band="bad"] {
+  --wfx-evalb-c: var(--wfx-evalb-bad);
+}
+
+.wfx-evalb-ring {
+  flex: none;
+}
+
+.wfx-evalb-track,
+.wfx-evalb-fill {
+  fill: none;
+  stroke-width: 2.2;
+}
+
+.wfx-evalb-track {
+  stroke: color-mix(in srgb, var(--wfx-evalb-dim) 35%, transparent);
+}
+
+.wfx-evalb-fill {
+  stroke: var(--wfx-evalb-c);
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.4s ease;
+}
+
+.wfx-evalb-num {
+  font-weight: 600;
+}
+
+.wfx-evalb-dim {
+  color: var(--wfx-evalb-dim);
+}
+
+.wfx-evalb-pill {
+  --wfx-evalb-c: var(--wfx-evalb-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--wfx-evalb-c) 50%, transparent);
+  background: color-mix(in srgb, var(--wfx-evalb-c) 12%, transparent);
+  font-weight: 600;
+}
+
+.wfx-evalb-pill svg {
+  flex: none;
+  color: var(--wfx-evalb-c);
+}
+
+.wfx-evalb-pill[data-tone="ok"] {
+  --wfx-evalb-c: var(--wfx-evalb-ok);
+}
+
+.wfx-evalb-pill[data-tone="warn"] {
+  --wfx-evalb-c: var(--wfx-evalb-warn);
+}
+
+.wfx-evalb-pill[data-tone="bad"] {
+  --wfx-evalb-c: var(--wfx-evalb-bad);
+}
+
+.wfx-evalb[data-compact="true"] .wfx-evalb-rate,
+.wfx-evalb[data-compact="true"] .wfx-evalb-pill {
+  height: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wfx-evalb-fill {
+    transition: none;
+  }
+}

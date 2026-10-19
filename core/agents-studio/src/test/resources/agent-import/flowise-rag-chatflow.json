@@ -1,0 +1,36 @@
+{
+  "name": "Docs QnA",
+  "description": "Answers from the product docs.",
+  "nodes": [
+    {
+      "id": "chatAnthropic_0", "type": "customNode",
+      "data": { "id": "chatAnthropic_0", "label": "ChatAnthropic", "name": "chatAnthropic", "type": "ChatAnthropic", "category": "Chat Models",
+                "inputs": { "modelName": "claude-3-5-sonnet-latest", "temperature": "0.2" } }
+    },
+    {
+      "id": "faiss_0", "type": "customNode",
+      "data": { "id": "faiss_0", "label": "Faiss", "name": "faiss", "type": "Faiss", "category": "Vector Stores", "inputs": { "topK": "" } }
+    },
+    {
+      "id": "textFile_0", "type": "customNode",
+      "data": { "id": "textFile_0", "label": "Text File", "name": "textFile", "type": "Document", "category": "Document Loaders", "inputs": {} }
+    },
+    {
+      "id": "openAIEmbeddings_0", "type": "customNode",
+      "data": { "id": "openAIEmbeddings_0", "label": "OpenAI Embeddings", "name": "openAIEmbeddings", "type": "OpenAIEmbeddings", "category": "Embeddings", "credential": "abcd", "inputs": {} }
+    },
+    {
+      "id": "chatPromptTemplate_0", "type": "customNode",
+      "data": { "id": "chatPromptTemplate_0", "label": "Chat Prompt Template", "name": "chatPromptTemplate", "type": "ChatPromptTemplate", "category": "Prompts",
+                "inputs": { "systemMessagePrompt": "Answer only from the provided context. If unsure, say you do not know.", "humanMessagePrompt": "{text}" } }
+    },
+    {
+      "id": "conversationalRetrievalQAChain_0", "type": "customNode",
+      "data": { "id": "conversationalRetrievalQAChain_0", "label": "Conversational Retrieval QA Chain", "name": "conversationalRetrievalQAChain",
+                "type": "ConversationalRetrievalQAChain", "category": "Chains",
+                "inputs": { "model": "{{chatAnthropic_0.data.instance}}", "vectorStoreRetriever": "{{faiss_0.data.instance}}",
+                            "rephrasePrompt": "Rephrase the follow up question.", "responsePrompt": "", "chatPromptTemplate": "{{chatPromptTemplate_0.data.instance}}" } }
+    }
+  ],
+  "edges": []
+}

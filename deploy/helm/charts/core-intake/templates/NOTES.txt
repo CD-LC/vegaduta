@@ -1,0 +1,2 @@
+core-intake: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) - runs only omnichannel intake pollers (inbound email, X DMs), actuator only.
+  app Secret : {{ include "vegaduta-lib.core.appSecretName" . }} (must be the same Secret core uses)

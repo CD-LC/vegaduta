@@ -1,0 +1,210 @@
+/* --- Per-module icon animations -----------------------------------------
+ * Six bespoke loops, one per tile, each a small compositor-only (transform/
+ * opacity, occasionally clipped translate) visual metaphor for what that
+ * module actually does, replacing the identical rim+dot every card used to
+ * share. All six sit inside .mc-bento-icon, which already clips to its own
+ * rounded-square bounds where a rule below needs that (Knowledge's scan
+ * line) - everywhere else the motion stays within the icon's own box by
+ * construction, so no extra overflow rules were needed elsewhere. */
+
+/* Workflows - a data packet tracing the icon's border, step by step through
+ * a pipeline. CSS motion-path (offset-path/offset-distance) is itself
+ * compositor-friendly; on the rare browser without support the dot just
+ * sits still at its start position - graceful, never an error. */
+.mc-bento-card-workflows .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-workflows .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px 1.5px rgba(255, 255, 255, 0.85);
+  offset-path: border-box;
+  animation: mc-icon-flow 3.2s linear infinite;
+}
+@keyframes mc-icon-flow {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+/* Agents - a soft breathing presence halo, the "a live process is thinking"
+ * cue instead of a flat icon. */
+.mc-bento-card-agents .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-agents .mc-bento-icon::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  animation: mc-icon-halo 2.6s ease-in-out infinite;
+}
+@keyframes mc-icon-halo {
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0;
+  }
+}
+
+/* Knowledge Base - a thin bright line sweeping top-to-bottom, like a
+ * document/OCR scan beam reading a page. */
+.mc-bento-card-knowledge .mc-bento-icon {
+  position: relative;
+  overflow: hidden;
+}
+.mc-bento-card-knowledge .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.7);
+  animation: mc-icon-scan 2.4s ease-in-out infinite;
+}
+@keyframes mc-icon-scan {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(2.6rem);
+    opacity: 0;
+  }
+}
+
+/* Providers - three signal bars pulsing like a live connection meter.
+ * One element, three bars via repeating-linear-gradient, whole thing eased
+ * on a scaleY loop rather than three separately-timed elements - still
+ * reads clearly as "signal," at the same one-pseudo-element cost as every
+ * other tile here. */
+.mc-bento-card-providers .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-providers .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  bottom: 22%;
+  left: 50%;
+  width: 14px;
+  height: 10px;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  background: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.9) 0 3px, transparent 3px 6px);
+  animation: mc-icon-signal 1.8s ease-in-out infinite;
+}
+@keyframes mc-icon-signal {
+  0%,
+  100% {
+    transform: translateX(-50%) scaleY(0.4);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(-50%) scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* MCP Tools - a slow rotating dashed ring, a socket/connector turning. */
+.mc-bento-card-tools .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-tools .mc-bento-icon::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.75);
+  animation: mc-icon-turn 6s linear infinite;
+}
+@keyframes mc-icon-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Quick Task - a quick lightning-bolt flicker: two fast flashes then a
+ * pause, "instant, one-off dispatch" rather than a continuous process like
+ * the other tiles' loops. */
+.mc-bento-card-quicktask .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-quicktask .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  animation: mc-icon-zap 2.2s ease-in-out infinite;
+}
+@keyframes mc-icon-zap {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 0.85;
+  }
+  8% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.6;
+  }
+  18%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Playground - a blinking chat cursor, "a live conversation is ready." */
+.mc-bento-card-playground .mc-bento-icon {
+  position: relative;
+}
+.mc-bento-card-playground .mc-bento-icon::after {
+  content: "";
+  position: absolute;
+  bottom: 15%;
+  right: 15%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px 1.5px rgba(255, 255, 255, 0.85);
+  animation: mc-icon-blink 1.1s steps(1, end) infinite;
+}
+@keyframes mc-icon-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.mc-bento-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-cyan);
+  box-shadow:
+    0 0 0 1px var(--accent-glow-cyan),
+    0 24px 48px -24px var(--accent-glow);
+}

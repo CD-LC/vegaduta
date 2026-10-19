@@ -1,0 +1,44 @@
+{{- include "vegaduta-lib.serviceGuard" . -}}
+{{- $name := include "vegaduta-lib.fullname" . -}}
+{{- $g := .Values.global | default dict -}}
+{{- $o := $g.oidc | default dict -}}
+{{- $db := .Values.database -}}
+{{- $external := (($g.postgresql | default dict).host) -}}
+{{- $dbHost := $db.host | default (include "vegaduta-lib.pg.host" .) -}}
+{{- $dbSecret := $db.existingSecret -}}
+{{- if not $dbSecret -}}
+{{- if $external -}}
+{{- fail "keycloak.database.existingSecret is required when PostgreSQL is external (global.postgresql.host set): a Secret with Keycloak's database password" -}}
+{{- end -}}
+{{- $dbSecret = printf "%s-keycloak" (include "vegaduta-lib.componentName" (dict "root" . "name" "postgres")) -}}
+{{- end -}}
+{{- $env := dict
+  "KC_DB" "postgres"
+  "KC_DB_URL_HOST" $dbHost
+  "KC_DB_URL_PORT" (toString ($db.port | default 5432))
+  "KC_DB_URL_DATABASE" $db.name
+  "KC_DB_USERNAME" $db.username
+  "KC_HOSTNAME" (include "vegaduta-lib.publicUrl" (dict "root" . "key" .Values.ingress.hostKey))
+  "KC_HOSTNAME_BACKCHANNEL_DYNAMIC" "true"
+  "KC_HTTP_ENABLED" "true"
+  "KC_HTTP_PORT" "8080"
+  "KC_PROXY_HEADERS" "xforwarded"
+  "KC_HEALTH_ENABLED" "true"
+  "KC_METRICS_ENABLED" "true"
+  "KC_CACHE" "ispn"
+  "KC_CACHE_STACK" "kubernetes"
+  "JAVA_OPTS_APPEND" (printf "%s -Djgroups.dns.query=%s-headless.%s.svc.cluster.local" .Values.javaOptsAppend $name .Release.Namespace) -}}
+{{- $secretEnv := list
+  (dict "name" "KC_DB_PASSWORD" "secretName" $dbSecret "key" ($db.passwordKey | default "password"))
+  (dict "name" "KC_BOOTSTRAP_ADMIN_USERNAME" "secretName" (include "keycloak.adminSecretName" .) "key" "username")
+  (dict "name" "KC_BOOTSTRAP_ADMIN_PASSWORD" "secretName" (include "keycloak.adminSecretName" .) "key" "password")
+  (dict "name" "KC_CORE_CLIENT_SECRET" "secretName" (include "vegaduta-lib.oidc.secretName" .) "key" ($o.clientSecretKey | default "clientSecret")) -}}
+{{- with .Values.admin.consoleUrl }}{{ $_ := set $env "KC_HOSTNAME_ADMIN" . }}{{ end -}}
+{{- $v := deepCopy .Values -}}
+{{- $args := list "start" -}}
+{{- if .Values.realm.import }}{{ $args = append $args "--import-realm" }}{{ end -}}
+{{- $_ := set $v "args" $args -}}
+{{- $_ := set $v "extraVolumes" (append (.Values.extraVolumes | default list) (dict "name" "realm" "configMap" (dict "name" (printf "%s-realm" $name)))) -}}
+{{- $_ := set $v "extraVolumeMounts" (append (.Values.extraVolumeMounts | default list) (dict "name" "realm" "mountPath" "/opt/keycloak/data/import" "readOnly" true)) -}}
+{{- $ctx := dict "Values" $v "Chart" .Chart "Release" .Release "Capabilities" .Capabilities "Template" .Template -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" $ctx "env" $env "secretEnv" $secretEnv) }}

@@ -1,0 +1,36 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-vision-sessions",
+      "method": "POST",
+      "path": "/api/vision/sessions",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.mode",
+          "$.source"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-vision-sessions-sessionId-end",
+      "method": "POST",
+      "path": "/api/vision/sessions/{sessionId}/end",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.durationSeconds",
+          "$.endedAt",
+          "$.framesAnalyzed",
+          "$.sessionId"
+        ]
+      }
+    }
+  ]
+}

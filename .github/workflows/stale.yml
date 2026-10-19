@@ -1,0 +1,42 @@
+name: Stale
+
+# Marks issues and PRs with no activity as stale, and closes them later if
+# nothing happens. Anything labeled as accepted work or security is exempt.
+
+on:
+  schedule:
+    - cron: "33 6 * * *" # daily 06:33 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
+jobs:
+  stale:
+    name: Mark stale issues and PRs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write # label and close stale issues
+      pull-requests: write # label and close stale pull requests
+    steps:
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: pinned,security,roadmap,good first issue,help wanted
+          exempt-pr-labels: pinned,security,work-in-progress
+          exempt-draft-pr: true
+          stale-issue-message: >
+            This issue has had no activity for 60 days. It will be closed in 14
+            days unless there is new activity. Comment if it still matters.
+          stale-pr-message: >
+            This pull request has had no activity for 60 days. It will be closed
+            in 14 days unless there is new activity.
+          operations-per-run: 60

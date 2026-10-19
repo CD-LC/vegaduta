@@ -1,0 +1,10 @@
+{{- include "voice-agent.guard" . -}}
+{{- $lk := .Values.global.livekit -}}
+{{- $env := dict
+  "LIVEKIT_URL" $lk.internalUrl
+  "CORE_API_BASE_URL" (printf "http://%s:8080" (include "vegaduta-lib.componentName" (dict "root" . "name" "core")))
+  "SIDECAR_BASE_URL" (printf "http://%s:8001" (include "vegaduta-lib.componentName" (dict "root" . "name" "sidecar"))) -}}
+{{- $secretEnv := concat
+  (list (dict "name" "LIVEKIT_API_KEY" "secretName" $lk.existingSecret "key" "LIVEKIT_API_KEY") (dict "name" "LIVEKIT_API_SECRET" "secretName" $lk.existingSecret "key" "LIVEKIT_API_SECRET"))
+  (include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "SIDECAR_SHARED_SECRET") | fromYamlArray) -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" $env "secretEnv" $secretEnv) }}

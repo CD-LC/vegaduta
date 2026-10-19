@@ -1,0 +1,1 @@
+valkey: {{ include "vegaduta-lib.fullname" . }}:6379 ({{ include "vegaduta-lib.image" . }}), password in Secret {{ include "vegaduta-lib.fullname" . }} key `password`.

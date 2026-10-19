@@ -1,0 +1,180 @@
+com.agenticai.core.admin.sso.ScimProvisioningController depends on JPA entity com.agenticai.core.admin.sso.TenantScimToken
+com.agenticai.core.admin.sso.ScimProvisioningController depends on repository com.agenticai.core.admin.sso.TenantScimTokenRepository
+com.agenticai.core.admin.sso.TenantSsoController depends on JPA entity com.agenticai.core.admin.sso.TenantScimToken
+com.agenticai.core.admin.sso.TenantSsoController depends on repository com.agenticai.core.admin.sso.TenantScimTokenRepository
+com.agenticai.core.agents.guardrail.AgentGuardrailController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.edge.EdgeToolExecutionController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.edge.EdgeToolExecutionController depends on JPA entity com.agenticai.core.devices.MobileDevice
+com.agenticai.core.agents.edge.EdgeTurnTelemetryController depends on JPA entity com.agenticai.core.agents.edge.EdgeTurn
+com.agenticai.core.agents.edge.EdgeTurnTelemetryController depends on repository com.agenticai.core.agents.edge.EdgeTurnRepository
+com.agenticai.core.agents.crew.AgentSpecialtyController depends on JPA entity com.agenticai.core.agents.crew.AgentSpecialization
+com.agenticai.core.agents.decision.JevController depends on JPA entity com.agenticai.core.providers.capability.CapabilityPolicy
+com.agenticai.core.agents.demo.DemoChatController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.agents.demo.DemoMusicController depends on JPA entity com.agenticai.core.tenancy.demo.DemoGeneratedMusic
+com.agenticai.core.agents.demo.DemoMusicController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.agents.demo.DemoShareController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.demo.DemoShareController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.agents.demo.DemoShareController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.agents.demo.magic.DemoMagicController depends on JPA entity com.agenticai.core.tenancy.demo.DemoMagicWorkflow
+com.agenticai.core.agents.demo.magic.DemoMagicController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.agents.demo.magic.DemoMagicController depends on repository com.agenticai.core.tenancy.demo.DemoSessionRepository
+com.agenticai.core.agents.demo.studio.DemoStudioController depends on JPA entity com.agenticai.core.agents.demo.studio.DemoStudioRun
+com.agenticai.core.agents.demo.studio.DemoStudioController depends on JPA entity com.agenticai.core.agents.demo.studio.DemoStudioWorkflow
+com.agenticai.core.agents.demo.studio.DemoStudioController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.agents.demo.studio.DemoStudioController depends on repository com.agenticai.core.agents.demo.studio.DemoStudioRunRepository
+com.agenticai.core.agents.demo.studio.DemoStudioController depends on repository com.agenticai.core.agents.demo.studio.DemoStudioWorkflowRepository
+com.agenticai.core.agents.directory.AgentDirectoryController depends on JPA entity com.agenticai.core.agents.directory.AgentDirectoryEntry
+com.agenticai.core.agents.job.AgentJobObservabilityController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.job.AgentJobObservabilityController depends on JPA entity com.agenticai.core.agents.job.AgentJob
+com.agenticai.core.agents.job.AgentJobObservabilityController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.agents.job.AgentJobObservabilityController depends on repository com.agenticai.core.agents.job.AgentJobRepository
+com.agenticai.core.agents.share.AgentShareController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.share.AgentShareController depends on JPA entity com.agenticai.core.agents.share.AgentShare
+com.agenticai.core.agents.share.AgentShareOwnerController depends on JPA entity com.agenticai.core.agents.share.AgentShare
+com.agenticai.core.agents.share.AgentShareVisionController depends on JPA entity com.agenticai.core.agents.share.AgentShare
+com.agenticai.core.agents.tools.classification.ToolClassificationController depends on JPA entity com.agenticai.core.agents.tools.classification.ToolClassificationEntity
+com.agenticai.core.agents.tools.mcpapps.McpAppsController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.tools.openapi.OpenApiToolSourceController depends on JPA entity com.agenticai.core.agents.tools.openapi.OpenApiToolSource
+com.agenticai.core.agents.tools.x402.X402OfferController depends on JPA entity com.agenticai.core.agents.tools.x402.X402Offer
+com.agenticai.core.agents.tools.x402.X402OfferController depends on repository com.agenticai.core.agents.tools.x402.X402OfferRepository
+com.agenticai.core.agents.tools.x402.X402ResourceController depends on JPA entity com.agenticai.core.agents.tools.x402.X402Offer
+com.agenticai.core.agents.tools.x402.X402ResourceController depends on JPA entity com.agenticai.core.agents.tools.x402.X402PaymentRecord
+com.agenticai.core.agents.trust.DelegationController depends on JPA entity com.agenticai.core.agents.trust.DelegationGrant
+com.agenticai.core.approval.ApprovalController depends on JPA entity com.agenticai.core.approval.ApprovalRequest
+com.agenticai.core.approval.ApprovalController depends on repository com.agenticai.core.approval.ApprovalRequestRepository
+com.agenticai.core.chat.AgentSessionLlmUsageController depends on JPA entity com.agenticai.core.chat.LlmCallLog
+com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.job.AgentJob
+com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.job.schedule.AgentSchedule
+com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.job.schedule.AgentScheduleRun
+com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.audit.Notification
+com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.job.AgentJobRepository
+com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.job.schedule.AgentScheduleRepository
+com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.job.schedule.AgentScheduleRunRepository
+com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.approval.ApprovalRequestRepository
+com.agenticai.core.common.improve.AgentImprovementController depends on JPA entity com.agenticai.core.common.improve.AgentImprovementSuggestion
+com.agenticai.core.common.quicktask.QuickTaskController depends on JPA entity com.agenticai.core.common.quicktask.QuickTaskRun
+com.agenticai.core.common.security.FraudAnalysisController depends on JPA entity com.agenticai.core.common.security.ChallengeNonce
+com.agenticai.core.common.security.FraudAnalysisController depends on repository com.agenticai.core.common.security.ChallengeNonceRepository
+com.agenticai.core.common.security.FraudAnalysisController depends on repository com.agenticai.core.common.security.IpBlacklistRepository
+com.agenticai.core.common.security.FraudAnalysisController depends on repository com.agenticai.core.common.security.UserBlacklistRepository
+com.agenticai.core.common.studioapp.StudioAppDomainController depends on JPA entity com.agenticai.core.common.studioapp.StudioAppDomain
+com.agenticai.core.common.studioapp.StudioAppOwnerController depends on JPA entity com.agenticai.core.common.studioapp.StudioApp
+com.agenticai.core.common.studioapp.StudioAppPublicController depends on JPA entity com.agenticai.core.common.studioapp.StudioApp
+com.agenticai.core.common.studioapp.StudioAppPublicController depends on JPA entity com.agenticai.core.common.studioapp.StudioAppConnection
+com.agenticai.core.common.studioapp.StudioCollabController depends on JPA entity com.agenticai.core.common.studioapp.StudioProjectComment
+com.agenticai.core.common.studioapp.StudioCollabController depends on JPA entity com.agenticai.core.common.studioapp.StudioProjectMember
+com.agenticai.core.common.studioapp.StudioProjectController depends on JPA entity com.agenticai.core.common.studioapp.StudioProject
+com.agenticai.core.common.studioapp.StudioProjectController depends on JPA entity com.agenticai.core.common.studioapp.StudioProjectVersion
+com.agenticai.core.common.systemstatus.SystemStatusController depends on repository com.agenticai.core.eventbus.WorkflowEventOutboxRepository
+com.agenticai.core.devices.DeviceController depends on JPA entity com.agenticai.core.devices.MobileDevice
+com.agenticai.core.devices.DeviceController depends on repository com.agenticai.core.devices.MobileDeviceRepository
+com.agenticai.core.documentgen.web.DocumentGenerationController depends on JPA entity com.agenticai.core.documentgen.entity.DocumentGenerationJob
+com.agenticai.core.elevenlabs.ElevenLabsGeneratedAudioController depends on JPA entity com.agenticai.core.elevenlabs.ElevenLabsGeneratedAudio
+com.agenticai.core.elevenlabs.GeneratedMusicController depends on JPA entity com.agenticai.core.elevenlabs.GeneratedMusic
+com.agenticai.core.eventbus.webhook.WebhookSubscriptionController depends on JPA entity com.agenticai.core.eventbus.webhook.WebhookDelivery
+com.agenticai.core.eventbus.webhook.WebhookSubscriptionController depends on repository com.agenticai.core.eventbus.webhook.WebhookDeliveryRepository
+com.agenticai.core.google.GoogleOAuthController depends on JPA entity com.agenticai.core.google.GoogleCredential
+com.agenticai.core.guardrails.procedures.ProcedureController depends on JPA entity com.agenticai.core.guardrails.procedures.Procedure
+com.agenticai.core.imagegen.GeneratedImageController depends on JPA entity com.agenticai.core.imagegen.GeneratedImage
+com.agenticai.core.imagegen.VideoGenerationController depends on JPA entity com.agenticai.core.imagegen.VideoGenerationJob
+com.agenticai.core.imagegen.demo.DemoImageController depends on JPA entity com.agenticai.core.tenancy.demo.DemoGeneratedImage
+com.agenticai.core.imagegen.demo.DemoImageController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.imagegen.demo.DemoVideoController depends on JPA entity com.agenticai.core.tenancy.demo.DemoGeneratedVideo
+com.agenticai.core.imagegen.demo.DemoVideoController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.knowledge.KnowledgeController depends on JPA entity com.agenticai.core.knowledge.KnowledgeDocument
+com.agenticai.core.mcpserver.DeveloperApiController depends on JPA entity com.agenticai.core.workflow.WorkflowDefinition
+com.agenticai.core.omnichannel.contact.ChannelContactController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.omnichannel.contact.ChannelContactController depends on JPA entity com.agenticai.core.omnichannel.contact.ChannelContact
+com.agenticai.core.omnichannel.contact.ChannelContactController depends on JPA entity com.agenticai.core.omnichannel.contact.ContactGroup
+com.agenticai.core.omnichannel.contact.ChannelContactController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.contact.ChannelContactController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.omnichannel.contact.ChannelContactController depends on repository com.agenticai.core.omnichannel.session.ChannelSessionRepository
+com.agenticai.core.omnichannel.contact.ChannelRoutingController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.omnichannel.contact.ChannelRoutingController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelDefaultAgent
+com.agenticai.core.omnichannel.contact.ChannelRoutingController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.omnichannel.demo.DemoChannelController depends on JPA entity com.agenticai.core.tenancy.demo.DemoChannelLink
+com.agenticai.core.omnichannel.demo.DemoChannelController depends on JPA entity com.agenticai.core.tenancy.demo.DemoChannelMessage
+com.agenticai.core.omnichannel.demo.DemoChannelController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.omnichannel.demo.DemoTelegramWebhookController depends on JPA entity com.agenticai.core.tenancy.demo.DemoChannelLink
+com.agenticai.core.omnichannel.demo.DemoTelegramWebhookController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.omnichannel.demo.DemoWhatsAppWebhookController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.omnichannel.demo.DemoWhatsAppWebhookController depends on JPA entity com.agenticai.core.tenancy.demo.DemoChannelLink
+com.agenticai.core.omnichannel.demo.DemoWhatsAppWebhookController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.omnichannel.demo.DemoWhatsAppWebhookController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.omnichannel.discord.DiscordWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.email.EmailMessageController depends on repository com.agenticai.core.omnichannel.email.EmailMessageRepository
+com.agenticai.core.omnichannel.meta.MetaSocialWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.meta.MetaWhatsAppWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.slack.SlackWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.teams.TeamsWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.teams.TeamsWebhookController depends on JPA entity com.agenticai.core.omnichannel.teams.TeamsCredential
+com.agenticai.core.omnichannel.teams.TeamsWebhookController depends on repository com.agenticai.core.omnichannel.teams.TeamsCredentialRepository
+com.agenticai.core.omnichannel.telegram.TelegramWebhookController depends on JPA entity com.agenticai.core.omnichannel.telegram.TelegramCredential
+com.agenticai.core.omnichannel.telegram.TelegramWebhookController depends on repository com.agenticai.core.omnichannel.telegram.TelegramCredentialRepository
+com.agenticai.core.omnichannel.twilio.TwilioSmsWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.omnichannel.twilio.TwilioWebhookController depends on JPA entity com.agenticai.core.omnichannel.session.ChannelSession
+com.agenticai.core.payments.PaymentController depends on JPA entity com.agenticai.core.payments.PaymentMandate
+com.agenticai.core.payments.PaymentController depends on repository com.agenticai.core.payments.PaymentTransactionRepository
+com.agenticai.core.payments.commerce.CommerceMandateController depends on JPA entity com.agenticai.core.payments.commerce.CommerceMandate
+com.agenticai.core.payments.commerce.CommerceMandateController depends on JPA entity com.agenticai.core.payments.commerce.CommerceMandateEvent
+com.agenticai.core.platform.PlatformController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.platform.PlatformController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.platform.PlatformTenantDetailController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.platform.PlatformTenantDetailController depends on repository com.agenticai.core.agents.core.AgentRepository
+com.agenticai.core.platform.PlatformTenantDetailController depends on repository com.agenticai.core.chat.LlmCallLogRepository
+com.agenticai.core.platform.PlatformTenantDetailController depends on repository com.agenticai.core.tenancy.AppUserRepository
+com.agenticai.core.platform.PlatformTenantDetailController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.platform.PlatformTenantDetailController depends on repository com.agenticai.core.workflow.WorkflowDefinitionRepository
+com.agenticai.core.platform.PlatformUserController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.platform.PlatformUserController depends on repository com.agenticai.core.tenancy.AppUserRepository
+com.agenticai.core.platform.PlatformUserController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.platform.ops.PlatformSessionController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.platform.ops.PlatformSessionController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.platform.spendcap.PlatformSpendCapController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.platform.spendcap.PlatformSpendCapController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.quality.QualityController depends on JPA entity com.agenticai.core.quality.AgentQualityRecord
+com.agenticai.core.quality.dataset.EvalCredibilityController depends on JPA entity com.agenticai.core.quality.dataset.EvalDataset
+com.agenticai.core.quality.dataset.EvalCredibilityController depends on JPA entity com.agenticai.core.quality.dataset.EvalDatasetCase
+com.agenticai.core.quality.dataset.EvalCredibilityController depends on JPA entity com.agenticai.core.quality.dataset.EvalRun
+com.agenticai.core.quality.dataset.EvalDatasetController depends on JPA entity com.agenticai.core.quality.dataset.EvalDataset
+com.agenticai.core.quality.dataset.EvalDatasetController depends on JPA entity com.agenticai.core.quality.dataset.EvalDatasetCase
+com.agenticai.core.quality.dataset.EvalDatasetController depends on JPA entity com.agenticai.core.quality.dataset.EvalRun
+com.agenticai.core.quality.dataset.EvalDatasetController depends on JPA entity com.agenticai.core.quality.dataset.EvalRunCaseResult
+com.agenticai.core.quality.gate.EvalGateController depends on JPA entity com.agenticai.core.quality.dataset.EvalDataset
+com.agenticai.core.quality.gate.EvalGateController depends on JPA entity com.agenticai.core.quality.gate.AgentEvalGate
+com.agenticai.core.quality.gate.EvalGateController depends on repository com.agenticai.core.quality.dataset.EvalDatasetRepository
+com.agenticai.core.quality.simulation.SimulationController depends on JPA entity com.agenticai.core.quality.simulation.SimulationPersona
+com.agenticai.core.sarvam.SarvamGeneratedAudioController depends on JPA entity com.agenticai.core.sarvam.SarvamGeneratedAudio
+com.agenticai.core.sharing.ShareController depends on JPA entity com.agenticai.core.sharing.ResourceGrant
+com.agenticai.core.sharing.SharedWithMeController depends on JPA entity com.agenticai.core.sharing.ResourceGrant
+com.agenticai.core.tenancy.AccountController depends on JPA entity com.agenticai.core.tenancy.AppUser
+com.agenticai.core.tenancy.AccountController depends on repository com.agenticai.core.tenancy.AppUserRepository
+com.agenticai.core.tenancy.TenantBrandingLogoController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.tenancy.TenantBrandingLogoController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.tenancy.TenantSettingsController depends on JPA entity com.agenticai.core.tenancy.Tenant
+com.agenticai.core.tenancy.TenantSettingsController depends on repository com.agenticai.core.tenancy.TenantRepository
+com.agenticai.core.tenancy.aireport.AiContentReportController depends on JPA entity com.agenticai.core.tenancy.aireport.AiContentReport
+com.agenticai.core.tenancy.demo.DemoSessionController depends on JPA entity com.agenticai.core.tenancy.demo.DemoChatMessage
+com.agenticai.core.tenancy.demo.DemoShareOwnerController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.tenancy.demo.DemoTranscriptEmailController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
+com.agenticai.core.voice.AgentShareVoiceController depends on JPA entity com.agenticai.core.agents.share.AgentShare
+com.agenticai.core.voice.VoiceCallRecordingController depends on JPA entity com.agenticai.core.voice.VoiceCallRecording
+com.agenticai.core.voice.VoiceCallRecordingController depends on repository com.agenticai.core.voice.VoiceCallRecordingRepository
+com.agenticai.core.voice.realtime.RealtimeVoiceSessionController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.workflow.WorkflowController depends on JPA entity com.agenticai.core.workflow.WorkflowDefinition
+com.agenticai.core.workflow.WorkflowController depends on JPA entity com.agenticai.core.workflow.WorkflowRun
+com.agenticai.core.workflow.WorkflowWebhookController depends on JPA entity com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode
+com.agenticai.core.workflow.WorkflowWebhookController depends on JPA entity com.agenticai.core.workflow.WorkflowDefinition
+com.agenticai.core.workflow.WorkflowWebhookController depends on repository com.agenticai.core.workflow.WorkflowDefinitionRepository
+com.agenticai.core.workflow.humaninput.WorkflowInputRequestController depends on JPA entity com.agenticai.core.workflow.WorkflowRun
+com.agenticai.core.workflow.humaninput.WorkflowInputRequestController depends on JPA entity com.agenticai.core.workflow.humaninput.WorkflowInputRequest
+com.agenticai.core.workflow.share.WorkflowShareController depends on JPA entity com.agenticai.core.workflow.WorkflowDefinition
+com.agenticai.core.workflow.share.WorkflowShareController depends on JPA entity com.agenticai.core.workflow.share.WorkflowShare
+com.agenticai.core.workflow.share.WorkflowShareOwnerController depends on JPA entity com.agenticai.core.workflow.share.WorkflowShare
+com.agenticai.core.workflow.share.WorkflowShareVoiceController depends on JPA entity com.agenticai.core.workflow.WorkflowDefinition
+com.agenticai.core.workflow.share.WorkflowShareVoiceController depends on JPA entity com.agenticai.core.workflow.share.WorkflowShare
+com.agenticai.core.workflow.version.WorkflowVersionController depends on JPA entity com.agenticai.core.workflow.WorkflowRun
+com.agenticai.core.workflow.version.WorkflowVersionController depends on JPA entity com.agenticai.core.workflow.version.WorkflowVersion
+com.agenticai.core.workflow.version.WorkflowVersionController depends on repository com.agenticai.core.workflow.WorkflowRunRepository

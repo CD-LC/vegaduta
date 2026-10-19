@@ -1,0 +1,31 @@
+# =============================================================================
+# Build-from-source overlay for LITE mode (separate from docker-compose.build.yml
+# because an overlay that names a service the base file lacks would ADD it).
+#
+#   ./scripts/vegaduta up --lite --build
+#   docker compose -f deploy/compose/lite.yml -f deploy/compose/lite.build.yml build
+# =============================================================================
+services:
+  postgres:
+    build: ../postgres
+  db-roles:
+    # Same image as postgres (it runs psql); built, never pulled, with --build.
+    build: ../postgres
+  core:
+    build:
+      context: ../../core
+      args:
+        MODULE: app
+        MCP_TOOLCHAIN: ${CORE_MCP_TOOLCHAIN:-none}
+  web:
+    build:
+      context: ../../web
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+        NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
+        NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
+        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
+        NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-lite}
+        NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+  sidecar:
+    build: ../../services/sidecar

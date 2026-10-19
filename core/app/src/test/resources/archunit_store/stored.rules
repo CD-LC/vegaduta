@@ -1,0 +1,10 @@
+#
+#Sat Oct 17 11:46:22 IST 2026
+a\ class\ must\ not\ have\ a\ constructor\ with\ more\ than\ 12\ collaborator\ parameters\ (audit\ F3;\ @Value\ settings\ do\ not\ count),\ because\ a\ constructor\ that\ needs\ that\ many\ collaborators\ means\ the\ class\ has\ several\ responsibilities;\ split\ it\ by\ responsibility=e802d0a3-4413-4d16-aaf0-73d96632ae01
+a\ controller\ must\ not\ depend\ on\ a\ repository\ or\ a\ JPA\ entity\ (audit\ F5),\ because\ web\ code\ returns\ DTOs\ produced\ by\ a\ service;\ reaching\ into\ persistence\ from\ a\ controller\ bypasses\ transactions,\ tenancy\ and\ authorization=3b0a0201-dd7c-434e-a3d0-51e1aa441926
+a\ feature\ area\ must\ not\ use\ another\ area's\ repository\ (audit\ F4),\ because\ an\ area's\ tables\ are\ private;\ other\ areas\ go\ through\ its\ service\ interface\ so\ the\ schema\ can\ change\ and\ the\ area\ can\ be\ split\ off=a6a2058b-faaa-48a8-bb64-52b971750207
+kernel\ code\ must\ not\ depend\ on\ vendor\ adapter\ code\ (ADR-0011\ rule\ a),\ because\ vendors\ must\ be\ removable\ from\ a\ distribution;\ the\ kernel\ talks\ to\ them\ through\ SPI\ interfaces\ it\ owns=959148a7-f069-40c3-8a1d-f76595f83304
+no\ package\ may\ be\ part\ of\ a\ package\ dependency\ cycle\ (audit\ F2),\ because\ cycles\ between\ packages\ make\ a\ module\ impossible\ to\ split\ or\ test\ in\ isolation;\ ModuleBoundaryRulesTest\ only\ checks\ top-level\ packages=9900f9ce-3c32-4dd5-8c53-1bf01295a6b5
+outbound\ HTTP\ clients\ must\ come\ from\ SafeHttpClients,\ not\ a\ raw\ HttpClient,\ RestTemplate,\ WebClient,\ OkHttp\ or\ Apache\ client,\ because\ SafeHttpClients\ resolves\ every\ connection\ through\ SsrfGuard,\ so\ a\ tenant-,\ model-\ or\ internet-supplied\ URL\ cannot\ reach\ loopback,\ private\ or\ metadata\ addresses,\ and\ DNS\ rebinding\ is\ closed=853d44fa-09d0-4fb4-856b-3bcfcf8eb0fe
+top-level\ com.agenticai.core.*\ packages\ must\ be\ free\ of\ cycles\ (ADR-0011\ rule\ c)=207f6f49-005c-4f42-a9c2-f25cf3dfd874
+vendor\ units\ must\ not\ depend\ on\ each\ other\ (ADR-0011\ rule\ b)=975ac461-fb3c-4796-b7d9-53f9af8d1974

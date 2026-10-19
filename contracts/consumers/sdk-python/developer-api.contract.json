@@ -1,0 +1,14 @@
+{
+  "consumer": "sdk-python",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "developer-chat",
+      "method": "POST",
+      "path": "/api/dev/v1/agents/{agentId}/chat",
+      "status": 200,
+      "request": { "requiredFields": ["$.message"] },
+      "response": { "requiredFields": ["$.reply"] }
+    }
+  ]
+}

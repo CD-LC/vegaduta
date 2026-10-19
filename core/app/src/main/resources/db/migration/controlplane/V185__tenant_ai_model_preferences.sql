@@ -1,0 +1,25 @@
+-- Per-tenant "AI Model Control" settings page (backend) - a generic bag of
+-- per-feature model overrides ("for feature X, use provider/model Y instead
+-- of whatever the calling code would otherwise resolve").
+--
+-- Single JSON column, not one column per feature - same call the V162
+-- branding migration made ("tenant-scoped settings live as columns on
+-- control_plane.tenant, not in a key-value store") for a FIXED small set of
+-- fields, but this bag is open-ended (new AI-touching features get added to
+-- AiModelFeature in code with zero further migrations, the same tradeoff
+-- PlatformSetting's generic key-value shape makes for platform-wide knobs -
+-- see that entity's javadoc). TEXT, not JSONB - same reasoning as
+-- V132__demo_magic_workflow.sql's plan_json/form_spec_json: nothing queries
+-- INTO this column server-side, it is read/written whole by
+-- TenantAiModelPreferenceService (core/tenancy), which owns
+-- parsing/validating the {featureKey: {providerName, model}} shape. NULL
+-- (the default for every existing tenant) means "no overrides configured" -
+-- every AI call keeps resolving exactly as it does today.
+--
+-- V185: controlplane/ and tenant/ share ONE combined Flyway version sequence
+-- (see V100/V162's header comments for the same collision class). Originally
+-- authored as V184, but a concurrent session claimed V184 first with
+-- tenant/V184__mcp_edge_eligible.sql - renumbered to V185 to avoid the
+-- duplicate-version collision that caused the 2026-07-31 V156 outage.
+ALTER TABLE control_plane.tenant
+    ADD COLUMN ai_model_preferences TEXT;

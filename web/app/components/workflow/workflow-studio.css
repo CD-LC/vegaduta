@@ -1,0 +1,311 @@
+/* Workflow designer - STUDIO layout (2026-09-29).
+ *
+ * The canvas fills the whole designer area and never scrolls the page; the
+ * top bar, node library (left), inspector (right), notices and the AI
+ * describe bar float over it as translucent glass. Everything positions
+ * itself against custom properties set on the shell by useStudioLayout:
+ *
+ *   --wf-left / --wf-right   space a side panel occupies incl. its gap (0 when hidden)
+ *   --wf-left-w / --wf-right-w  the open panel widths
+ *   --wf-top                 height reserved by the floating top bar
+ *   --wf-gap, --wf-rail      12px gutter, 52px collapsed rail
+ *
+ * Scope: `.ax-wf-shell.ax-wf-studio` only (focus mode keeps its own
+ * `.ax-wf-shell-immersive` rules). Panel overlay rules apply from 900px up;
+ * below that the palette and inspector stay the off-canvas drawers defined in
+ * globals.css, and StudioPanel's wrapper steps out of the way
+ * (display: contents) so their position:fixed isn't re-anchored by glass.
+ *
+ * Canvas node rule (web-design-system memory): never put a `transform` on
+ * .wf-node - handle positions are measured with getBoundingClientRect.
+ * Nothing here touches nodes.
+ */
+
+/* Continued in workflow-studio-{overlays,panels}.css. workflowStudioStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+.ax-wf-shell.ax-wf-studio {
+  /* shadcn tokens (--card/--border/--foreground) - the same ones Card and
+     every console page use, so light/dark/accent follow automatically. */
+  --wf-glass: color-mix(in oklab, var(--card) 72%, transparent);
+  --wf-glass-strong: color-mix(in oklab, var(--card) 88%, transparent);
+  --wf-glass-border: color-mix(in oklab, var(--border) 85%, transparent);
+  --wf-glass-shadow:
+    0 18px 48px -18px rgb(0 0 0 / 0.55), 0 2px 6px -2px rgb(0 0 0 / 0.25), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  --wf-glass-blur: blur(20px) saturate(1.5);
+  --wf-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Fill the (fillViewport) main region exactly: no min-height, no growth. */
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: clip;
+  isolation: isolate;
+}
+
+:root[data-mode="light"] .ax-wf-shell.ax-wf-studio {
+  --wf-glass: color-mix(in oklab, var(--card) 76%, transparent);
+  --wf-glass-strong: color-mix(in oklab, var(--card) 92%, transparent);
+  --wf-glass-shadow:
+    0 18px 40px -20px rgb(15 23 42 / 0.32), 0 2px 6px -2px rgb(15 23 42 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.75);
+}
+
+/* ---- Glass surfaces ------------------------------------------------------- */
+
+.ax-wf-studio > .ax-wf-topbar,
+.ax-wf-studio .wf-studio-panel,
+.ax-wf-studio .ax-wf-notices > *,
+.ax-wf-studio .ax-wf-describe-bar {
+  background: var(--wf-glass);
+  -webkit-backdrop-filter: var(--wf-glass-blur);
+  backdrop-filter: var(--wf-glass-blur);
+  border: 1px solid var(--wf-glass-border);
+  box-shadow: var(--wf-glass-shadow);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ax-wf-studio > .ax-wf-topbar,
+  .ax-wf-studio .wf-studio-panel,
+  .ax-wf-studio .ax-wf-notices > *,
+  .ax-wf-studio .ax-wf-describe-bar {
+    background: var(--wf-glass-strong);
+  }
+}
+
+/* ---- Canvas: full bleed under everything --------------------------------- */
+
+.ax-wf-studio > .ax-wf-main {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  gap: 0;
+  min-height: 0;
+}
+
+.ax-wf-studio .ax-wf-canvas-col {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: auto;
+}
+
+.ax-wf-studio .rob-stage {
+  position: absolute;
+  inset: 0;
+  gap: 0;
+}
+
+.ax-wf-studio .ax-wf-canvas-zone {
+  border: 0;
+  border-radius: 0;
+  height: 100%;
+}
+
+/* ---- Floating top bar ------------------------------------------------------ */
+
+.ax-wf-studio > .ax-wf-topbar {
+  position: absolute;
+  z-index: 30;
+  top: 10px;
+  left: var(--wf-gap);
+  right: var(--wf-gap);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 6px 8px;
+  border-radius: 14px;
+  container: wftopbar / inline-size;
+}
+
+.ax-wf-studio .ax-wf-tb-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+.ax-wf-studio .ax-wf-tb-identity {
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.ax-wf-studio .ax-wf-tb-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 6ch;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-left: 2px;
+}
+
+.ax-wf-studio .ax-wf-tb-name {
+  display: inline-block;
+  min-width: 6ch;
+  max-width: clamp(10ch, 18vw, 28ch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  letter-spacing: -0.01em;
+}
+
+.ax-wf-studio .ax-wf-tb-status {
+  flex: none;
+  gap: 6px;
+  text-transform: capitalize;
+}
+
+.ax-wf-studio .ax-wf-tb-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--muted-foreground);
+}
+
+.ax-wf-studio .ax-wf-tb-status-dot.is-active {
+  background: var(--state-success, #22c55e);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--state-success, #22c55e) 22%, transparent);
+}
+
+.ax-wf-studio .ax-wf-tb-edit {
+  padding-left: 6px;
+  margin-left: 2px;
+  border-left: 1px solid var(--wf-glass-border);
+}
+
+.ax-wf-studio .ax-wf-tb-more {
+  padding-left: 6px;
+  border-left: 1px solid var(--wf-glass-border);
+}
+
+/* Segmented cluster (the console builds segmented controls from the Tabs
+   pill track: bg-muted, 2px inset). Squared to match the studio's
+   rectangular control language - no pill track here. */
+.ax-wf-studio .wf-action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  margin-left: 4px;
+  border-radius: 9px;
+  background: var(--muted);
+}
+
+/* ---- Squared controls ----------------------------------------------------
+ * The console's Button/Badge primitives are rounded-full by design; the
+ * workflow designer's old oval chrome is being retired in favour of tight
+ * rectangles, so inside .ax-wf-shell every shadcn control renders at a small
+ * corner radius instead. Scoped to the shell (and the portalled "More"
+ * menu) so no other console page changes shape. The focus-mode shell
+ * shares the same ancestor class, so it picks this up too. */
+.ax-wf-shell [data-slot="button"],
+.ax-wf-more-menu [data-slot="button"] {
+  border-radius: 8px;
+}
+
+.ax-wf-shell [data-slot="badge"] {
+  border-radius: 6px;
+}
+
+.ax-wf-shell [data-slot="tabs-list"] {
+  border-radius: 8px;
+}
+
+.ax-wf-studio .wf-action-group .wf-icon-action[data-pressed="true"] {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.ax-wf-studio .ax-wf-dirty-badge {
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  min-width: 0;
+  padding-left: 2px;
+}
+
+.ax-wf-studio .ax-wf-dirty-badge[data-dirty] {
+  color: var(--state-warning, #d97706);
+}
+
+/* Narrower bars shed text first, then secondary groups - never wrap. */
+@container wftopbar (width < 1100px) {
+  .ax-wf-studio .ax-wf-tb-label,
+  .ax-wf-studio .ax-wf-tb-crumb {
+    display: none;
+  }
+}
+
+/* Status collapses to its coloured dot (full text stays in title/aria). */
+@container wftopbar (width < 1000px) {
+  .ax-wf-studio .ax-wf-tb-status-text {
+    display: none;
+  }
+
+  .ax-wf-studio .ax-wf-tb-status {
+    padding: 6px;
+  }
+}
+
+@container wftopbar (width < 900px) {
+  .ax-wf-studio .ax-wf-dirty-badge {
+    display: none;
+  }
+}
+
+@container wftopbar (width < 760px) {
+  .ax-wf-studio .ax-wf-tb-studio,
+  .ax-wf-studio .ax-wf-tb-edit {
+    display: none;
+  }
+}
+
+/* "More" menu (Radix popover content, portalled - not inside the shell). */
+.ax-wf-more-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 240px;
+  padding: 6px;
+}
+
+.ax-wf-more-menu > [data-slot="button"] {
+  width: 100%;
+  /* Menu rows: no global button{} border/shadow, like the console's menus. */
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.ax-wf-more-hint {
+  margin: 4px 0 0;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--border);
+  line-height: 1.7;
+}
+
+/* Tooltip content: label + key hint (the console's kbd look). */
+.wf-icon-action-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wf-icon-action-kbd {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  line-height: 16px;
+  text-align: center;
+  color: var(--muted-foreground);
+  background: var(--muted);
+}

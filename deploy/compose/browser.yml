@@ -1,0 +1,68 @@
+# Browser add-on for the personal install: the agent's own browser (browser_* tools, the sign-in
+# takeover pane in the Assistant) in a separate container, so core stays slim.
+#
+#   scripts/vegaduta personal --browser          (the Setup app has the same checkbox)
+#
+# or by hand, on top of the personal stack:
+#
+#   docker compose -f deploy/compose/personal.yml -f deploy/compose/browser.yml \
+#     --env-file deploy/compose/.env --profile browser up -d --build
+#
+# What runs: services/browser-runner, a Playwright server (headless Chromium per connected client).
+# Core attaches to it with APP_BROWSERUSE_REMOTE_URL; the tools, the domain policy
+# (BROWSER_ALLOWED_DOMAINS / BROWSER_BLOCKED_DOMAINS), the confirmation gates, saved logins and the
+# takeover behave exactly as with an in-core Chromium (CORE_IMAGE_VARIANT=-full, the 6 GB image, still works and
+# needs none of this).
+#
+# Security:
+#   - The runner publishes no port and sits on `browser-net`, shared with core only: a page the agent
+#     opens cannot reach Postgres, Valkey, the workspace runner or the sidecar. It can reach the
+#     internet, which is its job; core still refuses private and loopback targets before it navigates.
+#   - A Playwright server has no authentication of its own, so the network is the boundary. Do not
+#     publish its port or attach it to another network.
+#   - No capabilities, no-new-privileges, read-only root, a memory and process limit.
+services:
+  browser-runner:
+    profiles: [browser]
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/browser-runner:${VEGADUTA_VERSION:-local}
+    build: ../../services/browser-runner
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    shm_size: 1gb
+    tmpfs:
+      - /tmp:size=512m
+      - /home/pwuser:size=256m,uid=1001,gid=1001
+    networks: [browser-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('net').connect(3000,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: ${BROWSER_RUNNER_MEM_LIMIT:-2g}
+          pids: 512
+
+  # `default` is named explicitly because listing any network drops the implicit one.
+  core:
+    networks:
+      - default
+      - browser-net
+    environment:
+      APP_BROWSERUSE_REMOTE_URL: ${APP_BROWSERUSE_REMOTE_URL:-ws://browser-runner:3000/}
+      # The Playwright client unpacks its own Node into /tmp, which core mounts noexec; use the image's Node instead.
+      PLAYWRIGHT_NODEJS_PATH: ${PLAYWRIGHT_NODEJS_PATH:-/usr/local/bin/node}
+
+networks:
+  browser-net: {}

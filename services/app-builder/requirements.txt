@@ -1,0 +1,32 @@
+# app-builder microservice
+fastapi==0.142.0
+# Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
+# carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
+# 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+
+# HTTP client for calling code-intel's REST API (codeintel_client.py)
+httpx==0.28.1
+
+# auth_mode=keycloak (JWT validation against the realm JWKS)
+PyJWT[crypto]==2.15.1
+
+# github_credentials.py: Fernet encryption of each tenant's GitHub PAT at
+# rest. Already pulled in transitively by PyJWT[crypto] above — declared
+# explicitly because this service now imports `cryptography` directly, and a
+# direct dependency should not rely on another package's extra to stay
+# installed.
+cryptography==50.0.1
+
+# baas.py: per-project Postgres schema provisioning (optional feature —
+# provision_backend() degrades gracefully if this or
+# APP_BUILDER_ADMIN_DATABASE_URL is missing)
+psycopg[binary]==3.3.6
+
+# generate.py NL->file edits now calls core's own
+# POST /api/internal/app-builder/generate-files over httpx (see
+# app/generate.py's module docstring) instead of the Anthropic SDK
+# directly — no `anthropic` package dependency needed here anymore
+# (2026-08-06 routing fix).

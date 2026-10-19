@@ -1,0 +1,30 @@
+# Applies only to builds whose context is the repository root. Each component
+# (core/, web/, services/*) builds from its own directory with its own ignore file.
+.git
+.github
+.claude
+scratchpad
+**/node_modules
+**/.next
+**/target
+**/__pycache__
+**/.venv
+**/.pytest_cache
+**/coverage
+**/playwright-report
+**/test-results
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env*.example
+deploy/compose/.env
+dist
+docs
+# Secrets never enter a build context (INF-017).
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+secrets
+# (top-level only: core/secrets is a Maven module, not key material)

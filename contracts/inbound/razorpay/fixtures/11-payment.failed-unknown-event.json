@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "headers": {
+      "X-Razorpay-Event-Id": "evt_fixture_payment_failed_0000000001",
+      "X-Razorpay-Signature": "9cdc1fb33329aaa3b74e78677ea379d1f44f3a9fe518b816565772a490bcf99c"
+    },
+    "note": "Deliberately NOT covered by its own schema file - see contracts/README.md's Razorpay section on the payment.failed/invoice.paid gap. mapEventType's switch has no case for 'payment.failed' today, so parseWebhookEvent maps this to BillingEventType.UNKNOWN rather than throwing. This fixture exists to assert exactly that: the parser degrades gracefully on a recognized-envelope/unrecognized-event-name payload instead of failing. It DOES still validate against _envelope.schema.json (the envelope shape itself is generic), just not against any subscription.* schema (event value wouldn't match any of those consts)."
+  },
+  "body": {
+    "entity": "event",
+    "account_id": "acc_fixture0000000001",
+    "event": "payment.failed",
+    "contains": [
+      "payment"
+    ],
+    "payload": {
+      "subscription": {
+        "entity": {
+          "id": "sub_fixture00000011",
+          "plan_id": "plan_fixture_premium_monthly",
+          "status": "active",
+          "notes": {
+            "agentic_ai_tenant_id": "00000000-0000-4000-8000-0000000000f2"
+          }
+        }
+      },
+      "payment": {
+        "entity": {
+          "id": "pay_fixture0000000001",
+          "status": "failed",
+          "error_code": "BAD_REQUEST_ERROR",
+          "error_description": "Payment failed due to insufficient funds in the customer's account."
+        }
+      }
+    },
+    "created_at": 1753000100
+  }
+}

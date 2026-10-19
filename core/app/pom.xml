@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>app</artifactId>
+  <name>app</name>
+  <description>
+    The actual Spring Boot application: CoreApplication (main class), common/
+    (GlobalExceptionHandler, WebConfig - cross-cutting glue nothing else depends
+    on), and all of application*.yml + db/migration/** (Flyway discovers
+    migrations by classpath location, so they live wherever the app that runs
+    them lives). Depends on every other module - this is the one module that
+    gets built into the executable jar (`mvn -pl app -am spring-boot:run` from
+    core/, or `cd core/app` then `mvn spring-boot:run`). Still one process, one
+    deployable - the modular monolith split changes compile-time boundaries
+    between packages, not how this thing runs.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>app-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>admin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- Chat turn path: AgentChatService, memory, hooks, context, skills, shares,
+         the chat SSE endpoint (ADR-0023). In-process: a jar, not a network hop. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-turn</artifactId>
+    </dependency>
+    <!-- Tool layer: AgentToolProvider, resolvers, MCP connections, built-in tools,
+         data tables (ADR-0023). Implements the agents tool ports the turn path calls,
+         so every shape that runs turns loads it. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+    </dependency>
+    <!-- Chat import/export, extracted from agents (docs/architecture/agents-decomposition/chatport.md).
+         API shape only: it is REST controllers plus the services behind them, with no scheduled
+         or event-driven work, so the jobs and worker shapes (which exclude controllers) do not
+         need it. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-chatport</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-jobs</artifactId>
+    </dependency>
+    <!-- A2A, AG-UI, OpenAI-compatible endpoints, collaboration and crew hand-off tools,
+         agent directory (ADR-0023). The delegation tools and the specialist hand-off run
+         inside agent turns, so every shape that runs turns loads it. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-interop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-browser</artifactId>
+    </dependency>
+    <!-- App builder, coding harness, agent import, demo studio, agent lab,
+         face enrollment, tutor, RAG quality: extracted from agents (ADR-0023). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-studio</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-budget</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>secrets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>billing</artifactId>
+    </dependency>
+    <!-- E1 Agentic UPI Payments module (mandates, ledger, tool services,
+         reconciliation job, webhook fan-in) -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>payments</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- Cloud KMS providers (app.crypto.kms.provider=aws|azure|gcp); inert with the default `local`. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto-kms</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>devices</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>documentgen</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>eventbus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>google</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sarvam</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sdlc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>imagegen</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>elevenlabs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>knowledge</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>mcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>mcpserver</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>omnichannel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>omnichannel-social</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>platform</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>rl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>templates</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>brief</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>quality</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>voice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>workflow-portability</artifactId>
+    </dependency>
+
+    <!-- Fraud-detection classes (common/security: AbuseDetectionService,
+         HCaptchaClient, FraudAnalysisController, ...) use Lombok. Pinned
+         ABOVE the spring-boot BOM's managed 1.18.36: that version predates
+         JDK 24 support and silently produces no generated members (every
+         `log`/getter reference fails to compile). 1.18.38 is the first
+         release with JDK 24 support. Optional so it never lands on the
+         runtime classpath. -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.38</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <!-- Prometheus metrics pipeline: the Micrometer Prometheus registry
+         exposes Actuator's existing Micrometer metrics (JVM, HTTP server,
+         HikariCP, etc. - all already collected once spring-boot-starter-
+         actuator above is on the classpath) in Prometheus text format at
+         /actuator/prometheus, which the deploy/prometheus/prometheus.yml
+         scrape job (job "core") polls at core:8080. Version is managed by
+         the spring-boot-starter-parent BOM (see core/pom.xml) - no explicit
+         <version> needed, same convention every other starter/Micrometer
+         artifact in this file already follows. -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <!-- Tech-Stack-Audit-2026.md P3.1 / Master-Roadmap-2026.md item #9
+         ("Langfuse tracing"). Both versions are managed by the
+         spring-boot-starter-parent BOM (see core/pom.xml) - no explicit
+         <version> needed, same convention every other Spring Boot starter
+         in this file already follows. micrometer-tracing-bridge-otel wires
+         Spring Boot's existing Micrometer Observation instrumentation
+         (already active for HTTP requests via spring-boot-starter-actuator
+         above, and for every ChatClient call via Spring AI's own built-in
+         ChatClient/ChatModel observation support once this bridge is on the
+         classpath) to produce real OpenTelemetry spans; opentelemetry-
+         exporter-otlp ships them to management.otlp.tracing.endpoint (see
+         application.yml) via OTLP/HTTP - Langfuse's native ingestion
+         protocol as of v3.22+ (POST .../api/public/otel/v1/traces), so no
+         Langfuse-specific SDK or custom span code is needed here at all. -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-exporter-otlp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- ADR-0011 phase 1: ModuleBoundaryRulesTest (FreezingArchRule baseline in
+         src/test/resources/archunit_store). Version managed in core/pom.xml. -->
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Real-database integration tests (src/test/java/com/agenticai/core/it,
+         docs/engineering/INTEGRATION-TESTS.md). Versions come from the
+         testcontainers BOM that spring-boot-dependencies already imports;
+         only the property override in core/pom.xml moves it. The classes
+         compile in every build, but run only under -Pit (failsafe, below). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <!-- JDK 23+ removed classpath annotation-processor discovery, so a
+               lombok jar on the classpath is never run and every generated
+               member (log/getters/ctors) fails to compile. The explicit
+               processor path works on both build JDKs in play (local 24 and
+               the Dockerfile's temurin-21); -proc:full would too but the flag
+               does not exist on 21. Version pinned, not BOM-managed.
+               combine.children="append": keeps the Error Prone/NullAway paths
+               the parent's -Pstatic-analysis profile adds (a child list
+               otherwise replaces the inherited one). No-op without it. -->
+          <annotationProcessorPaths combine.children="append">
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.38</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <!-- Explicit so `repackage` never scans target/classes for a unique
+               main method - deterministic, and avoids an intermittent "Unable
+               to find main class" when a fresh clean-build's class file is
+               momentarily unreadable (Windows AV / JDK-24 timing). -->
+          <mainClass>com.agenticai.core.CoreApplication</mainClass>
+        </configuration>
+        <executions>
+          <!-- META-INF/build-info.properties -> BuildProperties bean (project
+               version + build time) for GET /api/platform/version. The git SHA
+               comes from the GIT_SHA env var baked in by core/Dockerfile instead
+               of git-commit-id-maven-plugin (not resolvable offline here, and the
+               Docker build context has no .git anyway). -->
+          <execution>
+            <id>build-info</id>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Unit-test run never touches the integration suite: *IT classes are
+           outside surefire's default includes already, and the tag exclusion
+           keeps any @Tag("integration") class out even if it is misnamed.
+           Merged with the argLine inherited from core/pom.xml. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludedGroups>integration</excludedGroups>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- mvn -P migrator ...: puts spring-boot-properties-migrator on the runtime
+         classpath so a boot (or -Pit ApplicationContextIT) logs every renamed or
+         removed configuration property with its replacement. NOT part of the
+         default build and never shipped; ADR-0012 P1 uses it to clear property
+         warnings before the Boot 4 hop. Version managed by the Boot parent. -->
+    <profile>
+      <id>migrator</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-properties-migrator</artifactId>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <!-- mvn -P it verify: runs the Testcontainers suite (MigrationsIT,
+         ApplicationContextIT, KnowledgeVectorSearchIT) through failsafe after
+         the unit tests. Needs a Docker daemon; each class is skipped (not
+         failed) when none is reachable. Pass
+         -Dvegaduta.test.postgres.image=<tag> to reuse a pre-built
+         deploy/postgres image instead of building it on the fly. Failsafe's
+         classesDirectory is pointed at target/classes by the Boot parent, so
+         the repackaged fat jar is not on the test classpath. -->
+    <profile>
+      <id>it</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <argLine>@{jacocoArgLine} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+              <includes>
+                <include>**/*IT.java</include>
+              </includes>
+              <groups>integration</groups>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

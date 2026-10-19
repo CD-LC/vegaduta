@@ -1,0 +1,57 @@
+# CI-only overlay (full-stack smoke job). Adds mock-provider — an
+# OpenAI-compatible stub that deploy/seed/seed.sql points the platform-hosted
+# LLM pool at (core has no generic provider-base-URL env var; the base URL is
+# a control_plane DATA row) — and trims memory for 7 GB CI runners.
+#
+#   docker compose -f deploy/compose/docker-compose.yml \
+#                  -f deploy/compose/docker-compose.build.yml \
+#                  -f deploy/compose/docker-compose.ci.yml up -d --wait
+services:
+  postgres:
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  core:
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+
+  sidecar:
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  keycloak:
+    environment:
+      # web/e2e and the smoke job log in with the password grant on
+      # agentic-ai-core; off everywhere else (deploy/keycloak/agentic-ai-realm.json).
+      KC_CORE_DIRECT_GRANTS: "true"
+
+  temporal:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  mock-provider:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    build:
+      context: ../mock-provider
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:9101:9101"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9101/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks: [agent-io, app]

@@ -1,0 +1,37 @@
+# Overlay for the kind stage: lets tenant BYOK Ollama calls reach the in-cluster mock model server, and turns on the
+# opt-in features the e2e suite needs. Stage only - none of this is a production default.
+# Layered after the stage's own values:
+#   helm upgrade ... -f <stage values> -f ~/vegaduta-values-kind-memory.yaml -f tests/load/kind/values-loadtest.yaml
+# (always include ~/vegaduta-values-kind-memory.yaml: without it the node runs out of memory.)
+global:
+  core:
+    # Plain env for EVERY core-family process: api (core), core-jobs, core-worker, core-ingest/-webhooks/-intake/-billing.
+    # Only core carried the mock host before, so every background job and scheduled agent run failed with
+    # EXECUTION_FAILED "This model server URL is not allowed ... internal host name" (SE-09).
+    extraEnv:
+      APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: "mock-llm:11434"
+      # Test-only: the top plan allows 600 LLM calls/minute per tenant; a single-tenant load test would only measure 429s.
+      APP_LLM_GATEWAY_RATE_LIMIT_UNLIMITED_MAX_CALLS_PER_MINUTE: "1000000"
+      # SE-16: the redis store was set on the stage but the feature switch defaults to false, so X-Turn-Id was never
+      # returned and the web resume path could not trigger. The stage runs 2 core replicas, hence redis.
+      APP_CHAT_RESUMABLE_STREAMS_ENABLED: "true"
+      APP_CHAT_RESUMABLE_STREAMS_STORE: "redis"
+      # SE-71: the device claim limiter is 10 attempts per IP per 10 minutes by default and every stage client shares one
+      # IP, so a rerun got 429 for ten minutes. Stage only; the production default is unchanged.
+      APP_DEVICES_CLAIM_RATE_LIMIT_MAX_ATTEMPTS_PER_IP: "1000"
+      # SE-77: features that ship dark and were therefore untestable on the stage (docs/configuration.md "Ship dark").
+      # On every shape, because the sweeps that act on them run in core-jobs / core-worker.
+      EVAL_JUDGE_CALIBRATION_ENABLED: "true"      # judge calibration; the mock answers judge prompts
+      SCHEDULED_TASKS_ENABLED: "true"             # /scheduled and the schedule_task tool
+      DATA_TABLES_ENABLED: "true"                 # Data Tables API, agent tools, the data_table workflow node
+      WORKFLOW_FORM_TRIGGER_ENABLED: "true"       # hosted workflow form trigger
+      CODING_HARNESS_ENABLED: "true"              # /coding-tasks page and API; the default e2b runner stays unconfigured,
+                                                  # so starting a task reports an honest "runner unavailable"
+      RESEARCH_DEEP_ENABLED: "true"               # deep_research / verify_citations tools; no search credential is seeded
+      RESEARCH_RUNS_ENABLED: "true"               # /research page and /api/research/runs
+# SE-76: web restarted 4 times on the stage (768Mi limit against a Next.js SSR process under parallel load).
+# Postgres and the core shapes are sized in ~/vegaduta-values-kind-memory.yaml; do not duplicate them here.
+web:
+  resources:
+    requests: { cpu: 100m, memory: 384Mi }
+    limits: { memory: 1Gi }

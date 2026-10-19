@@ -1,0 +1,61 @@
+# Centralized logging config (Grafana Loki). Filesystem-backed
+# storage - the doc's own "simplest possible v1" option, not the MinIO/S3
+# route - deliberately chosen over reusing the app's existing `minio`
+# service: this sandbox can't be compile/run-verified end to end this
+# session, and getting S3-compatible auth/bucket config wrong for Loki's
+# chunk+index stores is a much easier way to end up with a Loki container
+# that starts but silently can't write anything, versus a plain bind-mounted
+# filesystem path. Swapping to S3/MinIO later is a config-only change (see
+# https://grafana.com/docs/loki/latest/configure/storage/) once this is
+# confirmed working, not a re-architecture.
+#
+# Single-binary mode (all of Loki's components in one process) - correct at
+# this project's local-dev / early-production scale, same tradeoff already
+# made for Redpanda-over-real-Kafka and Temporal's `auto-setup` image
+# elsewhere in this compose file.
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# Build plan doc's own retention note: 14-30 days for INFO/DEBUG, cheap to
+# adjust since it's just an object-storage lifecycle setting. 14 days here as
+# the conservative default; raise via a future compose env var if needed.
+limits_config:
+  retention_period: 336h
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+  # Local-dev/early-stage volume guard-rails - generous enough that normal
+  # multi-service chatter never trips them, but present so a genuinely
+  # runaway log loop fails loudly in Loki's own logs instead of silently
+  # filling the container's disk.
+  ingestion_rate_mb: 16
+  ingestion_burst_size_mb: 32
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem

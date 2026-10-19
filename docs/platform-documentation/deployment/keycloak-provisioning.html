@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Keycloak Provisioning — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="deployment" data-page="keycloak-provisioning.html" data-doc="VD-DEP-008" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Deployment</a><span class="sep">/</span>Keycloak Provisioning</div>
+<div class="doc-meta" data-auto></div>
+<h1>Keycloak Provisioning</h1>
+<p class="lede">
+  How the <code>agentic-ai</code> realm, its clients, the branded theme and the social
+  identity providers get into Keycloak — and, more importantly, what an import
+  cannot do. The one idea to hold: <strong>the realm JSON is a seed; the live realm is
+  the source of truth</strong>, because <code>--import-realm</code> never re-imports an
+  existing realm.
+</p>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Standing rule: issuer consistency</div>
+  Keycloak pins its hostname (<code>KC_HOSTNAME</code> = <code>PUBLIC_AUTH_URL</code>), so tokens
+  carry <code>&lt;PUBLIC_AUTH_URL&gt;/realms/agentic-ai</code>. Core must accept exactly that
+  issuer; list any other (for example the old one during a domain change) in
+  <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>. A mismatch 401s every authenticated call while
+  browser logins still work. See <a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a>.
+</div>
+
+<dl class="props">
+  <dt>Realm template</dt><dd><code>deploy/keycloak/agentic-ai-realm.json</code>; <code>${env.X:default}</code> placeholders are resolved from the keycloak container's environment at first import</dd>
+  <dt>Clients in the template</dt><dd><code>agentic-ai-core</code> (confidential), <code>agentic-ai-web</code>, <code>agentic-ai-platform-admin</code> (public, PKCE), plus <code>agentic-ai-mobile</code>, <code>agentic-ai-app</code>, <code>agentic-ai-ide</code> reserved for external clients that are not part of this repository</dd>
+  <dt>Social IdPs in the template</dt><dd><code>github</code>, <code>google</code>, <code>microsoft</code> — committed disabled with <code>REPLACE_WITH_*_CLIENT_ID</code> placeholders; the reconcile step enables them when <code>*_CLIENT_ID</code>/<code>*_CLIENT_SECRET</code> are set</dd>
+  <dt>Compose</dt><dd><code>quay.io/keycloak/keycloak:26.0.7</code>, command <code>start --import-realm</code> (<code>KEYCLOAK_START_COMMAND=start-dev</code> only for local use); realm JSON and theme mounted read-only; Full tier stores data in <code>keycloak-db</code>, Lite in the <code>keycloak-data</code> volume</dd>
+  <dt>Helm</dt><dd><code>deploy/helm/charts/keycloak</code>: realm imported on first start, then a post-install/post-upgrade Job reconciles it; or bring any OIDC issuer</dd>
+</dl>
+
+<h2>Provisioning model</h2>
+<pre class="mermaid">
+flowchart LR
+  J[realm JSON in deploy/keycloak] -->|mounted| K[keycloak container]
+  T[theme: deploy/keycloak/themes/agentic-ai] -->|mounted| K
+  K -->|--import-realm, FIRST start only| L[(live realm in Keycloak DB)]
+  R[reconcile-keycloak.sh / Helm reconcile Job] -->|kcadm, idempotent| L
+  H[admin console / scripts] --> L
+</pre>
+
+<div class="callout callout-warning">
+  <div class="callout-title">--import-realm is a no-op once the realm exists</div>
+  Editing the JSON and restarting has no effect on a live realm. Client redirect URIs and web
+  origins are written from <code>PUBLIC_APP_URL</code>/<code>PUBLIC_ADMIN_URL</code> at the
+  <em>first</em> import only; after a domain change, update the <code>agentic-ai-web</code> and
+  <code>agentic-ai-platform-admin</code> clients in the admin console (in domain mode it is reachable
+  only on <code>127.0.0.1:8180</code>: <code>ssh -L 8180:127.0.0.1:8180 server</code>).
+</div>
+
+<h2>Scripts in the repository</h2>
+<table>
+  <thead><tr><th>Script</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>deploy/keycloak/reconcile-keycloak.sh</code> (+ <code>reconcile-realm.kcadm.sh</code>)</td><td>Idempotent post-import fixes, run automatically by <code>scripts/vegaduta up</code>: (1) <code>unmanagedAttributePolicy=ADMIN_EDIT</code>; (2) sync the <code>agentic-ai-core</code> client secret from <code>KEYCLOAK_CLIENT_SECRET</code>; (3) <code>realm-admin</code> on the core service account; (4) SMTP from <code>KEYCLOAK_SMTP_*</code>; (5) Google/GitHub/Microsoft login from <code>*_CLIENT_ID</code>/<code>_SECRET</code>; (6) first-broker-login review profile and <code>VERIFY_PROFILE</code> off. The kcadm steps run inside the keycloak container.</td></tr>
+    <tr><td><code>scripts/vegaduta make-admin you@example.com</code></td><td>Grants the <code>platform-admin</code> realm role (platform-operator console access).</td></tr>
+    <tr><td><code>deploy/keycloak/repair-federated-profiles.sh</code></td><td>Repairs federated users whose <code>email</code>/<code>firstName</code>/<code>lastName</code> were blanked.</td></tr>
+    <tr><td><code>deploy/keycloak/restore-default-role.py</code></td><td>Re-attaches the realm default-role composite to users that lost it (symptom: "Offline tokens are not allowed for this user"). Additive; supports <code>--dry-run</code>.</td></tr>
+    <tr><td><code>scripts/keycloak/*</code></td><td>Local helpers: <code>ensure-platform-admin-client.ps1</code> (creates a missing <code>agentic-ai-platform-admin</code> client), <code>check-tenant-claim.ps1</code>, <code>delete-orphaned-user.ps1</code>, <code>grant-offline-access.mjs</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>Realm, clients, theme</h2>
+<ul>
+  <li><strong>Redirect URIs per client.</strong> <code>agentic-ai-web</code> and <code>agentic-ai-platform-admin</code> get your console origins at first import. <code>agentic-ai-core</code> is confidential with the standard flow disabled — <code>api.</code> is a resource server and never receives a browser redirect.</li>
+  <li><strong>Theme.</strong> <code>deploy/keycloak/themes/agentic-ai/</code> holds <code>login</code>, <code>account</code> and <code>email</code>. Without the mount Keycloak silently falls back to the default theme.</li>
+  <li><strong>Hostname.</strong> <code>KC_HOSTNAME</code> is the public auth URL; the domain overlay keeps the admin console on <code>localhost</code> (<code>KC_HOSTNAME_ADMIN</code>).</li>
+</ul>
+
+<h2>Documented gotchas</h2>
+<table>
+  <thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead>
+  <tbody>
+    <tr><td>Every <code>/api/tenant/**</code> call 500s; no <code>tenant_id</code> claim</td><td>Keycloak 24+ drops undeclared attributes. Re-run the reconcile (<code>scripts/vegaduta up</code>). It must be <code>ADMIN_EDIT</code>, never <code>ENABLED</code> — <code>ENABLED</code> lets a user edit their own <code>tenant_id</code> and move into another tenant.</td></tr>
+    <tr><td>Signup 502 or 500 after a fresh import / DB reset</td><td>Run the reconcile; the template cannot carry the real core client secret or the <code>realm-admin</code> role mapping.</td></tr>
+    <tr><td>Login works, every API call 401</td><td>Issuer mismatch — see the callout above.</td></tr>
+    <tr><td>"Invalid redirect URI" on login</td><td>Realm clients were imported with other URLs; fix them in the admin console.</td></tr>
+    <tr><td>"Offline tokens are not allowed"</td><td>Default-role composite missing; repair with <code>restore-default-role.py</code> or <code>grant-offline-access.mjs</code>.</td></tr>
+    <tr><td>Python services cannot fetch JWKS</td><td>Point them at the internal URL (<code>http://keycloak:8080/...</code>), as Compose does; an edge proxy in front of <code>auth.</code> may block Python user agents.</td></tr>
+    <tr><td>Realm SMTP</td><td>Set by the reconcile from <code>KEYCLOAK_SMTP_*</code>; the template carries no SMTP password. Verify with a real signup email after every change.</td></tr>
+  </tbody>
+</table>
+
+<p>Related: <a href="../architecture/identity-access.html">Identity &amp; Access</a> · <a href="index.html">Deployment Guide</a> · <a href="../operations/backup-restore.html">Backup &amp; Restore</a></p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/keycloak/</code> (<code>agentic-ai-realm.json</code>, <code>reconcile-keycloak.sh</code>, <code>reconcile-realm.kcadm.sh</code>, <code>repair-federated-profiles.sh</code>, <code>restore-default-role.py</code>, <code>themes/</code>), <code>scripts/keycloak/</code>.</li>
+  <li><code>deploy/compose/docker-compose.yml</code>, <code>lite.yml</code>, <code>docker-compose.domain.yml</code> — keycloak service; <code>deploy/helm/charts/keycloak/values.yaml</code>.</li>
+  <li><code>deploy/README.md</code> — "Issuer consistency" and troubleshooting.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

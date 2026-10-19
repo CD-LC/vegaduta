@@ -1,0 +1,273 @@
+/* ---- Body: time axis + swim lanes ---- */
+.rfr-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rfr-body[hidden] {
+  display: none;
+}
+
+.rfr-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.rfr-inner {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Axis stays pinned while lanes scroll; it carries the playhead knob. */
+.rfr-axis {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: var(--rfr-label-w) minmax(0, 1fr);
+  height: 22px;
+  border-bottom: 1px solid var(--rfr-border);
+  background: var(--rfr-solid);
+}
+
+.rfr-axis-corner {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rfr-muted);
+}
+
+.rfr-axis-track {
+  position: relative;
+  margin: 0 12px 0 8px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.rfr-tick {
+  position: absolute;
+  bottom: 0;
+  height: 5px;
+  border-left: 1px solid var(--rfr-border2);
+}
+
+.rfr-tick-label {
+  position: absolute;
+  bottom: 5px;
+  left: 3px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--rfr-muted);
+  white-space: nowrap;
+}
+
+/* "Black box" event marks on the axis: failures and pauses. */
+.rfr-event {
+  position: absolute;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+  background: var(--rfr-tone);
+  box-shadow: 0 0 0 1.5px var(--rfr-panel);
+  pointer-events: none;
+}
+
+.rfr-lane {
+  display: grid;
+  grid-template-columns: var(--rfr-label-w) minmax(0, 1fr);
+  height: 24px;
+}
+
+.rfr-lane:nth-child(even) {
+  background: color-mix(in srgb, var(--rfr-chip) 70%, transparent);
+}
+
+.rfr-lane[data-active="true"] .rfr-lane-label {
+  color: var(--rfr-text);
+  font-weight: 600;
+}
+
+.rfr-lane-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 0 8px;
+  border-right: 1px solid var(--rfr-border);
+  color: var(--rfr-mid);
+  font-size: 11px;
+}
+
+.rfr-lane-label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rfr-lane-count {
+  flex: 0 0 auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  color: var(--rfr-muted);
+}
+
+.rfr-lane-track {
+  position: relative;
+  margin: 0 12px 0 8px;
+}
+
+/* ---- Visit bars ---- */
+.rfr-bar-visit {
+  --rfr-fill: 0;
+  position: absolute;
+  top: 4px;
+  height: 16px;
+  min-width: 4px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--rfr-tone) 70%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--rfr-tone) 12%, transparent);
+  color: var(--rfr-text);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* The playhead "records" each bar: the solid fill tracks how far the run
+ * had got through this visit at the current position. */
+.rfr-bar-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--rfr-fill));
+  background: color-mix(in srgb, var(--rfr-tone) 62%, transparent);
+  pointer-events: none;
+}
+
+/* Not reached yet: the chrome fades, the duration text does not (whole-bar
+ * opacity took the small mono text under AA). */
+.rfr-bar-visit[data-phase="future"] {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--rfr-tone) 38%, transparent);
+  background: color-mix(in srgb, var(--rfr-tone) 5%, transparent);
+  color: var(--rfr-mid);
+}
+.rfr-bar-visit[data-phase="future"] .rfr-bar-icon {
+  opacity: 0.55;
+}
+
+.rfr-bar-visit[data-phase="live"] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--rfr-tone) 30%, transparent);
+}
+
+.rfr-bar-visit[data-critical="true"] {
+  outline: 1.5px solid var(--rfr-text);
+  outline-offset: 1px;
+}
+
+.rfr-bar-visit[data-selected="true"] {
+  outline: 2px solid var(--rfr-focus);
+  outline-offset: 1px;
+}
+
+/* No timestamps: position is inferred from trace order, so say so visually. */
+.rfr-bar-visit[data-timing="estimated"] {
+  border-style: dotted;
+}
+
+/* Non-OK outcomes get a texture as well as a colour. */
+.rfr-bar-visit[data-status="skipped"],
+.rfr-bar-visit[data-status="cancelled"] {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--rfr-tone) 26%, transparent) 0 3px,
+    transparent 3px 7px
+  );
+}
+
+.rfr-bar-visit[data-status="paused"] .rfr-bar-fill {
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rfr-tone) 62%, transparent) 0 4px,
+    color-mix(in srgb, var(--rfr-tone) 30%, transparent) 4px 7px
+  );
+}
+
+.rfr-bar-visit[data-status="running"] .rfr-bar-fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rfr-tone) 30%, transparent),
+    color-mix(in srgb, var(--rfr-tone) 70%, transparent),
+    color-mix(in srgb, var(--rfr-tone) 30%, transparent)
+  );
+  background-size: 200% 100%;
+  animation: rfr-shimmer 1.6s linear infinite;
+}
+
+/* Dark mode: the light duration text sits on the recorded fill, and a 62%
+ * tone fill measured ~3.4:1 against it. A lighter fill keeps the colour
+ * story and puts the 9.5px text back above 4.5:1 (light mode is ~8:1). */
+:root[data-mode="dark"] .rfr-bar-fill {
+  background: color-mix(in srgb, var(--rfr-tone) 34%, transparent);
+}
+:root[data-mode="dark"] .rfr-bar-visit[data-status="paused"] .rfr-bar-fill {
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rfr-tone) 34%, transparent) 0 4px,
+    color-mix(in srgb, var(--rfr-tone) 18%, transparent) 4px 7px
+  );
+}
+:root[data-mode="dark"] .rfr-bar-visit[data-status="running"] .rfr-bar-fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rfr-tone) 16%, transparent),
+    color-mix(in srgb, var(--rfr-tone) 36%, transparent),
+    color-mix(in srgb, var(--rfr-tone) 16%, transparent)
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes rfr-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.rfr-bar-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: 2px;
+  color: var(--rfr-text);
+}
+
+.rfr-bar-text {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+}

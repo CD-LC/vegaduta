@@ -1,0 +1,555 @@
+/* Bind Tailwind's `dark:` variant to this app's OWN theme toggle
+ * (data-mode="dark" on <html>, set by ThemeProvider - and, inside the merged
+ * /platform-admin section, by AdminShell's local mode state + body.dark) -
+ * instead of the framework default, which is the OS `prefers-color-scheme`
+ * media query. This matches the rule the standalone web-admin app shipped
+ * verbatim; without it every `dark:` utility on the merged platform-admin
+ * screens (shadcn primitives, status badges) silently ignores the in-app
+ * toggle. Effect on the rest of this app: `dark:` utilities now follow the
+ * console's own data-mode attribute rather than the OS setting - the same
+ * signal ThemeProvider already drives every other token from. */
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+/* Visual redesign pass (Tailwind CSS v4) - every existing semantic class
+ * name (.panel, .error-box, .success-box, .list-item, .badge, .row, .field,
+ * .hint, .muted, .chat-log, .chat-turn, .tool-call, .field-error,
+ * .stage-badge) and every bare element selector (input[type], select,
+ * textarea, button, button.primary) is intentionally KEPT rather than
+ * renamed or restructured, and redefined here with @apply instead of raw
+ * CSS. Every component file (ProvidersPanel, AgentsPanel, ChatPanel,
+ * AdminUsersPanel, ApprovalsPanel, AuditLogPanel, ChannelsPanel, the signup
+ * pages, etc.) and every Playwright spec in web/e2e/specs/ - including the
+ * numbered business-case suite and the 00-full-platform-showcase demo -
+ * targets these exact class names, element selectors, data-testids,
+ * placeholder text, and button/heading text. Renaming any of them or
+ * swapping the underlying DOM structure (e.g. to shadcn/ui component
+ * markup) would silently break that entire test suite. New UI going forward
+ * (the workflow/agent builder) is the right place to reach for the actual
+ * shadcn/ui primitives under app/components/ui/ - retrofitting today's
+ * already-tested screens is not worth the regression risk for a visual
+ * pass alone.
+ *
+ * Theme customizer pass (ThemeProvider.js/ThemePicker.js): rather than a
+ * full Chakra UI migration (which would mean rebuilding every one of the
+ * screens described above from scratch, at real regression risk to months
+ * of already-tested work for a purely cosmetic goal), this keeps the exact
+ * same Tailwind/@apply approach and instead makes the COLORS themselves
+ * live in CSS custom properties, switched by two data attributes
+ * ThemeProvider sets on <html>: `data-accent` (which brand palette - indigo,
+ * emerald, rose, amber, sky, or slate) and `data-mode` (light or dark).
+ * Every rule below that used to hardcode a Tailwind color literal (e.g.
+ * `text-indigo-600`, `bg-slate-50`) now reads the matching CSS variable via
+ * Tailwind's arbitrary-value bracket syntax (e.g. `text-[var(--accent-600)]`,
+ * `bg-[var(--surface-page)]`) instead - same utility-class mechanism, just a
+ * variable in the bracket instead of a literal, so no class names or DOM
+ * structure changed and the Playwright suite is unaffected.
+ *
+ * Two exceptions, both deliberate: (1) semantic status colors - .badge.ok's
+ * emerald, .badge.warn/.error-box's rose, .success-box's emerald - stay
+ * hardcoded regardless of the chosen accent palette, because "success" and
+ * "error" need to mean the same thing no matter what brand color a tenant
+ * picked; recoloring them to match a rose *accent* theme, for instance,
+ * would make error states nearly invisible against themselves. (2) the
+ * Workflow Designer canvas (.wf-node/.wf-handle glow colors) keeps its
+ * fixed indigo highlight and stays light-mode-only for this pass - it
+ * already carries its own dynamic per-node-type color coding assigned in
+ * WorkflowCanvas.js plus true/false handle colors and a live-run pulse
+ * animation, and correctly re-deriving all of that against a dark canvas
+ * background was judged more risk than this pass's budget justified; it's
+ * flagged here rather than silently left inconsistent. (3) signup/sign-in
+ * (app/signup/signup.css's .auth-nova-shell) run a third, independent
+ * palette (--nova-text/-panel/-cyan/-violet/-magenta/-gold/-mint) instead of
+ * this file's tokens - same reasoning as (2): it's the platform's "first
+ * contact" screen, deliberately fixed-dark regardless of a tenant's
+ * data-mode preference, shown before any tenant preference even exists.
+ * See DESIGN-TOKEN-SYSTEM-AUDIT.md at the repo root for the full audit this
+ * note is drawn from, including WCAG contrast verification for that palette
+ * and the migration notes for the brand/status tokens added just below.
+ */
+
+:root {
+  /* AXON dual-font typography (Geist + Geist Mono) - reinstates the
+   * dual-font pattern AXON Design System.dc.html specifies, superseding an
+   * earlier single-Inter pass that had itself replaced the original Space
+   * Grotesk + IBM Plex Mono dual-font system. This is a deliberate,
+   * user-approved reversal for the AXON pixel-fidelity rebuild, not a
+   * regression - see memory note "axon-font-strategy-reversal". Noto Sans
+   * Devanagari stays separate - Hindi script coverage, not part of the
+   * AXON "look." Every existing font-family rule across this file,
+   * dashboard.css, marketing.css, genesis.css, and signup.css already reads
+   * --font-inter, --font-sora, or --font-mono - rather than editing every
+   * one of those ~40 rules individually, they're all re-aliased here:
+   * --font-inter/-sora (body/headings/UI) now resolve to Geist, and
+   * --font-mono (every telemetry number, code block, timestamp, label) now
+   * resolves to Geist Mono. --font-jetbrains-mono is kept as a
+   * compatibility alias, also pointing at Geist Mono, for any stray direct
+   * reference. */
+  --font-inter: var(--font-geist-loaded);
+  --font-sora: var(--font-geist-loaded);
+  --font-mono: var(--font-geist-mono-loaded);
+  --font-jetbrains-mono: var(--font-geist-mono-loaded);
+  --font-devanagari: var(--font-noto-devanagari);
+  /* Brand wordmark - AXON's own display face IS Geist, so this now aliases
+   * straight to the same loaded font rather than a separate Space Grotesk
+   * instance. */
+  --font-brand-display: var(--font-geist-loaded);
+
+  /* ---- TYPE SCALE (2026-09-23 font audit) -------------------------------
+   * The one standard: every font-size and letter-spacing in the console and
+   * the in-app auth surfaces resolves to one of these steps - no ad-hoc
+   * px values, no "12.5px because it looked right once". rem-based so they
+   * follow the user's root font size. The Keycloak theme (deploy/keycloak/
+   * themes/agentic-ai/) mirrors this scale as --aai-fs-* -- it is a separate
+   * build that cannot import this file; keep the two in sync.
+   * Named by ROLE, not number, so a call site reads what it is. */
+  --fs-micro: 0.625rem; /* 10px - legal footnotes, micro badges */
+  --fs-label: 0.6875rem; /* 11px - uppercase micro labels, trust strips */
+  --fs-caption: 0.75rem; /* 12px - captions, help text, timestamps */
+  --fs-meta: 0.8125rem; /* 13px - secondary/meta text, dense buttons */
+  --fs-body: 0.875rem; /* 14px - body copy, inputs, nav items */
+  --fs-lede: 0.9375rem; /* 15px - emphasized body, card subtitles */
+  --fs-subtitle: 1rem; /* 16px - section intros */
+  --fs-h4: 1.125rem; /* 18px */
+  --fs-h3: 1.25rem; /* 20px */
+  --fs-h2: 1.375rem; /* 22px */
+  --fs-title: 1.625rem; /* 26px - page/card titles */
+  --fs-display: 2.5rem; /* 40px - hero/statement headlines */
+  /* Tracking scale: tight for display headings, then three widening steps
+   * for caps labels (the larger the tracking, the smaller the type that
+   * carries it). */
+  --ls-tight: -0.02em; /* display headings */
+  --ls-normal: 0.02em; /* default text - browsers already space Geist */
+  --ls-caps: 0.06em; /* small caps labels, badges */
+  --ls-label: 0.12em; /* uppercase eyebrows */
+
+  /* ---- SHARED BRAND SYSTEM (2026-07-25) -------------------------------
+   * These two tokens are the single source of truth for the VegaDūta
+   * wordmark, and they are duplicated verbatim into the three other
+   * customer-facing surfaces so all four render one identical brand:
+   *   - web-admin/app/globals.css              (platform admin console)
+   *   - vegaduta-webapp/ui/src/index.css       (Academy, Vite+shadcn)
+   *   - deploy/keycloak/.../login.css          (--aai-brand-accent /
+   *                                             --aai-font-wordmark)
+   * They are copied rather than imported because these are four separate
+   * builds with no shared package; if you change one, change all four.
+   *
+   * --brand-accent  the "Dūta" half of the wordmark. Fixed #f97316 in BOTH
+   *                 themes on purpose - it is a brand colour, not a theme
+   *                 colour, so it must not follow the accent customizer.
+   *                 "Vega" deliberately uses var(--foreground) instead, which
+   *                 is what makes it white on dark and near-black on light.
+   * --font-wordmark Yatra One (loaded in layout.tsx via next/font/google, so
+   *                 it is self-hosted at build time and the strict CSP never
+   *                 sees a fonts.googleapis.com request). Wordmark ONLY. */
+  --brand-accent: #f97316;
+  --font-wordmark: var(--font-brand-wordmark);
+
+  /* Kept as plain CSS custom properties (not Tailwind theme tokens) because
+   * two components still reference them directly via inline style={} rather
+   * than a class name: ApprovalsPanel.js's <hr> divider and ChatPanel.js's
+   * tool-call error text. */
+  --border: #e6e8ec;
+  --danger: #be123c; /* tailwind rose-700 */
+
+  /* Semantic status colors (success/warning/error) for .badge.ok/.warn,
+   * .success-box, .error-box, .field-error - light-mode values. Kept fixed
+   * regardless of accent theme (see file-level comment: "success"/"error"
+   * must mean the same thing no matter what brand color a tenant picked),
+   * but - unlike that original design - now DO flip with data-mode, since
+   * the light-only pastel backgrounds these used to hardcode (emerald-50/
+   * rose-50 with dark text) looked broken sitting on a dark-mode page: a
+   * bright white-ish box stapled onto an otherwise dark console. */
+  --success-bg: #ecfdf5; /* emerald-50 */
+  --success-border: #a7f3d0; /* emerald-200 */
+  --success-text: #065f46; /* emerald-800 */
+  --danger-bg: #fff1f2; /* rose-50 */
+  --danger-border: #fecdd3; /* rose-200 */
+  --danger-text: #9f1239; /* rose-800 */
+  /* Warning and info semantics (2026-07-20 premium redesign) - same
+   * light-pastel-box pattern as success and danger above, with dark-mode
+   * counterparts in the data-mode block below. */
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
+  --info: #2563eb;
+  --info-bg: #eff6ff;
+  --info-border: #bfdbfe;
+  --info-text: #1e40af;
+
+  /* --- Surfaces & text - the "light" values; overridden wholesale by
+   * :root[data-mode="dark"] below. Every panel/input/button/list/badge/nav/
+   * dashboard/mcp/auth rule in this file reads one of these instead of a
+   * hardcoded slate-* literal, so ThemeProvider flipping data-mode restyles
+   * the entire console in one attribute change. */
+  --surface-page: #f7f8fa;
+  --surface-card: #ffffff;
+  --surface-card-alt: #f7f8fa; /* chat-log/mcp-setup-box/wf-trigger-box wells */
+  /* Light-mode counterparts of the two rungs the dark ladder adds. Light mode
+   * inverts the depth cue - recessed gets DARKER, raised stays white and
+   * leans on shadow - so these are not a mirror of the dark values. */
+  --surface-sunken: #eceef3;
+  --surface-raised: #ffffff;
+  --surface-border: #e6e8ec; /* subtle border */
+  --surface-border-strong: #d8dbe1; /* input borders */
+  --surface-hover: #f1f2f5; /* button/nav hover */
+  --text-primary: #14161c;
+  --text-secondary: #565b6b;
+  --text-muted: #636a78; /* 5.44:1 on white, 4.86:1 on hover */
+  /* Accessibility fix (Stage 1 of ACCESSIBILITY-AUDIT-AND-REMEDIATION-PLAN.md):
+   * the previous value (slate-400, #94a3b8) computes to 2.56:1 against this
+   * page's actual background (#f8fafc) - a confirmed WCAG failure, below even
+   * the 3:1 floor for large text/UI components, let alone the 4.5:1 normal-
+   * text minimum. This is the app's most-used "quiet" text tier (badges,
+   * timestamps, empty-state copy, section labels), so the failure wasn't
+   * theoretical - it affects real, frequently-read text app-wide in light
+   * mode. Slate-500/600 boundary (#5f6b7d) computes to 5.17:1, a real pass
+   * with margin, not just scraping the threshold. It reads close to
+   * --text-muted now (both had to converge once actually held to 4.5:1 on a
+   * near-white background - a light page can't support two meaningfully
+   * different "muted" grays that both pass AA), but distinguishing "muted"
+   * from "faint" by weight/usage rather than by a contrast-failing color is
+   * the correct trade. Dark mode's --text-faint was ALSO re-audited here
+   * (follow-up full-site audit): the original #64748b measured 4.08:1
+   * against a flat dark background - already a fail at 4.5:1 AA, and this
+   * comment previously (incorrectly) claimed it passed - and only 4.23/3.92:1
+   * against the real --surface-page/--surface-card it actually renders on.
+   * Retuned to #73839a (5.22/4.84:1 against those same two surfaces). */
+  --text-faint: #5f6470; /* 5.93:1 on white, 5.29:1 on hover - re-verified 2026-07-20 */
+  --text-disabled: #c2c5cc; /* decorative only - exempt from AA */
+  --overlay: rgb(15 23 42 / 40%); /* mobile nav backdrop */
+
+  /* Glass-card surface light-mode fallback (see the fuller comment on the
+   * dark-mode block below) - a much subtler tint since a translucent white
+   * over a light page is barely visible; .glass-card still reads correctly
+   * in light mode, it just isn't the dramatic frosted-glass effect dark mode
+   * gets. */
+  --glass-surface: rgba(15, 23, 42, 0.03);
+  --glass-border: rgba(15, 23, 42, 0.08);
+
+  /* --- Aurora depth layer (2026-08-12 console redesign) ----------------
+   * Additive token family for the post-auth "next gen" pass: a layered
+   * two-part card shadow (ambient wash + tight contact line, replacing the
+   * single flat shadow-sm), a specular sheen colour for the pointer-tracked
+   * highlight on tilting cards, and two ultra-low-alpha aurora hues for the
+   * shell's ambient background. Both aurora hues derive from the LIVE accent
+   * tokens via color-mix, so a tenant switching accent (ThemePicker /
+   * WeatherThemeEngine) recolours the ambience for free. Alphas are kept low
+   * enough that no text ever sits on a meaningfully tinted surface - the
+   * AA-verified ladder above stays the real contrast substrate. */
+  --shadow-card: 0 1px 2px rgba(10, 12, 18, 0.06), 0 8px 24px -12px rgba(10, 12, 18, 0.1);
+  --shadow-card-hover: 0 2px 4px rgba(10, 12, 18, 0.08), 0 16px 40px -16px rgba(10, 12, 18, 0.18);
+  /* Light mode uses a faint ACCENT tint, not white: white-on-white is
+   * invisible on the card body yet still washes dark text under the pointer,
+   * which is exactly backwards. A 9% accent tint reads as light catching the
+   * surface and leaves text contrast effectively untouched. */
+  --sheen: color-mix(in srgb, var(--accent-400) 9%, transparent);
+  /* Gloss curvature gradient (.glossy). A white card can't be lightened, so
+   * light mode implies the curve with a 2% shade settling toward the bottom
+   * edge; dark mode gets the classic top light-catch instead (see the dark
+   * block). Background-image only - it composites over ANY card fill and
+   * never fights the Tailwind shadow utilities for box-shadow. */
+  --gloss-surface: linear-gradient(180deg, rgb(255 255 255 / 0%) 55%, rgb(10 12 18 / 2.5%) 100%);
+  --aurora-a: color-mix(in srgb, var(--accent-500) 9%, transparent);
+  --aurora-b: color-mix(in srgb, var(--accent-cyan) 7%, transparent);
+
+  /* Radius scale (2026-07-20 premium redesign) - these override Tailwind
+   * v4's default --radius-md, -lg, -xl and -2xl theme variables at runtime,
+   * so every existing rounded-md (small controls, 6px), rounded-lg (buttons
+   * and pills, 10px), rounded-xl (cards, 14px) and rounded-2xl (large
+   * panels and modals, 20px) utility across the app picks up the new scale
+   * with zero per-file edits. Mode-independent, defined once here. */
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+
+  /* Elevation scale - resting cards are 1px border only (no shadow token);
+   * raised, popover and modal tiers below. Light-mode opacities are about
+   * a third of the dark-mode ones so shadows stay crisp on white. */
+  --shadow-raised: 0 1px 2px rgba(10, 12, 18, 0.08);
+  --shadow-popover: 0 8px 24px -8px rgba(10, 12, 18, 0.16);
+  --shadow-modal: 0 24px 64px -16px rgba(10, 12, 18, 0.2);
+
+  /* --- Accent palette - AXON default. Direct feedback: "remove all old
+   * colour pallets ... follow exact design given" - the previous indigo/
+   * violet "aurora" default (#6366f1-family, unrelated to the AXON design
+   * handoff) is replaced with the AXON cyan/violet identity itself
+   * (matches --ax-cyan/--ax-violet exactly), so every shared component
+   * still reading --accent-* (buttons, badges, plan-cards, form focus
+   * rings, the Logo gradient, etc.) inherits the AXON brand identity
+   * automatically instead of needing a per-file rewrite. Still a tenant-
+   * overridable default via the theme picker (:root[data-accent="..."]
+   * blocks below), not the only option - but the platform's own default
+   * "no choice made yet" identity is now AXON's, not the old aurora one.
+   */
+  /* 2026-07-20 premium redesign: the primary-action family (CTAs, links,
+   * focus rings, Logo gradient) is now the indigo-violet brand; the
+   * established nova cyan stays on as the secondary accent via
+   * --accent-cyan, matching --ax-cyan exactly. 600 is the light-mode
+   * text-safe step (6.29:1 on white); 400 is the dark-mode hover step. */
+  --accent-cyan: #0a7c96;
+  --accent-50: #f2f1ff;
+  --accent-100: #e6e3ff;
+  --accent-200: #d2cdff;
+  --accent-400: #8a7bff;
+  --accent-500: #6d5bff;
+  --accent-600: #5643e6;
+  --accent-700: #4736c4;
+  --accent-gradient: linear-gradient(120deg, #6d5bff 0%, #0a7c96 100%);
+  --accent-glow: rgb(109 91 255 / 30%);
+  --accent-glow-cyan: rgb(10 124 150 / 28%);
+
+  /* Kept as aliases - a handful of comments elsewhere in this file and any
+   * external reference to the pre-theming variable names still resolves. */
+  --brand-50: var(--accent-50);
+  --brand-100: var(--accent-100);
+  --brand-400: var(--accent-400);
+  --brand-500: var(--accent-500);
+  --brand-600: var(--accent-600);
+  --brand-700: var(--accent-700);
+  --brand-gradient: var(--accent-gradient);
+
+  /* Fixed regardless of accent/mode - see the file-level comment above for
+   * why status colors never follow the chosen theme. */
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
+
+  /* Light-mode CATEGORY + STATE hues. See the dark block for the full
+   * rationale (hue spacing, the colour-is-secondary rule, and why category
+   * and state deliberately share some hues but never share a FORM).
+   *
+   * These are NOT lightened dark values - dark mode can afford bright, high-
+   * chroma accents, whereas on white every one of these has to be darkened
+   * to clear AA, which unavoidably mutes amber into brown. Anchored to
+   * tokens the system already ships (--accent-600, --destructive,
+   * --text-muted) so light mode stays recognisably the same product.
+   * Verified: worst case 4.65:1 (cat-data), zero hue gaps under 35. */
+  --cat-assistant: #5643e6; /* h247 */
+  --cat-comms: #0b6bc4; /* h209 */
+  --cat-data: #0f7a70; /* h174 */
+  --cat-analysis: #467324; /* h95  */
+  --cat-automation: #8a24b0; /* h285 - violet; re-hued off amber so no warm hue sits in the category set */
+  --cat-creative: #be2a76; /* h329 */
+
+  --state-running: #0a7188;
+  --state-success: #047857;
+  --state-warning: #9a5b08;
+  --state-error: #cc2130;
+  --state-idle: #636a78;
+  --state-queued: #5643e6;
+
+  /* Upgrade / premium CTA accent. Deliberately its OWN namespace: it is not a
+     category (not a kind of thing) and not a state (not something executing) -
+     it is a commercial affordance, so folding it into --state-warning would
+     have said "degraded" where the UI means "paid feature".
+     Added because the raw Tailwind orange it replaces FAILED AA in light mode:
+     text-orange-500 (#f97316) on white is 2.80:1, and even orange-600 only
+     reaches 3.56:1. #a84f08 is 4.95:1 worst-case across the light surfaces.
+     Honest caveat: at h27 this sits only ~7 deg from
+     --state-warning (h34), i.e. inside the >=25 deg separation the category
+     set holds itself to. It is allowed to, on the same form-not-hue grounds
+     documented in the dark block - upgrade only ever renders on a CTA carrying
+     a lock/sparkle glyph, never as a bare status dot or a category chip. */
+  --upgrade: #a84f08;
+
+  /* Code/log wells (.mcp-yaml, .wf-trace-loglines) intentionally stay a
+   * fixed dark "terminal" look in both light and dark mode - it's already
+   * the maximum-contrast choice against either page background and reads as
+   * an intentional "this is a log/code block" cue either way. */
+  --code-bg: #0c0e13;
+  --code-text: #f3f4f6;
+
+  /* Design-token audit (DESIGN-TOKEN-SYSTEM-AUDIT.md): these five hexes were
+   * found copy-pasted as raw literals across 5-8 files each (the "living
+   * canvas" visual-effect components in dashboard/genesis/marketing and
+   * their paired CSS, plus workflow node-type colors and admin/dashboard
+   * card gradients) instead of reading from one shared source. Fixed
+   * regardless of accent/mode, same reasoning as the status colors above -
+   * these particular components' own logic decides when to use "the indigo
+   * one" vs "the green one," independent of a tenant's chosen accent theme.
+   * Additive only: existing hardcoded literals in those files still work
+   * today; new/edited code should read these tokens instead (see the
+   * audit's migration plan for the exact file list, done incrementally,
+   * not as a retrofit sweep). */
+  /* AXON identity replaces the old indigo/violet hardcoded literals these
+   * three fed (see the audit note above) - --brand-indigo-600 keeps its
+   * name for the ~5-8 call sites that still reference it (workflow node
+   * colors, dashboard/genesis/marketing "living canvas" effects), but now
+   * resolves to the AXON dark-violet, not indigo. */
+  --brand-indigo-600: #6d5bff;
+  --brand-violet-600: #8a7bff;
+  --brand-cyan-500: #3fe6cf;
+  --status-success-600: #059669;
+  --status-info-600: #0284c7;
+
+  /* --- HUD chrome tokens (system-wide) --------------------------------
+   * "Command center" language shared by ToastHost, the onboarding tour,
+   * LanguageSwitcher's popover, and (see dashboard.css) Mission Control -
+   * one set of variables instead of colors re-picked per component. Cyan
+   * reuses --accent-cyan already above; violet/magenta/ok/warn/panel/line
+   * are new. These are the LIGHT-mode values - a bright, high-contrast HUD
+   * rather than a dark glass panel, since "the background animation should
+   * be seen properly in light as well as dark" and the console's default
+   * theme is light during local daytime (see WeatherThemeEngine.js) - the
+   * instrumentation look has to hold up in both, not just at night. */
+  --hud-cyan: #0a7c96;
+  --hud-violet: #5643e6;
+  --hud-magenta: #db2777;
+  --hud-ok: #0f8a5c;
+  --hud-warn: #b3781a;
+  --hud-panel: #ffffff;
+  --hud-panel-alt: #f7f8fa;
+  --hud-line: rgba(15, 25, 50, 0.1);
+  --hud-text-dim: #62687b; /* 5.55:1 vs hud-panel */
+
+  /* --- AXON design-handoff tokens (design_handoff_axon/README.md) --------
+   * Verbatim light-theme values from the handoff's design-token table -
+   * used by the rebuilt rail/topbar and the AXON Dashboard "Cognition
+   * Cockpit" (and every other rebuilt screen)'s translucent panel surfaces,
+   * which are visually distinct from the opaque --surface-card panels the
+   * rest of the console still uses (.panel/.glass-card) - kept as their own
+   * namespace rather than overloading --surface-* so neither system has to
+   * compromise its own contrast tuning. --ax-cyan/-violet/-red intentionally
+   * equal --hud-cyan/-violet/-red above (one accent identity, two names for
+   * historical/namespace reasons) - see the dark-mode block for the same
+   * pairing. */
+  /* Rebuild & Strict Audit Spec §4 (2026-07): "replace the earlier tinted-
+   * navy remap with this clean slate/white system" - opaque white cards +
+   * soft shadow instead of translucent-navy fills + glow. --ax-shadow-sm/-md
+   * are new (additive); dark mode keeps glow as its depth cue, so those two
+   * tokens resolve to "none" there (see :root[data-mode="dark"] below) -
+   * components should layer box-shadow: var(--ax-shadow-sm) alongside their
+   * existing glow rule, not replace it, so each mode gets the right effect. */
+  /* Retuned to AXON Design System.dc.html's literal token table (2026-07-19
+   * AXON pixel-fidelity rebuild) - bg/rail/bar/panel/border/text values are
+   * the spec's exact light-theme numbers (--bg1/--bg2/--base,
+   * --surface/-2/-hi, --border/-2, --text/--mid/--dim). --ax-cyan and
+   * --ax-amber deliberately keep their previously-audited, slightly-darker
+   * values instead of the spec's literal #0aa79f/#b8720c: those literal
+   * values compute to ~3:1 on white (WCAG AA text fail, see the original
+   * audit note this replaces), and this project has a standing "verify real
+   * contrast ratios, don't eyeball" convention - not a pixel deviation made
+   * lightly. Every other accent (--ax-accent2/-violet/-green/-red/-sky/
+   * -spectral) is only ever used on large glyphs, icons, borders, and
+   * colored surfaces in the AXON screens, not small body text, so those use
+   * the spec's exact hex with no adjustment. */
+  --ax-bg: var(
+    --surface-page
+  ); /* was a radial-gradient mesh; now a flat, theme-reactive solid color per direct feedback */
+  --ax-rail: var(
+    --surface-card
+  ); /* was translucent rgba(255,255,255,0.7) + backdrop-blur, letting page content/glow blobs bleed through the nav - now a solid opaque surface per direct feedback */
+  --ax-bar: rgba(255, 255, 255, 0.66);
+  --ax-panel: rgba(255, 255, 255, 0.92);
+  --ax-panel2: #ffffff;
+  --ax-border: rgba(15, 23, 42, 0.1);
+  --ax-border2: rgba(15, 23, 42, 0.18);
+  --ax-text: #14161c;
+  --ax-mid: #565b6b;
+  --ax-dim: #5c6270; /* 6.11:1 vs white panel */
+  --ax-cyan: #0a7c96;
+  --ax-accent2: #5b7de0;
+  --ax-violet: #6d5bff;
+  --ax-violetd: #5643e6;
+  --ax-green: #0e9f6e;
+  --ax-amber: #a06a1a;
+  --ax-red: #dd405a;
+  --ax-sky: #2f74d8;
+  --ax-spectral: #8a4fd8;
+  /* Google brand blue - a real fixed brand color (like the X/Slack/
+   * Discord hexes in ChannelsPanel.tsx's CHANNEL_META), not meant to
+   * shift with the accent theme. But unlike those, this one WAS still a
+   * single hardcoded literal (#8ab4f8/rgba(66,133,244,0.18)) reused as-is
+   * in both modes (McpPanel.tsx) - fine on a dark panel (8.5:1) but only
+   * ~2.1:1 on a light one. Split into a real light/dark-reactive pair,
+   * same treatment already given to --ax-cyan/--ax-amber for the same
+   * reason (see this block's own comment above). */
+  --ax-google-blue: #1967d2;
+  --ax-google-blue-bg: rgba(25, 103, 210, 0.12);
+  --ax-glow: color-mix(in srgb, var(--ax-cyan) 34%, transparent);
+  --ax-track: rgba(15, 23, 42, 0.08);
+  --ax-chip: rgba(15, 23, 42, 0.04);
+  --ax-shadow-sm: 0 1px 2px rgba(10, 12, 18, 0.08);
+  --ax-shadow-md: 0 8px 24px -8px rgba(10, 12, 18, 0.16);
+
+  /* AXON landing page design tokens (from design_handoff_axon) */
+  --ax-bg: #eef2fb;
+  --ax-bg2: #e4e9f4;
+  --ax-panel-bg: rgba(15, 25, 50, 0.04);
+  --ax-panel-border: rgba(15, 25, 50, 0.1);
+
+  /* Dock-only inverse chrome - direct feedback: "menu needs to be
+   * highlighted in dark if theme is light and light if theme is dark."
+   * Every other panel/glass-card in this file matches the current mode
+   * (light panel in light mode, dark panel in dark mode) - the dock is
+   * the one deliberate exception, always the opposite of whatever the rest
+   * of the page is doing, so it reads as a distinct, floating instrument
+   * rather than blending into the page chrome around it. Light mode gets
+   * the dark panel values (and light text), dark mode gets the light
+   * panel values (and dark text) - see the :root[data-mode="dark"] block
+   * below for the flip. */
+  --dock-panel: #12141b;
+  --dock-line: rgba(138, 123, 255, 0.28);
+  --dock-text-faint: #94a3b8;
+  --dock-text-primary: #f1f5f9;
+  /* Scanline/underline colors tuned for contrast against --dock-panel
+   * specifically (which is dark here) - the normal --hud-cyan/--hud-violet
+   * are tuned for the PAGE's own panel color, not this inverted one, so
+   * reusing them as-is would wash out once the panel flips. */
+  --dock-scan-1: #39e6ff;
+  --dock-scan-2: #8a7bff;
+
+  /* --- AXON admin sub-sidebar (Admin.dc.html) -------------------------
+   * Direct feedback: "add all the panels suggested in design template ...
+   * same animation panel." Own small namespace rather than reusing --ax-*
+   * (which is tuned for the wider main-content panels) since this column
+   * sits directly against the --ax-rail/--ax-bar chrome and needs to read
+   * as part of that same instrument cluster, not a third visual layer. */
+  --admin-nav-active-bg: rgba(109, 91, 255, 0.12);
+  --admin-nav-active-border: rgba(109, 91, 255, 0.26);
+  --admin-nav-active-text: #5643e6;
+  --admin-nav-dot: #d8dbe1;
+
+  /* --- Per-panel accent families (nova reskin) -------------------------
+   * Direct spec: "Each panel is ONE solid color... using the curated
+   * accent set (cyan/teal/violet/amber/blue/magenta)... same family so it
+   * reads scientific, not random." Six --p-*-tone/--p-*-acc pairs, LIGHT
+   * values here, dark values in :root[data-mode="dark"] below. .p-cyan
+   * etc (see @layer components) just copy one pair into --tone/--acc, so
+   * .panel/.glass-card/.card only ever read --tone/--acc and never need to
+   * know which family is active. PanelAccentAssigner.js applies the class
+   * automatically to every .panel/.glass-card app-wide - no per-page edits
+   * required for "apply it app-wide, every page/panel." */
+  --p-cyan-tone: #dff4fb;
+  --p-cyan-acc: #0a8bb0;
+  --p-teal-tone: #def5f0;
+  --p-teal-acc: #0c9488;
+  --p-violet-tone: #efe8ff;
+  --p-violet-acc: #7a3aed;
+  --p-amber-tone: #fbf3e0;
+  --p-amber-acc: #b07214;
+  --p-blue-tone: #e7eeff;
+  --p-blue-acc: #2b57ff;
+  --p-magenta-tone: #fce7f2;
+  --p-magenta-acc: #c0269a;
+  /* Dock accent overrides - the dock's own panel deliberately INVERTS
+   * (dark dock panel in light mode, white dock panel in dark mode, see
+   * --dock-panel above), so --dock-acc can't just reuse --p-*-acc verbatim
+   * the way every other panel does: that reuse was the actual bug (found
+   * in the follow-up full-site audit) - dark-mode's neon --p-*-acc values
+   * (tuned for a dark --p-*-tone background elsewhere) landed on the dock's
+   * now-WHITE panel and became nearly invisible (as low as 1.47:1). These
+   * --dock-acc-* tokens are the dock-panel-aware fix: each one is picked to
+   * have real contrast against THIS mode's actual (inverted) --dock-panel,
+   * not against the mode label. In light mode the dock panel is dark, so
+   * these reuse the dark block's --p-*-acc values verbatim (already tuned
+   * for a dark background, 5.6-13:1 here); see the dark block below for
+   * the light-panel counterparts. */
+  --dock-acc-cyan: #39e6ff;
+  --dock-acc-teal: #3fe0c0;
+  --dock-acc-violet: #a76bff;
+  --dock-acc-amber: #ffce6a;
+  --dock-acc-blue: #6b93ff;
+  --dock-acc-magenta: #ff6ab0;
+}

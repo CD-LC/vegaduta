@@ -1,0 +1,41 @@
+{
+  "id" : "00000000-0000-0000-0000-000000000001",
+  "workflowId" : "00000000-0000-0000-0000-000000000001",
+  "workflowName" : "workflowName-value",
+  "status" : "RUNNING",
+  "requestedBy" : "requestedBy-value",
+  "errorMessage" : "errorMessage-value",
+  "trace" : [
+    {
+      "nodeId" : "nodeId-value",
+      "nodeType" : "nodeType-value",
+      "label" : "label-value",
+      "status" : "status-value",
+      "summary" : "summary-value",
+      "startedAt" : "2026-09-30T10:15:30.123456789Z",
+      "completedAt" : "2026-09-30T10:15:30.123456789Z",
+      "logLines" : [
+        "logLines-1-value",
+        "logLines-2"
+      ],
+      "durationMs" : 42,
+      "inputJson" : "inputJson-value",
+      "outputJson" : "outputJson-value",
+      "inputTruncated" : true,
+      "outputTruncated" : true,
+      "tokensIn" : 42,
+      "tokensOut" : 42,
+      "costUsd" : 1234.5000,
+      "toolCalls" : [ ]
+    }
+  ],
+  "startedAt" : "2026-09-30T10:15:30.123456789Z",
+  "completedAt" : "2026-09-30T10:15:30.123456789Z",
+  "outputFileName" : "outputFileName-value",
+  "workflowVersion" : 7,
+  "mode" : "mode-value",
+  "pinnedNodeCount" : 7,
+  "comment" : "comment-value",
+  "warningCount" : 7,
+  "cancelRequested" : true
+}

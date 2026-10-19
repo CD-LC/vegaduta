@@ -1,0 +1,37 @@
+# Every opt-in scaling and hot-path feature on, sized for a laptop kind cluster.
+# Layered after the stage's own values and values-loadtest.yaml:
+#   helm upgrade ... -f <stage values> -f tests/load/kind/values-loadtest.yaml -f tests/load/kind/values-all-features.yaml
+global:
+  components:
+    coreIngest: true
+    coreWebhooks: true
+    coreIntake: true
+    coreBilling: true
+  core:
+    extraEnv:
+      # chat hot path
+      # APP_CHAT_STREAM_END_ASYNC is deliberately NOT on. It moves the call-log row, the BYOK counter increment, the
+      # hosted-spend accounting and the output-guardrail audit into a queue that is lost on SIGKILL/OOM and lets a burst
+      # overshoot a spend cap by about the queue depth (security review, F5), and the A/B showed no measurable gain.
+      # The plan cache (APP_CHAT_HOTPATH_PLAN_CACHE_TTL) is deliberately NOT on: it showed no measurable benefit
+      # (the plan is read once per turn now) and adds up to a TTL of staleness on a plan downgrade.
+      # tenant sweeps skip idle tenants (fresh work waits at most 3 ticks / 60 s)
+      APP_TENANT_IDLE_SKIP_ENABLED: "true"
+      # knowledge ingestion: per-job claiming instead of one advisory lock
+      KNOWLEDGE_INGESTION_CLAIMING_ENABLED: "true"
+core-ingest:
+  resources:
+    requests: { cpu: 100m, memory: 768Mi }
+    limits: { memory: 1536Mi }
+core-webhooks:
+  resources:
+    requests: { cpu: 100m, memory: 768Mi }
+    limits: { memory: 1536Mi }
+core-intake:
+  resources:
+    requests: { cpu: 100m, memory: 768Mi }
+    limits: { memory: 1536Mi }
+core-billing:
+  resources:
+    requests: { cpu: 100m, memory: 768Mi }
+    limits: { memory: 1536Mi }

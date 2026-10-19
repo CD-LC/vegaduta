@@ -1,0 +1,93 @@
+# ollama - single-node Ollama StatefulSet with a persistent model volume.
+# Service "<release>-ollama":11434. It has no authentication: keep it ClusterIP and let only core reach it.
+# Enable it from the umbrella chart with `ollama.enabled=true` plus `global.localLlm.*` (see docs/local-models.md).
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: llm
+
+image:
+  registry: docker.io
+  repository: ollama/ollama
+  tag: "0.40.3"
+  digest: ""
+  pullPolicy: ""
+
+containerPort: 11434
+service:
+  enabled: true
+  type: ClusterIP
+  port: 11434
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# -- Model pulled on first start (a no-op once it is in the volume) and the readiness target.
+model: qwen3.5:2b
+
+env:
+  OLLAMA_HOST: "0.0.0.0:11434"
+  HOME: /data
+  OLLAMA_MODELS: /data/models
+  OLLAMA_KEEP_ALIVE: 30m
+  OLLAMA_NUM_PARALLEL: "1"
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+
+# CPU-only unless the node exposes a GPU. Size memory for the model plus its context: roughly
+# 1.2x the download for short chats (2B: ~3 GiB, 4B: ~5 GiB, 9B: ~9 GiB).
+resources:
+  requests: { cpu: 500m, memory: 3Gi }
+  limits: { memory: 4Gi }
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 256Mi }
+
+probes:
+  # The first start downloads the model (minutes to an hour on a slow link).
+  startup:
+    tcpSocket: { port: http }
+    periodSeconds: 10
+    failureThreshold: 360
+  liveness:
+    tcpSocket: { port: http }
+    periodSeconds: 20
+    failureThreshold: 6
+  readiness:
+    exec:
+      command: ["bash", "-c", "ollama show \"$LOCAL_LLM_MODEL\" >/dev/null 2>&1"]
+    periodSeconds: 15
+    timeoutSeconds: 10
+    failureThreshold: 3
+
+pdb:
+  enabled: false
+
+networkPolicy:
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker]
+  allowEgressTo: []
+  # The first start downloads the model from the public registry.
+  allowExternalEgress: true
+  extraIngress: []
+  extraEgress: []
+
+terminationGracePeriodSeconds: 30
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

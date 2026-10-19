@@ -1,0 +1,2 @@
+# Frozen internal-planning-jargon offenders: "<count><TAB><path>". Shrink-only; see
+# internal-reference-lint.sh. Reword a file, then run the script with --update.

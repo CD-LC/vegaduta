@@ -1,0 +1,4 @@
+{
+  "description": "Operations whose success status in docs/api/openapi.json is wrong. OpenApiSpecGenerator reads a constant ResponseEntity status from the handler's bytecode (OpenApiBodyStatusScanner), but a status chosen at run time from a variable, or two different 2xx statuses, still documents the default (200, or 204 for an empty DELETE) where core may send another. A consumer contract states the status core really sends (what the provider verifier checks); the consumer-side spec check accepts it only through an entry here, reads the response schema from specStatus, and fails once the spec documents coreStatus (the entry is then stale and must be removed). Each entry names the controller line that proves coreStatus; the checker fails if that text disappears from the file.",
+  "drift": []
+}

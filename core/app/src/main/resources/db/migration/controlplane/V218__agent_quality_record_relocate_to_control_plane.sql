@@ -1,0 +1,61 @@
+-- Fixes the cross-schema bug flagged in docs/AGENT-COORDINATION.md's
+-- carried-forward backlog ("agent_quality_record cross-schema bug, found but
+-- not fixed - a control-plane table is being queried while a tenant schema
+-- is the active search path").
+--
+-- ROOT CAUSE
+-- ----------
+-- V152__agent_quality_evaluation.sql lives in db/migration/controlplane/ (so
+-- does V186's follow-up fix), which this project's convention (see
+-- application.yml's flyway.locations comment) requires to be
+-- `control_plane.`-schema-qualified DDL - global, run once, never re-run per
+-- tenant. V152 did NOT qualify it: `CREATE TABLE agent_quality_record (...)`
+-- with no schema prefix. The startup Flyway run's connection has no active
+-- tenant, so TenantSchemaResolver.DEFAULT_SCHEMA (`public`) was on its
+-- search_path, and that's where the table landed - stranded, exactly as
+-- db/migration/tenant/V213__agent_eval_dataset.sql's header already
+-- diagnosed when it explained why ITS tables are deliberately tenant-scoped
+-- and schema-unqualified instead of repeating V152's mistake.
+--
+-- The matching JPA entity (AgentQualityRecord, see its class javadoc for the
+-- companion fix) also had no `schema` on its `@Table`, so at runtime
+-- Hibernate emitted unqualified `agent_quality_record` SQL. For every real,
+-- tenant-scoped request (QualityController's four GET endpoints are reachable
+-- today independent of whether the async write path has any callers),
+-- SchemaMultiTenantConnectionProvider had already put the ACTIVE TENANT's
+-- schema on that connection's search_path (a single-schema `SET
+-- search_path`, no `public` fallback) - so the query resolved against the
+-- wrong schema, in fact against a schema where this table has never existed
+-- at all, throwing Postgres 42P01 ("relation ... does not exist") rather
+-- than silently reading another tenant's rows. Confirmed via
+-- db/migration/controlplane/V79__tenant_emergency_stop_and_platform_kill_switch.sql's
+-- and 30+ other entities' `@Table(schema = "control_plane")` convention (see
+-- e.g. PlatformKillSwitch, FeatureFlag) - the established, already-used
+-- pattern this migration and its entity-side companion now bring
+-- agent_quality_record into line with.
+--
+-- WHY A MOVE, NOT A RE-CREATE
+-- ---------------------------
+-- V186's own header already established these tables are guaranteed empty
+-- ("core/app never depended on the quality module until now, so these
+-- tables were never reachable"). That was true again as of this migration:
+-- QualityEvaluationService#evaluateResponseAsync (the only writer) has zero
+-- callers anywhere in the codebase, so nothing could have inserted a row via
+-- the application. `ALTER TABLE ... SET SCHEMA` is therefore safe, cheap,
+-- and - unlike DROP + CREATE - preserves the tables' identity (OIDs,
+-- indexes, the FK from the two child tables back to the parent, sequences)
+-- with no data-migration step needed either way.
+--
+-- VERSION NUMBER: controlplane/ and tenant/ share ONE Flyway version
+-- sequence (see V213/V216/V217's own headers for the same rule). Checked at
+-- authoring time (2026-08-26): controlplane/'s highest is V216,
+-- tenant/'s highest is V217, so V218 is the next free slot in both.
+--
+-- Move the parent table first, then its two @ElementCollection child
+-- tables - order doesn't matter to Postgres (the FK constraints reference
+-- the parent by OID internally, not by schema-qualified name, so they
+-- survive either table moving independently), but parent-first mirrors how
+-- V152 created them.
+ALTER TABLE IF EXISTS public.agent_quality_record SET SCHEMA control_plane;
+ALTER TABLE IF EXISTS public.agent_quality_record_scores SET SCHEMA control_plane;
+ALTER TABLE IF EXISTS public.agent_quality_record_feedback SET SCHEMA control_plane;

@@ -1,0 +1,28 @@
+-- Edge tool-access consent system (2026-08-06) - direct report: "I dont want
+-- anything going wrong allowing directly without user or end user approval."
+-- Layer 1 of 2 (see McpServerRegistration#edgeEligible's javadoc for layer 2,
+-- the end-user's own consent, which lives entirely client-side and has no
+-- table of its own). A registration's schema is tenant-supplied and was
+-- never reviewed the way a built-in platform tool was - the exact reasoning
+-- the original EdgeToolExecutionController whitelist stated before it was
+-- replaced with full hosted/edge tool parity - so nothing becomes edge-usable
+-- just because it's enabled/approved for hosted use.
+--
+-- Version V184: application.yml's flyway.locations merges controlplane/ and
+-- tenant/ into ONE version stream, so this number must be unique across BOTH
+-- folders combined - same convention V183's header documents. Highest
+-- existing number as of this writing: tenant V183
+-- (V183__mcp_review_gate_retry_and_credential_flags.sql), controlplane V182
+-- (V182__retire_grok3_deepseek_v3_groq_gemma_catalog_repair.sql). V184 is the
+-- next free number across both.
+--
+-- TENANT-schema table (no schema qualifier) - mcp_server_registration has
+-- always lived here (see V48/V104/V107/V133/V135/V183, all under
+-- db/migration/tenant/).
+--
+-- Default FALSE for every existing row (both new and previously-registered
+-- servers) - safe-forward, matches the "nothing goes without approval" ask;
+-- a tenant admin must explicitly opt each registration in via
+-- PATCH /api/mcp/registry/{id}/edge-eligible.
+ALTER TABLE mcp_server_registration
+    ADD COLUMN IF NOT EXISTS edge_eligible BOOLEAN NOT NULL DEFAULT FALSE;

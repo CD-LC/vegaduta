@@ -1,0 +1,439 @@
+# =============================================================================
+# VegaDūta PERSONAL — one person, one laptop (3 long-running containers)
+#
+#   ./scripts/vegaduta personal                 # recommended
+#   ./scripts/vegaduta personal --native-core   # core on the host JVM, rest in Docker
+#   docker compose -f deploy/compose/personal.yml --env-file deploy/compose/.env up -d --wait
+#
+#   postgres  PostgreSQL 16 + pgvector + Apache AGE (same image as lite/full)
+#   valkey    Redis-protocol store, capped at 128 MB (session memory, counters and
+#             rate limits use Redis directly in ~60 classes; see
+#             application-personal.yml for why it is kept)
+#   core      single Spring Boot process, profiles security,knowledge,graph-memory,
+#             personal: local accounts (no Keycloak), no Kafka/Temporal, files on a
+#             local volume, billing off
+#   web       Next.js console
+#
+# Compared with lite.yml this drops Keycloak (~768 MB) and publishes no database
+# port. Optional:  --profile rag  adds the Python sidecar (document ingestion,
+# embeddings); a model comes from Ollama on the host (--local-ai=host overlays).
+#
+# On by default for a FRESH install (scripts/vegaduta personal; opt out with --no-search /
+# --no-tools, or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 in .env):
+#   --profile tools   mcp-stdio-runner: the container STDIO MCP servers (npx/uvx packages) run in,
+#                     so the slim core image needs no Node or uv. Starter connectors (fetch, time,
+#                     sequential-thinking) are registered for the owner when it is on.
+#   web search        docker-compose.search.yml (SearXNG, profile `search`), layered by the launcher.
+#
+# Memory budget (limits, not measured use): postgres 384m + valkey 192m + core 1536m
+# + web 384m = 2.5 GB; the defaults add searxng 512m + mcp-stdio-runner 768m = 3.8 GB.
+# Measured start-up and memory: docs/personal-mode.md.
+#
+# Upgrading to lite/full keeps the Postgres volume only if COMPOSE_PROJECT_NAME is
+# the same; local accounts do NOT migrate to Keycloak automatically.
+# =============================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-vegaduta-personal}
+
+x-restart: &restart
+  restart: unless-stopped
+
+# Bounded container logs (json-file is unbounded by default).
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-hardened: &hardened
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+
+x-nnp: &nnp
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  postgres:
+    image: ${VEGADUTA_POSTGRES_IMAGE:-${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/postgres:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}}
+    <<: [*restart, *logging, *nnp]
+    # shared_preload_libraries=age: see docker-compose.yml (non-superuser AGE).
+    # Sized for one user: core's pool is 10, so 50 connections leave room for psql/backups.
+    command: ["postgres", "-c", "shared_preload_libraries=age", "-c", "max_connections=50", "-c", "shared_buffers=64MB", "-c", "effective_cache_size=192MB", "-c", "work_mem=4MB", "-c", "maintenance_work_mem=32MB"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agentic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_ai}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: ${POSTGRES_MEM_LIMIT:-384m}
+
+  workspace-perms:
+    # One-shot, idempotent: the projects folder is shared by core (uid 999, saves chat uploads in
+    # "Chat uploads") and the workspace-runner (uid 1000, writes the build output). Whichever
+    # container creates the named volume first owns it, and a volume owned by 1000 refused core's
+    # upload with "AccessDeniedException: /workspace/Chat uploads", so attaching any file failed.
+    # Opened up only for the named volume (VEGADUTA_PROJECTS_DIR unset); a folder the person chose
+    # on the host keeps the permissions they gave it.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core${CORE_IMAGE_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    restart: "no"
+    user: "0:0"
+    entrypoint: ["sh", "-c", "[ -n \"$$VEGADUTA_PROJECTS_DIR\" ] || chmod 0777 /workspace"]
+    environment:
+      VEGADUTA_PROJECTS_DIR: ${VEGADUTA_PROJECTS_DIR:-}
+    volumes:
+      - ${VEGADUTA_PROJECTS_DIR:-core-projects}:/workspace
+
+  db-roles:
+    # One-shot, idempotent: the least-privileged login core uses (see lite.yml).
+    image: ${VEGADUTA_POSTGRES_IMAGE:-${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/postgres:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}}
+    <<: [*logging, *hardened]
+    restart: "no"
+    user: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["sh", "/ensure-app-role.sh"]
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-agentic}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?run scripts/vegaduta secrets}
+      PGDATABASE: ${POSTGRES_DB:-agentic_ai}
+      APP_DB_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+      APP_DB_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+    volumes:
+      - ../postgres/ensure-app-role.sh:/ensure-app-role.sh:ro
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+
+  valkey:
+    image: valkey/valkey:8.1.10-alpine
+    <<: [*restart, *logging, *nnp]
+    # allkeys-lru at 128 MB (a rate-limit counter evicted under pressure fails open, so keep headroom): everything kept here is a cache, a counter or a short-lived
+    # session buffer. Persistence is off (save ""); nothing in it is a system of record.
+    command:
+      - sh
+      - -c
+      - printf 'requirepass %s\nmaxmemory 128mb\nmaxmemory-policy allkeys-lru\nsave ""\n' "$$VALKEY_PASSWORD" > /tmp/valkey.conf && exec valkey-server /tmp/valkey.conf
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a \"$$VALKEY_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 192m # maxmemory 128mb plus replication/client buffers and allocator overhead; below that the cgroup kills it before allkeys-lru can evict
+
+  core:
+    # Slim image (no Node/uv/browsers). The profile set has no `mcp`, so nothing here
+    # needs the core-full variant unless you want the agent's browser: CORE_IMAGE_VARIANT=-full adds
+    # Chromium (about 6 GB image) and the browser_* tools appear; raise CORE_MEM_LIMIT to 2560m with it.
+    # Browser flags default on in application-personal.yml and do nothing without Chromium.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core${CORE_IMAGE_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened]
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+      - /home/agentic/.npm:size=256m,uid=999,gid=999,mode=0700
+      - /home/agentic/.cache/uv:size=256m,uid=999,gid=999,mode=0700
+      - /home/agentic/.vegaduta:size=256m,uid=999,gid=999,mode=0700
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-roles:
+        condition: service_completed_successfully
+      workspace-perms:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+      sidecar:
+        condition: service_healthy
+        required: false
+      mcp-stdio-runner:
+        condition: service_healthy
+        required: false
+    env_file:
+      # Shipped Google OAuth client (written into release tarballs by release.yml; absent in a git
+      # checkout). Listed first so your own core.env wins.
+      - path: ./google-oauth.env
+        required: false
+      - path: ./core.env
+        required: false
+    environment:
+      # Google's callback lands on core, which the browser reaches on PUBLIC_API_URL. Register this exact
+      # URL on the Google OAuth client. Set it in .env (not core.env) to change it.
+      GOOGLE_OAUTH_REDIRECT_URI: ${GOOGLE_OAUTH_REDIRECT_URI:-${PUBLIC_API_URL:-http://localhost:${CORE_HOST_PORT:-8080}}/oauth/google/callback}
+      # Small-heap JVM: SerialGC (no concurrent GC threads, lowest footprint on 1-4 cores), heap
+      # trimmed back after a spike (Min/MaxHeapFreeRatio), capped metaspace and code cache.
+      # PERSONAL_JAVA_OPTS_EXTRA appends (later flags win), e.g. "-Xmx700m" or "-XX:TieredStopAtLevel=1".
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 -XX:MaxMetaspaceSize=256m -XX:ReservedCodeCacheSize=128m -XX:+ExitOnOutOfMemoryError -Djava.net.preferIPv4Stack=true ${PERSONAL_JAVA_OPTS_EXTRA:-}"
+      SPRING_PROFILES_ACTIVE: ${PERSONAL_SPRING_PROFILES:-security,knowledge,graph-memory,personal}${CORE_PROFILES_EXTRA:-}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_ai}
+      POSTGRES_USER: ${POSTGRES_APP_USER:-vegaduta_app}
+      POSTGRES_PASSWORD: ${POSTGRES_APP_PASSWORD:?run scripts/vegaduta secrets}
+      REDIS_HOST: valkey
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${VALKEY_PASSWORD:?run scripts/vegaduta secrets}
+      # NEVER change after first boot (stored secrets become undecryptable).
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
+      PLATFORM_MASTER_KEY: ${PLATFORM_MASTER_KEY:-}
+      # app.auth.mode / taint / billing defaults come from application-personal.yml;
+      # set APP_AUTH_MODE etc. in core.env to change them.
+      #
+      # STDIO MCP sandbox: the personal profile defaults to `os`, which needs macOS sandbox-exec or
+      # Linux bubblewrap. Inside this container neither exists (the slim image has no bwrap and
+      # `cap_drop: ALL` blocks the unshare fallback), and a required-but-missing sandbox stops core
+      # at start-up. The container itself is the boundary here and this profile set has no `mcp`
+      # profile, so the container default is `none`. Set APP_MCP_STDIO_SANDBOX=container in .env
+      # only if core can reach a Docker or Podman socket; use --native-core for the `os` sandbox.
+      APP_MCP_STDIO_SANDBOX: ${APP_MCP_STDIO_SANDBOX:-none}
+      # Local-auth signing keys and the one-time setup link. The default (~/.vegaduta/auth) is a
+      # tmpfs here, so keys would be regenerated on every restart; keep them on the storage volume.
+      APP_AUTH_LOCAL_DATA_DIR: /data/storage/.auth
+      APP_WEB_PUBLIC_URL: ${PUBLIC_APP_URL:-http://localhost:${WEB_HOST_PORT:-3000}}
+      APP_WEB_ALLOWED_ORIGINS: ${PUBLIC_APP_URL:-http://localhost:${WEB_HOST_PORT:-3000}},http://localhost:${WEB_HOST_PORT:-3000},http://127.0.0.1:${WEB_HOST_PORT:-3000}
+      APP_STORAGE_TYPE: local
+      APP_STORAGE_LOCAL_PATH: /data/storage
+      # The Ollama on this computer (host.docker.internal:11434) is always reachable by the SSRF guard,
+      # so the console's local-model wizard works whether Ollama was installed before or after this
+      # stack. --local-ai overlays set their own value.
+      APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:-host.docker.internal:11434}
+      APP_LOCAL_LLM_BOOTSTRAP_ENABLED: ${APP_LOCAL_LLM_BOOTSTRAP_ENABLED:-false}
+      # Default: Ollama on this computer. `--local-ai` (container) overlays http://ollama:11434.
+      APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${APP_LOCAL_LLM_BOOTSTRAP_BASE_URL:-http://host.docker.internal:11434}
+      APP_LOCAL_LLM_BOOTSTRAP_MODEL: ${APP_LOCAL_LLM_BOOTSTRAP_MODEL:-qwen3.5:4b}
+      APP_LOCAL_LLM_BOOTSTRAP_LABEL: ${APP_LOCAL_LLM_BOOTSTRAP_LABEL:-Local model (Ollama)}
+      APP_LOCAL_LLM_BOOTSTRAP_API_KEY: ${APP_LOCAL_LLM_BOOTSTRAP_API_KEY-ollama}
+      SIDECAR_BASE_URL: http://sidecar:8001
+      # Self-hosted voice calling (same wiring docker-compose.yml's
+      # x-voice-environment gives the full stack): LiveKitTokenService throws
+      # "Self-hosted voice calling is not configured" without these. Empty by
+      # default so an install that never generated LiveKit keys keeps behaving
+      # exactly as before; `scripts/vegaduta secrets` writes them to .env.
+      # LIVEKIT_URL stays BROWSER-facing - it is the ws(s) URL callers connect
+      # to, handed back inside the token response.
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+      LIVEKIT_URL: ${PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
+      # Off unless the rag profile is on (the launcher sets it): without a sidecar container the
+      # host `sidecar` does not exist and embeddings/ingest would fail against nothing.
+      APP_SIDECAR_ENABLED: ${APP_SIDECAR_ENABLED:-false}
+      # What this computer is, for the console's local-model wizard: the container only sees its own
+      # memory limit and a Linux kernel. The launcher sets both (empty = measure what core sees).
+      APP_LOCAL_MODELS_HOST_RAM_GB: ${HOST_RAM_GB:-0}
+      APP_LOCAL_MODELS_HOST_ACCELERATOR: ${HOST_ACCELERATOR:-}
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:-}
+      # The Assistant's build terminal (--profile workspace): commands run in the workspace-runner
+      # container, files are read and written in the projects folder mounted at /workspace. Without
+      # the profile the runner URL is empty and the terminal stays off, as before.
+      APP_ASSISTANT_LOCAL_SHELL_WORKSPACE: /workspace
+      # Shown in the Assistant's folder picker so the person knows where the files are on this computer.
+      APP_ASSISTANT_LOCAL_SHELL_WORKSPACE_HOST_PATH: ${VEGADUTA_PROJECTS_DIR:-}
+      APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL: ${APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL:-}
+      APP_ASSISTANT_LOCAL_SHELL_RUNNER_SECRET: ${WORKSPACE_RUNNER_SECRET:-}
+      APP_ASSISTANT_LOCAL_SHELL_MAX_TIMEOUT_SECONDS: ${WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS:-1800}
+      # STDIO MCP servers run in the mcp-stdio-runner container (profile `tools`), never inside this slim image.
+      # The launcher exports true with the profile; a raw `docker compose --profile tools` needs it in .env too.
+      MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
+      MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
+      MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+      # The agent's browser (needs CORE_IMAGE_VARIANT=-full). Empty = the shipped policy: a takeover
+      # (sign-in) needs a site listed here or in the profile's allowed domains. Example:
+      # BROWSER_ALLOWED_DOMAINS=github.com,*.github.com
+      BROWSER_ALLOWED_DOMAINS: ${BROWSER_ALLOWED_DOMAINS:-}
+      BROWSER_BLOCKED_DOMAINS: ${BROWSER_BLOCKED_DOMAINS:-}
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+      MANAGEMENT_TRACING_ENABLED: "false"
+      SPRING_MAIL_HOST: ${SMTP_HOST:-}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # `default` is named explicitly because listing any network drops the implicit one; mcp-stdio-net
+    # is the only network the runner is on (empty when the `tools` profile is off).
+    networks:
+      - default
+      - mcp-stdio-net
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${CORE_HOST_PORT:-8080}:8080"
+    volumes:
+      - core-storage:/data/storage
+      - core-mcp-data:/app/mcp-data
+      # The projects folder (VEGADUTA_PROJECTS_DIR, set by --profile workspace); an empty named
+      # volume otherwise, so nothing of the host is mounted unless the person asked for it.
+      - ${VEGADUTA_PROJECTS_DIR:-core-projects}:/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: ${CORE_MEM_LIMIT:-1536m}
+
+  web:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/web:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    <<: [*restart, *logging, *hardened]
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+      - /app/.next/cache:size=256m,uid=999,gid=999,mode=0700
+      - /home/nextjs:size=32m,uid=999,gid=999,mode=0700
+    depends_on:
+      core:
+        condition: service_healthy
+        restart: true
+    # Runtime NEXT_PUBLIC_* (window.__ENV) with build-time fallback. Browser-facing URLs come
+    # from PUBLIC_* configuration only (AGENTS.md rule 4).
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:${CORE_HOST_PORT:-8080}}
+      # Server-side only: where the console's same-origin sign-in proxy (/api/local-auth/*) reaches
+      # core. Without it the proxy falls back to the browser URL above, which inside this container
+      # is the container itself, so every sign-in answers "could not reach the server".
+      CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://core:8080}
+      NEXT_PUBLIC_AUTH_MODE: ${WEB_AUTH_MODE:-local}
+      NEXT_PUBLIC_BILLING_ENABLED: ${WEB_BILLING_ENABLED:-}
+      NEXT_PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:${WEB_HOST_PORT:-3000}}
+      NEXT_PUBLIC_CODE_INTEL_URL: ""
+      NEXT_PUBLIC_APP_BUILDER_URL: ""
+      NEXT_PUBLIC_EDGE_AGENTS: ${WEB_EDGE_AGENTS:-}
+      NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-personal}
+      NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+      NEXT_PUBLIC_ACADEMY_URL: ${WEB_ACADEMY_URL:-https://academy.vegaduta.ai}
+      # Console language the installer picked (proxy.js reads it server-side when no
+      # language cookie exists); the installer writes APP_LOCALE into .env.
+      APP_LOCALE: ${APP_LOCALE:-en}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${WEB_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: ${WEB_MEM_LIMIT:-384m}
+
+  # ----------------------------------------------------------- profile: rag
+  sidecar:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/sidecar:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["rag"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      SIDECAR_AUTH_REQUIRED: "true"
+      RENDER_THREADS: "1"
+      RENDER_CALLBACK_ALLOWED_HOSTS: core
+    volumes:
+      - sidecar-workspace:/app/workspace
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${SIDECAR_MEM_LIMIT:-2g}
+
+  # ----------------------------------------------------------- profile: tools
+  # STDIO MCP servers (tenant-registered `npx <pkg>` / `uvx <pkg>` and the starter connectors) run HERE, in
+  # their own container, away from core's secrets, database and Valkey (docs/architecture/
+  # MCP-STDIO-SANDBOXING-DESIGN.md section 8). Same service the full stack runs; core reaches it over the
+  # mcp-stdio-net network only, through a relay that is part of the core image. No port is published, no
+  # volume is mounted (the projects folder is deliberately NOT visible here) and the shared secret is the
+  # only credential it knows about.
+  #
+  # Its network is open to the internet (a server must download its own package from npm or PyPI), so it
+  # can also reach what this computer exposes to Docker containers; that is the residual risk the design
+  # document names. Sized for a laptop: three small servers fit in 768m. Raise MCP_STDIO_RUNNER_MEM_LIMIT
+  # for heavier ones, lower MCP_STDIO_RUNNER_MAX_CHILDREN to cap how many run at once.
+  mcp-stdio-runner:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/mcp-stdio-runner:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["tools"]
+    <<: [*restart, *logging]
+    environment:
+      MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      MCP_STDIO_RUNNER_MAX_CHILDREN: ${MCP_STDIO_RUNNER_MAX_CHILDREN:-8}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8098/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:../../services/mcp-stdio-runner/seccomp-profile.json
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits:
+          memory: ${MCP_STDIO_RUNNER_MEM_LIMIT:-768m}
+          pids: 256
+    networks: [mcp-stdio-net]
+
+  # The Assistant's build terminal (--profile workspace, services/workspace-runner): runs the
+  # commands the person approves, in the folder they attached, with JDK 21, Maven, Node and git.
+  # Only the projects folder is mounted; it holds no platform secret and no Docker socket.
+  workspace-runner:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/workspace-runner:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["workspace"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      WORKSPACE_RUNNER_SECRET: ${WORKSPACE_RUNNER_SECRET:?run scripts/vegaduta secrets}
+      WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS: ${WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS:-1800}
+    # Dev servers the Assistant starts (local_shell background:true) listen on one of these ports;
+    # published on this computer's loopback only, so the console's Preview pane can show them.
+    ports:
+      - "127.0.0.1:13210-13219:13210-13219"
+    volumes:
+      - ${VEGADUTA_PROJECTS_DIR:-core-projects}:/workspace
+      # ~/.m2, ~/.gradle and ~/.npm caches survive restarts and stay out of the projects.
+      - workspace-runner-home:/home/runner
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8090/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${WORKSPACE_RUNNER_MEM_LIMIT:-3g}
+
+volumes:
+  postgres-data:
+  core-storage:
+  core-mcp-data:
+  sidecar-workspace:
+  core-projects:
+  workspace-runner-home:
+
+# Compose's default "<project>_default" for everything, plus mcp-stdio-net: only core and the
+# mcp-stdio-runner are on it, so a package running there has no route to postgres or valkey.
+networks:
+  mcp-stdio-net: {}

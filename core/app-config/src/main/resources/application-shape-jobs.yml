@@ -1,0 +1,73 @@
+# "shape-jobs" profile - the BACKGROUND deployment shape of a split deployment
+# (api + jobs, one image). Owns every scheduled sweep and job poller that the
+# "shape-api" profile skips. Pair it with whatever removes the REST surface from
+# this pod (the app-jobs deployable / a controller-less entry point); this file
+# only decides which background work runs here.
+#
+# Full ownership tables and rationale: docs/deploy/DEPLOYMENT-SHAPES.md.
+
+app:
+  scheduling:
+    # Beans whose @Scheduled work acts on API-JVM state, so it must not run here.
+    # NOT listed on purpose: DynamicMcpConnectionManager - its health/retry/cache
+    # sweeps act on the connections held by THIS JVM, and agent jobs run here
+    # open their own MCP connections, so this shape needs those sweeps too.
+    skip-bean-classes:
+      # Writes throttles into AbuseThrottleService, an in-memory map read by the
+      # API JVM's request filters; sweeping here would throttle nobody.
+      - com.agenticai.core.platform.abuse.AbuseSignalService
+    # These run their resume/report-on-boot sweep in whichever JVM boots. The eval
+    # and simulation executors fail EVERY live run at boot (no owner column) and
+    # their runs execute inside the API JVM, so booting a jobs pod must not fail
+    # them; the Telegram bot keeps its resolved username in memory for API
+    # request threads.
+    skip-listener-classes:
+      - com.agenticai.core.quality.dataset.EvalRunExecutor
+      - com.agenticai.core.quality.simulation.SimulationRunExecutor
+      - com.agenticai.core.omnichannel.demo.DemoTelegramBot
+      # One-shot startup registration of the local LLM pool row; the api shape owns it.
+      - com.agenticai.core.providers.LocalLlmPoolBootstrap
+
+    # Named pools of this shape (SchedulingPools). A pool is a set of classes one optional Deployment owns.
+    # On the main jobs pod, app.scheduling.offloaded-pools=<names> skips those pools' classes (it composes,
+    # which a replaced skip list cannot); on a pool pod, app.scheduling.pool=<name> skips every product
+    # scheduled bean except that pool's. Both default to empty = this pod runs everything it owns today.
+    # JobsPoolsCoverEveryJobTest proves no class is lost or run by two pools for any combination.
+    pools:
+      ingest:
+        - com.agenticai.core.knowledge.KnowledgeIngestionJobRunner
+        - com.agenticai.core.knowledge.KnowledgeReembedJobRunner
+      webhooks:
+        - com.agenticai.core.eventbus.webhook.WebhookDeliveryRelay
+        - com.agenticai.core.eventbus.WorkflowEventOutboxRelay
+      intake:
+        - com.agenticai.core.omnichannel.email.EmailInboundPollingJob
+        - com.agenticai.core.omnichannel.x.XDmPollingJob
+      billing:
+        - com.agenticai.core.platform.LlmUsageRollupScheduler
+        - com.agenticai.core.chat.LlmSpendCounterReconciler
+        - com.agenticai.core.tenancy.CompGrantExpiryReverter
+        # These three also tick in the API shape (advisory-locked); the pool only takes the jobs-pod copy.
+        - com.agenticai.core.tenancy.CompGrantReminderJob
+        - com.agenticai.core.tenancy.StalePendingUpgradeCleanup
+        - com.agenticai.core.payments.PaymentReconciliationJob
+
+    # Per-JVM lifecycle classes (see DEPLOYMENT-SHAPES.md "Per-JVM by design") that ALSO run in a pool's pod.
+    # The intake pollers run whole agent turns (agentChatService.chat), which open MCP connections, browser
+    # sessions and sandbox artifacts in the pod's own JVM; those sweeps are what reap and renew them. Pools
+    # whose jobs hold no such state have no entry. These classes are not owned by the pool: they also run in
+    # the main jobs pod, as every per-JVM class does.
+    pool-lifecycle:
+      intake:
+        - com.agenticai.core.agents.tools.DynamicMcpConnectionManager
+        - com.agenticai.core.agents.tools.mcpregistry.RedisMcpOwnershipGate
+        - com.agenticai.core.agents.tools.mcpregistry.McpOrphanAdopter
+        - com.agenticai.core.agents.tools.browseruse.BrowserUseSessionManager
+        - com.agenticai.core.agents.tools.browseruse.BrowserTakeoverService
+        - com.agenticai.core.agents.tools.e2b.SandboxArtifactRetention
+        - com.agenticai.core.platform.LandingEventBuffer
+
+  agent-jobs:
+    # Sweeps and workers are both here, but the flag also covers a jobs pod
+    # whose sweep leader is a different jobs pod (2+ replicas).
+    interrupt-on-external-terminal: true

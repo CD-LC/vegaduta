@@ -1,0 +1,18 @@
+apiVersion: v2
+name: app-builder
+description: VegaDuta App Builder (Python) - generates and previews tenant apps.
+type: application
+version: 0.2.0
+appVersion: "0.1.0"
+home: https://github.com/CD-LC/vegaduta
+sources:
+  - https://github.com/CD-LC/vegaduta/tree/main/services/app-builder
+maintainers:
+  - name: VegaDuta maintainers
+    url: https://github.com/CD-LC/vegaduta
+annotations:
+  licenses: Apache-2.0
+dependencies:
+  - name: vegaduta-lib
+    version: 0.2.0
+    repository: file://../vegaduta-lib

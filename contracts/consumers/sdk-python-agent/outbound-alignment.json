@@ -1,0 +1,26 @@
+{
+  "$comment": "Frozen record of how the Python Agent SDK's records line up with core's outbound shapes (contracts/outbound). Read by sdk/python-agent/tests/test_contracts.py. The SDK makes no HTTP call to core; its AuditEvent.to_flat_map() reuses core's AuditLogEntryResponse field names, and its ApprovalRequest mirrors ApprovalRequestResponse. Every divergence is listed here on purpose: a new one fails the test until it is added (and justified) here. Lists only shrink when the SDK and core converge.",
+  "audit": {
+    "schema": "audit-event.schema.json",
+    "sdkOnlyKeys": ["runId", "tenantId", "agentId", "sessionId", "correlationId", "risks"],
+    "sdkOnlyOutcomes": []
+  },
+  "approval": {
+    "schema": "approval-callback.schema.json",
+    "fieldMap": {
+      "id": "id",
+      "actionType": "action_type",
+      "summary": "summary",
+      "status": "status",
+      "requestedBy": "requested_by",
+      "decidedBy": "decided_by",
+      "createdAt": "created_at",
+      "decidedAt": "decided_at",
+      "payload": "payload_json"
+    },
+    "coreOnlyRequired": ["retryCount"],
+    "sdkOnlyStatuses": ["EXPIRED", "EXECUTED", "FAILED"],
+    "coreOnlyStatuses": ["EXECUTION_FAILED", "DEAD_LETTERED"],
+    "reportKeyRenames": { "action": "actionType", "decisionReason": "rejectionReason" }
+  }
+}

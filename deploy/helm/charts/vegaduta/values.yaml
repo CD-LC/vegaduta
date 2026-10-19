@@ -1,0 +1,407 @@
+# VegaDuta umbrella chart.
+#
+#   helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta \
+#     --namespace vegaduta --create-namespace --set global.domain=example.com
+#
+# Layout of this file
+#   global          everything shared by several charts: images, domain/TLS/ingress,
+#                   which components run, and WHERE the dependencies are
+#                   (bundled or your own: PostgreSQL, Valkey, S3, OIDC, Temporal, Kafka, OTel)
+#   postgres/valkey/keycloak/seaweedfs   the optional bundled dependencies
+#   core/core-jobs/core-worker/web/...   per-component overrides (see each chart's values.yaml)
+#
+# Rule of thumb: a dependency is BUNDLED when its `global.<dep>` host/endpoint/issuer is
+# empty and `<dep>.enabled=true`; set the host AND `<dep>.enabled=false` to bring your own.
+# The chart fails to render when the two disagree.
+
+global:
+  # -- Registry for every VegaDuta image (<registry>/<component>:<tag>).
+  imageRegistry: ghcr.io/cd-lc
+  # -- Image tag for every VegaDuta image ("" = chart appVersion). Pin a release tag or use per-image digests.
+  imageTag: ""
+  # -- IfNotPresent | Always | Never ("" = IfNotPresent).
+  imagePullPolicy: ""
+  # -- Image pull secrets (names) added to every pod.
+  imagePullSecrets: []
+
+  # -- REQUIRED. Base domain; public hosts are <hosts.X>.<domain>.
+  domain: ""
+  # -- Scheme of the public URLs (https in production; http only for local kind clusters).
+  scheme: https
+  # -- Sub-domains per public entry point. A value containing a dot is used as the full host name.
+  hosts:
+    app: app
+    admin: admin
+    api: api
+    auth: auth
+    codeintel: codeintel
+    builder: builder
+
+  # -- Generated Secrets (APP_ENCRYPTION_KEY, internal tokens, bundled-dependency passwords) are
+  # created once and reused via `lookup`. A render WITHOUT cluster access (helm template, Argo CD,
+  # Flux, --dry-run=client) cannot lookup and would mint NEW values on every render - for
+  # APP_ENCRYPTION_KEY that makes all stored credentials undecryptable - so such renders FAIL unless
+  # every secret comes from an existingSecret. true = allow it anyway (CI renders, throwaway kind
+  # clusters). Never set it for a GitOps-managed install.
+  allowGeneratedSecrets: false
+
+  tls:
+    # -- Add a TLS section to every Ingress.
+    enabled: true
+    # -- cert-manager ClusterIssuer (adds the cert-manager.io/cluster-issuer annotation).
+    clusterIssuer: ""
+    # -- One existing (e.g. wildcard) TLS Secret for all hosts; "" = one "<component>-tls" Secret per Ingress.
+    secretName: ""
+
+  ingress:
+    # -- Publish public components with networking.k8s.io/v1 Ingress.
+    enabled: true
+    # -- IngressClass name.
+    className: nginx
+    # -- Annotations added to every Ingress.
+    annotations: {}
+
+  gateway:
+    # -- Publish public components with Gateway API HTTPRoutes (set global.ingress.enabled=false to use only this).
+    enabled: false
+    # -- Gateway(s) to attach to, e.g. [{name: public, namespace: gateway-system, sectionName: https}].
+    parentRefs: []
+    annotations: {}
+
+  # -- Default StorageClass for PVCs ("" = cluster default).
+  storageClass: ""
+
+  networkPolicy:
+    # -- Render NetworkPolicies: a namespace default-deny plus explicit allows per component.
+    # On by default (needs a CNI that enforces them: Calico, Cilium, ...; kindnet/flannel ignore them).
+    enabled: true
+    # -- Namespace of the ingress controller pods allowed to reach public components (global.ingress).
+    ingressControllerNamespace: ingress-nginx
+    # -- Optional pod labels to narrow the ingress-controller peer.
+    ingressControllerPodLabels: {}
+    # -- Namespace of the Gateway API data-plane (proxy) pods; REQUIRED with global.gateway.enabled
+    # (e.g. envoy-gateway-system, istio-ingress).
+    gatewayNamespace: ""
+    # -- Optional pod labels to narrow the gateway peer.
+    gatewayPodLabels: {}
+    # -- Namespace of Prometheus; REQUIRED when any ServiceMonitor is on (else scrapes are blocked).
+    monitoringNamespace: ""
+    # -- Optional pod labels to narrow the Prometheus peer.
+    monitoringPodLabels: {}
+    dnsNamespace: kube-system
+    dnsPodLabels:
+      k8s-app: kube-dns
+    # -- CIDRs excluded from "internet" egress rules.
+    privateCIDRs: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 100.64.0.0/10]
+    # -- Extra egress rules. Each applies to every component, or only to those named in its
+    # `components:` key (chart names, plus core-migrate), e.g.
+    # [{components: [core, core-worker, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-migrate], to: [{ipBlock: {cidr: 10.20.0.0/16}}], ports: [{port: 5432}]}]
+    extraEgress: []
+    # -- Egress of the core family (core, core-worker, core-jobs, migrate Job) beyond DNS, public 443
+    # and the release's own components. The ports of every CONFIGURED integration are opened
+    # automatically: external PostgreSQL/Valkey/S3, global.otel.tracesEndpoint, global.kafka,
+    # global.temporal.target, global.livekit.internalUrl, global.oidc.internalBaseUrl.
+    coreEgress:
+      # -- SMTP submission (587, 465) to public addresses: invites and notifications mail.
+      smtp: false
+      # -- OTLP 4317 (gRPC) and 4318 (HTTP) to any address except link-local.
+      otlp: false
+      # -- More TCP ports to any address except link-local (169.254/16, the cloud metadata range),
+      # e.g. [11434] for Ollama, [8000] for vLLM, a remote MCP server on a non-443 port.
+      ports: []
+      # -- More destinations, e.g. [{cidr: 10.30.0.0/24, ports: [8080]}] for an in-VPC LLM gateway.
+      cidrs: []
+
+  serviceMonitor:
+    # -- Create Prometheus Operator ServiceMonitors for components that expose metrics.
+    enabled: false
+    labels: {}
+
+  tests:
+    # -- Image used by `helm test` pods.
+    image:
+      registry: docker.io
+      repository: curlimages/curl
+      tag: "8.22.0"
+
+  # -- Which VegaDuta components run. The core API always runs. These switches also wire core's
+  # integrations (CODE_INTEL_ENABLED, TOOL_SANDBOX_ENABLED, ...) so the two can never disagree.
+  components:
+    # -- Background jobs deployable (API then runs the shape-api profile).
+    coreJobs: true
+    # -- Run the knowledge ingestion and re-embedding pollers in their own pool (core-ingest) instead of in
+    # core-jobs. Needs coreJobs. Off by default: one jobs pod runs everything, exactly as before.
+    coreIngest: false
+    # -- Run webhook delivery and the workflow event outbox relay in their own pool (core-webhooks). Needs coreJobs.
+    # Off by default: core-jobs runs them.
+    coreWebhooks: false
+    # -- Run the inbound email and X DM pollers in their own pool (core-intake). Needs coreJobs. Off by default.
+    coreIntake: false
+    # -- Run the usage rollup, payment reconciliation and comp-grant sweeps in their own pool (core-billing).
+    # Needs coreJobs. Off by default.
+    coreBilling: false
+    web: true
+    # -- The platform-admin console is merged into web (served at
+    #   /platform-admin, also reachable on the admin.<domain> host which web's
+    #   ingress now binds via extraHostKeys). webAdmin no longer deploys
+    #   anything; the key is kept so older values files do not break.
+    webAdmin: false
+    # -- ML sidecar (embeddings, rerank, STT/TTS, rendering).
+    sidecar: true
+    codeIntel: false
+    appBuilder: false
+    rlTrainer: false
+    # -- Runs tenant code: needs a VM-isolating RuntimeClass (tool-sandbox.runtimeClassName).
+    toolSandbox: false
+    # -- Runs third-party MCP servers out of the core pod: needs a RuntimeClass too.
+    mcpStdioRunner: false
+    # -- LiveKit voice worker: needs global.livekit.*.
+    voiceAgent: false
+
+  core:
+    appSecret:
+      # -- The ONE Secret holding APP_ENCRYPTION_KEY (base64 of 32 random bytes) for core, core-jobs, core-worker
+      # and the migrate Job. Every other key in it is exposed to core as env (RAZORPAY_*, SMTP_*, GOOGLE_OAUTH_*...).
+      # "" = generate "<release>-core-app" once (helm install/upgrade only - NOT with helm template/Argo CD).
+      existingSecret: ""
+    # -- Base Spring profiles (temporal/shape-api/shape-jobs/jobs/worker are added automatically,
+    # and `mcp` - the built-in STDIO MCP servers - when components.mcpStdioRunner=true or, for the
+    # API only, mcpToolchain=full).
+    springProfiles: security,knowledge,workflow,graph-memory,mcpserver
+    # -- none: the slim `core` image (no Node/uv/browsers; STDIO MCP servers run in mcp-stdio-runner).
+    # full: the API uses the `core-full` image (in-core toolchain, ~6 GB) and gets `mcp` without the
+    # runner. core-jobs/core-worker are published slim only - enable mcpStdioRunner for their MCP tools.
+    mcpToolchain: none
+    # -- Plain env for every core-family process. Example, cloud KMS for envelope-encrypted data keys (see
+    # docs/configuration.md "Encryption key management" for the IAM permissions; set the same on every shape):
+    #   APP_CRYPTO_KMS_PROVIDER: aws            # aws | azure | gcp | local (default)
+    #   APP_CRYPTO_KMS_AWS_KEY_ID: arn:aws:kms:<region>:<account>:key/<id>
+    #   APP_CRYPTO_KMS_AZURE_KEY_ID: https://<vault>.vault.azure.net/keys/<name>
+    #   APP_CRYPTO_KMS_GCP_KEY_NAME: projects/<p>/locations/<l>/keyRings/<r>/cryptoKeys/<k>
+    extraEnv: {}
+    # -- More Secrets exposed to every core-family process as env.
+    extraEnvFromSecrets: []
+    # -- Extra CORS origins for the API (the app and admin URLs are always included).
+    extraAllowedOrigins: []
+
+  internalSecret:
+    # -- Secret with service-to-service tokens (keys: SIDECAR_SHARED_SECRET, MCP_STDIO_SIDECAR_SHARED_SECRET,
+    # CODE_INTEL_INTERNAL_TOKEN, TOOL_SANDBOX_INTERNAL_TOKEN, APP_BUILDER_CORE_SERVICE_TOKEN,
+    # APP_BUILDER_ENCRYPTION_KEY, RL_TRAINER_INTERNAL_TOKEN). "" = generate "<release>-internal".
+    existingSecret: ""
+
+  postgresql:
+    # -- External PostgreSQL host ("" = bundled CloudNativePG cluster, postgres.enabled=true).
+    # Needs the `vector` extension; `age` is optional (see `age`). A pooler in front must use SESSION pooling.
+    host: ""
+    # -- Whether the server provides Apache AGE (graph memory). false for servers that do not offer it
+    # (AWS RDS/Aurora, Cloud SQL, AlloyDB): removes the graph-memory profile; core skips the AGE migration.
+    age: true
+    # -- The server's (or pooler's) connection limit. Set it for an external database so the chart can refuse a
+    # replica or autoscaling setting whose worst-case connections (pods x Hikari pool) would exhaust it. 0 = unknown, not checked.
+    # The bundled cluster is checked against postgres.parameters.max_connections automatically.
+    maxConnections: 0
+    port: 5432
+    database: vegaduta
+    username: vegaduta
+    # -- Secret with the password (required for an external host).
+    existingSecret: ""
+    passwordKey: password
+    # -- Database login. password: the Secret above (default). aws-iam | azure-entra | gcp-iam: core asks the cloud for a
+    # short-lived token for every new connection and no password is stored anywhere. Needs an external `host`, a
+    # `sslMode` of require/verify-ca/verify-full, and cloud identity on the core ServiceAccount
+    # (`core.serviceAccount.annotations`, same for core-jobs and core-worker): EKS IRSA `eks.amazonaws.com/role-arn`
+    # (or Pod Identity), AKS Workload Identity `azure.workload.identity/client-id` (plus the pod label
+    # `azure.workload.identity/use: "true"`), GKE Workload Identity `iam.gke.io/gcp-service-account`.
+    # `username` is then the database role mapped to that identity. AWS needs the region from AWS_REGION (set by IRSA)
+    # or `global.core.extraEnv.DB_AWS_REGION`. Keycloak's own database is separate and still uses a password.
+    # NetworkPolicies: in these modes core, core-jobs, core-worker and the migrate Job also get egress to public 443
+    # (AWS STS, Entra) and a /32 rule for EKS Pod Identity (169.254.170.23:80, aws-iam) or the GKE metadata server
+    # (169.254.169.254:80, gcp-iam). STS/Entra via a private endpoint, or Pod Identity over IPv6, need
+    # `global.networkPolicy.extraEgress`. `sslMode: require` encrypts but does not authenticate the server;
+    # verify-ca/verify-full need a root CA the chart cannot mount (override SPRING_DATASOURCE_URL with sslrootcert).
+    auth: password
+    # -- JDBC sslmode for an external server (disable|require|verify-full...); "" = driver default.
+    sslMode: ""
+    # -- Declared pooling mode of whatever sits in front of PostgreSQL. Only "session" is accepted.
+    poolMode: session
+
+  valkey:
+    # -- External Valkey/Redis host ("" = bundled Valkey, valkey.enabled=true).
+    host: ""
+    port: 6379
+    # -- Secret with the password ("" and external host = no password).
+    existingSecret: ""
+    passwordKey: password
+    # -- TLS to the server (ElastiCache in-transit encryption, Azure Cache for Redis 6380, Memorystore TLS).
+    tls: false
+    # -- ACL user name ("" = the default user; most managed services take the password alone).
+    username: ""
+
+  objectStorage:
+    # -- s3 (bundled SeaweedFS or your S3) | azure-blob (Azure Blob Storage; set seaweedfs.enabled=false) | local (a PVC
+    # mounted by every core-family pod; set seaweedfs.enabled=false).
+    type: s3
+    azure:
+      # -- Account endpoint, https://<account>.blob.core.windows.net (required with credentials=default).
+      endpoint: ""
+      # -- credentials=static only: Secret holding a connection string (key below). Prefer workload identity.
+      existingSecret: ""
+      connectionStringKey: connectionString
+    local:
+      # -- PVC size for type=local.
+      size: 20Gi
+      # -- ReadWriteMany is required as soon as more than one core-family pod runs (core-jobs is on by default).
+      accessModes: [ReadWriteMany]
+      storageClass: ""
+      existingClaim: ""
+    # -- External S3-compatible endpoint, e.g. https://s3.eu-west-1.amazonaws.com ("" = bundled SeaweedFS).
+    endpoint: ""
+    region: us-east-1
+    bucket: vegaduta
+    # -- true for MinIO/SeaweedFS/Ceph; false for AWS S3 virtual-hosted style and Cloudflare R2.
+    pathStyleAccess: true
+    # -- static: the key pair below (MinIO, SeaweedFS, R2, S3 with an IAM user, GCS HMAC keys; for azure-blob a
+    # connection string). default: no keys in the cluster. type=s3 uses the AWS SDK credential chain (EKS IRSA / Pod
+    # Identity via the core ServiceAccount's annotations or role) and needs an explicit `endpoint`; type=azure-blob uses
+    # DefaultAzureCredential (AKS workload identity) and needs `azure.endpoint` instead (`endpoint` must stay empty).
+    credentials: static
+    # -- Secret with the access key pair (required for an external endpoint when credentials=static).
+    existingSecret: ""
+    accessKeyIdKey: accessKeyId
+    secretAccessKeyKey: secretAccessKey
+
+  oidc:
+    # -- Public issuer URL exactly as in the tokens' `iss` ("" = bundled Keycloak at <hosts.auth>.<domain>).
+    issuerUrl: ""
+    # -- Realm name (bundled Keycloak and URL derivation).
+    realm: agentic-ai
+    # -- In-cluster base URL of the IdP for JWKS and the Keycloak Admin API ("" = derived).
+    internalBaseUrl: ""
+    # -- Override the JWKS URL.
+    jwkSetUri: ""
+    # -- Override the Keycloak Admin API base URL used for signup/tenant provisioning.
+    adminBaseUrl: ""
+    # -- Additional accepted issuers (multi-hostname IdPs).
+    additionalIssuers: []
+    # -- Confidential client core uses (token validation + Admin API service account).
+    clientId: agentic-ai-core
+    # -- Secret with that client's secret ("" with bundled Keycloak = generated).
+    existingSecret: ""
+    clientSecretKey: clientSecret
+    # -- Public PKCE clients baked into the web image (adminClientId is kept for the legacy client entry).
+    webClientId: agentic-ai-web
+    adminClientId: agentic-ai-platform-admin
+
+  temporal:
+    # -- Use Temporal for workflow execution and deploy core-worker. Bring your own Temporal.
+    enabled: false
+    # -- host:port of the Temporal frontend, e.g. temporal-frontend.temporal:7233.
+    target: ""
+    namespace: default
+
+  kafka:
+    # -- Kafka-compatible bootstrap servers for workflow events ("" = off).
+    bootstrapServers: ""
+    # -- PLAINTEXT | SSL | SASL_PLAINTEXT | SASL_SSL ("" = the client default, PLAINTEXT).
+    securityProtocol: ""
+    # -- PLAIN | SCRAM-SHA-256 | SCRAM-SHA-512 (Event Hubs: PLAIN; MSK SCRAM: SCRAM-SHA-512). MSK IAM auth needs a
+    # client library that is not in the core image.
+    saslMechanism: ""
+    # -- Secret holding the full JAAS line (it carries the credential), e.g.
+    # org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="...";
+    existingSecret: ""
+    saslJaasConfigKey: saslJaasConfig
+
+  otel:
+    # -- OTLP/HTTP traces endpoint, e.g. http://otel-collector.observability:4318/v1/traces ("" = export off).
+    tracesEndpoint: ""
+    # -- Trace sampling probability (0.0 - 1.0).
+    samplingProbability: "0.0"
+
+  livekit:
+    # -- Public wss:// URL of your LiveKit server (handed to browsers by core).
+    url: ""
+    # -- URL voice-agent dials from inside the cluster.
+    internalUrl: ""
+    # -- Secret with LIVEKIT_API_KEY and LIVEKIT_API_SECRET.
+    existingSecret: ""
+
+# -- Allow core, core-jobs and core-worker images to have different tags (never do this in production).
+allowCoreImageSkew: false
+
+# ==========================================================================
+# Optional bundled dependencies
+# ==========================================================================
+
+postgres:
+  # -- Bundled PostgreSQL as a CloudNativePG Cluster. REQUIRES the CloudNativePG operator.
+  enabled: true
+  instances: 1
+  storage:
+    size: 20Gi
+
+valkey:
+  # -- Bundled single-node Valkey.
+  enabled: true
+
+ollama:
+  # -- Bundled Ollama serving a local model as the free platform LLM pool. Off by default.
+  # Also set the core bootstrap env (see deploy/kind/values-kind-ollama.yaml and docs/local-models.md).
+  enabled: false
+
+keycloak:
+  # -- Bundled Keycloak (official image) with the realm import.
+  enabled: true
+
+seaweedfs:
+  # -- Bundled single-node SeaweedFS S3 gateway.
+  enabled: true
+
+# ==========================================================================
+# Per-component overrides (full reference: charts/<name>/values.yaml)
+# ==========================================================================
+
+core:
+  replicaCount: 1
+  migrate:
+    enabled: true
+
+core-jobs: {}
+
+core-ingest: {}
+
+core-webhooks: {}
+
+core-intake: {}
+
+core-billing: {}
+
+core-worker: {}
+
+# -- The platform-admin console is part of this app (web/app/platform-admin).
+#   Serving the admin.<domain> host here keeps old links working: proxy.js
+#   redirects those paths under /platform-admin (PLATFORM_ADMIN_HOST).
+web:
+  ingress:
+    extraHostKeys: [admin]
+
+sidecar: {}
+
+code-intel: {}
+
+app-builder: {}
+
+rl-trainer: {}
+
+tool-sandbox:
+  # -- VM-isolating RuntimeClass (e.g. kata, gvisor). Required when global.components.toolSandbox=true.
+  runtimeClassName: ""
+
+mcp-stdio-runner:
+  runtimeClassName: ""
+  # -- true = the mcp-stdio-runner-browser image (pinned Playwright Chromium + puppeteer Chrome) for
+  # the puppeteer / playwright-vision built-ins; raises a default 1Gi memory limit to 2Gi.
+  browser: false
+
+voice-agent: {}

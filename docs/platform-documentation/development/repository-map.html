@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Repository Map — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="development" data-page="repository-map.html" data-doc="VD-DEV-003" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="getting-started.html">Developer Guide</a><span class="sep">/</span>Repository Map</div>
+<div class="doc-meta" data-auto></div>
+<h1>Repository Map</h1>
+
+<dl class="props">
+  <dt>Basis</dt><dd>Top-level layout and the <code>core/</code> module list from <code>core/pom.xml</code>; purposes from each folder's README where one exists.</dd>
+  <dt>Related</dt><dd><a href="getting-started.html">Getting Started</a> · <a href="conventions.html">Conventions</a> · <a href="../architecture/system-architecture.html">System Architecture</a></dd>
+</dl>
+
+<h2>1. Top-level folders</h2>
+<table>
+  <thead><tr><th>Folder</th><th>Purpose (source)</th></tr></thead>
+  <tbody>
+    <tr><td><code>core/</code></td><td>Java 21 + Spring Boot 3.4 modular monolith; one JAR from <code>core/app</code>, plus <code>app-worker</code> and <code>app-jobs</code> assemblies (README)</td></tr>
+    <tr><td><code>web/</code></td><td>Next.js tenant console — agents, workflows, knowledge, channels, billing (README)</td></tr>
+    <tr><td><code>web-admin/</code></td><td>Next.js platform-admin console (<code>web-admin/README.md</code>)</td></tr>
+    <tr><td><code>services/sidecar/</code></td><td>Python + FastAPI knowledge/RAG service: chunking, embeddings, extraction, reranking, transcription</td></tr>
+    <tr><td><code>services/code-intel/</code></td><td>Multi-tenant code-intelligence service (RAG index, code graph), bridged into core via <code>core/codeintel</code></td></tr>
+    <tr><td><code>services/app-builder/</code></td><td>No-code app-builder microservice, sibling of code-intel</td></tr>
+    <tr><td><code>services/voice-agent/</code></td><td>Real-time voice pipeline on LiveKit Agents</td></tr>
+    <tr><td><code>services/tool-sandbox/</code></td><td>Compiles, verifies and runs tenant-authored Java/Python custom-code tools (<a href="../decisions/adr-0009-untrusted-code-sandboxing.html">ADR-0009</a>)</td></tr>
+    <tr><td><code>services/mcp-stdio-runner/</code></td><td>Runs STDIO MCP server subprocesses in an isolated container on core's behalf</td></tr>
+    <tr><td><code>services/rl-trainer/</code></td><td>Offline preference/prompt optimisation sidecar for <code>core/rl</code></td></tr>
+    <tr><td><code>deploy/</code></td><td>Everything to self-host: <code>compose/</code> (Lite, Full, build, <code>domain</code>, <code>ci</code>, <code>local-llm</code> overlays), <code>helm/</code> (charts), <code>kind/</code>, plus configs for Keycloak, Postgres, Caddy, Prometheus/Grafana/Loki/Promtail, Alertmanager, Temporal, LiveKit, the mock LLM provider and CI seed data. See <code>deploy/README.md</code>.</td></tr>
+    <tr><td><code>infra/</code></td><td>Terraform modules and Keycloak realm material kept from the original hosted deployment. Not used by Compose or Helm and not a supported install path.</td></tr>
+    <tr><td><code>scripts/</code></td><td>CI gates (<code>scripts/ci/</code>), dev tooling (<code>scripts/dev/</code>, <code>dev-up.sh</code>, <code>run-core-local.sh</code>, <code>vegaduta</code> CLI helpers), <code>backup/</code>, <code>keycloak/</code></td></tr>
+    <tr><td><code>contracts/</code></td><td>Inbound/outbound wire-format JSON Schemas and fixture corpus</td></tr>
+    <tr><td><code>examples/</code></td><td>Example MCP servers (<code>home-assistant</code>, <code>http-gateway</code>) and known-good workflow create-request bodies (<code>workflow-templates/</code>)</td></tr>
+    <tr><td><code>tests/</code></td><td>Standalone Playwright suite for the public surface (<code>tests/e2e/</code>) and a k6 load harness (<code>tests/load/</code>)</td></tr>
+    <tr><td><code>docs/</code></td><td>Design notes (<code>docs/architecture/</code>), connector specs (<code>docs/connectors/</code>), MCP registration guide (<code>docs/core/</code>) and this documentation site (<code>docs/platform-documentation/</code>)</td></tr>
+    <tr><td><code>.github/</code></td><td>Workflows, <code>CODEOWNERS</code>, PR and issue templates, Dependabot and labeler config</td></tr>
+    <tr><td><code>.githooks/</code>, <code>.devcontainer/</code></td><td>Tracked git hooks (<code>pre-push</code>); devcontainer</td></tr>
+  </tbody>
+</table>
+<p>Also at the root: <code>README.md</code>, <code>CONTRIBUTING.md</code>, <code>SECURITY.md</code>, <code>CODE_OF_CONDUCT.md</code>, <code>LICENSE</code> (Apache-2.0), <code>NOTICE</code>, <code>install.sh</code>, <code>.editorconfig</code>, <code>.gitleaks.toml</code>. No mobile, desktop, IDE or browser-extension clients are part of this repository.</p>
+
+<h2>2. <code>core/</code> — modules</h2>
+<p><code>core/pom.xml</code> (packaging <code>pom</code>, Spring Boot parent 3.4.4, <code>java.version</code> 21) lists the reactor modules, in build order:</p>
+<pre><code>audit billing crypto secrets storage speech mcp mcpserver security admin sharing
+providers tenancy chat eventbus approval payments knowledge guardrails google sarvam
+imagegen elevenlabs sdlc eval graphmemory codeintel documentgen agents quality voice
+omnichannel devices workflow platform rl templates brief app-config app app-worker app-jobs</code></pre>
+<p>The directories <code>mcp-data</code> and <code>mcp-stdio-proxy</code> also exist under <code>core/</code> but are not reactor modules. Areas:</p>
+<ul>
+  <li><strong>Platform/tenancy</strong> — <code>tenancy</code>, <code>security</code>, <code>admin</code>, <code>platform</code>, <code>billing</code></li>
+  <li><strong>Agent runtime</strong> — <code>agents</code>, <code>chat</code>, <code>providers</code>, <code>eval</code></li>
+  <li><strong>Automation</strong> — <code>workflow</code>, <code>eventbus</code> (Kafka-backed outbox), <code>approval</code></li>
+  <li><strong>Knowledge</strong> — <code>knowledge</code>, <code>graphmemory</code> (Apache AGE)</li>
+  <li><strong>Governance</strong> — <code>guardrails</code>, <code>audit</code>, <code>mcp</code> (dynamic connector registry)</li>
+  <li><strong>Channels/devices</strong> — <code>omnichannel</code>, <code>devices</code>, <code>sarvam</code>, <code>imagegen</code>, <code>elevenlabs</code>, <code>google</code></li>
+  <li><strong>Infra</strong> — <code>storage</code>, <code>crypto</code>, <code>secrets</code>, <code>sdlc</code>, <code>codeintel</code></li>
+  <li><strong><code>app</code></strong> — the Spring Boot assembly; this is what runs. <code>app-worker</code> (Temporal worker) and <code>app-jobs</code> (scheduled sweeps) are sibling assemblies from the same codebase; see <code>shape-api</code>/<code>shape-jobs</code> in the <a href="../overview/glossary.html">Glossary</a> and <a href="../decisions/adr-0001-modular-monolith.html">ADR-0001</a>.</li>
+  <li>Others: <code>speech</code>, <code>mcpserver</code>, <code>sharing</code>, <code>payments</code>, <code>documentgen</code>, <code>quality</code>, <code>voice</code>, <code>rl</code>, <code>templates</code>, <code>brief</code>, <code>app-config</code>.</li>
+</ul>
+
+<h3>Flyway migrations</h3>
+<p><code>core/app/src/main/resources/db/migration/</code> contains <code>controlplane/</code> and <code>tenant/</code>. Both are one combined version space (README §6) — see <a href="conventions.html">Conventions</a>.</p>
+
+<h2>3. Two facts that explain most surprises</h2>
+<ol>
+  <li><strong>Schema-per-tenant.</strong> Tenant isolation is a Postgres schema resolved from the request's tenant context; hence PgBouncer must stay <code>POOL_MODE=session</code> (README §1).</li>
+  <li><strong>Flyway versions share one namespace</strong> across <code>controlplane/</code> and <code>tenant/</code>.</li>
+</ol>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li>Repository root listing; <code>core/pom.xml</code> — module list and properties.</li>
+  <li><code>README.md</code> §1 and §6; READMEs under <code>services/</code>, <code>web-admin/</code>, <code>contracts/</code>, <code>examples/</code>, <code>tests/e2e/</code>, <code>tests/load/</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

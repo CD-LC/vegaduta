@@ -1,0 +1,13 @@
+{{- include "app-builder.guard" . -}}
+{{- $env := dict
+  "APP_BUILDER_KEYCLOAK_ISSUER" (include "vegaduta-lib.oidc.issuer" .)
+  "APP_BUILDER_KEYCLOAK_JWKS_URL" (include "vegaduta-lib.oidc.jwkSetUri" .)
+  "APP_BUILDER_CORS_ORIGINS" (include "vegaduta-lib.publicUrl" (dict "root" . "key" "app"))
+  "APP_BUILDER_PREVIEW_PATH_BASE_URL" (include "vegaduta-lib.publicUrl" (dict "root" . "key" .Values.ingress.hostKey))
+  "APP_BUILDER_CORE_BASE_URL" (printf "http://%s:8080" (include "vegaduta-lib.componentName" (dict "root" . "name" "core")))
+  "APP_BUILDER_CODE_INTEL_URL" (printf "http://%s:8090" (include "vegaduta-lib.componentName" (dict "root" . "name" "code-intel"))) -}}
+{{- $secretEnv := concat
+  (include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "APP_BUILDER_CODE_INTEL_TOKEN" "key" "CODE_INTEL_INTERNAL_TOKEN") | fromYamlArray)
+  (include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "APP_BUILDER_CORE_SERVICE_TOKEN") | fromYamlArray)
+  (include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "APP_BUILDER_ENCRYPTION_KEY") | fromYamlArray) -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" $env "secretEnv" $secretEnv) }}

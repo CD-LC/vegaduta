@@ -1,0 +1,55 @@
+{
+  "name": "SDLC Modernization - Search & Propose",
+  "description": "Example workflow demonstrating the code-intel integration added 2026-07-20. Given a natural-language description of a legacy pattern (e.g. a deprecated API, an outdated library usage, a security anti-pattern), it semantically searches the tenant's indexed codebase for matches (search_code), then hands the results to an analysis agent that can follow up with code_callers/code_impact/code_callees/code_graph_stats to reason about blast radius, and produces a written migration proposal. READ-ONLY end to end - it stops at 'here is the plan', deliberately, because the write/execute half (create a workspace, apply a fix, run tests) exists in the codebase as of today but is NOT YET wired to any agent - see docs/SDLC-CODEINTEL-INTEGRATION-2026-07-20.md for exactly what that means and what's left to safely turn it on.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "trigger-1",
+        "type": "trigger",
+        "position": { "x": 0, "y": 0 },
+        "data": {
+          "label": "Manual trigger - input is the search_code tool's JSON args",
+          "config": {}
+        }
+      },
+      {
+        "id": "tool-search-code",
+        "type": "tool",
+        "position": { "x": 280, "y": 0 },
+        "data": {
+          "label": "search_code",
+          "config": {
+            "agentId": "REPLACE_WITH_A_REAL_AGENT_ID",
+            "toolName": "search_code",
+            "argsJson": ""
+          }
+        }
+      },
+      {
+        "id": "agent-propose-migration",
+        "type": "agent",
+        "position": { "x": 560, "y": 0 },
+        "data": {
+          "label": "Migration analyst",
+          "config": {
+            "agentId": "REPLACE_WITH_A_REAL_AGENT_ID"
+          }
+        }
+      },
+      {
+        "id": "output-report",
+        "type": "output",
+        "position": { "x": 840, "y": 0 },
+        "data": {
+          "label": "Migration proposal",
+          "config": { "channel": "log" }
+        }
+      }
+    ],
+    "edges": [
+      { "id": "e1", "source": "trigger-1", "target": "tool-search-code", "sourceHandle": null, "targetHandle": null },
+      { "id": "e2", "source": "tool-search-code", "target": "agent-propose-migration", "sourceHandle": null, "targetHandle": null },
+      { "id": "e3", "source": "agent-propose-migration", "target": "output-report", "sourceHandle": null, "targetHandle": null }
+    ]
+  }
+}

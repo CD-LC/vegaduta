@@ -1,0 +1,361 @@
+@layer components {
+  /* --- App shell: persistent sidebar + topbar -----------------------------
+   * Replaces the old "everything stacked in .shell on one page" layout.
+   * New namespace ("app-*"), nothing here touches .shell/.header/.panel or
+   * any other class the existing Playwright suite keys off - old pages that
+   * still render those classes directly (none should, after the nav
+   * rewrite) would keep working unchanged. */
+  .app-shell {
+    @apply relative flex min-h-screen w-full items-stretch bg-[var(--surface-page)];
+  }
+
+  /* --- AXON left rail + topbar (design_handoff_axon/README.md's "Global
+   * Layout (console screens)") ------------------------------------------
+   * Replaces the floating BottomDock nav (BottomDock.js kept in place,
+   * unused, same "don't delete superseded work" posture as TopNav.js/
+   * MarketingHome.js) with the handoff's fixed 74px left icon rail - a
+   * condensed 8-destination IA (HOME/AGENTS/FLOWS/TASK/KNOW/TOOLS/CHAN/
+   * ADMIN) instead of the previous 15-link grouped nav, matching the
+   * reference AXON Dashboard.dc.html exactly. `position:fixed` (not part of
+   * the flex flow) so .app-main's own `margin-left: 74px` is the only other
+   * change needed to make room for it. */
+  /* AXON Pro screens' rail is a hover-expanding flyout (76px collapsed,
+   * 216px on hover, revealing each item's full label + badge) rather than a
+   * permanently-narrow icon strip - see e.g. Admin Pro.dc.html's `.ax-rail`
+   * width transition. `overflow:hidden` clips the label/badge text at
+   * collapsed width instead of wrapping/overflowing the rail. */
+  .ax-rail {
+    @apply fixed left-0 top-0 z-30 flex h-screen w-[76px] flex-col items-center gap-1 overflow-hidden py-4;
+    /* backdrop-blur-md removed - background is now a solid opaque surface (see --ax-rail), so there is nothing left for the blur to soften */
+    border-right: 1px solid var(--ax-border2);
+    background: var(--ax-rail);
+    transition:
+      width 0.32s cubic-bezier(0.34, 1.1, 0.4, 1),
+      box-shadow 0.32s ease;
+    /* Rebuild spec §3/DESIGN-SYSTEM.md §3: persistent chrome keeps a stable
+     * view-transition-name so browser-native View Transitions (see the
+     * @view-transition block near the top of this file) only cross-fades
+     * .app-content, not the rail/topbar. */
+    view-transition-name: ax-chrome-rail;
+  }
+
+  .ax-rail:hover {
+    width: 216px;
+    box-shadow: 24px 0 60px -30px rgba(0, 0, 0, 0.5);
+  }
+
+  .ax-rail-logo {
+    /* Direct feedback ("I want logo-mark.png to fit in ax-rail-logo - no
+     * button functionality required. Logo-mark should be clearly visible
+     * and on click retain the same functionality what we have now") - this
+     * used to be a dark-navy rounded tile with an inset ring + ambient
+     * box-shadow glow behind the mark (see git history for the earlier
+     * contrast-fix reasoning), which read as a pressable UI button/chip
+     * rather than a plain brand mark. Stripped down to just a sizing/
+     * centering box with no background, border, radius, or shadow - the
+     * logo image itself sits directly on the rail. Still a real <button>
+     * underneath (same onClick={() => setBrandOpen(true)} in AppShell.js)
+     * so clicking it still opens the brand identity modal exactly as
+     * before; only the visual "button chrome" is gone, per this request. */
+    /* Direct feedback ("reduce a height little bit to make it look exactly
+     * square") - h-14/w-14 are both 56px on paper, but this is a <button>:
+     * the UA/Tailwind reset leaves line-height and a hair of baseline
+     * space in play that a plain flex box doesn't have, so it rendered a
+     * few px taller than wide. Explicit width/height (56/52) plus
+     * line-height/font-size: 0 removes that baseline slack instead of
+     * guessing at another utility class. */
+    @apply mb-2.5 flex items-center justify-center;
+    width: 56px;
+    height: 52px;
+    line-height: 0;
+    font-size: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /* Direct feedback ("on hover colour of background should not change or
+   * highlight") - every <button> in the app gets a cursor-tracking
+   * spotlight overlay via the shared button::after/button:hover::after
+   * rules above (GlobalCursorFX.js's "buttons - something unique" effect,
+   * mix-blend-mode: overlay so it lightens whatever's under the pointer).
+   * That's exactly the "background changes on hover" the rail logo isn't
+   * supposed to have now that it's a plain image, not a button-styled
+   * chip - opt this one button back out rather than touching the shared
+   * rule every other button in the app still uses.  */
+  .ax-rail-logo::after {
+    content: none;
+  }
+
+  /* Each item is a full-width row; the icon sits in a fixed 58px column so
+   * it stays perfectly centered under the collapsed 76px rail, and stays
+   * put (doesn't re-center) once the rail expands and the label/badge fade
+   * in after it - exactly the Pro screens' flyout item layout. */
+  .ax-rail-link {
+    @apply relative flex h-[46px] shrink-0 items-center gap-0 rounded-[13px] no-underline transition-colors;
+    width: 100%;
+    padding-right: 12px;
+    color: var(--ax-mid);
+    z-index: 1;
+  }
+
+  .ax-rail-link:hover {
+    color: var(--ax-text);
+    background: var(--ax-panel2);
+  }
+
+  .ax-rail-link-active {
+    color: var(--ax-cyan);
+  }
+
+  .ax-rail-link-active:hover {
+    color: var(--ax-cyan);
+    background: none;
+  }
+
+  /* The layoutId-animated pill (see AppShell.js) - fills the active link,
+   * behind its icon/label/badge (z-index 0 vs. the link's own content at 1
+   * implicitly above it in paint order). */
+  .ax-rail-indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: 13px;
+    background: color-mix(in srgb, var(--ax-cyan) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ax-cyan) 34%, transparent);
+    box-shadow: 0 6px 18px -10px var(--ax-glow);
+  }
+
+  .ax-rail-icon {
+    @apply relative flex h-[46px] w-[58px] shrink-0 items-center justify-center;
+  }
+
+  /* Collapsed-rail-only presence indicator for a badged item (e.g. Agents'
+   * "12") - a small dot on the icon, since the full numeric badge only has
+   * room once the rail expands. */
+  .ax-rail-dot {
+    position: absolute;
+    top: 6px;
+    right: 14px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ax-cyan);
+    box-shadow: 0 0 6px var(--ax-cyan);
+    border: 1.5px solid var(--ax-rail);
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .ax-rail:hover .ax-rail-dot {
+    opacity: 0;
+  }
+
+  .ax-rail-label {
+    @apply shrink-0 whitespace-nowrap text-[13px];
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .ax-rail:hover .ax-rail-label {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ax-rail-badge {
+    @apply ml-auto shrink-0 whitespace-nowrap rounded-full px-2 py-px text-[10.5px];
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-cyan);
+    background: color-mix(in srgb, var(--ax-cyan) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ax-cyan) 32%, transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .ax-rail:hover .ax-rail-badge {
+    opacity: 1;
+  }
+
+  .ax-rail-admin {
+    margin-top: auto;
+  }
+
+  /* Topbar - 60px, truly rigid: `position: fixed` (not sticky) so it never
+   * moves regardless of scroll position, exactly matching the design
+   * handoff's own persistent chrome (the rail + topbar sit outside the
+   * scrollable content area in AXON Dashboard.dc.html - only the content
+   * beneath them scrolls). Direct feedback: "I want header to be rigid...
+   * follow exact design principles." `left: 74px` clears the fixed rail;
+   * `.app-content`/`.app-content-bleed` below carry the matching
+   * `padding-top: 60px` so content starts right under it instead of
+   * sliding beneath. */
+  .ax-topbar {
+    @apply fixed left-[76px] right-0 top-0 z-20 flex h-[60px] items-center gap-4 px-6 backdrop-blur-md;
+    border-bottom: 1px solid var(--ax-border2);
+    background: var(--ax-bar);
+    view-transition-name: ax-chrome-topbar;
+  }
+
+  .ax-topbar-brand {
+    @apply flex shrink-0 items-baseline gap-2.5 no-underline;
+  }
+
+  .ax-topbar-eyebrow {
+    @apply text-[10.5px];
+    font-family: var(--font-mono), monospace;
+    color: var(--ax-dim);
+  }
+
+  /* Direct feedback: "Organization should be displayed fully, with proper
+   * professional font and colour" - was `max-w-[10rem]` (160px) + truncate,
+   * which clipped anything longer than a couple words (e.g. "Cloud
+   * Development & Testing" rendered as "CLod Development & T..."). Raised
+   * the cap enough to fit realistic org names in full, switched off the
+   * topbar's monospace/dim-grey treatment (the "// EYEBROW" label's font,
+   * meant to read as secondary chrome) to the brand's sans display font at
+   * full-strength text color instead, so the org name reads as real
+   * identity text next to the wordmark rather than a faint system label.
+   * `truncate` stays only as a safety net for pathologically long names -
+   * the title attribute at the call site still surfaces the full string on
+   * hover in that edge case. */
+  /* Direct feedback: "organization name is some colour, highlight it in
+   * underlined style" - was plain --ax-text (same color as every other
+   * topbar label), which is exactly the "blends in" complaint. Recolored to
+   * the brand's cyan accent (--ax-cyan, the same token .ax-rail-link-active/
+   * status pills already use for "this is live/important") with a real
+   * underline offset from the text rather than crossing through descenders. */
+  .ax-topbar-org {
+    @apply max-w-[26rem] shrink truncate text-[13px] font-semibold tracking-tight;
+    font-family:
+      var(--font-sora),
+      var(--font-inter),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    color: var(--ax-cyan);
+    text-decoration: underline;
+    text-decoration-color: rgba(79, 227, 227, 0.55);
+    text-underline-offset: 3px;
+    padding-left: 0.15rem;
+    border-left: 1px solid var(--ax-border2);
+    margin-left: 0.1rem;
+  }
+
+  .ax-search {
+    @apply hidden shrink-0 items-center gap-2 rounded-[11px] border px-3.5 py-[9px] text-[12.5px] lg:flex;
+    width: 300px;
+    border-color: var(--ax-border);
+    color: var(--ax-dim);
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ax-search-placeholder {
+    @apply min-w-0 flex-1 truncate;
+  }
+
+  .ax-search-kbd {
+    @apply ml-auto shrink-0 rounded-[5px] border px-[6px] py-px text-[10px];
+    border-color: var(--ax-border);
+    color: var(--ax-dim);
+  }
+
+  .ax-theme-toggle {
+    @apply flex shrink-0 items-center gap-0.5 rounded-[9px] border p-[3px];
+    border-color: var(--ax-border);
+    background: var(--ax-chip);
+  }
+
+  .ax-theme-opt {
+    @apply flex h-[26px] w-[30px] cursor-pointer items-center justify-center rounded-[7px] border-0 bg-transparent p-0 text-[13px] shadow-none;
+    color: var(--ax-dim);
+  }
+
+  .ax-theme-opt-active {
+    background: rgba(124, 92, 255, 0.25) !important;
+    color: var(--ax-text) !important;
+  }
+
+  .ax-status-pill {
+    @apply hidden shrink-0 items-center gap-2 rounded-[9px] border px-3 py-1.5 text-[11.5px] sm:flex;
+    font-family: var(--font-mono), monospace;
+    border-color: rgba(70, 224, 160, 0.28);
+    background: rgba(70, 224, 160, 0.08);
+    color: var(--ax-green);
+  }
+
+  .ax-status-pill-dot {
+    @apply h-2 w-2 shrink-0 rounded-full;
+    background: var(--ax-green);
+    box-shadow: 0 0 10px var(--ax-green);
+    animation: axPulse 2s infinite;
+  }
+
+  .ax-status-pill-down {
+    border-color: rgba(255, 92, 114, 0.32);
+    background: rgba(255, 92, 114, 0.08);
+    color: var(--ax-red);
+  }
+
+  .ax-status-pill-down .ax-status-pill-dot {
+    background: var(--ax-red);
+    box-shadow: 0 0 10px var(--ax-red);
+  }
+
+  /* Shared ambient backdrop (see AppShell.js) - sits behind .ax-topbar/
+   * .app-content, in front of the plain --ax-bg gradient body paints. */
+  .ax-ambient {
+    @apply pointer-events-none fixed inset-0 z-0 overflow-hidden;
+  }
+
+  /* .ax-ambient-grid (48px line-grid pattern) removed per direct feedback -
+   * the app background is now a solid, theme-reactive color (see --ax-bg
+   * above) instead of a decorative grid. The <span> that used this class
+   * was removed from AppShell.tsx; rule intentionally deleted, not just
+   * hidden, since it had no other consumers (verified via grep). */
+
+  .ax-ambient-blob {
+    @apply absolute rounded-full;
+    width: 560px;
+    height: 560px;
+    filter: blur(60px);
+    animation: axDrift 26s ease-in-out infinite;
+  }
+
+  .ax-ambient-blob-a {
+    top: -160px;
+    left: 8%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--ax-cyan) 14%, transparent), transparent 62%);
+  }
+
+  .ax-ambient-blob-b {
+    bottom: -180px;
+    right: 4%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--ax-violet) 13%, transparent), transparent 62%);
+    animation-duration: 32s;
+    animation-direction: reverse;
+  }
+
+  @keyframes axDrift {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(24px, -18px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ax-ambient-blob {
+      animation: none;
+    }
+  }
+}

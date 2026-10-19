@@ -1,0 +1,6 @@
+# Template - replace the Contact and Canonical values with your deployment's
+# security contact and origin before serving this file publicly (RFC 9116).
+Contact: mailto:security@example.com
+Expires: 2027-07-30T00:00:00.000Z
+Preferred-Languages: en, hi
+Canonical: https://example.com/.well-known/security.txt

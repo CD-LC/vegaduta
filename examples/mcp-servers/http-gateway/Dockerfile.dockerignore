@@ -1,0 +1,17 @@
+# Per-Dockerfile ignore (BuildKit picks up <Dockerfile>.dockerignore next to
+# the Dockerfile and uses it INSTEAD of the root .dockerignore). This image
+# builds from the REPO ROOT, so allow-list exactly what the Dockerfile COPYs
+# rather than uploading the whole repository (INF-017).
+*
+!examples/mcp-servers/http-gateway/server.js
+!examples/mcp-servers/http-gateway/package.json
+!examples/mcp-servers/home-assistant
+# ...and never anything secret or local inside the allowed dirs.
+**/node_modules
+**/test
+**/*.log
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/secrets

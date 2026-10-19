@@ -1,0 +1,2 @@
+voice-agent: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) -> LiveKit {{ .Values.global.livekit.internalUrl }}
+  Browsers need the PUBLIC LiveKit URL in core (global.livekit.url, wss://...).

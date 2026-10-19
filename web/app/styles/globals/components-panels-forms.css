@@ -1,0 +1,395 @@
+@layer components {
+  /* LanguageSwitcher.js - lives in AppShell's topbar and the signup/sign-in
+   * shell (see those files). Plain, small, reuses the same surface/border
+   * tokens every other dropdown-ish control in this file already does. */
+  .lang-switcher {
+    @apply relative inline-block;
+  }
+
+  .lang-switcher-trigger {
+    @apply flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors;
+    border-color: var(--surface-border);
+    background-color: var(--surface-card);
+    color: var(--text-secondary);
+  }
+
+  .lang-switcher-trigger:hover {
+    background-color: var(--surface-hover);
+  }
+
+  /* max-w + overscroll-contain added 2026-09-11 (mobile-nav audit): this menu
+   * lists 30 locales and now also renders inside the landing page's mobile
+   * sheet, where an unclamped width ran off the side of a 375px screen.
+   * `right-0`/`max-h-72` are only the DEFAULTS - LanguageSwitcher.tsx measures
+   * the real room around the trigger on open and overrides the anchor edge
+   * and the height inline, because neither is knowable from CSS here (trigger
+   * width varies by locale, and the menu sits inside a sticky header). */
+  .lang-switcher-menu {
+    @apply absolute right-0 z-30 mt-1.5 max-h-72 min-w-[9.5rem] max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-xl border p-1.5 shadow-xl;
+    border-color: var(--surface-border);
+    background-color: var(--surface-card);
+    animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+    inset-inline-end: 0;
+  }
+
+  /* RTL text direction: no special menu positioning needed since the component
+   * (LanguageSwitcher.tsx) handles placement dynamically based on available space
+   * using getBoundingClientRect() measurements, accounting for the dir attribute. */
+  html[dir="rtl"] .lang-switcher-menu {
+    inset-inline-end: 0;
+  }
+
+  .lang-switcher-option {
+    @apply flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm;
+    color: var(--text-secondary);
+  }
+
+  .lang-switcher-option:hover {
+    background-color: var(--surface-hover);
+  }
+
+  .lang-switcher-option-active {
+    color: var(--accent-600);
+    font-weight: 600;
+  }
+
+  .shell {
+    @apply mx-auto max-w-5xl px-6 pb-16 pt-8;
+  }
+
+  .header {
+    @apply mb-6 flex items-baseline justify-between border-b border-[var(--surface-border)] pb-4;
+  }
+
+  .header h1 {
+    @apply m-0 text-xl font-semibold text-[var(--text-primary)];
+  }
+
+  .header .stage-badge,
+  .stage-badge {
+    @apply rounded-full bg-[var(--surface-hover)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)];
+  }
+
+  /* HUD reskin, applied at the .panel level rather than per-page - this ONE
+   * class already renders every existing screen in the console (Agents,
+   * Playground, Knowledge, Providers, Tools, Workflows list, every Admin
+   * sub-page - see the dark-mode comment just below), so giving it the
+   * command-center treatment here is what "replicated across all pages"
+   * means structurally: zero per-page changes, one shared rule.
+   *
+   * Deliberately NOT adding overflow:hidden here - the existing accent-bar
+   * comment further down explains why: a clipped .panel silently cuts off
+   * any InfoTip/CredentialHelp/AskAiHelper popover that opens near a panel
+   * edge. That constraint stays; the HUD treatment below works within it:
+   *   1. --hud-line border instead of the plain --surface-border, tying
+   *      every panel to the same instrument-panel language as the
+   *      dashboard/toasts/nav.
+   *   2. The existing top accent bar (see .panel::before further down)
+   *      gets an added scale-wipe animation, transform-only and contained
+   *      exactly within the bar's own inset-x-0 bounds - no risk of the
+   *      "bleeds past the rounded corner" problem overflow:hidden was
+   *      there to hide, since nothing here moves outside the panel's box.
+   *   3. ::after - a small live-pulse dot, top-right, reusing the existing
+   *      mc-pulse keyframe (opacity/transform only) - "this screen is a
+   *      live system," not a static form, on every single panel-based page.
+   */
+  /* Nova reskin: ONE solid accent family per panel (--tone/--acc, set by
+   * .p-cyan/.p-teal/.p-violet/.p-amber/.p-blue/.p-magenta - see the token
+   * block above and PanelAccentAssigner.js, which applies one of those six
+   * classes to every .panel/.glass-card app-wide automatically). No
+   * gradients anywhere on the panel itself per the brief ("no gradient
+   * fills") - background is the flat --tone, the only color accent is the
+   * top instrument edge (--acc) and the corner instrument code
+   * (.panel-tick). Falls back to --hud-cyan/--surface-card if a panel
+   * hasn't been tagged yet (first paint before the assigner runs, or a
+   * screen rendered outside .app-content). */
+  /* Normalized panel (redesign 2026-07-21): one uniform card standard for
+   * every .panel app-wide. Removed the per-panel colored top edge + the
+   * PanelAccentAssigner rainbow (different panels rendering different accent
+   * colors is the opposite of a standard), the infinite opacity-pulsing aura
+   * glow, the sci-fi "SYS-01" corner instrument code, and the
+   * translate-on-hover lift (things moving on hover read as cheap). A panel is
+   * now a quiet, flat surface - 1px border, soft shadow, consistent radius -
+   * matching AuthKit's Card and the rest of the redesigned system. The
+   * panel-aura keyframes and PanelAccentAssigner still exist but no longer
+   * drive any visible style. */
+  .panel {
+    @apply relative mb-6 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-6 shadow-sm;
+    animation: fade-in-up 0.35s ease-out both;
+  }
+
+  /* Stage 3/4 of the console-wide cinematic redesign: every existing .panel
+   * (Agents, Playground, Knowledge, Providers, Tools, Workflows list, every
+   * Admin sub-page) picks up the glass surface in dark mode automatically -
+   * same class name, same DOM, same Playwright selectors, just the surface
+   * itself goes translucent/blurred instead of a flat dark card, matching
+   * the shell (Stage 2) and dashboard (Stage 3). This one rule is what
+   * carries the redesign onto every panel-based screen in the app at once,
+   * rather than needing a bespoke dark-mode override per page. */
+  /* Dark mode keeps the same solid --tone background (set by the .p-*
+   * class), just adds the frosted-glass blur on top - no longer overrides
+   * background to a flat glass tint, since "one solid colour, no gradient"
+   * needs to hold in dark mode too. */
+  :root[data-mode="dark"] .panel {
+    border-color: var(--hud-line);
+    backdrop-filter: blur(10px);
+  }
+
+  /* .glass-card - same accent system as .panel (this is the other base
+   * container class every page uses; PanelAccentAssigner.js tags both). */
+  .glass-card {
+    @apply relative rounded-2xl border p-6 shadow-sm backdrop-blur-md;
+    background: var(--tone, var(--glass-surface));
+    border-color: var(--hud-line);
+    border-top: 3px solid var(--acc, var(--hud-cyan));
+  }
+
+  .glass-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px -14px var(--acc, var(--hud-cyan));
+  }
+
+  /* Cinematic gradient headline text, matching .mkt-gradient-text - opt-in
+   * on a <span> around the word/phrase that should carry the accent
+   * gradient, same technique as the marketing site. */
+  .gradient-text {
+    background-image: var(--accent-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* --- Panel accent families (nova reskin) --------------------------------
+   * .p-cyan/.p-teal/.p-violet/.p-amber/.p-blue/.p-magenta just copy one
+   * --p-*-tone/--p-*-acc pair (see the :root token blocks) into the two
+   * variables .panel/.glass-card actually read. PanelAccentAssigner.js
+   * applies one of these six to every panel app-wide, cycling in this
+   * order, so "different panels use different colours from the same
+   * curated family" needs zero per-page edits. */
+  .p-cyan {
+    --tone: var(--p-cyan-tone);
+    --acc: var(--p-cyan-acc);
+  }
+  .p-teal {
+    --tone: var(--p-teal-tone);
+    --acc: var(--p-teal-acc);
+  }
+  .p-violet {
+    --tone: var(--p-violet-tone);
+    --acc: var(--p-violet-acc);
+  }
+  .p-amber {
+    --tone: var(--p-amber-tone);
+    --acc: var(--p-amber-acc);
+  }
+  .p-blue {
+    --tone: var(--p-blue-tone);
+    --acc: var(--p-blue-acc);
+  }
+  .p-magenta {
+    --tone: var(--p-magenta-tone);
+    --acc: var(--p-magenta-acc);
+  }
+
+  /* --- Dock item accent colors ---------------------------------------------
+   * Direct feedback: "highlight menu in different colours as per chosen
+   * theme and colour, users should come to know this is the menu." Each
+   * dock item picks up a --dock-acc variable, one per item, rotating
+   * through the same six curated hues as PanelAccentAssigner's --p-*-acc
+   * family - but NOT by reusing --p-*-acc directly (that was a real bug,
+   * found in the follow-up full-site audit): --p-*-acc is tuned per mode
+   * assuming it lands on a same-mode --p-*-tone background, while the
+   * dock's own panel deliberately INVERTS (--dock-panel is dark in light
+   * mode, white in dark mode - "highlighted in dark if theme is light and
+   * light if theme is dark"). Reusing --p-*-acc verbatim meant dark mode's
+   * neon accents (tuned for a dark surface) landed on the dock's now-white
+   * panel and nearly vanished (as low as 1.47:1 contrast). The dedicated
+   * --dock-acc-* tokens above (defined once per :root block, next to their
+   * --p-*-acc siblings) are each verified against THIS mode's actual
+   * (inverted) --dock-panel instead, so the dock stays theme-aware without
+   * the contrast regression. BottomDock.js assigns one of these six
+   * classes to each nav section/item in order, cycling every 6. */
+  .dock-c-cyan {
+    --dock-acc: var(--dock-acc-cyan);
+  }
+  .dock-c-teal {
+    --dock-acc: var(--dock-acc-teal);
+  }
+  .dock-c-violet {
+    --dock-acc: var(--dock-acc-violet);
+  }
+  .dock-c-amber {
+    --dock-acc: var(--dock-acc-amber);
+  }
+  .dock-c-blue {
+    --dock-acc: var(--dock-acc-blue);
+  }
+  .dock-c-magenta {
+    --dock-acc: var(--dock-acc-magenta);
+  }
+
+  .panel h2 {
+    @apply m-0 mb-3 text-base font-semibold text-[var(--text-primary)];
+  }
+
+  .panel .hint {
+    @apply -mt-1 mb-3 text-sm leading-relaxed text-[var(--text-muted)];
+  }
+
+  .row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .field {
+    @apply mb-3 flex flex-col gap-1.5;
+  }
+
+  /* A <Label> stacked directly above its field in a plain block wrapper had no space of its own: the label sat
+   * against the input's top edge ("Table name" over its box). Give it a small gap, but ONLY where the wrapper does
+   * not already provide spacing or lay the label out sideways: flex/grid parents (gap), space-y parents (margin on
+   * the sibling), .field (gap) and .row/.vd-* inline groups are left exactly as they were. */
+  :where(div, section, fieldset, form, li, p):not(
+      [class~="flex"],
+      [class~="inline-flex"],
+      [class~="grid"],
+      [class~="field"],
+      [class~="row"],
+      [class*="space-y"],
+      [class*="gap-"]
+    )
+    > [data-slot="label"]:not(:last-child) {
+    margin-bottom: 0.375rem;
+  }
+
+  .field label {
+    @apply text-xs font-medium text-[var(--text-muted)];
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="number"],
+  input[type="email"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    @apply rounded-lg border border-[var(--surface-border-strong)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)] shadow-sm outline-none transition-[border-color,box-shadow];
+    @apply placeholder:text-[var(--text-faint)] hover:border-[var(--surface-border-strong)] focus:border-[var(--accent-500)] focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50;
+    --tw-ring-color: var(--accent-glow);
+  }
+
+  textarea {
+    @apply min-h-[5rem] resize-y;
+  }
+
+  /* Native checkbox/radio - one consistent brand-accent tick app-wide
+   * (redesign 2026-07-21), instead of the browser default blue. accent-color
+   * keeps the native control (accessible, keyboard-operable) while matching
+   * the rest of the system's accent. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--accent-500);
+    cursor: pointer;
+  }
+  input[type="checkbox"]:focus-visible,
+  input[type="radio"]:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+  }
+
+  /* --- Custom Select (Select.js) ------------------------------------------
+   * Replaces the native <select> across the console per direct feedback
+   * ("selecting drop down feels old style") - a trigger button styled like
+   * the existing input/select rule above, plus a floating options panel that
+   * reuses the same popover-in animation as ThemePicker/CredentialHelp so it
+   * feels like the same design system, not a bolted-on widget. The native
+   * `select` rule above is left in place as a fallback for any stray
+   * <select> a future edit might add, but every call site listed in the
+   * console audit has been migrated to this component. */
+  .select-root {
+    @apply relative inline-block w-full;
+  }
+
+  .select-trigger {
+    @apply flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--surface-border-strong)] bg-[var(--surface-card)] px-3 py-2 text-left text-sm font-normal text-[var(--text-primary)] shadow-sm outline-none transition;
+    @apply hover:bg-[var(--surface-hover)] focus:border-[var(--accent-500)] focus:ring-2;
+    --tw-ring-color: var(--accent-glow);
+  }
+
+  .select-trigger-disabled {
+    @apply cursor-not-allowed opacity-50 hover:bg-[var(--surface-card)];
+  }
+
+  .select-trigger-value {
+    @apply truncate;
+  }
+
+  .select-trigger-placeholder {
+    @apply text-[var(--text-faint)];
+  }
+
+  .select-chevron {
+    @apply flex-shrink-0 text-[var(--text-muted)] transition-transform duration-150;
+  }
+
+  .select-chevron-open {
+    @apply rotate-180;
+  }
+
+  .select-popover {
+    @apply absolute left-0 right-0 top-[calc(100%+0.375rem)] z-30 max-h-64 overflow-y-auto rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-1.5 shadow-xl;
+    transform-origin: top;
+    animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .select-option {
+    @apply flex w-full items-center justify-between gap-2 rounded-lg border-none bg-transparent px-2.5 py-2 text-left text-sm font-normal text-[var(--text-secondary)] shadow-none transition;
+  }
+
+  .select-option-active {
+    /* Was bg-[var(--surface-hover)] alone - measured well under the 3:1
+     * non-text contrast minimum against the popover's own surface in both
+     * themes (color audit follow-up). An accent-tinted fill plus a solid
+     * left rule gives a cue that actually clears it. */
+    @apply text-[var(--text-primary)];
+    background: color-mix(in srgb, var(--accent-500) 12%, var(--surface-hover));
+    box-shadow: inset 2px 0 0 0 var(--accent-600);
+  }
+
+  .select-option-selected {
+    @apply font-medium text-[var(--accent-600)];
+  }
+
+  .select-empty {
+    @apply px-2.5 py-2 text-sm text-[var(--text-faint)];
+  }
+
+  /* Search opt-in (Select's `searchable` prop) - direct feedback: "select
+   * from a modern dropdown by searching." Sits inside the popover itself
+   * (not the trigger) so the trigger keeps showing the current value like
+   * every other Select, and the search box only exists while the list is
+   * actually open. Auto-focused on open (see Select.js's effect). */
+  .select-search {
+    @apply mb-1 w-full rounded-lg border border-[var(--surface-border)] bg-[var(--surface-page)] px-2.5 py-1.5 text-sm text-[var(--text-primary)] outline-none transition;
+    @apply focus:border-[var(--accent-500)] focus:ring-2;
+    --tw-ring-color: var(--accent-glow);
+  }
+
+  /* Custom-value row (Select's `allowCustom` prop) - visually distinct
+   * (dashed border, italic) from a real curated option so it always reads
+   * as "type this in as a new value," never mistaken for an existing
+   * choice. */
+  .select-option-custom {
+    @apply border border-dashed border-[var(--surface-border-strong)] italic text-[var(--text-muted)];
+  }
+
+  /* Opt-in modifier for a Select dropped inside a `.row` (flex) next to a
+   * button rather than stacked full-width in a `.field` - keeps the same
+   * "shrink to content, min sensible width" footprint the native <select>
+   * it replaced had, instead of stretching to fill the row and wrapping the
+   * button onto its own line. */
+  .select-inline {
+    @apply w-auto min-w-[12rem] flex-1;
+  }
+}

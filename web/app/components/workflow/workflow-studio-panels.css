@@ -1,0 +1,330 @@
+/* ---- Floating side panels (>= 900px) ------------------------------------- */
+
+.wf-studio-panel {
+  display: contents;
+}
+
+@media (min-width: 900px) {
+  .ax-wf-studio .wf-studio-panel {
+    position: absolute;
+    z-index: 20;
+    top: var(--wf-top);
+    bottom: var(--wf-gap);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: 16px;
+    container-type: inline-size;
+    transition:
+      width 0.24s var(--wf-ease),
+      opacity 0.2s ease,
+      translate 0.24s var(--wf-ease);
+  }
+
+  .ax-wf-studio .wf-studio-left {
+    left: var(--wf-gap);
+    width: var(--wf-left-w);
+  }
+
+  .ax-wf-studio .wf-studio-right {
+    right: var(--wf-gap);
+    width: var(--wf-right-w);
+  }
+
+  .ax-wf-studio .wf-studio-panel[data-mode="rail"] {
+    width: var(--wf-rail);
+  }
+
+  .ax-wf-studio .wf-studio-panel[data-mode="hidden"] {
+    display: none;
+  }
+
+  /* Zen: slide the panels away rather than just vanishing. */
+  .ax-wf-studio.ax-wf-zen > .ax-wf-topbar {
+    opacity: 0.55;
+  }
+
+  .ax-wf-studio.ax-wf-zen > .ax-wf-topbar:hover,
+  .ax-wf-studio.ax-wf-zen > .ax-wf-topbar:focus-within {
+    opacity: 1;
+  }
+
+  /* Title-left, collapse-right on BOTH panels (the console's panel-chrome
+     convention) - the right panel used to flip the icon to the label's
+     left, which read as misaligned next to the inspector's content. */
+  .ax-wf-studio .wf-studio-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    min-height: 44px;
+    padding: 6px 8px 4px 12px;
+    border-bottom: 1px solid var(--wf-glass-border);
+  }
+
+  /* The inspector's content runs on a 16px gutter - give its head label the
+     same left edge. */
+  .ax-wf-studio .wf-studio-right .wf-studio-head {
+    padding-left: 16px;
+  }
+
+  .ax-wf-studio .wf-studio-head-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ax-wf-studio .wf-studio-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .ax-wf-studio .wf-studio-body[data-collapsed] {
+    display: none;
+  }
+
+  /* The wrapped components drop their own column chrome - the glass panel is
+     the chrome now - and scroll inside it. */
+  .ax-wf-studio .wf-studio-body > .ax-wf-palette {
+    width: auto;
+    height: auto;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px 10px 12px;
+    scrollbar-width: thin;
+  }
+
+  .ax-wf-studio .wf-studio-body > .ax-wf-inspector {
+    width: auto;
+    height: auto;
+    flex: 1;
+    min-height: 0;
+    border: 0;
+    /* 15px, not 16: the panel's own border consumes the outermost pixel of
+       its corner radius, so the inner surface sits flush at r-1. */
+    border-radius: 0 0 15px 15px;
+    background: transparent;
+    /* No scroll on the inspector root - header, tab strip and footer pin
+       while .ax-wf-tab-body / .workflow-inspector-scroll scroll inside.
+       (overflow-y:auto here let the whole panel content scroll, so the
+       footer drifted off-screen and the head row floated over it.) */
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  /* The node drawer's own X duplicates the panel head's collapse control
+     once it's docked (it stays - the <900px off-canvas drawer still needs
+     it, the head is hidden there). */
+  .ax-wf-studio .wf-node-close {
+    display: none;
+  }
+
+  /* Resize handle on the panel's inner edge. */
+  .ax-wf-studio .wf-studio-resize {
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    width: 12px;
+    cursor: col-resize;
+    touch-action: none;
+    z-index: 3;
+  }
+
+  .ax-wf-studio .wf-studio-left .wf-studio-resize {
+    right: -7px;
+  }
+
+  .ax-wf-studio .wf-studio-right .wf-studio-resize {
+    left: -7px;
+  }
+
+  .ax-wf-studio .wf-studio-resize::after {
+    content: "";
+    position: absolute;
+    inset: 0 5px;
+    border-radius: 2px;
+    background: var(--primary, #6d5efc);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .ax-wf-studio .wf-studio-resize:hover::after,
+  .ax-wf-studio .wf-studio-resize:active::after,
+  .ax-wf-studio .wf-studio-resize:focus-visible::after {
+    opacity: 0.75;
+  }
+
+  .ax-wf-studio .wf-studio-resize:focus-visible {
+    outline: none;
+  }
+
+  /* Collapsed rail. */
+  .ax-wf-studio .wf-studio-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    min-height: 0;
+    padding: 8px 0;
+  }
+
+  .ax-wf-studio .wf-studio-rail-items {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding: 2px 0 4px;
+  }
+
+  .ax-wf-studio .wf-studio-rail-items::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ax-wf-studio .wf-studio-rail-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .ax-wf-studio .wf-studio-rail-sep {
+    display: block;
+    width: 22px;
+    height: 1px;
+    margin: 3px 0;
+    background: var(--wf-glass-border);
+  }
+}
+
+/* Rail node tiles are plain <button>s: the global button{} base (border,
+   card bg, padding, shadow) must be reset (web-design-system memory). */
+.ax-wf-studio .wf-studio-rail-node {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.ax-wf-studio .wf-studio-rail-node {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--node-color, #6d5efc);
+  box-shadow:
+    0 4px 10px -4px color-mix(in oklab, var(--node-color, #6d5efc) 80%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+  cursor: grab;
+  transition:
+    scale 0.15s var(--wf-ease),
+    box-shadow 0.15s ease;
+}
+
+.ax-wf-studio .wf-studio-rail-node:hover {
+  scale: 1.08;
+}
+
+.ax-wf-studio .wf-studio-rail-node:active {
+  cursor: grabbing;
+}
+
+.ax-wf-studio .wf-studio-rail-node:focus-visible {
+  outline: 2px solid var(--primary, #6d5efc);
+  outline-offset: 2px;
+}
+
+/* ---- See-through while you work under a panel --------------------------- */
+
+/* Dragging a node, panning, or box-selecting: the chrome fades so the graph
+   underneath stays visible, then returns the moment the gesture ends. */
+.ax-wf-studio:has(.react-flow__node.dragging, .react-flow__pane.dragging, .react-flow__selection)
+  :is(.wf-studio-panel, .ax-wf-describe-bar, .ax-wf-notices > *) {
+  opacity: 0.28;
+}
+
+.ax-wf-studio:has(.react-flow__node.dragging, .react-flow__pane.dragging, .react-flow__selection) > .ax-wf-topbar {
+  opacity: 0.5;
+}
+
+.ax-wf-studio > .ax-wf-topbar,
+.ax-wf-studio .ax-wf-describe-bar,
+.ax-wf-studio .ax-wf-notices > * {
+  transition: opacity 0.2s ease;
+}
+
+/* ---- Small screens --------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  /* Off-canvas drawers are position:fixed and must stack over the app
+     header as before - no stacking context on the shell here. */
+  .ax-wf-shell.ax-wf-studio {
+    isolation: auto;
+  }
+
+  .ax-wf-studio > .ax-wf-topbar {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ax-wf-studio > .ax-wf-topbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ax-wf-studio .ax-wf-tb-studio {
+    display: none;
+  }
+
+  /* The bar scrolls sideways here, so groups keep their natural width. */
+  .ax-wf-studio .ax-wf-tb-identity {
+    flex: none;
+    overflow: visible;
+  }
+
+  .ax-wf-studio .ax-wf-describe-bar {
+    width: calc(100% - 24px);
+    left: 50%;
+  }
+
+  .ax-wf-studio .wf-studio-head,
+  .ax-wf-studio .wf-studio-rail,
+  .ax-wf-studio .wf-studio-resize {
+    display: none;
+  }
+
+  .ax-wf-studio .wf-studio-body {
+    display: contents;
+  }
+
+  /* The off-canvas drawers need an opaque console surface over the backdrop. */
+  .ax-wf-studio .ax-wf-palette,
+  .ax-wf-studio .ax-wf-inspector {
+    background: var(--card);
+    border-color: var(--border);
+  }
+
+  .ax-wf-studio .ax-wf-palette {
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-wf-studio *,
+  .ax-wf-studio *::before,
+  .ax-wf-studio *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

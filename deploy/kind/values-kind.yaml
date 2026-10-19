@@ -1,0 +1,69 @@
+# VegaDuta on a local kind cluster (deploy/kind/kind-config.yaml): everything bundled,
+# plain HTTP on *.127.0.0.1.nip.io (resolves to 127.0.0.1 from the host; inside the
+# cluster only the in-cluster Service names are used), small resource requests.
+#
+#   helm install vegaduta deploy/helm/charts/vegaduta -n vegaduta --create-namespace \
+#     -f deploy/kind/values-kind.yaml
+#
+# Needs ~8 GiB of RAM for Docker. Not for production: no TLS, no backups, single replicas.
+global:
+  domain: 127.0.0.1.nip.io
+  scheme: http
+  tls:
+    enabled: false
+  ingress:
+    enabled: true
+    className: nginx
+  networkPolicy:
+    enabled: false
+  components:
+    coreJobs: true
+    web: true
+    sidecar: true
+
+postgres:
+  instances: 1
+  storage:
+    size: 2Gi
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+
+valkey:
+  persistence:
+    size: 512Mi
+
+seaweedfs:
+  volumeSizeLimitMB: 256
+  persistence:
+    size: 2Gi
+
+keycloak:
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits: { memory: 1Gi }
+  topologySpread: { enabled: false }
+
+core:
+  topologySpread: { enabled: false }
+  resources:
+    requests: { cpu: 250m, memory: 1Gi }
+    limits: { memory: 2560Mi }
+
+core-jobs:
+  resources:
+    requests: { cpu: 100m, memory: 768Mi }
+    limits: { memory: 1536Mi }
+
+web:
+  replicaCount: 1
+  topologySpread: { enabled: false }
+  resources:
+    requests: { cpu: 50m, memory: 192Mi }
+    limits: { memory: 512Mi }
+
+sidecar:
+  topologySpread: { enabled: false }
+  resources:
+    requests: { cpu: 100m, memory: 1Gi }
+    limits: { memory: 3Gi }

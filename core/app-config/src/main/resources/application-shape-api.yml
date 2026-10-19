@@ -1,0 +1,54 @@
+# "shape-api" profile - the INTERACTIVE deployment shape of a split deployment
+# (api + jobs, one image). Activate it on the pods that serve chat; run at least
+# one pod with the "shape-jobs" profile or NONE of the background work below
+# will run anywhere. Do not activate it on a single-process deployment - the
+# default (no shape profile) is "everything runs here", exactly as before.
+#
+# Full ownership tables and rationale: docs/deploy/DEPLOYMENT-SHAPES.md.
+
+app:
+  scheduling:
+    # @Scheduled beans owned by the jobs shape. Not registered in this JVM.
+    skip-bean-classes:
+      - com.agenticai.core.agents.job.AgentJobRunner
+      - com.agenticai.core.agents.job.ownership.AgentJobLeaseSweep
+      - com.agenticai.core.agents.job.approval.AgentJobApprovalSweep
+      - com.agenticai.core.agents.job.schedule.AgentScheduleTicker
+      - com.agenticai.core.agents.quota.DailyQuotaResetScheduler
+      - com.agenticai.core.agents.experiment.AgentExperimentService
+      - com.agenticai.core.workflow.WorkflowScheduler
+      - com.agenticai.core.workflow.WorkflowRunRecoveryJob
+      - com.agenticai.core.eventbus.webhook.WebhookDeliveryRelay
+      - com.agenticai.core.eventbus.WorkflowEventOutboxRelay
+      - com.agenticai.core.imagegen.VideoGenerationJobRunner
+      - com.agenticai.core.knowledge.KnowledgeIngestionJobRunner
+      # Re-embedding a whole knowledge base is as heavy as ingestion: keep it off the chat pods.
+      - com.agenticai.core.knowledge.KnowledgeReembedJobRunner
+      - com.agenticai.core.omnichannel.email.EmailInboundPollingJob
+      - com.agenticai.core.omnichannel.x.XDmPollingJob
+      - com.agenticai.core.platform.LlmUsageRollupScheduler
+      - com.agenticai.core.chat.LlmSpendCounterReconciler
+      - com.agenticai.core.platform.auditseal.AuditSealSweep
+      - com.agenticai.core.providers.ProviderModelCatalogService
+      - com.agenticai.core.chat.ModelCapabilitySummaryGenerationService
+      - com.agenticai.core.tenancy.AbandonedSignupCleanupJob
+      - com.agenticai.core.tenancy.CompGrantExpiryReverter
+      - com.agenticai.core.tenancy.demo.DemoSessionExpiryJob
+      - com.agenticai.core.approval.RetryFailedActionsJob
+      - com.agenticai.core.common.resolution.ChannelSessionResolutionSweep
+    # Boot-time @EventListener sweeps owned by the jobs shape. The class's only
+    # listener is the ApplicationReadyEvent one (verified), so silencing the class
+    # is exact.
+    skip-listener-classes:
+      - com.agenticai.core.agents.job.durability.AgentJobBootReconciliation
+      - com.agenticai.core.agents.quota.DailyQuotaResetScheduler
+
+  agent-jobs:
+    # POST /api/agents/{id}/jobs only writes the durable QUEUED row; the jobs
+    # shape's poller claims it (<= app.agent-jobs.poll-interval later). No agent
+    # turn runs on this JVM.
+    run-now-mode: enqueue
+    # A deadline/orphan sweep now runs in a different pod from the worker, so
+    # the worker must notice its row was terminalised (cancel already works via
+    # the cancel_requested column regardless of this flag).
+    interrupt-on-external-terminal: true

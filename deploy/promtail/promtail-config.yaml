@@ -1,0 +1,79 @@
+# Tails every container's stdout via
+# the Docker socket and ships it to Loki - additive and zero-config per
+# service (no per-container labels/annotations required to opt in), so this
+# starts working for `core`/`web`/every other service in this
+# compose file the moment `promtail` is up, with no changes to how any of
+# them log today. Structured JSON console logging (already wired via
+# LOGGING_STRUCTURED_FORMAT_CONSOLE on the `core` service, see that
+# service's own comment) is what makes those particular logs queryable by
+# field once they land in Loki - Promtail itself is format-agnostic and
+# ships plain-text lines from every other service just as well.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+# Avoids re-shipping the same lines after a promtail container restart -
+# same "remember where we left off" role sessionMemoryService/etc. play
+# elsewhere in this project, just for log-tailing instead of chat history.
+# Backed by the promtail-positions named volume (see docker-compose.yml)
+# rather than an ephemeral path, so a `docker compose restart promtail`
+# doesn't replay the whole container log history into Loki again.
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      # docker-socket-proxy: GET-only subset of the Docker API, never the raw socket.
+      - host: tcp://docker-socket-proxy:2375
+        refresh_interval: 5s
+    # Infra audit (2026-07-27) - promotes two fields out of the JSON body into
+    # real indexed Loki labels, instead of leaving them only queryable via a
+    # slower `|~`/`| json` line filter. `core`'s containerized logging is
+    # already structured JSON (LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs, see
+    # docker-compose.yml's `core` service) - the entry Promtail receives via
+    # docker_sd_configs is that raw JSON line, unwrapped, so a `json` stage can
+    # parse it directly with no extra `docker` unwrap stage needed first.
+    # "tenantId" is the actual MDC field TenantContextFilter populates (see
+    # that class's own javadoc/source - NOT "tenant_id" with an underscore,
+    # despite the JWT claim it's read from being named that); Boot's
+    # structured-logging formats emit every MDC entry as a flat top-level JSON
+    # field verbatim, so "tenantId" is exactly the key present. "log.level" is
+    # Boot's own ECS-format field for the log level (a literal dot IN the key
+    # name, not a nested object - same flat-key convention "service.name"
+    # etc. use in this same output) and needs the JMESPath-quoted-literal form
+    # below (`"log.level"`) so it's read as one field name rather than parsed
+    # as nested `log` -> `level` access. Lines with no JSON body (or non-`core`
+    # containers not using structured logging) simply produce no match for
+    # either expression - the `labels` stage below only sets a label when its
+    # extracted value is non-empty, so those lines are unaffected, not broken.
+    pipeline_stages:
+      - json:
+          expressions:
+            tenant_id: tenantId
+            level: '"log.level"'
+      - labels:
+          tenant_id:
+          level:
+    relabel_configs:
+      # Container name (Compose's own `container_name:` value, e.g.
+      # "agentic-core") as the primary label - this is what you filter by in
+      # Grafana/LogQL ({container="agentic-core"}), same "service name" role
+      # `compose_service` labels play in other Promtail setups, just matched
+      # to how this file's services are actually named.
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+      # Excludes Promtail's and Loki's own containers from the set they ship
+      # - not strictly necessary (their own logs are low-volume and harmless
+      # to include) but avoids a trivial self-referential feedback loop being
+      # the first thing anyone notices in a fresh Grafana Explore query.
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(agentic-promtail|agentic-loki)'
+        action: drop

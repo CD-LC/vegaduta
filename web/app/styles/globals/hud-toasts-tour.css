@@ -1,0 +1,502 @@
+/* ============================================================
+ * HUD alert stack (ToastHost.js)
+ * "All errors should be popup and also any warnings" - every failed api.js
+ * call already raises one of these (see toJson()'s toastBus.js wiring);
+ * anything else can push one manually via toast.warn()/success()/info().
+ * Fixed top-right, above the floating nav orb's own z-index (999) and the
+ * reactive background canvas, so an alert is never hidden behind either.
+ * ============================================================ */
+.hud-toast-stack {
+  position: fixed;
+  top: 1.1rem;
+  right: 1.1rem;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: min(22rem, calc(100vw - 2.2rem));
+  pointer-events: none;
+}
+
+.hud-toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 2rem 0.7rem 0.85rem;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  pointer-events: auto;
+  background: var(--hud-panel);
+  border: 1px solid var(--hud-line);
+  box-shadow: 0 14px 36px -14px rgba(15, 23, 42, 0.35);
+  color: var(--text-primary);
+}
+
+:root[data-mode="dark"] .hud-toast {
+  background: color-mix(in srgb, var(--hud-panel) 92%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 44px -16px rgba(0, 0, 0, 0.6);
+}
+
+/* Left accent rim, colored per kind - the one thing that differs between
+ * error/warning/success/info; everything else about the card is identical. */
+.hud-toast::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+}
+
+.hud-toast-error::before {
+  background: var(--danger-text);
+}
+.hud-toast-warning::before {
+  background: var(--hud-warn);
+}
+.hud-toast-success::before {
+  background: var(--hud-ok);
+}
+.hud-toast-info::before {
+  background: var(--hud-cyan);
+}
+
+.hud-toast-icon {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.hud-toast-error .hud-toast-icon {
+  color: var(--danger-text);
+}
+.hud-toast-warning .hud-toast-icon {
+  color: var(--hud-warn);
+}
+.hud-toast-success .hud-toast-icon {
+  color: var(--hud-ok);
+}
+.hud-toast-info .hud-toast-icon {
+  color: var(--hud-cyan);
+}
+
+.hud-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.hud-toast-kind {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+}
+
+.hud-toast-message {
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.hud-toast-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* At least a 24x24 CSS-pixel hit area (WCAG 2.5.8) regardless of the
+   * console-density root rescale - was 1.3rem, well under the floor at that
+   * density (responsive audit follow-up). */
+  width: max(1.5rem, 24px);
+  height: max(1.5rem, 24px);
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hud-text-dim);
+  cursor: pointer;
+}
+
+.hud-toast-close:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* Countdown rim along the bottom edge - transform-only (scaleX), same
+ * compositor-safe discipline as every other looping/timed animation in this
+ * app (see dashboard.css's Law-1 comments). Skipped under reduced-motion:
+ * the toast still auto-dismisses on the same timer, it just doesn't show
+ * the countdown visually. */
+.hud-toast-timer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  transform-origin: left;
+  background: var(--hud-cyan);
+  opacity: 0.55;
+  animation-name: hud-toast-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes hud-toast-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-toast-timer {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+ * HUD onboarding tour + language switcher restyle
+ * Rebuilds OnboardingTour.js's previously hardcoded inline-styled modal
+ * (predates the design system entirely) and adds an animated HUD frame to
+ * LanguageSwitcher.js's popover, in the same corner-bracket/mono-label
+ * visual language as the toast stack and the Mission Control dashboard.
+ * ============================================================ */
+.hud-tour-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(5, 6, 15, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.hud-tour-card {
+  position: relative;
+  width: 100%;
+  max-width: 30rem;
+  padding: 1.6rem 1.6rem 1.4rem;
+  border-radius: 1.1rem;
+  overflow: hidden;
+  background: var(--hud-panel);
+  border: 1px solid var(--hud-line);
+  box-shadow: 0 30px 70px -24px rgba(15, 23, 42, 0.45);
+}
+
+:root[data-mode="dark"] .hud-tour-card {
+  background: color-mix(in srgb, var(--hud-panel) 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+/* Corner-bracket reticle REMOVED - same "nova reskin brief" call already
+ * applied to dashboard.css's .mc-bento-corners/.mc-status-corners: a
+ * preserveAspectRatio="none" SVG stretched non-uniformly over a wide/short
+ * card distorts strokes into a stray elongated line instead of a small
+ * bracket (reported directly: a long teal line running from the close
+ * button down through the card body). OnboardingTour.js no longer renders
+ * this SVG at all; this rule is kept only in case anything else still
+ * references the class name. */
+.hud-tour-corners {
+  display: none;
+}
+
+.hud-tour-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud-cyan);
+}
+
+.hud-tour-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hud-cyan);
+  box-shadow: 0 0 8px 2px var(--accent-glow-cyan);
+  animation: mc-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-tour-eyebrow-dot {
+    animation: none;
+  }
+}
+
+.hud-tour-close {
+  border: none;
+  background: transparent;
+  color: var(--hud-text-dim);
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 999px;
+}
+
+.hud-tour-close:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.hud-tour-title {
+  margin: 0.7rem 0 0.45rem;
+  font-family: var(--font-sora), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.hud-tour-body {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* flex-wrap (2026-09-11): this row is space-between with two text buttons
+ * whose widths are translation-dependent ("Not now" / "Continue in English"
+ * are far longer in several of the 30 locales). With nowrap they squeezed
+ * into each other and then overflowed the card on a phone; wrapping drops
+ * the primary onto its own line instead. Shared with OnboardingTour, which
+ * has the same two-button shape and the same exposure. */
+.hud-tour-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-top: 1.2rem;
+}
+
+.hud-tour-skip {
+  font-size: 0.78rem;
+  color: var(--hud-text-dim);
+}
+
+.hud-tour-skip:hover {
+  color: var(--hud-cyan);
+}
+
+.hud-tour-dots {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.9rem;
+}
+
+.hud-tour-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--surface-border-strong);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.hud-tour-dot-active {
+  background: var(--hud-cyan);
+  transform: scale(1.4);
+}
+
+.hud-tour-reopen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--hud-line);
+  background: var(--surface-card);
+  color: var(--hud-cyan);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* LanguageChoicePrompt.js - first-visit "choose your language" matrix, same
+ * .hud-tour-card shell as OnboardingTour but widened (.lang-choice-card) to
+ * fit a real grid of cells instead of a single tall list - a country like
+ * India can offer 20+ languages at once, and a scrolling single-column list
+ * of that many options reads as an afterthought, not a deliberate picker. */
+.lang-choice-card {
+  max-width: 40rem;
+  width: 100%;
+}
+
+/* Header row: eyebrow on the left, count pill on the right, never wrapping.
+ * The eyebrow is the shrinkable one (min-width:0 so its text can ellipsize
+ * rather than force a wrap); the pill is white-space:nowrap and must keep
+ * its intrinsic width, so it is the one pinned with flex-shrink:0. */
+.lang-choice-head {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lang-choice-head .hud-tour-eyebrow {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lang-choice-count {
+  flex: 0 0 auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--hud-cyan);
+  border: 1px solid var(--hud-line);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  white-space: nowrap;
+}
+
+.lang-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  max-height: 17rem;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+/* Row gap was 0.1rem (~1.6px) under a label line-height of 1.3. That is
+ * fine for Latin, but this grid is mostly Indic: Devanagari matras, the
+ * Gurmukhi/Bengali/Ol Chiki descenders and the Perso-Arabic forms in
+ * ks/ur/sd all paint OUTSIDE a 1.3 line box, so their ink landed on top of
+ * the locale code sitting in row 2 - the reported overlap. A taller label
+ * line box plus a real row gap gives that ink somewhere to go. */
+.lang-choice-cell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.3rem 0.45rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--hud-line);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.lang-choice-cell:hover,
+.lang-choice-cell:focus-visible {
+  background: var(--surface-hover);
+  border-color: var(--hud-cyan);
+  transform: translateY(-1px);
+}
+
+.lang-choice-cell-index {
+  grid-row: 1;
+  grid-column: 1;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--hud-text-dim);
+}
+
+.lang-choice-cell-label {
+  grid-row: 1;
+  grid-column: 2;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.5;
+  /* A long native name (कोंकणी, ᱥᱟᱱᱛᱟᱲᱤ, ꯃꯤꯇꯩꯂꯣꯟ) wraps inside its cell
+   * instead of widening the auto-fill track and forcing the whole grid down
+   * to one column. */
+  overflow-wrap: anywhere;
+}
+
+.lang-choice-cell-code {
+  grid-row: 2;
+  grid-column: 2;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+}
+
+/* Phone layout for the language matrix (mobile audit, 2026-09-11). None of
+ * the .lang-choice-* / .hud-tour-* rules above had a single media query, so
+ * this panel rendered at desktop metrics on a 360-375px screen: 3.2rem of
+ * fixed card padding left ~290px of content, one 9.5rem grid track no longer
+ * fit twice, and the 23-language India list collapsed into a single column
+ * inside a 17rem scroller with the footer clipped by .hud-tour-card's
+ * overflow:hidden. */
+@media (max-width: 640px) {
+  .lang-choice-card {
+    padding: 1.15rem 1.05rem 1.1rem;
+    /* Overrides .hud-tour-card's overflow:hidden on the Y axis only, so a
+     * card taller than the screen scrolls to its footer instead of having
+     * it silently cut off. 100dvh, not vh, so a mobile browser's collapsing
+     * URL bar doesn't hide the last row either. */
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .lang-choice-head {
+    gap: 0.5rem;
+  }
+
+  .lang-choice-head .hud-tour-eyebrow {
+    letter-spacing: 0.08em;
+  }
+
+  .lang-choice-grid {
+    /* 7.25rem (116px) keeps TWO columns on a 360px phone: 116*2 + 8px gap
+     * = 240px, inside the ~290px of content width the padding above leaves. */
+    grid-template-columns: repeat(auto-fill, minmax(7.25rem, 1fr));
+    /* The CARD is the scroll container on mobile (above), so the grid must
+     * not also scroll: nested scrollers on a touch screen mean a drag that
+     * starts inside the grid - i.e. almost every drag, since the grid is
+     * most of the card - never scrolls down to the footer buttons. */
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+
+  .lang-choice-cell {
+    padding: 0.55rem 0.6rem;
+  }
+
+  /* Full-width stacked buttons once the footer wraps - two half-width text
+   * buttons on a phone are both under the 44px touch target on the cross
+   * axis and ambiguous about which is primary. */
+  .lang-choice-card .hud-tour-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .lang-choice-card .hud-tour-footer > * {
+    width: 100%;
+    text-align: center;
+    padding-block: 0.6rem;
+  }
+}

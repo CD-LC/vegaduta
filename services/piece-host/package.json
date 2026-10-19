@@ -1,0 +1,16 @@
+{
+  "name": "@agenticai/piece-host",
+  "version": "0.1.0",
+  "description": "stdio MCP server that exposes allow-listed Activepieces community pieces (MIT) as MCP tools, for dynamic registration via VegaDuta's core/mcp registry.",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "describe": "node server.js --describe"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "Apache-2.0"
+}

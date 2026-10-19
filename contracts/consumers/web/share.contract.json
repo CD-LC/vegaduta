@@ -1,0 +1,107 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-share-agents-shareId",
+      "method": "GET",
+      "path": "/api/share/agents/{shareId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-agents-shareId-chat",
+      "method": "POST",
+      "path": "/api/share/agents/{shareId}/chat",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.message"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-agents-shareId-report",
+      "method": "POST",
+      "path": "/api/share/agents/{shareId}/report",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-agents-shareId-voice-token",
+      "method": "POST",
+      "path": "/api/share/agents/{shareId}/voice/token",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-agents-shareId-voice-turn",
+      "method": "POST",
+      "path": "/api/share/agents/{shareId}/voice/turn",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-share-workflows-shareId",
+      "method": "GET",
+      "path": "/api/share/workflows/{shareId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-workflows-shareId-report",
+      "method": "POST",
+      "path": "/api/share/workflows/{shareId}/report",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-workflows-shareId-run",
+      "method": "POST",
+      "path": "/api/share/workflows/{shareId}/run",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.message"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-share-workflows-shareId-turn",
+      "method": "POST",
+      "path": "/api/share/workflows/{shareId}/turn",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

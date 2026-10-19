@@ -1,0 +1,242 @@
+# "personal" Spring profile - one person, one laptop (or one small box you own):
+# the lightest way to run the platform. Opt-in and additive like every other
+# profile here: nothing in this file applies unless `personal` is in
+# SPRING_PROFILES_ACTIVE.
+#
+# Intended profile set (no `workflow`, so no Kafka/Redpanda; no `temporal`; no
+# `mcp`, so the slim core image is enough):
+#   SPRING_PROFILES_ACTIVE=security,knowledge,graph-memory,personal
+# scripts/vegaduta personal sets exactly this; deploy/compose/personal.yml is
+# the matching stack (postgres + valkey + core + web).
+#
+# What `personal` changes vs. the default profile set (the shared contract
+# names other tranche areas read are in the first block):
+#   - auth: local accounts in core instead of Keycloak (app.auth.mode)
+#   - agent taint tracking enforced, not just observed (app.agents.taint.mode)
+#   - STDIO MCP servers run under an OS sandbox (app.mcp.stdio.sandbox)
+#   - skills learning on (app.skills.learning.enabled)
+#   - learning proposals on (app.learning.proposals.enabled): the assistant proposes, you approve
+#   - billing off (app.edition.billing-enabled): no plans, quotas or gateways
+#   - tracing off, local file storage, in-process (legacy) workflow engine
+#   - small connection pools
+#   - the mail and telegram settings that normally ship inside the `workflow`
+#     profile, copied (as `lite` does) so email/telegram keep working without it
+#
+# What it does NOT remove, and why: Redis (Valkey) stays. Session memory, the
+# turn-cancel and budget counters, rate limits and the effect journal use Redis
+# scripts and atomic counters directly in ~60 classes; there is no in-memory
+# stand-in behind one abstraction, so personal.yml runs a 64 MB Valkey instead.
+# Kafka and Temporal are already off without the `workflow` / `temporal`
+# profiles (the Kafka event switch also stays off when no bootstrap server
+# resolves), so nothing here has to disable them.
+#
+# Every value stays env-overridable. Where a property is shared with another
+# area the env name is the relaxed-binding name of the property itself, so
+# APP_AUTH_MODE=keycloak puts a personal install back on Keycloak.
+
+app:
+  # ---- shared contract (read by other modules; defaults here are the personal ones) ----
+  auth:
+    # keycloak | local. `local` = accounts and sessions held by core itself.
+    mode: ${APP_AUTH_MODE:local}
+  agents:
+    taint:
+      # off | observe | enforce
+      mode: ${APP_AGENTS_TAINT_MODE:enforce}
+  tools:
+    auto-selection:
+      # One person's agent keeps about 15 tools on every turn (memory, guides, workspace, terminal) against the
+      # shared default cap of 12, so a request naming a family that only works as a set (driving a page:
+      # navigate, read, click, type) got one or two of its tools. 24 leaves room for the family; small-model mode
+      # still caps what a small model is shown.
+      max-tools-per-turn: ${TOOL_AUTO_SELECTION_MAX_TOOLS:24}
+      # The always-kept tools alone use most of the shared 3000-token default, which left a matching family
+      # (the rest of the browser tools) no room even with the count raised.
+      max-schema-tokens-per-turn: ${TOOL_AUTO_SELECTION_MAX_SCHEMA_TOKENS:6000}
+  google:
+    oauth:
+      # web | loopback. `loopback` = a Google "Desktop app" client: the redirect is this computer's own
+      # address (PUBLIC_API_URL must be localhost/127.0.0.1) and the exchange uses PKCE. Only personal
+      # installs get it by default; every other shape keeps `web` and its fixed https redirect URI
+      # (app.google.oauth.redirect-uri). Set GOOGLE_OAUTH_MODE=web to use a Web-application client here.
+      mode: ${GOOGLE_OAUTH_MODE:loopback}
+  mcp:
+    stdio:
+      # none | os | container
+      sandbox: ${APP_MCP_STDIO_SANDBOX:os}
+      # Comma-separated absolute paths a sandboxed child may not read, on top of the built-in
+      # credential list. The native launcher puts the checkout's deploy/compose directory here:
+      # .env and core.env hold the database passwords and APP_ENCRYPTION_KEY.
+      sandbox-extra-deny-read: ${VEGADUTA_MCP_DENY_READ:}
+    # Starter connectors (fetch, time, sequential-thinking): registered once for the owner's workspace on a
+    # start where the MCP runner is on (MCP_STDIO_SIDECAR_ENABLED=true; the launcher turns it on with its
+    # `tools` profile). A connector the owner deletes or edits is never put back. false = register none.
+    starter:
+      enabled: ${APP_MCP_STARTER_ENABLED:true}
+  skills:
+    learning:
+      enabled: ${APP_SKILLS_LEARNING_ENABLED:true}
+      # A drafted skill is replayed against its own turn before it is queued; a FAIL is dropped.
+      self-check:
+        enabled: ${APP_SKILLS_LEARNING_SELF_CHECK_ENABLED:true}
+  learning:
+    proposals:
+      # What the assistant proposes to learn (lessons, preferences, routines) waits here for approval.
+      enabled: ${APP_LEARNING_PROPOSALS_ENABLED:true}
+    lessons:
+      # Lessons from mistakes and corrections, filed as LESSON proposals (needs proposals.enabled).
+      enabled: ${APP_LEARNING_LESSONS_ENABLED:true}
+    preferences:
+      # Counts repeated style requests and approval habits, then proposes a preference (needs proposals on).
+      enabled: ${APP_LEARNING_PREFERENCES_ENABLED:true}
+    routines:
+      # Requests you repeat on a rhythm become a proposed scheduled task (you approve it).
+      enabled: ${APP_LEARNING_ROUTINES_ENABLED:true}
+      # The zone your "around 9am" is read in; blank = the server's own zone.
+      timezone: ${APP_LEARNING_ROUTINES_TIMEZONE:}
+    review:
+      # Daily memory review: proposes merging near-duplicate facts, dropping stale ones.
+      enabled: ${APP_LEARNING_REVIEW_ENABLED:true}
+  # The agent's own browser (browser_* tools): the person signs in once in a live view of the SAME headless page
+  # (human takeover), the login is kept as an encrypted profile, and the agent keeps driving that logged-in
+  # browser. The flags are on for a one-person install; they cost nothing without Chromium, because the tools are
+  # only offered when a Chromium binary exists (the slim core image has none: CORE_IMAGE_VARIANT=-full adds it, and
+  # GET /api/browser/automation/capabilities says browserAvailable=false plus a reason until then).
+  # Unchanged on purpose: the domain policy (BROWSER_ALLOWED_DOMAINS / BROWSER_BLOCKED_DOMAINS), the confirmation
+  # gate on irreversible clicks, takeover.require-explicit-allowlist (a takeover needs an allow-listed site or a
+  # profile with allowed domains), and TOTP (off: it reads authenticator seeds from the vault).
+  browser:
+    v2:
+      enabled: ${BROWSER_V2_ENABLED:true}
+    profiles:
+      enabled: ${BROWSER_PROFILES_ENABLED:true}
+    takeover:
+      enabled: ${BROWSER_TAKEOVER_ENABLED:true}
+  # A one-person install keeps its own spreadsheet-like tables - on by default
+  # here (the shared default keeps it off for multi-tenant servers).
+  data-tables:
+    enabled: ${DATA_TABLES_ENABLED:true}
+  edition:
+    billing-enabled: ${APP_EDITION_BILLING_ENABLED:false}
+  # Documents, agent memory and the per-turn query embedding. `auto` picks a cloud key if one is
+  # set, else an Ollama named in the environment (APP_EMBEDDINGS_OLLAMA_BASE_URL, or the local-AI
+  # bootstrap one), else - decided per call - the Ollama this install registered in the console's
+  # local-model wizard, else the sidecar; it never needs the sidecar container. The sidecar itself is off unless the launcher's `--profile rag` (or
+  # APP_SIDECAR_ENABLED=true) turns it on.
+  embeddings:
+    provider: ${APP_EMBEDDINGS_PROVIDER:auto}
+  sidecar:
+    enabled: ${APP_SIDECAR_ENABLED:false}
+  assistant:
+    local-shell:
+      # The Assistant's terminal (local_shell_read, local_shell) and file tools (workspace_*). Offered with the
+      # OS sandbox above (the native launcher, --native-core) or, in the container stack, with the
+      # workspace-runner container (--profile workspace sets runner-url). Without either it stays off.
+      enabled: ${APP_ASSISTANT_LOCAL_SHELL_ENABLED:true}
+      # One person's own laptop: commands run without a per-call approval card, inside the sandbox
+      # (or the workspace-runner container), still logged to the tool-call audit. A SUPERVISED-tier
+      # agent is still gated on every call. Set =true to restore per-command approval.
+      approval-required: ${APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED:false}
+      # The folder a command starts in and the only place it can write (the projects folder).
+      workspace: ${APP_ASSISTANT_LOCAL_SHELL_WORKSPACE:${user.home}/vegaduta-workspace}
+      runner-url: ${APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL:}
+      runner-secret: ${APP_ASSISTANT_LOCAL_SHELL_RUNNER_SECRET:}
+      # A build (mvn package, npm install) can take minutes; the runner stops a command at this limit.
+      max-timeout-seconds: ${APP_ASSISTANT_LOCAL_SHELL_MAX_TIMEOUT_SECONDS:1800}
+    desktop:
+      # Computer-use on the person's own screen: the local_desktop_* tools talk to the
+      # desktop-agent sidecar (services/desktop-agent) the person runs ON the laptop - grant it
+      # Accessibility + Screen Recording. Setting agent-url IS the opt-in; empty keeps the tools off.
+      agent-url: ${APP_ASSISTANT_DESKTOP_AGENT_URL:}
+      agent-secret: ${APP_ASSISTANT_DESKTOP_AGENT_SECRET:}
+      # These actions are NOT sandboxed - the pin parks press/click/type/key/open/activate for
+      # approval on shared installs. On this one-person profile commands run without asking (the
+      # sidecar's existence is already the opt-in); set =true to approve each GUI action.
+      approval-required: ${APP_ASSISTANT_DESKTOP_APPROVAL_REQUIRED:false}
+  llm:
+    http:
+      # A local model (the default Ollama row) on a laptop can take well over 90 s to send its first
+      # token once a turn carries file contents and build output; the shared default treated that as a
+      # dead provider and the chat showed "every model failed". 240 s stays under the browser's 300 s
+      # ceiling; step heartbeats keep the page's connection alive meanwhile.
+      stream-idle-timeout: ${LLM_HTTP_STREAM_IDLE_TIMEOUT:240s}
+  guardrails:
+    # One person's own install: a project build is dozens of file reads and writes per turn, and the
+    # shared-server cap (15) stopped it mid-way. Commands still each need an approval unless
+    # APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED=false (this profile's default) lifts the pin.
+    max-tool-calls-per-turn: ${GUARDRAILS_MAX_TOOL_CALLS_PER_TURN:150}
+  omnichannel:
+    rate-limit:
+      # Off everywhere else (opt-in); a personal install is a new surface with strangers
+      # able to message it, so it starts with the cap on.
+      enabled: ${APP_OMNICHANNEL_RATE_LIMIT_ENABLED:true}
+  # Recurring unattended runs of an agent ("every morning check my mail and ping me on
+  # WhatsApp") - off by default on shared installs; on a one-person install this is the
+  # heartbeat/proactive loop, and the same process ticks it. Each firing is a normal agent
+  # job (budget, caps, kill switch); a tool call that still needs approval parks instead of
+  # running, so nothing is ever auto-approved.
+  scheduled-tasks:
+    enabled: ${SCHEDULED_TASKS_ENABLED:true}
+    max-per-tenant: ${SCHEDULED_TASKS_MAX_PER_TENANT:25}
+  # ---- runtime shape ----
+  storage:
+    type: ${APP_STORAGE_TYPE:local}
+    local:
+      path: ${APP_STORAGE_LOCAL_PATH:/data/storage}
+  workflow:
+    execution-engine: legacy
+  # Copied (not moved) from application-workflow.yml - keep in sync (same as application-lite.yml).
+  telegram:
+    bot-token: ${TELEGRAM_BOT_TOKEN:}
+    webhook-base-url: ${TELEGRAM_WEBHOOK_BASE_URL:}
+    # No public URL on a laptop: receive messages by long polling. Ignored when a
+    # webhook base URL is set. Run in ONE process per bot.
+    polling:
+      enabled: ${TELEGRAM_POLLING_ENABLED:true}
+  mail:
+    from: ${WORKFLOW_MAIL_FROM:workflows@agentic-ai.local}
+
+management:
+  tracing:
+    enabled: false
+    sampling:
+      probability: 0.0
+  otlp:
+    tracing:
+      export:
+        enabled: false
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # The `security` profile has no default for this on purpose (AGENTS.md rule 4: a
+          # token issuer never falls back to localhost). With app.auth.mode=local there is no
+          # external issuer, so personal supplies a URN that names none and can never resolve:
+          # if something still tried Keycloak discovery it would fail closed, not reach a
+          # wrong host. Set KEYCLOAK_ISSUER_URI (and APP_AUTH_MODE=keycloak) to use Keycloak.
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:urn:vegaduta:personal:no-external-issuer}
+  data:
+    redis:
+      # A missing or slow Valkey degrades fast instead of hanging a request for the 5s default.
+      timeout: 2s
+  datasource:
+    # One user: the 15/5 defaults pin connections (and ~10 MB of Postgres backend memory each)
+    # that a single person never uses. personal.yml's Postgres allows 50 connections.
+    hikari:
+      maximum-pool-size: ${DB_HIKARI_MAX_POOL_SIZE:10}
+      minimum-idle: ${DB_HIKARI_MIN_IDLE:2}
+  # Copied (not moved) from application-workflow.yml - keep in sync. Leave SMTP_HOST unset to
+  # leave the email channel unconfigured; every consumer checks spring.mail.host and skips.
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

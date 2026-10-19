@@ -1,0 +1,456 @@
+# VegaDuta Platform Business & System Metrics - Comprehensive monitoring
+# Extends vegaduta-alerts.yml with business KPI tracking and detailed subsystem monitoring.
+# These metrics track: user registration, authentication, payments, LLM calls, SMTP deliveries,
+# and other critical platform flows.
+
+groups:
+  # ============================================================================
+  # USER & AUTHENTICATION METRICS
+  # ============================================================================
+  - name: vegaduta-user-authentication
+    interval: 15s
+    rules:
+      # User Registration Tracking
+      - record: tenant:user_registration:total
+        expr: increase(user_registrations_total[5m])
+
+      # Sign-in Success Rate
+      - record: tenant:auth_success:rate
+        expr: rate(auth_attempts_success_total[5m])
+
+      # Sign-in Failure Rate
+      - record: tenant:auth_failure:rate
+        expr: rate(auth_attempts_failed_total[5m])
+
+      # Active Sessions
+      - record: tenant:active_sessions:gauge
+        expr: user_active_sessions_current
+
+  # ============================================================================
+  # PAYMENT & BILLING METRICS
+  # ============================================================================
+  - name: vegaduta-payments-billing
+    interval: 15s
+    rules:
+      # Payment Success Rate
+      - record: tenant:payment_success:rate
+        expr: rate(payment_transactions_success_total[5m])
+
+      # Payment Failure Rate
+      - record: tenant:payment_failure:rate
+        expr: rate(payment_transactions_failed_total[5m])
+
+      # Total Revenue (USD)
+      - record: tenant:revenue:total
+        expr: increase(payment_amount_usd_total[1h])
+
+      # Plan Upgrades
+      - record: tenant:plan_upgrade:rate
+        expr: rate(plan_upgrade_total[1h])
+
+      # Failed Payment Alerts
+      - alert: HighPaymentFailureRate
+        expr: |
+          (
+            sum(rate(payment_transactions_failed_total[10m]))
+            /
+            sum(rate(payment_transactions_success_total[10m]))
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Payment failure rate above 10% (tenant: {{ $labels.tenant }})"
+          description: >-
+            {{ $value | humanizePercentage }} of payment transactions for tenant
+            {{ $labels.tenant }} have failed in the last 10 minutes. Check Razorpay
+            API status and payment gateway connectivity.
+
+      - alert: RevenueDrop
+        expr: |
+          (
+            increase(payment_amount_usd_total[1h])
+            <
+            increase(payment_amount_usd_total[1h] offset 24h) * 0.5
+          )
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Revenue dropped >50% compared to yesterday"
+          description: >-
+            Current hour revenue is ${{ $value | humanize }} vs the same hour
+            yesterday. Investigate payment gateway issues or a spike in failed
+            transactions.
+
+  # ============================================================================
+  # LLM CALL METRICS
+  # ============================================================================
+  - name: vegaduta-llm-operations
+    interval: 15s
+    rules:
+      # LLM Request Success Rate
+      - record: tenant:llm_success:rate
+        expr: rate(llm_calls_success_total[5m])
+
+      # LLM Request Failure Rate
+      - record: tenant:llm_failure:rate
+        expr: rate(llm_calls_failed_total[5m])
+
+      # LLM Latency P95
+      - record: tenant:llm_latency:p95
+        expr: histogram_quantile(0.95, rate(llm_call_duration_seconds_bucket[5m]))
+
+      # LLM Cost Tracking
+      - record: tenant:llm_cost:total
+        expr: increase(llm_cost_usd_total[1h])
+
+      # Tokens Used
+      - record: tenant:llm_tokens:total
+        expr: increase(llm_tokens_used_total[1h])
+
+      # LLM High Error Rate Alert
+      - alert: LlmHighErrorRate
+        expr: |
+          (
+            sum by (tenant, model) (rate(llm_calls_failed_total[10m]))
+            /
+            sum by (tenant, model) (rate(llm_calls_success_total[10m]))
+          ) > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM error rate >25% for tenant {{ $labels.tenant }} / model {{ $labels.model }}"
+          description: >-
+            Model {{ $labels.model }} for tenant {{ $labels.tenant }} is failing
+            {{ $value | humanizePercentage }} of requests. Check provider API status
+            and API key validity.
+
+      - alert: LlmLatencyHigh
+        expr: |
+          histogram_quantile(0.95, rate(llm_call_duration_seconds_bucket[5m])) > 30
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM P95 latency >30s (model: {{ $labels.model }})"
+          description: >-
+            P95 latency for model {{ $labels.model }} is {{ $value }}s. This may
+            indicate provider overload or network issues.
+
+  # ============================================================================
+  # EMAIL & SMTP METRICS
+  # ============================================================================
+  - name: vegaduta-email-delivery
+    interval: 15s
+    rules:
+      # Email Send Rate
+      - record: tenant:email_sent:rate
+        expr: rate(email_sent_total[5m])
+
+      # Email Delivery Success Rate
+      - record: tenant:email_delivery_success:rate
+        expr: rate(email_delivery_success_total[5m])
+
+      # Email Bounce Rate
+      - record: tenant:email_bounce:rate
+        expr: rate(email_bounced_total[5m])
+
+      # SMTP Connection Failures
+      - record: tenant:smtp_connection_errors:rate
+        expr: rate(smtp_connection_errors_total[5m])
+
+      # High Email Bounce Rate Alert
+      - alert: HighEmailBounceRate
+        expr: |
+          (
+            sum(rate(email_bounced_total[10m]))
+            /
+            sum(rate(email_sent_total[10m]))
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Email bounce rate above 5%"
+          description: >-
+            {{ $value | humanizePercentage }} of sent emails have bounced.
+            Check email list quality and SMTP configuration.
+
+      - alert: SmtpConnectionError
+        expr: rate(smtp_connection_errors_total[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SMTP connection errors detected (>0.5/sec)"
+          description: >-
+            SMTP server connectivity issues detected at {{ $value }}/sec.
+            Check SMTP_SERVER and credentials in deploy/.env.
+
+  # ============================================================================
+  # AGENT & WORKFLOW METRICS
+  # ============================================================================
+  - name: vegaduta-agent-workflows
+    interval: 15s
+    rules:
+      # Agent Execution Rate
+      - record: tenant:agent_execution:rate
+        expr: rate(agent_executions_total[5m])
+
+      # Agent Success Rate
+      - record: tenant:agent_success:rate
+        expr: rate(agent_executions_success_total[5m])
+
+      # Agent Failure Rate
+      - record: tenant:agent_failure:rate
+        expr: rate(agent_executions_failed_total[5m])
+
+      # Workflow Completion Time P95
+      - record: tenant:workflow_duration:p95
+        expr: histogram_quantile(0.95, rate(workflow_duration_seconds_bucket[5m]))
+
+      # Stuck Workflows
+      - alert: HighAgentFailureRate
+        expr: |
+          (
+            sum by (tenant) (rate(agent_executions_failed_total[10m]))
+            /
+            sum by (tenant) (rate(agent_executions_total[10m]))
+          ) > 0.20
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Agent failure rate >20% for tenant {{ $labels.tenant }}"
+          description: >-
+            Agents for tenant {{ $labels.tenant }} have been failing
+            {{ $value | humanizePercentage }} over 10 minutes. Check agent logs
+            and external service dependencies (APIs, databases).
+
+      - alert: WorkflowStuck
+        expr: increase(workflow_duration_seconds_bucket{le="+Inf"}[1h]) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No workflow completions in 30 minutes"
+          description: >-
+            No workflows have completed in the last 30 minutes. Check if
+            the workflow scheduler is running and backend services are healthy.
+
+  # ============================================================================
+  # DATA & STORAGE METRICS
+  # ============================================================================
+  - name: vegaduta-data-storage
+    interval: 15s
+    rules:
+      # Database Query Latency P95
+      - record: tenant:db_query:p95
+        expr: histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m]))
+
+      # Database Connection Pool Usage
+      - record: tenant:db_connections:used
+        expr: hikaricp_connections_active
+
+      # Storage Size
+      - record: tenant:storage:bytes
+        expr: tenant_storage_bytes_total
+
+      # High DB Latency Alert
+      - alert: DatabaseLatencyHigh
+        expr: |
+          histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m])) > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database P95 latency >5s"
+          description: >-
+            Database queries are taking {{ $value }}s at P95. This may indicate
+            slow queries, missing indexes, or resource contention.
+
+      - alert: StorageNearCapacity
+        expr: |
+          tenant_storage_bytes_total / tenant_storage_quota_bytes_total > 0.9
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tenant {{ $labels.tenant }} storage >90% full"
+          description: >-
+            Tenant {{ $labels.tenant }} is using {{ $value | humanizePercentage }}
+            of their storage quota. They may need a quota increase or data cleanup.
+
+  # ============================================================================
+  # API & GATEWAY METRICS
+  # ============================================================================
+  - name: vegaduta-api-gateway
+    interval: 15s
+    rules:
+      # API Request Rate
+      - record: tenant:api_requests:rate
+        expr: rate(http_server_requests_seconds_count[5m])
+
+      # API Error Rate (4xx + 5xx)
+      - record: tenant:api_errors:rate
+        expr: rate(http_server_requests_seconds_count{status=~"[45].."}[5m])
+
+      # API Latency P99
+      - record: tenant:api_latency:p99
+        expr: histogram_quantile(0.99, rate(http_server_requests_seconds_bucket[5m]))
+
+      # Rate Limit Hits
+      - record: tenant:rate_limit_exceeded:rate
+        expr: rate(http_rate_limit_exceeded_total[5m])
+
+      # High API Error Rate Alert
+      - alert: ApiErrorRateHigh
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API 5xx error rate >5%"
+          description: >-
+            {{ $value | humanizePercentage }} of API requests are returning 5xx.
+            Check core logs and backend service health.
+
+      - alert: ApiLatencyHigh
+        expr: |
+          histogram_quantile(0.99, rate(http_server_requests_seconds_bucket[5m])) > 10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API P99 latency >10s"
+          description: >-
+            API requests are taking {{ $value }}s at P99 percentile. Investigate
+            slow endpoints and database performance.
+
+      - alert: RateLimitExceeded
+        expr: rate(http_rate_limit_exceeded_total[1m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rate limit being exceeded for tenant {{ $labels.tenant }}"
+          description: >-
+            Tenant {{ $labels.tenant }} is hitting rate limits at
+            {{ $value }}/sec. They may need a higher plan or API quota.
+
+  # ============================================================================
+  # CACHE & SESSION METRICS
+  # ============================================================================
+  - name: vegaduta-cache-sessions
+    interval: 15s
+    rules:
+      # Cache Hit Rate
+      - record: tenant:cache_hit:rate
+        expr: |
+          sum(rate(redis_commands_processed_total{cmd="get"}[5m]))
+          /
+          (
+            sum(rate(redis_commands_processed_total{cmd="get"}[5m])) +
+            sum(rate(redis_commands_processed_total{cmd="set"}[5m]))
+          )
+
+      # Session Evictions
+      - record: tenant:session_evictions:rate
+        expr: rate(redis_evicted_keys_total[5m])
+
+      # Cache Memory Usage
+      - record: tenant:redis_memory:used
+        expr: redis_memory_used_bytes
+
+      # Session Eviction Spike Alert
+      - alert: SessionEvictionSpike
+        expr: rate(redis_evictions_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High session eviction rate (>10/sec)"
+          description: >-
+            Redis is evicting {{ $value }} sessions/sec. Sessions may be lost
+            and users forced to re-login. Consider increasing Redis memory.
+
+  # ============================================================================
+  # WEBHOOK & EVENT DELIVERY METRICS
+  # ============================================================================
+  - name: vegaduta-webhooks-events
+    interval: 15s
+    rules:
+      # Webhook Delivery Rate
+      - record: tenant:webhook_delivery:rate
+        expr: rate(webhook_deliveries_total[5m])
+
+      # Webhook Success Rate
+      - record: tenant:webhook_delivery_success:rate
+        expr: rate(webhook_deliveries_success_total[5m])
+
+      # Event Queue Backlog
+      - record: tenant:event_backlog:size
+        expr: workflow_event_outbox_pending
+
+      # Webhook Delivery Failure Alert
+      - alert: HighWebhookFailureRate
+        expr: |
+          (
+            sum(rate(webhook_deliveries_failed_total[10m]))
+            /
+            sum(rate(webhook_deliveries_total[10m]))
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Webhook delivery failure rate >10%"
+          description: >-
+            {{ $value | humanizePercentage }} of webhooks are failing to deliver.
+            Check customer webhook endpoints and network connectivity.
+
+      - alert: EventOutboxBacklogGrowing
+        expr: workflow_event_outbox_pending > 500
+        for: 20m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Event outbox backlog >500 (current: {{ $value }})"
+          description: >-
+            {{ $value }} events are waiting in the outbox to be published.
+            The event relay may be stuck. Check Redpanda connectivity and logs.
+
+  # ============================================================================
+  # MULTI-TENANT ISOLATION METRICS
+  # ============================================================================
+  - name: vegaduta-multi-tenant
+    interval: 15s
+    rules:
+      # Tenant Request Distribution
+      - record: tenant:request:distribution
+        expr: sum by (tenant) (rate(http_server_requests_seconds_count[5m]))
+
+      # Cross-Tenant Query Detection (security)
+      - record: tenant:cross_tenant_queries:total
+        expr: increase(db_cross_tenant_query_attempts_total[5m])
+
+      # Cross-Tenant Query Alert
+      - alert: CrossTenantQueryDetected
+        expr: increase(db_cross_tenant_query_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SECURITY: Cross-tenant query detected!"
+          description: >-
+            A database query was detected that attempted to access data from
+            multiple tenants. This is a critical isolation violation. Immediate
+            investigation required. Tenant: {{ $labels.tenant }},
+            Attempted access: {{ $labels.other_tenant }}.

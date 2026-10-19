@@ -1,0 +1,10 @@
+# Dev/test-only dependencies - NOT installed into the rl-trainer image (the
+# Dockerfile installs requirements.txt only). Mirrors sidecar's own
+# requirements-dev.txt convention. Install locally with:
+#   pip install -r requirements.txt -r requirements-dev.txt
+# then run the suite from rl-trainer/ with:  python -m pytest -q
+#
+# fastapi.testclient needs httpx and tests/test_auth.py needs cryptography;
+# both are already exact-pinned in requirements.txt (httpx directly,
+# cryptography via PyJWT[crypto]), so pytest is the only test-only addition.
+pytest==9.1.1

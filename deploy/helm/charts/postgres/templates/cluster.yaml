@@ -1,0 +1,131 @@
+{{- $name := include "vegaduta-lib.fullname" . -}}
+{{- $g := .Values.global | default dict -}}
+{{- $kc := .Values.keycloakDatabase -}}
+{{- $kcOn := or (eq (toString $kc.enabled) "true") (and (eq (toString $kc.enabled) "auto") (include "vegaduta-lib.oidc.bundled" .)) -}}
+{{- $sc := .Values.storage.storageClass | default $g.storageClass -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+  annotations:
+    # Argo CD: the database before the workloads (wave 0) that need it.
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  instances: {{ .Values.instances }}
+  imageName: {{ include "vegaduta-lib.image" . | quote }}
+  {{- $ps := include "vegaduta-lib.imagePullSecrets" . | fromYaml }}
+  {{- with $ps.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  inheritedMetadata:
+    labels:
+      app.kubernetes.io/name: {{ include "vegaduta-lib.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/part-of: vegaduta
+      app.kubernetes.io/component: database
+  {{- with .Values.priorityClassName }}
+  priorityClassName: {{ . }}
+  {{- end }}
+  postgresql:
+    parameters:
+      {{- toYaml .Values.parameters | nindent 6 }}
+    {{- with .Values.sharedPreloadLibraries }}
+    shared_preload_libraries:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  bootstrap:
+    initdb:
+      database: {{ include "vegaduta-lib.pg.database" . }}
+      owner: {{ include "vegaduta-lib.pg.username" . }}
+      {{- $owner := include "vegaduta-lib.pg.username" . }}
+      {{- $sql := .Values.initSQL | default list }}
+      {{- if has "age" (.Values.sharedPreloadLibraries | default list) }}
+      {{- /* AGE catalog for the (non-superuser) owner: graph memory's create_graph()/cypher(). */}}
+      {{- $sql = concat $sql (list "CREATE EXTENSION IF NOT EXISTS age;" (printf "GRANT USAGE ON SCHEMA ag_catalog TO %s;" ($owner | quote)) (printf "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ag_catalog TO %s;" ($owner | quote)) (printf "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ag_catalog TO %s;" ($owner | quote))) | uniq }}
+      {{- end }}
+      {{- with $sql }}
+      postInitApplicationSQL:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if $kcOn }}
+  managed:
+    roles:
+      - name: {{ $kc.owner }}
+        ensure: present
+        login: true
+        passwordSecret:
+          name: {{ $name }}-keycloak
+  {{- end }}
+  storage:
+    size: {{ .Values.storage.size }}
+    {{- if $sc }}
+    storageClass: {{ $sc }}
+    {{- end }}
+  {{- if .Values.walStorage.enabled }}
+  walStorage:
+    size: {{ .Values.walStorage.size }}
+    {{- with (.Values.walStorage.storageClass | default $sc) }}
+    storageClass: {{ . }}
+    {{- end }}
+  {{- end }}
+  resources:
+    {{- include "vegaduta-lib.resources" . | nindent 4 }}
+  {{- with .Values.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  monitoring:
+    enablePodMonitor: {{ .Values.monitoring.enablePodMonitor }}
+  {{- with .Values.backup }}
+  backup:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- if $kcOn }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $name }}-keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+    cnpg.io/reload: "true"
+  annotations:
+    {{- include "vegaduta-lib.keepAnnotations" . | nindent 4 }}
+type: kubernetes.io/basic-auth
+stringData:
+  username: {{ $kc.owner | quote }}
+  password: {{ include "vegaduta-lib.stableRandom" (dict "root" . "secret" (printf "%s-keycloak" $name) "key" "password" "length" 32) | quote }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ $name }}-{{ $kc.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  name: {{ $kc.name }}
+  owner: {{ $kc.owner }}
+  cluster:
+    name: {{ $name }}
+{{- end }}
+{{- if .Values.scheduledBackup.enabled }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.scheduledBackup.schedule | quote }}
+  backupOwnerReference: {{ .Values.scheduledBackup.backupOwnerReference }}
+  cluster:
+    name: {{ $name }}
+{{- end }}

@@ -1,0 +1,27 @@
+{
+  "messages": [
+    {"content": "You are a helpful assistant.", "role": "developer"},
+    {"content": "Hello!", "role": "user"},
+    {"content": null, "role": "assistant", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "lookup", "arguments": "{}"}}]},
+    {"content": "42", "role": "tool", "tool_call_id": "call_1"},
+    {"content": [{"type": "text", "text": "Summarise that."}, {"type": "image_url", "image_url": {"url": "https://example.test/a.png"}}], "role": "user", "name": "alice"}
+  ],
+  "model": "11111111-2222-3333-4444-555555555555",
+  "frequency_penalty": 0,
+  "logprobs": false,
+  "max_completion_tokens": 128,
+  "n": 1,
+  "parallel_tool_calls": true,
+  "presence_penalty": 0,
+  "response_format": {"type": "text"},
+  "seed": 7,
+  "stop": ["\n\n"],
+  "store": false,
+  "stream": true,
+  "stream_options": {"include_usage": true},
+  "temperature": 1,
+  "tool_choice": "auto",
+  "tools": [{"type": "function", "function": {"name": "lookup", "description": "d", "parameters": {"type": "object", "properties": {}}}}],
+  "top_p": 1,
+  "user": "user-1234"
+}

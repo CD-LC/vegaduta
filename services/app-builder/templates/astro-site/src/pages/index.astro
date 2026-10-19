@@ -1,0 +1,35 @@
+---
+const title = "My Website";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #1a1a1a;
+        background: #fafafa;
+      }
+      .hero {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="hero">
+      <h1>{title}</h1>
+      <p>A fast static site built with Astro.</p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-agent-bundles-agentId",
+      "method": "GET",
+      "path": "/api/agent-bundles/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agent-bundles-import",
+      "method": "POST",
+      "path": "/api/agent-bundles/import",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agent-bundles-preview",
+      "method": "POST",
+      "path": "/api/agent-bundles/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

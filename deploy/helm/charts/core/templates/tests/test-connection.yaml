@@ -1,0 +1,2 @@
+{{- include "core.imageVariant" . -}}
+{{ include "vegaduta-lib.testPod" . }}

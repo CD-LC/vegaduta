@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Data Architecture &amp; Tenancy — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="architecture" data-page="data-architecture.html" data-doc="VD-AR-004" data-status="verified" data-updated="2026-10-10" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>Data Architecture &amp; Tenancy</div>
+<div class="doc-meta" data-auto></div><h1>Data Architecture &amp; Tenancy</h1>
+
+<p class="lede">
+  One Postgres database, one schema per tenant, one control-plane schema —
+  routed by <code>SET search_path</code> on every connection. This is the
+  highest-leverage and highest-risk design decision in the platform (ADR-0002):
+  it gives tenants hard data isolation inside a single database, and it makes
+  connection pooling and migration ordering genuinely dangerous.
+</p>
+
+<pre class="mermaid">
+flowchart LR
+  REQ["HTTP request<br/>JWT with tenant_id"] --> F["TenantContextFilter"]
+  F --> TC["TenantContext<br/>(ThreadLocal)"]
+  TC --> R["TenantSchemaResolver"]
+  R --> CP["SchemaMultiTenantConnectionProvider<br/>SET search_path = tenant_schema"]
+  CP --> DB[("Postgres<br/>· control plane: public<br/>· tenant_a<br/>· tenant_b<br/>· …")]
+  F -->|&quot;no claim / bootstrap / health&quot;| FB["public fallback<br/>(metriced)"]
+  FB --> DB
+</pre>
+
+<h2>1. Tenant resolution request path</h2>
+<ol>
+  <li><strong><code>TenantContextFilter</code></strong> reads the <code>tenant_id</code> JWT claim on every authenticated request.</li>
+  <li>The claim is stored in <strong><code>TenantContext</strong></strong> (a ThreadLocal; the AI layer restores it across Reactor thread hops on streamed calls).</li>
+  <li><strong><code>TenantSchemaResolver</code></strong> maps tenant → schema name.</li>
+  <li><strong><code>SchemaMultiTenantConnectionProvider</code></strong> issues <code>SET search_path = &lt;tenant_schema&gt;</code> when handing out a connection. From then on, every unqualified table reference lands in the tenant schema.</li>
+  <li>Requests with no resolvable tenant — bootstrap, health checks, platform-admin paths — fall back to <code>public</code>, and the fallback is metriced.</li>
+</ol>
+
+<div class="callout callout-warning">
+  <div class="callout-title">The public-schema fallback is a known bug signature</div>
+  <p>If tenant data appears to "vanish" or writes land in the wrong place, the
+  first suspect is a code path that ran without <code>TenantContext</code> —
+  async executors, scheduled jobs, webhook handlers that skip the filter chain —
+  and silently fell back to <code>public</code>. The fallback exists so
+  bootstrap/health/platform-admin work without a tenant; it is deliberately
+  observable (a dedicated metric) precisely because silent fallback is the
+  classic failure shape.</p>
+</div>
+
+<h2>2. What lives where</h2>
+<table>
+  <thead><tr><th>Schema</th><th>Contents</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>public</code> (control plane)</td>
+      <td><code>tenant</code>, <code>app_user</code>, <code>plan_limits</code>,
+      <code>platform_hosted_llm_provider</code>, <code>platform_setting</code>,
+      <code>per_user_budget_settings</code>, <code>community_template</code></td>
+    </tr>
+    <tr>
+      <td><code>&lt;tenant_schema&gt;</code> (one per tenant)</td>
+      <td>Agents, workflows, knowledge documents + pgvector <code>vector_store</code>,
+      Apache AGE graph memory, channel credentials and sessions, provider credentials
+      (<code>LlmProviderCredential</code>), <code>llm_call_log</code>, <code>audit_log</code>,
+      LLM gateway tables, approval records — everything tenant-owned</td>
+    </tr>
+    <tr>
+      <td><strong>Redis</strong></td>
+      <td>Session memory (<code>SessionMemoryService</code>: per-conversation history lists and owner records under caller-scoped keys <code>agentic:session:c1:&lt;sha256&gt;</code>, 24h TTL; see <a href="../security/security-architecture.html">Security Architecture §4.1</a>),
+      MCP ownership registry (<code>RedisMcpOwnershipRegistry</code>) for cross-replica
+      STDIO connection ownership. Cache/coordination only — never the system of record.</td>
+    </tr>
+    <tr>
+      <td><strong>Object storage</strong></td>
+      <td>S3-API abstraction via <code>storage</code> module (<code>FileStorageService</code>):
+      MinIO in compose, S3/R2 in prod by config. Tenant data export and generated
+      media/documents land here.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>3. Flyway — two directories, one version namespace</h2>
+<p>Migrations live in two directories under
+<code>core/app/src/main/resources/db/migration/</code>:</p>
+<table>
+  <thead><tr><th>Directory</th><th>Applies to</th><th>≈ Files</th><th>When it runs</th></tr></thead>
+  <tbody>
+    <tr><td><code>db/migration/controlplane</code></td><td><code>public</code></td><td>~80</td><td>On boot, once</td></tr>
+    <tr><td><code>db/migration/tenant</code></td><td>Every tenant schema</td><td>~139+ (V334 latest claimed)</td><td>At tenant provisioning (replayed into the new schema) and migrate-on-boot on the API shape</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-danger">
+  <div class="callout-title">One version namespace — a collision breaks startup</div>
+  <p>The two directories <strong>share a single Flyway version namespace</strong>.
+  Two files with the same <code>V###</code> number — or a renamed/renumbered
+  file — corrupt the shared <code>flyway_schema_history</code> and stop core from
+  booting. Rules that exist because of it:</p>
+  <ul style="margin:6px 0 2px">
+    <li>Always pick the next free version across <em>both</em> directories.</li>
+    <li>Never rename or renumber an applied migration.</li>
+    <li>Run <code>flyway-lint.sh</code> before committing — it guards exactly this.</li>
+  </ul>
+</div>
+
+<h2>4. Connection pooling — PgBouncer must be session mode</h2>
+<div class="callout callout-danger">
+  <div class="callout-title">Transaction pooling = cross-tenant data exposure</div>
+  <p><code>SET search_path</code> is connection state, not transaction state.
+  Under PgBouncer <em>transaction</em> pooling a connection checked out for one
+  tenant's transaction can be handed back and reused mid-session for a different
+  tenant — with the previous tenant's <code>search_path</code> still set. The
+  result is reads and writes in the wrong tenant's schema. <strong>PgBouncer
+  MUST run in <code>pool_mode = session</code></strong> anywhere it fronts this
+  database. This is a hard requirement of ADR-0002, not a tuning preference.</p>
+</div>
+
+<h2>5. Secrets and encryption</h2>
+<p>One chokepoint: <code>EncryptionService</code> (<code>core/crypto</code>),
+AES-256-GCM, keyed by <code>APP_ENCRYPTION_KEY</code> (base64 32-byte) with
+rotation support via <code>APP_ENCRYPTION_KEY_PREVIOUS</code>. It encrypts LLM
+provider keys, channel tokens, MCP connection env vars, Google refresh tokens,
+Sarvam/ElevenLabs/Jev credentials, and hosted-pool keys. The same key value
+must be present everywhere core boots — a divergent key renders every stored
+credential undecryptable rather than merely failing loudly.</p>
+
+<h2>6. Provisioning and lifecycle</h2>
+<ul>
+  <li><strong>Signup:</strong> <code>/api/signup</code> creates the Keycloak user and provisions a fresh tenant schema; tenant migrations replay into it at provisioning time.</li>
+  <li><strong>Migrate-on-boot:</strong> the API shape (<code>core/app</code>) runs tenant migrations across all schemas on startup; <code>app-worker</code> and <code>app-jobs</code> deliberately do not run Flyway.</li>
+  <li><strong>Data export:</strong> tenant-data export uses the <code>storage</code> module (Master Roadmap item #22).</li>
+</ul>
+
+<h2>7. Backup posture</h2>
+<table>
+  <thead><tr><th>Layer</th><th>Self-hosted default</th><th>Note</th></tr></thead>
+  <tbody>
+    <tr><td>Postgres</td><td>Bundled PostgreSQL 16 (pgvector + AGE) in Compose, or a CloudNativePG cluster / your managed Postgres with Helm</td><td>Irreplaceable. Back it up with <code>pg_dumpall</code> (Compose) or your operator's backup; see <a href="../operations/backup-restore.html">Backup &amp; Restore</a></td></tr>
+    <tr><td>Valkey (Redis API)</td><td>Bundled Valkey or your own Redis-compatible service</td><td>Contents are disposable by design (sessions/ownership can be rebuilt)</td></tr>
+    <tr><td>Object storage</td><td>SeaweedFS S3 gateway (Full / Helm), local disk (Lite), or any S3 API</td><td>Tenant exports and generated artifacts</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Read this before touching anything</div>
+  <ul style="margin:6px 0 2px">
+    <li>Back up the database <strong>together with <code>APP_ENCRYPTION_KEY</code></strong>; a dump without the key cannot decrypt stored provider keys and channel secrets.</li>
+    <li>Redis is reconstructable; Postgres is not. Never conflate the two when weighing an operation's blast radius.</li>
+    <li><code>llm_call_log</code> and <code>audit_log</code> are per-tenant tables — platform-wide cost/audit queries must iterate schemas, not assume a central table.</li>
+  </ul>
+</div>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

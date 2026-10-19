@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "VegaDuta core chart values",
+  "type": "object",
+  "required": ["image", "replicaCount", "containerPort", "resources", "probes", "migrate"],
+  "properties": {
+    "global": { "type": "object" },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "component": { "type": "string" },
+    "image": {
+      "type": "object",
+      "required": ["repository"],
+      "properties": {
+        "registry": { "type": "string" },
+        "repository": { "type": "string", "minLength": 1 },
+        "tag": { "type": ["string", "number"], "not": { "const": "latest" } },
+        "digest": { "type": "string", "pattern": "^(|sha256:[a-f0-9]{64})$" },
+        "pullPolicy": { "type": "string", "enum": ["", "IfNotPresent", "Always", "Never"] }
+      }
+    },
+    "appSecret": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "existingSecret": { "type": "string" } }
+    },
+    "replicaCount": { "type": "integer", "minimum": 1 },
+    "replicaReadiness": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "strategy": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["RollingUpdate", "Recreate"] },
+        "rollingUpdate": { "type": "object" }
+      }
+    },
+    "replicaStrict": { "type": "boolean" },
+    "resumableStreamsEnabled": { "type": "boolean" },
+    "allowNonZeroUnavailable": { "type": "boolean" },
+    "terminationGracePeriodSeconds": { "type": "integer", "minimum": 0 },
+    "containerPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+    "service": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "type": { "type": "string", "enum": ["ClusterIP", "NodePort", "LoadBalancer"] },
+        "port": { "type": "integer" },
+        "trafficDistribution": { "type": "string", "enum": ["", "PreferClose", "PreferSameZone", "PreferSameNode"] }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "annotations": { "type": "object" }
+      }
+    },
+    "javaToolOptions": { "type": "string" },
+    "hikari": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxPoolSize": { "type": "integer", "minimum": 1, "maximum": 15 },
+        "minIdle": { "type": "integer", "minimum": 0 },
+        "connectionTimeoutMs": { "type": "integer", "minimum": 1000 }
+      }
+    },
+    "probes": {
+      "type": "object",
+      "required": ["startup", "liveness", "readiness"],
+      "properties": {
+        "startup": { "type": "object" },
+        "liveness": { "type": "object" },
+        "readiness": { "type": "object" }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "required": ["requests", "limits"],
+      "properties": {
+        "requests": { "type": "object", "minProperties": 1 },
+        "limits": { "type": "object", "required": ["memory"] }
+      }
+    },
+    "hpa": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "minReplicas": { "type": "integer", "minimum": 1 },
+        "maxReplicas": { "type": "integer", "minimum": 1 },
+        "targetCPUUtilizationPercentage": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "metrics": { "type": "array" },
+        "behavior": { "type": "object" }
+      }
+    },
+    "keda": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "minReplicas": { "type": "integer", "minimum": 1 },
+        "maxReplicas": { "type": "integer", "minimum": 1 },
+        "pollingInterval": { "type": "integer", "minimum": 1 },
+        "triggers": { "type": "array" },
+        "behavior": { "type": "object" }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "hostKey": { "type": "string" },
+        "extraHosts": { "type": "array", "items": { "type": "string", "not": { "enum": ["localhost", "127.0.0.1"] } } },
+        "annotations": { "type": "object" }
+      }
+    },
+    "networkPolicy": { "type": "object" },
+    "migrate": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "backoffLimit": { "type": "integer", "minimum": 0 },
+        "activeDeadlineSeconds": { "type": "integer", "minimum": 60 },
+        "ttlSecondsAfterFinished": { "type": "integer", "minimum": 0 },
+        "waitForDatabaseAttempts": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "env": {
+      "type": "object",
+      "propertyNames": { "not": { "enum": ["APP_ENCRYPTION_KEY", "APP_ENCRYPTION_KEY_PREVIOUS", "POSTGRES_PASSWORD", "REDIS_PASSWORD", "KEYCLOAK_CLIENT_SECRET", "STORAGE_SECRET_KEY", "SPRING_DATA_REDIS_PASSWORD", "SPRING_DATASOURCE_PASSWORD", "SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG", "STORAGE_AZURE_CONNECTION_STRING"] } }
+    },
+    "secretEnv": {
+      "type": "array",
+      "items": { "type": "object", "required": ["name", "secretName"] }
+    },
+    "extraEnv": { "type": "array" },
+    "envFrom": { "type": "array" }
+  }
+}

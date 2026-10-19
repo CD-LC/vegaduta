@@ -1,0 +1,15 @@
+# Known findings, by gitleaks fingerprint (commit:file:rule:line).
+# Add an entry only for a finding that is (a) not a secret or (b) already
+# rotated, and say which.
+#
+# Both entries below are in the initial public commit, so only full-history
+# scans (first push to a branch, or no merge-base with the base ref) hit them.
+
+# (a) Not a secret: the throwaway CI-only APP_ENCRYPTION_KEY core's Maven
+# verify job used to boot with (since replaced by a key minted per run).
+# Nothing encrypted with it ever left the job.
+0fbe3a957e57362bb357503c0c81134eda62907d:.github/workflows/ci.yml:generic-api-key:182
+
+# (a) Not a secret: generic-api-key false positive on prose ("keyed by
+# APP_ENCRYPTION_KEY ... tokens,") in the data-architecture page.
+0fbe3a957e57362bb357503c0c81134eda62907d:docs/platform-documentation/architecture/data-architecture.html:generic-api-key:118

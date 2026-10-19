@@ -1,0 +1,12 @@
+# =============================================================================
+# Ollama container for `scripts/vegaduta personal --native-core --local-ai` (container Ollama).
+#
+# A core running on the HOST JVM cannot reach http://ollama:11434 on the compose network, so the
+# container publishes Ollama on the loopback interface only. Layer it after
+# docker-compose.local-ai.yml and personal.native.yml. (Using the host's own Ollama instead:
+# --local-ai=host.)
+# =============================================================================
+services:
+  ollama:
+    ports:
+      - "127.0.0.1:11434:11434"

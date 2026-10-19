@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Architecture — VegaDūta Docs</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="architecture" data-page="system-architecture.html" data-doc="VD-AR-001" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>System Architecture</div>
+  <div class="doc-meta" data-auto></div>
+  <h1>System Architecture</h1>
+  <p class="lede">
+    VegaDūta is a <strong>modular monolith</strong> — one Spring Boot 3.4 /
+    Java 21 deployable assembled from ~42 Maven modules — surrounded by a
+    small set of satellite services for the work a JVM should not do
+    (Python ML, untrusted-code execution, voice) and the work frontends do
+    (two Next.js consoles). This page is the layered
+    view; <a href="service-topology.html">Service Topology</a> is the
+    deployment view.
+  </p>
+
+  <h2>The layered picture</h2>
+  <pre class="mermaid">
+flowchart TB
+    subgraph edge["Edge"]
+        CF["Your DNS / optional CDN"]
+        ACAI["Caddy (Compose domain overlay) or Kubernetes Ingress — TLS"]
+    end
+
+    subgraph front["Frontends"]
+        WEB["web — tenant console :3000"]
+        WADM["web-admin — platform console :3001"]
+        MOB["external API / OAuth clients"]
+    end
+
+    subgraph core["core — the modular monolith (one JAR)"]
+        direction TB
+        CAPI["REST surface — ~193 controllers, SSE/AG-UI, webhooks, inbound MCP, A2A"]
+        subgraph mods["Modules by concern"]
+            MAG["agents · chat · providers · eval"]
+            MWF["workflow · eventbus · approval"]
+            MKN["knowledge (vector+keyword, RRF) · graphmemory (AGE)"]
+            MGOV["guardrails · audit · mcp registry"]
+            MCH["omnichannel · devices · sarvam · imagegen · elevenlabs · google"]
+            MPL["tenancy · security · admin · platform · billing"]
+            MINF["storage · crypto · sdlc · codeintel bridge"]
+        end
+        PGB["pgbouncer (session mode, :6432; Full tier)"]
+    end
+
+    subgraph sat["Satellite services"]
+        SC["sidecar — knowledge/ML :8001"]
+        CI["code-intel — codebase RAG :8090"]
+        AB["app-builder :8091"]
+        MCPR["mcp-stdio-runner :8097"]
+        VA["voice-agent (LiveKit)"]
+        TS["tool-sandbox :8095"]
+        RL["rl-trainer :8095 (opt-in)"]
+    end
+
+    subgraph data["Data &amp; platform services"]
+        PG[("Postgres 16 + pgvector + AGE — schema-per-tenant")]
+        RD[("Valkey (Redis API)")]
+        RP[("Redpanda (Kafka API)")]
+        TMP["Temporal"]
+        KC["Keycloak 26 (realm agentic-ai)"]
+        MIN["SeaweedFS / any S3 API"]
+        LF["Langfuse (LLM tracing)"]
+    end
+
+    subgraph ext["External"]
+        BYOK["Tenant BYOK LLM providers (~14)"]
+        POOL["Operator-configured platform pool (optional)"]
+    end
+
+    CF --&gt; ACAI --&gt; WEB
+    CF --&gt; ACAI --&gt; WADM
+    CF --&gt; ACAI --&gt; CAPI
+    MOB --&gt; CAPI
+    WEB --&gt; CAPI
+    WADM --&gt; CAPI
+    CAPI --&gt; mods
+    mods --&gt; PGB --&gt; PG
+    mods --&gt; RD
+    mods --&gt; RP
+    mods --&gt; TMP
+    mods --&gt; KC
+    mods --&gt; MIN
+    mods --&gt; SC
+    mods --&gt; MCPR
+    mods --&gt; TS
+    mods --&gt; LF
+    MKN --&gt; SC
+    MINF -. bridge off by default .-&gt; CI
+    MCH --&gt; VA
+    MAG --&gt; BYOK
+    MAG --&gt; POOL
+  </pre>
+
+  <h2>Why a modular monolith</h2>
+  <p>
+    The choice is deliberate and documented
+    (<a href="../decisions/adr-0001-modular-monolith.html">ADR-0001</a>):
+    the team's constraint was deployment operability and data-consistency
+    under multi-tenancy, not service-count. One JAR gives a single Flyway
+    migrator, a single security context, in-process calls between agent /
+    workflow / tenancy logic, and one artifact to build, scan and roll back.
+    The module boundaries are drawn so a later extraction is possible —
+    the deployment-shapes work (below) already splits background work onto
+    separate JVMs without splitting the codebase.
+  </p>
+  <p>
+    What is <em>not</em> in the monolith is equally deliberate: anything that
+    executes untrusted code (MCP STDIO packages, tenant-authored code), the
+    Python ML stack, and the per-channel bridges live in satellites so core's
+    process boundary is also its trust boundary.
+  </p>
+
+  <h2>The three deployable assemblies</h2>
+  <table>
+    <thead><tr><th>Assembly</th><th>Main class</th><th>Runs</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>core/app</code></td>
+        <td><code>CoreApplication</code></td>
+        <td>The HTTP surface — all ~193 REST controllers, SSE/AG-UI streams, webhooks — plus, in a single-process deployment, every scheduled job too</td>
+        <td>The <code>core</code> image; the only assembly in the Lite tier and the default Full tier (port 8080)</td>
+      </tr>
+      <tr>
+        <td><code>core/app-worker</code></td>
+        <td><code>WorkerApplication</code></td>
+        <td>Temporal workflow worker — executes durable workflow activities</td>
+        <td>Defined and built (<code>core/pom.xml</code>); gated by <code>app.workflow.temporal.worker-enabled</code>; no <code>@EnableScheduling</code>. Runs as <code>core-worker</code> with Compose profile <code>temporal</code> or Helm <code>global.temporal.enabled</code>.</td>
+      </tr>
+      <tr>
+        <td><code>core/app-jobs</code></td>
+        <td><code>JobsApplication</code></td>
+        <td>The ~30 scheduled sweeps — job dispatch, outbox relays, channel pollers, quota resets</td>
+        <td>Its own <code>application-jobs.yml</code>; runs as <code>core-jobs</code> with Compose profile <code>jobs</code> or the Helm chart <code>deploy/helm/charts/core-jobs</code> (<code>global.components.coreJobs</code>, default on).</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    The same split also exists <em>inside</em> one image as Spring profiles:
+    <code>shape-api</code> (serve traffic, skip the sweeps) and
+    <code>shape-jobs</code> (run the sweeps, skip request-serving concerns),
+    defined in <code>core/app-config</code>. With neither profile set,
+    one JVM runs everything — which is what the Lite tier and the default Full
+    tier do: the single <code>core</code> container serves requests and runs the
+    sweeps.
+  </p>
+
+  <h2>Module map of the monolith</h2>
+  <table>
+    <thead><tr><th>Area</th><th>Modules</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Platform / tenancy</strong></td><td><code>tenancy</code> (provisioning, plan limits, upgrades, erasure), <code>security</code> (auth, tenant context, plan enforcement), <code>admin</code>, <code>platform</code>, <code>billing</code></td></tr>
+      <tr><td><strong>Agent runtime</strong></td><td><code>agents</code>, <code>chat</code>, <code>providers</code>, <code>eval</code></td></tr>
+      <tr><td><strong>Automation</strong></td><td><code>workflow</code>, <code>eventbus</code> (Kafka-backed outbox), <code>approval</code></td></tr>
+      <tr><td><strong>Knowledge</strong></td><td><code>knowledge</code> (hybrid vector + keyword, RRF fusion), <code>graphmemory</code> (Apache AGE)</td></tr>
+      <tr><td><strong>Governance</strong></td><td><code>guardrails</code>, <code>audit</code>, <code>mcp</code> (dynamic connector registry)</td></tr>
+      <tr><td><strong>Channels / devices</strong></td><td><code>omnichannel</code>, <code>devices</code>, <code>sarvam</code> (India voice/IVR), <code>imagegen</code>, <code>elevenlabs</code>, <code>google</code></td></tr>
+      <tr><td><strong>Infrastructure</strong></td><td><code>storage</code> (S3 API or local disk), <code>crypto</code> (<code>APP_ENCRYPTION_KEY</code>), <code>sdlc</code>, <code>codeintel</code> (bridge — off by default)</td></tr>
+      <tr><td><strong>Assembly</strong></td><td><code>app</code> — the Spring Boot assembly that runs; <code>app-worker</code>, <code>app-jobs</code> — alternate assemblies from the same modules</td></tr>
+    </tbody>
+  </table>
+  <p>The full per-module catalogue with dependency edges is on
+  <a href="backend-core-modules.html">Core Module Catalogue</a>.</p>
+
+  <h2>Satellite services</h2>
+  <table>
+    <thead><tr><th>Service</th><th>Stack</th><th>Port</th><th>Role</th><th>How to enable</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td>Next.js</td><td>3000</td><td>Tenant console + public site</td><td>Always (<code>app.&lt;your-domain&gt;</code> with a domain)</td></tr>
+      <tr><td><code>web-admin</code></td><td>Next.js</td><td>3001</td><td>Platform-operator console</td><td>Full tier / Helm (<code>admin.&lt;your-domain&gt;</code>)</td></tr>
+      <tr><td><code>sidecar</code></td><td>Python 3.12 + FastAPI</td><td>8001</td><td>Chunking, embeddings, OCR/extraction, reranking, transcription</td><td>On in Full; Compose profile <code>rag</code> in Lite; internal only</td></tr>
+      <tr><td><code>code-intel</code></td><td>Python FastAPI</td><td>8090</td><td>Codebase RAG / SDLC tooling</td><td>Profile <code>code-intel</code>; core's bridge also needs <code>CODE_INTEL_ENABLED=true</code></td></tr>
+      <tr><td><code>code-intel-docker</code></td><td>Docker-in-Docker</td><td>—</td><td>Privileged sandboxed analysis executor for code-intel</td><td>With profile <code>code-intel</code> (privileged)</td></tr>
+      <tr><td><code>app-builder</code></td><td>Python FastAPI</td><td>8091</td><td>Generates small apps from a prompt</td><td>Profile <code>builder</code> (implies <code>code-intel</code>)</td></tr>
+      <tr><td><code>mcp-stdio-runner</code></td><td>Node</td><td>8097</td><td>Spawns untrusted MCP STDIO packages outside core</td><td>Profiles <code>tools</code> / <code>browser</code> / <code>sandbox</code></td></tr>
+      <tr><td><code>tool-sandbox</code></td><td>Python + Java</td><td>8095</td><td>Executes tenant-authored code with Linux isolation</td><td>Profile <code>sandbox</code> + <code>TOOL_SANDBOX_ENABLED=true</code></td></tr>
+      <tr><td><code>voice-agent</code></td><td>Python LiveKit worker</td><td>—</td><td>Voice channel runtime</td><td>Profile <code>voice</code> (with <code>livekit</code>)</td></tr>
+      <tr><td><code>rl-trainer</code></td><td>Python FastAPI</td><td>8095</td><td>RL policy training for agent tuning</td><td>Profile <code>rl</code> (opt-in)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>How the two canonical flows traverse the layers</h2>
+
+  <h3>A console page load</h3>
+  <pre><code>Browser
+  → Caddy (Compose domain overlay) or Kubernetes Ingress, TLS for *.&lt;your-domain&gt;
+    → web (Next.js, server-rendered)
+
+Browser (client-side JS)
+  → api.&lt;your-domain&gt; (or localhost:8080) → core:8080
+    → pgbouncer:6432 (Full tier, session pooling)
+      → postgres:5432 (bundled) or your managed PostgreSQL</code></pre>
+  <p>Core reaches the database through compose DNS (<code>DB_HOST</code>/<code>DB_PORT</code>);
+  internal service names such as <code>pgbouncer</code> and <code>keycloak:8080</code> are
+  correct and must not be "fixed" to public URLs.</p>
+
+  <h3>An agent turn</h3>
+  <pre><code>core → guardrails
+     → tool resolution (MCP + custom code + built-ins)
+     → LLM provider (tenant BYO key, or the platform hosted pool)
+     → LlmMetricsAdvisor → llm_call_log row (in the tenant's schema)
+                         → OTLP span → Langfuse (profile tracing, optional)</code></pre>
+
+  <h2>Identity at a glance</h2>
+  <p>
+    Keycloak 26, realm <code>agentic-ai</code>. Clients — verified from the
+    checked-in realm JSON: <code>agentic-ai-web</code> (public, browser PKCE),
+    <code>agentic-ai-core</code> (confidential; the only client that can mint a
+    token from username + password via direct-access grants),
+    <code>agentic-ai-platform-admin</code>, <code>agentic-ai-mobile</code>,
+    <code>agentic-ai-app</code>, <code>agentic-ai-ide</code> (the last three are
+    reserved for external clients that are not part of this repository). Realm roles: <code>tenant-admin</code>,
+    <code>platform-admin</code>, <code>agent-builder</code>,
+    <code>delegated-user</code>, <code>end-customer</code>. Because Keycloak
+    pins its hostname, core validates tokens under a <strong>dual issuer</strong>:
+    it validates the issuer Keycloak stamps (<code>PUBLIC_AUTH_URL/realms/agentic-ai</code>),
+    and <code>KEYCLOAK_ADDITIONAL_ISSUERS</code> adds others, for example the old
+    issuer during a domain change. See
+    <a href="identity-access.html">Identity &amp; Access</a>.
+  </p>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Off by default</div>
+    <ul style="margin:4px 0 2px">
+      <li>Core's code-intel bridge (<code>code-intel.enabled=false</code> by default; needs <code>CODE_INTEL_*</code> env to enable).</li>
+      <li>The Kafka event bus (Redpanda) — only with Compose profile <code>events</code> or <code>temporal</code>; the <code>workflow</code> Spring profile needs it.</li>
+      <li><code>app-worker</code> and <code>app-jobs</code> as separate processes — the assemblies exist; Lite and the default Full tier run everything in the one <code>core</code> container.</li>
+    </ul>
+  </div>
+
+  <h2>Sources</h2>
+  <p><code>README.md</code> §1, <code>core/pom.xml</code>, <code>deploy/compose/docker-compose.yml</code>, <code>deploy/helm/charts/</code>, <code>deploy/README.md</code>.</p>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body>
+</html>

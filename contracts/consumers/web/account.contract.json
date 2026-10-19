@@ -1,0 +1,56 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "delete-api-account",
+      "method": "DELETE",
+      "path": "/api/account",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-account",
+      "method": "GET",
+      "path": "/api/account",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-account-avatar",
+      "method": "GET",
+      "path": "/api/account/avatar",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-account-avatar",
+      "method": "POST",
+      "path": "/api/account/avatar",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-account-phone",
+      "method": "PUT",
+      "path": "/api/account/phone",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.phoneNumber"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

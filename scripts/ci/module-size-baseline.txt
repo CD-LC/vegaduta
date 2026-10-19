@@ -1,0 +1,4 @@
+# Module-size baseline for scripts/ci/check-module-size.sh (ADR-0023 section 6).
+# SHRINK-ONLY: never add an entry or raise a count to make a build pass; split
+# the module (or move classes out of the root package) instead.
+# max: 300 root-package: com.agenticai.core.agents 0

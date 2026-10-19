@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "headers": {
+      "X-Razorpay-Event-Id": "evt_fixture_completed_0000000001",
+      "X-Razorpay-Signature": "7c616fc1d2c753f465d2395461319127bdf0ca230e1f1376b032ac248a9811a2"
+    },
+    "note": "_meta is fixture-corpus metadata, not part of the body Razorpay sends - see contracts/README.md's Razorpay section. Schema validation runs against the body only (everything except _meta)."
+  },
+  "body": {
+    "entity": "event",
+    "account_id": "acc_fixture0000000001",
+    "event": "subscription.completed",
+    "contains": [
+      "subscription"
+    ],
+    "payload": {
+      "subscription": {
+        "entity": {
+          "id": "sub_fixture00000009",
+          "plan_id": "plan_fixture_premium_monthly",
+          "status": "completed",
+          "current_start": 1753000000,
+          "current_end": 1755678400,
+          "charge_at": 1755678400,
+          "total_count": 120,
+          "paid_count": 3,
+          "notes": {
+            "agentic_ai_tenant_id": "00000000-0000-4000-8000-0000000000f2"
+          }
+        }
+      }
+    },
+    "created_at": 1753000000
+  }
+}

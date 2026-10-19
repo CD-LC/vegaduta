@@ -1,0 +1,130 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-skill-security-preview-archive",
+      "method": "POST",
+      "path": "/api/skill-security/preview/archive",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-skill-security-preview-draft",
+      "method": "POST",
+      "path": "/api/skill-security/preview/draft",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.skillMd"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-skill-security-preview-registry",
+      "method": "POST",
+      "path": "/api/skill-security/preview/registry",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.githubUrl"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-skill-security-reviews",
+      "method": "GET",
+      "path": "/api/skill-security/reviews",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].approvedAt",
+          "$[*].approvedBy",
+          "$[*].attachedAgentIds",
+          "$[*].changes",
+          "$[*].enabled",
+          "$[*].name",
+          "$[*].reason",
+          "$[*].riskLevel",
+          "$[*].skillId",
+          "$[*].status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-skill-security-skills-name-approve",
+      "method": "POST",
+      "path": "/api/skill-security/skills/{name}/approve",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.acknowledgeHighRisk",
+          "$.expectedSha256"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.approvedAt",
+          "$.approvedBy",
+          "$.approvedSha256",
+          "$.attachedAgentIds",
+          "$.blocked",
+          "$.changes",
+          "$.contentSha256",
+          "$.disclaimer",
+          "$.enforcing",
+          "$.name",
+          "$.scan",
+          "$.source",
+          "$.stagedScan",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-skill-security-skills-name-report",
+      "method": "GET",
+      "path": "/api/skill-security/skills/{name}/report",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.approvedAt",
+          "$.approvedBy",
+          "$.approvedSha256",
+          "$.attachedAgentIds",
+          "$.blocked",
+          "$.changes",
+          "$.contentSha256",
+          "$.disclaimer",
+          "$.enforcing",
+          "$.name",
+          "$.scan",
+          "$.source",
+          "$.stagedScan",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-skill-security-summary",
+      "method": "GET",
+      "path": "/api/skill-security/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.enabled",
+          "$.enforcing",
+          "$.skills"
+        ]
+      }
+    }
+  ]
+}

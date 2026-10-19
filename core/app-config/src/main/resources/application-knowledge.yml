@@ -1,0 +1,94 @@
+# Stage 5/6: knowledge/vector-store configuration - active only under the
+# "knowledge" profile, same isolation pattern as Stage 4's "mcp" profile so
+# the Stage 1-4 baseline is unaffected for anyone who hasn't upgraded
+# Postgres to a pgvector-enabled image yet.
+#
+# Requires:
+#   - Postgres running the pgvector extension (pgvector/pgvector:pg16 image,
+#     not plain postgres:16 - see README Stage 5 section)
+#   - the sidecar running with Stage 5's /embed and /embed-query endpoints
+#
+#   mvn spring-boot:run -Dspring-boot.run.profiles=knowledge
+#
+# Combine with Stage 4's tools: -Dspring-boot.run.profiles=mcp,knowledge
+app:
+  sidecar:
+    base-url: ${SIDECAR_BASE_URL:http://localhost:8001}
+    # false = run without the Python sidecar (personal profile): rerank fails open, html/docx are
+    # extracted in-process, and PDF/OCR/transcription/media answer 503 "feature unavailable" with
+    # the setting to flip instead of waiting on a connection that cannot succeed. Embeddings then
+    # need app.embeddings.provider=ollama|auto|openai-compatible. Default true = unchanged.
+    enabled: ${APP_SIDECAR_ENABLED:true}
+  # Text embeddings backend. "sidecar" (default) = the Python sidecar's /embed,
+  # unchanged. "openai-compatible" = any POST {base-url}/embeddings server
+  # (OpenAI, Ollama, vLLM, LM Studio, LiteLLM...) and the sidecar is no
+  # longer needed for embeddings (it still serves extract/transcribe/rerank).
+  # dimensions = the model's native width and must be 1..384 (the memory and
+  # response-cache tables are vector(384); knowledge chunks are vector(768),
+  # vectors are zero-padded). Startup fails fast on a bad combination.
+  # Switching provider on a populated database requires re-embedding every
+  # knowledge collection and clearing memory/cache rows.
+  embeddings:
+    provider: ${APP_EMBEDDINGS_PROVIDER:sidecar}
+    base-url: ${APP_EMBEDDINGS_BASE_URL:}
+    api-key: ${APP_EMBEDDINGS_API_KEY:}
+    model: ${APP_EMBEDDINGS_MODEL:}
+    dimensions: ${APP_EMBEDDINGS_DIMENSIONS:384}
+    send-dimensions: ${APP_EMBEDDINGS_SEND_DIMENSIONS:false}
+    batch-size: ${APP_EMBEDDINGS_BATCH_SIZE:64}
+    timeout: ${APP_EMBEDDINGS_TIMEOUT:30s}
+    # provider=ollama|auto: free local embeddings through Ollama's /api/embed (no key, no
+    # sidecar). auto = a cloud key (api-key + base-url above) wins, else an Ollama configured here
+    # (or the local-LLM bootstrap Ollama, app.local-llm.bootstrap.*), else the sidecar. Pull the
+    # model first: ollama pull nomic-embed-text. Width, Matryoshka truncation and query/document
+    # prefixes come from a built-in table for nomic-embed-text, bge-m3, qwen3-embedding,
+    # mxbai-embed-large, embeddinggemma, all-minilm; any value can be overridden.
+    ollama:
+      base-url: ${APP_EMBEDDINGS_OLLAMA_BASE_URL:}
+      model: ${APP_EMBEDDINGS_OLLAMA_MODEL:nomic-embed-text}
+      dimensions: ${APP_EMBEDDINGS_OLLAMA_DIMENSIONS:0}
+      keep-alive: ${APP_EMBEDDINGS_OLLAMA_KEEP_ALIVE:10m}
+  knowledge:
+    # Each collection records which embedding source (sidecar, or provider:model:width) built its
+    # vectors. Ingestion into a collection built by a different source is refused (409) and vector
+    # search skips it (keyword search still answers) until it is re-embedded; unbound collections
+    # bind on first ingest, so existing installs are unaffected. false = no guard (old behaviour).
+    embedding-binding:
+      enabled: ${KNOWLEDGE_EMBEDDING_BINDING_ENABLED:true}
+    rerank:
+      # Master-Roadmap-2026.md item #2 (hybrid search + reranking). Off by
+      # default - the vector+keyword RRF fusion in KnowledgeSearchService
+      # runs unconditionally (cheap, both are plain SQL queries), but the
+      # cross-encoder rerank pass is a genuinely more expensive extra
+      # network round trip to the sidecar on every search, and the sidecar
+      # lazily loads a second ML model (ms-marco-MiniLM-L-6-v2) into memory
+      # the first time it's ever used. Set to true once the sidecar has
+      # headroom for it; KnowledgeSearchService fails open (falls back to
+      # the RRF-fused order) if the sidecar is unreachable either way.
+      enabled: ${KNOWLEDGE_RERANK_ENABLED:false}
+
+spring:
+  servlet:
+    multipart:
+      # Stage 6: POST /api/knowledge/upload - Spring Boot's defaults (1MB per
+      # file, 10MB per request) are tight for real .md knowledge files.
+      # KnowledgeController enforces its own per-format caps on top of this
+      # with a clearer error message (5MB for text/image formats via
+      # MAX_UPLOAD_BYTES, 25MB for audio/video via
+      # MAX_TRANSCRIBABLE_UPLOAD_BYTES, Stage F3c) - this just needs to be
+      # >= the largest of those, with some headroom, or Spring rejects the
+      # multipart request before it ever reaches the controller (a real gap
+      # Stage F3c's audio cap would have silently hit if this weren't raised
+      # alongside it).
+      #
+      # Deliberately above Sonar's 8MB guidance (java:S5693): the 30MB
+      # ceiling exists for POST /api/knowledge/upload-audio (25MB media
+      # ingestion). It is not an open door - this only applies under the
+      # "knowledge" profile, both upload endpoints require an authenticated
+      # tenant user holding PERM_MANAGE_AGENTS (ToolChannelWorkflowRules;
+      # pinned by authorization-rule-snapshot.txt), the controller rejects anything over its
+      # own per-endpoint cap before reading the bytes, and every upload is
+      # scoped to the caller's tenant collection. Lower this only together
+      # with MAX_TRANSCRIBABLE_UPLOAD_BYTES in KnowledgeController.
+      max-file-size: 30MB
+      max-request-size: 30MB

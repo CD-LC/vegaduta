@@ -1,0 +1,101 @@
+# Overlay file - keeps deploy/docker-compose.yml untouched. Run with:
+#   docker compose -f deploy/docker-compose.yml -f code-intel/docker-compose.code-intel.yml up -d code-intel
+services:
+  code-intel:
+    build:
+      context: ../code-intel
+    container_name: agentic-code-intel
+    ports:
+      - "8090:8090"
+    environment:
+      CODE_INTEL_AUTH_MODE: ${CODE_INTEL_AUTH_MODE:-internal}
+      CODE_INTEL_INTERNAL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:?set in deploy/.env}
+      # For auth_mode=keycloak instead (tokens validated directly):
+      CODE_INTEL_KEYCLOAK_ISSUER: ${CODE_INTEL_KEYCLOAK_ISSUER:-http://keycloak:8080/realms/agentic-ai}
+      CODE_INTEL_EMBEDDER: ${CODE_INTEL_EMBEDDER:-fastembed}
+      CODE_INTEL_ALLOW_CONTEXT_SCRIPTS: "false"
+      # Code execution / rework loop. OFF by default (fail closed). Turn on
+      # only where you accept running tenant code in this container; for
+      # untrusted multi-tenant use, front it with a sandbox (docker-per-run
+      # or the platform's E2B credentials).
+      CODE_INTEL_ALLOW_EXEC: ${CODE_INTEL_ALLOW_EXEC:-false}
+      CODE_INTEL_EXEC_TIMEOUT: ${CODE_INTEL_EXEC_TIMEOUT:-300}
+      # Execution sandbox (see app/executor.py + app/settings.py). "local"
+      # (default) runs commands as a bare subprocess in THIS container -
+      # fine for the engineer-owned rework loop on a self-hosted/single-org
+      # deployment, but NOT sufficient once this service also runs
+      # arbitrary/generated code for untrusted or consumer-facing callers
+      # (e.g. the app-builder feature) - use "docker" or "e2b" for that.
+      # start_process (long-running dev-server processes for live preview)
+      # refuses to run at all under "local".
+      CODE_INTEL_RUN_MODE: ${CODE_INTEL_RUN_MODE:-local}
+      CODE_INTEL_DOCKER_IMAGE: ${CODE_INTEL_DOCKER_IMAGE:-node:22-bookworm}
+      # Sandbox container hardening (app/settings.py docker_*). Secure by
+      # default: non-root uid ("auto" = this service's own `codeintel` uid,
+      # which owns the workspaces it creates; never root - falls back to
+      # 65534), read-only root fs, 512m /tmp tmpfs, cap_drop ALL,
+      # no-new-privileges, no network.
+      CODE_INTEL_DOCKER_USER: ${CODE_INTEL_DOCKER_USER:-auto}
+      CODE_INTEL_DOCKER_READ_ONLY: ${CODE_INTEL_DOCKER_READ_ONLY:-true}
+      CODE_INTEL_DOCKER_TMPFS_SIZE: ${CODE_INTEL_DOCKER_TMPFS_SIZE:-512m}
+      # run_mode=docker needs a Docker daemon reachable from THIS
+      # container. Two ways to provide one - pick ONE, both documented
+      # below (commented out; nothing here is enabled by default):
+      #
+      # (a) Mount the HOST's docker.sock directly - simplest for local dev.
+      #     Tradeoff, spelled out because it matters: this container can
+      #     then control the HOST's Docker daemon (create/kill ANY
+      #     container on the host, not just its own sandboxed runs) - that
+      #     is a real privilege escalation surface for a service that also
+      #     executes tenant-supplied commands. Do not use this in
+      #     production multi-tenant deployments.
+      #       volumes:
+      #         - /var/run/docker.sock:/var/run/docker.sock
+      #     (DOCKER_HOST left unset - docker-py's from_env() finds the
+      #     mounted socket on its own.)
+      #
+      # (b) (RECOMMENDED for production) A docker-in-docker SIDECAR - see
+      #     the commented `code-intel-docker` service below. code-intel
+      #     talks to it over the compose network instead of the host
+      #     socket, so a compromised/buggy sandbox run can never reach the
+      #     HOST's Docker daemon - only the sidecar's own throwaway one.
+      #       DOCKER_HOST: tcp://code-intel-docker:2375
+      DOCKER_HOST: ${DOCKER_HOST:-}
+      # run_mode=e2b (https://e2b.dev cloud sandboxes) - no local Docker
+      # daemon needed at all; set this instead (settings.py reads the SDK's
+      # own E2B_API_KEY var name; namespaced here as CODE_INTEL_E2B_API_KEY
+      # in deploy/.env alongside this service's other CODE_INTEL_* vars).
+      E2B_API_KEY: ${CODE_INTEL_E2B_API_KEY:-}
+      CODE_INTEL_E2B_TEMPLATE: ${CODE_INTEL_E2B_TEMPLATE:-base}
+      # Browser access for the web module's /code-intel page. Set to the
+      # web origin(s) and run this service with CODE_INTEL_AUTH_MODE=keycloak
+      # so the page's existing Keycloak token authenticates directly.
+      CODE_INTEL_CORS_ORIGINS: ${CODE_INTEL_CORS_ORIGINS:-http://localhost:3000}
+      # Per-tenant git tokens, operator-managed, referenced by name from
+      # repo registrations (auth_env), e.g.:
+      # GITHUB_TOKEN_TENANT_ACME: ${GITHUB_TOKEN_TENANT_ACME:-}
+    volumes:
+      - code_intel_data:/data
+      # Option (a) above - mount the host socket instead of running the
+      # code-intel-docker sidecar. Uncomment ONLY ONE of (a)/(b):
+      # - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  # Option (b) above (RECOMMENDED for production run_mode=docker): a
+  # docker-in-docker sidecar so code-intel never needs the HOST's docker
+  # socket. Uncomment this service AND set code-intel's DOCKER_HOST (in
+  # deploy/.env) to tcp://code-intel-docker:2375 to use it.
+  # code-intel-docker:
+  #   image: docker:dind
+  #   container_name: agentic-code-intel-docker
+  #   privileged: true   # required by dind itself
+  #   environment:
+  #     DOCKER_TLS_CERTDIR: ""   # plaintext daemon on the private compose network only - never expose this port publicly
+  #   command: ["--host=tcp://0.0.0.0:2375"]
+  #   volumes:
+  #     - code_intel_docker_data:/var/lib/docker
+  #   restart: unless-stopped
+
+volumes:
+  code_intel_data:
+  # code_intel_docker_data:   # uncomment alongside the code-intel-docker sidecar

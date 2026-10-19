@@ -1,0 +1,133 @@
+# tool-sandbox - runs TENANT-CONTROLLED code (services/tool-sandbox/Dockerfile, :8095).
+# Hard rules (enforced at render time, see templates/_guard.tpl):
+#   * a VM-isolating runtimeClassName (Kata, gVisor) unless requireRuntimeClass=false
+#   * the only secret is TOOL_SANDBOX_INTERNAL_TOKEN; no cloud identity, no SA token
+#   * NetworkPolicy: ingress from core only, NO egress at all (not even DNS)
+# Put it on a dedicated, tainted node pool with nodeSelector/tolerations.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: sandbox
+
+image:
+  registry: ""
+  repository: tool-sandbox
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+# -- RuntimeClass that isolates the pod in its own VM/kernel, e.g. kata, kata-qemu, gvisor.
+runtimeClassName: ""
+# -- Refuse to render without runtimeClassName. Set false ONLY for local evaluation (never with untrusted tenants).
+requireRuntimeClass: true
+# -- Keys this pod may receive (from the shared internal Secret).
+sandboxAllowedSecretKeys: [TOOL_SANDBOX_INTERNAL_TOKEN]
+
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+terminationGracePeriodSeconds: 30
+revisionHistoryLimit: 5
+containerPort: 8095
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8095
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+probes:
+  startup:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 30
+  liveness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 500m, memory: 1Gi }
+  limits: { memory: 2Gi }
+
+# The supervisor starts as root and drops each run to uid 5001 (needs SETUID/SETGID/KILL).
+podSecurityContext:
+  runAsNonRoot: false
+  runAsUser: 0
+  runAsGroup: 0
+securityContext:
+  runAsNonRoot: false
+  capabilities:
+    drop: [ALL]
+    add: [SETUID, SETGID, KILL]
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 256Mi }
+  - { name: sandbox-work, mountPath: /var/sandbox/work, sizeLimit: 256Mi }
+  - { name: sandbox-cache, mountPath: /var/sandbox/cache, sizeLimit: 256Mi }
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  # Always on for this chart, regardless of global.networkPolicy.enabled.
+  enabled: true
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker]
+  allowEgressTo: []
+  allowDns: false
+  allowExternalEgress: false
+  globalExtraEgress: false
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: false
+
+env:
+  TOOL_SANDBOX_MAX_CONCURRENT: "4"
+  TOOL_SANDBOX_MAX_TIMEOUT_MS: "15000"
+  TOOL_SANDBOX_MAX_MEMORY_MB: "512"
+  TOOL_SANDBOX_MAX_SOURCE_BYTES: "65536"
+  TOOL_SANDBOX_REQUIRE_PRIVILEGE_DROP: "true"
+  TOOL_SANDBOX_SECCOMP: "false"
+  TOOL_SANDBOX_LOG_LEVEL: INFO
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels:
+  vegaduta.io/egress: none
+# e.g. { vegaduta.io/pool: sandbox }
+nodeSelector: {}
+# e.g. [{ key: vegaduta.io/sandbox, operator: Equal, value: "true", effect: NoSchedule }]
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

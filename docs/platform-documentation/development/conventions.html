@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Conventions &amp; Standards — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="development" data-page="conventions.html" data-doc="VD-DEV-004" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="getting-started.html">Developer Guide</a><span class="sep">/</span>Conventions &amp; Standards</div>
+<div class="doc-meta" data-auto></div>
+<h1>Conventions &amp; Standards</h1>
+
+<dl class="props">
+  <dt>Scope</dt><dd>Rules written in the repository (<code>CONTRIBUTING.md</code>, <code>README.md</code>, CI scripts) plus the deployment invariants this documentation relies on. Formatting tooling is not documented in a contributor guide (<code>core/pom.xml</code> carries a <code>google-java-format.version</code> property).</dd>
+  <dt>Authority</dt><dd><code>CONTRIBUTING.md</code>. Where it cites a deeper doc it is linked below.</dd>
+</dl>
+
+<h2>1. Environment invariants</h2>
+<table>
+  <thead><tr><th>Rule</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td>Names</td><td>Keep production and staging on separate domains (this site uses <code>example.com</code> as a placeholder). Never call a staging or local deploy "production" or "verified live".</td></tr>
+    <tr><td>No <code>localhost</code></td><td>No browser-facing or token-issuer URL may point at <code>localhost</code>/<code>127.0.0.1</code>. Public hostnames: <code>app.</code> / <code>admin.</code> / <code>api.</code> / <code>auth.</code> (plus <code>codeintel.</code>, <code>builder.</code>, <code>livekit.</code> when used) on the environment's domain.</td></tr>
+    <tr><td>Baked variables</td><td><code>NEXT_PUBLIC_*</code> are read at runtime; a value set at build time is baked in as a fallback. Never bake a <code>localhost</code> value into an image you deploy (<a href="../decisions/adr-0007-build-time-frontend-config.html">ADR-0007</a>).</td></tr>
+    <tr><td>Issuer</td><td>Core must accept exactly the issuer Keycloak stamps (<code>PUBLIC_AUTH_URL/realms/agentic-ai</code>); extra issuers go in <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>. See <a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a>.</td></tr>
+    <tr><td>Internal exception</td><td>Container healthchecks, compose DNS (<code>http://keycloak:8080</code>, <code>http://core:8080</code>), JWK fetch stay as-is; do not "fix" them to the domain.</td></tr>
+    <tr><td>Encryption key</td><td><code>APP_ENCRYPTION_KEY</code> must be identical everywhere core boots; otherwise stored provider keys and channel secrets become undecryptable.</td></tr>
+    <tr><td>Deploys</td><td>Follow the <a href="../deployment/index.html">Deployment Guide</a>. Flyway versions share one namespace across controlplane and tenant directories.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Never power-cycle, stop, delete or tear down a live deployment casually</div>
+  No operator, CI job or automated agent should reset, reboot or stop a host, or run <code>docker compose down</code> on a production or shared staging stack, without an explicit human decision for that exact command. A hung deployment is evidence to collect (logs, container states, memory), not a thing to reboot: a reset is a power-yank of the tenant database.
+</div>
+
+<h2>2. Verification vocabulary</h2>
+<ul>
+  <li>Be exact about state: <strong>compiled ≠ tested ≠ deployed-to-staging ≠ deployed-to-prod</strong>. "Merged" is not "deployed" — diff the running image against the repo before assuming.</li>
+  <li>Verify before you relay: a local negative result must not be promoted into a system-wide fact.</li>
+  <li>PR descriptions must say exactly how the change was verified — compiled, unit-tested, run against Postgres, tried in a browser (<code>CONTRIBUTING.md</code>, PR template).</li>
+  <li>Dated design documents under <code>docs/</code> are point-in-time; the date is when the document was true.</li>
+</ul>
+
+<h2>3. Database migrations (Flyway)</h2>
+<ul>
+  <li>Location: <code>core/app/src/main/resources/db/migration/{controlplane,tenant}/</code>. The two directories are <strong>one version namespace</strong>: <code>controlplane/V227</code> and <code>tenant/V227</code> collide and every core instance fails at boot. Pick the next number free across both (README §6).</li>
+  <li>A shipped migration is never edited, renamed or renumbered; add a new one. A genuine pre-release renumber needs a justified line in <code>scripts/ci/flyway-lint-allowed-renames.txt</code> (human sign-off, not verified by the script).</li>
+  <li>Destructive DDL (<code>DROP TABLE</code>, <code>DROP COLUMN</code>, tightening to <code>NOT NULL</code>) requires a marker comment on its own line: <code>-- gated:contract</code>.</li>
+  <li>After any Flyway rename use <code>mvn clean</code>; stale <code>target/classes</code> shadow real migrations.</li>
+  <li>Before deploying an image that adds/changes migrations, check migration state against the target database.</li>
+  <li><code>CODEOWNERS</code> requires maintainer review for <code>core/app/src/main/resources/db/migration/</code>, <code>core/crypto/</code>, <code>core/security/</code>, <code>.github/</code> and <code>scripts/ci/</code>.</li>
+</ul>
+
+<h2>4. Repository hygiene gates</h2>
+<table>
+  <thead><tr><th>Script</th><th>Enforces (CONTRIBUTING.md unless noted)</th></tr></thead>
+  <tbody>
+    <tr><td><code>flyway-lint.sh</code></td><td>Applied-migration edit guard, destructive-DDL marker, version-collision check.</td></tr>
+    <tr><td><code>skip-expiry.sh</code></td><td>Test skips tracking a known gap carry an expiry, e.g. <code>expires:2026-08-15</code>, or CI fails.</td></tr>
+    <tr><td><code>InjectableConstructorTest</code>, <code>UniqueBeanNamesTest</code> (core/app; <code>make spring-wiring</code>)</td><td>Beans with several constructors and no <code>@Autowired</code>, duplicate Spring bean / JPA entity names (compile fine, crash core at startup).</td></tr>
+    <tr><td><code>entity-name-lint.sh</code></td><td>Entity, table, bean and controller base-path collisions.</td></tr>
+    <tr><td><code>secret-scan.sh</code></td><td>gitleaks over new commits. Never commit real keys, tokens or passwords, including in <code>.env*.example</code>, fixtures or docs; fake credentials go under <code>src/test/</code> or <code>*.test.*</code>/<code>*.spec.*</code> (<code>.gitleaks.toml</code>).</td></tr>
+    <tr><td><code>check-file-size.sh</code></td><td>File-size ratchet (hard cap 700 lines; a file over 665, within 5% of the cap, fails unless listed in the shrink-only baseline <code>scripts/ci/file-size-baseline.txt</code>); wired in <code>static-gates.yml</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>5. Build and deploy conventions</h2>
+<ul>
+  <li>Release images are published to GHCR with version tags and signed with cosign; pin a version in Compose or Helm rather than tracking <code>latest</code>.</li>
+  <li>Deploy <code>core</code> first (it owns migrations), verify healthy, then the frontends.</li>
+  <li>Build images from a clean checkout, never a tree with local edits (<code>make images</code> for source builds).</li>
+  <li>PgBouncer must stay <code>POOL_MODE=session</code> (README §1).</li>
+  <li>No production core image without the boot check described on <a href="build-and-test.html">Build, Test &amp; Verify</a>.</li>
+</ul>
+
+<h2>6. Tooling hygiene</h2>
+<ul>
+  <li>One Maven build at a time; do not run <code>npm install</code> while other processes run <code>npx</code> in the same project.</li>
+  <li>Never route around a real build error with <code>--force</code> / <code>--legacy-peer-deps</code> (README §2).</li>
+  <li>External-system integrations go through the MCP dynamic connector registry (<code>core/mcp</code>), not bespoke Java modules (README §7).</li>
+  <li>Sign off every commit (DCO) and use Conventional Commits (<code>CONTRIBUTING.md</code>).</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>CONTRIBUTING.md</code> — "Checks" and per-gate sections; <code>README.md</code> §1, §2, §4, §6, §7.</li>
+  <li><code>.github/CODEOWNERS</code>, <code>.gitleaks.toml</code>, <code>scripts/ci/*.sh</code>, <code>core/pom.xml</code>.</li>
+  <li><a href="../deployment/index.html">Deployment Guide</a>, <a href="../decisions/index.html">ADR Index</a>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

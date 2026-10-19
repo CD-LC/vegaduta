@@ -1,0 +1,4 @@
+ALTER TABLE agent
+    ADD COLUMN IF NOT EXISTS input_schema_json TEXT,
+    ADD COLUMN IF NOT EXISTS output_schema_json TEXT,
+    ADD COLUMN IF NOT EXISTS schema_version INTEGER NOT NULL DEFAULT 0;

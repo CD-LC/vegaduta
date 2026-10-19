@@ -1,0 +1,7 @@
+{
+  "app_name": "My App",
+  "package_id": "app.builder.generated",
+  "version_name": "0.0.1",
+  "short_description": "A mobile app built with VegaDuta App Builder.",
+  "full_description": "Describe what your app does, who it is for, and what makes it worth installing. Replace this text before you submit to the store."
+}

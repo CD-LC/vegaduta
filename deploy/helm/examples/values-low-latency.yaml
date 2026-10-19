@@ -1,0 +1,23 @@
+# Keep pod-to-pod calls close. Kubernetes 1.31+ (the field is GA in 1.33); on older clusters leave this out.
+#
+# A chat turn crosses the cluster network a few times: web to API, API to the ML sidecar (retrieval
+# embeddings), API to Valkey and Postgres. In a multi-zone cluster each hop that lands in another zone costs
+# about a millisecond and a data-transfer charge. PreferClose makes the Service route to an endpoint in the
+# caller's zone when a healthy one exists, and falls back to any zone when none does.
+#
+# Only stateless Services benefit. Postgres and the bundled single-instance Valkey have one writer, so
+# there is nothing closer to prefer; for a managed database keep the application in the database's zone
+# (a topology spread or node affinity on the core pods) instead.
+#
+# Rendered and schema-checked only; not measured on a multi-zone cluster.
+core:
+  service:
+    trafficDistribution: PreferClose
+
+# Optional services: they pass the field through the shared Service template.
+sidecar:
+  service:
+    trafficDistribution: PreferClose
+keycloak:
+  service:
+    trafficDistribution: PreferClose

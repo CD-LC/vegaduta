@@ -1,0 +1,103 @@
+# VegaDuta on Google Cloud (GKE) with managed services: Cloud SQL or AlloyDB for PostgreSQL, Memorystore,
+# Cloud Storage through its S3-interoperability API.
+#
+#   helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta -n vegaduta --create-namespace \
+#     -f values-gcp.yaml -f my-overrides.yaml
+#
+# STATUS: rendered and schema-validated only (deploy/helm/test-guards.sh). Not installed on a real GKE
+# cluster; no Google Cloud service was contacted, and GCS interoperability with the S3 client used by
+# core has not been run. Every host, id and CIDR below is a placeholder.
+# Every existingSecret must exist before `helm install`: external-secrets/gcp.yaml creates them from
+# Google Secret Manager with the External Secrets Operator.
+global:
+  domain: example.com
+  imageTag: "0.1.0"
+
+  ingress:
+    className: nginx                          # the GKE "gce" class is not covered by the NetworkPolicy peers
+  tls:
+    clusterIssuer: letsencrypt-prod
+  networkPolicy:
+    enabled: true
+    ingressControllerNamespace: ingress-nginx
+    # No extraEgress is needed for the managed data services: the chart derives egress for the configured
+    # PostgreSQL, Valkey, object-storage and Kafka ports to any address except link-local 169.254.0.0/16, so
+    # private-range endpoints are reachable (rendered and checked in test-guards.sh). To narrow egress to your
+    # data subnets instead, set networkPolicy.integrationEgress=false on core, core-jobs and core-worker and add
+    # your own scoped extraEgress rules.
+
+  core:
+    appSecret:
+      existingSecret: vegaduta-core-app       # key APP_ENCRYPTION_KEY
+  internalSecret:
+    existingSecret: vegaduta-internal
+
+  # --- Cloud SQL for PostgreSQL 16 or AlloyDB ----------------------------------------------------
+  # pgvector is available on both (CREATE EXTENSION vector). Neither offers Apache AGE: age=false.
+  # Private IP, direct connection (this chart has no Cloud SQL Auth Proxy sidecar). `require` encrypts but
+  # does not verify the server certificate. A pooler (Managed Connection Pooling) must use session mode.
+  postgresql:
+    host: 10.64.0.5
+    port: 5432
+    database: vegaduta
+    username: vegaduta
+    existingSecret: vegaduta-postgres         # key password (built-in user; IAM database auth is not supported yet)
+    sslMode: require
+    age: false
+
+  # --- Memorystore (standalone, in-transit encryption on) -----------------------------------------
+  # The server certificate is signed by a CA that is not in the image's trust store: if the TLS handshake
+  # fails, import the instance CA into the image, or use an instance without in-transit encryption (tls: false,
+  # port 6379) on a private network.
+  valkey:
+    host: 10.64.1.3
+    port: 6378
+    tls: true
+    existingSecret: vegaduta-valkey           # key password (the AUTH string)
+
+  # --- Cloud Storage through S3 interoperability with HMAC keys ----------------------------------
+  # Create an HMAC key for a service account with roles/storage.objectUser on the bucket; keep it in Secret
+  # Manager (external-secrets/gcp.yaml). These are STATIC credentials: GCS does not accept workload identity
+  # through the S3 API. Interoperability of core's S3 client (AWS SDK v2 2.28.x) with GCS has not been run.
+  objectStorage:
+    type: s3
+    endpoint: https://storage.googleapis.com
+    region: us-east-1                         # required by the S3 client, ignored by GCS
+    bucket: vegaduta-files-example
+    pathStyleAccess: true
+    credentials: static
+    existingSecret: vegaduta-s3               # keys accessKeyId, secretAccessKey (HMAC access id and secret)
+
+  # Events: for Google Cloud Managed Service for Apache Kafka use the SASL_SSL settings shown in
+  # values-aws.yaml (SCRAM) or values-azure.yaml (PLAIN) with the endpoint and mechanism Google documents.
+
+  # --- Identity provider: an EXTERNAL KEYCLOAK (see values-external.yaml for the other keys) ----------
+  # Not any OIDC issuer: today signup, user and SSO management call the Keycloak Admin API and tokens carry
+  # Keycloak-shaped claims (realm_access.roles, tenant_id), see the Identity row of the ADR. Point this at a
+  # Keycloak you run (the bundled chart is off in this file) that has the agentic-ai realm and the
+  # agentic-ai-core client imported (charts/keycloak ships the realm import). Cognito, Entra ID and Google
+  # Identity cannot be used for provisioning yet.
+  oidc:
+    issuerUrl: https://sso.example.com/realms/agentic-ai
+    internalBaseUrl: https://sso.example.com
+    realm: agentic-ai
+    clientId: agentic-ai-core
+    existingSecret: vegaduta-oidc             # key clientSecret
+
+# --- GKE Workload Identity (not needed today, so left out) ---------------------------------------
+# Storage uses HMAC keys, so none of the pods needs a Google identity. Add this only if you add features that
+# call Google APIs: bind each Kubernetes ServiceAccount (<release>-core, <release>-core-jobs,
+# <release>-core-worker) to a Google service account with roles/iam.workloadIdentityUser, then in your own file:
+#   core:        {serviceAccount: {annotations: {iam.gke.io/gcp-service-account: <gsa>@<project>.iam.gserviceaccount.com}}}
+#   core-jobs:   {serviceAccount: {annotations: {iam.gke.io/gcp-service-account: <gsa>@<project>.iam.gserviceaccount.com}}}
+#   core-worker: {serviceAccount: {annotations: {iam.gke.io/gcp-service-account: <gsa>@<project>.iam.gserviceaccount.com}}}
+
+# Everything above is managed: no bundled dependency runs.
+postgres:
+  enabled: false
+valkey:
+  enabled: false
+keycloak:
+  enabled: false
+seaweedfs:
+  enabled: false

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>chat</artifactId>
+  <name>chat</name>
+  <description>Spring AI ChatClient factory/registry per provider. Depends on: providers.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- Gap-radar P0 (LLM gateway content policy, V300) - LlmGatewayContentPolicyAdvisor
+         audit-logs a flagged/blocked prompt-injection verdict through AuditLogService,
+         the one place this codebase writes audit_log_entry rows (see that class's
+         javadoc). audit is a leaf module (no com.agenticai dependencies of its own -
+         verified against its pom.xml before adding this edge), so this cannot cycle
+         back through chat the way a direct dependency on guardrails would (guardrails
+         -> approval -> rl -> chat already exists; see LlmGatewayPiiRedactor's javadoc
+         for that check). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <!-- Smart AI layer (PlatformFeatureBudgetService / PlatformSettingsService) -
+         ProviderErrorTranslator's AI-generated error explanation feature reads
+         the master switch/per-feature budget from here. tenancy depends only on
+         admin/billing/security/storage (never on chat), so this direction adds
+         no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-anthropic</artifactId>
+    </dependency>
+    <!-- Spring AI auto-configs that stay live after the ADR-0012 P1a starter swap
+         (plain spring-ai-anthropic/-openai/-google-genai above carry NO auto-config;
+         these five used to arrive transitively via the spring-ai-starter-model-*
+         starters and are deliberately kept so the bean set is unchanged): tool calling
+         (ToolCallingManager), retry (RetryTemplate/ResponseErrorHandler), and the
+         chat/embedding/image observation conventions. Versions from spring-ai-bom. -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-autoconfigure-model-tool</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-autoconfigure-retry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-autoconfigure-model-chat-observation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-autoconfigure-model-embedding-observation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-autoconfigure-model-image-observation</artifactId>
+    </dependency>
+    <!-- OpenRouter + Grok (xAI) are both OpenAI-chat-completions-compatible
+         APIs with no dedicated Spring AI starter of their own - both are
+         implemented by pointing OpenAiApi's baseUrl at the provider's own
+         endpoint (see OpenRouterAgentChatClientFactory/GrokAgentChatClientFactory). -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-openai</artifactId>
+    </dependency>
+    <!-- LlmHttpClientFactory builds an explicit Apache HttpClient 5 pool (the
+         default 5-per-route pool queued every provider's long LLM calls). It
+         used to arrive only transitively at app assembly; version from Boot. -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+    </dependency>
+    <!-- Direct Google AI Studio (Gemini Developer API) key auth via Google's
+         unified GenAI SDK - see GeminiAgentChatClientFactory. Same starter
+         also supports Vertex AI (GCP service-account) auth, unused here. -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-google-genai</artifactId>
+    </dependency>
+    <!-- Section2.1 in-memory-state fix: LlmGatewayRateLimiterService moves from a
+         per-instance ConcurrentHashMap to a Redis-backed counter, same shape
+         as ToolCircuitBreakerService (core.agents) / WorkflowTriggerRateLimiter
+         (core.omnichannel) - this is the dependency those two already had
+         that this module didn't, per the class's own prior javadoc. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <!-- Infrastructure audit fix (Langfuse tenant/agent/session/cost tagging) -
+         LlmMetricsAdvisor reads/tags the current OTel span (io.opentelemetry.
+         api.trace.Span/SpanContext, io.opentelemetry.api.common.AttributeKey)
+         directly, rather than through Micrometer's Tracer/Span abstraction,
+         because Micrometer's Span#tag(String,String) only supports scalar
+         string tags - Langfuse's langfuse.trace.tags attribute needs a real
+         string-ARRAY-valued attribute, which only the raw OTel API exposes
+         (AttributeKey.stringArrayKey). Already transitively on the classpath
+         at runtime via micrometer-tracing-bridge-otel (core/app/pom.xml) -
+         declared explicitly here so the types resolve at COMPILE time for
+         this module too. Version managed transitively by
+         spring-boot-starter-parent's BOM, so no explicit <version> here. -->
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-api</artifactId>
+    </dependency>
+    <!-- Infra audit (2026-07-27) - custom business metrics (LLM call count/
+         errors/latency/cost in LlmMetricsAdvisor, gateway budget/rate-limit
+         rejection counters in LlmGatewayBudgetService/LlmGatewayRateLimiterService).
+         Version managed by spring-boot-starter-parent's dependency management -
+         no explicit version needed. The MeterRegistry bean itself is
+         autoconfigured at runtime by core/app's spring-boot-starter-actuator +
+         micrometer-registry-prometheus - this module only needs the API on
+         its own compile classpath since Maven resolves each module's
+         dependencies independently of how core/app eventually packages them. -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <!-- AWS Bedrock (AwsBedrockAgentChatClientFactory/AwsBedrockChatModel) -
+         hand-rolled against the Converse API's "bedrockruntime" client
+         rather than a Spring AI Bedrock starter; see AwsBedrockChatModel's
+         javadoc for why. NOT "bedrock" (that's core/providers' dependency,
+         for AwsBedrockProviderValidator's control-plane ListFoundationModels
+         probe) - Bedrock splits its SDK into a management surface and a
+         separate runtime/inference surface. No explicit <version> - managed
+         by the awssdk bom imported below. -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>bedrockruntime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- AWS SDK v2 BOM - same version core/storage and core/providers
+           already pin, kept identical so every module's transitive AWS
+           dependencies (auth, regions, http-client, etc.) resolve to
+           matching versions. -->
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>2.28.29</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

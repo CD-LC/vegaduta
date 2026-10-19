@@ -1,0 +1,13 @@
+{
+  "name": "mcp-http-gateway",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "description": "Streamable-HTTP front end for this repo's first-party stdio MCP connectors.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/gateway.test.js"
+  },
+  "engines": { "node": ">=22" }
+}

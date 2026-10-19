@@ -1,0 +1,63 @@
+{
+  "summary" : {
+    "fromDate" : "2026-09-01",
+    "toDate" : "2026-09-30",
+    "includesLiveToday" : true,
+    "metrics" : {
+      "totalCalls" : 12,
+      "errorCount" : 1,
+      "successRate" : 0.9166666666666666,
+      "promptTokens" : 4500,
+      "completionTokens" : 1200,
+      "totalTokens" : 5700,
+      "messageVolume" : 24,
+      "distinctSessions" : 3,
+      "estimatedCostUsd" : 0.004200,
+      "avgLatencyMs" : 812.5,
+      "latencyP50Ms" : null,
+      "latencyP95Ms" : 1500.0,
+      "cacheHitRate" : null
+    }
+  },
+  "days" : [
+    {
+      "date" : "2026-09-30",
+      "metrics" : {
+        "totalCalls" : 12,
+        "errorCount" : 1,
+        "successRate" : 0.9166666666666666,
+        "promptTokens" : 4500,
+        "completionTokens" : 1200,
+        "totalTokens" : 5700,
+        "messageVolume" : 24,
+        "distinctSessions" : 3,
+        "estimatedCostUsd" : 0.004200,
+        "avgLatencyMs" : 812.5,
+        "latencyP50Ms" : null,
+        "latencyP95Ms" : 1500.0,
+        "cacheHitRate" : null
+      }
+    }
+  ],
+  "byModel" : [
+    {
+      "model" : "claude-sonnet-4-5",
+      "modality" : "text",
+      "metrics" : {
+        "totalCalls" : 12,
+        "errorCount" : 1,
+        "successRate" : 0.9166666666666666,
+        "promptTokens" : 4500,
+        "completionTokens" : 1200,
+        "totalTokens" : 5700,
+        "messageVolume" : 24,
+        "distinctSessions" : 3,
+        "estimatedCostUsd" : 0.004200,
+        "avgLatencyMs" : 812.5,
+        "latencyP50Ms" : null,
+        "latencyP95Ms" : 1500.0,
+        "cacheHitRate" : null
+      }
+    }
+  ]
+}

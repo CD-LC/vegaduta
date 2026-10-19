@@ -1,0 +1,56 @@
+# ============================================================
+# Fraud Detection & Abuse Prevention Configuration
+# ============================================================
+# Copy these properties to application.properties and fill in your values
+
+# hCaptcha Integration
+# Get your site key and secret from https://dashboard.hcaptcha.com
+fraud-detection.hcaptcha.enabled=true
+fraud-detection.hcaptcha.site-key=${HCAPTCHA_SITE_KEY:}
+fraud-detection.hcaptcha.secret-key=${HCAPTCHA_SECRET_KEY:}
+
+# Authentication Abuse Detection
+# Max failed attempts before challenge is triggered
+fraud-detection.auth.max-attempts=5
+# Threshold for automatic IP block
+fraud-detection.auth.block-threshold=10
+
+# API Rate Limiting
+# Soft limit: >60 req/min triggers challenge
+fraud-detection.api.soft-limit=60
+# Hard limit: >100 req/min triggers block
+fraud-detection.api.hard-limit=100
+
+# VPN / Proxy / Bot Detection
+# Confidence score threshold (0.0-1.0) for challenging on sensitive endpoints
+fraud-detection.vpn.score-threshold=0.7
+
+# Automatic Blacklist Duration
+# How long to block an IP/user automatically (in minutes)
+fraud-detection.auto-block-duration-minutes=60
+
+# IP Reputation Service
+# Provider: maxmind, ip-qualityscore, ip2location, hubbard
+fraud-detection.ip-reputation.provider=${IP_REPUTATION_PROVIDER:ip2location}
+fraud-detection.ip-reputation.api-key=${IP_REPUTATION_API_KEY:}
+
+# Database Cleanup
+# Cleanup job runs every 5 minutes (300000 ms)
+# Removes expired blacklist entries and challenge nonces
+fraud-detection.cleanup.enabled=true
+fraud-detection.cleanup.interval-ms=300000
+
+# Metrics & Logging
+# Log all fraud events (may be high volume - consider sampling in production)
+fraud-detection.logging.enabled=true
+fraud-detection.logging.log-all-events=false
+# Only log events with decision CHALLENGE or BLOCK
+fraud-detection.logging.log-suspicious-only=true
+
+# Feature Flags (for gradual rollout)
+# Enable/disable fraud detection for auth endpoints
+fraud-detection.auth.enabled=true
+# Enable/disable fraud detection for API endpoints
+fraud-detection.api.enabled=true
+# Enable/disable fraud detection for billing endpoints
+fraud-detection.billing.enabled=true

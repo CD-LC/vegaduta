@@ -1,0 +1,36 @@
+# =============================================================================
+# Build-from-source overlay for PERSONAL mode (its own file for the reason
+# lite.build.yml is: an overlay naming a service the base lacks would ADD it).
+#
+#   ./scripts/vegaduta personal --build
+#   PERSONAL_AOT_CACHE=true ./scripts/vegaduta personal --build   # + AppCDS archive
+#
+# PERSONAL_AOT_CACHE=true passes ENABLE_AOT_CACHE=true to core/Dockerfile (the
+# opt-in AppCDS training stage described there): a boot-time-only saving, no
+# effect on request handling, a larger image. Off by default.
+# =============================================================================
+services:
+  postgres:
+    build: ../postgres
+  db-roles:
+    build: ../postgres
+  core:
+    build:
+      context: ../../core
+      args:
+        MODULE: app
+        MCP_TOOLCHAIN: none
+        ENABLE_AOT_CACHE: ${PERSONAL_AOT_CACHE:-false}
+  web:
+    build:
+      context: ../../web
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+        NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-personal}
+        NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
+  sidecar:
+    build: ../../services/sidecar
+  workspace-runner:
+    build: ../../services/workspace-runner
+  mcp-stdio-runner:
+    build: ../../services/mcp-stdio-runner

@@ -1,0 +1,49 @@
+{
+  "format": "vegaduta.agent-bundle/1",
+  "title": "Meeting Notes to Actions",
+  "summary": "Paste raw meeting notes; get decisions, action items with owners and dates, and open questions. Asks before guessing an owner.",
+  "category": "Productivity",
+  "tags": [
+    "use-case:meetings",
+    "autonomy:supervised"
+  ],
+  "agent": {
+    "systemPrompt": "You turn raw meeting notes into a clear record.\n\nOutput exactly three sections: Decisions (one line each), Action items (what - owner - due date), Open questions. If an owner or date is not in the notes, write 'unassigned' and use request_human to ask once at the end instead of guessing. Keep each line under 20 words. Offer generate_document to produce the formatted notes.",
+    "providerName": "PLATFORM_HOSTED",
+    "model": null,
+    "maxTokens": 1536,
+    "temperature": 0.1,
+    "topP": 0.9,
+    "tuningMode": "SIMPLE",
+    "reasoningDepth": "BALANCED",
+    "autonomyTier": "SUPERVISED",
+    "experienceMode": null,
+    "knowledgeBaseEnabled": false,
+    "sarvamEnabled": false,
+    "e2bEnabled": false,
+    "codeWorkspaceEnabled": false,
+    "responseCachingEnabled": false,
+    "semanticResponseCachingEnabled": false,
+    "shareMemoryWithTenant": false,
+    "costRoutingEnabled": false,
+    "economyProviderName": null,
+    "economyModel": null,
+    "fallbackProviderName": "PLATFORM_HOSTED",
+    "fallbackModel": null,
+    "voiceModelProvider": null,
+    "voiceModel": null,
+    "videoModelProvider": null,
+    "videoModel": null,
+    "allowedToolNames": [
+      "generate_document",
+      "remember_fact",
+      "recall_related_facts",
+      "request_human"
+    ],
+    "enabledGuardrails": [
+      "pii",
+      "jailbreak"
+    ],
+    "allowedKnowledgeCollectionIds": []
+  }
+}

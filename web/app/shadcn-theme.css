@@ -1,0 +1,215 @@
+/* ============================================================================
+   ShadCN/ui token layer — added 2026-07-22 for the ShadCN landing rebuild.
+
+   The rest of this app's design tokens live in globals.css (the big --ax-* /
+   --ael-* / --hud-* system). This file adds ONLY the canonical shadcn/ui token
+   names (--background, --primary, --card, --ring, --radius, …) plus the Tailwind
+   v4 `@theme inline` mapping that turns them into utilities (bg-primary,
+   text-muted-foreground, border-border, rounded-lg via --radius, …).
+
+   Everything is scoped to `.dark`, which is otherwise UNUSED anywhere else in
+   globals.css (verified: only a stale code comment references it). That keeps
+   this token set from colliding with the existing global `--border` / `:root`
+   values — shadcn components only see these values inside a `.dark` subtree,
+   which is exactly where the rebuilt landing renders.
+   ============================================================================ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-brand-violet: var(--brand-violet);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--sc-border);
+  --color-input: var(--input);
+  --color-control: var(--control-border);
+  --color-switch-off: var(--switch-off);
+  --color-ring: var(--ring);
+
+  /* One named small-text step between text-[10.5px]/text-[0.62rem]-style
+     arbitrary values the merged platform-admin components each invented
+     separately for similar-purpose badge/label text (ConfigViewer,
+     TemplateQueueCard, sections/common.tsx's ComingSoon badge, ...). Kept
+     verbatim from web-admin's copy of this file. */
+  --text-2xs: 0.65625rem;
+  --text-2xs--line-height: 0.875rem;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Font standardization — point Tailwind's font-sans/font-mono utilities at
+     the app's OWN loaded fonts (Geist + Geist Mono, from next/font in
+     layout.tsx, exposed as --font-geist-loaded / --font-geist-mono-loaded).
+     Without this, Tailwind's default system-font stack would make the ShadCN-
+     redesigned screens render in a DIFFERENT typeface than the rest of the app.
+     Now every Tailwind font utility matches the app's --font-inter/-sora/-mono
+     system exactly, so typography is uniform app-wide. */
+  --font-sans:
+    var(--font-geist-loaded), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    var(--font-geist-mono-loaded), ui-monospace, "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas,
+    monospace;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* Default (theme-following) token values — mapped to the app's OWN existing
+   theme tokens (--surface-* / --text-* / --accent-*), which already flip
+   between light and app-dark (:root[data-mode="dark"]). So any shadcn primitive
+   dropped into an AUTHENTICATED screen (which has no .dark wrapper) automatically
+   follows the app's light/dark theme, instead of being forced to one look.
+   The public funnel (landing/login/billing/signup/ui-kit) opts OUT of this by
+   wrapping in .dark below, which pins the committed marketing-dark values. */
+:root {
+  /* Fixed brand violet — the "AuthKit / login violet" the public dark funnel
+     (landing/login/signup/billing) pins its --primary to below, regardless of
+     mode. Defined here, unscoped by .dark/data-mode/data-accent, so any
+     AUTHENTICATED surface that wants to match the landing page's nav/CTA
+     colour exactly (not the tenant-customizable --accent-* palette) can
+     reference var(--brand-violet) directly instead of duplicating the hex.
+     Product-owner feedback (2026-07-26): the console's nav menu items were
+     drifting from this colour because they read --primary, which here
+     resolves to --accent-500 - the tenant's customizable AXON accent (default
+     indigo, but changeable via ThemePicker/WeatherThemeEngine to emerald/
+     rose/amber/sky/slate) - a totally different token chain from the landing
+     page's hardcoded violet below. AppShell's active-nav-item styling now
+     points at this token instead so it stays visually locked to the landing
+     brand colour even when a tenant has picked a different accent theme. */
+  --brand-violet: #8b83f8;
+
+  --background: var(--surface-page);
+  --foreground: var(--text-primary);
+  --card: var(--surface-card);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent-500);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-hover);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-card-alt);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-hover);
+  --accent-foreground: var(--text-primary);
+  /* WCAG AA: #e5484d was 3.91:1 both as error text on white and as white
+     text on the error button (fails 4.5:1). #cc2130 is 5.49:1 both ways. */
+  --destructive: #cc2130;
+  --destructive-foreground: #ffffff; /* on #cc2130 = 5.49:1 */
+  --sc-border: var(--surface-border);
+  --input: var(--surface-border-strong);
+  --ring: var(--accent-500);
+  --radius: 0.7rem;
+  /* WCAG 1.4.11 non-text contrast (2026-10-12): --input / --sc-border are
+     decorative hairlines (1.2-1.4:1 on the page), too faint to identify a
+     form control or an OFF switch. These two tokens carry the >=3:1 colours:
+     --control-border  input/textarea edge: 3.4:1 on white, 3.2:1 on the field fill
+     --switch-off      unchecked switch track: 3.4:1 on white, 3.2:1 on page */
+  --control-border: #80879a;
+  --switch-off: #868c98;
+}
+
+:root[data-mode="dark"] {
+  /* dark: control edge 3.9:1 on card / 3.7:1 on field fill; switch track 3.7:1 on card, 4.1:1 on page */
+  --control-border: #707892;
+  --switch-off: #6b7390;
+}
+
+.dark {
+  /* Unified with the elevation ladder (2026-07-29 redesign). This block used
+     to hardcode a SECOND, parallel dark palette that did not derive from
+     --surface-*: --background: #08090f with --card: rgba(255,255,255,0.025).
+     That glass card composites to #0e0f15 over that canvas — a separation of
+     1.04:1 from the surface behind it, i.e. visually no card at all. Since
+     this block governs the whole ShadCN funnel (landing/login/billing/signup
+     plus the channels admin screen), it was the single largest contributor to
+     the "flat, monochromatic" read, and it silently diverged from the rest of
+     the app's dark theme.
+
+     Both now resolve to the same ladder, so there is exactly one dark palette.
+     Note contrast RATIO is the wrong metric for two adjacent dark surfaces
+     (ratios compress hard at low luminance — the honest number is only
+     1.11:1); the cue that actually reads is the L* delta, which goes from
+     ~1.1 to 5.5. Every token retained below was re-verified against the new
+     surfaces and stays AA — worst case --primary at 5.05:1 on --surface-raised.
+
+     Anything that genuinely wants a frosted look should opt into
+     --glass-surface / .glass-card (globals.css), not re-flatten the default. */
+  --background: var(--surface-page);
+  --foreground: #e9eaf2;
+
+  --card: var(--surface-card);
+  --card-foreground: #e9eaf2;
+  --popover: var(--surface-raised);
+  --popover-foreground: #e9eaf2;
+
+  /* Single brand accent — the AuthKit / login violet (--ak-accent-400).
+     Backed by --brand-violet (defined once in :root above) so this and
+     AppShell's console-nav active-item colour can never drift apart again. */
+  --primary: var(--brand-violet);
+  --primary-foreground: #0a0a12;
+
+  --secondary: var(--surface-hover);
+  --secondary-foreground: #e9eaf2;
+  --muted: var(--surface-card-alt);
+  /* Readability lift (2026-07-23): body/subtext across the dark public funnel
+     leans heavily on text-muted-foreground, and the prior #9aa1b8 read as
+     "weak / not properly readable" against the near-black canvas. Raised the
+     lightness of the same cool-gray hue to ~#adb3c9 — now ~9.5:1 on #08090f,
+     comfortably past WCAG AA for body text while staying a muted secondary
+     tone (not full #e9eaf2 foreground). Signup opts out via its own --nova-*
+     palette, so this only affects landing/login/billing body copy. */
+  --muted-foreground: #adb3c9;
+  --accent: rgba(139, 131, 248, 0.14);
+  --accent-foreground: #cbc7ff;
+  /* #f2617a stays LIGHT so it reads as error text on the near-black canvas
+     (6.4:1). White text ON a #f2617a button is only 3.1:1, so the button
+     uses dark foreground instead (#0a0a12 on #f2617a = 6.19:1). */
+  --destructive: #f2617a;
+  --destructive-foreground: #0a0a12;
+
+  /* Opaque ladder borders instead of translucent white: over the old
+     near-black canvas rgba(255,255,255,0.09) resolved to roughly #202127,
+     which read as a smudge rather than an edge. These are the same values
+     the rest of the app's dark theme already uses. */
+  --sc-border: var(--surface-border);
+  --input: var(--surface-border-strong);
+  --ring: var(--brand-violet);
+
+  --radius: 0.75rem;
+  --control-border: #707892;
+  --switch-off: #6b7390;
+}

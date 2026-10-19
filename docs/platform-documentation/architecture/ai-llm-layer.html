@@ -1,0 +1,360 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI / LLM Layer — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="architecture" data-page="ai-llm-layer.html" data-doc="VD-AR-003" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>AI / LLM Layer</div>
+<div class="doc-meta" data-auto></div><h1>AI / LLM Layer</h1>
+
+<p class="lede">
+  The AI layer is the heart of the platform: a Spring AI 1.1.7 stack that talks to
+  fourteen LLM providers under two credential regimes (tenant BYOK and a
+  platform-hosted pool), wraps every call in metrics, budget, guardrail and
+  tracing advisors, and deliberately disables almost everything Spring AI would
+  auto-configure. Everything on this page was verified against
+  <code>core/chat/</code>, <code>core/providers/</code>, <code>core/agents/</code>,
+  <code>core/mcp/</code>, <code>core/mcpserver/</code> and <code>core/pom.xml</code>.
+</p>
+
+<div class="card-grid">
+  <div class="card"><div class="card-kpi">14 + 1</div><h4>Providers</h4><p><code>ProviderName</code> enum values — 14 real providers plus the <code>PLATFORM_HOSTED</code> pool marker</p></div>
+  <div class="card"><div class="card-kpi">11</div><h4>Auto-configs excluded</h4><p><code>CoreApplication</code> opts out of every Spring AI chat/embedding/image/audio/moderation auto-configuration</p></div>
+  <div class="card"><div class="card-kpi">100%</div><h4>Per-request clients</h4><p>No singleton <code>ChatClient</code> beans — each call builds a client from that tenant's decrypted credentials</p></div>
+  <div class="card"><div class="card-kpi">1 row / call</div><h4>Durable logging</h4><p><code>LlmMetricsAdvisor</code> writes <code>llm_call_log</code> for every real call, success or failure</p></div>
+</div>
+
+<h2>1. Build and dependency surface</h2>
+<dl class="props">
+  <dt>Parent</dt><dd><code>spring-boot-starter-parent 3.4.4</code> (<code>core/pom.xml</code>)</dd>
+  <dt>Java</dt><dd>Release 21 (virtual threads enabled); local toolchain compiles on JDK 24</dd>
+  <dt>Spring AI BOM</dt><dd><code>spring-ai-bom 1.1.7</code>, imported in <code>dependencyManagement</code></dd>
+  <dt>Chat module starters</dt><dd><code>spring-ai-starter-model-anthropic</code>, <code>-openai</code>, <code>-google-genai</code></dd>
+  <dt>Agents module</dt><dd><code>spring-ai-starter-mcp-client</code> (outbound MCP tool calls)</dd>
+  <dt>MCP server module</dt><dd><code>spring-ai-starter-mcp-server-webmvc</code> (inbound MCP hosting)</dd>
+  <dt>AWS Bedrock</dt><dd>AWS SDK v2 <code>2.28.29</code> with a hand-rolled <code>AwsBedrockChatModel</code> — no starter</dd>
+  <dt>HTTP layer</dt><dd><code>LlmHttpClientFactory</code> supplies <code>RestClient</code>/<code>WebClient</code> builders <em>with timeouts</em> — Spring AI's defaults have none</dd>
+</dl>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Critical design: auto-configuration is the enemy</div>
+  <p><code>CoreApplication</code> excludes eleven Spring AI auto-configurations —
+  Anthropic chat; OpenAI chat, embedding, image, speech, transcription and
+  moderation; GoogleGenAI chat and both embedding configs; and
+  <code>ToolCallbackConverterAutoConfiguration</code>. The reason is fundamental:
+  <strong>every <code>ChatClient</code> is built per-request from that tenant's
+  decrypted credentials</strong>. A singleton auto-configured client would pin one
+  API key (or none) for the whole JVM — wrong for a multi-tenant BYOK platform,
+  and a boot-time crash when no key is present. The
+  <code>ToolCallbackConverter</code> exclusion additionally stops outbound MCP
+  tools from leaking into the <em>inbound</em> MCP server — without it, the
+  server published the tenant's outbound tool set to external MCP clients. It was
+  removed once, broke the curated-tool contract, and was re-excluded immediately
+  (2026-08-15, documented in <code>CoreApplication</code>'s javadoc).</p>
+</div>
+
+<h2>2. Provider registry</h2>
+<p><code>ProviderName</code> (<code>core/providers/.../ProviderName.java</code>)
+is the single source of truth for what the platform can call. The
+<code>PLATFORM_HOSTED</code> value is different in kind — it is a marker that
+means "resolve through the hosted pool," not a provider with its own API.</p>
+
+<table>
+  <thead><tr><th>Provider</th><th>Enum</th><th>Client implementation</th><th>Quirks — verified in the factories</th></tr></thead>
+  <tbody>
+    <tr><td>Anthropic</td><td><code>ANTHROPIC</code></td><td><code>AnthropicAgentChatClientFactory</code> (Spring AI Anthropic)</td><td>Prompt caching via <code>AnthropicProviderCachingStrategy</code>; cache tokens recorded to <code>llm_call_log</code></td></tr>
+    <tr><td>OpenAI</td><td><code>OPENAI</code></td><td><code>OpenAIAgentChatClientFactory</code></td><td>Baseline OpenAI-compatible path</td></tr>
+    <tr><td>Azure OpenAI</td><td><code>AZURE_OPENAI</code></td><td><code>AzureOpenAIAgentChatClientFactory</code></td><td>Hosted pool uses the newer <code>/openai/v1/</code> bearer-token surface, not the classic deployment+api-key protocol</td></tr>
+    <tr><td>Google Vertex AI</td><td><code>GOOGLE_VERTEX</code></td><td><code>VertexAiChatClientFactory</code></td><td>Requires a single merged system message (<code>SystemMessageMergingAdvisor</code>); needs Google Application Default Credentials</td></tr>
+    <tr><td>AWS Bedrock</td><td><code>AWS_BEDROCK</code></td><td><code>AwsBedrockAgentChatClientFactory</code> + hand-rolled <code>AwsBedrockChatModel</code></td><td>AWS SDK v2 direct — no Spring AI Bedrock starter</td></tr>
+    <tr><td>Google Gemini (API key)</td><td><code>GEMINI</code></td><td><code>GeminiAgentChatClientFactory</code> (google-genai)</td><td><code>GeminiMixedContentToolCallChatModel</code> + <code>GeminiSchemaSelfHealer</code>; <code>-latest</code> aliases can silently roll generations — pin versions</td></tr>
+    <tr><td>xAI Grok</td><td><code>GROK</code></td><td><code>GrokAgentChatClientFactory</code> (OpenAI-compatible)</td><td>Grok 4.x rejects <code>stop</code> and penalty params</td></tr>
+    <tr><td>OpenRouter</td><td><code>OPENROUTER</code></td><td><code>OpenRouterAgentChatClientFactory</code> (OpenAI-compatible)</td><td>Custom <code>baseUrl</code> on shared <code>OpenAiApi</code></td></tr>
+    <tr><td>DeepSeek</td><td><code>DEEPSEEK</code></td><td><code>DeepSeekAgentChatClientFactory</code> (OpenAI-compatible)</td><td>Custom <code>baseUrl</code></td></tr>
+    <tr><td>Groq</td><td><code>GROQ</code></td><td><code>GroqAgentChatClientFactory</code> (OpenAI-compatible)</td><td>Custom <code>baseUrl</code></td></tr>
+    <tr><td>Mistral</td><td><code>MISTRAL</code></td><td><code>MistralAgentChatClientFactory</code> (OpenAI-compatible)</td><td>422s on <code>stream_options</code> but appends usage itself — excluded from the <code>streamUsage</code> flag</td></tr>
+    <tr><td>Meta (Llama / Muse Spark)</td><td><code>META</code></td><td><code>MetaAgentChatClientFactory</code> (OpenAI-compatible)</td><td>Rejects <code>stop</code> / <code>stream_options</code> with HTTP 400; <code>*-contributor</code> models train on traffic</td></tr>
+    <tr><td>Sarvam AI</td><td><code>SARVAM</code></td><td><code>SarvamAgentChatClientFactory</code></td><td>Uses <code>api-subscription-key</code> header via <code>NoopApiKey</code>; own credential table</td></tr>
+    <tr><td>Ollama</td><td><code>OLLAMA</code></td><td><code>OllamaAgentChatClientFactory</code> (OpenAI-compatible)</td><td>Self-hosted / local models</td></tr>
+    <tr><td>Hosted pool marker</td><td><code>PLATFORM_HOSTED</code></td><td><code>HostedLlmChatClientFactory</code> → <code>FreeTierChatClientService</code></td><td>Not a provider — resolves to a control-plane pool row at call time</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-note">
+  <div class="callout-title">One OpenAI-compatible engine, many providers</div>
+  <p>Grok, DeepSeek, OpenRouter, Groq, Mistral, Meta, Sarvam and Ollama all reuse
+  Spring AI's <code>OpenAiApi</code> with a custom <code>baseUrl</code> (and, for
+  Sarvam, a custom auth header). That reuse is exactly why their parameter
+  quirks — <code>stop</code>, <code>stream_options</code>, penalties — had to be
+  discovered provider-by-provider in real traffic and are now handled in each
+  factory rather than assumed by the shared client.</p>
+</div>
+
+<h2>3. Credential model — BYOK and the hosted pool</h2>
+<p>There is exactly one encryption chokepoint: <code>EncryptionService</code>
+(<code>core/crypto</code>), AES-256-GCM, keyed by <code>APP_ENCRYPTION_KEY</code>
+(a base64-encoded 32-byte key). Rotation is supported via
+<code>APP_ENCRYPTION_KEY_PREVIOUS</code>. If the key differs between any two
+places core boots, every stored credential becomes undecryptable.</p>
+
+<table>
+  <thead><tr><th>Credential kind</th><th>Storage</th><th>Resolution</th></tr></thead>
+  <tbody>
+    <tr><td>Tenant BYOK LLM keys</td><td>Per-tenant <code>LlmProviderCredential</code> rows in the tenant's own schema, AES-256-GCM encrypted</td><td><code>ProviderCredentialResolver</code>, per call — never cached, plaintext never logged</td></tr>
+    <tr><td>Hosted pool keys</td><td><code>platform_hosted_llm_provider</code> rows in the control plane (<code>public</code>)</td><td>Managed only via <code>POST /api/platform/hosted-llm-providers</code> — the endpoint encrypts on write</td></tr>
+    <tr><td>Sarvam / ElevenLabs / Jev keys</td><td>Own credential tables (not <code>LlmProviderCredential</code>)</td><td>Own services — e.g. <code>ProviderCredentialResolver</code> branches <code>SARVAM</code> to <code>SarvamCredentialService</code></td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Never raw-INSERT a hosted pool row</div>
+  <p><code>api_key</code> is encrypted by <code>EncryptionService</code> on the way
+  in. A hand-written SQL INSERT produces a row that cannot be decrypted and fails
+  at call time with an unhelpful error. Use the platform-admin API. A
+  per-provider <code>ProviderValidator</code> verifies the key on activation, and
+  the plan gate <code>plan_limits.byok_allowed</code> (seeded <code>false</code>
+  for FREE) controls whether a tenant may bring keys at all.</p>
+</div>
+
+<h2>4. Request path — how a turn becomes a provider call</h2>
+
+<pre class="mermaid">
+flowchart TD
+  A["Inbound turn<br/>(web / channel / job)"] --> B["ChatClientResolver"]
+  B -->|&quot;FREE tenant or usePlatformLlm&quot;| C["FreeTierChatClientService<br/>hosted-pool fallback chain"]
+  B -->|&quot;BYOK tenant&quot;| D["ProviderCredentialResolver<br/>decrypts tenant key"]
+  C --> E["ChatClientRegistry<br/>ProviderName → factory"]
+  D --> E
+  E --> F["*AgentChatClientFactory<br/>builds ChatClient this call"]
+  F --> G["Advisors: LlmGatewayService pre-flight<br/>LlmMetricsAdvisor + DefaultAgentAdvisor"]
+  G --> H["GuardedToolCallback chain<br/>ceiling → HITL → validate → sanitize"]
+  H --> I["Provider API"]
+  I --> J["llm_call_log row<br/>+ OTLP span to Langfuse"]
+</pre>
+
+<h3>4.1 The registry and factories</h3>
+<p><code>ChatClientRegistry</code> dispatches <code>ProviderName</code> to one
+factory class per provider (e.g. <code>AnthropicAgentChatClientFactory</code>).
+Every factory-built client gets the same advisor stack:</p>
+<ul>
+  <li><strong><code>LlmMetricsAdvisor</code></strong> — implements both
+  <code>CallAdvisor</code> and <code>StreamAdvisor</code>. Records latency and
+  call counts, writes the durable <code>llm_call_log</code> row, computes cost
+  via <code>LlmPricingCatalog</code>, and restores <code>TenantContext</code>
+  across Reactor thread hops on streamed calls.</li>
+  <li><strong><code>DefaultAgentAdvisor</code> beans</strong> — includes
+  <code>RlTrajectoryAdvisor</code> (per-turn trajectory recording for the RL
+  subsystem).</li>
+  <li><strong>Hosted-only advisors</strong> — <code>FreeTierTokenTrackingAdvisor</code>
+  and <code>PerUserBudgetTrackingAdvisor</code> run only on pool calls.</li>
+</ul>
+<p>Two shared pieces of plumbing deserve note:
+<code>ResilientToolCallingManagerFactory</code> gives every client a tool-calling
+manager in which a malformed tool call cannot kill a turn, and
+<code>AnthropicProviderCachingStrategy</code> (with Gemini, OpenAI, Azure and
+Mistral siblings behind <code>ProviderCachingRegistry</code>) manages prompt
+caching per provider.</p>
+
+<h3>4.2 The hosted-pool fallback chain</h3>
+<p>When <code>ChatClientResolver</code> selects the pool (FREE tenant or
+<code>usePlatformLlm</code>), <code>FreeTierChatClientService</code> walks an
+ordered chain of <code>platform_hosted_llm_provider</code> rows ranked by
+<code>HOSTED_POOL_ORDER_BY_COST</code>, observed latency, and admin-assigned
+priority. <code>HostedProviderHealth</code> circuit breakers skip rows that are
+failing. A wholly failed chain surfaces to the user as a generic chat failure —
+when debugging, check <em>all</em> rows, not just priority 0.</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">streamUsage gap — fixed 2026-09-25</div>
+  <p>Streamed OpenAI-compatible calls were missing
+  <code>stream_options.include_usage</code>, so streamed responses arrived with
+  no usage object and <code>llm_call_log</code> / budget reconciliation recorded
+  <strong>0 tokens</strong> for those calls. <code>.streamUsage(true)</code> is
+  now set wherever the upstream accepts it; Meta, Sarvam and Mistral are excluded
+  because they reject the parameter. Any historical token/cost report that
+  predates the fix undercounts streamed calls on OpenAI-compatible providers.</p>
+</div>
+
+<h2>5. The LLM gateway — pre-flight governance</h2>
+<p>Before any provider call, <code>LlmGatewayService</code>
+(<code>core/chat/gateway/</code>) runs the pre-flight chain: rate limiter →
+budget service → content policy → PII redactor → audit service. Its state lives
+in five tables: <code>LlmGatewayPolicy</code>, <code>LlmGatewayUserPolicy</code>,
+<code>LlmGatewayUsageLedger</code>, <code>LlmGatewayAuditLog</code> and
+<code>LlmGatewayPiiAuditLog</code>. A refusal or budget denial happens
+<em>before</em> the call — which is why "no <code>llm_call_log</code> row" is a
+valid debugging signal, not a bug.</p>
+
+<h2>6. Reasoning depth and the tool pipeline</h2>
+<table>
+  <thead><tr><th>Depth</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td><code>FAST</code></td><td>Default. Direct streamed call, no extra verification passes.</td></tr>
+    <tr><td><code>CAREFUL</code></td><td>Self-consistency check over the answer.</td></tr>
+    <tr><td><code>RIGOROUS</code></td><td>CAREFUL plus reflexion and an independent <code>ToolCallVerifierService</code> pass.</td></tr>
+    <tr><td><code>PLANNED</code></td><td>Writes a task plan first; not combined with the CAREFUL/RIGOROUS quality passes in the same turn.</td></tr>
+  </tbody>
+</table>
+<p>Non-<code>FAST</code> depths run through <code>BufferedTurnRunner</code>
+(they cannot stream mid-verification).</p>
+
+<h3>Tool resolution and the guarded pipeline</h3>
+<p><code>AgentToolProvider.resolveToolsFor</code> assembles the toolset per turn
+from resolvers: integrations, knowledge (gated by the agent's knowledge profile
+and flag), browser, the MCP registry, commerce (payment links), and the
+imagegen / documentgen / sdlc / codeintel / google / sarvam generators, plus
+<code>call_agent</code>, <code>a2a</code> and progress tools. Every tool is
+wrapped in <code>GuardedToolCallback</code> inside
+<code>LoggingToolCallback</code>, and executes in this order:</p>
+<ol>
+  <li><strong>Step ceiling</strong> — a shared <code>AtomicInteger</code> bounds tool calls per turn.</li>
+  <li><strong>Optional RIGOROUS pre-verify</strong> — the independent verifier can reject a call before it runs.</li>
+  <li><strong>HITL gate</strong> — tools matching <code>mcp_tool.*</code> policy go through <code>ApprovalPolicyService</code> + <code>ApprovalReplayGrant</code>.</li>
+  <li><strong><code>ToolCallOutputValidator</code></strong> — validates the result shape.</li>
+  <li><strong><code>sanitizeToolOutput</code></strong> — strips content the model should not see verbatim.</li>
+</ol>
+
+<h2>7. Session memory</h2>
+<p>Conversation memory is Redis-backed: <code>MessageHistoryAdvisor</code>
+rehydrates prior turns, persisted through <code>RedisMessageStore</code> and
+<code>RedisChatSessionStore</code>, with <code>SessionSummarizer</code>
+compacting long sessions. This is why Redis loss degrades continuity but never
+loses durable data — the system of record is Postgres.</p>
+
+<h2>8. MCP — outbound and inbound</h2>
+<table>
+  <thead><tr><th>Direction</th><th>Module</th><th>Mechanism</th><th>Controls</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Outbound</strong> (agent → external MCP servers)</td>
+      <td><code>core/mcp</code></td>
+      <td>DB-backed registry with encrypted env vars; per-JVM <code>DynamicMcpConnectionManager</code> plus <code>RedisMcpOwnershipRegistry</code> for cross-replica ownership. Dynamic STDIO runs through the <code>mcp-stdio-proxy</code> Node sidecar (<code>MCP_STDIO_SIDECAR_*</code> envs).</td>
+      <td><code>McpStdioCommandGuard</code>, <code>McpRemoteUrlGuard</code>; zero-credential stdio servers preconfigured: filesystem, memory, sequential-thinking, puppeteer, <code>@playwright/mcp@0.0.79</code></td>
+    </tr>
+    <tr>
+      <td><strong>Inbound</strong> (external MCP client → this platform)</td>
+      <td><code>core/mcpserver</code> (Spring profile <code>mcpserver</code>)</td>
+      <td>STREAMABLE HTTP endpoint at <code>/mcp</code>, server name <code>vegaduta-mcp-server</code></td>
+      <td><code>McpApiKeyAuthFilter</code> + access grants + rate limiter; only the curated tools <code>call_agent</code>, <code>call_workflow</code>, <code>search_knowledge</code> are exposed</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>9. Supporting subsystems</h2>
+<h3>Autonomous jobs</h3>
+<p>Scheduled/event agent runs are durable <code>QUEUED</code> rows with
+run-now-mode enqueue on the API pods, cron schedules, event triggers,
+approval parking, boot-time reconciliation of orphaned rows, and a structured
+output contract enforced by <code>JobResultSchemaValidator</code>. Progress
+notes stream back to the session.</p>
+
+<h3>Jev — the calibrated decision model</h3>
+<p><code>JevDecisionService</code> wraps a TypeSafe-calibrated yes/no model used
+for two hot decisions: <code>AgentRelevanceSelector</code> (which agent should
+reply on a shared channel) and <code>QueryComplexityClassifier</code> (per-turn
+cost routing — deterministic checks first, Jev as rescue-only, fail-toward-primary).
+Jev uses its own BYOK credential and tenant policy, with a per-agent threshold;
+precedence is agent &gt; tenant &gt; platform flag.</p>
+
+<h3>Knowledge / RAG</h3>
+<p>Per-tenant pgvector <code>vector_store</code> plus hierarchical
+<code>knowledge_document</code> tables. The Python sidecar does chunking,
+embedding, OCR, transcription and reranking. <code>KnowledgeSearchService</code>
+runs hybrid retrieval — vector similarity + Postgres full-text search fused by
+Reciprocal Rank Fusion (<code>RRF_K=60</code>) — capped at
+<code>rag.max-results=20</code> / <code>rag.max-chars=8000</code> per turn.
+Ingestion jobs and Notion / SharePoint / web-crawl connectors feed the base;
+<code>graphmemory</code> adds Apache AGE multi-hop Cypher recall as a tool.</p>
+
+<h2>10. Tracing and the durable call record</h2>
+<p>Core exports OTLP spans to Langfuse:</p>
+<pre><code>OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = http://&lt;langfuse-web&gt;/api/public/otel/v1/traces
+LANGFUSE_OTEL_AUTH_HEADER          = &lt;Basic …&gt;   (a secret: env var or Kubernetes Secret)
+TRACING_SAMPLING_PROBABILITY       = 0.1           (10% sampling by default)</code></pre>
+<p><code>llm_call_log.trace_id</code> is the Langfuse trace id — the join key
+between cost accounting (SQL) and prompt/tool detail (Langfuse). Spring AI's
+built-in observations light up via <code>micrometer-tracing-bridge-otel</code>.
+Tracing fails <em>silently</em>: a wrong endpoint or stale header drops spans but
+never breaks calls, so absence of traces is not evidence of absence of calls.</p>
+
+<h3><code>llm_call_log</code> schema</h3>
+<p>One row per real LLM call, success or failure, <strong>in the tenant's own
+schema</strong> (assembled across migrations V52, V82, V93, V138, V195):</p>
+<table>
+  <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>uuid</td></tr>
+    <tr><td><code>agent_id</code>, <code>session_id</code></td><td>which agent, which conversation</td></tr>
+    <tr><td><code>provider_name</code>, <code>model</code></td><td>who served it, which model string</td></tr>
+    <tr><td><code>prompt_tokens</code>, <code>completion_tokens</code>, <code>total_tokens</code></td><td>usage</td></tr>
+    <tr><td><code>cache_creation_tokens</code>, <code>cache_read_tokens</code></td><td>prompt-caching accounting (V195)</td></tr>
+    <tr><td><code>estimated_cost_usd</code></td><td><code>NUMERIC(12,6)</code> — estimate from <code>LlmPricingCatalog</code>; reconcile against provider billing before quoting</td></tr>
+    <tr><td><code>success</code></td><td>boolean</td></tr>
+    <tr><td><code>error_message</code>, <code>exception_type</code>, <code>stack_trace</code></td><td>failure detail (V82)</td></tr>
+    <tr><td><code>latency_ms</code>, <code>started_at</code></td><td>timing</td></tr>
+    <tr><td><code>trace_id</code>, <code>span_id</code></td><td>join key to Langfuse (V138)</td></tr>
+    <tr><td><code>request_id</code></td><td>the <code>req=</code> value from the application log line</td></tr>
+  </tbody>
+</table>
+
+<h3>Queries worth memorising</h3>
+<pre><code>SET search_path TO &lt;tenant_schema&gt;;
+
+-- last 20 calls, newest first
+SELECT started_at, provider_name, model, success, latency_ms,
+       total_tokens, estimated_cost_usd, left(error_message, 80) AS err
+FROM llm_call_log ORDER BY started_at DESC LIMIT 20;
+
+-- today's failures, grouped by cause
+SELECT provider_name, model, exception_type, count(*), max(started_at)
+FROM llm_call_log
+WHERE success = false AND started_at > now() - interval '24 hours'
+GROUP BY 1,2,3 ORDER BY 4 DESC;
+
+-- spend and volume by model, last 7 days
+SELECT model, count(*) AS calls,
+       sum(total_tokens) AS tokens,
+       round(sum(estimated_cost_usd), 4) AS usd
+FROM llm_call_log
+WHERE started_at > now() - interval '7 days'
+GROUP BY 1 ORDER BY usd DESC NULLS LAST;
+
+-- p50 / p95 latency by provider
+SELECT provider_name,
+       percentile_cont(0.5)  WITHIN GROUP (ORDER BY latency_ms) AS p50,
+       percentile_cont(0.95) WITHIN GROUP (ORDER BY latency_ms) AS p95,
+       count(*)
+FROM llm_call_log WHERE started_at > now() - interval '24 hours'
+GROUP BY 1;
+
+-- one conversation, in order
+SELECT started_at, model, success, total_tokens, trace_id
+FROM llm_call_log WHERE session_id = '&lt;session&gt;' ORDER BY started_at;</code></pre>
+
+<div class="callout callout-note">
+  <div class="callout-title">Debugging one bad call, in order</div>
+  <ol style="margin:6px 0 2px">
+    <li>Get identifiers: approximate time, agent, conversation; the <code>req=</code> id from app logs.</li>
+    <li>Find the row: <code>SELECT * FROM llm_call_log WHERE request_id='&lt;req&gt;' OR session_id='&lt;s&gt;'</code>.</li>
+    <li>Read <code>success</code>, <code>exception_type</code>, <code>error_message</code> — usually ends it.</li>
+    <li><code>success = true</code> but wrong answer → Langfuse via <code>trace_id</code>.</li>
+    <li>No row → the call never reached a provider: on-device/WebLLM path, guardrail refusal, budget cap, or earlier auth/tenant failure.</li>
+    <li>Many rows failing at once → check the pool, not the tenant.</li>
+  </ol>
+</div>
+
+<h2>11. Known provider quirks — quick reference</h2>
+<table>
+  <thead><tr><th>Provider / area</th><th>Behaviour</th><th>Handling</th></tr></thead>
+  <tbody>
+    <tr><td>Meta Model API</td><td>400 on <code>stop</code> / <code>stream_options</code></td><td>Params stripped in <code>MetaAgentChatClientFactory</code></td></tr>
+    <tr><td>Mistral</td><td>422 on <code>stream_options</code>, but appends usage itself</td><td>Excluded from <code>streamUsage(true)</code></td></tr>
+    <tr><td>Grok 4.x</td><td>Rejects <code>stop</code> and penalties</td><td>Params stripped in <code>GrokAgentChatClientFactory</code></td></tr>
+    <tr><td>Sarvam</td><td>Non-standard auth (<code>api-subscription-key</code>)</td><td><code>NoopApiKey</code> + custom header interceptor</td></tr>
+    <tr><td>Vertex</td><td>Requires single merged system message</td><td><code>SystemMessageMergingAdvisor</code></td></tr>
+    <tr><td>Gemini</td><td><code>-latest</code> aliases roll generations silently (Gemini 3 requires echoed <code>thought_signature</code>)</td><td>Pin explicit model versions — never <code>-latest</code> — in the hosted pool</td></tr>
+    <tr><td>Spring AI HTTP</td><td>Default clients have no timeouts</td><td><code>LlmHttpClientFactory</code> injects timeout-configured builders</td></tr>
+  </tbody>
+</table>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

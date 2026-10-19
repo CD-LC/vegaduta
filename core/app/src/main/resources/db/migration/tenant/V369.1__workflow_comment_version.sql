@@ -1,0 +1,13 @@
+-- Optimistic locking for workflow_comment (JAVA-007 convention): a comment's
+-- body edit (author) and its resolve/reopen (author or editor) are separate
+-- read-modify-write requests on the same row, and two reviewers can race on
+-- resolve. With a JPA @Version a lost race is a 409, not a silent overwrite.
+--
+-- VERSION NUMBER: V369.1 - OSS-local dotted minor version on top of the current
+-- maximum (V369, synced from upstream), see docs/engineering/FLYWAY-VERSIONING.md.
+-- One shared namespace across controlplane/ and tenant/. Folder: tenant, because
+-- workflow_comment (V367) lives in every tenant schema.
+--
+-- Additive, metadata-only on Postgres 11+ (constant DEFAULT, no rewrite). A no-op
+-- when the table is absent is NOT needed: V367 always precedes this version.
+ALTER TABLE workflow_comment ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;

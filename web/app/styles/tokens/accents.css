@@ -1,0 +1,202 @@
+/* ---- 11. Accent palettes (8), tuned for paper (light) and ink (dark) ------ */
+/* One accent is live at a time (data-accent on <html>). Anonymous visitors
+   get a new one on every refresh; logged-in users sit on the brand indigo
+   unless they pick one in ThemePicker. Each palette has the same 7 stops the
+   rest of the app already reads (--accent-50/100/200/400/500/600/700) plus a
+   gradient. Light 500s are decorative only (amber is 2.39:1 on white):
+   fills under white text and accent-coloured text use the 600 stop in light
+   (--primary / --accent-text below); dark 500s are the text-safe lighter
+   step, and the tints go translucent so they sit on glass. */
+:root[data-accent="indigo"] {
+  --accent-50: #f2f1ff;
+  --accent-100: #e6e3ff;
+  --accent-200: #d2cdff;
+  --accent-400: #8a7bff;
+  --accent-500: #6d5bff;
+  --accent-600: #5643e6;
+  --accent-700: #4736c4;
+}
+:root[data-accent="teal"] {
+  --accent-50: #effcfa;
+  --accent-100: #d3f7f1;
+  --accent-200: #a6efe3;
+  --accent-400: #2cc7b6;
+  --accent-500: #0d9488;
+  --accent-600: #0b7a70;
+  --accent-700: #0a5f58;
+}
+:root[data-accent="coral"] {
+  --accent-50: #fff4f1;
+  --accent-100: #ffe3dc;
+  --accent-200: #ffc7ba;
+  --accent-400: #ff8570;
+  --accent-500: #f0553f;
+  --accent-600: #d63d2a;
+  --accent-700: #b02f1f;
+}
+:root[data-accent="amber"] {
+  --accent-50: #fff8ea;
+  --accent-100: #ffefc6;
+  --accent-200: #ffe094;
+  --accent-400: #f5b53a;
+  --accent-500: #e8960c;
+  --accent-600: #a86600;
+  --accent-700: #8a5300;
+}
+:root[data-accent="emerald"] {
+  --accent-50: #effdf3;
+  --accent-100: #d8f9e3;
+  --accent-200: #b3f1c9;
+  --accent-400: #3fd07a;
+  --accent-500: #16a34a;
+  --accent-600: #15803d;
+  --accent-700: #166534;
+}
+:root[data-accent="rose"] {
+  --accent-50: #fff1f5;
+  --accent-100: #ffe0ea;
+  --accent-200: #fec7d8;
+  --accent-400: #fb5b8e;
+  --accent-500: #e11d63;
+  --accent-600: #be123c;
+  --accent-700: #9f1239;
+}
+:root[data-accent="sky"] {
+  --accent-50: #eff8ff;
+  --accent-100: #dbeffe;
+  --accent-200: #b8e2fd;
+  --accent-400: #38b0f5;
+  --accent-500: #0284c7;
+  --accent-600: #0369a1;
+  --accent-700: #075985;
+}
+:root[data-accent="violet"] {
+  --accent-50: #f8f2ff;
+  --accent-100: #efe3ff;
+  --accent-200: #dfc8ff;
+  --accent-400: #a86bea;
+  --accent-500: #8b3fd9;
+  --accent-600: #7326b8;
+  --accent-700: #5c1d94;
+}
+
+/* Focus-ring glow (color audit follow-up): globals.css only ever defines
+   --accent-glow for its OWN older 5-palette set (emerald/rose/amber/sky/
+   slate), which predates this 8-palette system. teal/coral/violet/indigo
+   silently fell back to globals.css's indigo-purple default glow, mismatched
+   against whichever of those a tenant actually had selected. Deriving it
+   from the live --accent-500 covers every palette above (current and any
+   future addition) uniformly; the four palettes globals.css already has a
+   correct hand-tuned value for keep it via that selector's higher specificity. */
+:root {
+  --accent-glow: color-mix(in srgb, var(--accent-500) 35%, transparent);
+}
+:root[data-mode="dark"] {
+  --accent-glow: color-mix(in srgb, var(--accent-500) 35%, transparent);
+}
+
+:root[data-mode="dark"][data-accent="indigo"] {
+  --accent-400: #a99dff;
+  --accent-500: #8a7bff;
+  --accent-600: #7a69ff;
+  --accent-700: #6d5bff;
+}
+:root[data-mode="dark"][data-accent="teal"] {
+  --accent-400: #5fe3d3;
+  --accent-500: #2dd4bf;
+  --accent-600: #22bfab;
+  --accent-700: #14a596;
+}
+:root[data-mode="dark"][data-accent="coral"] {
+  --accent-400: #ffa08f;
+  --accent-500: #ff8570;
+  --accent-600: #ff7058;
+  --accent-700: #f0553f;
+}
+:root[data-mode="dark"][data-accent="amber"] {
+  --accent-400: #ffcb6b;
+  --accent-500: #f5b53a;
+  --accent-600: #eaa41f;
+  --accent-700: #d9930f;
+}
+:root[data-mode="dark"][data-accent="emerald"] {
+  --accent-400: #7ae8a3;
+  --accent-500: #4ade80;
+  --accent-600: #35cf6c;
+  --accent-700: #22b85a;
+}
+:root[data-mode="dark"][data-accent="rose"] {
+  --accent-400: #ff93b5;
+  --accent-500: #fb6b9a;
+  --accent-600: #f55088;
+  --accent-700: #e83a76;
+}
+:root[data-mode="dark"][data-accent="sky"] {
+  --accent-400: #7dd3fc;
+  --accent-500: #38bdf8;
+  --accent-600: #22ace9;
+  --accent-700: #0e98d6;
+}
+:root[data-mode="dark"][data-accent="violet"] {
+  --accent-400: #caa6f7;
+  --accent-500: #b48af0;
+  --accent-600: #a473e8;
+  --accent-700: #935cdd;
+}
+
+:root[data-mode="dark"] {
+  --accent-50: color-mix(in oklab, var(--accent-500) 8%, transparent);
+  --accent-100: color-mix(in oklab, var(--accent-500) 14%, transparent);
+  --accent-200: color-mix(in oklab, var(--accent-500) 22%, transparent);
+}
+
+:root {
+  --accent-gradient: linear-gradient(135deg, var(--accent-500), var(--accent-400));
+  --brand-violet: var(--accent-500);
+  --primary: var(--accent-500);
+  --ring: var(--accent-500);
+  /* Label colour on a --primary / accent fill, and accent used as text. */
+  --accent-fg: #ffffff;
+  --accent-text: var(--accent-500);
+  --primary-foreground: var(--accent-fg);
+  accent-color: var(--accent-500);
+}
+
+/* Light: the 600 stop is the AA-safe fill (white label), link/text colour and
+   focus ring for all eight accents; dark stays on the 500 tint. */
+:root:not([data-mode="dark"]) {
+  --primary: var(--accent-600);
+  --ring: var(--accent-600);
+  --accent-text: var(--accent-600);
+}
+
+:root[data-mode="dark"] {
+  --accent-fg: #0e0e12;
+}
+
+/* Amber, coral and emerald 600 are AA on white but fall under 4.5:1 as body
+   text on the tinted paper page, so these three use the 700 stop for text
+   and links. */
+:root:not([data-mode="dark"])[data-accent="amber"],
+:root:not([data-mode="dark"])[data-accent="coral"],
+:root:not([data-mode="dark"])[data-accent="emerald"] {
+  --primary: var(--accent-700);
+  --accent-text: var(--accent-700);
+}
+
+/* Solid focus ring on every button: the ShadCN recipe pairs `outline-none`
+   with a 50% `ring-ring/50` halo (~2:1), so the ring is drawn here instead. */
+[data-slot="button"]:focus-visible,
+.auth-card button:focus-visible,
+.marketing-root .mkt-btn:focus-visible,
+.std-screen__btn:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+}
+
+:root[data-mode="dark"] [data-slot="button"]:focus-visible,
+:root[data-mode="dark"] .auth-card button:focus-visible,
+:root[data-mode="dark"] .marketing-root .mkt-btn:focus-visible,
+:root[data-mode="dark"] .std-screen__btn:focus-visible {
+  outline-color: var(--accent-500);
+}

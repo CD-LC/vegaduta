@@ -1,0 +1,25 @@
+# "shape-jobs-core" profile - the MAIN jobs pool when the heavy knowledge pollers run in their own pool
+# (shape-jobs-ingest). Activate it AFTER "shape-jobs" (later profiles win, and a list is replaced as a whole,
+# which is why shape-jobs' own entries are repeated here): the jobs pod keeps everything it owns today
+# except the pollers listed below.
+#
+# Pools split WHICH pod runs a job, never WHAT runs: every class the api shape hands to the jobs family is
+# run by exactly one pool. JobsPoolsCoverEveryJobTest enforces that, so a job can't fall between two pools.
+# Ownership table and rationale: docs/deploy/DEPLOYMENT-SHAPES.md.
+
+app:
+  scheduling:
+    skip-bean-classes:
+      # As shape-jobs: writes throttles into the API JVM's in-memory map, so sweeping here would throttle nobody.
+      - com.agenticai.core.platform.abuse.AbuseSignalService
+      # Owned by shape-jobs-ingest.
+      - com.agenticai.core.knowledge.KnowledgeIngestionJobRunner
+      - com.agenticai.core.knowledge.KnowledgeReembedJobRunner
+    skip-listener-classes:
+      - com.agenticai.core.quality.dataset.EvalRunExecutor
+      - com.agenticai.core.quality.simulation.SimulationRunExecutor
+      - com.agenticai.core.omnichannel.demo.DemoTelegramBot
+      - com.agenticai.core.providers.LocalLlmPoolBootstrap
+
+  agent-jobs:
+    interrupt-on-external-terminal: true

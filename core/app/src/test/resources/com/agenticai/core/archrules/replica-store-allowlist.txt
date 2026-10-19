@@ -1,0 +1,9 @@
+# Stores that default to a per-JVM memory implementation but are deliberately NOT inspected by
+# ReplicaModeSafetyCheck's isRedis(...) scan. One per line: <property key>  # <reason>.
+# ReplicaStoreCoverageTest enforces this.
+# Empty-ish on purpose: every store that has a Valkey switch should be checked at boot AND switched
+# by the Helm chart; entries here are the documented exceptions.
+app.mcp.oauth.store # inspected by ReplicaModeSafetyCheck inside the app.mcp.oauth.enabled /
+                    # providers-enabled findings (unsafe only while OAuth is on, via redisStore(...),
+                    # not an unconditional isRedis); the Helm chart switches it to redis through the
+                    # replicaReadiness.mcpOAuthStoreRedis flag (ADR-0014 section 5).

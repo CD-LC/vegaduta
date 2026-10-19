@@ -1,0 +1,139 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-providers",
+      "method": "GET",
+      "path": "/api/providers",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].id",
+          "$[*].lastValidatedAt",
+          "$[*].providerName",
+          "$[*].status",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-providers",
+      "method": "POST",
+      "path": "/api/providers",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.providerName"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.id",
+          "$.lastValidatedAt",
+          "$.providerName",
+          "$.status",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-providers-provider",
+      "method": "DELETE",
+      "path": "/api/providers/{provider}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-providers-provider-models",
+      "method": "GET",
+      "path": "/api/providers/{provider}/models",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].modelId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-providers-availability",
+      "method": "GET",
+      "path": "/api/providers/availability",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.canCreateAgents",
+          "$.hasByokProvider",
+          "$.platformHostedAvailable"
+        ]
+      }
+    },
+    {
+      "id": "get-api-providers-default-model",
+      "method": "GET",
+      "path": "/api/providers/default-model",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.message",
+          "$.model",
+          "$.needsAttention",
+          "$.providerName",
+          "$.source"
+        ]
+      }
+    },
+    {
+      "id": "post-api-providers-local-openai-probe",
+      "method": "POST",
+      "path": "/api/providers/local-openai/probe",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.model"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.advice",
+          "$.model",
+          "$.parameterBillions",
+          "$.serverKind",
+          "$.toolCallGrade",
+          "$.toolRouterMode"
+        ]
+      }
+    },
+    {
+      "id": "get-api-providers-modalities",
+      "method": "GET",
+      "path": "/api/providers/modalities",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.speechToText",
+          "$.textToSpeech",
+          "$.videoToText"
+        ]
+      }
+    },
+    {
+      "id": "get-api-providers-platform-llm",
+      "method": "GET",
+      "path": "/api/providers/platform-llm",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.available",
+          "$.label",
+          "$.model"
+        ]
+      }
+    }
+  ]
+}

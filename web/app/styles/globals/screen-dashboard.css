@@ -1,0 +1,363 @@
+/* =========================================================================
+ * AXON Dashboard - "Cognition Cockpit" (design_handoff_axon/design_files/
+ * AXON Dashboard.dc.html, the handoff's flagship/reference screen). Ported
+ * 1:1 from that file's inline styles into real classes here, using the
+ * --ax-* tokens defined near the top of this file. Grid shape matches the
+ * reference exactly: row 1 = 5-tile telemetry strip spanning all columns,
+ * row 2 = gauge stack | Cognition Core hero | live event tail, row 3 =
+ * agent activity | workflow runs spanning the first two columns.
+ * ========================================================================= */
+
+.ax-dash {
+  display: grid;
+  grid-template-columns: minmax(0, 288px) minmax(0, 1fr) minmax(0, 356px);
+  grid-template-rows: auto minmax(340px, 1fr) auto;
+  gap: 15px;
+  /* min-width: 0 is what actually lets a grid *item* (this is one, when
+   * nested in .ax-admin-main's flex row) shrink below its content's
+   * intrinsic width instead of forcing the parent to overflow - the classic
+   * "flex/grid child won't shrink" trap. Bare `minmax(220px, 288px)` etc.
+   * (the previous rule) put a hard 220/280px FLOOR on the side columns that
+   * doesn't yield even when the container is narrower than the original
+   * 1560px design canvas - exactly what happened once this grid started
+   * living inside the narrower .ax-admin-main (74px rail + 216px admin
+   * sub-sidebar eat into the available width there, unlike the flagship "/"
+   * Dashboard). minmax(0, Npx) keeps the same target size but lets it
+   * actually compress instead of pushing tiles off the right edge. */
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .ax-dash {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-dash-row-full {
+  grid-column: 1 / -1;
+}
+
+.ax-telemetry-row {
+  display: grid;
+  /* minmax(0, 1fr), not bare `1fr` (== minmax(auto, 1fr)) - same overflow
+   * trap as .ax-dash above: a tile's own min-content width (numbers, the
+   * 3-column mini-stat, donut SVGs) was setting an implicit floor on each
+   * of the 5 columns wider than 1/5 of the available row, so the whole row
+   * pushed past the container's right edge instead of shrinking. */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 15px;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .ax-telemetry-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile pass (2026-07): at true phone widths (<=640px, the "fits in a
+ * pocket" breakpoint used elsewhere in this file) even 2 columns of tiles
+ * gets cramped - the 3-stat latency row and the model-routing donut+legend
+ * tile both need more than ~150px of breathing room to read cleanly. Drop
+ * to a single column here rather than letting text wrap awkwardly. */
+@media (max-width: 640px) {
+  .ax-telemetry-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ax-tile {
+  position: relative;
+  padding: 13px 15px;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 13px;
+  overflow: hidden;
+  color: var(--ax-text);
+}
+
+.ax-tile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 1px;
+  background: var(--ax-cyan);
+}
+
+.ax-tile::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 30px;
+  background: var(--ax-cyan);
+}
+
+.ax-tile-flex {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ax-tile-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+}
+
+.ax-tile-value {
+  font-size: 27px;
+  font-weight: 600;
+  font-family: var(--font-mono), monospace;
+  margin-top: 2px;
+  color: var(--ax-text);
+}
+
+.ax-tile-value-cyan {
+  color: var(--ax-cyan);
+}
+
+.ax-tile-sub {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  margin-top: 6px;
+}
+
+.ax-tile-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ax-track);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.ax-tile-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ax-cyan), var(--ax-violetd));
+}
+
+.ax-latency-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-latency-val {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ax-text);
+}
+
+.ax-latency-lbl {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+}
+
+.ax-routing-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 5px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-micro);
+}
+
+.ax-gauge-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 0;
+}
+
+.ax-gauge-tile {
+  flex: 1;
+  padding: 14px 16px;
+  background: var(--ax-panel2);
+  border: 1px solid var(--ax-border);
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--ax-text);
+}
+
+.ax-gauge-big {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+.ax-dot-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.ax-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ax-green);
+}
+
+.ax-dot-glow {
+  box-shadow: 0 0 7px var(--ax-green);
+}
+
+.ax-dot-down {
+  background: var(--ax-red);
+  box-shadow: 0 0 7px var(--ax-red);
+}
+
+.ax-core-panel {
+  position: relative;
+  border: 1px solid var(--ax-border);
+  border-radius: 16px;
+  overflow: hidden;
+  /* Was a hardcoded dark-only gradient (#12163a/#070a18) - those are
+   * literally the dark-mode --hud-panel-alt/--hud-panel values (see
+   * :root[data-mode="dark"] above), copied as fixed hex instead of the
+   * token, so this panel silently ignored the light/dark toggle even
+   * though the toggle already worked everywhere else on the page (direct
+   * user report: "this section on theme change is not changing"). */
+  background: radial-gradient(90% 90% at 50% 45%, var(--hud-panel-alt), var(--hud-panel));
+  min-height: 340px;
+}
+
+.ax-core-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ax-core-corner {
+  position: absolute;
+  z-index: 2;
+}
+
+.ax-core-kicker {
+  font-size: var(--fs-micro);
+  color: var(--hud-violet);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.16em;
+}
+
+.ax-core-sub {
+  font-size: var(--fs-label);
+  color: var(--hud-text-dim);
+  font-family: var(--font-mono), monospace;
+  margin-top: 2px;
+}
+
+.ax-core-thinking {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  color: var(--ax-text);
+}
+
+.ax-core-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ax-core-center-num {
+  font-size: 52px;
+  font-weight: 700;
+  font-family: var(--font-mono), monospace;
+  color: var(--ax-text);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--hud-cyan) 40%, transparent);
+  line-height: 1;
+}
+
+.ax-core-center-lbl {
+  font-size: var(--fs-label);
+  color: var(--hud-cyan);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.14em;
+  margin-top: 4px;
+}
+
+.ax-core-stats {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
+  z-index: 2;
+  display: flex;
+  gap: 26px;
+  justify-content: center;
+  font-family: var(--font-mono), monospace;
+  flex-wrap: wrap;
+}
+
+.ax-core-stat {
+  text-align: center;
+}
+
+.ax-core-stat-num {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+}
+
+.ax-core-stat-lbl {
+  font-size: var(--fs-micro);
+  color: var(--hud-text-dim);
+}
+
+.ax-event-panel {
+  border: 1px solid var(--ax-border);
+  border-radius: 14px;
+  background: var(--ax-panel2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 340px;
+}
+
+.ax-event-header {
+  padding: 14px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ax-event-title {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.1em;
+}
+
+.ax-event-live {
+  font-size: var(--fs-micro);
+  color: var(--ax-green);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-feed {
+  flex: 1;
+  padding: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  overflow: hidden;
+}

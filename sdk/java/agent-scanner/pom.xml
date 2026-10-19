@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.vegaduta</groupId>
+    <artifactId>vegaduta-agent-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>vegaduta-agent-scanner</artifactId>
+  <name>VegaDuta Agent SDK :: Scanner</name>
+  <description>
+    Zero-integration risk-map scanner: points at a package, jar or class list and reports every
+    tool the agent can call, its classification (or UNCLASSIFIED), approval coverage, the lethal
+    trifecta, OWASP ASI exposure and a readiness score. Runs as a library or as a CLI that can
+    gate CI with --fail-under.
+  </description>
+
+  <properties>
+    <automatic.module.name>io.vegaduta.agent.scanner</automatic.module.name>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vegaduta</groupId>
+      <artifactId>vegaduta-agent-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vegaduta</groupId>
+      <artifactId>vegaduta-agent-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>io.vegaduta.agent.scanner.Main</mainClass>
+            </manifest>
+            <manifestEntries>
+              <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+              <Implementation-Title>${project.artifactId}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Bundle-License>Apache-2.0</Bundle-License>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

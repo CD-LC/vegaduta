@@ -1,0 +1,470 @@
+@layer components {
+  /* Normalized base button (redesign 2026-07-21): one clean, consistent
+   * standard for every plain <button> in the app. The previous version was
+   * built around GlobalCursorFX flourish (overflow-hidden to clip a bright
+   * cursor-tracking `button::after` spotlight, plus a transform transition
+   * to smooth a magnetic cursor-pull) - both removed, since buttons visibly
+   * moving toward the cursor and glowing under it read as cheap. Now: quiet
+   * surface, a calm hover (background + text lift), a standard press, and a
+   * clear accent focus ring. Only color/shadow transition (no transform
+   * follow), so nothing drifts on hover. */
+  button {
+    @apply relative cursor-pointer rounded-lg border border-[var(--surface-border-strong)] bg-[var(--surface-card)] px-3.5 py-2 text-sm font-medium text-[var(--text-secondary)] shadow-sm;
+    @apply transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out;
+    @apply hover:border-[var(--surface-border-strong)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] active:scale-[0.98];
+    @apply outline-none;
+  }
+
+  button:focus-visible {
+    @apply outline outline-2 outline-offset-2;
+    outline-color: var(--accent-500);
+  }
+
+  /* GlobalBackgroundFX.js's canvas - the console-wide, every-page,
+   * every-theme reactive background (ripples on click/approve/reject/nav,
+   * see that file's own comment). Sits ABOVE regular content, per the
+   * explicit "effects on overlay and click" ask, not tucked behind it like
+   * AmbientNetwork - it's meant to be a visible reaction layered over
+   * whatever was just clicked, not ambient wallpaper. Kept genuinely subtle
+   * (see the low alpha values in GlobalBackgroundFX.js) specifically so it
+   * can safely sit on top of real UI without ever obscuring text, and
+   * pointer-events: none so it can never intercept a click itself. */
+  .ai-bg-fx-canvas {
+    @apply pointer-events-none fixed inset-0 z-[999];
+  }
+
+  /* --- Floating AI nav orb (FloatingNavOrb.js) -----------------------------
+   * Replaces .app-sidebar/.app-sidebar-mobile (rules left in place further
+   * up this file, now unused/dead - AppShell.js no longer renders those
+   * elements - rather than deleted outright, same "leave unused, documented"
+   * posture as MarketingHome.js/LoginLanding.js elsewhere in this app).
+   * Direct response to "left bar menu item is not professional - give a
+   * floating menu, true AI, expand on click." */
+  .ai-orb-backdrop {
+    @apply pointer-events-auto fixed inset-0 z-[1000];
+    background: color-mix(in srgb, var(--surface-page) 55%, transparent);
+    backdrop-filter: blur(7px) saturate(1.1);
+  }
+
+  .ai-orb-root {
+    @apply fixed z-[1001];
+    left: 22px;
+    bottom: 22px;
+  }
+
+  @media (max-width: 640px) {
+    .ai-orb-root {
+      left: 16px;
+      bottom: 16px;
+    }
+  }
+
+  .ai-orb-launcher {
+    @apply relative flex items-center justify-center rounded-full border-0 text-white;
+    width: 58px;
+    height: 58px;
+    background: radial-gradient(circle at 35% 30%, #fff, #39e6ff 28%, #a24bff 66%, #ff3d9a 100%);
+    box-shadow:
+      0 6px 24px -6px rgba(124, 58, 237, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+    transition:
+      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.25s ease;
+  }
+
+  .ai-orb-launcher:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow:
+      0 10px 30px -6px rgba(124, 58, 237, 0.65),
+      0 0 0 1px rgba(255, 255, 255, 0.22) inset;
+  }
+
+  .ai-orb-launcher-open {
+    box-shadow:
+      0 6px 24px -6px rgba(0, 229, 255, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.22) inset;
+  }
+
+  /* Idle "breathing" halo - the orb visibly reads as alive/alert even
+   * before anyone touches it, not a static icon-in-a-circle. Paused
+   * entirely under reduced-motion rather than offered as a lesser version,
+   * same posture as every other ambient animation in this app. */
+  .ai-orb-launcher-halo {
+    @apply pointer-events-none absolute rounded-full;
+    inset: -10px;
+    background: radial-gradient(circle, rgba(162, 75, 255, 0.35), transparent 70%);
+    animation: ai-orb-breathe 2.6s ease-in-out infinite;
+  }
+
+  .ai-orb-launcher-ring-spin {
+    @apply pointer-events-none absolute rounded-full;
+    inset: -5px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.45);
+    animation: ai-orb-spin 9s linear infinite;
+  }
+
+  @keyframes ai-orb-breathe {
+    0%,
+    100% {
+      transform: scale(0.92);
+      opacity: 0.55;
+    }
+    50% {
+      transform: scale(1.18);
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes ai-orb-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-orb-launcher-halo,
+    .ai-orb-launcher-ring-spin {
+      animation: none;
+    }
+  }
+
+  .ai-orb-launcher-icon {
+    @apply relative z-10 flex items-center justify-center;
+  }
+
+  /* v2 layout: a vertical stack directly above the orb, not a wide radial
+   * arc - see FloatingNavOrb.js's header comment for exactly why (v1's arc
+   * pushed nodes off the left edge of the viewport). .ai-orb-stack is the
+   * positioning root every node's x/y offset (set via Motion, in the
+   * component) is relative to - anchored at the orb's own top-left via
+   * bottom:0/left:0, so a node's `y` offset is always a negative
+   * translateY (up), never able to escape leftward. */
+  .ai-orb-stack {
+    @apply pointer-events-none absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .ai-orb-stack-thread {
+    @apply pointer-events-none absolute rounded-full;
+    left: 28px;
+    bottom: 30px;
+    width: 2px;
+    background: linear-gradient(to top, rgba(162, 75, 255, 0.35), rgba(162, 75, 255, 0));
+  }
+
+  .ai-orb-node {
+    @apply pointer-events-auto absolute flex items-center gap-2 rounded-full no-underline;
+    left: 0;
+    bottom: 0;
+    height: 44px;
+    padding: 0 16px 0 6px;
+    width: max-content;
+    max-width: 220px;
+    background: var(--surface-card);
+    /* HUD instrument-line border (--hud-line), replacing the plain
+     * surface-border box-shadow - visually ties the nav nodes to the same
+     * "command-center readout" language as the dashboard's panels/toasts. */
+    border: 1px solid var(--hud-line);
+    box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.35);
+    cursor: grab;
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  :root[data-mode="dark"] .ai-orb-node {
+    background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+    box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .ai-orb-node:hover {
+    border-color: var(--hud-cyan);
+    box-shadow:
+      0 10px 28px -8px rgba(124, 58, 237, 0.4),
+      0 0 0 1px var(--accent-glow-cyan);
+  }
+
+  .ai-orb-node:active {
+    cursor: grabbing;
+  }
+
+  /* "Icons should get highlighted and moving on hover" - a scale + tilt +
+   * accent-color swap on the icon badge specifically (not the whole pill),
+   * same technique already used for .dash-card-icon elsewhere in this file
+   * - transform + background-image only, so this costs nothing beyond
+   * ordinary compositor work no matter how many nodes are on screen. */
+  .ai-orb-node-icon {
+    @apply flex shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] transition-transform duration-200 ease-out;
+    width: 32px;
+    height: 32px;
+    background: var(--surface-hover);
+  }
+
+  .ai-orb-node:hover .ai-orb-node-icon,
+  .ai-orb-node:focus-visible .ai-orb-node-icon {
+    transform: scale(1.15) rotate(-6deg);
+    background-image: var(--accent-gradient);
+    color: #fff;
+  }
+
+  .ai-orb-node-active .ai-orb-node-icon {
+    background-image: var(--accent-gradient);
+    color: #fff;
+  }
+
+  .ai-orb-node-label {
+    @apply whitespace-nowrap text-[13px] font-medium text-[var(--text-secondary)];
+    /* HUD mono readout font - the one visual thread every telemetry label
+     * in this console now shares (dashboard stat labels, toast kind tags,
+     * system-status rows, and now every nav destination). */
+    font-family: var(--font-mono), monospace;
+  }
+
+  .ai-orb-node-active .ai-orb-node-label {
+    @apply text-[var(--accent-600)];
+  }
+
+  :root[data-mode="dark"] .ai-orb-node-active .ai-orb-node-label {
+    color: var(--accent-cyan);
+  }
+
+  .ai-orb-node-group-dot {
+    @apply absolute rounded-full;
+    top: 8px;
+    right: 8px;
+    width: 5px;
+    height: 5px;
+    background: var(--accent-cyan);
+  }
+
+  .ai-orb-node-back {
+    background: var(--surface-hover);
+  }
+
+  /* First-visit discoverability hint (FloatingNavOrb.js) - "this is
+   * confusing to the customer, give some hint." A small pill next to the
+   * orb, shown once per browser, dismissed on first real interaction. */
+  .ai-orb-hint {
+    @apply pointer-events-none absolute flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[12px] font-medium text-white;
+    left: 68px;
+    bottom: 16px;
+    font-family: var(--font-mono), monospace;
+    background: color-mix(in srgb, var(--text-primary) 88%, transparent);
+    box-shadow:
+      0 6px 18px -6px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--accent-glow-cyan);
+  }
+
+  .ai-orb-hint-arrow {
+    animation: ai-orb-hint-nudge 1.1s ease-in-out infinite;
+  }
+
+  @keyframes ai-orb-hint-nudge {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-orb-hint-arrow {
+      animation: none;
+    }
+  }
+
+  /* Primary action button - one saturated accent fill, no motion. The
+   * previous version ran an infinite 6s `btn-shift` gradient drift on EVERY
+   * primary button in the app; a perpetually-animating button reads as a
+   * demo/template, not a product, so it's removed. Hover is a quiet
+   * elevation bump only. */
+  button.primary {
+    @apply border-[var(--accent-600)] text-white shadow-sm;
+    background-image: var(--accent-gradient);
+    box-shadow: 0 1px 2px 0 var(--accent-glow);
+  }
+
+  button.primary:hover {
+    @apply shadow-md brightness-[1.05];
+  }
+
+  /* A slow, subtle drift across the primary gradient - the same "this is
+   * alive, not just colored" idea as the Dashboard's animated stat values
+   * and the pre-login experience's living canvas, applied to the one
+   * button every important action in the console routes through. */
+  @keyframes btn-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    button.primary {
+      animation: none;
+    }
+  }
+
+  button:disabled,
+  button.primary:disabled {
+    @apply cursor-not-allowed opacity-50 active:scale-100;
+  }
+
+  button:disabled::after {
+    display: none;
+  }
+
+  .list-item {
+    @apply mb-2 flex cursor-default items-center justify-between gap-3 rounded-xl border bg-[var(--surface-card)] px-4 py-3 transition;
+    @apply hover:border-[var(--accent-200)] hover:bg-[var(--accent-50)];
+    border-color: var(--hud-line);
+  }
+
+  .list-item.selected {
+    @apply border-[var(--accent-200)] bg-[var(--accent-50)] ring-1;
+    --tw-ring-color: var(--accent-200);
+  }
+
+  :root[data-mode="dark"] .list-item {
+    background: var(--glass-surface);
+    border-color: var(--hud-line);
+  }
+
+  :root[data-mode="dark"] .list-item:hover {
+    border-color: var(--accent-cyan);
+    background: var(--glass-surface);
+  }
+
+  :root[data-mode="dark"] .list-item.selected {
+    border-color: var(--accent-cyan);
+    background: var(--glass-surface);
+    box-shadow: 0 0 0 1px var(--accent-glow-cyan);
+  }
+
+  /* Phone-width pass (#1028) - .list-item is `justify-between` with no
+   * wrap, which is fine on desktop (two children: a text block on the
+   * left, a `.row` of badge+buttons on the right, both comfortably wide),
+   * but DevicesPanel's paired-device rows are the worst case of this
+   * shared class on a phone: the left side already carries a fairly long
+   * "platform · paired on <date> · last seen <datetime>" line, and the
+   * right side is a badge plus two buttons (Command History/Revoke).
+   * Neither child has flex-wrap, so at 360-430px both sides get squeezed
+   * into a sliver rather than actually overflowing - readable text turns
+   * into a stack of clipped one-word lines and the buttons become
+   * near-unusable tap targets. Letting the row wrap gives the text block
+   * its own full-width line and drops the action row underneath it,
+   * matching how `.row` itself already wraps its own children. */
+  @media (max-width: 640px) {
+    .list-item {
+      flex-wrap: wrap;
+    }
+  }
+
+  .badge {
+    @apply inline-flex items-center whitespace-nowrap rounded-full border bg-[var(--surface-hover)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-secondary)];
+    border-color: var(--hud-line);
+  }
+
+  /* Fixed emerald/rose regardless of accent theme - see file-level comment:
+   * status colors must keep meaning "success"/"error" no matter what brand
+   * accent a tenant has chosen. */
+  .badge.ok {
+    @apply border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)];
+  }
+
+  .badge.warn {
+    /* Was pointed at the danger tokens (copy/paste from .badge.ok's sibling
+     * above) - a warning badge and an error badge rendered visually
+     * identical (color audit follow-up). Dedicated warning tokens already
+     * exist in this file; use them. */
+    @apply border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)];
+  }
+
+  /* Compact icon-only action button (edit/delete rows in a list) - direct
+   * response to "instead of big buttons, give icons for edit and delete."
+   * Square footprint instead of the base `button` rule's px-3.5/py-2 text
+   * padding, which reads oddly around a bare icon with no label. `.danger`
+   * is opt-in per-button (delete), not automatic, so a plain `.icon-btn`
+   * (edit/open) stays neutral. */
+  .icon-btn {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--surface-border-strong)] bg-[var(--surface-card)] p-0 text-[var(--text-secondary)];
+  }
+
+  .icon-btn:hover {
+    @apply bg-[var(--surface-hover)] text-[var(--text-primary)];
+  }
+
+  .icon-btn.danger:hover {
+    @apply border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger-text)];
+  }
+
+  .success-box {
+    @apply mb-3 rounded-lg border border-[var(--success-border)] bg-[var(--success-bg)] px-3 py-2 text-sm text-[var(--success-text)];
+  }
+
+  .error-box {
+    @apply mb-3 whitespace-pre-wrap rounded-lg border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger-text)];
+  }
+
+  /* Completes the semantic alert set (redesign 2026-07-21): warning + info now
+   * exist alongside success/error, all four on the identical structure and
+   * their matching status tokens - one consistent alert standard. */
+  .warning-box {
+    @apply mb-3 rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-3 py-2 text-sm text-[var(--warning-text)];
+  }
+
+  .info-box {
+    @apply mb-3 rounded-lg border border-[var(--info-border)] bg-[var(--info-bg)] px-3 py-2 text-sm text-[var(--info-text)];
+  }
+
+  .field-error {
+    @apply -mt-2 mb-2 text-xs font-medium text-[var(--danger-text)];
+  }
+
+  /* Full-width fix, chat-specific case: Playground is now a dedicated,
+   * full-width page (not squeezed under five other panels the way it used
+   * to be), so the log itself gets much more vertical room (60vh instead of
+   * a fixed 20rem) - but each message's text still wraps at a comfortable
+   * reading width (.chat-turn below), the same way any chat product keeps
+   * message bubbles well short of the full screen width even in a wide
+   * window, since "use the whole screen" and "readable line length" are
+   * different, sometimes opposing, goals. */
+  .chat-log {
+    @apply mb-3 overflow-y-auto rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card-alt)] p-4;
+    height: 60vh;
+    min-height: 20rem;
+  }
+
+  :root[data-mode="dark"] .chat-log {
+    background: var(--glass-surface);
+    border-color: var(--glass-border);
+  }
+
+  .chat-turn {
+    @apply mb-3 max-w-3xl whitespace-pre-wrap text-sm text-[var(--text-secondary)];
+  }
+
+  .chat-turn .role {
+    @apply mb-1 block text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--text-faint)];
+  }
+
+  .muted {
+    @apply text-sm text-[var(--text-muted)];
+  }
+
+  .tool-call {
+    @apply mb-2 border-l-2 border-[var(--accent-400)] py-1 pl-3 text-xs text-[var(--text-muted)];
+  }
+}

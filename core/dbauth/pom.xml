@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>dbauth</artifactId>
+  <name>dbauth</name>
+  <description>
+    Database IAM / token authentication (app.datasource.auth): a DataSource that asks a token supplier for a
+    fresh short-lived credential for every new physical connection (AWS RDS IAM, Azure Entra, Cloud SQL IAM).
+    The default mode, password, adds no DataSource and leaves Spring Boot's own untouched. Leaf module (no
+    dependency on any other core module); it exists so the three cloud credential SDKs live in one place
+    instead of in tenancy or each app shape. The SDK classes are only loaded when their mode is selected.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <!-- AWS: RdsUtilities.generateAuthenticationToken. Only SigV4 signing is used, so the HTTP clients the
+         rds artifact brings (apache, netty) are excluded; the storage module already ships one. -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>rds</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>software.amazon.awssdk</groupId>
+          <artifactId>netty-nio-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>software.amazon.awssdk</groupId>
+          <artifactId>apache-client</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- EKS IRSA (web identity) credentials: DefaultCredentialsProvider loads the STS credentials factory by
+         reflection; without this module it logs "the 'sts' service module must be on the class path" and the chain
+         falls through to credentials the pod does not have. Pinned by AwsCredentialChainClasspathTest. -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>sts</artifactId>
+      <!-- Unlike rds (which only signs locally), STS makes a real HTTPS call, so the Apache client stays; only the
+           async Netty client is left out. -->
+      <exclusions>
+        <exclusion>
+          <groupId>software.amazon.awssdk</groupId>
+          <artifactId>netty-nio-client</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- Azure: DefaultAzureCredential (workload identity, managed identity, az login). Same Netty
+         exclusion as core/storage; the JDK HTTP client comes from azure-core-http-jdk-httpclient. -->
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-identity</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.azure</groupId>
+          <artifactId>azure-core-http-netty</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-core-http-jdk-httpclient</artifactId>
+    </dependency>
+    <!-- GCP: Application Default Credentials (GKE Workload Identity, metadata server). The version is managed
+         once in core/pom.xml (google-auth.version), shared with core/providers (Vertex AI). The AWS and Azure
+         BOM versions below are still copied per module (storage, providers, chat), as before. -->
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-oauth2-http</artifactId>
+    </dependency>
+    <!-- Tests compare the TLS check with how the real driver parses the same URL. -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-sdk-bom</artifactId>
+        <version>1.3.8</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>2.28.29</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

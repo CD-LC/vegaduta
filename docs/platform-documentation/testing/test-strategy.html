@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Test Strategy — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="testing" data-page="test-strategy.html" data-doc="VD-TST-001" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="test-strategy.html">Testing &amp; Quality</a><span class="sep">/</span>Test Strategy</div>
+<div class="doc-meta" data-auto></div>
+<h1>Test Strategy</h1>
+<p class="lede">
+  How the platform is tested, layer by layer, and where each layer runs. The strategy is defined by the
+  configuration and workflows in the repository rather than by a single test-plan document (none exists under
+  <code>docs/testing</code>). Detail pages: <a href="e2e-suites.html">End-to-End Suites</a> and
+  <a href="quality-gates.html">Quality Gates &amp; CI Checks</a>.
+</p>
+
+<div class="callout callout-note">
+  <div class="callout-title">What runs automatically</div>
+  <p style="margin:4px 0 0">
+    <code>ci.yml</code> (summary check <code>CI OK</code>) and <code>static-gates.yml</code> run on every pull request;
+    <code>e2e.yml</code> runs nightly and on demand. Each layer also has a local <code>make</code> target
+    (<code>make gates</code>, <code>make test</code>, <code>make lint</code>, <code>make compose-validate</code>, <code>make helm-lint</code>).
+  </p>
+</div>
+
+<h2>Layers</h2>
+<div class="mermaid">
+flowchart TB
+  L1["Static gates: Flyway lint, price and file-size ratchets, skip expiry, bean/entity-name guards, gitleaks"]
+  L2["Unit tests: Maven surefire (core), vitest (web, web-admin), pytest (sidecar), script harness (code-intel)"]
+  L3["Boot check: full jar against a throwaway Postgres before any prod image"]
+  L4["End-to-end: Playwright against a real stack, no mocking"]
+  L5["Eval: golden-dataset runner in core/quality, run by hand"]
+  L6["Load: k6, staging only"]
+  L1 --> L2 --> L3 --> L4
+  L4 --> L5
+  L4 --> L6
+</div>
+
+<table>
+  <thead><tr><th>Layer</th><th>Tooling as configured</th><th>Where it lives</th></tr></thead>
+  <tbody>
+    <tr><td>Static gates</td><td>Shell scripts and gitleaks</td><td><code>scripts/ci/</code>, <code>.github/workflows/static-gates.yml</code>, <code>make gates</code></td></tr>
+    <tr><td>Core unit / integration</td><td>Maven reactor, surefire with a documented JVM-flag mitigation for random fork crashes on JDK 21+; maintainers build locally with JDK 24</td><td>Modules under <code>core/</code> (563 <code>*Test.java</code> files at authoring time; a file count, not a test count)</td></tr>
+    <tr><td>Web unit</td><td>Vitest 4 + React Testing Library, jsdom; includes only <code>app/**/*.test.{ts,tsx}</code></td><td><code>web/vitest.config.mts</code>, <code>web/vitest.setup.ts</code>; <code>npm test</code> runs <code>vitest run</code></td></tr>
+    <tr><td>Python services</td><td>Ruff lint; <code>pytest</code> for sidecar; code-intel uses a script harness, not pytest</td><td><code>services/sidecar/tests/</code>, <code>services/code-intel/tests/</code>; <code>make test-python</code>, <code>ci.yml</code> &ldquo;python&rdquo; job</td></tr>
+    <tr><td>Lint + build</td><td><code>npm run lint</code> and <code>npm run build</code> for <code>web/</code> and <code>web-admin/</code></td><td><code>ci.yml</code> jobs <code>web</code>, <code>web-admin</code>; <code>make lint</code></td></tr>
+    <tr><td>End-to-end</td><td>Playwright against a real running stack</td><td><code>tests/e2e/</code> (run by <code>e2e.yml</code>) and <code>web/e2e/</code>; see <a href="e2e-suites.html">E2E Suites</a></td></tr>
+    <tr><td>Agent eval</td><td>Golden-dataset runner <code>com.agenticai.core.quality.eval.EvalRunner</code>; no workflow runs it</td><td><code>core/quality/</code> (see eval-harness.md)</td></tr>
+    <tr><td>Infra validation</td><td>helm lint/template and kubeconform; <code>docker compose config</code> on every compose file</td><td><code>ci.yml</code> jobs <code>helm</code> and <code>compose</code>; <code>make helm-lint</code>, <code>make compose-validate</code></td></tr>
+    <tr><td>Load / latency</td><td>k6 profile with a documented acceptance rule; staging only</td><td><code>tests/load/</code></td></tr>
+  </tbody>
+</table>
+
+<h2>Principles visible in the configuration</h2>
+<ul>
+  <li><strong>Real stack, no mocking at the E2E tier.</strong> The Playwright suite header states there is no mocking layer anywhere; a fresh tenant is signed up per test through <code>POST /api/signup</code>.</li>
+  <li><strong>Tests cannot see boot-time failures.</strong> Several recorded incidents (duplicate bean names, missing <code>@Autowired</code>, Hibernate validation) passed compile and unit tests and failed at Spring context start. The mitigations are the bean-name gate and booting the jar: a full-reactor jar boot against a throwaway <code>deploy-postgres</code> before building images, with all migrations applied and <code>Started CoreApplication</code> logged. The rule: boot the jar before any prod image (see <a href="../development/build-and-test.html">Build, Test &amp; Verify</a>).</li>
+  <li><strong>Ratchets over big-bang fixes.</strong> File size and hardcoded prices are frozen at a baseline that may only go down; see <a href="quality-gates.html">Quality Gates</a>.</li>
+  <li><strong>Skips must expire.</strong> Tracked-gap skips carry an <code>expires:YYYY-MM-DD</code> token enforced by <code>scripts/ci/skip-expiry.sh</code>; opt-in credential skips do not.</li>
+  <li><strong>Load tests never target production.</strong> The k6 runbook forbids the production host unless a human explicitly approves <code>ALLOW_PROD=1</code>, and requires an allow-listed load-test tenant so no billed LLM turns occur.</li>
+  <li><strong>Prod verification is a separate step.</strong> Distinguish compiled, tested, deployed-to-staging and deployed-to-prod. A production e2e probe should use a dedicated tenant kept for that purpose.</li>
+</ul>
+
+<h2>Environment prerequisites for the heavy tiers</h2>
+<ul>
+  <li>E2E needs Postgres (pgvector), Valkey, Keycloak, sidecar, core (profiles <code>security,knowledge,mcp,e2e</code>) and the web console; the <code>e2e</code> profile raises the signup rate limit (default 5 per IP per window).</li>
+  <li>The CI <code>core</code> job starts Postgres with pgvector and Apache AGE for the Maven verify; <code>e2e.yml</code> builds the compose stack with throwaway CI-only secrets.</li>
+  <li>Local Maven: JDK 21+ for core (maintainers use 24), one Maven build at a time; the parent POM's <code>coverage</code> profile is opt-in.</li>
+</ul>
+
+<div class="callout callout-note">
+  <div class="callout-title">Not documented in the repository</div>
+  <p style="margin:4px 0 0">Coverage percentages, total test counts per module, pass rates, flaky-test statistics and a coverage threshold are not recorded. JaCoCo and vitest coverage are advisory with no threshold. The eval golden-dataset pass criteria are not summarised on this page; see <code>core/quality/eval-harness.md</code>.</p>
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>.github/workflows/ci.yml</code>, <code>static-gates.yml</code>, <code>e2e.yml</code>, <code>codeql.yml</code> (<code>on:</code> blocks and job lists); <code>Makefile</code>.</li>
+  <li><code>web/vitest.config.mts</code>, <code>web/package.json</code>; <code>web/e2e/README.md</code>; <code>core/pom.xml</code> (surefire and coverage profile).</li>
+  <li><code>tests/load/README.md</code> (k6 acceptance rule, <code>ALLOW_PROD</code>).</li>
+</ul>
+<p>Related: <a href="e2e-suites.html">E2E Suites</a> &middot; <a href="quality-gates.html">Quality Gates</a> &middot; <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a> &middot; <a href="../development/build-and-test.html">Build, Test &amp; Verify</a></p>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

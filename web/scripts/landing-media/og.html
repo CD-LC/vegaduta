@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VegaDūta — OpenGraph 1200×630</title>
+<!-- Fonts are self-hosted (node fetch-fonts.mjs) so renders are deterministic and offline. -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root{--canvas:#080a10;--surface:#171b28;--raised:#1d2231;--line:#2b3145;--ink:#fff;--ink2:#adb3c9;--accent:#6d5efc;--flow:#4dd8f5;--warm:#f97316;--pos:#34d399;
+    --sans:"Inter","Segoe UI",system-ui,sans-serif;--disp:"Sora","Segoe UI",system-ui,sans-serif;--dev:"Noto Sans Devanagari","Nirmala UI",sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1200px;height:630px;overflow:hidden;background:var(--canvas)}
+  body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+  #stage{position:relative;width:1200px;height:630px;overflow:hidden;background:var(--canvas)}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;
+    -webkit-mask-image:radial-gradient(ellipse at 60% 50%,#000 25%,transparent 78%);mask-image:radial-gradient(ellipse at 60% 50%,#000 25%,transparent 78%)}
+  .glow{position:absolute;border-radius:50%;filter:blur(70px)}
+  .g1{width:640px;height:520px;left:-200px;top:-220px;background:radial-gradient(circle,rgba(109,94,252,.32),transparent 65%)}
+  .g2{width:620px;height:560px;right:-160px;bottom:-260px;background:radial-gradient(circle,rgba(77,216,245,.18),transparent 65%)}
+  .left{position:absolute;left:64px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;font-size:15px;font-weight:500;color:var(--ink2);background:rgba(23,27,40,.9);border:1px solid var(--line);border-radius:999px;padding:9px 16px;margin-bottom:26px}
+  .eyebrow b{font-family:var(--dev);font-weight:600;color:var(--ink)}
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--warm);box-shadow:0 0 12px var(--warm)}
+  h1{font-family:var(--disp);font-weight:700;font-size:56px;line-height:1.1;letter-spacing:-.03em;max-width:620px;
+    background:linear-gradient(180deg,#fff 0%,#c9cde0 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{margin-top:22px;font-size:21px;color:var(--ink2);font-weight:500;letter-spacing:-.005em}
+  .sub b{color:var(--flow);font-weight:600}
+  .foot{position:absolute;left:64px;bottom:44px;display:flex;align-items:center;gap:14px}
+  .foot img{height:44px;width:auto}
+  .foot .wm{font-family:var(--disp);font-weight:700;font-size:28px;letter-spacing:-.01em}
+  .foot .wm em{font-style:normal;color:var(--warm)}
+  .foot .meta{margin-left:10px;padding-left:20px;border-left:1px solid var(--line);font-size:15.5px;color:var(--ink2);line-height:1.4}
+  .foot .meta b{color:var(--ink);font-weight:600}
+  .foot .meta i{font-style:normal;color:var(--pos);font-weight:600}
+  /* right composition */
+  .phone{position:absolute;left:796px;top:56px;width:300px;height:520px;border-radius:36px;background:#0b0e14;border:1px solid #2d3346;
+    box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 6px #14171f,0 0 0 7px #2b3145,0 0 80px rgba(109,94,252,.25);overflow:hidden;transform:rotate(-7deg);transform-origin:50% 50%}
+  .notch{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:92px;height:22px;border-radius:12px;background:#000;z-index:3}
+  .wa-h{height:88px;background:#1f2c33;padding:40px 16px 0;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2a3942}
+  .wa-h .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--warm),#ffb26b);display:grid;place-items:center;font-weight:700;font-size:13px;color:#3a1600}
+  .wa-h .n{font-size:14px;font-weight:600;line-height:1.2}.wa-h .s{font-size:11.5px;color:#8fd1a8}
+  .wa-c{position:absolute;top:88px;bottom:0;left:0;right:0;background:#0b141a;padding:16px 12px;display:flex;flex-direction:column;gap:10px;
+    background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:18px 18px}
+  .bub{max-width:86%;padding:9px 12px 8px;border-radius:12px;font-size:14.5px;line-height:1.5;font-family:var(--dev),var(--sans)}
+  .bub .tm{display:block;font-size:10px;color:rgba(255,255,255,.45);text-align:right;margin-top:3px;font-family:var(--sans)}
+  .me{align-self:flex-end;background:#005c4b;border-top-right-radius:4px}
+  .ag{align-self:flex-start;background:#202c33;border-top-left-radius:4px}
+  .upi{align-self:flex-start;width:84%;background:#202c33;border-radius:12px;padding:10px 12px}
+  .upi .amt{font-family:var(--disp);font-weight:700;font-size:20px}.upi .lbl{font-size:11.5px;color:var(--ink2);margin-top:2px}
+  .upi .btn{margin-top:9px;background:#25D366;color:#062b1c;font-weight:600;font-size:12.5px;border-radius:8px;text-align:center;padding:7px}
+  .console{position:absolute;left:672px;top:388px;width:372px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:0 30px 70px rgba(0,0,0,.55);transform:rotate(3deg)}
+  .console .tb{display:flex;gap:6px;margin-bottom:12px}.console .tb i{width:9px;height:9px;border-radius:50%;background:#3a4056}
+  .console .tb i:nth-child(1){background:#5b3a42}.console .tb i:nth-child(2){background:#5b5236}.console .tb i:nth-child(3){background:#2f5748}
+  .ok{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:500}
+  .check{width:24px;height:24px;border-radius:50%;background:var(--pos);display:grid;place-items:center;color:#062b1c;box-shadow:0 0 22px rgba(52,211,153,.5);flex:none}
+  .chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .chip{font-size:11.5px;font-weight:500;color:var(--ink);background:var(--raised);border:1px solid rgba(77,216,245,.5);border-radius:999px;padding:5px 10px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="grid"></div><div class="glow g1"></div><div class="glow g2"></div>
+  <div class="left">
+    <div class="eyebrow"><b>देश का अपना AI एजेंट</b> · Agentic AI platform</div>
+    <h1>An AI employee for your business, hired in one sentence.</h1>
+    <div class="sub">WhatsApp · Telegram · Email · Voice · <b>22 Indian languages</b></div>
+  </div>
+  <div class="foot">
+    <img class="logo" alt=""><span class="wm">Vega<em>Dūta</em></span>
+    <div class="meta"><b>vegaduta.ai</b><br><i>Free for every account</i> until 1 Jan 2027</div>
+  </div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="wa-h"><div class="av">SG</div><div><div class="n">Sharma General Store</div><div class="s">online</div></div></div>
+    <div class="wa-c">
+      <div class="bub me">भैया, 5 kg आटा और 2 लीटर तेल मिलेगा?<span class="tm">6:41 pm</span></div>
+      <div class="bub ag">जी हाँ! आटा 5 kg ₹245 और तेल 2 L ₹310 — कुल ₹555. आज शाम 7 बजे डिलीवरी ठीक रहेगी?<span class="tm">6:41 pm</span></div>
+      <div class="bub me">हाँ भेज दो<span class="tm">6:42 pm</span></div>
+      <div class="upi"><div class="amt">₹555</div><div class="lbl">Pay via UPI · order #4822</div><div class="btn">Pay now</div></div>
+    </div>
+  </div>
+  <div class="console">
+    <div class="tb"><i></i><i></i><i></i></div>
+    <div class="ok"><div class="check"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>Agent created · <b>Sharma General Store</b></span></div>
+    <div class="chips"><span class="chip">WhatsApp · Telegram · Email</span><span class="chip">Knowledge: price-list.pdf</span><span class="chip">Tools: UPI · Sheets</span></div>
+  </div>
+</div>
+</body>
+</html>

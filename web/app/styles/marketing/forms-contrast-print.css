@@ -1,0 +1,387 @@
+/* ---------------------------------------------------------------------------
+ * 16. FORM CONTROLS
+ * The funnel does collect input — the calculator's volume fields, the studio
+ * demo's prompt box, the contact band — and none of it had system styling, so
+ * each site reached for its own Tailwind border-and-ring stack.
+ *
+ * OPT-IN CLASSES ONLY, for a concrete reason: `.marketing-root` wraps
+ * /whatsapp-cost-calculator, which renders the ShadCN <Input> component. A
+ * bare `.marketing-root input {}` rule here is unlayered and would beat that
+ * component's `@layer utilities` classes on every public page it appears on.
+ * So nothing is styled by element, ever.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.marketing-root .mkt-label {
+  font-size: 0.8125rem; /* 13px — above the 12px floor */
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--mkt-ink-2);
+}
+
+.marketing-root .mkt-input,
+.marketing-root .mkt-textarea {
+  width: 100%;
+  /* Padding, border and background are all set explicitly for the same reason
+   * §5 does it on buttons: the UA (and globals.css) already have opinions
+   * about form controls that would otherwise show through. */
+  padding: 0.625rem 0.875rem;
+  font: inherit;
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.45;
+  color: var(--mkt-ink);
+  background: var(--mkt-surface);
+  border: 1px solid var(--mkt-line);
+  border-radius: var(--mkt-radius-sm);
+  box-shadow: inset 0 1px 2px color-mix(in oklab, #000 5%, transparent);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.marketing-root .mkt-textarea {
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+/* iOS Safari zooms the viewport on focus for any control under 16px and never
+ * zooms back out. Most of this product's traffic is mobile, so the phone
+ * width gets the full 16px. */
+@media (max-width: 640px) {
+  .marketing-root .mkt-input,
+  .marketing-root .mkt-textarea {
+    font-size: 1rem;
+  }
+}
+
+.marketing-root .mkt-input::placeholder,
+.marketing-root .mkt-textarea::placeholder {
+  color: var(--mkt-ink-3);
+  /* Placeholders otherwise inherit the input's weight and read as a filled
+   * value rather than as a hint. */
+  opacity: 1;
+}
+
+.marketing-root .mkt-input:hover:not(:disabled),
+.marketing-root .mkt-textarea:hover:not(:disabled) {
+  border-color: var(--mkt-line-strong);
+}
+
+/* Focus keeps §5's single outline ring and adds a soft tint underneath it, so
+ * the field reads as live without a second hard ring competing with it.
+ *
+ * NO `outline: none` here, deliberately. This selector is (0,3,0) and §5's
+ * `.marketing-root :is(…, input, …):focus-visible` is also (0,3,0) but sits
+ * EARLIER in the file, so an `outline: none` on this rule would win on source
+ * order and silently delete the keyboard focus ring on every funnel form
+ * field — and with it §17's `prefers-contrast: more` hardening, which only
+ * thickens `outline-width`. The 18%-alpha halo below is a tint, not an
+ * indicator: on white it is ~1.2:1 and cannot carry focus on its own. */
+.marketing-root .mkt-input:focus,
+.marketing-root .mkt-textarea:focus {
+  border-color: var(--mkt-accent);
+  background: var(--mkt-surface-raised);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--mkt-accent) 18%, transparent);
+}
+
+.marketing-root .mkt-input:disabled,
+.marketing-root .mkt-textarea:disabled {
+  cursor: not-allowed;
+  color: var(--mkt-ink-3);
+  background: var(--mkt-surface-sunken);
+  border-color: var(--mkt-line);
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* `:user-invalid`, not `:invalid`. `:invalid` matches an empty required field
+ * the instant the page paints, so an untouched form comes up covered in red;
+ * `:user-invalid` waits until the visitor has actually interacted with it.
+ * Baseline widely available since 2023. */
+.marketing-root .mkt-input:user-invalid,
+.marketing-root .mkt-textarea:user-invalid {
+  border-color: color-mix(in oklab, #d92d20 70%, var(--mkt-line));
+  box-shadow: 0 0 0 3px color-mix(in oklab, #d92d20 14%, transparent);
+}
+
+/* The error line that pairs with it. Red is reserved for exactly this — the
+ * one place in the system where a non-brand hue is allowed to appear, because
+ * here the hue IS the meaning. */
+.marketing-root .mkt-field__error {
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.4;
+  color: #b42318;
+}
+
+:root[data-mode="dark"] .marketing-root .mkt-field__error {
+  color: #fda29b;
+}
+
+/* ---------------------------------------------------------------------------
+ * 17. HIGH CONTRAST AND FORCED COLORS
+ * Neither was handled. They are different things and both matter here,
+ * because this file's whole look is built out of color-mix() tints, gradients
+ * and hairlines — precisely what these two modes take away.
+ * ------------------------------------------------------------------------ */
+
+/* prefers-contrast: more — the visitor still gets our colours, they just want
+ * more separation. So: harder hairlines, no faint tertiary ink, no decorative
+ * atmosphere competing with the text. The token block is repeated at the dark
+ * selector's specificity so it lands in both themes. */
+@media (prefers-contrast: more) {
+  .marketing-root,
+  :root[data-mode="dark"] .marketing-root {
+    --mkt-line: var(--mkt-ink-2);
+    --mkt-line-strong: var(--mkt-accent);
+    /* The faintest ink stops existing: everything bottoms out at the
+     * secondary tone, which is the last one that holds 4.5:1. */
+    --mkt-ink-3: var(--mkt-ink-2);
+    --mkt-grid: transparent;
+    --mkt-glow-a: transparent;
+    --mkt-glow-b: transparent;
+    --mkt-glow-c: transparent;
+  }
+
+  /* Grain, the emblem watermark and the aurora pools are texture, and
+   * texture is noise to someone who asked for contrast. */
+  .mkt-grain,
+  .mkt-emblem,
+  .marketing-root .mkt-spot::after,
+  .marketing-root .mkt-card--interactive::after {
+    display: none;
+  }
+
+  .marketing-root .mkt-card {
+    box-shadow: none;
+  }
+
+  /* A wider, thicker ring, because the 2px/2px default can vanish against a
+   * border that is now equally dark. */
+  .marketing-root :is(a, button, [role="button"], input, select, textarea, summary):focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+
+  /* Gradient text at high contrast is unreadable by definition — it is a
+   * contrast reduction dressed up as a flourish. */
+  .marketing-root .mkt-gradient-text {
+    background-image: none;
+    color: var(--mkt-ink);
+  }
+}
+
+/* forced-colors (Windows High Contrast) — the browser swaps our palette for
+ * the user's system colours. Backgrounds and shadows are dropped wholesale,
+ * which silently deletes anything this file draws with a gradient: the flow
+ * line, the live dot, the card sheen, and most seriously the hero headline,
+ * which is `color: transparent` over a clipped background and so disappears
+ * completely. System colour keywords ARE honoured in this mode, so each of
+ * those is redrawn with one. */
+@media (forced-colors: active) {
+  /* The headline. This is the bug fix in this block, not a polish item. */
+  .marketing-root .mkt-gradient-text {
+    background-image: none;
+    color: CanvasText;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  /* Pure decoration — remove it rather than let it render as flat blocks. */
+  .mkt-canvas-bg,
+  .mkt-grain,
+  .mkt-emblem,
+  .marketing-root .mkt-spot::after,
+  .marketing-root .mkt-card::before,
+  .marketing-root .mkt-card--interactive::after,
+  .marketing-root .mkt-btn-primary::after {
+    display: none;
+  }
+
+  .marketing-root .mkt-card,
+  .marketing-root .mkt-pill,
+  .marketing-root .mkt-input,
+  .marketing-root .mkt-textarea {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+
+  .marketing-root .mkt-btn {
+    border: 1px solid ButtonBorder;
+    box-shadow: none;
+  }
+
+  /* Hover, pressed and selected have to stay distinguishable once colour is
+   * gone, so they move to the system's own "this is the highlighted thing"
+   * colour instead of to a tint. */
+  .marketing-root .mkt-btn:hover,
+  .marketing-root .mkt-btn[aria-pressed="true"],
+  .marketing-root .mkt-card--interactive:hover,
+  .marketing-root .mkt-card--interactive[aria-selected="true"],
+  .marketing-root .mkt-card--interactive[data-selected="true"],
+  .marketing-root .mkt-card--interactive.is-selected {
+    border-color: Highlight;
+  }
+
+  .marketing-root .mkt-btn:disabled,
+  .marketing-root .mkt-btn[aria-disabled="true"] {
+    color: GrayText;
+    border-color: GrayText;
+    opacity: 1; /* GrayText already carries the meaning; opacity would double it */
+  }
+
+  /* Gradient-drawn indicators, redrawn as borders so they survive. */
+  .marketing-root .mkt-flowline {
+    background-image: none;
+    border-top: 1px dashed CanvasText;
+  }
+
+  .marketing-root .mkt-flowline--v {
+    border-top: 0;
+    border-left: 1px dashed CanvasText;
+  }
+
+  .marketing-root .mkt-dot {
+    background: CanvasText;
+  }
+
+  .marketing-root .mkt-band--ruled::before,
+  .marketing-root .mkt-rule {
+    background: CanvasText;
+    opacity: 1;
+  }
+
+  .marketing-root .mkt-skeleton {
+    border: 1px solid GrayText;
+  }
+
+  .marketing-root .mkt-link,
+  .marketing-root .mkt-prose a:not([class]) {
+    color: LinkText;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 18. PRINT
+ * No print styles existed anywhere in this app. For a dark-mode visitor the
+ * pricing page prints as a black rectangle with invisible text, and even in
+ * light mode the fixed aurora backdrop, the grain sheet and the sticky nav
+ * all land on the paper.
+ *
+ * Print gets a forced LIGHT palette regardless of the visitor's theme, which
+ * is why the dark selector is repeated here at its own specificity —
+ * otherwise `:root[data-mode="dark"] .marketing-root` would keep winning over
+ * a plain `.marketing-root` override.
+ * ------------------------------------------------------------------------ */
+
+@media print {
+  .marketing-root,
+  :root[data-mode="dark"] .marketing-root {
+    --mkt-canvas: #ffffff;
+    --mkt-surface: #ffffff;
+    --mkt-surface-raised: #ffffff;
+    --mkt-surface-sunken: #ffffff;
+    --mkt-ink: #000000;
+    --mkt-ink-2: #333333;
+    --mkt-ink-3: #555555;
+    --mkt-line: #bbbbbb;
+    --mkt-line-strong: #888888;
+    --mkt-shadow-sm: none;
+    --mkt-shadow: none;
+    --mkt-shadow-lg: none;
+    --mkt-shadow-glow: none;
+    --mkt-halo: transparent;
+    --mkt-sheen: transparent;
+    --mkt-grid: transparent;
+    --mkt-band-y: 1.5rem;
+    --mkt-band-y-lg: 2rem;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  /* Anything fixed to the viewport either repeats on every sheet or eats the
+   * first one whole. */
+  .mkt-canvas-bg,
+  .mkt-grain,
+  .mkt-emblem {
+    display: none;
+  }
+
+  .marketing-root .mkt-nav {
+    position: static;
+    background: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid #bbbbbb;
+    box-shadow: none;
+  }
+
+  /* The hero headline is `color: transparent` over a clipped background, and
+   * background graphics are off by default when printing — without this it
+   * prints as a blank line. Same failure as forced-colors, different cause. */
+  .marketing-root .mkt-gradient-text {
+    background-image: none;
+    color: #000000;
+    -webkit-text-fill-color: #000000;
+  }
+
+  /* Scroll-driven reveals have no scroll on paper, and a browser that
+   * resolves `view()` to nothing can leave these parked at the keyframe's
+   * opacity 0 — i.e. print the page blank. This is the one rule in this block
+   * that is a correctness fix rather than an aesthetic one, so it uses
+   * !important: it has to beat the animation regardless of what any band
+   * added on top. */
+  .marketing-root .mkt-reveal,
+  .marketing-root .mkt-reveal-group > *,
+  .marketing-root .mkt-marquee__track,
+  .marketing-root .mkt-flowline::after,
+  .marketing-root .mkt-dot::after,
+  .marketing-root .mkt-skeleton::after {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The marquee is a horizontally overflowing strip; unmasked and unclipped it
+   * at least prints its first screenful instead of a faded sliver. */
+  .marketing-root .mkt-marquee {
+    overflow: visible;
+    mask-image: none;
+  }
+
+  .marketing-root .mkt-marquee__track {
+    flex-wrap: wrap;
+    width: auto;
+  }
+
+  /* Keep a card whole on one sheet — a pricing tier split across a page break
+   * is the specific thing people complain about. */
+  .marketing-root .mkt-card {
+    break-inside: avoid;
+    border: 1px solid #bbbbbb;
+    box-shadow: none;
+  }
+
+  .marketing-root :is(h1, h2, h3, .mkt-h1, .mkt-h2, .mkt-h3) {
+    break-after: avoid;
+  }
+
+  /* A solid ink-filled pill costs real toner and reads as a black smear on
+   * paper; outline it instead. */
+  .marketing-root .mkt-btn-primary,
+  .marketing-root .mkt-btn-secondary {
+    color: #000000;
+    background: none;
+    background-image: none;
+    border: 1px solid #666666;
+    box-shadow: none;
+  }
+
+  /* A placeholder for content that never arrived has nothing to say on paper. */
+  .marketing-root .mkt-skeleton {
+    display: none;
+  }
+}

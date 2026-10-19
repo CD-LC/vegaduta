@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Channels &amp; Integrations — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="architecture" data-page="channels-integrations.html" data-doc="VD-AR-006" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>Channels &amp; Integrations</div>
+<div class="doc-meta" data-auto></div><h1>Channels &amp; Integrations</h1>
+
+<p class="lede">
+  Ten channel types feed one agent runtime. Inbound traffic arrives on
+  provider-specific webhook endpoints in <code>core/omnichannel</code>, gets
+  normalised into channel sessions, routed to an agent, and answered through
+  the matching outbound adapter. Contact pairing, operator handoff and
+  per-channel plan gates sit on top. Webhook paths verified against the
+  controllers; channel set from the <code>ChannelType</code> enum.
+</p>
+
+<pre class="mermaid">
+flowchart LR
+  subgraph ext["External platforms"]
+    WA["WhatsApp<br/>(Twilio / Meta Cloud)"] & TG["Telegram"] & SL["Slack"] & DC["Discord"] & MS["Teams"] & META["Messenger /<br/>Instagram / X"] & EM["Email (IMAP)"] & VO["Voice<br/>(LiveKit / Twilio PSTN)"]
+  end
+  ext --> WH["/webhook/* controllers<br/>signature verification"]
+  WH --> NORM["Normalise → channel session<br/>contacts / pairing / routing"]
+  NORM --> SEL["AgentRelevanceSelector<br/>(Jev: which agent replies)"]
+  SEL --> AGENT["AgentChatService<br/>+ GuardedToolCallback pipeline"]
+  AGENT --> OUT["Outbound adapters<br/>(per-channel credential rows)"]
+  AGENT -->|&quot;request_human tool&quot;| OP["Operator handoff inbox"]
+</pre>
+
+<h2>1. Channel types</h2>
+<p><code>ChannelType</code>: <code>WHATSAPP</code>, <code>MESSENGER</code>,
+<code>INSTAGRAM</code>, <code>SLACK</code>, <code>DISCORD</code>, <code>X</code>,
+<code>TELEGRAM</code>, <code>EMAIL</code>, <code>TEAMS</code>,
+<code>VOICE</code>. WhatsApp has three distinct transports (Twilio, Meta Cloud
+API, and the unofficial QR path) under one type.</p>
+
+<h2>2. Inbound webhook surface</h2>
+<table>
+  <thead><tr><th>Path</th><th>Channel / provider</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST /webhook/twilio/whatsapp</code></td><td>WhatsApp via Twilio</td><td>Form-encoded; Twilio signature validation</td></tr>
+    <tr><td><code>POST /webhook/twilio/sms</code></td><td>SMS via Twilio</td><td><code>TwilioSmsWebhookController</code></td></tr>
+    <tr><td><code>POST /webhook/twilio/voice[/collect|/menu-collect]</code></td><td>PSTN voice via Twilio</td><td><code>TwilioVoiceWebhookController</code> — gather/collect turns</td></tr>
+    <tr><td><code>POST /webhook/twilio</code> (status)</td><td>Twilio delivery status</td><td><code>TwilioStatusCallbackController</code></td></tr>
+    <tr><td><code>GET/POST /webhook/meta/whatsapp</code></td><td>WhatsApp via Meta Cloud API</td><td>GET = verification challenge, POST = messages</td></tr>
+    <tr><td><code>GET/POST /webhook/meta/social</code></td><td>Messenger / Instagram</td><td><code>MetaSocialWebhookController</code></td></tr>
+    <tr><td><code>POST /webhook/telegram/{botUserId}</code></td><td>Telegram</td><td>Per-bot webhook keyed on bot user id</td></tr>
+    <tr><td><code>POST /webhook/discord</code></td><td>Discord</td><td>Inbound via a Node gateway service, which calls this endpoint</td></tr>
+    <tr><td><code>POST /webhook/slack</code></td><td>Slack</td><td>Events API surface</td></tr>
+    <tr><td><code>POST /webhook/teams/{appId}</code></td><td>Microsoft Teams</td><td>Per-app-id routing</td></tr>
+    <tr><td>— (polled)</td><td>Email</td><td><code>EmailInboundPollingJob</code> over IMAP — no webhook</td></tr>
+    <tr><td>— (WebRTC/WS)</td><td>Voice</td><td>LiveKit browser call + Twilio voice relay WebSocket; see §4</td></tr>
+  </tbody>
+</table>
+
+<h2>3. Session, pairing and routing model</h2>
+<ul>
+  <li><strong>Contacts, groups, routing:</strong> inbound senders resolve to contact records; group chats and per-channel routing rules decide which agent (or agents) may answer.</li>
+  <li><strong>Pairing inbox:</strong> unknown senders land in a pairing flow — <strong>pairing sessions are keyed on the external id</strong>, so a paired contact keeps memory continuity across conversations.</li>
+  <li><strong>Agent selection:</strong> on shared channels, <code>AgentRelevanceSelector</code> (backed by the Jev decision model) picks which agent replies.</li>
+  <li><strong>Operator handoff:</strong> the <code>request_human</code> tool parks the conversation in the operator inbox for a human to take over.</li>
+  <li><strong>Universal disconnect (2026-09-23):</strong> one disconnect path now cleanly tears down a channel linkage regardless of provider.</li>
+  <li><strong>Channel health endpoints:</strong> per-channel status is exposed for ops dashboards.</li>
+  <li><strong>Plan gate:</strong> <code>whatsapp_allowed</code> in <code>plan_limits</code> controls WhatsApp access per plan.</li>
+</ul>
+
+<h2>4. Voice pipeline</h2>
+<p>Two independent voice paths exist and are deliberately not unified:</p>
+<table>
+  <thead><tr><th>Path</th><th>Transport</th><th>Pipeline</th></tr></thead>
+  <tbody>
+    <tr><td><strong>In-app calling</strong> (<code>core/voice</code>)</td><td>LiveKit WebRTC, browser-to-agent, zero PSTN</td><td>LiveKit token issuance → push-to-talk STT → <code>AgentChatService</code> → TTS</td></tr>
+    <tr><td><strong>PSTN voice</strong> (<code>omnichannel/twilio</code>)</td><td>Twilio voice + relay WebSocket</td><td><strong>voice-agent worker:</strong> Silero VAD → Whisper STT → core SSE turn → ElevenLabs TTS</td></tr>
+  </tbody>
+</table>
+<p>All TTS output passes through <code>SpeechTextNormalizer</code>
+(<code>core/speech</code>) so the engine says something sensible — markdown,
+emoji and raw URLs are rewritten before synthesis. ElevenLabs voice cloning is
+BYOK per tenant (own credential table); Sarvam covers the Indic-language
+STT/TTS surface.</p>
+
+<h2>5. Credential storage</h2>
+<p>Each channel connection stores provider credentials as encrypted rows in the
+tenant schema (AES-256-GCM via <code>EncryptionService</code>) — e.g.
+<code>TwilioCredential</code>, <code>MetaWhatsAppCredential</code>,
+<code>DiscordCredential</code>, Google refresh tokens. Outbound adapters read
+them at send time; webhook inbound paths authenticate via provider signature
+validation rather than JWT.</p>
+
+<h2>6. Known risks and quirks</h2>
+<div class="callout callout-note">
+  <div class="callout-title">WhatsApp uses official paths only</div>
+  <p>WhatsApp connects through Meta's WhatsApp Cloud API or a Twilio WhatsApp
+  sender. Unofficial personal-number clients violate WhatsApp's terms of
+  service and are not part of this platform.</p>
+</div>
+<table>
+  <thead><tr><th>Area</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Discord</td><td>Not a direct webhook from Discord — a Node gateway service maintains the socket and forwards into <code>/webhook/discord</code></td></tr>
+    <tr><td>Email</td><td>Polling job, not push — inbound latency is bounded by the IMAP poll interval</td></tr>
+    <tr><td>Meta webhooks</td><td>GET challenge + POST messages on the same path; signature verification required before processing</td></tr>
+    <tr><td>Voice</td><td>Two stacks (LiveKit in-app, Twilio PSTN) — check which one a report refers to before debugging</td></tr>
+  </tbody>
+</table>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

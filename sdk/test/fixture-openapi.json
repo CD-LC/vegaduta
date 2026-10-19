@@ -1,0 +1,203 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Fixture API", "version": "1.2.3" },
+  "tags": [{ "name": "Health" }, { "name": "Widget" }],
+  "paths": {
+    "/api/health/import": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Import",
+        "operationId": "HealthController_import",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/widgets": {
+      "get": {
+        "tags": ["Widget"],
+        "summary": "List widgets",
+        "operationId": "WidgetController_list",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "format": "int32" } },
+          { "name": "kind", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/Kind" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Widget" } } }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        },
+        "security": [{ "bearerAuth": [] }]
+      },
+      "post": {
+        "tags": ["Widget"],
+        "summary": "Create",
+        "operationId": "WidgetController_create",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateWidget" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Widget" } } }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/widgets/{widgetId}": {
+      "get": {
+        "tags": ["Widget"],
+        "summary": "Get",
+        "operationId": "WidgetController_get",
+        "parameters": [
+          { "name": "widgetId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "X-Trace", "in": "header", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Widget" } } }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      },
+      "delete": {
+        "tags": ["Widget"],
+        "summary": "Delete",
+        "operationId": "WidgetController_delete",
+        "parameters": [
+          { "name": "widgetId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "204": { "description": "Successful response." } },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/widgets/{widgetId}/events": {
+      "get": {
+        "tags": ["Widget"],
+        "summary": "Events",
+        "operationId": "WidgetController_events",
+        "x-sse": true,
+        "parameters": [
+          { "name": "widgetId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events stream.",
+            "content": { "text/event-stream": { "schema": { "type": "string" } } }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/widgets/{widgetId}/image": {
+      "post": {
+        "tags": ["Widget"],
+        "summary": "Upload image",
+        "operationId": "WidgetController_uploadImage",
+        "parameters": [
+          { "name": "widgetId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": { "file": { "type": "string", "format": "binary" } },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": { "application/octet-stream": { "schema": { "type": "string", "format": "binary" } } }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/widgets/{widgetId}/note": {
+      "put": {
+        "tags": ["Widget"],
+        "summary": "Set note",
+        "operationId": "WidgetController_setNote",
+        "parameters": [
+          { "name": "widgetId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": { "text/plain": { "schema": { "type": "string" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": { "text/plain": { "schema": { "type": "string" } } }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "schemas": {
+      "CreateWidget": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "quantity": { "type": "integer", "format": "int32", "minimum": 1 },
+          "note_text": { "type": "string" }
+        },
+        "required": ["name"]
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error body.",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "status": { "type": "integer", "format": "int32" },
+          "error": { "type": "string" },
+          "code": { "type": "string" }
+        },
+        "required": ["status", "error"],
+        "additionalProperties": true
+      },
+      "Kind": { "type": "string", "enum": ["SMALL", "LARGE"] },
+      "Odd": {
+        "type": "object",
+        "properties": { "a-b": { "type": "string" }, "from": { "type": "integer", "format": "int32" } }
+      },
+      "Widget": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+          "count": { "type": "integer", "format": "int32", "default": 0 },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "kind": { "$ref": "#/components/schemas/Kind" },
+          "parent": { "$ref": "#/components/schemas/Widget" },
+          "extra": { "type": "object", "additionalProperties": { "type": "number", "format": "double" } }
+        },
+        "required": ["name", "count"]
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/twilio-conversation-relay/prompt.schema.json",
+  "title": "Twilio Conversation Relay - prompt message",
+  "description": "Source: VoiceRelayWebSocketHandler.java#handlePrompt, read directly (2026-07-19). The handler only acts when last=true AND voicePrompt is non-blank (node.path('last').asBoolean(false), node.path('voicePrompt').asText('')) - a partial/interim transcript (last=false) is a documented no-op, not an error, so this schema treats last=false as equally valid, just inert.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "prompt" },
+    "last": {
+      "type": "boolean",
+      "description": "Only last=true triggers AgentChatService#chat. last=false (interim transcript) is silently ignored by design - not a failure mode."
+    },
+    "voicePrompt": {
+      "type": "string",
+      "description": "The caller's utterance. A blank string with last=true is also a silent no-op (handler returns early) - not an error."
+    }
+  },
+  "required": ["type", "last", "voicePrompt"],
+  "additionalProperties": true
+}

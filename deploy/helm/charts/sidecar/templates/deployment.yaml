@@ -1,0 +1,5 @@
+{{- include "sidecar.guard" . -}}
+{{- $core := include "vegaduta-lib.componentName" (dict "root" . "name" "core") -}}
+{{- $env := dict "RENDER_CALLBACK_ALLOWED_HOSTS" (printf "%s,%s.%s.svc.cluster.local" $core $core .Release.Namespace) -}}
+{{- $secretEnv := include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "SIDECAR_SHARED_SECRET") | fromYamlArray -}}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" $env "secretEnv" $secretEnv) }}

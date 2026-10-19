@@ -1,0 +1,36 @@
+# rl-trainer microservice - offline preference & prompt optimization.
+#
+# LLM-DRIVEN ONLY. There are intentionally NO torch / GPU / CUDA dependencies
+# in this default image: the flagship features (/optimize/prompt,
+# /judge/constitutional) call the Anthropic API, and /train/dpo is a validated
+# stub. See README.md 'GPU-enablement path' for the optional weight-training
+# worker (TRL/VERL) that would add those heavy deps.
+fastapi==0.142.0
+# Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
+# carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
+# 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+
+# LLM client for the prompt optimizer + constitutional judge.
+anthropic==1.9.0
+
+# httpx is pulled in transitively by both anthropic and uvicorn, but pin it
+# explicitly since the optimizer/judge depend on outbound HTTP being present.
+httpx==0.28.1
+
+# auth_mode=keycloak (JWT validation against the realm JWKS). Optional at
+# runtime - only imported when RL_TRAINER_AUTH_MODE=keycloak; the default
+# internal-token mode needs nothing extra.
+PyJWT[crypto]==2.15.1
+
+# Optional [gpu] extra (NOT installed by default - see README 'GPU-enablement
+# path'). Enabling real DPO/GRPO weight training would add, roughly:
+#   torch>=2.3
+#   transformers>=4.44
+#   trl>=0.9          # DPOTrainer / GRPOTrainer
+#   datasets>=2.20
+#   accelerate>=0.33
+# These require a CUDA-capable image and are deliberately kept out of the
+# default CPU build to keep it small and torch-free.

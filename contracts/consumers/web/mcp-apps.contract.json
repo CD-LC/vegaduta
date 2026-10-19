@@ -1,0 +1,30 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-mcp-apps-appId",
+      "method": "GET",
+      "path": "/api/mcp-apps/{appId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-mcp-apps-appId-tools-call",
+      "method": "POST",
+      "path": "/api/mcp-apps/{appId}/tools/call",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.arguments",
+          "$.name"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

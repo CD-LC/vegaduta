@@ -1,0 +1,483 @@
+/* ---------------------------------------------------------------------------
+ * 19g. LIVE MOTION
+ * What makes a console screenshot read as a console: things arrive, a bar
+ * advances, a number flinches when it changes.
+ *
+ * THE RULES THIS BLOCK KEEPS, ALL DELIBERATE:
+ *  - Every keyframe is transform and/or opacity ONLY. No width/height/top, no
+ *    filter, no animated box-shadow. §2 already documents why: this page had
+ *    paint costs bad enough to time out screenshot capture, and the hero is
+ *    the LCP element.
+ *  - No JS. CSS keyframes run off the main thread; an animation library on
+ *    the LCP element costs parse, hydrate and frame budget on exactly the
+ *    mid-range Android hardware that is most of this product's traffic.
+ *  - Everything sits inside `prefers-reduced-motion: no-preference`. With
+ *    motion off, every element here is at its natural resting state, which is
+ *    the fully readable one. Nothing rests at opacity 0.
+ *  - Keyframe names are prefixed `mkt-ui-`, and nothing is re-declared: the
+ *    row shimmer reuses §15's `mkt-sweep`, which is already exactly
+ *    "translateX(-100%) -> translateX(100%)".
+ * ------------------------------------------------------------------------ */
+
+/* (1) ARRIVAL — a row that has just landed in a log or a list.
+ * The stagger index is a custom property, so a list sets it once per item
+ * (style={{ '--mkt-ui-arrive-i': i }}) and gets a cascade with no JS timing
+ * and no per-row class. The delay is CAPPED: an unbounded stagger on a long
+ * list leaves the last rows invisible for over a second, and on the LCP
+ * element that is a metric, not a nicety. */
+.marketing-root .mkt-ui .mkt-ui-arrive {
+  --mkt-ui-arrive-i: 0;
+  --mkt-ui-arrive-step: 55ms;
+  --mkt-ui-arrive-y: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes mkt-ui-arrive {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--mkt-ui-arrive-y), 0);
+    }
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-arrive {
+    animation: mkt-ui-arrive 280ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+    animation-delay: min(calc(var(--mkt-ui-arrive-i) * var(--mkt-ui-arrive-step)), 600ms);
+  }
+}
+
+/* (2) WORKING — an indeterminate bar, not a spinner.
+ * A spinner says "something is happening somewhere". A bar that belongs to a
+ * row says "this row is the one working", which is the entire point of
+ * showing a run log. The determinate form is the same element with a value.
+ *
+ * The fill is SIZED with width (static, set once) and MOVED with transform,
+ * so nothing reflows per frame. */
+.marketing-root .mkt-ui .mkt-ui-bar {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  /* The empty track is ink, not the role hue: a track tinted with the role
+   * makes an empty bar look half full. */
+  background: color-mix(in oklab, var(--mkt-ink) 10%, transparent);
+}
+
+/* Determinate. `--mkt-ui-bar-value` is 0-1; scaleX from the inline edge is
+ * the only way to express progress without touching layout. The
+ * brand-to-cyan gradient is the one place the two brand hues meet, and it
+ * means "the platform, working" — it is not a per-state colour. */
+.marketing-root .mkt-ui .mkt-ui-bar__fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--mkt-accent), var(--mkt-flow));
+  transform-origin: left center;
+  transform: scaleX(var(--mkt-ui-bar-value, 1));
+}
+
+/* A bar that belongs to one state rather than to the platform (a per-step
+ * progress, a quota nearing its limit) paints in that state's hue instead. */
+.marketing-root .mkt-ui .mkt-ui-bar--role .mkt-ui-bar__fill {
+  background: linear-gradient(90deg, var(--mkt-role), color-mix(in oklab, var(--mkt-role) 55%, var(--mkt-accent)));
+}
+
+/* Indeterminate: a fixed-width slug travelling the track. Its resting state
+ * — motion off, or on paper — is a 38% fill parked at the start, which reads
+ * as "partway through": the truthful static picture of "running", and not a
+ * bar that looks complete. */
+.marketing-root .mkt-ui .mkt-ui-bar--indeterminate .mkt-ui-bar__fill {
+  width: 38%;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes mkt-ui-bar-travel {
+    from {
+      transform: translate3d(-110%, 0, 0);
+    }
+    to {
+      transform: translate3d(300%, 0, 0);
+    }
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-bar--indeterminate .mkt-ui-bar__fill {
+    animation: mkt-ui-bar-travel 1.35s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+}
+
+/* (3) WORKING, ROW SCALE — a shimmer travelling along the row itself, for the
+ * one row currently executing. Put `.mkt-ui-live` on the row; it needs no
+ * extra element and no new keyframe (it reuses §15's `mkt-sweep`).
+ *
+ * The sweep is tinted with the ROLE, so a running row shimmers cyan and a
+ * waiting row shimmers orange — the shimmer carries state rather than being a
+ * generic "loading" texture pasted over the card. */
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-root .mkt-ui .mkt-ui-live {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--mkt-role) 14%, transparent), transparent);
+    animation: mkt-sweep 1.9s ease-in-out infinite;
+  }
+}
+
+/* (4) A VALUE THAT JUST CHANGED — one brief flash behind a metric cell.
+ * RETRIGGER CONTRACT: a CSS animation only restarts when it is (re)applied,
+ * so flip `data-changed` off and back on, or change the element's React key,
+ * on each new value. Leaving the attribute set does not re-flash.
+ *
+ * The flash is a ::after overlay resting at opacity 0. That is a decorative
+ * pseudo-element with no content in it — the number itself is never animated
+ * and never transparent, so the "nothing rests at opacity 0" rule is kept
+ * where it actually matters. z-index -1 keeps the tint behind the digits. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes mkt-ui-flash {
+    0% {
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-flash {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-flash[data-changed]:not([data-changed="false"])::after {
+    content: "";
+    position: absolute;
+    inset: -0.125rem -0.25rem;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--mkt-role) 22%, transparent);
+    opacity: 0;
+    animation: mkt-ui-flash 900ms ease-out 1;
+  }
+}
+
+/* (5) A BAR / SPARKLINE THAT DRAWS IN.
+ * scaleY from the baseline, staggered left to right, so a metric panel builds
+ * the way a charting library would draw it — without a charting library.
+ * `from` only: the implicit `to` is the bar's own scaleY(var(--v)), so the
+ * resting height is whatever the data says and the keyframe never has to know
+ * it. Reuses `--mkt-ui-arrive-i` rather than inventing a second index. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes mkt-ui-draw {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-spark__bar {
+    animation: mkt-ui-draw 520ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+    animation-delay: min(calc(var(--mkt-ui-arrive-i, 0) * 34ms), 500ms);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 19h. METRICS PANEL
+ * The small numbers panel a console shows beside its log — runs today, p95,
+ * success rate. Container-query driven, because this panel sits in the hero
+ * at roughly 640px wide on a desktop and 330px on a phone and must not have
+ * to ask the viewport which one it is in.
+ *
+ * TYPE NOTE. §19 fixes the console scale at 13/12/15 and that is not being
+ * reopened: those are the PROSE roles of a product UI. A KPI number is not
+ * prose, it is a figure, and every dashboard this card quotes (Stripe,
+ * Linear, Vercel) sets its figures well above its body text. So
+ * --mkt-ui-metric is a fourth role, for digits only, used by exactly one
+ * selector below. It starts at 18px and reaches 20px only when the PANEL is
+ * wide enough — never because the window is.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-ui .mkt-ui-metrics {
+  container-type: inline-size;
+  /* NAMED, so the query below cannot accidentally resolve against §3's
+   * unnamed band container, which is also inline-size. */
+  container-name: mkt-ui-metrics;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--mkt-ui-gap);
+  min-width: 0;
+}
+
+/* THE STAT CELL. Label above, figure below, trend beside the figure — the
+ * order every dashboard uses, because the label is what you scan and the
+ * figure is what you stop on.
+ *
+ * --mkt-ui-metric is declared HERE and not on .mkt-ui-metrics for two
+ * reasons: an element can never be restyled by a query against its own
+ * container, so the bump below has to land on a descendant; and a stat cell
+ * dropped straight into a pane with no grid around it still gets a size. */
+.marketing-root .mkt-ui .mkt-ui-stat {
+  --mkt-ui-metric: 1.125rem; /* 18px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  min-width: 0;
+  padding: var(--mkt-ui-pad);
+  border: 1px solid var(--mkt-line);
+  border-radius: var(--mkt-ui-radius);
+  background: var(--mkt-surface-raised);
+}
+
+/* --mkt-ink-2, never ink-3. This is a 12px label and §19's contrast note
+ * applies to it exactly as written. */
+.marketing-root .mkt-ui .mkt-ui-stat__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--mkt-ui-label); /* 12px */
+  line-height: var(--mkt-ui-leading-tight);
+  font-weight: 500;
+  color: var(--mkt-ink-2);
+}
+
+.marketing-root .mkt-ui .mkt-ui-stat__value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  font-size: var(--mkt-ui-metric, 1.125rem);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  /* Tabular figures so a counter that ticks does not shuffle its own width —
+   * the same reason §19's .mkt-ui-mono sets "tnum". */
+  font-feature-settings:
+    "tnum" 1,
+    "zero" 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--mkt-ink);
+}
+
+/* The unit or suffix ("ms", "%", "runs") rides at label size beside the
+ * figure, so the figure reads as one number rather than as a long string. */
+.marketing-root .mkt-ui .mkt-ui-stat__unit {
+  font-size: var(--mkt-ui-label); /* 12px */
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--mkt-ink-2);
+}
+
+/* THE TREND MARKER. Colour here means DIRECTION, and nothing else:
+ *   --up    --mkt-positive   the number moved up
+ *   --down  the app's rose   the number moved down
+ *   --flat  --mkt-ink-2      it did not move; a flat metric is not news
+ * Up is not always good (p95 latency, spend), so --good / --bad exist as the
+ * override pair and the CALL SITE decides which way is which. A falling error
+ * rate is `--down --good` and paints green.
+ *
+ * The arrow glyph is markup, not a CSS `content` string: an arrow injected by
+ * CSS is invisible to a screen reader and untranslatable, and a 29-locale
+ * translation run has no way to see it. */
+.marketing-root .mkt-ui .mkt-ui-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1875rem;
+  font-size: var(--mkt-ui-label); /* 12px */
+  line-height: var(--mkt-ui-leading-tight);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--mkt-ink-2);
+}
+
+.marketing-root .mkt-ui .mkt-ui-trend--up,
+.marketing-root .mkt-ui .mkt-ui-trend--good {
+  color: color-mix(in oklab, var(--mkt-positive) 84%, var(--mkt-ink)); /* 6.32:1 light */
+}
+
+.marketing-root .mkt-ui .mkt-ui-trend--down,
+.marketing-root .mkt-ui .mkt-ui-trend--bad {
+  color: color-mix(in oklab, var(--danger, #be123c) 84%, var(--mkt-ink)); /* 6.58:1 light */
+}
+
+.marketing-root .mkt-ui .mkt-ui-trend--flat {
+  color: var(--mkt-ink-2);
+}
+
+/* The figure grows only when the PANEL is wide enough. 26rem is where two
+ * stat cells stop being cramped, measured on the panel, not the window — the
+ * same reason §3 gives bands `container-type: inline-size`. */
+@container mkt-ui-metrics (min-width: 26rem) {
+  .marketing-root .mkt-ui .mkt-ui-stat {
+    --mkt-ui-metric: 1.25rem;
+  } /* 20px */
+}
+
+/* THE SPARK. A column chart, not a polyline: a polyline needs path geometry
+ * the CSS cannot know, and every cheap way to "draw" one animates
+ * stroke-dashoffset or clip-path, neither of which is transform or opacity.
+ * At 28px tall columns give the same read and cost one div each.
+ *
+ * Each bar sets `--v` (0-1) and, optionally, `--mkt-ui-arrive-i` for the
+ * draw-in stagger defined in §19g. */
+.marketing-root .mkt-ui .mkt-ui-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 0;
+  height: var(--mkt-ui-spark-h, 1.75rem);
+}
+
+.marketing-root .mkt-ui .mkt-ui-spark--tall {
+  --mkt-ui-spark-h: 2.75rem;
+}
+.marketing-root .mkt-ui .mkt-ui-spark--dense {
+  gap: 1px;
+}
+
+.marketing-root .mkt-ui .mkt-ui-spark__bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  height: 100%;
+  border-radius: 2px 2px 1px 1px;
+  transform-origin: bottom center;
+  transform: scaleY(var(--v, 0.5));
+  /* Fading toward the top stops a wall of bars reading as a solid block, and
+   * is where the role hue is allowed to be fully saturated — it is decoration
+   * sitting on top of a value the label already states in words. */
+  background: linear-gradient(to top, var(--mkt-role), color-mix(in oklab, var(--mkt-role) 45%, transparent));
+}
+
+/* The most recent column, so "now" is findable in a row of twenty. */
+.marketing-root .mkt-ui .mkt-ui-spark__bar--now {
+  background: linear-gradient(to top, var(--mkt-role-ink), color-mix(in oklab, var(--mkt-role) 70%, transparent));
+}
+
+/* ---------------------------------------------------------------------------
+ * 19e-h UNDER THE ENVIRONMENT OVERRIDES
+ * The same obligations §17, §18 and the §19 tail already carry, extended to
+ * the parts added above. Two of these are correctness fixes rather than
+ * polish, and are marked as such.
+ * ------------------------------------------------------------------------ */
+
+@media (prefers-contrast: more) {
+  /* A 12% tint is about 1.2:1 and carries nothing at this setting; the chip
+   * keeps its AA label and gains a real edge instead. */
+  .marketing-root .mkt-ui .mkt-pill--role {
+    background: none;
+    border-color: currentcolor;
+  }
+
+  /* A gradient fading to transparent loses its top half here, so the bars go
+   * flat in the readable ink. */
+  .marketing-root .mkt-ui .mkt-ui-spark__bar,
+  .marketing-root .mkt-ui .mkt-ui-spark__bar--now {
+    background: var(--mkt-role-ink);
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-bar {
+    border: 1px solid var(--mkt-line-strong);
+  }
+}
+
+@media (forced-colors: active) {
+  /* Forced colours discard every hue, so the whole semantic set collapses to
+   * one ink. The SHAPES are what survive, and they are what the marker set
+   * was designed around — square / circle / diamond / ring / barred square
+   * stay legible with no colour at all. That is the 1.4.1 argument made
+   * good rather than merely asserted. */
+  .marketing-root .mkt-ui .mkt-ui-mark {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-mark--approval {
+    background: none;
+    border-color: CanvasText;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-mark--error::after {
+    background: Canvas;
+  }
+
+  .marketing-root .mkt-ui .mkt-pill--role {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .marketing-root .mkt-ui .mkt-dot--role {
+    background: CanvasText;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-bar {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-bar__fill,
+  .marketing-root .mkt-ui .mkt-ui-spark__bar,
+  .marketing-root .mkt-ui .mkt-ui-spark__bar--now {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  /* The trend hue is gone, so the arrow glyph in the markup is the only
+   * carrier left — which is exactly why it is markup and not CSS `content`. */
+  .marketing-root .mkt-ui .mkt-ui-trend,
+  .marketing-root .mkt-ui .mkt-ui-trend--up,
+  .marketing-root .mkt-ui .mkt-ui-trend--down,
+  .marketing-root .mkt-ui .mkt-ui-trend--good,
+  .marketing-root .mkt-ui .mkt-ui-trend--bad,
+  .marketing-root .mkt-ui .mkt-ui-trend--flat {
+    color: CanvasText;
+  }
+}
+
+@media print {
+  /* CORRECTNESS, not aesthetics — the same fix §18 applies to the scroll
+   * reveals, for the same reason. `.mkt-ui-arrive` uses `backwards` fill with
+   * a delay, so an engine that starts the animation and never advances it can
+   * print a whole run log at opacity 0. !important, because it has to beat
+   * whatever a band put on top of it. */
+  .marketing-root .mkt-ui .mkt-ui-arrive,
+  .marketing-root .mkt-ui .mkt-ui-spark__bar,
+  .marketing-root .mkt-ui .mkt-ui-bar__fill,
+  .marketing-root .mkt-ui .mkt-ui-live::after,
+  .marketing-root .mkt-ui .mkt-ui-flash::after {
+    animation: none !important;
+    opacity: 1;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-arrive {
+    transform: none;
+  }
+
+  /* The sweep overlay and the flash tint are pure ornament and have no
+   * business on paper. The spark bars keep their scaleY, because that IS the
+   * data. */
+  .marketing-root .mkt-ui .mkt-ui-live::after,
+  .marketing-root .mkt-ui .mkt-ui-flash::after {
+    content: none;
+  }
+
+  /* Background graphics are off by default when printing, so a tinted chip
+   * and a gradient bar both come out blank. Give them an edge instead. */
+  .marketing-root .mkt-ui .mkt-pill--role {
+    border-color: currentcolor;
+    background: none;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-stat {
+    break-inside: avoid;
+  }
+}

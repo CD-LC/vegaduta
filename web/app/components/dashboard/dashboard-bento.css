@@ -1,0 +1,144 @@
+/* --- Bento module grid ------------------------------------------------- */
+
+/* No overflow:hidden here on purpose - cards inside hover-lift and drag-lift
+ * (page.js's Motion wrapper), and clipping the grid would clip their
+ * box-shadow/scale too. The drifting-grid pseudo below is left unclipped;
+ * at 16% opacity it bleeding a few extra px past the container edge is
+ * imperceptible, and isolation:isolate still keeps its z-index:-1 safely
+ * contained within this stacking context instead of escaping the page. */
+/* Direct feedback: "reduce the size of the tiles, as per tile content" -
+ * grid-auto-rows was a fixed 168px for every card regardless of how little
+ * it actually held. minmax(132px, auto) lowers that floor (a visibly
+ * smaller resting size, combined with the tighter padding/icon/type sizes
+ * below) while letting `auto` size a row to its own content when a card
+ * genuinely has more in it - so no tile is ever bigger than its content
+ * requires, but a two-line description still gets the room it needs
+ * instead of clipping. */
+.mc-bento {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(132px, auto);
+  gap: 0.85rem;
+}
+
+/* Direct feedback: "use the entire screen... only 40% used before" - now
+ * that .app-content's width cap is gone, a wide/ultrawide monitor has
+ * enough room for a 5th or 6th module column rather than 4 increasingly
+ * oversized cards. Content-driven, not viewport-driven, since what matters
+ * is how much room .app-content actually has (it's still constrained by
+ * the fixed BottomDock/topbar chrome either side on some layouts). */
+@media (min-width: 1440px) {
+  .mc-bento {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 1800px) {
+  .mc-bento {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Ambient drifting grid behind the whole module grid - ONE shared
+ * pseudo-element rather than repeating a background per card, so this is a
+ * single extra paint layer no matter how many modules exist. Deliberately
+ * near-invisible (16% line opacity) - a subliminal "there's a live system
+ * grid under this" cue, not a visible pattern competing with the cards.
+ *
+ * Originally animated background-position, which repaints the whole layer
+ * every frame - the same mistake as the old hero scanline, just easier to
+ * miss here since the pattern is faint. Fixed the same way: the pseudo is
+ * oversized by exactly one tile (42px) in every direction, and instead of
+ * shifting the background we translate the whole (transform-only,
+ * compositor-driven) element by one tile and snap back - because the
+ * oversize buffer is >= the translate distance, the seam this would
+ * otherwise expose always stays outside .mc-bento's clipped bounds. */
+.mc-bento::before {
+  content: "";
+  position: absolute;
+  inset: -42px;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--surface-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: 0.16;
+  transform: translate3d(0, 0, 0);
+  animation: mc-grid-drift 22s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes mc-grid-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(42px, 42px, 0);
+  }
+}
+
+.mc-bento-card {
+  position: relative;
+  grid-column: span 2;
+  grid-row: span 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.1rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card);
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+:root[data-mode="dark"] .mc-bento-card {
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(10px);
+}
+
+/* Static reactor-core rim: a thin gradient ring traced around each card's
+ * own border, no longer animated - the continuous motion six identical
+ * tiles all shared moved to the background instead (AmbientNetwork.js's
+ * live data-packet mesh), per direct feedback: "I want animation in
+ * background not on tiles, tiles should have animation something
+ * meaningful according to its functionality." Each tile's own animation
+ * now lives on its icon badge instead (below), one bespoke loop per
+ * module's actual job rather than six copies of the same rim/pulse.
+ *
+ * Still built with mask-composite (not an oversized bleeding pseudo) for
+ * the same reason as before: .mc-bento-card has overflow:hidden, which
+ * would otherwise clip it to nothing. */
+.mc-bento-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent-cyan),
+    transparent 30%,
+    transparent 70%,
+    #a24bff,
+    var(--accent-cyan)
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  opacity: 0.4;
+  pointer-events: none;
+}

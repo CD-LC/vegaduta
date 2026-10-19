@@ -1,0 +1,142 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-local-models-probe",
+      "method": "POST",
+      "path": "/api/local-models/probe",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tag"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.latencyMs",
+          "$.structuredOutput",
+          "$.tag",
+          "$.toolCalling",
+          "$.toolRouterMode"
+        ]
+      }
+    },
+    {
+      "id": "post-api-local-models-pull",
+      "method": "POST",
+      "path": "/api/local-models/pull",
+      "status": 202,
+      "request": {
+        "requiredFields": [
+          "$.tag"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.jobId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-local-models-pull-jobId",
+      "method": "GET",
+      "path": "/api/local-models/pull/{jobId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.message",
+          "$.percent",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-local-models-recommendation",
+      "method": "GET",
+      "path": "/api/local-models/recommendation",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.alternatives",
+          "$.budgetGb",
+          "$.catalog",
+          "$.hardware",
+          "$.ollama",
+          "$.recommended",
+          "$.servingModel"
+        ]
+      }
+    },
+    {
+      "id": "get-api-local-models-settings",
+      "method": "GET",
+      "path": "/api/local-models/settings",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.contextLength",
+          "$.keepAlive",
+          "$.loadedContext",
+          "$.reasoningEffort",
+          "$.servingModel",
+          "$.wantedContext"
+        ]
+      }
+    },
+    {
+      "id": "put-api-local-models-settings",
+      "method": "PUT",
+      "path": "/api/local-models/settings",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.contextLength",
+          "$.keepAlive",
+          "$.loadedContext",
+          "$.reasoningEffort",
+          "$.servingModel",
+          "$.wantedContext"
+        ]
+      }
+    },
+    {
+      "id": "post-api-local-models-use",
+      "method": "POST",
+      "path": "/api/local-models/use",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tag"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.created",
+          "$.enabled",
+          "$.rowId",
+          "$.tag",
+          "$.toolCallGrade"
+        ]
+      }
+    },
+    {
+      "id": "post-api-local-models-warm",
+      "method": "POST",
+      "path": "/api/local-models/warm",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tag"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.loaded",
+          "$.ms",
+          "$.tag"
+        ]
+      }
+    }
+  ]
+}

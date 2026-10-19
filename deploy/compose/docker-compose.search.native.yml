@@ -1,0 +1,13 @@
+# =============================================================================
+# SearXNG for `scripts/vegaduta personal --native-core --search`.
+#
+# The base search overlay leaves SearXNG reachable only as http://searxng:8080 on the private
+# search-net network, which a core running on the HOST JVM is not part of. This overlay publishes
+# it on the loopback interface ONLY (never BIND_ADDR: an open SearXNG is an open proxy), and the
+# launcher points the host core at http://127.0.0.1:${SEARXNG_HOST_PORT:-8888}.
+# Layer it only after docker-compose.search.yml and personal.native.yml.
+# =============================================================================
+services:
+  searxng:
+    ports:
+      - "127.0.0.1:${SEARXNG_HOST_PORT:-8888}:8080"

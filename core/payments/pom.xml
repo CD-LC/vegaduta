@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>payments</artifactId>
+  <name>payments</name>
+  <description>
+    Agentic UPI Payments (Build Specs §E1): signed per-agent spend mandates
+    (Ed25519, per-tenant vault key), mandate-gated payment tools, cap ledger
+    (SELECT ... FOR UPDATE), approval-gated execution, webhook + poller
+    reconciliation. Depends on billing (Razorpay gateway client), approval,
+    eventbus, crypto, tenancy, security - never the other way around
+    (billing stays a leaf; approval -&gt; tenancy -&gt; billing is why this is
+    its own module rather than a package inside core/billing).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- Ed25519 mandate signing keys at rest: EnvelopeEncryptionService. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- RazorpayGatewayClient / PaymentGatewayRegistry behind
+         UpiAgentProtocolAdapter; RoutedBillingEventHandler seam for
+         payment_link.paid / qr_code.credited. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>billing</artifactId>
+    </dependency>
+    <!-- upi.mandate.execute approval executor + ApprovalPolicyService. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>approval</artifactId>
+    </dependency>
+    <!-- payment.status.changed outbox events (WorkflowEventPublisher). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>eventbus</artifactId>
+    </dependency>
+    <!-- TenantSchemaIterator for the reconciliation poller; TenantRepository
+         for webhook-time gateway-ref -&gt; tenant-schema resolution. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- Every mandate grant/revoke/execute is audit-logged. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 4: the mandate payment agent tool adapters
+         (com.agenticai.core.payments.agenttools: Mandate* tool callbacks,
+         PaymentMandateToolSource, PaymentsAgentWalletLedger) implement the
+         kernel's agentspi ports (core/agentspi), so they live here with the vendor and not in
+         core/agents. Arrow is vendor -> kernel SPI; agents must never depend back
+         on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agentspi</artifactId>
+    </dependency>
+    <!-- Test scope only: MandatePaymentToolVisibilityTest drives the kernel AgentToolProvider resolution. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Test scope only: MandatePaymentToolVisibilityTest drives AgentIntegrationToolResolver
+         and the tool guard in core/agents-tools (ADR-0023). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- Mandate-revocation tombstone (mandate:revoked:&lt;id&gt;) - injected as
+         ObjectProvider so slim test contexts need no Redis. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

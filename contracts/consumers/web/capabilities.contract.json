@@ -1,0 +1,110 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-capabilities",
+      "method": "GET",
+      "path": "/api/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].key",
+          "$[*].providers"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-capabilities-capability-credential",
+      "method": "DELETE",
+      "path": "/api/capabilities/{capability}/credential",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-capabilities-capability-credential",
+      "method": "POST",
+      "path": "/api/capabilities/{capability}/credential",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.apiKey",
+          "$.provider"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.capabilities",
+          "$.createdAt",
+          "$.id",
+          "$.providerKey",
+          "$.status",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "get-api-capabilities-capability-policy",
+      "method": "GET",
+      "path": "/api/capabilities/{capability}/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.capability",
+          "$.overrides",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "put-api-capabilities-capability-policy",
+      "method": "PUT",
+      "path": "/api/capabilities/{capability}/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.capability",
+          "$.overrides",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-capabilities-decision-playground",
+      "method": "POST",
+      "path": "/api/capabilities/decision/playground",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.questions",
+          "$.state"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.answers",
+          "$.keySource",
+          "$.model",
+          "$.usage"
+        ]
+      }
+    },
+    {
+      "id": "get-api-capabilities-decision-status",
+      "method": "GET",
+      "path": "/api/capabilities/decision/status",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.configured",
+          "$.enabled",
+          "$.providerKey",
+          "$.source",
+          "$.tenantCredential"
+        ]
+      }
+    }
+  ]
+}

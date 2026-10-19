@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>devices</artifactId>
+  <name>devices</name>
+  <description>
+    Mobile SDK backend (device-channel module): lets a tenant pair a phone
+    (Android today, iOS skeleton - see the separate ios/ and android/
+    top-level Mobile SDK directories) to the platform and lets a workflow's
+    "Device Control" node queue a command for that device to execute (tap,
+    type text, open an app, take a screenshot). Reuses two already-established
+    cross-module patterns rather than inventing new ones: schema-per-tenant
+    persistence for MobileDevice/DeviceCommand (tenancy), and the
+    ExternalAccountProvider/ChannelAccountLink cross-tenant lookup (tenancy)
+    for resolving which tenant schema a bare device token belongs to on an
+    unauthenticated (no Keycloak JWT) poll/result request - the same posture
+    Twilio's and the workflow webhook's inbound endpoints already use, see
+    DeviceGatewayController's javadoc.
+
+    Deliberately polling, not a persistent WebSocket: a phone's OS
+    (Android Doze/App Standby, iOS background execution limits) kills
+    long-lived sockets in the background regardless of what the server
+    offers, so a real mobile automation product (MDM tools, Tasker, etc.)
+    polls or uses platform push (FCM/APNs) - not raw WebSocket - for exactly
+    this reason. Short-interval polling here is the honest, working choice;
+    a push-notification wake-up trigger (to shorten the interval a device
+    needs to poll at) is a reasonable later enhancement, not a compromise
+    hidden as "done."
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

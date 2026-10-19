@@ -1,0 +1,122 @@
+# sidecar - VegaDuta ML sidecar (services/sidecar/Dockerfile, FastAPI on :8001).
+# Internal only: called by core, core-jobs and voice-agent with SIDECAR_SHARED_SECRET
+# (key of the shared internal Secret, global.internalSecret).
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: ml
+
+image:
+  registry: ""
+  repository: sidecar
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+# -- Render jobs and their status live in-process (RENDER_RETAIN_JOBS): a second pod would 404 jobs started on the first.
+singleReplica: true
+singleReplicaReason: "render jobs are held in-process; a second pod would 404 a job started on the first"
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+terminationGracePeriodSeconds: 60
+revisionHistoryLimit: 5
+containerPort: 8001
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8001
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# Model loading (torch, sentence-transformers, faster-whisper) takes a while on first start.
+probes:
+  startup:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 60
+  liveness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 500m, memory: 2Gi }
+  limits: { memory: 4Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+# Model caches are written under the image's home dir; read-only root FS is not yet supported.
+securityContext:
+  readOnlyRootFilesystem: false
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 2Gi }
+  - { name: workspace, mountPath: /app/workspace, sizeLimit: 10Gi }
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, voice-agent]
+  # Render callbacks POST back to core.
+  allowEgressTo: [core]
+  # Hugging Face model downloads, Sarvam TTS.
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /health
+
+env:
+  SIDECAR_AUTH_REQUIRED: "true"
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  SARVAM_TARGET_LANGUAGE_CODE: en-IN
+  SARVAM_MODEL: "bulbul:v3"
+  RENDER_WORKSPACE_DIR: /app/workspace
+  RENDER_THREADS: "1"
+  RENDER_PRESET: medium
+  RENDER_CRF: "23"
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

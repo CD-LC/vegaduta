@@ -1,0 +1,266 @@
+/* ============================================================================
+ * CONSOLE — paper & ink + glass fixes for the authenticated screens
+ * (2026-09-24, redesign/vd-tier1). Imported AFTER tokens.css and
+ * deliberately UNLAYERED, so every rule here beats Tailwind utilities and the
+ * legacy unlayered `.ax-*` / `.hud-*` / `.mc-*` rules in globals.css and
+ * dashboard.css by source order alone. Nothing structural: only tokens,
+ * colours, radii, type and a handful of phone-width layout fixes.
+ *
+ * Conventions: light rules are bare; dark ones sit under
+ * `:root[data-mode="dark"] …` (same specificity as globals.css's dark block,
+ * later in the cascade, so they win).
+ *
+ * Previews (no backend needed): /ui-kit/console-preview/<page>.
+ * ==========================================================================*/
+
+/* Continued in styles/console/*.css. styles/consoleStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+/* ---- 1. Legacy AXON / HUD token aliases → the live theme ------------------ */
+/* Every remaining `.ax-*` screen reads these variables. Pointing them at the
+   tier-1 tokens re-skins the lot at once: ONE accent (the marketing cyan +
+   violet pair collapses onto --accent-*), paper surfaces, ink text. The
+   status hues (green / amber / red) are semantic and stay. */
+:root {
+  --ax-cyan: var(--accent-500);
+  --ax-violet: var(--accent-500);
+  --ax-violetd: var(--accent-600);
+  --ax-glow: transparent;
+  --ax-panel: var(--surface-card);
+  --ax-panel2: var(--surface-raised);
+  --ax-bar: var(--surface-card);
+  --ax-border: var(--surface-border);
+  --ax-border2: var(--surface-border-strong);
+  --ax-text: var(--text-primary);
+  --ax-mid: var(--text-secondary);
+  --ax-dim: var(--text-muted);
+  --ax-chip: var(--surface-sunken);
+  --ax-track: var(--surface-sunken);
+  --ax-shadow-sm: var(--shadow-card);
+  --ax-shadow-md: var(--shadow-card-hover);
+  --hud-cyan: var(--accent-500);
+  --hud-violet: var(--accent-500);
+  --hud-panel: var(--surface-card);
+  --hud-panel-alt: var(--surface-card-alt);
+  --hud-text-dim: var(--text-muted);
+  --accent-cyan: var(--accent-500);
+}
+
+/* Accessibility fix (color audit follow-up): --ax-cyan/--ax-violet resolve
+   to the decorative-only accent-500 stop in light mode (see the design
+   note on the 8-palette block in tokens.css - "Light 500s are
+   decorative only ... fills under white text and accent-coloured text use
+   the 600 stop in light"). --ax-violetd above was already lifted to
+   accent-600 for exactly this reason; these four rules use the other two
+   aliases for actual text/border colour and need the same readable stop.
+   Scoped to these specific selectors and to light mode only, rather than
+   changing --ax-cyan/--ax-violet themselves, which are also read by many
+   other .ax-* rules elsewhere in this codebase for non-text purposes where
+   the decorative accent-500 is correct as-is. */
+:root:not([data-mode="dark"]) .ax-mnt-role-pill-owner,
+:root:not([data-mode="dark"]) .ax-mnt-role-pill-admin,
+:root:not([data-mode="dark"]) .ax-wf-step-running .ax-wf-step-label {
+  color: var(--accent-600);
+}
+
+:root[data-mode="dark"] {
+  --ax-cyan: var(--accent-500);
+  --ax-violet: var(--accent-500);
+  --ax-violetd: var(--accent-400);
+  --ax-glow: transparent;
+  --ax-panel: var(--surface-card);
+  --ax-panel2: var(--surface-raised);
+  --ax-bar: var(--surface-card);
+  --ax-border: var(--surface-border);
+  --ax-border2: var(--surface-border-strong);
+  --ax-text: var(--text-primary);
+  --ax-mid: var(--text-secondary);
+  --ax-dim: var(--text-muted);
+  --ax-chip: rgba(255, 255, 255, 0.05);
+  --ax-track: rgba(255, 255, 255, 0.1);
+  --ax-shadow-sm: var(--shadow-card);
+  --ax-shadow-md: var(--shadow-card-hover);
+  --hud-cyan: var(--accent-500);
+  --hud-violet: var(--accent-500);
+  --hud-panel: var(--surface-card);
+  --hud-panel-alt: var(--surface-card-alt);
+  --hud-text-dim: var(--text-muted);
+  --accent-cyan: var(--accent-500);
+}
+
+/* ---- 2. Type: DM Mono for every label / id / code / number ---------------- */
+/* Tailwind's `font-mono` utility inlines the Geist Mono variable, so the
+   tier-1 alias of --font-mono never reached it. */
+.font-mono,
+code,
+kbd,
+pre,
+samp,
+.ax-pager,
+.ax-pager-size-btn,
+.ax-mnt-sub,
+.ax-feed,
+.ax-feed-time,
+.ax-feed-tag,
+.ax-wflist-limit-pill,
+.ax-wflist-meta,
+.ax-tl-card-phase,
+.ax-tl-card-sub,
+.ax-slider-head,
+.ax-slider-save,
+.ax-agent-sub,
+.hud-value,
+.mc-eyebrow {
+  font-family: var(--font-code);
+}
+
+/* Console page titles: same tight display tracking as the public pages */
+main h1 {
+  letter-spacing: -0.035em;
+}
+
+/* Console cards sit at 14px (tier-1's --radius-xl is 18px for marketing) */
+main [data-slot="card"] {
+  border-radius: 14px;
+}
+
+/* ---- 3. Glass for the legacy panels ---------------------------------------- */
+/* ShadCN cards already get the frosted slab from vd-tier1 §10. These are
+   the older AXON panels that still paint their own surface; same recipe,
+   10–14px radii (pills are for buttons only). Backdrop filters go on the
+   top-level panels only — never on chips — to keep paint cheap. */
+.ax-tl-card,
+.ax-tl-add-section,
+.ax-wflist-card,
+.ax-wflist-form,
+.ax-wflist-empty,
+.ax-mnt-section,
+.ax-mnt-llm-card,
+.ax-core-panel,
+.ax-admin-ovw-hero,
+.hud-panel,
+.mc-hud-card,
+.mc-bento-card {
+  background: rgba(255, 255, 255, 0.6);
+  background-image: none;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  box-shadow:
+    var(--glass-edge),
+    0 14px 40px -24px rgba(19, 19, 24, 0.2);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+:root[data-mode="dark"] .ax-tl-card,
+:root[data-mode="dark"] .ax-tl-add-section,
+:root[data-mode="dark"] .ax-wflist-card,
+:root[data-mode="dark"] .ax-wflist-form,
+:root[data-mode="dark"] .ax-wflist-empty,
+:root[data-mode="dark"] .ax-mnt-section,
+:root[data-mode="dark"] .ax-mnt-llm-card,
+:root[data-mode="dark"] .ax-core-panel,
+:root[data-mode="dark"] .ax-admin-ovw-hero,
+:root[data-mode="dark"] .hud-panel,
+:root[data-mode="dark"] .mc-hud-card,
+:root[data-mode="dark"] .mc-bento-card {
+  background: rgba(255, 255, 255, 0.045);
+  background-image: none;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    var(--glass-edge),
+    0 16px 40px -24px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* The admin hero paints its gradient + 24px radius inline (admin/page.tsx),
+   so these two need !important to reach it. */
+.ax-admin-ovw-hero {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    var(--glass-edge),
+    0 14px 40px -24px rgba(19, 19, 24, 0.2) !important;
+}
+
+:root[data-mode="dark"] .ax-admin-ovw-hero {
+  background: rgba(255, 255, 255, 0.045) !important;
+  box-shadow:
+    var(--glass-edge),
+    0 16px 40px -24px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Sunken wells inside a glass panel (tables, setup boxes, code) */
+.ax-mnt-table,
+.mcp-setup-box,
+.ax-tl-card-disabled {
+  background: color-mix(in oklab, var(--text-primary) 3.5%, transparent);
+  border-color: color-mix(in oklab, var(--text-primary) 6%, transparent);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.mcp-yaml,
+pre {
+  border-radius: 10px;
+}
+
+/* Selection / hover states: accent, not cyan; no rings of glow */
+.ax-tl-card-selected,
+.ax-tl-card-selected:hover,
+.ax-tl-body .ax-tl-card-selected,
+.ax-tl-body .ax-tl-card-selected:hover {
+  border-color: var(--accent-500);
+  box-shadow:
+    var(--glass-edge),
+    0 0 0 1px var(--accent-500);
+  background: color-mix(in oklab, var(--accent-500) 8%, rgba(255, 255, 255, 0.6));
+}
+
+:root[data-mode="dark"] .ax-tl-card-selected,
+:root[data-mode="dark"] .ax-tl-card-selected:hover {
+  background: color-mix(in oklab, var(--accent-500) 12%, rgba(255, 255, 255, 0.045));
+}
+
+.ax-tl-card:hover,
+.ax-wflist-card:hover,
+.mc-hud-card:hover {
+  border-color: color-mix(in oklab, var(--accent-500) 40%, var(--surface-border));
+  transform: none;
+}
+
+/* The bento / HUD cards' animated cyan sweeps, corner dots and conic frames */
+.mc-hud-card::before,
+.mc-hud-card::after,
+.mc-bento-card::before,
+.ax-qt-glow {
+  display: none;
+}
+
+.mc-eyebrow {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mc-eyebrow-dot {
+  background: var(--accent-500);
+  box-shadow: none;
+}
+
+.mc-greeting-accent {
+  background-image: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  color: var(--accent-500);
+}
+
+/* Section eyebrows on the legacy panels read like `.eyebrow` */
+.ax-mnt-sub,
+.ax-tl-card-sub,
+.ax-feed-time,
+.hud-value-empty {
+  color: var(--text-muted);
+}

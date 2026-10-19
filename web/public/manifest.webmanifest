@@ -1,0 +1,77 @@
+{
+  "$comment": "Colours are copied from web/app/globals.css, not invented: theme_color/background_color are --surface-page from the :root[data-mode=\"dark\"]/.dark block (#0d0f17), because ThemeProvider.tsx's DEFAULT_MODE is \"dark\". Do not substitute --brand-accent (#f97316) - that token is the wordmark colour, not a surface. Icon entries name only files that exist in web/public; missing sizes are listed in web/public/icons/README.md. Unknown manifest members are ignored by the spec, so this key is inert.",
+  "id": "/",
+  "name": "VegaDūta — Open-source AI agent platform",
+  "short_name": "VegaDūta",
+  "description": "Open-source, self-hostable platform for building and running AI agents.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d0f17",
+  "theme_color": "#0d0f17",
+  "categories": ["business", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    {
+      "src": "/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Try without an account",
+      "short_name": "Try it",
+      "description": "Open the no-signup sandbox.",
+      "url": "/try"
+    }
+  ]
+}

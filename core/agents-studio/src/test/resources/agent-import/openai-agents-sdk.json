@@ -1,0 +1,21 @@
+{
+  "name": "Triage agent",
+  "handoff_description": "Routes the customer to the right specialist.",
+  "instructions": "Help the user with their questions. If they ask about billing, hand off to the Billing agent. If they ask about refunds, hand off to the Refund agent.",
+  "model": "gpt-4.1",
+  "model_settings": { "temperature": 0.3, "top_p": 0.9, "tool_choice": "auto", "parallel_tool_calls": true },
+  "tools": [
+    { "type": "web_search" },
+    { "type": "file_search", "vector_store_ids": ["vs_999"], "max_num_results": 3 },
+    { "type": "code_interpreter" },
+    { "type": "mcp", "server_label": "docs", "server_url": "https://example.invalid/mcp?token=SHOULD_NOT_BE_COPIED" },
+    { "type": "function", "name": "lookup_invoice", "description": "Fetch an invoice by number.", "params_json_schema": { "type": "object" } }
+  ],
+  "handoffs": [
+    { "name": "Billing agent", "instructions": "You handle billing questions." },
+    "Refund agent"
+  ],
+  "input_guardrails": [ { "name": "no_pii" } ],
+  "output_guardrails": [ { "name": "tone_check" } ],
+  "output_type": { "type": "object" }
+}

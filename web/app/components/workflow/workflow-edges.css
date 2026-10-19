@@ -1,0 +1,107 @@
+/* Edge state colours resolve through --wf-edge-* so a theme can override one
+ * state without touching the rest; fallbacks reuse the existing HUD tokens. */
+.wf-edge {
+  --wf-edge-c-done: var(--hud-cyan, var(--ax-cyan, currentColor));
+  --wf-edge-c-flowing: var(--hud-violet, var(--ax-violet, currentColor));
+  --wf-edge-c-pending: var(--hud-text-dim, var(--text-dim, currentColor));
+  --wf-edge-c-failed: var(--hud-red, var(--ax-red, crimson));
+  --wf-edge-c-paused: var(--hud-amber, var(--ax-amber, orange));
+  --wf-edge-c-skipped: var(--hud-text-dim, var(--text-dim, gray));
+  --wf-edge-color: var(--wf-edge-c-flowing);
+}
+.wf-edge-done { --wf-edge-color: var(--wf-edge-c-done); }
+.wf-edge-flowing { --wf-edge-color: var(--wf-edge-c-flowing); }
+.wf-edge-pending { --wf-edge-color: var(--wf-edge-c-pending); }
+.wf-edge-failed { --wf-edge-color: var(--wf-edge-c-failed); }
+.wf-edge-paused { --wf-edge-color: var(--wf-edge-c-paused); }
+.wf-edge-skipped { --wf-edge-color: var(--wf-edge-c-skipped); }
+
+/* !important: React Flow writes stroke inline from the edge's style prop. */
+path.wf-edge-path {
+  stroke: var(--wf-edge-color) !important;
+  stroke-width: 2px;
+  transition: stroke 0.2s ease, stroke-width 0.15s ease;
+}
+path.wf-edge-path.wf-edge-pending { stroke-dasharray: 5 7; }
+path.wf-edge-path.wf-edge-skipped { stroke-dasharray: 3 6; opacity: 0.55; }
+path.wf-edge-path.wf-edge-paused { stroke-dasharray: 2 5; }
+path.wf-edge-path.wf-edge-flowing {
+  stroke-dasharray: 6 6;
+  animation: wfEdgeFlow 0.8s linear infinite;
+}
+path.wf-edge-path.wf-edge-hot,
+path.wf-edge-path.wf-edge-selected { stroke-width: 3px; }
+
+@keyframes wfEdgeFlow {
+  to { stroke-dashoffset: -12; }
+}
+
+.wf-edge-tools {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 10;
+}
+.wf-edge-tools > * { pointer-events: auto; }
+
+.wf-edge-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--ax-border, var(--wf-edge-color));
+  background: var(--ax-panel2, var(--surface-2, Canvas));
+  color: var(--text-primary, var(--ax-text, CanvasText));
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+.wf-edge-btn:hover,
+.wf-edge-btn:focus-visible {
+  transform: scale(1.15);
+  border-color: var(--wf-edge-color);
+}
+.wf-edge-btn:focus-visible {
+  outline: 2px solid var(--wf-edge-color);
+  outline-offset: 2px;
+}
+.wf-edge-btn-delete:hover,
+.wf-edge-btn-delete:focus-visible {
+  border-color: var(--wf-edge-c-failed);
+  color: var(--wf-edge-c-failed);
+}
+
+.wf-edge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 140px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--wf-edge-color);
+  background: var(--ax-panel2, var(--surface-2, Canvas));
+  color: var(--text-primary, var(--ax-text, CanvasText));
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+button.wf-edge-pill { cursor: pointer; }
+button.wf-edge-pill:focus-visible {
+  outline: 2px solid var(--wf-edge-color);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  path.wf-edge-path.wf-edge-flowing { animation: none; }
+  .wf-edge-btn, path.wf-edge-path { transition: none; }
+  .wf-edge-btn:hover, .wf-edge-btn:focus-visible { transform: none; }
+}

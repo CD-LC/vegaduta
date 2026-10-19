@@ -1,0 +1,132 @@
+# app-builder - App Builder (services/app-builder/Dockerfile, :8091). Public on
+# <global.hosts.builder>.<global.domain>. Tokens from the shared internal Secret:
+#   APP_BUILDER_CODE_INTEL_TOKEN   <- key CODE_INTEL_INTERNAL_TOKEN
+#   APP_BUILDER_CORE_SERVICE_TOKEN <- key APP_BUILDER_CORE_SERVICE_TOKEN (core reads the same key)
+#   APP_BUILDER_ENCRYPTION_KEY     <- key APP_BUILDER_ENCRYPTION_KEY (Fernet key for tenant GitHub PATs;
+#                                     deliberately NOT core's APP_ENCRYPTION_KEY)
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: app-builder
+
+image:
+  registry: ""
+  repository: app-builder
+  tag: ""
+  digest: ""
+  pullPolicy: ""
+
+singleReplica: true
+singleReplicaReason: "generated projects live on one ReadWriteOnce volume"
+replicaCount: 1
+strategy:
+  type: Recreate
+terminationGracePeriodSeconds: 60
+revisionHistoryLimit: 5
+containerPort: 8091
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8091
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+probes:
+  startup:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 30
+  liveness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 100m, memory: 512Mi }
+  limits: { memory: 1Gi }
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 1Gi }
+  - { name: home, mountPath: /home/appbuilder, sizeLimit: 128Mi }
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+  accessModes: [ReadWriteOnce]
+  mountPath: /data
+  existingClaim: ""
+
+shareProcessNamespace: true
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: true
+  hostKey: builder
+  extraHosts: []
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  allowFrom: []
+  allowEgressTo: [core, code-intel, keycloak]
+  # GitHub API / git for tenant repositories.
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /health
+
+env:
+  APP_BUILDER_AUTH_MODE: keycloak
+  APP_BUILDER_DATA_DIR: /data
+  APP_BUILDER_TEMPLATES_DIR: /srv/app-builder/templates
+  APP_BUILDER_EXPOSE_DOCS: "false"
+  APP_BUILDER_CORE_TIMEOUT: "120"
+  APP_BUILDER_INGRESS_MODE: path
+  APP_BUILDER_LOCAL_PREVIEW_ENABLED: "false"
+  HOME: /home/appbuilder
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

@@ -1,0 +1,228 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-briefs",
+      "method": "GET",
+      "path": "/api/briefs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].baseline",
+          "$[*].id",
+          "$[*].lastDelta",
+          "$[*].readinessSummary",
+          "$[*].rung",
+          "$[*].status",
+          "$[*].title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs",
+      "method": "POST",
+      "path": "/api/briefs",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.brief",
+          "$.note"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.status",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "get-api-briefs-id",
+      "method": "GET",
+      "path": "/api/briefs/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.brief",
+          "$.readiness",
+          "$.rung"
+        ]
+      }
+    },
+    {
+      "id": "put-api-briefs-id",
+      "method": "PUT",
+      "path": "/api/briefs/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.brief",
+          "$.note"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.id",
+          "$.status",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-apply",
+      "method": "POST",
+      "path": "/api/briefs/{id}/apply",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.jobId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-briefs-id-apply-jobId",
+      "method": "GET",
+      "path": "/api/briefs/{id}/apply/{jobId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.status",
+          "$.steps"
+        ]
+      }
+    },
+    {
+      "id": "get-api-briefs-id-ledger",
+      "method": "GET",
+      "path": "/api/briefs/{id}/ledger",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.baseline",
+          "$.experiments",
+          "$.noiseFloor",
+          "$.runs",
+          "$.state",
+          "$.thumbs",
+          "$.trustEvents"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-readiness",
+      "method": "POST",
+      "path": "/api/briefs/{id}/readiness",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.readiness",
+          "$.summary"
+        ]
+      }
+    },
+    {
+      "id": "get-api-briefs-id-rehearsals",
+      "method": "GET",
+      "path": "/api/briefs/{id}/rehearsals",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].createdAt",
+          "$[*].label",
+          "$[*].runs",
+          "$[*].sessionId",
+          "$[*].status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-rehearse",
+      "method": "POST",
+      "path": "/api/briefs/{id}/rehearse",
+      "status": 202,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.agentRef",
+          "$.label",
+          "$.personas",
+          "$.sessionIds"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-trust-rung",
+      "method": "POST",
+      "path": "/api/briefs/{id}/trust/{rung}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.effects",
+          "$.evidence",
+          "$.fromRung",
+          "$.kind",
+          "$.toRung",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-trust-proposal",
+      "method": "POST",
+      "path": "/api/briefs/{id}/trust/proposal",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.diff",
+          "$.effects",
+          "$.eligible",
+          "$.evidence",
+          "$.targetRung"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-tune",
+      "method": "POST",
+      "path": "/api/briefs/{id}/tune",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.instruction"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.baseVersion",
+          "$.diff",
+          "$.narrative",
+          "$.proposedBrief"
+        ]
+      }
+    },
+    {
+      "id": "post-api-briefs-id-versions-version-rollback",
+      "method": "POST",
+      "path": "/api/briefs/{id}/versions/{version}/rollback",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-briefs-plan",
+      "method": "POST",
+      "path": "/api/briefs/plan",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.brief",
+          "$.readiness",
+          "$.warnings"
+        ]
+      }
+    }
+  ]
+}

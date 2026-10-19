@@ -1,0 +1,22 @@
+# Grafana's own dashboard
+# auto-provisioning mechanism (mounted read-only into
+# /etc/grafana/provisioning/dashboards, see docker-compose.yml's grafana
+# service), so the starter dashboards ship in the box and appear the moment
+# Grafana boots - no manual "Import dashboard" click-through, same "don't make
+# the person run an extra manual setup step" posture the sibling
+# datasources/loki.yaml provisioning already uses.
+#
+# Grafana loads only *.json files from options.path as dashboards and ignores
+# this .yaml, so co-locating the provider config and the dashboard JSON in one
+# folder is intentional and safe.
+apiVersion: 1
+
+providers:
+  - name: vegaduta
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

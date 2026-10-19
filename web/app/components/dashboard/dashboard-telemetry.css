@@ -1,0 +1,222 @@
+/* --- System Status + Connected Platforms (real telemetry panels) -------
+ * Direct response to "nothing is loading backend dashboard, it should
+ * display all the information about the hosted environment, backend
+ * services, kafka health, Twilio and other platform health" - fed by
+ * GET /api/system/status (SystemStatusController.java) and the existing
+ * per-channel credential GETs (api.js) respectively. Every value rendered
+ * here is real or explicitly marked unavailable - see SystemStatusPanel.js/
+ * ConnectedPlatformsPanel.js's own header comments for exactly where each
+ * reading comes from. */
+.mc-status-deck {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .mc-status-deck {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Elevation ladder (docs/DESIGN-SYSTEM-CONTRACT-2026-07-29.md §1) rather than
+ * the legacy --hud-panel/--hud-line pair - this panel sits one rung above
+ * the page canvas (--surface-card / --surface-border), the same base level
+ * every other card in the console uses, so it reads as part of one system
+ * instead of a separately-tinted HUD island. */
+.mc-hud-panel {
+  position: relative;
+  padding: 1.1rem 1.3rem 1.3rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+:root[data-mode="dark"] .mc-hud-panel {
+  background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+/* Corner-bracket reticle REMOVED here too - see .mc-bento-corners above for
+ * the reasoning (nova reskin brief: no corner brackets anywhere). */
+.mc-status-corners {
+  display: none;
+}
+
+.mc-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.mc-status-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.mc-status-header-id {
+  color: var(--hud-violet);
+  opacity: 1;
+  font-weight: 700;
+}
+
+/* The overall NOMINAL/DEGRADED/CRITICAL banner and every per-row readout dot
+ * moved onto the shared contract utilities (.state-pill / .state-dot /
+ * .state-dot-live, globals.css) - see SystemStatusPanel.tsx /
+ * ConnectedPlatformsPanel.tsx. The bespoke mc-status-badge (and mc-status-dot)
+ * variant rules that used to live here (one-off color-mixes off the legacy
+ * --hud-ok/--hud-warn/--danger-text trio) are gone; one state system now,
+ * not two. */
+
+.mc-status-nosignal {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  color: var(--hud-text-dim);
+  margin: 0.5rem 0;
+}
+
+.mc-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1.2rem;
+}
+
+@media (max-width: 560px) {
+  .mc-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Row hover uses --surface-hover (elevation ladder rung above the panel
+ * itself) so scanning the grid highlights one readout at a time instead of
+ * everything sitting at one flat tone - the negative inline margin lets the
+ * highlight's rounded corners bleed to the row's full width without
+ * disturbing the grid's own gap/alignment. */
+.mc-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  margin: 0 -0.5rem;
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: var(--fs-meta);
+  transition: background-color 0.14s ease;
+}
+
+.mc-status-row:hover {
+  background: var(--surface-hover);
+  border-bottom-color: transparent;
+}
+
+.mc-status-row:last-child,
+.mc-status-row:nth-last-child(2) {
+  border-bottom: none;
+}
+
+.mc-status-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.mc-status-row-detail {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.mc-status-footnote {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  color: var(--hud-text-dim);
+}
+
+.mc-platform-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-platform-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.5rem;
+  margin: 0 -0.5rem;
+  border-radius: 0.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: var(--fs-meta);
+  transition: background-color 0.14s ease;
+}
+
+.mc-platform-item:hover {
+  background: var(--surface-hover);
+  border-bottom-color: transparent;
+}
+
+.mc-platform-item:last-child {
+  border-bottom: none;
+}
+
+.mc-platform-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.mc-platform-state {
+  margin-left: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--hud-text-dim);
+}
+
+/* Event-tail well: the scrolling audit/telemetry feed (AdminEventTail.tsx /
+ * LiveEventTail.tsx) sits one rung BELOW whatever card frames it
+ * (--surface-sunken, the elevation ladder's recessed rung -
+ * docs/DESIGN-SYSTEM-CONTRACT-2026-07-29.md §1) instead of being the exact
+ * same tone as its parent panel - the depth cue that tells you "this is a
+ * log scrolling inside the card," not just more panel. Border/background
+ * reuse the shared .elev-sunken utility (globals.css); this class only adds
+ * the radius/clip that utility doesn't own. */
+.mc-feed-well {
+  padding-top: 0.5rem;
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+
+/* /admin/audit-tail's full-height variant (AdminEventTail's `full` prop) -
+ * the well itself has to participate in the surrounding flex column
+ * (page.tsx's Card) and hand its height straight to .ax-feed-full's own
+ * scroll region, rather than adding a fixed padding-top that would eat into
+ * that height budget. */
+.mc-feed-well-full {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-top: 0;
+  border-radius: 0;
+}
+
+.mc-feed-well-full .ax-feed-full {
+  flex: 1 1 auto;
+  min-height: 0;
+}

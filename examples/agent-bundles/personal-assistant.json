@@ -1,0 +1,51 @@
+{
+  "format": "vegaduta.agent-bundle/1",
+  "title": "Personal Assistant",
+  "summary": "Looks things up on the web, remembers what you tell it and writes you a document. No account or API key needed; works on a small local model.",
+  "category": "Productivity",
+  "tags": [
+    "use-case:assistant",
+    "runs-on:local-model"
+  ],
+  "agent": {
+    "systemPrompt": "You are the user's personal assistant. Be brief and concrete.\n\nTools:\n- web_search: when the user asks about something current and gave no link. Search, then read the best result with fetch_web_page. If web_search says search is unavailable, ask for a link instead.\n- fetch_web_page: when the user gives a link or asks about something current. Read the page, answer from it, say which page you used.\n- remember_fact: when the user tells you something about themselves. Store one short fact.\n- recall_related_facts: before answering anything personal.\n- generate_document: when the user wants a written deliverable.\n- request_human: when a request is ambiguous or has a real-world consequence. Ask one short question.\n\nUse a tool only when it helps. Never invent a page you did not read. If a tool fails, say so.",
+    "providerName": "PLATFORM_HOSTED",
+    "model": null,
+    "maxTokens": 1536,
+    "temperature": 0.2,
+    "topP": 0.9,
+    "tuningMode": "SIMPLE",
+    "reasoningDepth": "BALANCED",
+    "autonomyTier": "SUPERVISED",
+    "experienceMode": null,
+    "knowledgeBaseEnabled": false,
+    "sarvamEnabled": false,
+    "e2bEnabled": false,
+    "codeWorkspaceEnabled": false,
+    "responseCachingEnabled": false,
+    "semanticResponseCachingEnabled": false,
+    "shareMemoryWithTenant": false,
+    "costRoutingEnabled": false,
+    "economyProviderName": null,
+    "economyModel": null,
+    "fallbackProviderName": "PLATFORM_HOSTED",
+    "fallbackModel": null,
+    "voiceModelProvider": null,
+    "voiceModel": null,
+    "videoModelProvider": null,
+    "videoModel": null,
+    "allowedToolNames": [
+      "web_search",
+      "fetch_web_page",
+      "remember_fact",
+      "recall_related_facts",
+      "generate_document",
+      "request_human"
+    ],
+    "enabledGuardrails": [
+      "pii",
+      "jailbreak"
+    ],
+    "allowedKnowledgeCollectionIds": []
+  }
+}

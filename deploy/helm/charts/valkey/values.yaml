@@ -1,0 +1,88 @@
+# valkey - single-node Valkey StatefulSet with AOF persistence and a generated password.
+# Service "<release>-valkey":6379, Secret "<release>-valkey" (key `password`).
+# For HA use a managed Redis-compatible service or a Valkey operator and set global.valkey.host.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: cache
+
+image:
+  registry: docker.io
+  repository: valkey/valkey
+  tag: "8.1.10-alpine"
+  digest: ""
+  pullPolicy: ""
+
+containerPort: 6379
+service:
+  enabled: true
+  type: ClusterIP
+  port: 6379
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# -- Memory ceiling for the dataset. Without it `maxmemory-policy` never evicts and the
+# pod is OOM-killed at resources.limits.memory instead. Keep ~20% below that limit for
+# fragmentation, client buffers and the AOF rewrite.
+maxmemory: 400mb
+# -- Extra valkey.conf lines.
+extraConfig: |
+  maxmemory-policy allkeys-lru
+
+persistence:
+  enabled: true
+  size: 2Gi
+  storageClass: ""
+
+resources:
+  requests: { cpu: 50m, memory: 128Mi }
+  limits: { memory: 512Mi }
+
+# The valkey image's `valkey` user (uid/gid 999).
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 64Mi }
+
+probes:
+  startup:
+    tcpSocket: { port: http }
+    periodSeconds: 5
+    failureThreshold: 30
+  liveness:
+    tcpSocket: { port: http }
+    periodSeconds: 15
+    failureThreshold: 5
+  readiness:
+    exec:
+      command: ["sh", "-c", "valkey-cli -h 127.0.0.1 ping | grep -q PONG"]
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+pdb:
+  enabled: true
+
+networkPolicy:
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, core-migrate]
+  allowEgressTo: []
+  allowExternalEgress: false
+  extraIngress: []
+  extraEgress: []
+
+terminationGracePeriodSeconds: 30
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

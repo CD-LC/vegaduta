@@ -1,0 +1,230 @@
+# core - VegaDuta API server (core/Dockerfile, MODULE=app).
+#
+# Everything the core family shares (database, Valkey, object storage, OIDC,
+# Temporal, the APP_ENCRYPTION_KEY Secret, which optional components exist)
+# lives in `global` - see the umbrella chart (charts/vegaduta/values.yaml) for
+# the documented block. This file only holds settings specific to the API pods.
+
+global: {}
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full resource name (breaks sibling lookups inside the umbrella; avoid).
+fullnameOverride: ""
+# -- app.kubernetes.io/component label value.
+component: api
+
+image:
+  # -- Registry; defaults to global.imageRegistry (ghcr.io/cd-lc).
+  registry: ""
+  # -- Repository of the API image (core/Dockerfile, MODULE=app).
+  repository: core
+  # -- Tag; defaults to global.imageTag, then the chart appVersion. Must match core-jobs/core-worker.
+  tag: ""
+  # -- Pin by digest (sha256:...); wins over the tag.
+  digest: ""
+  pullPolicy: ""
+
+# -- Optional per-chart override of the app Secret. Must equal global.core.appSecret.existingSecret when both are set (render fails otherwise).
+appSecret:
+  existingSecret: ""
+
+# -- API replicas. Must stay 1 until every replicaReadiness flag is true (render fails otherwise).
+replicaCount: 1
+# -- Readiness flags for running more than one API replica (replicaCount > 1 or hpa.enabled).
+# Every flag must be true then, or the chart refuses to render. Each store flag switches the matching
+# in-memory store to Valkey; the chart also sets APP_REPLICA_MODE=multi so core's boot-time
+# ReplicaModeSafetyCheck reports anything still unsafe. See docs/architecture/ADR-0014-horizontal-scaling.md.
+replicaReadiness:
+  # Off by default: each of these four was a separate opt-in before the rest were added.
+  a2aTaskStoreRedis: false
+  abuseThrottleRedis: false
+  mcpRegistryRedis: false
+  a2aSigningKeysPinned: false   # APP_A2A_SIGNING_* supplied via the app Secret (you must do this one)
+  # On by default, and applied only when multi-replica. Setting one to false with 2+ replicas makes the
+  # render fail: every one of these is per-pod state that breaks a request landing on another replica.
+  sandboxFilesRedis: true       # data-analysis sandbox uploads
+  e2bQuotaRedis: true           # platform-paid E2B daily run quota
+  resumableStreamsRedis: true   # resume of a chat stream on a different replica
+  guardrailSessionCallsRedis: true  # REQUIRE_TOOL_BEFORE procedure rules
+  demoStudioApprovalRedis: true     # /try Agent Studio approvals
+  effectJournalRedis: true          # idempotency of write/send tools
+  qualityBootSweepStale: true       # a booting replica no longer fails runs another replica is executing
+  mcpOAuthStoreRedis: true          # MCP OAuth state set, token cache and refresh single-flight
+# -- Turn on resumable chat streams (APP_CHAT_RESUMABLE_STREAMS_ENABLED): a stream that drops, or a page
+# that reloads mid-turn, can resume and the API returns X-Turn-Id. Off by default in core. The Valkey
+# store (replicaReadiness.resumableStreamsRedis) has no effect while this is false.
+resumableStreamsEnabled: false
+# -- Make core's boot-time ReplicaModeSafetyCheck refuse to start on a fatal finding (multi-replica only).
+replicaStrict: false
+# -- Zero-downtime rollout. maxUnavailable must stay 0 (guarded) unless allowNonZeroUnavailable.
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+allowNonZeroUnavailable: false
+terminationGracePeriodSeconds: 90
+revisionHistoryLimit: 5
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+  # -- Optional topology-aware routing (Kubernetes 1.31+): PreferClose keeps calls in the caller's zone.
+  # See deploy/helm/examples/values-low-latency.yaml.
+  trafficDistribution: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  # -- e.g. cloud workload-identity annotations.
+  annotations: {}
+
+# -- JVM options. MaxRAMPercentage is relative to the memory limit.
+javaToolOptions: "-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
+# -- Hikari overrides (default: 12 with core-jobs deployed, else 15; see docs on the DB connection budget).
+hikari: {}
+
+# Boot takes ~60-140 s (24 Maven modules, Flyway). The startup probe allows 5 min;
+# liveness is the light /liveness group so a database blip does not restart the JVM.
+probes:
+  startup:
+    httpGet: { path: /actuator/health/readiness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  # Liveness only has to catch a JVM that is really stuck, so it tolerates load: a busy pod (CPU saturation, long GC)
+  # answers late, and killing it makes the overload worse. 10 s timeout x 12 failures at a 10 s period = about 2
+  # minutes of continuous silence before a restart. Readiness stays quick so a busy pod leaves rotation first.
+  # deploy/helm/test-guards.sh fails if these regress.
+  liveness:
+    httpGet: { path: /actuator/health/liveness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 12
+  readiness:
+    httpGet: { path: /actuator/health/readiness, port: http }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+lifecycle:
+  preStop:
+    exec: { command: ["sleep", "10"] }
+
+resources:
+  requests: { cpu: 500m, memory: 1536Mi }
+  limits: { memory: 4Gi }
+
+# UID/GID 999 = `agentic` in core/Dockerfile (numeric so runAsNonRoot is verifiable).
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+# Read-only root FS; the writable paths the image needs are emptyDirs below.
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 1Gi }
+  - { name: mcp-data, mountPath: /app/mcp-data, sizeLimit: 1Gi }
+  - { name: npm-cache, mountPath: /home/agentic/.npm, sizeLimit: 1Gi }
+  - { name: uv-cache, mountPath: /home/agentic/.cache/uv, sizeLimit: 1Gi }
+  - { name: vegaduta-home, mountPath: /home/agentic/.vegaduta, sizeLimit: 1Gi }
+
+hpa:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 75
+  # -- Extra autoscaling/v2 metrics next to CPU. The HPA scales to the highest replica count any metric asks
+  # for. CPU alone is a poor signal for an API that mostly waits on model tokens: see
+  # deploy/helm/examples/values-autoscaling.yaml for "concurrent requests per pod".
+  metrics: []
+  # -- Scale in slowly: removing a pod cuts the chat streams still open on it once the drain window
+  # (app.shutdown.drain-seconds) passes. One pod per five minutes, after ten quiet minutes.
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - { type: Pods, value: 1, periodSeconds: 300 }
+# -- KEDA instead of the HPA (needs KEDA installed; KEDA creates the HPA, so hpa.enabled must stay false).
+# Counts as "more than one replica" for the replicaReadiness gate.
+keda:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 4
+  pollingInterval: 15
+  # -- KEDA triggers, passed through. Required when enabled.
+  triggers: []
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - { type: Pods, value: 1, periodSeconds: 300 }
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+# -- Public API host: <global.hosts.api>.<global.domain>. SSE chat streams need long timeouts and no buffering.
+ingress:
+  enabled: true
+  hostKey: api
+  extraHosts: []
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+  gatewayTimeouts:
+    request: 3600s
+
+serviceMonitor:
+  path: /actuator/prometheus
+  interval: 30s
+
+# -- NetworkPolicy (enabled follows global.networkPolicy.enabled unless set here).
+networkPolicy:
+  allowFrom: [web, web-admin, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, sidecar, voice-agent, app-builder, rl-trainer, code-intel]
+  allowEgressTo: [postgres, valkey, keycloak, seaweedfs, sidecar, code-intel, tool-sandbox, mcp-stdio-runner, rl-trainer]
+  # LLM providers, OAuth, payment gateways, remote MCP servers.
+  allowExternalEgress: true
+  externalEgressPorts: [443]
+  # -- Also allow the ports of every configured integration (external DB/Valkey/S3, OTLP,
+  # Kafka, Temporal, LiveKit, OIDC internal URL) plus global.networkPolicy.coreEgress.
+  integrationEgress: true
+  extraIngress: []
+  extraEgress: []
+
+# -- Schema-migration hook Job (post-install, pre-upgrade). API pods then run with APP_TENANCY_MIGRATE_ON_BOOT=false.
+migrate:
+  enabled: true
+  backoffLimit: 6
+  activeDeadlineSeconds: 1800
+  ttlSecondsAfterFinished: 3600
+  waitForDatabaseAttempts: 120
+
+tests:
+  enabled: true
+  path: /actuator/health/readiness
+
+# -- Plain env for the API only (wins over computed values; secrets are refused).
+env: {}
+# -- Extra secretKeyRef env: [{name, secretName, key, optional}].
+secretEnv: []
+# -- Raw k8s env entries.
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []
+
+# -- Argo CD sync wave of the Deployment: after the migrate Job (wave 0).
+argocd:
+  syncWave: "1"

@@ -1,0 +1,19 @@
+# Prometheus metrics pipeline - Grafana's own datasource auto-provisioning
+# mechanism (mounted read-only into /etc/grafana/provisioning/datasources, see
+# docker-compose.yml's grafana service), so Prometheus is already wired up and
+# queryable the moment Grafana boots - no manual "Add data source" click-
+# through, same posture the sibling loki.yaml here already uses. Loki stays the
+# default datasource (isDefault below is false); this just adds Prometheus
+# alongside it so the same Grafana instance serves both logs (Loki) and metrics
+# (Prometheus). The fixed uid "prometheus" is a stable handle provisioned
+# dashboards can reference by, independent of Grafana's own generated ids.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: false
+    editable: true

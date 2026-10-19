@@ -1,0 +1,4 @@
+rl-trainer: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) - internal only.
+{{- if not .Values.llmSecret.existingSecret }}
+  No llmSecret.existingSecret: LLM endpoints answer 503 (stub-only).
+{{- end }}

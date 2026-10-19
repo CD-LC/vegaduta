@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/outbound/audit-event.schema.json",
+  "title": "Audit log entry (outbound)",
+  "description": "Source: core/audit/src/main/java/com/agenticai/core/audit/dto/AuditLogEntryResponse.java, read directly (2026-07-19) - a Java record, fields listed in declaration order. AuditOutcome enum values inlined from core/audit/AuditOutcome.java (read directly, same date). This is what GET /api/audit/** actually returns (AuditLogEntryResponse.from(AuditLogEntry)), not the JPA entity behind it.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "actorId": { "type": "string" },
+    "actionType": { "type": "string" },
+    "targetType": { "type": "string" },
+    "targetId": { "type": "string" },
+    "outcome": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILURE", "PENDING_APPROVAL", "AUTO_APPROVED", "APPROVED", "REJECTED", "DENIED", "EXPIRED", "REPLAYED", "BUDGET_EXCEEDED", "WARNING"],
+      "description": "AuditOutcome is deliberately more granular than success/failure - PENDING_APPROVAL/AUTO_APPROVED/APPROVED/REJECTED are themselves meaningful compliance states for anything gated by HumanApprovalGateService, per that enum's own javadoc. DENIED/EXPIRED/REPLAYED/BUDGET_EXCEEDED/WARNING are the Agent SDK's audit vocabulary, added to core's enum (2026-10-16) so SDK and core records share one schema; core/app AuditOutcomeAlignmentTest pins this list to core's enum and both Agent SDKs."
+    },
+    "detail": {
+      "type": ["string", "null"],
+      "description": "Record field has no explicit nullability annotation checked here - schema treats it as nullable since Jackson will serialize a null detail as JSON null, not omit the key, for a record component."
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "actorId", "actionType", "targetType", "targetId", "outcome", "createdAt"],
+  "additionalProperties": false
+}

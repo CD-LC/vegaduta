@@ -1,0 +1,12 @@
+[
+  {
+    "role" : "USER",
+    "content" : "What is my balance?",
+    "timestamp" : "2026-09-30T10:15:30.123456789Z"
+  },
+  {
+    "role" : "ASSISTANT",
+    "content" : "Your balance is ₹1,234.50 \"today\".\nBye",
+    "timestamp" : "2026-09-30T10:15:30Z"
+  }
+]

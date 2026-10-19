@@ -1,0 +1,161 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-tutor-agent",
+      "method": "POST",
+      "path": "/api/tutor/agent",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tutor-plans",
+      "method": "GET",
+      "path": "/api/tutor/plans",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].completedLessons",
+          "$[*].createdAt",
+          "$[*].dueReviews",
+          "$[*].goal",
+          "$[*].id",
+          "$[*].language",
+          "$[*].level",
+          "$[*].status",
+          "$[*].topic",
+          "$[*].totalLessons",
+          "$[*].tutorAgentId",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tutor-plans-id",
+      "method": "DELETE",
+      "path": "/api/tutor/plans/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tutor-plans-id",
+      "method": "GET",
+      "path": "/api/tutor/plans/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.completedLessons",
+          "$.createdAt",
+          "$.dueReviews",
+          "$.goal",
+          "$.id",
+          "$.language",
+          "$.level",
+          "$.modules",
+          "$.status",
+          "$.topic",
+          "$.totalLessons",
+          "$.tutorAgentId",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tutor-plans-id-lessons-lessonId-answers",
+      "method": "POST",
+      "path": "/api/tutor/plans/{id}/lessons/{lessonId}/answers",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.questionId",
+          "$.selectedIndex"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tutor-plans-id-lessons-lessonId-complete",
+      "method": "POST",
+      "path": "/api/tutor/plans/{id}/lessons/{lessonId}/complete",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.completedLessons",
+          "$.createdAt",
+          "$.dueReviews",
+          "$.goal",
+          "$.id",
+          "$.language",
+          "$.level",
+          "$.modules",
+          "$.status",
+          "$.topic",
+          "$.totalLessons",
+          "$.tutorAgentId",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tutor-plans-id-lessons-lessonId-generate",
+      "method": "POST",
+      "path": "/api/tutor/plans/{id}/lessons/{lessonId}/generate",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tutor-plans-generate",
+      "method": "POST",
+      "path": "/api/tutor/plans/generate",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tutor-reviews-planId-cardId-answer",
+      "method": "POST",
+      "path": "/api/tutor/reviews/{planId}/{cardId}/answer",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.selectedIndex"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tutor-reviews-due",
+      "method": "GET",
+      "path": "/api/tutor/reviews/due",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.cards",
+          "$.sessionCap",
+          "$.totalDue"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tutor-status",
+      "method": "GET",
+      "path": "/api/tutor/status",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

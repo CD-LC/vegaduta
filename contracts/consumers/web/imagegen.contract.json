@@ -1,0 +1,24 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-imagegen-images",
+      "method": "GET",
+      "path": "/api/imagegen/images",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-imagegen-images-id",
+      "method": "GET",
+      "path": "/api/imagegen/images/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Security Architecture — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="security" data-page="security-architecture.html" data-doc="VD-SEC-001" data-status="verified" data-updated="2026-10-10" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="security-architecture.html">Security &amp; Compliance</a><span class="sep">/</span>Security Architecture</div>
+<div class="doc-meta" data-auto></div>
+<h1>Security Architecture</h1>
+
+<dl class="props">
+  <dt>Scope</dt><dd>How a request is authenticated, authorized, tenant-scoped and constrained in core; how untrusted code and anonymous callers are contained</dd>
+  <dt>Verified against</dt><dd>Source files read on 2026-09-26 (listed under Evidence). "Verified" here means the <em>code</em> does this; it does not mean a given prod deploy is running that code.</dd>
+  <dt>Related</dt><dd><a href="../architecture/identity-access.html">Identity &amp; Access</a>, <a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a>, <a href="../decisions/adr-0002-schema-per-tenant.html">ADR-0002</a>, <a href="secrets-management.html">Secrets</a>, <a href="threat-model.html">Threat Model</a></dd>
+</dl>
+
+<div class="callout callout-note">
+  <div class="callout-title">Read this with the Threat Model</div>
+  This page describes controls that exist in code. Gaps and open items are
+  deliberately kept on <a href="threat-model.html">Threat Model &amp; Known Exposures</a>,
+  and the certification stance is on <a href="compliance-posture.html">Compliance Posture</a>.
+</div>
+
+<h2>1. Layers at a glance</h2>
+<pre class="mermaid">
+flowchart LR
+  U[Browser / API client] --> CF[Optional CDN / WAF]
+  CF --> ING[Caddy or Kubernetes Ingress]
+  ING --> F1[ActuatorEdgeGuardFilter]
+  F1 --> F2[Bearer JWT validation: issuer set + azp]
+  F2 --> F3[TenantContextFilter: tenant_id claim to TenantContext]
+  F3 --> F4[Route matchers: PERM_* authorities]
+  F4 --> SVC[Services: guardrails, approvals, tenant schema]
+  SVC --> DB[(Postgres: schema per tenant)]
+  ANON[Anonymous: demo, share links, webhooks, device tokens] --> ING
+  SVC --> SBX[Sandboxes: tool-sandbox, mcp-stdio-runner]
+</pre>
+<p>Any CDN or WAF in front of the deployment is outside this repository; the Compose Caddyfile (<code>deploy/caddy/Caddyfile</code>) sets HSTS, <code>nosniff</code>, a referrer policy and a 32 MB body limit, and 404s the Keycloak admin console and master realm on <code>auth.</code>. What core itself enforces is described below. Edge configuration status is tracked as an open item on the <a href="threat-model.html">Threat Model</a>.</p>
+
+<h2>2. Authentication</h2>
+<ul>
+  <li><strong>OAuth2 resource server, fail-closed default.</strong> <code>SecurityConfig</code> is registered for <code>@Profile("!insecure")</code>. Without the <code>security</code> profile the issuer/JWKS placeholders fail to resolve and startup aborts rather than serving an open API; the no-auth chain (<code>NoSecurityConfig</code>) exists only under an explicit <code>insecure</code> profile, documented as dev/CI only.</li>
+  <li><strong>Issuer set, not a single issuer.</strong> The JWT decoder is built from a JWKS URI, with accepted issuers = primary <code>issuer-uri</code> plus the comma-separated <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>. Full default validation (timestamps) is kept. See <a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a>.</li>
+  <li><strong>Authorized-party (<code>azp</code>) allowlist.</strong> Tokens must be issued to a first-party client (<code>agentic-ai-web</code>, <code>agentic-ai-platform-admin</code>, <code>agentic-ai-mobile</code>, <code>agentic-ai-app</code>, <code>agentic-ai-ide</code>, <code>agentic-ai-core</code>); a client that serves open self-registration for another product should be left out. Configurable via <code>APP_KEYCLOAK_ALLOWED_AZP</code>; setting it empty disables the check (documented emergency lever). A token with no <code>azp</code> is passed to the other validators.</li>
+  <li><strong>Stateless.</strong> Session creation policy is STATELESS; CSRF is disabled because auth is bearer-token only. CORS is delegated to one shared <code>CorsConfigurationSource</code>.</li>
+  <li><strong>Response headers.</strong> Core sets CSP <code>default-src 'none'; frame-ancestors 'none'</code>, <code>Referrer-Policy</code> and <code>Permissions-Policy</code>; Spring's defaults add X-Content-Type-Options, X-Frame-Options and HSTS on HTTPS. These apply to the core API only (see <a href="threat-model.html">Threat Model</a> for the front-end origins).</li>
+</ul>
+
+<h2>3. Tenant isolation</h2>
+<ul>
+  <li><strong>Schema-per-tenant.</strong> <code>TenantContextFilter</code> runs after bearer validation and copies the <code>tenant_id</code> claim into <code>TenantContext</code> for the request; Hibernate resolves the Postgres schema from it (<code>TenantSchemaResolver</code>). Rationale: <a href="../decisions/adr-0002-schema-per-tenant.html">ADR-0002</a>; data layout: <a href="../architecture/data-architecture.html">Data Architecture</a>.</li>
+  <li><strong>Claim-less tokens are rejected</strong> with a 403 (after a 2026-07-15 incident that produced raw 500s); <code>platform-admin</code> tokens are tenant-less by design and exempt; social-login users without a tenant may reach onboarding only.</li>
+  <li><strong>Tenant status gate.</strong> <code>TenantStatusGuard</code> refuses tokens for tenants that are not usable (e.g. a schema dropped by a failed signup).</li>
+  <li><strong>Schema-name sanitization.</strong> <code>SchemaNameSanitizer</code> is the single place a raw string becomes a Postgres identifier (lowercase letters, digits, underscore; no leading digit). An internal SAST review found no bypass where checked.</li>
+  <li><strong>Missing-context fallback.</strong> If no <code>TenantContext</code> is set, the resolver falls back to the <code>public</code> schema unless <code>app.tenancy.fail-on-missing-context=true</code>. Default is <code>false</code>; the code comment says it stays false until the <code>authenticated_no_context</code> counter proves empty. This is an <strong>open item</strong> on the <a href="threat-model.html">Threat Model</a>.</li>
+  <li>PgBouncer must remain session-pooling for the search_path mechanism to be safe (unverified here; recorded in project notes — see Threat Model).</li>
+</ul>
+
+<h2>4. Authorization</h2>
+<p>Route-level authorization is a long ordered <code>authorizeHttpRequests</code> block in <code>SecurityConfig</code>. Roles from Keycloak are converted to authorities (<code>KeycloakRoleConverter</code>) and granular permissions to <code>PERM_*</code> authorities (<code>GranularPermissionConverter</code>, <code>PermissionAuthoritySource</code>); anything not matched falls to <code>anyRequest().authenticated()</code>.</p>
+<table>
+  <thead><tr><th>Surface</th><th>Required authority (as coded)</th></tr></thead>
+  <tbody>
+    <tr><td>User admin, <code>/api/admin/**</code> default</td><td><code>PERM_MANAGE_USERS</code> (templates: <code>PERM_MANAGE_TEMPLATES</code>; audit/issues: <code>PERM_VIEW_AUDIT_LOG</code>; usage: <code>PERM_VIEW_USAGE</code>)</td></tr>
+    <tr><td>Guardrail rules, procedures</td><td><code>PERM_MANAGE_GUARDRAILS</code></td></tr>
+    <tr><td>Approval policy writes</td><td><code>PERM_MANAGE_APPROVALS</code></td></tr>
+    <tr><td>MCP registry, provider keys, webhooks, credentials for SDLC/Sarvam/JEV/capabilities, knowledge connectors</td><td><code>PERM_MANAGE_INTEGRATIONS</code></td></tr>
+    <tr><td>Channel credentials, pairing, routing</td><td><code>PERM_MANAGE_CHANNELS</code></td></tr>
+    <tr><td>Code tools / OpenAPI tools</td><td><code>PERM_MANAGE_TOOLS</code> (generate/validate: tenant-admin or agent-builder)</td></tr>
+    <tr><td>Code-intel, sandbox run-code</td><td><code>ROLE_tenant-admin</code> or <code>ROLE_agent-builder</code></td></tr>
+    <tr><td>Billing, tenant settings, SSO</td><td><code>PERM_MANAGE_BILLING</code>, <code>PERM_MANAGE_TENANT_SETTINGS</code></td></tr>
+    <tr><td>Platform-wide manifests</td><td><code>ROLE_platform-admin</code></td></tr>
+  </tbody>
+</table>
+<p>Denied requests by an authenticated caller produce the standard 403 <em>and</em> an <code>authz.denied</code> audit entry through <code>AuditingAccessDeniedHandler</code> and the <code>AccessDeniedEventListener</code> SPI.</p>
+
+<h3>4.1 Conversation ownership (session memory)</h3>
+<p>A chat session id is chosen by the client and is not a secret: it appears in tool-call logs, browser history and support tickets. Session memory (<code>SessionMemoryService</code>, Redis) therefore never stores a conversation under that id. Every read and write goes through a <strong>caller-scoped id</strong>:</p>
+<pre><code>c1:sha256( tenantId , agentId , subject , clientSessionId )</code></pre>
+<p>where <code>subject</code> is the authenticated user's JWT <code>sub</code> (for a delegation token, the delegating user; for a share link, the visitor token; for a channel, the external id) and <code>agentId</code> is the agent the caller addressed. Two callers share a history only when all four parts match, so the same client id used by another user, another tenant or against another agent lands in a disjoint list. The first append also records an <strong>owner record</strong> (<code>tenant + subject</code>, <code>SETNX</code>, same TTL as the history) under that scoped id.</p>
+<p>Endpoints that read a conversation back by the id the client knows must derive the scoped id for the <em>current</em> caller (<code>CallerSessionIds.scopedForCurrentCaller</code>, <code>AgentChatSessionController#scopedMemorySessionId</code>) and then check <code>SessionMemoryService.isOwnedBy</code> on that id, in addition to the agent-level <code>RUNNER</code> permission:</p>
+<table>
+  <thead><tr><th>Endpoint</th><th>Check (as coded)</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /api/agents/{agentId}/sessions/{sessionId}/transcript</code></td><td><code>RUNNER</code> on the agent + owner of the scoped session; otherwise 404 (same as a session that does not exist)</td></tr>
+    <tr><td><code>GET /api/agents/{agentId}/sessions/{sessionId}/export</code></td><td>As above, plus <code>CHAT_EXPORT_ENABLED</code>; one audit entry per export, counts only</td></tr>
+    <tr><td><code>POST /api/agents/{agentId}/chat/sessions/{sessionId}/rewind</code></td><td><code>RUNNER</code>; operates on the caller's own scoped list, so it can only truncate the caller's conversation</td></tr>
+    <tr><td><code>GET .../sessions/{sessionId}/messages/{messageId}/siblings</code>, <code>PUT .../messages/active-leaf</code>, <code>POST .../messages/{messageId}/edit|regenerate</code> (chat branching)</td><td><code>RUNNER</code> + <code>APP_CHAT_BRANCHING_ENABLED</code>; the live transcript read/written is the caller's own scoped list. The branch tree (Postgres, keyed by the raw client id) is bound to the first subject whose own turns it records or who changes its active branch; any other caller gets 404</td></tr>
+    <tr><td><code>GET /api/agents/{agentId}/chat-branching/capabilities</code></td><td><code>RUNNER</code> + flag; reports whether branching is on, no session data</td></tr>
+  </tbody>
+</table>
+<p>A session with no owner record (expired, started before owner records existed, Redis unavailable) is not readable by anyone: the check fails closed. History and owner record expire together (<code>app.chat.session-ttl-hours</code>, 24h by default). Looking a session up by the raw client id is a bug, not a fallback; it finds nothing (regression fixed 2026-10-10, see CHANGELOG).</p>
+
+<h2>5. Deliberately unauthenticated surfaces</h2>
+<p>These are <code>permitAll()</code> at the Spring layer because the caller cannot hold a Keycloak token; each is expected to authenticate its own credential inside the controller. Anything new under these prefixes is anonymous by default.</p>
+<table>
+  <thead><tr><th>Surface</th><th>Own credential / control</th></tr></thead>
+  <tbody>
+    <tr><td><code>/webhook/**</code>, <code>/api/billing/webhook/**</code></td><td>Provider signature (Meta, Slack verified constant-time in an internal SAST review; HMAC for the optional Razorpay gateway); Slack adds a 5-minute replay window</td></tr>
+    <tr><td><code>/webhook/alerts/**</code>, <code>/mcp/**</code>, <code>/api/dev/**</code></td><td>Dedicated filter chains without bearer processing: shared secret (alerts) or <code>vmcp_</code> grant keys (<code>McpApiKeyAuthFilter</code>)</td></tr>
+    <tr><td><code>/api/demo/**</code></td><td>Opaque 256-bit <code>X-Demo-Token</code>, hashed lookup in <code>control_plane.demo_session</code>; per-IP creation limit (<code>DemoSessionRateLimiter</code>), per-IP live-sandbox cap, per-sandbox message cap, FREE-tier limits</td></tr>
+    <tr><td><code>/api/share/agents/**</code>, <code>/api/share/workflows/**</code></td><td>Unguessable share id; rate-limited, revocable, metered to the owning tenant</td></tr>
+    <tr><td><code>/api/signup</code></td><td><code>SignupRateLimiter</code>; email verification required by Keycloak</td></tr>
+    <tr><td><code>/api/devices/claim|poll|screen-state|notifications|app-usage|sms</code></td><td>Pairing code (claim; per-IP and per-code limiter added after an internal SAST finding) or <code>X-Device-Token</code></td></tr>
+    <tr><td><code>/oauth/{google,x,atlassian}/callback</code></td><td>Signed <code>state</code> carries tenant identity</td></tr>
+    <tr><td><code>/api/public/*</code>, template gallery, plugin catalog, commerce feed, A2A agent card, <code>/api/edge/*</code> reads</td><td>Read-mostly public catalog data; commerce checkout is server-priced and capped per tenant per day</td></tr>
+    <tr><td><code>/scim/v2/**</code>, <code>/api/tenant/comp-grant</code></td><td>Marked <code>permitAll()</code> in the matcher list; I did not trace the controller-level check for these two (see limits below)</td></tr>
+    <tr><td><code>/actuator/health/**</code>, <code>/actuator/info</code>, <code>/actuator/prometheus</code></td><td><code>ActuatorEdgeGuardFilter</code> (below)</td></tr>
+  </tbody>
+</table>
+<p><strong>Actuator edge guard.</strong> Requests to non-public actuator paths that carry a proxy forwarding header (which any request via a CDN, Ingress or Caddy has, and an in-network scrape lacks) get a 404 unless they present an optional scrape token. It exists so that keeping metrics private does not depend on an edge rule.</p>
+
+<h2>6. Agent action controls</h2>
+<ul>
+  <li><strong>Tool-output guardrails.</strong> <code>GuardrailService</code> is the seam every tool output passes through before re-entering the model (<code>GuardedToolCallback</code>). Default implementation is semantic (<code>app.guardrails.implementation</code>); a regex <code>pattern</code> variant is the opt-out. The source itself calls the pattern version "deliberately modest" and disclaims solving prompt injection or DLP.</li>
+  <li><strong>Content guardrails.</strong> PII, jailbreak, policy, profanity, toxicity and tenant custom-rule guardrails (<code>core/guardrails/.../impl</code>), managed through <code>/api/guardrails/rules</code> behind <code>PERM_MANAGE_GUARDRAILS</code>.</li>
+  <li><strong>Approval gating.</strong> <code>ApprovalGateMode</code> = <code>POLICY_DEFAULT | ALWAYS_GATE | NEVER_GATE</code>, mapped from an agent's autonomy tier. See <a href="../functional/governance-guardrails.html">Governance &amp; Guardrails</a>.</li>
+</ul>
+
+<h2>7. Untrusted-code and outbound-call containment</h2>
+<table>
+  <thead><tr><th>Control</th><th>What it does</th><th>Status recorded in repo</th></tr></thead>
+  <tbody>
+    <tr><td><code>McpStdioCommandGuard</code></td><td>Launcher allowlist; rejects inline-eval flags (<code>-e</code>, <code>--eval</code>, <code>-c</code>, ...) on allowed interpreters</td><td>Pentest C1 fix shipped 2026-07-25; running arbitrary <em>published</em> packages via <code>npx</code>/<code>uvx</code> remains by design</td></tr>
+    <tr><td><code>McpRemoteUrlGuard</code></td><td>SSRF filter: IP/denylist, IPv6-mapped decode, trailing-dot normalization, <code>host.docker.internal</code>; <code>checkResolved</code> re-checks resolved addresses at connect</td><td>Class documents a DNS-rebinding check (<code>checkResolved</code>); an internal pentest listed DNS rebinding as open at its time. Pin/egress-policy completeness not re-verified</td></tr>
+    <tr><td><code>mcp-stdio-runner</code></td><td>Separate container: isolated network, no secrets, non-root, <code>cap_drop: ALL</code>, custom seccomp profile, resource limits, shared-secret fail-closed relay</td><td>Design doc §9 verified 2026-09-23; off by default — enable with the Compose <code>tools</code>/<code>sandbox</code> profiles or Helm <code>global.components.mcpStdioRunner</code></td></tr>
+    <tr><td>Registration review gate</td><td>New MCP registrations pass a readiness/acknowledge gate; registration endpoints require <code>PERM_MANAGE_INTEGRATIONS</code></td><td>Pentest M8 fixed</td></tr>
+    <tr><td><code>SafePublicUrlFetcher</code>, <code>OpenApiUrlGuard</code>, <code>ReservedAddressRanges</code></td><td>Outbound-fetch guards for demo/OpenAPI/web-page tools</td><td>Present in code; not audited line-by-line here</td></tr>
+  </tbody>
+</table>
+<p>Design rationale for sandboxing: see <a href="../decisions/adr-0009-untrusted-code-sandboxing.html">ADR-0009</a> and <code>docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md</code>.</p>
+
+<h2>8. Operator and automation identity</h2>
+<p>A deployment can be taken down by an operator, a CI job or an automated agent that holds a human admin identity and issues a power-cycle or delete. Recommended mitigations: a procedural rule that no one resets, stops or deletes a production host or database without an explicit human decision, and a separate identity for automation with no destructive permissions. The repository does not enforce either; they are deployment decisions.</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Limits of this review</div>
+  Not traced: the controller-level checks behind <code>/scim/v2/**</code> and <code>/api/tenant/comp-grant</code>; a live Keycloak realm (which can drift from the checked-in realm JSON); CDN/WAF settings; and whether each control above is in a given running image.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/security/src/main/java/com/agenticai/core/security/SecurityConfig.java</code> — decoder, issuers, <code>azp</code>, header policy, dedicated chains, matcher list, demo/share/device comments.</li>
+  <li><code>core/security/.../TenantContextFilter.java</code>, <code>TenantStatusGuard.java</code>, <code>ActuatorEdgeGuardFilter.java</code>, <code>AuditingAccessDeniedHandler.java</code>, <code>NoSecurityConfig.java</code>.</li>
+  <li><code>core/tenancy/.../TenantSchemaResolver.java</code> (<code>fail-on-missing-context</code>), <code>SchemaNameSanitizer.java</code>, <code>demo/DemoSessionRateLimiter.java</code>.</li>
+  <li><code>core/agents/.../memory/SessionMemoryService.java</code> (<code>scopedSessionId</code>, <code>bindOwner</code>, <code>isOwnedBy</code>), <code>memory/CallerSessionIds.java</code>, <code>chatport/ChatTranscriptService.java</code>, <code>chatport/ChatExportService.java</code>, <code>branching/ChatBranchService.java</code>; tests <code>ChatTranscriptServiceTest</code>, <code>ChatExportServiceTest</code>, <code>ChatBranchServiceTest</code> run the real key derivation.</li>
+  <li><code>core/guardrails/.../GuardrailService.java</code>, <code>ApprovalGateMode.java</code>, <code>impl/*Guardrail.java</code>.</li>
+  <li><code>core/mcp/.../McpStdioCommandGuard.java</code>, <code>McpRemoteUrlGuard.java</code>; <code>docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md</code> (§8, §9).</li>
+  <li>Internal security reviews (MCP pentest, core SAST, live DAST of JWT forgery rejection and CORS; July 2026, not published).</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

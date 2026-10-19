@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>elevenlabs</artifactId>
+  <name>elevenlabs</name>
+  <description>
+    ElevenLabs voice cloning integration - Master-Roadmap-2026.md item #4.
+    New sibling module, same shape as "sarvam": a tenant BYOK ElevenLabs API
+    key (own credential table, not reused from LlmProviderCredential - unlike
+    imagegen's OpenAI reuse, ElevenLabs has no other reason to already have a
+    row there), voice cloning (upload a short sample clip, ElevenLabs returns
+    a voice_id), and text-to-speech synthesis against a cloned voice.
+
+    Unlike Sarvam/imagegen, voice cloning cannot be a pure "reuse an existing
+    credential, wire a tool" feature - the clone step itself needs a real
+    setup action (upload an audio sample) that only makes sense as a direct
+    API call, not an agent tool call (a tool result is text-in/text-out; a
+    multipart audio upload has no natural place in that shape). So this
+    module exposes two REST surfaces: /api/elevenlabs/credential (BYOK
+    activation, mirrors SarvamController) and /api/elevenlabs/voices (clone/
+    list/delete, a real setup action akin to connecting a channel). Only
+    synthesis (given an already-cloned voice_id) becomes the agent tool -
+    ElevenLabsSpeakToolCallback in core/agents, mirroring SarvamSpeakToolCallback.
+
+    Depends on: crypto (EncryptionService for the stored key), security
+    (TenantContext parity with every sibling module in this position),
+    tenancy (schema-per-tenant isolation - no tenant_id column needed on any
+    table here, same as SarvamCredential/GeneratedImage), storage
+    (FileStorageService - synthesized MP3 clips are stored the same way
+    SarvamGeneratedAudio/GeneratedImage bytes are, never inline in a tool result).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>speech</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 2: ElevenLabsTextToSpeechProvider implements the providers
+         TextToSpeechProvider SPI
+         (moved here from core/providers). Arrow is vendor -> kernel SPI;
+         providers must never depend back on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 4: the ElevenLabs agent tool adapters
+         (com.agenticai.core.elevenlabs.agenttools: speak and music capability
+         providers, GenerateMusicToolCallback, quota services) implement the
+         kernel's agentspi ports (core/agentspi), so they live here with the vendor and not in
+         core/agents. Arrow is vendor -> kernel SPI; agents must never depend back
+         on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agentspi</artifactId>
+    </dependency>
+    <!-- Test scope only: DemoMusicControllerTest exercises the kernel DemoMusicController. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- DemoMusicControllerTest exercises the demo music endpoint
+         (agents.demo, in agents-studio since ADR-0023). Test scope only;
+         agents-studio does not depend on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-studio</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

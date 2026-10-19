@@ -1,0 +1,43 @@
+{
+  "consumer": "sdk-java",
+  "provider": "core",
+  "description": "The Java Agent SDK (sdk/java) makes no REST call to core: its only HTTP clients (agent-core WebhookHook and approval JdkHttpTransport) post to URLs the host application configures (a policy webhook, a Slack or Teams incoming webhook). What it shares with core is the audit record shape: io.vegaduta.agent.api.audit.AuditEvent declares that its first eight fields match core's published audit contract (contracts/outbound/audit-event.schema.json), which is the element shape of GET /api/audit-log (core/audit AuditLogController -> AuditLogEntryResponse). A tool that reads audit from both an SDK-governed app and core relies on these fields keeping their names. The interaction below is therefore a shape-alignment contract, not a call the SDK makes; the consumer test is sdk/java/agent-testkit/src/test/java/io/vegaduta/agent/testkit/contract/CoreConsumerContractTest.java.",
+  "interactions": [
+    {
+      "id": "audit-log.list",
+      "x-kind": "shape-alignment",
+      "method": "GET",
+      "path": "/api/audit-log",
+      "status": 200,
+      "request": {
+        "requiredFields": []
+      },
+      "response": {
+        "requiredFields": [
+          "$[*].id",
+          "$[*].actorId",
+          "$[*].actionType",
+          "$[*].targetType",
+          "$[*].targetId",
+          "$[*].outcome",
+          "$[*].createdAt"
+        ],
+        "x-enums": {
+          "$[*].outcome": [
+            "SUCCESS",
+            "FAILURE",
+            "PENDING_APPROVAL",
+            "AUTO_APPROVED",
+            "APPROVED",
+            "REJECTED",
+            "DENIED",
+            "EXPIRED",
+            "REPLAYED",
+            "BUDGET_EXCEEDED",
+            "WARNING"
+          ]
+        }
+      }
+    }
+  ]
+}

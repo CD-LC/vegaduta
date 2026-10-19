@@ -1,0 +1,74 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-learning-proposals",
+      "method": "GET",
+      "path": "/api/learning/proposals",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].applicable",
+          "$[*].body",
+          "$[*].createdAt",
+          "$[*].id",
+          "$[*].kind",
+          "$[*].status",
+          "$[*].title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-learning-proposals-id-approve",
+      "method": "POST",
+      "path": "/api/learning/proposals/{id}/approve",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.applicable",
+          "$.body",
+          "$.createdAt",
+          "$.id",
+          "$.kind",
+          "$.status",
+          "$.title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-learning-proposals-id-reject",
+      "method": "POST",
+      "path": "/api/learning/proposals/{id}/reject",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.applicable",
+          "$.body",
+          "$.createdAt",
+          "$.id",
+          "$.kind",
+          "$.status",
+          "$.title"
+        ]
+      }
+    },
+    {
+      "id": "get-api-learning-review-summary",
+      "method": "GET",
+      "path": "/api/learning/review/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.approved",
+          "$.pending",
+          "$.text",
+          "$.tidied"
+        ]
+      }
+    }
+  ]
+}

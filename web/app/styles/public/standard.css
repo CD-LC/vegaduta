@@ -1,0 +1,120 @@
+/* ============================================================================
+ * 10. ONE standard for the public surface (consistency audit 2026-09-24;
+ *     tokens in tokens.css §18). Reading width 72rem, one gutter
+ *     (1rem phone / 1.5rem from sm), one section rhythm (4rem / 6rem), one
+ *     type scale, 12px floor. Applies to the landing (.marketing-root) and
+ *     every .vd-pub page alike; /hire and /signup/complete keep their own
+ *     display type (sections 8-9 above).
+ * ==========================================================================*/
+
+/* Landing bands: the marketing system ran 7rem / 10rem at desktop (the
+   "so much gap" complaint); both steps collapse onto the shared rhythm and
+   the band gutter follows the shared gutter. */
+.marketing-root {
+  --mkt-gutter: var(--gutter);
+  --mkt-band-y: var(--section-y);
+  --mkt-band-y-lg: var(--section-y);
+}
+
+@media print {
+  .marketing-root {
+    --mkt-band-y: 1.5rem;
+    --mkt-band-y-lg: 2rem;
+  }
+}
+
+/* Containers: 72rem, one gutter. (max-w-7xl on a public page was the console
+   width leaking into the reading column.) */
+.marketing-root :is(.max-w-6xl, .max-w-7xl),
+.marketing-root .mkt-band__inner,
+.vd-pub :is(.max-w-6xl, .max-w-7xl) {
+  max-width: var(--w-public);
+}
+
+.marketing-root :is(.max-w-6xl, .max-w-7xl)[class*="px-"],
+.vd-pub :is(.max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl)[class*="px-"] {
+  padding-inline: var(--gutter);
+}
+
+/* Sections written with Tailwind steps (py-16 / py-20 / py-24) join the
+   band rhythm. */
+.marketing-root section:is([class*="py-16"], [class*="py-20"], [class*="py-24"]),
+.vd-pub section:is([class*="py-16"], [class*="py-20"], [class*="py-24"]) {
+  padding-block: var(--section-y);
+}
+
+/* Type scale. Landing display roles keep their clamp (the approved dev
+   preview); page titles, section and card headings on every other public
+   page sit on the one scale. */
+.marketing-root .mkt-h1 {
+  font-size: var(--type-display);
+}
+
+.marketing-root .mkt-card-title {
+  font-size: var(--type-h3);
+}
+
+.vd-pub:not(.hire-scope):not(.vd-signup-complete) h1 {
+  font-size: var(--type-h1);
+  line-height: 1.1;
+}
+
+.vd-pub:not(.hire-scope) h2 {
+  font-size: var(--type-h2);
+  line-height: 1.2;
+}
+
+.vd-pub:not(.hire-scope) h3 {
+  font-size: var(--type-h3);
+  line-height: 1.3;
+}
+
+/* Headings inside a card / tile are one step down (card h2 = 20px, card h3
+   = 16px) so a card never out-shouts the page section it sits in. */
+.vd-pub:not(.hire-scope) :is([class*="bg-card"], [data-slot="card"], [class*="rounded-2xl"], [class*="rounded-xl"], li, article) h2 {
+  font-size: 1.25rem;
+}
+
+.vd-pub:not(.hire-scope) :is([class*="bg-card"], [data-slot="card"], [class*="rounded-2xl"], [class*="rounded-xl"], li, article) h3 {
+  font-size: 1rem;
+}
+
+/* 12px floor for the table headers and the dossier's smallest mono labels
+   (sections 6 and 8 above set 11 / 11.5px). */
+.vd-pub th,
+:root:not(#_) .hire-scope .reg-tag,
+:root:not(#_) .hire-scope .stampbtn small,
+:root:not(#_) .hire-scope .approval-card .from {
+  font-size: var(--type-caption);
+}
+
+/* Light washes only: the /try urgency panel painted red-50 / red-200 /
+   red-600 for a marketing nudge, not an error; it becomes the amber tint. */
+.vd-pub .bg-red-50 {
+  background-color: var(--tint-warn-bg);
+}
+
+.vd-pub .border-red-200 {
+  border-color: var(--tint-warn-line);
+}
+
+.vd-pub .text-red-600 {
+  color: var(--tint-warn-fg);
+}
+
+/* Pastel card washes: a `bg-gradient-to-br from-amber-50 to-orange-50` card
+   is a tinted page; keep the glass and a whisper of the warm tint instead. */
+.vd-pub .from-amber-50 {
+  --tw-gradient-from: var(--tint-warn-bg);
+}
+
+/* SensesStrip's honest "IoT senses: in design" chip painted amber
+   (text-amber-600 on the beige strip measured 2.48:1, and amber is not a
+   state a public page owns). It becomes the neutral dashed pill: line
+   border, muted ink, no wash. Covers /hire, /earn and the landing. */
+.marketing-root .border-dashed.border-amber-500\/50,
+.vd-pub .border-dashed.border-amber-500\/50 {
+  border-color: var(--surface-border-strong);
+  background-color: transparent;
+  color: var(--text-muted);
+}

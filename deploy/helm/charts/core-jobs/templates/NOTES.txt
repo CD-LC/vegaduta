@@ -1,0 +1,2 @@
+core-jobs: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) - singleton, actuator only.
+  app Secret : {{ include "vegaduta-lib.core.appSecretName" . }} (must be the same Secret core uses)

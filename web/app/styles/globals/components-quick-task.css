@@ -1,0 +1,201 @@
+@layer components {
+  /* --- Simple mode: Quick Task (SimpleTaskRunner.js) ----------------------
+   * Replaces the entire Mission Control dashboard when Simple mode is on -
+   * "let them type what they want without worrying about the workflow."
+   * One centered card: a prompt, a channel picker, a Run button. Reuses
+   * .panel (so it already picks up the HUD border/scan-bar/pulse-dot
+   * treatment every other panel in this console has) rather than
+   * inventing a second surface style. */
+  .qt-shell {
+    @apply flex justify-center px-2 py-6;
+  }
+
+  /* Widened from 640px - direct feedback: "simple text box is small, make
+   * it fit the section." Quick Task is the ENTIRE Dashboard in Simple mode
+   * (see page.js), so it should use the same generous reading width every
+   * other page's .app-content gets, not a narrow centered card. */
+  .qt-card {
+    @apply w-full;
+    max-width: 860px;
+  }
+
+  .qt-eyebrow {
+    @apply m-0 mb-1 text-xs font-semibold uppercase tracking-wider;
+    font-family: var(--font-mono), monospace;
+    color: var(--hud-cyan);
+  }
+
+  .qt-title {
+    @apply m-0 mb-2 text-2xl font-bold text-[var(--text-primary)];
+  }
+
+  .qt-subtitle {
+    @apply m-0 mb-5 text-sm leading-relaxed text-[var(--text-muted)];
+  }
+
+  .qt-phone-capture {
+    @apply mb-5 rounded-xl border p-3;
+    border-color: var(--hud-line);
+    background: var(--surface-hover);
+  }
+
+  .qt-phone-capture label {
+    @apply mb-1.5 block text-xs font-medium text-[var(--text-secondary)];
+  }
+
+  /* min-height fills the section instead of the cramped 5-row default every
+   * other <textarea> in this app gets - this is the ONE input on the whole
+   * page, so it should read as the page's main instrument, not a small form
+   * field. */
+  .qt-textarea {
+    @apply mb-4 w-full resize-y rounded-xl border p-4 text-[15px] leading-relaxed;
+    min-height: 220px;
+    border-color: var(--hud-line);
+    background: var(--hud-panel-alt);
+    color: var(--text-primary);
+    font-family: inherit;
+  }
+
+  .qt-textarea:focus {
+    outline: none;
+    border-color: var(--hud-cyan);
+    box-shadow: 0 0 0 3px var(--accent-glow-cyan);
+  }
+
+  .qt-attach-row {
+    @apply mb-4 flex flex-wrap items-center gap-2;
+  }
+
+  .qt-attach-btn {
+    @apply flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition;
+    border-color: var(--hud-line);
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .qt-attach-btn:hover:not(:disabled) {
+    border-color: var(--hud-cyan);
+    color: var(--text-primary);
+  }
+
+  .qt-attach-btn:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .qt-attach-chip {
+    @apply flex items-center gap-1 rounded-full px-2.5 py-1 text-xs;
+    color: var(--hud-ok);
+    background: rgba(90, 255, 200, 0.1);
+  }
+
+  /* Detected-tools preview - "detect the underlying workflow if specified,
+   * select defined tools/MCP tools" shown live as the person types, before
+   * they ever commit to a channel/Run. */
+  .qt-preview {
+    @apply mb-4 overflow-hidden rounded-xl border px-3 py-2.5;
+    border-color: var(--hud-line);
+    background: var(--hud-panel-alt);
+  }
+
+  .qt-preview-line {
+    @apply flex flex-wrap items-center gap-1.5 text-xs;
+    color: var(--text-secondary);
+    font-family: var(--font-mono), monospace;
+  }
+
+  .qt-channel-row {
+    @apply mb-4 flex flex-wrap gap-2;
+  }
+
+  .qt-channel-btn {
+    @apply flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition;
+    border-color: var(--hud-line);
+    background: var(--surface-card);
+    color: var(--text-secondary);
+  }
+
+  .qt-channel-btn:hover {
+    border-color: var(--hud-cyan);
+  }
+
+  .qt-channel-btn-active {
+    border-color: var(--hud-cyan);
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    box-shadow: inset 0 0 0 1px var(--accent-glow-cyan);
+  }
+
+  /* Validate-before-run confirmation panel - "ask user how to trigger it,
+   * validate it, ask him these are the tools available and used to
+   * accomplish that." Sits between the Run button and the actual API call:
+   * Run opens this instead of executing immediately, restating the
+   * detected agent/tools and delivery channel, so nothing runs unconfirmed. */
+  .qt-confirm {
+    @apply mb-4 overflow-hidden rounded-xl border px-4 py-3.5;
+    border-color: var(--hud-cyan);
+    background: var(--hud-panel-alt);
+  }
+
+  .qt-confirm-title {
+    @apply m-0 mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide;
+    color: var(--hud-cyan);
+  }
+
+  .qt-confirm-list {
+    @apply m-0 mb-3 flex list-disc flex-col gap-1.5 pl-4 text-sm;
+    color: var(--text-secondary);
+  }
+
+  /* Solid accent fill, not the gradient this used to have - "no gradient
+   * fills anywhere" per the nova reskin brief. */
+  .qt-run-btn {
+    @apply flex w-full items-center justify-center gap-2 rounded-xl border-0 py-3 text-sm font-semibold shadow-sm transition;
+    background: var(--hud-cyan);
+    color: var(--hud-panel);
+  }
+
+  .qt-run-btn:hover:not(:disabled) {
+    @apply -translate-y-px shadow-md;
+    filter: brightness(1.08);
+  }
+
+  .qt-run-btn:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .qt-spin {
+    animation: qt-spin 0.9s linear infinite;
+  }
+
+  @keyframes qt-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .qt-spin {
+      animation: none;
+    }
+  }
+
+  .qt-result {
+    @apply mt-5 rounded-xl border p-4;
+    border-color: var(--success-border);
+    background: var(--success-bg);
+  }
+
+  .qt-result-label {
+    @apply m-0 mb-1.5 text-xs font-semibold uppercase tracking-wide;
+    color: var(--success-text);
+  }
+
+  .qt-result-text {
+    @apply m-0 mb-2 text-sm leading-relaxed text-[var(--text-primary)];
+    white-space: pre-wrap;
+  }
+
+  .qt-result-delivery {
+    @apply m-0 text-xs text-[var(--text-muted)];
+  }
+}

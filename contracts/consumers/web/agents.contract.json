@@ -1,0 +1,3609 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-agents",
+      "method": "GET",
+      "path": "/api/agents",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].allowedCodeIntelRepoIds",
+          "$[*].allowedKnowledgeCollectionIds",
+          "$[*].allowedToolNames",
+          "$[*].autonomyTier",
+          "$[*].biometricConsentEnabled",
+          "$[*].codeWorkspaceEnabled",
+          "$[*].collaboratorAgentIds",
+          "$[*].costRoutingEnabled",
+          "$[*].costRoutingJevThreshold",
+          "$[*].createdAt",
+          "$[*].e2bEnabled",
+          "$[*].economyModel",
+          "$[*].economyProviderName",
+          "$[*].edgeRoutingPolicy",
+          "$[*].editable",
+          "$[*].experienceMode",
+          "$[*].fallbackFailedCount",
+          "$[*].fallbackModel",
+          "$[*].fallbackProviderName",
+          "$[*].fallbackTriggeredCount",
+          "$[*].frequencyPenalty",
+          "$[*].id",
+          "$[*].inputSchemaJson",
+          "$[*].knowledgeBaseEnabled",
+          "$[*].lastFallbackAt",
+          "$[*].maxTokens",
+          "$[*].modalities",
+          "$[*].model",
+          "$[*].name",
+          "$[*].outputSchemaJson",
+          "$[*].presencePenalty",
+          "$[*].providerName",
+          "$[*].reasoningDepth",
+          "$[*].responseCachingEnabled",
+          "$[*].sarvamEnabled",
+          "$[*].seed",
+          "$[*].semanticResponseCachingEnabled",
+          "$[*].shareMemoryWithTenant",
+          "$[*].stopSequences",
+          "$[*].systemPrompt",
+          "$[*].temperature",
+          "$[*].topK",
+          "$[*].topP",
+          "$[*].ttsModel",
+          "$[*].ttsProvider",
+          "$[*].tuningMode",
+          "$[*].updatedAt",
+          "$[*].videoModel",
+          "$[*].videoModelProvider",
+          "$[*].voiceModel",
+          "$[*].voiceModelProvider",
+          "$[*].xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents",
+      "method": "POST",
+      "path": "/api/agents",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-autonomy-tier",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/autonomy-tier",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.autonomyTier"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-available-tools",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/available-tools",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].description",
+          "$[*].name"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-biometric-consent",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/biometric-consent",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-capabilities",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].availability",
+          "$[*].availabilityHint",
+          "$[*].category",
+          "$[*].description",
+          "$[*].enabled",
+          "$[*].key",
+          "$[*].label"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-capabilities-capabilityKey",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/capabilities/{capabilityKey}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-chat",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/chat",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-chat-branching-capabilities",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/chat-branching/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-chat-attachments",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/chat/attachments",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.attachmentKey",
+          "$.category",
+          "$.mimeType",
+          "$.originalFilename",
+          "$.sizeBytes"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-chat-sessions-sessionId-cancel",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/chat/sessions/{sessionId}/cancel",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-chat-sessions-sessionId-rewind",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/chat/sessions/{sessionId}/rewind",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.keepTurns"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-code-intel-repo-access",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/code-intel-repo-access",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-collaborators",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/collaborators",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.collaboratorAgentIds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-cost-routing",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/cost-routing",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.enabled",
+          "$.jevThreshold"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-delegations",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/delegations",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-delegations",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/delegations",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.audience",
+          "$.createdAt",
+          "$.expiresAt",
+          "$.grantedBy",
+          "$.id",
+          "$.maxTokenTtlSeconds",
+          "$.scopes",
+          "$.spentMinor",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-delegations-grantId-revoke",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/delegations/{grantId}/revoke",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.audience",
+          "$.createdAt",
+          "$.expiresAt",
+          "$.grantedBy",
+          "$.id",
+          "$.maxTokenTtlSeconds",
+          "$.scopes",
+          "$.spentMinor",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-delegations-grantId-tokens",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/delegations/{grantId}/tokens",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.ttlSeconds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.expiresAt",
+          "$.grantId",
+          "$.jti",
+          "$.token"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-directory-publish",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/directory/publish",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.capabilities",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-directory-unpublish",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/directory/unpublish",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-duplicate",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/duplicate",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-edge-routing-policy",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/edge-routing-policy",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.edgeRoutingPolicy"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-experience-mode",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/experience-mode",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.experienceMode"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-experiments",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/experiments",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-experiments",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/experiments",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-experiments-experimentId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/experiments/{experimentId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-experiments-experimentId-metrics",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/experiments/{experimentId}/metrics",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-experiments-experimentId-start",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/experiments/{experimentId}/start",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-experiments-experimentId-stop",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/experiments/{experimentId}/stop",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-fallback",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/fallback",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.model",
+          "$.providerName"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-generation-params",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/generation-params",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.clearSamplingParams",
+          "$.frequencyPenalty",
+          "$.maxTokens",
+          "$.presencePenalty",
+          "$.seed",
+          "$.stopSequences",
+          "$.temperature",
+          "$.topK",
+          "$.topP"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-guardrails",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/guardrails",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.availableGuardrails",
+          "$.enabledGuardrails",
+          "$.guardrailDescriptions",
+          "$.lockedGuardrails"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-guardrails",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/guardrails",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.guardrails"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.availableGuardrails",
+          "$.enabledGuardrails",
+          "$.guardrailDescriptions",
+          "$.lockedGuardrails"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-hooks",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/hooks",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-hooks",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/hooks",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.hooks"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-improvements",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/improvements",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].appliedRef",
+          "$[*].createdAt",
+          "$[*].decidedAt",
+          "$[*].decidedBy",
+          "$[*].id",
+          "$[*].kind",
+          "$[*].rationale",
+          "$[*].status",
+          "$[*].suggestedText",
+          "$[*].title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-improvements-suggestionId-accept",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/improvements/{suggestionId}/accept",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.appliedRef",
+          "$.createdAt",
+          "$.decidedAt",
+          "$.decidedBy",
+          "$.id",
+          "$.kind",
+          "$.rationale",
+          "$.status",
+          "$.suggestedText",
+          "$.title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-improvements-suggestionId-dismiss",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/improvements/{suggestionId}/dismiss",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.appliedRef",
+          "$.createdAt",
+          "$.decidedAt",
+          "$.decidedBy",
+          "$.id",
+          "$.kind",
+          "$.rationale",
+          "$.status",
+          "$.suggestedText",
+          "$.title"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-improvements-generate",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/improvements/generate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].appliedRef",
+          "$[*].createdAt",
+          "$[*].decidedAt",
+          "$[*].decidedBy",
+          "$[*].id",
+          "$[*].kind",
+          "$[*].rationale",
+          "$[*].status",
+          "$[*].suggestedText",
+          "$[*].title"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-improvements-health",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/improvements/health",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-jobs",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/jobs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-jobs",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/jobs",
+      "status": 202,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.approvalDeadlineAt",
+          "$.cancelRequested",
+          "$.costUsd",
+          "$.createdAt",
+          "$.deadlineAt",
+          "$.errorCode",
+          "$.errorMessage",
+          "$.finishedAt",
+          "$.goal",
+          "$.id",
+          "$.maxTurns",
+          "$.origin",
+          "$.originRef",
+          "$.parkCount",
+          "$.parkedAt",
+          "$.progressNote",
+          "$.progressUpdatedAt",
+          "$.requestedBy",
+          "$.resultJson",
+          "$.resultText",
+          "$.scheduleId",
+          "$.scheduleOccurrenceAt",
+          "$.schemaAttempts",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.terminal",
+          "$.timeoutSeconds",
+          "$.turnsUsed"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-jobs-jobId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/jobs/{jobId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.approvalDeadlineAt",
+          "$.cancelRequested",
+          "$.costUsd",
+          "$.createdAt",
+          "$.deadlineAt",
+          "$.errorCode",
+          "$.errorMessage",
+          "$.finishedAt",
+          "$.goal",
+          "$.id",
+          "$.maxTurns",
+          "$.origin",
+          "$.originRef",
+          "$.parkCount",
+          "$.parkedAt",
+          "$.progressNote",
+          "$.progressUpdatedAt",
+          "$.requestedBy",
+          "$.resultJson",
+          "$.resultText",
+          "$.scheduleId",
+          "$.scheduleOccurrenceAt",
+          "$.schemaAttempts",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.terminal",
+          "$.timeoutSeconds",
+          "$.turnsUsed"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-jobs-jobId-cancel",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/jobs/{jobId}/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.approvalDeadlineAt",
+          "$.cancelRequested",
+          "$.costUsd",
+          "$.createdAt",
+          "$.deadlineAt",
+          "$.errorCode",
+          "$.errorMessage",
+          "$.finishedAt",
+          "$.goal",
+          "$.id",
+          "$.maxTurns",
+          "$.origin",
+          "$.originRef",
+          "$.parkCount",
+          "$.parkedAt",
+          "$.progressNote",
+          "$.progressUpdatedAt",
+          "$.requestedBy",
+          "$.resultJson",
+          "$.resultText",
+          "$.scheduleId",
+          "$.scheduleOccurrenceAt",
+          "$.schemaAttempts",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.terminal",
+          "$.timeoutSeconds",
+          "$.turnsUsed"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-jobs-jobId-progress",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/jobs/{jobId}/progress",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-jobs-jobId-trace",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/jobs/{jobId}/trace",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-jobs-jobId-trace-stream",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/jobs/{jobId}/trace/stream",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-knowledge-access",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/knowledge-access",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.allowedKnowledgeCollectionIds"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-knowledge-base",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/knowledge-base",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-lab-capabilities",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/lab/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-lab-runs",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/lab/runs",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-lab-runs-runId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/lab/runs/{runId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-lab-runs-runId-cancel",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/lab/runs/{runId}/cancel",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-manifest",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/manifest",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-memories",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/memories",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-memories-memoryId",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/memories/{memoryId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-model",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/model",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.model",
+          "$.providerName"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-prompt",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/prompt",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.systemPrompt"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-config",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-datasets",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/datasets",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-quality-datasets-datasetId",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets-datasetId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-quality-datasets-datasetId",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-datasets-datasetId-cases",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/cases",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-quality-datasets-datasetId-cases-caseId",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-quality-datasets-datasetId-cases-caseId",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-datasets-datasetId-cases-import",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/cases/import",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentResponse",
+          "$.sessionId",
+          "$.turnRef",
+          "$.userMessage"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets-datasetId-export.jsonl",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/export.jsonl",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets-datasetId-runs",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-datasets-datasetId-runs",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets-datasetId-runs-runId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-datasets-datasetId-runs-runId-cancel",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets-datasetId-runs-runId-export.jsonl",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/export.jsonl",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-datasets-datasetId-runs-runId-junit",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/junit",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-datasets-seed-golden",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/datasets/seed-golden",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-quality-gate",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/quality/gate",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-gate",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/gate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.gate",
+          "$.headEvaluation",
+          "$.headVersionId"
+        ]
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-quality-gate",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/quality/gate",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-gate-check",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/gate/check",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-history",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/history",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-judge-calibration",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/judge-calibration",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.calibrationSetId"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-judge-calibration-history",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/judge-calibration-history",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-judge-calibration-sets",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/judge-calibration-sets",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-judge-calibration-sets",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/judge-calibration-sets",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-quality-judge-calibration-sets-setId",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/quality/judge-calibration-sets/{setId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-reliability",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/reliability",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-reliability-compare",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/reliability/compare",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-reliability-noise-floor",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/reliability/noise-floor",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-simulations-personas",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/simulations/personas",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-simulations-personas",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/simulations/personas",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.builtIn",
+          "$.description",
+          "$.key",
+          "$.name",
+          "$.objective"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-quality-simulations-personas-key",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/quality/simulations/personas/{key}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-simulations-runs-runId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/simulations/runs/{runId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentVersionId",
+          "$.completedAt",
+          "$.costUsd",
+          "$.errorMessage",
+          "$.id",
+          "$.personaKey",
+          "$.personaName",
+          "$.sessionId",
+          "$.startedAt",
+          "$.status",
+          "$.termination",
+          "$.transcriptJson",
+          "$.turnCount",
+          "$.verdict",
+          "$.verdictReason"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-simulations-sessions",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/simulations/sessions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-simulations-sessions",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/simulations/sessions",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.budgetUsd",
+          "$.cancelRequested",
+          "$.completedAt",
+          "$.createdAt",
+          "$.createdBy",
+          "$.id",
+          "$.maxTurns",
+          "$.personaKeys",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-simulations-sessions-sessionId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/simulations/sessions/{sessionId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.budgetUsd",
+          "$.cancelRequested",
+          "$.completedAt",
+          "$.createdAt",
+          "$.createdBy",
+          "$.id",
+          "$.maxTurns",
+          "$.personaKeys",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-simulations-sessions-sessionId-attack-report",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/simulations/sessions/{sessionId}/attack-report",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-quality-simulations-sessions-sessionId-cancel",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/quality/simulations/sessions/{sessionId}/cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.budgetUsd",
+          "$.cancelRequested",
+          "$.completedAt",
+          "$.createdAt",
+          "$.createdBy",
+          "$.id",
+          "$.maxTurns",
+          "$.personaKeys",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-simulations-sessions-sessionId-runs",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/simulations/sessions/{sessionId}/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].completedAt",
+          "$[*].costUsd",
+          "$[*].errorMessage",
+          "$[*].id",
+          "$[*].personaKey",
+          "$[*].personaName",
+          "$[*].sessionId",
+          "$[*].startedAt",
+          "$[*].status",
+          "$[*].termination",
+          "$[*].turnCount",
+          "$[*].verdict",
+          "$[*].verdictReason"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-statistics",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/statistics",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-summary",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-trajectory-eval-config",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/trajectory-eval/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-trajectory-eval-datasets-datasetId-cases-caseId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/cases/{caseId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-quality-trajectory-eval-datasets-datasetId-cases-caseId",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/cases/{caseId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.trajectory"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-trajectory-eval-datasets-datasetId-runs-runId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/runs/{runId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-quality-trajectory-eval-datasets-datasetId-runs-runId-results-resultId-actual",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/runs/{runId}/results/{resultId}/actual",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-reasoning-depth",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/reasoning-depth",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reasoningDepth"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-reliability",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/reliability",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.avgResponseTimeMs",
+          "$.failedCalls",
+          "$.fallbackFailedCount",
+          "$.fallbackTriggeredCount",
+          "$.firstCallAt",
+          "$.lastCallAt",
+          "$.lastFallbackAt",
+          "$.recentFailures",
+          "$.successRatePercent",
+          "$.toolCallCount",
+          "$.toolCallFailureCount",
+          "$.totalCalls"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-response-caching",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/response-caching",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-result-schema",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/result-schema",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-result-schema",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/result-schema",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-result-schema",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/result-schema",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.schemaJson"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-run-budget",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/run-budget",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-run-budget",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/run-budget",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.runBudgetUsd"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-schedule",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/schedule",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-schedule",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/schedule",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-schedule",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/schedule",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-schedule-resume",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/schedule/resume",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-schedule-run-now",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/schedule/run-now",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.error",
+          "$.finishedAt",
+          "$.id",
+          "$.jobId",
+          "$.jobStatus",
+          "$.startedAt",
+          "$.status",
+          "$.targetType",
+          "$.trigger",
+          "$.workflowRunId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-schedule-runs",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/schedule/runs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].error",
+          "$[*].finishedAt",
+          "$[*].id",
+          "$[*].jobId",
+          "$[*].jobStatus",
+          "$[*].startedAt",
+          "$[*].status",
+          "$[*].targetType",
+          "$[*].trigger",
+          "$[*].workflowRunId"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-semantic-response-caching",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/semantic-response-caching",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-export",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-llm-requests",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/llm-requests",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].at",
+          "$[*].id",
+          "$[*].messages",
+          "$[*].tools"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-llm-usage",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/llm-usage",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].completionTokens",
+          "$[*].estimatedCostUsd",
+          "$[*].id",
+          "$[*].latencyMs",
+          "$[*].model",
+          "$[*].promptTokens",
+          "$[*].providerName",
+          "$[*].startedAt",
+          "$[*].success",
+          "$[*].totalTokens"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-llm-usage-summary",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/llm-usage/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.cacheAccountedCalls",
+          "$.cacheHitRatio",
+          "$.cacheReadTokens",
+          "$.cacheWriteTokens",
+          "$.callCount",
+          "$.completionTokens",
+          "$.endedAt",
+          "$.failedCalls",
+          "$.promptTokens",
+          "$.sessionId",
+          "$.startedAt",
+          "$.steps",
+          "$.summedLatencyMs",
+          "$.totalCostUsd",
+          "$.totalTokens",
+          "$.unpricedCalls",
+          "$.wallClockMs"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-messages",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/messages",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-messages-messageId-siblings",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/siblings",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-sessions-sessionId-messages-active-leaf",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/messages/active-leaf",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.messageId"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.activeLeafId",
+          "$.messages",
+          "$.sessionId"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-sessions-sessionId-transcript",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/sessions/{sessionId}/transcript",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.messages",
+          "$.sessionId"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-share",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/share",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-share",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/share",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.active",
+          "$.reportCount",
+          "$.shareId",
+          "$.shareUrl",
+          "$.viewerCount"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-share",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/share",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.active",
+          "$.reportCount",
+          "$.shareId",
+          "$.shareUrl",
+          "$.viewerCount"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-share-memory",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/share-memory",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-skills",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/skills",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.activeSkills",
+          "$.allowedSkillNames",
+          "$.skillsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-skills",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/skills",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.activeSkills",
+          "$.allowedSkillNames",
+          "$.skillsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-skills-distill",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/skills/distill",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].distinctSessions",
+          "$[*].meanReward",
+          "$[*].runs",
+          "$[*].sampleGoals",
+          "$[*].tools"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-skills-distill",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/skills/distill",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.patterns",
+          "$.proposedSkillNames",
+          "$.skipped"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-specialties",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/specialties",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.specialties"
+        ]
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-specialties",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/specialties",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.specialties"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.specialties"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-tier",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/tier",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tier"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-tool-access",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/tool-access",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.allowedToolNames"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-tool-access-trifecta",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/tool-access/trifecta",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-tool-calls",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/tool-calls",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].completedAt",
+          "$[*].errorMessage",
+          "$[*].id",
+          "$[*].mcpGrantId",
+          "$[*].sessionId",
+          "$[*].startedAt",
+          "$[*].toolInput",
+          "$[*].toolName",
+          "$[*].toolOutput"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-tool-policies",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/tool-policies",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-tool-policies",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/tool-policies",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-tts-model",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/tts-model",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.ttsModel",
+          "$.ttsProvider"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-tuning-mode",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/tuning-mode",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.tuningMode"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-turns-turnId-journal",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/turns/{turnId}/journal",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.brokenAtSeq",
+          "$.chainIntact",
+          "$.events",
+          "$.turnId",
+          "$.verification"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-turns-feedback",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/turns/feedback",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-versions",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/versions",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].agentName",
+          "$[*].changeSummary",
+          "$[*].createdAt",
+          "$[*].createdBy",
+          "$[*].id",
+          "$[*].label",
+          "$[*].model",
+          "$[*].providerName",
+          "$[*].versionNumber"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-versions-versionId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/versions/{versionId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.agentName",
+          "$.changeSummary",
+          "$.createdAt",
+          "$.createdBy",
+          "$.id",
+          "$.label",
+          "$.model",
+          "$.providerName",
+          "$.versionNumber"
+        ]
+      }
+    },
+    {
+      "id": "put-api-agents-agentId-versions-versionId-label",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/versions/{versionId}/label",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.force",
+          "$.label",
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-versions-versionId-promote",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/versions/{versionId}/promote",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.force",
+          "$.label",
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.agentName",
+          "$.changeSummary",
+          "$.createdAt",
+          "$.createdBy",
+          "$.id",
+          "$.label",
+          "$.model",
+          "$.providerName",
+          "$.versionNumber"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-versions-versionId-restore",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/versions/{versionId}/restore",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-versions-diff",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/versions/diff",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.fields",
+          "$.from",
+          "$.to",
+          "$.unchanged"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-versions-rollback",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/versions/rollback",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.agentName",
+          "$.changeSummary",
+          "$.createdAt",
+          "$.createdBy",
+          "$.id",
+          "$.label",
+          "$.model",
+          "$.providerName",
+          "$.versionNumber"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-video-model",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/video-model",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.videoModel",
+          "$.videoModelProvider"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-voice-model",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/voice-model",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.voiceModel",
+          "$.voiceModelProvider"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.allowedCodeIntelRepoIds",
+          "$.allowedKnowledgeCollectionIds",
+          "$.allowedToolNames",
+          "$.autonomyTier",
+          "$.biometricConsentEnabled",
+          "$.codeWorkspaceEnabled",
+          "$.collaboratorAgentIds",
+          "$.costRoutingEnabled",
+          "$.costRoutingJevThreshold",
+          "$.createdAt",
+          "$.e2bEnabled",
+          "$.economyModel",
+          "$.economyProviderName",
+          "$.edgeRoutingPolicy",
+          "$.editable",
+          "$.experienceMode",
+          "$.fallbackFailedCount",
+          "$.fallbackModel",
+          "$.fallbackProviderName",
+          "$.fallbackTriggeredCount",
+          "$.frequencyPenalty",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.knowledgeBaseEnabled",
+          "$.lastFallbackAt",
+          "$.maxTokens",
+          "$.modalities",
+          "$.model",
+          "$.name",
+          "$.outputSchemaJson",
+          "$.presencePenalty",
+          "$.providerName",
+          "$.reasoningDepth",
+          "$.responseCachingEnabled",
+          "$.sarvamEnabled",
+          "$.seed",
+          "$.semanticResponseCachingEnabled",
+          "$.shareMemoryWithTenant",
+          "$.stopSequences",
+          "$.systemPrompt",
+          "$.temperature",
+          "$.topK",
+          "$.topP",
+          "$.ttsModel",
+          "$.ttsProvider",
+          "$.tuningMode",
+          "$.updatedAt",
+          "$.videoModel",
+          "$.videoModelProvider",
+          "$.voiceModel",
+          "$.voiceModelProvider",
+          "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-x402-offers",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/x402/offers",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-x402-offers",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/x402/offers",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.evm",
+          "$.id",
+          "$.priceMinor",
+          "$.slug",
+          "$.status",
+          "$.title",
+          "$.url",
+          "$.walletId"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-x402-offers-offerId-disable",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/x402/offers/{offerId}/disable",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.createdAt",
+          "$.currency",
+          "$.evm",
+          "$.id",
+          "$.priceMinor",
+          "$.slug",
+          "$.status",
+          "$.title",
+          "$.url",
+          "$.walletId"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-delegations-introspect",
+      "method": "POST",
+      "path": "/api/agents/delegations/introspect",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.token"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.active"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-directory-mine",
+      "method": "GET",
+      "path": "/api/agents/directory/mine",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-import",
+      "method": "POST",
+      "path": "/api/agents/import",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-import-preview",
+      "method": "POST",
+      "path": "/api/agents/import/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-specialties-tags",
+      "method": "GET",
+      "path": "/api/agents/specialties/tags",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

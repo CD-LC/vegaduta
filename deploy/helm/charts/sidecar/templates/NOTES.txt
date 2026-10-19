@@ -1,0 +1,2 @@
+sidecar: {{ include "vegaduta-lib.fullname" . }} ({{ include "vegaduta-lib.image" . }}) - internal only, http://{{ include "vegaduta-lib.fullname" . }}:8001
+  shared secret: key SIDECAR_SHARED_SECRET of Secret {{ include "vegaduta-lib.internalSecretName" . }}

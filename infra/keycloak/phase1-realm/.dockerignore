@@ -1,0 +1,9 @@
+# Only used if this directory itself is the build context (the supported build
+# uses the repo root + Dockerfile.dockerignore alongside). INF-017.
+.env
+.env.*
+*.pem
+*.key
+secrets/
+*.log
+reconcile-azure.sh

@@ -1,0 +1,89 @@
+# ============================================================================
+# SUPERSEDED (2026-07-29) - DO NOT COMBINE THIS FILE WITH deploy/docker-compose.yml
+#
+# app-builder is now a first-class service IN deploy/docker-compose.yml, served
+# publicly at https://builder.staging.example.com via deploy/caddy/Caddyfile's @builder
+# route. A plain `docker compose up -d` from deploy/ starts it. This file is kept
+# only for running app-builder truly STANDALONE (its own project, no platform
+# stack), exactly as code-intel/docker-compose.code-intel.yml is.
+#
+# Layering it back on top of the base file with `-f` would now ACTIVELY BREAK the
+# deployed service, in three ways:
+#   1. `networks: [backend]` below - that network no longer exists. It was split
+#      into observability/app/agent-io on 2026-07-29. app-builder belongs on
+#      agent-io (see the base file's own service comment).
+#   2. `ports: 8091:8091` - the base file deliberately publishes NO host port;
+#      the only inbound path is through Caddy and the Cloudflare tunnel.
+#   3. `APP_BUILDER_AUTH_MODE` defaults to `internal` here, but the deployed
+#      service must be `keycloak` - the browser calls it directly with a
+#      Keycloak Bearer token and has no shared secret to present.
+# The `:?` requirements below would also hard-fail interpolation for anyone who
+# has not set APP_BUILDER_INTERNAL_TOKEN in deploy/.env (nobody needs to).
+#
+# Original header follows.
+# ============================================================================
+# Overlay file - keeps deploy/docker-compose.yml untouched, same pattern as
+# code-intel/docker-compose.code-intel.yml. Run with:
+#   docker compose -f deploy/docker-compose.yml \
+#                  -f code-intel/docker-compose.code-intel.yml \
+#                  -f app-builder/docker-compose.app-builder.yml \
+#                  up -d --build app-builder
+# (app-builder needs code-intel running too — it's a client of it.)
+services:
+  app-builder:
+    build:
+      context: ../app-builder
+    container_name: agentic-app-builder
+    ports:
+      - "8091:8091"
+    environment:
+      APP_BUILDER_AUTH_MODE: ${APP_BUILDER_AUTH_MODE:-internal}
+      APP_BUILDER_INTERNAL_TOKEN: ${APP_BUILDER_INTERNAL_TOKEN:?set in deploy/.env}
+      # For auth_mode=keycloak instead (tokens validated directly):
+      APP_BUILDER_KEYCLOAK_ISSUER: ${APP_BUILDER_KEYCLOAK_ISSUER:-http://keycloak:8080/realms/agentic-ai}
+      # app-builder is code-intel's CLIENT: compose DNS name, never a
+      # public domain (backend-to-backend call, never touches a browser).
+      APP_BUILDER_CODE_INTEL_URL: ${APP_BUILDER_CODE_INTEL_URL:-http://code-intel:8090}
+      # Must equal code-intel's own CODE_INTEL_INTERNAL_TOKEN — this is the
+      # secret app-builder presents AS a trusted caller of code-intel's
+      # `internal` auth mode. Reusing the same deploy/.env value keeps one
+      # secret instead of two that must be kept in sync by hand.
+      APP_BUILDER_CODE_INTEL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:?set in deploy/.env}
+      # Browser access, only if a future console UI calls this service
+      # directly with a Keycloak token instead of proxying through core.
+      APP_BUILDER_CORS_ORIGINS: ${APP_BUILDER_CORS_ORIGINS:-}
+      # generate.py — required for POST /projects/{id}/generate to work;
+      # scaffolding/preview/backend-provision all work without it. Calls
+      # core's POST /api/internal/app-builder/generate-files (2026-08-06
+      # routing fix) instead of the Anthropic SDK directly — core resolves
+      # the model/provider itself, so this standalone overlay needs a path
+      # to a running core (not part of THIS compose project) plus the
+      # shared service token, not an Anthropic key.
+      APP_BUILDER_CORE_BASE_URL: ${APP_BUILDER_CORE_BASE_URL:-http://core:8080}
+      APP_BUILDER_CORE_SERVICE_TOKEN: ${APP_BUILDER_CORE_SERVICE_TOKEN:?set in deploy/.env}
+      # baas.py — optional. Leave unset to run with scaffolding/preview
+      # only (provision_backend() degrades gracefully, see baas.py).
+      APP_BUILDER_ADMIN_DATABASE_URL: ${APP_BUILDER_ADMIN_DATABASE_URL:-}
+      # ingress.py — Caddy admin API, container-to-container only (see
+      # deploy/caddy/Caddyfile's `admin 0.0.0.0:2019`; never published to
+      # the host or the tunnel). Falls back to a raw host:port URL if
+      # unreachable, so this is optional but needed for real preview URLs.
+      APP_BUILDER_CADDY_ADMIN_URL: ${APP_BUILDER_CADDY_ADMIN_URL:-http://caddy:2019}
+      APP_BUILDER_INGRESS_MODE: ${APP_BUILDER_INGRESS_MODE:-path}
+    volumes:
+      - app_builder_data:/data
+    restart: unless-stopped
+    depends_on:
+      - code-intel
+    # backend - must reach code-intel:8090 (its own dependency) and
+    # caddy:2019 (ingress.py's admin-API calls); same network both of those
+    # already run on in deploy/docker-compose.yml's base service defs. No
+    # top-level `networks:` block needed here - this overlay is always run
+    # combined with `-f deploy/docker-compose.yml` (see the header comment
+    # above), and Compose merges all `-f` files into ONE project, so the
+    # `backend` network already declared there is what this resolves to.
+    networks:
+      - backend
+
+volumes:
+  app_builder_data:

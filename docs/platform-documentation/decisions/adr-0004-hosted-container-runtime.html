@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0004 Hosted Container Runtime — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0004-hosted-container-runtime.html" data-doc="VD-ADR-004" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0004 Hosted Container Runtime</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0004: Container runtime for the original hosted deployment</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-staging">superseded for self-hosting</span></dd>
+  <dt>Decided</dt><dd>September 2026 (hosted deployment)</dd>
+  <dt>Applies to this repository</dt><dd>No. This repository ships Docker Compose (<code>deploy/compose</code>) and Helm (<code>deploy/helm</code>); see the <a href="../deployment/index.html">Deployment Guide</a>.</dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  Before the code was open-sourced, the maintainers ran one hosted instance of the
+  platform on a managed container service (Azure Container Apps) with managed
+  PostgreSQL and Redis, plus one VM for the workloads that service could not host.
+  That runtime choice, and the infrastructure code for it, are not part of what this
+  repository supports.
+</p>
+
+<h2>Decision (historical)</h2>
+<p>
+  The hosted deployment ran the stateless request-path services on the managed
+  container platform and kept on a VM the services that need what such platforms
+  usually do not offer. Those constraints are properties of the services, so they
+  still matter to anyone choosing a runtime:
+</p>
+<table>
+  <thead><tr><th>Service</th><th>Needs</th></tr></thead>
+  <tbody>
+    <tr><td><code>redpanda</code></td><td>A block-device volume that supports <code>O_DIRECT</code> (XFS/ext4); network file shares such as SMB do not work.</td></tr>
+    <tr><td><code>livekit</code></td><td>Raw UDP 50000-50100 and TCP 7881 reachable from callers.</td></tr>
+    <tr><td><code>tool-sandbox</code>, <code>code-intel-docker</code></td><td>Linux capabilities or privileged containers (see <a href="adr-0009-untrusted-code-sandboxing.html">ADR-0009</a>).</td></tr>
+    <tr><td><code>mcp-stdio-runner</code></td><td>Plain internal TCP between core and the runner, with keepalive (idle flows through cloud NAT or load balancers may be dropped silently).</td></tr>
+  </tbody>
+</table>
+
+<h2>What applies to self-hosters</h2>
+<ul>
+  <li>Docker Compose on one host satisfies all of the needs above; enable the matching profiles (<code>events</code>, <code>voice</code>, <code>sandbox</code>, <code>tools</code>, <code>code-intel</code>).</li>
+  <li>On Kubernetes, check the same needs against your cluster: a storage class for Kafka (or an external Kafka), UDP exposure for LiveKit, a <code>runtimeClassName</code> or privileges for the sandboxes.</li>
+  <li>Managed PostgreSQL, Redis-compatible and S3-compatible services are supported through the Helm <code>global.*</code> values and the Compose database and <code>STORAGE_*</code> variables.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/README.md</code> (tiers, profiles), <code>deploy/helm/README.md</code> (bundled vs external dependencies).</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+</body></html>

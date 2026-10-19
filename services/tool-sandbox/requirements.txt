@@ -1,0 +1,9 @@
+# tool-sandbox service. Exact pins (was range-pinned) - this is a security-
+# boundary service, so a rebuild must never pull a different tree. The image
+# installs requirements.lock (full transitive tree, sha256-hashed, generated
+# from this file) with --require-hashes; regenerate with services/lock-requirements.sh.
+fastapi==0.142.0
+# Security floor, see services/app-builder/requirements.txt.
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5

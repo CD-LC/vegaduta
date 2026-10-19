@@ -1,0 +1,156 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0003 Spring AI Dynamic Clients — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0003-spring-ai-dynamic-clients.html" data-doc="VD-ADR-003" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0003 Dynamic ChatClients</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0003: Per-request Spring AI ChatClient construction (BYOK)</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span></dd>
+  <dt>Decided</dt><dd>2026-07; re-confirmed 2026-08-15</dd>
+  <dt>Deciders</dt><dd>Platform Engineering</dd>
+  <dt>Scope</dt><dd><code>core/app</code> (<code>CoreApplication.java</code>), <code>core/chat</code>, <code>core/providers</code></dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  The platform is <strong>BYOK and multi-provider</strong>: each tenant (or
+  individual agent) activates its own provider credential — Anthropic, OpenAI,
+  Google GenAI, OpenRouter, Grok, Groq, Mistral, DeepSeek, Azure OpenAI, AWS
+  Bedrock, Ollama, Meta, Sarvam and the platform-hosted pool — stored encrypted in
+  the database and decrypted at request time. There is no single platform API key
+  for these providers; <code>spring.ai.openai.api-key</code> is never configured at
+  all.
+</p>
+<p>
+  Spring AI's default model is the opposite: each provider starter registers
+  auto-configurations that eagerly build a singleton <code>ChatModel</code> from a
+  static <code>application.yml</code> key at context refresh. On this platform
+  those beans can never be constructed — and would be wrong even if they could be,
+  because "the OpenAI key" is a per-request value, not an environment variable.
+</p>
+<p>
+  Two real failures forced the full exclusion set:
+</p>
+<ul>
+  <li>Excluding only the two <em>chat</em> auto-configurations missed that
+    <code>spring-ai-starter-model-openai</code> registers <strong>six</strong>
+    auto-configuration classes (chat, embedding, image, audio-speech,
+    audio-transcription, moderation) and the Google GenAI starter registers three —
+    each eagerly building a static model bean. <code>OpenAiAudioSpeechAutoConfiguration</code>
+    was the one that actually crashed startup: "OpenAI API key must be set."</li>
+  <li><code>ToolCallbackConverterAutoConfiguration</code> was briefly un-excluded on
+    2026-08-15 after decompiling the pinned
+    <code>spring-ai-autoconfigure-mcp-server-common-1.1.7.jar</code> disproved the
+    original crash theory. Verified on a running stack: startup was fine, but
+    <code>tools/list</code> on the inbound MCP server returned <strong>all ~60
+    tools from every <code>ToolCallback</code> bean in the context</strong> —
+    including filesystem read/write/delete and full remote browser control — to any
+    caller holding a <code>core/mcpserver</code> grant key. A real capability leak,
+    confirmed live; the exclusion was restored immediately.</li>
+</ul>
+
+<h2>Decision</h2>
+<p>
+  <code>CoreApplication</code> excludes <strong>eleven</strong> Spring AI
+  auto-configurations, and no singleton provider client exists anywhere:
+</p>
+<ul>
+  <li><code>AnthropicChatAutoConfiguration</code>; all six OpenAI classes
+    (<code>OpenAiChat</code>, <code>OpenAiEmbedding</code>, <code>OpenAiImage</code>,
+    <code>OpenAiAudioSpeech</code>, <code>OpenAiAudioTranscription</code>,
+    <code>OpenAiModeration</code>); all three Google GenAI classes
+    (<code>GoogleGenAiChat</code>, <code>GoogleGenAiEmbeddingConnection</code>,
+    <code>GoogleGenAiTextEmbedding</code>); and
+    <code>ToolCallbackConverterAutoConfiguration</code>.</li>
+  <li><code>ChatClientRegistry</code> (<code>core/chat</code>) maps
+    <code>ProviderName → AgentChatClientFactory</code>; each call site resolves the
+    caller's credential and the registry dispatches to one of 14 per-provider
+    factories (<code>AnthropicAgentChatClientFactory</code>,
+    <code>GeminiAgentChatClientFactory</code>,
+    <code>OpenRouterAgentChatClientFactory</code>, …).</li>
+  <li>The factory builds a <strong>fresh Api + ChatModel + ChatClient per call</strong>
+    from the decrypted key. BYOK plaintext keys are decrypted per call and are
+    <strong>never cached as plaintext</strong> — the credential row is the only
+    persistent form, under <code>APP_ENCRYPTION_KEY</code>.</li>
+</ul>
+
+<div class="mermaid">
+flowchart LR
+  call["Chat turn / quick task /<br/>workflow node / assist"] --> reg["ChatClientRegistry"]
+  reg --> fac["*AgentChatClientFactory<br/>(per ProviderName)"]
+  cred["ProviderCredentialService<br/>decrypt per call"] --> fac
+  fac --> cc["new ChatClient<br/>+ LlmMetricsAdvisor<br/>+ shared DefaultAgentAdvisors"]
+</div>
+
+<h2>Alternatives considered</h2>
+<table>
+  <thead><tr><th>Option</th><th>Why it lost</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Spring AI auto-configuration + static keys</strong></td>
+      <td>Structurally incapable of expressing "key is chosen per request, per tenant." Also crashes at startup because the keys it wants don't exist.</td>
+    </tr>
+    <tr>
+      <td><strong>Singleton client pool, one per provider, platform key</strong></td>
+      <td>Defeats BYOK: tenant spend and tenant quotas would be untrackable, and a platform key makes the platform the billing party for every tenant's usage.</td>
+    </tr>
+    <tr>
+      <td><strong>Cached per-credential clients now</strong></td>
+      <td>Deliberately deferred, documented in <code>AnthropicAgentChatClientFactory</code>: "worth caching (keyed by credential id + updatedAt, invalidated on key rotation) once this is under real load — not done here to avoid a caching bug masquerading as a feature this early." Reconstruction cost is acceptable at current load.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Consequences</h2>
+<h3>Positive</h3>
+<ul>
+  <li><strong>Uniform instrumentation:</strong> because every
+    <code>ChatClient</code> in the app funnels through
+    <code>ChatClientRegistry</code> → the factories, registering
+    <code>LlmMetricsAdvisor</code> once per constructed client covers every call
+    site — agent chat, quick task, guardrails, reflexion, graph memory, workflow
+    graph generation, Ask-AI assist — with zero per-site instrumentation.</li>
+  <li>No plaintext key ever sits in a long-lived bean; a heap dump shows at most
+    the key in flight for the request being served.</li>
+  <li>Key rotation is trivially safe: the next call reads the current credential
+    row; there is nothing to invalidate.</li>
+  <li>Provider capability quirks live next to the client they affect (e.g.
+    Anthropic's "can't send both temperature and top_p", and the
+    <code>claude-sonnet-5</code> temperature-deprecation prefix list).</li>
+</ul>
+<h3>Negative / costs</h3>
+<ul>
+  <li>Client construction cost on every LLM call — accepted for now; the
+    documented future is a cache keyed by <code>credential id + updatedAt</code>
+    so rotation invalidates automatically.</li>
+  <li>The exclusion list is load-bearing and counter-intuitive: removing
+    <code>ToolCallbackConverterAutoConfiguration</code> from it re-opens the
+    whole-context tool leak — the 5 curated MCP-server tools are only reachable
+    through that same bean, so the exclusion also means
+    <code>core/mcpserver</code> exposes nothing until its own narrow conversion
+    is built (tracked follow-up, not a config toggle).</li>
+  <li>New provider starters must be audited for how many auto-configuration
+    classes they register; a partial exclusion is a startup crash or a
+    capability leak, not a compile error.</li>
+</ul>
+<div class="callout callout-warning">
+  <div class="callout-title">Do not remove</div>
+  <code>ToolCallbackConverterAutoConfiguration</code> was un-excluded once and
+  verified live to leak every tool in the context. Do not remove that exclusion
+  again until <code>core/mcpserver</code> has a narrow conversion that does not
+  route through <code>aggregateToolCallbacks</code>.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/app/src/main/java/com/agenticai/core/CoreApplication.java</code> — the exclusion block and the dated javadoc history (incl. the 2026-08-15 live verification).</li>
+  <li><code>core/chat/.../ChatClientRegistry.java</code>, <code>core/chat/.../*AgentChatClientFactory.java</code> (14 factories), <code>core/chat/.../LlmMetricsAdvisor.java</code>.</li>
+  <li><code>core/providers/.../ProviderCredentialService.java</code>, <code>ProviderCredentialResolver.java</code> — encrypted credentials resolved per call.</li>
+  <li><code>AnthropicAgentChatClientFactory</code> javadoc — the deferred caching design (key by credential id + updatedAt).</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

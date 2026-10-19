@@ -1,0 +1,32 @@
+{
+  "instantNanos" : "2026-09-30T10:15:30.123456789Z",
+  "instantWholeSecond" : "2026-09-30T10:15:30Z",
+  "localDate" : "2026-09-30",
+  "localDateTime" : "2026-09-30T10:15:30.123",
+  "offsetDateTime" : "2026-09-30T10:15:30+05:30",
+  "zonedDateTime" : "2026-09-30T10:15:30+05:30",
+  "duration" : "PT1M30.5S",
+  "bigDecimalScale" : 1234.5000,
+  "bigDecimalLarge" : 1E+3,
+  "doubleWhole" : 3.0,
+  "longBeyondJsNumberRange" : 9007199254740993,
+  "optionalPresent" : "present",
+  "optionalEmpty" : null,
+  "nullString" : null,
+  "emptyList" : [ ],
+  "emptyMap" : { },
+  "unorderedMap" : {
+    "zebra" : 1,
+    "apple" : 2,
+    "mango" : null
+  },
+  "sortedMap" : {
+    "apple" : 2,
+    "zebra" : 1
+  },
+  "uuid" : "00000000-0000-0000-0000-000000000001",
+  "enumValue" : "NOT_FOUND",
+  "bytes" : "AQID",
+  "character" : "x",
+  "unicodeAndEscapes" : "café ₹ \"quoted\" <tag> \\ \t tab"
+}

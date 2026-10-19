@@ -1,0 +1,24 @@
+title = "VegaDuta secret scan"
+
+[extend]
+useDefault = true
+
+# Fake credentials that exist on purpose. Keep this list short: every path here
+# is a place a real key would go unnoticed. .env*.example files are deliberately
+# NOT listed - a real Anthropic key leaked through web/.env.local.example.
+[allowlist]
+description = "Test fixtures with fake credentials, and vendored minified bundles"
+paths = [
+  '''(^|/)src/test/''',
+  '''\.(spec|test)\.(js|jsx|ts|tsx)$''',
+  '''(^|/)tests?/.*\.py$''',
+  '''\.min\.js$''',
+  # UI translation catalogs: message keys like "apiKey_hint" are copy, not credentials.
+  '''(^|/)web/messages/[a-z]{2,3}\.json$''',
+]
+# i18n/storage key NAMES that the generic-api-key rule mistakes for secrets.
+regexTarget = "match"
+regexes = [
+  '''(bodyKey|periodKey|labelKey|titleKey)\s*:\s*"[a-zA-Z0-9_.]+"''',
+  '''[A-Z_]+_(STORAGE|SESSION)_KEY\s*=\s*"[a-zA-Z0-9_.:-]+"''',
+]

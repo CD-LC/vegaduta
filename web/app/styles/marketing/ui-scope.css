@@ -1,0 +1,528 @@
+/* ---------------------------------------------------------------------------
+ * 19. `.mkt-ui` — THE PRODUCT-UI TYPE SCOPE
+ *
+ * WHY A SECOND TYPE SCALE EXISTS. READ THIS BEFORE CHANGING A SIZE HERE.
+ *
+ * Type size on this page has now been raised as a problem three times
+ * ("fonts are big, so cheap" twice, then specifically about the hero console
+ * card). The first two rounds were fixed in §10 by bringing the DISPLAY sizes
+ * down. The third is a different bug with the same symptom, and shrinking the
+ * marketing roles again would be the wrong fix:
+ *
+ *   The hero card is not marketing copy. It is a QUOTATION OF THE PRODUCT —
+ *   a window frame containing run logs, rails, tabs, step rows, counters.
+ *   It was dressed in marketing roles (.mkt-body 16px, .mkt-small 14px,
+ *   .mkt-caption 12px), and inside a console frame every one of those is a
+ *   full step too large. A real console rendered at 16px body is a console
+ *   with the browser zoomed to 125% (13 x 1.25 = 16.25) — which is exactly
+ *   what it looked like.
+ *
+ * MARKETING TYPE AND PRODUCT-UI TYPE ARE DIFFERENT SCALES. Both are correct;
+ * they are simply not the same scale, and the reference pages prove it:
+ *
+ *   marketing prose ....... 16px body / 14px secondary
+ *                           (Stripe's marketing body is documented at 16px;
+ *                           §10's .mkt-body / .mkt-small are 16/14 and FINAL)
+ *   product / app chrome .. 13-14px body / 12px micro-labels
+ *                           (Linear's app runs a 13px base; GitHub, Vercel
+ *                           and the Stripe DASHBOARD run 14px)
+ *
+ * Real consoles are DENSER than marketing pages, and that density is a large
+ * part of what makes them read as professional tools rather than as
+ * brochures. So a quotation of the product has to carry product-UI type, or
+ * it stops looking like the product.
+ *
+ * THEREFORE `.mkt-ui` IS A SCOPE, NOT A REPLACEMENT. It changes nothing
+ * outside itself. The landing's own prose keeps the §10 scale exactly as it
+ * is — .mkt-h1 32-52px, .mkt-h2 24-32px, .mkt-body 16px — and only what sits
+ * inside a product-UI quotation drops to console type.
+ *
+ * WHAT IS NOT NEGOTIABLE HERE:
+ *   - 12px is still the floor. There is no 11px and no 10px role in this
+ *     scope either. 13px body / 12px label IS the compression; below that it
+ *     stops being "dense like Linear" and becomes unreadable on the mid-range
+ *     Android screens that are most of this product's traffic.
+ *   - Contrast does not compress along with the type. Smaller text needs MORE
+ *     contrast, not less, so every readable role in this scope resolves to
+ *     --mkt-ink or --mkt-ink-2. --mkt-ink-3 measures ~3.3-3.7:1 in light mode
+ *     and stays what it is everywhere else in this file: decorative chrome
+ *     only. A previous pass regressed exactly this and had to be repaired.
+ *
+ * If the card ever reads oversized again, the fix is that a subtree is
+ * missing `.mkt-ui` — not that these numbers are too big.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-ui {
+  /* One place to retune the console scale. Everything below reads these, so a
+   * future adjustment is four numbers rather than forty selectors. */
+  --mkt-ui-text: 0.8125rem; /* 13px — Linear's app base */
+  --mkt-ui-label: 0.75rem; /* 12px — the floor, and the micro-label size */
+  --mkt-ui-title: 0.9375rem; /* 15px — dashboard panel titles sit at 14-15 */
+  --mkt-ui-leading: 1.45; /* vs 1.6 for prose: UI lines are short, and 1.6
+                               * on a 13px log row opens gaps the eye reads as
+                               * separation between unrelated rows */
+  --mkt-ui-leading-tight: 1.3;
+
+  /* Density comes down with the type, one step each. A console whose type
+   * shrank but whose padding did not just looks like a console with a
+   * shrunken font. */
+  --mkt-ui-gap: 0.5rem;
+  --mkt-ui-gap-lg: 0.75rem;
+  --mkt-ui-pad: 0.625rem 0.75rem;
+  --mkt-ui-pad-tight: 0.375rem 0.5rem;
+  --mkt-ui-radius: 8px;
+
+  font-size: var(--mkt-ui-text);
+  line-height: var(--mkt-ui-leading);
+  color: var(--mkt-ink);
+}
+
+/* THE THREE TEXT ROLES. The scope is repeated in the role name so a call site
+ * reads as product UI at a glance: `.mkt-ui .mkt-ui-body`, never a bare 13px
+ * utility that the next person has to reverse-engineer. */
+
+.marketing-root .mkt-ui .mkt-ui-body {
+  font-size: var(--mkt-ui-text); /* 13px */
+  line-height: var(--mkt-ui-leading);
+  letter-spacing: normal;
+  color: var(--mkt-ink);
+}
+
+/* Field names, row labels, column heads, timestamps — text that NAMES
+ * something rather than says it. --mkt-ink-2, never ink-3: at 12px this is
+ * the most contrast-sensitive role on the card. */
+.marketing-root .mkt-ui .mkt-ui-label {
+  font-size: var(--mkt-ui-label); /* 12px */
+  line-height: var(--mkt-ui-leading-tight);
+  letter-spacing: normal;
+  color: var(--mkt-ink-2);
+}
+
+/* Panel / pane headings inside the frame. 600 rather than 700 — a console
+ * heading separates, it does not announce, and at this size the weight is
+ * what carries it, not the size. Deliberately on the UI font and NOT the
+ * display font: Sora inside a console window reads as a poster taped to a
+ * monitor. */
+.marketing-root .mkt-ui .mkt-ui-title {
+  font-family: inherit;
+  font-size: var(--mkt-ui-title); /* 15px */
+  line-height: var(--mkt-ui-leading-tight);
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  color: var(--mkt-ink);
+}
+
+/* The mono micro-label keeps §10's identity treatment unchanged — 12px, the
+ * same 0.12em tracking, tabular figures — because that is already the right
+ * size for a console and it is the strongest single "developer product"
+ * signal on the page. The ONE thing the scope changes is colour: §10 paints
+ * .mkt-eyebrow in --mkt-ink-3, which is fine for a decorative kicker floating
+ * above a 32px heading and not fine for a label a visitor must read off a
+ * dense panel. */
+.marketing-root .mkt-ui .mkt-ui-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-feature-settings:
+    "tnum" 1,
+    "zero" 1;
+  font-size: var(--mkt-ui-label); /* 12px — unchanged */
+  line-height: var(--mkt-ui-leading-tight);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mkt-ink-2);
+}
+
+.marketing-root .mkt-ui .mkt-eyebrow {
+  color: var(--mkt-ink-2);
+}
+
+/* INHERITANCE SAFETY NET.
+ * A scope is only as good as its adoption, and the failure mode is silent:
+ * one leftover `.mkt-small` inside the window and that row alone renders a
+ * step too large — precisely the defect this section exists to fix. So the
+ * marketing roles are re-pointed at the console scale INSIDE the scope and
+ * nowhere else. These are (0,3,0) against §10's (0,2,0), so they win on
+ * specificity rather than on source order.
+ *
+ * This is not a redefinition of those roles. Outside `.mkt-ui` they are
+ * untouched and final. */
+.marketing-root .mkt-ui .mkt-body {
+  font-size: var(--mkt-ui-text);
+  line-height: var(--mkt-ui-leading);
+}
+.marketing-root .mkt-ui .mkt-small {
+  font-size: var(--mkt-ui-label);
+  line-height: var(--mkt-ui-leading-tight);
+}
+.marketing-root .mkt-ui .mkt-caption {
+  font-size: var(--mkt-ui-label);
+  line-height: var(--mkt-ui-leading-tight);
+}
+.marketing-root .mkt-ui .mkt-card-title {
+  font-size: var(--mkt-ui-title);
+  line-height: var(--mkt-ui-leading-tight);
+}
+.marketing-root .mkt-ui .mkt-section-sub {
+  font-size: var(--mkt-ui-text);
+  line-height: var(--mkt-ui-leading);
+}
+.marketing-root .mkt-ui .mkt-lead {
+  font-size: var(--mkt-ui-title);
+  line-height: 1.4;
+}
+
+/* Chips inside a console are status furniture, not marketing badges — §6's
+ * pill padding reads balloon-like at this density. */
+.marketing-root .mkt-ui .mkt-pill {
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  font-size: var(--mkt-ui-label);
+  line-height: var(--mkt-ui-leading-tight);
+}
+
+/* Layout primitives, so a pane never has to re-guess the density. */
+.marketing-root .mkt-ui .mkt-ui-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mkt-ui-gap);
+}
+
+.marketing-root .mkt-ui .mkt-ui-stack--lg {
+  gap: var(--mkt-ui-gap-lg);
+}
+
+.marketing-root .mkt-ui .mkt-ui-row {
+  display: flex;
+  align-items: center;
+  gap: var(--mkt-ui-gap);
+  min-width: 0;
+}
+
+.marketing-root .mkt-ui .mkt-ui-pad {
+  padding: var(--mkt-ui-pad);
+}
+.marketing-root .mkt-ui .mkt-ui-pad--tight {
+  padding: var(--mkt-ui-pad-tight);
+}
+
+/* A rail row or a log line is a fixed-width column: a long agent name
+ * truncates rather than wrapping the console to a new height mid-demo. */
+.marketing-root .mkt-ui .mkt-ui-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+ * 19b. VIEW SWITCH
+ * The affordance that makes the card a multi-view console rather than a
+ * static screenshot. Markup contract is a real tablist:
+ *
+ *   <div class="mkt-ui-tabs" role="tablist">
+ *     <button class="mkt-ui-tab" role="tab" aria-selected="true" …>
+ *
+ * Four selection hooks — aria-selected, aria-current, data-selected and an
+ * .is-selected escape hatch — matching §12 and §13 exactly, so this file has
+ * one convention for "this is the current thing" rather than three.
+ *
+ * Padding, border and background are all declared explicitly, because
+ * globals.css's global `button {}` rule otherwise forces a card background
+ * and a border onto every bare <button>. Same reason §5 declares all three.
+ *
+ * NO `outline: none` anywhere in this block: §5's focus-visible ring is the
+ * only keyboard indicator these controls have.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-ui .mkt-ui-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--mkt-line);
+  border-radius: 999px;
+  background: var(--mkt-surface-sunken);
+  /* A segmented control that outgrows its frame on a phone scrolls, rather
+   * than wrapping into a second row that no longer reads as one control. */
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.marketing-root .mkt-ui .mkt-ui-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.marketing-root .mkt-ui .mkt-ui-tab {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.6875rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: var(--mkt-ui-label); /* 12px */
+  line-height: var(--mkt-ui-leading-tight);
+  font-weight: 600;
+  /* An unselected tab is still a destination the visitor has to read, so it
+   * sits at --mkt-ink-2 and not at the decorative tone. */
+  color: var(--mkt-ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.marketing-root .mkt-ui .mkt-ui-tab:hover {
+  color: var(--mkt-ink);
+  background: color-mix(in oklab, var(--mkt-ink) 6%, transparent);
+}
+
+.marketing-root .mkt-ui .mkt-ui-tab[aria-selected="true"],
+.marketing-root .mkt-ui .mkt-ui-tab[aria-current]:not([aria-current="false"]),
+.marketing-root .mkt-ui .mkt-ui-tab[data-selected="true"],
+.marketing-root .mkt-ui .mkt-ui-tab.is-selected {
+  color: var(--mkt-ink);
+  background: var(--mkt-surface-raised);
+  border-color: var(--mkt-line-strong);
+  box-shadow: var(--mkt-shadow-sm);
+}
+
+/* Colour and elevation are not allowed to be the only carriers of "this one
+ * is current" (WCAG 1.4.1), so the selected tab also gets a 2px accent
+ * underline — a shape difference that survives greyscale, and the same device
+ * §13 uses for a selected card. */
+.marketing-root .mkt-ui .mkt-ui-tab[aria-selected="true"]::after,
+.marketing-root .mkt-ui .mkt-ui-tab[aria-current]:not([aria-current="false"])::after,
+.marketing-root .mkt-ui .mkt-ui-tab[data-selected="true"]::after,
+.marketing-root .mkt-ui .mkt-ui-tab.is-selected::after {
+  content: "";
+  position: absolute;
+  inset-inline: 30%;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--mkt-accent);
+}
+
+.marketing-root .mkt-ui .mkt-ui-tab:disabled,
+.marketing-root .mkt-ui .mkt-ui-tab[aria-disabled="true"] {
+  cursor: not-allowed;
+  color: var(--mkt-ink-3);
+  background: none;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * 19c. RAIL ITEMS
+ * The list down the side of a console window — agents, runs, channels, steps.
+ * Same four selection hooks as the tabs.
+ *
+ * The selected item deliberately does NOT change font-weight. A 400 -> 600
+ * swap on selection reflows the row and the whole rail twitches every time an
+ * autoplaying demo advances; the accent rail and the tint carry the state
+ * instead, and the rail is the non-colour carrier.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-ui .mkt-ui-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.marketing-root .mkt-ui .mkt-ui-rail__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: var(--mkt-ui-pad-tight);
+  padding-inline-start: 0.625rem;
+  border: 0;
+  border-radius: var(--mkt-ui-radius);
+  background: none;
+  font: inherit;
+  font-size: var(--mkt-ui-text); /* 13px */
+  line-height: var(--mkt-ui-leading-tight);
+  text-align: start;
+  color: var(--mkt-ink-2);
+  min-width: 0;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+/* Only an item that is genuinely actionable gets the pointer — a hand cursor
+ * on a static row is the same lie about affordance §4 avoids on cards. */
+.marketing-root .mkt-ui button.mkt-ui-rail__item,
+.marketing-root .mkt-ui a.mkt-ui-rail__item,
+.marketing-root .mkt-ui .mkt-ui-rail__item[role="tab"],
+.marketing-root .mkt-ui .mkt-ui-rail__item[role="option"] {
+  cursor: pointer;
+}
+
+.marketing-root .mkt-ui .mkt-ui-rail__item:hover {
+  color: var(--mkt-ink);
+  background: color-mix(in oklab, var(--mkt-ink) 5%, transparent);
+}
+
+.marketing-root .mkt-ui .mkt-ui-rail__item[aria-selected="true"],
+.marketing-root .mkt-ui .mkt-ui-rail__item[aria-current]:not([aria-current="false"]),
+.marketing-root .mkt-ui .mkt-ui-rail__item[data-selected="true"],
+.marketing-root .mkt-ui .mkt-ui-rail__item.is-selected {
+  color: var(--mkt-ink);
+  background: color-mix(in oklab, var(--mkt-accent) 12%, transparent);
+}
+
+.marketing-root .mkt-ui .mkt-ui-rail__item[aria-selected="true"]::before,
+.marketing-root .mkt-ui .mkt-ui-rail__item[aria-current]:not([aria-current="false"])::before,
+.marketing-root .mkt-ui .mkt-ui-rail__item[data-selected="true"]::before,
+.marketing-root .mkt-ui .mkt-ui-rail__item.is-selected::before {
+  content: "";
+  position: absolute;
+  inset-block: 15%;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--mkt-accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * 19d. PANE SWAP
+ * Swapping views inside the frame. The panes stack in ONE grid cell so an
+ * outgoing and an incoming pane can overlap during a cross-fade instead of
+ * the second one shoving the card's height around mid-transition.
+ *
+ * `display` is deliberately never set on a pane, so the `hidden` attribute
+ * (and React's conditional render) stays the single source of truth for which
+ * pane is showing. A rule like `.mkt-ui-panes > * { display: block }` would
+ * silently defeat `[hidden]`.
+ *
+ * REDUCED MOTION: the animation lives entirely inside a no-preference guard,
+ * and the un-animated resting state is the readable one (opacity 1, no
+ * transform). With motion disabled the switch is instant and complete — no
+ * fade that never finishes, nothing parked at opacity 0.
+ * ------------------------------------------------------------------------ */
+
+.marketing-root .mkt-ui .mkt-ui-panes {
+  display: grid;
+  min-height: 0;
+}
+
+.marketing-root .mkt-ui .mkt-ui-panes > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+/* Belt and braces against any reset that sets `display` on generic children. */
+.marketing-root .mkt-ui .mkt-ui-pane[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* No fill-mode, on purpose. If an engine ever declines to run this keyframe
+   * the pane's resting state is already the visible one, so the worst case is
+   * "it appears without a fade" rather than "it never appears at all" — the
+   * same failure §18 has to clean up after for the scroll-driven reveals. */
+  @keyframes mkt-ui-pane-in {
+    from {
+      opacity: 0;
+      transform: translate3d(var(--mkt-ui-slide-x, 0), var(--mkt-ui-slide-y, 4px), 0);
+    }
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-pane {
+    animation: mkt-ui-pane-in 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  /* Directional variant, for a switch that should read as lateral movement
+   * between sibling views rather than as a replacement. Set
+   * data-direction="back" on the container to reverse the nudge. */
+  .marketing-root .mkt-ui .mkt-ui-panes--slide > .mkt-ui-pane {
+    --mkt-ui-slide-x: 12px;
+    --mkt-ui-slide-y: 0;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-panes--slide[data-direction="back"] > .mkt-ui-pane {
+    --mkt-ui-slide-x: -12px;
+  }
+}
+
+/* --- §19 under the environment overrides of §17 and §18 ------------------ */
+
+@media (prefers-contrast: more) {
+  /* The 12% accent tint behind a selected rail item is roughly 1.2:1 against
+   * the pane and carries nothing on its own here; the accent rail and the ink
+   * step do the work, and an outline replaces the tint. */
+  .marketing-root .mkt-ui .mkt-ui-rail__item[aria-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-rail__item[aria-current]:not([aria-current="false"]),
+  .marketing-root .mkt-ui .mkt-ui-rail__item[data-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-rail__item.is-selected {
+    background: none;
+    outline: 1px solid var(--mkt-line-strong);
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-tab[aria-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-tab[aria-current]:not([aria-current="false"]),
+  .marketing-root .mkt-ui .mkt-ui-tab[data-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-tab.is-selected {
+    box-shadow: none;
+    border-color: var(--mkt-accent);
+  }
+}
+
+@media (forced-colors: active) {
+  /* Selection here is drawn with a tint plus a 2px accent bar, and the mode
+   * discards the tint; both states are redrawn with system colours so "which
+   * view am I on" survives. */
+  .marketing-root .mkt-ui .mkt-ui-tab[aria-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-tab[aria-current]:not([aria-current="false"]),
+  .marketing-root .mkt-ui .mkt-ui-tab[data-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-tab.is-selected,
+  .marketing-root .mkt-ui .mkt-ui-rail__item[aria-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-rail__item[aria-current]:not([aria-current="false"]),
+  .marketing-root .mkt-ui .mkt-ui-rail__item[data-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-rail__item.is-selected {
+    border: 1px solid Highlight;
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-tab::after,
+  .marketing-root .mkt-ui .mkt-ui-rail__item::before {
+    background: HighlightText;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-tabs {
+    border: 1px solid CanvasText;
+  }
+}
+
+@media print {
+  /* §18 resets every animated element in this file to a visible resting
+   * state; the pane swap is new and needs the same treatment for the same
+   * reason — a keyframe that never runs on paper must not be able to leave a
+   * pane at opacity 0. Hidden panes stay hidden: only the view the visitor
+   * was actually looking at belongs on the sheet. */
+  .marketing-root .mkt-ui .mkt-ui-pane {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .marketing-root .mkt-ui .mkt-ui-tabs,
+  .marketing-root .mkt-ui .mkt-ui-tab[aria-selected="true"],
+  .marketing-root .mkt-ui .mkt-ui-tab.is-selected {
+    box-shadow: none;
+  }
+}

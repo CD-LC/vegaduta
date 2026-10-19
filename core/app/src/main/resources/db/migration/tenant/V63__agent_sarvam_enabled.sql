@@ -1,0 +1,13 @@
+-- Direct feedback: "like every other llm as anthropic, gemini - user should
+-- be able to attach sarvam to agents...keep it as like other llm providers".
+-- Sarvam's translate/transcribe/speak tools used to attach to every agent
+-- automatically the moment the tenant activated a Sarvam key. This column
+-- flips that to an explicit per-agent opt-in, same "off by default" shape
+-- knowledge_base_enabled already established for its own tool - see
+-- Agent.java's field javadoc.
+--
+-- DEFAULT false backfills every pre-existing agent to "not attached" - no
+-- agent's behavior silently changes on deploy; a tenant-admin has to
+-- explicitly attach Sarvam to each agent that should get it, same as they
+-- would for any other opt-in tool/knowledge-base attachment.
+ALTER TABLE agent ADD COLUMN sarvam_enabled BOOLEAN NOT NULL DEFAULT false;

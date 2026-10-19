@@ -1,0 +1,30 @@
+{
+  "description": "Customer support with handoff",
+  "nodes": [
+    { "id": "startAgentflow_0", "type": "agentFlow", "data": { "id": "startAgentflow_0", "label": "Start", "name": "startAgentflow", "category": "Agent Flows",
+        "inputs": { "startInputType": "chatInput" } } },
+    { "id": "conditionAgentAgentflow_0", "type": "agentFlow", "data": { "id": "conditionAgentAgentflow_0", "label": "Detect Intention", "name": "conditionAgentAgentflow", "category": "Agent Flows",
+        "inputs": { "conditionAgentModel": "chatOpenAI" } } },
+    { "id": "agentAgentflow_0", "type": "agentFlow", "data": { "id": "agentAgentflow_0", "label": "Refund Agent", "name": "agentAgentflow", "category": "Agent Flows",
+        "inputs": {
+          "agentModel": "chatGoogleGenerativeAI",
+          "agentMessages": [ { "role": "system", "content": "<p>You are a refund agent. Help the user with <strong>refunds</strong>.</p><p>Be brief &amp; polite.</p>" },
+                             { "role": "user", "content": "<p>hello</p>" } ],
+          "agentTools": [ { "agentSelectedTool": "googleCustomSearch", "agentSelectedToolConfig": { "agentSelectedTool": "googleCustomSearch" } } ],
+          "agentKnowledgeDocumentStores": [ { "documentStore": "570df92b:policies" } ],
+          "agentModelConfig": { "credential": "cred-uuid", "modelName": "gemini-2.0-flash", "temperature": 0.4, "agentModel": "chatGoogleGenerativeAI" }
+        } } },
+    { "id": "agentAgentflow_1", "type": "agentFlow", "data": { "id": "agentAgentflow_1", "label": "Sales Agent", "name": "agentAgentflow", "category": "Agent Flows",
+        "inputs": {
+          "agentModel": "chatAnthropic",
+          "agentMessages": [ { "role": "system", "content": "<p>You are a sales assistant.</p>" } ],
+          "agentModelConfig": { "credential": "", "modelName": "claude-3-haiku", "temperature": 0.9 }
+        } } },
+    { "id": "stickyNoteAgentflow_0", "type": "stickyNote", "data": { "id": "stickyNoteAgentflow_0", "label": "Sticky", "name": "stickyNoteAgentflow", "category": "Agent Flows", "inputs": { "note": "hi" } } }
+  ],
+  "edges": [
+    { "source": "startAgentflow_0", "target": "conditionAgentAgentflow_0", "id": "a" },
+    { "source": "conditionAgentAgentflow_0", "target": "agentAgentflow_0", "id": "b" },
+    { "source": "conditionAgentAgentflow_0", "target": "agentAgentflow_1", "id": "c" }
+  ]
+}

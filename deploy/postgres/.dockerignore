@@ -1,0 +1,16 @@
+# Build context hygiene (INF-017). The extensions are git-cloned and verified
+# by commit, so nothing secret or local ever needs to be in this context.
+# Deny-list (not allow-list) so a script later COPYed into the image still works.
+.git
+*.log
+.env
+.env.*
+!.env*.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+*.dump
+*.sql.gz
+backups/

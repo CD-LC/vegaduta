@@ -1,0 +1,88 @@
+# Generic HTTPS edge for docker-compose.domain.yml.
+#
+# One site per public hostname under {$BASE_DOMAIN}. Caddy obtains and renews
+# Let's Encrypt certificates automatically (needs DNS A/AAAA records for each
+# hostname pointing at this host and ports 80+443 reachable). Set
+# ACME_EMAIL for expiry notices. Behind another TLS-terminating proxy or a
+# tunnel instead? Set CADDY_AUTO_HTTPS=off AND CADDY_SITE_SCHEME=http:// (sites then listen
+# on plain :80 only; without the scheme Caddy would still expect to terminate TLS on :443)
+# and point that proxy at :80.
+{
+	# Empty when ACME_EMAIL is unset (compose sets the whole directive), so a tunnel/auto_https-off
+	# deployment without an email still parses.
+	{$CADDY_EMAIL_DIRECTIVE}
+	# Empty (automatic HTTPS, the default) or `auto_https <value>`; compose builds it from CADDY_AUTO_HTTPS.
+	{$CADDY_AUTO_HTTPS_DIRECTIVE}
+	servers {
+		trusted_proxies static private_ranges
+		max_header_size 64KB
+	}
+}
+
+# Largest legitimate upload is the 30 MB knowledge multipart cap.
+(common) {
+	request_body {
+		max_size 32MB
+	}
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
+# The bare domain and www have no app of their own: send visitors to the console.
+{$CADDY_SITE_SCHEME}{$BASE_DOMAIN}, {$CADDY_SITE_SCHEME}www.{$BASE_DOMAIN} {
+	redir https://app.{$BASE_DOMAIN}{uri} permanent
+}
+
+{$CADDY_SITE_SCHEME}app.{$BASE_DOMAIN} {
+	import common
+	reverse_proxy web:3000
+}
+
+{$CADDY_SITE_SCHEME}admin.{$BASE_DOMAIN} {
+	import common
+	reverse_proxy web:3000
+}
+
+{$CADDY_SITE_SCHEME}api.{$BASE_DOMAIN} {
+	import common
+	# Actuator stays internal (Prometheus scrapes core:8080 on the compose
+	# network). Matched on Caddy's normalised path, so %-encoded variants of
+	# /actuator are caught too.
+	@actuator path /actuator /actuator/*
+	respond @actuator 404
+	reverse_proxy core:8080 {
+		# Long-lived SSE/streaming chat responses.
+		flush_interval -1
+	}
+}
+
+{$CADDY_SITE_SCHEME}auth.{$BASE_DOMAIN} {
+	import common
+	# Keycloak's admin console and the master realm (admin logins) are
+	# reachable only on the loopback port (8180); the public hostname serves
+	# the application realm, resources and js only. Keep in step with the
+	# Helm keycloak Ingress paths (deploy/helm/charts/keycloak).
+	@admin path /admin /admin/* /realms/master /realms/master/*
+	respond @admin 404
+	reverse_proxy keycloak:8080
+}
+
+{$CADDY_SITE_SCHEME}codeintel.{$BASE_DOMAIN} {
+	import common
+	reverse_proxy code-intel:8090
+}
+
+{$CADDY_SITE_SCHEME}builder.{$BASE_DOMAIN} {
+	import common
+	reverse_proxy app-builder:8091
+}
+
+{$CADDY_SITE_SCHEME}livekit.{$BASE_DOMAIN} {
+	import common
+	reverse_proxy livekit:7880
+}

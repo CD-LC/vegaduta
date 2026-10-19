@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>rl</artifactId>
+  <name>rl</name>
+  <description>
+    In-core Reinforcement-Learning subsystem: human/verifiable reward capture,
+    per-turn trajectory recording, a per-agent contextual bandit (Thompson
+    sampling over Beta posteriors) for the handful of SAFE, non-side-effecting
+    decision dimensions (model route, reasoning depth, prompt variant, tool
+    subset, generation params), and a DPO-style preference export for the
+    out-of-process Python trainer.
+
+    Deliberately an EXPOSE-only module: it never wires itself into the agent
+    runtime. It publishes two integration interfaces (RlPolicyPort,
+    RlTurnRecorder) and one Spring AI Advisor bean (RlTrajectoryAdvisor,
+    mirroring chat/LlmMetricsAdvisor) that the orchestrator registers in
+    AnthropicAgentChatClientFactory alongside LlmMetricsAdvisor. Promotion of
+    an offline-optimized prompt to a live agent stays a human action - this
+    module offers export/import only, never auto-writes Agent.systemPrompt.
+
+    Depends on: security (TenantContext - schema-per-tenant isolation is
+    automatic, so RL tables carry NO tenant_id and live in db/migration/tenant),
+    chat (reuses LlmMetricsAdvisor's AGENT_ID_PARAM/SESSION_ID_PARAM advisor
+    convention so the orchestrator threads ONE set of params for both
+    advisors), plus spring-web/validation/data-jpa and the Spring AI advisor
+    API. Nothing in core depends back on rl - a one-directional leaf addition,
+    same shape as eventbus/devices/graphmemory.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- Reuse LlmMetricsAdvisor.AGENT_ID_PARAM/SESSION_ID_PARAM (the advisor
+         context-param convention) and the Spring AI advisor API it is built
+         on, so RlTrajectoryAdvisor threads the exact same param keys the
+         orchestrator already sets for LLM metrics - no drift between the two
+         advisors the orchestrator registers side by side. chat depends only
+         on providers/security; nothing depends back on rl, so no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>chat</artifactId>
+    </dependency>
+
+    <!-- org.springframework.ai.chat.client.advisor.api.* (CallAdvisor/
+         StreamAdvisor) for RlTrajectoryAdvisor - same coordinate codeintel/
+         knowledge use to pull the Spring AI API from the reactor's managed
+         BOM. Already transitive via chat above; declared explicitly so the
+         advisor types resolve regardless of chat's own dependency shape. -->
+    <!-- Spring AI API only (ChatClient/advisors/ToolCallback/ChatModel types).
+         Was spring-ai-starter-model-anthropic until 2026-09-28, but nothing in
+         this module imports org.springframework.ai.anthropic (grep-verified,
+         main + test); the provider starters and their auto-configs belong to
+         core/chat, which builds every ChatModel. -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-client-chat</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

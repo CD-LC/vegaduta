@@ -1,0 +1,141 @@
+{
+  "realm": "vegaduta-ai",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "accessTokenLifespan": 600,
+  "ssoSessionIdleTimeout": 600,
+  "displayName": "VegaDuta",
+  "displayNameHtml": "<strong>VegaDuta</strong>",
+  "loginTheme": "agentic-ai",
+  "accountTheme": "agentic-ai",
+  "emailTheme": "agentic-ai",
+  "attributes": {
+    "frontendUrl": "https://auth.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"
+  },
+  "smtpServer": {
+    "host": "${env.KEYCLOAK_SMTP_HOST:smtp.example.com}",
+    "port": "587",
+    "from": "${env.KEYCLOAK_SMTP_FROM:no-reply@example.com}",
+    "fromDisplayName": "VegaDuta",
+    "auth": "true",
+    "starttls": "true",
+    "user": "REPLACE_AT_IMPORT_TIME"
+  },
+  "browserSecurityHeaders": {
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self' https://app.${env.VEGADUTA_PUBLIC_DOMAIN:example.com} https://${env.VEGADUTA_PUBLIC_DOMAIN:example.com} https://admin.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}; object-src 'none';"
+  },
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "roles": {
+    "realm": [
+      {
+        "name": "tenant-admin",
+        "description": "Full admin over their own tenant: providers, agents, MCP registry, knowledge base, user management within the tenant."
+      },
+      {
+        "name": "platform-admin",
+        "description": "Cross-tenant platform operator for the admin console. Not auto-granted at signup; assign manually to real platform-operator accounts only. Members of the platform-admins group below get MFA enforced - see keycloak/README.md for the one manual admin-console step this realm export can't express."
+      },
+      {
+        "name": "agent-builder",
+        "description": "Can create/edit agents, attach knowledge bases and tools, but cannot manage billing or invite/remove other users."
+      },
+      {
+        "name": "delegated-user",
+        "description": "Assisted/delegated-setup role - configuring an agent on behalf of a non-technical end user who never gets their own login."
+      },
+      {
+        "name": "end-customer",
+        "description": "Scoped role for the customer-facing widget's public auth path - rate-limited, domain-restricted, no access to any admin endpoint."
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "platform-admins",
+      "path": "/platform-admins",
+      "realmRoles": ["platform-admin"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "agentic-ai-core",
+      "name": "VegaDuta Core (Spring Boot resource server)",
+      "description": "Confidential client used by core's OAuth2 Resource Server config to validate tokens via the JWKS endpoint, and server-side for the Keycloak Admin REST API in tenant-provisioning.",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "secret": "CHANGE_ME_IN_A_REAL_ENVIRONMENT_DO_NOT_COMMIT_A_REAL_SECRET",
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "agentic-ai-web",
+      "name": "VegaDuta Web Console",
+      "description": "Public client (browser, no secret) for the Next.js console's OIDC authorization-code-with-PKCE login flow.",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["https://app.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*", "https://${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*"],
+      "webOrigins": ["https://app.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}", "https://${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "agentic-ai-platform-admin",
+      "name": "VegaDuta Platform Admin Console",
+      "description": "Public client (browser, no secret) for web-admin's OIDC auth-code+PKCE flow. No tenant_id mapper: platform-admin ops are cross-tenant. Fronted additionally by Cloudflare Access (terraform/modules/cloudflare-access) as a pre-auth gate.",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["https://admin.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*"],
+      "webOrigins": ["https://admin.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"],
+      "attributes": { "pkce.code.challenge.method": "S256" }
+    }
+  ],
+  "identityProviders": []
+}

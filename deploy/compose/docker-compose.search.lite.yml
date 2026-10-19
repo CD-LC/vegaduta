@@ -1,0 +1,15 @@
+# Lite-tier companion of docker-compose.search.yml. Added automatically by
+# `scripts/vegaduta up --lite --search`; do not layer it by hand.
+#
+# Why it exists: lite.yml gives `core` no `networks:` key, so core sits on the
+# implicit `default` network. The base search overlay then declares
+# `core.networks: [search-net]`, and a service that names networks is attached
+# to ONLY those, so core silently lost `default` and could no longer resolve
+# `postgres` (UnknownHostException at boot). Naming `default` again keeps core
+# where it was and still joins it to search-net. The full stack declares its
+# networks in the base file, so it does not need this.
+services:
+  core:
+    networks:
+      - default
+      - search-net

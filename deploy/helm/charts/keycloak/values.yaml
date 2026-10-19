@@ -1,0 +1,179 @@
+# keycloak - official Keycloak image in production mode (`start`), public on
+# <global.hosts.auth>.<global.domain>, database in the bundled CloudNativePG cluster
+# (database/role "keycloak") or an external PostgreSQL (database.*).
+#
+# Realm "agentic-ai" (global.oidc.realm) is imported on first start (existing realms
+# are never overwritten). A post-install/post-upgrade Job then reconciles what an import
+# cannot carry: unmanagedAttributePolicy=ADMIN_EDIT (tenant_id must persist but never be
+# user-editable), the core client secret, least-privilege realm-management roles for core's
+# service account (never realm-admin), and
+# the VERIFY_PROFILE required action (off; the app owns onboarding).
+#
+# Generated Secrets (kept on uninstall):
+#   <release>-keycloak-admin        username/password   bootstrap admin of the master realm
+#   <release>-keycloak-core-client  clientSecret        confidential client used by core
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: identity
+
+image:
+  registry: quay.io
+  repository: keycloak/keycloak
+  tag: "26.7.5"
+  digest: ""
+  pullPolicy: ""
+
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+terminationGracePeriodSeconds: 60
+revisionHistoryLimit: 5
+containerPort: 8080
+extraPorts:
+  - { name: management, containerPort: 9000 }
+  - { name: jgroups, containerPort: 7800 }
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8080
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+admin:
+  # -- Existing Secret with `username` and `password` for the bootstrap admin ("" = generate).
+  existingSecret: ""
+  # -- URL the admin console is served on (KC_HOSTNAME_ADMIN), e.g. https://kc-admin.internal.example.com
+  # behind a private (VPN/internal) Ingress. The public auth host never routes /admin or
+  # /realms/master (see ingress.paths), so with "" the console is reachable only by adding
+  # those paths yourself, ideally with an IP allowlist annotation.
+  consoleUrl: ""
+
+# -- External database for Keycloak (used when global.postgresql.host is set).
+database:
+  host: ""
+  port: 5432
+  name: keycloak
+  username: keycloak
+  existingSecret: ""
+  passwordKey: password
+
+realm:
+  # -- Import the realm on first start.
+  import: true
+  registrationAllowed: true
+  verifyEmail: false
+  displayName: VegaDuta
+  # -- Extra redirect URIs / web origins for the web client (e.g. a second domain).
+  extraRedirectUris: []
+  extraWebOrigins: []
+  # -- Additional client representations appended to the realm import (mobile/IDE clients, ...).
+  extraClients: []
+  # -- SMTP for verification / password-reset mail. The password is read from smtp.existingSecret (key `password`).
+  smtp:
+    host: ""
+    port: "587"
+    from: ""
+    fromDisplayName: VegaDuta
+    user: ""
+    starttls: "true"
+    existingSecret: ""
+
+reconcile:
+  enabled: true
+  backoffLimit: 10
+  activeDeadlineSeconds: 900
+
+probes:
+  startup:
+    httpGet: { path: /health/started, port: management }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  liveness:
+    httpGet: { path: /health/live, port: management }
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    httpGet: { path: /health/ready, port: management }
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests: { cpu: 250m, memory: 768Mi }
+  limits: { memory: 1536Mi }
+
+javaOptsAppend: "-XX:MaxRAMPercentage=70"
+
+# The keycloak user of the official image.
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 0
+  fsGroup: 0
+# `kc.sh start` (non-optimized) re-augments the server into /opt/keycloak/lib on boot, so the root
+# filesystem stays writable. Build a custom optimized image (`kc.sh build`) to turn this on.
+securityContext:
+  readOnlyRootFilesystem: false
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 256Mi }
+
+hpa:
+  enabled: false
+pdb:
+  enabled: true
+topologySpread:
+  enabled: true
+
+ingress:
+  enabled: true
+  hostKey: auth
+  extraHosts: []
+  # -- Routed paths. [] = /realms/<global.oidc.realm> and /resources only (no admin console,
+  # no master realm). Set explicitly to override.
+  paths: []
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+
+# Keycloak serves /metrics on the management port (9000); scrape it with your own PodMonitor.
+serviceMonitor:
+  enabled: false
+
+networkPolicy:
+  # Siblings reach the http port only; the keycloak pods themselves also need JGroups
+  # (7800) for clustering. Management (9000) stays closed to everyone.
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, core-migrate, code-intel, app-builder, rl-trainer, web, { name: keycloak, ports: [http, jgroups] }, keycloak-reconcile]
+  allowEgressTo: [postgres, keycloak]
+  # Social identity providers, SMTP relays.
+  allowExternalEgress: true
+  externalEgressPorts: [443, 587, 465]
+  extraIngress: []
+  extraEgress: []
+
+tests:
+  enabled: true
+  path: /realms/master
+
+env: {}
+secretEnv: []
+extraEnv: []
+envFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

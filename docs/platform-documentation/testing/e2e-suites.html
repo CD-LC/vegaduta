@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>End-to-End Suites — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="testing" data-page="e2e-suites.html" data-doc="VD-TST-002" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="test-strategy.html">Testing &amp; Quality</a><span class="sep">/</span>End-to-End Suites</div>
+<div class="doc-meta" data-auto></div>
+<h1>End-to-End Suites</h1>
+<p class="lede">
+  Everything under <code>web/e2e/</code>: the Playwright business-case suite, the smaller TypeScript specs, three
+  Playwright configurations, and the <code>@mvp-acceptance</code> slice that the (currently manual) GitHub workflow runs.
+  The suite header states the convention: a real running <code>core</code> + <code>sidecar</code> + Postgres + Keycloak + Redis stack,
+  no mocking anywhere. Setup detail lives in <code>web/e2e/README.md</code>.
+</p>
+
+<h2>Three Playwright configurations</h2>
+<table>
+  <thead><tr><th>Config</th><th>Test dir</th><th>Behaviour as configured</th></tr></thead>
+  <tbody>
+    <tr><td><code>web/playwright.config.js</code> (the business-case suite)</td><td><code>./e2e/specs</code></td><td>Sequential: <code>fullyParallel: false</code>, <code>workers: 1</code>, <code>retries: 0</code>, test timeout 120 s, expect timeout 15 s, action/navigation timeout 15 s. Headed with a 1000 ms <code>slowMo</code> by default; set <code>E2E_HEADLESS=true</code> and <code>E2E_SLOWMO_MS=0</code> for a fast run. Base URL from <code>E2E_BASE_URL</code> (default <code>http://localhost:3000</code>). Sequential on purpose: shared tenant state and the Redis-backed signup rate limiter.</td></tr>
+    <tr><td><code>web/playwright.staging.config.ts</code></td><td><code>./e2e</code></td><td>Targets <code>https://app.staging.example.com</code>, 1 retry, 4 workers, longer action timeout (15 s), no web server.</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-warning">
+  <div class="callout-title">Staging config target</div>
+  <p style="margin:4px 0 0">The staging config hard-codes a staging hostname (<code>app.staging.example.com</code> in these docs). Point it at your own staging domain, confirm the target before running it, and never describe a run against it as production-verified.</p>
+</div>
+
+<h2>Business-case suite (<code>web/e2e/specs/</code>, 22 files)</h2>
+<table>
+  <thead><tr><th>Spec</th><th>Covers (per the suite README)</th></tr></thead>
+  <tbody>
+    <tr><td>00 full-platform-showcase</td><td>One slow narrated walkthrough, signup through channels, for a human to watch (<code>npm run e2e:showcase</code>)</td></tr>
+    <tr><td>01 signup-and-login</td><td>Signup form, duplicate org/email rejection, Keycloak login, logout</td></tr>
+    <tr><td>02 providers-agents-chat</td><td>Provider activation (and invalid-key rejection), agent creation, streaming chat</td></tr>
+    <tr><td>03 mcp-registry</td><td>Register / enable / disable an MCP tool server</td></tr>
+    <tr><td>04 knowledge-collections-and-multimodal</td><td>Collections, <code>.md</code>/PDF/DOCX/image/audio/video ingestion, search, async job polling</td></tr>
+    <tr><td>05 agent-access-control</td><td>Per-agent tool and knowledge allow-lists</td></tr>
+    <tr><td>06 admin-users-and-roles</td><td>Create teammate, assign roles, forced password change</td></tr>
+    <tr><td>07 approvals-and-audit</td><td>HITL approve/reject, per-action policy override, audit log</td></tr>
+    <tr><td>08 channels-whatsapp</td><td>Twilio credential activation (and rejection), default agent routing</td></tr>
+    <tr><td>09 multi-tenant-isolation</td><td>Two tenants, zero cross-visibility, UI and direct API probe</td></tr>
+    <tr><td>10 api-security</td><td>Webhook signature rejection, unauthenticated / under-privileged 401/403</td></tr>
+    <tr><td>11 workflow-designer</td><td>Canvas build/save/validate, free-tier 3-workflow cap, triggers and a synchronous run (API-level)</td></tr>
+    <tr><td>12 quick-task</td><td>Delivery-number gate, example chips, task history</td></tr>
+    <tr><td>13 user-created-tools</td><td>Sandboxed SpEL tool create/test/toggle/delete</td></tr>
+    <tr><td>14 issues-portal</td><td>Admin-only gate, status tabs, failed run recorded as an issue and resolved</td></tr>
+    <tr><td>15 agent-templates</td><td>Audience filtering; a template pre-fills the create form</td></tr>
+    <tr><td>16 google-integration</td><td>Admin-only gate, disconnected state, OAuth callback parameters</td></tr>
+    <tr><td>17 social-channels</td><td>Messenger/Instagram/Slack/Discord/X validation and X callback handling</td></tr>
+    <tr><td>18 subscription-tiers</td><td>5-agent free-tier cap and upgrade dialog; <code>POST /api/tenant/upgrade</code> gate</td></tr>
+    <tr><td>19 web-admin-platform-app</td><td>Separate web-admin app: a tenant-admin without <code>platform-admin</code> sees &ldquo;Access restricted&rdquo;</td></tr>
+    <tr><td>20 telegram-and-email-channels</td><td>Fabricated bot token / unreachable IMAP host rejected by each channel's own check</td></tr>
+    <tr><td>21 agent-payments</td><td>Not in the README table; its header says it covers the <code>/admin/payments</code> mandate console up to the grant wizard review step, deliberately without completing a grant, and that it had not yet been run when written</td></tr>
+  </tbody>
+</table>
+<p>
+  Also under <code>web/e2e/</code> (run by the TypeScript config): <code>axon-redesign.spec.ts</code>, <code>admin-panel.spec.ts</code>,
+  <code>whatsapp-integration.spec.ts</code>, <code>core-api.spec.ts</code>, <code>signup-onboarding.spec.ts</code>, one spec for an optional external integration, and
+  <code>edge-faq-eval.spec.ts</code>, which collects the report from the <code>/eval/edge-faq</code> page (the on-device FAQ eval, run inside the browser).
+</p>
+
+<h2>Design conventions worth knowing</h2>
+<ul>
+  <li><strong>Fresh tenant per test</strong> via <code>POST /api/signup</code> in <code>web/e2e/fixtures.js</code>; no shared tenant.</li>
+  <li><strong>No real payment is completed</strong>; tenant schema is usable at signup independent of any payment step (billing is off by default).</li>
+  <li><strong>Direct-API specs</strong> (05, 09, 10) need <code>E2E_KEYCLOAK_CLIENT_SECRET</code> for the <code>agentic-ai-core</code> client via a test-only password-grant helper.</li>
+  <li><strong>Opt-in specs skip rather than fail</strong> when their variable is unset: <code>E2E_ANTHROPIC_API_KEY</code>, <code>E2E_TWILIO_*</code>, <code>E2E_SAMPLE_PDF_PATH</code> / <code>DOCX</code> / <code>IMAGE</code> / <code>AUDIO</code> / <code>VIDEO</code>, <code>E2E_ADMIN_BASE_URL</code>, <code>E2E_PLATFORM_ADMIN_EMAIL</code> / <code>PASSWORD</code>. Names only; values are never documented here.</li>
+  <li><strong>Local core needs the <code>e2e</code> Spring profile</strong> (add <code>e2e</code> to <code>SPRING_PROFILES_ACTIVE</code>, e.g. <code>security,knowledge,mcp,e2e</code>; <code>core/app-config/.../application-e2e.yml</code>), which raises the signup rate limit; otherwise the sixth signup from one IP fails with 429.</li>
+</ul>
+<pre><code>cd web
+npm run e2e            # headless, all specs
+npm run e2e:ui         # interactive UI mode
+npm run e2e:report     # open the last HTML report
+npm run e2e:showcase   # headed full-platform walkthrough</code></pre>
+
+<h2><code>@mvp-acceptance</code> slice and the e2e workflow</h2>
+<p>Six journeys are tagged in the <code>test(...)</code> title, per the README (six passing-tagged tests; workflow-designer contributes two): signup and login (01), agent-template pre-fill (15), knowledge <code>.md</code> upload and search (04), workflow create as draft and synchronous run (11, two tests), and the web-admin access-restricted negative path (19). A tagged FREE-tier chat journey in spec 02 is recorded as <code>test.fixme</code>, not passing.</p>
+<div class="mermaid">
+flowchart LR
+  A["workflow_dispatch e2e.yml"] --> B["boot-stack composite action: compose + ci overlay, health gate"]
+  B --> C["npm install + playwright install chromium"]
+  C --> D["timeout 900 npx playwright test --grep @mvp-acceptance"]
+  D -->|failure| E["upload traces + service logs"]
+  D --> F["compose down -v"]
+</div>
+<ul>
+  <li>Job timeout 30 minutes; the Playwright step itself is capped at 900 seconds (15 minutes), the acceptance budget cited in the workflow.</li>
+  <li>Triggers: the nightly cron <code>0 3 * * *</code> is commented out; the workflow is <code>workflow_dispatch</code> only by default. The job's PR path is gated on a <code>full-stack</code> label if PR triggers return.</li>
+  <li>The workflow's own comment asks a repo admin to mark <code>mvp-acceptance</code> a required check on <code>main</code>; that branch-protection setting is not verifiable from the repository.</li>
+</ul>
+
+<div class="callout callout-note">
+  <div class="callout-title">Not documented in the repository</div>
+  <p style="margin:4px 0 0">Current pass rates, the count of individual test cases, the date of the last full run, and whether the last full run was green are not recorded in the files read.</p>
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>web/e2e/README.md</code>; <code>web/e2e/specs/</code> (22 files, 00 to 21); <code>web/e2e/fixtures.js</code>.</li>
+  <li><code>web/playwright.config.js</code>, <code>web/playwright.staging.config.ts</code>; <code>web/package.json</code> scripts.</li>
+  <li><code>.github/workflows/e2e.yml</code>; <code>.github/actions/boot-stack/action.yml</code>; <code>scripts/ci/stack-health-gate.sh</code>.</li>
+</ul>
+<p>Related: <a href="test-strategy.html">Test Strategy</a> &middot; <a href="quality-gates.html">Quality Gates</a> &middot; <a href="../deployment/compose-stack.html">Docker Compose Stack</a></p>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

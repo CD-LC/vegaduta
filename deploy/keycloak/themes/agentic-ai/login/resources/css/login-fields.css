@@ -1,0 +1,244 @@
+/* ---- 6. Fields ----------------------------------------------------------- */
+/* Reset PatternFly 3's bootstrap grid the user-profile macro wraps labels and
+   inputs in (col-xs-12 ... float + 15px gutters = the "so much gap"). */
+.aai-card [class*="col-"] {
+  float: none !important;
+  width: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: static !important;
+}
+.aai-card .row, .aai-card .form-horizontal .form-group { margin-left: 0 !important; margin-right: 0 !important; }
+
+.aai-card .form-group,
+.aai-field {
+  margin: 0 0 14px !important;
+  padding: 0 !important;
+}
+.aai-card .form-group::before, .aai-card .form-group::after { display: none !important; }
+
+.aai-card label,
+.aai-label {
+  display: block;
+  margin: 0 0 6px;
+  padding: 0;
+  font-family: var(--aai-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--aai-ink);
+  max-width: none;
+}
+/* The user-profile macro prints a bare "*" text node after required labels.
+   Every field on register / update-profile is required, so the asterisks
+   were clutter: the wrapper's font-size hides the bare text node while the
+   label keeps its own explicit size. Keycloak still validates server-side
+   and the inline error text renders as usual. */
+.aai-card .form-group > div[class*="col-"]:first-child:has(> label) {
+  display: block;
+  margin-bottom: 6px !important;
+  font-size: 0;
+  line-height: 0;
+}
+.aai-card .form-group > div[class*="col-"]:first-child:has(> label) > label { margin: 0; }
+
+.aai-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.aai-label-row label { margin: 0; }
+.aai-link-sm { font-size: 0.8125rem; font-weight: 500; white-space: nowrap; }
+
+/* :where() keeps this at (0,1,1) so the password-wrap padding below can win. */
+.aai-card input:where(:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"])),
+.aai-card select,
+.aai-card .pf-c-form-control,
+.aai-card .form-control,
+.aai-input {
+  display: block;
+  width: 100% !important;
+  min-height: 44px !important;
+  margin: 0;
+  padding: 10px 16px !important;
+  border-radius: 999px !important;
+  background: var(--aai-field) !important;
+  background-image: none !important;
+  border: 1px solid var(--aai-field-line) !important;
+  box-shadow: none !important;
+  color: var(--aai-ink) !important;
+  font-family: var(--aai-font-sans) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.3 !important;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.aai-card textarea, .aai-card textarea.pf-c-form-control {
+  width: 100% !important;
+  min-height: 96px;
+  padding: 10px 16px !important;
+  border-radius: 18px !important;
+  background: var(--aai-field) !important;
+  border: 1px solid var(--aai-field-line) !important;
+  box-shadow: none !important;
+  color: var(--aai-ink) !important;
+  font-family: var(--aai-font-sans) !important;
+  font-size: 0.9375rem !important;
+}
+.aai-card input::placeholder, .aai-card textarea::placeholder { color: var(--aai-ink-3); opacity: 1; }
+.aai-card input:hover:not(:focus), .aai-card select:hover:not(:focus) { border-color: var(--aai-field-line-hover) !important; }
+.aai-card input:focus, .aai-card input:focus-visible,
+.aai-card select:focus, .aai-card textarea:focus {
+  border-color: var(--aai-accent) !important;
+  box-shadow: var(--aai-ring) !important;
+  outline: none !important;
+}
+.aai-card input[aria-invalid="true"],
+.aai-card .pf-c-form-control[aria-invalid="true"] {
+  border-color: var(--aai-error) !important;
+}
+.aai-card input:disabled, .aai-card input[disabled] { opacity: 0.6; cursor: not-allowed; }
+.aai-card input:-webkit-autofill,
+.aai-card input:-webkit-autofill:hover,
+.aai-card input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--aai-ink);
+  -webkit-box-shadow: 0 0 0 1000px var(--aai-page) inset !important;
+  caret-color: var(--aai-ink);
+}
+
+/* Password field + show/hide eye (passwordVisibility.js swaps the <i> class
+   between aai-eye-show / aai-eye-hide, see theme.properties). */
+.aai-input-wrap, .aai-card .pf-c-input-group {
+  position: relative;
+  display: block;
+  background: none !important;
+  box-shadow: none !important;
+}
+.aai-card .aai-input-wrap > input,
+.aai-card .pf-c-input-group > input { padding-right: 46px !important; }
+.aai-eye,
+.aai-card .pf-c-input-group > button {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 999px;
+  background: transparent !important;
+  color: var(--aai-ink-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none !important;
+}
+.aai-eye:hover, .aai-card .pf-c-input-group > button:hover { color: var(--aai-accent); background: var(--aai-accent-soft) !important; }
+.aai-eye:focus-visible { outline: 2px solid var(--aai-accent); outline-offset: 1px; }
+.aai-eye i, .aai-card .pf-c-input-group > button i {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--aai-eye-mask) center / contain no-repeat;
+  mask: var(--aai-eye-mask) center / contain no-repeat;
+  forced-color-adjust: none;
+}
+.aai-eye-show, .fa-eye {
+  --aai-eye-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+}
+.aai-eye-hide, .fa-eye-slash {
+  --aai-eye-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94'/%3E%3Cpath d='M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19'/%3E%3Cpath d='M14.12 14.12a3 3 0 1 1-4.24-4.24'/%3E%3Cline x1='1' y1='1' x2='23' y2='23'/%3E%3C/svg%3E");
+}
+
+/* Field-level validation text (messagesPerField). */
+.aai-card .pf-c-form__helper-text,
+.aai-card .help-block,
+.aai-card .kc-feedback-text.pf-m-error,
+.aai-field-error {
+  display: block;
+  margin: 6px 0 0 14px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--aai-error) !important;
+}
+.aai-card .pf-c-form__helper-text:not(.pf-m-error) { color: var(--aai-ink-3) !important; }
+
+/* Checkbox rows (remember me, sign out other sessions, terms) */
+.aai-check,
+.aai-card .checkbox,
+.aai-card .pf-c-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+.aai-check label, .aai-card .checkbox label, .aai-card .pf-c-check label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--aai-ink-2);
+  cursor: pointer;
+  min-height: 0;
+}
+.aai-card input[type="checkbox"], .aai-card input[type="radio"] {
+  position: static !important; /* PatternFly 3 floats .checkbox inputs absolute over the label text */
+  width: 17px;
+  height: 17px;
+  margin: 0 !important;
+  flex: none;
+  accent-color: var(--aai-accent);
+  cursor: pointer;
+}
+
+.aai-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 2px 0 18px;
+}
+
+/* Register: first + last name share one row (CSS-only, so the user-profile
+   macro keeps rendering whatever attributes the realm defines). */
+#kc-register-form, #kc-update-profile-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 12px;
+}
+#kc-register-form > *, #kc-update-profile-form > * { grid-column: 1 / -1; min-width: 0; }
+#kc-register-form > .form-group:has(> div > #firstName),
+#kc-register-form > .form-group:has(> div > #lastName),
+#kc-update-profile-form > .form-group:has(> div > #firstName),
+#kc-update-profile-form > .form-group:has(> div > #lastName) { grid-column: auto; }
+@media (max-width: 420px) {
+  #kc-register-form > .form-group, #kc-update-profile-form > .form-group { grid-column: 1 / -1; }
+}
+
+/* Terms block (only if the realm turns on terms acceptance). No max-height/
+   overflow: the markup comes from Keycloak's own register-commons macro
+   (not overridden here) with no tabindex/role on the wrapper, so a clipped
+   scroll region would be unreachable by keyboard - let it grow instead. */
+#kc-registration-terms-text {
+  margin: 6px 0 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--aai-field);
+  border: 1px solid var(--aai-field-line);
+  font-size: 0.8125rem;
+  color: var(--aai-ink-2);
+}

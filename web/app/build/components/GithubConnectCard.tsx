@@ -1,0 +1,435 @@
+"use client";
+
+// "Connect GitHub" — tenant-facing half of the BYO-repo pivot
+// (docs/APP-BUILDER-BYO-REPO-CONTRACT-2026-07-30.md §4). Build/preview moves
+// off our own Docker infra onto the tenant's own GitHub repo + Actions: the
+// tenant pastes a repo-scoped fine-grained PAT, app-builder validates + stores
+// it, and every future "generate" call pushes a branch and opens a PR on that
+// repo instead of writing to a container we run.
+//
+// Lives under web/app/build/components/ (not web/app/components/build/) on
+// purpose: .gitignore has a blanket `**/build/` rule (meant for Android/Gradle
+// build-cache dirs) with only `!web/app/build/**` carved back out for this
+// route. A components/build/ directory anywhere else silently matches the
+// blanket rule and never gets committed — verified with
+// `git check-ignore -v` before picking this path.
+//
+// Backend endpoints (GET/POST/DELETE /projects/github/*) are being built by a
+// parallel agent and are not live on any deployment yet as of 2026-07-30 —
+// every fetch here degrades to a plain error/disconnected state rather than
+// assuming success. Copy is inline (not i18n keys): web/messages/en.json is a
+// large, fragile, statically-imported file another session may be editing
+// concurrently, and this mirrors the same choice already made for the
+// "App Builder is not available" block in ../page.tsx.
+import { useCallback, useEffect, useState } from "react";
+import {
+  Github,
+  KeyRound,
+  Loader2,
+  ShieldCheck,
+  Unplug,
+  XCircle,
+  ExternalLink,
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../components/ui/alert-dialog";
+import { buttonVariants } from "../../components/ui/button";
+import { appBuilder, type AppBuilderGithubStatus } from "../lib";
+
+const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
+
+// GitHub's fine-grained PAT creation page accepts query params to pre-select
+// the resource owner, the single repo, and per-permission read/write level.
+// This is best-effort pre-scoping, not a guarantee — GitHub's own page is
+// still the source of truth, and the tenant should confirm the scopes shown
+// there before creating the token. Contents, Pull requests, and Pages are
+// requested (write implies read in GitHub's model), nothing broader. Pages
+// is required: without it the backend cannot switch on the repo's GitHub
+// Pages site and every preview URL 404s.
+function buildGithubPatUrl(repoFullName: string): string {
+  const params = new URLSearchParams();
+  // App NAME stays ASCII on purpose: GitHub derives the app slug from it and
+  // rejects/mangles non-ASCII there. The free-text description carries the
+  // real brand spelling.
+  params.set("name", "VegaDuta App Builder");
+  params.set("description", "Push branches and open PRs for VegaDūta App Builder");
+  const parts = repoFullName.trim().split("/");
+  if (parts.length === 2 && parts[0] && parts[1]) {
+    params.set("target_name", parts[0]);
+    params.set("repositories", parts[1]);
+  }
+  params.set("contents", "write");
+  params.set("pull_requests", "write");
+  params.set("pages", "write");
+  return `https://github.com/settings/personal-access-tokens/new?${params.toString()}`;
+}
+
+export interface GithubConnectCardProps {
+  /** Fired whenever the known connection status changes (connect, disconnect,
+   *  or the initial fetch resolving) — lets a parent screen (e.g. /build's
+   *  header pill) stay in sync without fetching status itself. */
+  onStatusChange?: (status: AppBuilderGithubStatus | null) => void;
+}
+
+export default function GithubConnectCard({ onStatusChange }: GithubConnectCardProps) {
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<AppBuilderGithubStatus | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+
+  const [token, setToken] = useState("");
+  const [repoFullName, setRepoFullName] = useState("");
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [disconnectError, setDisconnectError] = useState<string | null>(null);
+
+  const applyStatus = useCallback(
+    (next: AppBuilderGithubStatus | null) => {
+      setStatus(next);
+      onStatusChange?.(next);
+    },
+    [onStatusChange]
+  );
+
+  const refreshStatus = useCallback(() => {
+    setLoading(true);
+    setStatusError(null);
+    appBuilder
+      .getGithubStatus()
+      .then((s) => applyStatus(s))
+      .catch((e) => {
+        // The backend for this is not deployed everywhere yet — a 404/"not
+        // configured" here reads as "not connected", not a hard failure.
+        applyStatus({ connected: false, repo_full_name: null });
+        setStatusError(e?.notConfigured ? null : e.message || null);
+      })
+      .finally(() => setLoading(false));
+  }, [applyStatus]);
+
+  useEffect(() => {
+    refreshStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const canConnect = token.trim().length > 0 && REPO_PATTERN.test(repoFullName.trim());
+
+  const connect = async () => {
+    if (!canConnect || connecting) return;
+    setConnecting(true);
+    setConnectError(null);
+    try {
+      const result = await appBuilder.connectGithub({
+        token: token.trim(),
+        repo_full_name: repoFullName.trim(),
+      });
+      setToken(""); // write-only — never keep the raw token in memory longer than the request
+      applyStatus({ connected: true, repo_full_name: result?.repo_full_name || repoFullName.trim() });
+    } catch (e: any) {
+      setConnectError(e?.message || "Could not connect that repository.");
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const disconnect = async () => {
+    setDisconnecting(true);
+    setDisconnectError(null);
+    try {
+      await appBuilder.disconnectGithub();
+      applyStatus({ connected: false, repo_full_name: null });
+      setRepoFullName("");
+    } catch (e: any) {
+      setDisconnectError(e?.message || "Could not disconnect. Try again.");
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <span className="cat-chip cat-chip-sm" style={{ ["--cat" as string]: "var(--cat-automation)" }}>
+            <Github aria-hidden="true" size={13} />
+          </span>
+          Connect GitHub
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+            <Loader2 aria-hidden="true" size={15} className="animate-spin" /> Checking connection…
+          </div>
+        ) : status?.connected ? (
+          <ConnectedState
+            repoFullName={status.repo_full_name}
+            connectedBy={status.connected_by}
+            connectedAt={status.connected_at}
+            disconnecting={disconnecting}
+            disconnectError={disconnectError}
+            onDisconnect={disconnect}
+          />
+        ) : (
+          <DisconnectedForm
+            token={token}
+            setToken={setToken}
+            repoFullName={repoFullName}
+            setRepoFullName={setRepoFullName}
+            canConnect={canConnect}
+            connecting={connecting}
+            connectError={connectError}
+            onConnect={connect}
+          />
+        )}
+
+        {statusError && (
+          <Alert variant="destructive" className="mt-4">
+            <XCircle aria-hidden="true" />
+            <AlertDescription>{statusError}</AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function DisconnectedForm({
+  token,
+  setToken,
+  repoFullName,
+  setRepoFullName,
+  canConnect,
+  connecting,
+  connectError,
+  onConnect,
+}: {
+  token: string;
+  setToken: (v: string) => void;
+  repoFullName: string;
+  setRepoFullName: (v: string) => void;
+  canConnect: boolean;
+  connecting: boolean;
+  connectError: string | null;
+  onConnect: () => void;
+}) {
+  return (
+    <div>
+      <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+        Build and preview now run on <span className="font-medium text-foreground">your own GitHub repo</span> —
+        not on this platform. Connect a repo below and every change you ask for gets pushed to a branch and
+        opened as a pull request there. If you add a GitHub Actions workflow to that repo, build/test runs on
+        <span className="font-medium text-foreground"> your own Actions minutes</span>, not ours.
+      </p>
+
+      <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
+        <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground">
+          <ShieldCheck aria-hidden="true" size={13} className="cat-tint" style={{ ["--cat" as string]: "var(--cat-automation)" }} />
+          Why we need a token, and what it can and can&apos;t do
+        </div>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          This token lets the platform push a branch, open a pull request, and publish a GitHub Pages preview on
+          your behalf, on the one repo you name below — nothing else. It cannot read your other repos, delete
+          anything, or act on your account outside that repo&apos;s contents, pull requests, and Pages site. Use
+          GitHub&apos;s{" "}
+          <span className="font-medium text-foreground">fine-grained</span> token type (not a classic token),
+          scoped to exactly this repo.
+        </p>
+      </div>
+
+      <div className="mb-4">
+        <Label htmlFor="gh-repo" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Repository
+        </Label>
+        <Input
+          id="gh-repo"
+          placeholder="owner/repo"
+          value={repoFullName}
+          onChange={(e) => setRepoFullName(e.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <p className="mt-1 text-xs text-muted-foreground">e.g. acme-inc/storefront</p>
+      </div>
+
+      <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
+        <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-foreground">
+          <KeyRound aria-hidden="true" size={13} className="cat-tint" style={{ ["--cat" as string]: "var(--cat-automation)" }} />
+          How to create the token — what to select on GitHub
+        </div>
+        <ol className="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
+          <li>
+            Click <span className="font-medium text-foreground">Create one on GitHub</span> below — it opens
+            GitHub&apos;s <span className="font-medium text-foreground">fine-grained</span> token page with most of
+            this pre-filled. Sign in if asked.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Resource owner</span> — pick the account or organization
+            that owns the repo. If it&apos;s an org repo, the org may need to approve the token before it works.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Repository access</span> — choose{" "}
+            <span className="font-medium text-foreground">Only select repositories</span> and pick the repo you
+            entered above. Don&apos;t leave it on &quot;All repositories&quot;.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Permissions → Repository permissions</span> — set{" "}
+            <span className="font-medium text-foreground">Contents: Read and write</span>,{" "}
+            <span className="font-medium text-foreground">Pull requests: Read and write</span>, and{" "}
+            <span className="font-medium text-foreground">Pages: Read and write</span> (without Pages, the app
+            preview link 404s). Nothing else is needed — leave every other permission at its default.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Expiration</span> — any value you&apos;re comfortable
+            with (30/60/90 days or custom). When it expires, reconnect here with a fresh token.
+          </li>
+          <li>
+            Click <span className="font-medium text-foreground">Generate token</span> and copy it — it starts with{" "}
+            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> and is shown only once. Paste it into
+            the field below.
+          </li>
+        </ol>
+      </div>
+
+      <div className="mb-2">
+        <div className="mb-1.5 flex items-center justify-between">
+          <Label htmlFor="gh-token" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Personal access token
+          </Label>
+          <a
+            href={buildGithubPatUrl(repoFullName)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            Create one on GitHub <ExternalLink aria-hidden="true" size={11} />
+          </a>
+        </div>
+        <div className="relative">
+          <KeyRound aria-hidden="true" size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="gh-token"
+            type="password"
+            placeholder="github_pat_…"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            className="pl-9"
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          The link pre-fills the repo and Contents + Pull requests + Pages permissions where GitHub&apos;s page
+          supports it — double-check the scopes GitHub shows you before creating the token. The token is stored encrypted
+          and is never shown again once saved.
+        </p>
+      </div>
+
+      {connectError && (
+        <Alert variant="destructive" className="mt-3">
+          <XCircle aria-hidden="true" />
+          <AlertDescription>{connectError}</AlertDescription>
+        </Alert>
+      )}
+
+      <Button className="mt-4" disabled={!canConnect || connecting} onClick={onConnect}>
+        {connecting ? <Loader2 aria-hidden="true" size={15} className="animate-spin" /> : <Github aria-hidden="true" size={15} />}
+        {connecting ? "Connecting…" : "Connect repository"}
+      </Button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function ConnectedState({
+  repoFullName,
+  connectedBy,
+  connectedAt,
+  disconnecting,
+  disconnectError,
+  onDisconnect,
+}: {
+  repoFullName: string | null;
+  connectedBy?: string | null;
+  connectedAt?: string | null;
+  disconnecting: boolean;
+  disconnectError: string | null;
+  onDisconnect: () => void;
+}) {
+  return (
+    <div>
+      <div className="mb-4 flex items-center gap-2">
+        <span className="state-pill" style={{ ["--state" as string]: "var(--state-success)" }}>
+          <span className="state-dot" /> Connected
+        </span>
+        <span className="font-mono text-sm text-foreground">{repoFullName}</span>
+      </div>
+
+      <p className="mb-1 text-sm leading-relaxed text-muted-foreground">
+        Build and preview run on this repo&apos;s own GitHub Actions, not on this platform. Every change you ask
+        for pushes a branch and opens a pull request here.
+      </p>
+      {(connectedBy || connectedAt) && (
+        <p className="mb-4 text-xs text-muted-foreground">
+          {connectedBy ? `Connected by ${connectedBy}` : "Connected"}
+          {connectedAt ? ` on ${new Date(connectedAt).toLocaleString()}` : ""}
+        </p>
+      )}
+
+      {disconnectError && (
+        <Alert variant="destructive" className="mb-3">
+          <XCircle aria-hidden="true" />
+          <AlertDescription>{disconnectError}</AlertDescription>
+        </Alert>
+      )}
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={disconnecting}
+          >
+            {disconnecting ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Unplug aria-hidden="true" size={14} />}
+            Disconnect
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect {repoFullName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the stored access token for this repo — the platform will no longer be able to push
+              branches or open pull requests there until you reconnect. Nothing on GitHub itself (the repo, any
+              existing branches or open PRs) is deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={onDisconnect}>
+              <Unplug aria-hidden="true" size={14} />
+              Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

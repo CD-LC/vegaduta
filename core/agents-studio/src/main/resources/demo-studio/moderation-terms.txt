@@ -1,0 +1,407 @@
+# /try Agent Studio - layer (a) content pre-filter word lists.
+# Edited WITHOUT code changes: either change this file, or point
+# app.demo.studio.moderation.terms-file at an external copy.
+#
+# Text is normalised before matching: lower-case, Latin diacritics stripped,
+# zero-width characters removed, look-alike letters folded, leetspeak folded
+# (5hit, a$$, sh!t), letter repeats collapsed (fuuuck), "f u c k" / "f.u.c.k"
+# joined, and "f*ck" wildcards tolerated for Latin terms.
+#
+# Syntax
+#   [words:<category>]     whole-word terms, one per line.
+#                          Latin terms also match common endings (s, es, ed, er,
+#                          ers, ing, in, z, y). Prefix a term with "=" to match
+#                          it EXACTLY (no endings) - use that for short words that
+#                          could be a prefix of something innocent.
+#                          Non-Latin terms (Devanagari, Tamil, ...) match a whole
+#                          word only: list inflected forms explicitly.
+#                          A space inside a term matches any run of spaces . _ -
+#   [allow]                phrases removed from the text before matching - the
+#                          false-positive escape hatch (place names, idioms).
+#   [pattern:<category>]   Java regexes run over the lower-cased text (plain and
+#                          leet-folded). Whole-phrase hard rules.
+# Word boundaries are always enforced, so "Scunthorpe", "assess", "Essex",
+# "chutney", "Bhosale" and "Gandhi" never match a term inside them.
+# Lines starting with # are comments. UTF-8.
+
+[allow]
+lund university
+university of lund
+lund sweden
+lund, sweden
+cock-a-doodle-doo
+cock-a-doodle
+cock a doodle
+cock robin
+cock and bull
+pussy willow
+pussy cat
+blue tit
+blue tits
+great tit
+great tits
+spic and span
+chink in
+chinks in
+chink of
+randi zuckerberg
+randi weingarten
+james randi
+niki lauda
+lauda air
+randi rhodes
+retarded potential
+sex education
+sex ratio
+sex chat bot detection
+
+[words:sexual]
+fuck
+fuk
+fck
+fvck
+phuck
+fuq
+motherfuck
+cunt
+twat
+cocksuck
+=cock
+=cocks
+blowjob
+blow job
+handjob
+hand job
+rimjob
+pussy
+porn
+porno
+pornhub
+pornography
+pornographic
+pornstar
+xnxx
+xvideos
+xhamster
+redtube
+youporn
+brazzers
+bangbros
+hentai
+erotica
+erotic story
+erotic stories
+erotic chat
+sex chat
+sexchat
+sex video
+sex videos
+sex story
+sex stories
+sex tape
+sex photo
+sex photos
+sex pic
+sex pics
+sexting
+sex toy
+sex toys
+sex slave
+nude photo
+nude photos
+nude pic
+nude pics
+nude video
+nude videos
+nude leak
+=nudes
+naked girl
+naked girls
+naked women
+naked pics
+dildo
+orgy
+gangbang
+creampie
+cumshot
+cum shot
+jizz
+anal sex
+=tits
+=titties
+=titty
+=boobs
+=clit
+wank
+slut
+whore
+milf
+# Hindi / Hinglish (Roman) - explicit
+chudai
+chudayi
+chodu
+=chut
+=choot
+chutmar
+=lund
+=lauda
+lavda
+lawda
+=loda
+lodu
+gaand
+gaandmar
+gand mara
+gand marao
+jhant
+jhaant
+jhatu
+jhantu
+bhosda
+bhosdi
+bhosad
+bhosadi
+bhosri
+bhosdiwala
+bhosdike
+bhosdika
+bhosadike
+bhen ke lode
+maa ke lode
+bhen ke laude
+maa ke laude
+bsdk
+bkl
+# Tamil / Telugu / Kannada / Malayalam / Bengali / Marathi / Punjabi (Roman)
+punda
+pundai
+pundamavane
+pundamavan
+koothi
+mayiru
+lanjakoduku
+lanjamunda
+dengey
+soolemaga
+sulemaga
+soolimaga
+bolimaga
+bolimagane
+bosudi
+bosudike
+=tunne
+thayoli
+kunna
+kunnan
+poorimone
+poorimon
+khanki
+khankir
+khankirpola
+bokachoda
+bokachodra
+banchod
+phuddi
+phudi
+zavadya
+zavdya
+zavadyaa
+lavdya
+# Devanagari (Hindi / Marathi)
+लंड
+लौड़ा
+लौडा
+लवड़ा
+लौड़े
+लोडू
+चूत
+चुत
+चूतिया
+चुतिया
+चूतिये
+चुतिये
+चुदाई
+चोद
+चोदू
+चोदना
+गांड
+गाँड
+गान्ड
+झाँट
+झांट
+भोसड़ी
+भोसडी
+भोसड़ा
+भोसडा
+भोसड़ीके
+भोसडीके
+भोसड़ीवाले
+झवड्या
+# Other scripts
+புண்டை
+தேவடியா
+கூதி
+ஊம்பு
+లంజ
+లంజకొడుకు
+దెంగు
+ಸೂಳೆ
+ಸೂಳೆಮಗ
+ಬೋಸುಡಿ
+ತುನ್ನೆ
+പൂറ്
+തായോളി
+കുണ്ണ
+মাগি
+খানকি
+বোকাচোদা
+চুদি
+ਫੁੱਦੀ
+
+[words:hate_abuse]
+nigger
+nigga
+niggas
+faggot
+=fag
+=fags
+=retard
+=retards
+tranny
+kike
+=spic
+=spics
+=chink
+=chinks
+=gook
+=gooks
+wetback
+towelhead
+raghead
+sandnigger
+=beaner
+=paki
+=darkie
+bitch
+asshole
+asswipe
+dickhead
+dipshit
+dumbass
+shithead
+piece of shit
+son of a whore
+=stfu
+=gtfo
+# Hindi / Hinglish (Roman) - abuse
+madarchod
+maderchod
+madharchod
+madrchod
+madarchodh
+maderchodh
+behenchod
+bhenchod
+benchod
+bhenchodh
+behnchod
+bahenchod
+bhanchod
+bhen chod
+maa chod
+maa ki chut
+teri maa ka bhosda
+chutiya
+chutiye
+chutia
+chutiyapa
+chutiyon
+chutiyo
+gandu
+gaandu
+gandoo
+=randi
+randwa
+=raand
+haramzada
+haramzade
+haramzadi
+haramzaada
+haramkhor
+haramkhore
+=harami
+bhadwa
+bhadva
+bhadve
+bhadwe
+bhadwi
+kuttiya
+kutte ki aulad
+kanjar
+kanjri
+chinal
+chhinal
+hijda
+# Devanagari - abuse
+मादरचोद
+मादर चोद
+बहनचोद
+बहन चोद
+भेनचोद
+हरामी
+हरामज़ादा
+हरामजादा
+हरामज़ादी
+हरामजादी
+हरामखोर
+कुतिया
+रंडी
+रण्डी
+रांड
+गांडू
+गान्डू
+गाण्डू
+भड़वा
+भड़वे
+भड़वी
+भिकारचोट
+रांडीचा
+# Other scripts
+ஒத்தா
+
+[pattern:minors_sexual]
+\b(csam|lolicon|shotacon|jailbait)\b
+\b(child|kiddie|preteen|pre teen)\W?(porn\w*|sex\w*|nudes?)\b
+\b(child|children|kid|kids|minor|minors|underage|under ?age|teen|teens|teenage\w*|toddler|infant|schoolgirl|schoolboy|school ?girl|school ?boy|preteen|little girl|little boy)\b\W+(?:\w+\W+){0,4}?(nude|nudes|naked|porn\w*|erotic\w*|molest\w*|rape|raping|fuck\w*|lewd|blowjob|hentai|sex ?with|have sex|sexual (video|videos|photo|photos|pic|pics|content|act|acts)|sex (video|videos|photo|photos|pic|pics|story|stories|chat|act|scene|scenes))
+\b(have|having|has|do|doing|make|making|get|getting|show|showing|send|sending|share|sharing|watch|watching|find|finding|want|wanna|looking for|write|generate)\b\W+(?:\w+\W+){0,3}?(sex|nudes?|porn\w*|naked pics?|erotic\w*)\W+(?:\w+\W+){0,3}?(with|of|from|involving|about)\W+(?:\w+\W+){0,2}?(child|children|kid|kids|minor|minors|underage|toddler|infant|schoolgirl|schoolboy|preteen|little girl|little boy|\d{1,2} ?(yo|y ?o|year old|years old))\b
+\b(1[0-7]|[5-9]) ?(yo|y ?o|yr old|yrs old|year old|years old)\b\W+(?:\w+\W+){0,4}?(nude|naked|sex\w*|porn\w*|fuck\w*)
+\b(bachch\w+|bachchi|ladki|ladka|chhoti|choti)\b\W+(?:\w+\W+){0,4}?(sex|nangi|nanga|chudai|porn)
+
+[pattern:illegal_activity]
+\b(how|ways?|steps?|guide|instructions?|tutorial|teach|show|help|tell)\b\W+(?:\w+\W+){0,5}?(make|making|build|building|assemble|assembling|construct|3d ?print\w*|manufactur\w+|cook|cooking|synthesi[sz]\w*|produce|producing)\W+(?:\w+\W+){0,3}?(?<!bath )(?<!cherry )(bomb|bombs|explosives?|ieds?|pipe ?bombs?|molotov\w*|nerve ?agent|ricin|sarin|napalm|thermite|ghost ?gun|untraceable (gun|firearm)s?|silencers?|suppressor|grenades?|landmines?|dirty ?bomb)\b
+\b(make|making|build|building|assemble|manufactur\w+|cook|cooking|synthesi[sz]\w*)\b\W+(?:\w+\W+){0,3}?(pipe ?bombs?|molotov\w*|napalm|ghost ?gun|ricin|sarin|explosives?)\b
+\b(make|making|cook|cooking|synthesi[sz]\w*|manufactur\w+|produce|producing|brew\w*)\b\W+(?:\w+\W+){0,3}?(meth|methamphetamine|crystal meth|cocaine|heroin|fentanyl|lsd|mdma|mephedrone|ketamine)\b
+\b(sell|selling|buy|buying|supply|supplying|traffic\w*|smuggl\w+|distribut\w+|peddl\w+)\b\W+(?:\w+\W+){0,3}?(cocaine|heroin|meth|methamphetamine|fentanyl|lsd|mdma|charas|opium|mephedrone|illegal drugs)\b
+\b(how to|ways to|help me|teach me to|best way to|i want to|want to|wanna)\b\W+(?:\w+\W+){0,2}?(smuggle|traffic|launder|counterfeit|forge|steal|phish|scam|defraud|blackmail|extort)\b
+\b(phishing|scam|fake|spoofed?)\b\W+(?:\w+\W+){0,3}?(emails?|sms|messages?|pages?|sites?|websites?|links?|calls?|kits?|apps?|forms?)\b\W+(?:\w+\W+){0,5}?(steal\w*|trick\w*|defraud\w*|harvest\w*)\b
+\b(steal\w*)\b\W+(?:\w+\W+){0,3}?(otps?|passwords?|credentials|credit ?cards?|debit ?cards?|card ?details|upi ?pins?|bank ?details|cookies|session ?tokens)\b
+\b(write|create|make|build|code|develop|generate)\b\W+(?:\w+\W+){0,2}?(ransomware|keyloggers?|botnets?|trojans?|rootkits?|infostealers?|info ?stealers?|spyware|stalkerware|credential ?harvesters?|ddos (tool|script))\b
+\b(to|can you|could you|help me|please|teach me|show me how to)\s+hack\W+(?:\w+\W+){0,3}?(into|whatsapp|instagram|facebook|snapchat|gmail|email|phone|wifi|wi ?fi|bank|paytm|upi)\b
+\bbypass\w*\W+(?:\w+\W+){0,2}?(otp|kyc)\b
+\b(credit ?card|debit ?card|atm)\s+(skimm\w+|dumps|cloning)\b
+\bcarding\b\W+(?:\w+\W+){0,3}?(tutorial|guide|method|cvv|dumps)
+
+[pattern:violence_threat]
+\b(i|we|ill|i will|i ll|i am going to|im going to|i m going to|gonna)\b\W+(?:\w+\W+){0,2}?(kill|murder|stab|behead|acid attack|rape)\W+(you|u|him|her|them|your family|everyone)\b
+\b(kill yourself|go kill yourself|hang yourself|slit your wrists)\b
+\bkys\b
+\b(maar dunga|maar dalunga|maar daloonga|jaan se maar dunga|kaat dunga|goli maar dunga|goli mar dunga)\b
+\b(how to|ways to|plan|planning|plot|plotting|carry out|commit|committing|organi[sz]e|stage|staging)\b\W+(?:\w+\W+){0,3}?(terror\w*\W+attacks?|suicide bomb\w*|mass shooting|school shooting|massacre|bombing|hijack\w*|assassinat\w+|genocide|beheading)\b
+\b(join|joining|recruit\w*|fund|funding|donate to|pledge\w* allegiance to|glorif\w+)\b\W+(?:\w+\W+){0,3}?(isis|isil|islamic state|al ?qaeda|lashkar\w*|jaish\w*|hizbul\w*|boko haram|al ?shabaab)\b
+\b(isis|isil|islamic state|al ?qaeda|lashkar\w*|jaish\w*|boko haram)\b\W+(?:\w+\W+){0,2}?(recruitment|propaganda|manifesto|recruit\w*)\b
+
+[pattern:self_harm_instructions]
+\b(how (to|do i|can i)|ways to|best way to|easiest way to|methods? (of|for|to))\b\W+(?:\w+\W+){0,3}?(kill myself|commit suicide|end my life|take my (own )?life|hang myself|slit my wrists|die painlessly)\b
+\bsuicide (methods|note|plan)\b
+\b(aatmhatya|khudkushi)\b\W+(?:\w+\W+){0,3}?(kaise|tarika|tareeka)\b
+\bkaise\b\W+(?:\w+\W+){0,3}?(aatmhatya|khudkushi)\b

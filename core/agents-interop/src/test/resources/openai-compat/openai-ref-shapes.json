@@ -1,0 +1,43 @@
+{
+  "_comment": "Field contract transcribed from the public OpenAI Chat Completions API reference (chat.completion, chat.completion.chunk, error object). Not a recorded capture; it pins which keys an OpenAI SDK may rely on. 'required' keys must be present, 'allowed' is every key the reference defines for that object.",
+  "chat.completion": {
+    "required": ["id", "object", "created", "model", "choices"],
+    "allowed": ["id", "object", "created", "model", "choices", "usage", "system_fingerprint", "service_tier"]
+  },
+  "chat.completion.choice": {
+    "required": ["index", "message", "finish_reason"],
+    "allowed": ["index", "message", "finish_reason", "logprobs"]
+  },
+  "chat.completion.message": {
+    "required": ["role", "content"],
+    "allowed": ["role", "content", "refusal", "tool_calls", "annotations", "audio"]
+  },
+  "usage": {
+    "required": ["prompt_tokens", "completion_tokens", "total_tokens"],
+    "allowed": ["prompt_tokens", "completion_tokens", "total_tokens", "prompt_tokens_details", "completion_tokens_details"]
+  },
+  "chat.completion.chunk": {
+    "required": ["id", "object", "created", "model", "choices"],
+    "allowed": ["id", "object", "created", "model", "choices", "usage", "system_fingerprint", "service_tier"]
+  },
+  "chat.completion.chunk.choice": {
+    "required": ["index", "delta", "finish_reason"],
+    "allowed": ["index", "delta", "finish_reason", "logprobs"]
+  },
+  "chat.completion.chunk.delta": {
+    "required": [],
+    "allowed": ["role", "content", "refusal", "tool_calls", "function_call"]
+  },
+  "error": {
+    "required": ["message", "type", "param", "code"],
+    "allowed": ["message", "type", "param", "code"]
+  },
+  "model.list": {
+    "required": ["object", "data"],
+    "allowed": ["object", "data"]
+  },
+  "model": {
+    "required": ["id", "object", "created", "owned_by"],
+    "allowed": ["id", "object", "created", "owned_by", "name"]
+  }
+}

@@ -1,0 +1,105 @@
+# "workflow" Spring profile - Interactive Workflow Designer PRD, Phase 0.
+# Same pattern as the existing security/knowledge/mcp/e2e profiles (opt-in,
+# additive, zero effect unless explicitly activated): with this profile
+# inactive, WorkflowKafkaConfig/WorkflowEventOutboxRelay/WorkflowEventLogger
+# never start, and core never attempts to reach Kafka/Redpanda at all.
+#
+# app.workflow-events.enabled additionally gates WorkflowEventPublisher's
+# actual writes (see its javadoc) - set true here since there is no reason
+# to activate this profile at all without also wanting events published.
+#
+# Usage (PowerShell):
+#   cd deploy && docker compose up -d redpanda
+#   .\run-core.ps1 -Profiles "security,knowledge,mcp,workflow"
+#
+# bootstrap-servers has no default: set WORKFLOW_KAFKA_BOOTSTRAP_SERVERS (the Redpanda service in
+# deploy/compose/docker-compose.yml, or a real Kafka/MSK/Confluent bootstrap string). With none,
+# no Kafka client starts (see app.workflow-events.kafka.enabled below).
+app:
+  workflow-events:
+    # Defaults on for this profile, but WORKFLOW_EVENTS_ENABLED=false now really turns it off (it used
+    # to be shadowed by this literal, since profile files outrank application.yml).
+    #
+    # With no broker the outbox has no reader, so the default follows WORKFLOW_KAFKA_ENABLED (below):
+    # events are not written to a table nothing drains. An explicit WORKFLOW_EVENTS_ENABLED still wins.
+    enabled: ${WORKFLOW_EVENTS_ENABLED:${WORKFLOW_KAFKA_ENABLED:true}}
+    kafka:
+      # false = this "workflow" profile starts without a broker: no KafkaAdmin topic creation, no
+      # outbox relay, no consumers. When WORKFLOW_KAFKA_ENABLED is not set, core decides at start-up
+      # (MigrateOnlyEnvironmentPostProcessor): on iff spring.kafka.bootstrap-servers resolved to a
+      # non-blank value from any source (env, mounted Secret, ...), off otherwise. The Helm chart does
+      # not set this flag, because it cannot see Secret contents.
+      enabled: ${WORKFLOW_KAFKA_ENABLED:true}
+  # Output node "telegram" destination (#154) - platform-wide fallback bot
+  # token, used only when a tenant hasn't connected their own Telegram Bot
+  # via /admin/channels (see TelegramOutputService/TelegramCredentialService
+  # javadocs, #472). Leave unset to leave the "telegram" channel unconfigured
+  # for tenants without their own bot (nodes fail gracefully to SKIPPED with
+  # a clear message rather than erroring the whole run).
+  telegram:
+    bot-token: ${TELEGRAM_BOT_TOKEN:}
+    # Public HTTPS base URL this backend is reachable at, used to register
+    # each tenant's Telegram webhook (TelegramCredentialService#activate ->
+    # POST https://api.telegram.org/bot<token>/setWebhook). Leave unset on a
+    # deployment with no public HTTPS URL yet (e.g. local dev) - credentials
+    # still save and outbound sends still work, just without live inbound
+    # routing until this is set and the tenant reactivates.
+    webhook-base-url: ${TELEGRAM_WEBHOOK_BASE_URL:}
+  mail:
+    from: ${WORKFLOW_MAIL_FROM:workflows@agentic-ai.local}
+
+spring:
+  kafka:
+    bootstrap-servers: ${WORKFLOW_KAFKA_BOOTSTRAP_SERVERS:}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # #913/#914 (Kafka reliability hardening) - none of these five were set
+      # before, meaning the producer ran with Spring Kafka's own defaults:
+      # acks=1 (leader-only ack, a message can be lost if the leader dies
+      # before followers replicate it) and no idempotence (a retried send
+      # after a timeout could silently duplicate a message on the topic).
+      # Neither failure mode is acceptable for workflow-run events, which
+      # WorkflowEventOutboxRelay already goes to real lengths (the whole
+      # outbox pattern) to deliver at-least-once - the producer itself was
+      # the weakest link in that guarantee until now.
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        retries: 5
+        delivery.timeout.ms: 30000
+        request.timeout.ms: 10000
+        # B6: how long KafkaProducer.send may block waiting for broker metadata. Kafka's default is
+        # 60000, which with an unreachable broker parks the sending thread for a minute per call
+        # (WorkflowEventOutboxRelay now runs on its own thread, but a bounded block still keeps a
+        # tick short and lets it fail fast into the retry/dead-letter path).
+        max.block.ms: ${WORKFLOW_KAFKA_MAX_BLOCK_MS:2000}
+    consumer:
+      group-id: agentic-ai-core
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  # Output node "email" destination (#153) - a single platform-wide SMTP
+  # relay (see EmailOutputService's javadoc for why this isn't per-tenant).
+  # Leave spring.mail.host unset to leave the "email" channel unconfigured -
+  # EmailOutputService checks this explicitly and fails that one node
+  # gracefully (SKIPPED) rather than crashing the whole run or silently
+  # dropping the email.
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          # JavaMail's defaults are INFINITE connect/read/write timeouts: an SMTP relay that accepts the
+          # connection and goes silent parked the sending thread forever. Generous bounds (a normal send is
+          # well under a second); milliseconds, as JavaMail takes them.
+          connectiontimeout: ${SMTP_CONNECT_TIMEOUT_MS:15000}
+          timeout: ${SMTP_READ_TIMEOUT_MS:60000}
+          writetimeout: ${SMTP_WRITE_TIMEOUT_MS:60000}

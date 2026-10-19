@@ -1,0 +1,554 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 0.05},
+              {"color": "yellow", "value": 0.1},
+              {"color": "green", "value": 0.2}
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
+      "id": 1,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {"values": false, "fields": "", "calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "targets": [{"expr": "rate(auth_attempts_failed_total[5m]) / rate(auth_attempts_success_total[5m])", "refId": "A"}],
+      "title": "Auth Failure Rate",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 0.05},
+              {"color": "yellow", "value": 0.1},
+              {"color": "green", "value": 0.2}
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {"values": false, "fields": "", "calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "targets": [{"expr": "rate(payment_transactions_failed_total[5m]) / rate(payment_transactions_total[5m])", "refId": "A"}],
+      "title": "Payment Failure Rate",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 0.1},
+              {"color": "yellow", "value": 0.15},
+              {"color": "green", "value": 0.25}
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+      "id": 3,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {"values": false, "fields": "", "calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "targets": [{"expr": "rate(llm_calls_failed_total[5m]) / rate(llm_calls_total[5m])", "refId": "A"}],
+      "title": "LLM Failure Rate",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 0.02},
+              {"color": "yellow", "value": 0.05},
+              {"color": "green", "value": 0.1}
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
+      "id": 4,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {"values": false, "fields": "", "calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "targets": [{"expr": "rate(email_bounced_total[5m]) / rate(email_sent_total[5m])", "refId": "A"}],
+      "title": "Email Bounce Rate",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5},
+              {"color": "red", "value": 10}
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "id": 5,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {"values": false, "fields": "", "calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "targets": [{"expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m]))", "refId": "A"}],
+      "title": "API Latency P95",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 100},
+              {"color": "red", "value": 500}
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
+      "id": 6,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {"values": false, "fields": "", "calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "targets": [{"expr": "workflow_event_outbox_pending", "refId": "A"}],
+      "title": "Event Queue Backlog",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Requests/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "id": 7,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "rate(http_server_requests_seconds_count[1m])", "legendFormat": "Total Requests", "refId": "A"},
+        {"expr": "rate(http_server_requests_seconds_count{status=~'5..'}[1m])", "legendFormat": "5xx Errors", "refId": "B"},
+        {"expr": "rate(http_server_requests_seconds_count{status=~'4..'}[1m])", "legendFormat": "4xx Errors", "refId": "C"}
+      ],
+      "title": "API Request Rate & Errors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Transactions/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "id": 8,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "rate(payment_transactions_success_total[1m])", "legendFormat": "Success", "refId": "A"},
+        {"expr": "rate(payment_transactions_failed_total[1m])", "legendFormat": "Failed", "refId": "B"}
+      ],
+      "title": "Payment Transaction Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Calls/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "id": 9,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "sum(rate(llm_calls_success_total[1m]))", "legendFormat": "Success", "refId": "A"},
+        {"expr": "sum(rate(llm_calls_failed_total[1m]))", "legendFormat": "Failed", "refId": "B"}
+      ],
+      "title": "LLM Call Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Emails/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "id": 10,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "rate(email_sent_total[1m])", "legendFormat": "Sent", "refId": "A"},
+        {"expr": "rate(email_delivery_success_total[1m])", "legendFormat": "Delivered", "refId": "B"},
+        {"expr": "rate(email_bounced_total[1m])", "legendFormat": "Bounced", "refId": "C"}
+      ],
+      "title": "Email Delivery Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Executions/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "id": 11,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "sum(rate(agent_executions_success_total[1m]))", "legendFormat": "Success", "refId": "A"},
+        {"expr": "sum(rate(agent_executions_failed_total[1m]))", "legendFormat": "Failed", "refId": "B"}
+      ],
+      "title": "Agent Execution Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Users",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "id": 12,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "user_active_sessions_current", "legendFormat": "Active Sessions", "refId": "A"},
+        {"expr": "rate(user_registrations_total[1h])", "legendFormat": "Registrations/hour", "refId": "B"}
+      ],
+      "title": "User Activity Metrics",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Bytes",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
+      "id": 13,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "redis_memory_used_bytes", "legendFormat": "Redis Used", "refId": "A"},
+        {"expr": "sum(jvm_memory_used_bytes)", "legendFormat": "JVM Heap Used", "refId": "B"}
+      ],
+      "title": "Memory Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "Connections",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {"tooltip": false, "viz": false, "legend": false},
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {"type": "linear"},
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {"group": "A", "mode": "none"},
+            "thresholdsStyle": {"mode": "off"}
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+      "id": 14,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "hikaricp_connections_active", "legendFormat": "HikariCP Active", "refId": "A"},
+        {"expr": "hikaricp_connections_idle", "legendFormat": "HikariCP Idle", "refId": "B"}
+      ],
+      "title": "Database Connection Pool",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["operations", "business-metrics", "monitoring"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "VegaDuta Operations Center",
+  "uid": "operations-center",
+  "version": 1
+}

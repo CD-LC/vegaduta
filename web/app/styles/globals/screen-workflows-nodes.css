@@ -1,0 +1,383 @@
+/* ---- Node cards (wf-node/wf-handle) under the AXON shell --------------- */
+.ax-wf-shell .wf-node {
+  background: rgba(20, 26, 44, 0.85);
+  border: 1px solid var(--ax-border2);
+  border-radius: 13px;
+  backdrop-filter: blur(6px);
+  padding: 9px 12px;
+  width: 168px;
+  box-shadow: none;
+  color: var(--ax-text);
+  display: block;
+  /* Every node gets a slow, always-on breathing glow in its own accent
+   * color (--wf-node-glow, an "r, g, b" triple computed in WorkflowNode.js
+   * from the same def.color the icon badge already uses) - not just the
+   * ones currently mid-run - so the whole graph reads as "alive" rather
+   * than a static diagram. Deliberately gentler/slower than the violet
+   * running-pulse below so the two never get confused for one another;
+   * hover/selected/running/live all override this via normal cascade
+   * (see those rules further down, which come later in the file and win
+   * on tied specificity). */
+  /* Entrance uses axWfNodeIn (a fade + upward-slide + settle-in scale on the
+   * reference's springy cubic-bezier, matching vdNodeIn) instead of the old
+   * plain wf-node-pop, so a freshly-dropped node - or the whole graph on load
+   * - arrives with the same cinematic settle the AXON mockup uses. The second
+   * track (axWfNodeIdle) is the always-on breathing glow described above; its
+   * per-node stagger comes from the second animation-delay value. */
+  animation:
+    axWfNodeIn 0.5s cubic-bezier(0.34, 1.45, 0.5, 1) both,
+    axWfNodeIdle 4.2s ease-in-out infinite;
+  animation-delay: 0s, calc(var(--wf-node-idle-offset, 0) * 1s);
+  transition:
+    box-shadow 0.35s ease,
+    border-color 0.35s ease,
+    transform 0.3s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+/* Opacity-only entrance — deliberately NO transform. React Flow anchors each
+ * edge to its handle's getBoundingClientRect, which includes CSS transforms;
+ * a translate/scale here is active while React Flow measures handles at mount,
+ * so it cached edge endpoints ~16px below/inside where the dots actually
+ * settle (transform: none), leaving every connector visibly detached from its
+ * dots. A pure fade never moves the measured geometry, so edges land exactly
+ * on the handles. (The cinematic slide/scale settle was the direct cause of
+ * "connectors not connecting the two dots" — keep this transform-free.) */
+@keyframes axWfNodeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes axWfNodeIdle {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--wf-node-glow, 79, 227, 227), 0);
+  }
+  50% {
+    box-shadow: 0 0 13px 1px rgba(var(--wf-node-glow, 79, 227, 227), 0.24);
+  }
+}
+
+:root[data-mode="light"] .ax-wf-shell .wf-node {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.ax-wf-shell .wf-node:hover {
+  /* No transform on hover — a translate here shifts the node (and its handle
+   * dots) while React Flow's cached edge endpoints stay put, detaching every
+   * connected wire on hover. The elevated shadow alone reads as a lift, with
+   * the geometry kept perfectly still so edges never leave their dots. */
+  border-color: var(--wf-node-color, var(--ax-cyan));
+  box-shadow: 0 12px 26px -12px rgba(79, 227, 227, 0.4);
+  animation: none;
+}
+
+.ax-wf-shell .wf-node-selected {
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 0 2px rgba(79, 227, 227, 0.4);
+  animation: none;
+}
+
+.ax-wf-node-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ax-wf-node-kind {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  color: var(--ax-dim);
+}
+
+.ax-wf-node-main {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ax-wf-node-status {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ax-wf-node-status-ok {
+  background: var(--ax-green);
+  color: #05070d;
+}
+
+.ax-wf-node-status-error {
+  background: var(--ax-red);
+  color: #05070d;
+}
+
+.ax-wf-node-status-skipped {
+  background: var(--ax-mid);
+  color: #05070d;
+}
+
+.ax-wf-node-status-awaiting {
+  background: var(--ax-amber);
+  color: #05070d;
+}
+
+.ax-wf-node-status-spinner {
+  border: 2px solid var(--ax-violet);
+  border-top-color: transparent;
+  background: transparent;
+  animation: axWfSpin 0.8s linear infinite;
+}
+
+.ax-wf-node-status-idle {
+  border: 1.5px solid var(--ax-border2);
+  background: transparent;
+}
+
+@keyframes axWfSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ax-wf-shell .wf-node-title {
+  color: var(--ax-text);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.ax-wf-shell .wf-node-subtitle {
+  color: var(--ax-dim);
+  font-size: var(--fs-micro);
+  font-family: var(--font-mono), monospace;
+  margin-top: 2px;
+}
+
+.ax-wf-shell .wf-node-soon {
+  background: var(--ax-panel2);
+  border-color: var(--ax-border2);
+  color: var(--ax-dim);
+}
+
+.ax-wf-shell .wf-handle {
+  border-color: var(--ax-bg) !important;
+}
+
+.ax-wf-shell .wf-node-live {
+  border-color: var(--ax-amber) !important;
+}
+
+.ax-wf-shell .wf-node-running {
+  border-color: var(--ax-violet) !important;
+  background: rgba(24, 20, 48, 0.9);
+  animation:
+    wf-node-pop 0.2s ease,
+    axNodePulse 1.8s infinite;
+}
+
+/* Light mode: without this, the running-node fill above stays fixed dark
+ * while .wf-node-title/.wf-node-subtitle follow --ax-text/--ax-dim (near-
+ * black in light mode) - the one node actually executing becomes an
+ * unreadable near-black-on-near-black card. */
+:root[data-mode="light"] .ax-wf-shell .wf-node-running {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+@keyframes axNodePulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(155, 125, 255, 0.5),
+      0 0 22px rgba(155, 125, 255, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(155, 125, 255, 0.8),
+      0 0 34px rgba(155, 125, 255, 0.5);
+  }
+}
+
+/* ---- AXON pixel-fidelity pass: agent icon ring, port pulse, ambient drift,
+ * wire entrance, tour spotlight (all keyframes ported from the "Workflows Pro"
+ * reference: vdRing / vdPort / vdDrift / vdWireIn). Colors track the per-type
+ * accent (--wf-node-color / --wf-node-glow, the intentional categorical node
+ * colors) or the theme's --ax-* tokens - never a fixed hex. -------------- */
+
+/* Agent-class nodes: the icon badge gets a pulsing expanding ring (vdRing) and
+ * the card a soft persistent accent glow, marking them as the reasoning core.
+ * The glow uses filter:drop-shadow (not box-shadow) on purpose so it coexists
+ * with the box-shadow-driven idle/running pulses instead of being overwritten
+ * by them. */
+.ax-wf-shell .wf-node-agent .wf-node-icon {
+  position: relative;
+  overflow: visible;
+}
+
+.wf-node-icon-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--wf-node-color, var(--ax-cyan));
+  opacity: 0.55;
+  pointer-events: none;
+  animation: axWfRing 3.4s ease-out infinite;
+}
+
+@keyframes axWfRing {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.ax-wf-shell .wf-node-agent {
+  filter: drop-shadow(0 0 11px rgba(var(--wf-node-glow, 79, 227, 227), 0.3));
+}
+
+/* Port dots (React Flow handles) get the reference's vdPort glow pulse in the
+ * node's own accent color. Paused on hover so the existing hover ring/scale
+ * affordance (see .wf-handle:hover) reads cleanly. */
+.ax-wf-shell .wf-handle {
+  animation: axWfPort 3s ease-in-out infinite;
+}
+
+.ax-wf-shell .wf-handle:hover {
+  animation: none;
+}
+
+@keyframes axWfPort {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.18),
+      0 0 5px 0 var(--wf-node-color, var(--ax-cyan));
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.18),
+      0 0 11px 1px var(--wf-node-color, var(--ax-cyan));
+  }
+}
+
+/* Ambient background drift blobs (vdDrift) behind the canvas - two large,
+ * blurred, slowly drifting radial gradients in the cyan/violet accents. They
+ * sit at the very back (no z-index -> below every positioned React Flow node/
+ * edge) and are pointer-transparent, so they're pure atmosphere. */
+.ax-wf-canvas-zone::before,
+.ax-wf-canvas-zone::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(16px);
+}
+
+.ax-wf-canvas-zone::before {
+  top: -160px;
+  left: 6%;
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--ax-cyan) 22%, transparent), transparent 62%);
+  animation: axWfDrift 24s ease-in-out infinite;
+}
+
+.ax-wf-canvas-zone::after {
+  bottom: -200px;
+  right: 5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--ax-violet) 20%, transparent), transparent 62%);
+  animation: axWfDrift 29s ease-in-out infinite reverse;
+}
+
+@keyframes axWfDrift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(24px, -18px);
+  }
+}
+
+/* Edge/wire entrance (vdWireIn): each edge fades up once when it first mounts
+ * (fill-mode both). React Flow keeps edge DOM elements stable across prop
+ * changes, so this plays on creation only, not on every re-render. */
+.ax-wf-canvas-zone .react-flow__edge {
+  animation: axWfWireIn 0.5s ease both;
+}
+
+@keyframes axWfWireIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Edge delete affordance (DeletableEdge) - the small x that appears at a
+ * selected edge's midpoint, the first on-screen way to remove an edge
+ * (previously Backspace/Delete-only). Rendered through EdgeLabelRenderer,
+ * i.e. portaled OUT of the SVG into a plain div overlay, so it needs its
+ * own size/colors here; destructive pink matches the run inspector's Stop
+ * treatment rather than inventing a new red. */
+.ax-wf-edge-delete {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 92, 114, 0.45);
+  background: var(--ax-panel2);
+  color: #ff8a99;
+  font-size: var(--fs-caption);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.ax-wf-edge-delete:hover {
+  background: rgba(255, 92, 114, 0.16);
+  border-color: #ff8a99;
+}
+
+/* Guided-tour spotlight on the currently-narrated node - a pulsing violet
+ * focus ring (wins over the idle glow via !important on the animation). */
+.ax-wf-shell .wf-node-tour {
+  border-color: var(--ax-violet) !important;
+  animation:
+    axWfNodeIn 0.5s cubic-bezier(0.34, 1.45, 0.5, 1) both,
+    axWfTourPulse 1.6s ease-in-out infinite !important;
+}
+
+@keyframes axWfTourPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--ax-violet) 55%, transparent),
+      0 0 22px -4px var(--ax-violet);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px var(--ax-violet),
+      0 0 34px -2px var(--ax-violet);
+  }
+}

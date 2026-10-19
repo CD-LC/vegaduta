@@ -1,0 +1,88 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-handoff-conversations",
+      "method": "GET",
+      "path": "/api/handoff/conversations",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-handoff-inbox",
+      "method": "GET",
+      "path": "/api/handoff/inbox",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-handoff-sessions-sessionId-escalate",
+      "method": "POST",
+      "path": "/api/handoff/sessions/{sessionId}/escalate",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-handoff-sessions-sessionId-release",
+      "method": "POST",
+      "path": "/api/handoff/sessions/{sessionId}/release",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-handoff-sessions-sessionId-reply",
+      "method": "POST",
+      "path": "/api/handoff/sessions/{sessionId}/reply",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.body"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-handoff-sessions-sessionId-take-over",
+      "method": "POST",
+      "path": "/api/handoff/sessions/{sessionId}/take-over",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-handoff-sessions-sessionId-transcript",
+      "method": "GET",
+      "path": "/api/handoff/sessions/{sessionId}/transcript",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-handoff-stats",
+      "method": "GET",
+      "path": "/api/handoff/stats",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+# Ruff (lint + format) config for the code-intel service. First lint/format
+# config this service has ever had (2026-08-17).
+#
+# WHY THIS FILE EXISTS AND WHAT IT IS NOT: this pyproject.toml carries ONLY
+# tool config. There is deliberately no [project]/[build-system] section -
+# the service is not a package (the Dockerfile pip-installs requirements.txt
+# and COPYs app/ + codebase_rag/, it never builds or installs this
+# directory). The Dockerfile doesn't COPY this file, so it is completely
+# inert for image builds.
+#
+# WHY PER-SERVICE CONFIG, NOT ONE SHARED ROOT FILE: the rule content below
+# is kept byte-identical with sidecar/pyproject.toml on purpose (only the
+# per-file-ignores and excludes differ - both are code-intel-specific
+# paths). See the longer rationale at the top of sidecar/pyproject.toml;
+# if a repo-root config lands later, delete both service files in the same
+# change (ruff uses the NEAREST config up the tree, so these would silently
+# shadow a root one).
+#
+# THE MIRROR TRAP (read before ever running `ruff --fix` or `ruff format`
+# here): codebase_rag/ is vendor-mirrored to tools/codebase-rag/, and CI
+# already gates the two copies against drift (.github/workflows/
+# static-gates.yml -> scripts/ci/ragtree-sync-check.sh). Any autofix or
+# format run that touches codebase_rag/ MUST apply the identical change to
+# tools/codebase-rag/codebase_rag/ in the same commit, or the sync gate
+# goes red. `ruff check` (no --fix) is always safe.
+#
+# WHY line-length = 100 (measured, not guessed): the house style is visibly
+# ~88 with occasional overflow; across both services 78 lines exceed 88,
+# 32 exceed 100, 9 exceed 120. At 100 this service has 17 raw hits, but 12
+# of them are single-line tree-sitter definition-pattern regexes in
+# languages.py (11) and graph.py (1) - up to 205 chars, per-language table
+# rows that cannot be split without destroying their grep-ability - hence
+# the two per-file-ignores below. That leaves 5 genuine, splittable
+# violations (test_agent.py 2, test_exec_and_mcp.py 1, app/service.py 1,
+# app/gitops.py 1): one small cleanup commit, not a wall.
+#
+# WHY py312: the Dockerfile is python:3.12-slim. The checked-in local .venv
+# is cp311 - the image, not the laptop, is the deployment truth.
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# /data in the container, ./data in the checked-out tree: this is the RAG
+# index/workspace volume - it fills with CLONED TENANT REPOS at runtime,
+# i.e. foreign Python this service must never be lint-gated on.
+extend-exclude = ["data"]
+
+[tool.ruff.lint]
+# E4/E7/E9/F is ruff's default set and where the defect-catching value is
+# (F401 unused imports, F811 redefinition, F841 dead locals). E501 must be
+# named explicitly because the default set omits it. I/UP/B/C4/RUF are the
+# cheap upgrades this codebase is already ~95% compliant with: import blocks
+# are isort-clean, generics are modern (str | None, list[str]), exception
+# chaining uses `raise ... from e` throughout, and there is not a single
+# non-ASCII character in either service (so RUF001-003 are silent).
+#
+# DELIBERATELY NOT SELECTED - each of these is a several-hundred-violation
+# wall that would fight this repo's documented conventions, not improve them:
+#   D (pydocstyle)  - the house convention is multi-paragraph narrative
+#                     docstrings explaining WHY (see CLAUDE.md); D205/D400/
+#                     D401 would flag essentially all of them.
+#   TRY             - TRY003 flags long exception messages; this codebase
+#                     deliberately writes long, actionable ones.
+#   BLE             - every `except Exception` here is intentional and
+#                     comment-justified (tree-sitter parser failures,
+#                     per-file chunker fallbacks).
+#   T20             - the entire tests/ convention is print-based check()
+#                     scripts, and cli.py legitimately prints.
+#   PL              - PLW0603 would flag the `global PASS, FAIL` statements
+#                     the tests' check() harness depends on, plus complexity
+#                     rules on executor.py/service.py/graph.py.
+#   S, PTH, ANN, ERA, EM, COM812/ISC001 - subprocess-git false positives,
+#                     pathlib/annotation churn, or formatter-conflicting.
+select = ["E4", "E7", "E9", "F", "E501", "I", "UP", "B", "C4", "RUF"]
+# B008 ("function call in default argument") is the canonical FastAPI false
+# positive: app/main.py has 27 `ctx: TenantContext = Depends(tenant)` route
+# signatures - the framework's documented DI idiom, evaluated per request,
+# not a shared-mutable-default bug.
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Single-line tree-sitter definition-pattern regex tables, one row per
+# language construct, up to 205 chars. Splitting them would destroy the
+# one-row-one-pattern grep-ability that makes the tables maintainable.
+# (Globs here resolve relative to this file's directory.)
+"codebase_rag/languages.py" = ["E501"]
+"codebase_rag/graph_extract.py" = ["E501"]
+# DO NOT add `"tests/*" = ["E402"]` here, however tempting it looks: every
+# test module does sys.path.insert before its app imports and already
+# carries the ~20 inline `# noqa: E402` comments that make that legal.
+# Those noqas are load-bearing under the E4 select above; a blanket
+# per-file-ignore would instantly flip every one of them into an
+# unused-noqa RUF100 error. (Conversely: if anyone ever drops E4 from
+# select, the same ~20 noqas all become RUF100 errors at once.)
+
+[tool.ruff.format]
+# Defaults on purpose (double quotes, 4-space indent, magic trailing comma
+# respected) - they match the existing style, so a future `ruff format`
+# adoption produces the smallest possible diff. Re-read THE MIRROR TRAP
+# above before actually running the formatter on codebase_rag/.
+
+[tool.pytest.ini_options]
+# SVC-015: the tests are check()-harness scripts run in CI as
+# `python -m tests.<module>` (that stays the source of truth). pytest only
+# collects the thin adapter, which runs each harness module in a subprocess
+# and asserts exit code 0 - see tests/pytest_harness_adapter.py for why the
+# harness modules' own test_* functions must NOT be collected directly.
+testpaths = ["tests"]
+python_files = ["pytest_harness_adapter.py"]
+
+[tool.mypy]
+# Non-blocking (no CI gate yet). Whole-service mypy still has ~200 findings
+# in untyped legacy code; the security-sensitive modules in the override
+# below are held to the stricter bar and are clean under it:
+#   mypy app/executor.py app/gitops.py app/auth.py
+python_version = "3.12"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["app.executor", "app.workspace", "app.sandbox_sdk", "app.textcap", "app.gitops", "app.auth"]
+disallow_untyped_defs = true
+check_untyped_defs = true

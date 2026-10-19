@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Base &amp; RAG — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="functional" data-page="knowledge-rag.html" data-doc="VD-FN-004" data-status="verified" data-updated="2026-09-25" data-owner="Product Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <nav class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Functional</a><span class="sep">/</span>Knowledge Base &amp; RAG</nav>
+
+  <h1>Knowledge Base &amp; RAG</h1>
+  <p class="lede">
+    The knowledge subsystem (<code>core/knowledge</code>) gives agents
+    grounded retrieval over tenant-owned content. Content lives in
+    <strong>collections</strong> of <strong>documents</strong>, is ingested by
+    jobs and connectors, and is searched by a hybrid vector + full-text
+    pipeline with an optional reranker. A separate graph-memory store gives
+    agents entity/relationship recall.
+  </p>
+
+  <div class="figure">
+    <div class="mermaid">
+flowchart LR
+  subgraph Ingest
+    UP["Upload (≤ 50MB)"] &amp; NOTION["Notion connector"] &amp; SP["SharePoint connector"] &amp; CRAWL["Web crawl connector"]
+  end
+  Ingest --&gt; JOB["Ingestion job"]
+  JOB --&gt; OCR["OCR / transcription<br/>(sidecar)"]
+  JOB --&gt; CHUNK["Chunk + embed"]
+  CHUNK --&gt; VS["per-tenant vector_store"]
+  CHUNK --&gt; FTS["Full-text index"]
+  Q["Agent query<br/>search_knowledge_base"] --&gt; HYB["Hybrid search<br/>vector + FTS → RRF fuse"]
+  VS --&gt; HYB
+  FTS --&gt; HYB
+  HYB --&gt; RR["Reranker hook"]
+  RR --&gt; CTX["Grounded context → agent turn"]
+    </div>
+    <div class="figure-caption">Ingestion and retrieval: connectors → chunks → hybrid RRF search → rerank → context.</div>
+  </div>
+
+  <h2>FR-KB-01 · Collections &amp; documents</h2>
+  <p>
+    A collection (<code>KnowledgeCollectionService</code>) is a named corpus
+    scoped to a tenant — e.g. "support docs", "product manuals". Documents
+    belong to exactly one collection and carry source metadata, ingestion
+    state and hierarchical structure (a document may have parents/children,
+    preserving manuals and multi-page sources).
+  </p>
+  <div class="callout callout-note">
+    <div class="callout-title">Plan gates</div>
+    <p style="margin:4px 0 0">
+      FREE tenants are limited to <code>max_kb_collections = 1</code>; paid
+      tiers are uncapped (migration <code>V158__premium_kb_collections_uncapped.sql</code>).
+      Caps are data-driven via <code>plan_limits</code> and apply only when billing
+      is on — see <a href="index.html#billing">Functional Overview</a>.
+    </p>
+  </div>
+
+  <h2>FR-KB-02 · Ingestion jobs &amp; connectors</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-KB-02.1</td><td>File upload ingestion with a <strong>50&nbsp;MB cap</strong> (<code>KNOWLEDGE_MAX_UPLOAD_MB</code>); larger sources go through connectors.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-KB-02.2</td><td><strong>Notion</strong> connector: syncs selected pages/databases into a collection.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-KB-02.3</td><td><strong>SharePoint</strong> connector: syncs document libraries.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-KB-02.4</td><td><strong>Web crawl</strong> connector: ingests a site into documents.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-KB-02.5</td><td>Ingestion runs as tracked jobs — status visible per document, failures retryable.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-KB-02.6</td><td>OCR for images/PDFs and transcription for audio/video run via the <strong>sidecar</strong> service — core never does heavy media extraction in-process. See <a href="../architecture/service-topology.html">Service Topology</a>.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-KB-03 · Hybrid search &amp; reranker</h2>
+  <p>
+    Retrieval is <strong>hybrid</strong>: a vector similarity pass over the
+    tenant's <code>vector_store</code> and a full-text search pass are fused
+    with <strong>Reciprocal Rank Fusion (RRF)</strong>, so a query can win on
+    semantics, on exact terms, or both. An optional <strong>reranker
+    hook</strong> can re-order the fused list with a cross-encoder-style model
+    before results are injected as context.
+  </p>
+  <table>
+    <thead><tr><th>Stage</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td>Vector pass</td><td>Embedding similarity against the per-tenant vector store.</td></tr>
+      <tr><td>FTS pass</td><td>Database full-text search over chunk text.</td></tr>
+      <tr><td>RRF fusion</td><td>Rank-merge both lists; reciprocal-rank scoring, no weight tuning required.</td></tr>
+      <tr><td>Reranker hook</td><td>Optional second-stage reorder for precision-critical collections.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-KB-04 · Agent-facing tools</h2>
+  <p>
+    Agents reach knowledge through two built-in tools, both routed through
+    the guarded pipeline like every other tool call:
+  </p>
+  <table>
+    <thead><tr><th>Tool</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td><code>search_knowledge_base</code></td><td>Runs the hybrid search pipeline for a query and returns ranked chunks with source attribution.</td></tr>
+      <tr><td><code>add_to_knowledge_base</code></td><td>Writes new content into a collection at runtime — e.g. persisting a confirmed answer.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-KB-05 · Per-tenant vector store</h2>
+  <p>
+    Embeddings are stored per tenant — tenant A's vectors are never searched
+    for tenant B's query. Combined with schema-per-tenant data layout (see
+    <a href="../architecture/data-architecture.html">Data Architecture</a>),
+    retrieval is tenant-isolated at both the index and the query layer.
+  </p>
+
+  <h2>FR-KB-06 · Graph memory</h2>
+  <p>
+    Beyond document RAG, a <strong>graph memory</strong> layer stores
+    <em>entities</em> and <em>relationships</em> learned from conversations
+    and content, enabling <strong>multi-hop recall</strong> — "the customer's
+    order" → "the order's product" → "the product's known issues" in one
+    traversal. Graph memory participates in the session/agent/tenant memory
+    scoping described in <a href="agents-runtime.html">VD-FN-001</a> (FR-AGT-07).
+  </p>
+
+  <h2>Cross-references</h2>
+  <ul>
+    <li><a href="agents-runtime.html">VD-FN-001</a> — memory scopes and the guarded tool pipeline.</li>
+    <li><a href="../architecture/data-architecture.html">Architecture: Data &amp; Tenancy</a> — schema-per-tenant and vector storage layout.</li>
+    <li><a href="../architecture/service-topology.html">Architecture: Service Topology</a> — the OCR/transcription sidecar.</li>
+    <li><a href="index.html#billing">Billing and plans</a> — <code>max_kb_collections</code> plan limits (off by default).</li>
+  </ul>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

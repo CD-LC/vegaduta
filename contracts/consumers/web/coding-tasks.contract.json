@@ -1,0 +1,92 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-coding-tasks",
+      "method": "GET",
+      "path": "/api/coding-tasks",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-coding-tasks",
+      "method": "POST",
+      "path": "/api/coding-tasks",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-coding-tasks-taskId",
+      "method": "GET",
+      "path": "/api/coding-tasks/{taskId}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-coding-tasks-taskId-approve",
+      "method": "POST",
+      "path": "/api/coding-tasks/{taskId}/approve",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.diffHash"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-coding-tasks-taskId-cancel",
+      "method": "POST",
+      "path": "/api/coding-tasks/{taskId}/cancel",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-coding-tasks-taskId-diff",
+      "method": "GET",
+      "path": "/api/coding-tasks/{taskId}/diff",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-coding-tasks-taskId-reject",
+      "method": "POST",
+      "path": "/api/coding-tasks/{taskId}/reject",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-coding-tasks-taskId-rollback",
+      "method": "POST",
+      "path": "/api/coding-tasks/{taskId}/rollback",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-coding-tasks-capabilities",
+      "method": "GET",
+      "path": "/api/coding-tasks/capabilities",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

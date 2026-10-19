@@ -1,0 +1,361 @@
+/* =========================================================================
+ * Screen 5 - Knowledge (design_handoff_axon/design_files/Knowledge.dc.html,
+ * re-supplied by the user this session). KnowledgeCollectionsPanel.js +
+ * KnowledgePanel.js + knowledge/page.js - the 3-column collections/detail/
+ * semantic-search layout the mockup draws (AppShell already provides the
+ * 74px rail + 60px topbar it hand-draws around that).
+ *
+ * Direct feedback: "pixel to pixel reconstruct the exact UI." Followed for
+ * every element the real KnowledgeCollectionController/KnowledgeController/
+ * AgentController backend can actually back up.
+ *
+ * Original build (this comment's history): at the time this screen was
+ * first rebuilt, two elements of the mockup had no backing data and were
+ * deliberately replaced rather than faked - (1) per-collection/per-file
+ * chunk counts, and (2) the "INGESTION PIPELINE · LIVE" 4-stage diagram
+ * plus full file table, since no per-file entity existed at all for sync
+ * uploads and the async job only had 4 coarse states with no percentage
+ * field anywhere. A "recent uploads (this session)" list stood in for both.
+ *
+ * "Build the backend to make it real" (task #534-542) then added a real
+ * KnowledgeDocument row per upload (migration V45, both sync and async
+ * paths) with genuine EXTRACTING/EMBEDDING/READY/FAILED transitions timed
+ * to actual work, plus real fileCount/chunkCount aggregates on
+ * KnowledgeCollectionResponse. Task #543 used that to rebuild the
+ * INGESTION PIPELINE · LIVE panel for real: 4 stages (Upload/Extract/
+ * Embed/Index), each showing a live count from KnowledgeDocumentStatus for
+ * the selected collection - no percentage anywhere, since the sidecar's
+ * /embed call chunks+embeds in a single request and there's no
+ * intermediate progress fraction to report. See KnowledgePanel.js's
+ * pipelineStats useMemo for the exact per-stage tallies. The full file
+ * table (now backed by real per-document rows) sits directly below it. */
+.ax-kb-topbar {
+  display: flex;
+  align-items: center;
+  gap: 3x;
+  flex-wrap: wrap;
+  padding: 2px 2px 16px;
+}
+
+.ax-kb-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: var(--fs-caption);
+  color: var(--ax-dim);
+}
+
+.ax-kb-breadcrumb strong {
+  color: var(--ax-text);
+  font-weight: 600;
+}
+
+.ax-kb-spacer {
+  flex: 1;
+}
+
+.ax-kb-body {
+  display: flex;
+  gap: 0;
+  min-height: 560px;
+  border: 1px solid var(--ax-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ax-panel);
+}
+
+/* ---- Sidebar: collection list ----------------------------------------- */
+.ax-kb-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--ax-border);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+}
+
+.ax-kb-sidebar-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.1em;
+  padding: 0 8px 8px;
+}
+
+.ax-kb-collection-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: var(--ax-text);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-kb-collection-row:hover {
+  background: var(--ax-chip);
+}
+
+.ax-kb-collection-row-active {
+  background: rgba(79, 227, 227, 0.1);
+  border-color: rgba(79, 227, 227, 0.24);
+}
+
+.ax-kb-collection-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.ax-kb-collection-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-meta);
+  color: var(--ax-mid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-kb-collection-row-active .ax-kb-collection-name {
+  color: var(--ax-cyan);
+}
+
+.ax-kb-collection-tag {
+  font-size: var(--fs-micro);
+  color: var(--ax-dim);
+  font-family: var(--font-mono), monospace;
+  flex-shrink: 0;
+}
+
+/* KnowledgeCollectionsPanel.js's per-row edit-pencil icon (role="button") -
+ * was missing any hover/focus affordance at all (rendered fine via inline
+ * styles + the Pencil icon's own color prop, just static), which breaks the
+ * "highlight and animate every interactive element" rule (#409) applied
+ * everywhere else in this list. Small opacity+color lift on hover/focus,
+ * consistent with how .ax-kb-collection-row itself reacts to interaction. */
+.ax-kb-collection-edit {
+  border-radius: 6px;
+  padding: 2px;
+  opacity: 0.7;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.ax-kb-collection-edit:hover,
+.ax-kb-collection-edit:focus-visible {
+  opacity: 1;
+  background: var(--ax-chip);
+  outline: none;
+}
+
+.ax-kb-new-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--ax-border2);
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  cursor: pointer;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-kb-new-row:hover {
+  border-color: var(--ax-cyan);
+  color: var(--ax-text);
+}
+
+/* Inline create/edit form - same card language as the rest of the console's
+ * AXON forms (.ax-agent-card lineage): bordered panel, mono field labels. */
+.ax-kb-form {
+  margin: 10px 2px 4px;
+  padding: 14px;
+  border: 1px solid var(--ax-border);
+  border-radius: 12px;
+  background: var(--ax-panel2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ax-kb-form-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: var(--fs-label);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+}
+
+.ax-kb-form-input {
+  width: 100%;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-border);
+  border-radius: 9px;
+  padding: 8px 11px;
+  color: var(--ax-text);
+  font-size: var(--fs-meta);
+  font-family: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ax-kb-form-input:focus {
+  outline: none;
+  border-color: var(--ax-cyan);
+  box-shadow: 0 0 0 3px rgba(79, 227, 227, 0.18);
+}
+
+.ax-kb-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ax-kb-form-hint {
+  font-size: var(--fs-label);
+  color: var(--ax-dim);
+  line-height: 1.5;
+}
+
+.ax-kb-error {
+  margin: 8px 2px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 92, 114, 0.3);
+  background: rgba(255, 92, 114, 0.08);
+  color: var(--ax-red);
+  font-size: var(--fs-caption);
+  white-space: pre-wrap;
+}
+
+.ax-kb-success {
+  margin: 8px 2px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(70, 224, 160, 0.3);
+  background: rgba(70, 224, 160, 0.08);
+  color: var(--ax-green);
+  font-size: var(--fs-caption);
+}
+
+/* ---- Detail column ------------------------------------------------------ */
+.ax-kb-detail {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.ax-kb-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ax-kb-detail-name {
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  color: var(--ax-text);
+  font-family: var(--font-noto-devanagari), var(--font-inter), sans-serif;
+}
+
+.ax-kb-detail-meta {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  margin-top: 4px;
+}
+
+.ax-kb-detail-desc {
+  font-size: var(--fs-caption);
+  color: var(--ax-mid);
+  margin-top: 4px;
+  max-width: 480px;
+  line-height: 1.5;
+}
+
+.ax-kb-detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ax-kb-exposed {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.ax-kb-exposed-label {
+  font-size: var(--fs-micro);
+  color: var(--ax-mid);
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.ax-kb-exposed-avatars {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.ax-kb-avatar-chip {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--ax-cyan), var(--ax-violetd));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: #05070d;
+  flex-shrink: 0;
+}
+
+.ax-kb-avatar-add {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px dashed var(--ax-border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-meta);
+  color: var(--ax-mid);
+  flex-shrink: 0;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ax-kb-avatar-add:hover {
+  border-color: var(--ax-cyan);
+  color: var(--ax-cyan);
+}

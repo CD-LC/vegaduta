@@ -1,0 +1,57 @@
+# Namespace baseline for a VegaDuta install: apply BEFORE `helm install`, then install with
+# `-n vegaduta` (without --create-namespace).
+#
+#   kubectl apply -f deploy/helm/examples/namespace.yaml
+#
+# * Pod Security Admission `restricted` is enforced: the charts already run every workload as
+#   non-root with a read-only root filesystem, no privilege escalation, all capabilities dropped and
+#   the RuntimeDefault seccomp profile. `audit`/`warn` keep the same level so a values override that
+#   weakens a pod shows up in the API audit log and in `helm install` output, not only as a rejection.
+# * The tool-sandbox runs tenant code and needs a VM-isolating RuntimeClass; it does not belong in this
+#   namespace. Give it its own (see the tool-sandbox chart) instead of loosening this one.
+# * ResourceQuota/LimitRange cap what a runaway release can take from a shared cluster and give every
+#   container a default request/limit. Size the quota to your replica counts; the values below fit the
+#   default single-replica install with the optional components that ship enabled.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vegaduta
+  labels:
+    app.kubernetes.io/part-of: vegaduta
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: vegaduta
+  namespace: vegaduta
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.memory: 32Gi
+    persistentvolumeclaims: "20"
+    pods: "60"
+    services.loadbalancers: "0"
+    services.nodeports: "0"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: vegaduta
+  namespace: vegaduta
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      default:
+        memory: 512Mi
+      max:
+        memory: 8Gi

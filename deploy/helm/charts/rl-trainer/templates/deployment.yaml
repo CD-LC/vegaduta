@@ -1,0 +1,9 @@
+{{- include "rl-trainer.guard" . -}}
+{{- $env := dict
+  "RL_TRAINER_KEYCLOAK_ISSUER" (include "vegaduta-lib.oidc.issuer" .)
+  "RL_TRAINER_KEYCLOAK_JWKS_URL" (include "vegaduta-lib.oidc.jwkSetUri" .) -}}
+{{- $secretEnv := include "vegaduta-lib.internalSecretEnv" (dict "root" . "name" "RL_TRAINER_INTERNAL_TOKEN") | fromYamlArray -}}
+{{- with .Values.llmSecret.existingSecret }}
+{{- $secretEnv = append $secretEnv (dict "name" "ANTHROPIC_API_KEY" "secretName" . "key" $.Values.llmSecret.key "optional" true) -}}
+{{- end }}
+{{ include "vegaduta-lib.serviceDeployment" (dict "root" . "env" $env "secretEnv" $secretEnv) }}

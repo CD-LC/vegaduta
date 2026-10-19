@@ -1,0 +1,23 @@
+# Master Roadmap 2026 item #14 (E2B code execution completion, §B).
+#
+# V1-format template config. The V2 CLI (`e2b template create`) does NOT read
+# this file: the Dockerfile is built directly and the start/ready commands are
+# passed as `--cmd` / `--ready-cmd` (README.md has the exact command line).
+# This file is kept for two reasons:
+#   1. it is the single place that records the start and ready commands the
+#      template needs, so the README's `e2b template create` flags and any
+#      SDK build script (`set_start_cmd(...)`) are copied from here;
+#   2. `e2b template migrate --dockerfile Dockerfile` reads it (together with
+#      the Dockerfile) to generate a V2 SDK build project (template.py +
+#      build_dev.py / build_prod.py) for tenants that prefer the SDK flow.
+# Do not add a template_id here: V2 builds print the template ID / alias on
+# the CLI and no longer write it back into this file.
+dockerfile = "Dockerfile"
+template_name = "vegaduta-code-exec"
+start_cmd = "python3 /runner.py"
+# Gives runner.py's HTTP server enough time to bind port 8080 before E2B
+# snapshots the template as "ready" - E2B re-runs this until it exits 0.
+# E2bCodeExecutionClient.java also retries on its own for a few seconds as a
+# second layer of defense against the same race, so this is a floor, not the
+# only safety net.
+ready_cmd = "curl -s http://localhost:8080/health"

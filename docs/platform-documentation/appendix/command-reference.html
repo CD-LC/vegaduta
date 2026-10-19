@@ -1,0 +1,159 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Command Reference (A–Z) — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="appendix" data-page="command-reference.html" data-doc="VD-APP-001" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="command-reference.html">Appendix</a><span class="sep">/</span>Command Reference (A–Z)</div>
+<div class="doc-meta" data-auto></div>
+<h1>Command Reference (A–Z)</h1>
+
+<p class="lede">Every command below appears verbatim, or with only placeholder generalisation
+(<code>&lt;sha&gt;</code>, <code>&lt;service&gt;</code>), in <code>deploy/README.md</code>, a script header, the <code>Makefile</code>, or a workflow. Entries are
+grouped by executable, alphabetically. Nothing here was executed while writing this page.</p>
+
+<dl class="props">
+  <dt>Scope</dt><dd>Operator, deploy, CI and developer commands. Not a Spring or Next.js manual.</dd>
+  <dt>Deployments</dt><dd>Self-hosted with Docker Compose (<code>scripts/vegaduta</code>, <code>make</code>) or Helm (<code>deploy/helm</code>). Do not confuse environments when copying a command.</dd>
+  <dt>Verification</dt><dd>Command text was checked against the cited file. It does <em>not</em> mean the command was run or is safe on your machine.</dd>
+</dl>
+
+<div class="callout callout-danger">
+  <div class="callout-title">Careful on a live stack</div>
+  Avoid host reboots and <code>docker compose down</code> (especially with <code>-v</code>) on a stack people depend on,
+  unless you mean to take it offline. A hung service is evidence to collect (logs, container states, memory) before you restart anything. Teardown of the ephemeral CI stack in <code>.github/workflows/e2e.yml</code> runs on a throwaway runner, not a real environment.
+</div>
+
+<p>Jump to:
+  <a href="#bash">bash / scripts</a> · <a href="#curl">curl</a> · <a href="#docker">docker</a> ·
+  <a href="#git">git</a> · <a href="#gitleaks">gitleaks</a> · <a href="#mvn">mvn</a> · <a href="#npm">npm / npx</a> ·
+  <a href="#openssl">openssl</a> · <a href="#powershell">powershell</a> · <a href="#pytest">pip / pytest</a> ·
+  <a href="#notes">Conventions</a></p>
+
+<h2 id="bash">B — make, scripts/vegaduta and repo scripts</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>make help</code></td><td>List Makefile targets.</td><td><code>Makefile</code></td><td></td></tr>
+<tr><td><code>scripts/vegaduta up --lite</code> / <code>up --full [--profile x]</code> (<code>make up-lite</code>, <code>make up PROFILE="temporal observability"</code>)</td><td>Generate <code>deploy/compose/.env</code>, start the Lite or Full stack, wait for healthy.</td><td><code>deploy/README.md</code></td><td>Windows: <code>scriptsegaduta.ps1</code> with <code>-Lite</code>, <code>-Full</code>, <code>-Profile</code>.</td></tr>
+<tr><td><code>scripts/vegaduta down|status|logs|doctor|secrets|upgrade|make-admin|compose</code></td><td>Operate the Compose stack.</td><td><code>deploy/README.md</code></td><td><code>down</code> keeps volumes; do not run it on a production stack unprompted.</td></tr>
+<tr><td><code>make build</code> · <code>make images</code></td><td>Build core, web and web-admin from source; build the Full-tier images from source.</td><td><code>Makefile</code></td><td>Core needs JDK 21+; one Maven build at a time.</td></tr>
+<tr><td><code>make test</code> · <code>make lint</code> · <code>make gates</code></td><td>Tests, linters and the static gates CI runs.</td><td><code>Makefile</code></td><td>See <a href="../testing/quality-gates.html">Quality Gates</a>.</td></tr>
+<tr><td><code>make compose-validate</code> · <code>make helm-lint</code> · <code>make shellcheck</code></td><td>Validate deploy artifacts and shell scripts.</td><td><code>Makefile</code>; <code>scripts/ci/compose-validate.sh</code>, <code>helm-validate.sh</code></td><td>helm-lint runs kubeconform (Docker fallback).</td></tr>
+<tr><td><code>make sbom</code></td><td>SPDX JSON SBOM of the source tree into <code>dist/</code>.</td><td><code>Makefile</code></td><td>Uses syft via Docker.</td></tr>
+<tr><td><code>make hooks</code></td><td>Point git at <code>.githooks</code> (pre-push static gates).</td><td><code>Makefile</code></td><td></td></tr>
+<tr><td><code>bash scripts/dev-up.sh</code> (<code>--app</code> | <code>--all</code> | <code>--env-only</code>)</td><td>Local dev spin-up of the compose infra subset.</td><td><code>scripts/dev-up.sh</code> header</td><td>Local only; never reuse its <code>.env</code> for a deployment.</td></tr>
+<tr><td><code>./scripts/run-core-local.sh</code></td><td>Run core with <code>deploy/compose/.env</code> sourced into the environment.</td><td><code>scripts/run-core-local.sh</code> header</td><td>Spring Boot does not read <code>.env</code> files; without this core dies on a missing <code>APP_ENCRYPTION_KEY</code>.</td></tr>
+<tr><td><code>bash scripts/ci/flyway-lint.sh</code></td><td>Flyway lint: applied-migration edit guard and version-collision checks across both migration folders.</td><td><code>scripts/ci/flyway-lint.sh</code>; <code>static-gates.yml</code></td><td>Needs git history (<code>fetch-depth: 0</code>). Versions share one namespace across <code>controlplane</code> and <code>tenant</code>.</td></tr>
+<tr><td><code>bash scripts/ci/entity-name-lint.sh</code></td><td>Static gate: entity, table, bean and path collisions.</td><td><code>static-gates.yml</code></td><td></td></tr>
+<tr><td><code>make spring-wiring</code></td><td>Runs core/app's <code>InjectableConstructorTest</code> and <code>UniqueBeanNamesTest</code>: beans Spring cannot construct, duplicate Spring bean / JPA entity names. No context, no database.</td><td><code>Makefile</code>; <code>ci.yml</code> (<code>mvn verify</code>)</td><td>Needs Maven and JDK 21+.</td></tr>
+<tr><td><code>bash scripts/ci/skip-expiry.sh</code>; <code>sh scripts/ci/check-file-size.sh</code></td><td>Static gates: expired test skips, file-size ratchet.</td><td><code>static-gates.yml</code></td><td></td></tr>
+<tr><td><code>bash scripts/ci/secret-scan.sh</code></td><td>Gitleaks scan over the commits being added (not the whole history).</td><td>script header; <code>static-gates.yml</code></td><td>Skips locally if gitleaks is absent; fails in CI (<code>CI=true</code>). Base ref via <code>SECRET_SCAN_BASE_REF</code>.</td></tr>
+<tr><td><code>bash scripts/ci/helm-validate.sh</code>; <code>bash deploy/helm/test-guards.sh</code></td><td>Helm lint, template and kubeconform; render-guard negative tests.</td><td><code>ci.yml</code> job <code>helm</code></td><td>The Helm charts are a preview.</td></tr>
+<tr><td><code>bash scripts/ci/helm-package.sh &lt;version&gt; dist/charts</code></td><td>Package the Helm charts.</td><td><code>release.yml</code></td><td>Release-time step.</td></tr>
+</tbody></table></div>
+
+<h2 id="curl">C — curl</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>curl -s http://localhost:8080/actuator/health</code> (or <code>https://api.&lt;your-domain&gt;/actuator/health</code>)</td><td>Core health.</td><td><code>deploy/compose/docker-compose.yml</code> healthcheck</td><td>Add <code>/liveness</code> or <code>/readiness</code> to separate "JVM alive" from "able to serve" (DB, Redis).</td></tr>
+<tr><td><code>curl -s http://localhost:8180/realms/agentic-ai/.well-known/openid-configuration</code></td><td>Check the Keycloak realm and the issuer it advertises.</td><td><code>deploy/README.md</code> (issuer consistency)</td><td>The <code>issuer</code> field must match what core validates.</td></tr>
+</tbody></table></div>
+
+<h2 id="docker">D — docker / docker compose</h2>
+<p>Compose files live in <code>deploy/compose/</code>; <code>scripts/vegaduta compose &lt;args&gt;</code> supplies the right files and profiles.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>scripts/vegaduta compose build core</code>; <code>scripts/vegaduta compose up -d core</code></td><td>Rebuild and restart one service (with the build overlay).</td><td><code>deploy/README.md</code></td><td>Prefer restarting a named service over a whole-stack <code>down</code>.</td></tr>
+<tr><td><code>scripts/vegaduta up --full --domain example.com --build</code></td><td>Build and run with the domain overlay so public URLs are correct.</td><td><code>deploy/README.md</code></td><td>For images built from source, rebuild web after a domain change so the fallback URLs change too.</td></tr>
+<tr><td><code>docker compose ps</code>; <code>docker compose logs -f core</code>; <code>docker compose logs --since 30m core | grep -i error</code></td><td>Status and logs (or <code>scripts/vegaduta status</code> / <code>logs core</code>).</td><td><code>deploy/README.md</code></td><td></td></tr>
+<tr><td><code>docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v</code></td><td>Tear down the ephemeral CI stack.</td><td><code>.github/workflows/e2e.yml</code></td><td>CI runner only. Not for any real environment.</td></tr>
+<tr><td><code>docker compose up -d postgres --wait</code></td><td>Start Postgres locally for core tests (<code>make test-core</code>).</td><td><code>Makefile</code></td><td></td></tr>
+<tr><td><code>docker run -d --name vd-restore-test -e POSTGRES_PASSWORD=… -p 5499:5432 postgres:16</code>; <code>docker rm -f vd-restore-test</code></td><td>Throwaway container for a restore drill (Windows helper scripts).</td><td><code>scripts/backup/verify-restore.ps1</code></td><td>A stock <code>postgres:16</code> loses pgvector columns; use the release <code>postgres</code> image (see <a href="../operations/backup-restore.html">Backup &amp; Restore</a>).</td></tr>
+</tbody></table></div>
+
+<h2 id="git">G — git</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>git worktree add --detach "$SCRATCH/build" &lt;sha&gt;</code>; <code>git -C … status --short</code> (must be empty); <code>git worktree remove --force …</code></td><td>Build images from a clean checkout of an exact sha.</td><td>Build hygiene practice</td><td>Because a build uploads whatever is on disk, including stray <code>.env*.local</code> files.</td></tr>
+<tr><td><code>git log --remotes -G'sk-ant-api03-[A-Za-z0-9_-]{80,}'</code></td><td>Scan all remote refs for a committed key pattern.</td><td>Secret-hygiene practice</td><td>Complements <code>scripts/ci/secret-scan.sh</code>.</td></tr>
+</tbody></table></div>
+
+<h2 id="gitleaks">G — gitleaks</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>go install github.com/zricethezav/gitleaks/v8@v8.30.1</code></td><td>Install the pinned scanner in CI.</td><td><code>.github/workflows/static-gates.yml</code></td><td>Version as pinned in that workflow.</td></tr>
+</tbody></table></div>
+
+<h2 id="mvn">M — mvn (core, Java)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>mvn -B clean verify</code></td><td>Full core build and tests (run from <code>core/</code>).</td><td><code>.github/workflows/ci.yml</code>; <code>make test-core</code></td><td>Context tests need Postgres with pgvector and AGE, else they skip.</td></tr>
+<tr><td><code>mvn -B -ntp -DskipTests package</code></td><td>Build core without tests (run from <code>core/</code>; <code>make build-core</code>).</td><td><code>Makefile</code></td><td>CI uses JDK 21 (<code>ci.yml</code>).</td></tr>
+<tr><td><code>mvn spring-boot:run</code></td><td>Run core directly.</td><td><code>scripts/dev-up.sh</code> header; <code>scripts/run-core-local.sh</code></td><td>Env comes from the shell only — use the run-core-local wrapper.</td></tr>
+</tbody></table></div>
+<div class="callout callout-note">
+  <div class="callout-title">JDK version</div>
+  <code>scripts/dev-up.sh</code> says "JDK 21+"; CI and <code>core/Dockerfile</code> use Java 21 images. Some maintainers build locally with JDK 24. Run one Maven build at a time.
+</div>
+
+<h2 id="npm">N — npm / npx (web, web-admin)</h2>
+<p>Scripts from <code>web/package.json</code> and <code>web-admin/package.json</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>npm run dev</code></td><td>Dev server: web on port 3000, web-admin on port 3001.</td><td><code>web/package.json</code>; <code>web-admin/package.json</code></td><td>web's <code>predev</code> runs the vendor scripts (<code>vendor-webllm</code>, <code>vendor-kokoro</code>, <code>vendor-babel</code>).</td></tr>
+<tr><td><code>npm run build</code> / <code>npm run start</code></td><td>Production build / serve.</td><td>both <code>package.json</code></td><td><code>NEXT_PUBLIC_*</code> are baked at build time. web's <code>prebuild</code> runs <code>scripts/i18n-route-namespaces.mjs</code> and the vendor scripts.</td></tr>
+<tr><td><code>npm run lint</code> · <code>npm run typecheck</code> · <code>npm test</code> · <code>npm run test:watch</code></td><td>eslint, <code>tsc --noEmit</code>, <code>vitest run</code>, <code>vitest</code>.</td><td>both <code>package.json</code></td><td>CI runs lint, typecheck, test and build for both consoles (<code>ci.yml</code>).</td></tr>
+<tr><td><code>npm run e2e</code> · <code>e2e:ui</code> · <code>e2e:report</code> · <code>e2e:showcase</code></td><td>Playwright (web only).</td><td><code>web/package.json</code></td><td>The nightly <code>e2e.yml</code> runs the suite in <code>tests/e2e</code> with <code>npx playwright test --project=chromium</code>.</td></tr>
+<tr><td><code>npm run translate-messages</code></td><td><code>node scripts/translate-messages.mjs</code>.</td><td><code>web/package.json</code></td><td>Maintainers regenerate message catalogs with this; no workflow runs it.</td></tr>
+<tr><td><code>npm ci --prefer-offline --no-audit</code> / <code>npm install</code></td><td>Install deps.</td><td><code>Makefile</code> (<code>npm ci</code>); <code>ci.yml</code></td><td>Do not run <code>npm install</code> in a tree while other processes run <code>npx</code> there.</td></tr>
+</tbody></table></div>
+
+<h2 id="openssl">O — openssl</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>openssl rand -base64 32</code></td><td>Generate <code>APP_ENCRYPTION_KEY</code> (base64 of 32 raw bytes).</td><td><code>core/.env.example</code></td><td>Never regenerate once encrypted rows exist. See <a href="environment-variables.html#secrets">Environment Variables</a>.</td></tr>
+<tr><td><code>openssl rand -hex 32</code> / <code>-hex 24</code></td><td>Generate shared secrets (sidecar, Langfuse) / <code>CODE_INTEL_INTERNAL_TOKEN</code>.</td><td><code>core/.env.example</code>; <code>deploy/compose/.env.example</code></td><td></td></tr>
+</tbody></table></div>
+
+<h2 id="powershell">P — powershell (Windows)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup\register-backup-task.ps1</code></td><td>Register a nightly backup scheduled task on a Windows Docker host (optional helper).</td><td><code>scripts/backup/register-backup-task.ps1</code></td><td>Runs <code>scripts/backup/pg-backup.ps1</code> (dumps main Postgres and Keycloak DB to a backups directory beside the repo).</td></tr>
+<tr><td><code>powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup\verify-restore.ps1</code></td><td>Monthly restore drill against a throwaway Postgres.</td><td>script header</td><td>The script starts nothing itself; the operator starts and removes the container.</td></tr>
+<tr><td><code>.\scripts\dev\validate-platform.ps1 -Username … -Password …</code></td><td>Read-only platform validation (admin API, login, roles, tenant resolution).</td><td><code>scripts/dev/validate-platform.ps1</code> header</td><td>Uses a real tenant-admin login; do not paste credentials into shared logs.</td></tr>
+<tr><td><code>scripts/dev/reset-full.ps1</code></td><td>Full local reset — wipes all tenant data and all Keycloak realm users.</td><td>script header</td><td>Irreversible, no backup taken. Local dev only.</td></tr>
+<tr><td><code>scripts/keycloak/*.ps1</code></td><td>Keycloak diagnostics and fixes.</td><td>files exist in repo</td><td>Usage text not read for this page; open the script header before running.</td></tr>
+</tbody></table></div>
+
+<h2 id="pytest">P — pip / pytest (sidecar and Python services)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>Purpose</th><th>Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>pip install -r requirements.txt</code>; <code>python -m pytest tests/ -q</code></td><td>Python service tests (<code>make test-python</code>).</td><td><code>Makefile</code>; <code>.github/workflows/ci.yml</code></td><td>Run from <code>services/sidecar</code>; code-intel uses a script harness.</td></tr>
+</tbody></table></div>
+
+<h2 id="notes">Conventions and cross-links</h2>
+<ul>
+  <li>Pull requests run <code>CI</code> (<code>CI OK</code>) and <code>Static gates</code>; tags run <code>release.yml</code>. See <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a>.</li>
+  <li>Pin release versions (<code>VEGADUTA_VERSION</code>), never <code>latest</code>; upgrade with <code>scripts/vegaduta upgrade --version X.Y.Z</code>.</li>
+  <li>Ports and service names: <a href="ports-services.html">Ports &amp; Service Matrix</a>. Variables: <a href="environment-variables.html">Environment Variables</a>.</li>
+  <li>Not documented in the repository: a single canonical list of Maven module goals.</li>
+</ul>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><a href="../deployment/index.html">Deployment Guide</a>, <a href="../operations/observability.html">Observability</a>, <code>deploy/README.md</code></li>
+  <li><code>.github/workflows/ci.yml</code>, <code>static-gates.yml</code>, <code>e2e.yml</code>, <code>release.yml</code>; <code>Makefile</code></li>
+  <li><code>web/package.json</code>, <code>web-admin/package.json</code>, <code>scripts/**</code> (headers of <code>dev-up.sh</code>, <code>run-core-local.*</code>, <code>ci/secret-scan.sh</code>, <code>backup/*.ps1</code>)</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

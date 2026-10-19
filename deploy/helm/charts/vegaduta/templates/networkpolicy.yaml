@@ -1,0 +1,53 @@
+{{- /* Namespace baseline when global.networkPolicy.enabled: deny everything, then each
+  component's own policy (rendered by its chart) opens exactly what it needs.
+  Install VegaDuta in a DEDICATED namespace - this default-deny applies to every pod in it,
+  except CloudNativePG instance pods (they need the Kubernetes API, replication and backup
+  egress; the postgres chart gives them an ingress-only policy). */ -}}
+{{- $gn := .Values.global.networkPolicy -}}
+{{- if $gn.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vegaduta-lib.componentName" (dict "root" . "name" "default-deny") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: cnpg.io/cluster, operator: DoesNotExist }
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress: []
+---
+{{- /* `helm test` pods: DNS + the release's own pods. */}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vegaduta-lib.componentName" (dict "root" . "name" "helm-tests") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      vegaduta.io/helm-test: "true"
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $gn.dnsNamespace | default "kube-system" }}
+          podSelector:
+            matchLabels:
+              {{- toYaml ($gn.dnsPodLabels | default (dict "k8s-app" "kube-dns")) | nindent 14 }}
+      ports:
+        - { port: 53, protocol: UDP }
+        - { port: 53, protocol: TCP }
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

@@ -1,0 +1,343 @@
+{
+  "realm": "agentic-ai",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 10,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "passwordPolicy": "length(12) and maxLength(128) and notUsername(undefined) and notEmail(undefined) and passwordHistory(3)",
+  "eventsEnabled": true,
+  "eventsExpiration": 7776000,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 14400,
+  "displayName": "VegaDūta",
+  "displayNameHtml": "Vega<span style=\"color:#7c5cff;\">Dūta</span>",
+  "loginTheme": "agentic-ai",
+  "accountTheme": "agentic-ai",
+  "emailTheme": "agentic-ai",
+  "attributes": {
+    "frontendUrl": "https://auth.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"
+  },
+  "smtpServer": {
+    "host": "${env.KEYCLOAK_SMTP_HOST:smtp.example.com}",
+    "port": "587",
+    "from": "${env.KEYCLOAK_SMTP_FROM:noreply@example.com}",
+    "fromDisplayName": "VegaDūta",
+    "ssl": "false",
+    "starttls": "true",
+    "auth": "true",
+    "user": "${env.KEYCLOAK_SMTP_USER:noreply@example.com}",
+    "password": ""
+  },
+  "browserSecurityHeaders": {
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self' https://app.${env.VEGADUTA_PUBLIC_DOMAIN:example.com} https://${env.VEGADUTA_PUBLIC_DOMAIN:example.com} https://admin.${env.VEGADUTA_PUBLIC_DOMAIN:example.com} https://academy.${env.VEGADUTA_PUBLIC_DOMAIN:example.com} http://localhost:3000 http://localhost:3001; object-src 'none';"
+  },
+  "roles": {
+    "realm": [
+      {
+        "name": "tenant-admin",
+        "description": "Full admin over their own tenant: providers, agents, MCP registry, knowledge base, user management within the tenant. Maps to the 'Organization/Support admin' persona (PRD Section 3)."
+      },
+      {
+        "name": "platform-admin",
+        "description": "Cross-tenant platform operator for the Ecosystem Maintenance console (/platform). Not auto-granted at signup like tenant-admin; must be assigned manually in the Keycloak admin console to real platform operator accounts only."
+      },
+      {
+        "name": "agent-builder",
+        "description": "Can create/edit agents, attach knowledge bases and tools, but cannot manage billing or invite/remove other users. Maps to the 'Product Owner/PM' persona (PRD Section 3)."
+      },
+      {
+        "name": "delegated-user",
+        "description": "Assisted/delegated-setup role (PRD Section 3.1) - a parent, adult child, or shop assistant configuring an agent on behalf of a kid, elderly, or non-technical end user who never gets their own login."
+      },
+      {
+        "name": "end-customer",
+        "description": "Scoped role for the customer-facing widget's public auth path (PRD Section 6.9) - rate-limited, domain-restricted, no access to any admin endpoint."
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "agentic-ai-core",
+      "name": "Agentic AI Core (Spring Boot resource server)",
+      "description": "Confidential client used by core's OAuth2 Resource Server config (Phase 0 Stage 3) to validate tokens via the JWKS endpoint. Also used server-side for the Keycloak Admin REST API calls in Stage 5's tenant-provisioning flow.",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "secret": "CHANGE_ME_IN_A_REAL_ENVIRONMENT_DO_NOT_COMMIT_A_REAL_SECRET",
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "agentic-ai-web",
+      "name": "Agentic AI Web Console",
+      "description": "Public client (browser, no secret) for the Next.js console's OIDC authorization-code-with-PKCE login flow (Phase 0 Stage 3).",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "https://app.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*",
+        "https://${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*"
+      ],
+      "webOrigins": [
+        "https://app.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}",
+        "https://${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "agentic-ai-platform-admin",
+      "name": "Agentic AI Platform Admin Console",
+      "description": "Public client (browser, no secret) for the web-admin/ Next.js app's OIDC auth-code+PKCE login flow. Own client entry (own redirect URIs, port 3001), separate from agentic-ai-web. No tenant_id mapper: platform-admin ops are cross-tenant.",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "https://admin.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*"
+      ],
+      "webOrigins": [
+        "https://admin.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "agentic-ai-mobile",
+      "name": "Agentic AI Mobile SDK (Android)",
+      "description": "Public client (native app, no secret, AppAuth-Android) for the Mobile SDK's OIDC auth-code+PKCE login flow. Reuses this realm's Google/GitHub/Microsoft IdP brokering. Uses a custom URI redirect scheme (no localhost on a phone).",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "com.agenticai.mobilesdk:/oauth2redirect"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "agentic-ai-app",
+      "name": "AXON Consumer App (Android)",
+      "description": "Public client (native app, no secret, AppAuth-Android) for the consumer-facing AXON mobile app's OIDC auth-code+PKCE login flow. Distinct from agentic-ai-mobile (different product/distribution/package id). Reuses realm IdP brokering.",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "com.agenticai.app:/oauth2redirect"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "agentic-ai-ide",
+      "name": "VegaDuta IDE & Browser Plugins",
+      "description": "Public client (PKCE S256) for VS Code/JetBrains (OAuth device grant) and the Chrome MV3 extension (chrome.identity auth-code+PKCE; extension ID pinned via manifest key). No webOrigins. Full detail: docs/IDE-PLUGIN-PLATFORM-CONTRACT-2026-08-09.md.",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "https://ehhjcemahgpfcmhiahlpobohnfldhfjm.chromiumapp.org/*"
+      ],
+      "attributes": {
+        "oauth2.device.authorization.grant.enabled": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "academy-webapp",
+      "name": "VegaDuta Academy Webapp",
+      "description": "Public client (browser, no secret) for the Academy webapp's OIDC auth-code+PKCE login flow (see docker-compose.yml's `academy` service). Same public/PKCE shape as agentic-ai-web, own redirect URIs for the academy subdomain/port 4100.",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "https://academy.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}/*"
+      ],
+      "webOrigins": [
+        "https://academy.${env.VEGADUTA_PUBLIC_DOMAIN:example.com}"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "github",
+      "providerId": "github",
+      "enabled": false,
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "REPLACE_WITH_GITHUB_CLIENT_ID",
+        "clientSecret": "REPLACE_WITH_GITHUB_CLIENT_SECRET",
+        "useJwksUrl": "true",
+        "syncMode": "FORCE",
+        "defaultScope": "read:user user:email"
+      }
+    },
+    {
+      "alias": "google",
+      "providerId": "google",
+      "enabled": false,
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "REPLACE_WITH_GOOGLE_CLIENT_ID",
+        "clientSecret": "REPLACE_WITH_GOOGLE_CLIENT_SECRET",
+        "useJwksUrl": "true",
+        "syncMode": "FORCE",
+        "defaultScope": "openid profile email"
+      }
+    },
+    {
+      "alias": "microsoft",
+      "providerId": "microsoft",
+      "enabled": false,
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "REPLACE_WITH_MICROSOFT_CLIENT_ID",
+        "clientSecret": "REPLACE_WITH_MICROSOFT_CLIENT_SECRET",
+        "useJwksUrl": "true",
+        "syncMode": "FORCE",
+        "defaultScope": "openid profile email"
+      }
+    }
+  ]
+}

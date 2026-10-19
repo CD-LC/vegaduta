@@ -1,0 +1,56 @@
+# Tool config for the voice-agent service (lint, tests, types). First such
+# config this service has had (2026-09-30).
+#
+# WHY THIS FILE EXISTS AND WHAT IT IS NOT: this pyproject.toml carries ONLY
+# tool config. There is deliberately no [project]/[build-system] section -
+# the service is not a package (the Dockerfile pip-installs requirements.txt
+# and COPYs app/, it never builds or installs this directory), and adding
+# packaging metadata here would invite someone to `pip install .` a thing
+# that was never designed to be installed. The Dockerfile doesn't COPY this
+# file, so it is completely inert for image builds.
+#
+# WHY py312 / line-length 100: same as sidecar/pyproject.toml - the image is
+# python:3.12-slim, and 100 is the house line length.
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# NARROWER THAN sidecar/pyproject.toml ON PURPOSE. Measured with ruff 0.12.4
+# (the CI version) when this file landed: the full sidecar set reports 29
+# pre-existing findings - 17 E501 (long prose/log lines), 4 RUF006, 3 I001,
+# 2 RUF100, 2 UP041, 1 UP037. Fixing them means touching most of app/, and
+# CI's blocking "Ruff lint + format (changed files)" gate then runs
+# `ruff format --check` on every touched file - none of which is ruff-format
+# clean yet - so a lint tidy-up becomes a whole-service reformat. That
+# belongs in one dedicated commit, after which this select should be
+# widened to the sidecar set.
+#
+# NOTE the 4 RUF006 hits are worth that follow-up on their own merits, not
+# just style: `asyncio.create_task(...)` results that are never stored
+# (app/main.py x3, app/llm_core_bridge.py x1) can be garbage-collected
+# mid-flight. Run `ruff check --select RUF006 .` to list them.
+#
+# Until then: ruff's default defect-catching set plus B (bugbear) and C4,
+# both of which are already clean here.
+select = ["E4", "E7", "E9", "F", "B", "C4"]
+# B008 is the canonical FastAPI/DI false positive; kept for parity with
+# sidecar even though nothing here trips it today.
+ignore = ["B008"]
+
+[tool.ruff.format]
+# Defaults on purpose - they match the existing style.
+
+[tool.pytest.ini_options]
+# Plain pytest suite. tests/conftest.py puts voice-agent/ on sys.path and
+# pre-stubs livekit's native local-inference extension (see its docstring).
+# Install: pip install -r requirements.txt -r requirements-dev.txt
+testpaths = ["tests"]
+
+[tool.mypy]
+# NON-BLOCKING / advisory: nothing in CI runs mypy against this service
+# today, and app/ is not fully annotated. ignore_missing_imports because
+# the livekit plugin packages do not all ship type information.
+python_version = "3.12"
+ignore_missing_imports = true

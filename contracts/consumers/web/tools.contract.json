@@ -1,0 +1,455 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-tools-classifications",
+      "method": "GET",
+      "path": "/api/tools/classifications",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tools-code",
+      "method": "GET",
+      "path": "/api/tools/code",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tools-code",
+      "method": "POST",
+      "path": "/api/tools/code",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.description",
+          "$.displayName",
+          "$.enabled",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.language",
+          "$.memoryMb",
+          "$.outputDescription",
+          "$.sourceCode",
+          "$.status",
+          "$.timeoutMs",
+          "$.toolName",
+          "$.updatedAt",
+          "$.validationError",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tools-code-id",
+      "method": "DELETE",
+      "path": "/api/tools/code/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tools-code-id",
+      "method": "PUT",
+      "path": "/api/tools/code/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.description",
+          "$.displayName",
+          "$.enabled",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.language",
+          "$.memoryMb",
+          "$.outputDescription",
+          "$.sourceCode",
+          "$.status",
+          "$.timeoutMs",
+          "$.toolName",
+          "$.updatedAt",
+          "$.validationError",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-tools-code-id-enabled",
+      "method": "PATCH",
+      "path": "/api/tools/code/{id}/enabled",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.description",
+          "$.displayName",
+          "$.enabled",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.language",
+          "$.memoryMb",
+          "$.outputDescription",
+          "$.sourceCode",
+          "$.status",
+          "$.timeoutMs",
+          "$.toolName",
+          "$.updatedAt",
+          "$.validationError",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-code-id-revalidate",
+      "method": "POST",
+      "path": "/api/tools/code/{id}/revalidate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.description",
+          "$.displayName",
+          "$.enabled",
+          "$.id",
+          "$.inputSchemaJson",
+          "$.language",
+          "$.memoryMb",
+          "$.outputDescription",
+          "$.sourceCode",
+          "$.status",
+          "$.timeoutMs",
+          "$.toolName",
+          "$.updatedAt",
+          "$.validationError",
+          "$.version"
+        ]
+      }
+    },
+    {
+      "id": "put-api-tools-code-id-secrets",
+      "method": "PUT",
+      "path": "/api/tools/code/{id}/secrets",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.allowedSecretNames"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tools-code-id-test",
+      "method": "POST",
+      "path": "/api/tools/code/{id}/test",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.input"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.durationMs",
+          "$.error",
+          "$.errorType",
+          "$.ok",
+          "$.result",
+          "$.stdout"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-code-generate",
+      "method": "POST",
+      "path": "/api/tools/code/generate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.errors",
+          "$.language",
+          "$.sourceCode",
+          "$.valid",
+          "$.warnings"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-code-validate",
+      "method": "POST",
+      "path": "/api/tools/code/validate",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.language",
+          "$.sourceCode",
+          "$.toolName"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-tools-openapi",
+      "method": "GET",
+      "path": "/api/tools/openapi",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].authType",
+          "$[*].baseUrl",
+          "$[*].enabled",
+          "$[*].enabledToolCount",
+          "$[*].hasSecret",
+          "$[*].id",
+          "$[*].name",
+          "$[*].toolCount",
+          "$[*].toolPrefix"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-openapi",
+      "method": "POST",
+      "path": "/api/tools/openapi",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.authType",
+          "$.baseUrl",
+          "$.enabled",
+          "$.enabledToolCount",
+          "$.hasSecret",
+          "$.id",
+          "$.name",
+          "$.toolCount",
+          "$.toolPrefix"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-tools-openapi-id",
+      "method": "DELETE",
+      "path": "/api/tools/openapi/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tools-openapi-id",
+      "method": "PUT",
+      "path": "/api/tools/openapi/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.authType",
+          "$.baseUrl",
+          "$.enabled",
+          "$.enabledToolCount",
+          "$.hasSecret",
+          "$.id",
+          "$.name",
+          "$.toolCount",
+          "$.toolPrefix"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-tools-openapi-id-enabled",
+      "method": "PATCH",
+      "path": "/api/tools/openapi/{id}/enabled",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.authType",
+          "$.baseUrl",
+          "$.enabled",
+          "$.enabledToolCount",
+          "$.hasSecret",
+          "$.id",
+          "$.name",
+          "$.toolCount",
+          "$.toolPrefix"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-openapi-id-refresh",
+      "method": "POST",
+      "path": "/api/tools/openapi/{id}/refresh",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.authType",
+          "$.baseUrl",
+          "$.enabled",
+          "$.enabledToolCount",
+          "$.hasSecret",
+          "$.id",
+          "$.name",
+          "$.toolCount",
+          "$.toolPrefix"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tools-openapi-id-tools",
+      "method": "GET",
+      "path": "/api/tools/openapi/{id}/tools",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].bodyMode",
+          "$[*].deprecated",
+          "$[*].enabled",
+          "$[*].httpMethod",
+          "$[*].id",
+          "$[*].operationKey",
+          "$[*].pathTemplate",
+          "$[*].sourceId",
+          "$[*].toolName"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-tools-openapi-id-tools-toolId-enabled",
+      "method": "PATCH",
+      "path": "/api/tools/openapi/{id}/tools/{toolId}/enabled",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.bodyMode",
+          "$.deprecated",
+          "$.enabled",
+          "$.httpMethod",
+          "$.id",
+          "$.operationKey",
+          "$.pathTemplate",
+          "$.sourceId",
+          "$.toolName"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-openapi-id-tools-toolId-test",
+      "method": "POST",
+      "path": "/api/tools/openapi/{id}/tools/{toolId}/test",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.inputJson"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.resultJson"
+        ]
+      }
+    },
+    {
+      "id": "post-api-tools-openapi-preview",
+      "method": "POST",
+      "path": "/api/tools/openapi/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.operations",
+          "$.toolPrefix"
+        ]
+      }
+    },
+    {
+      "id": "get-api-tools-scripts",
+      "method": "GET",
+      "path": "/api/tools/scripts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tools-scripts",
+      "method": "POST",
+      "path": "/api/tools/scripts",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-tools-scripts-id",
+      "method": "DELETE",
+      "path": "/api/tools/scripts/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-tools-scripts-id",
+      "method": "PUT",
+      "path": "/api/tools/scripts/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-tools-scripts-id-enabled",
+      "method": "PATCH",
+      "path": "/api/tools/scripts/{id}/enabled",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-tools-scripts-test",
+      "method": "POST",
+      "path": "/api/tools/scripts/test",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.expression",
+          "$.sampleInputJson"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.resultJson"
+        ]
+      }
+    }
+  ]
+}

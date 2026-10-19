@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-signup",
+      "method": "POST",
+      "path": "/api/signup",
+      "status": 201,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

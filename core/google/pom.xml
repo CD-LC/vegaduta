@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>google</artifactId>
+  <name>google</name>
+  <description>
+    Google Workspace integration - one platform-level OAuth app (Drive, Gmail,
+    Calendar, Sheets scopes), per-tenant connection (encrypted refresh token,
+    schema-per-tenant like TwilioCredential/MetaWhatsAppCredential - no
+    tenant_id column needed), plus thin REST clients for each of the four
+    Google APIs. Exposed to agents as native ToolCallbacks by the "agents"
+    module (this module has no ToolCallback dependency itself - see
+    GoogleDriveToolCallback etc. living in agents/tools, same split as
+    knowledge's search tool). Depends on: crypto, security, tenancy.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- TenantSchemaResolver.resolveCurrentTenantIdentifier() - captured
+         into the signed OAuth `state` at authorize-url time so the callback
+         (which arrives with no JWT, like any third-party OAuth redirect)
+         can restore the right tenant context without a DB round trip. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 4: the Google Workspace agent tool adapters
+         (com.agenticai.core.google.agenttools: Drive, Gmail, Calendar, Sheets,
+         YouTube tool callbacks, GoogleWorkspaceToolSource, GoogleDriveFileUploader)
+         implement the kernel's agentspi ports (core/agentspi), so they live here with the
+         vendor and not in core/agents. Arrow is vendor -> kernel SPI; agents must
+         never depend back on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agentspi</artifactId>
+    </dependency>
+    <!-- GoogleCalendarChangeEventToolCallback implements guardrails.ToolConfirmationDescriber
+         (the confirmation-card text). Kernel module, no cycle: guardrails depends on
+         json/approval/audit/tenancy only. Used to arrive through agents. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
+    <!-- Test scope only: GoogleBookingToolsTest checks the kernel BuiltInToolClassifications of these tools. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

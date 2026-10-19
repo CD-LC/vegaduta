@@ -1,0 +1,42 @@
+{
+  "note": "Tiny in-repo eval set (smoke-scale, NOT a statistically meaningful benchmark). Each query lists the doc ids that answer it. Mixes paraphrase, exact-term and multi-aspect queries; one romanised-Hindi and one code-ish query. Extend before drawing conclusions.",
+  "docs": {
+    "d01": "Pgvector stores embeddings in a vector column and supports cosine distance with an ivfflat or hnsw index.",
+    "d02": "Flyway applies versioned SQL migrations in order; each tenant schema runs the same migration set.",
+    "d03": "The Whisper model transcribes speech to text on CPU; long audio is split into thirty second windows.",
+    "d04": "Cross-encoder rerankers score a query and passage jointly, which is more accurate than bi-encoders but cannot be precomputed.",
+    "d05": "Zero padding a 384 dimension vector to 768 dimensions does not change its direction or its cosine similarity.",
+    "d06": "OAuth refresh tokens let a client obtain new access tokens without asking the user to sign in again.",
+    "d07": "Chunking splits long documents into overlapping passages so each embedding captures one idea.",
+    "d08": "Reciprocal rank fusion merges the ranked lists from keyword search and vector search into one ranking.",
+    "d09": "A circuit breaker stops calling a failing service for a cooldown period, then probes it with a single request.",
+    "d10": "Tesseract performs optical character recognition on scanned images and returns plain text.",
+    "d11": "Server sent events stream tokens from the model to the browser one chunk at a time.",
+    "d12": "Rate limiting with a token bucket allows short bursts while enforcing an average request rate.",
+    "d13": "ColBERT keeps one vector per token and scores relevance with MaxSim: each query token takes its best match among document tokens.",
+    "d14": "Docker containers share the host kernel, so they start faster than virtual machines but isolate less.",
+    "d15": "Garbage collection pauses in the JVM can be reduced by tuning the heap size and choosing the G1 collector.",
+    "d16": "Bayesian optimisation models an expensive objective with a Gaussian process and picks the next point by expected improvement.",
+    "d17": "Citations in a research answer should quote the exact span of the source that supports the claim.",
+    "d18": "Mujhe apna password badalna hai: Settings mein jaakar Security chunein aur naya password set karein.",
+    "d19": "def retry(fn, attempts=3): loops and calls fn, sleeping with exponential backoff between failures.",
+    "d20": "Keycloak issues JWT access tokens; the core service validates the signature against the realm JWK set."
+  },
+  "queries": [
+    {"q": "how do I store vectors in postgres and search by similarity", "relevant": ["d01"]},
+    {"q": "why is padding embeddings with zeros safe for cosine", "relevant": ["d05"]},
+    {"q": "speech recognition for long recordings", "relevant": ["d03"]},
+    {"q": "combine keyword and semantic search results", "relevant": ["d08"]},
+    {"q": "model that scores each query token against document tokens", "relevant": ["d13"]},
+    {"q": "get a new access token without logging in again", "relevant": ["d06"]},
+    {"q": "stop hammering a service that keeps failing", "relevant": ["d09"]},
+    {"q": "read text out of a scanned picture", "relevant": ["d10"]},
+    {"q": "password kaise badlein", "relevant": ["d18"]},
+    {"q": "retry a function with exponential backoff", "relevant": ["d19"]},
+    {"q": "why rerank candidates after first stage retrieval", "relevant": ["d04"]},
+    {"q": "split long files so each piece is one idea", "relevant": ["d07"]},
+    {"q": "how are JWT signatures verified", "relevant": ["d20"]},
+    {"q": "quote the source passage that backs a claim", "relevant": ["d17"]},
+    {"q": "allow bursts but cap the average request rate", "relevant": ["d12"]}
+  ]
+}

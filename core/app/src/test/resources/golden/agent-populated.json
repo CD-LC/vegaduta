@@ -1,0 +1,81 @@
+{
+  "id" : "00000000-0000-0000-0000-000000000001",
+  "name" : "name-value",
+  "systemPrompt" : "systemPrompt-value",
+  "providerName" : "ANTHROPIC",
+  "model" : "model-value",
+  "fallbackProviderName" : "ANTHROPIC",
+  "fallbackModel" : "fallbackModel-value",
+  "fallbackTriggeredCount" : 42,
+  "fallbackFailedCount" : 42,
+  "lastFallbackAt" : "2026-09-30T10:15:30.123456789Z",
+  "maxTokens" : 7,
+  "temperature" : 0.7,
+  "topP" : 0.7,
+  "tuningMode" : "SIMPLE",
+  "knowledgeBaseEnabled" : true,
+  "sarvamEnabled" : true,
+  "e2bEnabled" : true,
+  "codeWorkspaceEnabled" : true,
+  "responseCachingEnabled" : true,
+  "semanticResponseCachingEnabled" : true,
+  "costRoutingEnabled" : true,
+  "economyProviderName" : "ANTHROPIC",
+  "economyModel" : "economyModel-value",
+  "costRoutingJevThreshold" : 0.7,
+  "shareMemoryWithTenant" : true,
+  "biometricConsentEnabled" : true,
+  "edgeRoutingPolicy" : "EDGE_ONLY",
+  "allowedToolNames" : [
+    "allowedToolNames-1-value",
+    "allowedToolNames-2"
+  ],
+  "allowedKnowledgeCollectionIds" : [
+    "00000000-0000-0000-0000-000000000001",
+    "00000000-0000-0000-0000-000000000002"
+  ],
+  "allowedCodeIntelRepoIds" : [
+    "allowedCodeIntelRepoIds-1-value",
+    "allowedCodeIntelRepoIds-2"
+  ],
+  "experienceMode" : "SIMPLE",
+  "reasoningDepth" : "FAST",
+  "autonomyTier" : "SUPERVISED",
+  "collaboratorAgentIds" : [
+    "00000000-0000-0000-0000-000000000001",
+    "00000000-0000-0000-0000-000000000002"
+  ],
+  "createdAt" : "2026-09-30T10:15:30.123456789Z",
+  "updatedAt" : "2026-09-30T10:15:30.123456789Z",
+  "voiceModelProvider" : "SIDECAR_WHISPER",
+  "voiceModel" : "voiceModel-value",
+  "videoModelProvider" : "OPENAI_WHISPER_VIDEO",
+  "videoModel" : "videoModel-value",
+  "ttsProvider" : "ELEVENLABS",
+  "ttsModel" : "ttsModel-value",
+  "editable" : true,
+  "modalities" : {
+    "image" : true,
+    "audio" : true,
+    "video" : true,
+    "document" : true,
+    "maxAttachmentBytes" : 42,
+    "maxAttachments" : 7,
+    "sandboxData" : true,
+    "sandboxDataUnavailableReason" : "sandboxDataUnavailableReason-value"
+  },
+  "inputSchemaJson" : "inputSchemaJson-value",
+  "outputSchemaJson" : "outputSchemaJson-value",
+  "xaiServerToolsEnabled" : true,
+  "topK" : 7,
+  "stopSequences" : [
+    "stopSequences-1-value",
+    "stopSequences-2"
+  ],
+  "frequencyPenalty" : 0.7,
+  "presencePenalty" : 0.7,
+  "seed" : 7,
+  "createdBy" : "createdBy-value",
+  "updatedBy" : "updatedBy-value",
+  "accessLevel" : "accessLevel-value"
+}

@@ -1,0 +1,178 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Core Module Catalogue — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="architecture" data-page="backend-core-modules.html" data-doc="VD-AR-002" data-status="verified" data-updated="2026-09-25" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>Architecture<span class="sep">/</span>Core Module Catalogue</div>
+<div class="doc-meta" data-auto></div><h1>Core Module Catalogue</h1>
+
+<p class="lede">
+  The backend is a modular monolith: <code>core/pom.xml</code> is a pure
+  aggregator/BOM (<code>packaging=pom</code>, no source of its own) over 40 Maven
+  modules plus two auxiliary components (<code>mcp-data</code>,
+  <code>mcp-stdio-proxy</code>), assembled into one Spring Boot deployable
+  (<code>core/app</code>) and two specialised assemblies
+  (<code>app-worker</code>, <code>app-jobs</code>). Maven itself enforces the
+  dependency boundaries — a module that reaches across a boundary is a compile
+  error, not a code-review nit. Descriptions below are taken from each module's
+  own <code>pom.xml</code>.
+</p>
+
+<pre class="mermaid">
+flowchart TD
+  subgraph leaf["Leaf modules (no core deps)"]
+    audit["audit"] & crypto["crypto"] & storage["storage"] & speech["speech"] & evalM["eval"]
+  end
+  subgraph mid["Platform & tenancy"]
+    security["security"] --> admin["admin"] --> sharing["sharing"]
+    crypto --> secrets["secrets"]
+    crypto --> providers["providers"]
+    admin --> tenancy["tenancy"]
+    providers --> chat["chat"]
+    tenancy --> eventbus["eventbus"]
+  end
+  subgraph top["Agent runtime & channels"]
+    approval["approval"] --> guardrails["guardrails"]
+    knowledge["knowledge"] --> agents["agents"]
+    agents --> omnichannel["omnichannel"]
+    agents --> voice["voice"]
+    eventbus --> workflow["workflow"]
+  end
+  omnichannel & workflow & agents --> app["app<br/>(REST deployable)"]
+  app --> worker["app-worker<br/>(Temporal worker)"]
+  app --> jobs["app-jobs<br/>(scheduled jobs)"]
+</pre>
+
+<h2>Module catalogue</h2>
+
+<h3>Platform, tenancy & infrastructure</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>security</code></td><td>Keycloak OAuth2 resource-server config, <code>TenantContext</code> + servlet filter. Leaf.</td></tr>
+    <tr><td><code>tenancy</code></td><td>Tenant/AppUser entities, schema-per-tenant Hibernate multi-tenancy, signup/provisioning, Flyway migration-per-schema. Depends on admin, billing, security, storage.</td></tr>
+    <tr><td><code>admin</code></td><td>Keycloak Admin REST client for user management (<code>UserAdminController</code>). Depends on audit, security.</td></tr>
+    <tr><td><code>platform</code></td><td>Cross-tenant "Ecosystem Maintenance" API for super-admins: hosted LLM pool, plan overrides, platform observability, health/metrics aggregation. Gated by <code>/api/platform/** → ROLE_platform-admin</code>.</td></tr>
+    <tr><td><code>billing</code></td><td>Billing-gateway abstraction (Razorpay adapter) + GST invoicing, used by hosted operators; plan gating is off by default (<code>NEXT_PUBLIC_BILLING_ENABLED</code>). Depends only on security.</td></tr>
+    <tr><td><code>crypto</code></td><td><code>EncryptionService</code> — AES-256-GCM at-rest encryption for provider keys and channel tokens. JDK <code>javax.crypto</code> only; leaf.</td></tr>
+    <tr><td><code>secrets</code></td><td>Consumer secrets vault: named encrypted secrets referenced as <code>{{secret.NAME}}</code>, resolved only inside the tool-execution boundary.</td></tr>
+    <tr><td><code>storage</code></td><td><code>FileStorageService</code> — S3-API object storage (SeaweedFS in the Full tier, local disk in Lite, or any S3 API via config). Leaf.</td></tr>
+    <tr><td><code>eventbus</code></td><td>Kafka-backed event backbone (WorkflowEvent envelope, transactional outbox, relay). Inert unless configured; depends only on tenancy.</td></tr>
+  </tbody>
+</table>
+
+<h3>Agent runtime & LLM</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>agents</code></td><td>Agent entity + chat orchestration <em>and</em> the tool-call plumbing (old "tools" package) in one module — a verified circular dependency (AgentToolProvider needs Agent; AgentChatService needs AgentToolProvider) made splitting them a real code change.</td></tr>
+    <tr><td><code>chat</code></td><td>Spring AI ChatClient factories/registry per provider, <code>LlmMetricsAdvisor</code>, <code>llm_call_log</code>, pricing catalog, LLM gateway. Depends on providers.</td></tr>
+    <tr><td><code>providers</code></td><td>LLM provider credential abstraction (BYOK, encrypted at rest), <code>ProviderName</code>, <code>ProviderCredentialResolver</code>, <code>ProviderValidator</code>. Depends on crypto (+ sarvam for credential resolution).</td></tr>
+    <tr><td><code>mcp</code></td><td>MCP server registry — DB-backed metadata, encrypted connection env vars, dynamic STDIO/remote connection management. Depends on crypto, security.</td></tr>
+    <tr><td><code>mcpserver</code></td><td>Inbound MCP hosting: exposes a curated tenant tool set (<code>call_agent</code>, <code>call_workflow</code>, <code>search_knowledge</code>) to external MCP clients over STREAMABLE HTTP at <code>/mcp</code>.</td></tr>
+    <tr><td><code>codeintel</code></td><td>Code-intelligence ToolCallbacks: search a tenant's indexed codebase, walk its deterministic code graph, get cited answers. Thin HTTP client over the code-intel service.</td></tr>
+    <tr><td><code>sdlc</code></td><td>E2B sandbox integration scaffold: <code>E2bCredential</code> BYOK storage + <code>E2bSandboxClient</code> (create/list/kill sandboxes). Leaf-shaped; no tool callbacks yet.</td></tr>
+  </tbody>
+</table>
+
+<h3>Automation</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>workflow</code></td><td>WorkflowDefinition/WorkflowRun persistence, OrchestratorService (structural validation + runtime governance over sensitive nodes), WorkflowExecutionEngine.</td></tr>
+    <tr><td><code>approval</code></td><td>Human-in-the-loop approval gate, policy overrides, retry job. Depends on audit, tenancy.</td></tr>
+    <tr><td><code>eventbus</code></td><td>(Also listed under platform — the Kafka backbone the workflow designer publishes trigger events through.)</td></tr>
+  </tbody>
+</table>
+
+<h3>Knowledge & memory</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>knowledge</code></td><td>Hierarchical multi-modal knowledge base (RAG): sidecar client, ingestion jobs, ToolCallbacks, hybrid vector+FTS search. Depends on tenancy, crypto.</td></tr>
+    <tr><td><code>graphmemory</code></td><td>Graph-based agent memory on Apache AGE (a Postgres extension, not a separate database) — <code>RememberFactToolCallback</code> / <code>GraphRecallToolCallback</code>.</td></tr>
+  </tbody>
+</table>
+
+<h3>Governance & quality</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>guardrails</code></td><td>Tool step ceiling, allow-list, output sanitisation, <code>GuardedToolCallback</code>; content-moderation policy packs, external-classifier seam, human review queue. Depends on approval, audit, tenancy.</td></tr>
+    <tr><td><code>audit</code></td><td>Audit log: AuditLogEntry/Service/Controller. Leaf.</td></tr>
+    <tr><td><code>eval</code></td><td>Standalone golden-dataset prompt-regression CLI harness. Deliberately touches no DB or tenant context; runs in its own CI workflow, never in <code>mvn verify</code>.</td></tr>
+    <tr><td><code>quality</code></td><td>Agent response quality scoring across dimensions (helpfulness, accuracy, tone, length, relevance, safety) with historical trend tracking.</td></tr>
+    <tr><td><code>rl</code></td><td>In-core RL subsystem: reward capture, per-turn trajectory recording, contextual bandit (Thompson sampling over Beta posteriors) for safe non-side-effecting choices.</td></tr>
+    <tr><td><code>sharing</code></td><td>Cross-user resource sharing: <code>resource_grant</code> table + <code>ResourceAccessService</code> (RUNNER/VIEWER/EDITOR, anti-enumeration 404-on-denial). No dependency on agents/workflow — owner lookup goes through a ResourceOwnerLookup SPI.</td></tr>
+  </tbody>
+</table>
+
+<h3>Media, channels & integrations</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>omnichannel</code></td><td>Channel adapters and inbound webhooks (Twilio WhatsApp/SMS/voice, Meta, Telegram, Slack, Discord, Teams, email), channel sessions/pairing, operator handoff, signature validation.</td></tr>
+    <tr><td><code>voice</code></td><td>Self-hosted in-app voice/video calling via LiveKit WebRTC + push-to-talk STT→AgentChatService→TTS pipeline. Independent of omnichannel's Twilio PSTN bridge.</td></tr>
+    <tr><td><code>speech</code></td><td><code>SpeechTextNormalizer</code> — rewrites LLM text into something a TTS engine should say (strip markdown/emoji, speak URLs as "a link"). Shared by elevenlabs and sarvam. Leaf.</td></tr>
+    <tr><td><code>sarvam</code></td><td>Sarvam AI across 22 Indian languages: chat, translation, STT, TTS, transliteration, language ID. Own credential table.</td></tr>
+    <tr><td><code>elevenlabs</code></td><td>ElevenLabs voice cloning + TTS, tenant BYOK key in its own credential table (not <code>LlmProviderCredential</code>).</td></tr>
+    <tr><td><code>imagegen</code></td><td>Image generation (Flux / GPT-Image) with own entity/service/controller/tool-callback surface.</td></tr>
+    <tr><td><code>documentgen</code></td><td>Event-driven document generation: DOCX/PDF/XLSX/PPTX/CSV/TXT/MD/JSON.</td></tr>
+    <tr><td><code>google</code></td><td>Google Workspace: one platform-level OAuth app (Drive/Gmail/Calendar/Sheets), per-tenant encrypted refresh tokens.</td></tr>
+    <tr><td><code>devices</code></td><td>Device-pairing backend: pair an external device client as a channel (the device app is not in this repository); workflow "Device Control" node depends on it.</td></tr>
+  </tbody>
+</table>
+
+<h3>Assemblies & auxiliary</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>app</code></td><td>The Spring Boot application: <code>CoreApplication</code>, cross-cutting glue (<code>GlobalExceptionHandler</code>, <code>WebConfig</code>), <code>application*.yml</code> and <code>db/migration/**</code>.</td></tr>
+    <tr><td><code>app-config</code></td><td>Shared Spring configuration resources (<code>application.yml</code> + profile files) for every executable assembly.</td></tr>
+    <tr><td><code>app-worker</code></td><td>Temporal workflow-worker deployable: same modules via app-config, booted as <code>WorkerApplication</code> — no REST controllers, no <code>@Scheduled</code>, no Flyway.</td></tr>
+    <tr><td><code>app-jobs</code></td><td>Background-jobs deployable: <code>JobsApplication</code> — no REST controllers, <code>@Scheduled</code> ON, no Flyway, no per-tenant startup work.</td></tr>
+    <tr><td><code>templates</code></td><td>Community template gallery: sanitised moderated catalogue of agent/workflow designs (<code>community_template</code>, control-plane schema).</td></tr>
+    <tr><td><code>mcp-data</code></td><td>Auxiliary MCP data component (not in the main reactor build).</td></tr>
+    <tr><td><code>mcp-stdio-proxy</code></td><td>Node.js sidecar that executes dynamic STDIO MCP servers outside the JVM (<code>MCP_STDIO_SIDECAR_*</code> envs).</td></tr>
+  </tbody>
+</table>
+
+<h2>REST surface — controller distribution</h2>
+<p>Approximately <strong>193 <code>@RestController</code> classes</strong> ship in
+the core assembly. The distribution is deliberately uneven — channel and agent
+administration dominate:</p>
+<table>
+  <thead><tr><th>Module</th><th>≈ Controllers</th><th>What they cover</th></tr></thead>
+  <tbody>
+    <tr><td><code>omnichannel</code></td><td>~36</td><td>Per-channel webhook endpoints, channel config CRUD, pairing, operator inbox, health</td></tr>
+    <tr><td><code>agents</code></td><td>~34</td><td>Agent CRUD/config, chat endpoints, tools, memory, jobs</td></tr>
+    <tr><td><code>tenancy</code></td><td>~18</td><td>Tenant management, signup, provisioning, user self-service</td></tr>
+    <tr><td><code>app</code> / common</td><td>~11</td><td>Cross-cutting endpoints assembled with the application</td></tr>
+    <tr><td><code>platform</code></td><td>~9</td><td>Platform-admin maintenance, hosted pool, observability</td></tr>
+    <tr><td><code>billing</code></td><td>~7</td><td>Plans, checkout, invoices, usage</td></tr>
+    <tr><td><code>workflow</code></td><td>~7</td><td>Definitions, runs, triggers</td></tr>
+    <tr><td><code>chat</code></td><td>~6</td><td>LLM usage/logs, model catalog, gateway policy</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-note">
+  <div class="callout-title">Why "common" is not a module</div>
+  <p><code>GlobalExceptionHandler</code> and <code>WebConfig</code> live in
+  <code>app</code>, not a shared module: the exception handler has an
+  <code>@ExceptionHandler</code> for nearly every module's custom exceptions —
+  it depends on almost everything and nothing depends on it. That is
+  cross-cutting glue, not shared low-level code.</p>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Dependency rules that will bite you</div>
+  <ul style="margin:6px 0 2px">
+    <li>New capability = new leaf module depending on <code>crypto/security/tenancy</code> only — the established "sarvam shape". Nothing upstream may depend back on it.</li>
+    <li><code>providers</code> → <code>sarvam</code> is a real dependency (credential resolution); the reactor builds sarvam first regardless of <code>&lt;modules&gt;</code> order.</li>
+    <li><code>agents</code> and <code>tools</code> are merged — do not attempt to re-split without breaking the verified AgentToolProvider↔AgentChatService cycle first.</li>
+    <li><code>eval</code> is a true standalone leaf — never let it gain a dependency on tenancy or the database.</li>
+  </ul>
+</div>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

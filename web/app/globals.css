@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@import "./shadcn-theme.css";
+
+/* The console's global stylesheet, split into partials by responsibility.
+ * ORDER IS THE CASCADE: the partials are imported in exactly the order their
+ * rules used to appear in this one file, so add new rules to the partial that
+ * owns the area (or a new partial at the right position), never by reordering.
+ * Partials named components-* hold slices of the one `@layer components`
+ * block (each re-opens the same layer, so the layer order is unchanged);
+ * every other partial is unlayered, as the original rules were. */
+@import "./styles/globals/theme-light.css"; /* dark: variant binding, design notes, light :root tokens */
+@import "./styles/globals/theme-dark.css"; /* dark :root tokens */
+@import "./styles/globals/theme-motion-accents.css"; /* view transitions, aurora/landing keyframes, accent palettes */
+@import "./styles/globals/base.css"; /* @layer base: element defaults, typography density, scrollbars, links */
+@import "./styles/globals/components-primitives.css"; /* elevation/category/state primitives, aurora depth layer */
+@import "./styles/globals/components-panels-forms.css"; /* language switcher, panels, accent families, fields, Select */
+@import "./styles/globals/components-controls.css"; /* buttons, background FX, nav orb, list items, alerts */
+@import "./styles/globals/components-brand.css"; /* brand mark, animated brand mark, wordmarks */
+@import "./styles/globals/components-auth.css"; /* auth pages (login landing, signup) */
+@import "./styles/globals/components-workflow-designer.css"; /* workflow designer nodes, popovers, run log viewer */
+@import "./styles/globals/components-workflow-dialogs.css"; /* workflow modals, alerts popover, designer dark mode */
+@import "./styles/globals/components-quick-task.css"; /* simple mode: Quick Task */
+@import "./styles/globals/components-app-shell.css"; /* app shell: AXON rail + topbar */
+@import "./styles/globals/components-console-primitives.css"; /* console content primitives, mobile nav drawer */
+@import "./styles/globals/components-admin-shell.css"; /* admin sub-sidebar, admin overview grid */
+@import "./styles/globals/components-ambient-sidebar.css"; /* ambient layer, sidebar blocks, nav groups */
+@import "./styles/globals/components-header-dock.css"; /* unified header bar, floating bottom HUD dock */
+@import "./styles/globals/components-header-row.css"; /* one header row, page info, content width, page transitions, UI mode toggle */
+@import "./styles/globals/components-pages.css"; /* theme picker, dashboard cards, catalog grids, InfoTip, setup */
+@import "./styles/globals/components-assistant.css"; /* /assistant panel tints, bubbles, composer */
+@import "./styles/globals/hud-toasts-tour.css"; /* HUD alert stack, onboarding tour, language choice */
+@import "./styles/globals/screen-dashboard.css"; /* AXON dashboard (Cognition Cockpit) */
+@import "./styles/globals/screen-dashboard-feeds.css"; /* audit-tail page, dashboard rows, run list */
+@import "./styles/globals/screen-agents.css"; /* Agents config panel */
+@import "./styles/globals/screen-agents-tools.css"; /* agent templates gallery, toggles, tool selector */
+@import "./styles/globals/screen-playground.css"; /* Playground pane */
+@import "./styles/globals/screen-workflows-layout.css"; /* workflow canvas: topbar, columns, canvas column */
+@import "./styles/globals/screen-workflows-nodes.css"; /* workflow canvas: node cards, pixel-fidelity pass */
+@import "./styles/globals/screen-workflows-tour.css"; /* workflow canvas: guided tour overlay */
+@import "./styles/globals/screen-workflows-run-inspector.css"; /* workflow canvas: run inspector */
+@import "./styles/globals/screen-workflows-responsive.css"; /* workflow canvas: mobile drawers, focus mode */
+@import "./styles/globals/screen-workflows-list.css"; /* Workflows list page */
+@import "./styles/globals/screen-quick-task.css"; /* Quick Task screen */
+@import "./styles/globals/screen-quick-task-trace.css"; /* Quick Task live trace, task id, history, detail modal */
+@import "./styles/globals/screen-knowledge.css"; /* Knowledge: collections sidebar, detail column */
+@import "./styles/globals/screen-knowledge-pipeline.css"; /* Knowledge: cards, ingestion pipeline */
+@import "./styles/globals/screen-knowledge-search.css"; /* Knowledge: semantic search panel */
+@import "./styles/globals/screen-tools.css"; /* Tools & MCP: grid, palette, tabs */
+@import "./styles/globals/screen-tools-inspector.css"; /* Tools & MCP: inspector, add-server */
+@import "./styles/globals/screen-channels.css"; /* Channels screen */
+@import "./styles/globals/screen-admin-users.css"; /* Platform maintenance: users and roles, pagination */
+@import "./styles/globals/screen-admin-approvals.css"; /* Approvals (human-in-the-loop) */
+@import "./styles/globals/screen-admin-integrations.css"; /* Integrations, billing and usage */
+@import "./styles/globals/light-mode-fills.css"; /* light-mode fill fix (contrast audit) */
+@import "./styles/globals/screen-audit-log.css"; /* Admin audit log */
+@import "./styles/globals/refine-dashboard-workbench.css"; /* dashboard hierarchy, agent workbench, canvas topbar */
+@import "./styles/globals/screen-code-intel.css"; /* Code Intelligence console (code-intel page) */
+@import "./styles/globals/refine-knowledge-providers.css"; /* Knowledge premium pass, Providers panel */
+@import "./styles/globals/refine-playground-chat.css"; /* Playground chat surface, ax-pg-v2 pane */
+@import "./styles/globals/refine-help-audit.css"; /* Help page, audit log premium pass, Select, floating z tier */
+@import "./styles/globals/marketing-type.css"; /* senses showcase, marketing display face, type scale */
+@import "./styles/globals/form-typeface.css"; /* fieldset min-width, one typeface for form controls */

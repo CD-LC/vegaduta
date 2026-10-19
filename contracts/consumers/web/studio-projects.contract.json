@@ -1,0 +1,131 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-studio-projects",
+      "method": "GET",
+      "path": "/api/studio-projects",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-studio-projects-id",
+      "method": "DELETE",
+      "path": "/api/studio-projects/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-studio-projects-id",
+      "method": "GET",
+      "path": "/api/studio-projects/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-studio-projects-id",
+      "method": "PUT",
+      "path": "/api/studio-projects/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.createdAt",
+          "$.emoji",
+          "$.name",
+          "$.settings",
+          "$.versions"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-studio-projects-id-comments",
+      "method": "GET",
+      "path": "/api/studio-projects/{id}/comments",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-projects-id-comments",
+      "method": "POST",
+      "path": "/api/studio-projects/{id}/comments",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.body",
+          "$.versionAt"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-studio-projects-id-comments-commentId",
+      "method": "DELETE",
+      "path": "/api/studio-projects/{id}/comments/{commentId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "patch-api-studio-projects-id-comments-commentId",
+      "method": "PATCH",
+      "path": "/api/studio-projects/{id}/comments/{commentId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.resolved"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-studio-projects-id-members",
+      "method": "GET",
+      "path": "/api/studio-projects/{id}/members",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-studio-projects-id-members",
+      "method": "POST",
+      "path": "/api/studio-projects/{id}/members",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.email",
+          "$.role"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-studio-projects-id-members-subject",
+      "method": "DELETE",
+      "path": "/api/studio-projects/{id}/members/{subject}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

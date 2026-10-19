@@ -1,0 +1,396 @@
+@layer components {
+  /* ==================================================================
+   * ELEVATION + CATEGORY + STATE primitives (2026-07-29 redesign)
+   *
+   * Three small systems that together replace "everything is a flat dark
+   * rectangle with a grey dot on it":
+   *   .elev-*      depth, expressed as lightness (shadows don't read on dark)
+   *   .cat-chip    category identity - ALWAYS icon + tint, never tint alone
+   *   .state-dot / .state-pill   execution state - shape + motion + hue
+   *
+   * Each takes its colour from a single custom property (--cat / --state)
+   * and derives its wash/border/ring via color-mix, so a call site sets one
+   * value and the whole treatment follows. That keeps per-component colour
+   * decisions out of TSX and makes the set impossible to drift.
+   * ================================================================== */
+
+  /* --- Elevation ---------------------------------------------------- */
+  .elev-sunken {
+    background-color: var(--surface-sunken);
+    border: 1px solid color-mix(in srgb, var(--surface-border) 60%, transparent);
+  }
+
+  .elev-base {
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+  }
+
+  .elev-raised {
+    background-color: var(--surface-raised);
+    border: 1px solid var(--surface-border-strong);
+  }
+
+  /* Interactive card: the hover feedback the flat treatment was missing.
+   * Lightens (the dark-mode depth cue), tightens the border, and lifts 1px.
+   * The accent hairline at the top edge only appears on hover/focus, so a
+   * grid of cards stays calm at rest but responds individually. */
+  .card-interactive {
+    position: relative;
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      transform 0.16s ease,
+      box-shadow 0.16s ease;
+  }
+
+  .card-interactive::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--cat, var(--accent-500)) 70%, transparent),
+      transparent
+    );
+    opacity: 0;
+    transition: opacity 0.16s ease;
+    pointer-events: none;
+  }
+
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    background-color: var(--surface-raised);
+    border-color: color-mix(in srgb, var(--cat, var(--accent-500)) 38%, var(--surface-border));
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 4%) inset,
+      0 10px 28px -14px rgb(0 0 0 / 55%);
+  }
+
+  .card-interactive:hover::after,
+  .card-interactive:focus-within::after {
+    opacity: 1;
+  }
+
+  /* --- Category identity -------------------------------------------- */
+  /* Rounded SQUARE on purpose: state indicators are circles, so the two
+   * never read as the same signal even at a glance or in greyscale. The
+   * icon is mandatory - simulating protanopia collapses cat-assistant and
+   * cat-comms to a perceptual distance of 6.7, so hue alone cannot be
+   * allowed to carry the meaning. */
+  .cat-chip {
+    @apply inline-flex shrink-0 items-center justify-center rounded-[0.55rem];
+    width: 2rem;
+    height: 2rem;
+    color: var(--cat, var(--accent-500));
+    background: color-mix(in srgb, var(--cat, var(--accent-500)) 13%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cat, var(--accent-500)) 28%, transparent);
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease;
+  }
+
+  .cat-chip-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.4rem;
+  }
+
+  .cat-chip-lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.7rem;
+  }
+
+  /* Hero size, for an identity card's primary mark. Added on request from the
+   * agents surface, which otherwise had to override width/height/border-radius
+   * inline on top of .cat-chip - box metrics leaking back into TSX is the exact
+   * drift this utility set exists to stop, so it belongs here instead. */
+  .cat-chip-xl {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+  }
+
+  /* Hover on the enclosing card intensifies the chip - ties the icon to the
+   * card's own hover state instead of leaving it inert. */
+  .card-interactive:hover .cat-chip {
+    background: color-mix(in srgb, var(--cat, var(--accent-500)) 20%, transparent);
+    border-color: color-mix(in srgb, var(--cat, var(--accent-500)) 45%, transparent);
+  }
+
+  .cat-tint {
+    color: var(--cat, var(--accent-500));
+  }
+
+  /* --- Execution state ---------------------------------------------- */
+  .state-dot {
+    @apply relative inline-block shrink-0 rounded-full;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--state, var(--state-idle));
+  }
+
+  /* Live states get an expanding ring rather than a bare opacity blink, so
+   * "running" is distinguishable from "idle" by MOTION as well as hue. */
+  .state-dot-live::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    border: 1px solid var(--state, var(--state-running));
+    opacity: 0.75;
+    animation: state-ring 1.8s cubic-bezier(0.24, 0.6, 0.35, 1) infinite;
+  }
+
+  @keyframes state-ring {
+    0% {
+      transform: scale(0.7);
+      opacity: 0.8;
+    }
+    70% {
+      transform: scale(1.55);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.55);
+      opacity: 0;
+    }
+  }
+
+  .state-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[0.6875rem] font-medium leading-5;
+    color: var(--state, var(--state-idle));
+    background: color-mix(in srgb, var(--state, var(--state-idle)) 12%, transparent);
+    border-color: color-mix(in srgb, var(--state, var(--state-idle)) 32%, transparent);
+    white-space: nowrap;
+  }
+
+  /* Progress/among-many meter that inherits the same state hue. */
+  .state-meter {
+    @apply relative w-full overflow-hidden rounded-full;
+    height: 0.25rem;
+    background: color-mix(in srgb, var(--surface-border) 70%, transparent);
+  }
+
+  .state-meter > span {
+    @apply block h-full rounded-full;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--state, var(--accent-500)) 55%, transparent),
+      var(--state, var(--accent-500))
+    );
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Honour the OS reduced-motion setting for every animation added above. */
+  @media (prefers-reduced-motion: reduce) {
+    .state-dot-live::before {
+      animation: none;
+      opacity: 0.5;
+    }
+
+    .card-interactive,
+    .card-interactive::after,
+    .cat-chip,
+    .state-meter > span {
+      transition: none;
+    }
+
+    .card-interactive:hover,
+    .card-interactive:focus-within {
+      transform: none;
+    }
+  }
+
+  /* ==================================================================
+   * AURORA DEPTH LAYER (2026-08-12 post-auth redesign) - additive only.
+   *
+   * Four small pieces that give the console dimensionality without WebGL:
+   *   .app-aurora     ambient accent-tinted background inside the shell
+   *   .tilt-3d        perspective tilt driven by Tilt3d.tsx via --rx/--ry
+   *   .card-sheen     pointer-tracked specular highlight via --mx/--my
+   *   .aurora-ring    animated gradient border for ONE hero card per page
+   *   .text-gradient-accent   accent gradient headline numbers
+   *
+   * Performance contract: every animation here is transform/opacity only
+   * (compositor-friendly, no layout, no paint storms, no blur() filters -
+   * the aurora blobs are pre-soft radial gradients, not filtered boxes),
+   * hover-only effects gate on (hover:hover)/(pointer:fine) so touch
+   * devices never pay for them, and prefers-reduced-motion turns all of it
+   * off. Nothing below repositions text or changes any AA-verified
+   * foreground/background pairing.
+   * ================================================================== */
+
+  .app-aurora {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* Two large, pre-blurred (gradient-falloff) accent blobs that drift very
+   * slowly. Kept on their own composited layers by the transform animation;
+   * at 60-90s a frame's delta is sub-pixel, so the GPU cost is one cheap
+   * composite, not continuous repaints. */
+  .app-aurora::before,
+  .app-aurora::after {
+    content: "";
+    position: absolute;
+    width: 55vw;
+    height: 55vw;
+    min-width: 480px;
+    min-height: 480px;
+    border-radius: 9999px;
+    will-change: transform;
+  }
+
+  .app-aurora::before {
+    top: -22vw;
+    right: -14vw;
+    background: radial-gradient(closest-side, var(--aurora-a), transparent 72%);
+    animation: aurora-drift-a 70s ease-in-out infinite alternate;
+  }
+
+  .app-aurora::after {
+    bottom: -26vw;
+    left: -16vw;
+    background: radial-gradient(closest-side, var(--aurora-b), transparent 72%);
+    animation: aurora-drift-b 90s ease-in-out infinite alternate;
+  }
+
+  /* Perspective tilt target. The identity custom-property defaults mean the
+   * element keeps ONE stable transform (and stacking context) whether or not
+   * a pointer is over it - the guidance's "apply an identity transformation
+   * to the base element" rule, expressed through the vars Tilt3d.tsx sets. */
+  .tilt-3d {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .tilt-3d:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Specular sheen - a radial highlight that follows the pointer (Tilt3d
+   * writes --mx/--my as percentages). Painted on an overlay pseudo-element
+   * so it never interferes with the card's own background or children. */
+  .card-sheen {
+    position: relative;
+  }
+
+  .card-sheen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), var(--sheen), transparent 62%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card-sheen:hover::before {
+      opacity: 1;
+    }
+  }
+
+  /* Animated gradient ring for the page's single hero card. Implemented as
+   * a padding-box/border-box mask so the 1px ring is a real gradient while
+   * the card interior stays untouched; the hue rotation animates
+   * --aurora-angle (a registered custom property below), which resolves to
+   * a repaint of a 1px ring - negligible. */
+  .aurora-ring {
+    position: relative;
+  }
+
+  .aurora-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--aurora-angle, 0deg),
+      color-mix(in srgb, var(--accent-500) 65%, transparent),
+      color-mix(in srgb, var(--accent-cyan) 55%, transparent),
+      transparent 42%,
+      transparent 58%,
+      color-mix(in srgb, var(--accent-500) 65%, transparent)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: aurora-ring-spin 14s linear infinite;
+    pointer-events: none;
+  }
+
+  /* Deferred rendering for heavy BELOW-FOLD dashboard sections (modern-web-
+   * guidance "defer-rendering-heavy-content"). content-visibility:auto lets
+   * the browser skip layout/paint for the subtree until it nears the
+   * viewport; the mandatory contain-intrinsic-size placeholder (auto =
+   * remember the real size after first render) prevents scrollbar jumping.
+   * ONLY apply to sections that are reliably below the initial fold -
+   * putting it on above-fold content actively slows first paint. */
+  .defer-offscreen {
+    content-visibility: auto;
+    contain-intrinsic-size: auto none auto 320px;
+  }
+
+  /* Glossy surface (2026-08-12, direct request: "glossy feel and style").
+   * background-image ONLY - it composites over any card fill and never
+   * competes with Tailwind box-shadow utilities on the same element. The
+   * per-mode curvature gradient lives in --gloss-surface (:root blocks). */
+  .glossy {
+    background-image: var(--gloss-surface);
+  }
+
+  /* Primary-button gloss: top light-catch + a primary-tinted drop shadow.
+   * Owns the button's full box-shadow (the default variant's shadow-sm
+   * utilities were removed in ui/button.tsx - a utility would win the
+   * cascade over this components-layer rule and erase the inset). */
+  .btn-glossy {
+    background-image: linear-gradient(180deg, rgb(255 255 255 / 14%), rgb(255 255 255 / 0%) 55%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 20%),
+      0 1px 2.5px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+
+  /* Accent gradient display numbers/headlines - use ONLY on large
+   * display-size figures (the AA rule for body text still applies). */
+  .text-gradient-accent {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-aurora::before,
+    .app-aurora::after,
+    .aurora-ring::before {
+      animation: none;
+    }
+
+    .tilt-3d {
+      transform: none;
+      transition: none;
+    }
+
+    .card-sheen::before {
+      display: none;
+    }
+  }
+}

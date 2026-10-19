@@ -1,0 +1,96 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-edge-config",
+      "method": "GET",
+      "path": "/api/edge/config",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-edge-manifest",
+      "method": "GET",
+      "path": "/api/edge/manifest",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-edge-manifest-full",
+      "method": "GET",
+      "path": "/api/edge/manifest/full",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-edge-manifest-registry",
+      "method": "GET",
+      "path": "/api/edge/manifest/registry",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-edge-memory",
+      "method": "GET",
+      "path": "/api/edge/memory",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-edge-tools",
+      "method": "GET",
+      "path": "/api/edge/tools",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-edge-tools-execute",
+      "method": "POST",
+      "path": "/api/edge/tools/execute",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.argumentsJson",
+          "$.toolName"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-edge-turns",
+      "method": "POST",
+      "path": "/api/edge/turns",
+      "status": 202,
+      "request": {
+        "requiredFields": [
+          "$.agentId",
+          "$.latencyMs",
+          "$.modelId",
+          "$.outcome",
+          "$.reason",
+          "$.sessionKey",
+          "$.tier"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

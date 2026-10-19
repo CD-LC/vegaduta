@@ -1,0 +1,11 @@
+{
+  "name": "Node + React",
+  "description": "Vite + React starter — a single-page app with hot reload.",
+  "install": "npm install",
+  "run": "npm run dev -- --host 0.0.0.0 --port 3000",
+  "build": "npm run build",
+  "test": "npm test -- --run",
+  "port": 3000,
+  "image": "node:22-bookworm",
+  "preview_dir": "dist"
+}

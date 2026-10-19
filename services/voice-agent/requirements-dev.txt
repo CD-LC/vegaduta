@@ -1,0 +1,6 @@
+# Dev/test-only dependencies - NOT installed into the voice-agent image (the
+# Dockerfile installs requirements.txt only). Mirrors sidecar's own
+# requirements-dev.txt convention exactly. Install locally with:
+#   pip install -r requirements.txt -r requirements-dev.txt
+# then run the suite from voice-agent/:  pytest tests/
+pytest==9.1.1

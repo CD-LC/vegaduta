@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.vegaduta</groupId>
+    <artifactId>vegaduta-agent-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>vegaduta-agent-bom</artifactId>
+  <packaging>pom</packaging>
+  <name>VegaDuta Agent SDK :: BOM</name>
+  <description>Bill of materials: import it to align every vegaduta-agent-* artifact version.</description>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-jdbc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-testkit</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-scanner</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-spring-ai</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!-- A BOM has no code: nothing to compile, test, document or scan. -->
+  <dependencies combine.self="override"/>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <configuration>
+          <skipSource>true</skipSource>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.siom79.japicmp</groupId>
+        <artifactId>japicmp-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <flattenMode>bom</flattenMode>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

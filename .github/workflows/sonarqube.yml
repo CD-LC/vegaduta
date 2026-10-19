@@ -1,0 +1,144 @@
+name: SonarQube
+
+# Code quality, coverage, duplication and a second SAST engine for the whole
+# platform, uploaded as one SonarQube project (see sonar-project.properties).
+#
+# Required configuration:
+#   secrets.SONAR_TOKEN   analysis token (SonarQube Cloud or self-hosted)
+#   vars.SONAR_HOST_URL   https://sonarcloud.io for SonarQube Cloud; your
+#                         server URL for self-hosted. If unset, the scan is
+#                         skipped so forks without a SonarQube project stay green.
+#   sonar.organization    add it to sonar-project.properties for SonarQube Cloud
+#
+# Branch/PR analysis is a paid/self-hosted Developer+ or SonarQube Cloud
+# feature; Community Edition only analyzes the main branch, in which case
+# restrict this workflow to `push` on main.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonarqube-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  enabled:
+    name: SonarQube configured
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        run: |
+          if [ -n "$SONAR_HOST_URL" ]; then
+            echo "enabled=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >>"$GITHUB_OUTPUT"
+            echo "::notice::SonarQube skipped: vars.SONAR_HOST_URL not set"
+          fi
+
+  analyze:
+    name: Build coverage and scan
+    needs: enabled
+    if: needs.enabled.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: SonarQube diffs "new code" and annotates lines with
+          # SCM blame; a shallow clone disables both.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # Throwaway CI-only key (base64 of 32 random bytes), same as ci.yml.
+      - name: Mint a per-run APP_ENCRYPTION_KEY
+        run: echo "APP_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
+      # JaCoCo XML per module under core/*/target/site/jacoco/jacoco.xml.
+      # Context tests that need Postgres (pgvector+AGE) self-skip here, so
+      # coverage reflects unit tests only unless a database is provided.
+      - name: core tests + coverage
+        run: mvn -B -ntp -Pcoverage verify
+        working-directory: core
+
+      # sdk/java contributes binaries (sonar.java.binaries); it has no JaCoCo
+      # profile yet, so it reports issues but not coverage.
+      - name: sdk/java build
+        run: mvn -B -ntp -DskipTests package
+        working-directory: sdk/java
+
+      - name: web coverage (lcov)
+        run: npm ci --no-audit --no-fund && npm run test:coverage
+        working-directory: web
+
+      - name: sidecar coverage (coverage.xml)
+        run: |
+          pip install -r requirements.txt pytest pytest-cov
+          python -m pytest tests/ -q --cov=. --cov-report=xml:coverage.xml
+        working-directory: services/sidecar
+
+      - name: python-agent coverage (coverage.xml)
+        run: |
+          pip install -e '.[dev]' pytest-cov
+          python -m pytest tests/ -q --cov=vegaduta_agent --cov-report=xml:coverage.xml
+        working-directory: sdk/python-agent
+
+      # sonar-java needs the dependency jars on its classpath to resolve
+      # JUnit/Spring types (see sonar-project.properties); the Maven cache
+      # populated by the builds above is the complete set.
+      - name: Locate the Maven repository for sonar-java
+        run: echo "SONAR_JAVA_LIBS=$HOME/.m2/repository/**/*.jar" >> "$GITHUB_ENV"
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.java.libraries=${{ env.SONAR_JAVA_LIBS }}
+            -Dsonar.java.test.libraries=${{ env.SONAR_JAVA_LIBS }}
+
+  sonarqube-ok:
+    name: SonarQube OK
+    if: always()
+    needs: [enabled, analyze]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check analysis results
+        env:
+          GATE: ${{ needs.enabled.result }}
+          ENABLED: ${{ needs.enabled.outputs.enabled }}
+          RESULT: ${{ needs.analyze.result }}
+        run: |
+          echo "enabled: $GATE ($ENABLED); analyze: $RESULT"
+          [ "$GATE" = success ] || { echo "::error::configuration check did not succeed ($GATE)"; exit 1; }
+          if [ "$ENABLED" != true ]; then echo "SonarQube skipped: not configured"; exit 0; fi
+          [ "$RESULT" = success ] || { echo "::error::SonarQube analysis did not succeed ($RESULT)"; exit 1; }

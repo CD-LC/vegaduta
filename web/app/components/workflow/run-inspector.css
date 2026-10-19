@@ -1,0 +1,364 @@
+/* RunStepInspector - the node-anchored "black box" card for a run/replay visit.
+ * Tokens mirror the --wfx-* chains in workflow-canvas.css (those are scoped to
+ * .wfx-node, so they are re-derived here rather than inherited). Every colour
+ * is a theme variable, so :root[data-mode="dark"] and light both just work. */
+
+/* Continued in run-inspector-{body,data,responsive}.css. runInspectorStyles.ts imports this file and those
+ * in cascade order: import that module, not this file. */
+
+.wfx-ri {
+  --ri-bg: var(--surface-card, var(--hud-panel));
+  --ri-border: var(--ax-border2, var(--surface-border-strong));
+  --ri-hair: var(--ax-border, var(--surface-border));
+  --ri-text: var(--text-primary, var(--ax-text));
+  --ri-mid: var(--text-secondary, var(--ax-mid));
+  --ri-muted: var(--text-muted, var(--ax-dim));
+  --ri-chip: var(--ax-chip, var(--surface-hover));
+  --ri-accent: var(--ax-cyan, var(--hud-cyan));
+  --ri-focus: var(--ax-accent2, var(--ax-cyan, Highlight));
+  --ri-ok: var(--ax-green, var(--hud-ok));
+  --ri-err: var(--ax-red, var(--hud-magenta));
+  --ri-warn: var(--ax-amber, var(--hud-warn));
+  --ri-run: var(--ax-cyan, var(--hud-cyan));
+  --ri-violet: var(--ax-violet, var(--hud-violet));
+  --ri-mono: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  --ri-inset: color-mix(in srgb, var(--ri-text) 4%, var(--ri-bg));
+  --ri-tone: var(--ri-muted);
+
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 30;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  max-width: calc(100% - 16px);
+  /* Fixed (not max) height on desktop: switching tabs must not resize the
+   * card, or the anchor clamp would make it hop up and down beside the node. */
+  height: min(468px, calc(100% - 24px));
+  border: 1px solid var(--ri-border);
+  border-radius: 14px;
+  background: var(--ri-bg);
+  color: var(--ri-text);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: var(--ax-shadow-lg, var(--ax-shadow-md, 0 18px 48px -16px rgb(0 0 0 / 0.35)));
+  animation: ri-in 0.18s ease-out both;
+}
+.wfx-ri *,
+.wfx-ri *::before,
+.wfx-ri *::after {
+  box-sizing: border-box;
+}
+.wfx-ri:focus-visible {
+  outline: 2px solid var(--ri-focus);
+  outline-offset: 2px;
+}
+.wfx-ri[data-anchored] {
+  top: var(--ri-top);
+  left: var(--ri-left);
+  right: auto;
+}
+
+/* Status tone: any element carrying data-status inside the card picks it up. */
+.wfx-ri [data-status="ok"],
+.wfx-ri[data-status="ok"] {
+  --ri-tone: var(--ri-ok);
+}
+.wfx-ri [data-status="error"],
+.wfx-ri[data-status="error"] {
+  --ri-tone: var(--ri-err);
+}
+.wfx-ri [data-status="paused"],
+.wfx-ri[data-status="paused"],
+.wfx-ri [data-status="approval"],
+.wfx-ri[data-status="approval"] {
+  --ri-tone: var(--ri-warn);
+}
+.wfx-ri [data-status="running"],
+.wfx-ri[data-status="running"] {
+  --ri-tone: var(--ri-run);
+}
+.wfx-ri [data-status="skipped"],
+.wfx-ri[data-status="skipped"],
+.wfx-ri [data-status="cancelled"],
+.wfx-ri[data-status="cancelled"] {
+  --ri-tone: var(--ri-muted);
+}
+
+/* ---- chrome: notch toward the node, status stripe, sheet grip ---- */
+.ri-notch {
+  display: none;
+}
+.wfx-ri[data-side="right"] .ri-notch,
+.wfx-ri[data-side="left"] .ri-notch {
+  display: block;
+  position: absolute;
+  top: var(--ri-notch-y, 40px);
+  width: 11px;
+  height: 11px;
+  background: var(--ri-bg);
+  border: 1px solid var(--ri-border);
+  transform: translateY(-50%) rotate(45deg);
+}
+.wfx-ri[data-side="right"] .ri-notch {
+  left: -6px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+.wfx-ri[data-side="left"] .ri-notch {
+  right: -6px;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+.ri-stripe {
+  position: absolute;
+  top: -1px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--ri-tone);
+}
+.wfx-ri[data-status="running"] .ri-stripe {
+  background: linear-gradient(90deg, transparent, var(--ri-run), transparent) 0 0 / 200% 100%;
+  animation: ri-sweep 1.4s linear infinite;
+}
+.ri-grip {
+  display: none;
+}
+
+/* ---- header ---- */
+.ri-head {
+  padding: 12px 12px 10px;
+}
+.ri-titlerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ri-status-ico {
+  display: inline-flex;
+  color: var(--ri-tone);
+  flex: none;
+}
+.ri-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ri-subrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+}
+.ri-pill {
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--ri-tone) 38%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ri-tone) 13%, transparent);
+  color: var(--ri-tone);
+  font-size: 11px;
+  font-weight: 650;
+}
+.ri-type {
+  max-width: 140px;
+  overflow: hidden;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--ri-chip);
+  color: var(--ri-muted);
+  font-family: var(--ri-mono);
+  font-size: 10.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ri-visits {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.ri-visit-text {
+  color: var(--ri-mid);
+  font-family: var(--ri-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ri-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.ri-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ri-hair);
+}
+.ri-dot[data-past] {
+  background: color-mix(in srgb, var(--ri-accent) 45%, var(--ri-hair));
+}
+.ri-dot[data-on] {
+  width: 8px;
+  height: 8px;
+  background: var(--ri-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ri-accent) 25%, transparent);
+}
+.ri-ribbon-track {
+  position: relative;
+  width: 44px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ri-hair);
+}
+.ri-ribbon-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--ri-accent);
+}
+
+.ri-flight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ri-flight-t {
+  flex: none;
+  color: var(--ri-muted);
+  font-family: var(--ri-mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+.ri-flight-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 6px;
+  border: 1px solid var(--ri-hair);
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, transparent 0 9.5%, var(--ri-hair) 9.5% 10%), var(--ri-inset);
+}
+.ri-flight-seg {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  min-width: 3px;
+  border-radius: 999px;
+  background: var(--ri-tone);
+}
+
+/* ---- buttons ---- */
+.ri-iconbtn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ri-mid);
+  cursor: pointer;
+}
+.ri-iconbtn.ri-sm {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+.ri-iconbtn:hover:not(:disabled) {
+  background: var(--ri-chip);
+  color: var(--ri-text);
+}
+.ri-iconbtn:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+.wfx-ri button:focus-visible,
+.ri-search:focus-within {
+  outline: 2px solid var(--ri-focus);
+  outline-offset: 1px;
+}
+
+.ri-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ri-accent);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.ri-link:hover {
+  text-decoration: underline;
+}
+.ri-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--ri-accent) 45%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ri-accent) 10%, transparent);
+  color: var(--ri-accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.ri-btn:hover {
+  background: color-mix(in srgb, var(--ri-accent) 18%, transparent);
+}
+
+/* ---- tabs ---- */
+.ri-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--ri-hair);
+  scrollbar-width: none;
+}
+.ri-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 8px 7px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ri-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ri-tab:hover {
+  color: var(--ri-text);
+}
+.ri-tab[aria-selected="true"] {
+  border-bottom-color: var(--ri-accent);
+  color: var(--ri-text);
+  font-weight: 650;
+}
+.ri-badge {
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--ri-chip);
+  font-family: var(--ri-mono);
+  font-size: 10px;
+  font-weight: 500;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@agenticai/mcp-server-home-assistant",
+  "version": "0.1.0",
+  "description": "Reference MCP server exposing Home Assistant entities/services as tools, for dynamic registration via VegaDuta's core/mcp registry.",
+  "private": true,
+  "main": "index.js",
+  "bin": {
+    "mcp-server-home-assistant": "./index.js"
+  },
+  "scripts": {
+    "test": "node test/server.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "Apache-2.0"
+}

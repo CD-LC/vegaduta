@@ -1,0 +1,245 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-skills",
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].description",
+          "$[*].enabled",
+          "$[*].fileCount",
+          "$[*].id",
+          "$[*].name",
+          "$[*].source"
+        ]
+      }
+    },
+    {
+      "id": "post-api-skills",
+      "method": "POST",
+      "path": "/api/skills",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.skillMd"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.body",
+          "$.description",
+          "$.files",
+          "$.id",
+          "$.name",
+          "$.skillMd",
+          "$.source"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-skills-id",
+      "method": "DELETE",
+      "path": "/api/skills/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-skills-id",
+      "method": "PUT",
+      "path": "/api/skills/{id}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.skillMd"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.body",
+          "$.description",
+          "$.files",
+          "$.id",
+          "$.name",
+          "$.skillMd",
+          "$.source"
+        ]
+      }
+    },
+    {
+      "id": "post-api-skills-id-agents",
+      "method": "POST",
+      "path": "/api/skills/{id}/agents",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.agentIds"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-skills-id-approve",
+      "method": "POST",
+      "path": "/api/skills/{id}/approve",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-skills-id-archive",
+      "method": "POST",
+      "path": "/api/skills/{id}/archive",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-skills-id-improvement",
+      "method": "DELETE",
+      "path": "/api/skills/{id}/improvement",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-skills-id-improvement",
+      "method": "GET",
+      "path": "/api/skills/{id}/improvement",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-skills-id-improvement-apply",
+      "method": "POST",
+      "path": "/api/skills/{id}/improvement/apply",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.body",
+          "$.description",
+          "$.files",
+          "$.id",
+          "$.name",
+          "$.skillMd",
+          "$.source"
+        ]
+      }
+    },
+    {
+      "id": "post-api-skills-id-reject",
+      "method": "POST",
+      "path": "/api/skills/{id}/reject",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-skills-name",
+      "method": "GET",
+      "path": "/api/skills/{name}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.body",
+          "$.description",
+          "$.files",
+          "$.id",
+          "$.name",
+          "$.skillMd",
+          "$.source"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-skills-name-enabled",
+      "method": "PATCH",
+      "path": "/api/skills/{name}/enabled",
+      "status": 204,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-skills-name-export",
+      "method": "GET",
+      "path": "/api/skills/{name}/export",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-skills-name-file",
+      "method": "GET",
+      "path": "/api/skills/{name}/file",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-skills-import",
+      "method": "POST",
+      "path": "/api/skills/import",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.skill",
+          "$.skippedPaths"
+        ]
+      }
+    },
+    {
+      "id": "post-api-skills-registry-install",
+      "method": "POST",
+      "path": "/api/skills/registry/install",
+      "status": 201,
+      "request": {
+        "requiredFields": [
+          "$.expectedSha256",
+          "$.githubUrl",
+          "$.replace"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.skill",
+          "$.skippedPaths"
+        ]
+      }
+    },
+    {
+      "id": "get-api-skills-registry-search",
+      "method": "GET",
+      "path": "/api/skills/registry/search",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.page",
+          "$.skills",
+          "$.total",
+          "$.totalPages"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.vegaduta</groupId>
+  <artifactId>vegaduta-agent-parent</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>VegaDuta Agent SDK</name>
+  <description>
+    Governance-first agent SDK for Java: tool risk classification, human approval, budgets,
+    idempotent effects, guardrails, hooks and audit, on top of Spring AI (and other frameworks).
+    See docs/architecture/ADR-0013-embeddable-agent-sdk.md.
+  </description>
+  <url>https://github.com/CD-LC/vegaduta</url>
+  <inceptionYear>2026</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>VegaDuta maintainers</name>
+      <url>https://github.com/CD-LC/vegaduta/blob/main/GOVERNANCE.md</url>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/CD-LC/vegaduta.git</connection>
+    <developerConnection>scm:git:git@github.com:CD-LC/vegaduta.git</developerConnection>
+    <url>https://github.com/CD-LC/vegaduta</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/CD-LC/vegaduta/issues</url>
+  </issueManagement>
+
+  <modules>
+    <module>agent-api</module>
+    <module>agent-core</module>
+    <module>agent-jdbc</module>
+    <module>agent-testkit</module>
+    <module>agent-scanner</module>
+    <module>agent-spring-ai</module>
+    <module>agent-spring-boot-starter</module>
+    <module>agent-bom</module>
+  </modules>
+
+  <properties>
+    <!-- Java 17 bytecode for every artifact: Spring Boot 4 and Spring AI 2 support 17, and
+         17 is the floor most enterprises are on. No preview features, no Java 21-only APIs. -->
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- Reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html).
+         Bump when cutting a release. -->
+    <project.build.outputTimestamp>2026-10-12T00:00:00Z</project.build.outputTimestamp>
+
+    <!-- Framework baselines. The adapters are built and tested against these; consumers may
+         run newer patch versions. -->
+    <spring-boot.version>4.1.1</spring-boot.version>
+    <spring-ai.version>2.0.1</spring-ai.version>
+
+    <jspecify.version>1.0.0</jspecify.version>
+    <re2j.version>1.8</re2j.version>
+    <h2.version>2.3.232</h2.version>
+
+    <!-- Plugins -->
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.11.1</maven-javadoc-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+    <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+    <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
+    <japicmp-maven-plugin.version>0.23.1</japicmp-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
+    <spotless.version>2.44.4</spotless.version>
+    <!-- Same formatter version as core/. google-java-format does not run on JDK 17.0.20+ (a javac
+         internal it calls changed), so run spotless with a JDK 21: see .github/workflows/ci.yml. -->
+    <google-java-format.version>1.25.2</google-java-format.version>
+    <jacoco.version>0.8.13</jacoco.version>
+
+    <!-- japicmp compares against the last released version of each artifact. Until 0.1.0 is on
+         Maven Central there is no baseline, so the check is skipped. Set
+         -Djapicmp.skip=false -Djapicmp.baseline=<version> once one exists. -->
+    <japicmp.skip>true</japicmp.skip>
+    <japicmp.baseline>0.1.0</japicmp.baseline>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-jdbc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-testkit</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-scanner</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-spring-ai</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vegaduta</groupId>
+        <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.re2j</groupId>
+        <artifactId>re2j</artifactId>
+        <version>${re2j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
+      </dependency>
+
+      <!-- Spring Boot's BOM manages SLF4J, Micrometer, OpenTelemetry, JUnit, AssertJ and
+           Mockito versions. Imported here so every module tests against one consistent set.
+           flatten-maven-plugin resolves these into the published POMs, so consumers never
+           see the import. -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-bom</artifactId>
+        <version>${spring-ai.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- Apache-2.0 §4: every distributed jar carries the license and the NOTICE file.
+         They live at the repository root (this reactor only builds from a checkout). -->
+    <resources>
+      <!-- Declaring <resources> replaces the default list, so keep src/main/resources
+           (JDBC DDL, Spring auto-configuration metadata) alongside the legal files. -->
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>${maven.multiModuleProjectDirectory}/../..</directory>
+        <includes>
+          <include>LICENSE</include>
+          <include>NOTICE</include>
+        </includes>
+        <targetPath>META-INF</targetPath>
+      </resource>
+    </resources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+            <release>${maven.compiler.release}</release>
+            <parameters>true</parameters>
+            <showWarnings>true</showWarnings>
+            <compilerArgs>
+              <arg>-Xlint:all,-processing,-serial</arg>
+            </compilerArgs>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                <Implementation-Title>${project.artifactId}</Implementation-Title>
+                <Implementation-Version>${project.version}</Implementation-Version>
+                <Bundle-License>Apache-2.0</Bundle-License>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven-source-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <configuration>
+            <doclint>all,-missing</doclint>
+            <quiet>true</quiet>
+            <failOnWarnings>false</failOnWarnings>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>enforce</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <requireJavaVersion>
+                    <version>[17,)</version>
+                  </requireJavaVersion>
+                  <requireMavenVersion>
+                    <version>[3.8.0,)</version>
+                  </requireMavenVersion>
+                  <banDuplicatePomDependencyVersions/>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Publishes a POM without the parent, the BOM imports or build plumbing, so
+             consumers resolve plain coordinates. -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${flatten-maven-plugin.version}</version>
+          <configuration>
+            <flattenMode>ossrh</flattenMode>
+            <updatePomFile>true</updatePomFile>
+          </configuration>
+          <executions>
+            <execution>
+              <id>flatten</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>flatten</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>flatten-clean</id>
+              <phase>clean</phase>
+              <goals>
+                <goal>clean</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- CycloneDX SBOM per artifact, attached as a classifier so it ships with the release. -->
+        <plugin>
+          <groupId>org.cyclonedx</groupId>
+          <artifactId>cyclonedx-maven-plugin</artifactId>
+          <version>${cyclonedx-maven-plugin.version}</version>
+          <configuration>
+            <projectType>library</projectType>
+            <includeTestScope>false</includeTestScope>
+            <outputFormat>json</outputFormat>
+            <outputName>${project.artifactId}-${project.version}-cyclonedx</outputName>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>makeBom</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Semantic-versioning gate: binary and source compatibility against the last release. -->
+        <plugin>
+          <groupId>com.github.siom79.japicmp</groupId>
+          <artifactId>japicmp-maven-plugin</artifactId>
+          <version>${japicmp-maven-plugin.version}</version>
+          <configuration>
+            <skip>${japicmp.skip}</skip>
+            <oldVersion>
+              <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${japicmp.baseline}</version>
+                <type>jar</type>
+              </dependency>
+            </oldVersion>
+            <parameter>
+              <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+              <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
+              <onlyModified>true</onlyModified>
+              <excludes>
+                <exclude>@io.vegaduta.agent.api.Experimental</exclude>
+              </excludes>
+            </parameter>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>verify</phase>
+              <goals>
+                <goal>cmp</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless.version}</version>
+          <configuration>
+            <java>
+              <googleJavaFormat>
+                <version>${google-java-format.version}</version>
+                <style>GOOGLE</style>
+              </googleJavaFormat>
+              <removeUnusedImports/>
+            </java>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven-gpg-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>${central-publishing-maven-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.github.siom79.japicmp</groupId>
+        <artifactId>japicmp-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- mvn -Prelease deploy: signs every artifact and uploads the bundle to the Central
+         Portal. Needs GPG keys and the CENTRAL_USERNAME / CENTRAL_PASSWORD (user token)
+         environment variables from the publisher account. -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>no-snapshots-in-release</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireReleaseDeps/>
+                    <requireReleaseVersion/>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>false</autoPublish>
+              <waitUntil>validated</waitUntil>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>coverage</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

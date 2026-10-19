@@ -1,0 +1,285 @@
+[
+  {
+    "id": "mcp-servers",
+    "title": "Connect an MCP server (give agents outside tools)",
+    "keywords": ["mcp", "mcp server", "model context protocol", "connect tool", "external tool", "github mcp", "npx", "remote mcp", "stdio", "jira", "atlassian", "notion", "linear"],
+    "summary": "MCP servers are how agents reach outside systems (GitHub, Jira, databases, Notion...). Register the server once on the Tools page, then enable its tools for the agent that should use them.",
+    "path": "/tools",
+    "steps": [
+      "Open Tools and pick the server from the catalogue (or add a custom one with its URL or command).",
+      "Enter its credentials (they go to the encrypted vault) and press Test; wait for it to show Connected.",
+      "Open the agent that should use it (Agents page) and make sure the server's tools are enabled for that agent.",
+      "Come back and ask again."
+    ],
+    "docs": ["console/configuration.md", "core/mcp/REGISTERING-A-CUSTOM-MCP-SERVER.md"],
+    "also": ["agent-tools", "secrets", "mcp-credentials"],
+    "apiHints": ["mcp registry", "mcp server registration"],
+    "needs": "the integrations permission (tenant-admin by default)"
+  },
+  {
+    "id": "mcp-credentials",
+    "title": "Fix or rotate an MCP server's credentials",
+    "keywords": ["mcp credentials", "mcp error", "mcp not connecting", "mcp token", "mcp api key", "mcp auth", "oauth mcp", "server error"],
+    "summary": "Every configured MCP server's credentials, masked, with an Edit dialog; a server in Error shows why and a suggested fix.",
+    "path": "/tools/credentials",
+    "steps": ["Open the credentials page, edit the failing server's credential, save.", "Open All enabled MCP servers and press Test on that row."],
+    "docs": ["console/configuration.md"],
+    "also": ["mcp-servers"]
+  },
+  {
+    "id": "mcp-expose",
+    "title": "Expose VegaDuta itself as an MCP server (Claude Desktop, Cursor, other clients)",
+    "keywords": ["expose mcp", "mcp access", "mcp grants", "use vegaduta from claude desktop", "vegaduta as mcp", "mcp client key", "mcp endpoint"],
+    "summary": "The reverse direction: let outside MCP clients call this install's tools. Create a grant (a key) and choose which tools it may see.",
+    "path": "/admin/mcp-servers",
+    "steps": ["Open MCP access, create a grant, choose the tools to expose.", "Copy the key once (it is shown once) and the endpoint into the client."],
+    "docs": ["console/administration.md", "architecture/mcp-spec-alignment.md"],
+    "apiHints": ["mcpserver grants", "mcp exposure"],
+    "needs": "the integrations permission"
+  },
+  {
+    "id": "agent-tools",
+    "title": "Enable a tool or MCP server for an agent",
+    "keywords": ["enable tool", "tool access", "agent tools", "allow tool", "agent cannot use", "tool not available", "tool missing", "give agent access", "allow-list"],
+    "summary": "Registering a server or connecting a service makes tools exist; each agent still has its own allow-list. If an agent says it has no tool for something, the tool is usually not enabled for that agent.",
+    "path": "/agents",
+    "steps": ["Open the agent, go to its tools, tick the tools (or the whole MCP server) it should have, save.", "Ask again."],
+    "docs": ["console/build.md"],
+    "apiHints": ["agent tool access", "list available tools"]
+  },
+  {
+    "id": "llm-providers",
+    "title": "Add or activate an LLM provider (OpenAI, Anthropic, Gemini, Ollama...)",
+    "keywords": ["provider", "llm", "model", "api key openai", "anthropic key", "gemini", "ollama", "local model", "byok", "bring your own key", "no model", "model not working", "switch model"],
+    "summary": "Agents need an active model provider. Add a key (or point at a local Ollama) and activate it.",
+    "path": "/providers",
+    "steps": ["Open Providers, choose a provider, paste its key (stored encrypted) or the local URL.", "Activate it, then pick the model on the agent."],
+    "docs": ["console/ai-and-engine.md", "local-models.md"],
+    "apiHints": ["providers", "model catalog"]
+  },
+  {
+    "id": "telegram",
+    "title": "Connect Telegram",
+    "keywords": ["telegram", "bot", "botfather"],
+    "summary": "Chat with an agent from Telegram. No public URL or business account needed - the quickest channel.",
+    "path": "/admin/channels?channel=telegram",
+    "steps": ["Create a bot with @BotFather and copy its token.", "Open the Telegram channel, paste the token, save, then message the bot."],
+    "docs": ["console/administration.md"]
+  },
+  {
+    "id": "whatsapp",
+    "title": "Connect WhatsApp",
+    "keywords": ["whatsapp", "whats app", "wa business", "meta business"],
+    "summary": "Talk to an agent on WhatsApp through the WhatsApp Business Cloud API.",
+    "path": "/admin/channels?channel=whatsapp",
+    "steps": ["Have your Meta business account, phone number id and access token ready.", "Open the WhatsApp channel, enter them, copy the webhook URL and verify token into Meta, save."],
+    "docs": ["channels/whatsapp-policy.md", "channels/whatsapp-qr.md"],
+    "needs": "a public URL for the webhook"
+  },
+  {
+    "id": "slack",
+    "title": "Connect Slack",
+    "keywords": ["slack", "slack bot", "slack app"],
+    "summary": "Let agents answer in Slack and send approvals there.",
+    "path": "/admin/channels?channel=slack",
+    "steps": ["Create a Slack app with a bot token and signing secret.", "Open the Slack channel, enter them, copy the events URL into Slack, save."],
+    "docs": ["console/administration.md"]
+  },
+  {
+    "id": "email",
+    "title": "Connect email (a mailbox)",
+    "keywords": ["email", "mailbox", "imap", "smtp", "inbox", "mail"],
+    "summary": "Give an agent a mailbox to read and send mail. Linking Google (Gmail) is the other way to get email.",
+    "path": "/admin/channels?channel=email",
+    "steps": ["Open the Email channel and enter the mailbox settings, or connect Google instead.", "Save and send a test message."],
+    "docs": ["console/administration.md"],
+    "also": ["google"]
+  },
+  {
+    "id": "sms",
+    "title": "Connect SMS",
+    "keywords": ["sms", "text message", "twilio"],
+    "summary": "Text with an agent over SMS.",
+    "path": "/admin/channels?channel=sms",
+    "steps": ["Have the SMS provider's account details and number ready.", "Open the SMS channel, enter them, save."],
+    "docs": ["sms-channel.md"]
+  },
+  {
+    "id": "google",
+    "title": "Connect Google (Calendar, Gmail, Drive, Sheets)",
+    "keywords": ["google", "calendar", "gmail", "drive", "sheets", "spreadsheet", "google docs", "youtube", "book meeting", "append row"],
+    "summary": "Linking a Google account gives every agent Calendar, Gmail, Drive and Sheets tools automatically (no per-agent toggle).",
+    "path": "/admin/integrations",
+    "steps": ["Open Workspace integrations and press Connect Google; approve on Google's consent screen.", "Come back and ask again; the tools appear on the next turn."],
+    "docs": ["connectors/google-calendar-sheets.md", "console/administration.md"],
+    "needs": "the integrations permission"
+  },
+  {
+    "id": "knowledge",
+    "title": "Add knowledge (documents the agent can search)",
+    "keywords": ["knowledge", "knowledge base", "rag", "upload document", "pdf", "documents", "faq", "retrieval", "train on my docs"],
+    "summary": "Upload documents or sites into a knowledge collection; agents search them with the knowledge tools.",
+    "path": "/knowledge",
+    "steps": ["Open Knowledge, create a collection and add files or a URL.", "Attach the collection to the agent that should answer from it."],
+    "docs": ["console/library.md"],
+    "apiHints": ["knowledge collections", "knowledge ingest"]
+  },
+  {
+    "id": "secrets",
+    "title": "Store a secret or API key safely",
+    "keywords": ["secret", "vault", "api key store", "credential", "token store", "allowed hosts"],
+    "summary": "The tenant secrets vault; integrations authenticate with entries from it and can be limited to allowed hosts.",
+    "path": "/secrets",
+    "steps": ["Open Secrets, create the entry, optionally restrict allowed hosts.", "Reference it from the integration that needs it."],
+    "docs": ["console/configuration.md"],
+    "apiHints": ["secrets"]
+  },
+  {
+    "id": "custom-tools",
+    "title": "Build a custom tool (from an OpenAPI spec or code)",
+    "keywords": ["custom tool", "openapi tool", "import openapi", "swagger", "code tool", "my own api", "http tool", "tool from api"],
+    "summary": "Turn any REST API (from its OpenAPI spec) or a small script into a tool agents can call.",
+    "path": "/tools/code",
+    "steps": ["For code tools open Custom code tools: write, validate, test and enable.", "For an OpenAPI spec use the OpenAPI tool source on the Tools page, then enable the tools on the agent."],
+    "docs": ["console/configuration.md"],
+    "also": ["agent-tools"],
+    "apiHints": ["openapi tool source", "code tools"]
+  },
+  {
+    "id": "agents",
+    "title": "Create or edit an agent",
+    "keywords": ["create agent", "new agent", "agent instructions", "system prompt", "agent settings", "agent template", "persona"],
+    "summary": "Agents hold instructions, a model, tools and knowledge.",
+    "path": "/agents",
+    "steps": ["Open Agents, choose New agent or a template.", "Set instructions, model, tools and knowledge, then test it in the Assistant."],
+    "docs": ["console/build.md"],
+    "apiHints": ["agents"]
+  },
+  {
+    "id": "workflows",
+    "title": "Build a workflow (multi-step automation)",
+    "keywords": ["workflow", "automation", "trigger", "schedule workflow", "n8n", "pipeline", "node"],
+    "summary": "Visual multi-step automations with triggers, agent steps, approvals and integrations.",
+    "path": "/workflows",
+    "steps": ["Open Workflows, create one from a template or blank.", "Add nodes, test-run it, then enable its trigger."],
+    "docs": ["console/build.md", "api/workflow-dsl-v1.md"],
+    "apiHints": ["workflows"]
+  },
+  {
+    "id": "schedules",
+    "title": "Schedule recurring work",
+    "keywords": ["schedule", "every day", "recurring", "cron", "routine", "remind me", "background job"],
+    "summary": "Run an agent on a schedule or as a background job.",
+    "path": "/jobs/schedules",
+    "steps": ["Open Schedules and add a routine with the agent, the prompt and the timing."],
+    "docs": ["console/assistant.md"],
+    "apiHints": ["jobs", "schedules"]
+  },
+  {
+    "id": "approvals",
+    "title": "Set up approvals (human-in-the-loop)",
+    "keywords": ["approval", "approve", "human in the loop", "review before", "sign off", "pending action"],
+    "summary": "Risky tool calls wait for a person; approvals can be answered in the console or on a channel.",
+    "path": "/admin/approvals",
+    "steps": ["Open Approvals to decide waiting items and to set which actions need approval."],
+    "docs": ["console/administration.md"],
+    "apiHints": ["approvals"]
+  },
+  {
+    "id": "guardrails",
+    "title": "Guardrails (safety rules, PII, blocked topics)",
+    "keywords": ["guardrail", "safety", "pii", "block topic", "content filter", "moderation", "policy"],
+    "summary": "Rules checked before and after the model on every turn.",
+    "path": "/admin/guardrails",
+    "steps": ["Open Guardrails and add or tune rules."],
+    "docs": ["console/administration.md", "security-model.md"],
+    "needs": "the guardrails permission"
+  },
+  {
+    "id": "instructions",
+    "title": "Platform prompt directives (house rules for all agents)",
+    "keywords": ["directive", "house rules", "platform prompt", "global instructions", "tone for all agents"],
+    "summary": "Tenant-wide prompt directives that apply to every agent.",
+    "path": "/admin/instructions",
+    "steps": ["Open Instructions, edit the directive, save."],
+    "docs": ["console/administration.md"]
+  },
+  {
+    "id": "team",
+    "title": "Invite teammates and set roles",
+    "keywords": ["invite", "team", "user", "member", "role", "permission", "rbac", "teammate"],
+    "summary": "Add people and choose what they may do.",
+    "path": "/admin/access",
+    "steps": ["Open Team access, invite by email, choose a role or permissions."],
+    "docs": ["console/roles-and-permissions.md"],
+    "needs": "the users permission",
+    "apiHints": ["admin users"]
+  },
+  {
+    "id": "sso",
+    "title": "Single sign-on and SCIM",
+    "keywords": ["sso", "saml", "oidc", "okta", "azure ad", "entra", "scim", "single sign on", "login with"],
+    "summary": "Let people sign in with your identity provider and sync users.",
+    "path": "/admin/sso",
+    "steps": ["Open Single sign-on, add the identity provider and its metadata, test sign-in."],
+    "docs": ["console/single-sign-on.md"],
+    "needs": "the tenant settings permission"
+  },
+  {
+    "id": "api-keys",
+    "title": "Create an API key to call the platform from code",
+    "keywords": ["api key", "api token", "call the api", "programmatic", "sdk", "rest", "curl", "bearer", "integrate with my app"],
+    "summary": "Tenant API keys authenticate scripts and apps. The REST contract is the OpenAPI spec at /api/openapi.json (Swagger-style reference at /api-reference); SDKs exist for TypeScript, Python and Java.",
+    "path": "/admin/api-keys",
+    "steps": ["Open API keys, create a key, copy it once.", "Send it as a Bearer token; look up endpoints with the API guide tool."],
+    "docs": ["api/README.md", "console/administration.md"],
+    "apiHints": ["api keys"],
+    "needs": "the users permission"
+  },
+  {
+    "id": "branding",
+    "title": "Branding (logo, name, colors)",
+    "keywords": ["branding", "logo", "white label", "colors", "company name"],
+    "summary": "Make the console and shared agent pages carry your brand.",
+    "path": "/admin/branding",
+    "steps": ["Open Branding, upload the logo and set the name, save."],
+    "docs": ["console/administration.md"]
+  },
+  {
+    "id": "billing",
+    "title": "Plan, usage and billing",
+    "keywords": ["billing", "plan", "upgrade", "invoice", "subscription", "usage limit", "quota", "credits"],
+    "summary": "See and change the plan, usage and invoices.",
+    "path": "/admin/billing",
+    "steps": ["Open Billing to see usage and change plan."],
+    "docs": ["console/plans-and-billing.md"]
+  },
+  {
+    "id": "cost-roi",
+    "title": "Cost and ROI",
+    "keywords": ["cost", "roi", "spend", "token cost", "savings", "how much did"],
+    "summary": "What agents cost and what they saved.",
+    "path": "/roi",
+    "steps": ["Open Cost and ROI."],
+    "docs": ["cost-and-roi.md"]
+  },
+  {
+    "id": "audit",
+    "title": "Audit log and evidence",
+    "keywords": ["audit", "who did", "log", "compliance", "evidence", "history of changes"],
+    "summary": "A tamper-evident record of what agents and people did.",
+    "path": "/admin/audit",
+    "steps": ["Open Audit to filter by actor, action or date."],
+    "docs": ["console/test-and-monitor.md"]
+  },
+  {
+    "id": "plugins-skills",
+    "title": "Install plugins and skills",
+    "keywords": ["plugin", "skill", "marketplace", "extension", "install app"],
+    "summary": "Add packaged capabilities: skills teach an agent a procedure; plugins bundle tools and apps.",
+    "path": "/skills",
+    "steps": ["Open Skills (or Plugins), pick one, install, then enable it on the agent."],
+    "docs": ["plugins-and-apps.md", "console/library.md"],
+    "also": ["agent-tools"]
+  }
+]

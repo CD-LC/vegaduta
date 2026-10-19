@@ -1,0 +1,51 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-mobile-sentinels-admin-summary",
+      "method": "GET",
+      "path": "/api/mobile/sentinels/admin/summary",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-mobile-sentinels-events",
+      "method": "DELETE",
+      "path": "/api/mobile/sentinels/events",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mobile-sentinels-events",
+      "method": "GET",
+      "path": "/api/mobile/sentinels/events",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-mobile-sentinels-policy",
+      "method": "GET",
+      "path": "/api/mobile/sentinels/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-mobile-sentinels-policy",
+      "method": "PUT",
+      "path": "/api/mobile/sentinels/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

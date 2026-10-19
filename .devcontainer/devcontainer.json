@@ -1,0 +1,49 @@
+{
+  "name": "VegaDuta",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    // Toolchain mirrors CI (.github/workflows/ci.yml): JDK 21 for core
+    // (<java.version>21</java.version>), Node 22 for web/web-admin,
+    // Python 3.12 for services/ (their images are python:3.12-slim).
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": true,
+      "installGradle": false
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+    // docker-in-docker so `scripts/vegaduta` / `scripts/dev-up.sh` can run the compose
+    // stack inside the container. docker-outside-of-docker is NOT used on
+    // purpose: a contributor on a fresh machine has no host daemon to bind.
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  // Ports the compose stacks publish (loopback-bound in deploy/compose/*.yml;
+  // forwarding makes them reachable from the contributor's browser).
+  "forwardPorts": [3000, 3001, 8080, 8001, 8090, 8180, 8088, 8333],
+  "portsAttributes": {
+    "3000": { "label": "web" },
+    "3001": { "label": "web-admin" },
+    "8080": { "label": "core API" },
+    "8001": { "label": "sidecar" },
+    "8090": { "label": "code-intel" },
+    "8180": { "label": "Keycloak" },
+    "8088": { "label": "Temporal UI" },
+    "8333": { "label": "S3 (SeaweedFS)" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-python.python"
+      ]
+    }
+  }
+}

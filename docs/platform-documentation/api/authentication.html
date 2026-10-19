@@ -1,0 +1,168 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Authentication &amp; Authorization — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="api" data-page="authentication.html" data-doc="VD-API-002" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="overview.html">API Reference</a><span class="sep">/</span>Authentication &amp; Authorization</div>
+<div class="doc-meta" data-auto></div>
+<h1>Authentication &amp; Authorization</h1>
+
+<dl class="props">
+  <dt>Default scheme</dt><dd><code>Authorization: Bearer &lt;access-token&gt;</code> — a Keycloak-issued JWT, validated by Spring's OAuth2 resource server in <code>SecurityConfig</code>.</dd>
+  <dt>Token issuer</dt><dd>Keycloak at <code>https://auth.example.com</code>, realm <code>agentic-ai</code>.</dd>
+  <dt>Stateless</dt><dd>No sessions, CSRF disabled (<code>SessionCreationPolicy.STATELESS</code>); the API never sets auth cookies.</dd>
+  <dt>Fail-closed</dt><dd>The secure chain is <code>@Profile("!insecure")</code>. Missing profile configuration fails startup instead of serving an open API.</dd>
+</dl>
+
+<h2>Credential types at a glance</h2>
+<table>
+  <thead><tr><th>Credential</th><th>Header</th><th>Used by</th><th>Verified where</th></tr></thead>
+  <tbody>
+    <tr><td>Keycloak JWT</td><td><code>Authorization: Bearer &lt;token&gt;</code></td><td>Web console, admin console, other registered OAuth clients, external callers</td><td>Spring resource server (<code>SecurityConfig.jwtDecoder</code>)</td></tr>
+    <tr><td>Demo sandbox token</td><td><code>X-Demo-Token</code></td><td>Anonymous <code>/api/demo/**</code> sandbox and <code>/try</code></td><td><code>DemoSessionController</code> / <code>DemoChatController</code> (hash lookup; minted by <code>POST /api/demo/session</code>)</td></tr>
+    <tr><td>Device token</td><td><code>X-Device-Token</code> (pairing code for claim)</td><td>Paired phones and desktop daemons</td><td><code>DeviceGatewayController</code>, <code>DeviceAuthResolver</code></td></tr>
+    <tr><td>MCP / developer API key</td><td><code>Authorization: Bearer vmcp_&lt;key&gt;</code></td><td><code>/mcp/**</code> and <code>/api/dev/**</code></td><td><code>McpApiKeyAuthFilter</code>. See <a href="developer-api.html">Developer API</a>.</td></tr>
+    <tr><td>Share id</td><td>None (id in the path)</td><td><code>/api/share/agents/**</code>, <code>/api/share/workflows/**</code></td><td>Controller resolves the id; rate-limited, revocable</td></tr>
+    <tr><td>Provider signature / secret</td><td>Varies</td><td><code>/webhook/**</code>, <code>/api/billing/webhook/**</code></td><td>Per controller. See <a href="webhooks.html">Webhooks</a>.</td></tr>
+  </tbody>
+</table>
+
+<h2>Obtaining a token</h2>
+<p>
+  Browsers and clients sign in through Keycloak (OIDC). For scripted access the
+  repository's Postman collection uses Keycloak's standard token endpoint,
+  <code>POST https://auth.example.com/realms/agentic-ai/protocol/openid-connect/token</code>,
+  form-encoded, in two shapes: a password grant
+  (<code>grant_type</code>, <code>client_id</code>, <code>client_secret</code>, <code>username</code>,
+  <code>password</code>) and a service-account grant (<code>grant_type</code>, <code>client_id</code>,
+  <code>client_secret</code>). Which Keycloak clients permit which grant is realm configuration; see
+  <a href="../deployment/keycloak-provisioning.html">Keycloak Provisioning</a>. Never paste client
+  secrets or tokens into shared docs or tickets; use <code>&lt;token&gt;</code> placeholders.
+</p>
+<pre><code>curl -H "Authorization: Bearer &lt;token&gt;" https://api.example.com/api/agents</code></pre>
+
+<h2>What a token must satisfy</h2>
+<ol>
+  <li><strong>Signature</strong> against the JWKS at <code>app.keycloak.jwk-set-uri</code> (container-reachable, deliberately separate from the issuer).</li>
+  <li><strong>Default JWT validation</strong> (timestamps) via <code>JwtValidators</code>.</li>
+  <li><strong>Issuer</strong> must be the primary <code>issuer-uri</code> or one of the comma-separated <code>KEYCLOAK_ADDITIONAL_ISSUERS</code>. See <a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a>. A missing additional issuer 401s every call while browser logins still look fine.</li>
+  <li><strong>Authorized party (<code>azp</code>)</strong> must be one of <code>app.keycloak.allowed-azp</code>. Default: <code>agentic-ai-web</code>, <code>agentic-ai-platform-admin</code>, <code>agentic-ai-mobile</code>, <code>agentic-ai-app</code>, <code>agentic-ai-ide</code>, <code>agentic-ai-core</code>. A client that serves open self-registration for a separate product should deliberately be left out. Setting the property empty disables the check (an emergency lever). A token with no <code>azp</code> is not rejected by this validator.</li>
+  <li><strong>Tenant claim.</strong> <code>TenantContextFilter</code> reads <code>tenant_id</code>; an authenticated JWT with none gets <code>403</code> with a JSON body saying the account is not linked to an organization (platform-level accounts are tenant-less by design). A tenant whose provisioning never completed also gets <code>403</code>.</li>
+</ol>
+
+<pre class="mermaid">
+sequenceDiagram
+  participant C as Client
+  participant K as Keycloak
+  participant A as core SecurityConfig
+  participant F as TenantContextFilter
+  participant X as Controller
+  C->>K: token request
+  K-->>C: JWT (iss, azp, tenant_id, realm_access.roles)
+  C->>A: request + Bearer JWT
+  A->>A: signature, timestamps, iss in accepted set, azp allowed
+  A->>A: authorities = ROLE_* + PERM_* (GranularPermissionConverter)
+  A->>A: URL matcher (permitAll / hasAuthority / authenticated)
+  A->>F: tenant_id to TenantContext
+  F->>X: handler runs in tenant schema
+  X->>X: resource check (requireAccess VIEWER / RUNNER)
+</pre>
+
+<h2>Authorization model</h2>
+<h3>Layer 1: authorities</h3>
+<p>
+  <code>GranularPermissionConverter</code> emits two kinds of authority for every JWT:
+  <code>ROLE_&lt;name&gt;</code> from the token's <code>realm_access.roles</code>
+  (<code>KeycloakRoleConverter</code>), and <code>PERM_&lt;SCOPE&gt;</code> from the caller's stored
+  <code>user_permission_grant</code> rows via <code>PermissionAuthoritySource</code>. Grants bind
+  tenant-admins too: the role seeds a full bundle, it is not a bypass.
+</p>
+<h3>Layer 2: URL matchers (first match wins)</h3>
+<table>
+  <thead><tr><th>Path (verb)</th><th>Requirement</th></tr></thead>
+  <tbody>
+    <tr><td><code>/api/platform/**</code></td><td><code>ROLE_platform-admin</code></td></tr>
+    <tr><td><code>/api/admin/users/**</code>; other <code>/api/admin/**</code> (catch-all)</td><td><code>PERM_MANAGE_USERS</code></td></tr>
+    <tr><td><code>/api/admin/templates/**</code>; <code>/api/admin/issues/**</code>; <code>/api/admin/llm-usage/**</code>, <code>/spend-reports/**</code></td><td><code>PERM_MANAGE_TEMPLATES</code>; <code>PERM_VIEW_AUDIT_LOG</code>; <code>PERM_VIEW_USAGE</code></td></tr>
+    <tr><td><code>/api/audit-log/**</code></td><td><code>PERM_VIEW_AUDIT_LOG</code></td></tr>
+    <tr><td>Writes to <code>/api/providers</code>, <code>/api/mcp/registry</code>, <code>/api/mcpserver/grants</code>, <code>/api/webhooks</code>, <code>/api/knowledge/connectors</code>, <code>/api/sdlc/**</code>, <code>/api/jev</code>, <code>/api/capabilities</code>, <code>/api/sarvam/credential</code></td><td><code>PERM_MANAGE_INTEGRATIONS</code></td></tr>
+    <tr><td>Channel credentials, defaults, pairing, contacts, routing (<code>/api/channels/**</code> writes), <code>/api/elevenlabs/credential</code></td><td><code>PERM_MANAGE_CHANNELS</code></td></tr>
+    <tr><td>Workflow node webhooks and schedules (<code>/api/workflows/*/nodes/*/webhook</code>, <code>/schedule</code>, <code>/trigger-channel</code>)</td><td><code>PERM_MANAGE_WORKFLOWS_ADMIN</code></td></tr>
+    <tr><td>Agent schedule, specialties, triggers writes; <code>/api/rl/agents/*/policies</code></td><td><code>PERM_MANAGE_AGENTS</code></td></tr>
+    <tr><td>Guardrail rule writes, procedures writes, <code>/api/tenant/llm-gateway/content-policy</code> PUT</td><td><code>PERM_MANAGE_GUARDRAILS</code></td></tr>
+    <tr><td><code>PUT /api/approvals/policy/**</code></td><td><code>PERM_MANAGE_APPROVALS</code></td></tr>
+    <tr><td><code>/api/tools/code/**</code>, <code>/api/tools/openapi/**</code> writes</td><td><code>PERM_MANAGE_TOOLS</code> (code generate/validate: <code>ROLE_tenant-admin</code> or <code>ROLE_agent-builder</code>)</td></tr>
+    <tr><td><code>/api/code-intel/**</code></td><td><code>ROLE_tenant-admin</code> or <code>ROLE_agent-builder</code></td></tr>
+    <tr><td><code>/api/leads/**</code></td><td><code>PERM_MANAGE_LEADS</code></td></tr>
+    <tr><td><code>PUT /api/tenant/settings</code>, branding logo writes, AI model preferences writes, <code>/api/tenant/sso/**</code></td><td><code>PERM_MANAGE_TENANT_SETTINGS</code></td></tr>
+    <tr><td><code>/api/tenant/upgrade</code>, invoices, billing-profile, subscription cancel, resolutions</td><td><code>PERM_MANAGE_BILLING</code></td></tr>
+    <tr><td><code>/api/tenant/data-export</code>, <code>data-deletion</code>, <code>data-usage</code></td><td><code>PERM_MANAGE_DATA_GOVERNANCE</code></td></tr>
+    <tr><td><code>/api/briefs/**</code></td><td>Reads and readiness: authenticated; tune/rehearse/experiments: <code>PERM_MANAGE_AGENTS</code>; apply/rollback: both <code>PERM_MANAGE_AGENTS</code> and <code>PERM_MANAGE_WORKFLOWS_ADMIN</code>; trust: <code>ROLE_tenant-admin</code></td></tr>
+    <tr><td>Everything else</td><td><code>anyRequest().authenticated()</code></td></tr>
+  </tbody>
+</table>
+<p>
+  This table summarises the matchers; the full ordered list is in
+  <code>SecurityConfig.filterChain</code>. Reads on integration resources generally fall through
+  to plain <code>authenticated()</code>, so any tenant member can read status while only holders of
+  the permission can write.
+</p>
+<h3>Layer 3: per-resource access</h3>
+<p>
+  Agents and workflows have their own sharing levels. <code>AgentChatStreamController.chat</code> and
+  <code>AgUiRunController.run</code> call <code>agentService.requireAccess(agentId, PermissionLevel.RUNNER)</code>;
+  <code>AgUiRunController.tools</code> requires <code>VIEWER</code>. A caller without access gets 404 rather than 403
+  (anti-enumeration). Workflow run requires <code>RUNNER</code> (<code>WorkflowController.run</code>). Denied requests
+  refused by the URL matchers are written to the audit log (<code>authz.denied</code>).
+</p>
+
+<h2>Unauthenticated and alternate-credential paths</h2>
+<table>
+  <thead><tr><th>Path</th><th>Verb</th><th>Note</th></tr></thead>
+  <tbody>
+    <tr><td><code>/actuator/health/**</code>, <code>/actuator/info</code>, <code>/actuator/prometheus</code></td><td>any</td><td>Prometheus scraped on the internal network; the edge proxy is expected to block <code>/actuator/*</code> publicly.</td></tr>
+    <tr><td><code>/api/system/status/live</code>, <code>/api/public/status</code></td><td>GET</td><td>Bare liveness and component status.</td></tr>
+    <tr><td><code>/api/public/landing-event</code></td><td>POST</td><td>Funnel beacon; controller enforces event whitelist and per-IP cap.</td></tr>
+    <tr><td><code>/api/signup</code>, <code>/api/auth/social-providers</code></td><td>POST, GET</td><td>Pre-login; signup has its own rate limiter.</td></tr>
+    <tr><td><code>/api/demo/**</code></td><td>any</td><td>Path-prefix rule; identity via <code>X-Demo-Token</code>. Anything added here is public.</td></tr>
+    <tr><td><code>/api/share/agents/**</code>, <code>/api/share/workflows/**</code>, <code>/api/share/branding/**</code></td><td>any / GET</td><td>Anonymous share links (branding: GET only).</td></tr>
+    <tr><td><code>/api/public/email/unsubscribe</code></td><td>GET, POST</td><td>HMAC token in <code>?t=</code>.</td></tr>
+    <tr><td><code>/api/templates/gallery/**</code>, <code>/api/plugins/catalog</code>, <code>/api/plugins/artifacts/**</code>, <code>/api/commerce/feed/**</code></td><td>GET (feed also POST)</td><td>Public catalogues; the feed's POST is the public cart checkout.</td></tr>
+    <tr><td><code>/.well-known/agent-card.json</code>, <code>/.well-known/agent.json</code>, <code>/.well-known/jwks.json</code></td><td>GET</td><td>A2A discovery and card-signing keys.</td></tr>
+    <tr><td><code>/api/edge/config</code>, <code>/api/edge/manifest</code>, <code>/api/edge/tools</code>, <code>/api/edge/memory</code>, <code>/api/edge/tools/execute</code>, <code>/api/edge/turns</code></td><td>GET / POST</td><td>Filter-level permitAll; <code>/tools/execute</code> and <code>/tools</code> require a JWT or <code>X-Device-Token</code> inside the controller. <code>/api/edge/manifest/full</code> and <code>/manifest/registry</code> need <code>ROLE_platform-admin</code>.</td></tr>
+    <tr><td><code>/api/devices/claim</code>, <code>/poll</code>, <code>/commands/*/result</code>, <code>/screen-state</code>, <code>/notifications</code>, <code>/app-usage</code>, <code>/sms</code></td><td>POST</td><td>Device credential inside the controller. <code>/api/devices/register</code> uses a Keycloak JWT.</td></tr>
+    <tr><td><code>/oauth/google/callback</code>, <code>/oauth/x/callback</code>, <code>/oauth/atlassian/callback</code></td><td>GET</td><td>Third-party OAuth redirects; identity via signed <code>state</code>.</td></tr>
+    <tr><td><code>/webhook/**</code>, <code>/api/billing/webhook/**</code></td><td>POST (GET for verification handshakes)</td><td>See <a href="webhooks.html">Webhooks</a>. <code>/webhook/alerts/**</code> and <code>/mcp/**</code>, <code>/api/dev/**</code> sit on dedicated filter chains that skip bearer-JWT processing.</td></tr>
+    <tr><td><code>/scim/v2/**</code>, <code>POST /api/tenant/comp-grant</code>, <code>POST /api/internal/app-builder/generate-files</code></td><td>any</td><td>permitAll at the filter layer; the credential each controller expects was not confirmed while writing this page (not documented here).</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Why a bearer header can break a public route</div>
+  <code>permitAll()</code> does not skip bearer processing. If a route is on the main chain and a caller
+  sends a non-JWT <code>Authorization: Bearer</code> value, the resource server rejects it with 401 before the
+  controller runs. That is why the Alertmanager webhook and the MCP/developer-API paths have their own
+  <code>@Order(1)</code> chains without <code>oauth2ResourceServer</code>.
+</div>
+
+<h2>Environments</h2>
+<p>
+  Deployed with a domain: API <code>https://api.&lt;your-domain&gt;</code>, Keycloak <code>https://auth.&lt;your-domain&gt;</code>.
+  Local development runs core with Keycloak on <code>localhost:8180</code> as the primary issuer (local-dev only;
+  never a public URL) plus the additional-issuer entry for the public host. Clients must send tokens minted by
+  the same environment they call.
+</p>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/security/src/main/java/com/agenticai/core/security/SecurityConfig.java</code> — decoder, issuers, <code>azp</code> check, filter chains, every matcher above.</li>
+  <li><code>core/security/.../GranularPermissionConverter.java</code>, <code>KeycloakRoleConverter.java</code> — <code>ROLE_</code> / <code>PERM_</code> authority mapping.</li>
+  <li><code>core/security/.../TenantContextFilter.java</code> — <code>tenant_id</code> claim, 403 shapes.</li>
+  <li><code>core/agents/.../AgentController.java</code>, <code>agui/AgUiRunController.java</code>, <code>core/workflow/.../WorkflowController.java</code> — resource-level <code>requireAccess</code>.</li>
+  <li><code>core/tenancy/.../demo/DemoSessionController.java</code> — <code>X-Demo-Token</code> header constant.</li>
+  <li><code>Agentic-AI-Platform.postman_collection.json</code> — token request shapes.</li>
+  <li><a href="../decisions/adr-0005-dual-issuer-keycloak.html">ADR-0005</a>, <a href="../architecture/identity-access.html">Identity &amp; Access</a>, <a href="../security/security-architecture.html">Security Architecture</a>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

@@ -1,0 +1,52 @@
+{
+  "format": "vegaduta.agent-bundle/1",
+  "title": "Daily Briefing",
+  "summary": "Give it a few links and topics once; each morning ask 'brief me' and get a one-page summary of what changed, with sources.",
+  "category": "Productivity",
+  "tags": [
+    "use-case:briefing",
+    "tool:web",
+    "tool:memory"
+  ],
+  "agent": {
+    "systemPrompt": "You write a short daily briefing.\n\nFirst time: ask the user for up to five links or topics (for a topic with no link, use web_search to find one) and store them with remember_fact, one per fact.\nEach time the user says 'brief me': recall the sources with recall_related_facts, read each link with fetch_web_page, then produce ONE page: three headline bullets, then one short paragraph per source, each ending with its link. Say plainly when a page could not be read. Do not pad. Offer to save it with generate_document.",
+    "providerName": "PLATFORM_HOSTED",
+    "model": null,
+    "maxTokens": 1536,
+    "temperature": 0.2,
+    "topP": 0.9,
+    "tuningMode": "SIMPLE",
+    "reasoningDepth": "BALANCED",
+    "autonomyTier": "SUPERVISED",
+    "experienceMode": null,
+    "knowledgeBaseEnabled": false,
+    "sarvamEnabled": false,
+    "e2bEnabled": false,
+    "codeWorkspaceEnabled": false,
+    "responseCachingEnabled": false,
+    "semanticResponseCachingEnabled": false,
+    "shareMemoryWithTenant": false,
+    "costRoutingEnabled": false,
+    "economyProviderName": null,
+    "economyModel": null,
+    "fallbackProviderName": "PLATFORM_HOSTED",
+    "fallbackModel": null,
+    "voiceModelProvider": null,
+    "voiceModel": null,
+    "videoModelProvider": null,
+    "videoModel": null,
+    "allowedToolNames": [
+      "web_search",
+      "fetch_web_page",
+      "remember_fact",
+      "recall_related_facts",
+      "generate_document",
+      "request_human"
+    ],
+    "enabledGuardrails": [
+      "pii",
+      "jailbreak"
+    ],
+    "allowedKnowledgeCollectionIds": []
+  }
+}

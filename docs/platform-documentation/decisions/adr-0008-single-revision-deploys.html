@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0008 Single-Revision Deploys — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0008-single-revision-deploys.html" data-doc="VD-ADR-008" data-status="verified" data-updated="2026-09-30" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0008 Single-Revision Deploys</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0008: Immutable, verified, reversible deploys</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span> (principles) · <span class="badge badge-staging">superseded</span> (hosted pipeline)</dd>
+  <dt>Decided</dt><dd>2026, for the original hosted deployment</dd>
+  <dt>Applies to this repository</dt><dd>The principles do; the hosted single-revision deploy pipeline is not part of this repository. Releases publish signed images and Helm charts to GHCR and you deploy them (see <a href="../deployment/ci-cd-pipeline.html">CI/CD Pipelines</a>).</dd>
+</dl>
+
+<h2>Context</h2>
+<p>
+  The hosted deployment ran each service as a single active revision on a managed
+  container platform. An early outage lasted about 40 minutes because no previous
+  image existed to roll back to. The rules below came out of that.
+</p>
+
+<h2>Decision</h2>
+<ul>
+  <li><strong>Immutable versions.</strong> Deploy a pinned version, never <code>latest</code>. A re-push of the same tag does not reliably roll anything.</li>
+  <li><strong>Core first, frontends after.</strong> Deploy and verify the API before the consoles that call it; stop on failure.</li>
+  <li><strong>Verify health, then continue.</strong> A deploy is done when the new instance is healthy, not when the command returns.</li>
+  <li><strong>Keep the previous version to roll back to.</strong> Record what was running before every update.</li>
+</ul>
+
+<h2>How this maps to self-hosting</h2>
+<table>
+  <thead><tr><th>Principle</th><th>Compose</th><th>Helm</th></tr></thead>
+  <tbody>
+    <tr><td>Immutable versions</td><td>Pin <code>VEGADUTA_VERSION</code> in <code>deploy/compose/.env</code></td><td><code>--version &lt;chart&gt;</code>; image tags come from the chart</td></tr>
+    <tr><td>Verify health</td><td><code>scripts/vegaduta upgrade</code> pulls, recreates and waits for every service to be healthy</td><td>Rolling update with <code>maxUnavailable: 0</code> (guarded); the migrate Job runs <code>pre-upgrade</code> and a failure rolls no pods</td></tr>
+    <tr><td>Roll back</td><td>Set the previous <code>VEGADUTA_VERSION</code> and run <code>upgrade</code> again. Database migrations are forward-only; restore from backup if one must be undone.</td><td><code>helm rollback</code> (same caveat for migrations)</td></tr>
+  </tbody>
+</table>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>deploy/README.md</code> (Upgrade), <code>deploy/helm/README.md</code> (Upgrade), <code>deploy/helm/charts/core/values.yaml</code> (<code>strategy</code>).</li>
+  <li><a href="../deployment/rollback-recovery.html">Rollback &amp; Recovery</a>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+</body></html>

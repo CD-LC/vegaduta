@@ -1,0 +1,74 @@
+/* ==========================================================================
+ * Light-mode fill fix, batched (theme contrast audit follow-up). Dozens of
+ * card/chip/tab/input surfaces across Agents+Playground/Knowledge/Tools/
+ * Channels/Maintenance use a low-opacity WHITE overlay (rgba(255,255,255,
+ * 0.0X)) as their fill - that only lightens a DARK backdrop. Layered on
+ * light mode's near-white --ax-panel, it does nothing, so these surfaces
+ * render as flat, boundary-less smudges instead of visible cards/inputs
+ * (text inside stays legible since it already follows --ax-text/--ax-mid/
+ * --ax-dim - this is a "looks broken" bug, not an invisible-text one).
+ * Higher specificity than the base rule (:root[data-mode="light"] .class
+ * beats .class alone) so source order doesn't matter here. Same fix shape
+ * already used for .ax-wf-canvas-zone/.ax-kb-card/.ax-qt-plan/.ax-qt-trace
+ * elsewhere in this file - swap the white tint for the dark-on-light
+ * --ax-panel/--ax-panel2 tokens (or an equivalent literal where a stronger
+ * fill is needed for a functional element like a toggle track).
+ * ========================================================================== */
+
+:root[data-mode="light"] .ax-agent-tool-card,
+:root[data-mode="light"] .ax-pg-input-row,
+:root[data-mode="light"] .ax-pg-attach-chip,
+:root[data-mode="light"] .ax-kb-result-card,
+:root[data-mode="light"] .ax-tl-tab,
+:root[data-mode="light"] .ax-tl-card-disabled,
+:root[data-mode="light"] .ax-tl-card-add,
+:root[data-mode="light"] .ax-tl-inspector-card,
+:root[data-mode="light"] .ax-tl-add-section,
+:root[data-mode="light"] .ax-tl-catalog-card,
+:root[data-mode="light"] .ax-tl-form-input,
+:root[data-mode="light"] .ax-ch-method-tab,
+:root[data-mode="light"] .ax-ch-qr-placeholder,
+:root[data-mode="light"] .ax-ch-route-box,
+:root[data-mode="light"] .ax-ch-card-not-connected,
+:root[data-mode="light"] .ax-mnt-table-head,
+:root[data-mode="light"] .ax-mnt-table-footer {
+  background: var(--ax-panel2);
+}
+
+:root[data-mode="light"] .ax-agent-tool-icon,
+:root[data-mode="light"] .ax-tool-selector-row:hover,
+:root[data-mode="light"] .ax-pg-bubble-agent {
+  background: var(--ax-panel);
+}
+
+:root[data-mode="light"] .ax-mnt-user-row:hover,
+:root[data-mode="light"] .ax-mnt-appr-card:hover {
+  background: var(--ax-panel2);
+}
+
+/* Toggle OFF track: a functional control, needs to stay visibly "off"
+ * against the panel behind it rather than fade to near-nothing. This
+ * selector already wins the cascade (0,3,0 beats console.css's plain
+ * `.ax-toggle`) - the earlier 0.16 opacity itself was the problem (color
+ * audit follow-up): composited over a white/near-white panel it measured
+ * well under the 3:1 non-text contrast minimum. 0.5 clears it. */
+:root[data-mode="light"] .ax-toggle {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+/* Score bar track (Knowledge search results): same reasoning as the toggle
+ * above - it's a progress track, needs to read as a track in both modes. */
+:root[data-mode="light"] .ax-kb-score-bar {
+  background: rgba(15, 23, 42, 0.12);
+}
+
+/* "Add" card's dashed border was a low-opacity white line, invisible on a
+ * light backdrop - a dashed line is the whole visual cue for "click to add
+ * a new one" here. */
+:root[data-mode="light"] .ax-tl-card-add {
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+:root[data-mode="light"] .ax-tl-card-add-icon {
+  border-color: rgba(15, 23, 42, 0.22);
+}

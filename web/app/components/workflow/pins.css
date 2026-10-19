@@ -1,0 +1,154 @@
+/* Data pinning UI: node badge, drawer banner, "Pin output" buttons, the
+ * redacted-data confirmation, the persistent draft-run chip. Every colour is a
+ * theme variable (same token chain as step-test.css), so light and dark follow
+ * the app theme; pinned = the success hue with a dashed edge so it never reads
+ * as a plain green "ran for real". */
+
+.wfx-pin-badge,
+.wfx-pin-banner,
+.wfx-pin-hint,
+.wfx-pin-out,
+.wfx-pin-draftchip,
+.wfx-pin-count,
+.wfx-pin-editor {
+  --pin-text: var(--text-primary, var(--ax-text));
+  --pin-mid: var(--text-secondary, var(--ax-mid));
+  --pin-muted: var(--text-muted, var(--ax-dim));
+  --pin-border: var(--ax-border2, var(--surface-border-strong));
+  --pin-ok: var(--ax-green, var(--hud-ok));
+  --pin-warn: var(--ax-amber, var(--hud-warn));
+  --pin-err: var(--ax-red, var(--hud-magenta));
+  --pin-focus: var(--ax-accent2, var(--ax-cyan, Highlight));
+  --pin-accent-text: var(--accent-text, var(--pin-text));
+}
+
+/* ---- node card badge ---- */
+.wfx-pin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-left: auto;
+  padding: 2px;
+  color: var(--pin-ok);
+}
+.wfx-pin-badge + .wfx-glyph { margin-left: 4px; }
+
+/* Run-state chip on a node a pin answered for. */
+.wfx-chip[data-pinned="true"] {
+  border-style: dashed;
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--wfx-ok, var(--pin-ok)) 55%, transparent);
+}
+
+/* ---- drawer banner ---- */
+.wfx-pin-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px dashed color-mix(in srgb, var(--pin-ok) 55%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--pin-ok) 8%, transparent);
+  color: var(--pin-text);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.wfx-pin-banner-head { display: flex; align-items: center; gap: 6px; color: var(--pin-ok); }
+.wfx-pin-banner-head strong { color: var(--pin-text); font-size: 13px; }
+.wfx-pin-banner-text { margin: 0; color: var(--pin-mid); }
+.wfx-pin-banner-meta { margin: 0; color: var(--pin-muted); }
+.wfx-pin-banner-note { margin: 0; color: var(--pin-mid); }
+.wfx-pin-banner-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+
+.wfx-pin-hint { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; }
+
+/* ---- links / buttons ---- */
+.wfx-pin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--pin-accent-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.wfx-pin-link:hover:not(:disabled) { text-decoration-thickness: 2px; }
+.wfx-pin-link:disabled { cursor: default; opacity: 0.65; text-decoration: none; }
+.wfx-pin-link-danger { color: var(--pin-err); }
+.wfx-pin-link-strong { color: var(--pin-text); }
+.wfx-pin-link:focus-visible,
+.wfx-pin-editor :focus-visible { outline: 2px solid var(--pin-focus); outline-offset: 2px; }
+
+/* ---- "Pin output" + confirmation ---- */
+.wfx-pin-out { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.wfx-pin-confirm {
+  max-width: 320px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--pin-warn) 55%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--pin-warn) 10%, var(--surface-card, var(--hud-panel, Canvas)));
+  color: var(--pin-text);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.wfx-pin-confirm-title { margin: 0 0 2px; font-weight: 700; }
+.wfx-pin-confirm-text { margin: 0 0 8px; color: var(--pin-mid); }
+.wfx-pin-confirm-actions { display: flex; justify-content: flex-end; gap: 14px; }
+
+/* In the flight recorder the confirmation floats above the bar so the dock does not clip it. */
+.wfx-pin-out-float { position: relative; }
+.wfx-pin-out-float .wfx-pin-confirm {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 30;
+  width: 300px;
+}
+
+/* ---- run-level indicators ---- */
+.wfx-pin-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--pin-ok);
+  font-size: 12px;
+}
+.wfx-pin-runbar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 8;
+  transform: translateX(-50%);
+  pointer-events: none;
+  max-width: calc(100% - 24px);
+}
+.wfx-pin-draftchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px dashed color-mix(in srgb, var(--pin-ok) 65%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pin-ok) 14%, var(--surface-card, var(--hud-panel, Canvas)));
+  color: var(--pin-text);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.wfx-pin-draftchip svg { color: var(--pin-ok); }
+.wfx-pin-draftchip-count { color: var(--pin-mid); font-weight: 500; }
+
+/* ---- inspector status tone: pinned reads as success-like ---- */
+.wfx-ri [data-status="pinned"], .wfx-ri[data-status="pinned"] { --ri-tone: var(--ri-ok); }
+
+@media (prefers-reduced-motion: reduce) {
+  .wfx-pin-link { transition: none; }
+}

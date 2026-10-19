@@ -1,0 +1,119 @@
+/* ---- 9. Auth pages: /login, /signup (same paper + glass language) --------- */
+.auth-main {
+  background: var(--surface-page);
+}
+
+:root:not([data-mode="dark"]) .auth-main {
+  background:
+    radial-gradient(46% 38% at 22% 8%, color-mix(in oklab, var(--accent-500) 18%, transparent) 0%, transparent 70%),
+    radial-gradient(36% 32% at 88% 92%, color-mix(in oklab, #1b9fbb 10%, transparent) 0%, transparent 72%),
+    radial-gradient(30% 26% at 78% 18%, color-mix(in oklab, #f97316 7%, transparent) 0%, transparent 74%),
+    var(--surface-page);
+}
+
+/* Brand panel: quiet paper column, big tight headline, no gradient tint */
+:root:not([data-mode="dark"]) .auth-panel {
+  background: rgba(255, 255, 255, 0.28);
+  border-right-color: rgba(19, 19, 24, 0.06);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+
+.auth-panel h1 {
+  font-size: clamp(2rem, 1.4rem + 1.8vw, 2.875rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+.auth-panel li {
+  font-size: 0.9375rem;
+}
+
+/* The form card: one glass slab, larger radius, pill fields */
+:root:not([data-mode="dark"]) .auth-card {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 24px;
+  box-shadow:
+    var(--glass-edge),
+    0 34px 90px -34px rgba(19, 19, 24, 0.3);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+}
+
+.auth-card input:not([type="checkbox"]):not([type="radio"]) {
+  height: 2.75rem;
+  border-radius: 999px;
+  padding-inline: 1rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(19, 19, 24, 0.1);
+  box-shadow: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+/* icon-prefixed fields keep room for the glyph (Tailwind pl-9 would lose to
+   the unlayered padding above) */
+.auth-card .relative > input.pl-9 {
+  padding-inline-start: 2.5rem;
+}
+
+.auth-card input:focus-visible {
+  outline: none;
+  border-color: var(--accent-600);
+  box-shadow:
+    0 0 0 2px var(--surface-page),
+    0 0 0 4px var(--accent-600);
+}
+
+:root[data-mode="dark"] .auth-card input:focus-visible {
+  border-color: var(--accent-500);
+  box-shadow:
+    0 0 0 2px var(--surface-page),
+    0 0 0 4px var(--accent-500);
+}
+
+.auth-card [data-slot="button"],
+.auth-card button {
+  border-radius: 999px;
+}
+
+.auth-card [data-slot="button"][class*="w-full"] {
+  height: 2.875rem;
+  font-size: 0.9375rem;
+}
+
+/* Sign-in / Sign-up switcher rides the same pill language */
+.auth-card [role="tablist"],
+.auth-card .bg-secondary\/40 {
+  background: rgba(19, 19, 24, 0.05);
+  border-color: transparent;
+}
+
+/* ---- 10. Console (post-auth) glass ---------------------------------------- */
+/* Every ShadCN Card in the console becomes a frosted slab (the auth card has
+   its own, slightly heavier recipe above). Popovers / menus stay opaque via
+   --surface-raised. */
+:root:not([data-mode="dark"]) [data-slot="card"]:not(.auth-card) {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    var(--glass-edge),
+    0 14px 40px -24px rgba(19, 19, 24, 0.2);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+:root:not([data-mode="dark"]) .app-aurora {
+  opacity: 0.85;
+}
+
+/* Console header: same glass as the marketing nav; it is already sticky. */
+:root:not([data-mode="dark"]) header.sticky {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-bottom-color: rgba(19, 19, 24, 0.06);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+}

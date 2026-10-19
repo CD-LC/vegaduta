@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Threat Model &amp; Known Exposures — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="security" data-page="threat-model.html" data-doc="VD-SEC-004" data-status="unverified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="security-architecture.html">Security &amp; Compliance</a><span class="sep">/</span>Threat Model &amp; Known Exposures</div>
+<div class="doc-meta" data-auto></div>
+<h1>Threat Model &amp; Known Exposures</h1>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Status: unverified (point-in-time)</div>
+  Threat classes and mitigations below are grounded in the code and in internal security reviews (July–September 2026, not published). "Open" or "fixed" describes the code at the time of writing, not any particular deployment; confirm against your own running system before relying on any row. This page deliberately records classes and statuses, not exploit steps. Report new vulnerabilities as described in <code>SECURITY.md</code>.
+</div>
+
+<dl class="props">
+  <dt>Audience</dt><dd>Engineers and operators deploying or contributing to the platform</dd>
+  <dt>Related</dt><dd><a href="security-architecture.html">Security Architecture</a>, <a href="secrets-management.html">Secrets</a>, <a href="compliance-posture.html">Compliance Posture</a>, <a href="../operations/observability.html">Observability</a></dd>
+</dl>
+
+<h2>1. Assets</h2>
+<ul>
+  <li>Tenant data in per-tenant Postgres schemas (conversations, knowledge, memories, agent definitions).</li>
+  <li>Tenant-supplied credentials (LLM provider keys, channel tokens, OAuth refresh tokens) encrypted under <code>APP_ENCRYPTION_KEY</code>; the key itself and wherever it is stored (<code>deploy/compose/.env</code>, a Kubernetes Secret).</li>
+  <li>Identity: the Keycloak realm, its signing keys, the <code>tenant_id</code> claim that selects a schema.</li>
+  <li>Money paths: LLM spend on platform-pool keys; for operators who enable billing, payment webhooks and plan entitlements.</li>
+  <li>Availability: the single tenant database and the core API (do not power-cycle a live stack to diagnose it; see <a href="../deployment/rollback-recovery.html">Rollback &amp; Recovery</a>).</li>
+</ul>
+
+<h2>2. Trust boundaries</h2>
+<pre class="mermaid">
+flowchart TB
+  subgraph Internet
+    A1[Authenticated tenant user]
+    A2[Anonymous: demo, share link, webhook sender, paired device]
+    A3[Hostile MCP server or web page content]
+  end
+  subgraph Edge
+    CF[Caddy / Ingress / optional CDN]
+  end
+  subgraph Runtime[Compose or Kubernetes]
+    CORE[core: JWT + tenant context]
+    KC[Keycloak]
+    SBX[mcp-stdio-runner / tool-sandbox]
+  end
+  subgraph Data
+    PG[(Postgres schema per tenant)]
+    KV[(.env / Kubernetes Secret)]
+  end
+  A1 --> CF --> CORE
+  A2 --> CF
+  CORE --> PG
+  KV -. env .-> CORE
+  CORE --> SBX
+  CORE -->|outbound fetch, MCP connect| A3
+  A1 --> KC
+</pre>
+<p>Boundaries that matter most: internet to core (JWT, or a per-surface credential for anonymous paths); tenant to tenant (schema selection from a claim); core to sandbox (untrusted code); core to outbound network (SSRF); operator or automation tooling to the host or cluster.</p>
+
+<h2>3. Threat classes and mitigations in place</h2>
+<table>
+  <thead><tr><th>Threat class</th><th>Mitigation in code or config</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr><td>Forged or foreign-client tokens</td><td>Signature via JWKS; issuer set; <code>azp</code> allowlist. A live DAST confirmed <code>alg:none</code>, algorithm-confusion and bad-signature tokens rejected.</td><td><code>SecurityConfig.java</code>; internal DAST review</td></tr>
+    <tr><td>Cross-tenant access</td><td>Schema-per-tenant from validated claim; claim-less tokens 403; sanitized schema names; no caller-supplied tenant ids</td><td><code>TenantContextFilter.java</code>, <code>SchemaNameSanitizer.java</code>, internal SAST review</td></tr>
+    <tr><td>Privilege misuse within a tenant</td><td><code>PERM_*</code> matchers; denied attempts audited</td><td><code>SecurityConfig.java</code></td></tr>
+    <tr><td>Anonymous-surface abuse</td><td>Demo tokens, per-IP limits and caps; share-link rate limits; signup limiter; device-claim limiter; Redis limiters with local fallback</td><td><code>SecurityConfig.java</code>, <code>LocalRateLimitFallback.java</code></td></tr>
+    <tr><td>Webhook spoofing and replay</td><td>Provider signatures, constant-time compare, Slack replay window, billing dedupe ledger</td><td>Webhook controllers; <code>V250__billing_webhook_event.sql</code></td></tr>
+    <tr><td>Untrusted code execution</td><td>Interpreter allowlist plus inline-eval flag rejection; separate sandbox container with seccomp, cap-drop, no secrets</td><td><code>McpStdioCommandGuard.java</code>; sandboxing design §8-§9</td></tr>
+    <tr><td>SSRF from tenant-supplied URLs</td><td>Denylist, IPv6-mapped decode, trailing-dot normalization, resolve-time re-check (<code>checkResolved</code>); guards on demo/OpenAPI fetchers</td><td><code>McpRemoteUrlGuard.java</code></td></tr>
+    <tr><td>Prompt injection via tool output</td><td>Guardrail seam on every tool result; MCP output sanitizer strips invisible/bidi/tag characters. Described in source as partial, not a solution.</td><td><code>GuardrailService.java</code></td></tr>
+    <tr><td>Credential theft at rest</td><td>AES-256-GCM, fail-fast key validation, dual-key rotation</td><td><code>EncryptionService.java</code></td></tr>
+    <tr><td>Public metrics/actuator disclosure</td><td><code>ActuatorEdgeGuardFilter</code> 404s forwarded requests to non-public actuator paths</td><td><code>ActuatorEdgeGuardFilter.java</code></td></tr>
+    <tr><td>Operator or automation power-cycling a live deployment</td><td>Procedural rule (no host reset, stop or delete without an explicit human decision); give CI and automated agents a least-privilege identity without destructive permissions</td><td><a href="../deployment/index.html">Deployment Guide</a></td></tr>
+  </tbody>
+</table>
+
+<h2>4. Known exposures and open items</h2>
+<p>Status vocabulary: <strong>open</strong> = not shown fixed in the code; <strong>fixed in code</strong> = the code change is visible; <strong>deployment</strong> = depends on how you deploy, not on the code.</p>
+<table>
+  <thead><tr><th>#</th><th>Class</th><th>Status</th><th>Recorded in</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>Public operational endpoints.</strong> Core 404s proxied requests to non-public actuator paths (<code>ActuatorEdgeGuardFilter</code>), so metrics stay private as long as core's port is only reached through a proxy. The Compose Caddyfile 404s the Keycloak admin console and master realm on <code>auth.</code>; with another edge (Helm Ingress, CDN) you must do the same. An edge rule for <code>/actuator/*</code> (exempting <code>/actuator/health</code>) is defence in depth.</td><td>guard <strong>fixed in code</strong>; edge rules are <strong>deployment</strong></td><td><a href="../operations/observability.html">Observability</a>; <code>deploy/caddy/Caddyfile</code>; <code>ActuatorEdgeGuardFilter.java</code></td></tr>
+    <tr><td>2</td><td><strong>Keycloak run mode.</strong> Compose runs <code>start --import-realm</code> by default; <code>KEYCLOAK_START_COMMAND=start-dev</code> exists for local use and must not be used on a server.</td><td><strong>deployment</strong></td><td><code>deploy/compose/docker-compose.yml</code></td></tr>
+    <tr><td>3</td><td><strong>Tenant-claim integrity.</strong> If the realm's unmanaged-attribute policy is <code>ENABLED</code>, a user can edit their own <code>tenant_id</code>. It must be <code>ADMIN_EDIT</code>; the realm reconcile (<code>deploy/keycloak/reconcile-keycloak.sh</code>, run by <code>scripts/vegaduta up</code>; the Helm reconcile Job) sets it, but a live realm must be checked.</td><td><strong>deployment</strong>; high priority to verify</td><td><a href="../deployment/keycloak-provisioning.html">Keycloak Provisioning</a></td></tr>
+    <tr><td>4</td><td><strong>Missing tenant context falls back to the shared <code>public</code> schema</strong> (<code>app.tenancy.fail-on-missing-context</code> defaults false; the code comment says it stays false until a soak proves the counter empty).</td><td>open by design; flip pending a soak with an empty counter</td><td><code>core/tenancy/.../TenantSchemaResolver.java</code></td></tr>
+    <tr><td>5</td><td><strong>Anonymous-by-prefix routes.</strong> Path prefixes such as <code>/api/demo/**</code> are open by construction; any new endpoint under them is unauthenticated. Two <code>permitAll()</code> matchers (<code>/scim/v2/**</code>, <code>/api/tenant/comp-grant</code>) rely on controller-level checks I did not trace.</td><td>design risk; two items untraced</td><td><code>SecurityConfig.java</code></td></tr>
+    <tr><td>6</td><td><strong>MCP remote connect: DNS rebinding and numeric-IP encodings</strong> were the top remaining remote-side risk after the first round of fixes; a resolve-time check is now present in the guard, its pinning completeness is not re-verified. Redirect re-guarding, pre-buffer result-size cap, static-tool sanitization, readiness-cache window, legacy env leak on SDK downgrade, and tool-name shadowing are follow-ups.</td><td>partly <strong>fixed in code</strong>; remainder open</td><td><code>McpRemoteUrlGuard.java</code></td></tr>
+    <tr><td>7</td><td><strong>Untrusted-tenant STDIO MCP.</strong> Running published packages via allowed launchers is by design; the safe posture is trusted, staff-reviewed registration only. The isolation container exists and has been verified on a dev host; the feature ships flag-off.</td><td>open posture constraint</td><td><code>docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md</code> §8-§9; <a href="../decisions/adr-0009-untrusted-code-sandboxing.html">ADR-0009</a></td></tr>
+    <tr><td>8</td><td><strong>Code-intel execution host isolation.</strong> A data-governance review found directory-per-tenant separation but commands run as host processes without a container mode implemented.</td><td>open as of that review</td><td><code>services/code-intel/</code></td></tr>
+    <tr><td>9</td><td><strong>Browser security headers on front-end origins.</strong> A live DAST once found none on the console origins (only the API had them); <code>next.config</code> now sets headers and the Compose Caddyfile adds HSTS, <code>nosniff</code> and a referrer policy.</td><td>re-check your deployment</td><td><code>web/next.config.*</code>, <code>web-admin/next.config.*</code></td></tr>
+    <tr><td>10</td><td><strong>Weak database password fallback.</strong> Config comments now say the fallback was removed for production paths.</td><td>appears <strong>fixed in code</strong></td><td><code>application.yml</code> comments</td></tr>
+    <tr><td>11</td><td><strong>Secrets posture.</strong> Secrets sit in a plaintext <code>deploy/compose/.env</code> on Compose hosts; envelope/KMS encryption is not wired; no rotation schedule.</td><td>open</td><td><a href="secrets-management.html">Secrets</a></td></tr>
+    <tr><td>12</td><td><strong>Encryption-key drift.</strong> A regenerated or mistyped <code>APP_ENCRYPTION_KEY</code> (new host, restore, second stack on the same database) makes stored credentials undecryptable.</td><td>procedural risk (<strong>deployment</strong>)</td><td><a href="../decisions/adr-0010-secret-injection.html">ADR-0010</a></td></tr>
+    <tr><td>13</td><td><strong>Security scanning.</strong> CodeQL runs on pull requests, pushes to <code>main</code> and weekly; static gates, gitleaks and dependency review run inside CI; OpenSSF Scorecard weekly.</td><td><strong>fixed in CI</strong></td><td><code>.github/workflows/ci.yml</code>, <code>codeql.yml</code>, <code>scorecard.yml</code></td></tr>
+    <tr><td>14</td><td><strong>Operator identity not separated from automation identity.</strong> Give CI and automated agents an identity without destructive permissions on your hosts or cluster.</td><td><strong>deployment</strong></td><td>—</td></tr>
+    <tr><td>15</td><td><strong>Edge configuration</strong> (HTTPS enforcement, minimum TLS, WAF and rate-limit rules, email DMARC policy) and plaintext service-to-service traffic inside the Compose networks or cluster must be considered per deployment.</td><td><strong>deployment</strong></td><td><code>deploy/caddy/Caddyfile</code>, Helm Ingress values</td></tr>
+    <tr><td>16</td><td><strong>No dedicated incident-response plan, vendor review or DR drill</strong> ships with the project.</td><td>open</td><td><a href="compliance-posture.html">Compliance Posture</a> §3</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-note">
+  <div class="callout-title">How to keep this page honest</div>
+  When an item is closed, change its status and cite the commit, not the intent. When a new review lands, add it to the evidence list and its date to the row. Prefer editing a row over deleting it, so the history of what was once open stays readable.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/security/src/main/java/com/agenticai/core/security/SecurityConfig.java</code>, <code>ActuatorEdgeGuardFilter.java</code>, <code>TenantContextFilter.java</code>.</li>
+  <li><code>core/tenancy/src/main/java/com/agenticai/core/tenancy/TenantSchemaResolver.java</code>.</li>
+  <li><code>docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md</code>, <code>core/mcp/.../McpRemoteUrlGuard.java</code>, <code>McpStdioCommandGuard.java</code>.</li>
+  <li>Internal security reviews (MCP pentest, core SAST, live DAST, data-governance review; July 2026, not published).</li>
+  <li><code>.github/workflows/codeql.yml</code>, <code>static-gates.yml</code>.</li>
+  <li><code>deploy/caddy/Caddyfile</code>, <code>deploy/compose/docker-compose.yml</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

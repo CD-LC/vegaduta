@@ -1,0 +1,21 @@
+# Allowlist for scripts/ci/openapi-breaking.mjs (the breaking-change gate on docs/api/openapi.json).
+#
+# Format: "<finding key>  # reason". The key is exactly what the script prints for a finding,
+# e.g. "operation-removed DELETE /api/agents/{id}" or "request-property-required schemas.AgentRequest.name".
+# The reason is MANDATORY: say why no client breaks, or which clients were told and how
+# (CHANGELOG entry, migration note). An entry without one fails the gate.
+#
+# An entry is only needed while the change is unmerged: once it is on the base branch the merge base
+# moves past it and the entry matches nothing (the script warns). Remove such entries.
+response-body-removed DELETE /api/studio-apps/{appId} response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed DELETE /api/studio-apps/{appId}/domains/{domainId} response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed DELETE /api/studio-apps/{appId}/users/{userId} response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/demo/session/event response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/demo/share/{shareId}/report response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/public/apps/{slug}/auth/logout response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/share/agents/{shareId}/report response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/share/workflows/{shareId}/report response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/studio-apps/{appId}/disable response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/studio-apps/{appId}/enable response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/studio-apps/{appId}/users/{userId}/disable response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent
+response-body-removed POST /api/studio-apps/{appId}/users/{userId}/enable response 200 application/json  # doc correction (640599188): the handler already answers 204 with no body; the old spec documented a 200 body it never sent

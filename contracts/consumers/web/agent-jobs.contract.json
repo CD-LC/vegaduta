@@ -1,0 +1,50 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-agent-jobs",
+      "method": "GET",
+      "path": "/api/agent-jobs",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].agentName",
+          "$[*].approvalDeadlineAt",
+          "$[*].createdAt",
+          "$[*].errorCode",
+          "$[*].finishedAt",
+          "$[*].goalPreview",
+          "$[*].id",
+          "$[*].parkedAt",
+          "$[*].progressNote",
+          "$[*].startedAt",
+          "$[*].status"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agent-jobs-counts",
+      "method": "GET",
+      "path": "/api/agent-jobs/counts",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.asOf",
+          "$.awaitingApproval",
+          "$.cancelledInWindow",
+          "$.failedInWindow",
+          "$.live",
+          "$.queued",
+          "$.running",
+          "$.succeededInWindow",
+          "$.tenantWide",
+          "$.window",
+          "$.windowStart"
+        ]
+      }
+    }
+  ]
+}

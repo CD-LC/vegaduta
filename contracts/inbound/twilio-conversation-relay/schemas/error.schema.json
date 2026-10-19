@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vegaduta.internal/contracts/inbound/twilio-conversation-relay/error.schema.json",
+  "title": "Twilio Conversation Relay - error message",
+  "description": "Source: VoiceRelayWebSocketHandler.java#handleTextMessage, read directly (2026-07-19). case \"error\" -> log.warn(..., node.path(\"description\").asText(\"\")) - logged only, no state transition, no reply sent. Included for corpus completeness (the replay test asserts this doesn't throw), not because the handler does anything interesting with it.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "error" },
+    "description": {
+      "type": "string",
+      "description": "Free text. Missing/blank defaults to empty string via asText(\"\") - not a failure mode."
+    }
+  },
+  "required": ["type"],
+  "additionalProperties": true
+}

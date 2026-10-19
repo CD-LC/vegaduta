@@ -1,0 +1,167 @@
+# Mutating endpoints deliberately left on SecurityConfig's anyRequest().authenticated() (any
+# authenticated tenant member, no @PreAuthorize) - see AuthorizationCoverageTest. Each was
+# reviewed in the authorization review of 2026-10 and carries its category and evidence:
+#   HANDLER  the controller or service checks access (owner, EDITOR/RUNNER/VIEWER grant, ...)
+#   MEMBER   meant for any member: the caller's own data, or a metered member feature
+#   FIX      a weakness the review found in the handler's own check, still to be fixed;
+#            the number of FIX lines may only go down (MAX_FIX_ENTRIES)
+# Prefer a SecurityConfig rule or @PreAuthorize to a new line here. A new line needs the same
+# review: say what checks access, and where.
+DELETE /api/agents/{agentId}  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+DELETE /api/agents/{agentId}/memories/{memoryId}  # HANDLER: AgentMemoryController: the caller's own memories with VIEWER, any subject's with EDITOR (review step 8)
+DELETE /api/agents/{agentId}/quality/datasets/{datasetId}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
+DELETE /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
+DELETE /api/agents/{agentId}/quality/gate  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
+DELETE /api/agents/{agentId}/quality/simulations/personas/{key}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
+DELETE /api/agents/{agentId}/result-schema  # HANDLER: AgentJobObservabilityController (requireAccess EDITOR)
+DELETE /api/agents/{agentId}/share  # HANDLER: AgentShareOwnerController -> AgentShareService requireOwnerAccess (ResourceAccessService)
+DELETE /api/channels/google/personal/connection  # MEMBER: removes the caller's own Google connection (GoogleOAuthService, scoped to the caller's subject)
+DELETE /api/secrets/{id}  # HANDLER: SecretVaultService requireCanWrite + SecretVaultService requireVisible
+DELETE /api/studio-projects/{id}  # HANDLER: StudioProjectService (canAdminister=OWNER; access())
+DELETE /api/studio-projects/{id}/comments/{commentId}  # HANDLER: StudioCollabService (canDeleteComment author/owner)
+DELETE /api/studio-projects/{id}/members/{subject}  # HANDLER: StudioCollabService (canManageMembers=OWNER)
+DELETE /api/templates/{id}/rating  # MEMBER: deletes the caller's own rating (CommunityTemplateService)
+DELETE /api/tutor/plans/{id}  # MEMBER: the caller's own study plans (StudyPlanController)
+DELETE /api/workflows/{workflowId}  # HANDLER: WorkflowService (requireAccess EDITOR)
+DELETE /api/workflows/{workflowId}/comments/{commentId}  # HANDLER: WorkflowCommentService (VIEWER + author only)
+DELETE /api/workflows/{workflowId}/nodes/{nodeId}/pin  # HANDLER: WorkflowPinService (EDITOR)
+DELETE /api/workflows/{workflowId}/share  # HANDLER: WorkflowShareService (requireOwnerAccess owner/admin)
+DELETE /api/{resourceKind:agents|workflows}/{resourceId}/grants/{grantId}  # HANDLER: ResourceAccessService.revoke requireOwnerOrAdmin (resource owner or tenant-admin)
+PATCH /api/agents/{agentId}/autonomy-tier  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/biometric-consent  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/capabilities/{capabilityKey}  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/collaborators  # HANDLER: AgentService EDITOR on this agent, RUNNER on each newly added collaborator (review step 8)
+PATCH /api/agents/{agentId}/cost-routing  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/edge-routing-policy  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/experience-mode  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/fallback  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/generation-params  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/knowledge-access  # HANDLER: AgentService EDITOR; collections have no per-user ACL and every member can already read and search them, so attaching one grants nothing new
+PATCH /api/agents/{agentId}/knowledge-base  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/model  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/prompt  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/reasoning-depth  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/response-caching  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/run-budget  # HANDLER: AgentService (EDITOR + assertEditable); VIEWER 404 first at AgentRunBudgetService
+PATCH /api/agents/{agentId}/semantic-response-caching  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/share-memory  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/text-model  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/tier  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/tool-access  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/tts-model  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/tuning-mode  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/video-model  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/voice-model  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/studio-projects/{id}/comments/{commentId}  # HANDLER: StudioCollabService (canResolveComment: any project member)
+PATCH /api/workflows/{workflowId}/comments/{commentId}  # HANDLER: WorkflowCommentService (VIEWER; author edit; author/EDITOR resolve)
+PATCH /api/workflows/{workflowId}/cost-routing  # HANDLER: WorkflowService (requireAccess EDITOR)
+PATCH /api/workflows/{workflowId}/execution-limits  # HANDLER: WorkflowService (requireAccess EDITOR)
+PATCH /api/workflows/{workflowId}/reasoning-depth  # HANDLER: WorkflowService (requireAccess EDITOR)
+PATCH /api/workflows/{workflowId}/step-caching  # HANDLER: WorkflowService (requireAccess EDITOR)
+PATCH /api/workflows/{workflowId}/tuning-mode  # HANDLER: WorkflowService (requireAccess EDITOR)
+POST /api/a2a  # HANDLER: A2aJsonRpcController requireAccess RUNNER; task get/cancel owner-scoped A2aTaskService
+POST /api/account/avatar  # MEMBER: the caller's own account (AccountController currentUser)
+POST /api/agents/{agentId}/a2a  # HANDLER: A2aJsonRpcController requireAccess RUNNER
+POST /api/agents/{agentId}/agui/run  # HANDLER: AgUiRunController requireAccess RUNNER
+POST /api/agents/{agentId}/chat  # HANDLER: AgentController requireAccess RUNNER
+POST /api/agents/{agentId}/chat/attachments  # HANDLER: ChatAttachmentService requireAccess RUNNER
+POST /api/agents/{agentId}/chat/sessions/{sessionId}/cancel  # HANDLER: AgentChatSessionController RUNNER; the cancel flag is keyed by the caller-scoped session id the turn watches (review step 8)
+POST /api/agents/{agentId}/chat/sessions/{sessionId}/rewind  # HANDLER: AgentChatSessionController (RUNNER) + scopedMemorySessionId keyed to principal
+POST /api/agents/{agentId}/experiments  # HANDLER: AgentExperimentService (EDITOR) + agent slot
+POST /api/agents/{agentId}/experiments/{experimentId}/start  # HANDLER: AgentExperimentService (EDITOR)
+POST /api/agents/{agentId}/experiments/{experimentId}/stop  # HANDLER: AgentExperimentService (EDITOR)
+POST /api/agents/{agentId}/improvements/generate  # HANDLER: AgentImprovementController -> AgentService.requireAccess EDITOR (review step 2)
+POST /api/agents/{agentId}/improvements/{suggestionId}/dismiss  # HANDLER: AgentImprovementController -> AgentService.requireAccess EDITOR (review step 2)
+POST /api/agents/{agentId}/jobs  # HANDLER: AgentJobService RUNNER plus the run meter
+POST /api/agents/{agentId}/jobs/{jobId}/cancel  # HANDLER: AgentJobService RUNNER for the job's requester, EDITOR on the agent for anyone else (review step 8)
+POST /api/agents/{agentId}/lab/runs  # HANDLER: AgentLabRunService RUNNER plus stored-plan caps
+POST /api/agents/{agentId}/lab/runs/{runId}/cancel  # HANDLER: AgentLabRunService (requestedBy must equal caller)
+POST /api/agents/{agentId}/prompt/versions/{versionId}/revert  # HANDLER: AgentService (EDITOR + assertEditable)
+POST /api/agents/{agentId}/quality/datasets  # HANDLER: QualityAgentAccessGate (EDITOR for non-GET)
+POST /api/agents/{agentId}/quality/datasets/seed-golden  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/datasets/seed-research  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/datasets/{datasetId}/cases  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/datasets/{datasetId}/cases/import  # HANDLER: QualityAgentAccessGate EDITOR; EvalDatasetService copies the recorded turn only when the caller had it (review step 8)
+POST /api/agents/{agentId}/quality/datasets/{datasetId}/runs  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/cancel  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/judge-calibration  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/simulations/sessions  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/quality/simulations/sessions/{sessionId}/cancel  # HANDLER: QualityAgentAccessGate (EDITOR)
+POST /api/agents/{agentId}/share  # HANDLER: AgentShareOwnerController (requireOwnedAgent: owner or admin)
+POST /api/agents/{agentId}/turns/feedback  # HANDLER: TurnFeedbackAccessGate RUNNER on the agent; FeedbackService rejects a recorded turn someone else had (review step 8)
+POST /api/agents/{agentId}/versions  # HANDLER: AgentVersionService (EDITOR + assertEditable)
+POST /api/agents/{agentId}/versions/rollback  # HANDLER: AgentVersionService (EDITOR + assertEditable)
+POST /api/agents/{agentId}/versions/{versionId}/promote  # HANDLER: AgentVersionService (EDITOR); gate force needs MANAGE_AGENTS
+POST /api/agents/{agentId}/versions/{versionId}/restore  # HANDLER: AgentVersionService (EDITOR + assertEditable)
+POST /api/approvals/{id}/approve  # FIX: tool-call and adminOnly approvals need PERM_MANAGE_APPROVALS and workflow-node approvals need RUNNER on the workflow (review step 8), but channel-send and agent.proposal approvals can still be decided by any member except the requester - who should decide them is a product decision
+POST /api/approvals/{id}/reject  # FIX: same as approve: channel-send and agent.proposal approvals can still be decided by any member except the requester
+POST /api/budget/top-up  # MEMBER: the caller's own prepaid budget (BudgetTopUpController requireUserKey = principal; review 2026-10-10)
+POST /api/budget/top-up/confirm  # MEMBER: confirms the caller's own top-up (BudgetTopUpController requireUserKey = principal)
+POST /api/completions/fim  # MEMBER: editor code completion for any member, entitlement- and per-user-budgeted (FimCompletionService)
+POST /api/documentgen/documents  # MEMBER: document generation for any member within the plan cap (DocumentGenerationQuotaService)
+POST /api/internal/abuse/verify-captcha  # MEMBER: verifies the caller's own CAPTCHA challenge and issues the caller's own challenge-pass token (FraudAnalysisController)
+POST /api/knowledge/search  # MEMBER: read-only search; collections have no per-user ACL and every member may read them (see PATCH .../knowledge-access); writes are PERM_MANAGE_AGENTS
+POST /api/mcp-apps/{appId}/tools/call  # HANDLER: McpAppsController requireAccess RUNNER on the app's agent
+POST /api/model-pricing  # MEMBER: read-only pricing calculation, no side effects
+POST /api/notifications/read-all  # MEMBER: marks the caller's visible notifications read (NotificationController)
+POST /api/notifications/{id}/read  # MEMBER: marks one notification read; no recipient check by design (NotificationService), changes only a read flag
+POST /api/onboarding  # MEMBER: a tenant-less signup creates its own tenant; OnboardingController rejects a caller that already has one
+POST /api/payments/mandates/preview  # MEMBER: computes a draft mandate; signs and stores nothing (granting is PERM_MANAGE_BILLING)
+POST /api/quick-task  # HANDLER: QuickTaskService resolves the agent with VIEWER, stricter than chat's RUNNER (RUNNER is the lowest level)
+POST /api/quick-task/preview  # MEMBER: dry run, executes nothing; lists tools of agents the caller can view (QuickTaskService)
+POST /api/quick-task/stream  # HANDLER: QuickTaskService resolves the agent with VIEWER, stricter than chat's RUNNER
+POST /api/quick-task/{taskId}/cancel  # HANDLER: QuickTaskController findForOwner(taskId, principal)
+POST /api/secrets  # HANDLER: SecretVaultController requireCanWriteScope (SecretVaultController)
+POST /api/studio-projects/{id}/comments  # HANDLER: StudioCollabService (access(): owner/member else 404)
+POST /api/studio-projects/{id}/members  # HANDLER: StudioCollabService (canManageMembers=OWNER)
+POST /api/templates/{id}/rating  # MEMBER: the caller's own vote; self-rating refused (CommunityTemplateService)
+POST /api/templates/{id}/validate  # HANDLER: CommunityTemplateService.validate requireOwned (submitter only; stores nothing; ai=true runs the AI review for the owner's own draft)
+POST /api/templates/{id}/withdraw  # HANDLER: CommunityTemplateService requireOwned
+POST /api/tenant/referral/redeem  # HANDLER: ReferralController requires PERM_MANAGE_BILLING or ROLE_platform-admin
+POST /api/tenant/trial/claim  # HANDLER: TrialGrantController requires PERM_MANAGE_BILLING or ROLE_platform-admin
+POST /api/tutor/agent  # MEMBER: the caller's own tutor agent (TutorAgentController, keyed on principal.getName())
+POST /api/tutor/plans  # MEMBER: the caller's own study plans (StudyPlanController, keyed on principal.getName())
+POST /api/tutor/plans/generate  # MEMBER: the caller's own study plans (StudyPlanController)
+POST /api/tutor/plans/{id}/lessons/{lessonId}/answers  # MEMBER: the caller's own study plans (StudyPlanController)
+POST /api/tutor/plans/{id}/lessons/{lessonId}/complete  # MEMBER: the caller's own study plans (StudyPlanController)
+POST /api/tutor/plans/{id}/lessons/{lessonId}/generate  # MEMBER: the caller's own study plans (StudyPlanController)
+POST /api/tutor/reviews/{planId}/{cardId}/answer  # MEMBER: the caller's own review cards (StudyPlanController)
+POST /api/videogen/generate  # MEMBER: video generation for any member within the tenant's tier quota (VideoGenerationQuotaService)
+POST /api/vision/sessions  # HANDLER: VisionSessionController RUNNER on the agent, same as chat (review step 8)
+POST /api/vision/sessions/{sessionId}/end  # HANDLER: VisionSessionService ends only a session the caller started (review step 8)
+POST /api/voice/agents/{agentId}/calls/{roomName}/recording/start  # HANDLER: VoiceCallRecordingController: the room must be this agent's call room and issued to the caller (VoiceCallRoomRegistry) (review step 8)
+POST /api/voice/agents/{agentId}/calls/{roomName}/recording/stop  # HANDLER: VoiceCallRecordingController: same room check, and the recording must belong to this agent (review step 8)
+POST /api/voice/agents/{agentId}/speak  # HANDLER: VoiceCallController resolves the agent with VIEWER, stricter than chat's RUNNER
+POST /api/voice/agents/{agentId}/token  # HANDLER: VoiceCallController resolves the agent with VIEWER, stricter than chat's RUNNER
+POST /api/voice/agents/{agentId}/turn  # HANDLER: VoiceCallController resolves the agent with VIEWER, stricter than chat's RUNNER
+POST /api/voice/realtime/sessions  # HANDLER: RealtimeVoiceSessionController requireAccess VIEWER, stricter than chat's RUNNER
+POST /api/workflows/input-requests/{id}/submit  # HANDLER: WorkflowInputRequestController -> WorkflowRunnerAccess: RUNNER on the run's workflow (review step 2)
+POST /api/workflows/{workflowId}/comments  # HANDLER: WorkflowCommentService (VIEWER)
+POST /api/workflows/{workflowId}/expressions/evaluate  # HANDLER: WorkflowExpressionService (EDITOR)
+POST /api/workflows/{workflowId}/expressions/lint  # HANDLER: WorkflowExpressionService (VIEWER)
+POST /api/workflows/{workflowId}/lint  # HANDLER: WorkflowController (requireViewerAccess)
+POST /api/workflows/{workflowId}/nodes/{nodeId}/test  # HANDLER: WorkflowNodeTestService (RUNNER)
+POST /api/workflows/{workflowId}/run  # HANDLER: WorkflowController (RUNNER, EDITOR for draft)
+POST /api/workflows/{workflowId}/runs/{runId}/cancel  # HANDLER: WorkflowRunControlController (RUNNER, run scoped to workflowId)
+POST /api/workflows/{workflowId}/runs/{runId}/pause  # HANDLER: WorkflowRunControlController (RUNNER)
+POST /api/workflows/{workflowId}/runs/{runId}/resume  # HANDLER: WorkflowRunControlController (RUNNER)
+POST /api/workflows/{workflowId}/share  # HANDLER: WorkflowShareService (requireOwnerAccess owner/admin)
+POST /api/workflows/{workflowId}/validate  # HANDLER: WorkflowService (VIEWER)
+POST /api/workflows/{workflowId}/versions  # HANDLER: WorkflowVersionController (EDITOR)
+POST /api/workflows/{workflowId}/versions/rollback  # HANDLER: WorkflowVersionController (EDITOR)
+POST /api/workflows/{workflowId}/versions/{versionNumber}/promote  # HANDLER: WorkflowVersionController (EDITOR)
+POST /api/workflows/{workflowId}/versions/{versionNumber}/restore  # HANDLER: WorkflowService (EDITOR + assertEditable)
+POST /api/{resourceKind:agents|workflows}/{resourceId}/grants  # HANDLER: ResourceAccessService.grant requireOwnerOrAdmin (resource owner or tenant-admin)
+PUT /api/account/phone  # MEMBER: the caller's own account (AccountController currentUser)
+PUT /api/agents/{agentId}/quality/datasets/{datasetId}  # HANDLER: QualityAgentAccessGate (EDITOR)
+PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER: QualityAgentAccessGate (EDITOR)
+PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}/grader  # HANDLER: QualityAgentAccessGate (EDITOR)
+PUT /api/agents/{agentId}/quality/gate  # HANDLER: QualityAgentAccessGate (EDITOR)
+PUT /api/agents/{agentId}/result-schema  # HANDLER: AgentJobObservabilityController (EDITOR)
+PUT /api/agents/{agentId}/skills  # HANDLER: SkillController (EDITOR + assertEditable)
+PUT /api/agents/{agentId}/versions/{versionId}/label  # HANDLER: AgentVersionService (EDITOR + assertEditable)
+PUT /api/secrets/{id}/allowed-hosts  # HANDLER: SecretVaultService requireCanWrite + SecretVaultService requireVisible
+PUT /api/studio-projects/{id}  # HANDLER: StudioProjectService (owner or writer member)
+PUT /api/templates/{id}  # HANDLER: CommunityTemplateService requireOwned (CommunityTemplateService)
+PUT /api/workflows/{workflowId}  # HANDLER: WorkflowService (EDITOR)
+PUT /api/workflows/{workflowId}/nodes/{nodeId}/pin  # HANDLER: WorkflowPinService (EDITOR)

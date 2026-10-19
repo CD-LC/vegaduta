@@ -1,0 +1,127 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-payments-mandates",
+      "method": "GET",
+      "path": "/api/payments/mandates",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-payments-mandates",
+      "method": "POST",
+      "path": "/api/payments/mandates",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.allowedMerchantCategories",
+          "$.allowedVpas",
+          "$.approvalPolicy",
+          "$.canonicalHashSha256",
+          "$.createdAt",
+          "$.grantedByUserId",
+          "$.id",
+          "$.maxDailyPaise",
+          "$.maxMonthlyPaise",
+          "$.maxPerTxnPaise",
+          "$.scope",
+          "$.status",
+          "$.validFrom",
+          "$.validUntil"
+        ]
+      }
+    },
+    {
+      "id": "get-api-payments-mandates-id",
+      "method": "GET",
+      "path": "/api/payments/mandates/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-payments-mandates-id-revoke",
+      "method": "POST",
+      "path": "/api/payments/mandates/{id}/revoke",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.allowedMerchantCategories",
+          "$.allowedVpas",
+          "$.approvalPolicy",
+          "$.canonicalHashSha256",
+          "$.createdAt",
+          "$.grantedByUserId",
+          "$.id",
+          "$.maxDailyPaise",
+          "$.maxMonthlyPaise",
+          "$.maxPerTxnPaise",
+          "$.scope",
+          "$.status",
+          "$.validFrom",
+          "$.validUntil"
+        ]
+      }
+    },
+    {
+      "id": "get-api-payments-mandates-id-spend",
+      "method": "GET",
+      "path": "/api/payments/mandates/{id}/spend",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-payments-mandates-preview",
+      "method": "POST",
+      "path": "/api/payments/mandates/preview",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.canonicalHashSha256",
+          "$.canonicalJson"
+        ]
+      }
+    },
+    {
+      "id": "get-api-payments-mandates-spend",
+      "method": "GET",
+      "path": "/api/payments/mandates/spend",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-payments-transactions",
+      "method": "GET",
+      "path": "/api/payments/transactions",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-payments-transactions-id",
+      "method": "GET",
+      "path": "/api/payments/transactions/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

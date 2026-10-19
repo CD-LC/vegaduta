@@ -1,0 +1,73 @@
+{
+  "content" : [
+    {
+      "agentId" : "00000000-0000-0000-0000-000000000001",
+      "amountPaise" : 42,
+      "approvalId" : "00000000-0000-0000-0000-000000000001",
+      "createdAt" : "2026-09-30T10:15:30.123456789Z",
+      "currency" : "currency-value",
+      "description" : "description-value",
+      "expiresAt" : "2026-09-30T10:15:30.123456789Z",
+      "failureReason" : "failureReason-value",
+      "gatewayPaymentId" : "gatewayPaymentId-value",
+      "id" : "00000000-0000-0000-0000-000000000001",
+      "mandateId" : "00000000-0000-0000-0000-000000000001",
+      "merchantCategory" : "merchantCategory-value",
+      "paidAt" : "2026-09-30T10:15:30.123456789Z",
+      "receiptUrl" : "receiptUrl-value",
+      "sessionId" : "sessionId-value",
+      "shortUrl" : "shortUrl-value",
+      "status" : "INITIATED",
+      "type" : "PAYMENT_LINK",
+      "updatedAt" : "2026-09-30T10:15:30.123456789Z",
+      "vpa" : "vpa-value"
+    },
+    {
+      "agentId" : null,
+      "amountPaise" : 0,
+      "approvalId" : null,
+      "createdAt" : null,
+      "currency" : null,
+      "description" : null,
+      "expiresAt" : null,
+      "failureReason" : null,
+      "gatewayPaymentId" : null,
+      "id" : null,
+      "mandateId" : null,
+      "merchantCategory" : null,
+      "paidAt" : null,
+      "receiptUrl" : null,
+      "sessionId" : null,
+      "shortUrl" : null,
+      "status" : null,
+      "type" : null,
+      "updatedAt" : null,
+      "vpa" : null
+    }
+  ],
+  "empty" : false,
+  "first" : false,
+  "last" : false,
+  "number" : 1,
+  "numberOfElements" : 2,
+  "pageable" : {
+    "offset" : 2,
+    "pageNumber" : 1,
+    "pageSize" : 2,
+    "paged" : true,
+    "sort" : {
+      "empty" : true,
+      "sorted" : false,
+      "unsorted" : true
+    },
+    "unpaged" : false
+  },
+  "size" : 2,
+  "sort" : {
+    "empty" : true,
+    "sorted" : false,
+    "unsorted" : true
+  },
+  "totalElements" : 5,
+  "totalPages" : 3
+}

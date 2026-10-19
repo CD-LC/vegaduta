@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agents &amp; Agent Runtime — VegaDūta Platform Documentation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-base="../" data-section="functional" data-page="agents-runtime.html" data-doc="VD-FN-001" data-status="verified" data-updated="2026-09-25" data-owner="Product Engineering">
+<header id="site-header"></header>
+<nav id="site-nav"></nav>
+<main id="content">
+<div class="doc-body">
+
+  <div class="doc-meta" data-auto></div>
+  <nav class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Functional</a><span class="sep">/</span>Agents &amp; Agent Runtime</nav>
+
+  <h1>Agents &amp; Agent Runtime</h1>
+  <p class="lede">
+    The agent is the platform's primary unit of capability: a configured LLM
+    persona with tools, skills, memory, reasoning depth and guardrail posture,
+    invocable by chat, channel, workflow, schedule, event or API. This page
+    specifies the functional surface of agent authoring and execution in
+    <code>core/agents</code>.
+  </p>
+
+  <div class="figure">
+    <div class="mermaid">
+flowchart LR
+  U["Caller: web chat / channel / share link / API / job"] --&gt; T["Chat turn (BufferedTurnRunner)"]
+  T --&gt; M["Memory recall<br/>session · agent · tenant · graph"]
+  T --&gt; SK["Skill injection<br/>SKILL.md progressive disclosure"]
+  T --&gt; L["LLM call<br/>reasoning depth FAST/CAREFUL/RIGOROUS/PLANNED"]
+  L --&gt; G["Guarded tool-call pipeline"]
+  G --&gt;|approved| EX["Tool executes"]
+  G --&gt;|parked| AP["Approval inbox"]
+  EX --&gt; L
+  L --&gt; R["Answer + step events<br/>SSE / AG-UI stream"]
+    </div>
+    <div class="figure-caption">A chat turn: context assembly → model loop → guarded tools → streamed answer.</div>
+  </div>
+
+  <h2>FR-AGT-01 · Agent creation &amp; editing workbench</h2>
+  <p>
+    Agents are created and maintained in the <code>web-admin</code> workbench.
+    An agent record captures identity (name, description, avatar), the model
+    binding (provider + model, sourced from tenant BYOK keys, the
+    platform-hosted pool, or the on-device edge tier), system prompt, tool
+    selection, skills, memory scopes, reasoning depth, and autonomy/jev
+    settings. A generation assist path
+    (<code>AgentGenerationService</code>) can draft an agent configuration
+    from a natural-language brief.
+  </p>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-AGT-01.1</td><td>Create/edit agent configuration through the workbench; changes to reasoning depth apply via <code>PATCH /api/agents/{id}/reasoning-depth</code> without recreating the agent.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-01.2</td><td>Per-agent provider binding: tenant BYOK key, platform-hosted pool model, or edge/on-device model.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-01.3</td><td>NL-to-config generation assist produces a draft agent from a brief.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-AGT-02 · Versioning &amp; promotion</h2>
+  <p>
+    Agent configuration is versioned. Edits produce new versions; promotion
+    moves a chosen version into the serving position so channels, share links
+    and jobs pick it up consistently. The snapshot codec
+    (<code>AgentConfigSnapshotCodec</code>) serialises a full config —
+    including reasoning depth — so a version is a complete, restorable
+    artifact rather than a diff.
+  </p>
+
+  <h2>FR-AGT-03 · A/B experiments</h2>
+  <p>
+    Agent experiments (migration <code>V265</code>) let a builder split
+    traffic between configuration arms — e.g. two prompts, two models, or two
+    reasoning depths — and compare outcomes. Arms are described by
+    <code>ChatArmConfig</code>; the runtime resolves the arm per session/turn
+    so results can be attributed.
+  </p>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-AGT-03.1</td><td>Define experiment arms over agent config; deterministic arm assignment per session.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-03.2</td><td>Arm attribution flows into metering/outcome records so arms can be compared on resolutions, not just volume.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-AGT-04 · Skills</h2>
+  <p>
+    Skills are packaged prompt-and-resource bundles that teach an agent a
+    repeatable procedure. A skill is a <code>SKILL.md</code> document loaded
+    with <strong>progressive disclosure</strong>: the model sees the skill's
+    summary in its system context and pulls the full body (and any bundled
+    files) only when the skill is invoked. Five built-in skills ship with the
+    platform; tenants manage theirs on the <code>/skills</code> page in
+    web-admin.
+  </p>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-AGT-04.1</td><td>SKILL.md format with progressive disclosure (summary in context, body on demand).</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-04.2</td><td>5 built-in skills shipped with the platform; tenant-authored skills managed on the <code>/skills</code> page.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-AGT-05 · Reasoning depths</h2>
+  <p>
+    Every agent carries a <code>ReasoningDepth</code>
+    (<code>core/agents/.../ReasoningDepth.java</code>) — a per-agent knob that
+    controls how much verification and deliberation wraps its turn, independent
+    of model sampling parameters.
+  </p>
+  <table>
+    <thead><tr><th>Depth</th><th>Behaviour</th><th>Intended use</th></tr></thead>
+    <tbody>
+      <tr><td><code>FAST</code></td><td>No extra verification pass; lowest latency.</td><td>High-volume, low-risk agents (FAQ bots, lookups). Default.</td></tr>
+      <tr><td><code>CAREFUL</code></td><td>One self-consistency re-check of the final answer (<code>AnswerConsistencyChecker</code>); revised once if a genuine problem is found.</td><td>Agents whose answers must be right but take no side effects.</td></tr>
+      <tr><td><code>RIGOROUS</code></td><td>CAREFUL plus a Reflexion self-critique pass (<code>ReflexionService</code>) plus an independent verifier check on <em>every tool call</em> (<code>ToolCallVerifierService</code>) before it executes.</td><td>Agents that send messages, spend money, or write/delete data.</td></tr>
+      <tr><td><code>PLANNED</code></td><td>Plan-and-execute: a cheap planning call (<code>TaskPlanningService</code>) decomposes the request into an ordered step list surfaced as context and as a plan entry in the trace.</td><td>Multi-step tasks; opt-in and not combined with CAREFUL/RIGOROUS passes in the same turn.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-AGT-06 · Tools</h2>
+  <p>
+    Agents call tools through Spring AI <code>ToolCallback</code>s resolved by
+    <code>AgentToolProvider</code>. The platform ships <strong>50+ built-in
+    tools</strong> spanning web search, messaging, knowledge, commerce
+    (payment links), media (YouTube upload, b-roll, clip generation) and
+    workflow invocation, plus tenant-connected integration and MCP tools.
+    Every tool call executes inside the guarded pipeline — see
+    <a href="governance-guardrails.html">VD-FN-006</a> for the
+    <code>GuardedToolCallback</code> stage list.
+  </p>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-AGT-06.1</td><td>50+ built-in tools selectable per agent; classification registry (<code>V224__tool_classification.sql</code>) tags tools by risk for the guard pipeline.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-06.2</td><td>All tool calls — built-in, integration, MCP — route through <code>GuardedToolCallback</code> (step ceiling → RIGOROUS verify → HITL gate → output validation → sanitization).</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-06.3</td><td>Step events emitted per tool call (<code>AgentStepEventEmitter</code>) stream intermediate reasoning/actions to the UI and to AG-UI consumers.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-AGT-07 · Memory</h2>
+  <p>
+    Memory is scoped, not global: <strong>session</strong> memory covers the
+    current conversation, <strong>agent</strong> memory persists facts the
+    agent should retain across sessions, and <strong>tenant</strong> memory
+    is shared across a tenant's agents. A <strong>graph memory</strong> layer
+    stores entities and relationships and supports multi-hop recall — see
+    <a href="knowledge-rag.html">VD-FN-004</a> for its retrieval behaviour.
+  </p>
+
+  <h2>FR-AGT-08 · Share &amp; embed surfaces</h2>
+  <p>
+    An agent can be exposed to end-customers without console access via
+    public share links and embeddable chat widgets
+    (<code>AgentShareController</code>). Share surfaces reuse the same
+    runtime, memory and guardrail stack as console chat; plan features such as
+    white-labelling the widget are gated by <code>plan_limits</code> when billing
+    is on (see <a href="index.html#billing">Functional Overview</a>).
+  </p>
+
+  <h2>FR-AGT-09 · A2A agent cards</h2>
+  <p>
+    Agents can be published to other agents through Agent-to-Agent (A2A)
+    agent cards (<code>core/agents/.../a2a</code>), advertising capabilities
+    so external agents can discover and delegate to a VegaDūta agent without a
+    human client. See <a href="../api/developer-api.html">API: Developer
+    surface</a>.
+  </p>
+
+  <h2>FR-AGT-10 · AG-UI runs</h2>
+  <p>
+    Agent runs can be driven and streamed over the AG-UI protocol, giving
+    external UIs a structured event stream of a run (messages, tool calls,
+    state deltas). Transport details are specified in
+    <a href="../api/streaming.html">API: Streaming (SSE &amp; AG-UI)</a>.
+  </p>
+
+  <h2>FR-AGT-11 · Autonomous jobs</h2>
+  <p>
+    Agents run unattended as jobs (<code>core/agents/.../job</code>): a job
+    binds an agent to a schedule and/or event triggers, with durable
+    bookkeeping so a job survives restarts and can be paused for approval.
+  </p>
+  <table>
+    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FR-AGT-11.1</td><td>Cron-style scheduling of agent jobs.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-11.2</td><td>Event triggers: platform events (e.g. inbound channel messages, webhook events) dispatch agent runs via <code>AgentEventTriggerService</code>/<code>AgentEventTriggerDispatcher</code>.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-11.3</td><td>Approval parking: a gated action inside a job run parks the job on the approval inbox rather than failing it; the run resumes when the approval resolves.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-11.4</td><td>Durability: job executions persist state and are reconciled on boot so a restart neither loses nor double-runs a job.</td><td><span class="badge badge-live">live</span></td></tr>
+      <tr><td>FR-AGT-11.5</td><td>Structured output: jobs can demand a schema-bound result, recorded on the execution rather than free text.</td><td><span class="badge badge-live">live</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>FR-AGT-12 · Vision sessions</h2>
+  <p>
+    Vision sessions (<code>core/agents/.../vision</code>) let an agent consume
+    camera/screen frames. <code>VisionSessionMode</code> distinguishes
+    SNAPSHOT frames (per-user frame quota) from continuous WATCH/LIVE modes
+    gated by the <code>live_vision_allowed</code> plan flag —
+    <code>VisionNotAllowedForPlanException</code> enforces it.
+  </p>
+  <div class="callout callout-note">
+    <div class="callout-title">Plan gate</div>
+    <p style="margin:4px 0 0">Continuous vision (<code>live_vision_allowed</code>) is FALSE on FREE and TRUE on paid plans (migration <code>V180</code>). SNAPSHOT frames ride the per-user quota and are not gated by the flag.</p>
+  </div>
+
+  <h2>FR-AGT-13 · Crew handoffs</h2>
+  <p>
+    Agents can be composed into crews: a delegating agent hands a sub-task to
+    a specialist agent and consumes its result, enabling multi-agent
+    collaboration without exposing the internal split to the caller.
+  </p>
+
+  <h2>FR-AGT-14 · Jev decision controls</h2>
+  <p>
+    "Jev" is the platform's decision-control surface for agent autonomy: a
+    policy layer plus a <strong>per-agent threshold</strong> that tunes how
+    much independence an agent has before an action escalates to the approval
+    pipeline. It composes with tenant autonomy tiers and allow-lists — see
+    <a href="governance-guardrails.html">VD-FN-006</a>.
+  </p>
+
+  <h2>FR-AGT-15 · Edge / on-device agents</h2>
+  <p>
+    The edge tier runs models off-platform: the web console can run a model in
+    the browser (WebLLM, vendored by <code>web/scripts/vendor-webllm.mjs</code>)
+    when <code>NEXT_PUBLIC_EDGE_AGENTS=1</code>. The core supports the split via
+    <code>EdgeToolExecutionController</code>, which executes tool calls on
+    behalf of an on-device run that cannot reach the tools itself. Other
+    on-device clients can use the same endpoint; none ship in this repository.
+  </p>
+
+  <h2>Cross-references</h2>
+  <ul>
+    <li><a href="../architecture/ai-llm-layer.html">AI / LLM Layer</a> — Spring AI ChatClient construction and provider resolution.</li>
+    <li><a href="../api/streaming.html">API: Streaming</a> — SSE and AG-UI wire formats.</li>
+    <li><a href="../api/developer-api.html">API: Developer surface</a> — A2A cards and MCP.</li>
+    <li><a href="governance-guardrails.html">VD-FN-006</a> — the guarded pipeline, approvals, autonomy tiers.</li>
+    <li><a href="index.html#billing">Billing and plans</a> — plan gates touching agents (<code>byok_allowed</code>, <code>live_vision_allowed</code>, <code>max_agents</code>), off by default.</li>
+  </ul>
+
+</div>
+</main>
+<script src="../assets/js/site.js"></script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>

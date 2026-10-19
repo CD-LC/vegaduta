@@ -1,0 +1,152 @@
+/* ---- 13. Professional backgrounds: tinted paper + one fixed mesh --------- */
+/* Direct instruction 2026-09-24: "add proper background colours, to make it
+   more professional". The page is no longer a flat neutral: the paper is
+   tinted a few percent toward the live accent, and ONE fixed mesh layer on
+   <body> (three accent washes + a faint dot grid, edge-faded) sits behind
+   every surface — public, auth and console alike — so the glass always has
+   colour to catch and every page reads as one product. The older per-area
+   washes (.mkt-canvas-bg::before, .app-aurora, .auth-main gradient) are
+   retired here so nothing paints twice. `data-bg="plain"` (ThemePicker)
+   turns the mesh off. */
+:root:not([data-mode="dark"]) {
+  --surface-page: color-mix(in oklab, #f5f5f7 95%, var(--accent-500));
+  --surface-sunken: color-mix(in oklab, #ebebef 94%, var(--accent-500));
+  --mesh-a: color-mix(in oklab, var(--accent-500) 22%, transparent);
+  --mesh-b: color-mix(in oklab, var(--accent-400) 13%, transparent);
+  --mesh-c: color-mix(in oklab, #1b9fbb 9%, transparent);
+  --mesh-d: color-mix(in oklab, #f97316 6%, transparent);
+  --mesh-dot: color-mix(in oklab, #131318 9%, transparent);
+}
+
+:root[data-mode="dark"] {
+  --surface-page: color-mix(in oklab, #0e0e12 93%, var(--accent-500));
+  --mesh-a: color-mix(in oklab, var(--accent-500) 30%, transparent);
+  --mesh-b: color-mix(in oklab, var(--accent-400) 16%, transparent);
+  --mesh-c: color-mix(in oklab, #1b9fbb 12%, transparent);
+  --mesh-d: color-mix(in oklab, #f97316 7%, transparent);
+  --mesh-dot: color-mix(in oklab, #ffffff 7%, transparent);
+}
+
+body {
+  background: var(--surface-page);
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {
+  background:
+    radial-gradient(62% 46% at 50% -6%, var(--mesh-a) 0%, transparent 70%),
+    radial-gradient(42% 36% at 102% 28%, var(--mesh-b) 0%, transparent 72%),
+    radial-gradient(38% 32% at -4% 58%, var(--mesh-c) 0%, transparent 74%),
+    radial-gradient(46% 40% at 86% 104%, var(--mesh-a) 0%, transparent 72%),
+    radial-gradient(30% 26% at 20% 100%, var(--mesh-d) 0%, transparent 74%);
+}
+
+body::after {
+  background-image: radial-gradient(var(--mesh-dot) 1px, transparent 1.2px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 20%, transparent 100%);
+  opacity: 0.8;
+}
+
+:root[data-bg="plain"] body::before,
+:root[data-bg="plain"] body::after {
+  display: none;
+}
+
+/* Retire the per-area washes now that the body mesh covers every page */
+.mkt-canvas-bg::before,
+.app-aurora {
+  display: none !important;
+}
+
+.mkt-canvas-bg {
+  background: transparent;
+}
+
+.auth-main,
+:root:not([data-mode="dark"]) .auth-main,
+:root[data-mode="dark"] .auth-main {
+  background: transparent;
+}
+
+/* ---- 14. Modern options: motion + contrast (ThemePicker) ------------------ */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-contrast="high"] {
+  --surface-border: rgba(19, 19, 24, 0.28);
+  --surface-border-strong: rgba(19, 19, 24, 0.45);
+  --text-secondary: #26262e;
+  --text-muted: #3f3f48;
+}
+
+:root[data-contrast="high"][data-mode="dark"] {
+  --surface-border: rgba(255, 255, 255, 0.3);
+  --surface-border-strong: rgba(255, 255, 255, 0.5);
+  --text-secondary: #e6e6ea;
+  --text-muted: #c9c9d1;
+}
+
+/* Every glass recipe (cards, pills, nav/header/rail, secondary buttons,
+   outlined public panels, hire-scope paper, legacy console panels) goes
+   opaque and unblurred. `!important` because header.sticky, the nav rail and
+   .ax-admin-ovw-hero set their fills with !important; `:not(#_)` so the
+   hire-scope rules' id-level specificity is beaten too. */
+:root[data-contrast="high"]:not(#_) [data-slot="card"],
+:root[data-contrast="high"]:not(#_) .mkt-card,
+:root[data-contrast="high"]:not(#_) .auth-card,
+:root[data-contrast="high"]:not(#_) .mkt-pill,
+:root[data-contrast="high"]:not(#_) .mkt-nav,
+:root[data-contrast="high"]:not(#_) .mkt-btn-secondary,
+:root[data-contrast="high"]:not(#_) .std-screen__card,
+:root[data-contrast="high"]:not(#_) .std-screen__btn--secondary,
+:root[data-contrast="high"]:not(#_) header.sticky,
+:root[data-contrast="high"]:not(#_) nav[class*="group/rail"],
+:root[data-contrast="high"]:not(#_) .panel,
+:root[data-contrast="high"]:not(#_) .glass-card,
+:root[data-contrast="high"]:not(#_) .vd-pub [class*="bg-card"],
+:root[data-contrast="high"]:not(#_) .vd-pub [data-slot="button"][class*="border-border"],
+:root[data-contrast="high"]:not(#_) .vd-pub [data-slot="button"][class*="bg-secondary"],
+:root[data-contrast="high"]:not(#_)
+  .vd-pub
+  :is(div, section, article, li)[class*="rounded-2xl"][class*="border-border"]:not([class*="bg-"]),
+:root[data-contrast="high"]:not(#_)
+  .vd-pub
+  :is(div, section, article, li)[class*="rounded-xl"][class*="border-border"]:not([class*="bg-"]),
+:root[data-contrast="high"]:not(#_) .hire-scope :is(.doc, .slip, .cand, nav),
+:root[data-contrast="high"]:not(#_)
+  :is(
+    .ax-tl-card,
+    .ax-tl-add-section,
+    .ax-wflist-card,
+    .ax-wflist-form,
+    .ax-wflist-empty,
+    .ax-mnt-section,
+    .ax-mnt-llm-card,
+    .ax-core-panel,
+    .ax-admin-ovw-hero,
+    .hud-panel,
+    .mc-hud-card,
+    .mc-bento-card,
+    .ax-tl-card-selected
+  ) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--surface-raised) !important;
+  background-image: none !important;
+}

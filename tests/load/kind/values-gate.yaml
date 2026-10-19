@@ -1,0 +1,18 @@
+# Overlay for the load-test gate on a throwaway kind cluster (gate-stage.sh, .github/workflows/load-nightly.yml).
+# Layered after deploy/kind/values-kind.yaml and values-loadtest.yaml. Sized for a 16 GB / 4 vCPU runner:
+#   - one API replica, no HPA: the comparison is the "replicas=1 caches=on vus=32" row of results-2026-10-13.jsonl
+#     (p95 of the whole turn 571 ms). The hot-path caches keep their defaults (3 s TTL, which is "caches=on").
+#   - the sidecar STAYS ON (values-kind.yaml sets it; it is repeated here so nobody trims it to save memory). Every
+#     turn runs ChatMemoryRecall, which embeds the user message through SidecarClient.embedQuery: a real blocking
+#     network call. That call is the regression this benchmark caught (docs/architecture/HOT-PATH-PERFORMANCE.md 4a:
+#     a blocked embed pinned carrier threads). With the sidecar off, SIDECAR_BASE_URL is unset, the call is refused
+#     in microseconds against localhost:8001 inside the core pod, and the gate could no longer see that class of
+#     regression. The baseline row above also ran with the sidecar on.
+# Stage only. Nothing here is a production default.
+global:
+  components:
+    sidecar: true
+core:
+  replicaCount: 1
+  hpa:
+    enabled: false

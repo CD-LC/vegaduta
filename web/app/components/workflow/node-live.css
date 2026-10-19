@@ -1,0 +1,245 @@
+/* Live agent strip inside agent/supervisor node cards (NodeLivePanel).
+ * Theme tokens only: --wfx-* (set on the canvas) first, then --ax-* / --hud-*. */
+
+.nlp-root,
+.nlp-chip {
+  --nlp-text: var(--wfx-text, var(--ax-text, var(--text-primary)));
+  --nlp-mid: var(--ax-mid, var(--wfx-muted, var(--text-muted)));
+  --nlp-dim: var(--wfx-muted, var(--ax-dim, var(--hud-text-dim)));
+  --nlp-border: var(--ax-border, var(--surface-border));
+  --nlp-chip: var(--wfx-chip-bg, var(--ax-chip, var(--surface-hover)));
+  --nlp-live: var(--wfx-run, var(--ax-cyan, var(--hud-cyan)));
+  --nlp-ok: var(--wfx-ok, var(--ax-green, var(--hud-ok)));
+  --nlp-err: var(--wfx-err, var(--ax-red, var(--hud-magenta)));
+  --nlp-warn: var(--wfx-warn, var(--ax-amber, var(--hud-warn)));
+  /* Text-safe steps for the 9.5-10px status words: --ax-cyan follows the
+   * per-visit accent's 500 stop (~2.1-2.5:1 on white in light mode) and
+   * red/green sit near 3.4-4.2:1, so words use --accent-text (the theme's
+   * AA text stop) or the hue pulled toward the ink. Dots, carets and
+   * borders keep the raw hue. Focus rings use the fixed --ax-accent2. */
+  --nlp-live-text: var(--accent-text, color-mix(in srgb, var(--nlp-live) 62%, var(--nlp-text)));
+  --nlp-ok-text: color-mix(in srgb, var(--nlp-ok) 68%, var(--nlp-text));
+  --nlp-err-text: color-mix(in srgb, var(--nlp-err) 68%, var(--nlp-text));
+  --nlp-focus: var(--ax-accent2, var(--nlp-live));
+  --nlp-mono: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+
+.nlp-root {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--nlp-border);
+  color: var(--nlp-text);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* --- header ------------------------------------------------------------- */
+.nlp-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+.nlp-head-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--nlp-dim);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.nlp-root[data-streaming="true"] .nlp-head-label { color: var(--nlp-live-text); }
+.nlp-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nlp-live);
+  animation: nlp-pulse 1.4s ease-in-out infinite;
+}
+.nlp-capped {
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1px solid var(--nlp-warn);
+  color: var(--nlp-warn);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.nlp-open,
+.nlp-tool-btn,
+.nlp-more {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.nlp-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  color: var(--nlp-mid);
+}
+.nlp-open:hover,
+.nlp-tool-btn:hover,
+.nlp-more:hover { background: var(--nlp-chip); }
+.nlp-open:focus-visible,
+.nlp-tool-btn:focus-visible,
+.nlp-more:focus-visible { outline: 2px solid var(--nlp-focus); outline-offset: 1px; }
+
+/* --- stream: 3-line tail, bottom-anchored, faded top edge ---------------- */
+.nlp-stream {
+  position: relative;
+  height: calc(3 * 1.4em);
+  overflow: hidden;
+  color: var(--nlp-mid);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 1.1em);
+  mask-image: linear-gradient(to bottom, transparent 0, black 1.1em);
+}
+/* Anchored to the bottom so the newest line stays visible with no scroll JS
+ * per token; older lines slide up under the faded top edge. */
+.nlp-stream-inner { position: absolute; left: 0; right: 0; bottom: 0; }
+.nlp-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.nlp-caret {
+  display: inline-block;
+  width: 6px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -0.15em;
+  border-radius: 2px;
+  background: var(--nlp-live);
+  opacity: 0.7;
+  animation: nlp-blink 1.1s steps(2, start) infinite;
+}
+
+/* --- tool rows ---------------------------------------------------------- */
+.nlp-tools { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nlp-tool { min-width: 0; border-radius: 6px; }
+.nlp-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  min-height: 22px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  text-align: left;
+}
+.nlp-chev { flex: none; color: var(--nlp-dim); transition: transform 0.15s ease; }
+.nlp-tool-btn[aria-expanded="true"] .nlp-chev { transform: rotate(90deg); }
+.nlp-tool-icon { flex: none; color: var(--nlp-dim); }
+.nlp-tool-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--nlp-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.nlp-tool-status { display: inline-flex; align-items: center; gap: 2px; flex: none; font-size: 10px; }
+.nlp-tool[data-status="running"] .nlp-tool-status { color: var(--nlp-live-text); }
+.nlp-tool[data-status="ok"] .nlp-tool-status { color: var(--nlp-ok-text); }
+.nlp-tool[data-status="error"] .nlp-tool-status { color: var(--nlp-err-text); }
+.nlp-tool-ms {
+  flex: none;
+  color: var(--nlp-dim);
+  font-family: var(--nlp-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.nlp-tool-line {
+  padding: 0 4px 2px 34px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--nlp-dim);
+  font-size: 10px;
+}
+.nlp-tool-line[data-error="true"] { color: var(--nlp-err-text); }
+
+.nlp-detail {
+  margin: 2px 0 4px 18px;
+  max-height: 160px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--nlp-chip);
+}
+.nlp-detail-label { color: var(--nlp-dim); font-size: 9.5px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.04em; }
+.nlp-detail-empty { color: var(--nlp-dim); font-size: 10px; }
+.nlp-pre {
+  margin: 1px 0 4px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--nlp-mono);
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--nlp-text);
+}
+.nlp-pre[data-error="true"] { color: var(--nlp-err-text); }
+
+.nlp-more {
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--nlp-mid);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+/* --- compact (zoomed-out pill) chip ------------------------------------- */
+.nlp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--nlp-chip);
+  color: var(--nlp-mid);
+  font-size: 9.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nlp-chip[data-state="running"] { color: var(--nlp-live-text); }
+.nlp-chip[data-state="error"] { color: var(--nlp-err-text); }
+
+.nlp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nlp-spin { animation: nlp-spin 0.9s linear infinite; }
+
+@keyframes nlp-spin { to { transform: rotate(360deg); } }
+@keyframes nlp-blink { 0% { opacity: 0.75; } 100% { opacity: 0; } }
+@keyframes nlp-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nlp-caret { display: none; }
+  .nlp-spin,
+  .nlp-live-dot { animation: none; }
+  .nlp-chev { transition: none; }
+}
+
+/* Mounted inside a node card (WorkflowNode): align with the body/footer gutters. */
+.wfx-node > .nlp-root { margin: 2px 12px 8px; }
+.wfx-node > .nlp-chip { margin: 0 12px 8px; }

@@ -1,0 +1,84 @@
+# seaweedfs - `weed server` (master + volume + filer + S3 gateway) in ONE pod on one PVC.
+# Meant for evaluation and small installs; for production point global.objectStorage at
+# AWS S3, GCS (S3 interop), Cloudflare R2, Ceph RGW, MinIO or a full SeaweedFS cluster.
+# S3 endpoint: http://<release>-seaweedfs:8333. Credentials: Secret "<release>-seaweedfs"
+# (keys accessKeyId, secretAccessKey). core creates its bucket on first use.
+
+global: {}
+
+nameOverride: ""
+fullnameOverride: ""
+component: object-storage
+
+image:
+  registry: docker.io
+  repository: chrislusf/seaweedfs
+  tag: "4.48"
+  digest: ""
+  pullPolicy: ""
+
+containerPort: 8333
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8333
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# -- Max size of one volume file in MB (smaller = less disk preallocated on small PVCs).
+volumeSizeLimitMB: 1024
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits: { memory: 1Gi }
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+securityContext: {}
+emptyDirs:
+  - { name: tmp, mountPath: /tmp, sizeLimit: 256Mi }
+
+probes:
+  startup:
+    tcpSocket: { port: http }
+    periodSeconds: 5
+    failureThreshold: 60
+  liveness:
+    tcpSocket: { port: http }
+    periodSeconds: 15
+    failureThreshold: 5
+  readiness:
+    tcpSocket: { port: http }
+    periodSeconds: 10
+    failureThreshold: 3
+
+pdb:
+  enabled: true
+
+networkPolicy:
+  # The S3 gateway port only (weed server also listens on the unauthenticated master,
+  # volume and filer ports). sidecar is not a client: it has no storage env and no egress here.
+  allowFrom: [core, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-worker, core-migrate]
+  allowEgressTo: []
+  allowExternalEgress: false
+  extraIngress: []
+  extraEgress: []
+
+terminationGracePeriodSeconds: 30
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+imagePullSecrets: []

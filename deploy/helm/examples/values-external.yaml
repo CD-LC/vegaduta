@@ -1,0 +1,61 @@
+# Bring-your-own everything: managed PostgreSQL, managed Redis-compatible cache, S3,
+# an external OIDC issuer, Temporal Cloud, Kafka and an OTel collector. No bundled
+# dependency is deployed. Every existingSecret below must exist before `helm install`.
+global:
+  domain: example.com
+  imageTag: "0.1.0"
+  tls:
+    secretName: wildcard-example-com
+  networkPolicy:
+    enabled: true
+    extraEgress:
+      - components: [core, core-worker, core-jobs, core-ingest, core-webhooks, core-intake, core-billing, core-migrate]
+        to: [{ ipBlock: { cidr: 10.30.0.0/16 } }]       # managed data services subnet
+        ports:
+          - { port: 5432, protocol: TCP }
+          - { port: 6380, protocol: TCP }
+  core:
+    appSecret:
+      existingSecret: vegaduta-core-app                # key APP_ENCRYPTION_KEY (+ optional core env)
+  internalSecret:
+    existingSecret: vegaduta-internal
+  postgresql:
+    host: vegaduta.abcdefgh.eu-west-1.rds.amazonaws.com
+    port: 5432
+    database: vegaduta
+    username: vegaduta
+    existingSecret: vegaduta-postgres                   # key password
+    sslMode: require
+  valkey:
+    host: vegaduta.cache.amazonaws.com
+    port: 6380
+    existingSecret: vegaduta-valkey                     # key password
+  objectStorage:
+    endpoint: https://s3.eu-west-1.amazonaws.com
+    region: eu-west-1
+    bucket: vegaduta-files
+    pathStyleAccess: false
+    existingSecret: vegaduta-s3                         # keys accessKeyId, secretAccessKey
+  oidc:
+    issuerUrl: https://sso.example.com/realms/agentic-ai
+    internalBaseUrl: https://sso.example.com
+    realm: agentic-ai
+    clientId: agentic-ai-core
+    existingSecret: vegaduta-oidc                       # key clientSecret
+  temporal:
+    enabled: true
+    target: vegaduta.a1b2c.tmprl.cloud:7233
+    namespace: vegaduta.a1b2c
+  kafka:
+    bootstrapServers: b-1.kafka.example.internal:9092
+  otel:
+    tracesEndpoint: http://otel-collector.observability.svc.cluster.local:4318/v1/traces
+
+postgres:
+  enabled: false
+valkey:
+  enabled: false
+keycloak:
+  enabled: false
+seaweedfs:
+  enabled: false

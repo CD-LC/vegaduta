@@ -1,0 +1,82 @@
+# Optum - Claim Status API v2 (sandbox): X12 276/277 as JSON
+#
+# Import via Tools -> Import from OpenAPI -> "Paste the document".
+#   name:      Optum Claim Status (sandbox)
+#   baseUrl:   https://sandbox-apigw.optum.com
+#   authType:  OAUTH2_CLIENT_CREDENTIALS
+#   tokenUrl:  https://sandbox-apigw.optum.com/apip/auth/v2/token
+#   style:     JSON
+#   clientId / secret: same Optum sandbox project as eligibility
+#
+# Field set follows the Optum Claim Status API v2 reference; the sandbox
+# returns canned statuses for its documented fixture claims.
+
+openapi: 3.0.0
+info:
+  title: Optum Claim Status API v2 (sandbox)
+  version: "2.0.0"
+  description: >-
+    Real-time claim status inquiry (X12 276/277 translated to JSON): where a
+    submitted claim sits in the payer's adjudication pipeline, plus the
+    reason a claim was pended, denied or rejected.
+servers:
+  - url: https://sandbox-apigw.optum.com
+paths:
+  /medicalnetwork/claimstatus/v2/:
+    post:
+      operationId: checkClaimStatus
+      summary: Check the adjudication status of a submitted claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [controlNumber, tradingPartnerServiceId, providers, subscriber]
+              properties:
+                controlNumber:
+                  type: string
+                  description: 9-digit unique trace number for this request.
+                tradingPartnerServiceId:
+                  type: string
+                  description: Optum payer id the claim was submitted to.
+                providers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      providerType: { type: string }
+                      npi: { type: string }
+                      taxonomyId: { type: string }
+                      organizationName: { type: string }
+                      employerId: { type: string, description: Provider tax id when the payer requires it. }
+                subscriber:
+                  type: object
+                  properties:
+                    memberId: { type: string }
+                    firstName: { type: string }
+                    lastName: { type: string }
+                    gender: { type: string }
+                    dateOfBirth: { type: string, description: CCYYMMDD }
+                dependents:
+                  type: array
+                  items: { type: object }
+                encounter:
+                  type: object
+                  properties:
+                    beginningDateOfService: { type: string, description: CCYYMMDD }
+                    endDateOfService: { type: string }
+                    trackingNumber: { type: string }
+                claim:
+                  type: object
+                  properties:
+                    patientAccountNumber: { type: string, description: The provider's own account/claim reference. }
+                    claimNumber: { type: string, description: Payer-assigned claim number, if known. }
+                    claimChargeAmount: { type: string }
+      responses:
+        "200":
+          description: Claim status response (X12 277 as JSON) - status category, status code, payer claim number.
+        "400":
+          description: Validation failure.
+        "401":
+          description: Bad or expired bearer token.

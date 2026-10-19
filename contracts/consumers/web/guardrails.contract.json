@@ -1,0 +1,75 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-guardrails-rules",
+      "method": "GET",
+      "path": "/api/guardrails/rules",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].action",
+          "$[*].createdAt",
+          "$[*].description",
+          "$[*].enabled",
+          "$[*].id",
+          "$[*].name",
+          "$[*].pattern",
+          "$[*].ruleType",
+          "$[*].tenantId",
+          "$[*].updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "post-api-guardrails-rules",
+      "method": "POST",
+      "path": "/api/guardrails/rules",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.action",
+          "$.createdAt",
+          "$.description",
+          "$.enabled",
+          "$.id",
+          "$.name",
+          "$.pattern",
+          "$.ruleType",
+          "$.tenantId",
+          "$.updatedAt"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-guardrails-rules-id",
+      "method": "DELETE",
+      "path": "/api/guardrails/rules/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "put-api-guardrails-rules-id",
+      "method": "PUT",
+      "path": "/api/guardrails/rules/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.action",
+          "$.createdAt",
+          "$.description",
+          "$.enabled",
+          "$.id",
+          "$.name",
+          "$.pattern",
+          "$.ruleType",
+          "$.tenantId",
+          "$.updatedAt"
+        ]
+      }
+    }
+  ]
+}

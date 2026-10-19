@@ -1,0 +1,85 @@
+{{- $name := include "vegaduta-lib.fullname" . -}}
+{{- $g := .Values.global | default dict -}}
+{{- $p := .Values.persistence -}}
+{{- $sc := $p.storageClass | default $g.storageClass -}}
+{{- $ak := include "vegaduta-lib.stableRandom" (dict "root" . "secret" $name "key" "accessKeyId" "length" 20) -}}
+{{- $sk := include "vegaduta-lib.stableRandom" (dict "root" . "secret" $name "key" "secretAccessKey" "length" 40) -}}
+{{- $s3 := dict "identities" (list (dict "name" "vegaduta" "credentials" (list (dict "accessKey" $ak "secretKey" $sk)) "actions" (list "Admin" "Read" "List" "Tagging" "Write"))) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+  annotations:
+    {{- include "vegaduta-lib.keepAnnotations" . | nindent 4 }}
+type: Opaque
+stringData:
+  accessKeyId: {{ $ak | quote }}
+  secretAccessKey: {{ $sk | quote }}
+  s3.json: {{ toJson $s3 | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - { name: http, port: 8333, targetPort: http }
+  selector:
+    {{- include "vegaduta-lib.selectorLabels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vegaduta-lib.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ $name }}-headless
+  selector:
+    matchLabels:
+      {{- include "vegaduta-lib.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "vegaduta-lib.labels" . | nindent 8 }}
+    spec:
+      {{- $v := deepCopy .Values -}}
+      {{- $_ := set $v "persistence" (dict "enabled" false) -}}
+      {{- $_ := set $v "topologySpread" (dict "enabled" false) -}}
+      {{- $_ := set $v "extraVolumes" (list (dict "name" "s3-config" "secret" (dict "secretName" $name "items" (list (dict "key" "s3.json" "path" "s3.json"))))) -}}
+      {{- $mounts := list (dict "name" "s3-config" "mountPath" "/etc/seaweedfs" "readOnly" true) -}}
+      {{- if $p.enabled }}{{ $mounts = append $mounts (dict "name" "data" "mountPath" "/data") }}{{ else }}{{ $_ := set $v "emptyDirs" (append $v.emptyDirs (dict "name" "data" "mountPath" "/data" "sizeLimit" "5Gi")) }}{{ end -}}
+      {{- $_ := set $v "extraVolumeMounts" $mounts -}}
+      {{- /* the filer's leveldb store is created relative to the working directory */ -}}
+      {{- $_ := set $v "workingDir" "/data" -}}
+      {{- $_ := set $v "args" (list "server" "-dir=/data" "-ip.bind=0.0.0.0" (printf "-master.volumeSizeLimitMB=%v" .Values.volumeSizeLimitMB) "-volume.max=0" "-filer" "-s3" "-s3.port=8333" "-s3.config=/etc/seaweedfs/s3.json") -}}
+      {{- $ctx := dict "Values" $v "Chart" .Chart "Release" .Release "Capabilities" .Capabilities "Template" .Template -}}
+      {{- include "vegaduta-lib.podSpec" (dict "root" $ctx "command" (list "weed")) | nindent 6 }}
+  {{- if $p.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "vegaduta-lib.selectorLabels" . | nindent 10 }}
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- if $sc }}
+        storageClassName: {{ $sc | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $p.size | quote }}
+  {{- end }}

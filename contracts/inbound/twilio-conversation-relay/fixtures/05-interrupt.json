@@ -1,0 +1,5 @@
+{
+  "type": "interrupt",
+  "utteranceUntilInterrupt": "I'd like to",
+  "durationUntilInterruptMs": "1200"
+}

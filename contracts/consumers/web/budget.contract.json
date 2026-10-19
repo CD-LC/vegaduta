@@ -1,0 +1,68 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-budget-top-up",
+      "method": "POST",
+      "path": "/api/budget/top-up",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.amountUsd",
+          "$.modality"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.amountInSubunits",
+          "$.amountUsd",
+          "$.currency",
+          "$.gatewayName",
+          "$.modality",
+          "$.orderId",
+          "$.publicKeyId",
+          "$.status"
+        ]
+      }
+    },
+    {
+      "id": "post-api-budget-top-up-confirm",
+      "method": "POST",
+      "path": "/api/budget/top-up/confirm",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.orderId",
+          "$.paymentId",
+          "$.signature"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.alreadyProcessed",
+          "$.amountUsd",
+          "$.credited",
+          "$.modality"
+        ]
+      }
+    },
+    {
+      "id": "get-api-budget-top-up-options",
+      "method": "GET",
+      "path": "/api/budget/top-up/options",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.currency",
+          "$.enabled",
+          "$.gatewayName",
+          "$.maxUsd",
+          "$.minUsd",
+          "$.options",
+          "$.publicKeyId"
+        ]
+      }
+    }
+  ]
+}

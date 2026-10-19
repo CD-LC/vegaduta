@@ -1,0 +1,20 @@
+{
+  "name": "vegaduta-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for the VegaDuta REST API (generated from docs/api/openapi.json). Placeholder name until a package scope is chosen.",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "generate": "node ../generate.mjs",
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,71 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. **Security vulnerabilities must not be reported here**; see [SECURITY.md](https://github.com/CD-LC/vegaduta/blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ./scripts/vegaduta up --lite
+        2. Sign in and create an agent
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Install tier
+      options:
+        - Lite (compose, single core process)
+        - Full (compose with profiles)
+        - Kubernetes (Helm)
+        - Local development (mvn / npm)
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - core API / agents
+        - chat / LLM providers
+        - MCP / A2A / AG-UI / tools
+        - workflows / approvals
+        - knowledge / RAG
+        - channels
+        - web console
+        - admin console
+        - Python services (sidecar, code-intel, ...)
+        - install / deploy / Helm
+        - other
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v0.1.0, or the output of git rev-parse --short HEAD
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: OS, Docker / Kubernetes version, browser
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant log lines (for example `./scripts/vegaduta logs core`). Remove API keys, tokens and personal data first.
+      render: shell

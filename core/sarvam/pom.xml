@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>sarvam</artifactId>
+  <name>sarvam</name>
+  <description>
+    Sarvam AI integration (see Sarvam-Integration-Build-Plan.md) - chat
+    completion, translation, speech-to-text, text-to-speech, transliteration,
+    and language identification across 22 Indian languages, brought in as a
+    new sibling module rather than a rewrite of anything existing (same shape
+    as "google": a new module, not an infrastructure milestone - see the
+    build plan's "Where this fits" section for the full reasoning).
+
+    Stage 1 (this module's initial contents): module scaffold + encrypted
+    credential storage only - SarvamCredential/SarvamCredentialRepository/
+    SarvamCredentialService/SarvamApiException/SarvamController. No actual
+    call to api.sarvam.ai happens yet; that starts in Stage 2 (chat
+    completion provider, in core/chat) and Stage 3 (translation/STT/TTS/
+    transliteration/language-ID clients, added directly to this module).
+
+    Credential model: per-tenant BYOK, schema-scoped like TwilioCredential/
+    LlmProviderCredential/GoogleCredential - no tenant_id column needed,
+    schema-per-tenant multi-tenancy already isolates it. Depends on: crypto
+    (EncryptionService for the stored key), security (TenantContext - none
+    needed directly in Stage 1, but every sibling module in this position
+    depends on it for the stages that follow), tenancy (not used in Stage 1
+    either, kept for parity with "google"'s dependency set since Stage 2+
+    will need TenantSchemaResolver-adjacent lookups the same way Twilio's
+    credential activation does).
+  </description>
+
+  <dependencies>
+    <!-- ListPaging / OffsetLimitRequest for the paged generated-audio list. Acyclic:
+         tenancy depends on admin/audit/billing/security/storage/dbauth, never on sarvam. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>crypto</artifactId>
+    </dependency>
+    <!-- Storage migration Stage 3: SarvamGeneratedAudioService uploads
+         synthesized WAV clips to S3-compatible object storage instead of
+         base64-in-Postgres - see FileStorageService's javadoc. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>storage</artifactId>
+    </dependency>
+    <!-- HttpStatusMapped: this module's exceptions declare their own HTTP
+         mapping for the central exception handler (ADR-0011 rule a). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <!-- SpeechTextNormalizer: SarvamTextToSpeechClient#synthesize must not
+         hand raw markdown/emoji to bulbul, or it reads the asterisks out
+         loud (2026-07-29 live bug). Leaf module, no transitive weight. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>speech</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 2: SarvamTextToSpeechProvider / SarvamSpeechToTextProvider implement the
+         providers modality SPIs and SarvamProviderCredentialSource implements
+         ExternalProviderCredentialSource
+         (moved here from core/providers). Arrow is vendor -> kernel SPI;
+         providers must never depend back on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>providers</artifactId>
+    </dependency>
+    <!-- ADR-0011 phase 4 prep: the Sarvam agent tool adapters
+         (com.agenticai.core.sarvam.agenttools: translate, transliterate,
+         transcribe, language-id tools, speak capability providers, audio quota)
+         implement the kernel's agentspi ports, so they live here with the
+         vendor and not in core/agents. Arrow is vendor -> kernel; agents must
+         never depend back on this module. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agentspi</artifactId>
+    </dependency>
+    <!-- Still compile scope: SarvamToolsCapability implements the kernel's
+         agents.capability.AgentCapability (CapabilityAvailability) and reads and
+         writes agents.Agent's sarvamEnabled flag. That is the one remaining
+         sarvam -> agents edge; it goes once AgentCapability has a port. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

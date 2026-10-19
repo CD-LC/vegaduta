@@ -1,0 +1,132 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Webhooks &amp; Callbacks — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="api" data-page="webhooks.html" data-doc="VD-API-004" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="overview.html">API Reference</a><span class="sep">/</span>Webhooks &amp; Callbacks</div>
+<div class="doc-meta" data-auto></div>
+<h1>Webhooks &amp; Callbacks</h1>
+
+<dl class="props">
+  <dt>Inbound base</dt><dd><code>https://api.example.com/webhook/**</code> and <code>/api/billing/webhook/**</code> (public URL that providers call).</dd>
+  <dt>Spring Security</dt><dd><code>permitAll</code> by design: third-party servers cannot present a Keycloak token. Each controller authenticates the payload itself. See <a href="authentication.html">Authentication</a>.</dd>
+  <dt>Outbound</dt><dd>Tenant-managed subscriptions at <code>/api/webhooks</code> (HMAC-signed, retried).</dd>
+  <dt>Delivery model</dt><dd>Providers are at-least-once; core de-duplicates on provider ids or content hashes before acting.</dd>
+</dl>
+
+<h2>Inbound: channel and provider callbacks</h2>
+<p>All are <code>POST</code> unless a GET is noted. "Credential" is the header or field the handler checks.</p>
+<table>
+  <thead><tr><th>Path</th><th>Controller</th><th>Credential</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>/webhook/meta/whatsapp</code> (GET, POST)</td><td><code>MetaWhatsAppWebhookController</code></td><td>POST: <code>X-Hub-Signature-256</code>. GET: <code>hub.mode=subscribe</code> + <code>hub.verify_token</code> (constant-time match with <code>app.meta.webhook-verify-token</code>)</td><td>GET echoes <code>hub.challenge</code> as <code>text/plain</code>, else 403.</td></tr>
+    <tr><td><code>/webhook/meta/social</code> (GET, POST)</td><td><code>MetaSocialWebhookController</code></td><td><code>X-Hub-Signature-256</code> (POST); same GET handshake</td><td>Messenger / Instagram.</td></tr>
+    <tr><td><code>/webhook/twilio/whatsapp</code></td><td><code>TwilioWebhookController</code></td><td><code>X-Twilio-Signature</code> validated with the tenant's own auth token</td><td><code>application/x-www-form-urlencoded</code>.</td></tr>
+    <tr><td><code>/webhook/twilio/sms</code></td><td><code>TwilioSmsWebhookController</code></td><td><code>X-Twilio-Signature</code></td><td>Form-encoded.</td></tr>
+    <tr><td><code>/webhook/twilio/status</code></td><td><code>TwilioStatusCallbackController</code></td><td><code>X-Twilio-Signature</code></td><td>Delivery status callbacks.</td></tr>
+    <tr><td><code>/webhook/twilio/voice</code>, <code>/voice/collect</code>, <code>/voice/menu-collect</code></td><td><code>TwilioVoiceWebhookController</code></td><td>Twilio signature (same validator)</td><td>Voice and DTMF menu flow.</td></tr>
+    <tr><td><code>/webhook/telegram/{botUserId}</code></td><td><code>TelegramWebhookController</code></td><td><code>X-Telegram-Bot-Api-Secret-Token</code> compared with the tenant's stored secret; mismatch 403</td><td>Unknown bot is ignored with 200. De-duped on <code>update_id</code>.</td></tr>
+    <tr><td><code>/webhook/slack</code></td><td><code>SlackWebhookController</code></td><td><code>X-Slack-Request-Timestamp</code> + <code>X-Slack-Signature</code></td><td>Answers <code>url_verification</code> by echoing <code>challenge</code>; handles <code>event_callback</code>.</td></tr>
+    <tr><td><code>/webhook/teams/{appId}</code></td><td><code>TeamsWebhookController</code></td><td><code>Authorization</code> header (verification scheme not confirmed here)</td><td>Bot activity delivery.</td></tr>
+    <tr><td><code>/webhook/discord</code></td><td><code>DiscordWebhookController</code></td><td><code>X-Internal-Secret</code> (shared with the Discord gateway service); mismatch 403</td><td>Internal hop from the Node gateway, not from Discord directly.</td></tr>
+    <tr><td><code>/webhook/razorpay</code></td><td><code>RazorpayWebhookController</code> (<code>core/tenancy</code>)</td><td><code>X-Razorpay-Signature</code>; bad or missing signature 403 via <code>GlobalExceptionHandler</code></td><td>Tenant-state machine for the optional Razorpay gateway (hosted billing; off by default). Dedupe on <code>X-Razorpay-Event-Id</code>. Profile <code>security</code>.</td></tr>
+    <tr><td><code>/api/billing/webhook/{gateway}</code></td><td><code>BillingWebhookController</code> (<code>core/billing</code>)</td><td><code>X-Razorpay-Signature</code> verified by the resolved gateway client; unknown gateway 404; bad signature 401</td><td>Gateway-agnostic. Always 200 after verification (failures are logged, not re-raised) so the gateway does not retry-storm.</td></tr>
+    <tr><td><code>/webhook/alerts/alertmanager</code></td><td><code>PlatformAlertWebhookController</code></td><td><code>Authorization: Bearer &lt;shared-secret&gt;</code> (constant-time compare)</td><td>Fails closed: 503 if the secret is unset, 401 on mismatch, else <code>{"recorded": n}</code>. Own filter chain.</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-note">
+  <div class="callout-title">Not covered</div>
+  <code>DemoWhatsAppWebhookController</code> and <code>DemoTelegramWebhookController</code> (demo sandbox channels, <code>core/omnichannel/demo</code>),
+  the OAuth redirect callbacks (<code>/oauth/{google,x,atlassian}/callback</code>) and <code>/scim/v2</code> are
+  listed in <a href="authentication.html">Authentication</a> but their payload contracts are not documented here.
+</div>
+
+<h3>Inbound processing pattern</h3>
+<pre class="mermaid">
+sequenceDiagram
+  participant P as Provider
+  participant W as Webhook controller
+  participant T as TenantResolutionService
+  participant D as Dedup (Redis)
+  participant S as AgentChatService / workflow
+  P->>W: POST /webhook/... (signature or secret)
+  W->>T: resolve tenant from provider account id
+  W->>W: verify signature with tenant credential
+  W->>D: claim delivery id
+  D-->>W: new or duplicate
+  W->>S: run agent turn / trigger workflow
+  W-->>P: 200 (fast)
+</pre>
+<p>
+  Tenant is resolved from the provider's account identifier (bot id, phone-number id, team id, and so on) through the
+  control plane, then <code>TenantContext</code> is set to that schema. Deep behaviour per channel is in
+  <a href="../functional/channels-omnichannel.html">Channels &amp; Omnichannel</a>.
+</p>
+
+<h2>Inbound: workflow webhook triggers</h2>
+<table>
+  <thead><tr><th>Path</th><th>Credential</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST /webhook/workflows/{token}</code></td><td>The secret <code>{token}</code> itself (SHA-256 hashed for lookup); one token per Trigger node</td><td>Unknown token or disabled node: 404. Node not in shared-secret auth mode: 409. Workflow not ACTIVE: 409. Redelivery: 409. Success: 200 with the run (<code>WorkflowRunResponse</code>). JSON body is optional; it becomes the run input.</td></tr>
+    <tr><td><code>POST /webhook/workflows/oidc/{workflowId}</code></td><td><code>Authorization: Bearer &lt;jwt&gt;</code> with a tenant JWT whose <code>realm_access.roles</code> contains <code>workflow-trigger</code></td><td>503 if no JWT decoder (security profile off). Missing bearer or invalid token: 401. Role or tenant problems: 401/403 per the controller.</td></tr>
+  </tbody>
+</table>
+<p>
+  De-duplication on the token path uses the first of <code>X-Delivery-Id</code>, <code>X-Webhook-Id</code>, <code>X-Request-Id</code> that the sender
+  provides, else a SHA-256 of the body, scoped by trigger node. The <code>workflow-trigger</code> role is a realm role that is not
+  auto-provisioned; it must be assigned to a service account in Keycloak. Tokens are created and revoked through
+  <code>GET/POST/DELETE /api/workflows/{workflowId}/nodes/{nodeId}/webhook</code> (<code>PERM_MANAGE_WORKFLOWS_ADMIN</code>). See
+  <a href="../functional/workflows.html">Workflow Engine</a>.
+</p>
+
+<h2>Outbound: tenant webhook subscriptions</h2>
+<p>
+  <code>WebhookSubscriptionController</code>, base <code>/api/webhooks</code>. Writes (POST, PATCH, DELETE) need
+  <code>PERM_MANAGE_INTEGRATIONS</code>; GETs need any authenticated tenant member.
+</p>
+<table>
+  <thead><tr><th>Verb and path</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /api/webhooks</code></td><td>List subscriptions.</td></tr>
+    <tr><td><code>GET /api/webhooks/event-types</code></td><td>Event catalogue (<code>WebhookEventCatalog</code>).</td></tr>
+    <tr><td><code>GET /api/webhooks/{id}</code></td><td>One subscription.</td></tr>
+    <tr><td><code>POST /api/webhooks</code></td><td>Create. Body <code>{name (max 120), url (max 2048), eventTypes[]}</code>. The signing secret is returned in plaintext only here and on rotate.</td></tr>
+    <tr><td><code>PATCH /api/webhooks/{id}</code></td><td>Update <code>name</code>, <code>url</code>, <code>eventTypes</code>, <code>enabled</code>.</td></tr>
+    <tr><td><code>DELETE /api/webhooks/{id}</code></td><td>Delete.</td></tr>
+    <tr><td><code>POST /api/webhooks/{id}/rotate-secret</code></td><td>New signing secret (returned once).</td></tr>
+    <tr><td><code>POST /api/webhooks/{id}/test</code></td><td>Enqueue a synthetic <code>webhook.test</code> delivery; returns <code>{"deliveryId": ...}</code>.</td></tr>
+    <tr><td><code>GET /api/webhooks/{id}/deliveries</code></td><td>Newest 100 deliveries: <code>id, eventType, runId, status, attemptCount, responseCode, lastError, createdAt, deliveredAt, durationMs</code>.</td></tr>
+  </tbody>
+</table>
+<h3>Event types (catalogue)</h3>
+<p>
+  <code>workflow.run.started|completed|failed|cancelled|resumed</code>, <code>workflow.node.completed</code>, <code>workflow.output.emitted</code>,
+  <code>approval.requested</code>, <code>approval.resolved</code>, <code>approval.execution.recorded</code>,
+  <code>document.generation.completed</code>, an agent-reply-completed event (payload includes <code>agentId</code>, <code>sessionId</code>),
+  inbound-channel-message events (Discord, X, Telegram, email and Teams entries were read; earlier entries in the catalogue were not), and <code>webhook.test</code>.
+  Use <code>GET /api/webhooks/event-types</code> for the authoritative list on a deployment.
+</p>
+<h3>Delivery contract</h3>
+<ul>
+  <li>HTTP <code>POST</code>, <code>Content-Type: application/json</code>, <code>User-Agent: VegaDuta-Webhooks/1.0</code>; connect timeout 5 s, request timeout 15 s; redirects are never followed (a 3xx is a failure).</li>
+  <li>Headers: <code>X-VegaDuta-Event</code>, <code>X-VegaDuta-Delivery</code> (delivery id), <code>X-VegaDuta-Signature: t=&lt;unix&gt;,v1=&lt;hex&gt;</code> where <code>v1 = HMAC-SHA256(secret, "&lt;t&gt;.&lt;raw body&gt;")</code>.</li>
+  <li>Any 2xx marks the delivery DELIVERED; anything else retries with exponential backoff (30 s doubling, capped at 30 min) up to 10 attempts, then DEAD. At-least-once: receivers must be idempotent (use <code>X-VegaDuta-Delivery</code>).</li>
+  <li>The target URL passes the same SSRF guard as remote MCP URLs at save time and again at send time.</li>
+  <li>The JSON body envelope is not specified on this page (payload shape per event is not documented in the repository beyond the catalogue descriptions).</li>
+</ul>
+<pre><code># verify (pseudo): reject if abs(now - t) is large, then compare
+expected = hex(hmac_sha256(secret, t + "." + raw_body))
+constant_time_equal(expected, v1)</code></pre>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>core/security/.../SecurityConfig.java</code> — <code>/webhook/**</code>, <code>/api/billing/webhook/**</code> permitAll, <code>alertWebhookFilterChain</code>, webhook admin gates.</li>
+  <li><code>core/omnichannel/src/main/java/com/agenticai/core/omnichannel/{meta,twilio,telegram,slack,teams,discord}/*WebhookController.java</code> and <code>TwilioStatusCallbackController.java</code>.</li>
+  <li><code>core/workflow/.../WorkflowWebhookController.java</code>, <code>WorkflowController.java</code> (node webhook management).</li>
+  <li><code>core/billing/.../gateway/BillingWebhookController.java</code>; <code>core/tenancy/.../RazorpayWebhookController.java</code>; <code>core/platform/.../PlatformAlertWebhookController.java</code>.</li>
+  <li><code>core/eventbus/.../webhook/WebhookSubscriptionController.java</code>, <code>WebhookDeliveryRelay.java</code>, <code>WebhookSignature.java</code>, <code>WebhookEventCatalog.java</code>.</li>
+  <li>Related: <a href="../functional/channels-omnichannel.html">Channels &amp; Omnichannel</a>, <a href="../architecture/channels-integrations.html">Channels &amp; Integrations</a>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

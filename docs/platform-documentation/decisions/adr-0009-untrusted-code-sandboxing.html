@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADR-0009 Untrusted-Code Sandboxing — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="decisions" data-page="adr-0009-untrusted-code-sandboxing.html" data-doc="VD-ADR-009" data-status="verified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span><a href="index.html">Decisions</a><span class="sep">/</span>ADR-0009 Untrusted-Code Sandboxing</div>
+<div class="doc-meta" data-auto></div>
+<h1>ADR-0009: Untrusted code never runs inside core</h1>
+
+<dl class="props">
+  <dt>Status</dt><dd><span class="badge badge-verified">accepted</span></dd>
+  <dt>Decided</dt><dd>Analysis 2026-07-27 (the design doc's date); MCP STDIO isolation implemented 2026-08-05 (design doc section 8); seccomp profile 2026-09-23. The design analysis initially recommended a review gate; the sidecar followed.</dd>
+  <dt>Deciders</dt><dd>Platform Engineering, with product confirmation that self-service STDIO was never meant to be instantly live.</dd>
+  <dt>Motivating finding</dt><dd>An internal security review (not published), finding C1 (Critical): a tenant-admin could register an STDIO MCP server for any npm/PyPI package and get code execution inside the shared core container. No exploitation is recorded.</dd>
+</dl>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Off by default</div>
+  The design (separate services) is verified. Both paths are off until you enable them: Compose profiles
+  <code>sandbox</code> / <code>tools</code> (the CLI sets <code>TOOL_SANDBOX_ENABLED</code> and
+  <code>MCP_STDIO_SIDECAR_ENABLED</code>), or the Helm <code>global.components</code> values. See "Consequences".
+</div>
+
+<h2>Context</h2>
+<p>
+  Two features run code the platform did not write. <strong>Custom code tools</strong>: a tenant-admin writes a
+  Java or Python program that becomes an agent tool. <strong>Dynamic MCP STDIO servers</strong>: a
+  registration can point at <code>npx</code>/<code>uvx</code>/<code>node</code>/<code>python</code> and run any
+  published package. Before isolation, the STDIO child was a subprocess of the core JVM: same container, same
+  networks as Postgres/Redis/Keycloak, and core holds <code>APP_ENCRYPTION_KEY</code>, the datasource password,
+  the Keycloak client secret and decrypted tenant provider keys. The security review concluded that no further allowlist
+  closes this; only container isolation does. The command guard blocks inline-eval flags but,
+  by design, not "run this published package".
+</p>
+
+<h2>Decision</h2>
+<p>Tenant-influenced code executes only in dedicated services with no platform secrets and no route to the data tier; core keeps only a thin client.</p>
+<ul>
+  <li><strong><code>tool-sandbox</code></strong> compiles, verifies and runs tenant Java/Python tools. Core calls it through <code>ToolSandboxClient</code> (<code>core/agents/.../tools/code/</code>); it is built only when <code>tool-sandbox.enabled</code> is true, and requests need an internal token plus tenant id. Its README lists its layers: no platform credentials in the container; an <code>internal: true</code> compose network; dropped capabilities, no-new-privileges and a uid drop to 5001; scrubbed environment, rlimits and wall-clock kill; Java bytecode verification against a denylist; per-tenant budgets.</li>
+  <li><strong><code>mcp-stdio-runner</code></strong> spawns the real STDIO subprocess. Core spawns a local relay (<code>core/mcp-stdio-proxy/proxy.js</code>) that opens one TCP connection to the runner; the connection is the child's lease, and closing it kills the child. The runner drops all capabilities, runs as a fixed unprivileged user, rejects requests without the shared secret, and re-checks an allowlist of launchers. The compose network is deliberately not <code>internal</code> so packages can be fetched, so egress to the internet remains open. A custom seccomp profile (2026-09-23) is wired through <code>security_opt</code>.</li>
+  <li><strong>A review gate sits in front of it:</strong> custom STDIO registrations carry a <code>McpReviewStatus</code> (<code>PENDING</code> until platform staff approve) and <code>connect()</code>/<code>test()</code> refuse unapproved ones. The design doc calls this a policy control, not isolation.</li>
+  <li>Both features are fail-closed and off unless explicitly configured on the core side, and an empty secret makes the service reject everything.</li>
+</ul>
+<pre class="mermaid">
+flowchart LR
+  core[core: holds secrets] -->|internal token + tenant id| ts[tool-sandbox: sandbox-net internal]
+  core -->|relay, shared secret| rn[mcp-stdio-runner: mcp-stdio-net]
+  rn -->|npm / PyPI egress| net((Internet))
+  core --- data[(Postgres / Redis / Keycloak)]
+</pre>
+
+<h2>Alternatives considered</h2>
+<p>From <code>docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md</code>, evaluated on the Compose stack of that day:</p>
+<table>
+  <thead><tr><th>Option</th><th>Outcome</th></tr></thead>
+  <tbody>
+    <tr><td>(a) Separate unprivileged sidecar container</td><td><strong>Chosen and built</strong>, initially estimated at 2 to 3 weeks; the built version relays raw bytes through a small Node relay, avoiding a new Java MCP transport.</td></tr>
+    <tr><td>(b) gVisor / Firecracker microVM</td><td>Not feasible on that host: no KVM through WSL2, no <code>runsc</code> installed. Only additive to (a) anyway.</td></tr>
+    <tr><td>(c) bubblewrap / nsjail inside core</td><td>Rejected: would need extra capability on the secret-holding container and does not remove network access without re-deriving (a).</td></tr>
+    <tr><td>(d) Staff review gate only</td><td>Shipped as the interim control (section 7 of the doc); does not fix the isolation gap.</td></tr>
+  </tbody>
+</table>
+<p>For Python tools, the tool-sandbox README says static checks are hardening, not a boundary, and names a per-execution kernel namespace (gVisor or per-call container) as the stronger option. It is not implemented.</p>
+
+<h2>Consequences</h2>
+<h3>Positive</h3>
+<ul>
+  <li>A compromised tool or package lands in a container holding no platform secret and with no route to the data tier. For tool-sandbox, the README says total compromise yields "a container that can run code".</li>
+  <li>Existing core-side protections (per-tenant STDIO caps, self-heal, stderr capture) are unchanged, because core still owns a local child process (the relay).</li>
+  <li>Component tests exist: <code>services/mcp-stdio-runner/server.test.js</code>, <code>core/mcp-stdio-proxy/proxy.test.js</code>, <code>services/tool-sandbox/tests</code>.</li>
+</ul>
+<h3>Negative / costs</h3>
+<ul>
+  <li><strong>Residual risk in the docs:</strong> mcp-stdio-runner can still reach the public internet; Python tool checks are not escape-proof; JVM/CPython 0-days are out of scope.</li>
+  <li><strong>Not measured:</strong> round-trip latency, and a full booted end-to-end registration through core, relay and runner, are listed as open in the design doc.</li>
+  <li><strong>Runtime needs:</strong> the sandboxes need Linux isolation features that some managed container platforms do not grant (see <a href="adr-0004-hosted-container-runtime.html">ADR-0004</a>). In Compose they sit on their own networks (<code>sandbox-net</code>, <code>mcp-stdio-net</code>); on Kubernetes use the charts' <code>runtimeClassName</code> and NetworkPolicies.</li>
+  <li><strong>Verify end to end:</strong> after enabling, register a real STDIO MCP server and a custom code tool and check they run in the runner/sandbox, not in core.</li>
+  <li>Duplicated launcher allowlist in <code>server.js</code> and <code>McpStdioCommandGuard</code> must be kept in sync by hand.</li>
+</ul>
+<div class="callout callout-danger">
+  <div class="callout-title">Standing rule</div>
+  Do not run tenant-supplied code, or spawn tenant-chosen packages, inside the core process or container. Core-side
+  guards are a gate, not the boundary; the boundary is the separate service. Keep the shared secrets non-empty,
+  and never give tool-sandbox or mcp-stdio-runner platform credentials.
+</div>
+
+<h2>Evidence &amp; references</h2>
+<ul>
+  <li><code>docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md</code> — options (a) to (d), 2026-08-05 implementation and review gate, 2026-09-23 seccomp update, open items.</li>
+  <li><code>services/tool-sandbox/README.md</code> — threat model, layers, "not claimed" list, enabling flags.</li>
+  <li><code>services/mcp-stdio-runner/README.md</code> — wire protocol, lease lifecycle, fail-closed and network posture.</li>
+  <li><code>deploy/compose/docker-compose.yml</code> — <code>sandbox-net</code>, <code>mcp-stdio-net</code>, <code>TOOL_SANDBOX_*</code>, <code>MCP_STDIO_SIDECAR_*</code> settings.</li>
+  <li><code>core/app-config/src/main/resources/application.yml</code> — <code>tool-sandbox.*</code> properties (default disabled); <code>core/agents/src/main/java/com/agenticai/core/agents/tools/code/ToolSandboxClient.java</code>.</li>
+</ul>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>

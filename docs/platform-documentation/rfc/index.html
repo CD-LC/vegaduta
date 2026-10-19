@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RFC Index &amp; Process — VegaDūta Docs</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-base="../" data-section="rfc" data-page="index.html" data-doc="VD-RFC-000" data-status="unverified" data-updated="2026-09-26" data-owner="Platform Engineering">
+<header id="site-header"></header><nav id="site-nav"></nav><main id="content"><div class="doc-body">
+<div class="crumbs"><a href="../index.html">Docs</a><span class="sep">/</span>RFC Process<span class="sep">/</span>RFC Index &amp; Process</div>
+<div class="doc-meta" data-auto></div>
+<h1>RFC Index &amp; Process</h1>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Proposed process, not yet adopted</div>
+  The repository contains no RFC process document, and no RFCs exist yet. This page defines a
+  lightweight process for review. Until the team adopts it (for example by referencing it from
+  <code>CONTRIBUTING.md</code>), treat it as a proposal, and treat the index below as empty.
+</div>
+
+<p class="lede">
+  An RFC (request for comments) is a written proposal opened <em>before</em> a consequential change is built,
+  so that affected owners can object cheaply. Once a proposal is decided, its outcome is recorded as an
+  <a href="../decisions/index.html">ADR</a>; the RFC stays as the discussion record.
+</p>
+
+<h2>RFC index</h2>
+<table>
+  <thead><tr><th>RFC</th><th>Title</th><th>Status</th><th>Author</th><th>Outcome</th></tr></thead>
+  <tbody>
+    <tr><td><a href="rfc-0000-template.html">RFC-0000</a></td><td>Template (not a proposal)</td><td><span class="badge badge-draft">template</span></td><td>n/a</td><td>Copy this to start a new RFC</td></tr>
+    <tr><td colspan="5"><em>No RFCs have been filed.</em></td></tr>
+  </tbody>
+</table>
+
+<h2>RFC or ADR?</h2>
+<table>
+  <thead><tr><th></th><th>RFC</th><th>ADR</th></tr></thead>
+  <tbody>
+    <tr><td>Purpose</td><td>Ask for review of a proposal that is not yet decided</td><td>Record a decision that has been made</td></tr>
+    <tr><td>Written</td><td>Before implementation</td><td>At decision time, or afterwards to capture what already exists</td></tr>
+    <tr><td>Mutability</td><td>Edited freely while open; frozen when closed</td><td>Append-only after acceptance (dated clarifications and supersession links)</td></tr>
+    <tr><td>Skip it when</td><td>The change is reversible, local to one module, and touches no other owner's files</td><td>The choice is reversible implementation detail</td></tr>
+  </tbody>
+</table>
+
+<h2>When to write an RFC</h2>
+<ul>
+  <li>A change that crosses module or service boundaries owned by different maintainers (see <code>.github/CODEOWNERS</code>), when it is more than a one-line dependency.</li>
+  <li>Anything that would meet the ADR tests (hard to reverse, crosses service boundaries, taught by an incident) and where more than one viable design exists.</li>
+  <li>Changes to shared infrastructure, tenancy, authentication or secret handling, where the cost of a wrong guess is an outage or a data exposure.</li>
+</ul>
+
+<h2>Lifecycle</h2>
+<table>
+  <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-draft">draft</span></td><td>The author is still writing; not ready for comments.</td></tr>
+    <tr><td><span class="badge badge-staging">open</span></td><td>Announced for review. Set a review deadline in the header.</td></tr>
+    <tr><td><span class="badge badge-verified">accepted</span></td><td>Approved to build. Link the implementing work and, where the decision is architectural, the new ADR.</td></tr>
+    <tr><td><span class="badge badge-deprecated">rejected / withdrawn</span></td><td>Closed without implementation. Keep the page and record why.</td></tr>
+    <tr><td><span class="badge badge-live">implemented</span></td><td>Shipped. Verification state must be stated exactly: compiled, tested, deployed to staging, or deployed to production are different claims.</td></tr>
+  </tbody>
+</table>
+
+<h2>Process</h2>
+<ol>
+  <li><strong>Number it.</strong> Take the next free number; numbers are never reused. Copy <a href="rfc-0000-template.html">RFC-0000 Template</a> to <code>rfc-NNNN-short-slug.html</code>.</li>
+  <li><strong>Fill the header and sections</strong>: Summary, Motivation, Detailed design, Alternatives, Risks, Rollout, Open questions. Cite repo paths for every claim about existing behaviour.</li>
+  <li><strong>Announce it.</strong> Add the row to the index above and a nav entry in <code>assets/js/site.js</code> under the <code>rfc</code> section; open a GitHub issue or discussion linking to it.</li>
+  <li><strong>Review.</strong> Owners of affected scopes comment until the deadline. Record objections and how they were resolved in the page, not only in chat.</li>
+  <li><strong>Decide.</strong> The owner of the affected area (per <code>CODEOWNERS</code>), or the maintainers where ownership is unclear, accept or reject. Set the status and date.</li>
+  <li><strong>Close the loop.</strong> On acceptance, write or update the ADR; on implementation, update the RFC with what actually shipped.</li>
+</ol>
+
+<div class="callout callout-note">
+  <div class="callout-title">Constraints that apply to every RFC</div>
+  A proposal must respect the standing deployment rules (see <a href="../development/conventions.html">Conventions</a>):
+  production and staging stay distinct; no browser-facing URL points at <code>localhost</code>; and no rollout step may
+  stop, delete or power-cycle production. An RFC that needs such an action must say so and leave the
+  decision to a human.
+</div>
+
+</div></main>
+<script src="../assets/js/site.js"></script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true, theme:"neutral"});</script>
+</body></html>
