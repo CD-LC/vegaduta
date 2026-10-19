@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, poolLabel, showPlatformPoolToggle, workflowNodeOffered } from "./personalInstall";
+import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, poolLabel, showPlatformPoolToggle, tierCommand, workflowNodeOffered } from "./personalInstall";
 
 // getPublicEnv reads NEXT_PUBLIC_AUTH_MODE from the public runtime config; the
 // test setup leaves it unset, which is the hosted/Keycloak default. Local-auth
@@ -101,6 +101,21 @@ describe("hiddenOnPersonalInstall", () => {
     hosted();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);
     expect(hiddenOnPersonalInstall("/add-ons-extra")).toBe(false);
+  });
+});
+
+describe("tierCommand", () => {
+  it("names the personal launcher on a personal install", () => {
+    local();
+    expect(tierCommand("--local-ai=host")).toBe("scripts/vegaduta personal --local-ai=host");
+    expect(tierCommand("")).toBe("scripts/vegaduta personal");
+  });
+  it("names `up --lite` on the lite tier and `up --full` on the shared one", () => {
+    lite();
+    expect(tierCommand("--browser")).toBe("scripts/vegaduta up --lite --browser");
+    hosted();
+    expect(tierCommand("--browser")).toBe("scripts/vegaduta up --full --browser");
+    expect(tierCommand("")).toBe("scripts/vegaduta up --full");
   });
 });
 

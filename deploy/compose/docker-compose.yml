@@ -497,6 +497,42 @@ services:
           memory: ${KEYCLOAK_MEM_LIMIT:-1g}
     networks: [data-tier, agent-io, app]
 
+  # The realm file's ${env.*} placeholders substitute on import EXCEPT a client
+  # `secret`, which lands as the literal "${env.KEYCLOAK_CLIENT_SECRET}" - every
+  # admin-API call (tenant signup included) then fails 401 until the realm is
+  # reconciled. The CLI runs the same script after `up` (reconcile_keycloak);
+  # this one-shot makes a plain `docker compose up` converge the same way.
+  # Idempotent; shares keycloak's network namespace so the script's
+  # localhost:8080 is this realm's Keycloak.
+  keycloak-reconcile:
+    image: quay.io/keycloak/keycloak:26.7.5
+    <<: [*logging, *nnp]
+    restart: "no"
+    network_mode: "service:keycloak"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      <<: *keycloak-env
+      REALM: ${KEYCLOAK_REALM:-agentic-ai}
+      # The script takes short names; the CLI maps the same .env keys into them.
+      SH: ${KEYCLOAK_SMTP_HOST:-}
+      SP: ${KEYCLOAK_SMTP_PORT:-587}
+      SF: ${KEYCLOAK_SMTP_FROM:-}
+      SD: ${KEYCLOAK_SMTP_FROM_DISPLAY:-}
+      SU: ${KEYCLOAK_SMTP_USER:-}
+      SW: ${KEYCLOAK_SMTP_PASSWORD:-}
+      ST: ${KEYCLOAK_SMTP_STARTTLS:-true}
+      GGID: ${GOOGLE_CLIENT_ID:-}
+      GGSEC: ${GOOGLE_CLIENT_SECRET:-}
+      GHID: ${GITHUB_CLIENT_ID:-}
+      GHSEC: ${GITHUB_CLIENT_SECRET:-}
+      MSID: ${MICROSOFT_CLIENT_ID:-}
+      MSSEC: ${MICROSOFT_CLIENT_SECRET:-}
+    entrypoint: ["bash", "/realm-reconcile.kcadm.sh"]
+    volumes:
+      - ../keycloak/reconcile-realm.kcadm.sh:/realm-reconcile.kcadm.sh:ro
+
   # -------------------------------------------------------------- app tier
   sidecar:
     # Python ML/ingestion sidecar: chunk / embed / rerank / transcribe / render.

@@ -13,6 +13,7 @@ import { Alert } from "../ui/alert";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { OLLAMA_INSTALL_LINKS, detectOs, fmtGb } from "./ollamaInstall";
+import { tierCommand } from "../../lib/personalInstall";
 import {
   canStart,
   exceedsRam,
@@ -174,7 +175,7 @@ function OllamaMissing({
       <AlertTriangle aria-hidden="true" />
       <div className="flex flex-col gap-2">
         <p className="font-semibold">{t("ollamaMissingTitle")}</p>
-        <p>{t("ollamaMissingBody", { url: rec.ollama.baseUrl })}</p>
+        <p>{t("ollamaMissingBody", { url: rec.ollama.baseUrl, cmd: tierCommand("--local-ai=host") })}</p>
         <ul className="flex flex-wrap gap-2">
           {(["mac", "windows", "linux"] as const).map((key) => (
             <li key={key}>

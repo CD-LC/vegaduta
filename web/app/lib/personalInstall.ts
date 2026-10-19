@@ -73,6 +73,21 @@ export function isPersonalInstall(): boolean {
   return isLocalAuth();
 }
 
+/**
+ * The vegaduta CLI command that fits this install's shape - `personal` on the one-user
+ * install, `up --lite`/`up --full` on the Keycloak tiers. Mirrors the backend's
+ * apply-command switch (AddonService.BASE_COMMAND_*): the flag tail (`rest`) reads
+ * identically on every tier, e.g. "--local-ai=host" or "--browser".
+ */
+export function tierCommand(rest = ""): string {
+  const base = isLocalAuth()
+    ? "scripts/vegaduta personal"
+    : isLiteInstall()
+      ? "scripts/vegaduta up --lite"
+      : "scripts/vegaduta up --full";
+  return rest ? `${base} ${rest}` : base;
+}
+
 /** What the pool row is called on a personal install; matches core's bootstrap label (app.local-llm.bootstrap.label). */
 export const LOCAL_MODEL_LABEL = "Local model (Ollama)";
 

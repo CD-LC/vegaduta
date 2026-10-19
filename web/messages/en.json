@@ -13,7 +13,8 @@
     "profileEmpty": "No login saved yet.",
     "profileNone": "No saved login is linked to this agent, so a sign-in lasts only while its browser session lives.",
     "profileManage": "Manage saved logins",
-    "unavailableReason": "The agent's browser needs the browser add-on, which this installation does not run. Turn it on in the Setup app (\"Let the assistant browse the web\") or run scripts/vegaduta personal --browser."
+    "unavailableReason": "The agent's browser needs the browser add-on, which this installation does not run. Enable it by running {cmd}.",
+    "unavailableReasonPersonal": "The agent's browser needs the browser add-on, which this installation does not run. Turn it on in the Setup app (\"Let the assistant browse the web\") or run {cmd}."
   },
   "featureUnavailable": {
     "titlePersonal": "{feature} is not available in the personal installation",
@@ -14384,7 +14385,7 @@
     "gradeConstrainedHint": "The platform guides the model into valid tool calls. Works, but can be less reliable than native.",
     "gradeNoneHint": "Chat only. Tools will not be offered to this model.",
     "ollamaMissingTitle": "Ollama was not found",
-    "ollamaMissingBody": "VegaDūta could not reach Ollama at {url}. Install it and make sure it is running, then check again. If Ollama already runs on this computer, point VegaDūta at it: run scripts/vegaduta personal --local-ai=host, or set APP_LOCAL_LLM_BOOTSTRAP_BASE_URL and APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS in deploy/compose/.env and recreate core. Nothing is downloaded or installed for you.",
+    "ollamaMissingBody": "VegaDūta could not reach Ollama at {url}. Install it and make sure it is running, then check again. If Ollama already runs on this computer, point VegaDūta at it: run {cmd}, or set APP_LOCAL_LLM_BOOTSTRAP_BASE_URL and APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS in deploy/compose/.env and recreate core. Nothing is downloaded or installed for you.",
     "installFor": "Install Ollama for {os}",
     "osMac": "macOS",
     "osWindows": "Windows",
@@ -14611,7 +14612,7 @@
     "apiOk": "The console can reach the API.",
     "apiFail": "The console cannot reach the API - core may be down. In the install folder run: scripts/vegaduta logs core",
     "serverOk": "The local model server answers at {url}.",
-    "serverFail": "Nothing answers at {url} - start Ollama on this machine, or restart the stack with scripts/vegaduta personal.",
+    "serverFail": "Nothing answers at {url} - start Ollama on this machine, or restart the stack with {cmd}.",
     "modelOk": "{tag} is installed - agents can use it.",
     "modelMissing": "{tag} is not downloaded yet - pull it below, then chat works.",
     "pullModel": "Download {tag} ({gb} GB)",

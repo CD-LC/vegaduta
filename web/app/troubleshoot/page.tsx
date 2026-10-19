@@ -12,6 +12,7 @@ import AppShell from "../components/AppShell";
 import PageHeader from "../components/ax/PageHeader";
 import { Button } from "../components/ui/button";
 import { localModelsApi, type LocalModelChoice, type LocalModelRecommendation } from "../lib/api/localModels";
+import { tierCommand } from "../lib/personalInstall";
 import { academyHref, hasAcademy } from "../lib/academyUrl";
 import { useTranslations } from "../lib/i18n";
 
@@ -69,7 +70,7 @@ export default function TroubleshootPage() {
     set("api", "ok", t("apiOk"));
 
     if (!r.ollama.reachable) {
-      set("server", "fail", t("serverFail", { url: r.ollama.baseUrl }));
+      set("server", "fail", t("serverFail", { url: r.ollama.baseUrl, cmd: tierCommand("") }));
       set("model", "run", t("skipped"));
       return;
     }

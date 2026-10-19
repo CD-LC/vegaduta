@@ -11,6 +11,7 @@ import { useTranslations } from "../../lib/i18n";
 import { docPageHref } from "../../lib/siteLinks";
 import type { BrowserProfile } from "../../lib/api/browserAutomation";
 import EmptyState from "../EmptyState";
+import { isPersonalInstall, tierCommand } from "../../lib/personalInstall";
 import { Button } from "../ui/button";
 import BrowserTakeoverPanel from "../agents/BrowserTakeoverPanel";
 import type { BrowserAvailability } from "./browserAvailability";
@@ -59,7 +60,9 @@ export default function BrowserPane({
               title={tu("titlePersonal", { feature: t("title") })}
               hint={
                 <>
-                  {t("unavailableReason")}
+                  {t(isPersonalInstall() ? "unavailableReasonPersonal" : "unavailableReason", {
+                    cmd: tierCommand("--browser"),
+                  })}
                   <br />
                   {tu("guidance")}
                 </>
