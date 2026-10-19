@@ -37,7 +37,8 @@ vegaduta/
 │                          operations/, maintainers/ and api/ (OpenAPI + generated clients)
 ├── mkdocs.yml             builds docs/ into the documentation site
 ├── deploy/                Compose tiers and overlays, Helm charts (23), supporting configs (Postgres,
-│                          Keycloak, Prometheus/Grafana/Loki, LiveKit, Temporal, kind, models/catalog.txt)
+│                          Keycloak, Prometheus/Grafana/Loki, LiveKit, Temporal, kind, models/catalog.txt),
+│                          omnibus/ (the single-container personal image)
 ├── infra/                 Terraform reference modules (30: Azure, GCP, AWS, Cloudflare, Upstash) and Keycloak
 ├── contracts/             wire-format contracts (JSON Schemas + fixtures)
 ├── tests/                 end-to-end (Playwright), load tests, and install/ (installer shell tests)

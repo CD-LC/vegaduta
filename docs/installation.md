@@ -21,7 +21,17 @@ Release images are multi-arch (`linux/amd64`, `linux/arm64`) and published as
 `app-builder`, `tool-sandbox`, `mcp-stdio-runner`, `workspace-runner`, `voice-agent`, `rl-trainer`,
 `postgres` (PostgreSQL 16 with pgvector and Apache AGE; also tagged `16` for
 Compose, and `16-pgvector-age` for the CloudNativePG-based variant the Helm
-`postgres` chart uses).
+`postgres` chart uses), and `omnibus` — Postgres, a Redis-protocol store,
+core and the console in **one** container for the smallest possible install:
+
+```sh
+docker run -d --name vegaduta -v vegaduta-data:/data \
+  -p 3000:3000 -p 8080:8080 ghcr.io/cd-lc/omnibus:<version>
+```
+
+All data and the generated secrets live under `/data`. The omnibus is a
+personal-tier packaging, not a second product; the tradeoffs are in
+[Personal mode](personal-mode.md#one-container-the-omnibus-image).
 
 Each image is signed with cosign (keyless) and carries an SPDX SBOM and SLSA
 build provenance as attestations:

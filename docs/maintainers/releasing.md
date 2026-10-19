@@ -31,7 +31,7 @@ verification commands reject.
 
 | Artifact | Where | Tags |
 |---|---|---|
-| 16 multi-arch images | `ghcr.io/<owner>/<image>` | `<version>` always; `latest` and `<major>.<minor>` for stable releases; `postgres` also `16`, and the CloudNativePG variant `16-pgvector-age-<version>` / `16-pgvector-age` |
+| 17 multi-arch images + the `omnibus` single-container image | `ghcr.io/<owner>/<image>` | `<version>` always; `latest` and `<major>.<minor>` for stable releases; `postgres` also `16`, and the CloudNativePG variant `16-pgvector-age-<version>` / `16-pgvector-age`. `omnibus` is assembled from the published images after `publish` |
 | Helm charts | `oci://ghcr.io/<owner>/charts/<chart>` | chart version = `<version>` |
 | Source tarball | release assets `vegaduta-<version>.tar.gz` and `vegaduta.tar.gz` (same content) | the tarball's `deploy/compose/.env.example` has `VEGADUTA_VERSION=<version>` written in |
 | Checksums | `SHA256SUMS` | GNU `sha256sum` format (`<sha256>  <file>`, bare file names) over every tarball, chart and SBOM asset |
