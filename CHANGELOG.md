@@ -8,6 +8,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-19
 ### Changed
 
 - **License: Business Source License 1.1.** The platform (everything outside `sdk/`) is now under BSL-1.1: free for any use except offering the software itself to third parties as a competing hosted service, and each version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0 so clients embed anywhere. Versions already released under Apache-2.0 remain under Apache-2.0.
@@ -28,11 +29,6 @@ Release notes on GitHub are generated from the section for each version.
 ### Fixed
 
 - **Redis-backed counters no longer stall when the store is down.** After one failed Redis call, `RedisFixedWindowCounter` skips Redis for ~10 s instead of paying a connect timeout on every request before the in-process fallback engages — the same path `--no-valkey` installs depend on.
-
-## [0.1.4] - 2026-10-19
-
-### Fixed
-
 - **CI and security-scan pipeline.** The license scan pins the ScanCode 32.5.0
   toolchain stack it was released against, SARIF uploads (Trivy, OWASP ZAP,
   grype) now skip cleanly on repositories without code scanning enabled, the
