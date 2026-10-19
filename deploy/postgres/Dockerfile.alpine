@@ -1,0 +1,59 @@
+# Alpine variant of the pgvector + Apache AGE Postgres image - same extension
+# versions and commit pins as ./Dockerfile (KEEP THE TWO IN SYNC), on
+# postgres:16-alpine instead of postgres:16-bookworm. The alpine base is
+# roughly a third of the size of the Debian one; everything else (initdb,
+# shared_preload_libraries=age via -c, the plugins/age.so symlink the app
+# role's LOAD needs, gosu) is identical.
+#
+# Where it is used: size-sensitive installs that still need graph memory -
+# the bookworm variant stays the default for the compose tiers and the
+# release's `postgres` image; this file exists so a deployment can opt into
+# the smaller base by building it itself:
+#
+#   docker build -f deploy/postgres/Dockerfile.alpine \
+#     -t vegaduta-postgres:alpine deploy/postgres
+#
+# and pointing VEGADUTA_POSTGRES_IMAGE at the result.
+#
+# Musl vs glibc is the only real difference: the apk build deps below are the
+# alpine equivalents of the bookworm Dockerfile's apt ones, and the purge
+# happens in the same layer for the same reason. `with_llvm=no` because the
+# alpine postgres binary is built with LLVM JIT, so PGXS tries to emit clang
+# bitcode for the extensions too - neither extension needs it and pinning a
+# matching clangN package would break on every base bump.
+ARG BASE_IMAGE=postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+# hadolint ignore=DL3006
+FROM ${BASE_IMAGE}
+USER root
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ARG PGVECTOR_VERSION=v0.8.0
+ARG PGVECTOR_COMMIT=2627c5ff775ae6d7aef0c430121ccf857842d2f2
+ARG AGE_VERSION=PG16/v1.6.0-rc0
+ARG AGE_COMMIT=2db2f060c4c9265a14d40f007eb8c56febf31e4c
+ARG PG_CONFIG=/usr/local/bin/pg_config
+
+# hadolint ignore=DL3018
+RUN apk add --no-cache --virtual .build-deps \
+        build-base git flex bison readline-dev zlib-dev linux-headers perl \
+    && git clone --branch "${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector \
+    && test "$(git -C /tmp/pgvector rev-parse HEAD)" = "${PGVECTOR_COMMIT}" \
+    && make -C /tmp/pgvector PG_CONFIG="${PG_CONFIG}" with_llvm=no \
+    && make -C /tmp/pgvector install PG_CONFIG="${PG_CONFIG}" with_llvm=no \
+    && git clone --branch "${AGE_VERSION}" --depth 1 https://github.com/apache/age.git /tmp/age \
+    && test "$(git -C /tmp/age rev-parse HEAD)" = "${AGE_COMMIT}" \
+    && make -C /tmp/age PG_CONFIG="${PG_CONFIG}" with_llvm=no \
+    && make -C /tmp/age install PG_CONFIG="${PG_CONFIG}" with_llvm=no \
+    && pkglibdir="$("${PG_CONFIG}" --pkglibdir)" \
+    && mkdir -p "${pkglibdir}/plugins" \
+    && ln -sf ../age.so "${pkglibdir}/plugins/age.so" \
+    && test -e "${pkglibdir}/plugins/age.so" \
+    && rm -rf /tmp/pgvector /tmp/age \
+    && apk del .build-deps
+
+# Loading AGE: unchanged from the bookworm variant - compose and Helm pass
+# `-c shared_preload_libraries=age` at runtime; the plugins/age.so symlink
+# above is what a non-superuser's `LOAD '$libdir/plugins/age'` resolves.
+# Same final user as the bookworm variant: the official entrypoint starts as
+# root and drops to postgres itself via gosu.
+USER root
