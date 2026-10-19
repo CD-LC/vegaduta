@@ -78,14 +78,15 @@ class AddonRegistryIT extends AbstractContextIT {
         AddonApi.Overview first = service.overview(true);
         assertThat(first.addons()).extracting(AddonApi.View::id).contains("workspace", "search", "documents", "browser", "tools");
         assertThat(first.addons()).filteredOn(v -> v.id().equals("tools")).singleElement()
-                .satisfies(v -> assertThat(v.status()).isEqualTo("unavailable"));
+                .satisfies(v -> assertThat(v.status()).isEqualTo("off"));
         assertThat(first.hostBridge().configured()).isFalse(); // no app.addons.host-token in this context
 
         long auditedBefore = auditEntries("addon.enable", "browser");
         AddonApi.ChangeResult enabled = service.enable("browser", "it-owner");
         assertThat(enabled.changed()).containsExactly("browser");
         assertThat(enabled.addon().status()).isEqualTo("enable_requested");
-        assertThat(enabled.apply().envSet()).containsEntry("CORE_IMAGE_VARIANT", "-full");
+        // full tier renders the single-box --browser flag as the browser compose profile
+        assertThat(enabled.apply().profiles()).contains("browser");
         Map<String, Object> row = jdbc.queryForMap("SELECT * FROM control_plane.addon_state WHERE addon_id = 'browser'");
         assertThat(row).containsEntry("desired", true).containsEntry("rev", 1L).containsEntry("desired_by", "it-owner");
         // the audit log is append-only: count entries instead of clearing them
@@ -120,7 +121,10 @@ class AddonRegistryIT extends AbstractContextIT {
     void aFirstReportForAnUntouchedAddonCreatesItsRowWithoutChangingTheWish() {
         service.hostReport(new AddonApi.ReportRequest(List.of(new AddonApi.ReportItem("workspace", 0L, "running", null))));
         Map<String, Object> row = jdbc.queryForMap("SELECT * FROM control_plane.addon_state WHERE addon_id = 'workspace'");
-        assertThat(row).containsEntry("desired", true).containsEntry("rev", 0L).containsEntry("reported_status", "running");
+        // On the full tier 'workspace' is not applicable to the install, so the first host
+        // report records it with desired=effectiveNow=false rather than inheriting the
+        // single-box default-on wish.
+        assertThat(row).containsEntry("desired", false).containsEntry("rev", 0L).containsEntry("reported_status", "running");
         assertThat(row.get("desired_by")).isNull();
     }
 

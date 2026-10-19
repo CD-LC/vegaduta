@@ -314,9 +314,9 @@ class HotPathQueryBudgetIT extends AbstractContextIT {
         assertThat(warm[0])
                 .as("budget: raise it only with a reason, and say what the new query buys")
                 .isLessThanOrEqualTo(BUDGET_TURN_CONNECTIONS);
-        assertThat(warm[1]).isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
+        assertThat(warm[1]).as(java.util.Arrays.toString(stats.getQueries())).isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
         assertThat(warmAgain[0]).isLessThanOrEqualTo(BUDGET_TURN_CONNECTIONS);
-        assertThat(warmAgain[1]).isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
+        assertThat(warmAgain[1]).as(java.util.Arrays.toString(stats.getQueries())).isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
         assertThat(cold[0]).as("a cold turn pays for the lookups once").isGreaterThan(warm[0]);
     }
 
@@ -547,9 +547,14 @@ class HotPathQueryBudgetIT extends AbstractContextIT {
      * resolution, prompt assembly, the model call), warm, against the mock model, recorded on
      * 2026-10-13: 15 connections and 14 statements (44 and 46 cold). Two of slack. The statements
      * that remain are listed in docs/architecture/HOT-PATH-PERFORMANCE.md; lower these as they are
-     * removed.
+     * removed. Raised to 17 on 2026-10-20: the warm turn now issues 17 measured statements -
+     * the two slack slots plus one. The newcomers are the RL turn recorder's per-turn
+     * bookkeeping (rl_episode open-episode lookup, rl_trajectory_step step count) and the
+     * agent_job/webhook checks that join prompt assembly; they buy episode continuity for
+     * reward attribution and job-aware turns. rl_trajectory_step could become a cached
+     * counter later; until then the queries are part of the recorded budget.
      */
     private static final long BUDGET_TURN_CONNECTIONS = 17;
 
-    private static final long BUDGET_TURN_STATEMENTS = 16;
+    private static final long BUDGET_TURN_STATEMENTS = 17;
 }
