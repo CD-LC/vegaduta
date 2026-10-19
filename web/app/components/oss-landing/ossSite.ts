@@ -130,6 +130,7 @@ export const DEPENDENCIES: { name: string; coordinates: string; body: string; st
 /** Links into the documentation. Functions, not constants: the docs site URL is runtime configuration. */
 export function resourceLinks(): { label: string; href: string }[] {
   return [
+    { label: "Downloads", href: "/downloads" },
     { label: hasDocsSite() ? "Documentation" : "Help and docs", href: docsHref() },
     { label: "Java Agent SDK", href: docPageHref("javaSdk") },
     { label: "SDKs and dependencies", href: docPageHref("sdkOverview") },

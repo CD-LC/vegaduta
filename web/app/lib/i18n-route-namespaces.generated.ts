@@ -655,6 +655,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel"
   ],
   "/docs": [],
+  "/downloads": [],
   "/earn": [
     "senses"
   ],

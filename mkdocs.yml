@@ -4,7 +4,7 @@
 # without this file; nothing here is required to read the docs.
 site_name: VegaDūta documentation
 site_description: Open-source platform for building, governing and running AI agents, and the Java Agent SDK.
-site_url: https://cdandlc.github.io/vegaduta/
+site_url: https://cd-lc.github.io/vegaduta/
 repo_url: https://github.com/CD-LC/vegaduta
 repo_name: vegaduta
 edit_uri: edit/main/docs/

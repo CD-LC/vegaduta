@@ -108,6 +108,11 @@ export const PUBLIC_ROUTES = [
   "/status",
   "/api-reference",
   "/changelog",
+  // "/downloads" (the Setup app's per-OS installers + release artifacts) - same
+  // premise as "/plugins" and "/templates": a public page over data that needs
+  // no session (the GitHub release's own asset list), rendered standalone so a
+  // logged-out visitor gets it instead of the landing hero.
+  "/downloads",
   // The browser device node (core/devices gateway): pairs with a code and
   // holds a device token, never a user session - it must not bounce into
   // the sign-in flow.

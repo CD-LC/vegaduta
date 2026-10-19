@@ -46,6 +46,7 @@ export function SmartLink({
 function navItems(): { label: string; href: string }[] {
   return [
     { label: "Docs", href: docsHref() },
+    { label: "Downloads", href: "/downloads" },
     { label: "Dependencies", href: "/#dependencies" },
     { label: "Plugins & apps", href: "/plugins" },
     { label: "Integrations", href: "/integrations" },
