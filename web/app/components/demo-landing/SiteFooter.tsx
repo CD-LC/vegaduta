@@ -145,6 +145,9 @@ export default function SiteFooter() {
                 // carry, so the commercial pages and the open-source pages cross-link. Inline
                 // English like "About" below: reference links, not marketing copy.
                 { label: "Plugins & apps", href: "/plugins" },
+                // Release artifacts (Setup installers, source tarball, images,
+                // Helm) - public page, same self-contained chrome as /plugins.
+                { label: "Downloads", href: "/downloads" },
                 { label: "Java Agent SDK", href: docPageHref("javaSdk"), external: true },
                 { label: "Open source", href: REPO_URL, external: true },
                 { label: "Self-host guide", href: docPageHref("installation"), external: true },

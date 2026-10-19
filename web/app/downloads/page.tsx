@@ -25,7 +25,10 @@ import { fetchLatestRelease, pickAssets, type DownloadSet, type ReleaseAsset } f
 // rather than rendering dead links.
 
 const RELEASES = `${REPO_URL}/releases`;
-const PACKAGES = `${REPO_URL}/pkgs`;
+// The repo's container packages, filtered list on the org's Packages tab.
+// (github.com/<owner>/<repo>/pkgs is not a page; ?repo_name= is the supported
+// repo-scoped view.)
+const PACKAGES = `https://github.com/orgs/${REPO_URL.split("/")[3]}/packages?repo_name=${REPO_URL.split("/")[4]}`;
 
 export const metadata: Metadata = {
   title: "Download VegaDūta — macOS, Windows and Linux installers",
