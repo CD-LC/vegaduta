@@ -55,7 +55,11 @@ describe("roiApi", () => {
     const core = await import("./core");
     apiFetchMock.mockImplementationOnce(async () => new Response("a,b", { status: 200, headers: { "Content-Disposition": 'attachment; filename="agent-roi-x.csv"' } }));
     await roiApi.downloadAgentsCsv({ from: "2026-10-01", to: "2026-10-14" });
-    expect(core.triggerBrowserDownload).toHaveBeenCalledWith(expect.any(Blob), "agent-roi-x.csv");
+    // `Any<Blob>` and `.text()` are env-fragile: which Blob implementation a Response
+    // returns depends on the runner's Node/jsdom globals. `size` exists on all of them.
+    const [blob, name] = vi.mocked(core.triggerBrowserDownload).mock.calls[0];
+    expect(blob).toHaveProperty("size");
+    expect(name).toBe("agent-roi-x.csv");
     apiFetchMock.mockImplementationOnce(async () => new Response("no", { status: 500 }));
     await expect(roiApi.downloadAgentsCsv()).rejects.toThrow("HTTP 500");
   });
