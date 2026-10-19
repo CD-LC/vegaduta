@@ -393,6 +393,8 @@ jobs:
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+          # next build runs its own type check; the default ~2 GB heap OOMs on it.
+          NODE_OPTIONS: --max-old-space-size=6144
 
   python:
     name: Python (sidecar pytest, code-intel harness, ruff)
