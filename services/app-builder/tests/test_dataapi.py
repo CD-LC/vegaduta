@@ -11,6 +11,7 @@ import dataclasses
 import os
 import sys
 import tempfile
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -393,6 +394,12 @@ def main() -> int:
     settings = tweak(data_api_anon_rpm_per_ip=1000)
     dataapi._LIMITER._w.clear()
 
+    # The failed-auth limiter runs on a fixed 60s wall-clock window: if the
+    # flood straddles a boundary the counter resets mid-flood and no 429 ever
+    # appears. Align to just after a boundary when we're near one.
+    edge = int(time.time()) % 60
+    if edge > 55:
+        time.sleep(66 - edge)
     dataapi._LIMITER._w.clear()
     bad = [
         c.get("/data/v1/notes", headers={"apikey": "bad", "X-Forwarded-For": "7.7.7.7"}).status_code
