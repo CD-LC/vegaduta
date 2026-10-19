@@ -69,7 +69,7 @@ class MeteringCharacterisationTest {
     private static final long FREE_TIER_RESERVED = 5_000L;
     private static final long BUDGET_RESERVED_MICRO_CENTS = 150_000L;
 
-    /** One captured {@code LlmCallLogService.record(...)} invocation (full 21-arg form, incl. billable reasoning tokens). */
+    /** One captured {@code LlmCallLogService.record(...)} invocation (any of the 21+ arg forms; captured indices are the same in all of them). */
     private record LogRow(Long prompt, Long completion, Long total, boolean success, Long cacheCreation, Long cacheRead) {}
 
     /** One captured {@code reconcileTokenReservation}. */
@@ -89,7 +89,7 @@ class MeteringCharacterisationTest {
     private ChatClient rig(ScriptedChatModel model) {
         LlmCallLogService logService = Mockito.mock(LlmCallLogService.class, invocation -> {
             Object[] a = invocation.getArguments();
-            if ("record".equals(invocation.getMethod().getName()) && a.length == 21) {
+            if ("record".equals(invocation.getMethod().getName()) && a.length >= 21) {
                 rows.add(new LogRow((Long) a[4], (Long) a[5], (Long) a[6], (Boolean) a[7], (Long) a[17], (Long) a[18]));
             }
             return null;
