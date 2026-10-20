@@ -63,6 +63,21 @@ new_home
 out="$(python3 "$PTY" "" "$CLI" up --dry-run 2>&1)"
 check "--cloud and an existing install are never asked again" "$(! has "$out" 'Which model should power'; echo $?)" "$out"
 
+echo "personal: a local model without asking"
+new_home
+out="$("$CLI" personal --build --dry-run </dev/null 2>&1)"
+check "no terminal still gets the local model container" "$(has "$out" 'local_ai=container local_model=qwen3.5:' && has "$out" 'docker-compose.local-ai.yml --profile local-ai'; echo $?)" "$out"
+check "it is remembered" "$([ "$(state local_ai)" = container ] && [ -n "$(state local_model)" ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+new_home
+out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
+check "--cloud opts out" "$(has "$out" 'local_ai=none'; echo $?)" "$out"
+out="$("$CLI" personal --build --dry-run </dev/null 2>&1)"
+check "a later run keeps --cloud" "$(has "$out" 'local_ai=none'; echo $?)" "$out"
+new_home
+printf 'tier=personal\nprofiles=\nbuild=1\nlocal_ai=\nlocal_model=\nsearch=1\nnative_core=0\ncloud=0\n' > "$VEGADUTA_STATE_FILE"
+out="$("$CLI" personal --dry-run </dev/null 2>&1)"
+check "an install that never chose gets the model on its next run" "$(has "$out" 'local_ai=container'; echo $?)" "$out"
+
 echo "compose project"
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   new_home

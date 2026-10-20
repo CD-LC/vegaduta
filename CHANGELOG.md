@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Personal installs come with a free local model.** `personal` (bash and `vegaduta.ps1`, so the Setup app too) now picks the model that fits the machine's RAM from the shared catalog and downloads it without asking: into an Ollama already running on the machine, otherwise through the Ollama container. Previously it only adopted an Ollama that was already installed, so most machines ended up with no model. `--cloud` (`-Cloud`) opts out and is remembered; machines under 8 GB of RAM keep the cloud-key path; installs that never chose get the model on their next run. The first start waits up to an hour for the download, and the Setup app gives Docker room for the model.
+
 ## [0.1.5] - 2026-10-20
 
 ### Changed

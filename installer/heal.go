@@ -49,14 +49,20 @@ func ensureDocker(ctx context.Context, tier string, emit func(Event)) error {
 	}
 	enableDockerAutostart(emit)
 	needGB, _, _ := tierNeeds(tier)
+	if tier == "personal" {
+		needGB += 4 // the local model a personal install downloads runs next to the stack
+	}
 	have := dockerMemGB(ctx)
 	if have >= int64(needGB) {
 		return nil
 	}
-	target, ok := memoryTarget(int64(needGB), hostRAMMB()/1024)
-	if !ok {
+	target, full := memoryTarget(int64(needGB), hostRAMMB()/1024)
+	if target <= have {
 		line(fmt.Sprintf("Docker has %d GB of memory and this computer cannot spare the %d GB VegaDūta wants - it may run slowly.", have, needGB))
 		return nil
+	}
+	if !full {
+		line(fmt.Sprintf("This computer can spare %d GB for Docker, short of the %d GB VegaDūta wants - it may run slowly.", target, needGB))
 	}
 	changed, err := raiseDockerMemory(ctx, target, emit)
 	if err != nil {
@@ -71,6 +77,8 @@ func ensureDocker(ctx context.Context, tier string, emit func(Event)) error {
 
 // memoryTarget picks how much memory to give Docker: the tier's need plus
 // 2 GB of headroom, never leaving the host itself less than 2 GB.
+// The second result reports whether the target covers the whole need; a
+// smaller computer still gets as much as it can spare.
 func memoryTarget(needGB, hostGB int64) (int64, bool) {
 	if hostGB <= 0 {
 		return 0, false

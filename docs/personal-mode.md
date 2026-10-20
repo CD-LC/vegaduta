@@ -70,7 +70,7 @@ images are pulled instead.
 | `./scripts/vegaduta restart` | restart core and print a fresh first-run setup link and the sign-in e-mail. Use it for a lost or expired link |
 | `./scripts/vegaduta personal --native-core` | core on the host JVM (`-Xmx1g`, SerialGC), the rest in Docker. Saves the container's memory limit and the Docker VM overhead; logs go to `~/.vegaduta/personal/core.log` |
 | `--local-ai=host`, `--local-model TAG` | use the Ollama on this machine with that model (see below) |
-| `--cloud` | do not adopt a local Ollama; you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Install Ollama later and run `personal --local-ai=host` to switch |
+| `--cloud` | no local model (by default one is downloaded, see below); you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Run `personal --local-ai` or `--local-ai=host` to switch |
 | `--search` / `--no-search` | start or leave out the private SearXNG that gives agents `web_search` with no API key. On by default for a fresh install; the choice is remembered (see [What is on from the start](#what-is-on-from-the-start)) |
 | `--no-tools` | leave out the MCP connector runner and its starter connectors. `--profile tools` turns it back on |
 | `--no-valkey` | leave out the Valkey container; core's counters and caches run in its in-process fallback (see [Running without Valkey](#running-without-valkey)). `--valkey` turns it back on |
@@ -342,13 +342,16 @@ security key) and no real browser has been used with it yet**, so expect rough e
 
 Agents need a model. Personal mode has three ways to get a free local one, all through Ollama:
 
-- **At install.** If Ollama is already running on the machine, `personal` uses it (on a first run, and on later runs
-  until you say `--cloud`), picks a model that fits your RAM from the shared catalog and registers it as the free
-  platform pool. Choose another with `--local-model TAG`, or opt out with `--cloud`. On a terminal the launcher
-  offers to `ollama pull` a model (and the `nomic-embed-text` embedding model) that is missing; otherwise it prints
-  the exact command, and the final summary says **NOT PULLED YET** instead of announcing a model that is not there.
-  Nothing is pulled or started without your say-so. `--local-ai=host` states it explicitly;
-  `--local-ai` (container) starts an Ollama container instead, which on macOS is CPU-only.
+- **At install, automatically.** With no choice made, `personal` (bash and `vegaduta.ps1` alike, so the Setup app
+  too) picks the model that fits your RAM from the shared catalog, downloads it and registers it as the free
+  platform pool, without asking. It uses the Ollama already running on the machine when there is one (and pulls the
+  model and the `nomic-embed-text` embedding model into it), otherwise it starts the Ollama container, which
+  downloads the model on its first start; that first start may take a while, so the launcher waits up to an hour
+  for it instead of 15 minutes. Machines with less than 8 GB of RAM keep the cloud-key path. Choose another model
+  with `--local-model TAG` (`-LocalModel` on Windows), or opt out with `--cloud` (`-Cloud`), which is remembered.
+  An install that never chose gets its model on its next plain `personal`. `--local-ai=host` and `--local-ai`
+  (container) state the source explicitly; the container is CPU-only on macOS. `VEGADUTA_ASSUME_NO=1` skips the
+  pull into a host Ollama.
 - **In the console.** **Providers → Set up a local model** (`/providers/local-model`) detects your hardware (RAM,
   cores, an NVIDIA card or Apple Silicon; with the container core the launcher passes the host's RAM and
   accelerator, because the container alone would report its own 1.5 GB limit) and Ollama (by default the one on this
