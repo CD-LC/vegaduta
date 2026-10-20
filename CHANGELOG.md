@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-20
+
 ### Changed
 
 - **Setup app repairs the machine instead of stopping.** Clicking Install now installs Docker Desktop (silently accepting its licence, so no first-launch screen), starts it, turns on WSL2 on Windows (one permission prompt; after a required restart Setup reopens by itself), gives Docker's WSL2 VM enough memory through `%USERPROFILE%\.wslconfig` when the computer can spare it, and turns on Docker's start-at-sign-in so the stack returns after a reboot. A failed start is classified (stale registry login, full disk, stopped engine, interrupted download, slow first boot), repaired and retried up to three times. Missing or stopped Docker no longer blocks the Install button. The setup app also accepts the `SHA256SUMS.txt` asset name used by v0.1.0.
@@ -26,7 +28,6 @@ Release notes on GitHub are generated from the section for each version.
 
 - **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.
 
-## [0.1.4] - 2026-10-19
 ### Changed
 
 - **License: Business Source License 1.1.** The platform (everything outside `sdk/`) is now under BSL-1.1: free for any use except offering the software itself to third parties as a competing hosted service, and each version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0 so clients embed anywhere. Versions already released under Apache-2.0 remain under Apache-2.0.
