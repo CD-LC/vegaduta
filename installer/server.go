@@ -336,6 +336,10 @@ func runInstall(ctx context.Context, c config, emit func(Event)) error {
 		}
 		emit(Event{Line: s})
 	}
+	emit(Event{Phase: "docker", Line: "Checking Docker"})
+	if err := ensureDocker(ctx, c.tier, emit); err != nil {
+		return err
+	}
 	root := c.from
 	if root == "" {
 		ver := "custom"
@@ -389,7 +393,8 @@ func runInstall(ctx context.Context, c config, emit func(Event)) error {
 		}
 	}
 	emit(Event{Phase: "up", Line: upLine})
-	if err := runCLI(ctx, root, emitLine, argv...); err != nil {
+	start := func(onLine func(string)) error { return runCLI(ctx, root, onLine, argv...) }
+	if err := upWithRepair(ctx, start, emit, emitLine); err != nil {
 		return fmt.Errorf("up: %w", err)
 	}
 	x.afterUp(ctx, root, emit)

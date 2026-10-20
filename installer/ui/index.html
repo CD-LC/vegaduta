@@ -338,6 +338,9 @@ function log(line) {
 // Deterministic explanations for the failures people actually hit. Runs on the
 // collected log, no model needed; the AI explainer below is the fallback.
 const PLAYBOOK = [
+  [/restart Windows to finish/i,
+   'Windows needs one restart to finish turning on WSL2.',
+   'Restart the computer. VegaDūta Setup reopens by itself and carries on.'],
   [/no published release|releases\/latest|resolve the latest release/i,
    'Setup could not find a published release to download.',
    'This is a source checkout, not a released build. Run Setup with --from <path to your checkout>, or "scripts/vegaduta personal --build".'],
@@ -346,17 +349,17 @@ const PLAYBOOK = [
    'Quit the other app (an existing VegaDūta, a local web server) or set the matching *_HOST_PORT in deploy/compose/.env.'],
   [/Cannot connect to the Docker daemon|docker daemon.*not running|docker daemon is not|error during connect/i,
    'Docker Desktop is installed but the engine is not running.',
-   'Open Docker Desktop and wait until it says "Engine running", then Re-check.'],
+   'Click Install again - Setup starts Docker for you. If it keeps failing, restart the computer first.'],
   [/docker: command not found|executable file not found/i,
    'Docker is not installed.',
-   'Use "Install Docker for me" above, or install Docker Desktop, then Re-check.'],
+   'Click Install again - Setup installs Docker for you.'],
   [/wsl.?2|VirtualMachinePlatform|WslRegister/i,
    'Docker Desktop on Windows needs WSL2.',
-   'In an admin PowerShell run "wsl --install", reboot, start Docker Desktop, then Re-check.'],
+   'Click Install again and choose Yes when Windows asks for permission; restart if asked.'],
   [/no space left|disk.*full/i,
    'The disk is full.',
    'Free space (Docker images take several GB), then run Install again.'],
-  [/checksum mismatch|SHA256SUMS/i,
+  [/checksum mismatch|SHA256SUMS has no entry/i,
    'The downloaded release did not match its checksum.',
    'Delete the install folder and re-run the installer; if it repeats, do not proceed - report it.'],
   [/pull access denied|manifest unknown|manifest: not found|VEGADUTA_VERSION/i,
@@ -370,7 +373,7 @@ const PLAYBOOK = [
    'Look at the log above for the exact migration. If this is an existing install, restore the backup rather than retrying blindly.'],
   [/137|OOMKill|out of memory|insufficient memory/i,
    'Docker ran out of memory.',
-   'Docker Desktop > Settings > Resources: raise memory (personal wants ~4 GB), then run Install again.'],
+   'Close other big apps and click Install again. On a Mac: Docker Desktop > Settings > Resources > Memory (about 6 GB).'],
 ];
 
 function explainFailure() {
