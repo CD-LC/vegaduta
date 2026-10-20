@@ -28,4 +28,7 @@ requests==2.34.2
 # ingestion job path (KnowledgeIngestionJobRunner). Bundles its own audio
 # decoding (via the av/PyAV wheel) - unlike pytesseract, no separate
 # system binary is required on most platforms.
-faster-whisper==1.0.3
+faster-whisper==1.2.1
+# faster-whisper's av<13 pin (1.0.x) dragged PyAV builds that vendored ffmpeg
+# 6.1.x; 1.2.1 accepts av>=11 so pin the newest wheel (bundled ffmpeg 7.1.x).
+av==15.1.0

@@ -150,6 +150,16 @@ spring:
               args:
                 - "-y"
                 - "@modelcontextprotocol/server-puppeteer"
+              env:
+                # server-puppeteer is frozen on puppeteer@23.11.1 (Chrome
+                # 131.0.6778.204, flagged by the release scan); its own
+                # PUPPETEER_LAUNCH_OPTIONS merge lets the images point the
+                # launch at the fixed Chrome build they install. On a slim
+                # core this resolves empty and the runner's image-level
+                # value applies instead (RUNNER_OWNED_ENV); on a host with
+                # no image the empty value is ignored and puppeteer falls
+                # back to its own resolution.
+                PUPPETEER_LAUNCH_OPTIONS: ${PUPPETEER_LAUNCH_OPTIONS:}
             # Master-Roadmap-2026.md item #10 ("Vision-driven browser
             # automation upgrade") - Microsoft's official @playwright/mcp run
             # with --caps=vision, giving agents a screenshot + pixel-

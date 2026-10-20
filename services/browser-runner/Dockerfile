@@ -17,7 +17,11 @@ FROM ${PLAYWRIGHT_IMAGE}
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --no-audit --no-fund && chown -R pwuser:pwuser /app
+RUN npm ci --omit=dev --no-audit --no-fund && chown -R pwuser:pwuser /app \
+    # Clients connect over chromium.connect() only (app.browseruse.remote-url);
+    # the playwright base image also ships Firefox and WebKit builds the service
+    # never launches, and the release image scan flags their binaries. Drop them.
+    && rm -rf /ms-playwright/firefox-* /ms-playwright/webkit-*
 
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     BROWSER_RUNNER_PORT=3000

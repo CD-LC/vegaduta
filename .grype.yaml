@@ -40,3 +40,10 @@ ignore:
     fix-state: wont-fix
     package:
       name: libcurl3-gnutls
+  # PyAV (faster-whisper's audio-decode wheel) vendors its own ffmpeg build;
+  # the newest wheel (15.1.0, bundled ffmpeg 7.1.x) still predates the upstream
+  # 8.1 fix. Surface is local audio transcription only. Re-evaluate when a
+  # wheel shipping ffmpeg >= 8.1 exists. (2026-10-20)
+  - vulnerability: CVE-2026-40962
+    package:
+      name: ffmpeg

@@ -371,7 +371,12 @@ function validateSpawnRequest(command, args, env) {
 // Dockerfile). Handed to the child ONLY when set in this container's own env,
 // as defaults a registration's env may override. Nothing else from this
 // process's env ever reaches a child (see handleSpawnRequest).
-const IMAGE_ENV_PASSTHROUGH = ['PLAYWRIGHT_BROWSERS_PATH', 'PUPPETEER_CACHE_DIR', 'DOCKER_CONTAINER'];
+const IMAGE_ENV_PASSTHROUGH = [
+    'PLAYWRIGHT_BROWSERS_PATH',
+    'PUPPETEER_CACHE_DIR',
+    'PUPPETEER_LAUNCH_OPTIONS',
+    'DOCKER_CONTAINER',
+];
 
 // ---------------------------------------------------------------------------
 // Per-connection sandbox (SEC-012).
@@ -423,6 +428,10 @@ const RUNNER_OWNED_ENV = new Set([
     'XDG_DATA_HOME',
     'XDG_STATE_HOME',
     'XDG_RUNTIME_DIR',
+    // The image pins the launch options (fixed-Chrome executablePath) - a
+    // caller-supplied value, including an empty default from a slim core's
+    // unresolved ${PUPPETEER_LAUNCH_OPTIONS}, must not override it.
+    'PUPPETEER_LAUNCH_OPTIONS',
 ]);
 
 /** The directory layout of one connection's sandbox (pure). */

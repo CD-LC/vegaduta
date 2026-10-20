@@ -113,7 +113,8 @@ FROM base AS browsers-true
 # DOCKER_CONTAINER below) to every spawned child - IMAGE_ENV_PASSTHROUGH -
 # because a child otherwise inherits nothing from this container's env.
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
-    PUPPETEER_CACHE_DIR=/opt/puppeteer-cache
+    PUPPETEER_CACHE_DIR=/opt/puppeteer-cache \
+    PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/opt/puppeteer-cache/chrome/linux-153.0.8010.47/chrome-linux64/chrome"}
 
 # This RUN executes as root (HOME=/home/mcprunner only points npm/npx at that
 # directory, it doesn't change the executing uid), so npx fetching the
@@ -156,14 +157,14 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # both together if the connection block ever changes) into
     # $PUPPETEER_CACHE_DIR, which the chown below hands to the runtime user.
     && npm exec --yes --package=@modelcontextprotocol/server-puppeteer@2025.5.12 -- node -e "process.exit(0)" \
-    # The frozen puppeteer@23.11.1 resolves Chrome 131.0.6778.204, which the
+    # The frozen puppeteer@23.11.1 pins Chrome 131.0.6778.204, which the
     # release image scan (grype, fail on critical) rejects with fixed
-    # criticals. server-puppeteer cannot take a newer puppeteer, so install
-    # the fixed Chrome-for-Testing build and place it at the directory the
-    # frozen resolver computes - the launch contract stays exact, only the
-    # binary behind it is the patched one.
+    # criticals. server-puppeteer cannot take a newer puppeteer, but it does
+    # honour PUPPETEER_LAUNCH_OPTIONS (env JSON merged into puppeteer.launch,
+    # see its dist/index.js), so install the fixed Chrome-for-Testing build
+    # under its own path and point the launch at it via the ENV below - it
+    # reaches spawned children through server.js's IMAGE_ENV_PASSTHROUGH.
     && npx --yes puppeteer@23.11.1 browsers install chrome@153.0.8010.47 \
-    && mv "$PUPPETEER_CACHE_DIR/chrome/linux-153.0.8010.47" "$PUPPETEER_CACHE_DIR/chrome/linux-131.0.6778.204" \
     && rm -rf /var/lib/apt/lists/* \
     && chown -R mcprunner:mcprunner "$PLAYWRIGHT_BROWSERS_PATH" "$PUPPETEER_CACHE_DIR" /home/mcprunner
 
