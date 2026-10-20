@@ -693,8 +693,8 @@ parse_tier_flags() {
       --profile) add_profile "${2:?--profile needs a name}"; shift 2 ;;
       --profile=*) add_profile "${1#*=}"; shift ;;
       --build) BUILD=1; shift ;;
-      --local-ai) LOCAL_AI=container; shift ;;
-      --local-ai=container|--local-ai=host) LOCAL_AI="${1#*=}"; shift ;;
+      --local-ai) LOCAL_AI=container; LOCAL_AI_FLAG=1; shift ;;
+      --local-ai=container|--local-ai=host) LOCAL_AI="${1#*=}"; LOCAL_AI_FLAG=1; shift ;;
       --local-ai=*) die "--local-ai takes 'container' (default) or 'host'" ;;
       --local-model) LOCAL_MODEL="${2:?--local-model needs a model tag, e.g. qwen3.5:4b}"; shift 2 ;;
       --local-model=*) LOCAL_MODEL="${1#*=}"; shift ;;
@@ -1529,6 +1529,13 @@ wsl_docker_memory_assist() {
 # model on first start). --cloud opts out; below 4 GB of RAM the cloud-key path stays.
 personal_default_model() {
   [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  # Ollama installed on this machine after an install that used the container: switch to it
+  # (all of the machine's memory, its GPU, and the models already pulled there).
+  if [ "$LOCAL_AI" = container ] && [ "${LOCAL_AI_FLAG:-0}" != 1 ] && host_ollama_models >/dev/null 2>&1; then
+    LOCAL_AI=host
+    say "Ollama found on this machine: agents now use it instead of the container ('${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL)}')"
+    return 0
+  fi
   # --local-ai[=host] with no model of its own (flag, saved state or .env) still gets one that fits
   # this machine: without this the compose default (qwen3.5:4b, ~10 GB) runs on every machine.
   local explicit=0

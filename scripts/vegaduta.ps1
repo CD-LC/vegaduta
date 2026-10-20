@@ -260,7 +260,15 @@ function Resolve-LocalModel {
   $script:LocalModelTag = if ($LocalModel) { $LocalModel } else { Read-StateValue 'local_model' }
   $script:CloudChoice = $Cloud -or ((Read-StateValue 'cloud') -eq '1' -and -not $LocalModel)
   if ($Cloud) { $script:LocalAi = ''; $script:LocalModelTag = ''; return }
-  if ($script:LocalAi -or $script:CloudChoice) { return }
+  if ($script:CloudChoice) { return }
+  # Ollama installed on this computer after an install that used the container: switch to it
+  # (all of the computer's memory, its GPU, and the models already pulled there).
+  if ($script:LocalAi -eq 'container' -and (Test-HostOllama)) {
+    $script:LocalAi = 'host'
+    Say "Ollama found on this machine: agents now use it instead of the container ('$($script:LocalModelTag)')"
+    return
+  }
+  if ($script:LocalAi) { return }
   $gb = 0
   try { $gb = [int][math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) } catch { $gb = 0 }
   if ($gb -eq 0 -or $gb -ge 8) { Install-HostOllama }

@@ -174,14 +174,32 @@ class LocalLlmPoolBootstrapTest {
     }
 
     @Test
-    void secondRunWithSameLabelOrBaseUrlWritesNothing() {
-        List<PlatformHostedLlmProvider> byLabel =
-                List.of(row(5, "Local model (Ollama)", "http://other:1", 1));
-        when(repository.findAllByOrderByPriorityAsc()).thenReturn(byLabel);
-        assertEquals(
-                Outcome.ALREADY_PRESENT,
-                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+    void ownRowOnAnotherBaseUrlIsRepointedToTheConfiguredOllama() {
+        // The install moved Ollama (container before, the computer's own Ollama now): the old
+        // row must follow, or the pool keeps calling an Ollama that no longer runs.
+        server.expect(requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider old =
+                row(5, "Local model (Ollama)", "http://host.docker.internal:11434", -3);
+        when(old.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(old));
 
+        assertEquals(
+                Outcome.MOVED, bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        ArgumentCaptor<PlatformHostedLlmProviderUpsertRequest> req =
+                ArgumentCaptor.forClass(PlatformHostedLlmProviderUpsertRequest.class);
+        verify(service).update(org.mockito.ArgumentMatchers.eq(5L), req.capture());
+        assertEquals(BASE, req.getValue().baseUrl());
+        assertEquals("llama3.2", req.getValue().model());
+        assertEquals(-3, req.getValue().priority());
+        assertTrue(req.getValue().enabled());
+        assertEquals(null, req.getValue().apiKey(), "the stored key is kept");
+        verify(service, never()).createAllowingBlankKey(any());
+    }
+
+    @Test
+    void secondRunWithSameBaseUrlWritesNothing() {
         List<PlatformHostedLlmProvider> byUrl =
                 List.of(row(6, "Renamed by admin", "http://ollama:11434/v1/", 1));
         when(repository.findAllByOrderByPriorityAsc()).thenReturn(byUrl);

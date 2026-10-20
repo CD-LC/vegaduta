@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **The local model follows Ollama when it moves.** Installing Ollama on the computer after an install that used the Ollama container now switches `personal` to it (Windows and macOS/Linux launchers) instead of keeping the container, and core repoints its own "Local model (Ollama)" pool row to the new address and model. Before, the row kept calling the old Ollama, so the console showed a local model in use while every chat failed.
 - **No GPU, no GPU mode.** Docker on WSL2 lists the nvidia runtime even on a laptop without a graphics card, which switched the Ollama container to GPU mode and made it fail to start ("no adapters were found"). The GPU overlay is now used only when `nvidia-smi` reports an adapter.
 - **Installing from a checkout or a download of `main` just works.** An empty `VEGADUTA_VERSION` used to stop `personal` with an error; it now uses the latest published release and records it in `.env`.
 
