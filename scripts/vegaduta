@@ -1458,42 +1458,96 @@ personal_install_ollama() {
   warn "Ollama did not start in 2 minutes - the model runs in a container instead"
 }
 
+# Sets memory=<gb>GB under [wsl2] of a .wslconfig (stdin -> stdout, CRLF out), keeping every other line.
+wslconfig_with_memory() {
+  tr -d '\r' | awk -v want="memory=$1GB" '
+    /^[ \t]*\[/ { if (inw && !done) { print want; done = 1 } inw = (tolower($0) ~ /^[ \t]*\[wsl2\][ \t]*$/); print; next }
+    inw && tolower($0) ~ /^[ \t]*memory[ \t]*=/ { if (!done) { print want; done = 1 } next }
+    { print }
+    END { if (!done) { if (!inw) { print ""; print "[wsl2]" } print want } }' | sed 's/$/\r/'
+}
+
+# WSL2 + Docker Desktop: the Docker VM is capped by %UserProfile%\.wslconfig (default: half the
+# machine), which can leave a 16 GB laptop with a ~7 GB VM and so a smaller model than it could run.
+# Offers to give Docker 8 GB (less on small machines, always leaving Windows 4 GB), backs the old
+# file up, and stops with the one restart step the change needs. Never edits anything without a
+# yes, and never when there is no terminal, --dry-run or VEGADUTA_ASSUME_NO=1 (a hint instead).
+wsl_docker_memory_assist() {
+  grep -qi microsoft /proc/version 2>/dev/null || return 0
+  [ "$DRY_RUN" != 1 ] || return 0
+  local host_gb docker_gb target
+  host_gb="$(host_ram_gb)"
+  docker_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+  target=8; [ $(( host_gb - 4 )) -lt "$target" ] && target=$(( host_gb - 4 ))
+  [ "$target" -ge 6 ] && [ "$docker_gb" -gt 0 ] && [ "$docker_gb" -lt "$target" ] || return 0
+  local home cfg
+  home="$(cd /mnt/c 2>/dev/null && cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')"
+  [ -n "$home" ] && home="$(wslpath "$home" 2>/dev/null)"
+  if [ -z "$home" ] || [ ! -d "$home" ]; then
+    warn "Docker has ${docker_gb} GB of this machine's ${host_gb} GB. Add memory=${target}GB under [wsl2] in %UserProfile%\\.wslconfig, run 'wsl --shutdown' in PowerShell, start Docker Desktop and run this again for a bigger model"
+    return 0
+  fi
+  cfg="$home/.wslconfig"
+  if [ ! -t 0 ] || [ "${VEGADUTA_ASSUME_NO:-0}" = 1 ]; then
+    warn "Docker has ${docker_gb} GB of this machine's ${host_gb} GB, so the local model is small. To allow a bigger one add memory=${target}GB under [wsl2] in $cfg, run 'wsl --shutdown' in PowerShell, start Docker Desktop and run this again"
+    return 0
+  fi
+  say "Docker only has ${docker_gb} GB of this machine's ${host_gb} GB, which limits the free local model to a small one."
+  printf 'Give Docker %s GB (edits %s, old copy kept as .wslconfig.vegaduta.bak; needs a WSL restart)? [Y/n]: ' "$target" "$cfg"
+  local a; read -r a
+  case "${a:-y}" in n|N|no) return 0 ;; esac
+  [ ! -f "$cfg" ] || cp -f "$cfg" "$cfg.vegaduta.bak" || { warn "could not back up $cfg - left it alone"; return 0; }
+  local tmp; tmp="$(mktemp)"
+  { [ -f "$cfg" ] && cat "$cfg" || true; } | wslconfig_with_memory "$target" > "$tmp" && cat "$tmp" > "$cfg" || { rm -f "$tmp"; warn "could not write $cfg - left Docker's memory alone"; return 0; }
+  rm -f "$tmp"
+  ok "Docker's memory set to ${target} GB in $cfg"
+  printf '\nOne step left (the change only applies after WSL restarts):\n  1. Open PowerShell and run:  wsl --shutdown\n  2. Start Docker Desktop and wait until it says it is running\n  3. Open Ubuntu again and run the same command as before - it will pick a bigger model\n\n'
+  exit 0
+}
+
 # With nothing chosen, a personal install gets the free local model that fits this machine's
 # RAM: through an Ollama already running here, else the Ollama container (which downloads the
 # model on first start). --cloud opts out; below 4 GB of RAM the cloud-key path stays.
 personal_default_model() {
-  [ -z "$LOCAL_AI" ] && [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  # --local-ai[=host] with no model of its own (flag, saved state or .env) still gets one that fits
+  # this machine: without this the compose default (qwen3.5:4b, ~10 GB) runs on every machine.
+  local explicit=0
+  if [ -n "$LOCAL_AI" ]; then
+    [ -z "$LOCAL_MODEL" ] && [ -z "$(get_env LOCAL_LLM_MODEL)" ] || return 0
+    explicit=1
+  fi
   # An earlier run that said --cloud stays cloud. Any other earlier run (no local model then)
   # looks again, so an install that never chose gets its model on the next plain `personal`.
-  if [ "${CLOUD:-0}" = 1 ]; then return 0; fi
-  personal_install_ollama
+  if [ "$explicit" = 0 ] && [ "${CLOUD:-0}" = 1 ]; then return 0; fi
+  [ "$explicit" = 1 ] || personal_install_ollama
   # The model runs where Ollama runs: a host Ollama can use all of the machine's RAM, the container
   # only what Docker is given (Docker Desktop / WSL2 VMs are often far smaller than the machine).
-  local gb host_gb docker_gb
+  local gb host_gb docker_gb mode=container
   host_gb="$(host_ram_gb)"
-  if host_ollama_models >/dev/null 2>&1; then
-    gb="$host_gb"
-  else
+  if [ "$explicit" = 1 ]; then mode="$LOCAL_AI"; elif host_ollama_models >/dev/null 2>&1; then mode=host; fi
+  gb="$host_gb"
+  if [ "$mode" != host ]; then
+    [ -n "$LOCAL_MODEL" ] || wsl_docker_memory_assist
     docker_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
-    gb="$host_gb"
     if [ "$docker_gb" -gt 0 ] && { [ "$gb" -le 0 ] || [ "$docker_gb" -lt "$gb" ]; }; then gb="$docker_gb"; fi
   fi
   [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model "$gb")"
-  if host_ollama_models >/dev/null 2>&1; then
+  if [ "$mode" = host ]; then
     LOCAL_AI=host
-    say "Ollama found on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
+    say "Ollama on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
     return 0
   fi
   # Local AI stays the default on small machines (the smallest catalog model, CPU only is fine);
-  # only a machine that cannot hold even that falls back to a cloud key.
-  if [ "$gb" -gt 0 ] && [ "$gb" -lt 4 ]; then
+  # only an install that did not ask for it, on a machine that cannot hold even that, falls back to a cloud key.
+  if [ "$explicit" = 0 ] && [ "$gb" -gt 0 ] && [ "$gb" -lt 4 ]; then
     say "This machine has ${gb} GB RAM - too little for a local model next to the stack; add a cloud provider key in the console"
     LOCAL_MODEL=""
     return 0
   fi
   LOCAL_AI=container
   say "Agents will use the free local model '$LOCAL_MODEL' (downloaded once on first start; change with --local-model, opt out with --cloud)"
-  if [ "$host_gb" -gt 0 ] && [ "$gb" -lt "$host_gb" ]; then
+  if [ "${host_gb:-0}" -gt 0 ] && [ "$gb" -lt "$host_gb" ]; then
     warn "Docker has ${gb} GB of this machine's ${host_gb} GB; the model was chosen to fit that. For a bigger one raise Docker's memory (Docker Desktop > Settings > Resources, or memory= in %UserProfile%\\.wslconfig on Windows)"
   fi
   [ "$gb" -lt 8 ] && warn "${gb} GB is tight: '$LOCAL_MODEL' runs on the CPU and the first reply can take a minute; close other apps while it loads"

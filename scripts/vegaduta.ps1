@@ -253,9 +253,16 @@ function Resolve-LocalModel {
   if ($script:LocalAi -or $script:CloudChoice) { return }
   $gb = 0
   try { $gb = [int][math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) } catch { $gb = 0 }
-  if (-not $script:LocalModelTag) { $script:LocalModelTag = Get-RecommendedModel $gb }
   if ($gb -eq 0 -or $gb -ge 8) { Install-HostOllama }
-  if (Test-HostOllama) {
+  $hostOllama = Test-HostOllama
+  # In the container the model only gets the memory Docker has (a WSL2 VM is often smaller than the computer).
+  $modelGb = $gb
+  if (-not $hostOllama) {
+    try { $dg = [int][math]::Floor([int64](& docker info --format '{{.MemTotal}}' 2>$null) / 1GB) } catch { $dg = 0 }
+    if ($dg -gt 0 -and ($modelGb -le 0 -or $dg -lt $modelGb)) { $modelGb = $dg }
+  }
+  if (-not $script:LocalModelTag) { $script:LocalModelTag = Get-RecommendedModel $modelGb }
+  if ($hostOllama) {
     $script:LocalAi = 'host'
     Say "Ollama found on this machine: agents will use '$($script:LocalModelTag)' (change with -LocalModel, opt out with -Cloud)"
     return
@@ -269,7 +276,7 @@ function Resolve-LocalModel {
   }
   $script:LocalAi = 'container'
   Say "Agents will use the free local model '$($script:LocalModelTag)' (downloaded once on first start; change with -LocalModel, opt out with -Cloud)"
-  if ($gb -gt 0 -and $gb -lt 8) { Warn "$gb GB is tight: '$($script:LocalModelTag)' runs on the CPU and the first reply can take a minute; close other apps while it loads" }
+  if ($modelGb -gt 0 -and $modelGb -lt 8) { Warn "$modelGb GB is tight: '$($script:LocalModelTag)' runs on the CPU and the first reply can take a minute; close other apps while it loads" }
 }
 function Resolve-Profiles {
   foreach ($p in ((Get-EnvValue 'COMPOSE_PROFILES') -split ',')) { Add-Profile $p.Trim() }
