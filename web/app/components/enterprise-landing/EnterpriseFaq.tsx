@@ -35,7 +35,7 @@ export default function EnterpriseFaq() {
     },
     {
       q: "Can we run it ourselves?",
-      a: "The code is licensed Apache-2.0 and includes a Docker Compose stack for self-hosting. The public repository is still being prepared, so ask us for access today. The managed service runs in one cloud region.",
+      a: "The code is licensed under the Business Source License 1.1 (free to self-host, including commercially; converts to Apache-2.0 four years after release) and includes a Docker Compose stack for self-hosting. The public repository is still being prepared, so ask us for access today. The managed service runs in one cloud region.",
     },
     {
       q: "How do we know what an agent did, and why?",

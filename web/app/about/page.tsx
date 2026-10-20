@@ -172,8 +172,10 @@ export default function AboutPage() {
                 Open source
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                The source code is published under the Apache-2.0 license. Contributions, bug
-                reports and security disclosures are welcome through the project repository.
+                The source code is published under the Business Source License 1.1 - free to run,
+                fork and build on, converting to Apache-2.0 four years after each release.
+                Contributions, bug reports and security disclosures are welcome through the
+                project repository.
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-5">
