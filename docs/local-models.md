@@ -159,6 +159,8 @@ column for the chosen model (the 8 GB default cannot hold `gpt-oss:20b`); set
 `OLLAMA_MEM_LIMIT` in `.env` to override it. `scripts/vegaduta doctor` warns
 when Docker has less memory than the picked model wants.
 
+On a machine where Docker has little memory the launcher also lowers the model's context window so it fits next to the stack: 8192 tokens under 6 GB, 16384 under 10 GB, the full 32768 otherwise. Set `LOCAL_LLM_NUM_CTX` in `.env` to choose your own (it feeds `app.llm.ollama.num-ctx` and Ollama's `OLLAMA_CONTEXT_LENGTH`).
+
 Check each model's licence on its Ollama library page before redistributing it.
 
 ### Tool calls from small models
