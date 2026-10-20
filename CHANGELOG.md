@@ -8,11 +8,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-10-20
+
 ### Changed
 
 - **Personal installs come with a free local model.** `personal` (bash and `vegaduta.ps1`, so the Setup app too) now picks the model that fits the machine's RAM from the shared catalog and downloads it without asking: free open-weights models, no account or subscription. On macOS (Homebrew) and Windows (`winget`, per-user) Ollama itself is installed and started when missing, so the model runs natively and can use the GPU; Linux and WSL, and any failed install, use the Ollama container. Previously it only adopted an Ollama that was already installed, so most machines ended up with no model. `--cloud` (`-Cloud`) opts out and is remembered; machines under 8 GB of RAM keep the cloud-key path; installs that never chose get the model on their next run. The first start waits up to an hour for the download, and the Setup app gives Docker room for the model.
-
-## [0.1.5] - 2026-10-20
 
 ### Changed
 
