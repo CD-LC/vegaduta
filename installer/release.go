@@ -94,8 +94,12 @@ func fetchRelease(ctx context.Context, c config, version string, onEvent func(Ev
 		if c.releaseURL != "" {
 			sumBase = url[:len(url)-len(filepath.Base(url))-1]
 		}
+		// Current releases publish SHA256SUMS; v0.1.0 named it SHA256SUMS.txt
+		// (install.sh falls back the same way).
 		if err := download(ctx, sumBase+"/SHA256SUMS", sums, nil); err != nil {
-			return fail(fmt.Errorf("downloading SHA256SUMS: %w (refusing an unverified install)", err))
+			if err2 := download(ctx, sumBase+"/SHA256SUMS.txt", sums, nil); err2 != nil {
+				return fail(fmt.Errorf("downloading SHA256SUMS: %w (refusing an unverified install)", err))
+			}
 		}
 		want, err = sumFor(sums, name)
 		if err != nil {

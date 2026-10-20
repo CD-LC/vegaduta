@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -62,16 +63,16 @@ func runPreflight(c config) Report {
 	add := func(ch Check) { rep.Checks = append(rep.Checks, ch) }
 
 	if _, err := exec.LookPath("docker"); err != nil {
-		add(Check{Name: "Docker installed", Detail: "docker command not found",
-			Fix: dockerInstallHint()})
+		add(Check{Name: "Docker installed", Warn: true, Detail: "not installed yet",
+			Fix: "Setup installs it for you when you click Install."})
 		return rep // everything else needs the daemon
 	}
 	add(Check{Name: "Docker installed", OK: true})
 
 	out, err := exec.CommandContext(ctx, "docker", "info", "--format", "{{.ServerVersion}} {{.MemTotal}}").Output()
 	if err != nil {
-		add(Check{Name: "Docker running", Detail: "the Docker daemon is not answering",
-			Fix: dockerStartHint()})
+		add(Check{Name: "Docker running", Warn: true, Detail: "not running yet",
+			Fix: "Setup starts it for you when you click Install."})
 		return rep
 	}
 	fields := strings.Fields(strings.TrimSpace(string(out)))
@@ -102,8 +103,12 @@ func runPreflight(c config) Report {
 	if int(memGB) >= needGB {
 		add(Check{Name: "Memory", OK: true, Detail: fmt.Sprintf("Docker has %d GB (>= %d GB for %s)", memGB, needGB, c.tier)})
 	} else {
+		fix := dockerMemoryHint()
+		if runtime.GOOS == "windows" {
+			fix = "Setup gives Docker more memory for you when you click Install, if this computer has it to spare."
+		}
 		add(Check{Name: "Memory", Warn: true, Detail: fmt.Sprintf("Docker has %d GB; %s wants >= %d GB", memGB, c.tier, needGB),
-			Fix: dockerMemoryHint()})
+			Fix: fix})
 	}
 
 	freeGB := int64(diskFreeGB(existingDir(c.dir)))
