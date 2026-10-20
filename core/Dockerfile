@@ -267,7 +267,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 # PUPPETEER_LAUNCH_OPTIONS (merged into puppeteer.launch by server-puppeteer);
 # application-mcp.yml's puppeteer connection passes this container value to
 # the spawned server.
-ENV PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/home/agentic/.cache/puppeteer/chrome/linux-153.0.8010.47/chrome-linux64/chrome"}
+ENV PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome"}
 # This RUN still executes as root (HOME=/home/agentic above only points
 # npm/npx at that directory, it doesn't change the executing uid), so npx
 # fetching the `playwright` CLI package leaves root-owned files under
@@ -318,7 +318,15 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # under its own path and point the launch at it via the ENV below - the
     # value reaches the spawned server through application-mcp.yml's
     # puppeteer connection env, which resolves it from this container env.
-    && npx --yes puppeteer@23.11.1 browsers install chrome@153.0.8010.47 \
+    # Chrome-for-Testing STABLE, resolved at build time: a pinned build goes
+    # stale within weeks and then fails the release scan again (153.0.8010.47
+    # did). `current` is a stable path for PUPPETEER_LAUNCH_OPTIONS above, and
+    # the 131 builds puppeteer@23.11.1 downloads for itself are removed so the
+    # image carries only the fixed one.
+    && npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
+    && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
+    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome \
     && chown -R agentic:agentic "$PLAYWRIGHT_BROWSERS_PATH" /home/agentic
 
 # server-puppeteer (application-mcp.yml's `puppeteer` stdio connection)

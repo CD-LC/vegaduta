@@ -19,8 +19,9 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,11 +86,14 @@ class TelegramPollingServiceTest {
         EncryptionService encryption = mock(EncryptionService.class);
         when(encryption.decrypt("enc")).thenReturn("tok");
         TelegramUpdateService handler = mock(TelegramUpdateService.class);
-        AtomicReference<String> tenantSeen = new AtomicReference<>();
+        // A future, not an AtomicReference: Mockito records the call (which
+        // verify(timeout) waits for) before the answer runs, so a plain read
+        // could happen before the poller thread stores the tenant.
+        CompletableFuture<String> tenantSeen = new CompletableFuture<>();
         when(handler.acceptVerifiedUpdate(any(), any(), any()))
                 .thenAnswer(
                         inv -> {
-                            tenantSeen.set(
+                            tenantSeen.complete(
                                     TenantContext.current()
                                             .map(TenantContext::getTenantId)
                                             .orElse(null));
@@ -97,7 +101,8 @@ class TelegramPollingServiceTest {
                         });
         TelegramApiClient api =
                 new TelegramApiClient(
-                        MAPPER, "http://127.0.0.1:" + server.getAddress().getPort() + "/bot",
+                        MAPPER,
+                        "http://127.0.0.1:" + server.getAddress().getPort() + "/bot",
                         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build());
         service =
                 new TelegramPollingService(
@@ -113,7 +118,7 @@ class TelegramPollingServiceTest {
         ArgumentCaptor<JsonNode> update = ArgumentCaptor.forClass(JsonNode.class);
         verify(handler, timeout(5000)).acceptVerifiedUpdate(eq("42"), update.capture(), eq("tok"));
         assertThat(update.getValue().path("message").path("text").asText()).isEqualTo("hi");
-        assertThat(tenantSeen.get()).isEqualTo("tenant_abc");
+        assertThat(tenantSeen.get(5, TimeUnit.SECONDS)).isEqualTo("tenant_abc");
         // A webhook must not be registered while polling, and the next poll acknowledges update 7.
         assertThat(calls).contains("deleteWebhook");
         long deadline = System.currentTimeMillis() + 5000;
