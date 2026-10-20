@@ -38,6 +38,9 @@ func ensureDocker(ctx context.Context, tier string, emit func(Event)) error {
 			return err
 		}
 		augmentPath()
+		if _, err := exec.LookPath("docker"); err != nil {
+			return errors.New("Docker could not be installed automatically on this computer - follow the steps above, then click Install again")
+		}
 	}
 	if !dockerUp(ctx) {
 		if err := dockerStart(ctx, emit); err != nil {
