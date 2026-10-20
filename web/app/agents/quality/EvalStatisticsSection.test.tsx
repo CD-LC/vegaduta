@@ -189,7 +189,9 @@ describe("EvalStatisticsSection — wired against the real backend contract", ()
 
     // The standalone floor endpoint answered "not measured" — rendered as a
     // warning in words, never as a floor of zero.
-    expect(await screen.findByText(/Noise floor not measured yet/)).toBeInTheDocument();
-    expect(screen.getByText(/Fewer than two SUCCEEDED runs/)).toBeInTheDocument();
+    // Wait on the endpoint's own warning: the "not measured yet" title also
+    // renders while the floor request is still pending (floor === null).
+    expect(await screen.findByText(/Fewer than two SUCCEEDED runs/)).toBeInTheDocument();
+    expect(screen.getByText(/Noise floor not measured yet/)).toBeInTheDocument();
   });
 });
