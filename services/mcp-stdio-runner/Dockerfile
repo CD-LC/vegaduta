@@ -114,7 +114,7 @@ FROM base AS browsers-true
 # because a child otherwise inherits nothing from this container's env.
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
     PUPPETEER_CACHE_DIR=/opt/puppeteer-cache \
-    PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/opt/puppeteer-cache/chrome/linux-153.0.8010.47/chrome-linux64/chrome"}
+    PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/opt/puppeteer-cache/chrome/current/chrome-linux64/chrome"}
 
 # This RUN executes as root (HOME=/home/mcprunner only points npm/npx at that
 # directory, it doesn't change the executing uid), so npx fetching the
@@ -164,7 +164,15 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # see its dist/index.js), so install the fixed Chrome-for-Testing build
     # under its own path and point the launch at it via the ENV below - it
     # reaches spawned children through server.js's IMAGE_ENV_PASSTHROUGH.
-    && npx --yes puppeteer@23.11.1 browsers install chrome@153.0.8010.47 \
+    # Chrome-for-Testing STABLE, resolved at build time: a pinned build goes
+    # stale within weeks and then fails the release scan again (153.0.8010.47
+    # did). `current` is a stable path for PUPPETEER_LAUNCH_OPTIONS above, and
+    # the 131 builds puppeteer@23.11.1 downloads for itself are removed so the
+    # image carries only the fixed one.
+    && npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
+    && ln -sfn "$(ls -d /opt/puppeteer-cache/chrome/linux-* | sort -V | tail -n 1)" /opt/puppeteer-cache/chrome/current \
+    && test -x /opt/puppeteer-cache/chrome/current/chrome-linux64/chrome \
     && rm -rf /var/lib/apt/lists/* \
     && chown -R mcprunner:mcprunner "$PLAYWRIGHT_BROWSERS_PATH" "$PUPPETEER_CACHE_DIR" /home/mcprunner
 
