@@ -41,6 +41,9 @@ services:
       LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
       OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
       OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-2}
+      # The context window is what grows the model's memory beyond its weights; the launcher lowers it on
+      # machines where Docker has little memory (empty = 32768, the agent default).
+      OLLAMA_CONTEXT_LENGTH: ${LOCAL_LLM_NUM_CTX:-32768}
     volumes:
       - ollama-data:/root/.ollama
     mem_limit: ${OLLAMA_MEM_LIMIT:-8g}
@@ -61,6 +64,7 @@ services:
       APP_LOCAL_LLM_BOOTSTRAP_ENABLED: "true"
       APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${LOCAL_LLM_BASE_URL:-http://ollama:11434}
       APP_LOCAL_LLM_BOOTSTRAP_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
+      APP_LLM_OLLAMA_NUM_CTX: ${LOCAL_LLM_NUM_CTX:-32768}
       # Exactly the local model server, plus whatever the operator already allows.
       APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${LOCAL_LLM_ALLOWED_HOST:-ollama:11434}${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:+,${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS}}
 
