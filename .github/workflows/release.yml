@@ -418,7 +418,26 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
 
+      # actions/attest-sbom refuses SBOMs over 16 MiB. Compact the JSON first;
+      # an image whose SBOM is still larger (a bundled browser, the omnibus)
+      # keeps its signature, scan and provenance attestation and its SBOM
+      # artifact, and skips only the SBOM attestation, with a warning.
+      - name: Fit SBOM for attestation
+        id: sbomfit
+        env:
+          SBOM: sbom-${{ matrix.image }}.spdx.json
+        run: |
+          jq -c . "$SBOM" > "$SBOM.min" && mv "$SBOM.min" "$SBOM"
+          size="$(stat -c %s "$SBOM")"
+          if [ "$size" -le 16777216 ]; then
+            echo "attest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "attest=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::$SBOM is ${size} bytes, over the 16 MiB attestation limit: not attested"
+          fi
+
       - name: Attest SBOM
+        if: steps.sbomfit.outputs.attest == 'true'
         uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
         with:
           subject-name: ${{ env.IMAGE }}
@@ -618,7 +637,26 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
 
+      # actions/attest-sbom refuses SBOMs over 16 MiB. Compact the JSON first;
+      # an image whose SBOM is still larger (a bundled browser, the omnibus)
+      # keeps its signature, scan and provenance attestation and its SBOM
+      # artifact, and skips only the SBOM attestation, with a warning.
+      - name: Fit SBOM for attestation
+        id: sbomfit
+        env:
+          SBOM: sbom-omnibus.spdx.json
+        run: |
+          jq -c . "$SBOM" > "$SBOM.min" && mv "$SBOM.min" "$SBOM"
+          size="$(stat -c %s "$SBOM")"
+          if [ "$size" -le 16777216 ]; then
+            echo "attest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "attest=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::$SBOM is ${size} bytes, over the 16 MiB attestation limit: not attested"
+          fi
+
       - name: Attest SBOM
+        if: steps.sbomfit.outputs.attest == 'true'
         uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
         with:
           subject-name: ${{ env.IMAGE }}
