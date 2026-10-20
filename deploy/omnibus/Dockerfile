@@ -38,6 +38,10 @@ RUN "$JAVA_HOME/bin/jlink" \
 
 FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-img
 
+# COPY --from cannot expand ARGs, so the release's own images are named stages.
+FROM ${REGISTRY}/core:${VEGADUTA_VERSION} AS core-img
+FROM ${REGISTRY}/web:${VEGADUTA_VERSION} AS web-img
+
 # The substrate is our own postgres image: PostgreSQL 16 on Debian trixie
 # with pgvector and Apache AGE already compiled in, plus gosu for dropping
 # privileges - everything downstream (redis-server, node, the JRE) is either
@@ -59,10 +63,10 @@ ENV PATH="/opt/java/openjdk/bin:${PATH}"
 
 COPY --from=node-img /usr/local/bin/node /usr/local/bin/node
 
-COPY --from=${REGISTRY}/core:${VEGADUTA_VERSION} /app/app.jar /opt/core/app.jar
+COPY --from=core-img /app/app.jar /opt/core/app.jar
 # The web image's /app IS the Next standalone bundle (server.js + traced
 # node_modules + .next/static + public).
-COPY --from=${REGISTRY}/web:${VEGADUTA_VERSION} /app /opt/web
+COPY --from=web-img /app /opt/web
 
 # Runtime users (postgres exists in the base image). The only tree the
 # console writes at runtime is .next/cache; the entrypoint gives each service
