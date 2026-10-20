@@ -18,7 +18,7 @@ import en from "../../../messages/en.json";
 // folder (resolveEvalStatsApi, resolveEvalApi) feature-detect METHOD NAMES on
 // it, so each test controls whether this build "has" the wiring by adding or
 // removing functions — the same mechanism the section gates on in production.
-const apiMock = vi.hoisted(() => ({} as Record<string, unknown>));
+const apiMock = vi.hoisted(() => ({}) as Record<string, unknown>);
 vi.mock("../../lib/api", () => ({ api: apiMock }));
 
 import type { EvalReliabilityReport } from "../../lib/api";
@@ -189,7 +189,9 @@ describe("EvalStatisticsSection — wired against the real backend contract", ()
 
     // The standalone floor endpoint answered "not measured" — rendered as a
     // warning in words, never as a floor of zero.
-    expect(await screen.findByText(/Noise floor not measured yet/)).toBeInTheDocument();
-    expect(screen.getByText(/Fewer than two SUCCEEDED runs/)).toBeInTheDocument();
+    // Wait on the endpoint's own warning: the "not measured yet" title also
+    // renders while the floor request is still pending (floor === null).
+    expect(await screen.findByText(/Fewer than two SUCCEEDED runs/)).toBeInTheDocument();
+    expect(screen.getByText(/Noise floor not measured yet/)).toBeInTheDocument();
   });
 });
