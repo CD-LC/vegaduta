@@ -8,7 +8,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-## [0.1.4] - 2026-10-20
+## [0.1.5] - 2026-10-20
 
 ### Changed
 
@@ -28,6 +28,7 @@ Release notes on GitHub are generated from the section for each version.
 
 - **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.
 
+## [0.1.4] - 2026-10-19
 ### Changed
 
 - **License: Business Source License 1.1.** The platform (everything outside `sdk/`) is now under BSL-1.1: free for any use except offering the software itself to third parties as a competing hosted service, and each version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0 so clients embed anywhere. Versions already released under Apache-2.0 remain under Apache-2.0.
