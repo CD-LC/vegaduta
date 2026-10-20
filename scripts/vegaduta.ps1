@@ -98,7 +98,17 @@ function Resolve-Version {
   $v = Get-EnvValue 'VEGADUTA_VERSION'
   if ($v) { $env:VEGADUTA_VERSION = $v; return }
   if ($script:DoBuild) { $env:VEGADUTA_VERSION = 'local'; return }
-  Die "VEGADUTA_VERSION is empty in $EnvFile. Set a published release (.\scripts\vegaduta.ps1 upgrade -Version 1.2.3) or build from source with -Build."
+  # A git checkout or a download of main has no release stamped in: use the newest published one.
+  try {
+    $r = Invoke-RestMethod -UseBasicParsing -TimeoutSec 20 -Headers @{ 'User-Agent' = 'vegaduta-setup' } "https://api.github.com/repos/$(if ($env:VEGADUTA_REPO) { $env:VEGADUTA_REPO } else { 'CD-LC/vegaduta' })/releases/latest"
+    $tag = [string]$r.tag_name
+    if ($tag -match '^v(\d.*)$') {
+      Say "No release pinned in ${EnvFile}: using the latest published release ($($Matches[1]))"
+      Set-EnvValue VEGADUTA_VERSION $Matches[1] -Force
+      $env:VEGADUTA_VERSION = $Matches[1]; return
+    }
+  } catch { }
+  Die "VEGADUTA_VERSION is empty in $EnvFile and the latest release could not be looked up (no network?). Set a published release (.\scripts\vegaduta.ps1 upgrade -Version 1.2.3) or build from source with -Build."
 }
 function Get-EnvValue([string]$Key) {
   $v = ''

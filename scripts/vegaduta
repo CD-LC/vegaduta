@@ -124,11 +124,27 @@ shipped_version() {
 
 # resolve_version: every image tag comes from VEGADUTA_VERSION (no `latest`
 # default). With --build and no version, images are built and tagged `local`.
+# X.Y.Z of the newest published (non-pre) release, or nothing when GitHub is unreachable.
+latest_release_version() {
+  local eff tag
+  eff="$(curl -fsSLI --proto '=https' --tlsv1.2 --max-time 20 -o /dev/null -w '%{url_effective}' \
+    "https://github.com/${VEGADUTA_REPO:-CD-LC/vegaduta}/releases/latest" 2>/dev/null)" || return 0
+  tag="${eff##*/}"
+  case "$tag" in v[0-9]*) printf '%s' "${tag#v}" ;; esac
+}
+
 resolve_version() {
   local v; v="$(get_env VEGADUTA_VERSION)"
   if [ -n "$v" ]; then export VEGADUTA_VERSION="$v"; return 0; fi
   if [ "$BUILD" = 1 ]; then export VEGADUTA_VERSION=local; return 0; fi
-  die "VEGADUTA_VERSION is empty in $ENV_FILE. Set it to a published release (see https://github.com/CD-LC/vegaduta/releases), e.g. scripts/vegaduta upgrade --version 1.2.3, or build from source with --build."
+  # A git checkout or a download of main has no release stamped in: use the newest published one.
+  v="$(latest_release_version)"
+  if [ -n "$v" ]; then
+    say "No release pinned in $ENV_FILE: using the latest published release ($v)"
+    set_env VEGADUTA_VERSION "$v" force
+    export VEGADUTA_VERSION="$v"; return 0
+  fi
+  die "VEGADUTA_VERSION is empty in $ENV_FILE and the latest release could not be looked up (no network?). Set it to a published release (see https://github.com/CD-LC/vegaduta/releases), e.g. scripts/vegaduta upgrade --version 1.2.3, or build from source with --build."
 }
 
 rand_hex() { # rand_hex BYTES
@@ -380,7 +396,10 @@ local_ai_args() {
     export LOCAL_LLM_ALLOWED_HOST="${LOCAL_LLM_ALLOWED_HOST:-host.docker.internal:11434}"
   else
     [ "$TIER" = full ] && COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.full.yml")
-    if [ "$(uname -s)" = Linux ] && docker info --format '{{json .Runtimes}}' 2>/dev/null | grep -q nvidia; then
+    # Docker lists the nvidia runtime on any machine with the toolkit installed (WSL2 included), GPU
+    # or not; asking the driver is what tells a real adapter from none.
+    if [ "$(uname -s)" = Linux ] && docker info --format '{{json .Runtimes}}' 2>/dev/null | grep -q nvidia \
+       && command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L 2>/dev/null | grep -q '^GPU'; then
       COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.nvidia.yml")
     fi
     COMPOSE_ARGS+=(--profile local-ai)
