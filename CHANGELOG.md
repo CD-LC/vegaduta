@@ -18,6 +18,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Security
 
+- **Browser images ship the current stable Chrome.** core-full and mcp-stdio-runner-browser install Chrome-for-Testing stable at build time (behind a fixed `current` path for `PUPPETEER_LAUNCH_OPTIONS`) and drop the Chrome 131 builds puppeteer@23.11.1 downloads for itself, so the release image scan no longer fails on fixed critical CVEs.
 - **Release images move off Debian bookworm.** Node services to `*-trixie-slim` (22.23.3 / 24.21.0), Python services to `3.12.15-slim-trixie`, the JRE to `eclipse-temurin:21.0.12.1_1-*-noble`, PostgreSQL to `postgres:16.15-trixie` and CloudNativePG to `16.15-system-trixie`. The release's critical-vulnerability gate now fails only where a fixed package exists (`only-fixed`), and `.grype.yaml` records the scoped wont-fix exceptions (re-matched automatically the day Debian ships a backport).
 
 ### Changed
