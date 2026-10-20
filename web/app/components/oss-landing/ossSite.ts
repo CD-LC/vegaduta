@@ -14,8 +14,7 @@ export const RELEASES_URL = `${REPO_URL}/releases`;
 export const GETTING_STARTED =
   "The release ships pinned, signed container images - vegaduta up pulls them; no source build.";
 
-export const INSTALL_COMMANDS = `curl -LO ${RELEASES_URL}/latest/download/vegaduta-setup-linux-amd64.tar.gz
-tar xzf vegaduta-setup-linux-amd64.tar.gz
+export const INSTALL_COMMANDS = `curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh
 ./scripts/vegaduta up --lite`;
 
 export const STACK: { name: string; detail: string }[] = [
@@ -33,6 +32,10 @@ export const CAPABILITIES: { title: string; body: string }[] = [
     body: "Build agents on any supported LLM provider. Import OpenAPI 3.x / Swagger 2.0 specs as tools, register MCP servers per tenant, and attach Agent Skills (SKILL.md).",
   },
   {
+    title: "An Assistant for every user",
+    body: "Everyone gets their own Assistant agent with routines, threads, scheduled tasks and learned skills - on every install shape, personal to full.",
+  },
+  {
     title: "Workflows with approvals",
     body: "A node-based workflow engine with human-in-the-loop approval steps, hosted forms, and an audit log of who decided what.",
   },
@@ -41,16 +44,28 @@ export const CAPABILITIES: { title: string; body: string }[] = [
     body: "Ground agents in your own data with pgvector retrieval and graph memory on Apache AGE.",
   },
   {
-    title: "Channels",
+    title: "Omnichannel",
     body: "Reach agents over web chat, voice, email, WhatsApp and other channels through adapters that share one approval model.",
+  },
+  {
+    title: "Build Studio",
+    body: "Draft an agent from a description, preview it, and publish it to a tenant - the same pipeline the hosted builder runs.",
   },
   {
     title: "Guardrails and governance",
     body: "Content-filtering guardrails, budgets, tenant isolation, and role-based access, enforced in-process on the chat hot path.",
   },
   {
-    title: "Self-hosted by design",
-    body: "Runs from a five-container laptop install to a Helm deployment on Kubernetes. Your data, keys and models stay on your infrastructure.",
+    title: "Artifacts, tables, schedules",
+    body: "Agents produce files and datasets, keep structured data tables, and run work on a schedule - all tenant-scoped.",
+  },
+  {
+    title: "Browser automation",
+    body: "An opt-in browser runner lets agents navigate, read and fill real pages under the same approval and audit rules.",
+  },
+  {
+    title: "Learning and Academy",
+    body: "Agents learn reusable skills with proposals you approve; the Academy teaches the platform inside the console and on academy.vegaduta.ai.",
   },
 ];
 
@@ -65,14 +80,19 @@ export const STANDARDS: { name: string; detail: string }[] = [
 
 export const TIERS: { name: string; body: string; cmd: string }[] = [
   {
-    name: "Desktop",
-    body: "The personal install: one person, local sign-in (passkey, PIN or password), a bundled local model. Packaged as .dmg, .exe and tarball.",
+    name: "Personal",
+    body: "One person on a laptop: the Setup app, a bundled local model, sign-in with a passkey or PIN. Nothing to deploy.",
     cmd: "See /downloads",
   },
   {
-    name: "Compose",
-    body: "Lite (five containers) to Full (admin console, object storage, PgBouncer, opt-in profiles). Images come from GHCR at the pinned release tag.",
+    name: "Lite",
+    body: "A small team's box: five containers, Keycloak sign-in, your own provider keys or host Ollama.",
     cmd: "./scripts/vegaduta up --lite",
+  },
+  {
+    name: "Full",
+    body: "The whole platform on compose: admin console, object storage, PgBouncer, every opt-in profile.",
+    cmd: "./scripts/vegaduta up --full",
   },
   {
     name: "Kubernetes",
@@ -91,6 +111,70 @@ export const COMMUNITY_LINKS: { label: string; href: string }[] = [
   { label: "Changelog", href: "/changelog" },
   { label: "API reference", href: "/api-reference" },
 ];
+
+// ---------------------------------------------------------------------------
+// The suite: three ways a visitor meets VegaDūta - run it, build on it, or
+// extend it. Links go where the artifacts actually live.
+// ---------------------------------------------------------------------------
+
+export const SUITE: { title: string; body: string; links: { label: string; href: string }[] }[] = [
+  {
+    title: "The platform",
+    body: "Agents with tools, an Assistant per user, workflows with human approval, retrieval and graph memory, omnichannel reach, guardrails, budgets and a sealed audit log. Try it in the browser, then put it on your own box.",
+    links: [
+      { label: "Try it live", href: "/try" },
+      { label: "Install guide", href: docPageHref("installation") },
+      { label: "API reference", href: "/api-reference" },
+    ],
+  },
+  {
+    title: "The SDKs",
+    body: "Governance inside your own application: @Governed risk labels, human approval, budgets, idempotent effects and audit around any tool call. Java Agent SDK, Python Agent SDK, and generated TypeScript/Python REST clients.",
+    links: [
+      { label: "Java Agent SDK", href: docPageHref("javaSdk") },
+      { label: "Python Agent SDK", href: `${REPO_URL}/blob/main/sdk/python-agent/README.md` },
+      { label: "All SDKs", href: docPageHref("sdkOverview") },
+    ],
+  },
+  {
+    title: "Plugins and apps",
+    body: "IDE extensions for VS Code, JetBrains and Eclipse; Chrome and Edge companions; the Android app (beta); a Wear OS preview; a desktop agent; and VegaDūta itself as an MCP server your own client can drive.",
+    links: [
+      { label: "Plugins and apps", href: "/plugins" },
+      { label: "Reference guide", href: docPageHref("pluginsAndApps") },
+      { label: "Example MCP servers", href: `${REPO_URL}/tree/main/examples/mcp-servers` },
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Get it: the per-OS installer cards. The /downloads page resolves the real
+// asset names from the latest release; these cards point there and name the
+// artifact so the visitor knows exactly what they get.
+// ---------------------------------------------------------------------------
+
+export const DOWNLOAD_CARDS: { os: string; file: string; note: string }[] = [
+  {
+    os: "macOS",
+    file: "VegaDuta-Setup-<version>.dmg",
+    note: "Universal app - checks Docker, pulls the signed release, opens the console. Gatekeeper warns once (unsigned build).",
+  },
+  {
+    os: "Windows",
+    file: "vegaduta-setup-windows-amd64.zip",
+    note: "Unzip and run the Setup exe; SmartScreen warns once. Installs the personal shape by default.",
+  },
+  {
+    os: "Linux",
+    file: "vegaduta-setup-linux-{amd64,arm64}.tar.gz",
+    note: "Both architectures. Untar, run the setup binary, done - or use the one-line terminal installer below.",
+  },
+];
+
+export const HELM_COMMAND = "helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta";
+
+export const VERIFY_NOTE =
+  "Every release artifact is listed in SHA256SUMS.txt - verify before you run. Images are cosign-signed and carry SBOMs.";
 
 // ---------------------------------------------------------------------------
 // Using VegaDūta from your own code, and everywhere it runs. Statuses are the
@@ -116,6 +200,12 @@ export const DEPENDENCIES: { name: string; coordinates: string; body: string; st
     coordinates: "io.vegaduta:vegaduta-agent-*",
     body: "Governance inside your own Java application: tool risk classification, human approval, budgets, idempotent effects, guardrails, hooks, audit and telemetry around Spring AI tools. The core has no framework dependency.",
     status: "Apache-2.0. Builds reproducibly from the v0.1.4 tag; Maven Central publishing is on the roadmap.",
+  },
+  {
+    name: "Python Agent SDK",
+    coordinates: "vegaduta-agent (PyPI name reserved)",
+    body: "The same governance contracts for Python: @governed, ApprovalGate, budgets, guardrails, tamper-evident evidence chain - dependency-free, transports are injected ports.",
+    status: "Apache-2.0. In sdk/python-agent. First PyPI publish is on the roadmap.",
   },
   {
     name: "TypeScript client",

@@ -17,6 +17,10 @@ Release notes on GitHub are generated from the section for each version.
 
 - **Release images move off Debian bookworm.** Node services to `*-trixie-slim` (22.23.3 / 24.21.0), Python services to `3.12.15-slim-trixie`, the JRE to `eclipse-temurin:21.0.12.1_1-*-noble`, PostgreSQL to `postgres:16.15-trixie` and CloudNativePG to `16.15-system-trixie`. The release's critical-vulnerability gate now fails only where a fixed package exists (`only-fixed`), and `.grype.yaml` records the scoped wont-fix exceptions (re-matched automatically the day Debian ships a backport).
 
+### Changed
+
+- **The OSS landing now sells the whole suite.** `/` leads with three ways in - run the platform (Personal, Lite, Full, Kubernetes), build on the SDKs (Java, Python, REST clients), extend with plugins and apps (IDEs, browsers, mobile, MCP) - plus a "Get VegaDūta" section with per-OS installer cards, the terminal installer, Helm and the verification step.
+
 ### Fixed
 
 - **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.
