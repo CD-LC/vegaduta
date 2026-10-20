@@ -1437,6 +1437,23 @@ personal_doctor() {
   printf '%sLooks good%s (%d warning(s)).\n' "$C_G" "$C_0" "$WARNINGS"
 }
 
+# macOS: install and start Ollama through Homebrew when it is missing, so the model runs natively
+# on the Apple GPU (the container is CPU-only there). Linux needs root for Ollama's installer,
+# so it keeps the container. Skipped for --dry-run and VEGADUTA_ASSUME_NO=1; never fails the run.
+personal_install_ollama() {
+  [ "$(uname -s)" = Darwin ] && [ "$DRY_RUN" != 1 ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ] || return 0
+  host_ollama_models >/dev/null 2>&1 && return 0
+  if ! command -v ollama >/dev/null 2>&1 && [ ! -d /Applications/Ollama.app ]; then
+    command -v brew >/dev/null 2>&1 || return 0
+    say "Installing Ollama (free open models on this Mac, no account) with Homebrew"
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install ollama >&2 || { warn "brew install ollama failed - the model runs in a container instead"; return 0; }
+  fi
+  if [ -d /Applications/Ollama.app ]; then open -g -a Ollama 2>/dev/null || true
+  else brew services start ollama >/dev/null 2>&1 || true; fi
+  local i; for i in $(seq 1 40); do host_ollama_models >/dev/null 2>&1 && { ok "Ollama is running"; return 0; }; sleep 3; done
+  warn "Ollama did not start in 2 minutes - the model runs in a container instead"
+}
+
 # With nothing chosen, a personal install gets the free local model that fits this machine's
 # RAM: through an Ollama already running here, else the Ollama container (which downloads the
 # model on first start). --cloud opts out; below 8 GB of RAM the cloud-key path stays.
@@ -1446,6 +1463,7 @@ personal_default_model() {
   # looks again, so an install that never chose gets its model on the next plain `personal`.
   if [ "${CLOUD:-0}" = 1 ]; then return 0; fi
   [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model)"
+  personal_install_ollama
   if host_ollama_models >/dev/null 2>&1; then
     LOCAL_AI=host
     say "Ollama found on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"

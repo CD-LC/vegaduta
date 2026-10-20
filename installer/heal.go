@@ -20,6 +20,8 @@ import (
 
 // errRestartNeeded stops an install that can only continue after a reboot
 // (Windows enabling WSL2). The setup app is registered to reopen by itself.
+var errNoBrew = errors.New("Homebrew is not installed")
+
 var errRestartNeeded = errors.New("restart Windows to finish setting up - VegaDūta Setup reopens by itself afterwards")
 
 // upAttempts bounds how often a failed start is repaired and retried.
@@ -49,8 +51,8 @@ func ensureDocker(ctx context.Context, tier string, emit func(Event)) error {
 	}
 	enableDockerAutostart(emit)
 	needGB, _, _ := tierNeeds(tier)
-	if tier == "personal" {
-		needGB += 4 // the local model a personal install downloads runs next to the stack
+	if tier == "personal" && !ollamaUp(ctx) {
+		needGB += 4 // the model then runs in the Ollama container, next to the stack
 	}
 	have := dockerMemGB(ctx)
 	if have >= int64(needGB) {

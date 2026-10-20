@@ -227,6 +227,21 @@ function Get-ModelRamGb([string]$Tag) {
 function Test-HostOllama {
   try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 'http://127.0.0.1:11434/api/tags' | Out-Null; return $true } catch { return $false }
 }
+# Installs (per-user, no administrator prompt) and starts Ollama when it is not running, so the
+# model runs natively and can use the GPU; the container stays the fallback. Never fails the run.
+function Install-HostOllama {
+  if ($env:VEGADUTA_ASSUME_NO -eq '1' -or (Test-HostOllama)) { return }
+  $app = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama app.exe'
+  if (-not (Test-Path $app) -and -not (Get-Command ollama -ErrorAction SilentlyContinue)) {
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { return }
+    Say 'Installing Ollama (free open models on this computer, no account)'
+    & winget install -e --id Ollama.Ollama --silent --accept-source-agreements --accept-package-agreements | Out-Host
+    if ($LASTEXITCODE -ne 0) { Warn 'could not install Ollama - the model runs in a container instead'; return }
+  }
+  if (Test-Path $app) { Start-Process -FilePath $app -WindowStyle Hidden } else { Start-Process -FilePath 'ollama' -ArgumentList 'serve' -WindowStyle Hidden }
+  for ($i = 0; $i -lt 40; $i++) { if (Test-HostOllama) { Ok 'Ollama is running'; return }; Start-Sleep -Seconds 3 }
+  Warn 'Ollama did not start in 2 minutes - the model runs in a container instead'
+}
 # A personal install gets the free local model that fits this machine's RAM: through an Ollama
 # already running here, else the Ollama container (it downloads the model on first start).
 # -Cloud opts out and is remembered; below 8 GB of RAM the cloud-key path stays.
@@ -239,6 +254,7 @@ function Resolve-LocalModel {
   $gb = 0
   try { $gb = [int][math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) } catch { $gb = 0 }
   if (-not $script:LocalModelTag) { $script:LocalModelTag = Get-RecommendedModel $gb }
+  if ($gb -eq 0 -or $gb -ge 8) { Install-HostOllama }
   if (Test-HostOllama) {
     $script:LocalAi = 'host'
     Say "Ollama found on this machine: agents will use '$($script:LocalModelTag)' (change with -LocalModel, opt out with -Cloud)"
@@ -524,9 +540,12 @@ switch ($Command) {
     $ca = Get-ComposeArgs
     Save-State
     if ($script:LocalAi -eq 'host' -and $script:LocalModelTag) {
-      Say "Downloading model '$($script:LocalModelTag)' into Ollama on this machine (once; can take a while)"
-      try { Invoke-RestMethod -Method Post -TimeoutSec 3600 -Uri 'http://127.0.0.1:11434/api/pull' -Body (@{ model = $script:LocalModelTag; stream = $false } | ConvertTo-Json) | Out-Null }
-      catch { Warn "could not download '$($script:LocalModelTag)' into Ollama: $($_.Exception.Message) - run: ollama pull $($script:LocalModelTag)" }
+      # The chat model, and the embedding model documents and memory use when no sidecar runs.
+      foreach ($m in @($script:LocalModelTag, 'nomic-embed-text')) {
+        Say "Downloading model '$m' into Ollama on this machine (once; can take a while)"
+        try { Invoke-RestMethod -Method Post -TimeoutSec 3600 -Uri 'http://127.0.0.1:11434/api/pull' -Body (@{ model = $m; stream = $false } | ConvertTo-Json) | Out-Null }
+        catch { Warn "could not download '$m' into Ollama: $($_.Exception.Message) - run: ollama pull $m" }
+      }
     }
     # The Ollama container reports healthy only once its model is downloaded (several GB on a first start).
     $wt = if ($env:VEGADUTA_WAIT_TIMEOUT) { $env:VEGADUTA_WAIT_TIMEOUT } elseif ($script:LocalAi -eq 'container') { '3600' } else { '900' }

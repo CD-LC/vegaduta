@@ -344,8 +344,11 @@ Agents need a model. Personal mode has three ways to get a free local one, all t
 
 - **At install, automatically.** With no choice made, `personal` (bash and `vegaduta.ps1` alike, so the Setup app
   too) picks the model that fits your RAM from the shared catalog, downloads it and registers it as the free
-  platform pool, without asking. It uses the Ollama already running on the machine when there is one (and pulls the
-  model and the `nomic-embed-text` embedding model into it), otherwise it starts the Ollama container, which
+  platform pool, without asking. Free open-weights models: no account, key or subscription. When Ollama is missing it
+  is installed and started for you on macOS (Homebrew; the Setup app too) and Windows (`winget`, per-user, no
+  administrator prompt), so the model runs natively and can use the GPU. It uses that Ollama (and pulls the
+  model and the `nomic-embed-text` embedding model into it); on Linux and WSL, where Ollama's installer needs root,
+  or when the install fails, it starts the Ollama container instead, which
   downloads the model on its first start; that first start may take a while, so the launcher waits up to an hour
   for it instead of 15 minutes. Machines with less than 8 GB of RAM keep the cloud-key path. Choose another model
   with `--local-model TAG` (`-LocalModel` on Windows), or opt out with `--cloud` (`-Cloud`), which is remembered.
