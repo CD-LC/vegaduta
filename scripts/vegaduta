@@ -616,16 +616,18 @@ cmd_doctor() {
 # After `up` with a local model: measure whether it can really call tools, so a
 # first-time user learns now (not from a broken first agent) and is told what to
 # do. Never fails the install; the probe is one short request.
-# Offers `ollama pull TAG` on a terminal (the user answers; nothing is downloaded unasked) and
-# returns 0 when the model is there afterwards.
+# Seconds `up --wait` allows. The Ollama container reports healthy only once its model is
+# downloaded (several GB on a first start), so it gets an hour instead of 15 minutes.
+up_wait_default() { if [ "$LOCAL_AI" = container ]; then echo 3600; else echo 900; fi; }
+
+# Pulls the model the install uses into the host Ollama, so the first chat does not fail on a
+# missing model (VEGADUTA_ASSUME_NO=1 or CI skip it). Returns 0 when the model is there afterwards.
 pull_missing_model() {
-  local tag="$1" a=""
-  if [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ]; then
-    printf "Model '%s' is not pulled on this machine yet. Pull it now? [Y/n]: " "$tag"; read -r a || a=n
-    case "$a" in n|N|no|NO) return 1 ;; esac
-    if command -v ollama >/dev/null 2>&1; then ollama pull "$tag" && return 0
-    else curl -fsS --max-time 3600 -X POST "http://127.0.0.1:11434/api/pull" -d "{\"model\":\"$tag\",\"stream\":false}" >/dev/null && return 0; fi
-  fi
+  local tag="$1"
+  [ -z "${CI:-}" ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ] || return 1
+  say "Downloading model '$tag' into Ollama on this machine (once; can take a while)"
+  if command -v ollama >/dev/null 2>&1; then ollama pull "$tag" && return 0
+  else curl -fsS --max-time 3600 -X POST "http://127.0.0.1:11434/api/pull" -d "{\"model\":\"$tag\",\"stream\":false}" >/dev/null && return 0; fi
   return 1
 }
 
@@ -847,7 +849,7 @@ cmd_up() {
   fi
   cmd_doctor || die "fix the problems above, then re-run. (scripts/vegaduta doctor)"
   save_state
-  local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-900}")
+  local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-$(up_wait_default)}")
   [ "$BUILD" = 1 ] && up_args+=(--build)
   say "Starting ($TIER) — first start pulls/builds images and runs migrations; this can take several minutes"
   if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
@@ -1435,17 +1437,46 @@ personal_doctor() {
   printf '%sLooks good%s (%d warning(s)).\n' "$C_G" "$C_0" "$WARNINGS"
 }
 
-# With nothing chosen, a personal install uses an Ollama that is already running on this machine
-# (free and private); --cloud opts out. Never starts or pulls anything.
+# macOS: install and start Ollama through Homebrew when it is missing, so the model runs natively
+# on the Apple GPU (the container is CPU-only there). Linux needs root for Ollama's installer,
+# so it keeps the container. Skipped for --dry-run and VEGADUTA_ASSUME_NO=1; never fails the run.
+personal_install_ollama() {
+  [ "$(uname -s)" = Darwin ] && [ "$DRY_RUN" != 1 ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ] || return 0
+  host_ollama_models >/dev/null 2>&1 && return 0
+  if ! command -v ollama >/dev/null 2>&1 && [ ! -d /Applications/Ollama.app ]; then
+    command -v brew >/dev/null 2>&1 || return 0
+    say "Installing Ollama (free open models on this Mac, no account) with Homebrew"
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install ollama >&2 || { warn "brew install ollama failed - the model runs in a container instead"; return 0; }
+  fi
+  if [ -d /Applications/Ollama.app ]; then open -g -a Ollama 2>/dev/null || true
+  else brew services start ollama >/dev/null 2>&1 || true; fi
+  local i; for i in $(seq 1 40); do host_ollama_models >/dev/null 2>&1 && { ok "Ollama is running"; return 0; }; sleep 3; done
+  warn "Ollama did not start in 2 minutes - the model runs in a container instead"
+}
+
+# With nothing chosen, a personal install gets the free local model that fits this machine's
+# RAM: through an Ollama already running here, else the Ollama container (which downloads the
+# model on first start). --cloud opts out; below 8 GB of RAM the cloud-key path stays.
 personal_default_model() {
   [ -z "$LOCAL_AI" ] && [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
-  # An earlier run that said --cloud stays cloud. Any other earlier run (no Ollama then) looks
-  # again: that is how an Ollama installed afterwards gets picked up by a plain `personal`.
+  # An earlier run that said --cloud stays cloud. Any other earlier run (no local model then)
+  # looks again, so an install that never chose gets its model on the next plain `personal`.
   if [ "${CLOUD:-0}" = 1 ]; then return 0; fi
-  host_ollama_models >/dev/null 2>&1 || return 0
-  LOCAL_AI=host
   [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model)"
-  say "Ollama found on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
+  personal_install_ollama
+  if host_ollama_models >/dev/null 2>&1; then
+    LOCAL_AI=host
+    say "Ollama found on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
+    return 0
+  fi
+  local gb; gb="$(host_ram_gb)"
+  if [ "$gb" -gt 0 ] && [ "$gb" -lt 8 ]; then
+    say "This machine has ${gb} GB RAM - too little for a local model next to the stack; add a cloud provider key in the console"
+    LOCAL_MODEL=""
+    return 0
+  fi
+  LOCAL_AI=container
+  say "Agents will use the free local model '$LOCAL_MODEL' (downloaded once on first start; change with --local-model, opt out with --cloud)"
 }
 
 # The core jar for --native-core: VEGADUTA_CORE_JAR, else built from source (--build), else the
@@ -1719,11 +1750,9 @@ personal_apply_defaults() {
 
 personal_up() {
   TIER=personal
-  # Same first-run question as `up`: a personal install gets to pick a local
-  # model too - host Ollama when one is running, the Docker container
-  # otherwise, or any catalog tag (gpt-oss, deepseek-r1, ...). Non-interactive
-  # runs and re-runs skip it; the fallback below then adopts a host Ollama.
-  choose_model_source
+  # No question: a personal install gets the local model that fits this machine
+  # (host Ollama when one is running, the Docker container otherwise).
+  # --cloud, --local-ai[=host] and --local-model override it.
   personal_default_model
   if [ -n "$LOCAL_MODEL" ] && [ -z "$LOCAL_AI" ]; then
     warn "--local-model '$LOCAL_MODEL' has no effect: there is no local AI. Use --local-ai=host (Ollama on this machine) or --local-ai (a container)"
@@ -1756,7 +1785,7 @@ personal_up() {
   personal_sync_public_urls
   cmd_doctor || die "fix the problems above, then re-run. (scripts/vegaduta doctor --personal)"
   save_state
-  local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-900}")
+  local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-$(up_wait_default)}")
   [ "$BUILD" = 1 ] && up_args+=(--build)
   say "Starting (personal) - first start pulls/builds images and runs migrations; this can take several minutes"
   if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then

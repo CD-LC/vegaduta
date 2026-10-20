@@ -336,6 +336,10 @@ func runInstall(ctx context.Context, c config, emit func(Event)) error {
 		}
 		emit(Event{Line: s})
 	}
+	if c.tier == "personal" {
+		emit(Event{Phase: "docker", Line: "Checking Ollama (free local AI models)"})
+		ensureOllama(ctx, emit)
+	}
 	emit(Event{Phase: "docker", Line: "Checking Docker"})
 	if err := ensureDocker(ctx, c.tier, emit); err != nil {
 		return err
