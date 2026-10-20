@@ -32,7 +32,9 @@ param(
   [switch] $Yes,
   [switch] $NoFollow,
   [string] $Version = '',
-  [switch] $NoBackup
+  [switch] $NoBackup,
+  [switch] $Cloud,
+  [string] $LocalModel = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -181,14 +183,90 @@ function Load-State {
       if ($l -like 'tier=*') { $script:Tier = $l.Substring(5) }
       elseif ($l -like 'profiles=*' -and $script:Profiles.Count -eq 0) { foreach ($p in ($l.Substring(9) -split ' ')) { Add-Profile $p } }
       elseif ($l -eq 'build=1') { $script:DoBuild = $true }
+      elseif ($l -like 'local_ai=*') { $script:LocalAi = $l.Substring(9) }
+      elseif ($l -like 'local_model=*') { $script:LocalModelTag = $l.Substring(12) }
     }
   }
   if (-not $script:Tier) { $script:Tier = 'lite' }
 }
+# The local-model choice, in the same state-file keys the bash launcher uses.
+function Read-StateValue([string]$Key) {
+  if (-not (Test-Path $StateFile)) { return '' }
+  foreach ($l in [System.IO.File]::ReadAllLines($StateFile)) { if ($l -like "$Key=*") { return $l.Substring($Key.Length + 1) } }
+  return ''
+}
 function Save-State {
   $b = if ($script:DoBuild) { '1' } else { '0' }
-  $txt = "tier=$($script:Tier)`nprofiles=$($script:Profiles -join ' ')`nbuild=$b`n"
+  $c = if ($script:LocalAi) { '0' } elseif ($script:CloudChoice) { '1' } else { '0' }
+  $txt = "tier=$($script:Tier)`nprofiles=$($script:Profiles -join ' ')`nbuild=$b`nlocal_ai=$($script:LocalAi)`nlocal_model=$($script:LocalModelTag)`ncloud=$c`n"
   [System.IO.File]::WriteAllText($StateFile, $txt, (New-Object System.Text.UTF8Encoding($false)))
+}
+# Memory in GB -> the catalog's recommended model (deploy/models/catalog.txt "#ladder|minGB|tag" lines).
+function Get-RecommendedModel([int]$Gb) {
+  $cat = Join-Path $RepoRoot 'deploy\models\catalog.txt'
+  if (Test-Path $cat) {
+    foreach ($l in [System.IO.File]::ReadAllLines($cat)) {
+      $f = $l -split '\|'
+      if ($f.Count -ge 3 -and $f[0] -eq '#ladder' -and $f[1] -match '^\d+$' -and $Gb -ge [int]$f[1]) { return $f[2] }
+    }
+  }
+  if ($Gb -ge 32) { return 'gpt-oss:20b' } elseif ($Gb -ge 24) { return 'qwen3.5:9b' } elseif ($Gb -ge 12) { return 'qwen3.5:4b' }
+  return 'qwen3.5:2b'
+}
+# The catalog's "RAM GB wanted" for a tag (field 4), or 0.
+function Get-ModelRamGb([string]$Tag) {
+  $cat = Join-Path $RepoRoot 'deploy\models\catalog.txt'
+  if (Test-Path $cat) {
+    foreach ($l in [System.IO.File]::ReadAllLines($cat)) {
+      $f = $l -split '\|'
+      if ($f.Count -ge 4 -and $f[0] -eq $Tag -and $f[3] -match '^\d+') { return [int]($f[3] -replace '\..*$', '') }
+    }
+  }
+  return 0
+}
+function Test-HostOllama {
+  try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 'http://127.0.0.1:11434/api/tags' | Out-Null; return $true } catch { return $false }
+}
+# Installs (per-user, no administrator prompt) and starts Ollama when it is not running, so the
+# model runs natively and can use the GPU; the container stays the fallback. Never fails the run.
+function Install-HostOllama {
+  if ($env:VEGADUTA_ASSUME_NO -eq '1' -or (Test-HostOllama)) { return }
+  $app = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama app.exe'
+  if (-not (Test-Path $app) -and -not (Get-Command ollama -ErrorAction SilentlyContinue)) {
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { return }
+    Say 'Installing Ollama (free open models on this computer, no account)'
+    & winget install -e --id Ollama.Ollama --silent --accept-source-agreements --accept-package-agreements | Out-Host
+    if ($LASTEXITCODE -ne 0) { Warn 'could not install Ollama - the model runs in a container instead'; return }
+  }
+  if (Test-Path $app) { Start-Process -FilePath $app -WindowStyle Hidden } else { Start-Process -FilePath 'ollama' -ArgumentList 'serve' -WindowStyle Hidden }
+  for ($i = 0; $i -lt 40; $i++) { if (Test-HostOllama) { Ok 'Ollama is running'; return }; Start-Sleep -Seconds 3 }
+  Warn 'Ollama did not start in 2 minutes - the model runs in a container instead'
+}
+# A personal install gets the free local model that fits this machine's RAM: through an Ollama
+# already running here, else the Ollama container (it downloads the model on first start).
+# -Cloud opts out and is remembered; below 8 GB of RAM the cloud-key path stays.
+function Resolve-LocalModel {
+  $script:LocalAi = Read-StateValue 'local_ai'
+  $script:LocalModelTag = if ($LocalModel) { $LocalModel } else { Read-StateValue 'local_model' }
+  $script:CloudChoice = $Cloud -or ((Read-StateValue 'cloud') -eq '1' -and -not $LocalModel)
+  if ($Cloud) { $script:LocalAi = ''; $script:LocalModelTag = ''; return }
+  if ($script:LocalAi -or $script:CloudChoice) { return }
+  $gb = 0
+  try { $gb = [int][math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) } catch { $gb = 0 }
+  if (-not $script:LocalModelTag) { $script:LocalModelTag = Get-RecommendedModel $gb }
+  if ($gb -eq 0 -or $gb -ge 8) { Install-HostOllama }
+  if (Test-HostOllama) {
+    $script:LocalAi = 'host'
+    Say "Ollama found on this machine: agents will use '$($script:LocalModelTag)' (change with -LocalModel, opt out with -Cloud)"
+    return
+  }
+  if ($gb -gt 0 -and $gb -lt 8) {
+    Say "This machine has $gb GB RAM - too little for a local model next to the stack; add a cloud provider key in the console"
+    $script:LocalModelTag = ''
+    return
+  }
+  $script:LocalAi = 'container'
+  Say "Agents will use the free local model '$($script:LocalModelTag)' (downloaded once on first start; change with -LocalModel, opt out with -Cloud)"
 }
 function Resolve-Profiles {
   foreach ($p in ((Get-EnvValue 'COMPOSE_PROFILES') -split ',')) { Add-Profile $p.Trim() }
@@ -236,6 +314,26 @@ function Get-ComposeArgs {
     if ($script:DoBuild) { $a += @('-f', (Join-Path $ComposeDir 'personal.build.yml')) }
     # The agent's own browser (services/browser-runner): `-Profile browser` layers its overlay; core attaches to it.
     if ($script:Profiles.Contains('browser')) { $a += @('-f', (Join-Path $ComposeDir 'browser.yml')) }
+    if ($script:LocalAi) {
+      if ($script:LocalModelTag) { $env:LOCAL_LLM_MODEL = $script:LocalModelTag }
+      $a += @('-f', (Join-Path $ComposeDir 'docker-compose.local-ai.yml'))
+      if ($script:LocalAi -eq 'host') {
+        $a += @('-f', (Join-Path $ComposeDir 'docker-compose.local-ai.host.yml'))
+        if (-not $env:LOCAL_LLM_BASE_URL) { $env:LOCAL_LLM_BASE_URL = 'http://host.docker.internal:11434' }
+        if (-not $env:LOCAL_LLM_ALLOWED_HOST) { $env:LOCAL_LLM_ALLOWED_HOST = 'host.docker.internal:11434' }
+      } else {
+        $a += @('--profile', 'local-ai')
+        # personal.yml allow-lists the machine's own Ollama for the console's model wizard; keep it next to the container.
+        $allow = Get-EnvValue 'APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS'
+        if ((",$allow,") -notlike '*,host.docker.internal:11434,*') { $allow = if ($allow) { "host.docker.internal:11434,$allow" } else { 'host.docker.internal:11434' } }
+        $env:APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS = $allow
+        # The container's memory cap follows the model (the 8g default cannot hold the larger rows); never lowered.
+        if (-not $env:OLLAMA_MEM_LIMIT -and -not (Get-EnvValue 'OLLAMA_MEM_LIMIT')) {
+          $want = Get-ModelRamGb $script:LocalModelTag
+          if ($want -gt 8) { $env:OLLAMA_MEM_LIMIT = "${want}g" }
+        }
+      }
+    }
   } elseif ($script:Tier -eq 'lite') {
     $a += @('-f', (Join-Path $ComposeDir 'lite.yml'))
     if ($script:DoBuild) { $a += @('-f', (Join-Path $ComposeDir 'lite.build.yml')) }
@@ -437,10 +535,20 @@ switch ($Command) {
     Invoke-Secrets ''
     Resolve-Profiles
     Resolve-Version
+    Resolve-LocalModel
     if (-not (Invoke-PersonalDoctor)) { Die 'fix the problems above, then re-run' }
     $ca = Get-ComposeArgs
     Save-State
-    $wt = if ($env:VEGADUTA_WAIT_TIMEOUT) { $env:VEGADUTA_WAIT_TIMEOUT } else { '900' }
+    if ($script:LocalAi -eq 'host' -and $script:LocalModelTag) {
+      # The chat model, and the embedding model documents and memory use when no sidecar runs.
+      foreach ($m in @($script:LocalModelTag, 'nomic-embed-text')) {
+        Say "Downloading model '$m' into Ollama on this machine (once; can take a while)"
+        try { Invoke-RestMethod -Method Post -TimeoutSec 3600 -Uri 'http://127.0.0.1:11434/api/pull' -Body (@{ model = $m; stream = $false } | ConvertTo-Json) | Out-Null }
+        catch { Warn "could not download '$m' into Ollama: $($_.Exception.Message) - run: ollama pull $m" }
+      }
+    }
+    # The Ollama container reports healthy only once its model is downloaded (several GB on a first start).
+    $wt = if ($env:VEGADUTA_WAIT_TIMEOUT) { $env:VEGADUTA_WAIT_TIMEOUT } elseif ($script:LocalAi -eq 'container') { '3600' } else { '900' }
     $upArgs = @('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', $wt)
     if ($script:DoBuild) { $upArgs += '--build' }
     Say 'Starting (personal) - first start pulls/builds images and runs migrations; this can take several minutes'
@@ -455,7 +563,8 @@ switch ($Command) {
     $m = [regex]::Matches($txt, 'https?://\S+/login\?setup=[A-Za-z0-9_-]+')
     if ($m.Count -gt 0) { $setup = $m[$m.Count - 1].Value }
     if ($setup) { Write-Host "  First-run setup  $setup" } else { Write-Host '  Open the console and sign in (first-run setup is already done).' }
-    Write-Host '  Add an LLM provider key in the console (Settings -> Providers), or run Ollama on this machine.'
+    if ($script:LocalAi) { Write-Host "  Local model  $($script:LocalModelTag) via $($script:LocalAi) Ollama (free; agents can use it right away)" }
+    else { Write-Host '  Add an LLM provider key in the console (Settings -> Providers), or run Ollama on this machine.' }
   }
   'up' {
     Parse-TierFlags

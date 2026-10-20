@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -106,5 +108,25 @@ func TestUpWithRepairGivesUp(t *testing.T) {
 	err := upWithRepairWait(context.Background(), start, func(Event) {}, func(string) {}, 0)
 	if err == nil || calls != upAttempts {
 		t.Fatalf("err=%v calls=%d, want an error after %d attempts", err, calls, upAttempts)
+	}
+}
+
+func TestOllamaUp(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/tags" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Write([]byte(`{"models":[]}`))
+	}))
+	old := ollamaURL
+	defer func() { ollamaURL = old }()
+	ollamaURL = srv.URL + "/api/tags"
+	if !ollamaUp(context.Background()) {
+		t.Fatal("a server answering /api/tags is Ollama running")
+	}
+	srv.Close()
+	if ollamaUp(context.Background()) {
+		t.Fatal("nothing listening is not Ollama running")
 	}
 }

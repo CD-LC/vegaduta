@@ -63,7 +63,8 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    if: vars.DOCS_PUBLISH_PAGES == 'true'
+    # Pull requests only build: the github-pages environment accepts deployments from main alone.
+    if: vars.DOCS_PUBLISH_PAGES == 'true' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
