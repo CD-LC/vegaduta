@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Local AI stays the default on small machines.** `personal` no longer drops to the cloud-key path below 8 GB of RAM: it picks the smallest catalog model (CPU only is fine) and warns that the first reply is slow; only machines under 4 GB keep the cloud-key path. The model is now sized to the memory Docker actually has when it runs in the Ollama container (a WSL2 or Docker Desktop VM is often much smaller than the machine), with a hint to raise Docker's memory for a bigger one.
+
 ## [0.1.5] - 2026-10-20
 
 ### Changed
