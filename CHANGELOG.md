@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-20
+
 ### Fixed
 
 - **The local model follows Ollama when it moves.** Installing Ollama on the computer after an install that used the Ollama container now switches `personal` to it (Windows and macOS/Linux launchers) instead of keeping the container, and core repoints its own "Local model (Ollama)" pool row to the new address and model. Before, the row kept calling the old Ollama, so the console showed a local model in use while every chat failed. A row whose model is not on its Ollama (never pulled, or removed) switches to the configured model when that one is there, and an Ollama that is installed but not running (after a restart, or its app was closed) is started; if it still does not answer, the container takes over.
