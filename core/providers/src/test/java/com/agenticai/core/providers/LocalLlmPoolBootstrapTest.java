@@ -103,6 +103,7 @@ class LocalLlmPoolBootstrapTest {
         when(row.getLabel()).thenReturn(label);
         when(row.getBaseUrl()).thenReturn(baseUrl);
         when(row.getPriority()).thenReturn(priority);
+        when(row.getModel()).thenReturn("llama3.2");
         return row;
     }
 
@@ -174,14 +175,67 @@ class LocalLlmPoolBootstrapTest {
     }
 
     @Test
-    void secondRunWithSameLabelOrBaseUrlWritesNothing() {
-        List<PlatformHostedLlmProvider> byLabel =
-                List.of(row(5, "Local model (Ollama)", "http://other:1", 1));
-        when(repository.findAllByOrderByPriorityAsc()).thenReturn(byLabel);
+    void ownRowOnAnotherBaseUrlIsRepointedToTheConfiguredOllama() {
+        // The install moved Ollama (container before, the computer's own Ollama now): the old
+        // row must follow, or the pool keeps calling an Ollama that no longer runs.
+        server.expect(requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider old =
+                row(5, "Local model (Ollama)", "http://host.docker.internal:11434", -3);
+        when(old.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(old));
+
+        assertEquals(
+                Outcome.MOVED, bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        ArgumentCaptor<PlatformHostedLlmProviderUpsertRequest> req =
+                ArgumentCaptor.forClass(PlatformHostedLlmProviderUpsertRequest.class);
+        verify(service).update(org.mockito.ArgumentMatchers.eq(5L), req.capture());
+        assertEquals(BASE, req.getValue().baseUrl());
+        assertEquals("llama3.2", req.getValue().model());
+        assertEquals(-3, req.getValue().priority());
+        assertTrue(req.getValue().enabled());
+        assertEquals(null, req.getValue().apiKey(), "the stored key is kept");
+        verify(service, never()).createAllowingBlankKey(any());
+    }
+
+    @Test
+    void rowWhoseModelIsNotOnTheServerSwitchesToTheConfiguredModel() {
+        // The console said "in use" but the row's model was never pulled there: every chat failed.
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider stale = row(7, "Local model (Ollama)", BASE, 0);
+        when(stale.getModel()).thenReturn("qwen3.5:4b");
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(stale));
+
+        assertEquals(
+                Outcome.MODEL_REPLACED,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service).updateModel(7L, "llama3.2");
+        verify(service, never()).createAllowingBlankKey(any());
+    }
+
+    @Test
+    void anInstalledModelTheOperatorPickedIsKept() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(
+                        withSuccess(
+                                "{\"models\":[{\"name\":\"llama3.2:latest\"},{\"name\":\"mistral:latest\"}]}",
+                                MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider picked = row(8, "Local model (Ollama)", BASE, 0);
+        when(picked.getModel()).thenReturn("mistral");
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(picked));
+
         assertEquals(
                 Outcome.ALREADY_PRESENT,
                 bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
 
+        verify(service, never()).updateModel(any(), any());
+    }
+
+    @Test
+    void secondRunWithSameBaseUrlWritesNothing() {
         List<PlatformHostedLlmProvider> byUrl =
                 List.of(row(6, "Renamed by admin", "http://ollama:11434/v1/", 1));
         when(repository.findAllByOrderByPriorityAsc()).thenReturn(byUrl);
