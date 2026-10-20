@@ -80,14 +80,18 @@ sha256_of() {
   else die "sha256sum, shasum or openssl is required to verify the download"; fi
 }
 
-# verify_signature SUMS_FILE DIR -> cosign keyless check of SHA256SUMS
+# verify_signature SUMS_FILE DIR -> cosign keyless check of the checksums file.
+# The published asset is SHA256SUMS on current releases; early releases named
+# it SHA256SUMS.txt - SUMS_NAME (set by download_release) tracks whichever was
+# fetched, and the signature bundle beside it carries the same base name.
 verify_signature() {
   if ! have cosign; then
     [ "${VEGADUTA_REQUIRE_SIGNATURE:-0}" = 1 ] && die "VEGADUTA_REQUIRE_SIGNATURE=1 but cosign is not installed (https://docs.sigstore.dev/cosign/system_config/installation/)"
     say "cosign not installed: checked SHA-256 only (install cosign to also verify the release signature)"
     return 0
   fi
-  if ! fetch "$BASE/SHA256SUMS.sigstore.json" "$2/SHA256SUMS.sigstore.json" 2>/dev/null; then
+  if ! fetch "$BASE/$SUMS_NAME.sigstore.json" "$2/SHA256SUMS.sigstore.json" 2>/dev/null \
+     && ! fetch "$BASE/SHA256SUMS.sigstore.json" "$2/SHA256SUMS.sigstore.json" 2>/dev/null; then
     [ "${VEGADUTA_REQUIRE_SIGNATURE:-0}" = 1 ] && die "release v$VERSION has no SHA256SUMS.sigstore.json signature bundle"
     warn "release v$VERSION publishes no signature bundle; checked SHA-256 only"
     return 0
@@ -116,7 +120,15 @@ download_release() {
     _name="vegaduta-$VERSION.tar.gz"
     say "Downloading VegaDūta v$VERSION ($BASE/$_name)"
     fetch "$BASE/$_name" "$_tgz" || die "download failed: $BASE/$_name"
-    fetch "$BASE/SHA256SUMS" "$_tmp/SHA256SUMS" || die "download failed: $BASE/SHA256SUMS (refusing to install an unverified tarball)"
+    # Published as SHA256SUMS on current releases, SHA256SUMS.txt on the first
+    # ones - accept either; keep the name for the signature bundle beside it.
+    if fetch "$BASE/SHA256SUMS" "$_tmp/SHA256SUMS" 2>/dev/null; then
+      SUMS_NAME=SHA256SUMS
+    elif fetch "$BASE/SHA256SUMS.txt" "$_tmp/SHA256SUMS" 2>/dev/null; then
+      SUMS_NAME=SHA256SUMS.txt
+    else
+      die "download failed: $BASE/SHA256SUMS (refusing to install an unverified tarball)"
+    fi
     verify_signature "$_tmp/SHA256SUMS" "$_tmp"
     # Lines are "<sha256>  <name>" or "<sha256>  ./<name>" (sha256sum format).
     _want="$(awk -v n="$_name" '$2==n || $2=="./"n || $2=="*"n {print $1; exit}' "$_tmp/SHA256SUMS")"
