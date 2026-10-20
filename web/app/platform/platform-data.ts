@@ -44,7 +44,7 @@
 //                    application.yml, core/admin/sso (TenantSsoController,
 //                    ScimProvisioningController), core/chat GenAi*Observation*,
 //                    web app/admin/audit-tail
-//   self-hosting     LICENSE (Apache-2.0) + deploy/docker-compose.yml. Helm and
+//   self-hosting     LICENSE (BSL 1.1) + deploy/docker-compose.yml. Helm and
 //                    Terraform directories are drafts and are not presented.
 // Deliberately NOT claimed anywhere (flag off in prod): swarm goal verifier,
 // eval judge calibration, E2B microVM tool sandbox, graph-memory arbitration.

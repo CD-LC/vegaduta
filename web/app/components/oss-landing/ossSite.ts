@@ -7,12 +7,16 @@ export { REPO_URL };
 // Every claim here is taken from README.md / docs/ in this repo; keep it that
 // way (no capacity, latency or customer numbers).
 
-export const LICENSE_NAME = "Apache-2.0";
+export const LICENSE_NAME = "Business Source License 1.1";
 export const CONTACT_EMAIL = getPublicEnv("NEXT_PUBLIC_CONTACT_EMAIL") || "";
+export const RELEASES_URL = `${REPO_URL}/releases`;
 
-export const INSTALL_COMMANDS = `git clone ${REPO_URL}.git
-cd vegaduta
-./scripts/vegaduta up --lite --build`;
+export const GETTING_STARTED =
+  "The release ships pinned, signed container images - vegaduta up pulls them; no source build.";
+
+export const INSTALL_COMMANDS = `curl -LO ${RELEASES_URL}/latest/download/vegaduta-setup-linux-amd64.tar.gz
+tar xzf vegaduta-setup-linux-amd64.tar.gz
+./scripts/vegaduta up --lite`;
 
 export const STACK: { name: string; detail: string }[] = [
   { name: "Core", detail: "Java 21, Spring Boot, one Maven reactor of focused modules" },
@@ -61,19 +65,19 @@ export const STANDARDS: { name: string; detail: string }[] = [
 
 export const TIERS: { name: string; body: string; cmd: string }[] = [
   {
-    name: "Lite",
-    body: "Five containers: Postgres, Valkey, Keycloak, core, web. For trying it and local development.",
-    cmd: "./scripts/vegaduta up --lite --build",
+    name: "Desktop",
+    body: "The personal install: one person, local sign-in (passkey, PIN or password), a bundled local model. Packaged as .dmg, .exe and tarball.",
+    cmd: "See /downloads",
   },
   {
-    name: "Full",
-    body: "Adds the admin console, object storage, PgBouncer and opt-in profiles (Temporal, observability, voice, sandbox).",
-    cmd: "./scripts/vegaduta up --full --build",
+    name: "Compose",
+    body: "Lite (five containers) to Full (admin console, object storage, PgBouncer, opt-in profiles). Images come from GHCR at the pinned release tag.",
+    cmd: "./scripts/vegaduta up --lite",
   },
   {
     name: "Kubernetes",
     body: "Umbrella Helm chart with scalable API, jobs, optional worker and every optional service as its own chart.",
-    cmd: "helm install vegaduta deploy/helm/charts/vegaduta",
+    cmd: "helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta",
   },
 ];
 
@@ -97,21 +101,21 @@ export const COMMUNITY_LINKS: { label: string; href: string }[] = [
 export const SDK_MAVEN_SNIPPET = `<dependency>
   <groupId>io.vegaduta</groupId>
   <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>`;
 
 export const SDK_JAVA_SNIPPET = `@Tool(description = "Refund an order")
 @Governed(risk = RiskLabel.HIGH, requiresApproval = true, idempotent = true)
 String refund(String orderId, long cents) { ... }`;
 
-export const SDK_BUILD_COMMAND = "mvn -f sdk/java/pom.xml install";
+export const SDK_BUILD_COMMAND = "git checkout v0.1.4 && mvn -f sdk/java/pom.xml install";
 
 export const DEPENDENCIES: { name: string; coordinates: string; body: string; status: string }[] = [
   {
     name: "Java Agent SDK",
     coordinates: "io.vegaduta:vegaduta-agent-*",
     body: "Governance inside your own Java application: tool risk classification, human approval, budgets, idempotent effects, guardrails, hooks, audit and telemetry around Spring AI tools. The core has no framework dependency.",
-    status: "0.1.0-SNAPSHOT. Build from source; not on Maven Central yet.",
+    status: "Apache-2.0. Builds reproducibly from the v0.1.4 tag; Maven Central publishing is on the roadmap.",
   },
   {
     name: "TypeScript client",

@@ -41,7 +41,7 @@ describe("llms.txt (SE-67)", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://s.test");
     vi.stubEnv("NEXT_PUBLIC_SITE_MODE", "oss");
     const body = await llmsTxt().text();
-    expect(body).toContain("Apache-2.0");
+    expect(body).toContain("Business Source License");
     expect(body).not.toMatch(/UPI|\/month|Pricing|Hire AI staff/);
     expect(body).not.toContain("localhost");
   });

@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Changed
 
+- **Merged landing page and release-aware public copy.** The signed-out homepage keeps the OSS landing's technical spine (capabilities, standards, SDK-as-dependency, install paths) under the marketing chrome (ambient backdrop, display typeface), and adds direct "Download the release" and "Try it live" calls to action. Install instructions now use the signed release artifacts (desktop installers, pinned GHCR images, the published Helm chart) instead of a source build, and every public license mention follows the Business Source License 1.1 relicensing (SDK stays Apache-2.0).
 - **Tenant surfaces stop offering server-side controls.** On a full install (`NEXT_PUBLIC_DEPLOY_ENV=full`) `/add-ons` leaves the rail and renders an "all add-ons included" notice instead of switches, since every extra already ships. The local-model wizard (`/providers/local-model`), its entry points on `/providers`, the local-model card on `/troubleshoot` and the Assistant's model warm-up are now personal-install only (`localModelAllowed`) — on lite and full the LLM pools are operator-managed infrastructure a tenant can browse but not change.
 
 ### Security

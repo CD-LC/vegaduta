@@ -191,7 +191,7 @@ ${COMPETITORS.map((c) => `- [VegaDūta vs ${c.name}](${BASE}/compare/${c.slug}):
 - [Java Agent SDK](${docPageHref("javaSdk")}): embeddable governance for AI agents in Java applications (tool risk classification, human approval, budgets, audit); 0.1.0-SNAPSHOT, built from source
 - [SDKs and dependencies](${docPageHref("sdkOverview")}): the Java SDK and the generated TypeScript and Python API clients
 - [Plugins, apps and mobile](${docPageHref("pluginsAndApps")}): editor, browser and mobile surfaces with their real status
-- [Source code](${REPO_URL}): Apache-2.0, on GitHub
+- [Source code](${REPO_URL}): Business Source License 1.1 (converts to Apache-2.0 four years after each release), on GitHub
 
 ## Account
 

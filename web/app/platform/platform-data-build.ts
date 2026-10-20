@@ -327,7 +327,7 @@ export const BUILD_TOPICS: HubPage[] = [
       {
         heading: "Where we stand on compliance — honestly",
         body:
-          "The hosted service runs in a single region today, and we have not completed SOC 2 or ISO 27001 certification. A documented security program exists in preparation for formal assessment. The controls above are real and in the code, which is open source under the Apache-2.0 license so you can read them, but we will not dress them up as a certificate we do not hold. This page will change when that status does.",
+          "The hosted service runs in a single region today, and we have not completed SOC 2 or ISO 27001 certification. A documented security program exists in preparation for formal assessment. The controls above are real and in the code, which is source-available under the Business Source License 1.1 so you can read them, but we will not dress them up as a certificate we do not hold. This page will change when that status does.",
       },
     ],
     faqs: [

@@ -59,7 +59,7 @@ describe("OSS landing wiring", () => {
     const text = section.textContent ?? "";
     expect(text).toContain("io.vegaduta");
     expect(text).toContain("vegaduta-agent-spring-boot-starter");
-    expect(text).toContain("Not on Maven Central yet");
+    expect(text).toContain("Maven Central publishing is on the roadmap");
     expect(text).toContain("Java Agent SDK");
     expect(text).toContain("TypeScript client");
     expect(text).toContain("Python client");

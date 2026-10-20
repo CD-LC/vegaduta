@@ -411,55 +411,61 @@ export const OPERATE_TOPICS: HubPage[] = [
   {
     slug: "self-hosting",
     keyTakeaways: [
-      "VegaDūta is open source under the Apache-2.0 license.",
-      "The supported way to self-host VegaDūta is the Docker Compose stack in the repository's deploy directory.",
-      "Kubernetes charts in the repository are drafts and are not a supported install path yet.",
+      "VegaDūta is source-available under the Business Source License 1.1 - free to run, fork and build on, including commercially; every version converts to Apache-2.0 four years after release.",
+      "Self-host paths are first-class release artifacts: desktop installers (macOS .dmg, Windows, Linux), the Docker Compose stack, and a Helm chart published as a signed OCI chart on GHCR.",
+      "Every release artifact is pinned, checksummed (SHA256SUMS), cosign-signed and ships an SBOM.",
     ],
     citations: [
-      { label: "Apache License, Version 2.0", href: "https://www.apache.org/licenses/LICENSE-2.0" },
+      { label: "Business Source License 1.1", href: "https://github.com/CD-LC/vegaduta/blob/main/LICENSE" },
+      { label: "Releases and checksums", href: "https://github.com/CD-LC/vegaduta/releases" },
       { label: "Docker Compose documentation", href: "https://docs.docker.com/compose/" },
     ],
-    name: "Open Source & Self-Hosting",
-    metaTitle: "Open-Source AI Agent Platform, Self-Hosted | VegaDūta",
+    name: "Source-Available & Self-Hosting",
+    metaTitle: "Source-Available AI Agent Platform, Self-Hosted | VegaDūta",
     metaDescription:
-      "VegaDūta is open source under Apache-2.0 and self-hosts with Docker Compose. Bring your own LLM keys or point it at local models with Ollama.",
-    h1: "Open source, and yours to run",
-    kicker: "Platform · Open source",
+      "VegaDūta is source-available under BSL 1.1 and self-hosts with packaged installers, Docker Compose or Helm. Bring your own LLM keys or point it at local models with Ollama.",
+    h1: "Source-available, and yours to run",
+    kicker: "Platform · Self-hosting",
     cardBlurb:
-      "Apache-2.0 licensed, with a Docker Compose stack for running the whole platform on your own machines.",
+      "BSL 1.1 licensed, with desktop installers, a Docker Compose stack and a Helm chart for running the whole platform on your own machines.",
     intro: [
-      "VegaDūta is open source under the Apache-2.0 license. You can run the platform yourself with the Docker Compose stack in the repository's deploy directory.",
-      "The same code runs in both places. Self-hosting means your conversations, documents, and credentials stay on infrastructure you control.",
+      "VegaDūta is published under the Business Source License 1.1: free to run, fork and build on - including for production use - with the single restriction that you cannot offer it as a competing hosted service. Each version converts to Apache-2.0 four years after release.",
+      "Self-hosting means your conversations, documents, and credentials stay on infrastructure you control. Install from a signed release artifact - not a source build - unless you choose to build from source yourself.",
     ],
     sections: [
       {
-        heading: "What the Compose stack runs",
+        heading: "Three supported install paths",
         body:
-          "The stack brings up the platform's services together, including the core API, the web console, the knowledge sidecar that handles document extraction and embeddings, Postgres, Redis, and Keycloak for sign-in. Configuration is by environment file.",
+          "Desktop installers for macOS (.dmg), Windows and Linux set up a personal install - one person, local sign-in, a bundled local model. The Docker Compose stack brings up the platform's services together, including the core API, the web console, the knowledge sidecar that handles document extraction and embeddings, Postgres, Valkey, and Keycloak for sign-in. The Helm chart is published as a signed OCI artifact on GHCR for Kubernetes.",
+      },
+      {
+        heading: "Verified artifacts, not source builds",
+        body:
+          "Every release pins its container images to the release tag on GHCR, ships SHA256SUMS and a sigstore bundle, signs the images and the chart with cosign, and includes SBOMs. You can verify what you are running before you run it.",
       },
       {
         heading: "Models: your keys or your hardware",
         body:
-          "A self-hosted install uses the same 14 bring-your-own-key providers as the hosted service. One of them is Ollama, which points the platform at models running on your own hardware, so an install can work without sending prompts to a hosted model API.",
+          "A self-hosted install uses the same bring-your-own-key providers as the hosted service. One of them is Ollama, which points the platform at models running on your own hardware, so an install can work without sending prompts to a hosted model API.",
       },
       {
         heading: "What is not supported yet",
         body:
-          "Docker Compose is the install path we support. The repository also contains Helm and Terraform directories; those are drafts and should not be treated as a supported Kubernetes deployment. An optional Temporal-based workflow engine is in the code and is off by default.",
+          "The Terraform modules under infra/ are drafts and should not be treated as a supported deployment path. An optional Temporal-based workflow engine is in the code and is off by default.",
       },
     ],
     faqs: [
       {
         q: "Is VegaDūta open source?",
-        a: "Yes. The platform is licensed under Apache-2.0.",
+        a: "VegaDūta is source-available under the Business Source License 1.1: free to run and modify, including commercially, except for offering it as a competing hosted service. Each version automatically converts to Apache-2.0 four years after release.",
       },
       {
         q: "How do I self-host VegaDūta?",
-        a: "With Docker Compose, using the stack in the repository's deploy directory. It runs the core API, web console, knowledge sidecar, Postgres, Redis, and Keycloak, along with supporting services.",
+        a: "Use a signed release artifact: the desktop installer for a personal install, Docker Compose for a server (./scripts/vegaduta up), or the Helm chart published on GHCR for Kubernetes.",
       },
       {
         q: "Can I run VegaDūta on Kubernetes?",
-        a: "Not as a supported path today. Helm and Terraform files exist in the repository as drafts. Docker Compose is the supported way to self-host.",
+        a: "Yes. The Helm chart is published as a signed OCI artifact on GHCR at oci://ghcr.io/cd-lc/charts/vegaduta, alongside the platform images.",
       },
       {
         q: "Can a self-hosted install use local models?",
@@ -471,6 +477,5 @@ export const OPERATE_TOPICS: HubPage[] = [
       { href: "/ai/llm-connectors", label: "LLM connectors" },
       { href: "/platform/governance", label: "Governance and cost controls" },
       { href: "/docs", label: "Documentation" },
-    ],
-  },
+    ],  },
 ];
