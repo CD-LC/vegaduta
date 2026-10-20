@@ -8,6 +8,14 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Tenant surfaces stop offering server-side controls.** On a full install (`NEXT_PUBLIC_DEPLOY_ENV=full`) `/add-ons` leaves the rail and renders an "all add-ons included" notice instead of switches, since every extra already ships. The local-model wizard (`/providers/local-model`), its entry points on `/providers`, the local-model card on `/troubleshoot` and the Assistant's model warm-up are now personal-install only (`localModelAllowed`) — on lite and full the LLM pools are operator-managed infrastructure a tenant can browse but not change.
+
+### Fixed
+
+- **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.
+
 ## [0.1.4] - 2026-10-19
 ### Changed
 

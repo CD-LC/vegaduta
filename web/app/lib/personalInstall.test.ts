@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, poolLabel, showPlatformPoolToggle, tierCommand, workflowNodeOffered } from "./personalInstall";
+import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, localModelAllowed, poolLabel, showPlatformPoolToggle, tierCommand, workflowNodeOffered } from "./personalInstall";
 
 // getPublicEnv reads NEXT_PUBLIC_AUTH_MODE from the public runtime config; the
 // test setup leaves it unset, which is the hosted/Keycloak default. Local-auth
@@ -22,6 +22,11 @@ const hosted = () => {
 const lite = () => {
   hosted();
   vi.mocked(getPublicEnv).mockImplementation((key) => (key === "NEXT_PUBLIC_DEPLOY_ENV" ? "lite" : undefined));
+};
+// Full: the multi-tenant tier (NEXT_PUBLIC_DEPLOY_ENV=full) - everything ships installed.
+const full = () => {
+  hosted();
+  vi.mocked(getPublicEnv).mockImplementation((key) => (key === "NEXT_PUBLIC_DEPLOY_ENV" ? "full" : undefined));
 };
 
 describe("hiddenOnPersonalInstall", () => {
@@ -93,16 +98,43 @@ describe("hiddenOnPersonalInstall", () => {
     expect(hiddenOnPersonalInstall("/assistant-tools")).toBe(false);
   });
 
-  it("lists Add-ons on every install (the registry is install-wide and host-applied)", () => {
+  it("lists Add-ons on personal and lite, hides it on full", () => {
     local();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
     lite();
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
+    full();
+    // A full install ships every add-on - the rail drops the switchboard and the
+    // page itself renders the "managed for you" notice.
+    expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);
+    expect(hiddenOnPersonalInstall("/add-ons/anything")).toBe(true);
     hosted();
-    // On the shared tier the page marks what the tier cannot run and the switches follow the
-    // caller's add-on permission; the switchboard itself is not hidden.
+    // DEPLOY_ENV unset on a shared install keeps the switchboard (the switches
+    // themselves still follow the caller's add-on permission).
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(false);
     expect(hiddenOnPersonalInstall("/add-ons-extra")).toBe(false);
+  });
+
+  it("hides local-model setup on every shared tier", () => {
+    local();
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(false);
+    lite();
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    full();
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    hosted();
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    // The catalogue itself stays: the tenant may look, just not change the server.
+    expect(hiddenOnPersonalInstall("/providers")).toBe(false);
+  });
+
+  it("localModelAllowed follows the personal install only", () => {
+    local();
+    expect(localModelAllowed()).toBe(true);
+    lite();
+    expect(localModelAllowed()).toBe(false);
+    full();
+    expect(localModelAllowed()).toBe(false);
   });
 });
 

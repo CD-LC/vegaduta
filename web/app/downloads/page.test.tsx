@@ -62,7 +62,10 @@ describe("/downloads", () => {
       })),
     );
     render(await DownloadsPage());
-    expect(screen.getByRole("heading", { level: 1, name: /Download VegaDūta/ })).toBeTruthy();
+    // BrandName splits the wordmark into accent spans; match the level-1 heading, not a flattened name.
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1.textContent).toBe("Download VegaDūta");
+    expect(h1.querySelector(".brand-name-accent")?.textContent).toBe("Dūta");
     const dmg = screen.getByRole("link", { name: /macOS \.dmg/ });
     expect(dmg.getAttribute("href")).toBe("https://dl/VegaDuta-Setup-1.2.3.dmg");
     expect(document.body.textContent).toContain("v1.2.3");

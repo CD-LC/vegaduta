@@ -10,6 +10,7 @@ import PageHeader from "../components/ax/PageHeader";
 import ProvidersPanel from "../components/ProvidersPanel";
 import { useTranslations } from "../lib/i18n";
 import LocalModelFirstRun from "../components/localModel/LocalModelFirstRun";
+import { localModelAllowed } from "../lib/personalInstall";
 import { SetupHint } from "../components/setup/SetupLinks";
 import { Button } from "../components/ui/button";
 
@@ -77,9 +78,13 @@ export default function ProvidersPage() {
                 {tp("decisionProviders")} <ArrowRight size={14} />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/providers/local-model">{tl("providersEntry")}</Link>
-            </Button>
+            {/* Local-model wizard is personal-only (localModelAllowed): on lite and
+             * full the pools are operator-managed, so the entry point stays off. */}
+            {localModelAllowed() && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/providers/local-model">{tl("providersEntry")}</Link>
+              </Button>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link href="/agents">
                 {t("createAgentLink")} <ArrowRight size={14} />
@@ -88,7 +93,7 @@ export default function ProvidersPage() {
           </>
         }
       />
-      {loaded && providers.length === 0 && <LocalModelFirstRun />}
+      {localModelAllowed() && loaded && providers.length === 0 && <LocalModelFirstRun />}
       <SetupHint className="mb-4" lead={tp("providersSetupLead")} targets={["agents", "edge", "tools", "workflows"]} />
       <ProvidersPanel providers={providers} onChanged={refresh} />
     </AppShell>

@@ -36,16 +36,38 @@ const PERSONAL_HIDDEN_ROUTES: readonly string[] = [
 
 /**
  * Surfaces a shared/hosted install does not advertise. /assistant is for every install (the
- * Assistant agent is per user, on any tier), and /add-ons is the install's switchboard on every
- * shape too - entries the tier cannot run are marked there instead of the page disappearing, and
- * the switches follow the caller's add-on permission (a tenant member reads; who may change is
- * core's AddonAccess).
+ * Assistant agent is per user, on any tier). /add-ons is the switchboard on personal and lite -
+ * on full every add-on ships installed, so the page drops out of the rail and renders a
+ * "managed for you" notice instead of live switches for a server a tenant cannot change.
+ * /providers/local-model is personal-only everywhere: guided Ollama setup writes the install's
+ * platform pool, which on a tenant-based install belongs to the operator, never a tenant.
  */
-const SHARED_ONLY_ROUTES: readonly string[] = [];
+const SHARED_ONLY_ROUTES: readonly string[] = ["/providers/local-model"];
+
+const FULL_HIDDEN_ROUTES: readonly string[] = ["/add-ons"];
 
 /** True on the lite tier (`NEXT_PUBLIC_DEPLOY_ENV=lite`): self-hosted, single box, Keycloak auth. */
 function isLiteInstall(): boolean {
   return getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV")?.trim().toLowerCase() === "lite";
+}
+
+/**
+ * True on the full tier (`NEXT_PUBLIC_DEPLOY_ENV=full`): the multi-tenant shape where every
+ * add-on and runner already ships. Tenant surfaces that would change what runs on the server
+ * (the add-ons switchboard, local-model setup) stay disabled on it.
+ */
+export function isFullInstall(): boolean {
+  return getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV")?.trim().toLowerCase() === "full";
+}
+
+/**
+ * Local-model setup (Ollama pull/warm/use, the /providers/local-model wizard, the troubleshoot
+ * card's pull buttons) belongs to the personal install only: on lite and full the LLM pools are
+ * platform infrastructure the operator configures at deploy time, so tenant surfaces neither
+ * offer nor trigger them.
+ */
+export function localModelAllowed(): boolean {
+  return isLocalAuth();
 }
 
 const under = (href: string, route: string): boolean => href === route || href.startsWith(`${route}/`);
@@ -57,7 +79,10 @@ const under = (href: string, route: string): boolean => href === route || href.s
  */
 export function hiddenOnPersonalInstall(href: string): boolean {
   if (!isLocalAuth()) {
-    return SHARED_ONLY_ROUTES.some((r) => under(href, r));
+    return (
+      SHARED_ONLY_ROUTES.some((r) => under(href, r)) ||
+      (isFullInstall() && FULL_HIDDEN_ROUTES.some((r) => under(href, r)))
+    );
   }
   return PERSONAL_HIDDEN_ROUTES.some((r) => under(href, r));
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { localModelsApi } from "./api/localModels";
+import { localModelAllowed } from "./personalInstall";
 
 const STORAGE_KEY = "vegaduta.localModel.warmedAt";
 /** How long one warm-up is trusted before a surface asks again (core keeps the model for app.local-models.keep-alive). */
@@ -16,7 +17,7 @@ const REWARM_AFTER_MS = 5 * 60 * 1000;
  */
 export function useWarmLocalModel(enabled = true): void {
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !localModelAllowed()) return;
     let last = 0;
     try {
       last = Number(sessionStorage.getItem(STORAGE_KEY) ?? 0);

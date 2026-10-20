@@ -12,7 +12,7 @@ import AppShell from "../components/AppShell";
 import PageHeader from "../components/ax/PageHeader";
 import { Button } from "../components/ui/button";
 import { localModelsApi, type LocalModelChoice, type LocalModelRecommendation } from "../lib/api/localModels";
-import { tierCommand } from "../lib/personalInstall";
+import { localModelAllowed, tierCommand } from "../lib/personalInstall";
 import { academyHref, hasAcademy } from "../lib/academyUrl";
 import { useTranslations } from "../lib/i18n";
 
@@ -49,6 +49,7 @@ export default function TroubleshootPage() {
     setChecks((cs) => cs.map((c) => (c.key === key ? { ...c, state, detail } : c)));
 
   const run = useCallback(async () => {
+    if (!localModelAllowed()) return;
     setRec(null);
     setProbe(null);
     setUseNote(null);
@@ -168,6 +169,14 @@ export default function TroubleshootPage() {
         }
       />
       <div className="mx-auto w-full max-w-3xl space-y-3 px-4 pb-16">
+        {!localModelAllowed() && (
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4" data-testid="troubleshoot-shared-notice">
+            <span className="mt-0.5 shrink-0"><LifeBuoy className="h-4 w-4 text-muted-foreground" /></span>
+            <p className="text-sm text-muted-foreground">{t("sharedBody")}</p>
+          </div>
+        )}
+        {localModelAllowed() && (
+        <>
         {checks.map((c) => (
           <div key={c.key} className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
             <span className="mt-0.5 shrink-0">{MARK[c.state]}</span>
@@ -326,6 +335,8 @@ export default function TroubleshootPage() {
             </code>
           </div>
         </div>
+        </>
+        )}
       </div>
     </AppShell>
   );

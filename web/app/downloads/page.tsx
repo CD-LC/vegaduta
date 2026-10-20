@@ -13,6 +13,7 @@ import {
   Terminal,
   type LucideIcon,
 } from "lucide-react";
+import BrandName from "../components/BrandName";
 import TemplatesPublicChrome from "../components/templates/TemplatesPublicChrome";
 import { REPO_URL, docsHref, docPageHref } from "../lib/siteLinks";
 import { fetchLatestRelease, pickAssets, type DownloadSet, type ReleaseAsset } from "../components/downloads/releaseInfo";
@@ -117,7 +118,7 @@ export default async function DownloadsPage() {
             Downloads
           </p>
           <h1 className="max-w-2xl text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Download VegaDūta
+            Download <BrandName />
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             {released ? (
@@ -150,7 +151,7 @@ export default async function DownloadsPage() {
         <section aria-labelledby="setup-app">
           <h2 id="setup-app" className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
             <Laptop className="size-5 text-primary" aria-hidden="true" />
-            VegaDūta Setup - the guided installer
+            <BrandName /> Setup - the guided installer
           </h2>
           <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
             A small app that checks your machine, starts Docker if needed, downloads the signed
@@ -287,7 +288,7 @@ export default async function DownloadsPage() {
         <section aria-labelledby="sdk" className="rounded-xl border border-border bg-card p-5">
           <h2 id="sdk" className="mb-3 flex items-center gap-2 text-lg font-semibold text-foreground">
             <BookOpen className="size-5 text-primary" aria-hidden="true" />
-            SDKs - VegaDūta from your own code
+            SDKs - <BrandName /> from your own code
           </h2>
           <ul className="m-0 list-none space-y-3 p-0 text-sm text-muted-foreground">
             <li>
