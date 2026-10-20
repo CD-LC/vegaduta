@@ -220,7 +220,7 @@ jobs:
             [ -n "$MCP_TOOLCHAIN" ] && echo "MCP_TOOLCHAIN=$MCP_TOOLCHAIN"
             [ -n "$WITH_BROWSERS" ] && echo "WITH_BROWSERS=$WITH_BROWSERS"
             if [ "$IMAGE" = postgres-cnpg ]; then
-              echo "BASE_IMAGE=ghcr.io/cloudnative-pg/postgresql:16.15-system-bookworm@sha256:18db2679228571d798438a4cb9301bccd18acaf3c8a9f184e43f2d4aa5cdf507"
+              echo "BASE_IMAGE=ghcr.io/cloudnative-pg/postgresql:16.15-system-trixie@sha256:8ca5699981c25db72e549e9fa69561bac233df15b9b1e3a6282847b0629bb5ea"
               echo "FINAL_USER=26"
             fi
             if [ "$IMAGE" = web ]; then
@@ -347,6 +347,10 @@ jobs:
           image: ${{ env.IMAGE }}@${{ steps.manifest.outputs.digest }}
           fail-build: true
           severity-cutoff: critical
+          # Debian "won't fix" CVEs (no backport shipped) are residual risk the
+          # platform accepts per image, not releasable defects - the gate fires
+          # only where a fixed package exists and we're not running it.
+          only-fixed: true
           output-format: table
 
       # Same manifest re-scanned to SARIF so the release findings also land in
@@ -553,6 +557,10 @@ jobs:
           image: ${{ env.IMAGE }}@${{ steps.manifest.outputs.digest }}
           fail-build: true
           severity-cutoff: critical
+          # Debian "won't fix" CVEs (no backport shipped) are residual risk the
+          # platform accepts per image, not releasable defects - the gate fires
+          # only where a fixed package exists and we're not running it.
+          only-fixed: true
           output-format: table
 
       - name: Vulnerability scan (grype SARIF)

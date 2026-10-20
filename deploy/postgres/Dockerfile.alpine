@@ -1,12 +1,12 @@
 # Alpine variant of the pgvector + Apache AGE Postgres image - same extension
 # versions and commit pins as ./Dockerfile (KEEP THE TWO IN SYNC), on
-# postgres:16-alpine instead of postgres:16-bookworm. The alpine base is
+# postgres:16-alpine instead of postgres:16-trixie. The alpine base is
 # roughly a third of the size of the Debian one; everything else (initdb,
 # shared_preload_libraries=age via -c, the plugins/age.so symlink the app
 # role's LOAD needs, gosu) is identical.
 #
 # Where it is used: size-sensitive installs that still need graph memory -
-# the bookworm variant stays the default for the compose tiers and the
+# the debian variant stays the default for the compose tiers and the
 # release's `postgres` image; this file exists so a deployment can opt into
 # the smaller base by building it itself:
 #
@@ -16,7 +16,7 @@
 # and pointing VEGADUTA_POSTGRES_IMAGE at the result.
 #
 # Musl vs glibc is the only real difference: the apk build deps below are the
-# alpine equivalents of the bookworm Dockerfile's apt ones, and the purge
+# alpine equivalents of the debian Dockerfile's apt ones, and the purge
 # happens in the same layer for the same reason. `with_llvm=no` because the
 # alpine postgres binary is built with LLVM JIT, so PGXS tries to emit clang
 # bitcode for the extensions too - neither extension needs it and pinning a
@@ -51,9 +51,9 @@ RUN apk add --no-cache --virtual .build-deps \
     && rm -rf /tmp/pgvector /tmp/age \
     && apk del .build-deps
 
-# Loading AGE: unchanged from the bookworm variant - compose and Helm pass
+# Loading AGE: unchanged from the debian variant - compose and Helm pass
 # `-c shared_preload_libraries=age` at runtime; the plugins/age.so symlink
 # above is what a non-superuser's `LOAD '$libdir/plugins/age'` resolves.
-# Same final user as the bookworm variant: the official entrypoint starts as
+# Same final user as the debian variant: the official entrypoint starts as
 # root and drops to postgres itself via gosu.
 USER root

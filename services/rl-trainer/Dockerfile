@@ -1,5 +1,5 @@
 # Pinned patch + Debian release, identical across every Python service image.
-FROM python:3.12.15-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258
+FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
 
 # No system packages needed: this is an LLM-driven service (no git, no OCR
 # binary, no CUDA). Deliberately torch-free - see requirements.txt / README.

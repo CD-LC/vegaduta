@@ -1343,7 +1343,7 @@ services:
       CODE_INTEL_EXEC_TIMEOUT: ${CODE_INTEL_EXEC_TIMEOUT:-300}
       # Tenant commands only ever run in the dind sidecar, never in-process.
       CODE_INTEL_RUN_MODE: docker
-      CODE_INTEL_DOCKER_IMAGE: ${CODE_INTEL_DOCKER_IMAGE:-node:22-bookworm}
+      CODE_INTEL_DOCKER_IMAGE: ${CODE_INTEL_DOCKER_IMAGE:-node:22-trixie}
       # Plain TCP, but only on `code-exec` (internal; members: code-intel and
       # code-intel-docker). No other service can reach the daemon.
       DOCKER_HOST: tcp://code-intel-docker:2375

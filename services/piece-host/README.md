@@ -185,7 +185,7 @@ docker build -f piece-host/Dockerfile --target runner \
 ```
 
 The stock runner image is node:20, so build the base first with
-`docker build --build-arg NODE_IMAGE=node:24.20.0-bookworm-slim mcp-stdio-runner`
+`docker build --build-arg NODE_IMAGE=node:24.21.0-trixie-slim mcp-stdio-runner`
 (the `NODE_IMAGE` arg defaults to node:20, so a plain build is unchanged).
 With Docker Compose, `../../deploy/compose/docker-compose.piece-host.yml` does
 both builds as an opt-in overlay (commands in its header).
@@ -278,7 +278,7 @@ deployed:
   the `--describe --strict` build step passed: all 30 pieces load, 0 errors,
   1390 tools, 28 `*__custom_api_call` tools denied. Image 372 MB.
 - `docker build --target runner` on a Node 24 build of `mcp-stdio-runner`
-  (`--build-arg NODE_IMAGE=node:24.20.0-bookworm-slim`): succeeds, 657 MB, runs as
+  (`--build-arg NODE_IMAGE=node:24.21.0-trixie-slim`): succeeds, 657 MB, runs as
   uid `mcprunner`, `/opt/piece-host` not writable. On the shipped node:20 base it
   fails fast with the intended Node-version message; with `MIN_NODE_MAJOR=0` the
   `--describe --strict` load test also passes under Node 20.

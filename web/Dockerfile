@@ -20,7 +20,7 @@
 # same image; a value passed at runtime simply wins over the baked one.
 # See web/docs/RUNTIME-CONFIG.md for the full key list.
 
-FROM node:22.23.3-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c AS build
+FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS build
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -71,14 +71,14 @@ RUN NODE_OPTIONS=--max-old-space-size=3072 npm run build
 # next.config.js sets output: "standalone", so .next/standalone holds
 # server.js plus only the node_modules it actually traces - no full
 # dependency tree, no npm, no source.
-FROM node:22.23.3-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c AS runtime
+FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-# Same user creation as before (system uid/gid, 999 on node:*-bookworm-slim) -
+# Same user creation as before (system uid/gid, 999 on node:*-trixie-slim) -
 # deploy/helm/charts/web values.yaml pins runAsUser 999 against it.
 RUN groupadd -r nextjs && useradd -r -g nextjs nextjs
 
@@ -97,7 +97,7 @@ USER nextjs
 
 EXPOSE 3000
 
-# node is always present (curl/wget are not on node:*-bookworm-slim): a real HTTP
+# node is always present (curl/wget are not on node:*-trixie-slim): a real HTTP
 # readiness check against the running server, not just a port check.
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000)+'/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"

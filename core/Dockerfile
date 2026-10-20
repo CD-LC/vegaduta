@@ -169,7 +169,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends zip unzip \
 
 # ---- JRE variants (JRE=full|jlink) ----------------------------------------
 # jre-full is the unmodified temurin JRE (~230 MB of platform modules).
-FROM eclipse-temurin:21.0.12.1_1-jre-jammy@sha256:f04fb34e053148344e83317976114ec3f37e4b830ec8bdab5a2fe3cecd7d010b AS jre-full
+FROM eclipse-temurin:21.0.12.1_1-jre-noble@sha256:35501d3f93173b420ac9001658eb68157e813316b865087e345c187fca422c4c AS jre-full
 
 # jre-jlink keeps the same jre-jammy base (same glibc, CA store and packages)
 # but replaces /opt/java/openjdk with a jlink-minimal runtime - roughly half
@@ -179,7 +179,7 @@ FROM eclipse-temurin:21.0.12.1_1-jre-jammy@sha256:f04fb34e053148344e83317976114e
 # (nested-jar reads) are the ones jdeps-style analysis misses. A missing
 # module fails loudly at JVM start; report the name and rebuild with
 # JRE=full.
-FROM eclipse-temurin:21.0.12.1_1-jdk-jammy@sha256:742daacb9316be4b6fc60258f6e4ac2a11882f6c597373c92290a57bfad0d2e0 AS jre-linker
+FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS jre-linker
 RUN "$JAVA_HOME/bin/jlink" \
         --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
         --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
@@ -215,7 +215,7 @@ ENV HOME=/home/agentic
 # exists solely to execute /opt/mcp-stdio-proxy/proxy.js (zero-dependency,
 # see core/mcp-stdio-proxy/framing.js). The official binary targets glibc
 # >= 2.28 and links only libc/libstdc++/libgcc_s, all present in jammy.
-FROM node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392 AS node-relay
+FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-relay
 
 FROM runtime-base AS mcp-toolchain-none
 COPY --from=node-relay /usr/local/bin/node /usr/local/bin/node

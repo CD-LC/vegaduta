@@ -1,0 +1,42 @@
+# Grype configuration for the release image scans (.github/workflows/release.yml).
+# The fail-on-critical gate runs with only-fixed: true, so a CVE listed here is
+# belt-and-suspenders for anyone re-tightening the gate: every entry is scoped to
+# a vulnerability ID plus its wont-fix state, so the moment Debian ships a
+# backport the exception stops matching and the finding gates again. Re-evaluate
+# the whole list on the next base-image migration; add a comment and a date for
+# any new entry.
+ignore:
+  # Debian bookworm "won't fix" triage - glibc; no backport planned for deb12.
+  - vulnerability: CVE-2026-5450
+    fix-state: wont-fix
+    package:
+      name: libc6
+  - vulnerability: CVE-2026-5450
+    fix-state: wont-fix
+    package:
+      name: libc-bin
+  # Debian bookworm "won't fix" triage - curl (gnutls flavour); no backport.
+  - vulnerability: CVE-2026-19931
+    fix-state: wont-fix
+    package:
+      name: libcurl3-gnutls
+  - vulnerability: CVE-2026-11856
+    fix-state: wont-fix
+    package:
+      name: libcurl3-gnutls
+  - vulnerability: CVE-2026-8924
+    fix-state: wont-fix
+    package:
+      name: libcurl3-gnutls
+  - vulnerability: CVE-2026-10536
+    fix-state: wont-fix
+    package:
+      name: libcurl3-gnutls
+  - vulnerability: CVE-2026-18924
+    fix-state: wont-fix
+    package:
+      name: libcurl3-gnutls
+  - vulnerability: CVE-2026-8927
+    fix-state: wont-fix
+    package:
+      name: libcurl3-gnutls

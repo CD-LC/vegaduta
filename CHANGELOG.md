@@ -12,6 +12,10 @@ Release notes on GitHub are generated from the section for each version.
 
 - **Tenant surfaces stop offering server-side controls.** On a full install (`NEXT_PUBLIC_DEPLOY_ENV=full`) `/add-ons` leaves the rail and renders an "all add-ons included" notice instead of switches, since every extra already ships. The local-model wizard (`/providers/local-model`), its entry points on `/providers`, the local-model card on `/troubleshoot` and the Assistant's model warm-up are now personal-install only (`localModelAllowed`) — on lite and full the LLM pools are operator-managed infrastructure a tenant can browse but not change.
 
+### Security
+
+- **Release images move off Debian bookworm.** Node services to `*-trixie-slim` (22.23.3 / 24.21.0), Python services to `3.12.15-slim-trixie`, the JRE to `eclipse-temurin:21.0.12.1_1-*-noble`, PostgreSQL to `postgres:16.15-trixie` and CloudNativePG to `16.15-system-trixie`. The release's critical-vulnerability gate now fails only where a fixed package exists (`only-fixed`), and `.grype.yaml` records the scoped wont-fix exceptions (re-matched automatically the day Debian ships a backport).
+
 ### Fixed
 
 - **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.

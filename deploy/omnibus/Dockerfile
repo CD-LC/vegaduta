@@ -29,24 +29,24 @@ ARG VEGADUTA_VERSION=latest
 # jlink-minimal JRE: same module list as core/Dockerfile's JRE=jlink variant
 # (keep the two in sync). Roughly half the size of the full temurin JRE on
 # the same glibc generation.
-FROM eclipse-temurin:21.0.12.1_1-jdk-jammy@sha256:742daacb9316be4b6fc60258f6e4ac2a11882f6c597373c92290a57bfad0d2e0 AS jre-linker
+FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS jre-linker
 RUN "$JAVA_HOME/bin/jlink" \
         --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
         --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
         --output /jre-minimal \
     && rm -f /jre-minimal/lib/server/classes.jsa
 
-FROM node:22.23.3-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c AS node-img
+FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-img
 
-# The substrate is our own postgres image: PostgreSQL 16 on Debian bookworm
+# The substrate is our own postgres image: PostgreSQL 16 on Debian trixie
 # with pgvector and Apache AGE already compiled in, plus gosu for dropping
 # privileges - everything downstream (redis-server, node, the JRE) is either
-# bookworm-native or glibc-compatible.
+# trixie-native or glibc-compatible.
 FROM ${REGISTRY}/postgres:${VEGADUTA_VERSION}
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# redis-server (bookworm) is protocol-identical for everything core uses -
+# redis-server (trixie) is protocol-identical for everything core uses -
 # the compose tiers run the Valkey fork; inside one container the fork makes
 # no difference. curl is only for the HEALTHCHECK below.
 RUN apt-get update \

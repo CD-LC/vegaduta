@@ -13,7 +13,7 @@
 # The trusted Java side, built once at image build time. `vega-api.jar` is what
 # tenant code compiles against; `harness.jar` is the loader that invokes it and
 # is deliberately NOT on the tenant's compile classpath.
-FROM eclipse-temurin:21.0.12.1_1-jdk-jammy@sha256:e0c60c487345d1dc9d0fc7b6f0496f3cc941e5132e09296cc17a6decc71b902b AS harness
+FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS harness
 
 WORKDIR /build
 COPY harness/java ./java
@@ -30,14 +30,14 @@ RUN set -eux; \
 # the module allowlist in app/policy.py is checked against the stdlib that
 # actually ships. (Previously this stage was the temurin jammy image with apt's
 # python3 - 3.10 - the only 3.10 service in the repo.)
-FROM python:3.12.15-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258
+FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # A JDK, not a JRE: `javac` is the whole point. Copied from the harness stage
 # so the runtime JDK is byte-for-byte the one the harness jars were built with
-# (one pinned temurin tag, one place). A jammy-built JDK runs on bookworm: it
-# needs glibc >= 2.35 (bookworm ships 2.36) and bundles its own zlib/libjpeg;
+# (one pinned temurin tag, one place). A noble-built JDK runs on trixie: it
+# needs glibc >= 2.35 (trixie ships 2.41) and bundles its own zlib/libjpeg;
 # `java -version` / `javac -version` below make the build fail if that ever
 # stops being true.
 COPY --from=harness /opt/java/openjdk /opt/java/openjdk

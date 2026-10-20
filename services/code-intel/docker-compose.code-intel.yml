@@ -29,7 +29,7 @@ services:
       # start_process (long-running dev-server processes for live preview)
       # refuses to run at all under "local".
       CODE_INTEL_RUN_MODE: ${CODE_INTEL_RUN_MODE:-local}
-      CODE_INTEL_DOCKER_IMAGE: ${CODE_INTEL_DOCKER_IMAGE:-node:22-bookworm}
+      CODE_INTEL_DOCKER_IMAGE: ${CODE_INTEL_DOCKER_IMAGE:-node:22-trixie}
       # Sandbox container hardening (app/settings.py docker_*). Secure by
       # default: non-root uid ("auto" = this service's own `codeintel` uid,
       # which owns the workspaces it creates; never root - falls back to

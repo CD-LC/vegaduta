@@ -17,8 +17,8 @@ ARG WITH_BROWSERS=false
 
 # NODE_IMAGE: the Node base. services/piece-host/Dockerfile --target runner needs
 # Node >= 22, which the default already satisfies; override it (e.g.
-# --build-arg NODE_IMAGE=node:24.20.0-bookworm-slim) only with a runner rollout plan.
-ARG NODE_IMAGE=node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392
+# --build-arg NODE_IMAGE=node:24.21.0-trixie-slim) only with a runner rollout plan.
+ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
 
 # ---- Base (shared by both variants) ---------------------------------------
 FROM ${NODE_IMAGE} AS base
@@ -57,7 +57,7 @@ RUN groupadd -r mcprunner && useradd -r -g mcprunner -m -d /home/mcprunner mcpru
 ENV HOME=/home/mcprunner
 
 # Live report, 2026-08-13: a2atlassian (and presumably other current-gen
-# uv/uvx packages) require Python>=3.12 - Debian bookworm's apt repo only
+# uv/uvx packages) require Python>=3.12 - Debian's apt repo only
 # ships 3.11 (installed above), so `uv` failed dependency resolution outright
 # ("current Python version (3.11.2) does not satisfy... Python>=3.12") before
 # ever reaching the target package. Baking a managed 3.12 in at BUILD time

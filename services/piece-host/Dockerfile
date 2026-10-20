@@ -24,7 +24,7 @@
 # Node 24 is the current Active LTS (support until 2028-04-30; Node 26 becomes
 # LTS 2026-10-28) - https://raw.githubusercontent.com/nodejs/Release/main/schedule.json.
 # Pin a digest in your build pipeline if you need byte-for-byte reproducibility.
-ARG NODE_IMAGE=node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20
+ARG NODE_IMAGE=node:24.21.0-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66
 ARG RUNNER_IMAGE=mcp-stdio-runner:latest
 
 # ---------------------------------------------------------------------------
@@ -67,13 +67,13 @@ COPY --from=assets /opt/piece-host /opt/piece-host
 USER ${RUNNER_USER}
 # Fail fast, with a readable message, when the runner base is older than the Node this host (package.json
 # engines) and its pinned pieces are built against. The mcp-stdio-runner image is node:20 today, so layer
-# onto a runner rebuilt on node:24 (FROM node:24.20.0-bookworm-slim) - or pass --build-arg MIN_NODE_MAJOR=0 to
+# onto a runner rebuilt on node:24 (FROM node:24.21.0-trixie-slim) - or pass --build-arg MIN_NODE_MAJOR=0 to
 # skip this check and rely on the `--describe --strict` load test below as the only gate.
 ARG MIN_NODE_MAJOR=22
 RUN set -eu; \
     major="$(node -p 'process.versions.node.split(".")[0]')"; \
     if [ "$major" -lt "${MIN_NODE_MAJOR}" ]; then \
-      echo "piece-host: RUNNER_IMAGE has Node ${major}; this host needs Node >= ${MIN_NODE_MAJOR}. Rebuild the mcp-stdio-runner base on node:24.20.0-bookworm-slim (or pass --build-arg MIN_NODE_MAJOR=0 to skip this check)." >&2; \
+      echo "piece-host: RUNNER_IMAGE has Node ${major}; this host needs Node >= ${MIN_NODE_MAJOR}. Rebuild the mcp-stdio-runner base on node:24.21.0-trixie-slim (or pass --build-arg MIN_NODE_MAJOR=0 to skip this check)." >&2; \
       exit 1; \
     fi
 # Proves every pinned piece loads under the runner's actual Node version.

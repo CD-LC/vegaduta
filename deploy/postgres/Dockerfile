@@ -36,14 +36,14 @@
 # Re-pin tag AND commit together (and re-test) rather than bumping blindly.
 
 # BASE_IMAGE selects the flavour; the extension build is identical for both:
-#   postgres:16.x-bookworm@sha256 (default)  Compose tiers (official image entrypoint, initdb)
-#   ghcr.io/cloudnative-pg/postgresql:16-system-bookworm   Helm chart deploy/helm/charts/postgres (CloudNativePG
+#   postgres:16.x-trixie@sha256 (default)  Compose tiers (official image entrypoint, initdb)
+#   ghcr.io/cloudnative-pg/postgresql:16-system-trixie   Helm chart deploy/helm/charts/postgres (CloudNativePG
 #                                          operand, includes barman-cloud; pass FINAL_USER=26,
 #                                          the CNPG postgres uid)
 # The release workflow publishes both: ghcr.io/<owner>/postgres:16 and :16-pgvector-age.
 # Default is tag + digest pinned (INF-018; tag kept so Renovate/Dependabot can
 # bump both). A --build-arg BASE_IMAGE=... still overrides it wholesale.
-ARG BASE_IMAGE=postgres:16.15-bookworm@sha256:efedf3595f1d6f415c08568ba171029bf54052e754cc9f030e3f2412b21f3d67
+ARG BASE_IMAGE=postgres:16.15-trixie@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
 # hadolint ignore=DL3006
 FROM ${BASE_IMAGE}
 ARG FINAL_USER=root

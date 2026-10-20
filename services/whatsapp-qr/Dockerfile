@@ -8,7 +8,7 @@
 # WhatsApp session state lives in /data (the auth-<hash> dirs): mount a volume -
 # it IS the linked device. No published port: core reaches it on the compose
 # network only.
-ARG NODE_IMAGE=node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392
+ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
 
 FROM ${NODE_IMAGE}
 
