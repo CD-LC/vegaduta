@@ -18,7 +18,7 @@ import en from "../../../messages/en.json";
 // folder (resolveEvalStatsApi, resolveEvalApi) feature-detect METHOD NAMES on
 // it, so each test controls whether this build "has" the wiring by adding or
 // removing functions — the same mechanism the section gates on in production.
-const apiMock = vi.hoisted(() => ({} as Record<string, unknown>));
+const apiMock = vi.hoisted(() => ({}) as Record<string, unknown>);
 vi.mock("../../lib/api", () => ({ api: apiMock }));
 
 import type { EvalReliabilityReport } from "../../lib/api";
