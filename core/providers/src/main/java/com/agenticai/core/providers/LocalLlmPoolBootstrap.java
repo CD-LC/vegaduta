@@ -64,6 +64,7 @@ public class LocalLlmPoolBootstrap {
         CREATED,
         ALREADY_PRESENT,
         MOVED,
+        MODEL_REPLACED,
         REFUSED,
         UNREACHABLE,
         INVALID_CONFIG,
@@ -144,7 +145,8 @@ public class LocalLlmPoolBootstrap {
         }
         if ((outcome == Outcome.CREATED
                         || outcome == Outcome.ALREADY_PRESENT
-                        || outcome == Outcome.MOVED)
+                        || outcome == Outcome.MOVED
+                        || outcome == Outcome.MODEL_REPLACED)
                 && localModels != null) {
             // Still on the bootstrap thread: load the pool row's model now so the first chat of
             // the session does not pay the cold start on top of its own latency.
@@ -182,7 +184,15 @@ public class LocalLlmPoolBootstrap {
         }
         String normalizedBase = HostedPoolEndpointProbe.normalizeBaseUrl(baseUrl);
         List<PlatformHostedLlmProvider> existing = repository.findAllByOrderByPriorityAsc();
-        if (existing.stream().anyMatch(row -> sameBaseUrl(row, normalizedBase))) {
+        PlatformHostedLlmProvider same =
+                existing.stream()
+                        .filter(row -> sameBaseUrl(row, normalizedBase))
+                        .findFirst()
+                        .orElse(null);
+        if (same != null) {
+            if (replacedMissingModel(same, normalizedBase)) {
+                return Outcome.MODEL_REPLACED;
+            }
             log.info(
                     "Local LLM pool row '{}' ({}) already exists - bootstrap left it unchanged.",
                     label,
@@ -321,11 +331,42 @@ public class LocalLlmPoolBootstrap {
     }
 
     /**
+     * A row whose model is not on its server while the configured one is (the model was removed, or
+     * never pulled there) fails every chat; it is switched to the configured model. A model the
+     * operator picked that is still installed is never touched.
+     */
+    private boolean replacedMissingModel(PlatformHostedLlmProvider row, String normalizedBase) {
+        String current = row.getModel();
+        if (current != null && sameModel(current, model)) {
+            return false;
+        }
+        boolean currentMissing =
+                current == null
+                        || current.isBlank()
+                        || Boolean.FALSE.equals(modelIsAvailable(normalizedBase, current));
+        if (!currentMissing || !Boolean.TRUE.equals(modelIsAvailable(normalizedBase, model))) {
+            return false;
+        }
+        service.updateModel(row.getId(), model);
+        log.warn(
+                "Local LLM pool row '{}' used model '{}', which is not on {}; switched it to '{}'.",
+                row.getLabel(),
+                current,
+                normalizedBase,
+                model);
+        return true;
+    }
+
+    Boolean modelIsAvailable(String normalizedBase) {
+        return modelIsAvailable(normalizedBase, model);
+    }
+
+    /**
      * TRUE/FALSE when the server answered with a model list, null when it could not be determined
      * (the create call that follows reports an unreachable server). Ollama's {@code /api/tags}
      * first, then the OpenAI-style {@code /v1/models}.
      */
-    Boolean modelIsAvailable(String normalizedBase) {
+    Boolean modelIsAvailable(String normalizedBase, String wanted) {
         for (String path : List.of("/api/tags", "/v1/models")) {
             try {
                 JsonNode body =
@@ -339,7 +380,8 @@ public class LocalLlmPoolBootstrap {
                 }
                 for (JsonNode entry : list) {
                     for (String field : List.of("name", "model", "id")) {
-                        if (entry.hasNonNull(field) && sameModel(entry.get(field).asText())) {
+                        if (entry.hasNonNull(field)
+                                && sameModel(entry.get(field).asText(), wanted)) {
                             return Boolean.TRUE;
                         }
                     }
@@ -353,8 +395,8 @@ public class LocalLlmPoolBootstrap {
     }
 
     /** "llama3.2" matches "llama3.2:latest"; an explicit tag must match exactly. */
-    private boolean sameModel(String listed) {
-        String want = model.toLowerCase(Locale.ROOT);
+    private static boolean sameModel(String listed, String wanted) {
+        String want = wanted.toLowerCase(Locale.ROOT);
         String have = listed.toLowerCase(Locale.ROOT);
         return have.equals(want) || have.equals(want + ":latest");
     }

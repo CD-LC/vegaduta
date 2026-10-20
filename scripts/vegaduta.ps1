@@ -261,6 +261,15 @@ function Resolve-LocalModel {
   $script:CloudChoice = $Cloud -or ((Read-StateValue 'cloud') -eq '1' -and -not $LocalModel)
   if ($Cloud) { $script:LocalAi = ''; $script:LocalModelTag = ''; return }
   if ($script:CloudChoice) { return }
+  # An install that uses (or could use) the computer's Ollama: start it if it is installed but not
+  # running (after a restart, or its tray app was closed), or the model never answers.
+  $ollamaApp = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama app.exe'
+  if (($script:LocalAi -eq 'host' -or ($script:LocalAi -eq 'container' -and ((Test-Path $ollamaApp) -or (Get-Command ollama -ErrorAction SilentlyContinue)))) -and -not (Test-HostOllama)) { Install-HostOllama }
+  if ($script:LocalAi -eq 'host' -and -not (Test-HostOllama)) {
+    $script:LocalAi = 'container'
+    Warn "Ollama on this computer is not answering - the model runs in a container instead ('$($script:LocalModelTag)')"
+    return
+  }
   # Ollama installed on this computer after an install that used the container: switch to it
   # (all of the computer's memory, its GPU, and the models already pulled there).
   if ($script:LocalAi -eq 'container' -and (Test-HostOllama)) {

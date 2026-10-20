@@ -103,6 +103,7 @@ class LocalLlmPoolBootstrapTest {
         when(row.getLabel()).thenReturn(label);
         when(row.getBaseUrl()).thenReturn(baseUrl);
         when(row.getPriority()).thenReturn(priority);
+        when(row.getModel()).thenReturn("llama3.2");
         return row;
     }
 
@@ -196,6 +197,41 @@ class LocalLlmPoolBootstrapTest {
         assertTrue(req.getValue().enabled());
         assertEquals(null, req.getValue().apiKey(), "the stored key is kept");
         verify(service, never()).createAllowingBlankKey(any());
+    }
+
+    @Test
+    void rowWhoseModelIsNotOnTheServerSwitchesToTheConfiguredModel() {
+        // The console said "in use" but the row's model was never pulled there: every chat failed.
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider stale = row(7, "Local model (Ollama)", BASE, 0);
+        when(stale.getModel()).thenReturn("qwen3.5:4b");
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(stale));
+
+        assertEquals(
+                Outcome.MODEL_REPLACED,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service).updateModel(7L, "llama3.2");
+        verify(service, never()).createAllowingBlankKey(any());
+    }
+
+    @Test
+    void anInstalledModelTheOperatorPickedIsKept() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(
+                        withSuccess(
+                                "{\"models\":[{\"name\":\"llama3.2:latest\"},{\"name\":\"mistral:latest\"}]}",
+                                MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider picked = row(8, "Local model (Ollama)", BASE, 0);
+        when(picked.getModel()).thenReturn("mistral");
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(picked));
+
+        assertEquals(
+                Outcome.ALREADY_PRESENT,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service, never()).updateModel(any(), any());
     }
 
     @Test
