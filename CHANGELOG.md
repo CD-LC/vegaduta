@@ -8,6 +8,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **No GPU, no GPU mode.** Docker on WSL2 lists the nvidia runtime even on a laptop without a graphics card, which switched the Ollama container to GPU mode and made it fail to start ("no adapters were found"). The GPU overlay is now used only when `nvidia-smi` reports an adapter.
+- **Installing from a checkout or a download of `main` just works.** An empty `VEGADUTA_VERSION` used to stop `personal` with an error; it now uses the latest published release and records it in `.env`.
+
 ### Changed
 
 - **Local AI stays the default on small machines.** `personal` no longer drops to the cloud-key path below 8 GB of RAM: it picks the smallest catalog model (CPU only is fine) and warns that the first reply is slow; only machines under 4 GB keep the cloud-key path. The model is now sized to the memory Docker actually has when it runs in the Ollama container (a WSL2 or Docker Desktop VM is often much smaller than the machine), with a hint to raise Docker's memory for a bigger one. `--local-ai` given by hand now gets a model sized the same way instead of Docker's `qwen3.5:4b` default, and under WSL2 the script offers (with a yes, a backup and the one restart step) to give Docker 8 GB through `%UserProfile%\.wslconfig`.
