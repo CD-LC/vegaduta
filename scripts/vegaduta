@@ -423,7 +423,7 @@ local_ai_args() {
     # A small Docker VM cannot hold a 32k-token context next to the stack: the model's memory grows with
     # the window, and the kernel then kills core or Ollama mid-reply. Scale it down with Docker's memory.
     if [ -z "${LOCAL_LLM_NUM_CTX:-}" ] && [ -z "$(get_env LOCAL_LLM_NUM_CTX)" ]; then
-      local dgb; dgb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+      local dgb; dgb=$(( $(docker_mem_bytes) / 1073741824 ))
       if [ "$dgb" -gt 0 ] && [ "$dgb" -lt 6 ]; then export LOCAL_LLM_NUM_CTX=8192
       elif [ "$dgb" -gt 0 ] && [ "$dgb" -lt 10 ]; then export LOCAL_LLM_NUM_CTX=16384; fi
     fi
