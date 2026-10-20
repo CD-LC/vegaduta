@@ -765,11 +765,15 @@ reconcile_keycloak() {
 # when a flag already decided it (--local-ai, --local-model, --cloud), when a
 # state file exists, or when there is no terminal (CI, scripts): those keep the
 # cloud-key default.
-recommended_local_model() { # RAM in GB on this machine -> catalog tag
+recommended_local_model() { # [RAM in GB, default: this machine's] -> catalog tag
   local gb=0
-  case "$(uname -s)" in
-    Darwin) gb=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 )) ;;
-    Linux) gb=$(( $(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0) / 1048576 )) ;;
+  case "${1:-}" in
+    ''|*[!0-9]*)
+      case "$(uname -s)" in
+        Darwin) gb=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 )) ;;
+        Linux) gb=$(( $(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0) / 1048576 )) ;;
+      esac ;;
+    *) gb="$1" ;;
   esac
   # The ladder lives in the shared catalog ("#ladder|minGB|tag" lines, also read by core);
   # the built-in rungs below are only the fallback when the file is missing.
@@ -1456,27 +1460,44 @@ personal_install_ollama() {
 
 # With nothing chosen, a personal install gets the free local model that fits this machine's
 # RAM: through an Ollama already running here, else the Ollama container (which downloads the
-# model on first start). --cloud opts out; below 8 GB of RAM the cloud-key path stays.
+# model on first start). --cloud opts out; below 4 GB of RAM the cloud-key path stays.
 personal_default_model() {
   [ -z "$LOCAL_AI" ] && [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
   # An earlier run that said --cloud stays cloud. Any other earlier run (no local model then)
   # looks again, so an install that never chose gets its model on the next plain `personal`.
   if [ "${CLOUD:-0}" = 1 ]; then return 0; fi
-  [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model)"
   personal_install_ollama
+  # The model runs where Ollama runs: a host Ollama can use all of the machine's RAM, the container
+  # only what Docker is given (Docker Desktop / WSL2 VMs are often far smaller than the machine).
+  local gb host_gb docker_gb
+  host_gb="$(host_ram_gb)"
+  if host_ollama_models >/dev/null 2>&1; then
+    gb="$host_gb"
+  else
+    docker_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+    gb="$host_gb"
+    if [ "$docker_gb" -gt 0 ] && { [ "$gb" -le 0 ] || [ "$docker_gb" -lt "$gb" ]; }; then gb="$docker_gb"; fi
+  fi
+  [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model "$gb")"
   if host_ollama_models >/dev/null 2>&1; then
     LOCAL_AI=host
     say "Ollama found on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
     return 0
   fi
-  local gb; gb="$(host_ram_gb)"
-  if [ "$gb" -gt 0 ] && [ "$gb" -lt 8 ]; then
+  # Local AI stays the default on small machines (the smallest catalog model, CPU only is fine);
+  # only a machine that cannot hold even that falls back to a cloud key.
+  if [ "$gb" -gt 0 ] && [ "$gb" -lt 4 ]; then
     say "This machine has ${gb} GB RAM - too little for a local model next to the stack; add a cloud provider key in the console"
     LOCAL_MODEL=""
     return 0
   fi
   LOCAL_AI=container
   say "Agents will use the free local model '$LOCAL_MODEL' (downloaded once on first start; change with --local-model, opt out with --cloud)"
+  if [ "$host_gb" -gt 0 ] && [ "$gb" -lt "$host_gb" ]; then
+    warn "Docker has ${gb} GB of this machine's ${host_gb} GB; the model was chosen to fit that. For a bigger one raise Docker's memory (Docker Desktop > Settings > Resources, or memory= in %UserProfile%\\.wslconfig on Windows)"
+  fi
+  [ "$gb" -lt 8 ] && warn "${gb} GB is tight: '$LOCAL_MODEL' runs on the CPU and the first reply can take a minute; close other apps while it loads"
+  return 0
 }
 
 # The core jar for --native-core: VEGADUTA_CORE_JAR, else built from source (--build), else the

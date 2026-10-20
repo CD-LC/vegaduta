@@ -244,7 +244,7 @@ function Install-HostOllama {
 }
 # A personal install gets the free local model that fits this machine's RAM: through an Ollama
 # already running here, else the Ollama container (it downloads the model on first start).
-# -Cloud opts out and is remembered; below 8 GB of RAM the cloud-key path stays.
+# -Cloud opts out and is remembered; below 4 GB of RAM the cloud-key path stays.
 function Resolve-LocalModel {
   $script:LocalAi = Read-StateValue 'local_ai'
   $script:LocalModelTag = if ($LocalModel) { $LocalModel } else { Read-StateValue 'local_model' }
@@ -260,13 +260,16 @@ function Resolve-LocalModel {
     Say "Ollama found on this machine: agents will use '$($script:LocalModelTag)' (change with -LocalModel, opt out with -Cloud)"
     return
   }
-  if ($gb -gt 0 -and $gb -lt 8) {
+  # Local AI stays the default on small machines (CPU only is fine); only a machine that cannot
+  # hold even the smallest model falls back to a cloud key.
+  if ($gb -gt 0 -and $gb -lt 4) {
     Say "This machine has $gb GB RAM - too little for a local model next to the stack; add a cloud provider key in the console"
     $script:LocalModelTag = ''
     return
   }
   $script:LocalAi = 'container'
   Say "Agents will use the free local model '$($script:LocalModelTag)' (downloaded once on first start; change with -LocalModel, opt out with -Cloud)"
+  if ($gb -gt 0 -and $gb -lt 8) { Warn "$gb GB is tight: '$($script:LocalModelTag)' runs on the CPU and the first reply can take a minute; close other apps while it loads" }
 }
 function Resolve-Profiles {
   foreach ($p in ((Get-EnvValue 'COMPOSE_PROFILES') -split ',')) { Add-Profile $p.Trim() }
