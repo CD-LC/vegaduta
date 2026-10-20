@@ -423,7 +423,7 @@ local_ai_args() {
     # A small Docker VM cannot hold a 32k-token context next to the stack: the model's memory grows with
     # the window, and the kernel then kills core or Ollama mid-reply. Scale it down with Docker's memory.
     if [ -z "${LOCAL_LLM_NUM_CTX:-}" ] && [ -z "$(get_env LOCAL_LLM_NUM_CTX)" ]; then
-      local dgb; dgb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+      local dgb; dgb=$(( $(docker_mem_bytes) / 1073741824 ))
       if [ "$dgb" -gt 0 ] && [ "$dgb" -lt 6 ]; then export LOCAL_LLM_NUM_CTX=8192
       elif [ "$dgb" -gt 0 ] && [ "$dgb" -lt 10 ]; then export LOCAL_LLM_NUM_CTX=16384; fi
     fi
@@ -533,7 +533,7 @@ cmd_doctor() {
 
   local mem_b mem_gb need_gb=6 disk_need=15
   [ "$TIER" = full ] && { need_gb=12; disk_need=40; }
-  mem_b="$(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0)"
+  mem_b="$(docker_mem_bytes)"
   mem_gb=$((mem_b / 1024 / 1024 / 1024))
   if [ "$mem_gb" -ge "$need_gb" ]; then ok "Docker memory ${mem_gb} GB (>= ${need_gb} GB for $TIER)"
   else warn "Docker has ${mem_gb} GB RAM; $TIER wants >= ${need_gb} GB (raise Docker Desktop's memory limit)"; fi
@@ -700,8 +700,8 @@ parse_tier_flags() {
       --profile) add_profile "${2:?--profile needs a name}"; shift 2 ;;
       --profile=*) add_profile "${1#*=}"; shift ;;
       --build) BUILD=1; shift ;;
-      --local-ai) LOCAL_AI=container; shift ;;
-      --local-ai=container|--local-ai=host) LOCAL_AI="${1#*=}"; shift ;;
+      --local-ai) LOCAL_AI=container; LOCAL_AI_FLAG=1; shift ;;
+      --local-ai=container|--local-ai=host) LOCAL_AI="${1#*=}"; LOCAL_AI_FLAG=1; shift ;;
       --local-ai=*) die "--local-ai takes 'container' (default) or 'host'" ;;
       --local-model) LOCAL_MODEL="${2:?--local-model needs a model tag, e.g. qwen3.5:4b}"; shift 2 ;;
       --local-model=*) LOCAL_MODEL="${1#*=}"; shift ;;
@@ -1398,7 +1398,7 @@ personal_doctor() {
   # RAM: containers add up to ~2.4 GB of limits (about 0.9 GB without the core container) plus
   # the Docker VM; a local model needs its own memory on top (catalog: scripts/vegaduta models list).
   local mem_gb host_gb need_docker=4
-  mem_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1024 / 1024 / 1024 ))
+  mem_gb=$(( $(docker_mem_bytes) / 1024 / 1024 / 1024 ))
   host_gb="$(host_ram_gb)"
   [ "$NATIVE_CORE" = 1 ] && need_docker=2
   if [ "$mem_gb" -ge "$need_docker" ]; then ok "Docker memory ${mem_gb} GB (>= ${need_docker} GB)"
@@ -1470,6 +1470,10 @@ personal_doctor() {
 # macOS: install and start Ollama through Homebrew when it is missing, so the model runs natively
 # on the Apple GPU (the container is CPU-only there). Linux needs root for Ollama's installer,
 # so it keeps the container. Skipped for --dry-run and VEGADUTA_ASSUME_NO=1; never fails the run.
+docker_mem_bytes() { # Docker's memory in bytes; 0 when Docker does not answer (never two lines)
+  local b; b="$(docker info --format '{{.MemTotal}}' 2>/dev/null | head -n1)"
+  case "$b" in ''|*[!0-9]*) printf 0 ;; *) printf '%s' "$b" ;; esac
+}
 personal_install_ollama() {
   [ "$(uname -s)" = Darwin ] && [ "$DRY_RUN" != 1 ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ] || return 0
   host_ollama_models >/dev/null 2>&1 && return 0
@@ -1503,7 +1507,7 @@ wsl_docker_memory_assist() {
   [ "$DRY_RUN" != 1 ] || return 0
   local host_gb docker_gb target
   host_gb="$(host_ram_gb)"
-  docker_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+  docker_gb=$(( $(docker_mem_bytes) / 1073741824 ))
   target=8; [ $(( host_gb - 4 )) -lt "$target" ] && target=$(( host_gb - 4 ))
   [ "$target" -ge 6 ] && [ "$docker_gb" -gt 0 ] && [ "$docker_gb" -lt "$target" ] || return 0
   local home cfg
@@ -1536,6 +1540,23 @@ wsl_docker_memory_assist() {
 # model on first start). --cloud opts out; below 4 GB of RAM the cloud-key path stays.
 personal_default_model() {
   [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  # An install that uses (or could use) this machine's Ollama: start it if it is installed but not
+  # running (after a restart, or its app was quit), or the model never answers.
+  if [ "$LOCAL_AI" = host ] || { [ "$LOCAL_AI" = container ] && { command -v ollama >/dev/null 2>&1 || [ -d /Applications/Ollama.app ]; }; }; then
+    host_ollama_models >/dev/null 2>&1 || personal_install_ollama
+  fi
+  if [ "$LOCAL_AI" = host ] && [ "${LOCAL_AI_FLAG:-0}" != 1 ] && [ "$DRY_RUN" != 1 ] && ! host_ollama_models >/dev/null 2>&1; then
+    LOCAL_AI=container
+    warn "Ollama on this machine is not answering - the model runs in a container instead ('${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL)}')"
+    return 0
+  fi
+  # Ollama installed on this machine after an install that used the container: switch to it
+  # (all of the machine's memory, its GPU, and the models already pulled there).
+  if [ "$LOCAL_AI" = container ] && [ "${LOCAL_AI_FLAG:-0}" != 1 ] && host_ollama_models >/dev/null 2>&1; then
+    LOCAL_AI=host
+    say "Ollama found on this machine: agents now use it instead of the container ('${LOCAL_MODEL:-$(get_env LOCAL_LLM_MODEL)}')"
+    return 0
+  fi
   # --local-ai[=host] with no model of its own (flag, saved state or .env) still gets one that fits
   # this machine: without this the compose default (qwen3.5:4b, ~10 GB) runs on every machine.
   local explicit=0
@@ -1555,7 +1576,7 @@ personal_default_model() {
   gb="$host_gb"
   if [ "$mode" != host ]; then
     [ -n "$LOCAL_MODEL" ] || wsl_docker_memory_assist
-    docker_gb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+    docker_gb=$(( $(docker_mem_bytes) / 1073741824 ))
     if [ "$docker_gb" -gt 0 ] && { [ "$gb" -le 0 ] || [ "$docker_gb" -lt "$gb" ]; }; then gb="$docker_gb"; fi
   fi
   [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model "$gb")"

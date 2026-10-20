@@ -28,10 +28,15 @@ import org.springframework.web.client.RestClient;
  * is logged at WARN and the application carries on.
  *
  * <ul>
- *   <li><b>Idempotent.</b> If a pool row with the same label or the same base URL exists, nothing
- *       is written, so an admin's later edits survive restarts. Two instances starting together may
- *       both insert; each then re-reads the matching rows and the one with the higher id deletes
- *       itself, leaving exactly one.
+ *   <li><b>Idempotent.</b> If a pool row with the same base URL exists, nothing is written, so an
+ *       admin's later edits (model, label, priority) survive restarts.
+ *   <li><b>Follows the install.</b> A row with this label but another base URL is the install's own
+ *       row from before Ollama moved (the Docker container before, the computer's own Ollama now,
+ *       or the reverse): it is repointed to the configured base URL and model, keeping its
+ *       priority, enabled flag and overrides. Without this the pool keeps calling an Ollama that no
+ *       longer runs and the local model is never found. Two instances starting together may both
+ *       insert; each then re-reads the matching rows and the one with the higher id deletes itself,
+ *       leaving exactly one.
  *   <li><b>Goes through {@link PlatformHostedLlmProviderService}</b>, so the key is encrypted with
  *       {@code APP_ENCRYPTION_KEY}, the base URL passes the SSRF guard and the endpoint is probed
  *       exactly as for a hand-made row. A private host such as {@code ollama:11434} must be listed
@@ -58,6 +63,8 @@ public class LocalLlmPoolBootstrap {
     enum Outcome {
         CREATED,
         ALREADY_PRESENT,
+        MOVED,
+        MODEL_REPLACED,
         REFUSED,
         UNREACHABLE,
         INVALID_CONFIG,
@@ -98,7 +105,10 @@ public class LocalLlmPoolBootstrap {
         this.ssrfGuard = ssrfGuard;
     }
 
-    /** Optional: when a local-model warmer is present, the registered model is loaded after bootstrap. */
+    /**
+     * Optional: when a local-model warmer is present, the registered model is loaded after
+     * bootstrap.
+     */
     @Autowired(required = false)
     void setLocalModels(LocalModelWarmer gateway) {
         this.localModels = gateway;
@@ -133,7 +143,11 @@ public class LocalLlmPoolBootstrap {
                             + " restart core, or add the row in Platform Admin.",
                     baseUrl);
         }
-        if ((outcome == Outcome.CREATED || outcome == Outcome.ALREADY_PRESENT) && localModels != null) {
+        if ((outcome == Outcome.CREATED
+                        || outcome == Outcome.ALREADY_PRESENT
+                        || outcome == Outcome.MOVED
+                        || outcome == Outcome.MODEL_REPLACED)
+                && localModels != null) {
             // Still on the bootstrap thread: load the pool row's model now so the first chat of
             // the session does not pay the cold start on top of its own latency.
             String normalizedBase = HostedPoolEndpointProbe.normalizeBaseUrl(baseUrl);
@@ -170,13 +184,27 @@ public class LocalLlmPoolBootstrap {
         }
         String normalizedBase = HostedPoolEndpointProbe.normalizeBaseUrl(baseUrl);
         List<PlatformHostedLlmProvider> existing = repository.findAllByOrderByPriorityAsc();
-        if (existing.stream().anyMatch(row -> matches(row, normalizedBase))) {
+        PlatformHostedLlmProvider same =
+                existing.stream()
+                        .filter(row -> sameBaseUrl(row, normalizedBase))
+                        .findFirst()
+                        .orElse(null);
+        if (same != null) {
+            if (replacedMissingModel(same, normalizedBase)) {
+                return Outcome.MODEL_REPLACED;
+            }
             log.info(
                     "Local LLM pool row '{}' ({}) already exists - bootstrap left it unchanged.",
                     label,
                     normalizedBase);
             return Outcome.ALREADY_PRESENT;
         }
+
+        PlatformHostedLlmProvider moved =
+                existing.stream()
+                        .filter(row -> label.equalsIgnoreCase(row.getLabel()))
+                        .findFirst()
+                        .orElse(null);
 
         // Guard before the first outbound byte so a refusal comes with a precise hint.
         try {
@@ -201,6 +229,35 @@ public class LocalLlmPoolBootstrap {
                     model,
                     normalizedBase,
                     model);
+        }
+
+        if (moved != null) {
+            service.update(
+                    moved.getId(),
+                    new PlatformHostedLlmProviderUpsertRequest(
+                            moved.getLabel(),
+                            normalizedBase,
+                            model,
+                            // blank keeps the stored key (the keyless placeholder for Ollama)
+                            null,
+                            moved.isEnabled(),
+                            moved.getPriority(),
+                            moved.getRegion(),
+                            null,
+                            null,
+                            moved.getAuthType(),
+                            null,
+                            null,
+                            Boolean.TRUE,
+                            moved.getToolRouterEnabled(),
+                            moved.getSmallModel()));
+            log.info(
+                    "Local LLM pool row '{}' moved from {} to {} (model {}).",
+                    moved.getLabel(),
+                    moved.getBaseUrl(),
+                    normalizedBase,
+                    model);
+            return Outcome.MOVED;
         }
 
         int priority =
@@ -249,6 +306,11 @@ public class LocalLlmPoolBootstrap {
                         HostedPoolEndpointProbe.normalizeBaseUrl(row.getBaseUrl()));
     }
 
+    private static boolean sameBaseUrl(PlatformHostedLlmProvider row, String normalizedBase) {
+        return normalizedBase.equalsIgnoreCase(
+                HostedPoolEndpointProbe.normalizeBaseUrl(row.getBaseUrl()));
+    }
+
     /** Two instances racing both insert; the higher id removes itself. */
     private void resolveRaceIfDuplicated(Long ownId, String normalizedBase) {
         try {
@@ -269,11 +331,42 @@ public class LocalLlmPoolBootstrap {
     }
 
     /**
+     * A row whose model is not on its server while the configured one is (the model was removed, or
+     * never pulled there) fails every chat; it is switched to the configured model. A model the
+     * operator picked that is still installed is never touched.
+     */
+    private boolean replacedMissingModel(PlatformHostedLlmProvider row, String normalizedBase) {
+        String current = row.getModel();
+        if (current != null && sameModel(current, model)) {
+            return false;
+        }
+        boolean currentMissing =
+                current == null
+                        || current.isBlank()
+                        || Boolean.FALSE.equals(modelIsAvailable(normalizedBase, current));
+        if (!currentMissing || !Boolean.TRUE.equals(modelIsAvailable(normalizedBase, model))) {
+            return false;
+        }
+        service.updateModel(row.getId(), model);
+        log.warn(
+                "Local LLM pool row '{}' used model '{}', which is not on {}; switched it to '{}'.",
+                row.getLabel(),
+                current,
+                normalizedBase,
+                model);
+        return true;
+    }
+
+    Boolean modelIsAvailable(String normalizedBase) {
+        return modelIsAvailable(normalizedBase, model);
+    }
+
+    /**
      * TRUE/FALSE when the server answered with a model list, null when it could not be determined
      * (the create call that follows reports an unreachable server). Ollama's {@code /api/tags}
      * first, then the OpenAI-style {@code /v1/models}.
      */
-    Boolean modelIsAvailable(String normalizedBase) {
+    Boolean modelIsAvailable(String normalizedBase, String wanted) {
         for (String path : List.of("/api/tags", "/v1/models")) {
             try {
                 JsonNode body =
@@ -287,7 +380,8 @@ public class LocalLlmPoolBootstrap {
                 }
                 for (JsonNode entry : list) {
                     for (String field : List.of("name", "model", "id")) {
-                        if (entry.hasNonNull(field) && sameModel(entry.get(field).asText())) {
+                        if (entry.hasNonNull(field)
+                                && sameModel(entry.get(field).asText(), wanted)) {
                             return Boolean.TRUE;
                         }
                     }
@@ -301,8 +395,8 @@ public class LocalLlmPoolBootstrap {
     }
 
     /** "llama3.2" matches "llama3.2:latest"; an explicit tag must match exactly. */
-    private boolean sameModel(String listed) {
-        String want = model.toLowerCase(Locale.ROOT);
+    private static boolean sameModel(String listed, String wanted) {
+        String want = wanted.toLowerCase(Locale.ROOT);
         String have = listed.toLowerCase(Locale.ROOT);
         return have.equals(want) || have.equals(want + ":latest");
     }
