@@ -6,12 +6,12 @@
 #
 # The base image ships Chromium for exactly this Playwright version, and Playwright refuses a client
 # of a different major.minor: keep this version equal to the Playwright Java client pinned in
-# core/agents-browser/pom.xml (1.49.0) and bump both together.
+# core/agents-browser/pom.xml (1.63.0) and bump both together.
 #
 # No published port and no secrets: a Playwright server accepts any client that can reach it, so it
 # joins only the private `browser-net` network that core is on (deploy/compose/browser.yml), never the
 # network holding Postgres and Valkey.
-ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.49.0-noble
+ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.63.0-noble
 
 FROM ${PLAYWRIGHT_IMAGE}
 

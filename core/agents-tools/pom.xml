@@ -159,12 +159,14 @@
     <!-- x402 outbound payments (tools/x402): secp256k1 ECDSA + Keccak-256 for
          EIP-712/EIP-3009 transferWithAuthorization signing. Neither exists in
          the JDK (secp256k1 was removed; SHA3-256 is NOT Keccak), so BC is the
-         standard choice. 1.80 (2024-12) - pinned, not latest. Moved here from
-         core/agents with tools.x402 (ADR-0023); nothing left in agents imports it. -->
+         standard choice. 1.85 (2026) - pinned, not latest; raised from 1.80
+         for the release image scan (grype flagged 1.80 with fixed criticals).
+         Moved here from core/agents with tools.x402 (ADR-0023); nothing left
+         in agents imports it. -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.80</version>
+      <version>1.85</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

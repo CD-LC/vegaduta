@@ -171,7 +171,7 @@ spring:
                 # revision that was never downloaded). Bump this AND the
                 # Dockerfile's install-browser line together, deliberately -
                 # never let this float back to @latest.
-                - "@playwright/mcp@0.0.79"
+                - "@playwright/mcp@0.0.83"
                 - "--caps=vision"
                 # Without this, @playwright/mcp defaults to hunting for the
                 # BRANDED Google Chrome channel at a hardcoded path no Docker

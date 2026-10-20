@@ -138,9 +138,9 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
 # sync - bump all together, deliberately, never let any float to `@latest`)
 # and installing the browser via THAT package's own installer, guaranteeing
 # the binary on disk always matches what the pinned runtime package asks for.
-# playwright@1.63.0-alpha-2026-08-05 is exactly the version @playwright/mcp@0.0.79 depends on.
-RUN npx --yes playwright@1.63.0-alpha-2026-08-05 install --with-deps chromium \
-    && npx --yes @playwright/mcp@0.0.79 install-browser chrome-for-testing \
+# playwright@1.64.0-alpha-1790635538000 is exactly the version @playwright/mcp@0.0.83 depends on.
+RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium \
+    && npx --yes @playwright/mcp@0.0.83 install-browser chrome-for-testing \
     # server-puppeteer pre-warm (2026-08-19 incident): unlike playwright-vision
     # above, puppeteer's package AND its browser were still fetched at runtime
     # by the first `npx -y @modelcontextprotocol/server-puppeteer` - a cold
@@ -156,7 +156,14 @@ RUN npx --yes playwright@1.63.0-alpha-2026-08-05 install --with-deps chromium \
     # both together if the connection block ever changes) into
     # $PUPPETEER_CACHE_DIR, which the chown below hands to the runtime user.
     && npm exec --yes --package=@modelcontextprotocol/server-puppeteer@2025.5.12 -- node -e "process.exit(0)" \
-    && npx --yes puppeteer@23.11.1 browsers install chrome \
+    # The frozen puppeteer@23.11.1 resolves Chrome 131.0.6778.204, which the
+    # release image scan (grype, fail on critical) rejects with fixed
+    # criticals. server-puppeteer cannot take a newer puppeteer, so install
+    # the fixed Chrome-for-Testing build and place it at the directory the
+    # frozen resolver computes - the launch contract stays exact, only the
+    # binary behind it is the patched one.
+    && npx --yes puppeteer@23.11.1 browsers install chrome@153.0.8010.47 \
+    && mv "$PUPPETEER_CACHE_DIR/chrome/linux-153.0.8010.47" "$PUPPETEER_CACHE_DIR/chrome/linux-131.0.6778.204" \
     && rm -rf /var/lib/apt/lists/* \
     && chown -R mcprunner:mcprunner "$PLAYWRIGHT_BROWSERS_PATH" "$PUPPETEER_CACHE_DIR" /home/mcprunner
 
