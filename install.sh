@@ -230,15 +230,25 @@ main() {
   if [ -n "$DOMAIN" ]; then bash scripts/vegaduta secrets --domain "$DOMAIN"
   else bash scripts/vegaduta secrets; fi
 
+  # Default tier (before --no-start prints its hint): the one-liner installer
+  # targets a single user on their own machine, which is what `personal` is
+  # for; --domain still implies a multi-tenant --full install, and an explicit
+  # --lite/--full flag always wins.
+  case " $PASS " in
+    *" personal "*|*" --lite "*|*" --full "*) ;;
+    *) if [ -n "$DOMAIN" ]; then PASS="--full$PASS"; else PASS="personal$PASS"; fi ;;
+  esac
+
   if [ "$START" = 0 ]; then
     case " $PASS " in
       *" personal "*) say "Installed. Start with: cd $ROOT && scripts/vegaduta personal" ;;
+      *" --full "*) say "Installed. Start with: cd $ROOT && scripts/vegaduta up --full" ;;
       *) say "Installed. Start with: cd $ROOT && scripts/vegaduta up --lite   (or --full)" ;;
     esac
     exit 0
   fi
 
-  # 3. Start (lite by default; full when a domain is given) ------------------
+  # 3. Start ----------------------------------------------------------------
   # `personal` is its own subcommand (one person, one laptop), not an `up` flag.
   case " $PASS " in
     *" personal "*)
@@ -247,10 +257,6 @@ main() {
       say "Starting: scripts/vegaduta personal$PASS"
       # shellcheck disable=SC2086
       exec bash scripts/vegaduta personal $PASS ;;
-  esac
-  case " $PASS " in
-    *" --lite "*|*" --full "*) ;;
-    *) if [ -n "$DOMAIN" ]; then PASS="--full$PASS"; else PASS="--lite$PASS"; fi ;;
   esac
   say "Starting: scripts/vegaduta up $PASS"
   # shellcheck disable=SC2086
