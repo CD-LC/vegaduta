@@ -56,13 +56,16 @@ func dockerInstall(ctx context.Context, emit func(Event)) error {
 			line("winget is not available (needs Windows 10 1809+ with App Installer). Download Docker Desktop from https://docs.docker.com/desktop/install/windows-install/")
 			return nil
 		}
-		line("Installing Docker Desktop via winget…")
+		line("Installing Docker Desktop (a few minutes; Windows may ask for permission - click Yes)…")
+		// --accept-license skips Docker Desktop's first-launch agreement screen,
+		// so the engine can start without anyone clicking through it.
 		if err := streamCmd(ctx, emit, "winget", "install", "-e", "--id", "Docker.DockerDesktop",
-			"--accept-source-agreements", "--accept-package-agreements"); err != nil {
-			return fmt.Errorf("winget failed: %w (WSL2 may need enabling - run 'wsl --install' in an admin PowerShell, reboot, then start Docker Desktop)", err)
+			"--accept-source-agreements", "--accept-package-agreements",
+			"--override", "install --quiet --accept-license --backend=wsl-2"); err != nil {
+			return fmt.Errorf("installing Docker Desktop failed: %w - click Install again; if it keeps failing, install Docker Desktop from https://docs.docker.com/desktop/install/windows-install/", err)
 		}
-		line("Docker Desktop installed. Start it from the Start menu; first launch can take a minute and may ask to finish WSL2 setup.")
-		return nil
+		line("Docker Desktop installed - starting it…")
+		return dockerStart(ctx, emit)
 	default:
 		line("On Linux the engine install needs root. In a terminal run:")
 		line("  curl -fsSL https://get.docker.com | sudo sh   # then: sudo usermod -aG docker $USER, log out and back in")
@@ -71,7 +74,8 @@ func dockerInstall(ctx context.Context, emit func(Event)) error {
 }
 
 // dockerStart tries to bring the daemon up and waits until `docker info`
-// answers (or ~3 minutes, which covers Docker Desktop's first boot).
+// answers (or ~5 minutes, which covers Docker Desktop's first boot on a slow
+// machine).
 func dockerStart(ctx context.Context, emit func(Event)) error {
 	line := func(s string) { emit(Event{Line: s}) }
 	switch runtime.GOOS {
@@ -86,7 +90,7 @@ func dockerStart(ctx context.Context, emit func(Event)) error {
 			line("Could not start Docker without admin rights. Run: sudo systemctl start docker")
 		}
 	}
-	deadline := time.Now().Add(3 * time.Minute)
+	deadline := time.Now().Add(5 * time.Minute)
 	for time.Now().Before(deadline) {
 		if exec.CommandContext(ctx, "docker", "info").Run() == nil {
 			line("Docker engine is running.")
@@ -99,7 +103,7 @@ func dockerStart(ctx context.Context, emit func(Event)) error {
 		case <-time.After(5 * time.Second):
 		}
 	}
-	return fmt.Errorf("the Docker engine did not come up in 3 minutes - open Docker Desktop and check its status")
+	return fmt.Errorf("the Docker engine did not come up in 5 minutes - restart the computer and click Install again")
 }
 
 // streamCmd runs a command, forwarding output lines as events.
