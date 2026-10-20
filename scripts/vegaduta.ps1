@@ -364,6 +364,11 @@ function Get-ComposeArgs {
         $allow = Get-EnvValue 'APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS'
         if ((",$allow,") -notlike '*,host.docker.internal:11434,*') { $allow = if ($allow) { "host.docker.internal:11434,$allow" } else { 'host.docker.internal:11434' } }
         $env:APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS = $allow
+        # A small Docker VM cannot hold a 32k-token context next to the stack; scale it down with Docker's memory.
+        if (-not $env:LOCAL_LLM_NUM_CTX -and -not (Get-EnvValue 'LOCAL_LLM_NUM_CTX')) {
+          try { $dgb = [int][math]::Floor([int64](& docker info --format '{{.MemTotal}}' 2>$null) / 1GB) } catch { $dgb = 0 }
+          if ($dgb -gt 0 -and $dgb -lt 6) { $env:LOCAL_LLM_NUM_CTX = '8192' } elseif ($dgb -gt 0 -and $dgb -lt 10) { $env:LOCAL_LLM_NUM_CTX = '16384' }
+        }
         # The container's memory cap follows the model (the 8g default cannot hold the larger rows); never lowered.
         if (-not $env:OLLAMA_MEM_LIMIT -and -not (Get-EnvValue 'OLLAMA_MEM_LIMIT')) {
           $want = Get-ModelRamGb $script:LocalModelTag

@@ -420,6 +420,13 @@ local_ai_args() {
       local want; want="$(catalog_field "${LOCAL_LLM_MODEL:-qwen3.5:4b}" 4)"; want="${want%.*}"
       case "$want" in ''|*[!0-9]*) ;; *) [ "$want" -gt 8 ] && export OLLAMA_MEM_LIMIT="${want}g" ;; esac
     fi
+    # A small Docker VM cannot hold a 32k-token context next to the stack: the model's memory grows with
+    # the window, and the kernel then kills core or Ollama mid-reply. Scale it down with Docker's memory.
+    if [ -z "${LOCAL_LLM_NUM_CTX:-}" ] && [ -z "$(get_env LOCAL_LLM_NUM_CTX)" ]; then
+      local dgb; dgb=$(( $(docker info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1073741824 ))
+      if [ "$dgb" -gt 0 ] && [ "$dgb" -lt 6 ]; then export LOCAL_LLM_NUM_CTX=8192
+      elif [ "$dgb" -gt 0 ] && [ "$dgb" -lt 10 ]; then export LOCAL_LLM_NUM_CTX=16384; fi
+    fi
     # A host JVM reaches the Ollama container only through a loopback-published port.
     if [ "$TIER" = personal ] && [ "$NATIVE_CORE" = 1 ]; then COMPOSE_ARGS+=(-f "$COMPOSE_DIR/docker-compose.local-ai.native.yml"); fi
   fi
