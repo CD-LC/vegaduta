@@ -13,6 +13,11 @@ Release notes on GitHub are generated from the section for each version.
 ### Fixed
 
 - **Windows Setup no longer fails with "A required privilege is not held by the client".** The release package carried one symlink (`deploy/models/catalog.txt`), which Windows only lets administrators or Developer Mode create, so Setup stopped while unpacking. The release now ships the file itself, and Setup copies the file whenever the system refuses a symlink.
+- **A database left by an earlier install no longer stops the start.** Installing into a new folder generates a new database password, but the data volume kept the earlier install's one, so `db-roles` failed ("password authentication failed", exit 2) and nothing came up. `personal` and `up` (bash and PowerShell) now notice this, set the database to this install's password (the data is kept) and start again.
+- **Re-installing never locks you out of your own data.** The install's secrets (database passwords, `APP_ENCRYPTION_KEY`) are also kept outside the install folder (`~/.config/vegaduta/secrets.env`, `%LOCALAPPDATA%\VegaDuta\secrets.env` on Windows and WSL), so a new folder reuses them. When Docker holds an earlier install's data and no copy exists, that data is left untouched and the new install starts under its own project (`VEGADUTA_PERSONAL_PROJECT`).
+- **Windows: re-running Setup with VegaDūta already running works.** The personal checks no longer fail on ports 3000/8080 held by VegaDūta's own containers, use `WEB_HOST_PORT`/`CORE_HOST_PORT`, and also catch ports Windows reserves (Hyper-V/WinNAT), which look free but cannot be used. Setup stops with the fix instead of retrying a port conflict three times.
+- **Windows: personal installs get Valkey and the tools runner, as on macOS/Linux.** `vegaduta.ps1` now adds the `valkey` profile and, with the Tools or Browser add-on, routes STDIO connectors to `mcp-stdio-runner`.
+- **A failed model download no longer stalls the install for an hour.** The Ollama container retries the download and restarts after five failures instead of staying up but never healthy.
 
 ## [0.1.6] - 2026-10-20
 

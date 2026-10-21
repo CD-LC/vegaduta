@@ -33,7 +33,9 @@
 # the same; local accounts do NOT migrate to Keycloak automatically.
 # =============================================================================
 
-name: ${COMPOSE_PROJECT_NAME:-vegaduta-personal}
+# VEGADUTA_PERSONAL_PROJECT: set by `secrets` when a new install finds an earlier install's data in Docker
+# made with secrets it does not have - that data is kept, and this install gets a project of its own.
+name: ${VEGADUTA_PERSONAL_PROJECT:-${COMPOSE_PROJECT_NAME:-vegaduta-personal}}
 
 x-restart: &restart
   restart: unless-stopped

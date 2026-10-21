@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -55,7 +56,9 @@ func TestClassifyFailure(t *testing.T) {
 		"error during connect: open //./pipe/dockerDesktopLinuxEngine: The system cannot find": failEngine,
 		"Image ghcr.io/cd-lc/core:0.1.0 Interrupted\nnet/http: TLS handshake timeout":          failNetwork,
 		"ERROR: some services did not become healthy":                                          failSlow,
-		"something nobody has seen before":                                                     failUnknown,
+		"Error response from daemon: Ports are not available: exposing port TCP 127.0.0.1:3000 -> 0.0.0.0:0: listen tcp 127.0.0.1:3000: bind: An attempt was made to access a socket in a way forbidden by its access permissions.\nERROR: some services did not become healthy": failPort,
+		"Bind for 0.0.0.0:8080 failed: port is already allocated": failPort,
+		"something nobody has seen before":                        failUnknown,
 	}
 	for out, want := range cases {
 		if got := classifyFailure(out); got != want {
@@ -128,5 +131,23 @@ func TestOllamaUp(t *testing.T) {
 	srv.Close()
 	if ollamaUp(context.Background()) {
 		t.Fatal("nothing listening is not Ollama running")
+	}
+}
+
+// A port a listener holds is busy; so is one that refuses a bind (Windows
+// reserved ranges look free to a dial).
+func TestBusyPorts(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Skip(err)
+	}
+	defer l.Close()
+	held := l.Addr().(*net.TCPAddr).Port
+	free, _ := net.Listen("tcp", "127.0.0.1:0")
+	freePort := free.Addr().(*net.TCPAddr).Port
+	free.Close()
+	got := busyPorts([]int{held, freePort})
+	if len(got) != 1 || got[0] != held {
+		t.Fatalf("busyPorts = %v, want [%d]", got, held)
 	}
 }

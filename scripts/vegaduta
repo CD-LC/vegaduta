@@ -170,6 +170,51 @@ gen_secret() {
 is_local_url() { case "$1" in *localhost*|*127.0.0.1*|*'[::1]'*) return 0 ;; *) return 1 ;; esac; }
 
 # ------------------------------------------------------------------ secrets
+# Install secrets are also kept outside the install folder, one copy per user, so a re-install into a new
+# folder (or the setup app after a terminal install) reuses them: Docker keeps the old volumes, and a new
+# database password or APP_ENCRYPTION_KEY would lock this install out of its own data. On WSL the copy
+# is the Windows one (%LOCALAPPDATA%\VegaDuta), shared with scripts\vegaduta.ps1 on the same Docker.
+secrets_keep_file() {
+  [ -n "${VEGADUTA_SECRETS_KEEP:-}" ] && { printf '%s' "$VEGADUTA_SECRETS_KEEP"; return; }
+  if grep -qi microsoft /proc/version 2>/dev/null && command -v wslpath >/dev/null 2>&1; then
+    local la; la="$(cd /mnt/c 2>/dev/null && cmd.exe /c 'echo %LOCALAPPDATA%' 2>/dev/null | tr -d '\r')"
+    la="$(wslpath "$la" 2>/dev/null)" || la=""
+    [ -n "$la" ] && [ -d "$la" ] && { printf '%s/VegaDuta/secrets.env' "$la"; return; }
+  fi
+  printf '%s/vegaduta/secrets.env' "${XDG_CONFIG_HOME:-$HOME/.config}"
+}
+kept_secret() { # kept_secret NAME : the kept value, empty when none
+  local f; f="$(secrets_keep_file)"
+  [ -f "$f" ] && tr -d '\r' < "$f" | sed -n "s/^$1=//p" | tail -n1
+  return 0
+}
+keep_secrets() { # copies every secret in .env to the per-user file (0600); never fails the run
+  local f d spec name v; f="$(secrets_keep_file)"; d="$(dirname "$f")"
+  mkdir -p "$d" 2>/dev/null && chmod 700 "$d" 2>/dev/null
+  ( umask 077
+    for spec in $SECRET_SPECS VEGADUTA_PERSONAL_PROJECT; do
+      name="${spec%%:*}"; v="$(get_env "$name")"
+      if [ -n "$v" ]; then printf '%s=%s\n' "$name" "$v"; fi
+    done > "$f.tmp" ) 2>/dev/null && mv -f "$f.tmp" "$f" 2>/dev/null || rm -f "$f.tmp" 2>/dev/null
+  return 0
+}
+
+# A new .env with newly generated secrets, while Docker still holds the data of an earlier personal
+# install (its folder deleted, or one made before secrets were kept): that database and its encrypted
+# values belong to secrets this install does not have. Leave it untouched and give this install a
+# project of its own (personal.yml reads VEGADUTA_PERSONAL_PROJECT), stopping the old containers so
+# their ports are free.
+personal_separate_from_old_data() {
+  command -v docker >/dev/null 2>&1 && docker volume inspect vegaduta-personal_postgres-data >/dev/null 2>&1 || return 0
+  local n=2
+  while docker volume inspect "vegaduta-personal-${n}_postgres-data" >/dev/null 2>&1; do n=$((n + 1)); done
+  set_env VEGADUTA_PERSONAL_PROJECT "vegaduta-personal-$n" force
+  local ids; ids="$(docker ps -q --filter label=com.docker.compose.project=vegaduta-personal 2>/dev/null)"
+  # shellcheck disable=SC2086
+  [ -n "$ids" ] && docker stop $ids >/dev/null 2>&1
+  warn "An earlier VegaDuta install left its data in Docker, made with secrets this install does not have. It is kept untouched; this install starts with its own data (project vegaduta-personal-$n). To delete the old data later: docker volume ls -q --filter name=vegaduta-personal_ (then docker volume rm each)"
+}
+
 cmd_secrets() {
   local domain=""
   while [ $# -gt 0 ]; do
@@ -179,7 +224,9 @@ cmd_secrets() {
       *) die "secrets: unknown option $1" ;;
     esac
   done
+  local created=0
   if [ ! -f "$ENV_FILE" ]; then
+    created=1
     [ -f "$ENV_EXAMPLE" ] || die "missing $ENV_EXAMPLE"
     install -m 600 "$ENV_EXAMPLE" "$ENV_FILE" 2>/dev/null || cp "$ENV_EXAMPLE" "$ENV_FILE"
     say "Created $ENV_FILE from .env.example"
@@ -189,13 +236,22 @@ cmd_secrets() {
   # Pin the release these compose files belong to (never overrides a value).
   local shipped; shipped="$(shipped_version)"
   [ -n "$shipped" ] && set_env VEGADUTA_VERSION "$shipped"
-  local filled=0 spec name kind
+  local filled=0 reused=0 spec name kind kept
   for spec in $SECRET_SPECS; do
     name="${spec%%:*}"; kind="${spec#*:}"
     if [ -z "$(get_env "$name")" ]; then
-      set_env "$name" "$(gen_secret "$kind")"; filled=$((filled + 1))
+      kept="$(kept_secret "$name")"
+      if [ -n "$kept" ]; then set_env "$name" "$kept"; reused=$((reused + 1))
+      else set_env "$name" "$(gen_secret "$kind")"; filled=$((filled + 1)); fi
     fi
   done
+  [ "$reused" -gt 0 ] && say "Reused $reused secret(s) from an earlier install ($(secrets_keep_file)), so its data still opens."
+  if [ "$created" = 1 ]; then
+    if [ "$reused" -gt 0 ]; then
+      kept="$(kept_secret VEGADUTA_PERSONAL_PROJECT)"; [ -n "$kept" ] && set_env VEGADUTA_PERSONAL_PROJECT "$kept"
+    else personal_separate_from_old_data; fi
+  fi
+  keep_secrets
   # Derived: Langfuse OTLP auth header for core = Basic base64(pk:sk).
   if [ -z "$(get_env LANGFUSE_OTEL_AUTH_HEADER)" ]; then
     local pair
@@ -882,7 +938,7 @@ cmd_up() {
   local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-$(up_wait_default)}")
   [ "$BUILD" = 1 ] && up_args+=(--build)
   say "Starting ($TIER) — first start pulls/builds images and runs migrations; this can take several minutes"
-  if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
+  if ! dc_up_heal "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
     dc ps
     die "some services did not become healthy. Inspect with: scripts/vegaduta logs <service>"
   fi
@@ -1470,6 +1526,26 @@ personal_doctor() {
 # macOS: install and start Ollama through Homebrew when it is missing, so the model runs natively
 # on the Apple GPU (the container is CPU-only there). Linux needs root for Ollama's installer,
 # so it keeps the container. Skipped for --dry-run and VEGADUTA_ASSUME_NO=1; never fails the run.
+# A Postgres data volume left by an earlier install keeps that install's superuser password, while
+# a new folder's `secrets` writes a new one: db-roles then cannot log in ("password authentication
+# failed", psql exit 2) and nothing starts. Inside the postgres container the local socket needs no
+# password, so set the superuser's password to this install's (read there from POSTGRES_PASSWORD,
+# never on a command line). Data is kept. Returns non-zero when this is not that failure.
+db_password_heal() {
+  dc logs --no-log-prefix db-roles 2>/dev/null | grep -qi 'password authentication failed' || return 1
+  warn "the database was created by an earlier install with another password - switching it to this install's password (data is kept)"
+  printf '%s\n' '\getenv pw POSTGRES_PASSWORD' \
+    "SELECT format('ALTER ROLE %I PASSWORD %L', current_user, :'pw') \\gexec" |
+    dc exec -T postgres sh -c 'tr -d \\r | psql -X -q -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d postgres' >/dev/null ||
+    { warn "could not reset the database password; to start over with an empty database run: docker volume rm $(get_env VEGADUTA_PERSONAL_PROJECT | grep . || echo "${COMPOSE_PROJECT_NAME:-vegaduta-personal}")_postgres-data"; return 1; }
+  ok "database password updated"
+}
+# `up` that repairs what it can (db_password_heal) and tries once more.
+dc_up_heal() {
+  dc "$@" && return 0
+  db_password_heal && dc "$@"
+}
+
 docker_mem_bytes() { # Docker's memory in bytes; 0 when Docker does not answer (never two lines)
   local b; b="$(docker info --format '{{.MemTotal}}' 2>/dev/null | head -n1)"
   case "$b" in ''|*[!0-9]*) printf 0 ;; *) printf '%s' "$b" ;; esac
@@ -1910,7 +1986,7 @@ personal_up() {
   local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-$(up_wait_default)}")
   [ "$BUILD" = 1 ] && up_args+=(--build)
   say "Starting (personal) - first start pulls/builds images and runs migrations; this can take several minutes"
-  if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
+  if ! dc_up_heal "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
     dc ps
     die "some services did not become healthy. Inspect with: scripts/vegaduta logs <service>"
   fi
