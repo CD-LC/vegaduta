@@ -1213,6 +1213,20 @@ app:
         # "Browser tools: call browser_snapshot, then act with the [index]..." - only sent on turns where
         # browser_snapshot is on the resolved tool list (app.browser.v2.enabled).
         enabled: ${APP_CHAT_DIRECTIVES_BROWSER_V2_ENABLED:true}
+      artifacts:
+        # The one directive here that is OFF by default (it adds prompt tokens): teaches the model the
+        # ```artifact:<type>:<title> fenced-block convention the web Artifacts pane renders (html, svg,
+        # markdown, code, mermaid, csv). Needs BOTH this switch AND per-agent opt-in below; false =
+        # prompts byte-identical to today. The web side has its own flag (NEXT_PUBLIC_ARTIFACTS=1).
+        # CHANNEL CAVEAT: only the web console ChatPanel renders these blocks. Enabling this for an agent that is
+        # also reachable over WhatsApp/Telegram/voice/IDE/API makes the model emit raw fences there too (it does
+        # not know the channel), and the Agent Playground/Workbench chat does not render them yet. Not wired into
+        # DirectiveGates or delegationDirectiveBlock on purpose (inner agent-to-agent calls do not teach it).
+        enabled: ${APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED:false}
+        # true = every agent gets the directive (when enabled above); false = only the agents listed next.
+        all-agents: ${APP_CHAT_DIRECTIVES_ARTIFACTS_ALL_AGENTS:false}
+        # Comma-separated agent UUIDs that get the directive (when enabled above and all-agents is false).
+        agent-ids: ${APP_CHAT_DIRECTIVES_ARTIFACTS_AGENT_IDS:}
     # Chat branching (ChatBranchService, core/agents): edit an earlier user message, regenerate a
     # reply, and flip between the versions - a conversation tree instead of a list. OFF = the
     # /api/agents/{id}/sessions/{sid}/messages routes answer 404, the chat-branching capabilities
@@ -1230,20 +1244,6 @@ app:
       # schema on tenant erasure. Decide this value before turning the flag on.
       retention-days: ${APP_CHAT_BRANCHING_RETENTION_DAYS:30}
       retention-purge-interval: ${APP_CHAT_BRANCHING_RETENTION_PURGE_INTERVAL:6h}
-      artifacts:
-        # The one directive here that is OFF by default (it adds prompt tokens): teaches the model the
-        # ```artifact:<type>:<title> fenced-block convention the web Artifacts pane renders (html, svg,
-        # markdown, code, mermaid, csv). Needs BOTH this switch AND per-agent opt-in below; false =
-        # prompts byte-identical to today. The web side has its own flag (NEXT_PUBLIC_ARTIFACTS=1).
-        # CHANNEL CAVEAT: only the web console ChatPanel renders these blocks. Enabling this for an agent that is
-        # also reachable over WhatsApp/Telegram/voice/IDE/API makes the model emit raw fences there too (it does
-        # not know the channel), and the Agent Playground/Workbench chat does not render them yet. Not wired into
-        # DirectiveGates or delegationDirectiveBlock on purpose (inner agent-to-agent calls do not teach it).
-        enabled: ${APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED:false}
-        # true = every agent gets the directive (when enabled above); false = only the agents listed next.
-        all-agents: ${APP_CHAT_DIRECTIVES_ARTIFACTS_ALL_AGENTS:false}
-        # Comma-separated agent UUIDs that get the directive (when enabled above and all-agents is false).
-        agent-ids: ${APP_CHAT_DIRECTIVES_ARTIFACTS_AGENT_IDS:}
     # Multimodal playground contract - operator override hook for
     # ModelModalitiesService (core/agents). Keys are model-name glob patterns
     # (bracketed, since they contain special characters), values a comma-

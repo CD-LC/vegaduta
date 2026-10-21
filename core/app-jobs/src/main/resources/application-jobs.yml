@@ -19,6 +19,12 @@ app:
       # Signal has no webhook, so the API shape pulls messages (SignalReceiveService). This
       # deployable must not run a second receiver on the same number.
       enabled: false
+  whatsappqr:
+    receive:
+      # The WhatsApp QR bridge has no webhook either: the API shape long-polls each linked session
+      # (WhatsAppQrReceiveService), and the bridge hands each message out once. This deployable must
+      # not run a second receiver on the same session.
+      enabled: false
   workflow:
     temporal:
       # Polling the Temporal task queue is the app-worker deployable's job.
