@@ -352,6 +352,9 @@ APP_TENANCY_MIGRATE_ON_BOOT: "false"
 {{- if $v.resumableStreamsEnabled }}
 APP_CHAT_RESUMABLE_STREAMS_ENABLED: "true"
 {{- end }}
+{{- if $v.branchingEnabled }}
+APP_CHAT_BRANCHING_ENABLED: "true"
+{{- end }}
 {{- $rr := $v.replicaReadiness | default dict }}
 {{- $multi := include "vegaduta-lib.multiReplica" $root }}
 {{- if $multi }}

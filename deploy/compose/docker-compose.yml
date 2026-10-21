@@ -188,13 +188,15 @@ x-core-env: &core-env
   WORKFLOW_DRAFT_SIMULATE_SENDS: ${WORKFLOW_DRAFT_SIMULATE_SENDS:-false}
   GRAPH_MEMORY_USER_FORGET_SYNC_ENABLED: ${GRAPH_MEMORY_USER_FORGET_SYNC_ENABLED:-false}
   # The Assistant surface and its features (the /assistant page is for every
-  # install; its agent is per user). All default OFF on a shared install and
-  # switch on from .env: routines, persistent/editable chat history
-  # (branching writes each message to Postgres), reload-safe streaming answers,
-  # spreadsheet-like tables, learned skills and memory proposals.
+  # install; its agent is per user). Chat history is kept by default: branching
+  # writes each message to Postgres for app.chat.branching.retention-days (30)
+  # instead of letting it expire from Redis after 24 h, and chats can be edited
+  # and regenerated. The rest default OFF on a shared install and switch on from
+  # .env: routines, reload-safe streaming answers, spreadsheet-like tables,
+  # learned skills and memory proposals.
   SCHEDULED_TASKS_ENABLED: ${SCHEDULED_TASKS_ENABLED:-false}
   SCHEDULED_TASKS_MAX_PER_TENANT: ${SCHEDULED_TASKS_MAX_PER_TENANT:-10}
-  APP_CHAT_BRANCHING_ENABLED: ${APP_CHAT_BRANCHING_ENABLED:-false}
+  APP_CHAT_BRANCHING_ENABLED: ${APP_CHAT_BRANCHING_ENABLED:-true}
   APP_CHAT_RESUMABLE_STREAMS_ENABLED: ${APP_CHAT_RESUMABLE_STREAMS_ENABLED:-false}
   # memory = a resume must reach the replica generating the turn; use redis with
   # 2+ core replicas so any replica can serve a resume.
