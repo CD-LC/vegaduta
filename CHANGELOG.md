@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Local models answer sooner.** The Compose `local-ai` overlay now loads the model when the stack starts and keeps it in memory (`OLLAMA_KEEP_ALIVE=-1`, `OLLAMA_FLASH_ATTENTION=1`), so the first reply no longer pays a cold start, and sends `reasoning_effort: none` so reasoning models skip their hidden thinking pass (`LOCAL_LLM_REASONING_EFFORT` changes it; new core property `app.llm.ollama.reasoning-effort`, blank by default outside the overlay). The Assistant shows a short note when it runs on a local model, with a link to Agent settings where it can be tuned for speed or quality.
+
 ## [0.1.7] - 2026-10-21
 
 ### Fixed
