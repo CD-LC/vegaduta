@@ -20,6 +20,22 @@ import type { ScheduledTask } from "../scheduledTasks";
 const QUIET_POLL = [401, 403, 404, 405, 429, 500, 502, 503, 504];
 const QUIET_SETUP = [400, 401, 403, 404, 409, 412, 423, 429, 500, 502, 503, 504];
 
+/** One of the person's sessions as the server lists it (GET /api/chat/threads, ChatBranchDtos.ThreadView). */
+export interface ServerThread {
+  sessionId: string;
+  agentId: string;
+  /** The first user message, cut server-side; null for a session with none yet. */
+  title: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A page of the person's server-side sessions, newest activity first; `nextBefore` pages further back. */
+export interface ServerThreadsPage {
+  threads: ServerThread[];
+  nextBefore: string | null;
+}
+
 /** GET /api/assistant/workspace (core WorkspaceFolderController): the projects folder and its folders. */
 export interface AssistantWorkspace {
   available: boolean;
@@ -101,6 +117,28 @@ export const assistantApi = {
     for (const f of files) form.append("file", f);
     return apiFetch(`/api/assistant/workspace/files`, { method: "POST", body: form }).then(toJson<WorkspaceUpload>);
   },
+
+  /**
+   * GET /api/chat/threads - the signed-in user's chat sessions on the server (ChatThreadController), newest
+   * activity first. Quiet: 404 means branching is off on this core (nothing is stored server-side), and any
+   * other failure is no reason to hide the local list, so both resolve to null.
+   */
+  listThreads: (limit?: number, before?: string | null): Promise<ServerThreadsPage | null> => {
+    const params = new URLSearchParams();
+    if (limit !== undefined) params.set("limit", String(limit));
+    if (before) params.set("before", before);
+    const query = params.toString();
+    return apiFetch(`/api/chat/threads${query ? `?${query}` : ""}`, { skipGetCache: true })
+      .then(toJsonQuietOn<ServerThreadsPage | null>(QUIET_POLL))
+      .then((page): ServerThreadsPage | null => (page && Array.isArray(page.threads) ? page : null))
+      .catch((): ServerThreadsPage | null => null);
+  },
+
+  /** DELETE /api/chat/threads/{agentId}/{sessionId} - the server copy of one thread. Quiet: false on 404 (off, or not stored) or any failure. */
+  deleteServerThread: (agentId: string, sessionId: string): Promise<boolean> =>
+    apiFetch(`/api/chat/threads/${encodeURIComponent(agentId)}/${encodeURIComponent(sessionId)}`, { method: "DELETE" })
+      .then((res) => res.ok)
+      .catch(() => false),
 
   /** GET /api/agents/{id}/sessions/{sid}/transcript - the stored conversation of one session (no tool steps). */
   getChatTranscript: (agentId: string, sessionId: string): Promise<ChatTranscript | null> =>
