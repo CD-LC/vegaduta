@@ -1,25 +1,15 @@
 package com.agenticai.core.agents.branching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.branching.ChatBranchDtos.ActivePathResponse;
 import com.agenticai.core.agents.branching.ChatBranchDtos.MessageView;
-import com.agenticai.core.agents.branching.ChatBranchDtos.SiblingsResponse;
 import com.agenticai.core.agents.branching.ChatBranchTree.Node;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.ChatTurn;
@@ -28,8 +18,6 @@ import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
 import com.agenticai.core.agents.turn.cache.SemanticResponseCacheService;
 import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.sharing.PermissionLevel;
-import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,15 +29,14 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Shared fixture for the {@link ChatBranchService} tests: an in-memory {@link ChatBranchStore} and a
- * Redis stand-in for alice's live transcript. See {@link ChatBranchServiceTest}.
+ * Shared fixture for the {@link ChatBranchService} tests: an in-memory {@link ChatBranchStore} and
+ * a Redis stand-in for alice's live transcript. See {@link ChatBranchServiceTest}.
  */
 abstract class ChatBranchServiceTestBase {
 
@@ -60,8 +47,7 @@ abstract class ChatBranchServiceTestBase {
     final AgentService agentService = mock(AgentService.class);
     final SessionMemoryService sessionMemory = mock(SessionMemoryService.class);
     final LlmResponseCacheService responseCache = mock(LlmResponseCacheService.class);
-    final SemanticResponseCacheService semanticCache =
-            mock(SemanticResponseCacheService.class);
+    final SemanticResponseCacheService semanticCache = mock(SemanticResponseCacheService.class);
 
     @SuppressWarnings("unchecked")
     final ObjectProvider<SemanticResponseCacheService> semanticProvider =
@@ -149,6 +135,7 @@ abstract class ChatBranchServiceTestBase {
         }
         return out;
     }
+
     static void assertNotFound(org.junit.jupiter.api.function.Executable call) {
         ResponseStatusException e = assertThrows(ResponseStatusException.class, call);
         assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());

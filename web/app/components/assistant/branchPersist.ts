@@ -32,7 +32,11 @@ export function branchingEnabledFor(agentId: string): Promise<boolean> {
  * Records the session's newest turns in the server tree. Resolves true when the read was made, false when
  * branching is off or anything failed; never throws and never surfaces an error.
  */
-export async function persistTurnInBranchTree(agentId: string, sessionId: string, delayMs = PERSIST_DELAY_MS): Promise<boolean> {
+export async function persistTurnInBranchTree(
+  agentId: string,
+  sessionId: string,
+  delayMs = PERSIST_DELAY_MS
+): Promise<boolean> {
   try {
     if (!agentId || !sessionId) return false;
     const enabled = await branchingEnabledFor(agentId);

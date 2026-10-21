@@ -49,7 +49,10 @@ export function sortThreads<T extends ThreadSummary>(rows: readonly T[]): T[] {
 export type ThreadGroupKey = "pinned" | "today" | "yesterday" | "week" | "earlier";
 
 /** The rail's sections, in display order, empty ones dropped. */
-export function groupThreads<T extends ThreadSummary>(rows: readonly T[], now: number): { key: ThreadGroupKey; rows: T[] }[] {
+export function groupThreads<T extends ThreadSummary>(
+  rows: readonly T[],
+  now: number
+): { key: ThreadGroupKey; rows: T[] }[] {
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);
   const today = startOfToday.getTime();
@@ -63,13 +66,21 @@ export function groupThreads<T extends ThreadSummary>(rows: readonly T[], now: n
     else if (row.lastAt >= week) groups.week.push(row);
     else groups.earlier.push(row);
   }
-  return (Object.keys(groups) as ThreadGroupKey[]).filter((k) => groups[k].length > 0).map((key) => ({ key, rows: groups[key] }));
+  return (Object.keys(groups) as ThreadGroupKey[])
+    .filter((k) => groups[k].length > 0)
+    .map((key) => ({ key, rows: groups[key] }));
 }
 
 /** GET .../transcript (ChatTranscriptService.Transcript) as transcript entries. */
 export interface ChatTranscript {
   sessionId: string;
-  messages: { role: string | null; content: string | null; timestamp?: string | null; status?: string | null; error?: boolean }[];
+  messages: {
+    role: string | null;
+    content: string | null;
+    timestamp?: string | null;
+    status?: string | null;
+    error?: boolean;
+  }[];
 }
 
 /** Server transcript -> turns. Tool steps are not part of a stored transcript, so restored turns carry none. */
@@ -247,7 +258,11 @@ export function mergeServerThread(local: ThreadRow | null, server: ServerThreadL
       pinned: false,
     };
   }
-  const next: ThreadRow = { ...local, lastAt: Math.max(local.lastAt, updatedAt), agentId: server.agentId || local.agentId };
+  const next: ThreadRow = {
+    ...local,
+    lastAt: Math.max(local.lastAt, updatedAt),
+    agentId: server.agentId || local.agentId,
+  };
   return next.lastAt === local.lastAt && next.agentId === local.agentId ? null : next;
 }
 
