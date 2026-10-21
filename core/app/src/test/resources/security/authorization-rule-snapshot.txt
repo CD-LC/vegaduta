@@ -420,6 +420,7 @@ Deferred [Mvc [pattern='/api/browser/takeover/*/token', POST], Ant [pattern='/ap
 Deferred [Mvc [pattern='/api/agents/*/sessions/*/messages/*/edit', POST], Ant [pattern='/api/agents/*/sessions/*/messages/*/edit', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/agents/*/sessions/*/messages/*/regenerate', POST], Ant [pattern='/api/agents/*/sessions/*/messages/*/regenerate', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/agents/*/sessions/*/messages/active-leaf', PUT], Ant [pattern='/api/agents/*/sessions/*/messages/active-leaf', PUT]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/chat/threads/*/*', DELETE], Ant [pattern='/api/chat/threads/*/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/coding-tasks', POST], Ant [pattern='/api/coding-tasks', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/coding-tasks/*/approve', POST], Ant [pattern='/api/coding-tasks/*/approve', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/coding-tasks/*/reject', POST], Ant [pattern='/api/coding-tasks/*/reject', POST]] => -YYYYYYYYYYYYYYYYYYYY

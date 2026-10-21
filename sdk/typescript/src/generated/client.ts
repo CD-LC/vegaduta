@@ -3107,6 +3107,30 @@ export class ChatImportApi {
   }
 }
 
+export class ChatThreadApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/chat/threads`
+   */
+  list(options?: CallOptions<{ limit?: number; before?: string }, HeaderParams>): Promise<T.ChatBranchDtos_ThreadsResponse> {
+    return this.http.request<T.ChatBranchDtos_ThreadsResponse>({ ...options, method: "GET", path: "/api/chat/threads" });
+  }
+
+  /**
+   * Delete.
+   * `DELETE /api/chat/threads/{agentId}/{sessionId}`
+   */
+  delete(agentId: string, sessionId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/chat/threads/${encodeURIComponent(String(agentId))}/${encodeURIComponent(String(sessionId))}`, response: "void" });
+  }
+}
+
 export class ChatTranscriptApi {
   private readonly http: HttpClient;
 
@@ -15377,6 +15401,7 @@ export class VegadutaClient {
   readonly chatBranchCapabilities: ChatBranchCapabilitiesApi;
   readonly chatExport: ChatExportApi;
   readonly chatImport: ChatImportApi;
+  readonly chatThread: ChatThreadApi;
   readonly chatTranscript: ChatTranscriptApi;
   readonly checkoutSession: CheckoutSessionApi;
   readonly codeIntel: CodeIntelApi;
@@ -15706,6 +15731,7 @@ export class VegadutaClient {
     this.chatBranchCapabilities = new ChatBranchCapabilitiesApi(this.http);
     this.chatExport = new ChatExportApi(this.http);
     this.chatImport = new ChatImportApi(this.http);
+    this.chatThread = new ChatThreadApi(this.http);
     this.chatTranscript = new ChatTranscriptApi(this.http);
     this.checkoutSession = new CheckoutSessionApi(this.http);
     this.codeIntel = new CodeIntelApi(this.http);
