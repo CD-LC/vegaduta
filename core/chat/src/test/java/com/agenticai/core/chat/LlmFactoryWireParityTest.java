@@ -1,6 +1,8 @@
 package com.agenticai.core.chat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -203,5 +205,21 @@ class LlmFactoryWireParityTest {
             expected = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
         assertEquals(expected.replace("\r\n", "\n"), actual.toString());
+    }
+
+    @Test
+    void ollamaSendsReasoningEffortOnlyWhenConfigured() {
+        OllamaAgentChatClientFactory plain = new OllamaAgentChatClientFactory(
+            metrics, logs, meters, pricing, http(), tools, support(), 32768, 0);
+        run("ollama-default", plain.create(
+            new OllamaCredential("http://ollama.example:11434", null).encode(), "qwen3.5:2b", 512, 0.7, 0.9, java.util.Map.of()));
+        assertFalse(snapshot.get("ollama-default").contains("reasoning_effort"));
+
+        OllamaAgentChatClientFactory fast = new OllamaAgentChatClientFactory(
+            metrics, logs, meters, pricing, http(), tools, support(), 32768, 0);
+        org.springframework.test.util.ReflectionTestUtils.setField(fast, "reasoningEffort", "none");
+        run("ollama-none", fast.create(
+            new OllamaCredential("http://ollama.example:11434", null).encode(), "qwen3.5:2b", 512, 0.7, 0.9, java.util.Map.of()));
+        assertTrue(snapshot.get("ollama-none").contains("\"reasoning_effort\":\"none\""), snapshot.get("ollama-none"));
     }
 }
