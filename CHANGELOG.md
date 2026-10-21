@@ -8,9 +8,15 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-10-21
+
 ### Added
 
 - **Conversations follow you.** `GET /api/chat/threads` lists the signed-in user's chat sessions (title, agent, last activity) and `DELETE /api/chat/threads/{agentId}/{sessionId}` removes one; the Assistant merges them into its thread list, so history shows on a new browser or device. Needs `APP_CHAT_BRANCHING_ENABLED=true` (404 otherwise; the console then keeps its local list). The Assistant now records its turns in the conversation tree, and reopening a thread older than the 24 h session window reads the stored tree.
+
+### Fixed
+
+- **Windows: the personal install no longer stops with "required variable WORKSPACE_RUNNER_SECRET is missing a value".** The PowerShell launcher (`scripts/vegaduta.ps1`, which the Setup app runs on Windows) generated a shorter list of secrets than `scripts/vegaduta`: it lacked `WORKSPACE_RUNNER_SECRET`, which `personal.yml` and `lite.yml` require, and `SEARXNG_SECRET`, which web search requires. It now generates both, and an existing install gets them on its next start. A test fails CI when the two lists differ again.
 
 ## [0.1.8] - 2026-10-21
 
@@ -266,7 +272,6 @@ Release notes on GitHub are generated from the section for each version.
 - **iMessage channel** through BlueBubbles on a Mac that stays awake: webhook or polling (`app.imessage.polling.enabled`), allow-list and pairing, approval-gated replies. Migration V610. Never run against a real Mac so far. See [docs/imessage-channel.md](docs/imessage-channel.md).
 - **Optional billing edition** (`app.edition.billing-enabled`, default `true`). `false` removes the billing, checkout, invoice and top-up endpoints and billing mail, resolves every plan limit as unlimited, and never shows an upgrade prompt; usage is still counted.
 - **`docs/security-model.md`**: what taint tracking, the STDIO sandbox and channel pairing do and do not protect against.
-
 
 - **Free web search and polish**: `scripts/vegaduta up --search` (also offered by the first-run question) runs a private SearXNG so agents get `web_search` with no API key; three ready-made bundles use it; Export button per agent, Connect in the sidebar, and a "Start from a ready-made agent" action on the empty agents list.
 - **Console: Agent files and Connect.** `/agents/bundles` lets a person start from four ready-made agents or import an agent file, with a preview of tools, autonomy and safety adjustments before anything is created; `/connect` shows Telegram, WhatsApp, email, Google, Slack, SMS and documents with connected status and opens the page that connects each.
