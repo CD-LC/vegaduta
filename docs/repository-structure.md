@@ -15,7 +15,8 @@ vegaduta/
 ├── web/                   Next.js tenant console + the public pages (open-source and classic)
 ├── services/              services: sidecar (Python ML), code-intel, app-builder, tool-sandbox,
 │                          mcp-stdio-runner, piece-host, voice-agent, rl-trainer, workspace-runner,
-│                          whatsapp-qr (WhatsApp linked-device bridge), desktop-agent (loopback
+│                          whatsapp-qr (WhatsApp linked-device bridge), browser-runner (Playwright
+│                          server for the personal browser add-on), desktop-agent (loopback
 │                          computer-use helper for personal installs)
 ├── sdk/
 │   ├── java/              Java Agent SDK (io.vegaduta:vegaduta-agent-*, 7 modules + BOM, including the
@@ -26,6 +27,7 @@ vegaduta/
 │   ├── generate.mjs, lib/, test/   the client generator
 │   └── README.md          the REST clients (the agent SDKs have their own READMEs)
 ├── examples/
+│   ├── agent-bundles/         importable agent bundles
 │   ├── sdk/governed-tools/    runnable Spring Boot app using the Java Agent SDK
 │   ├── sdk/refund-agent/      the same support agent with and without the SDK, in Python and Java
 │   ├── workflow-templates/    importable workflow templates
@@ -34,9 +36,9 @@ vegaduta/
 │                          the top (cost-and-roi, local-models, edge-relay, sms-channel, ...), with
 │                          pilots/ (30-day pilot process), channels/, compliance/, security/, sdk/,
 │                          architecture/, engineering/ (plans, audits, generated config reference),
-│                          operations/, maintainers/ and api/ (OpenAPI + generated clients)
+│                          operations/, maintainers/ and api/ (OpenAPI and AsyncAPI documents, API guides)
 ├── mkdocs.yml             builds docs/ into the documentation site
-├── deploy/                Compose tiers and overlays, Helm charts (23), supporting configs (Postgres,
+├── deploy/                Compose tiers and overlays, Helm charts (22), supporting configs (Postgres,
 │                          Keycloak, Prometheus/Grafana/Loki, LiveKit, Temporal, kind, models/catalog.txt),
 │                          omnibus/ (the single-container personal image)
 ├── infra/                 Terraform reference modules (30: Azure, GCP, AWS, Cloudflare, Upstash) and Keycloak
@@ -109,11 +111,11 @@ split from, and not every module is equally proven:
   Langfuse client) - see `core/quality/eval-harness.md`.
 - **Early / niche** (treat as preview: thinner tests, narrower review, may
   move): `reliability` (single-class placeholder), `devices`, `payments`
-  (UPI mandates, x402 settlement), `agents-studio/.../demo`, `face`, `voice` menus,
+  (UPI mandates, x402 settlement), `agents-studio/.../demo` and `.../face`, `voice` menus,
   `documentgen`, `codeintel`, `sdlc`, `brief`, `sharing`.
 
 Flyway migrations are one namespace shared by `controlplane/` and `tenant/` under
-`core/app/src/main/resources/db/migration/` (370 files on 2026-10-18; the highest version is V610).
+`core/app/src/main/resources/db/migration/` (382 files on 2026-10-21; the highest version is V661).
 
 Scaling is by replica and workload class, never by a network hop between modules on the chat path:
 [ADR-0014](architecture/ADR-0014-horizontal-scaling.md) and [Deployment shapes](deploy/DEPLOYMENT-SHAPES.md)
@@ -150,10 +152,11 @@ share `web/app/components/PaginationControls.tsx`. Public configuration is read 
 
 ### `services/`
 
-Optional and isolated runtimes (11 service directories): the Python ML sidecar, code intelligence, the app builder, the tool sandbox
+Optional and isolated runtimes (12 service directories): the Python ML sidecar, code intelligence, the app builder, the tool sandbox
 (untrusted code), the MCP stdio runner, `piece-host` (Activepieces pieces as MCP tools; preview, off
 by default, see its README), the voice agent, the RL trainer, `whatsapp-qr` (the WhatsApp
-linked-device bridge), `workspace-runner` (the Assistant's shell-command runner for personal
+linked-device bridge), `browser-runner` (the Playwright server behind the personal install's browser
+add-on), `workspace-runner` (the Assistant's shell-command runner for personal
 installs, only the projects folder mounted) and `desktop-agent` (the loopback computer-use helper
 that runs on the laptop itself, never in a container). `services/lock-requirements.sh` is a helper
 that regenerates the hashed Python dependency locks, not a service.
@@ -191,7 +194,7 @@ tags) and its own API-compatibility gate. `core/` may consume it later
 | Layer | Source | Audience | Published as |
 |---|---|---|---|
 | Documentation site | `docs/**/*.md` + `mkdocs.yml` | operators, integrators, contributors | MkDocs Material site on GitHub Pages |
-| Embedded READMEs | `sdk/java/README.md`, `sdk/README.md`, `examples/sdk/governed-tools/README.md`, `examples/sdk/refund-agent/README.md` | SDK users | pages of the same site, via `scripts/docs/mkdocs_hooks.py` (one source) |
+| Embedded READMEs | `sdk/java/README.md`, `sdk/python-agent/README.md`, `sdk/README.md`, `examples/sdk/governed-tools/README.md`, `examples/sdk/refund-agent/README.md` | SDK users | pages of the same site, via `scripts/docs/mkdocs_hooks.py` (one source) |
 | HTML handbook (legacy) | `docs/platform-documentation/` | architecture and decisions (ADR-0001 to ADR-0010) from the `agentic-ai` era — the Markdown `docs/` tree is the maintained source; keep the handbook for the older ADRs, prefer `docs/` where they disagree | static files inside the site |
 | In-app help | `web/app/help/docs-content.tsx` | console users | `/docs` and `/help/docs` in the console |
 | API reference | `docs/api/openapi.json` | integrators | `/api-reference` in the console; basis of the generated clients |
@@ -241,7 +244,8 @@ tree. See [Plugins, apps and mobile](plugins-and-apps.md).
 | Workflow (`.github/workflows/`) | Runs | Purpose |
 |---|---|---|
 | `ci.yml` | every PR and push to `main` | path-filtered jobs: core, **sdk/java**, web, Python, Node services, shellcheck, hadolint, Compose, Helm, static gates, DCO, dependency review, docs links; the single required check is `CI OK` |
-| `static-gates.yml` | called by `ci.yml`, or manual | Flyway, bean/entity names, skip expiry, file size, secrets |
+| `static-gates.yml` | called by `ci.yml`, or manual | Flyway, bean/entity names, skip expiry, file and module size, generated SDKs and module graph, OpenAPI breaking changes, docs links, internal-jargon and no-telemetry ratchets, secrets |
+| `installer.yml` | PRs and pushes to `main` touching `installer/`, or manual | builds and tests the `vegaduta-setup` installer; manual runs also cross-compile the per-OS binaries |
 | `codeql.yml` | every PR and push to `main`, weekly | code scanning |
 | `scorecard.yml` | pushes to `main`, weekly, on branch-protection changes | OpenSSF Scorecard |
 | `e2e.yml` | nightly, or manual | Playwright end-to-end |

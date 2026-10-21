@@ -11,7 +11,7 @@ enabled:
 
 | Check | Workflow | What it covers |
 |---|---|---|
-| `CI OK` | `ci.yml` | Every CI job the change's paths trigger (core, web, Python, Node services, shellcheck, hadolint, compose, Helm), plus the always-on jobs: `Static gates` and `Secret scan (gitleaks)` (from `static-gates.yml`, called by `ci.yml`), `DCO sign-off`, `Dependency review` (skipped while the repository is private, see [repo-setup.md](repo-setup.md)) and `docs links`. Jobs skipped by path filters count as passed; a failed or cancelled job fails it. |
+| `CI OK` | `ci.yml` | Every CI job the change's paths trigger (core, the Java Agent SDK, SDK clients and consumer contracts, web, Python incl. the lock-drift check and the other Python services, Node services, shellcheck, hadolint, compose, Helm, and `docs links` when docs change), plus the always-on jobs: `Static gates` and `Secret scan (gitleaks)` (from `static-gates.yml`, called by `ci.yml`), `DCO sign-off` and `Dependency review` (pull requests only; skipped while the repository is private, see [repo-setup.md](repo-setup.md)). Jobs skipped by path filters count as passed; a failed or cancelled job fails it. |
 | `CodeQL OK` | `codeql.yml` | CodeQL for `java-kotlin`, `javascript-typescript` and `python`. Runs on every pull request, including docs-only changes, so it always reports. While code scanning is unavailable (a private repository without Advanced Security) the analysis is skipped and `CodeQL OK` passes; see [repo-setup.md](repo-setup.md). |
 
 Do **not** require the individual job names (`core (Maven verify, JDK 21)`,

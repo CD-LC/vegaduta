@@ -1,6 +1,6 @@
 # ADR: Swarm goal verifier for `delegate_parallel`
 
-Status: implemented behind `app.swarm.verifier.enabled` (default false). Date: 2026-10-02. Compiled/tested: NOT yet
+Status: implemented behind `app.swarm.verifier.enabled` (default false); `SwarmVerifier` (`core/agents-interop`) and `SwarmVerifierTest` are on main and compile with the reactor (2026-10-21, v0.1.9; the test was not run for this note). Date: 2026-10-02. Compiled/tested at the time of writing: NOT yet
 (the lead builds serially; the fix round was also statically checked only). Not deployed.
 
 ## Context

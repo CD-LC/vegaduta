@@ -55,6 +55,11 @@ replicaReadiness:
 # that reloads mid-turn, can resume and the API returns X-Turn-Id. Off by default in core. The Valkey
 # store (replicaReadiness.resumableStreamsRedis) has no effect while this is false.
 resumableStreamsEnabled: false
+# -- Keep chat history in Postgres (APP_CHAT_BRANCHING_ENABLED): each message is stored for
+# app.chat.branching.retention-days (30) instead of expiring from Redis after 24 h, and chats can be
+# edited and regenerated. On by default so the Assistant's conversations outlive a day; false sends
+# nothing and core's own default (off) applies.
+branchingEnabled: true
 # -- Make core's boot-time ReplicaModeSafetyCheck refuse to start on a fatal finding (multi-replica only).
 replicaStrict: false
 # -- Zero-downtime rollout. maxUnavailable must stay 0 (guarded) unless allowNonZeroUnavailable.

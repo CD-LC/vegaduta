@@ -1,52 +1,61 @@
 # Getting started
 
 This guide takes you from nothing to a running VegaDūta with your first agent,
-using the **Lite** tier: five containers on one machine. Until the first
-release is published, the images are built from your checkout (roughly 20 to
-40 minutes the first time, not a benchmark); with published images it takes a
-few minutes plus the download.
+using the **Lite** tier: five long-running containers on one machine. With
+the published release images it takes a few minutes plus the download;
+building the images from your checkout instead takes roughly 20 to 40 minutes
+the first time (not a benchmark).
 For servers and Kubernetes, see [installation.md](installation.md).
 
 > **Just want it on your own machine?** Personal mode is the one-person
 > install: no Keycloak, no Kafka, a local password instead of SSO, and a
-> lighter stack (~4 GB Docker memory). `./scripts/vegaduta personal` — see
-> [personal-mode.md](personal-mode.md). The rest of this guide covers Lite.
+> lighter stack (~4 GB Docker memory, more for the free local model it sets
+> up). `./scripts/vegaduta personal` — see [personal-mode.md](personal-mode.md).
+> Not a developer? The Setup app from the
+> [Releases](https://github.com/CD-LC/vegaduta/releases) page does it all
+> without a terminal. The rest of this guide covers Lite.
 
 ## 1. Prerequisites
 
 - Docker Engine or Docker Desktop with Compose v2 (`docker compose version`)
-- 8 GB of memory available to Docker for building the images from source (the
-  running Lite stack needs less) and 15 GB of free disk
+- 15 GB of free disk; 8 GB of memory available to Docker if you build the
+  images from source (the running Lite stack needs less)
 - Linux, macOS, or Windows (WSL2 / Git Bash, or PowerShell with `scripts\vegaduta.ps1`)
 - An API key for at least one LLM provider, or a local model server such as Ollama
 
 ## 2. Start the stack
 
-**Today (no release published yet): build from source.**
+**With the installer** (Linux, macOS, WSL): it downloads a release's tarball
+(whose `deploy/compose/.env.example` is pinned to that release), checks it
+against the release's `SHA256SUMS` and starts Lite with the signed images:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- --lite
+```
+
+Without `--version X.Y.Z` the installer uses GitHub's "latest release", which
+is never a pre-release. Without `--lite` it installs Personal mode instead.
+
+**From a git checkout:**
 
 ```sh
 git clone https://github.com/CD-LC/vegaduta.git
 cd vegaduta
-./scripts/vegaduta up --lite --build
+./scripts/vegaduta up --lite            # add --build to build the images from source
 ```
 
-**After the first release:** pull the signed images of a pinned version. The
-installer downloads that release's tarball (whose `deploy/compose/.env.example`
-is pinned to the release) and starts Lite:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- --version 0.1.0
-```
-
-Without `--version` the installer uses GitHub's "latest release", which is
-never a pre-release. In a git checkout, `VEGADUTA_VERSION` in
-`deploy/compose/.env` selects the image version, and
-`./scripts/vegaduta upgrade --version X.Y.Z` changes it (after a backup).
+In a checkout, `VEGADUTA_VERSION` in `deploy/compose/.env` selects the image
+version. When it is empty, `up` uses the latest published release and writes
+it there. `./scripts/vegaduta upgrade --version X.Y.Z` changes it (after a
+backup).
 
 What `up --lite` does:
 
-1. writes `deploy/compose/.env` with random secrets (it never overwrites values you set);
-2. runs `doctor` (Docker version, memory, free ports, secrets, URLs);
+1. writes `deploy/compose/.env` with random values for every secret the compose
+   files need (it never overwrites values you set, and reuses the secrets of an
+   earlier install kept in `~/.config/vegaduta/secrets.env`);
+2. runs `doctor` (Docker version, memory, free ports, secrets, URLs) and asks
+   Docker Compose whether a required value is still missing;
 3. starts `postgres` (with pgvector and Apache AGE), `valkey`, `keycloak`, `core` and `web`;
 4. waits until every container reports healthy, then prints the URLs.
 
@@ -123,6 +132,9 @@ on Temporal need the Full tier (`--profile temporal`).
 ./scripts/vegaduta doctor          # re-check the machine and configuration
 ./scripts/vegaduta down            # stop; data is kept in Docker volumes
 ```
+
+If something does not work, open **Troubleshoot** (`/troubleshoot`) in the
+console: it checks what an agent needs on this install.
 
 Back up `deploy/compose/.env` together with your data: without its
 `APP_ENCRYPTION_KEY`, stored provider keys and channel secrets cannot be

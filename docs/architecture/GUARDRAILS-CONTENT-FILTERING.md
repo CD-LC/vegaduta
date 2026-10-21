@@ -170,9 +170,15 @@ void logOutputViolation(UUID agentId, String sessionId, ContentGuardrailCheckRes
 
 ## Integration Points
 
-### AgentChatService (Planned)
+### AgentChatService (implemented)
 
-When integrated, AgentChatService will call guardrails at these points:
+The chat turn path enforces the enabled guardrails in `ChatGuardrailGate`
+(`core/agents-turn/.../agents/turn/ChatGuardrailGate.java`): `enforceInboundGuardrails` evaluates the input path
+with `GuardrailEvaluationContext.input(...)` after `moderateInbound`, and `enforceOutboundGuardrails` evaluates
+the output path with `GuardrailEvaluationContext.output(...)`; streamed output violations are audited by
+`auditStreamedOutboundViolation`. `ResponsePiiFlagAdvisor` (`core/agents-turn/.../agents/gateway`) also runs the
+PII guardrail over completed responses. The sketch below is the original design; read the class for the exact
+behaviour:
 
 **Input Path (before LLM call):**
 ```java

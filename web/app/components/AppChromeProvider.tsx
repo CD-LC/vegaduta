@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { hydrateApiCache, prefetchApiGets } from "../lib/api/core";
+import { warmPlatformModel } from "../lib/warmPlatformModel";
 import { AuthContext } from "./AuthProvider";
 import { useUsageQuota } from "./UsageQuota";
 
@@ -72,7 +73,10 @@ export function AppChromeProvider({ children }: { children: React.ReactNode }) {
   const [tenantSettings, setTenantSettings] = useState<TenantSettings | null>(null);
   useEffect(() => {
     if (!username) return;
-    api.getTenantSettings().then(setTenantSettings).catch(() => setTenantSettings(null));
+    api
+      .getTenantSettings()
+      .then(setTenantSettings)
+      .catch(() => setTenantSettings(null));
   }, [username]);
 
   // Session boot warm-up (see prefetchApiGets' comment in lib/api/core.ts):
@@ -90,6 +94,8 @@ export function AppChromeProvider({ children }: { children: React.ReactNode }) {
     // L2 first: seed the in-memory cache from IndexedDB so the prefetch below
     // (and any page that mounts first) is served from last session's data.
     void hydrateApiCache();
+    // Wake the platform model now, so the first chat does not pay its cold start (often a minute).
+    warmPlatformModel();
     prefetchApiGets([
       "/api/agents",
       "/api/workflows",
@@ -111,7 +117,10 @@ export function AppChromeProvider({ children }: { children: React.ReactNode }) {
   const [avatarBlobUrl, setAvatarBlobUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!username) return;
-    api.getAccount().then(setAccount).catch(() => setAccount(null));
+    api
+      .getAccount()
+      .then(setAccount)
+      .catch(() => setAccount(null));
   }, [username]);
   useEffect(() => {
     if (!account?.avatarUrl) {

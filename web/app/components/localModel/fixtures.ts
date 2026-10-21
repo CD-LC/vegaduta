@@ -11,7 +11,7 @@ const row = (
   ramGb: number,
   toolCalling: LocalModelChoice["toolCalling"],
   note: string,
-  extra: Partial<LocalModelChoice> = {},
+  extra: Partial<LocalModelChoice> = {}
 ): LocalModelChoice => ({
   tag,
   family,
@@ -30,15 +30,28 @@ const row = (
   ...extra,
 });
 
-export const recommendedFixture = row("qwen3:8b", "Qwen", 5.2, 8, "native", "Good all-round model for 16 GB machines.", {
-  paramsB: 8.2,
-  contextK: 40,
-  vramGb: 7,
-  bestFor: "coding help and tool-heavy agents",
-});
+export const recommendedFixture = row(
+  "qwen3:8b",
+  "Qwen",
+  5.2,
+  8,
+  "native",
+  "Good all-round model for 16 GB machines.",
+  {
+    paramsB: 8.2,
+    contextK: 40,
+    vramGb: 7,
+    bestFor: "coding help and tool-heavy agents",
+  }
+);
 
 export const catalogFixture: LocalModelChoice[] = [
-  row("qwen3:4b", "Qwen", 2.6, 5, "constrained", "Smaller and faster.", { paramsB: 4, contextK: 40, vramGb: 4, bestFor: "quick chat" }),
+  row("qwen3:4b", "Qwen", 2.6, 5, "constrained", "Smaller and faster.", {
+    paramsB: 4,
+    contextK: 40,
+    vramGb: 4,
+    bestFor: "quick chat",
+  }),
   recommendedFixture,
   row("llama3.2:3b", "Llama", 2, 8, "none", "Chat and summaries only.", {
     paramsB: 3,
@@ -68,6 +81,7 @@ export const recommendationFixture: LocalModelRecommendation = {
   budgetGb: 12,
   ollama: { reachable: true, baseUrl: "http://host.docker.internal:11434", installedTags: [] },
   servingModel: null,
+  servingBlocked: null,
 };
 
 export const probeFixture: LocalModelProbe = {
@@ -92,7 +106,11 @@ export function mockLocalModelApi(overrides: Partial<LocalModelWizardApi> = {}):
     },
     probeLocalModel: async () => probeFixture,
     useLocalModel: async (tag) => ({ tag, rowId: 1, created: false, enabled: true, toolCallGrade: "STRUCTURED" }),
-    getDefaultAgentModel: async () => ({ providerName: "PLATFORM_HOSTED", model: "platform-pool", source: "PLATFORM_POOL" }),
+    getDefaultAgentModel: async () => ({
+      providerName: "PLATFORM_HOSTED",
+      model: "platform-pool",
+      source: "PLATFORM_POOL",
+    }),
     createAgent: async (payload) => ({ id: "agent-1", name: (payload as { name?: string }).name }),
     ...overrides,
   };

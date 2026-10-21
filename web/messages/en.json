@@ -2652,7 +2652,8 @@
     "toolRunningLocalWithArgs": "running {tool} on this device — {args}",
     "toolRound": "{tool} (round {round})",
     "itemLabelCalls": "tool calls",
-    "itemLabelMemories": "memories"
+    "itemLabelMemories": "memories",
+    "modelWakingUp": "The model is starting up - the first reply can take up to a minute. Replies after that are fast."
   },
   "chatResume": {
     "reconnecting": "Reconnecting... (attempt {attempt} of {max})",
@@ -14662,6 +14663,10 @@
     "pull": "Download",
     "tooBig": "Needs ~{ram} GB RAM free - this install is smaller than that",
     "servingNow": "Agents currently use {tag}.",
+    "servingBlockedPoolOff": "But chats cannot use it: the platform model pool is switched off.",
+    "servingBlockedRowDisabled": "But chats cannot use it: its provider entry is disabled.",
+    "servingBlockedRowUnusable": "But chats cannot use it: its provider entry was saved under an earlier encryption key, or its address is blocked.",
+    "servingBlockedFix": "Restart VegaDūta (in the install folder: scripts/vegaduta restart) - it repairs this on start. Or fix the entry under Platform Admin → LLM & Providers.",
     "inUse": "in use",
     "use": "Use",
     "useHint": "Make agents use this model from the next turn - no restart needed",

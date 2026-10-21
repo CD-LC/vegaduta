@@ -11,10 +11,14 @@
 
 Before opening an issue:
 
-1. Run `./scripts/vegaduta doctor` and include its output.
+1. Run `./scripts/vegaduta doctor` (on Windows `.\scripts\vegaduta.ps1 doctor`)
+   and include its output. If the console opens, also check its
+   **Troubleshoot** page (`/troubleshoot`): it tests the API and, on a personal
+   install, the local model, and fixes the common problems.
 2. Search existing issues and discussions.
 3. Include the version (`VEGADUTA_VERSION` in `deploy/compose/.env`, or the
-   commit), the install tier, and relevant logs (`./scripts/vegaduta logs core`)
+   commit), the install tier, and relevant logs (`./scripts/vegaduta logs core`; the
+   Setup app on macOS also writes `~/Library/Logs/vegaduta-setup.log`)
    with keys, tokens and personal data removed.
 
 Support in this repository is community support on a best-effort basis. There

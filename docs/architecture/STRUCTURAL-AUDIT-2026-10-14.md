@@ -211,6 +211,17 @@ Classification of the 989 `ObjectProvider` uses:
 The classifier works from imports and same-package names, so these are
 candidates. Run it with `--list cycle-direct` for the full list.
 
+## 4b. Roadmap status (checked 2026-10-21, v0.1.9)
+
+| Item | State | Evidence |
+|---|---|---|
+| 1. Boot check | Done, still advisory in CI | `make boot-check`; the CI step still has `continue-on-error: true` |
+| 4. Vendor adapters out of `agents` | Done (2026-10-16) | [ADR-0011](ADR-0011-provider-plugins.md) status: 0 kernel to vendor Maven edges; vendor tools in their modules behind `agentspi` |
+| 6. Split `agents` | Done (2026-10-16) | [ADR-0023](ADR-0023-agents-module-decomposition.md): kernel plus nine satellite modules; `agents-turn` is over the 300-file cap again (307) |
+| 7. Split `AgentService` and `WorkflowNodeExecutor` | Split done; the channel-output port was not checked | `AgentService` 664 lines, `WorkflowNodeExecutor` 527 lines with one `NodeHandler` per node type ([overview](overview.md#internal-seams-of-the-core)) |
+| 11. Console files over 2,000 lines | Done | the largest hand-written file under `web/app` is 707 lines (`AssistantPane.tsx`) |
+| 5, 8, 9, 10 | Not re-checked | |
+
 ## 5. What would change these conclusions
 
 - A parser-based tool such as jdeps or ArchUnit would replace the import counts.

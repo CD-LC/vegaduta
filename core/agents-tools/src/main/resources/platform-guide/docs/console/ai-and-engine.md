@@ -7,7 +7,7 @@ decision layer, code intelligence and the on-device runtimes.
 |---|---|---|---|
 | Providers | `/providers` | any member | `POST /api/providers`, `DELETE /api/providers/{name}`, the ElevenLabs, Sarvam and SDLC credential writes and OCR credential need `PERM_MANAGE_INTEGRATIONS` |
 | Decision providers | `/capabilities/decision` | any member | credential, policy and playground writes need `PERM_MANAGE_INTEGRATIONS` |
-| Code Intel | `/code-intel` | any member | `/api/code-intel/**` needs the tenant-admin or agent-builder role |
+| Code Intel | `/code-intel` | any member, when the build has a Code Intel address | `/api/code-intel/**` needs the tenant-admin or agent-builder role |
 | Browser models | `/edge` | any member | the manifest is public; relay routes need `PERM_MANAGE_CHANNELS` |
 | Local code | `/code` | any member (page is also public) | none; no API call is made |
 
@@ -20,6 +20,13 @@ Mistral, Groq, OpenRouter, Ollama and others), each with a key form, a start hin
 screen also holds the keys for adjacent services: ElevenLabs (with a voice list), Sarvam, and the SDLC credential
 with the code-execution template and a "run code" sandbox test. Keys are encrypted at rest with `APP_ENCRYPTION_KEY`
 ([getting started](../getting-started.md)).
+
+On a personal install the page also has **Set up a local model** (`/providers/local-model`), a guided setup for a
+free model that runs on this computer through Ollama: it lists the models that fit the machine's memory, downloads
+the one you pick and makes agents use it. Its **Speed and behaviour** card sets how long the model thinks before
+answering, how long it stays loaded and its context window. A personal install with no provider yet sees a
+first-run card for this on the page. On lite and full installs the models the platform provides are set up by the
+operator, so these entries are not shown. See [local models](../local-models.md).
 
 A link on the page opens **AI Model Control** (`/ai-models`), where the workspace picks a preferred provider and
 model per AI-touching feature instead of the platform default; changing it needs `PERM_MANAGE_TENANT_SETTINGS`

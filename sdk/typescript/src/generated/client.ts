@@ -3107,6 +3107,30 @@ export class ChatImportApi {
   }
 }
 
+export class ChatThreadApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/chat/threads`
+   */
+  list(options?: CallOptions<{ limit?: number; before?: string }, HeaderParams>): Promise<T.ChatBranchDtos_ThreadsResponse> {
+    return this.http.request<T.ChatBranchDtos_ThreadsResponse>({ ...options, method: "GET", path: "/api/chat/threads" });
+  }
+
+  /**
+   * Delete.
+   * `DELETE /api/chat/threads/{agentId}/{sessionId}`
+   */
+  delete(agentId: string, sessionId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/chat/threads/${encodeURIComponent(String(agentId))}/${encodeURIComponent(String(sessionId))}`, response: "void" });
+  }
+}
+
 export class ChatTranscriptApi {
   private readonly http: HttpClient;
 
@@ -9561,6 +9585,22 @@ export class PlatformOpsApi {
   }
 }
 
+export class PlatformPoolWarmApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Warm.
+   * `POST /api/platform-llm/warm`
+   */
+  warm(options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<Record<string, boolean>> {
+    return this.http.request<Record<string, boolean>>({ ...options, method: "POST", path: "/api/platform-llm/warm" });
+  }
+}
+
 export class PlatformSessionApi {
   private readonly http: HttpClient;
 
@@ -15361,6 +15401,7 @@ export class VegadutaClient {
   readonly chatBranchCapabilities: ChatBranchCapabilitiesApi;
   readonly chatExport: ChatExportApi;
   readonly chatImport: ChatImportApi;
+  readonly chatThread: ChatThreadApi;
   readonly chatTranscript: ChatTranscriptApi;
   readonly checkoutSession: CheckoutSessionApi;
   readonly codeIntel: CodeIntelApi;
@@ -15489,6 +15530,7 @@ export class VegadutaClient {
   readonly platformImpersonation: PlatformImpersonationApi;
   readonly platformIssue: PlatformIssueApi;
   readonly platformOps: PlatformOpsApi;
+  readonly platformPoolWarm: PlatformPoolWarmApi;
   readonly platformSession: PlatformSessionApi;
   readonly platformSpend: PlatformSpendApi;
   readonly platformSpendCap: PlatformSpendCapApi;
@@ -15689,6 +15731,7 @@ export class VegadutaClient {
     this.chatBranchCapabilities = new ChatBranchCapabilitiesApi(this.http);
     this.chatExport = new ChatExportApi(this.http);
     this.chatImport = new ChatImportApi(this.http);
+    this.chatThread = new ChatThreadApi(this.http);
     this.chatTranscript = new ChatTranscriptApi(this.http);
     this.checkoutSession = new CheckoutSessionApi(this.http);
     this.codeIntel = new CodeIntelApi(this.http);
@@ -15817,6 +15860,7 @@ export class VegadutaClient {
     this.platformImpersonation = new PlatformImpersonationApi(this.http);
     this.platformIssue = new PlatformIssueApi(this.http);
     this.platformOps = new PlatformOpsApi(this.http);
+    this.platformPoolWarm = new PlatformPoolWarmApi(this.http);
     this.platformSession = new PlatformSessionApi(this.http);
     this.platformSpend = new PlatformSpendApi(this.http);
     this.platformSpendCap = new PlatformSpendCapApi(this.http);

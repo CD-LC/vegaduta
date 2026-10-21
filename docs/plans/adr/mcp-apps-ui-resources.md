@@ -1,6 +1,6 @@
 # ADR: MCP Apps (ui:// resources) in chat
 
-Status: proposed. Library-only first slice (validation lib + frame component; nothing imports them yet) behind `NEXT_PUBLIC_MCP_APPS=1` (default OFF). 2026-10-01.
+Status: proposed; implemented behind flags, default OFF. Originally a library-only first slice (2026-10-01). Checked 2026-10-21 (v0.1.9): the console renders `McpAppFrame` in chat (`web/app/components/agents/AgentActivityTrace.tsx`, `NEXT_PUBLIC_MCP_APPS=1`) and core serves app resources from `core/agents-tools/.../tools/mcpapps` (`McpAppsService`, `McpAppsController`, `app.mcp.apps.enabled`, default `false`).
 
 ## Premise check
 A grep of core/ and web/ finds no handling of `ui://`, `resources/read`, or tool `_meta.ui`. MCP tool results reach chat as text only. So the feature is absent, not already built. The sandbox pattern in `web/app/build/SandboxPreview.tsx` was the model, but `McpAppFrame` copies the idea and shares no code with it, and it is not wired into chat.

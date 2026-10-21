@@ -1,0 +1,15 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "post-api-platform-llm-warm",
+      "method": "POST",
+      "path": "/api/platform-llm/warm",
+      "status": 202,
+      "response": {
+        "requiredFields": []
+      }
+    }
+  ]
+}

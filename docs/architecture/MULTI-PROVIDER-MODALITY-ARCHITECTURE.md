@@ -67,7 +67,7 @@ Routes voice through the sidecar's local Whisper instance.
 - **Unavailable reason**: "Knowledge profile inactive" or "Sidecar service down"
 - **Error handling**: Distinguishes between audio quality issues (SpeechToTextTranscriptionException) and provider failures (SpeechToTextProviderException)
 
-#### SarvamSpeechToTextProvider (`core/providers/modality/SarvamSpeechToTextProvider.java`)
+#### SarvamSpeechToTextProvider (`core/sarvam/.../sarvam/SarvamSpeechToTextProvider.java`)
 Routes voice through Sarvam AI's speech-to-text API.
 
 - **Availability check**: Tenant has an active SarvamCredential
@@ -102,18 +102,18 @@ Registry and selector for all available providers.
 - `getUnavailabilityReason(enum)` - human-readable explanation why provider is unavailable
 - `getAvailableProviders()` - returns all currently usable providers (for UI dropdowns)
 
-**Initialization** via `SpeechToTextProviderConfiguration`:
+**Initialization** via `SpeechToTextProviderConfiguration`. Since ADR-0011 phase 2 it discovers every
+`SpeechToTextProvider` bean by type, so a vendor adapter in its own module (`core/sarvam`) registers itself and
+`providers` has no vendor dependency:
 ```java
 @Configuration
 public class SpeechToTextProviderConfiguration {
     public SpeechToTextProviderConfiguration(
         SpeechToTextProviderFactory factory,
-        SidecarWhisperProvider sidecarWhisperProvider,
-        SarvamSpeechToTextProvider sarvamProvider
-        // Add new providers here
+        List<SpeechToTextProvider> providers
     ) {
-        factory.register(sidecarWhisperProvider);
-        factory.register(sarvamProvider);
+        ModalityProviderRegistration.registerAll(
+            "SpeechToTextProvider", providers, SpeechToTextProvider::getProvider, factory::register);
     }
 }
 ```
@@ -373,16 +373,16 @@ outstanding future work:
 
 ## Testing Strategy
 
-### Unit Tests
-- `VoiceProviderValidatorTest` - validates all invariants
-- `SidecarWhisperProviderTest` - mocks SidecarClient, tests transcription + error handling
-- `SarvamSpeechToTextProviderTest` - mocks SarvamSpeechToTextClient, tests model/language parameters
-- `SpeechToTextProviderFactoryTest` - tests registration, availability checks, error reasons
+The test classes planned here at Stage 1 (`VoiceProviderValidatorTest`, `SidecarWhisperProviderTest`,
+`SarvamSpeechToTextProviderTest`, `SpeechToTextProviderFactoryTest`, `AgentServiceVoiceModelTest`,
+`AgentControllerVoiceModelTest`, `VoiceCallControllerIntegrationTest`) do not exist under those names. The
+coverage in the tree today (v0.1.9):
 
-### Integration Tests
-- `AgentServiceVoiceModelTest` - create agent with voice provider, update it, verify persistence
-- `AgentControllerVoiceModelTest` - test PATCH /api/agents/{id}/voice-model endpoint
-- `VoiceCallControllerIntegrationTest` - end-to-end voice turn with agent-selected provider
+- `core/providers`: `ModalityProviderConfigurationTest` (registration by type)
+- `core/sarvam`: `SarvamProviderPluginsTest`, `SarvamSpeechToTextClientTest`, `SarvamTextToSpeechClientTest`
+- `core/elevenlabs`: `ElevenLabsTextToSpeechProviderTest`
+- `core/voice`: `VoiceCallControllerProviderTest`, `VoiceCallControllerTest`
+- `core/app`: `ProviderPluginDiscoveryTest` (vendor providers are discovered, not named)
 
 ### Manual Testing
 1. Create agent, explicitly set SIDECAR_WHISPER provider
@@ -401,15 +401,15 @@ outstanding future work:
 | `core/providers/modality/SpeechToTextTranscriptionException.java` | Audio quality errors (HTTP 400) |
 | `core/providers/modality/SpeechToTextProviderException.java` | Provider errors (HTTP 503, retryable flag) |
 | `core/providers/modality/SidecarWhisperProvider.java` | Sidecar Whisper implementation |
-| `core/providers/modality/SarvamSpeechToTextProvider.java` | Sarvam implementation |
+| `core/sarvam/.../SarvamSpeechToTextProvider.java` | Sarvam implementation (vendor module since ADR-0011 phase 2) |
 | `core/providers/modality/SpeechToTextProviderFactory.java` | Registry and selector |
 | `core/providers/modality/VoiceProviderValidator.java` | Validates provider/model selections |
 | `core/providers/modality/SpeechToTextProviderConfiguration.java` | Spring config: registers providers |
-| `core/agents/Agent.java` | Added: voiceModelProvider, voiceModel fields + getters/setters |
+| `core/agents/.../agents/core/Agent.java` | Added: voiceModelProvider, voiceModel fields + getters/setters |
 | `core/agents/dto/AgentVoiceModelUpdateRequest.java` | PATCH request DTO |
-| `core/agents/AgentService.java` | Added: updateVoiceModel() method |
-| `core/agents/AgentController.java` | Added: PATCH /{id}/voice-model endpoint |
-| `core/app/db/migration/tenant/V148__agent_voice_model_provider.sql` | Schema: add voice_model_provider, voice_model columns |
+| `core/agents/.../agents/core/AgentService.java` | Added: updateVoiceModel() method |
+| `core/agents/.../agents/core/AgentController.java` | Added: PATCH /{id}/voice-model endpoint |
+| `core/app/src/main/resources/db/migration/tenant/V148__agent_voice_model_provider.sql` | Schema: add voice_model_provider, voice_model columns |
 | `core/sarvam/SarvamCredentialAvailabilityChecker.java` | Helper: checks if Sarvam is configured |
 | `web/app/components/agents/VoiceProviderSelector.tsx` | STT web UI selector (thin wrapper over TranscriptionProviderOptions) |
 
@@ -422,17 +422,17 @@ outstanding future work:
 | `core/providers/modality/TextToSpeechException.java` | Base exception class |
 | `core/providers/modality/TextToSpeechSynthesisException.java` | Input-text errors |
 | `core/providers/modality/TextToSpeechProviderException.java` | Provider errors (retryable flag) |
-| `core/providers/modality/ElevenLabsTextToSpeechProvider.java` | ElevenLabs implementation (quota-checked via ElevenLabsClient) |
-| `core/providers/modality/SarvamTextToSpeechProvider.java` | Sarvam implementation (NOT quota-checked - see its javadoc) |
+| `core/elevenlabs/.../ElevenLabsTextToSpeechProvider.java` | ElevenLabs implementation (quota-checked via ElevenLabsClient) |
+| `core/sarvam/.../SarvamTextToSpeechProvider.java` | Sarvam implementation (NOT quota-checked - see its javadoc) |
 | `core/providers/modality/TextToSpeechProviderFactory.java` | Registry and selector |
 | `core/providers/modality/TextToSpeechProviderValidator.java` | Validates provider/model selections |
 | `core/providers/modality/TextToSpeechProviderConfiguration.java` | Spring config: registers providers |
-| `core/providers/pom.xml` | New dependency: `elevenlabs` module (acyclic - see its comment) |
-| `core/agents/Agent.java` | Added: ttsProvider, ttsModel fields + getters/setters/clear |
+| `core/providers/pom.xml` | Had an `elevenlabs` dependency at Stage 2; removed in ADR-0011 phase 2 (vendor modules now depend on `providers`, not the reverse) |
+| `core/agents/.../agents/core/Agent.java` | Added: ttsProvider, ttsModel fields + getters/setters/clear |
 | `core/agents/dto/AgentTtsModelUpdateRequest.java` | PATCH request DTO |
-| `core/agents/AgentService.java` | Added: updateTtsModel() method + create()-time TTS handling |
-| `core/agents/AgentController.java` | Added: PATCH /{id}/tts-model endpoint |
-| `core/app/db/migration/tenant/V196__agent_tts_provider.sql` | Schema: add tts_provider, tts_model columns |
+| `core/agents/.../agents/core/AgentService.java` | Added: updateTtsModel() method + create()-time TTS handling |
+| `core/agents/.../agents/core/AgentController.java` | Added: PATCH /{id}/tts-model endpoint |
+| `core/app/src/main/resources/db/migration/tenant/V196__agent_tts_provider.sql` | Schema: add tts_provider, tts_model columns |
 | `core/voice/VoiceCallController.java` | `speak()` + new 4-arg `synthesizeSpeech()` overload consult agent.ttsProvider; `turn()`/`synthesizeChunk` do NOT yet - see Stage 2 section |
 | `web/app/components/agents/TextToSpeechProviderSelector.tsx` | TTS web UI selector, wired into AgentWorkbench.tsx |
 

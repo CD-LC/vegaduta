@@ -20,7 +20,8 @@ classes (full table in the [chart README](../../deploy/helm/README.md#essential-
   image build as the API; the chart refuses to render if the builds differ. How the work is split, and why the
   chat path is not: [ADR-0014](ADR-0014-horizontal-scaling.md), [Deployment shapes](../deploy/DEPLOYMENT-SHAPES.md).
 - **Plug-and-play:** sidecar (ML), code-intel, app-builder, rl-trainer, voice-agent, `mcp-stdio-runner`,
-  `tool-sandbox`. Components that execute untrusted code (`tool-sandbox`, `mcp-stdio-runner`) need a
+  `tool-sandbox`, and `ollama` (a single-node local model server, `ollama.enabled` plus `global.localLlm.*`;
+  see [local models](../local-models.md)). Components that execute untrusted code (`tool-sandbox`, `mcp-stdio-runner`) need a
   VM-isolating `RuntimeClass` (Kata, gVisor) and refuse to render without one.
 
 The chat hot path stays inside the `core` pod; nothing is added as a network hop between platform
@@ -70,7 +71,8 @@ The rest of the security model: [security architecture](../platform-documentatio
   Tenants are Postgres **schemas** selected with `SET search_path`, so any pooler in front must use
   **session** pooling; transaction pooling is refused at render time.
 - Schema migrations run in a `post-install,pre-upgrade` Job; API pods run with migrate-on-boot off.
-- Valkey: sessions, rate limits and shared stores once you run more than one API replica.
+- Valkey: sessions, rate limits and shared stores once you run more than one API replica. Chat history is
+  stored in Postgres (the conversation tree, `core.branchingEnabled`, default `true` since v0.1.8).
 - Object storage: single-node SeaweedFS by default; use an external S3 bucket in production.
 - Per cloud: ready-made values for AWS, Azure and GCP managed services (RDS, ElastiCache, S3/IRSA; Flexible Server,
   Azure Cache, Blob with workload identity; Cloud SQL/AlloyDB, Memorystore, GCS) and External Secrets Operator
@@ -105,13 +107,13 @@ node-pool guidance. Sizing guidance and load-test numbers are not published; `te
 | What | State |
 |---|---|
 | `helm lint --strict`, `helm template` across scenarios, `kubeconform -strict` on Kubernetes 1.28 and 1.31 | scripted in [`deploy/helm/validate.sh`](../../deploy/helm/validate.sh); runs in CI on every pull request |
-| Render-time guard tests | [`deploy/helm/test-guards.sh`](../../deploy/helm/test-guards.sh): 121 cases (the count moves with every guard added; run it for the current number) |
+| Render-time guard tests | [`deploy/helm/test-guards.sh`](../../deploy/helm/test-guards.sh): more than 230 cases at v0.1.9 (the count moves with every guard added; run it for the current number) |
 | Install on a kind cluster (Kubernetes 1.37, ingress-nginx, CloudNativePG, kube-prometheus-stack, 16 GiB Docker) | **run** with locally built images: core, web (incl. the merged platform-admin section), Keycloak, PostgreSQL (CNPG), Valkey and SeaweedFS Running and ready; console answers through the ingress |
 | Pod Security `restricted` admission ([`examples/namespace.yaml`](../../deploy/helm/examples/namespace.yaml)) | **run**: every pod admitted, no PodSecurity events |
 | `helm test` | **run**: 4 of 4 test pods Succeeded |
 | Prometheus scraping (`global.serviceMonitor.enabled`, [`values-kind-observability.yaml`](../../deploy/kind/values-kind-observability.yaml)) | **run**: the `vegaduta-core` ServiceMonitor target is up |
 | HPA scale-out | **run** for `web` (metrics-server with `--kubelet-insecure-tls`; target set to 20% CPU): 1 to 3 replicas. `core` was not scaled: it stays at 1 replica until its `replicaReadiness` flags are set |
-| Multi-replica contract (`values-scale-out.yaml`), request-based autoscaling, `core-ingest`, `core-webhooks`, `core-intake`, `core-billing`, connection-budget guard | **rendered** by `validate.sh` and exercised by the 278 guard cases in `deploy/helm/test-guards.sh` (all pass on this branch); the Java side (`ReplicaStoreCoverageTest`, `JobsPoolsCoverEveryJobTest`) is **run**. Two or more API replicas serving traffic have **not** been run |
+| Multi-replica contract (`values-scale-out.yaml`), request-based autoscaling, `core-ingest`, `core-webhooks`, `core-intake`, `core-billing`, connection-budget guard | **rendered** by `validate.sh` and exercised by the guard cases in `deploy/helm/test-guards.sh`; the Java side (`ReplicaStoreCoverageTest`, `JobsPoolsCoverEveryJobTest`) is **run**. Two API replicas booting Ready under `replicaStrict` with the Valkey stores, and a one-at-a-time rolling upgrade, were **partially run** on kind on 2026-10-14 ([ADR-0014 section 6](ADR-0014-horizontal-scaling.md)); open streams surviving a rollout and scale-in under load were **not** |
 | Per-cloud values (`values-aws/azure/gcp.yaml`) and External Secrets examples | **rendered** and `kubeconform`-checked; the External Secrets documents are skipped by kubeconform (CRD schemas not in its catalog). **Not installed** on EKS, AKS or GKE, no cloud service contacted |
 | NetworkPolicy enforcement | **not run**: kind's default CNI does not enforce them; use Calico or Cilium to test |
 | Without the sidecar and core-jobs (memory) | the kind runs above left both off |

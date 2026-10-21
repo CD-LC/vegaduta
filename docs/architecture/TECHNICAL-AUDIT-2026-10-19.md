@@ -263,6 +263,11 @@ block) are in. Still open: a published release, STDIO MCP inside the container
 stack, real-Chromium verification of browser automation, and the TypeScript
 strict ladder.
 
+**Status 2026-10-21 (v0.1.9).** Published release: done (signed release artifacts and pinned GHCR images; see
+`CHANGELOG.md` 0.1.5). STDIO MCP in the container stack: the `mcp-stdio-runner` profile landed in 0.1.4
+(`--profile tools`; the personal Tools/Browser add-on, also on Windows from 0.1.7). Browser automation was run against
+a real Chromium in the personal-install audit (`BrowserRemoteRealTest`). The TypeScript strict ladder was not re-checked.
+
 ## 4. Process observations
 
 - **Gates that nothing runs still rot.** Flyway lint passed today, but the
@@ -294,9 +299,9 @@ strict ladder.
 
 | # | Change | Effort |
 |---|---|---|
-| 1 | Wizard: random token in URL + required on `/api/*` POSTs; check `Origin`/`Host` | hours |
-| 2 | `unpackRelease`: refuse symlink targets escaping the install dir (or refuse symlinks) | hours |
-| 3 | `desktop-agent`: `timingSafeEqual` on the bearer check | minutes |
-| 4 | Personal mode: write the F5 residual-risk paragraph into `docs/personal-mode.md` | hours |
-| 5 | Annotate the F4 freeze-store entries with justification; burn down the `SafeHttpClients` subset | days |
-| 6 | Delete the stray root `package-lock.json`; add the missing `.dockerignore`s | hours |
+| 1 | Wizard: random token in URL + required on `/api/*` POSTs; check `Origin`/`Host` — **done** (F1, 0.1.3) | hours |
+| 2 | `unpackRelease`: refuse symlink targets escaping the install dir (or refuse symlinks) — **done** (F2, 0.1.3) | hours |
+| 3 | `desktop-agent`: `timingSafeEqual` on the bearer check — **done** (F3, 0.1.3) | minutes |
+| 4 | Personal mode: write the F5 residual-risk paragraph into `docs/personal-mode.md` — **done** (F5) | hours |
+| 5 | Annotate the F4 freeze-store entries with justification; burn down the `SafeHttpClients` subset — **partly done** (48 → 14, F4) | days |
+| 6 | Delete the stray root `package-lock.json`; add the missing `.dockerignore`s — **done** (F6) | hours |

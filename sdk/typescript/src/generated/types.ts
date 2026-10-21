@@ -2009,6 +2009,19 @@ export interface ChatBranchDtos_SwitchLeafRequest {
   messageId: string;
 }
 
+export interface ChatBranchDtos_ThreadView {
+  sessionId?: string;
+  agentId?: string;
+  title?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ChatBranchDtos_ThreadsResponse {
+  threads?: ChatBranchDtos_ThreadView[];
+  nextBefore?: string;
+}
+
 export interface ChatGenerationSettingsResponse {
   geminiReasoningEffort?: string;
   historyMaxTurns?: number;
@@ -4817,6 +4830,7 @@ export interface LocalModelsService_Recommended {
   budgetGb?: number;
   ollama?: LocalModelsService_OllamaState;
   servingModel?: string;
+  servingBlocked?: string;
 }
 
 export interface LocalModelsService_Settings {

@@ -35,7 +35,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-jobs | kernel | 171 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, sharing, tenancy |  |
 | agents-studio | kernel | 100 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 246 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
-| agents-turn | kernel | 305 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, providers, rl, security, sharing, storage, tenancy |  |
+| agents-turn | kernel | 307 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, providers, rl, security, sharing, storage, tenancy |  |
 | agentspi | kernel | 17 | security |  |
 | app | distribution | 196 | admin, agents, agents-browser, agents-budget, agents-chatport, agents-interop, agents-jobs, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, brief, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, providers, quality, rl, **sarvam**, sdlc, secrets, security, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
 | app-config | kernel | 8 | (none) |  |
@@ -45,7 +45,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | audit | kernel | 37 | json |  |
 | billing | kernel (hosts vendor code) | 69 | json, security | Razorpay + PhonePe gateways in billing.gateway |
 | brief | kernel | 70 | agents, agents-tools, agents-turn, approval, audit, chat, guardrails, json, knowledge, mcp, omnichannel, providers, quality, secrets, security, tenancy, workflow |  |
-| chat | kernel (hosts vendor code) | 161 | audit, json, providers, security, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
+| chat | kernel (hosts vendor code) | 163 | audit, json, providers, security, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
 | codeintel | kernel | 20 | approval, json, security |  |
 | crypto | kernel | 7 | (none) |  |
 | crypto-kms | kernel | 4 | crypto, json, security |  |

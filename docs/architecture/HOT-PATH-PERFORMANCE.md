@@ -354,7 +354,7 @@ both, 276 and 278 turns before against 288 and 288 after, time to first token p5
   measurable (1.65 s against 2.0 s, inside the spread of the old-pod control, which also showed a 1.6 s p90 once).
 
 So a fresh pod costs about 1.5 s on the first wave of a burst and about 0.6 s on its first single turn, then behaves like
-the others. A warm-up that removes that would have to run a real turn through `ChatService`, which needs a tenant, an
+the others. A warm-up that removes that would have to run a real turn through `AgentChatService`, which needs a tenant, an
 agent and a provider: a synthetic tenant means a tenant schema migration at boot on every pod, rows in tenant listings,
 billing and admin views, and a race between replicas in `replicaStrict` mode. Exercising only generic code (the experiment
 above) does not reach the chat path and showed no effect. Neither is worth shipping for a 1.5 s first-wave cost; a readiness
@@ -418,12 +418,12 @@ measurement) and is ordered by how many round trips the items are believed to co
 | The tenant's plan is re-read 8 to 12 times in one turn | guardrails, RL selection, gateway budget and rate limit | Pass the per-turn plan down; turn on the existing plan cache by default |
 | Feature flags evaluated three times, MCP availability twice, user message embedded twice | version resolution, prompt assembly, memory recall | Evaluate once per turn; embed once |
 | ~~A monthly `SUM` over the call log on every BYOK turn~~ done, see section 3a | gateway budget | An incrementally maintained counter (`llm_spend_month`, V481) |
-| 5 to 6 sequential Redis round trips to append one conversation turn, twice per turn | `SessionMemoryService` | One Lua script or pipeline |
-| A blocking Redis `DEL` every 500 ms for the cancel watcher | `ChatTurnCancelService` | Longer interval, or a signal instead of a poll |
-| Work done inline when the stream ends (audit, history append, call log, RL close) | `ChatTurnExecutor` | Hand to a bounded executor |
+| ~~5 to 6 sequential Redis round trips to append one conversation turn, twice per turn~~ done, see section 5a | `SessionMemoryService` | One Lua script (`SessionAppendScript`), on by default |
+| ~~A blocking Redis `DEL` every 500 ms for the cancel watcher~~ done, see section 5a | `ChatTurnCancelService` | One batched poll per pod for all in-flight turns |
+| Work done inline when the stream ends (audit, history append, call log, RL close) | `ChatTurnExecutor` | Built, see section 5a: `StreamEndExecutor` behind `app.chat.stream-end.async`, **off by default**; the history append stays inline on purpose |
 | Two extra `SET search_path` per transaction | `SchemaMultiTenantConnectionProvider` | Design in [ADR-0016](ADR-0016-search-path-round-trips.md) (proposed: transaction-scoped `SET LOCAL`, behind a flag); do not change it before the isolation test suite it specifies exists |
 | The tenant's plan is re-read in the outbound guardrail check and by the clients built for delegated calls, specialist handoffs and workflows | `ChatGuardrailGate` output path, `ChatDelegateCall`, `ChatSpecialistHandoff`, `WorkflowNodeExecutor` | Thread the plan through `streamFast` and `verifyThenRespond` (`ChatTurnExecutor` is at the file-size limit, so it needs a split first) |
-| A monthly `SUM` over the call log on every BYOK turn | gateway budget | An incrementally maintained counter |
+| ~~A monthly `SUM` over the call log on every BYOK turn~~ done (duplicate of the row above), see section 3a | gateway budget | An incrementally maintained counter |
 | Tools that make the whole reply buffered (first token = full reply) | `ChatTurnDispatcher` | Analysis in section 7; not implemented |
 
 ### 5a. Redis round trips and stream-end work (done in this change)
@@ -435,7 +435,7 @@ opened per poll) against a real Valkey 8. They are skipped unless `VEGADUTA_TEST
 
 ```bash
 docker run --rm -d -p 16379:6379 valkey/valkey:8-alpine
-cd core && VEGADUTA_TEST_REDIS=<host>:16379 mvn -pl agents -am test \
+cd core && VEGADUTA_TEST_REDIS=<host>:16379 mvn -pl agents-turn -am test \
   -Dtest='SessionAppendScriptRedisTest,ChatTurnCancelServiceRedisTest' -Dsurefire.failIfNoSpecifiedTests=false
 ```
 

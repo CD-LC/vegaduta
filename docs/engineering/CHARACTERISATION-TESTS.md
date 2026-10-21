@@ -1,7 +1,7 @@
 # Characterisation tests (ADR-0012, phase P0)
 
-These suites pin what core does **today** on Spring Boot 3.4.4 / Spring AI 1.1.7 / Jackson 2 /
-Hibernate 6.6 / MCP SDK 0.18.2, so that the Boot 4 + Spring AI 2 migration (ADR-0012, P2 and P3) can
+These suites pin what core did when they were written, on Spring Boot 3.4.4 / Spring AI 1.1.7 / Jackson 2 /
+Hibernate 6.6 / MCP SDK 0.18.2 (core is now on Spring Boot 3.5.16 / Spring AI 1.1.8, `core/pom.xml`), so that the Boot 4 + Spring AI 2 migration (ADR-0012, P2 and P3) can
 be checked against behaviour rather than against opinion. They are additive: no production code
 changed. A failure after a migration step means "behaviour changed", which is either a bug to fix or a
 deliberate decision to record by updating the test and the ADR.
@@ -20,7 +20,7 @@ boundaries where the risk is at the seams.
 | `ToolLoopCharacterisationTest` | `agents` | At `ChatClient` level over a scripted model: non-JSON tool arguments repaired in replayed history, invented tool names answered not fatal, tool exceptions redacted, the round cap (soft stop, then hard stop with no further model call), `ToolContext` reaching every round, tenant context following a tool onto the streaming thread, `returnDirect`, cancellation during a tool. | **Tool loop.** The loop moves from each `ChatModel` into the ChatClient's `ToolCallingAdvisor`; if `ResilientToolCallingManagerFactory` is not re-seated, sanitising, redaction and the cap silently stop applying. |
 | `MeteringCharacterisationTest` | `agents` | Token totals recorded by `LlmMetricsAdvisor` (log row and Micrometer meters, including `CacheTokenAccounting`), `FreeTierTokenTrackingAdvisor` and `PerUserBudgetTrackingAdvisor` for a plain turn and a 3-iteration tool turn, streaming and non-streaming, and for cancellation. Exact totals, one row per turn, nothing counted twice. | **Metering (most important).** Where usage accumulates and where the metering advisors sit relative to the tool advisor. Money and quota depend on it. |
 | `McpServerStreamableHttpContractTest` | `mcpserver` | Inbound `POST /mcp` Streamable HTTP with the real Spring AI server auto-configuration and `McpServerToolConfig`: `initialize` handshake and session id, `tools/list` returns exactly the curated tools, `tools/call` result shape, an uncurated tool is not callable. | **MCP.** Auto-configuration class moves, transport wiring, tool naming and result shape under SDK 2.0. |
-| `McpClientPerRequestBearerContractTest` | `agents` | On the wire: an OAuth-backed remote MCP connection sends a freshly read bearer on every HTTP request, never the connect-time one (the `McpRemoteHeaders` invariant); static headers unchanged. Uses a real MCP client against a local fake server. | **MCP.** SDK 2.0 removes `McpSyncHttpClientRequestCustomizer`; the hook moves to the transport builder. |
+| `McpClientPerRequestBearerContractTest` | `agents-tools` | On the wire: an OAuth-backed remote MCP connection sends a freshly read bearer on every HTTP request, never the connect-time one (the `McpRemoteHeaders` invariant); static headers unchanged. Uses a real MCP client against a local fake server. | **MCP.** SDK 2.0 removes `McpSyncHttpClientRequestCustomizer`; the hook moves to the transport builder. |
 
 Shared fixtures live next to the suites that use them: `ScriptedChatModel` and `ToolLoopHarness`
 (`agents/src/test/.../characterisation`) and `GoldenJson` / `RecordFixtures` (`app/src/test/.../golden`).
@@ -54,11 +54,12 @@ two decisions above.
 
 ```bash
 cd core
-export JAVA_HOME="<JDK 24>"            # core builds with JDK 24; one Maven build at a time
+export JAVA_HOME="<JDK 21 or later>"  # CI uses Temurin 21, JDK 24 works; one Maven build at a time
 
 # One suite (always -am: without it Maven resolves sibling modules from ~/.m2, which can be stale)
 mvn -o -pl app     -am test -Dtest=ApiJsonGoldenTest,JsonbRoundTripTest,JsonbJdbcWritersTest -Dsurefire.failIfNoSpecifiedTests=false
-mvn -o -pl agents  -am test -Dtest='ToolLoopCharacterisationTest,MeteringCharacterisationTest,McpClientPerRequestBearerContractTest' -Dsurefire.failIfNoSpecifiedTests=false
+mvn -o -pl agents  -am test -Dtest='ToolLoopCharacterisationTest,MeteringCharacterisationTest' -Dsurefire.failIfNoSpecifiedTests=false
+mvn -o -pl agents-tools -am test -Dtest=McpClientPerRequestBearerContractTest -Dsurefire.failIfNoSpecifiedTests=false
 mvn -o -pl mcpserver -am test -Dtest=McpServerStreamableHttpContractTest -Dsurefire.failIfNoSpecifiedTests=false
 
 # Everything except the Testcontainers ITs
@@ -94,7 +95,8 @@ every record component deterministically, so a field added later shows up in the
 
 ## Known gaps
 
-- `JsonbRoundTripIT` has not been executed (no Docker on the authoring machine).
+- `JsonbRoundTripIT` was not executed when written (no Docker on the authoring machine). It is in
+  `core/app/src/test/java/com/agenticai/core/it/`, so the CI `core` job's `mvn -Pcoverage,it verify` now runs it.
 - The tool-loop and metering fixtures model the Spring AI 1.1 provider loop (internal loop, cumulative
   usage); they are not a recording of a specific provider. Provider-specific streaming quirks (for
   example Gemini mixed content, OpenAI-compatible usage chunks) are covered by their own unit tests,

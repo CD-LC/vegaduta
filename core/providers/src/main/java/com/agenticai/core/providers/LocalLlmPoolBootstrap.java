@@ -1,5 +1,6 @@
 package com.agenticai.core.providers;
 
+import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.providers.validation.ProviderValidationException;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.security.startup.BackgroundStartupTask;
@@ -65,6 +66,7 @@ public class LocalLlmPoolBootstrap {
         ALREADY_PRESENT,
         MOVED,
         MODEL_REPLACED,
+        REPAIRED,
         REFUSED,
         UNREACHABLE,
         INVALID_CONFIG,
@@ -116,6 +118,38 @@ public class LocalLlmPoolBootstrap {
 
     private LocalModelWarmer localModels;
 
+    /** Last on-demand repair, epoch millis; one attempt per {@link #ON_DEMAND_INTERVAL_MILLIS}. */
+    private final java.util.concurrent.atomic.AtomicLong lastOnDemand =
+            new java.util.concurrent.atomic.AtomicLong();
+
+    static final long ON_DEMAND_INTERVAL_MILLIS = 30_000;
+
+    /**
+     * Called by the chat path when the platform pool resolves to nothing: runs one bootstrap pass
+     * now (register, move, re-enable or re-key the local row, switch the pool back on) so the very
+     * turn that found the pool empty can still be answered, with no restart. At most one attempt
+     * every 30 seconds across threads; a pass that changed nothing returns false.
+     */
+    public boolean repairOnDemand() {
+        long now = System.currentTimeMillis();
+        long last = lastOnDemand.get();
+        if (now - last < ON_DEMAND_INTERVAL_MILLIS || !lastOnDemand.compareAndSet(last, now)) {
+            return false;
+        }
+        Outcome outcome = bootstrapOnce(true);
+        boolean changed =
+                outcome == Outcome.CREATED
+                        || outcome == Outcome.MOVED
+                        || outcome == Outcome.MODEL_REPLACED
+                        || outcome == Outcome.REPAIRED;
+        if (changed) {
+            log.warn(
+                    "Local LLM pool row repaired on demand ({}) - the chat continues on it.",
+                    outcome);
+        }
+        return changed;
+    }
+
     /** Off the main thread: a slow or absent Ollama must not hold up readiness. */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
@@ -146,7 +180,8 @@ public class LocalLlmPoolBootstrap {
         if ((outcome == Outcome.CREATED
                         || outcome == Outcome.ALREADY_PRESENT
                         || outcome == Outcome.MOVED
-                        || outcome == Outcome.MODEL_REPLACED)
+                        || outcome == Outcome.MODEL_REPLACED
+                        || outcome == Outcome.REPAIRED)
                 && localModels != null) {
             // Still on the bootstrap thread: load the pool row's model now so the first chat of
             // the session does not pay the cold start on top of its own latency.
@@ -160,10 +195,18 @@ public class LocalLlmPoolBootstrap {
         return outcome;
     }
 
-    /** One bootstrap attempt. Never throws. */
+    /** One bootstrap attempt at startup. Never throws. */
     Outcome bootstrapOnce() {
+        return bootstrapOnce(false);
+    }
+
+    /**
+     * One bootstrap attempt; {@code onDemand} is true inside a chat that found the pool empty, the
+     * only moment the pool's master switch may be put back on. Never throws.
+     */
+    Outcome bootstrapOnce(boolean onDemand) {
         try {
-            return doBootstrap();
+            return doBootstrap(onDemand);
         } catch (ProviderValidationException e) {
             // Thrown by the pool service for an SSRF refusal or a failed probe; the message
             // is operator-facing and carries no secrets.
@@ -175,7 +218,7 @@ public class LocalLlmPoolBootstrap {
         }
     }
 
-    private Outcome doBootstrap() {
+    private Outcome doBootstrap(boolean onDemand) {
         if (!StringUtils.hasText(baseUrl) || !StringUtils.hasText(model)) {
             log.warn(
                     "Local LLM pool bootstrap is enabled but app.local-llm.bootstrap.base-url or"
@@ -192,6 +235,9 @@ public class LocalLlmPoolBootstrap {
         if (same != null) {
             if (replacedMissingModel(same, normalizedBase)) {
                 return Outcome.MODEL_REPLACED;
+            }
+            if (repairUnusable(same, normalizedBase, onDemand)) {
+                return Outcome.REPAIRED;
             }
             log.info(
                     "Local LLM pool row '{}' ({}) already exists - bootstrap left it unchanged.",
@@ -354,6 +400,117 @@ public class LocalLlmPoolBootstrap {
                 current,
                 normalizedBase,
                 model);
+        return true;
+    }
+
+    /**
+     * The row exists, but a chat could not use it: the pool's master switch is off, the row is
+     * disabled, or its stored key was encrypted with an {@code APP_ENCRYPTION_KEY} this install no
+     * longer has (an older database kept under a new {@code .env}). Every chat then answers "No
+     * platform LLM is configured" while the console shows the model as in use. The local row's key
+     * is the configured placeholder, so an enabled row whose key no longer decrypts is always
+     * re-keyed; the row's enabled flag is put back only when nothing else in the pool could serve,
+     * and the pool's master switch only inside a chat that needs the pool (never at startup), so an
+     * admin's deliberate choice survives a restart. A base URL the SSRF guard refuses cannot be
+     * repaired here and is logged with the host to allow.
+     */
+    private boolean repairUnusable(
+            PlatformHostedLlmProvider row, String normalizedBase, boolean onDemand) {
+        boolean repaired = false;
+        HostedLlmPoolSettingsResponse settings = service.getPoolSettings();
+        if (settings != null && !settings.enabled()) {
+            // Nothing an admin switched off is switched on because core restarted: the pool comes
+            // back only inside a chat that needs it, and only when this row is the pool's whole
+            // content (an admin who switched it off while a hosted row exists meant it).
+            if (!onDemand) {
+                log.info(
+                        "The platform LLM pool is switched off; the local model row stays unused"
+                                + " until a chat asks for it or an admin switches the pool on.");
+                return false;
+            }
+            List<PlatformHostedLlmProvider> enabledRows =
+                    repository.findAllByEnabledTrueOrderByPriorityAsc();
+            boolean othersEnabled =
+                    enabledRows != null
+                            && enabledRows.stream().anyMatch(r -> !r.getId().equals(row.getId()));
+            if (othersEnabled) {
+                log.info(
+                        "The platform LLM pool is switched off and other rows exist; leaving it as"
+                                + " the admin set it.");
+                return false;
+            }
+            service.setPoolEnabled(true, "local-llm-pool-bootstrap");
+            log.warn(
+                    "The platform LLM pool was switched off, so no chat could use the local model;"
+                            + " switched it back on.");
+            repaired = true;
+        }
+        java.util.Optional<HostedProviderSelection> usable =
+                service.resolveEnabledSelectionById(row.getId());
+        if (usable != null && usable.isPresent()) {
+            return repaired;
+        }
+        if (!row.isEnabled()) {
+            // A disabled local row is re-enabled only when nothing else in the pool can serve;
+            // with a hosted row serving, the admin disabled it on purpose.
+            List<HostedProviderSelection> chain = service.resolveEnabledChain();
+            if (chain != null && !chain.isEmpty()) {
+                log.info(
+                        "Local LLM pool row '{}' is disabled while {} other row(s) serve; leaving"
+                                + " it as the admin set it.",
+                        row.getLabel(),
+                        chain.size());
+                return repaired;
+            }
+        }
+        try {
+            HostedLlmBaseUrlGuard.checkAllowed(
+                    normalizedBase, ssrfGuard != null ? ssrfGuard : SsrfGuard.defaultGuard());
+        } catch (ProviderValidationException e) {
+            log.warn(
+                    "Local LLM pool row '{}' points at {}, which the SSRF guard refuses: {}. Add"
+                            + " '{}' to APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS.",
+                    row.getLabel(),
+                    normalizedBase,
+                    e.getMessage(),
+                    hostPort(normalizedBase));
+            return repaired;
+        }
+        if (!StringUtils.hasText(apiKey)) {
+            log.warn(
+                    "Local LLM pool row '{}' cannot be used by chats (disabled, or its key no longer"
+                            + " decrypts) and app.local-llm.bootstrap.api-key is blank, so it was"
+                            + " not rewritten. Re-enter the row in Platform Admin.",
+                    row.getLabel());
+            return repaired;
+        }
+        String keepModel = StringUtils.hasText(row.getModel()) ? row.getModel() : model;
+        service.update(
+                row.getId(),
+                new PlatformHostedLlmProviderUpsertRequest(
+                        row.getLabel(),
+                        normalizedBase,
+                        keepModel,
+                        apiKey,
+                        true,
+                        row.getPriority(),
+                        row.getRegion(),
+                        null,
+                        null,
+                        row.getAuthType(),
+                        null,
+                        null,
+                        Boolean.TRUE,
+                        row.getToolRouterEnabled(),
+                        row.getSmallModel()));
+        log.warn(
+                "Local LLM pool row '{}' could not be used by chats ({}): re-enabled it with a fresh"
+                        + " key, so the local model answers again.",
+                row.getLabel(),
+                row.isEnabled()
+                        ? "its key was encrypted with an APP_ENCRYPTION_KEY this install no longer"
+                                + " has"
+                        : "it was disabled");
         return true;
     }
 
