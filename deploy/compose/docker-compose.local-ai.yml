@@ -43,10 +43,16 @@ services:
           if [ "$$n" -ge 5 ]; then echo "model download failed $$n times - restarting" >&2; kill $$pid; exit 1; fi
           echo "model download failed - retrying in $$((n * 15))s" >&2; sleep $$((n * 15))
         done
+        # Load the model into memory now (an empty prompt only loads it) so the first reply does not pay
+        # the cold start; OLLAMA_KEEP_ALIVE below keeps it there. In the background: health stays tied
+        # to the pull, not to the load.
+        ( ollama run "$$LOCAL_LLM_MODEL" "" >/dev/null 2>&1 || true ) &
         wait $$pid
     environment:
       LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
-      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+      # -1 = never unload: a model that is dropped after idling costs a long cold start on the next reply.
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:--1}
+      OLLAMA_FLASH_ATTENTION: ${OLLAMA_FLASH_ATTENTION:-1}
       OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-2}
       # The context window is what grows the model's memory beyond its weights; the launcher lowers it on
       # machines where Docker has little memory (empty = 32768, the agent default).
@@ -71,7 +77,10 @@ services:
       APP_LOCAL_LLM_BOOTSTRAP_ENABLED: "true"
       APP_LOCAL_LLM_BOOTSTRAP_BASE_URL: ${LOCAL_LLM_BASE_URL:-http://ollama:11434}
       APP_LOCAL_LLM_BOOTSTRAP_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
+      APP_LOCAL_MODELS_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:--1}
       APP_LLM_OLLAMA_NUM_CTX: ${LOCAL_LLM_NUM_CTX:-32768}
+      # Skip the hidden thinking pass of reasoning models: on a laptop it is most of the wait. Blank = the model's own default.
+      APP_LLM_OLLAMA_REASONING_EFFORT: ${LOCAL_LLM_REASONING_EFFORT:-none}
       # Exactly the local model server, plus whatever the operator already allows.
       APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${LOCAL_LLM_ALLOWED_HOST:-ollama:11434}${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:+,${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS}}
 

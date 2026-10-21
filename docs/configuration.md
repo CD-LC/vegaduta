@@ -1191,6 +1191,7 @@ At most 10 drafts wait for review per workspace. See [Personal mode](personal-mo
 | `app.local-models.rate-limit.pulls-per-minute` | (none) | `6` | |
 | `app.llm.ollama.num-ctx` | `APP_LLM_OLLAMA_NUM_CTX` | `32768` | `num_ctx` sent to Ollama per request (its OpenAI-compat `options` field) - the provider default (~4k) silently truncates tool-heavy prompts |
 | `app.llm.ollama.num-batch` | `APP_LLM_OLLAMA_NUM_BATCH` | `0` (server default 512) | `num_batch` sent to Ollama per request - tokens evaluated per prompt step; a larger value (e.g. `2048`, keep `<= num-ctx`) speeds up the multi-thousand-token fixed-prefix eval that dominates turn latency on a local model |
+| `app.llm.ollama.reasoning-effort` | `APP_LLM_OLLAMA_REASONING_EFFORT` | blank (the model's own default); the Compose `local-ai` overlay sets `none` | `reasoning_effort` sent to Ollama's OpenAI-compat endpoint. `none` skips the hidden thinking pass of reasoning models (qwen3.5, gemma4, ...), which on a laptop CPU is most of the wait for the first word; `low`/`medium`/`high` pick a level where the model has them. An unsupported name falls back to the model's default, so it cannot fail a call. `LOCAL_LLM_REASONING_EFFORT` sets it for the overlay |
 | `app.llm.structured-output.ollama-format.enabled` | (none) | `false` | when on, a structured-output request that Ollama refuses (the MLX runner's `json_schema` 400) is retried with the schema in the prompt |
 
 A `LOCAL_OPENAI` provider (vLLM, llama.cpp, LM Studio, Jan, LocalAI) adds no keys. Its server must be listed in
