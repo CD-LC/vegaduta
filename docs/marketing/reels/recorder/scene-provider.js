@@ -1,0 +1,26 @@
+const { newSession, humanClick, humanType } = require('./record');
+const { login } = require('./login');
+(async () => {
+  const { browser, page, rec } = await newSession({ outDir: '/home/user/rec/out/02-provider' });
+  await login(page);
+  await page.goto('/providers', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+  const card = page.getByText('Local / OpenAI-compatible server', { exact: true }).first();
+  await card.scrollIntoViewIfNeeded(); await page.waitForTimeout(600);
+  await page.evaluate(() => window.scrollBy(0, -260)); await page.waitForTimeout(800);
+  await rec.start(page); await page.waitForTimeout(1200);
+  rec.mark('card');
+  await humanClick(page, card, { delay: 700, settle: 1200 });
+  await page.screenshot({ path: '/home/user/rec/shots/provider-after-card.png' });
+  rec.mark('preset');
+  await humanClick(page, page.getByRole('button', { name: 'llama.cpp', exact: true }), { delay: 600, settle: 900 });
+  rec.mark('url');
+  await humanType(page, '#provider-field-baseUrl', 'http://localhost:8089/v1', { cps: 20 });
+  await page.waitForTimeout(600);
+  rec.mark('activate');
+  await humanClick(page, page.getByRole('button', { name: 'Activate' }), { delay: 700, settle: 600 });
+  await page.waitForTimeout(5000);
+  rec.mark('done');
+  await page.screenshot({ path: '/home/user/rec/shots/provider-activated.png' });
+  console.log('frames', await rec.stop());
+  await browser.close();
+})().catch(async e => { console.error('FAILED', e.message.split('\n')[0]); process.exit(1); });

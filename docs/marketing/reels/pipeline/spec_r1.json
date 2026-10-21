@@ -1,0 +1,8 @@
+{"r1": {"music": "/home/user/reels/audio/music_drive.wav", "music_gain": -15, "landscape": false, "segments": [
+  {"image": "/home/user/reels/cards/r1_hook.png", "vo": "hook", "tail": 0.3, "srt": "You wanted an AI agent for your team. And every option wanted your data on someone else's cloud."},
+  {"video": "/home/user/reels/clips_term.mp4", "from": 0.0, "to": 4.8, "speed": 1.25, "vo": "cmd", "tail": 0.3, "caption": "One command.", "accent": true, "srt": "VegaDūta runs on your own machine. One command."},
+  {"video": "/home/user/reels/clips_term.mp4", "from": 4.8, "to": 15.0, "speed": 1.6, "vo": "boot", "tail": 0.3, "caption": "257 migrations · 1 setup link", "srt": "Postgres, a model, the console. It boots, runs its migrations, and hands you a setup link."},
+  {"take": "/home/user/rec/out/01-setup", "from": 1.0, "to": 17.0, "speed": 3.1, "vo": "unlock", "tail": 0.3, "caption": "Passkey · PIN · Password", "srt": "Choose how you unlock. Passkey, PIN, or password. That is your workspace."},
+  {"take": "/home/user/rec/out/01-setup", "from": 17.0, "to": 19.4, "speed": 1.0, "vo": "oss", "tail": 0.3, "caption": "Open source · Self-hosted", "accent": true, "srt": "Open source. Self-hosted. Yours."},
+  {"image": "/home/user/reels/cards/end.png", "vo": "end", "tail": 0.6, "srt": "VegaDūta. Build the agent, then give the idea wings."}
+]}}
