@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Windows: `vegaduta.ps1` generates `WORKSPACE_RUNNER_SECRET`.** The PowerShell launcher's secret table lacked it while `personal.yml` and `lite.yml` require it, so a personal install on Windows stopped with "required variable WORKSPACE_RUNNER_SECRET is missing a value" (surfacing inside the database-repair step). The bash launcher already had it.
+
 ## [0.1.8] - 2026-10-21
 
 ### Fixed
