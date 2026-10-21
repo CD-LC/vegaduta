@@ -8,6 +8,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **WhatsApp QR messages are no longer split between processes.** The jobs and worker shapes ran a second WhatsApp QR receiver next to the API's, so on a full install with the bridge each took a share of a linked number's incoming messages. They now switch it off, like the Signal receiver (`app.whatsappqr.receive.enabled: false` in `application-jobs.yml` and `application-worker.yml`).
+- **The chat artifacts directive keys sit where the code reads them.** The `artifacts` block in `application.yml` was nested under `app.chat.branching`, where nothing reads it; it now sits under `app.chat.directives`. Defaults and the `APP_CHAT_DIRECTIVES_ARTIFACTS_*` variables are unchanged.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added

@@ -72,16 +72,16 @@ devices.
 |---|---|---|---|
 | `app.whatsappqr.bridge-url` | `APP_WHATSAPPQR_BRIDGE_URL` | empty | Where the bridge lives. Empty hides the whole channel. |
 | `app.whatsappqr.bridge-secret` | `APP_WHATSAPPQR_BRIDGE_SECRET` | empty | Shared Bearer token, sent only over https or to an allow-listed host. |
-| `app.whatsappqr.receive.enabled` | `APP_WHATSAPPQR_RECEIVE_ENABLED` | `true` | Run the per-session poll loop. Idle until a session exists. Unlike Signal, the jobs/worker shapes do not switch it off: set it `false` there. |
+| `app.whatsappqr.receive.enabled` | `APP_WHATSAPPQR_RECEIVE_ENABLED` | `true` | Run the per-session poll loop. Idle until a session exists. The jobs and worker shapes switch it off, like Signal's. |
 | `app.whatsappqr.receive.poll-seconds` | (none) | `15` | Long-poll wait per request (1 to 20). |
 | `app.whatsappqr.max-message-chars` | (none) | `60000` | A reply longer than this is split into several messages. |
 
 Bridge side: `WHATSAPP_BRIDGE_PORT` (8080), `WHATSAPP_BRIDGE_DATA_DIR` (`/data`),
 `WHATSAPP_BRIDGE_QUEUE_CAP` (500 undelivered messages per session).
 
-Run the receiver in ONE core process: a session's long-poll hands each message out once. Set
-`APP_WHATSAPPQR_RECEIVE_ENABLED=false` on every other core process that has the bridge configured
-(jobs, worker, extra API replicas).
+Run the receiver in ONE core process: a session's long-poll hands each message out once. The jobs
+and worker shapes keep it off (`application-jobs.yml`, `application-worker.yml`); set
+`APP_WHATSAPPQR_RECEIVE_ENABLED=false` on any extra API replica that has the bridge configured.
 
 ## API
 
