@@ -13,6 +13,7 @@ Release notes on GitHub are generated from the section for each version.
 ### Fixed
 
 - **Windows Setup no longer fails with "A required privilege is not held by the client".** The release package carried one symlink (`deploy/models/catalog.txt`), which Windows only lets administrators or Developer Mode create, so Setup stopped while unpacking. The release now ships the file itself, and Setup copies the file whenever the system refuses a symlink.
+- **A database left by an earlier install no longer stops the start.** Installing into a new folder generates a new database password, but the data volume kept the earlier install's one, so `db-roles` failed ("password authentication failed", exit 2) and nothing came up. `personal` and `up` (bash and PowerShell) now notice this, set the database to this install's password (the data is kept) and start again.
 
 ## [0.1.6] - 2026-10-20
 

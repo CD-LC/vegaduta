@@ -882,7 +882,7 @@ cmd_up() {
   local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-$(up_wait_default)}")
   [ "$BUILD" = 1 ] && up_args+=(--build)
   say "Starting ($TIER) — first start pulls/builds images and runs migrations; this can take several minutes"
-  if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
+  if ! dc_up_heal "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
     dc ps
     die "some services did not become healthy. Inspect with: scripts/vegaduta logs <service>"
   fi
@@ -1470,6 +1470,26 @@ personal_doctor() {
 # macOS: install and start Ollama through Homebrew when it is missing, so the model runs natively
 # on the Apple GPU (the container is CPU-only there). Linux needs root for Ollama's installer,
 # so it keeps the container. Skipped for --dry-run and VEGADUTA_ASSUME_NO=1; never fails the run.
+# A Postgres data volume left by an earlier install keeps that install's superuser password, while
+# a new folder's `secrets` writes a new one: db-roles then cannot log in ("password authentication
+# failed", psql exit 2) and nothing starts. Inside the postgres container the local socket needs no
+# password, so set the superuser's password to this install's (read there from POSTGRES_PASSWORD,
+# never on a command line). Data is kept. Returns non-zero when this is not that failure.
+db_password_heal() {
+  dc logs --no-log-prefix db-roles 2>/dev/null | grep -qi 'password authentication failed' || return 1
+  warn "the database was created by an earlier install with another password - switching it to this install's password (data is kept)"
+  printf '%s\n' '\getenv pw POSTGRES_PASSWORD' \
+    "SELECT format('ALTER ROLE %I PASSWORD %L', current_user, :'pw') \\gexec" |
+    dc exec -T postgres sh -c 'tr -d \\r | psql -X -q -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d postgres' >/dev/null ||
+    { warn "could not reset the database password; to start over with an empty database run: docker volume rm ${COMPOSE_PROJECT_NAME:-vegaduta-personal}_postgres-data"; return 1; }
+  ok "database password updated"
+}
+# `up` that repairs what it can (db_password_heal) and tries once more.
+dc_up_heal() {
+  dc "$@" && return 0
+  db_password_heal && dc "$@"
+}
+
 docker_mem_bytes() { # Docker's memory in bytes; 0 when Docker does not answer (never two lines)
   local b; b="$(docker info --format '{{.MemTotal}}' 2>/dev/null | head -n1)"
   case "$b" in ''|*[!0-9]*) printf 0 ;; *) printf '%s' "$b" ;; esac
@@ -1910,7 +1930,7 @@ personal_up() {
   local up_args=(up -d --remove-orphans --wait --wait-timeout "${VEGADUTA_WAIT_TIMEOUT:-$(up_wait_default)}")
   [ "$BUILD" = 1 ] && up_args+=(--build)
   say "Starting (personal) - first start pulls/builds images and runs migrations; this can take several minutes"
-  if ! dc "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
+  if ! dc_up_heal "${up_args[@]}" ${REST[@]+"${REST[@]}"}; then
     dc ps
     die "some services did not become healthy. Inspect with: scripts/vegaduta logs <service>"
   fi

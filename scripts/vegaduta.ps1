@@ -398,6 +398,26 @@ function Invoke-Dc([string[]]$ComposeArgs, [string[]]$More) {
   return $LASTEXITCODE
 }
 function Prepare { Load-State; Resolve-Profiles; return (Get-ComposeArgs) }
+# A Postgres data volume left by an earlier install keeps that install's superuser password, while a
+# new folder's secrets are new: db-roles cannot log in ("password authentication failed") and nothing
+# starts. The postgres container's local socket needs no password, so set the superuser's password to
+# this install's (read there from POSTGRES_PASSWORD, never on a command line). Data is kept.
+function Repair-DbPassword([string[]]$ComposeArgs) {
+  $log = (& docker compose @ComposeArgs logs --no-log-prefix db-roles 2>&1) -join "`n"
+  if ($log -notmatch 'password authentication failed') { return $false }
+  Warn "the database was created by an earlier install with another password - switching it to this install's password (data is kept)"
+  $sql = "\getenv pw POSTGRES_PASSWORD`nSELECT format('ALTER ROLE %I PASSWORD %L', current_user, :'pw') \gexec`n"
+  $sql | & docker compose @ComposeArgs exec -T postgres sh -c 'tr -d \\r | psql -X -q -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d postgres' | Out-Null
+  if ($LASTEXITCODE -ne 0) { Warn 'could not reset the database password; to start over with an empty database run: docker volume rm vegaduta-personal_postgres-data'; return $false }
+  Ok 'database password updated'
+  return $true
+}
+# `up` that repairs what it can (Repair-DbPassword) and tries once more.
+function Invoke-UpHeal([string[]]$ComposeArgs, [string[]]$More) {
+  if ((Invoke-Dc $ComposeArgs $More) -eq 0) { return 0 }
+  if (Repair-DbPassword $ComposeArgs) { return (Invoke-Dc $ComposeArgs $More) }
+  return 1
+}
 
 # ------------------------------------------------------------------ doctor
 function Test-PortInUse([int]$port) {
@@ -594,7 +614,7 @@ switch ($Command) {
     $upArgs = @('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', $wt)
     if ($script:DoBuild) { $upArgs += '--build' }
     Say 'Starting (personal) - first start pulls/builds images and runs migrations; this can take several minutes'
-    if ((Invoke-Dc $ca ($upArgs + $Rest)) -ne 0) { & docker compose @ca ps | Out-Host; Die 'some services did not become healthy. Inspect: .\scripts\vegaduta.ps1 logs <service>' }
+    if ((Invoke-UpHeal $ca ($upArgs + $Rest)) -ne 0) { & docker compose @ca ps | Out-Host; Die 'some services did not become healthy. Inspect: .\scripts\vegaduta.ps1 logs <service>' }
     $app = Get-EnvValue 'PUBLIC_APP_URL'; if (-not $app) { $app = 'http://localhost:3000' }
     Write-Host ''
     Write-Host 'VegaDuta (personal) is up' -ForegroundColor Green
@@ -619,7 +639,7 @@ switch ($Command) {
     $upArgs = @('up', '-d', '--remove-orphans', '--wait', '--wait-timeout', $wt)
     if ($script:DoBuild) { $upArgs += '--build' }
     Say "Starting ($($script:Tier)) - first start pulls/builds images and runs migrations; this can take several minutes"
-    if ((Invoke-Dc $ca ($upArgs + $Rest)) -ne 0) { & docker compose @ca ps | Out-Host; Die 'some services did not become healthy. Inspect: .\scripts\vegaduta.ps1 logs <service>' }
+    if ((Invoke-UpHeal $ca ($upArgs + $Rest)) -ne 0) { & docker compose @ca ps | Out-Host; Die 'some services did not become healthy. Inspect: .\scripts\vegaduta.ps1 logs <service>' }
     Invoke-Reconcile $ca
     Show-Urls
   }
