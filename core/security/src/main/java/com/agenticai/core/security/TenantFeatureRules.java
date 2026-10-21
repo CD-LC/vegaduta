@@ -589,6 +589,9 @@ final class TenantFeatureRules {
                 .requestMatchers(HttpMethod.PUT, "/api/agents/*/sessions/*/messages/active-leaf")
                 .authenticated() // ChatBranchService#switchActiveLeaf ->
                 // #openForChange
+                .requestMatchers(HttpMethod.DELETE, "/api/chat/threads/*/*")
+                .authenticated() // ChatThreadService#delete: only a session
+                // bound to the caller's subject (owner_subject), 404 otherwise
                 .requestMatchers(HttpMethod.POST, "/api/coding-tasks")
                 .authenticated() // CodingTaskService#start: RUNNER on the
                 // agent, requester = JWT subject

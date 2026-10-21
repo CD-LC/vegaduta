@@ -16,10 +16,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * missing messageId would answer 400 from bean validation, which tells a caller the route exists.
  * {@link ChatBranchService} still checks the flag itself (defence in depth, and it is the unit-tested seam).
  *
+ * <p>The thread list ({@link ChatThreadController}, {@code /api/chat/threads}) reads the same tables, so it is
+ * gated the same way: the console reads a 404 there as "feature off, keep the local index only".
+ *
  * <p>The capabilities discovery call lives under another path and is deliberately not gated here.
  */
 @Component
 public class ChatBranchFlagGate implements HandlerInterceptor, WebMvcConfigurer {
+
+    /** Every route that only exists while the flag is on. */
+    static final String[] GATED_PATH_PATTERNS = {
+        "/api/agents/*/sessions/*/messages",
+        "/api/agents/*/sessions/*/messages/**",
+        "/api/chat/threads",
+        "/api/chat/threads/**"
+    };
 
     private final boolean enabled;
 
@@ -29,9 +40,7 @@ public class ChatBranchFlagGate implements HandlerInterceptor, WebMvcConfigurer 
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(this).addPathPatterns(
-            "/api/agents/*/sessions/*/messages",
-            "/api/agents/*/sessions/*/messages/**");
+        registry.addInterceptor(this).addPathPatterns(GATED_PATH_PATTERNS);
     }
 
     @Override
