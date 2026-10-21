@@ -11,6 +11,11 @@
       "method": "POST",
       "path": "/api/mcp/registry/{}/test",
       "file": "app/lib/api/mcp.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-llm/warm",
+      "file": "app/lib/warmPlatformModel.ts"
     }
   ]
 }
