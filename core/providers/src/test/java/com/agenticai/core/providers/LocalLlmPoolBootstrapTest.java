@@ -298,6 +298,49 @@ class LocalLlmPoolBootstrapTest {
     }
 
     @Test
+    void aDisabledLocalRowStaysDisabledWhileAnotherRowServes() {
+        // The admin switched the install to a hosted row on purpose.
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider local = row(13, "Local model (Ollama)", BASE, 0);
+        when(local.isEnabled()).thenReturn(false);
+        PlatformHostedLlmProvider hosted = row(14, "Groq", "https://api.groq.com/openai", 1);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(local, hosted));
+        when(service.resolveEnabledSelectionById(13L)).thenReturn(Optional.empty());
+        when(service.resolveEnabledChain())
+                .thenReturn(List.of(new HostedProviderSelection(hosted, "gsk")));
+
+        assertEquals(
+                Outcome.ALREADY_PRESENT,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service, never()).update(any(), any());
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+    }
+
+    @Test
+    void aPoolSwitchedOffStaysOffWhileAnotherRowIsEnabled() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider local = row(15, "Local model (Ollama)", BASE, 0);
+        when(local.isEnabled()).thenReturn(true);
+        PlatformHostedLlmProvider hosted = row(16, "Groq", "https://api.groq.com/openai", 1);
+        when(hosted.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(local, hosted));
+        when(repository.findAllByEnabledTrueOrderByPriorityAsc())
+                .thenReturn(List.of(local, hosted));
+        when(service.getPoolSettings())
+                .thenReturn(new HostedLlmPoolSettingsResponse(false, null, "admin"));
+
+        assertEquals(
+                Outcome.ALREADY_PRESENT,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+        verify(service, never()).update(any(), any());
+    }
+
+    @Test
     void refusedBaseUrlIsNotRewritten() {
         server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
                 .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
