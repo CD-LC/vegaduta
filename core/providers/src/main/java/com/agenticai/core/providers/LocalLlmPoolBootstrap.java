@@ -400,14 +400,28 @@ public class LocalLlmPoolBootstrap {
      * disabled, or its stored key was encrypted with an {@code APP_ENCRYPTION_KEY} this install no
      * longer has (an older database kept under a new {@code .env}). Every chat then answers "No
      * platform LLM is configured" while the console shows the model as in use. The local row's key
-     * is the configured placeholder, so it is safe to write again; the switch and the flag are put
-     * back on when nothing else in the pool could serve. A base URL the SSRF guard refuses cannot
-     * be repaired here and is logged with the host to allow.
+     * is the configured placeholder, so an enabled row whose key no longer decrypts is always
+     * re-keyed; the pool switch and the row's enabled flag are put back on only when nothing else
+     * in the pool could serve, so an admin's deliberate choice survives a restart. A base URL the
+     * SSRF guard refuses cannot be repaired here and is logged with the host to allow.
      */
     private boolean repairUnusable(PlatformHostedLlmProvider row, String normalizedBase) {
         boolean repaired = false;
         HostedLlmPoolSettingsResponse settings = service.getPoolSettings();
         if (settings != null && !settings.enabled()) {
+            // Only when this row is the pool's whole content: an admin who switched the pool off
+            // while a hosted row exists meant it, and a restart must not undo that.
+            List<PlatformHostedLlmProvider> enabledRows =
+                    repository.findAllByEnabledTrueOrderByPriorityAsc();
+            boolean othersEnabled =
+                    enabledRows != null
+                            && enabledRows.stream().anyMatch(r -> !r.getId().equals(row.getId()));
+            if (othersEnabled) {
+                log.info(
+                        "The platform LLM pool is switched off and other rows exist; leaving it as"
+                                + " the admin set it.");
+                return false;
+            }
             service.setPoolEnabled(true, "local-llm-pool-bootstrap");
             log.warn(
                     "The platform LLM pool was switched off, so no chat could use the local model;"
@@ -418,6 +432,19 @@ public class LocalLlmPoolBootstrap {
                 service.resolveEnabledSelectionById(row.getId());
         if (usable != null && usable.isPresent()) {
             return repaired;
+        }
+        if (!row.isEnabled()) {
+            // A disabled local row is re-enabled only when nothing else in the pool can serve;
+            // with a hosted row serving, the admin disabled it on purpose.
+            List<HostedProviderSelection> chain = service.resolveEnabledChain();
+            if (chain != null && !chain.isEmpty()) {
+                log.info(
+                        "Local LLM pool row '{}' is disabled while {} other row(s) serve; leaving"
+                                + " it as the admin set it.",
+                        row.getLabel(),
+                        chain.size());
+                return repaired;
+            }
         }
         try {
             HostedLlmBaseUrlGuard.checkAllowed(
