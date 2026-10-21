@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Conversations follow you.** `GET /api/chat/threads` lists the signed-in user's chat sessions (title, agent, last activity) and `DELETE /api/chat/threads/{agentId}/{sessionId}` removes one; the Assistant merges them into its thread list, so history shows on a new browser or device. Needs `APP_CHAT_BRANCHING_ENABLED=true` (404 otherwise; the console then keeps its local list). The Assistant now records its turns in the conversation tree, and reopening a thread older than the 24 h session window reads the stored tree.
+
 ## [0.1.8] - 2026-10-21
 
 ### Fixed

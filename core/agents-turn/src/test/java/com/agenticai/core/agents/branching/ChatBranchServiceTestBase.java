@@ -220,5 +220,53 @@ abstract class ChatBranchServiceTestBase {
             }
             return doomed.size();
         }
+
+        /** Per-session activity stamps, set by the thread-list tests ({@link #touch}). */
+        final Map<String, Instant> updatedAt = new HashMap<>();
+
+        void touch(UUID agentId, String sessionId, Instant at) {
+            updatedAt.put(key(agentId, sessionId), at);
+        }
+
+        @Override
+        public List<Thread> findThreadsOwnedBy(String subject, Instant before, int limit) {
+            List<Thread> out = new ArrayList<>();
+            for (Map.Entry<String, State> e : states.entrySet()) {
+                State s = e.getValue();
+                Instant at = updatedAt.getOrDefault(e.getKey(), Instant.EPOCH);
+                if (!subject.equals(s.ownerSubject()) || (before != null && !at.isBefore(before))) {
+                    continue;
+                }
+                Node first = null;
+                for (Node n : findNodes(s.agentId(), s.sessionId())) {
+                    if (n.role() == MessageRole.USER
+                            && (first == null || n.createdAt().isBefore(first.createdAt()))) {
+                        first = n;
+                    }
+                }
+                out.add(
+                        new Thread(
+                                s.agentId(),
+                                s.sessionId(),
+                                first == null ? null : first.content(),
+                                at,
+                                at));
+            }
+            out.sort((a, b) -> b.updatedAt().compareTo(a.updatedAt()));
+            return out.size() > limit ? new ArrayList<>(out.subList(0, limit)) : out;
+        }
+
+        @Override
+        public boolean deleteSessionOwnedBy(UUID agentId, String sessionId, String subject) {
+            String key = key(agentId, sessionId);
+            State s = states.get(key);
+            if (s == null || !subject.equals(s.ownerSubject())) {
+                return false;
+            }
+            states.remove(key);
+            nodeKey.values().removeIf(key::equals);
+            nodes.keySet().removeIf(id -> !nodeKey.containsKey(id));
+            return true;
+        }
     }
 }

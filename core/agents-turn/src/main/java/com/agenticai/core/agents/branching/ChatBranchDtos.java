@@ -67,4 +67,19 @@ public final class ChatBranchDtos {
     /** Optional body of a regenerate call; the user text is the one already stored. */
     public record RegenerateRequest(String turnRef, boolean stepEvents) {
     }
+
+    /**
+     * One of the caller's chat sessions ({@code GET /api/chat/threads}). {@code title} is the first user message
+     * of the session cut to {@value ChatThreadService#TITLE_MAX_CHARS} characters, null when the session holds
+     * no user message yet. {@code updatedAt} is the last branching activity, which is what the list is ordered by.
+     */
+    public record ThreadView(String sessionId, UUID agentId, String title, Instant createdAt, Instant updatedAt) {
+    }
+
+    /**
+     * A page of the caller's sessions, newest {@code updatedAt} first. {@code nextBefore} is the {@code before}
+     * to pass for the next page, null on the last one.
+     */
+    public record ThreadsResponse(List<ThreadView> threads, Instant nextBefore) {
+    }
 }

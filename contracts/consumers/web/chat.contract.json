@@ -3,6 +3,27 @@
   "provider": "core",
   "interactions": [
     {
+      "id": "get-api-chat-threads",
+      "method": "GET",
+      "path": "/api/chat/threads",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.nextBefore",
+          "$.threads"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-chat-threads-agentId-sessionId",
+      "method": "DELETE",
+      "path": "/api/chat/threads/{agentId}/{sessionId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
       "id": "get-api-chat-turns-turnId",
       "method": "GET",
       "path": "/api/chat/turns/{turnId}",
