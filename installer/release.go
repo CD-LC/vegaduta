@@ -257,6 +257,9 @@ func (p *progressWriter) Write(b []byte) (int, error) {
 // unpackRelease extracts the tarball into dir, stripping the single top-level
 // directory release tarballs are built with, and refusing any member that
 // would escape dir.
+// symlink is os.Symlink; a var so tests can make it fail the way Windows does.
+var symlink = os.Symlink
+
 func unpackRelease(tgz, dir string) error {
 	f, err := os.Open(tgz)
 	if err != nil {
@@ -296,9 +299,18 @@ func unpackRelease(tgz, dir string) error {
 		return insideLexical(p)
 	}
 	tr := tar.NewReader(zr)
+	// Links Windows would not create (no admin rights or Developer Mode): copied
+	// from their file once the whole archive is on disk.
+	type deferredLink struct{ target, source, name string }
+	var copies []deferredLink
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
+			for _, c := range copies {
+				if err := copyRegular(c.source, c.target); err != nil {
+					return fmt.Errorf("could not copy %s in place of its symlink: %w", c.name, err)
+				}
+			}
 			return nil
 		}
 		if err != nil {
@@ -362,9 +374,35 @@ func unpackRelease(tgz, dir string) error {
 			if (resolved && !insideResolved(candidate)) || (!resolved && !insideLexical(candidate)) {
 				return fmt.Errorf("tar symlink target escapes the install dir: %s -> %s", hdr.Name, hdr.Linkname)
 			}
-			if err := os.Symlink(hdr.Linkname, target); err != nil && !os.IsExist(err) {
-				return err
+			if err := symlink(hdr.Linkname, target); err != nil && !os.IsExist(err) {
+				copies = append(copies, deferredLink{target, candidate, hdr.Name})
 			}
 		}
 	}
+}
+
+// copyRegular writes src's bytes to dst (replacing it); src must be a regular file.
+func copyRegular(src, dst string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() {
+		return fmt.Errorf("%s is not a regular file", src)
+	}
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	_ = os.Remove(dst)
+	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, info.Mode().Perm())
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		return err
+	}
+	return out.Close()
 }

@@ -812,6 +812,14 @@ jobs:
           stage="${RUNNER_TEMP}/src"
           mkdir -p "${stage}/${prefix}"
           git archive --format=tar HEAD | tar -x -C "${stage}/${prefix}"
+          # Windows cannot create symlinks without admin rights or Developer Mode, so the
+          # setup app would fail to unpack one: ship each symlink as a copy of its file.
+          while IFS= read -r -d '' link; do
+            real="$(readlink -f "$link")"
+            case "$real" in "${stage}/${prefix}"/*) ;; *) echo "::error::symlink leaves the tree: $link"; exit 1 ;; esac
+            [ -f "$real" ] || { echo "::error::symlink is not to a file: $link"; exit 1; }
+            cp --remove-destination "$real" "$link"
+          done < <(find "${stage}/${prefix}" -type l -print0)
           envex="${stage}/${prefix}/deploy/compose/.env.example"
           if [ -f "$envex" ]; then
             sed -i -E "s|^VEGADUTA_VERSION=[[:space:]]*$|VEGADUTA_VERSION=${VERSION}|" "$envex"
