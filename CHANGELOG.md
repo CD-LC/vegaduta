@@ -17,6 +17,7 @@ Release notes on GitHub are generated from the section for each version.
 ### Fixed
 
 - **Windows: the personal install no longer stops with "required variable WORKSPACE_RUNNER_SECRET is missing a value".** The PowerShell launcher (`scripts/vegaduta.ps1`, which the Setup app runs on Windows) generated a shorter list of secrets than `scripts/vegaduta`: it lacked `WORKSPACE_RUNNER_SECRET`, which `personal.yml` and `lite.yml` require, and `SEARXNG_SECRET`, which web search requires. It now generates both, and an existing install gets them on its next start. A test fails CI when the two lists differ again.
+- **No secret a compose file requires can stop an install again.** Both launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`) now generate every secret-like variable any file under `deploy/compose` marks as required (so the opt-in WhatsApp QR and DefectDojo overlays no longer need hand-made secrets), not only the ones in their own table; and before `up`, each asks Docker Compose itself what is still missing and fills it, stopping with a plain "set X in .env" only for a value that is not a secret. The PowerShell launcher also no longer crashes on a Compose error written to stderr while it checks the database password. `tests/install` covers all three paths.
 
 ## [0.1.8] - 2026-10-21
 
