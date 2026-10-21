@@ -1,6 +1,6 @@
 # Installation
 
-VegaDūta has four install tiers: **Personal** (one person, one machine; the easiest, see [Personal mode](personal-mode.md) and the `vegaduta-setup` app in [installer/README.md](../installer/README.md), which needs no terminal), Lite, Full and Kubernetes. All of them run the **same container images**
+VegaDūta has four install tiers: **Personal** (one person, one machine; the easiest, see [Personal mode](personal-mode.md) and the Setup app in [installer/README.md](../installer/README.md), which needs no terminal and installs Docker and a free local model for you), Lite, Full and Kubernetes. All of them run the **same container images**
 (`ghcr.io/cd-lc/<component>`), so you can start small and move up without
 changing code.
 
@@ -17,8 +17,10 @@ changing code.
 Release images are multi-arch (`linux/amd64`, `linux/arm64`) and published as
 `ghcr.io/cd-lc/<name>:<version>`:
 
-`core`, `core-worker`, `core-jobs`, `web`, `sidecar`, `code-intel`,
-`app-builder`, `tool-sandbox`, `mcp-stdio-runner`, `workspace-runner`, `voice-agent`, `rl-trainer`,
+`core`, `core-full` (core with Chromium for browser tools), `core-worker`,
+`core-jobs`, `web`, `sidecar`, `code-intel`, `app-builder`, `tool-sandbox`,
+`mcp-stdio-runner`, `mcp-stdio-runner-browser`, `workspace-runner`,
+`browser-runner`, `voice-agent`, `rl-trainer`,
 `postgres` (PostgreSQL 16 with pgvector and Apache AGE; also tagged `16` for
 Compose, and `16-pgvector-age` for the CloudNativePG-based variant the Helm
 `postgres` chart uses), and `omnibus` — Postgres, a Redis-protocol store,
@@ -46,9 +48,10 @@ gh attestation verify oci://ghcr.io/cd-lc/core:<version> --repo CD-LC/vegaduta
 Compose images have **no `latest` default**: every image tag comes from
 `VEGADUTA_VERSION` in `deploy/compose/.env`, which a release tarball ships
 already set to its own version, so compose files, realm and images always
-belong to one release. In a git checkout set a published release, or use
-`--build` (images are then built and tagged `local`). Pin the chart version
-(Helm) the same way.
+belong to one release. In a git checkout with no version set, `up` and
+`personal` look up the latest published release and write it into `.env`; use
+`--build` to build the images instead (they are then tagged `local`). Pin the
+chart version (Helm) the same way.
 
 ### Verifying the installer download
 
@@ -71,10 +74,16 @@ sha256sum -c SHA256SUMS --ignore-missing
 See [getting-started.md](getting-started.md) for the walkthrough.
 
 ```sh
-./scripts/vegaduta up --lite                 # prebuilt images (needs a published release; none yet)
+./scripts/vegaduta up --lite                 # signed release images (the latest release unless .env pins one)
 ./scripts/vegaduta up --lite --build         # build from this checkout
 ./scripts/vegaduta up --lite --profile rag   # add the ML sidecar for document ingestion
+./scripts/vegaduta up --lite --local-ai      # add a free local model (Ollama), see local-models.md
 ```
+
+Other Lite add-ons: `--profile tools` (a runner for STDIO MCP connectors),
+`--profile workspace` (the Assistant's build terminal and projects folder),
+`--search` (private web search with SearXNG) and `--browser` (the Assistant's
+browser).
 
 What Lite leaves out on purpose: Kafka events, Temporal, Langfuse tracing,
 LiveKit voice, S3 (files go to a Docker volume), the admin console, and more
@@ -103,6 +112,10 @@ Profiles add optional services:
 | `code-intel` | code intelligence service with its private Docker executor (privileged dind, reachable only from code-intel on an internal network) |
 | `builder` | app builder (implies `code-intel`) |
 | `sandbox` | tool sandbox and MCP stdio runner for untrusted code |
+| `tools` | MCP stdio runner only (STDIO MCP connectors) |
+| `browser` | MCP stdio runner with a browser image (Chromium) for browser tools |
+
+Full keeps chat history in Postgres by default (`APP_CHAT_BRANCHING_ENABLED=true`).
 
 The CLI sets the matching core settings for you (for example
 `WORKFLOW_EXECUTION_ENGINE=temporal` with `temporal`). With raw
@@ -160,6 +173,22 @@ superuser for `db-roles`, backups and manual `psql`. PostgreSQL preloads `age`
 `LOAD 'age'`. Setting `POSTGRES_APP_USER` equal to `POSTGRES_USER` opts out
 (not recommended; `doctor` warns).
 
+When the database volume was made by an earlier install with a different
+password, `db-roles` fails with "password authentication failed". `up` and
+`personal` notice this, set the database to this install's password (the data
+is kept) and start again.
+
+### Where the secrets are kept
+
+`secrets` (run by every `up`) writes every secret the compose files require
+into `deploy/compose/.env`, and before starting asks Docker Compose
+(`docker compose config`) whether a required value is still missing. It also
+keeps a copy of the secrets outside the install folder, one per user:
+`~/.config/vegaduta/secrets.env` (`%LOCALAPPDATA%\VegaDuta\secrets.env` on
+Windows and WSL). A new install folder reuses them, so it can still read the
+data Docker kept. Back this file up with `.env`: it holds
+`APP_ENCRYPTION_KEY`.
+
 ### Backup, restore, upgrade
 
 ```sh
@@ -182,8 +211,8 @@ healthy. `.env`, its `.bak.*` copies and backups are always written with mode
 
 ## Kubernetes (Helm)
 
-Charts are published as OCI artifacts at `oci://ghcr.io/cd-lc/charts` by the release workflow
-(no release has been published yet; until then install from a checkout, after building the chart dependencies as described in [deploy/helm/README.md](../deploy/helm/README.md); the dependency step is not run by this guide). The
+Charts are published as OCI artifacts at `oci://ghcr.io/cd-lc/charts` by the release workflow,
+with the same version as the release. To install from a checkout instead, first build the chart dependencies as described in [deploy/helm/README.md](../deploy/helm/README.md). The
 umbrella chart `vegaduta` installs the platform; each component is also
 available as its own chart.
 
@@ -234,6 +263,9 @@ helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta \
 - **Untrusted code**: `tool-sandbox` and `mcp-stdio-runner` require a
   VM-isolating RuntimeClass (Kata Containers or gVisor) unless you explicitly
   set `requireRuntimeClass=false` for evaluation.
+- **Chat history**: `core.branchingEnabled` (default `true`) stores each chat
+  message in Postgres for 30 days, so conversations show on any device. Set it
+  to `false` to keep them only in Valkey for 24 hours.
 - **Local cluster**: `deploy/kind/` has a kind configuration and values for
   trying the chart on a laptop.
 

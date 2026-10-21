@@ -28,7 +28,14 @@ of the console, whose status list comes from `web/app/components/plugins/surface
 | MCP server | Use your agents, workflows and knowledge base from any MCP client | Available | Part of every workspace: `/mcp` (Streamable HTTP), scoped API key |
 
 "Available" means you can get it now. Everything else says plainly what is and is not ready; if
-a status changes, update `surfaces.ts` and this table together.
+a status changes, update `surfaces.ts` and this table together. The VS Code, JetBrains and Chrome
+rows say "Available" only when this deployment has published a build to its plugin catalog; when it
+has not, the page shows them as Preview ("Built, but no build is published to the download catalog
+yet.").
+
+The VegaDūta platform itself (the Setup app for macOS, Windows and Linux, container images, the
+Helm chart and the SDKs) is not on this page: the public `/downloads` page lists the installers of
+the latest release.
 
 ## The plugin catalog
 

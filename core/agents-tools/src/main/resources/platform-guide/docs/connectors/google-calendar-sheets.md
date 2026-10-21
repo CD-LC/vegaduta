@@ -27,7 +27,7 @@ same as `google_calendar` and `google_sheets` already did.
 ## Tools and their risk
 
 Every tool declares its risk in `BuiltInToolClassifications`
-(`core/agents-tools/.../tools/classification/`). The confirmation gate
+(`core/agents/.../tools/classification/`). The confirmation gate
 (`app.tools.classification.confirmation-gate`, on by default) asks a human
 before any tool classified irreversible and consequential runs.
 

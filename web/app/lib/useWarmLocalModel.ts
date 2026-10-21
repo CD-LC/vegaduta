@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { localModelsApi } from "./api/localModels";
 import { localModelAllowed } from "./personalInstall";
+import { warmPlatformModel } from "./warmPlatformModel";
 
 const STORAGE_KEY = "vegaduta.localModel.warmedAt";
 /** How long one warm-up is trusted before a surface asks again (core keeps the model for app.local-models.keep-alive). */
@@ -17,7 +18,12 @@ const REWARM_AFTER_MS = 5 * 60 * 1000;
  */
 export function useWarmLocalModel(enabled = true): void {
   useEffect(() => {
-    if (!enabled || !localModelAllowed()) return;
+    if (!enabled) return;
+    if (!localModelAllowed()) {
+      // Hosted console: the platform model is the one a chat would wait on.
+      warmPlatformModel();
+      return;
+    }
     let last = 0;
     try {
       last = Number(sessionStorage.getItem(STORAGE_KEY) ?? 0);

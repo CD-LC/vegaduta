@@ -13,6 +13,7 @@ import type { SessionLlmCall } from "../agents/playground/types";
 import { splitForSend, type PendingAttachment } from "../ChatAttachments";
 import type { StreamReconnectingState } from "../StreamReconnectingNotice";
 import type { AssistantTurn } from "./assistantTypes";
+import { persistTurnInBranchTree } from "./branchPersist";
 
 /** What a settled turn tells the pane (thread index, work counts, background offer). */
 export interface TurnOutcome {
@@ -121,10 +122,21 @@ export function useAssistantTurn(agentId: string | null) {
     async (
       message: string,
       attachments: PendingAttachment[] = [],
-      opts: { note?: string | null; targetAgentId?: string | null; replyNote?: string | null; sendText?: string | null } = {}
+      opts: {
+        note?: string | null;
+        targetAgentId?: string | null;
+        replyNote?: string | null;
+        sendText?: string | null;
+      } = {}
     ): Promise<TurnOutcome> => {
       const target = opts.targetAgentId ?? liveAgentRef.current;
-      const outcome: TurnOutcome = { sessionId: sessionIdRef.current, text: "", steps: [], ok: false, cancelled: false };
+      const outcome: TurnOutcome = {
+        sessionId: sessionIdRef.current,
+        text: "",
+        steps: [],
+        ok: false,
+        cancelled: false,
+      };
       if (!target) return outcome;
       const now = Date.now();
       const userId = nextTurnId("u");
@@ -137,9 +149,23 @@ export function useAssistantTurn(agentId: string | null) {
           content: message,
           at: now,
           note: opts.note ?? null,
-          attachments: attachments.map(({ fileName, mimeType, sizeBytes, previewUrl }) => ({ fileName, mimeType, sizeBytes, previewUrl })),
+          attachments: attachments.map(({ fileName, mimeType, sizeBytes, previewUrl }) => ({
+            fileName,
+            mimeType,
+            sizeBytes,
+            previewUrl,
+          })),
         },
-        { id: replyId, role: "assistant", content: "", at: now, startedAt: now, endedAt: null, steps: [], note: opts.replyNote ?? null }
+        {
+          id: replyId,
+          role: "assistant",
+          content: "",
+          at: now,
+          startedAt: now,
+          endedAt: null,
+          steps: [],
+          note: opts.replyNote ?? null,
+        }
       );
       setSending(true);
       setError(null);
@@ -180,8 +206,18 @@ export function useAssistantTurn(agentId: string | null) {
         if (ownSession && newSessionId) setSessionId(newSessionId);
         patchTurn(replyId, { endedAt: Date.now(), ref: turnRef });
         const enrichSid = ownSession ? newSessionId || sessionIdRef.current : null;
-        if (enrichSid) void enrichTurn(target, enrichSid, replyId);
-        return { ...outcome, sessionId: ownSession ? newSessionId || sessionIdRef.current : null, text, steps, ok: true };
+        if (enrichSid) {
+          void enrichTurn(target, enrichSid, replyId);
+          // Persistence only (the thread list and reopening after 24h); the answer is never applied here.
+          void persistTurnInBranchTree(target, enrichSid);
+        }
+        return {
+          ...outcome,
+          sessionId: ownSession ? newSessionId || sessionIdRef.current : null,
+          text,
+          steps,
+          ok: true,
+        };
       } catch (err) {
         const cancelled = isCancelledError(err);
         const reason = errorMessage(err);

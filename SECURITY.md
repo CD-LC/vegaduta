@@ -80,15 +80,19 @@ Every release artifact is signed keylessly (Sigstore) by the release workflow
 running on the release tag, so the signing identity is always
 `https://github.com/CD-LC/vegaduta/.github/workflows/release.yml@refs/tags/v<version>`.
 
-Container images and Helm charts (cosign signature, SPDX SBOM and SLSA
-provenance attestations):
+Container images (cosign signature, SPDX SBOM and SLSA provenance
+attestations) and Helm charts (cosign signature; SLSA provenance on the
+packaged `.tgz`):
 
 ```sh
 cosign verify ghcr.io/cd-lc/core:<version>   --certificate-identity-regexp '^https://github\.com/CD-LC/vegaduta/\.github/workflows/release\.yml@refs/tags/v'   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 gh attestation verify oci://ghcr.io/cd-lc/core:<version> --repo CD-LC/vegaduta
+cosign verify ghcr.io/cd-lc/charts/vegaduta:<version>   --certificate-identity-regexp '^https://github\.com/CD-LC/vegaduta/\.github/workflows/release\.yml@refs/tags/v'   --certificate-oidc-issuer https://token.actions.githubusercontent.com
+gh attestation verify vegaduta-<version>.tgz --repo CD-LC/vegaduta
 ```
 
-Release downloads (`vegaduta-<version>.tar.gz`, charts, SBOMs): check
+Release downloads (`vegaduta-<version>.tar.gz`, the Setup app `.dmg`/`.zip`/`.tar.gz`
+files, charts, SBOMs): check
 `SHA256SUMS` against its signature, then the files against `SHA256SUMS`:
 
 ```sh

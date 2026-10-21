@@ -78,8 +78,8 @@ These are targets for a small team, not guarantees.
   Business Source License 1.1: free for any use except offering the software
   itself to third parties as a competing hosted service, and each version
   converts to the Apache License 2.0 four years after its release.
-- **The SDKs stay Apache-2.0.** The `sdk/` directory (Java, Python and
-  TypeScript clients) is licensed under Apache-2.0 so the clients can be
+- **The SDKs stay Apache-2.0.** The `sdk/` directory (the Java and Python
+  Agent SDKs and the TypeScript and Python clients) is licensed under Apache-2.0 so the clients can be
   embedded in any application, proprietary or not.
 - **No split-licensed server.** There is no "open core" edition in which
   parts of the server (for example SSO, RBAC, audit logging, multi-tenancy or

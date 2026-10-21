@@ -9,15 +9,15 @@ practice. Additive; nothing in `core/` changed.*
 
 | Area | Files (all new/additive) | Purpose |
 |---|---|---|
-| Guardrail policy engine | `code-intel/app/policy.py` | deny/allow/ask gates, caps, protected paths, injection canary |
-| Per-tenant policy store | `code-intel/app/policy_store.py` | conservative defaults; service kill-switch overrides tenant |
-| Audit + approvals | `code-intel/app/audit.py` | append-only JSONL trail; pending-approval store |
-| Service wiring | `code-intel/app/service.py` (edited) | every run/apply is gated → audited; knowledge bridge |
-| API | `code-intel/app/main.py` (edited) | `/policy`, `/approvals`, `/audit`, `/knowledge/query`, `?approval_id=` |
-| Tests | `code-intel/tests/test_guardrails.py` | 35 tests, all passing |
-| Web page | `web/app/code-intel/page.js`, `lib.js` (edited) | "Ask the Code" + "Guardrails" tabs |
+| Guardrail policy engine | `services/code-intel/app/policy.py` | deny/allow/ask gates, caps, protected paths, injection canary |
+| Per-tenant policy store | `services/code-intel/app/policy_store.py` | conservative defaults; service kill-switch overrides tenant |
+| Audit + approvals | `services/code-intel/app/audit.py` | append-only JSONL trail; pending-approval store |
+| Service wiring | `services/code-intel/app/service.py` (edited) | every run/apply is gated → audited; knowledge bridge |
+| API | `services/code-intel/app/main.py` (edited) | `/policy`, `/approvals`, `/audit`, `/knowledge/query`, `?approval_id=` |
+| Tests | `services/code-intel/tests/test_guardrails.py` | 35 tests, all passing |
+| Web page | `web/app/code-intel/page.tsx`, `lib.ts`, `GovernanceTab.tsx` (originally `page.js`, `lib.js`) | the page now has Repos, Knowledge, Search, Graph, Exec and Governance tabs; the guardrail controls are on Governance |
 
-Test totals: **73 passing** (17 service + 35 guardrails + 21 exec/MCP).
+Test totals when this was added: **73 passing** (17 service + 35 guardrails + 21 exec/MCP). The suite has grown since; run it with `python -m tests.<module>` (not pytest).
 
 ---
 
@@ -97,7 +97,7 @@ governed by the same per-agent knowledge flags already in core.
 
 ## 4. Web integration (the /code-intel preview page)
 
-Two new tabs, still on the standalone pre-merge link (not in the nav rail):
+Two new tabs, added when the page was a standalone link (it is now in the nav rail as "Code Intel", `/code-intel`; the tabs are now Knowledge and Governance):
 
 - **Ask the Code** — natural-language, grounded, cited code Q&A across repos.
 - **Guardrails** — set the autonomy mode and toggles, see **pending
@@ -106,7 +106,7 @@ Two new tabs, still on the standalone pre-merge link (not in the nav rail):
   control surface the whole model depends on.
 
 The Execute & Rework tab now shows each action's policy decision; an ASK
-action surfaces as an approval in the Guardrails tab rather than running.
+action surfaces as an approval in the Governance tab rather than running.
 
 ### How this maps onto core's existing guardrails (when you promote it)
 
@@ -128,7 +128,7 @@ CODE_INTEL_AUTH_MODE=keycloak CODE_INTEL_CORS_ORIGINS=http://localhost:3000 \
 CODE_INTEL_ALLOW_EXEC=true python -m uvicorn app.main:app --port 8090
 
 # web, from web/
-npm run dev      # open http://localhost:3000/code-intel → Guardrails tab
+npm run dev      # open http://localhost:3000/code-intel → Governance tab
 ```
 
 Default posture is **test_gated with exec off** until you opt in — safe by

@@ -8,8 +8,8 @@ platform's infrastructure handles your data.
 | Integrations | `/tools` | any member (count badge when servers need attention) | registering, connecting, patching or deleting an MCP server, OAuth connections and approving a tool-list change need `PERM_MANAGE_INTEGRATIONS`; custom code and OpenAPI tool sources need `PERM_MANAGE_TOOLS` |
 | Secrets | `/secrets` | any member | members store user-scoped secrets; tenant-scoped writes need the tenant-admin role |
 | Data & Infrastructure | `/data-usage` | any member | `GET /api/tenant/data-usage` needs `PERM_MANAGE_DATA_GOVERNANCE` |
-| Add-ons | `/add-ons` | any member on a personal install (hidden elsewhere) | reading needs sign-in; changing needs tenant-admin on a personal install, platform-admin otherwise. See [Add-ons](add-ons.md) |
-| Troubleshoot | `/troubleshoot` | any member | local-model checks are signed-in; meant for personal/local installs |
+| Add-ons | `/add-ons` | any member on a personal or lite install (hidden on a full install) | reading needs sign-in; changing needs tenant-admin on a personal install, platform-admin otherwise. See [Add-ons](add-ons.md) |
+| Troubleshoot | `/troubleshoot` | any member | local-model checks are signed-in; the local-model part shows on a personal install only |
 
 ## Integrations (`/tools`)
 
@@ -83,9 +83,18 @@ inline error instead of the cards. API: `GET /api/tenant/data-usage`.
 
 ## Troubleshoot (`/troubleshoot`)
 
-The owner's "something is wrong" panel for a personal or local install. It checks what the browser can see —
-core API reachable, the local model server answering, the recommended model pulled, tool calling working — shows
-the local model catalog (recommended plus alternatives, install state, RAM fit) with one-click pulls, and links to
-Academy guides when the install has an Academy URL. What the page cannot see (Docker, host ports) it delegates to
-`scripts/vegaduta doctor --personal`. API: the local-model endpoints behind
-[local models](../local-models.md).
+The owner's "something is wrong" panel for a personal install. It checks what the browser can see — **API
+connection**, **Local model server**, **Model downloaded** and **Agent tool calls** (with a **Test tool calling**
+button) — and **Re-run checks** runs them again. Below the checks is the **Model catalog** (recommended model plus
+alternatives, download size, RAM fit, tool-call grade) with **Download** and **Use** buttons; **Use** switches the
+agents to that model from the next turn, without a restart.
+
+The page says which model agents use now ("Agents currently use …") and, when chats still cannot use it, why: the
+platform model pool is switched off, its provider entry is disabled, or the entry was saved under an earlier
+encryption key or its address is blocked. The fix it gives is to restart VegaDūta (`scripts/vegaduta restart` in the
+install folder), which repairs the entry on start, or to fix the entry under Platform Admin → LLM & Providers.
+
+A **Learn how this works** box links to the Academy guides when the install has an Academy address. What the page cannot see (Docker, host ports, the whole
+app being down) it delegates to `scripts/vegaduta doctor --personal`. On lite and full installs the models belong to
+the platform operator, so the page shows only a note to contact your admin. API: the local-model
+endpoints behind [local models](../local-models.md).

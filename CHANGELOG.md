@@ -8,8 +8,28 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-10-21
+
+### Added
+
+- **Conversations follow you.** `GET /api/chat/threads` lists the signed-in user's chat sessions (title, agent, last activity) and `DELETE /api/chat/threads/{agentId}/{sessionId}` removes one; the Assistant merges them into its thread list, so history shows on a new browser or device. Needs `APP_CHAT_BRANCHING_ENABLED=true` (404 otherwise; the console then keeps its local list). The Assistant now records its turns in the conversation tree, and reopening a thread older than the 24 h session window reads the stored tree.
+
+### Fixed
+
+- **A personal install keeps chat history.** The 0.1.8 note said personal installs already had it on; they did not: `personal.yml` never set `APP_CHAT_BRANCHING_ENABLED` and core defaults it to off, so the Assistant's history stayed in one browser and a conversation expired after 24 h. The `personal` profile now turns it on (`app.chat.branching.enabled`, still `APP_CHAT_BRANCHING_ENABLED=false` in `deploy/compose/core.env` to switch it off). Conversations that had already expired are not recovered.
+- **A personal install's local model answers again by itself after a secrets change.** When the install kept its database but got a new `.env` (a re-install, or a repaired install), the local model's platform-pool entry was still listed as "in use" while every chat answered "No platform LLM is configured": its stored key no longer decrypted under the new `APP_ENCRYPTION_KEY`, so the chat path left it out. Core now repairs that entry (re-keys it, re-enables it, switches the pool back on) at every start and, when a chat still finds the pool empty, on the spot during that chat. The troubleshoot page says why the entry cannot be used instead of calling it in use, and the chat notice points to Troubleshoot.
+- **Windows: the personal install no longer stops with "required variable WORKSPACE_RUNNER_SECRET is missing a value".** The PowerShell launcher (`scripts/vegaduta.ps1`, which the Setup app runs on Windows) generated a shorter list of secrets than `scripts/vegaduta`: it lacked `WORKSPACE_RUNNER_SECRET`, which `personal.yml` and `lite.yml` require, and `SEARXNG_SECRET`, which web search requires. It now generates both, and an existing install gets them on its next start. A test fails CI when the two lists differ again.
+- **No secret a compose file requires can stop an install again.** Both launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`) now generate every secret-like variable any file under `deploy/compose` marks as required (so the opt-in WhatsApp QR and DefectDojo overlays no longer need hand-made secrets), not only the ones in their own table; and before `up`, each asks Docker Compose itself what is still missing and fills it, stopping with a plain "set X in .env" only for a value that is not a secret. The PowerShell launcher also no longer crashes on a Compose error written to stderr while it checks the database password. `tests/install` covers all three paths.
+
+## [0.1.8] - 2026-10-21
+
+### Fixed
+
+- **The first chat no longer waits for the platform model to wake up.** A hosted model that scales to zero took 70 s or more to answer the first message. The console now asks core to load it (`POST /api/platform-llm/warm`, a one-token request to the pool's top row, at most once every 4 minutes per core instance) as soon as someone signs in or opens a chat. If a reply still has not started after 8 seconds, the chat says the model is starting up and that later replies are fast. Off with `APP_PLATFORM_LLM_WARM_ENABLED=false`.
+
 ### Changed
 
+- **Chat history is kept by default on full installs and in the Helm chart.** `APP_CHAT_BRANCHING_ENABLED` now defaults to `true` in `deploy/compose/docker-compose.yml` (lite and personal already had it) and the chart gains `core.branchingEnabled` (default `true`), so each message is stored in Postgres for 30 days instead of expiring from Redis after 24 h. Conversations that had already expired are not recovered. Set it to `false` to go back.
 - **Local models answer sooner.** The Compose `local-ai` overlay now loads the model when the stack starts and keeps it in memory (`OLLAMA_KEEP_ALIVE=-1`, `OLLAMA_FLASH_ATTENTION=1`), so the first reply no longer pays a cold start, and sends `reasoning_effort: none` so reasoning models skip their hidden thinking pass (`LOCAL_LLM_REASONING_EFFORT` changes it; new core property `app.llm.ollama.reasoning-effort`, blank by default outside the overlay). The Assistant shows a short note when it runs on a local model, with a link to Agent settings where it can be tuned for speed or quality.
 - **Academy links everywhere, Academy source nowhere.** The Academy is a separate, proprietary deployable, so the open-source console links to it but carries none of its content: the in-console `/learn` index, the screen→lesson map (`consoleLessonMap.ts`), the curriculum index and every lesson-id deep link are removed, and per-screen "Learn this" buttons become plain links to the Academy. The OSS landing header and footer, the docs site nav and every tier's compose/Helm defaults point at the hosted `academy.vegaduta.ai` (`WEB_ACADEMY_URL`/`NEXT_PUBLIC_ACADEMY_URL`, still overridable; `""` hides the links on a fork). The personal tutor stays at `/learn/tutor`.
 
@@ -255,7 +275,6 @@ Release notes on GitHub are generated from the section for each version.
 - **iMessage channel** through BlueBubbles on a Mac that stays awake: webhook or polling (`app.imessage.polling.enabled`), allow-list and pairing, approval-gated replies. Migration V610. Never run against a real Mac so far. See [docs/imessage-channel.md](docs/imessage-channel.md).
 - **Optional billing edition** (`app.edition.billing-enabled`, default `true`). `false` removes the billing, checkout, invoice and top-up endpoints and billing mail, resolves every plan limit as unlimited, and never shows an upgrade prompt; usage is still counted.
 - **`docs/security-model.md`**: what taint tracking, the STDIO sandbox and channel pairing do and do not protect against.
-
 
 - **Free web search and polish**: `scripts/vegaduta up --search` (also offered by the first-run question) runs a private SearXNG so agents get `web_search` with no API key; three ready-made bundles use it; Export button per agent, Connect in the sidebar, and a "Start from a ready-made agent" action on the empty agents list.
 - **Console: Agent files and Connect.** `/agents/bundles` lets a person start from four ready-made agents or import an agent file, with a preview of tools, autonomy and safety adjustments before anything is created; `/connect` shows Telegram, WhatsApp, email, Google, Slack, SMS and documents with connected status and opens the page that connects each.

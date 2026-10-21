@@ -102,6 +102,54 @@ printf 'tier=personal\nprofiles=\nbuild=1\nlocal_ai=\nlocal_model=\nsearch=1\nna
 out="$("$CLI" personal --dry-run </dev/null 2>&1)"
 check "an install that never chose gets the model on its next run" "$(has "$out" 'local_ai=container'; echo $?)" "$out"
 
+echo "secret tables"
+# Windows runs vegaduta.ps1, which keeps its own copy of the table; a secret missing there made
+# every Windows personal install stop with "WORKSPACE_RUNNER_SECRET is missing a value".
+sh_specs="$(sed -n '/^SECRET_SPECS="/,/^"/p' "$CLI" | grep -oE '^[A-Z0-9_]+:[a-z0-9]+' | sort)"
+ps_specs="$(tr -d '\r' < "$ROOT/scripts/vegaduta.ps1" | sed -n '/^\$SecretSpecs = /,/^}/p' \
+  | grep -oE "[A-Z0-9_]+='[a-z0-9]+'" | sed "s/='/:/; s/'\$//" | sort)"
+d="$(diff <(printf '%s\n' "$sh_specs") <(printf '%s\n' "$ps_specs"))"
+check "vegaduta.ps1 generates the same secrets as scripts/vegaduta" "$([ -z "$d" ]; echo $?)" "$d"
+required="$(grep -hoE '\$\{[A-Z0-9_]+:\?run scripts/vegaduta secrets' "$ROOT"/deploy/compose/*.yml \
+  | sed -E 's/^\$\{([A-Z0-9_]+).*/\1/' | sort -u)"
+missing="$(comm -23 <(printf '%s\n' "$required") <(printf '%s\n' "$sh_specs" | cut -d: -f1))"
+check "every secret the compose files require is generated" "$([ -z "$missing" ]; echo $?)" "not generated: $missing"
+
+echo "secrets the compose files require"
+# Belt and braces on top of the table: whatever any compose file marks ${X:?} and looks like a secret
+# is generated too (scan), and `up` asks Compose itself what is still missing and fills it (guard).
+# No table edit can leave an install stuck on "required variable X is missing a value" again.
+new_home; "$CLI" secrets >/dev/null 2>&1
+required_secrets="$(grep -rhoE '\$\{[A-Z0-9_]+:\?' "$ROOT/deploy/compose" --include='*.yml' --include='*.yaml' \
+  | sed -E 's/^\$\{([A-Z0-9_]+):\?$/\1/' | sort -u | grep -E 'SECRET|_PASSWORD$|_PASS$|_KEY$|_TOKEN$|_AUTH$|_SALT$' | awk '!/_API_KEY$/ || $0 == "LIVEKIT_API_KEY"')"
+empty=""; for n in $required_secrets; do [ -n "$(sed -n "s/^$n=//p" "$VEGADUTA_ENV_FILE")" ] || empty="$empty $n"; done
+check "every secret any compose file requires has a value after secrets" "$([ -n "$required_secrets" ] && [ -z "$empty" ]; echo $?)" "empty:$empty"
+check "the per-user copy holds them too" "$(grep -q '^WHATSAPP_QR_BRIDGE_SECRET=.' "$VEGADUTA_SECRETS_KEEP" && grep -q '^DD_SECRET_KEY=.' "$VEGADUTA_SECRETS_KEEP"; echo $?)"
+skel="$(mktemp -d)"; mkdir -p "$skel/scripts" "$skel/deploy"; ln -s "$ROOT/deploy/compose" "$skel/deploy/compose"
+sed '/^WORKSPACE_RUNNER_SECRET:hex32$/d' "$CLI" > "$skel/scripts/vegaduta"; chmod +x "$skel/scripts/vegaduta"
+new_home; "$skel/scripts/vegaduta" secrets >/dev/null 2>&1
+check "a secret the table forgot is still generated from the compose files" "$(grep -q '^WORKSPACE_RUNNER_SECRET=.' "$VEGADUTA_ENV_FILE"; echo $?)" "$(grep WORKSPACE_RUNNER "$VEGADUTA_ENV_FILE")"
+fake="$(mktemp -d)"; cat > "$fake/docker" <<'FAKE'
+#!/bin/sh
+# docker compose ... config -q: complains about the first FAKE_REQUIRE variable that is empty in .env
+case " $* " in
+  *" config "*)
+    for n in $FAKE_REQUIRE; do
+      grep -q "^$n=." "$VEGADUTA_ENV_FILE" && continue
+      echo "required variable $n is missing a value: run scripts/vegaduta secrets" >&2; exit 1
+    done; exit 0 ;;
+  *" up "*) echo "fake up"; exit 0 ;;
+  *) exit 1 ;;
+esac
+FAKE
+chmod +x "$fake/docker"
+heal() { PATH="$fake:$PATH" VEGADUTA_NO_MAIN=1 bash -c 'source "$1"; COMPOSE_ARGS=(); dc_up_heal up -d' _ "$CLI" 2>&1; }
+out="$(FAKE_REQUIRE="EXTRA_BRIDGE_SECRET NEW_SERVICE_PASSWORD" heal)"
+check "secrets compose reports missing are generated before up, then up runs" "$(grep -q '^EXTRA_BRIDGE_SECRET=.' "$VEGADUTA_ENV_FILE" && grep -q '^NEW_SERVICE_PASSWORD=.' "$VEGADUTA_ENV_FILE" && has "$out" 'generated 2 secret' && has "$out" 'fake up'; echo $?)" "$out"
+check "they are kept for the next install" "$(grep -q '^EXTRA_BRIDGE_SECRET=.' "$VEGADUTA_SECRETS_KEEP"; echo $?)"
+out="$(FAKE_REQUIRE="BASE_DOMAIN" heal)"
+check "a missing value that is not a secret stops with the name to set" "$(has "$out" 'required by the compose files but empty in .*: BASE_DOMAIN' && ! has "$out" 'fake up'; echo $?)" "$out"
+
 echo "compose project"
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   new_home

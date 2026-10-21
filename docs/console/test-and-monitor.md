@@ -2,13 +2,17 @@
 
 The **Test & Monitor** group is pre-launch verification and post-launch observation in one place. Gating is per
 row: the evaluation and insight pages are for everyone, while the `/admin/*` observability screens carry a
-permission. Playground, Quick Task and Jobs folded into [Assistant](assistant.md) on 2026-10-18 — their routes
-redirect there, and what follows describes the behaviour that moved.
+permission. On a **personal install** Playground, Quick Task and Jobs folded into [Assistant](assistant.md) on
+2026-10-18: their rows leave the sidebar and their routes redirect there. On lite and full installs they keep their
+rows and pages, as described below.
 
 | Label | Route | Nav needs | Backend rule |
 |---|---|---|---|
+| Playground | `/playground` | any member (not on a personal install) | the picked agent's access rules apply |
 | Agent quality | `/agents/quality` | any member | reads open; dataset, calibration and simulation writes need `PERM_MANAGE_AGENTS`; accepting an improvement needs `PERM_MANAGE_GUARDRAILS` |
-| Turn inspector | `/agents/turns` | any member | `GET /api/agents/{agentId}/turns/{turnId}/journal` needs `PERM_VIEW_AUDIT_LOG` and VIEWER on the agent |
+| Turn inspector | `/agents/turns` | `PERM_VIEW_AUDIT_LOG` | `GET /api/agents/{agentId}/turns/{turnId}/journal` needs `PERM_VIEW_AUDIT_LOG` and VIEWER on the agent |
+| Quick Task | `/quick-task` | any member (not on a personal install) | signed-in |
+| Jobs | `/jobs` | any member (not on a personal install) | schedule writes need `PERM_MANAGE_AGENTS` |
 | Insights | `/insights` | any member | spend reports (`/api/admin/spend-reports/**`) need `PERM_VIEW_USAGE`; job counts are open |
 | Cost & ROI | `/roi` | `PERM_VIEW_USAGE` | reads `PERM_VIEW_USAGE`; writes `PERM_MANAGE_BILLING` |
 | Usage | `/usage` | any member | signed-in |
@@ -17,16 +21,24 @@ redirect there, and what follows describes the behaviour that moved.
 | Live activity | `/admin/audit-tail` | `PERM_VIEW_AUDIT_LOG` | `/api/audit-log/**` needs `PERM_VIEW_AUDIT_LOG` |
 | Audit log | `/admin/audit` | `PERM_VIEW_AUDIT_LOG` | `/api/audit-log/**` needs `PERM_VIEW_AUDIT_LOG` |
 
-## Playground (`/playground` → `/assistant`)
+## Playground (`/playground`)
 
-The Playground folded into [Assistant](assistant.md) on 2026-10-18: `/playground` redirects to
-`/assistant`, and `?agent=` / `?prompt=` deep links keep working. The agent picker under the box is the old
-dropdown, and each finished reply still carries the request X-ray (prompt, sampling, tool list) the Playground
-showed. The chat exposes the agent's memories (with delete), the tool-call log, the model request log of a
-session, inline approval decisions, per-turn feedback, attachments, chat branching (edit and regenerate a
-message) and session export. Generated images, audio, video, documents and sandbox artifacts render in the
-thread. API: `POST /api/agents/{id}/chat` (streamed), `/api/agents/{id}/chat/attachments`,
-`/api/agents/{id}/tool-calls`, `/api/agents/{id}/sessions/{sessionId}/llm-requests`, `/api/agents/{id}/memories`.
+Chat with one agent at a time to try it out. Arriving from an agent's "Chat" link (`?agent=<id>`) pre-selects that
+agent; `?prompt=` pre-fills the box. Each finished reply carries the request X-ray (prompt, sampling, tool list). The
+chat exposes the agent's memories (with delete), the tool-call log, the model request log of a session, inline
+approval decisions, per-turn feedback, attachments and session export. Generated images, audio, video, documents
+and sandbox artifacts render in the thread.
+
+When the install keeps chat history (`APP_CHAT_BRANCHING_ENABLED`, on by default), each of your messages has
+**Edit message** and each reply **Regenerate response**; both keep the earlier version, and a "< 2/3 >" switcher
+moves between versions. The history is stored for 30 days. If a reply has not started after 8 seconds, a line says
+"The model is starting up - the first reply can take up to a minute. Replies after that are fast." (a hosted model
+that was idle, or a local model that was unloaded, loads first).
+
+On a personal install `/playground` redirects to [Assistant](assistant.md) with `?agent=` and `?prompt=` carried
+over; the Assistant's agent picker does the same job there. API: `POST /api/agents/{id}/chat` (streamed),
+`/api/agents/{id}/chat/attachments`, `/api/agents/{id}/tool-calls`, `/api/agents/{id}/sessions/{sessionId}/llm-requests`,
+`/api/agents/{id}/memories`.
 
 ## Agent quality (`/agents/quality`)
 
@@ -62,22 +74,24 @@ API: `GET /api/agents/{id}/improvements`, `POST .../improvements/generate`, `POS
 `POST .../improvements/{suggestionId}/dismiss`, `GET .../improvements/health` (the last computed health and confidence
 snapshot, null until the first sweep or generate).
 
-## Quick Task (`/quick-task` → `/assistant?mode=task`)
+## Quick Task (`/quick-task`)
 
-A fast alternative to building a workflow: describe a task and run it while you watch (streamed). The launcher
-folded into [Assistant](assistant.md) on 2026-10-18 (`/quick-task` redirects to `/assistant?mode=task`).
-`/quick-task/history` remains the history page: a paged list of the user's runs (server paging with
+A fast alternative to building a workflow: describe a task and run it while you watch (streamed). It previews the
+agent and tools it will use, asks you to confirm, then runs and can deliver the result to WhatsApp, SMS or a call.
+On a personal install `/quick-task` redirects to the Assistant's **Quick task** mode (`/assistant?mode=task`).
+`/quick-task/history` is the history page on every install: a paged list of the user's runs (server paging with
 `limit`/`offset` and `X-Total-Count`, so the footer can say "50 of 200") that opens a run's full untruncated log.
 API: `POST /api/quick-task`, `/api/quick-task/preview`, `/api/quick-task/stream`, `GET /api/quick-task/recent`,
 `GET /api/quick-task/{taskId}`.
 
-## Jobs (`/jobs` → `/assistant?mode=background`)
+## Jobs (`/jobs`)
 
-The console for background agent runs (start a job and close the tab). The launcher folded into
-[Assistant](assistant.md) on 2026-10-18 (`/jobs` redirects to `/assistant?mode=background`); `/jobs/{agentId}/{jobId}`
-still shows one job live: status, result, progress and the trace streamed over SSE (job endpoints are
-agent-scoped, so the agent id is in the route). The work rail inside Assistant shows running and finished
-background work for the current thread. API: `GET /api/agent-jobs`, `POST /api/agents/{id}/jobs`,
+The console for background agent runs (start a job and close the tab): a launcher on top, the run list under it and
+recurring schedules on a second tab. `?agentId=` pre-selects an agent and filters the list. On a personal install
+`/jobs` redirects to the Assistant's **In background** mode (`/assistant?mode=background`), whose work rail shows
+running and finished background work. On every install `/jobs/{agentId}/{jobId}` shows one job live (status,
+result, progress and the trace streamed over SSE; job endpoints are agent-scoped, so the agent id is in the route),
+`/jobs/all` is the tenant-wide list and `/jobs/schedules` the schedules. API: `GET /api/agent-jobs`, `POST /api/agents/{id}/jobs`,
 `/api/agents/{id}/jobs/{jobId}` (and `/cancel`, `/progress`, `/trace`, `/trace/stream`),
 `/api/agents/{id}/schedule` (and `/resume`, `/run-now`, `/runs`). Schedule writes need `PERM_MANAGE_AGENTS`.
 
@@ -92,11 +106,12 @@ only, with a short note. Every number follows the same rules as Cost & ROI (no r
 
 ## Turn inspector (`/agents/turns`)
 
-**Dependent on an off-by-default backend flag.** A sidebar row since 2026-10-18. The inspector shows the recorded journal of one agent
-turn: an ordered, hash-chained list of the stages the turn went through. It is the UI for the turn journal in
-[ADR-0020](../architecture/ADR-0020-turn-journal.md) and is built on the turn inspector decision (ADR-0021, not yet
-in this repository's architecture folder; treat the screen as proposed and still changing). It has no sidebar row;
-the route is reached by link (for example from a chat turn).
+**Dependent on an off-by-default backend flag.** A sidebar row since 2026-10-18, shown to holders of
+`PERM_VIEW_AUDIT_LOG`. The inspector shows the recorded journal of one agent turn: an ordered, hash-chained list of
+the stages the turn went through. It is the UI for the turn journal in
+[ADR-0020](../architecture/ADR-0020-turn-journal.md), designed in
+[ADR-0021](../architecture/ADR-0021-turn-inspector.md). Your browser also re-checks the hash chain itself, and the
+page's **Export as test fixture** button downloads the turn as `turn-<id>.fixture.json`.
 
 - **You give it** an agent and a turn id. It reads `GET /api/agents/{agentId}/turns/{turnId}/journal`.
 - **You see** one row per event, in order: type (`INTAKE`, `GUARD`, `MODEL_CALL`, `TOOL_CALL`, `APPROVAL`, `VERIFY`,

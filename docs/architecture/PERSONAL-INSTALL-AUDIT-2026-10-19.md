@@ -59,25 +59,27 @@ Blockers that remain:
 
 ## 3. Still open, ranked
 
+Status notes in **bold** were added on 2026-10-21 (v0.1.9) from `CHANGELOG.md` and the code; the rest of the table is as written.
+
 | Sev | Item | Where | Smallest fix |
 |---|---|---|---|
-| high | Embeddings `auto` and a registered Ollama (blocker 2) | `EmbeddingProviderSelection.java:43-66`; `personal.yml:208` | resolve `auto` against the registered Ollama before the sidecar and pin it per install |
-| high | STDIO MCP form defaults to a transport the container cannot run | `CustomServerForm.tsx:46,157`; `core/Dockerfile:16-17` | land the `mcp-stdio-runner` profile (in flight elsewhere) or hide STDIO until `StdioSandboxStatus` reports launchers |
-| high | No published release (blocker 1) | `install.sh:166`; `installer/release.go:52` | publish; until then make the installer and README say "clone and run `scripts/vegaduta personal --build`" |
-| medium | Local model 500 on a malformed tool call ("expected element type function but have parameter", 1 of 6 background failures) | Ollama `/v1/chat/completions` | retry once; record the failure with the model's raw output |
-| medium | Core has no identical-call guard: the 4B re-issued the same `web_search` query before answering (bounded only by 25 rounds) | `ArgumentSanitizingToolCallingManager.java:110` | refuse a byte-identical repeat in the same turn and say so in the tool result |
-| medium | Small-model cap of 6 is the limiting factor for qwen3.5, which chose correctly 6 of 6 with 12 tools in the benchmark | `AgentToolSelection.SMALL_MODEL_TOOL_CAP` | make the cap depend on the pool row's measured grade and size; benchmark other models first |
-| medium | Wizard preflight blocks Install when the busy ports are the user's own running stack | `installer/preflight.go:97-140` | report them as ok when this install publishes them (the doctor already does) |
-| medium | macOS download is an unsigned bare binary; the working `.app`/`.dmg` is a hand build | `release.yml:545-564` | build and sign in the workflow or document "Open Anyway" |
+| high | Embeddings `auto` and a registered Ollama (blocker 2). **Done in 0.1.3** (`RegisteredOllamaEmbeddingResolver`, core/knowledge) | `EmbeddingProviderSelection.java:43-66`; `personal.yml:208` | resolve `auto` against the registered Ollama before the sidecar and pin it per install |
+| high | STDIO MCP form defaults to a transport the container cannot run. **Partly done in 0.1.4**: the `mcp-stdio-runner` profile landed (`--profile tools`, the personal Tools/Browser add-on); the form still defaults to STDIO | `CustomServerForm.tsx:46,157`; `core/Dockerfile:16-17` | land the `mcp-stdio-runner` profile (in flight elsewhere) or hide STDIO until `StdioSandboxStatus` reports launchers |
+| high | No published release (blocker 1). **Done**: signed releases are published (v0.1.0 onward; the 0.1.5 entry moves install instructions to the release artifacts and pinned GHCR images) | `install.sh:166`; `installer/release.go:52` | publish; until then make the installer and README say "clone and run `scripts/vegaduta personal --build`" |
+| medium | Local model 500 on a malformed tool call ("expected element type function but have parameter", 1 of 6 background failures). **Partly done in 0.1.3**: streaming chat replays the request once | Ollama `/v1/chat/completions` | retry once; record the failure with the model's raw output |
+| medium | Core has no identical-call guard: the 4B re-issued the same `web_search` query before answering (bounded only by 25 rounds). **Done in 0.1.3** (an identical lookup later in the same reply is answered "use the earlier result") | `ArgumentSanitizingToolCallingManager.java:110` | refuse a byte-identical repeat in the same turn and say so in the tool result |
+| medium | **Still open at v0.1.9** (`SMALL_MODEL_TOOL_CAP = 6`). Small-model cap of 6 is the limiting factor for qwen3.5, which chose correctly 6 of 6 with 12 tools in the benchmark | `AgentToolSelection.SMALL_MODEL_TOOL_CAP` | make the cap depend on the pool row's measured grade and size; benchmark other models first |
+| medium | Wizard preflight blocks Install when the busy ports are the user's own running stack. **Done in 0.1.3** (`vegadutaHeldPorts` in `installer/preflight.go`; Windows in 0.1.7) | `installer/preflight.go:97-140` | report them as ok when this install publishes them (the doctor already does) |
+| medium | macOS download is an unsigned bare binary; the working `.app`/`.dmg` is a hand build. **Partly done**: `release.yml` builds an ad-hoc-signed `.dmg` (not notarized) | `release.yml:545-564` | build and sign in the workflow or document "Open Anyway" |
 | medium | Terminal install and Setup-app install produce different stacks (workspace profile only in the wizard) | `installer/runner.go:18-30`; `install.sh:226-231` | make `workspace` the default on the container stack |
-| medium | Webhook-only channels (Slack, SMS, Meta WhatsApp, Discord, Teams, Meta social, X) are advertised on `/connect` | `connectCatalog.ts:18-24` | mark "needs a public address"; send the WhatsApp card to the QR tab |
+| medium | Webhook-only channels (Slack, SMS, Meta WhatsApp, Discord, Teams, Meta social, X) are advertised on `/connect`. **Partly done in 0.1.3**: Slack and SMS carry a "Needs a public address" badge and WhatsApp goes to the QR flow | `connectCatalog.ts:18-24` | mark "needs a public address"; send the WhatsApp card to the QR tab |
 | medium | `taint=enforce` marks `search_knowledge_base` untrusted, so `local_shell` gets an approval card although approval is off | `BuiltInToolClassifications.java:163-164` | document, show the taint source on the card, allow trusting a collection |
-| medium | `HOST_RAM_GB` / `HOST_ACCELERATOR` exported but not persisted; memory budget understated (wizard default about 5.4 GB of limits, documented 4 GB) | `scripts/vegaduta:1598-1602`; `personal.yml` | persist both; scale doctor and preflight by enabled profiles |
+| medium | **Persisting done in 0.1.3** (both written to `.env`). `HOST_RAM_GB` / `HOST_ACCELERATOR` exported but not persisted; memory budget understated (wizard default about 5.4 GB of limits, documented 4 GB) | `scripts/vegaduta:1598-1602`; `personal.yml` | persist both; scale doctor and preflight by enabled profiles |
 | low | Dead tool schemas offered with nothing behind them: `telegram_read_messages`, four `read_device_*` | `AgentChannelToolResolver.java:106-124,262-287` | gate on a configured bot and a paired device (needs a per-turn lookup) |
-| low | Prompt names `run_code`, `delegate_parallel`, `deep_research`, which are not offered | `assistantAgent.ts:50,53` | build the prompt from the offered tools; point the `run_code` hint at `local_shell` |
-| low | Share pages dial `localhost` in the web container; CORS list hardcodes `:3000` (the compose half is fixed) | `web/app/a/[shareId]/layout.tsx:45-47` | read `CORE_INTERNAL_URL` |
+| low | Prompt names `run_code`, `delegate_parallel`, `deep_research`, which are not offered. **Still open at v0.1.9** (`assistantAgent.ts` still names all three) | `assistantAgent.ts:50,53` | build the prompt from the offered tools; point the `run_code` hint at `local_shell` |
+| low | Share pages dial `localhost` in the web container; CORS list hardcodes `:3000` (the compose half is fixed). **Share pages done in 0.1.3** (prefer `CORE_INTERNAL_URL`) | `web/app/a/[shareId]/layout.tsx:45-47` | read `CORE_INTERNAL_URL` |
 | low | `/templates` is empty on a one-person install; nested `/jobs/*` routes still render | `TemplateGalleryController.java:22`; `WorkRail.tsx` | seed or empty state; redirect |
-| low | Doc drift: `getting-started.md` has no personal section; `install.sh:217` prints `up --lite`; `core.env.example` has no personal block | docs | text edits |
+| low | Doc drift: `getting-started.md` has no personal section; `install.sh:217` prints `up --lite`; `core.env.example` has no personal block. **Partly done**: `getting-started.md` now points to Personal mode | docs | text edits |
 
 ## 4. What to disable or hide on a personal install
 
@@ -86,8 +88,8 @@ Blockers that remain:
 | `/research` rail row | **done** | `useResearchEnabled` |
 | Workflow nodes `wait`, `voice_menu`, `bulk_email`, `crm_lead`, `device_control` | **done** (palette; saved graphs still open) | `workflowNodeOffered` |
 | WhatsApp QR "waiting for scan" when unconfigured | **done** | honest not-configured state |
-| STDIO MCP transport | open | see section 3 |
-| Webhook-only channels | open | see section 3 |
+| STDIO MCP transport | **partly done** (runner profile, 0.1.4) | see section 3 |
+| Webhook-only channels | **partly done** (0.1.3) | see section 3 |
 | Device and Telegram tool schemas | open | see section 3 |
 | Voice/Call UI (no livekit or voice-agent in `personal.yml`) | open | hide when `LiveKitTokenService` reports not configured |
 | Custom code tools and skill scripts (`TOOL_SANDBOX_ENABLED=false`) | open | panel already shows a disabled state; reword the hint |

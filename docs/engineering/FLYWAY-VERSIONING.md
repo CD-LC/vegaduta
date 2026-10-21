@@ -9,48 +9,39 @@ so the same version in each folder is a hard boot failure ("Found more than one
 migration with version N"), not two independent migrations.
 `scripts/ci/flyway-lint.sh` check (c) fails on any duplicate across both folders.
 
-## OSS-local migrations use a dotted minor version: `V<max>.<n>__`
+## New migrations take the next free integer
 
-The upstream (private) repository keeps allocating integer versions
-(`V366`, `V367`, ... - synced through `V369` so far). A migration written in this repository must never take
-the next integer, or the next upstream sync collides with it. Instead it takes a
-**dotted minor version on top of the current maximum**:
-
-```
-current max across BOTH folders: V369 (synced from upstream)
-OSS-local migrations:            V369.1__...   (earlier ones: V365.1 ... V365.5)
-next upstream migration:         V370__...
-```
-
-Flyway compares versions numerically part by part, so
-`365 < 365.1 < 365.2 < 366`. The second upstream sync brought `V366`-`V369`, which sort
-*after* the OSS-local `V365.x` files; that is intended (the `V365.x` files were written
-against V365 and are independent of the later upstream ones), and `out-of-order: true`
-makes it harmless on databases that applied them in the other order. The dotted versions slot in after the migration they
-were written against and before anything upstream adds later. They never
-collide with an integer version.
+This repository allocates integer versions itself: since `V370` every new migration takes the
+next integer version free across **both** folders (the current maximum is `V661`, in
+`tenant/`). This is the rule in [CONTRIBUTING.md](../../CONTRIBUTING.md#flyway-migrations).
 
 Rules:
 
 1. Find the current maximum across **both** folders:
    `ls core/app/src/main/resources/db/migration/{controlplane,tenant} | sort -V | tail -3`.
-2. Use `V<max>.<n>__description.sql`, with `<n>` the next free minor under that
-   maximum in **either** folder. Use the dot form (`V365.1`), not the underscore
-   form (`V365_1`). Flyway reads both as version 365.1, but `flyway-lint.sh`
-   parses only the dot form (`^V([0-9]+(\.[0-9]+)*)__`). An underscore file is
-   silently left out of the duplicate check.
-3. If upstream has since added a higher integer version, new OSS migrations
-   move to the new maximum (for example `V367.1__`). Never renumber a
-   migration that has already shipped. Renumbering is an edit of an applied
-   migration, and check (a) in the lint rejects it.
-4. `out-of-order: true` is already on (`application.yml`). A database that
-   applied `V366` before it sees a later-merged `V365.x` still applies it.
-   Every migration here must stay additive and `IF NOT EXISTS`-safe so that an
-   out-of-order apply is harmless.
-5. Say which folder and why in the migration header, as every existing
-   migration does.
+2. Use `V<max+1>__description.sql`. If another branch takes the same number first, move yours to
+   the next free one before it is released.
+3. Never edit, rename or renumber a migration that has already shipped. Renumbering is an edit of
+   an applied migration, and check (a) in the lint rejects it.
+4. `out-of-order: true` is already on (`application.yml`). A database that applied a higher
+   version before it sees a later-merged lower one still applies it. Every migration here must
+   stay additive and `IF NOT EXISTS`-safe so that an out-of-order apply is harmless.
+5. Say which folder and why in the migration header, as every existing migration does.
 
-## Current OSS-local migrations
+## History: dotted minor versions (`V365.1` to `V369.1`)
+
+While this repository was synced from an upstream (private) repository that kept allocating
+integer versions (synced through `V369`), migrations written here took a **dotted minor version
+on top of the then-current maximum** so the next upstream sync could not collide with them:
+`V365.1` to `V365.5` (written against V365) and `V369.1` (written against V369). Flyway compares
+versions numerically part by part, so `365 < 365.1 < 365.2 < 366`; the later upstream `V366` to
+`V369` sort after the `V365.x` files, which is harmless with `out-of-order: true`. Those files
+keep their versions (a shipped migration is never renumbered). Should a dotted version ever be
+needed again, use the dot form (`V365.1`), not the underscore form (`V365_1`): Flyway reads both
+as 365.1, but `flyway-lint.sh` parses only the dot form (`^V([0-9]+(\.[0-9]+)*)__`), so an
+underscore file is silently left out of the duplicate check.
+
+## Dotted (OSS-local) migrations
 
 | Version | Folder | Purpose |
 |---|---|---|

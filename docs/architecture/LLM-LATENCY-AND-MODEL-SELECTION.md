@@ -125,6 +125,17 @@ model, but each removes real time:
   virtual threads for far higher concurrency under load.
 - **Streaming** (web/SSE) — for a chat UI, perceived latency ≈ time-to-first-
   token; a fast model + streaming feels instant even for longer answers.
+- **Platform-pool warm-up** (v0.1.8) — a hosted model that scales to zero (or a
+  local Ollama that unloaded it) can take 70 s or more on the first request. The
+  console calls `POST /api/platform-llm/warm` when someone signs in or opens a
+  chat; `PlatformPoolWarmer` (`core/chat`) sends a one-token request to the
+  pool's top row, at most once per `app.platform-llm.warm.interval-seconds`
+  (default 240) per core instance. Off with `APP_PLATFORM_LLM_WARM_ENABLED=false`.
+- **Local models kept loaded** (v0.1.8) — the Compose `local-ai` overlay loads the
+  model at start and keeps it in memory (`OLLAMA_KEEP_ALIVE=-1`) and sends
+  `reasoning_effort: none` (`LOCAL_LLM_REASONING_EFFORT`, core property
+  `app.llm.ollama.reasoning-effort`) so reasoning models skip their hidden
+  thinking pass.
 
 ---
 

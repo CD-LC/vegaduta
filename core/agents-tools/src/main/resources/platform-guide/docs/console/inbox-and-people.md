@@ -18,9 +18,10 @@ endpoints enforce their own rules.
 ## Channels (`/admin/channels`)
 
 The channels screen. The top bar reads live and connected counts from `/api/channels/status`. The body is a
-grid of channel tiles, a log, and an inspector for the selected channel. The tiles are, in order: WhatsApp,
-Telegram, Instagram, Messenger, Slack, Discord, X, Teams, Email, Voice and Mobile SDK. SMS is configured inside the
-WhatsApp tile's Twilio side.
+grid of channel tiles, a log, and an inspector for the selected channel. The tiles are, in order: WhatsApp, SMS,
+WhatsApp QR, Telegram, Matrix, Instagram DM, Messenger, Slack, Discord, X - DMs, Microsoft Teams, iMessage,
+Email - IMAP, Voice, Signal and Mobile SDK. The **SMS** tile ("Plain SMS") uses the Twilio number connected in the
+WhatsApp tile: connect Twilio there first, then point its webhook at the URL the SMS tile shows.
 
 Per channel the inspector offers, where the channel supports them:
 

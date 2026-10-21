@@ -45,6 +45,12 @@ export interface LocalModelRecommendation {
   ollama: { reachable: boolean; baseUrl: string; installedTags: string[] };
   /** The tag the local pool row currently serves (null when no row points at this server). */
   servingModel: string | null;
+  /**
+   * Why chats cannot use that row although it exists, null when they can: the platform pool's master
+   * switch is off, the row is disabled, or its key no longer decrypts / its URL is refused. Core
+   * repairs all three at its next start.
+   */
+  servingBlocked?: "pool-off" | "row-disabled" | "row-unusable" | null;
 }
 
 /** POST /api/local-models/use. */
@@ -101,7 +107,8 @@ export interface LocalModelSettings {
 }
 
 export const localModelsApi = {
-  getLocalModelSettings: () => apiFetch(`/api/local-models/settings`, { skipGetCache: true }).then(toJson<LocalModelSettings>),
+  getLocalModelSettings: () =>
+    apiFetch(`/api/local-models/settings`, { skipGetCache: true }).then(toJson<LocalModelSettings>),
   saveLocalModelSettings: (update: { reasoningEffort?: ReasoningEffort; keepAlive?: string; contextLength?: number }) =>
     apiFetch(`/api/local-models/settings`, { method: "PUT", ...jsonBody(update) }).then(toJson<LocalModelSettings>),
   /** Loads the local model into memory ahead of the first chat (no tag = the pool row's model). */

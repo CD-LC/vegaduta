@@ -225,6 +225,9 @@
       "name": "ChatImport"
     },
     {
+      "name": "ChatThread"
+    },
+    {
       "name": "ChatTranscript"
     },
     {
@@ -607,6 +610,9 @@
     },
     {
       "name": "PlatformOps"
+    },
+    {
+      "name": "PlatformPoolWarm"
     },
     {
       "name": "PlatformSession"
@@ -32826,6 +32832,123 @@
         ]
       }
     },
+    "/api/chat/threads": {
+      "get": {
+        "tags": [
+          "ChatThread"
+        ],
+        "summary": "List",
+        "operationId": "ChatThreadController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatBranchDtos_ThreadsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/chat/threads/{agentId}/{sessionId}": {
+      "delete": {
+        "tags": [
+          "ChatThread"
+        ],
+        "summary": "Delete",
+        "operationId": "ChatThreadController_delete",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/chat/turns/{turnId}": {
       "get": {
         "tags": [
@@ -52043,6 +52166,58 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/platform-llm/warm": {
+      "post": {
+        "tags": [
+          "PlatformPoolWarm"
+        ],
+        "summary": "Warm",
+        "operationId": "PlatformPoolWarmController_warm",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -93987,6 +94162,44 @@
           "messageId"
         ]
       },
+      "ChatBranchDtos_ThreadView": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChatBranchDtos_ThreadsResponse": {
+        "type": "object",
+        "properties": {
+          "threads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatBranchDtos_ThreadView"
+            }
+          },
+          "nextBefore": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "ChatGenerationSettingsResponse": {
         "type": "object",
         "properties": {
@@ -103550,6 +103763,9 @@
             "$ref": "#/components/schemas/LocalModelsService_OllamaState"
           },
           "servingModel": {
+            "type": "string"
+          },
+          "servingBlocked": {
             "type": "string"
           }
         },

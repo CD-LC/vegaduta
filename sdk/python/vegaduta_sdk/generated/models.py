@@ -2279,6 +2279,19 @@ class ChatBranchDtos_SwitchLeafRequest(TypedDict):
     messageId: str
 
 
+class ChatBranchDtos_ThreadView(TypedDict, total=False):
+    sessionId: str
+    agentId: str
+    title: str
+    createdAt: str
+    updatedAt: str
+
+
+class ChatBranchDtos_ThreadsResponse(TypedDict, total=False):
+    threads: List[ChatBranchDtos_ThreadView]
+    nextBefore: str
+
+
 class ChatGenerationSettingsResponse(TypedDict, total=False):
     geminiReasoningEffort: str
     historyMaxTurns: int
@@ -5089,6 +5102,7 @@ class LocalModelsService_Recommended(TypedDict, total=False):
     budgetGb: float
     ollama: LocalModelsService_OllamaState
     servingModel: str
+    servingBlocked: str
 
 
 class LocalModelsService_Settings(TypedDict, total=False):

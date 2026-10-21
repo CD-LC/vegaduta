@@ -9,6 +9,15 @@ Copy the block under "The prompt" into a fresh coding agent. Everything it needs
 
 ## Backend leftovers (non-billing)
 
+> **Status, checked against the code on 2026-10-21.** Done: 2 (`actor` and `q` on `GET /api/audit-log`),
+> 3 (`label` on `WorkflowVersionResponse`, `accessLevel` on the agent and workflow responses), 4 (the opt-in
+> card reads `GET /api/channels/whatsapp-compliance/opt-in`), the file-size part of 5 (all five files are under
+> the cap and out of the baseline), 6's compose part (`docker-compose.yml` passes
+> `APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST`) and the generated reference
+> ([CONFIG-REFERENCE.generated.md](CONFIG-REFERENCE.generated.md)), 7 (the seed's ROI is now about 276%) and 8
+> (see [I18N.md](I18N.md)). Partly done: 1 (`GET /api/agents`, approvals, coding tasks, agent jobs and platform
+> audit search are paged). Not rechecked: the A2A authorization rules, the mkdocs nav and OpenAPI descriptions.
+
 1. **Server paging still missing** (add `limit`/`offset` with `X-Total-Count` and `X-Has-More`, following `docs/api/LIST-ENDPOINT-PAGING.md`): `GET /api/agents` and the agent directory's `mine`, `GET /api/agents/{id}/jobs`, `GET /api/coding-tasks` (the Redis store hard-codes the newest 20), platform audit search, platform activity/abuse/billing-free lists, `GET /api/approvals` (the console pages the full list client-side), leads board (200 per column cap), image/audio/video job lists, knowledge and template lists that still cap silently.
 2. **Audit log filters:** `GET /api/audit-log` cannot filter by actor or free text server-side; add `actor`, `q` and make the console filters server-side.
 3. **Workflow versions** list returns no STAGING/PRODUCTION label state; add it. Expose the caller's **effective access level** (RUNNER/VIEWER/EDITOR) on agent and workflow GET responses so the UI can gate write actions instead of failing with a toast.

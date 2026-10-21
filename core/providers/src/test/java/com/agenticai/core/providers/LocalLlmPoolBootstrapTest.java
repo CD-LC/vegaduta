@@ -18,10 +18,12 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.agenticai.core.providers.LocalLlmPoolBootstrap.Outcome;
+import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.providers.validation.ProviderValidationException;
 import com.agenticai.core.security.net.SsrfGuard;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -226,6 +228,7 @@ class LocalLlmPoolBootstrapTest {
         PlatformHostedLlmProvider picked = row(8, "Local model (Ollama)", BASE, 0);
         when(picked.getModel()).thenReturn("mistral");
         when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(picked));
+        usable(picked);
 
         assertEquals(
                 Outcome.ALREADY_PRESENT,
@@ -239,11 +242,141 @@ class LocalLlmPoolBootstrapTest {
         List<PlatformHostedLlmProvider> byUrl =
                 List.of(row(6, "Renamed by admin", "http://ollama:11434/v1/", 1));
         when(repository.findAllByOrderByPriorityAsc()).thenReturn(byUrl);
+        usable(byUrl.get(0));
         assertEquals(
                 Outcome.ALREADY_PRESENT,
                 bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
 
         verify(service, never()).createAllowingBlankKey(any());
+        verify(service, never()).update(any(), any());
+    }
+
+    @Test
+    void rowWhoseKeyNoLongerDecryptsIsRewrittenAndEnabled() {
+        // An older database kept under a new .env: APP_ENCRYPTION_KEY changed, the chat path
+        // excludes the row, every chat says "No platform LLM is configured" while the console
+        // shows the model as in use.
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider stuck = row(9, "Local model (Ollama)", BASE, -2);
+        when(stuck.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(stuck));
+        when(service.resolveEnabledSelectionById(9L)).thenReturn(Optional.empty());
+
+        assertEquals(
+                Outcome.REPAIRED,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        ArgumentCaptor<PlatformHostedLlmProviderUpsertRequest> req =
+                ArgumentCaptor.forClass(PlatformHostedLlmProviderUpsertRequest.class);
+        verify(service).update(org.mockito.ArgumentMatchers.eq(9L), req.capture());
+        assertEquals(
+                "ollama", req.getValue().apiKey(), "a fresh key under the current encryption key");
+        assertTrue(req.getValue().enabled());
+        assertEquals("llama3.2", req.getValue().model(), "the operator's model is kept");
+        assertEquals(-2, req.getValue().priority());
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+        assertTrue(logged(Level.WARN, "re-enabled it with a fresh key"));
+    }
+
+    @Test
+    void poolSwitchedOffIsSwitchedBackOnOnlyInsideAChatThatNeedsIt() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider fine = row(10, "Local model (Ollama)", BASE, 0);
+        when(fine.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(fine));
+        when(repository.findAllByEnabledTrueOrderByPriorityAsc()).thenReturn(List.of(fine));
+        when(service.getPoolSettings())
+                .thenReturn(new HostedLlmPoolSettingsResponse(false, null, "admin"));
+        usable(fine);
+        LocalLlmPoolBootstrap b = bootstrap("ollama", guard(Set.of("ollama:11434")));
+
+        // Startup: nothing an admin switched off comes back just because core restarted.
+        assertEquals(Outcome.ALREADY_PRESENT, b.bootstrapOnce());
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+
+        // A chat that found the pool empty: the user is asking for it right now.
+        assertTrue(b.repairOnDemand());
+        verify(service).setPoolEnabled(true, "local-llm-pool-bootstrap");
+        verify(service, never()).update(any(), any());
+    }
+
+    @Test
+    void aDisabledLocalRowStaysDisabledWhileAnotherRowServes() {
+        // The admin switched the install to a hosted row on purpose.
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider local = row(13, "Local model (Ollama)", BASE, 0);
+        when(local.isEnabled()).thenReturn(false);
+        PlatformHostedLlmProvider hosted = row(14, "Groq", "https://api.groq.com/openai", 1);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(local, hosted));
+        when(service.resolveEnabledSelectionById(13L)).thenReturn(Optional.empty());
+        when(service.resolveEnabledChain())
+                .thenReturn(List.of(new HostedProviderSelection(hosted, "gsk")));
+
+        assertEquals(
+                Outcome.ALREADY_PRESENT,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service, never()).update(any(), any());
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+    }
+
+    @Test
+    void aPoolSwitchedOffStaysOffWhileAnotherRowIsEnabled() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider local = row(15, "Local model (Ollama)", BASE, 0);
+        when(local.isEnabled()).thenReturn(true);
+        PlatformHostedLlmProvider hosted = row(16, "Groq", "https://api.groq.com/openai", 1);
+        when(hosted.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(local, hosted));
+        when(repository.findAllByEnabledTrueOrderByPriorityAsc())
+                .thenReturn(List.of(local, hosted));
+        when(service.getPoolSettings())
+                .thenReturn(new HostedLlmPoolSettingsResponse(false, null, "admin"));
+
+        LocalLlmPoolBootstrap b = bootstrap("ollama", guard(Set.of("ollama:11434")));
+        assertEquals(Outcome.ALREADY_PRESENT, b.bootstrapOnce());
+        assertFalse(b.repairOnDemand(), "even on demand: another row is enabled");
+
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+        verify(service, never()).update(any(), any());
+    }
+
+    @Test
+    void refusedBaseUrlIsNotRewritten() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider blocked = row(11, "Local model (Ollama)", BASE, 0);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(blocked));
+        when(service.resolveEnabledSelectionById(11L)).thenReturn(Optional.empty());
+
+        assertEquals(Outcome.ALREADY_PRESENT, bootstrap("ollama", guard(Set.of())).bootstrapOnce());
+
+        verify(service, never()).update(any(), any());
+        assertTrue(logged(Level.WARN, "SSRF guard refuses"));
+    }
+
+    @Test
+    void onDemandRepairRunsOncePerIntervalAndReportsWhetherItChangedAnything() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider stuck = row(12, "Local model (Ollama)", BASE, 0);
+        when(stuck.isEnabled()).thenReturn(false);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(stuck));
+        when(service.resolveEnabledSelectionById(12L)).thenReturn(Optional.empty());
+        LocalLlmPoolBootstrap b = bootstrap("ollama", guard(Set.of("ollama:11434")));
+
+        assertTrue(b.repairOnDemand(), "the disabled row was re-enabled");
+        assertFalse(b.repairOnDemand(), "a second call inside the interval does nothing");
+        verify(service, times(1)).update(any(), any());
+    }
+
+    private void usable(PlatformHostedLlmProvider row) {
+        when(service.resolveEnabledSelectionById(row.getId()))
+                .thenReturn(Optional.of(new HostedProviderSelection(row, "ollama")));
     }
 
     @Test

@@ -141,7 +141,8 @@ Counts: 118 open or partial (101 excluding billing).
 - **Remaining now:** Layout fixed: knowledge/page.tsx:158 is grid-cols-1, then md:grid-cols-[220px_minmax(0,1fr)], then xl:grid-cols-[240px_minmax(0,1fr)_340px], with the third panel spanning below md. The raw English strings moved to the consolePolish namespace (tp(...) at lines 100-143). Remaining: the header actions still use imperative refs (collectionsRef.current?.openCreateForm() at 119, knowledgeRef.current?.openUpload() at 122, refs declared at 45-46). Plurals are still built by concatenation, with t('collectionCountLabel', {plural: ... ? '' : 's'}) at lines 106 and 111.
 - **Fix:** Use lg:grid-cols-[220px_minmax(0,1fr)] with the detail column moving below or into a Sheet until xl:, e.g. xl:grid-cols-[240px_minmax(0,1fr)_340px]. Replace ref-based header actions with lifted state or props. Use ICU plural messages instead of string concatenation and move the raw strings to messages/en.json.
 
-### [major] /learn  (PARTIAL, layout)
+### [major] /learn  (PARTIAL, layout) (done)
+- **Obsolete (0.1.8):** `web/app/learn/page.tsx` and `learn/CurriculumMap.tsx` were removed when the Academy moved out of the console (CHANGELOG [0.1.8]); only `/learn/tutor` remains, and its components use `useTranslations('tutorPage')`.
 - **Where:** `web/app/learn/page.tsx:68,107-109,142-175,242,254-270,357 (and learn/CurriculumMap.tsx, learn/tutor/*)`
 - **Problem:** The file never calls useTranslations; eyebrow 'Plans & Help', title 'Learn', subtitle, stat labels ('Lessons in the Academy', 'Lessons completed'), section titles, CTAs ('Open the Journey Map', 'Browse concepts'), empty state ('No screen mappings yet') are literal English in a console that is otherwise localized.
 - **Remaining now:** The tutor sub-components are localized: learn/tutor/PlanView, LessonView, TutorChat and ReviewSession all call useTranslations('tutorPage'). learn/page.tsx is not. It has no useTranslations call and still has literal English at line 107 (eyebrow 'Plans & Help'), lines 109-110 (title and subtitle), line 180 (title 'No screen mappings yet'), and lines 262 and 270 (cta 'Open the Journey Map' and 'Browse concepts'). CurriculumMap.tsx has no useTranslations call either.
@@ -418,6 +419,7 @@ Counts: 118 open or partial (101 excluding billing).
 - **Fix:** Use server redirect() for /devices (as jev does), and surface 'Mobile SDK devices' as an explicit nav item deep-linking to /admin/channels?channel=mobile-sdk.
 
 ### [minor] /learn, /learn/tutor, /capabilities/decision, /changelog, /insights jobs  (OPEN, layout)
+- **Note (0.1.8):** the `/learn` parts are obsolete: `web/app/learn/page.tsx` and `learn/CurriculumMap.tsx` were removed (CHANGELOG [0.1.8]).
 - **Where:** `web/app/learn/page.tsx:184, web/app/learn/CurriculumMap.tsx, web/app/capabilities/decision/page.tsx, web/app/changelog/page.tsx, web/app/insights/page.tsx:469`
 - **Problem:** Mapped-screen lessons, curriculum levels, decision history/criteria rows, the full changelog entry list (CHANGELOG_ENTRIES rendered in one page) and insights ranking rows have no pagination or 'show more'. Only code-intel (repos, trace, passages) and edge (models, engines) use PaginationControls in this area.
 - **Remaining now:** A grep for PaginationControls or usePagination in learn/, capabilities/decision/, changelog/ and insights/ finds nothing. changelog/page.tsx has no Load older, year filter or show-more control. The changelog still renders all entries in one page.
@@ -696,6 +698,7 @@ Counts: 118 open or partial (101 excluding billing).
 - **Fix:** Use sm:/lg: breakpoints only, flex-wrap on action rows, and one container width; verify at 375px with the page-kit mobile test pattern (page-kit.mobile.test.tsx).
 
 ### [minor] /learn, /help, /roi, /edge, /coding, /capabilities/decision  (PARTIAL, layout)
+- **Note (0.1.8):** the `/learn` parts are obsolete: `web/app/learn/page.tsx` and `learn/CurriculumMap.tsx` were removed (CHANGELOG [0.1.8]).
 - **Where:** `web/app/learn/page.tsx:107, help/page.tsx:85, edge/page.tsx:20, roi/page.tsx:199`
 - **Problem:** AppShell eyebrow is inconsistent: some pass t(...), some literal strings, and /usage and /code-intel also pass title= while others don't, so the topbar breadcrumb differs per page. Only code-intel uses the `wide` prop; other pages rely on unspecified container widths (code/page.tsx hard-codes max-w-6xl, billing uses max-w-3xl/4xl/6xl/xl mix).
 - **Remaining now:** Fixed: help (page.tsx:85), edge (:23) and roi (:195) now pass i18n eyebrows such as t('pageEyebrow'). Remaining: learn/page.tsx:107 still uses the literal <AppShell eyebrow="Plans & Help"> with hard-coded title and subtitle strings. I did not check the per-page max-w wrappers: code/page.tsx:79 and :116 still hard-code max-w-6xl, and I did not check billing. I did not check whether AppShell's `wide` prop was adopted as the single width token.
