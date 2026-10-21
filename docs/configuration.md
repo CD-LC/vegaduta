@@ -119,6 +119,13 @@ How the `mcp` profile and the runner fit together:
 | `POSTGRES_APP_USER` / `POSTGRES_APP_PASSWORD` (Compose `.env`) | the login core uses | default `vegaduta_app`; owner of `POSTGRES_DB` (`agentic_ai`) but **not** a superuser. Compose passes it to core as `POSTGRES_USER`/`POSTGRES_PASSWORD`. Equal to `POSTGRES_USER` = opt out (not recommended) |
 | `KEYCLOAK_CLIENT_SECRET` | secret of the `agentic-ai-core` client | must match the realm |
 
+`scripts/vegaduta secrets` (and `scripts\vegaduta.ps1 secrets`) also keeps a copy of these values outside the install folder, readable only by you: `~/.config/vegaduta/secrets.env`, or `%LOCALAPPDATA%\VegaDuta\secrets.env` on Windows (also used from WSL). A new install folder reuses them, so the data Docker kept from an earlier install still opens. If Docker holds a personal install's data but no copy exists, the new install leaves that data untouched and starts under its own compose project (`VEGADUTA_PERSONAL_PROJECT`, e.g. `vegaduta-personal-2`).
+
+| Variable | What | Notes |
+|---|---|---|
+| `VEGADUTA_SECRETS_KEEP` (environment) | path of the kept copy | default above; tests point it at a temporary file |
+| `VEGADUTA_PERSONAL_PROJECT` (Compose `.env`) | compose project of a personal install | set by `secrets` only in the case above; empty = `vegaduta-personal` |
+
 ## Database and cache
 
 | Property | Env | Default |

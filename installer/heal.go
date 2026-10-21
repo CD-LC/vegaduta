@@ -119,6 +119,7 @@ const (
 	failEngine              // the Docker engine stopped answering
 	failNetwork             // pull interrupted, timeouts, rate limits
 	failSlow                // services still starting when the health wait ended
+	failPort                // a host port is taken or reserved: retrying cannot help
 )
 
 var failurePatterns = []struct {
@@ -129,6 +130,7 @@ var failurePatterns = []struct {
 	{failDisk, regexp.MustCompile(`(?i)no space left on device`)},
 	{failEngine, regexp.MustCompile(`(?i)cannot connect to the docker daemon|error during connect|dockerDesktopLinuxEngine|docker daemon is not running|is the docker daemon running`)},
 	{failNetwork, regexp.MustCompile(`(?i)tls handshake timeout|i/o timeout|connection reset|unexpected eof|toomanyrequests|interrupted|temporary failure in name resolution|context deadline exceeded`)},
+	{failPort, regexp.MustCompile(`(?i)ports are not available|port is already allocated|address already in use|an attempt was made to access a socket in a way forbidden`)},
 	{failSlow, regexp.MustCompile(`(?i)did not become healthy|is unhealthy|dependency failed to start`)},
 }
 
@@ -162,6 +164,9 @@ func repair(ctx context.Context, kind failureKind, emit func(Event)) bool {
 		}
 	case failNetwork:
 		line("The download was interrupted - retrying…")
+	case failPort:
+		line("A port VegaDūta needs (3000 or 8080) is used by another program, or reserved by Windows. Close that program, or on Windows run as administrator: net stop winnat; net start winnat - then click Install again.")
+		return false
 	case failSlow:
 		line("Some services were still starting - giving them more time…")
 	default:

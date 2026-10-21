@@ -35,7 +35,14 @@ services:
         ollama serve &
         pid=$$!
         until ollama list >/dev/null 2>&1; do sleep 1; done
-        ollama pull "$$LOCAL_LLM_MODEL"
+        # A dropped connection must not leave the container up but never healthy (the install would
+        # wait out its whole timeout): retry, then exit so the restart policy starts over (pulls resume).
+        n=0
+        until ollama pull "$$LOCAL_LLM_MODEL"; do
+          n=$$((n + 1))
+          if [ "$$n" -ge 5 ]; then echo "model download failed $$n times - restarting" >&2; kill $$pid; exit 1; fi
+          echo "model download failed - retrying in $$((n * 15))s" >&2; sleep $$((n * 15))
+        done
         wait $$pid
     environment:
       LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-qwen3.5:4b}
