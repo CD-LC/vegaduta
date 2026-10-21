@@ -15,8 +15,7 @@ import java.util.UUID;
 @Table(name = "chat_branch_session")
 public class ChatBranchSession {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "agent_id", nullable = false)
     private UUID agentId;
@@ -76,7 +75,8 @@ public class ChatBranchSession {
     }
 
     public ChatBranchStore.State toState() {
-        return new ChatBranchStore.State(agentId, sessionId, ownerSubject, activeLeafMessageId, reuseUserMessageId);
+        return new ChatBranchStore.State(
+                agentId, sessionId, ownerSubject, activeLeafMessageId, reuseUserMessageId);
     }
 
     public void apply(ChatBranchStore.State state) {

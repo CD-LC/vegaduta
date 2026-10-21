@@ -17,7 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-/** {@link ChatThreadController} is a thin pass-through: the service decides everything, including the 404s. */
+/**
+ * {@link ChatThreadController} is a thin pass-through: the service decides everything, including
+ * the 404s.
+ */
 class ChatThreadControllerTest {
 
     private final ChatThreadService service = mock(ChatThreadService.class);
@@ -44,13 +47,16 @@ class ChatThreadControllerTest {
     @Test
     void theServices404ReachesTheClientUnchanged() {
         doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found."))
-            .when(service).delete(agentId, "not-mine");
+                .when(service)
+                .delete(agentId, "not-mine");
         when(service.list(null, null)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        ResponseStatusException onDelete = assertThrows(ResponseStatusException.class,
-            () -> controller.delete(agentId, "not-mine"));
-        ResponseStatusException onList = assertThrows(ResponseStatusException.class,
-            () -> controller.list(null, null));
+        ResponseStatusException onDelete =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> controller.delete(agentId, "not-mine"));
+        ResponseStatusException onList =
+                assertThrows(ResponseStatusException.class, () -> controller.list(null, null));
 
         assertEquals(HttpStatus.NOT_FOUND, onDelete.getStatusCode());
         assertEquals(HttpStatus.NOT_FOUND, onList.getStatusCode());

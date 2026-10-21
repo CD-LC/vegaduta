@@ -122,10 +122,21 @@ export function useAssistantTurn(agentId: string | null) {
     async (
       message: string,
       attachments: PendingAttachment[] = [],
-      opts: { note?: string | null; targetAgentId?: string | null; replyNote?: string | null; sendText?: string | null } = {}
+      opts: {
+        note?: string | null;
+        targetAgentId?: string | null;
+        replyNote?: string | null;
+        sendText?: string | null;
+      } = {}
     ): Promise<TurnOutcome> => {
       const target = opts.targetAgentId ?? liveAgentRef.current;
-      const outcome: TurnOutcome = { sessionId: sessionIdRef.current, text: "", steps: [], ok: false, cancelled: false };
+      const outcome: TurnOutcome = {
+        sessionId: sessionIdRef.current,
+        text: "",
+        steps: [],
+        ok: false,
+        cancelled: false,
+      };
       if (!target) return outcome;
       const now = Date.now();
       const userId = nextTurnId("u");
@@ -138,9 +149,23 @@ export function useAssistantTurn(agentId: string | null) {
           content: message,
           at: now,
           note: opts.note ?? null,
-          attachments: attachments.map(({ fileName, mimeType, sizeBytes, previewUrl }) => ({ fileName, mimeType, sizeBytes, previewUrl })),
+          attachments: attachments.map(({ fileName, mimeType, sizeBytes, previewUrl }) => ({
+            fileName,
+            mimeType,
+            sizeBytes,
+            previewUrl,
+          })),
         },
-        { id: replyId, role: "assistant", content: "", at: now, startedAt: now, endedAt: null, steps: [], note: opts.replyNote ?? null }
+        {
+          id: replyId,
+          role: "assistant",
+          content: "",
+          at: now,
+          startedAt: now,
+          endedAt: null,
+          steps: [],
+          note: opts.replyNote ?? null,
+        }
       );
       setSending(true);
       setError(null);
@@ -186,7 +211,13 @@ export function useAssistantTurn(agentId: string | null) {
           // Persistence only (the thread list and reopening after 24h); the answer is never applied here.
           void persistTurnInBranchTree(target, enrichSid);
         }
-        return { ...outcome, sessionId: ownSession ? newSessionId || sessionIdRef.current : null, text, steps, ok: true };
+        return {
+          ...outcome,
+          sessionId: ownSession ? newSessionId || sessionIdRef.current : null,
+          text,
+          steps,
+          ok: true,
+        };
       } catch (err) {
         const cancelled = isCancelledError(err);
         const reason = errorMessage(err);

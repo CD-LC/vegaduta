@@ -30,8 +30,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * {@link ChatThreadService}: the caller's own sessions only, newest first, titled by the first user message,
- * paged on {@code updatedAt}; a delete of anyone else's session is a 404 that reveals nothing.
+ * {@link ChatThreadService}: the caller's own sessions only, newest first, titled by the first user
+ * message, paged on {@code updatedAt}; a delete of anyone else's session is a 404 that reveals
+ * nothing.
  */
 class ChatThreadServiceTest {
 
@@ -58,14 +59,22 @@ class ChatThreadServiceTest {
         TenantContext.clear();
     }
 
-    /** A session of {@code owner} last touched at {@code at}, with the given turns (user, assistant, user, ...). */
+    /**
+     * A session of {@code owner} last touched at {@code at}, with the given turns (user, assistant,
+     * user, ...).
+     */
     private void session(String owner, String sessionId, Instant at, String... turns) {
         List<Node> nodes = new ArrayList<>();
         UUID parent = null;
         for (int i = 0; i < turns.length; i++) {
-            Node n = new Node(
-                UUID.randomUUID(), parent, i % 2 == 0 ? MessageRole.USER : MessageRole.ASSISTANT,
-                turns[i], 0, T0.plusSeconds(i));
+            Node n =
+                    new Node(
+                            UUID.randomUUID(),
+                            parent,
+                            i % 2 == 0 ? MessageRole.USER : MessageRole.ASSISTANT,
+                            turns[i],
+                            0,
+                            T0.plusSeconds(i));
             nodes.add(n);
             parent = n.id();
         }
@@ -94,7 +103,10 @@ class ChatThreadServiceTest {
         assertEquals(agentId, newest.agentId());
         assertEquals("plan a trip", newest.title());
         assertEquals(T0.plusSeconds(60), newest.updatedAt());
-        assertEquals("book a dentist\nnext week", page.threads().get(1).title(), "the stored line, uncut below 200 chars");
+        assertEquals(
+                "book a dentist\nnext week",
+                page.threads().get(1).title(),
+                "the stored line, uncut below 200 chars");
         assertNull(page.nextBefore(), "no further page");
     }
 
@@ -147,7 +159,8 @@ class ChatThreadServiceTest {
         assertTrue(store.findState(agentId, "mine").isEmpty());
         assertTrue(store.findNodes(agentId, "mine").isEmpty());
         assertTrue(service.list(null, null).threads().isEmpty());
-        // The Redis list the tree would be rebuilt from goes too - alice's own scoped list, nobody else's.
+        // The Redis list the tree would be rebuilt from goes too - alice's own scoped list, nobody
+        // else's.
         verify(sessionMemory).rewind(scoped("alice", "mine"), 0);
         verify(sessionMemory, never()).rewind(scoped("bob", "mine"), 0);
     }

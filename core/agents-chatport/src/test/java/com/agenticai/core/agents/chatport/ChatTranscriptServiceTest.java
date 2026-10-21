@@ -113,7 +113,15 @@ class ChatTranscriptServiceTest {
 
     private static MessageView view(String role, String content, String status) {
         return new MessageView(
-                UUID.randomUUID(), null, role, content, Instant.EPOCH, 0, 1, status, "failed".equals(status));
+                UUID.randomUUID(),
+                null,
+                role,
+                content,
+                Instant.EPOCH,
+                0,
+                1,
+                status,
+                "failed".equals(status));
     }
 
     @Test
@@ -126,7 +134,9 @@ class ChatTranscriptServiceTest {
                         new ActivePathResponse(
                                 "s1",
                                 null,
-                                List.of(view("user", "Say ok.", "ok"), view("assistant", "Key rejected.", "failed"))));
+                                List.of(
+                                        view("user", "Say ok.", "ok"),
+                                        view("assistant", "Key rejected.", "failed"))));
 
         ChatTranscriptService.Transcript transcript = service.transcript(agentId, "s1");
 
@@ -159,7 +169,8 @@ class ChatTranscriptServiceTest {
 
         for (String sid : List.of("s1", "s2")) {
             ResponseStatusException e =
-                    assertThrows(ResponseStatusException.class, () -> service.transcript(agentId, sid));
+                    assertThrows(
+                            ResponseStatusException.class, () -> service.transcript(agentId, sid));
             assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
             assertEquals(ChatTranscriptService.NO_SESSION_MESSAGE, e.getReason());
         }
@@ -199,7 +210,8 @@ class ChatTranscriptServiceTest {
     void theOwnerReloadsTheSessionTheyChattedIn() {
         InMemorySessionMemory redis = new InMemorySessionMemory();
         chatAs(redis.service(), "alice", agentId, "s1", "Hello from alice");
-        ChatTranscriptService real = new ChatTranscriptService(agentService, redis.service(), branches);
+        ChatTranscriptService real =
+                new ChatTranscriptService(agentService, redis.service(), branches);
 
         ChatTranscriptService.Transcript transcript = real.transcript(agentId, "s1");
 
@@ -213,7 +225,8 @@ class ChatTranscriptServiceTest {
         InMemorySessionMemory redis = new InMemorySessionMemory();
         chatAs(redis.service(), "alice", agentId, "s1", "Hello from alice");
         TenantContext.set(TenantContext.of("t1", "bob", Set.of("tenant_user")));
-        ChatTranscriptService real = new ChatTranscriptService(agentService, redis.service(), branches);
+        ChatTranscriptService real =
+                new ChatTranscriptService(agentService, redis.service(), branches);
 
         assertEquals(
                 HttpStatus.NOT_FOUND,
@@ -226,7 +239,8 @@ class ChatTranscriptServiceTest {
         InMemorySessionMemory redis = new InMemorySessionMemory();
         chatAs(redis.service(), "alice", agentId, "s1", "alice's turn");
         chatAs(redis.service(), "bob", agentId, "s1", "bob's turn");
-        ChatTranscriptService real = new ChatTranscriptService(agentService, redis.service(), branches);
+        ChatTranscriptService real =
+                new ChatTranscriptService(agentService, redis.service(), branches);
 
         assertEquals("bob's turn", real.transcript(agentId, "s1").messages().get(0).content());
         TenantContext.set(TenantContext.of("t1", "alice", Set.of("tenant_user")));
