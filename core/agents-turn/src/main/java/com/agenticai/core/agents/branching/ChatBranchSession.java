@@ -51,6 +51,30 @@ public class ChatBranchSession {
         this.updatedAt = this.createdAt;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getAgentId() {
+        return agentId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public String getOwnerSubject() {
+        return ownerSubject;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
     public ChatBranchStore.State toState() {
         return new ChatBranchStore.State(agentId, sessionId, ownerSubject, activeLeafMessageId, reuseUserMessageId);
     }

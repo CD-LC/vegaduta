@@ -1,5 +1,7 @@
 package com.agenticai.core.agents.chatport;
 
+import com.agenticai.core.agents.branching.ChatBranchDtos.MessageView;
+import com.agenticai.core.agents.branching.ChatBranchService;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.CallerSessionIds;
 import com.agenticai.core.agents.memory.ChatTurn;
@@ -10,6 +12,7 @@ import com.agenticai.core.sharing.PermissionLevel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +26,12 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>Same access rule as the export: RUNNER on the agent AND the caller is the tenant + subject
  * that started the session (a client-chosen session id alone never reads a conversation). Not
  * behind the export flag: restoring what you just saw is not an export.
+ *
+ * <p>Redis keeps a session for 24h. When it holds nothing for the caller (expired, or a new device
+ * reopening a thread from {@code GET /api/chat/threads}) and chat branching is on, the stored
+ * tree's active path is returned instead ({@link ChatBranchService#activePath}, which enforces its
+ * own ownership: a tree bound to another subject answers 404 there too). With branching off, or no
+ * tree, the session is simply not found, as before.
  */
 @Service
 public class ChatTranscriptService {
@@ -32,11 +41,15 @@ public class ChatTranscriptService {
 
     private final AgentService agentService;
     private final SessionMemoryService sessionMemoryService;
+    private final ObjectProvider<ChatBranchService> branches;
 
     public ChatTranscriptService(
-            AgentService agentService, SessionMemoryService sessionMemoryService) {
+            AgentService agentService,
+            SessionMemoryService sessionMemoryService,
+            ObjectProvider<ChatBranchService> branches) {
         this.agentService = agentService;
         this.sessionMemoryService = sessionMemoryService;
+        this.branches = branches;
     }
 
     /** {@code messages} oldest first. */
@@ -51,24 +64,52 @@ public class ChatTranscriptService {
             throw new IllegalArgumentException("That session id is not valid.");
         }
         // SEC-004: history and its owner record live under the caller-scoped id, never the raw one.
-        String memorySessionId =
+        // A session nobody owns any more (expired owner record) reads as empty, not as a miss, so
+        // the stored tree gets its turn below.
+        List<ChatTurn> turns =
                 CallerSessionIds.scopedForCurrentCaller(agentId, sessionId)
                         .filter(this::callerOwns)
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, NO_SESSION_MESSAGE));
-        List<ChatTurn> turns = sessionMemoryService.getFullHistory(memorySessionId);
-        if (turns == null || turns.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, NO_SESSION_MESSAGE);
-        }
-        List<TranscriptView.Entry> messages = new ArrayList<>(turns.size());
-        for (ChatTurn turn : turns) {
-            if (turn != null) {
-                messages.add(TranscriptView.of(turn));
+                        .map(sessionMemoryService::getFullHistory)
+                        .orElse(List.of());
+        List<TranscriptView.Entry> messages = new ArrayList<>();
+        if (turns != null) {
+            for (ChatTurn turn : turns) {
+                if (turn != null) {
+                    messages.add(TranscriptView.of(turn));
+                }
             }
         }
+        if (messages.isEmpty()) {
+            messages = storedPath(agentId, sessionId);
+        }
+        if (messages.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, NO_SESSION_MESSAGE);
+        }
         return new Transcript(sessionId, messages);
+    }
+
+    /**
+     * The active path of the stored conversation tree, or an empty list when branching is off, the
+     * session has no tree, or the tree is not the caller's (its own 404 is folded into ours: the
+     * answer is the same "no such conversation" either way). Never throws.
+     */
+    private List<TranscriptView.Entry> storedPath(UUID agentId, String sessionId) {
+        ChatBranchService branchService = branches == null ? null : branches.getIfAvailable();
+        if (branchService == null || !branchService.isEnabled()) {
+            return List.of();
+        }
+        try {
+            List<TranscriptView.Entry> out = new ArrayList<>();
+            for (MessageView m : branchService.activePath(agentId, sessionId).messages()) {
+                out.add(
+                        new TranscriptView.Entry(
+                                m.role(), m.content(), m.createdAt(), m.status(), m.error()));
+            }
+            return out;
+        } catch (ResponseStatusException | IllegalArgumentException e) {
+            // Not the caller's tree, no tree, or an id the tree store does not accept.
+            return List.of();
+        }
     }
 
     private boolean callerOwns(String memorySessionId) {

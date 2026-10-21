@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Conversations follow you.** `GET /api/chat/threads` lists the signed-in user's chat sessions (title, agent, last activity) and `DELETE /api/chat/threads/{agentId}/{sessionId}` removes one; the Assistant merges them into its thread list, so history shows on a new browser or device. Needs `APP_CHAT_BRANCHING_ENABLED=true` (404 otherwise; the console then keeps its local list). The Assistant now records its turns in the conversation tree, and reopening a thread older than the 24 h session window reads the stored tree.
+
 ### Changed
 
 - **Local models answer sooner.** The Compose `local-ai` overlay now loads the model when the stack starts and keeps it in memory (`OLLAMA_KEEP_ALIVE=-1`, `OLLAMA_FLASH_ATTENTION=1`), so the first reply no longer pays a cold start, and sends `reasoning_effort: none` so reasoning models skip their hidden thinking pass (`LOCAL_LLM_REASONING_EFFORT` changes it; new core property `app.llm.ollama.reasoning-effort`, blank by default outside the overlay). The Assistant shows a short note when it runs on a local model, with a link to Agent settings where it can be tuned for speed or quality.
