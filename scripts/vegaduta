@@ -77,6 +77,11 @@ LANGFUSE_INIT_PROJECT_PUBLIC_KEY:lfpk
 LANGFUSE_INIT_PROJECT_SECRET_KEY:lfsk
 LANGFUSE_INIT_USER_PASSWORD:hex16
 SEARXNG_SECRET:hex32
+WHATSAPP_QR_BRIDGE_SECRET:hex32
+DD_ADMIN_PASSWORD:hex16
+DD_SECRET_KEY:hex32
+DD_CREDENTIAL_AES_256_KEY:hex32
+DD_DATABASE_PASSWORD:hex16
 "
 ALL_PROFILES="temporal events jobs observability tracing voice rl code-intel builder sandbox tools browser"
 
@@ -167,6 +172,31 @@ gen_secret() {
   esac
 }
 
+# A name a compose file requires (${NAME:?...}) that is plainly a secret: generated, never asked for.
+# BASE_DOMAIN, VEGADUTA_VERSION and provider API keys are not (they carry meaning, not entropy).
+secret_like() {
+  case "$1" in
+    *_API_KEY) [ "$1" = LIVEKIT_API_KEY ] ;;
+    *SECRET*|*_PASSWORD|*_PASS|*_KEY|*_TOKEN|*_AUTH|*_SALT) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+# Every secret-like variable any compose file under deploy/compose requires, as NAME:hex32. The table
+# wins where it names one (all_secret_specs keeps its kind: base64 for encryption keys); this scan is
+# the safety net: a new overlay that requires a secret is served before anyone notices
+# the table was not updated. Compose checks ${X:?} even for a service behind an inactive profile, so
+# every file counts, not only the ones this run uses.
+compose_required_secret_specs() {
+  local name
+  for name in $(grep -rhoE '\$\{[A-Z0-9_]+:\?' "$COMPOSE_DIR" --include='*.yml' --include='*.yaml' 2>/dev/null |
+      sed -E 's/^\$\{([A-Z0-9_]+):\?$/\1/' | sort -u); do
+    secret_like "$name" && printf '%s:hex32\n' "$name"
+  done
+  return 0
+}
+# The table plus whatever the compose files require on top of it, one NAME:KIND per line.
+all_secret_specs() { { printf '%s\n' $SECRET_SPECS; compose_required_secret_specs; } | awk -F: '!seen[$1]++'; }
+
 is_local_url() { case "$1" in *localhost*|*127.0.0.1*|*'[::1]'*) return 0 ;; *) return 1 ;; esac; }
 
 # ------------------------------------------------------------------ secrets
@@ -192,7 +222,7 @@ keep_secrets() { # copies every secret in .env to the per-user file (0600); neve
   local f d spec name v; f="$(secrets_keep_file)"; d="$(dirname "$f")"
   mkdir -p "$d" 2>/dev/null && chmod 700 "$d" 2>/dev/null
   ( umask 077
-    for spec in $SECRET_SPECS VEGADUTA_PERSONAL_PROJECT; do
+    for spec in $(all_secret_specs) $GUARD_SECRETS VEGADUTA_PERSONAL_PROJECT; do
       name="${spec%%:*}"; v="$(get_env "$name")"
       if [ -n "$v" ]; then printf '%s=%s\n' "$name" "$v"; fi
     done > "$f.tmp" ) 2>/dev/null && mv -f "$f.tmp" "$f" 2>/dev/null || rm -f "$f.tmp" 2>/dev/null
@@ -237,7 +267,7 @@ cmd_secrets() {
   local shipped; shipped="$(shipped_version)"
   [ -n "$shipped" ] && set_env VEGADUTA_VERSION "$shipped"
   local filled=0 reused=0 spec name kind kept
-  for spec in $SECRET_SPECS; do
+  for spec in $(all_secret_specs); do
     name="${spec%%:*}"; kind="${spec#*:}"
     if [ -z "$(get_env "$name")" ]; then
       kept="$(kept_secret "$name")"
@@ -603,7 +633,7 @@ cmd_doctor() {
   if [ -f "$ENV_FILE" ]; then ok ".env present ($ENV_FILE)"
   else bad ".env missing — run: scripts/vegaduta secrets"; return 1; fi
   local spec name missing=""
-  for spec in $SECRET_SPECS; do
+  for spec in $(all_secret_specs); do
     name="${spec%%:*}"; [ -n "$(get_env "$name")" ] || missing="$missing $name"
   done
   if [ -z "$missing" ]; then ok "All secrets set"
@@ -1540,8 +1570,34 @@ db_password_heal() {
     { warn "could not reset the database password; to start over with an empty database run: docker volume rm $(get_env VEGADUTA_PERSONAL_PROJECT | grep . || echo "${COMPOSE_PROJECT_NAME:-vegaduta-personal}")_postgres-data"; return 1; }
   ok "database password updated"
 }
-# `up` that repairs what it can (db_password_heal) and tries once more.
+# Last line of defence before `up`: ask Compose itself which variables it still finds missing
+# (the exact "required variable X is missing a value" that stops every later compose call) and fill
+# the secret-like ones, so no table, scan or hand-edited .env can leave an install stuck on one.
+# Anything else that is missing stops here with the one line that says what to set.
+GUARD_SECRETS=""   # names compose_env_heal generated this run, so keep_secrets copies them too
+compose_env_heal() {
+  local err names name plain filled=0 round=0
+  while [ "$round" -lt 20 ]; do
+    round=$((round + 1))
+    err="$(dc config -q 2>&1 >/dev/null)" && { [ "$filled" -gt 0 ] && ok "generated $filled secret(s) the compose files required"; return 0; }
+    # Compose names every missing variable at once, one line each.
+    names="$(printf '%s\n' "$err" | sed -nE 's/.*required variable "?([A-Za-z0-9_]+)"? is missing a value.*/\1/p' | sort -u)"
+    [ -n "$names" ] || { printf '%s\n' "$err" >&2; return 0; }   # not a missing variable: let `up` report it
+    plain=""
+    for name in $names; do
+      [ -z "$(get_env "$name")" ] || { printf '%s\n' "$err" >&2; return 0; }   # set in .env but not seen: not ours to guess
+      if secret_like "$name"; then
+        set_env "$name" "$(gen_secret hex32)"; filled=$((filled + 1)); GUARD_SECRETS="$GUARD_SECRETS $name"
+      else plain="$plain $name"; fi
+    done
+    [ "$filled" -gt 0 ] && keep_secrets
+    [ -z "$plain" ] || die "required by the compose files but empty in $ENV_FILE:$plain. Set them there, then re-run. ($err)"
+  done
+  warn "still missing variables after $round rounds: $err"
+}
+# `up` that repairs what it can (compose_env_heal, db_password_heal) and tries once more.
 dc_up_heal() {
+  compose_env_heal
   dc "$@" && return 0
   db_password_heal && dc "$@"
 }
@@ -2076,4 +2132,5 @@ main() {
     *) usage; die "unknown command: $cmd" ;;
   esac
 }
-main "$@"
+# VEGADUTA_NO_MAIN=1 lets tests source the functions without running a command.
+[ "${VEGADUTA_NO_MAIN:-}" = 1 ] || main "$@"
