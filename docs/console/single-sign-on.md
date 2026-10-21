@@ -4,7 +4,7 @@
 |---|---|
 | Sidebar | Administration > **Single sign-on** |
 | Route | `/admin/sso` |
-| Nav needs | `PERM_MANAGE_TENANT_SETTINGS` |
+| Nav needs | `PERM_MANAGE_TENANT_SETTINGS`; not shown on a personal install |
 | Backend rule | every `/api/tenant/sso/**` call, reads included, needs `PERM_MANAGE_TENANT_SETTINGS` ("even reading an SSO config leaks the tenant's IdP shape") |
 
 "Connect your own identity provider and provision users with SCIM." The page is a per-tenant bring-your-own-IdP

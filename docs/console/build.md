@@ -45,11 +45,13 @@ integration screen. Cards an install cannot use yet are still shown, marked so t
 The page has two modes, chosen by the URL.
 
 **Index (no query).** A table of every agent in the workspace with a search box (name or model), a provider filter,
-and the columns Name, Model, Updated (hidden on narrow screens) and Actions. Row actions: **Open**, **Duplicate**
-and **Delete** (delete asks for confirmation and cannot be undone). **New agent** opens the workbench on a fresh
+and the columns Name, Model, Updated (hidden on narrow screens) and Actions. Row actions: **Open**, **Duplicate**,
+**Export** (downloads the agent as an [agent file](../agent-bundles.md)) and **Delete** (delete asks for confirmation
+and cannot be undone). **New agent** opens the workbench on a fresh
 draft. The list comes from `GET /api/agents`, which returns the full tenant list, so the pager is client-side
 ([Lists and paging](lists-and-paging.md)). The header buttons are **Quality** (`/agents/quality`),
-**Learning** (`/agents/learning`), **Templates** (`/agents/templates`) and **Import** (`/agents/import`);
+**Learning** (`/agents/learning`), **Templates** (`/agents/templates`), **Agent files** (`/agents/bundles`, ready-made
+agents and agent-file import, see [Share an agent as a file](../agent-bundles.md)) and **Import** (`/agents/import`);
 with an agent selected, Quality and Learning open on that agent.
 
 **Workbench (`?agentId=`, `?new=1`, `?template=`, `?lab=open`).** A two-pane build-and-test screen for one agent.

@@ -119,6 +119,14 @@ flowchart TB
 - **Valkey** (Redis protocol) holds rate limits, short-lived caches and
   coordination state, including the edge relay's job queue when that is
   enabled.
+- **Chat history.** The conversation tree (`core/agents-turn`, package
+  `agents.branching`) stores every message in Postgres for
+  `app.chat.branching.retention-days` (30) when `APP_CHAT_BRANCHING_ENABLED` is
+  on. The code default is off; `lite.yml`, `docker-compose.yml` and the Helm chart
+  (`core.branchingEnabled`) turn it on (since v0.1.8); `personal.yml` does not set
+  it. Without it, session history
+  lives only in Valkey for the 24 h session window. `GET /api/chat/threads`
+  (v0.1.9) lists a user's conversations from this tree.
 
 ## Authentication and authorization
 
@@ -214,14 +222,19 @@ flowchart BT
   budget --> kernel
   spi --> kernel
   kernel --> turn
-  kernel --> tools
-  kernel --> browser
-  kernel --> jobs
-  kernel --> chatport
-  kernel --> interop
-  kernel --> studio
+  budget --> turn
   turn --> tools
+  spi --> tools
+  tools --> browser
+  turn --> jobs
+  browser --> jobs
+  turn --> chatport
+  turn --> interop
+  turn --> studio
 ```
+
+An arrow points from a module to one that depends on it; every satellite also depends on the kernel directly
+(full list in the [core module graph](core-module-graph.md)).
 
 The patterns that make the split work, and why they were chosen:
 
@@ -243,9 +256,10 @@ The patterns that make the split work, and why they were chosen:
   ArchUnit "area" changed — the split is invisible to the runtime and to API
   clients. (Split packages are fine on the plain classpath; the platform does
   not use JPMS.)
-- **Module-size ratchet.** A CI gate caps each module at 300 main files and the
-  `agents` root package at zero classes; both baselines only shrink
-  (`StructureRulesTest` / `ModuleBoundaryRulesTest`).
+- **Module-size ratchet.** A CI gate (`scripts/ci/check-module-size.sh`, baseline
+  `scripts/ci/module-size-baseline.txt`) caps each module at 300 main files and the
+  `agents` root package at zero classes; the baseline only shrinks. At v0.1.9
+  `agents-turn` is over the cap (307 files).
 
 Why split into jars rather than leave it one big module: a change in `agents`
 used to recompile and retest ~4,000 tests plus every dependent module; the root

@@ -13,7 +13,11 @@ model (see [local models](local-models.md)).
 
 ## In the console
 
-Open **Agents → Agent files** (`/agents/bundles`). Pick a ready-made agent or
+To share one of your agents, open **Agents** and press **Export** on its row: the
+browser downloads the agent file.
+
+To import, open **Agents → Agent files** (`/agents/bundles`; an empty Agents page
+also offers it). Pick a ready-made agent or
 upload or paste a file, check the preview (the tools it may use, the autonomy it
 will really get, anything changed for safety), then import. Nothing is created
 until you press **Import agent**. From the same page, **Connect channels** takes

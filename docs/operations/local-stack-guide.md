@@ -14,8 +14,9 @@ public domain see [tunnel-hosting.md](tunnel-hosting.md); for the Kubernetes des
 | Full + profiles | `scripts/vegaduta up --full --build --profile observability --profile tracing …` | up to 24 GB+ | Grafana, Langfuse, code-intel, workflows |
 | kind (Kubernetes) | see [section 4](#4-kubernetes-on-your-machine-kind) | about 8 GB (chart README); the app plus monitoring used about 6 GB on a trimmed install | try the Helm charts, `kubectl`, `k9s` |
 
-`--build` builds the images from source (until a release is published); drop it once images are
-published. Docker Desktop's memory limit is a hard cap: Settings → Resources → Memory, then Apply & restart
+`--build` builds the images from source and tags them `local`; without it the CLI runs the published
+release images (`ghcr.io/cd-lc/<image>:<VEGADUTA_VERSION>`; an empty `VEGADUTA_VERSION` in a git checkout
+becomes the latest published release). Docker Desktop's memory limit is a hard cap: Settings → Resources → Memory, then Apply & restart
 (or set `MemoryMiB` in `~/Library/Group Containers/group.com.docker/settings-store.json` while Docker is
 quit). The figures are from [deploy/README.md](../../deploy/README.md); an idle Full core set measured about 2.5 GB, so treat them as sizing headroom. Running Compose and kind together worked in 16 GB with the optional profiles off.
 
@@ -66,12 +67,15 @@ helm upgrade --install cnpg cnpg/cloudnative-pg -n cnpg-system --create-namespac
 kubectl apply -f deploy/helm/examples/namespace.yaml            # Pod Security "restricted", quota, limits
 ```
 
-Images: until published, build and load them (`docker build` or `scripts/vegaduta compose build`, then
-`kind load docker-image ghcr.io/cd-lc/core:local --name vegaduta`, and `web`). The
-PostgreSQL image for the chart is the CloudNativePG flavour:
+Images: published releases are pulled from `ghcr.io/cd-lc` (set `global.imageTag` to the release, or leave
+it empty for the chart's appVersion), including the CloudNativePG PostgreSQL flavour
+`ghcr.io/cd-lc/postgres:16-pgvector-age`. To run your own code instead, build and load the images
+(`docker build` or `scripts/vegaduta compose build`, then
+`kind load docker-image ghcr.io/cd-lc/core:local --name vegaduta`, and `web`). The PostgreSQL image
+for the chart is built the way `release.yml` builds it:
 
 ```bash
-docker build --build-arg BASE_IMAGE=ghcr.io/cloudnative-pg/postgresql:16-system-bookworm --build-arg FINAL_USER=26 \
+docker build --build-arg BASE_IMAGE=ghcr.io/cloudnative-pg/postgresql:16.15-system-trixie --build-arg FINAL_USER=26 \
   -t ghcr.io/cd-lc/postgres:16-pgvector-age deploy/postgres
 kind load docker-image ghcr.io/cd-lc/postgres:16-pgvector-age --name vegaduta
 ```

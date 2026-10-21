@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Accepted — implemented 2026-10-16. All six cuts are done (`agents-jobs`, `agents-budget`, `agents-chatport`, `agents-browser`, `agents-interop`, `agents-studio`, `agents-tools`, `agents-turn`); the kernel is at ~256 main files and the `agents` root package is empty. Still open: step 7 (removing the split packages) and the owed 32-user kind benchmark after the `agents-tools`/`agents-turn` cuts. |
+| **Status** | Accepted — implemented 2026-10-16. All six cuts are done (`agents-jobs`, `agents-budget`, `agents-chatport`, `agents-browser`, `agents-interop`, `agents-studio`, `agents-tools`, `agents-turn`); the kernel is at ~256 main files and the `agents` root package is empty. Still open: step 7 (removing the split packages) and the owed 32-user kind benchmark after the `agents-tools`/`agents-turn` cuts. Note (2026-10-21, v0.1.9): `agents-turn` has since grown to 307 main files, over the 300 cap, and the kernel to 259 ([core module graph](core-module-graph.md)). |
 | **Date** | 2026-10-16 |
 | **Deciders** | Platform Engineering (maintainers) |
 | **Related** | [ADR-0011 Provider plugins](ADR-0011-provider-plugins.md), [Structural audit 2026-10-14](STRUCTURAL-AUDIT-2026-10-14.md), [Core module graph](core-module-graph.md), [ADR-AGENT-JOB-DURABILITY](ADR-AGENT-JOB-DURABILITY-2026-08-17.md) |

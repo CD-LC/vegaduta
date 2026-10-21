@@ -66,14 +66,14 @@ it never changes configuration itself. After editing `docs/console/*.md` or a to
 The left rail lists your threads (grouped Pinned, Today, Yesterday, This week, Earlier) with search, pin,
 rename and a confirmed delete; finished turns collapse under a "Worked for …" line with the tool calls inside it.
 
-When the install keeps chat history (`APP_CHAT_BRANCHING_ENABLED`; on by default on every install since 0.1.8),
+When the install keeps chat history (`APP_CHAT_BRANCHING_ENABLED`; on by default for personal, lite and full installs and the Helm chart),
 the conversations are stored on the server for 30 days, not only in this browser. The rail then also lists the
 threads you started on another browser or device (`GET /api/chat/threads`), reopening an older thread reads it back
 from the server (tool steps of earlier turns are not kept: "Restored from the server"), and deleting a thread also
 deletes the server copy (`DELETE /api/chat/threads/{agentId}/{sessionId}`). With chat history off, the list lives in
 this browser only.
 
- The work rail keeps background jobs and
+The work rail keeps background jobs and
 tasks visible while you chat — waiting-on-you, running and done — and lists routines with their next
 run; a task that finishes in the open conversation posts its result there, and a badge counts live
 tasks on narrow screens. The tenant-wide ledger (`/jobs/all`), schedules (`/jobs/schedules`) and the
