@@ -53,6 +53,12 @@ app:
       # The always-kept tools alone use most of the shared 3000-token default, which left a matching family
       # (the rest of the browser tools) no room even with the count raised.
       max-schema-tokens-per-turn: ${TOOL_AUTO_SELECTION_MAX_SCHEMA_TOKENS:6000}
+  chat:
+    branching:
+      # Chat history kept in Postgres (ChatBranchService): the Assistant's thread list across devices,
+      # edit/regenerate, and conversations older than the 24 h Redis window. Lite and the full stack
+      # turn it on in Compose; a personal install gets it here, so core.env can still switch it off.
+      enabled: ${APP_CHAT_BRANCHING_ENABLED:true}
   google:
     oauth:
       # web | loopback. `loopback` = a Google "Desktop app" client: the redirect is this computer's own

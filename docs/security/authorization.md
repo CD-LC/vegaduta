@@ -13,6 +13,12 @@ claim into the request's `TenantContext`. Every database query of the request
 runs in that tenant's Postgres schema. A token without a tenant is refused,
 except for `platform-admin` and users still in onboarding.
 
+That is `app.auth.mode=keycloak`, the default. A personal install runs with
+`app.auth.mode=local` (`APP_AUTH_MODE`, set by the `personal` profile): core
+then issues and validates its own tokens for a single owner, with no Keycloak
+(`core/security/.../localauth/LocalAuth.java`, sign-in under
+`/api/auth/local/*`). Any other value stops the boot.
+
 Non-human callers have their own credentials: MCP grant keys (`/mcp/**`,
 `/api/dev/**`), device tokens, share-link visitor tokens, channel webhook
 signatures and delegation tokens (which act as the delegating user).

@@ -5,7 +5,7 @@ own hardware in two ways. They compose: you can use both.
 
 | | In the browser (on-device) | Local server (Ollama) |
 |---|---|---|
-| Needs | A WebGPU browser (Chrome or Edge 113+, recent Safari) | Docker, plus ~4 GB RAM free for the default model |
+| Needs | A WebGPU browser (Chrome or Edge 113+, recent Safari) | Docker; the default `qwen3.5:4b` wants about 10 GB of memory with the stack (smaller models need less) |
 | Setup | Open **/edge**, click download | `./scripts/vegaduta up --lite --local-ai` |
 | Who benefits | One person, on that device | Everyone using the instance (it becomes the free platform pool) |
 | Data | Never leaves the device | Never leaves your network |
@@ -15,16 +15,21 @@ own hardware in two ways. They compose: you can use both.
 
 ## The installer asks
 
-On a first interactive `./scripts/vegaduta up` or `./scripts/vegaduta
-personal` you are asked how agents get their model: a free open-weights model
-on this machine (the default; the size is picked from your RAM, a host Ollama
-is used when one is installed, and otherwise the Ollama Docker container is
-added to the stack), a cloud provider key added later in the console, or a
-model you choose from the catalog (`gpt-oss`, `deepseek-r1`, `qwen3.5`, ...).
-The answer is stored in `deploy/compose/.vegaduta-state` and never asked
-again. Scripts and CI (no terminal) are not asked and keep the cloud default;
-pass `--cloud` to skip the question, or `--local-ai` / `--local-model` to
-answer it up front.
+On a first interactive `./scripts/vegaduta up` you are asked how agents get
+their model: a free open-weights model on this machine (the default; the size
+is picked from your RAM, a host Ollama is used when one is installed, and
+otherwise the Ollama Docker container is added to the stack), a cloud provider
+key added later in the console, or a model you choose from the catalog
+(`gpt-oss`, `deepseek-r1`, `qwen3.5`, ...). The answer is stored in
+`deploy/compose/.vegaduta-state` and never asked again. Scripts and CI (no
+terminal) are not asked and keep the cloud default; pass `--cloud` to skip the
+question, or `--local-ai` / `--local-model` to answer it up front.
+
+`./scripts/vegaduta personal` (and the Setup app, which runs it) does not ask:
+it picks the model that fits the memory it can use and downloads it. On macOS
+and Windows it installs Ollama on the computer when it is missing. Only
+`--cloud` (`-Cloud` on Windows), or a machine with less than 4 GB of memory,
+skips the model. See [Personal mode](personal-mode.md#picking-a-local-model).
 
 ### Your first agent, no setup
 
@@ -63,8 +68,10 @@ for a link instead.
 ./scripts/vegaduta up --lite --local-ai
 ```
 
-This adds an `ollama` service, pulls a default model on first start (about 3 GB,
-kept in the `ollama-data` volume), and registers it as the **platform pool**.
+This adds an `ollama` service, pulls a default model on first start
+(`qwen3.5:4b`, about 3 GB, kept in the `ollama-data` volume), loads it, and
+registers it as the **platform pool**. (`personal` sizes the model to the
+machine instead.)
 Core does the registration at startup and does it again, harmlessly, on every
 restart. Sign up, create an agent, and chat: new accounts are on the FREE plan,
 which uses the pool, so no provider key is involved.
@@ -104,9 +111,18 @@ before its first token. Core loads the model ahead of time (`POST
 bootstrap and when a chat screen opens) with `app.local-models.keep-alive`
 (default `30m`), but a chat request without that field resets Ollama's timer to
 its own default, so set it on the server too: `OLLAMA_KEEP_ALIVE=30m` in the
-environment of the Ollama app or service (the Compose `local-ai` overlay already
-sets it). While the model is loading, the chat shows "Model is working…" with a
-running clock; the model's reasoning streams below it as soon as it starts.
+environment of the Ollama app or service. While the model is loading, the chat
+shows "Model is working…" with a running clock; the model's reasoning streams
+below it as soon as it starts.
+
+The Compose `local-ai` overlay (Option 1) does more: it loads the model when
+the stack starts and never unloads it (`OLLAMA_KEEP_ALIVE=-1`), turns on
+`OLLAMA_FLASH_ATTENTION=1`, and sizes the context window to Docker's memory
+(see [Choosing a model](#choosing-a-model)). It also turns the hidden thinking
+pass off on the local row (`APP_LLM_OLLAMA_REASONING_EFFORT=none`); set
+`LOCAL_LLM_REASONING_EFFORT` in `.env` (for example `medium`) to change it.
+When the Assistant runs on a local model it shows a short note with a link to
+Agent settings, where you can tune it for speed or quality.
 
 ## What was registered, and why it is safe
 
@@ -123,6 +139,15 @@ running clock; the model's reasoning streams below it as soon as it starts.
 - Core never fails to start because of this. If the server is unreachable or the
   model is missing, it logs a warning with the exact `ollama pull` command and
   you can fix it while the stack runs.
+- The row repairs itself. If `APP_ENCRYPTION_KEY` changed (a re-install that
+  kept the database but got a new `.env`), the stored key of the row no longer
+  decrypts. At every start core re-keys such a row. It turns a disabled local
+  row back on only when nothing else in the pool can serve. A chat that finds
+  the pool empty runs the same repair on the spot (at most once every 30
+  seconds); only this in-chat repair switches the pool's master switch back on,
+  never a restart. `/troubleshoot` says why the row cannot be used (the pool is
+  off, the row is disabled, or the row is unusable) instead of calling it in
+  use.
 
 ## Option 3: in the browser, no server at all
 
@@ -257,7 +282,8 @@ loops on tools will hit them sooner than a chat does; the Platform Admin
 ## Model catalog
 
 One file, `core/providers/src/main/resources/local-models/catalog.txt` (core reads it
-from the classpath; `deploy/models/catalog.txt` is a symlink to it), lists every
+from the classpath; `deploy/models/catalog.txt` is a symlink to it in the
+repository and a plain copy in release downloads), lists every
 open-weight model the CLI and the console offer, so the two can never disagree.
 Add a line to offer another model.
 
@@ -334,6 +360,7 @@ row that already exists.
 |---|---|
 | Sign-up ends on "Failed to send email" | Keycloak has no SMTP and the account was told to verify its email. The lite tier turns that off (`KEYCLOAK_REQUIRE_EMAIL_VERIFICATION=false`); on the full stack configure `KEYCLOAK_SMTP_*` or set that variable to `false`. |
 | Chat says no active provider | Core could not register the pool row. `./scripts/vegaduta logs core | grep -i "local llm"` shows why. |
+| Chat answers "No platform LLM is configured…" while Troubleshoot shows the model in use | The local row's stored key no longer decrypts (a new `APP_ENCRYPTION_KEY` with the old database), or the row or the pool was switched off. Core repairs this at every start and again inside a chat that finds the pool empty (see [What was registered](#what-was-registered-and-why-it-is-safe)); restart core or send another message. `/troubleshoot` names the cause. If the log says the SSRF guard refuses the address, add the `host:port` it names to `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS`. |
 | `host not allowed` | The host:port must be in `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS`; `--local-ai` sets it for you. |
 | First reply takes minutes | The model is still downloading. `docker compose ... logs ollama`, or wait for the `ollama` container to turn healthy. |
 | `host.docker.internal` does not resolve (Linux) | Use `--local-ai=host`, which adds the mapping, and listen on `0.0.0.0`. |
@@ -341,7 +368,7 @@ row that already exists.
 | "Every model this workspace can use failed" after about four minutes | A CAREFUL/RIGOROUS/PLANNED agent ran out of time (`app.llm.http.buffered-turn-timeout`, 240 s): those depths make several model calls per turn, which a small local model cannot fit. Core now answers such a turn at FAST depth without tools and says so in the trace; to stop it recurring set the agent's reasoning depth to FAST (small-model mode does this on its own for models of 8B or fewer, judged by the model tag when the stored size disagrees). |
 | A reply fails with "every model failed" and the log shows `HTTP 500 ... XML syntax error on line 3: element <function> closed by </parameter>` | Ollama could not parse a tool call the model wrote (seen with `qwen3.5:4b` after a tool result, mostly on multi-step browser use). Core replays the request once when it sees this (log: "replaying the request once", counter `llm.ollama.toolcall_parse_retry`), which helps when the model's next try is well-formed; it did not help in the browsing case that was reproduced, so a bigger model (`qwen3.5:9b`) or a hosted key is the reliable way past it. Cause still open; see the personal-install audit. |
 | Replies are poor or truncated with a long system prompt on Apple Silicon | The MLX runner ignores the per-request `num_ctx` core sends and loads the server default (4096). Set `OLLAMA_CONTEXT_LENGTH=16384` (or the value of `APP_LLM_OLLAMA_NUM_CTX`) in the Ollama server's environment and restart it; core logs a warning with this hint after each warm-up when the loaded context is smaller than requested. |
-| The first reply after a pause is slow, later ones are fine | Ollama unloaded the model. Set `OLLAMA_KEEP_ALIVE=30m` on the server; see "Keep the model warm" under Option 2. The chat shows "Model is working…" with a clock while it reloads. |
+| The first reply after a pause is slow, later ones are fine | Ollama unloaded the model. On an Ollama you run yourself set `OLLAMA_KEEP_ALIVE=30m` (or `-1`) on the server; the Compose overlay already keeps it loaded. See "Keep the model warm" under Option 2. The chat shows "Model is working…" with a clock while it reloads. |
 | Replies take a minute or more on a laptop | Three things set the wait: the model loading (the Compose overlay now loads it at start and never unloads it: `OLLAMA_KEEP_ALIVE=-1`), the hidden thinking pass (the overlay sends `reasoning_effort: none`, `LOCAL_LLM_REASONING_EFFORT` in `.env`) and the size of the model and of the prompt on a CPU. For more speed pick a smaller model (`scripts/vegaduta models list`), keep conversations short, and turn off tools the agent does not need in Agent settings; for better answers at the cost of speed set `LOCAL_LLM_REASONING_EFFORT=medium` and a bigger model. |
 | The reply is raw JSON like `{"name": "...", "parameters": ...}` | The model wrote a tool call as text and kept doing so past the recovery limit, or named a tool the agent does not have. See [Tool calls from small models](#tool-calls-from-small-models); check the row's grade badge, and use a larger model for agents with many tools. |
 | The agent says "I will now generate the report" and nothing happens | The model narrates instead of calling. Check the row's tool-call grade in Platform Admin; a `NONE` row is chat only. Pull a tools-capable model (`qwen3.5:4b`, `qwen3:8b`) and add it as a row, or force the constrained router on for the row. |

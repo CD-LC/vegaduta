@@ -3,7 +3,7 @@
 > **⚠ Repository history rewritten (2026-10-19).** `main` was force-pushed to a
 > clean linear history; the old repository's merged-in commit history was
 > removed (content unchanged). If your local checkout predates this:
-> **`git fetch origin && git reset --hard origin main`** — do NOT `git pull`,
+> **`git fetch origin && git reset --hard origin/main`** — do NOT `git pull`,
 > do NOT push from a stale clone, and do NOT merge `cdandlc/vegaduta` or any
 > remote branch back into `main` without asking first; that re-imports the
 > old history. Remove this notice once all active checkouts have reset.
@@ -36,7 +36,7 @@ sdk/                  First-party SDKs. typescript/ and python/ are generated RE
                       reactor (group io.vegaduta, Java 17, own parent, NOT under core/) with
                       agent-api (framework-free governance contracts), agent-core,
                       agent-spring-ai, agent-spring-boot-starter, agent-jdbc, agent-testkit,
-                      agent-bom. Design: docs/architecture/ADR-0013-*.md
+                      agent-scanner (risk-map CLI), agent-bom. Design: docs/architecture/ADR-0013-*.md
                       python-agent/ is the Python Agent SDK (vegaduta_agent): the same
                       governance contracts as the Java SDK (@governed, ApprovalGate,
                       EffectJournal, budgets, guardrails, audit — plus the halt switch,
@@ -47,9 +47,10 @@ sdk/                  First-party SDKs. typescript/ and python/ are generated RE
                       hand-written, tests under sdk/python-agent/tests (pytest).
 web/                  Next.js console (tenant UI + public pages + platform-admin at app/platform-admin/)
 services/             sidecar (Python ML), code-intel, app-builder, tool-sandbox,
-                      mcp-stdio-runner (Node), voice-agent, rl-trainer
-examples/             workflow-templates/, mcp-servers/
-tests/e2e             Playwright suite;  tests/load  load tests
+                      mcp-stdio-runner (Node), piece-host, voice-agent, rl-trainer,
+                      browser-runner, workspace-runner, whatsapp-qr, desktop-agent
+examples/             workflow-templates/, mcp-servers/, agent-bundles/, sdk/
+tests/e2e             Playwright suite;  tests/load  load tests;  tests/install  installer tests
 deploy/compose        lite.yml, docker-compose.yml (+ *.build.yml, *.ci.yml, *.domain.yml overlays), .env.example
 deploy/helm           umbrella chart charts/vegaduta + per-service charts + vegaduta-lib library
 deploy/postgres       Postgres 16 + pgvector + Apache AGE image

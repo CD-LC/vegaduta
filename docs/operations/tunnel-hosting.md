@@ -17,10 +17,11 @@ localhost only.
 ## 1. Configure the stack
 
 ```bash
-scripts/vegaduta up --full --build --domain example.com   # --build until the first release exists
+scripts/vegaduta up --full --domain example.com   # published release images; add --build to build from source
 ```
 
-Then in `deploy/compose/.env` (the CLI writes `BASE_DOMAIN` and the `PUBLIC_*` URLs for you):
+With `VEGADUTA_VERSION` empty (a git checkout), the CLI looks up the latest published release and
+records it in `.env`. Then in `deploy/compose/.env` (the CLI writes `BASE_DOMAIN` and the `PUBLIC_*` URLs for you):
 
 ```
 CADDY_AUTO_HTTPS=off          # Cloudflare terminates TLS

@@ -21,7 +21,7 @@ These pages are also published as a searchable site (`mkdocs.yml`, `make docs-se
 
 | Page | For |
 |---|---|
-| [Personal mode](personal-mode.md) | One person on one machine: the `vegaduta-setup` app or `scripts/vegaduta personal`, local sign-in, local models, the Assistant's workspace and desktop tools, skills, sandbox levels, limitations |
+| [Personal mode](personal-mode.md) | One person on one machine: the Setup app (installs Docker and a free local model, repairs a failed start) or `scripts/vegaduta personal`, local sign-in, local models, the Assistant's workspace and desktop tools, skills, sandbox levels, limitations |
 | [Cost and ROI](cost-and-roi.md) | Per-agent cost, outcome rates, tenant-entered value assumptions; `/roi` and `/api/tenant/roi/**` |
 | [Running a 30-day pilot](pilots/README.md), [case-study template](pilots/case-study-template.md) | The pilot process, baseline, one-page pilot report, demo data (`scripts/vegaduta seed-demo`) |
 | [Run free with local models](local-models.md) | Ollama in Compose or Helm, the model catalog (`scripts/vegaduta models`), on-device models at `/edge` |

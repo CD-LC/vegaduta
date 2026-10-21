@@ -41,12 +41,14 @@ So the week is ordered to produce evidence without changing behaviour until the 
 Goal: a one-page table of every tool, its risk, side effects, data access and OWASP ASI
 exposure, produced from the code as it is.
 
-1. Run the scanner over the agent's build output (*in flight*; see the status table):
+1. Run the scanner over the agent's build output (`agent-scanner`, `@Experimental`; there is no
+   Maven plugin goal, see the status table):
 
    ```bash
-   mvn -f pom.xml io.vegaduta:vegaduta-agent-maven-plugin:scan
-   # or, standalone:
-   java -jar vegaduta-agent-scanner.jar --classpath target/classes --format markdown > risk-map.md
+   java -cp target/classes:vegaduta-agent-scanner-0.1.0.jar \
+       io.vegaduta.agent.scanner.Main --package com.acme.agent --format md > risk-map.md
+   # or, on a packaged jar:
+   java -jar vegaduta-agent-scanner-0.1.0.jar --jar target/app.jar --format md > risk-map.md
    ```
 
    It lists every `@Tool` / `ToolCallback` / `ToolCallbackProvider` it can see, whether it
@@ -188,11 +190,11 @@ their standard questions, with the data behind it.
 | `risk-map.md` (Day 1) | Which tools, what can each do, where is the trifecta | scanner or `agent.toolset` events |
 | `shadow-report.md` (Days 3-4) | What will change under the target policy, how many approvals per day | `ShadowReport` or the SQL fallback |
 | `showback-report.md` (Days 3-4) | What a run costs, what the caps will be | `ShowbackReport` or summed `model.call` events |
-| **EU AI Act Art. 12 / 14 pack** (*in flight*, `vegaduta-agent-compliance`) | Art. 12 record-keeping: the append-only `vegaduta_audit` table, its retention policy (six months minimum for high-risk deployers), the hash chain or DB-level immutability you configured. Art. 14 human oversight: the approval trail (`approval.requested` / `approval.decided` with requester, decider, four-eyes), the stop path (`GovernanceMode.OFF` is *not* a stop; the halt drill is, see below) | audit table, approval store |
+| **EU AI Act Art. 12 / 14 pack** (in code, `@Experimental`: the evidence exporters in `agent-core` `core/evidence`) | Art. 12 record-keeping: the append-only `vegaduta_audit` table, its retention policy (six months minimum for high-risk deployers), the hash chain or DB-level immutability you configured. Art. 14 human oversight: the approval trail (`approval.requested` / `approval.decided` with requester, decider, four-eyes), the stop path (`GovernanceMode.OFF` is *not* a stop; the halt drill is, see below) | audit table, approval store |
 | **OWASP ASI coverage** | For each of ASI01-ASI10, which SDK control is active for this agent and which is not. The README's standards table is the template; filter it to the controls this agent actually enables. Say plainly which items are *not* covered (for example ASI04 supply chain when no MCP or skills scanning is in place) | README mapping, `coversRisks(...)` testkit assertions |
-| **`UnderwritingReport`** (*in flight*) | The subset an insurer or an internal risk committee asks for: autonomy level per agent, approval coverage of side-effecting tools, budget caps, halt-drill result and date, audit retention, third-party audit status (**none** today, say so) | the above, condensed |
-| `compliance-mapping.md` (*in flight*) | Control-by-control mapping to EU AI Act, ISO/IEC 42001, NIST AI RMF, OWASP ASI | static document shipped with the compliance module |
-| `security-review-pack.md` (*in flight*) | The reviewer-facing walkthrough: threat model, what the SDK enforces, what the host must do (secure the approvals endpoint, run the DDL, set retention, protect `APP_ENCRYPTION_KEY`-style secrets), known limitations verbatim from the README | static document |
+| **`UnderwritingReport`** (in code, `@Experimental`) | The subset an insurer or an internal risk committee asks for: autonomy level per agent, approval coverage of side-effecting tools, budget caps, halt-drill result and date, audit retention, third-party audit status (**none** today, say so) | the above, condensed |
+| [`compliance-mapping.md`](compliance-mapping.md) | Control-by-control mapping to EU AI Act, ISO/IEC 42001, NIST AI RMF, OWASP ASI | static document on this site |
+| [`security-review-pack.md`](security-review-pack.md) | The reviewer-facing walkthrough: threat model, what the SDK enforces, what the host must do (secure the approvals endpoint, run the DDL, set retention, protect `APP_ENCRYPTION_KEY`-style secrets), known limitations verbatim from the README | static document |
 
 Hand it over with a 30-minute walkthrough. Lead with the shadow report: "here is what will
 change, here is how many times a day a human will be asked". Reviewers sign off on changes they
@@ -359,5 +361,5 @@ table. A control that is on the classpath and not enabled for the agent covers n
 
 The *in flight* markers in the steps above pre-date these classes; where this table says "in code",
 the class exists but is `@Experimental` and may change before 1.0, so keep the fallback as the
-safe default until you have tried it on your own agents. The `agent-maven-plugin` command shown in
-step 1 is not built; use the scanner CLI.
+safe default until you have tried it on your own agents. There is no `agent-maven-plugin`; step 1
+uses the scanner CLI.

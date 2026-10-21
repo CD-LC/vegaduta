@@ -464,8 +464,8 @@ The stages share no interface; the pipeline is the executor's method sequence pl
 the executor next to the `send` seam). To add a rule, put it in the stage that owns that decision, add a test for
 that stage, and keep the invariants the class javadoc names: nothing is sent before validation and host policy
 pass, a secret resolves only for its allowed hosts, a redirect never carries credentials to another origin, and
-every string heading back to the model passes the redactor. `HttpRequestExecutorSafeModeTest` and the
-stage-level tests are the regression net.
+every string heading back to the model passes the redactor. The `HttpRequestExecutorSafeMode*Test` classes
+(`core/agents-browser`) and the stage-level tests are the regression net.
 
 ## 12. Add an LLM call sink
 

@@ -179,20 +179,22 @@ Distroless or chiseled JRE (for example `gcr.io/distroless/java21-debian12:nonro
 
 None of these changes application behaviour in the default configuration.
 
-- [ ] Compose `x-logging` anchor with json-file rotation on all services (compose files only).
-- [ ] CI: `mvn -B spotless:check` step (ratcheted) with `fetch-depth: 0`.
-- [ ] CI: `prettier --check` and `ruff check` / `ruff format --check` on changed files.
-- [ ] CI: extend `ruff check` from sidecar and code-intel to app-builder, voice-agent, rl-trainer, tool-sandbox (advisory first).
-- [ ] `maven-enforcer-plugin` (Java, Maven, banned deps enforced; convergence warn-only).
-- [ ] JaCoCo report in CI (`-Pcoverage`, no threshold).
+- [x] Compose `x-logging` anchor with json-file rotation on all services (compose files only). *Done: `x-logging` in `docker-compose.yml` and `lite.yml`.*
+- [x] CI: `mvn -B spotless:check` step (ratcheted) with `fetch-depth: 0`. *Done (`ci.yml`).*
+- [x] CI: `prettier --check` and `ruff check` / `ruff format --check` on changed files. *Done (`ci.yml`).*
+- [x] CI: extend `ruff check` from sidecar and code-intel to app-builder, voice-agent, rl-trainer, tool-sandbox (advisory first). *Done: advisory whole-tree step in `ci.yml`.*
+- [x] `maven-enforcer-plugin` (Java, Maven, banned deps enforced; convergence warn-only). *Done (`core/pom.xml`).*
+- [x] JaCoCo report in CI (`-Pcoverage`, no threshold). *Done: the `core` job runs `mvn -Pcoverage,it verify`.*
 - [ ] ESLint baseline or suppressions so CI goes green without hiding new errors, plus the mechanical `no-unescaped-entities` autofix.
-- [ ] `application.yml`: explicit `server.shutdown: graceful`, `spring.lifecycle.timeout-per-shutdown-phase: 60s`, base Redis `timeout: 2s`, `logging.structured.format.console: ${LOG_FORMAT:}`.
-- [ ] Missing `.dockerignore` files. `USER` in rl-trainer. Replace `:latest` in the e2b template.
+- [x] `application.yml`: explicit `server.shutdown: graceful`, `spring.lifecycle.timeout-per-shutdown-phase: 60s`, base Redis `timeout: 2s`, `logging.structured.format.console: ${LOG_FORMAT:}`. *Done, with a base Redis timeout of `${REDIS_TIMEOUT:5s}` and the shutdown phase fed by `SHUTDOWN_PHASE_TIMEOUT` / `app.shutdown.drain-seconds`.*
+- [x] Missing `.dockerignore` files. `USER` in rl-trainer. Replace `:latest` in the e2b template. *Done: every service has a `.dockerignore`, rl-trainer runs as `USER 10001`, the e2b template base is digest-pinned.*
 - [ ] Helm: `existingSecret` for the internal-token charts (code-intel, tool-sandbox, sidecar, mcp-stdio-runner). Document the measured core request of about 1.1 GiB.
-- [ ] `.editorconfig` exists. Add `.gitattributes` `* text=auto eol=lf` if it is not present.
+- [x] `.editorconfig` exists. Add `.gitattributes` `* text=auto eol=lf` if it is not present. *Done: `.gitattributes` exists.*
 - [ ] PR-time image scan on Dockerfile changes (reuse the release job's scanner).
 
 ## 5. Phase 2 (code changes, ratcheted)
+
+*Status 2026-10-21:* done since the audit: ArchUnit with frozen baselines (`StructureRulesTest`, `ModuleBoundaryRulesTest`), Error Prone and the NullAway pilot (`-P static-analysis`, see [ERROR-PRONE-BASELINE.md](ERROR-PRONE-BASELINE.md)), Testcontainers integration tests (see [INTEGRATION-TESTS.md](INTEGRATION-TESTS.md)), Spring Boot 3.5.16, and an OpenAPI breaking-change check (`scripts/ci/openapi-breaking.mjs`). The rest was not rechecked.
 
 - Node 22 image bump, with a smoke test of MCP stdio and Playwright.
 - ArchUnit with a frozen baseline, then burn down.

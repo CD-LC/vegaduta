@@ -61,8 +61,9 @@ and every workflow stays green — the same opt-in pattern as
 `vars.SONAR_HOST_URL`.
 
 Each workflow imports into its own engagement (`trivy-fs`, `zap-baseline`,
-`license-scan`, `Release <version>`) under an auto-created `VegaDuta`
-product; reimports dedupe and close findings that disappear between runs.
+`license-scan`, `Release <version>`) under an auto-created product named
+after the repository (`DEFECTDOJO_PRODUCT`), in the product type `VegaDuta`
+(`DEFECTDOJO_PRODUCT_TYPE`); reimports dedupe and close findings that disappear between runs.
 The ZAP baseline and license scans set `DEFECTDOJO_CLOSE_OLD_FINDINGS=false`
 because their coverage varies between runs.
 

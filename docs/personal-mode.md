@@ -12,9 +12,9 @@ and Lite and Full behave exactly as before.
 
 | | Personal | Lite | Full |
 |---|---|---|---|
-| Containers always on | Postgres, Valkey, core, web (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
+| Containers always on | Postgres, Valkey, core, web, plus web search (SearXNG), the connector runner and a local model by default (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
 | Sign-in | local, one owner (core) | Keycloak | Keycloak |
-| Container memory limits (sum) | about 2.4 GB (about 2.2 GB with `--minimal`) | more (Keycloak alone is about 768 MB) | more |
+| Container memory limits (sum) | about 2.5 GB for the four; 3.8 GB with web search and the connector runner (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
 | Billing, plans, payments | off | on unless disabled | on unless disabled |
 | Meant for | one person | trying it | one server, a team |
 
@@ -31,38 +31,59 @@ and Lite and Full behave exactly as before.
 
 ## The Setup app (no terminal)
 
-Once a release is published, the easiest install is `vegaduta-setup` from the
-[Releases](https://github.com/CD-LC/vegaduta/releases) page (macOS, Windows, Linux): a single binary that opens a
-setup wizard in your browser, checks the machine, installs or starts Docker when asked, downloads the verified
-release, starts the stack and hands you the first-run setup link. On personal it has an **Extras** step: the
+The easiest install is the Setup app from the [Releases](https://github.com/CD-LC/vegaduta/releases) page:
+`VegaDuta-Setup-<version>.dmg` on macOS, `vegaduta-setup-windows-amd64.zip` on Windows,
+`vegaduta-setup-linux-<arch>.tar.gz` on Linux. It opens a setup wizard in your browser, checks the machine,
+downloads the verified release, starts the stack and hands you the first-run setup link. On macOS and Windows it
+installs and starts Docker Desktop for you (on Windows it also turns on WSL2, which asks for permission once and may
+need one restart, after which Setup reopens by itself); on Linux it shows the command to install Docker. It sets up
+a free local model (see [Picking a local model](#picking-a-local-model)). When a start fails it finds the cause (a
+busy port, a stopped Docker, a full disk, a database left by an earlier install, a missing secret), repairs what it
+can and tries again. On personal it has an **Extras** step: the
 optional add-ons (the Assistant's build terminal, private web search, document reading, the Assistant's browser and
 free local model packs) with their disk, memory and licence, the recommended ones ticked (the build terminal and web
 search), and a total against this computer's free disk, Docker memory and RAM. Shortfalls are warnings, never
 blocks. See [Add-ons](#add-ons). The wizard also offers a language picker: the choice lands in
-`.env`'s `APP_LOCALE` and the console opens in it (all 30 console locales). The binary is not yet code-signed, so
-the OS warns once. Details and headless flags: [`installer/README.md`](https://github.com/CD-LC/vegaduta/blob/main/installer/README.md).
+`.env`'s `APP_LOCALE` and the console opens in it (all 30 console locales). The app is not yet code-signed, so
+the OS warns once: on macOS choose "Open anyway", on Windows "More info" and then "Run anyway". Details and headless flags: [`installer/README.md`](https://github.com/CD-LC/vegaduta/blob/main/installer/README.md).
 
-The same result from a terminal against a published release:
+The same result from a terminal (Linux, macOS, WSL):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- personal
+curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh
 ```
 
-`install.sh` downloads the release tarball, verifies it (SHA256SUMS, and the Sigstore signature when `cosign` is
-installed) and runs the same `scripts/vegaduta` the Setup app calls. **No release has been published yet**, so for
-now build from your checkout, the same as the Lite quickstart:
+`install.sh` installs Personal mode unless you pass `--lite` or `--full`. It downloads the latest release tarball
+(or the one you name with `--version X.Y.Z`), verifies it (SHA256SUMS, and the Sigstore signature when `cosign` is
+installed) and runs the same `scripts/vegaduta` the Setup app calls.
 
 ## Start with one command
 
+From a release folder or a git checkout:
+
 ```sh
-./scripts/vegaduta personal --build
+./scripts/vegaduta personal
 ```
 
-`personal` checks the machine (`scripts/vegaduta doctor --personal` runs the same checks), generates the secrets in
-`deploy/compose/.env`, starts the stack, waits until it is healthy and prints the console URL and the first-run
-link. Later runs do not need `--build` once the images exist; plain `./scripts/vegaduta up` also starts a personal
-install, because the choice is remembered in the state file. After a release is published, drop `--build` and the
-images are pulled instead.
+`personal` checks the machine (`scripts/vegaduta doctor --personal` runs the same checks), generates every secret
+the compose files need in `deploy/compose/.env`, starts the stack, waits until it is healthy and prints the console
+URL and the first-run link. In a git checkout with no release pinned it uses the latest published release and
+writes it to `.env`; add `--build` to build the images from your checkout instead. Plain `./scripts/vegaduta up` also
+starts a personal install, because the choice is remembered in the state file.
+
+It also repairs the usual reasons a start fails:
+
+- **Secrets kept outside the install folder.** A copy of the secrets (database passwords, `APP_ENCRYPTION_KEY`) is
+  kept per user in `~/.config/vegaduta/secrets.env` (`%LOCALAPPDATA%\VegaDuta\secrets.env` on Windows and WSL). A
+  new install folder reuses them, so it can read the data Docker kept. When Docker holds an earlier install's data
+  and no copy of its secrets exists, that data is left untouched and the new install starts under its own project
+  (`VEGADUTA_PERSONAL_PROJECT`).
+- **Database password mismatch.** When the database was made by an earlier install with another password, the
+  launcher sets it to this install's password (the data is kept) and starts again.
+- **Missing secrets.** Before starting, the launcher asks Docker Compose (`docker compose config`) which required
+  values are still missing and generates them; it stops with "set X in .env" only for a value that is not a secret.
+- **Busy ports.** The checks name a port that another program holds (on Windows also ports the system reserves) and
+  ignore ports held by VegaDūta's own containers. Change `WEB_HOST_PORT` / `CORE_HOST_PORT` in `.env` to move them.
 
 | Command | What it does |
 |---|---|
@@ -141,12 +162,13 @@ and `uvx` resolve a version, not a hash, so the runner does not refuse a downloa
 remembered in the state file, and the choice is remembered (`search=` and `tools=` in `.vegaduta-state`). The Setup
 app passes `--no-search` itself when you untick web search. An install that **already existed** keeps what it had:
 with no remembered answer it is left alone until you pass `--search` or `--profile tools` once. Declining the
-interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` has no such
-flags yet, so a Windows install does not get these defaults.
+interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` has no
+search flag, so a Windows install does not get web search by default; it adds the connector runner when you pass
+`-Profile tools`.
 
 **What it costs.** Two more images to pull on the first start (SearXNG, and the runner with Node, uv and Python)
 and about 1.3 GB more of memory limits (512 MB + 768 MB; limits, not measured use), which takes the personal budget
-from about 2.4 GB to about 3.7 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s. None of
+from about 2.5 GB to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s. None of
 this was run on a real Docker stack when it was written: the launcher plan, the compose files and the registration
 logic are tested, the containers were not started.
 
@@ -182,7 +204,7 @@ difference is packaging, not capability:
 docker run -d --name vegaduta \
   -v vegaduta-data:/data \
   -p 3000:3000 -p 8080:8080 \
-  ghcr.io/cd-lc/omnibus:0.1.3
+  ghcr.io/cd-lc/omnibus:<version>
 ```
 
 Everything mutable lives under `/data` (the database cluster, uploaded files, Redis scratch space and the
@@ -210,9 +232,9 @@ copy (a test fails if they drift).
 | Documents and transcription | the ML sidecar (`rag` profile): PDF and scan reading, embeddings, audio to text | 4.1 GB | profile `rag` |
 | Assistant browser | the agent's own browser (see [The Assistant's browser](#the-assistants-browser)) | about 2 GB download (3.4 GB on disk), up to 2 GB of memory while it runs | `scripts/vegaduta personal --browser` (the Setup app offers it too) |
 | Local model packs | Qwen 3.5 2B, 4B, 9B and gpt-oss 20B, sizes and memory from `deploy/models/catalog.txt` | 1.5 to 14 GB | core downloads them through Ollama |
+| Connector runner | the container STDIO MCP connectors run in (`tools` profile, see [What is on from the start](#what-is-on-from-the-start)) | 500 MB | on by default for a fresh install |
 
-Three more are listed as **planned** and cannot be turned on: a tools runner (it is on by default through the
-launcher, see above, but is not yet a switch), local image generation and local spoken replies. Sizes are
+Two more are listed as **planned** and cannot be turned on: local image generation and local spoken replies. Sizes are
 approximate; the documents figure is on-disk size, while the Setup app's older "about 2 GB" is a download figure.
 
 How switching works, because core runs in a container and cannot start containers:
@@ -319,7 +341,8 @@ and asks for no e-mail address unless you choose "Use a password instead".
    (`POST /api/signup`) is closed in local mode.
 9. **Platform admin.** `scripts/vegaduta make-admin` grants a Keycloak role and refuses on a personal install. To let
    the owner open the platform-admin pages, put `APP_AUTH_LOCAL_OWNER_EXTRA_ROLES=platform-admin` in
-   `deploy/compose/core.env` and restart core.
+   `deploy/compose/core.env` and restart core. You do not need the platform-admin pages to fix the local model's
+   pool row: a restart, or simply chatting, repairs it (see [Free local models](local-models.md#what-was-registered-and-why-it-is-safe)).
 10. **Keys.** Core signs tokens with a key it generates into `signing-keys.json` in the auth data directory (rotated
     after 90 days; the retired key keeps verifying for a day). In the container stack that directory is
     `/data/storage/.auth` on the storage volume. A corrupt key file stops core from starting instead of silently
@@ -350,7 +373,10 @@ Agents need a model. Personal mode has three ways to get a free local one, all t
   model and the `nomic-embed-text` embedding model into it); on Linux and WSL, where Ollama's installer needs root,
   or when the install fails, it starts the Ollama container instead, which
   downloads the model on its first start; that first start may take a while, so the launcher waits up to an hour
-  for it instead of 15 minutes. Machines with less than 8 GB of RAM keep the cloud-key path. Choose another model
+  for it instead of 15 minutes. The model is sized to the memory it can really use: the whole machine for an Ollama
+  on the computer, Docker's memory for the container (a Docker Desktop or WSL2 VM is often much smaller than the
+  machine; under WSL2 the launcher offers to give Docker 8 GB). Below 8 GB it picks the smallest catalog model and
+  warns that the first reply is slow; only machines under 4 GB keep the cloud-key path. Choose another model
   with `--local-model TAG` (`-LocalModel` on Windows), or opt out with `--cloud` (`-Cloud`), which is remembered.
   An install that never chose gets its model on its next plain `personal`. `--local-ai=host` and `--local-ai`
   (container) state the source explicitly; the container is CPU-only on macOS. `VEGADUTA_ASSUME_NO=1` skips the
@@ -388,7 +414,9 @@ When something does not work, **Troubleshoot** (`/troubleshoot`, in the Configur
 model server answering, the recommended model pulled, tool calling working), offers the fix for each — including
 one-click model pulls from the same catalog the launcher reads — and links to Academy guides when the install has
 an Academy URL (`NEXT_PUBLIC_ACADEMY_URL`, `academy.vegaduta.ai` by default on personal). What the page cannot
-see (Docker, host ports) it delegates to `scripts/vegaduta doctor --personal`.
+see (Docker, host ports) it delegates to `scripts/vegaduta doctor --personal`. When the local model's pool row
+cannot be used (the pool is off, the row is disabled, or its key no longer decrypts after an `APP_ENCRYPTION_KEY`
+change) the page says which; core repairs the row at its next start or during the next chat.
 
 ## Skills
 
@@ -679,7 +707,7 @@ scripts/vegaduta personal --browser        # PowerShell: .\scripts\vegaduta.ps1 
 scripts/vegaduta personal --no-browser     # turn it off again (the choice is remembered)
 ```
 
-This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.49.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). Until the image is published for your release, add `--build`. A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
+This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.49.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
 
 To let the agent sign in to a site, name it in `deploy/compose/.env`: `BROWSER_ALLOWED_DOMAINS=github.com,*.github.com`.
 
@@ -721,7 +749,8 @@ accounts do not migrate to Keycloak.
 ## Honest limitations
 
 - **Valkey stays.** About 60 classes use Redis directly (session memory, turn cancel, budgets, rate limits, the
-  effect journal), so personal mode runs a 64 MB Valkey instead of replacing it. Expect about 1 GB for Postgres,
+  effect journal), so personal mode runs a 128 MB Valkey instead of replacing it (`--no-valkey` drops it, see
+  [Running without Valkey](#running-without-valkey)). Expect about 1 GB for Postgres,
   Valkey and core together, plus web, plus the Docker VM. Measured on a 16 GB laptop with other stacks running: core
   container about 765 MiB, Postgres about 135 MiB, Valkey about 12 MiB, start in about 21 seconds on an empty
   database. The web container, the AppCDS option and a from-source `--build` were not measured.

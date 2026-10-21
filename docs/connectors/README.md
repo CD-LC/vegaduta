@@ -3,7 +3,10 @@
 Real API connectors for the payer/clearinghouse demo on example.com. Each one
 is an **imported OpenAPI tool source**: paste the matching `*.openapi.yaml`
 into **Tools → Import from OpenAPI → Paste the document**, set the auth block,
-and every operation becomes an agent-callable tool (`<prefix>_<operationId>`).
+and every operation becomes an agent-callable tool (`<prefix>_<operationId>`, with a camelCase
+operationId snake-cased: `checkEligibility` becomes `<prefix>_check_eligibility`). The prefix is the
+one you enter, or else derived from the source name (`Optum Eligibility (sandbox)` gives
+`optum_eligibility_sandbox`).
 
 Since V340 the OpenAPI importer supports **OAuth 2.0 client-credentials**:
 the platform fetches a short-lived access token from the provider's token
@@ -47,7 +50,7 @@ eligibility run through it. This is the **fastest real working demo**.
   `https://sandbox-apigw.optum.com/apip/auth/v2/token`, style **JSON**, scope
   blank, client id/secret from step 3.
 - Repeat for `optum-claimstatus-sandbox.openapi.yaml` — same credentials.
-- In the tools list enable `optum_*_checkEligibility` / `*_checkClaimStatus`,
+- In the tools list enable `optum_*_check_eligibility` / `optum_*_check_claim_status`,
   use the built-in **Try it** button against a documented fixture (e.g. the
   portal's sample member id + NPI), then attach to the demo agent.
 
@@ -90,9 +93,11 @@ credential pair.
 - Demo-plan responses are canned: the spec declares `X-Api-Mock-Scenario-ID`
   as a header parameter on the POST (`Coverages-Complete-i` = success
   scenario). No PHI anywhere on the demo plan.
-- Coverages is asynchronous: `availity_create_coverage_inquiry` returns a
-  record with an `id`; the agent then calls `availity_get_coverage_by_id`
-  until `status` is `Complete`.
+- Coverages is asynchronous: the create-coverage-inquiry tool returns a
+  record with an `id`; the agent then calls the get-coverage-by-id tool
+  until `status` is `Complete`. The spec's operationIds already start with
+  `availity_`, so with the prefix `availity` the tools are named
+  `availity_availity_create_coverage_inquiry` and so on.
 - Production = **Standard plan** (Contact Sales → Trading Partner Management
   contracting), same token flow.
 
@@ -152,10 +157,11 @@ callback holding username/password (encrypted) and managing the session.
 
 1. Admin → **Tools → Import from OpenAPI** → paste
    `optum-eligibility-sandbox.openapi.yaml` → fill the OAuth2 block → enable
-   `optum_checkEligibility`.
+   `<prefix>_check_eligibility`.
 2. Same for `availity-coverages.openapi.yaml` → enable
-   `availity_create_coverage_inquiry`, `availity_get_coverage_by_id` and
-   `availity_list_payers`.
+   the tools for the operations `availity_create_coverage_inquiry`,
+   `availity_get_coverage_by_id` and `availity_list_payers` (each prefixed
+   with the source's tool prefix).
 3. Create/attach a demo agent (e.g. "Front-desk copilot") — tools are on the
    normal tool surface; the approval gate can require human sign-off per call.
 4. Scripted demo: *"Check whether member \<sandbox fixture\> is eligible for

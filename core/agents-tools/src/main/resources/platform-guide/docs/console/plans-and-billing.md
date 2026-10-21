@@ -9,7 +9,7 @@ reason.
 
 | Label | Route | Nav needs | Backend rule |
 |---|---|---|---|
-| Plans & Features | `/features` | any member, billing on | reads open; `POST /api/tenant/upgrade` needs `PERM_MANAGE_BILLING` |
+| Plans & Features | `/features` | any member, billing on (not on a personal install) | reads open; `POST /api/tenant/upgrade` needs `PERM_MANAGE_BILLING` |
 | Billing | `/admin/billing` | `PERM_MANAGE_BILLING`, billing on | invoices, billing profile, upgrade, subscription cancel and payment checkout need `PERM_MANAGE_BILLING` |
 
 ## Plans & Features (`/features`)

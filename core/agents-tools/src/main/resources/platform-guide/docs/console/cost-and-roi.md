@@ -4,7 +4,7 @@
 |---|---|
 | Sidebar | Test & Monitor > **Cost & ROI** |
 | Route | `/roi` |
-| Nav needs | `PERM_VIEW_USAGE` |
+| Nav needs | `PERM_VIEW_USAGE`; not shown on a personal install (the page still opens from a direct link) |
 | Backend rule | `GET /api/tenant/roi/**` needs `PERM_VIEW_USAGE`; every other method (prices, assumptions, baseline, outcomes) needs `PERM_MANAGE_BILLING` |
 
 The page answers, per agent: what did it cost, how did its conversations end, and, only if you typed in what a

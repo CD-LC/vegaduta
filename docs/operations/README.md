@@ -14,7 +14,7 @@ deployment: [Compose](../../deploy/README.md) and [Helm](../../deploy/helm/READM
 | Secrets model | [handbook](../platform-documentation/security/secrets-management.html) |
 | CLI: doctor, logs, secrets, status, backup, restore, upgrade | `scripts/vegaduta doctor`, `logs`, `secrets`, `status`, `backup`, `restore`, `upgrade` ([deploy/README.md](../../deploy/README.md)) |
 | First platform admin | `scripts/vegaduta make-admin USERNAME_OR_EMAIL` |
-| Local model catalog (Ollama) | `scripts/vegaduta models list`, `models pull TAG`, `models rm TAG`; catalog in `deploy/models/catalog.txt`. `models` and `seed-demo` exist in the bash script only; `scripts/vegaduta.ps1` has no such command (checked 2026-10-15) |
+| Local model catalog (Ollama) | `scripts/vegaduta models list`, `models pull TAG`, `models rm TAG`; catalog in `deploy/models/catalog.txt`. `models` and `seed-demo` exist in the bash script only; `scripts/vegaduta.ps1` has no such command (checked 2026-10-21, v0.1.9) |
 | Fictional demo data for a pilot | `scripts/vegaduta seed-demo [--tenant NAME] [--remove] [--yes]`; see [pilots](../pilots/README.md) |
 | Using the console (screens, permissions) | [Console guide](../console/README.md) |
 

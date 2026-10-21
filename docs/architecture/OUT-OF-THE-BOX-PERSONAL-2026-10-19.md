@@ -393,3 +393,9 @@ follow-ups in what shipped: finish the host bridge (installer polling and `ADDON
 Assistant browser add-on is the 6 GB `-full` image or the lighter browser-runner container the launcher now has,
 and make the `tools` runner a real, switchable add-on (it is still listed as "Coming soon" even though the
 launcher turns it on).
+
+**Follow-ups, checked 2026-10-21 (v0.1.9).** The `tools` runner is now an available add-on ("Tools runner (MCP
+servers)", `compose-profile`, in `core/providers/src/main/resources/addons/catalog.json`): done. The browser add-on is
+the separate browser-runner container ("Assistant browser" runs "in a separate container so VegaDūta itself stays
+small"; `services/browser-runner`): decided. The host bridge is still not built: nothing in `installer/` or the
+launchers polls `/api/addons/host/wanted` or generates `ADDONS_HOST_TOKEN`.
