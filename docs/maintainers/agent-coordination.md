@@ -26,7 +26,7 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | Agent | Where | Owns |
 |---|---|---|
 | Release / install agent | cloud session, branch `claude/why-the-hell-k4tttl` | installer (`installer/`), launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`), `deploy/compose/` personal and local-AI overlays, `.github/workflows/release.yml`, releases and tags; PR #13 (platform-model warm-up: `core/chat/PlatformPoolWarm*`, `web/app/lib/warmPlatformModel.ts`, `web/app/components/chat/ModelWakingUpNotice.tsx`) |
-| Local-model agent | cloud session, branches `ccr-*` | local-model performance (`docker-compose.local-ai.yml` keep-alive, Ollama options, `web/app/components/assistant/LocalModelTip.tsx`), through PRs |
+| Local-model agent | cloud session, branches `ccr-*`, `feat/chat-threads-list` | local-model performance (`docker-compose.local-ai.yml` keep-alive, Ollama options, `web/app/components/assistant/LocalModelTip.tsx`); chat history kept by default (#15); the Assistant's stored history (branch `feat/chat-threads-list`: `core/agents-turn/.../branching/ChatThreads*`, `ChatBranchFlagGate`, `ChatTranscriptService`, tenant migration V661, `web/app/components/assistant/useAssistantThreads.ts`, `useAssistantTurn.ts`, `web/app/lib/api/assistant.ts`, regenerated OpenAPI/SDK/contract files), through PRs |
 | Production agent | local editor | the production deployment: which release it runs, its configuration and its verification. Does not change application code without a PR |
 
 ## What production must run
@@ -46,6 +46,40 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
   Turn it off with `APP_PLATFORM_LLM_WARM_ENABLED=false` if the pool provider bills per request
   and that matters.
 - The core image tag in use matches the release you meant to deploy.
+
+### Rollout: v0.1.8 (production is Azure Container Apps)
+
+Production (`vegaduta-ai-az-rg`, images in `vegadutaaiazacr.azurecr.io`) runs the Container Apps
+listed by the production agent, not the Compose stack or the Helm chart. That matters for one
+setting below. What is live before this rollout is SHA `9a8139f2`; v0.1.8 is 24 commits after
+it and **changes no Flyway migration**, so the new core revision boots with no schema change
+and can serve beside the old one while Container Apps switches traffic.
+
+1. **Order:** core first, then web and web-admin (same image), then sidecar and
+   mcp-stdio-runner. Pull `ghcr.io/cd-lc/<image>:0.1.8`, retag into ACR, `az containerapp update
+   --image`. Single revision mode with the liveness probe keeps the old revision serving until the
+   new one passes its probes; `minReplicas: 1` keeps capacity during the roll.
+2. **Set the chat-history flag on core in the same update.** #15 turns
+   `APP_CHAT_BRANCHING_ENABLED` on by default in `docker-compose.yml` and the chart only; a
+   Container App's env is its own, and core's built-in default is off. Check first
+   (`az containerapp show -n vegaduta-ai-az-core -g vegaduta-ai-az-rg --query
+   properties.template.containers[0].env`) and add `--set-env-vars APP_CHAT_BRANCHING_ENABLED=true`
+   to the core update, so one revision roll carries both the image and the flag. Nothing else is
+   needed: the warm-up (#13) is on by default (`APP_PLATFORM_LLM_WARM_ENABLED=false` opts out);
+   the tables it writes to exist since tenant migration V450.
+3. **What changes for people:** the chat page's conversations are kept in Postgres for 30 days
+   (`app.chat.branching.retention-days`) instead of expiring from Redis after 24 h; edit and
+   regenerate appear on the chat page. A conversation still inside its 24 h window is absorbed in
+   full the first time it is opened after the rollout; one that had already expired is gone and
+   cannot be recovered. The Assistant page does not record its turns yet and its thread list is
+   still per browser: that comes with `feat/chat-threads-list` in 0.1.9.
+4. **Rollback:** `az containerapp update --image vegadutaaiazacr.azurecr.io/<svc>:9a8139f2` per
+   service, core last. Leaving the flag on during a rollback is harmless (rows stay until the
+   purge); removing it only stops new rows.
+5. **Checks after the roll** (in addition to the list above): core logs show no Flyway migration
+   applied; signed in, `GET /api/agents/<any agent id>/chat-branching/capabilities` answers
+   `{"enabled":true}` (proves the env var took effect); open an existing chat, send one message,
+   reload: it is still there; `POST /api/platform-llm/warm` answers `202`. Then add a Log line.
 
 ## Log
 
