@@ -102,6 +102,19 @@ printf 'tier=personal\nprofiles=\nbuild=1\nlocal_ai=\nlocal_model=\nsearch=1\nna
 out="$("$CLI" personal --dry-run </dev/null 2>&1)"
 check "an install that never chose gets the model on its next run" "$(has "$out" 'local_ai=container'; echo $?)" "$out"
 
+echo "secret tables"
+# Windows runs vegaduta.ps1, which keeps its own copy of the table; a secret missing there made
+# every Windows personal install stop with "WORKSPACE_RUNNER_SECRET is missing a value".
+sh_specs="$(sed -n '/^SECRET_SPECS="/,/^"/p' "$CLI" | grep -oE '^[A-Z0-9_]+:[a-z0-9]+' | sort)"
+ps_specs="$(tr -d '\r' < "$ROOT/scripts/vegaduta.ps1" | sed -n '/^\$SecretSpecs = /,/^}/p' \
+  | grep -oE "[A-Z0-9_]+='[a-z0-9]+'" | sed "s/='/:/; s/'\$//" | sort)"
+d="$(diff <(printf '%s\n' "$sh_specs") <(printf '%s\n' "$ps_specs"))"
+check "vegaduta.ps1 generates the same secrets as scripts/vegaduta" "$([ -z "$d" ]; echo $?)" "$d"
+required="$(grep -hoE '\$\{[A-Z0-9_]+:\?run scripts/vegaduta secrets' "$ROOT"/deploy/compose/*.yml \
+  | sed -E 's/^\$\{([A-Z0-9_]+).*/\1/' | sort -u)"
+missing="$(comm -23 <(printf '%s\n' "$required") <(printf '%s\n' "$sh_specs" | cut -d: -f1))"
+check "every secret the compose files require is generated" "$([ -z "$missing" ]; echo $?)" "not generated: $missing"
+
 echo "compose project"
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   new_home
