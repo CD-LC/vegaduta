@@ -37,9 +37,9 @@ final class ChatClientSelection {
 
     /**
      * {@code hostedChain} and {@code hostedPlan} are null unless {@code usesHostedPool}; a
-     * load-test tenant is never on the hosted pool. {@code context} is the turn's context, with
-     * the hosted chain's reservation guards as its budget when the turn is on the hosted pool
-     * (every link carries the same guards; see {@link HostedChainLink}).
+     * load-test tenant is never on the hosted pool. {@code context} is the turn's context, with the
+     * hosted chain's reservation guards as its budget when the turn is on the hosted pool (every
+     * link carries the same guards; see {@link HostedChainLink}).
      */
     record Clients(
             ChatClient chatClient,
@@ -149,7 +149,9 @@ final class ChatClientSelection {
                                 AgentChatService.NO_PLATFORM_LLM_NOTICE_PREFIX
                                         + " for this workspace right now. Please contact support,"
                                         + " or switch this agent to your own provider (BYOK) in"
-                                        + " Providers settings."));
+                                        + " Providers settings. On an install with a local model,"
+                                        + " open Troubleshoot or restart VegaDūta: it repairs the"
+                                        + " local model's entry on start."));
             }
         } else {
             hostedChain = null;
