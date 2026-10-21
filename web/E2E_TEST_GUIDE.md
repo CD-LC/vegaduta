@@ -67,23 +67,6 @@ Tests all backend API endpoints.
 
 **Tests:** 60+ test cases
 
-#### 4. **academy-platform.spec.ts** (Learning Platform)
-Tests the Academy learning platform.
-
-**Coverage:**
-- Homepage and hero section
-- Course listing and filtering
-- Lessons and content
-- Progress tracking
-- Quiz functionality
-- Labs and exercises
-- Learner achievements/certificates
-- Responsive design
-- Accessibility
-- Performance
-
-**Tests:** 45+ test cases
-
 #### 5. **whatsapp-integration.spec.ts** (WhatsApp Integration)
 Tests WhatsApp channel integration.
 
@@ -155,7 +138,6 @@ npx playwright test e2e/admin-panel.spec.ts
 npx playwright test e2e/core-api.spec.ts
 
 # Academy tests
-npx playwright test e2e/academy-platform.spec.ts
 
 # WhatsApp tests
 npx playwright test e2e/whatsapp-integration.spec.ts

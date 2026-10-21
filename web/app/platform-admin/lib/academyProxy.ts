@@ -4,13 +4,13 @@ import { logger } from "./logger";
 // Server-only helpers behind every Academy admin proxy route in this app:
 // today that's app/api/academy/learners/** (the per-learner course-unlock
 // proxy), which hits the Academy's `/api/admin/**` surface behind an
-// X-Admin-Key check (see vegaduta-webapp/src/server.ts's shared
+// X-Admin-Key check (see the Academy service/src/server.ts's shared
 // `adminKeyAuthorized`). The scholarship-fulfilment routes that shared this
 // file were removed when the Fast-Track Scholarship program was retired —
 // the plumbing stays because the learner-unlock routes use the identical
 // shared-key-never-reaches-the-browser posture: the browser calls
 // same-origin routes here, which forward to the Academy with the X-Admin-Key
-// header from *server* env. See vegaduta-webapp/ADMIN-SCHOLARSHIP-CONTRACT.md
+// header from *server* env. See the Academy service/ADMIN-SCHOLARSHIP-CONTRACT.md
 // ("web-admin integration shape") for the key contract.
 //
 // Env (server-only, NOT NEXT_PUBLIC_*): ACADEMY_ADMIN_API_BASE (e.g.

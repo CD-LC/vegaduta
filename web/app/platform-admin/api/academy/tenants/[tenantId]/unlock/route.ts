@@ -7,7 +7,7 @@ import { verifyPlatformAdmin } from "../../../../../lib/serverAuth";
 // spine for every learner whose Academy account is linked to that tenant —
 // strict non-null tenant_id equality on the Academy side (learners with no
 // tenant linkage can never be swept in; see THE NULL RULE in
-// vegaduta-webapp/src/learning-portal/tenant-progress.ts, which
+// the Academy service/src/learning-portal/tenant-progress.ts, which
 // unlockCourseForTenant honours identically).
 //
 // SECURITY: same auth requirement as every other route in this proxy family

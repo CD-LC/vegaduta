@@ -9,7 +9,7 @@ import { verifyPlatformAdmin } from "../../../../lib/serverAuth";
 // bypassed, completion history untouched, per-learner
 // `admin_course_unlocked` telemetry per learner) — just applied to the whole
 // learner collection at once. See
-// vegaduta-webapp/src/learning-portal/admin-learners.ts#unlockCourseForAllLearners.
+// the Academy service/src/learning-portal/admin-learners.ts#unlockCourseForAllLearners.
 //
 // SECURITY: same auth requirement as every other route in this proxy family
 // - see app/lib/serverAuth.ts.
