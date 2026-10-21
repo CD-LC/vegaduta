@@ -1,16 +1,17 @@
 package com.agenticai.core.agents.hosted;
 
-import com.agenticai.core.agents.budget.PerUserBudgetService.Modality;
 import com.agenticai.core.agents.budget.PerUserBudgetService;
+import com.agenticai.core.agents.budget.PerUserBudgetService.Modality;
 import com.agenticai.core.agents.budget.PerUserBudgetTrackingAdvisor;
 import com.agenticai.core.agents.budget.TurnReservationGuards;
 import com.agenticai.core.agents.quota.FreeTierUsageLimiterService;
 import com.agenticai.core.chat.HostedLlmChatClientFactory;
 import com.agenticai.core.chat.LlmPricingCatalog;
 import com.agenticai.core.chat.gateway.GatewayGovernanceAdvisor;
+import com.agenticai.core.providers.LocalLlmPoolBootstrap;
 import com.agenticai.core.providers.PlatformHostedLlmProvider;
-import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService;
+import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.util.ArrayList;
@@ -87,6 +88,7 @@ public class FreeTierChatClientService {
     private final boolean orderByCost;
     private final HostedChainOrdering ordering;
     private final GeminiReasoningEffortSetting reasoningEffort;
+
     /** V484 - see {@link #poolUnmetered()}. */
     private final boolean meterZeroCostRows;
 
@@ -173,6 +175,17 @@ public class FreeTierChatClientService {
     public void setSpendCapService(
             com.agenticai.core.agents.spendcap.SpendCapService spendCapService) {
         this.spendCapService = spendCapService;
+    }
+
+    /**
+     * The local model's pool bootstrap (present only when app.local-llm.bootstrap.enabled=true):
+     * lets an empty pool repair itself inside the turn. Setter-injected (optional) like the above.
+     */
+    private volatile LocalLlmPoolBootstrap localPoolBootstrap;
+
+    @Autowired(required = false)
+    public void setLocalPoolBootstrap(LocalLlmPoolBootstrap localPoolBootstrap) {
+        this.localPoolBootstrap = localPoolBootstrap;
     }
 
     /** See {@link GeminiReasoningEffortSetting#effective()}. */
@@ -357,6 +370,15 @@ public class FreeTierChatClientService {
 
             List<HostedProviderSelection> chain =
                     platformHostedLlmProviderService.resolveEnabledChain();
+            if (chain.isEmpty()) {
+                // A personal install whose local row stopped being usable (disabled, key saved
+                // under an earlier APP_ENCRYPTION_KEY, pool switched off): repair it now and look
+                // again, so this turn is answered instead of every turn failing until a restart.
+                LocalLlmPoolBootstrap repair = localPoolBootstrap;
+                if (repair != null && repair.repairOnDemand()) {
+                    chain = platformHostedLlmProviderService.resolveEnabledChain();
+                }
+            }
             if (chain.isEmpty()) {
                 throw new FreeTierProviderPoolEmptyException();
             }

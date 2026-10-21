@@ -103764,6 +103764,9 @@
           },
           "servingModel": {
             "type": "string"
+          },
+          "servingBlocked": {
+            "type": "string"
           }
         },
         "required": [
