@@ -12,7 +12,7 @@ describe("academyUrl", () => {
     delete process.env.NEXT_PUBLIC_ACADEMY_URL;
     expect(academyUrl()).toBe("");
     expect(hasAcademy()).toBe(false);
-    expect(academyHref()).toBe("/learn");
+    expect(academyHref()).toBe("https://academy.vegaduta.ai");
   });
 
   it("uses the configured origin without a trailing slash", () => {

@@ -702,7 +702,7 @@ resolves as unlimited. Usage and cost are still counted, so the Cost and ROI vie
 billing screens unless `WEB_BILLING_ENABLED=1`.
 
 Beyond billing, a local-auth install drops the surfaces a single user never reaches — from the nav rail, the
-command palette and the /learn screen index alike (`web/app/lib/personalInstall.ts` is the one list): Shared with
+command palette and the page-guide entries alike (`web/app/lib/personalInstall.ts` is the one list): Shared with
 me, the public agent Directory, Studio, Cost & ROI, and under Administration the agent trust, commerce and payments
 consoles, Branding, MCP access, API keys, SSO, Leads and Plans. The pages still answer on a deep link; they just are not
 advertised.

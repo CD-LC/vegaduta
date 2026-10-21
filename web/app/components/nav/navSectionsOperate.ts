@@ -21,7 +21,6 @@ import {
   ScrollText,
   Files,
   Palette,
-  Compass,
   Puzzle,
   Plug,
   Radar,
@@ -254,19 +253,9 @@ export const OPERATE_NAV_SECTIONS: NavSection[] = [
         adminHidden: false,
         adminOnly: false,
       },
-      // /learn - in-console index of the Academy curriculum and the 'which lesson explains
-      // this screen' map. Next to Guide (Guide documents the console, /learn teaches the
-      // subject). Not admin-gated; the page filters admin-only screens for non-admins.
-      {
-        href: "/learn",
-        labelKey: "railLearn",
-        icon: Compass,
-        exact: false,
-        badge: null,
-        badgeVariant: null,
-        adminHidden: false,
-        adminOnly: false,
-      },
+      // The Academy is a separate, proprietary deployable - no /learn index
+      // lives in the OSS console. Public chrome (header/footer) links to the
+      // hosted Academy directly; the tutor stays at /learn/tutor.
       // NAV-AUDIT FIX (2026-07-27): /help/docs existed but was only reachable
       // two clicks deep (AppShell -> /help -> "Open the docs" button) -
       // added a direct rail entry alongside Guide.

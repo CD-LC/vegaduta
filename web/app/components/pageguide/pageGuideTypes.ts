@@ -15,12 +15,12 @@ export type PageGuide = {
   reassurance?: string;
   /** Where to go once the steps are done. */
   next?: PageGuideLink;
-  /** Academy lesson id (e.g. "l3-3") that teaches this surface. Rendered as a
-   * "Learn this in the Academy" link resolved through academyLessonUrl() —
-   * never a hardcoded hostname, and the helper stamps console attribution.
-   * Distinct from `next`: next stays inside the console, learn leaves for the
-   * Academy (new tab). Only ids that exist in the Academy's seed are valid. */
-  learnLessonId?: string;
+  /** True when the Academy teaches this surface. Rendered as a "Learn this
+   * in the Academy" link to the configured Academy origin (academyHref()) —
+   * plain link, no lesson ids: the Academy is a private deployable and the
+   * OSS console never names its internal content ids. Distinct from `next`:
+   * next stays inside the console, learn leaves for the Academy (new tab). */
+  learnInAcademy?: boolean;
   /** Only shown to workspace admins (the page itself is admin-only). */
   adminOnly?: boolean;
   /** Only meaningful when on-device AI is built into this deployment. */

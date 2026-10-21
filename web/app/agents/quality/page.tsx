@@ -11,7 +11,6 @@ import Select from "../../components/Select";
 import { Button } from "../../components/ui/button";
 import { EmptyState } from "../../components/ax/page-kit";
 import AgentQualityPanel from "../../components/agents/AgentQualityPanel";
-import LearnThisButton from "../../learn/LearnThisButton";
 import EvalDatasetsSection from "./EvalDatasetsSection";
 import EvalGateSection from "./EvalGateSection";
 import JudgeCalibrationSection from "./JudgeCalibrationSection";
@@ -160,10 +159,8 @@ function AgentQualityInner() {
         subtitle={tp("qualitySubtitle")}
         actions={
           <>
-            {/* The page's own Academy lesson (l22-8 via consoleLessonMap);
-                each tab's sections carry a LearnLink to the lesson that
-                teaches THAT section. */}
-            <LearnThisButton path="/agents/quality" />
+            {/* The Academy covers this surface from the outside - the OSS
+                console keeps a plain link to it, never a lesson id. */}
             <Button asChild variant="outline" size="sm">
               <Link href="/agents">
                 <ArrowLeft size={14} aria-hidden="true" /> {tp("backToAgents")}

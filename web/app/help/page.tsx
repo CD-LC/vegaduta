@@ -12,7 +12,6 @@ import { useTour } from "../components/TourProvider";
 import { useAuth } from "../components/AuthProvider";
 import InlineStrong from "../components/InlineStrong";
 import BrandText from "./BrandText";
-import LearnThisButton from "../learn/LearnThisButton";
 
 // Help / docs reference — rebuilt on Tailwind + the shadcn token layer (theme-
 // following, since this renders inside AppShell with no .dark wrapper, so it
@@ -76,7 +75,6 @@ export default function HelpPage() {
         <PageHeader
           title={t("pageTitle")}
           subtitle={t("introHint")}
-          actions={<LearnThisButton path="/help" />}
         />
       </div>
 

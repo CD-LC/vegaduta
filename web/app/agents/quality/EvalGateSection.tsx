@@ -20,7 +20,6 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import Select from "../../components/Select";
 import { Section, SECTION_ACTION_GROUP_CLASS } from "../../components/ax/page-kit";
-import { LearnLink } from "../../learn/LearnThisButton";
 import { api } from "../../lib/api";
 
 /**
@@ -203,7 +202,6 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
       description="Require a passing eval run on the exact configuration before this agent can be labelled Production — the CI check for agent changes."
       actions={
         <div className={SECTION_ACTION_GROUP_CLASS}>
-          <LearnLink lessonId="l16-5" fromPath="/agents/quality" />
           <Button variant="outline" size="sm" onClick={refresh}>
             <RefreshCw size={14} aria-hidden="true" /> Refresh
           </Button>

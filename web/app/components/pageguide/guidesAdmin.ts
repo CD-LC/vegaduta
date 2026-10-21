@@ -18,7 +18,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Open a contact to see the conversations and details attached to them.",
       ],
       adminOnly: true,
-      learnLessonId: "l17-1",
+      learnInAcademy: true,
     },
   },
   {
@@ -32,7 +32,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Approve or answer it — the agent resumes with your reply.",
       ],
       adminOnly: true,
-      learnLessonId: "l16-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -43,7 +43,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Prospects captured from channels and workflows, in one pipeline.",
       steps: ["Review new leads and where they came from.", "Move a lead along the pipeline or hand it to an agent."],
       adminOnly: true,
-      learnLessonId: "l17-2",
+      learnInAcademy: true,
     },
   },
   {
@@ -54,7 +54,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Every action in this workspace, recorded in order — including the live tail.",
       steps: ["Filter by person, action or time.", "Open a row to see what actually changed."],
       adminOnly: true,
-      learnLessonId: "l17-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -65,7 +65,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Things the system or your agents surfaced that need a human eye.",
       steps: ["Open an issue to see what flagged it.", "Resolve it or hand it back with a note."],
       adminOnly: true,
-      learnLessonId: "l17-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -76,7 +76,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "The people on this workspace and what each of them is allowed to do.",
       steps: ["Invite a teammate and pick their role.", "Grant or revoke a permission from their row."],
       adminOnly: true,
-      learnLessonId: "l17-5",
+      learnInAcademy: true,
     },
   },
   {
@@ -90,7 +90,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Its tools become available to agents once connected.",
       ],
       adminOnly: true,
-      learnLessonId: "l4-10",
+      learnInAcademy: true,
     },
   },
   {
@@ -104,7 +104,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Approve or reject — the workflow waits for your answer.",
       ],
       adminOnly: true,
-      learnLessonId: "l4-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -118,7 +118,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Answer it — the paused work picks up from your reply.",
       ],
       adminOnly: true,
-      learnLessonId: "l16-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -129,7 +129,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Data requests and privacy controls for the people in this workspace.",
       steps: ["Review open requests and their deadlines.", "Export or erase a person's data from their row."],
       adminOnly: true,
-      learnLessonId: "l17-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -140,7 +140,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Planned downtime and the notice your users see during it.",
       steps: ["Schedule a window and write the notice users will see.", "The status surface updates from here."],
       adminOnly: true,
-      learnLessonId: "l20-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -152,7 +152,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       steps: ["Review recent transactions.", "Plan changes themselves happen under Billing."],
       next: { label: "Open Billing", href: "/billing" },
       adminOnly: true,
-      learnLessonId: "l4-9",
+      learnInAcademy: true,
     },
   },
   {
@@ -168,7 +168,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Publish to directory lists the agent publicly. View signed manifest shows what callers verify.",
       ],
       adminOnly: true,
-      learnLessonId: "l17-10",
+      learnInAcademy: true,
     },
   },
   {
@@ -183,7 +183,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "New offer publishes a paid endpoint at /x402/<slug>. Disable takes it offline.",
       ],
       adminOnly: true,
-      learnLessonId: "l17-11",
+      learnInAcademy: true,
     },
   },
   {
@@ -197,7 +197,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Review settings before you connect a public channel.",
       ],
       adminOnly: true,
-      learnLessonId: "l17-5",
+      learnInAcademy: true,
     },
   },
   {
@@ -213,7 +213,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Open a lesson, read it, and answer its questions with Check answer.",
         "Questions you miss come back later. Press Start review when some are due.",
       ],
-      next: { label: "Back to Learn", href: "/learn" },
+      next: { label: "Back to Help", href: "/help" },
     },
   },
   {
@@ -223,7 +223,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Find an answer",
       purpose: "Written guides and lessons for every part of the product.",
       steps: ["Search for what you are trying to do.", "Follow the guide next to the page it describes."],
-      learnLessonId: "l0-0",
+      learnInAcademy: true,
     },
   },
 ];

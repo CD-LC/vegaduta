@@ -12,7 +12,11 @@ const api = vi.hoisted(() => ({
   getAgentQualityHistory: vi.fn(),
 }));
 vi.mock("../../lib/api", () => ({ api }));
-vi.mock("../../learn/LearnThisButton", () => ({ LearnLink: (): null => null }));
+vi.mock("../../lib/academyUrl", () => ({
+  academyHref: () => "",
+  academyUrl: () => "",
+  hasAcademy: () => false,
+}));
 vi.mock("../ui/upgrade-lock", () => ({ UpgradeLock: (): null => null }));
 
 import AgentQualityPanel from "./AgentQualityPanel";

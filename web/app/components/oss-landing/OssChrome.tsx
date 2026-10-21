@@ -4,6 +4,7 @@ import HashLink from "./HashLink";
 import BrandName from "../BrandName";
 import { CIN_NUMBER, LEGAL_ENTITY } from "../../lib/legalEntity";
 import { commercialUrl, docsHref, isExternalHref } from "../../lib/siteLinks";
+import { academyHref } from "../../lib/academyUrl";
 import { COMMUNITY_LINKS, CONTACT_EMAIL, LICENSE_NAME, REPO_URL, resourceLinks } from "./ossSite";
 
 // Header and footer shared by the open-source public pages. Server component.
@@ -46,6 +47,9 @@ export function SmartLink({
 function navItems(): { label: string; href: string }[] {
   return [
     { label: "Docs", href: docsHref() },
+    // Academy is a separate, proprietary deployable; academyHref() is the
+    // configured origin - never a dead link either way.
+    { label: "Academy", href: academyHref() },
     { label: "Downloads", href: "/downloads" },
     { label: "Dependencies", href: "/#dependencies" },
     { label: "Plugins & apps", href: "/plugins" },

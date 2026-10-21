@@ -12,7 +12,6 @@ import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { toast } from "../../lib/toastBus";
 import { useTranslations } from "../../lib/i18n";
-import { LearnLink } from "../../learn/LearnThisButton";
 import { csvList, fmtTime, statusBadge } from "./trustFormat";
 
 // ---- Directory publish panel -------------------------------------------------
@@ -79,7 +78,6 @@ export function DirectoryPanel({ agentId, entry, onChanged }: {
         <div className="flex items-center gap-2">
           {/* The directory lesson (l18-11) teaches exactly what publishing
               here does — kept as a quiet link rather than a second button. */}
-          <LearnLink lessonId="l18-11" fromPath="/admin/agent-trust" label="Learn" />
           {entry && statusBadge(entry.status)}
           {published ? (
             <Button type="button" variant="outline" size="sm" disabled={busy} onClick={handleUnpublish}>

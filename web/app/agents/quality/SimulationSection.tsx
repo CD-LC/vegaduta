@@ -19,7 +19,6 @@ import { Button, buttonVariants } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Section } from "../../components/ax/page-kit";
-import { LearnLink } from "../../learn/LearnThisButton";
 import { api } from "../../lib/api";
 
 /**
@@ -288,7 +287,6 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
       description="Adversarial personas hold a bounded conversation with this agent — tools disabled, so no real side effects — and a judge scores each transcript."
       actions={
         <div className="flex items-center gap-2">
-          <LearnLink lessonId="l16-4" fromPath="/agents/quality" />
           <Button variant="outline" size="sm" onClick={refresh}>
             <RefreshCw size={14} aria-hidden="true" /> Refresh
           </Button>

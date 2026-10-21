@@ -39,7 +39,6 @@ import { credentialGuideFor, type McpCredentialGuideField } from "../../lib/cred
 import { Label } from "../../components/ui/label";
 import { Section } from "../../components/ax/page-kit";
 import { toast } from "../../lib/toastBus";
-import LearnThisButton from "../../learn/LearnThisButton";
 import PaginationControls from "../../components/PaginationControls";
 import { usePagination } from "../../lib/usePagination";
 
@@ -534,7 +533,6 @@ export default function CredentialsPage() {
         subtitle="Manage API keys and tokens for your connected MCP servers"
         actions={
           <>
-            <LearnThisButton path="/tools/credentials" />
             <Button variant="ghost" size="sm" className="gap-1" asChild>
               <Link href="/help/docs#tools" target="_blank" rel="noopener noreferrer">
                 <HelpCircle size={14} aria-hidden="true" /> How credentials work

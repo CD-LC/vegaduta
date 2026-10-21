@@ -1,7 +1,6 @@
 // Surfaces a one-person (local-auth) install never uses. The rail hides these
-// (useNavSections), and /learn drops the matching screen→lesson cards - same
-// rule both places, so a hidden screen never keeps a teaching link that leads
-// to a console page the owner was deliberately spared.
+// (useNavSections) - same rule both places, so a hidden screen never keeps a
+// link that leads to a console page the owner was deliberately spared.
 //
 // The pages still exist (deep links work); this list is about NOT advertising
 // multi-tenant/platform surfaces on a single box: nothing is shared with

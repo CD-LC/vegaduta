@@ -15,7 +15,6 @@ import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { useTranslations } from "../lib/i18n";
 import { usePagination } from "../lib/usePagination";
 import { usePageReady } from "../components/RouteTransition";
-import LearnThisButton from "../learn/LearnThisButton";
 import BlockEditor from "./BlockEditor";
 import FactRow from "./FactRow";
 import FactsToolbar from "./FactsToolbar";
@@ -265,7 +264,7 @@ export default function MemoryPage() {
 
   return (
     <AppShell eyebrow={t("eyebrow")}>
-      <PageHeader title={t("title")} subtitle={t("subtitle")} actions={<LearnThisButton path="/memory" />} />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {failed && (
         <Alert variant="destructive" className="mb-6">

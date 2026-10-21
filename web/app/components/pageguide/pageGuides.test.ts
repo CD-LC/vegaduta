@@ -1,11 +1,5 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { CONSOLE_SCREEN_LESSONS } from "../../learn/consoleLessonMap";
 import { ALL_PAGE_GUIDES, addSeen, guideForPath, parseSeen } from "./pageGuides";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe("guideForPath", () => {
   it("routes the specific page before its parent", () => {
@@ -83,39 +77,13 @@ describe("guide content", () => {
     expect(guideForPath("/workflows")?.steps.join(" ")).toMatch(/only thing you must fill in/);
   });
 
-  // The Academy is a separate deployable that is not part of this repository, so this
-  // cross-repo guard only runs where its seed sources are checked out beside the console.
-  const ACADEMY_SRC = path.resolve(__dirname, "../../../../vegaduta-webapp-prototype/vegaduta-webapp/src");
-  it.skipIf(!existsSync(ACADEMY_SRC))("every Academy lesson link points at a lesson that is actually seeded", () => {
-    // Cross-repo guard, the mirror image of the Academy's own
-    // test/webapp-links-routes.test.ts (which checks Academy→console links
-    // against web/app/<path>/page.tsx on disk). A learnLessonId or
-    // consoleLessonMap id that no seed file declares renders the Academy's
-    // 404 — a dead link is worse than no link.
-    const srcDir = path.resolve(
-      __dirname,
-      "../../../../vegaduta-webapp-prototype/vegaduta-webapp/src",
-    );
-    const seedFiles = readdirSync(srcDir).filter(
-      (f) => f === "seed.ts" || /^seed-level-\d+\.ts$/.test(f),
-    );
-    expect(seedFiles.length).toBeGreaterThan(1);
-    const seededIds = new Set<string>();
-    for (const f of seedFiles) {
-      const text = readFileSync(path.join(srcDir, f), "utf8");
-      for (const m of text.matchAll(/^\s*id: "(l[\w-]+)"/gm)) seededIds.add(m[1]);
-    }
-    expect(seededIds.size).toBeGreaterThan(200);
-
+  // The Academy is a separate, proprietary deployable: the OSS console only
+  // ever links to its origin, never names a lesson id. This guard keeps it
+  // that way — the day a "lN-M" id reappears in a guide, the private
+  // curriculum is leaking back into the open repo.
+  it("keeps the guides free of Academy lesson ids", () => {
     for (const g of ALL_PAGE_GUIDES) {
-      if (!g.learnLessonId) continue;
-      expect(g.learnLessonId, g.id).toMatch(/^l\d+-[\w-]+$/);
-      expect(seededIds.has(g.learnLessonId), `${g.id} -> ${g.learnLessonId}`).toBe(true);
-    }
-    for (const screen of CONSOLE_SCREEN_LESSONS) {
-      for (const l of screen.lessons) {
-        expect(seededIds.has(l.lessonId), `${screen.route} -> ${l.lessonId}`).toBe(true);
-      }
+      expect(JSON.stringify(g), g.id).not.toMatch(/"learnLessonId"|"l\d+-\d+"/);
     }
   });
 });

@@ -4,7 +4,6 @@ import { Suspense, lazy, useEffect, useId, useRef, useState, useSyncExternalStor
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslations } from "../../../lib/i18n";
-import { LearnLink } from "../../../learn/LearnThisButton";
 import { Button } from "../../ui/button";
 import { Tabs, TabsList, TabsTrigger } from "../../ui/tabs";
 import { tabbableWithin } from "./focusables";
@@ -169,7 +168,6 @@ function AgentLabDialog({ onClose, agent, sessionId, turns, busy, onForkRerun, o
             {/* l22-4 teaches all three instruments (run graph, knockout,
                 consistency) — one link for the lab itself; the knockout
                 panel's dataset empty state links l16-3 separately. */}
-            <LearnLink lessonId="l22-4" fromPath="/playground" label={t("learnLink")} />
             <Button
               type="button"
               ref={closeButtonRef}

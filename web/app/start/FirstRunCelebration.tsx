@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, Compass, PartyPopper, SlidersHorizontal, Workflow } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+import { academyHref } from "../lib/academyUrl";
 import { elapsedParts } from "./events";
 
 type T = (key: string, params?: Record<string, string | number>) => string;
@@ -39,7 +40,7 @@ export default function FirstRunCelebration({
     { href: `/agents?agentId=${encodeURIComponent(agentId)}`, label: t("nextCustomize"), icon: SlidersHorizontal },
     { href: "/knowledge", label: t("nextDocuments"), icon: BookOpen },
     { href: "/workflows", label: t("nextAutomate"), icon: Workflow },
-    { href: "/learn", label: t("nextLearn"), icon: Compass },
+    { href: academyHref(), label: t("nextLearn"), icon: Compass },
   ];
 
   return (

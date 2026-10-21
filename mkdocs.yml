@@ -74,6 +74,7 @@ validation:
 
 nav:
   - Home: README.md
+  - Academy (learning portal): https://academy.vegaduta.ai
   - Get started:
       - Getting started: getting-started.md
       - Installation: installation.md

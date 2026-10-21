@@ -839,17 +839,6 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel",
     "tenantLists"
   ],
-  "/learn": [
-    "auditNotifications",
-    "brandIdentityModal",
-    "edge",
-    "featureUnavailable",
-    "localCode",
-    "nav",
-    "pageGuide",
-    "systemStatusPanel",
-    "tutorPage"
-  ],
   "/learn/tutor": [
     "auditNotifications",
     "brandIdentityModal",

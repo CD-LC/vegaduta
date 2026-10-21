@@ -15,7 +15,11 @@ vi.mock("../lib/i18n", () => ({
 vi.mock("../components/AppShell", () => ({ default: ({ children }: any): React.ReactElement => <div>{children}</div> }));
 vi.mock("../components/ax/PageHeader", () => ({ default: ({ title }: any) => <h1>{title}</h1> }));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: () => {} }));
-vi.mock("../learn/LearnThisButton", () => ({ default: (): null => null }));
+vi.mock("../lib/academyUrl", () => ({
+  academyHref: () => "",
+  academyUrl: () => "",
+  hasAcademy: () => false,
+}));
 vi.mock("./ImportChatsCard", () => ({ default: () => <div>import-chats-card</div> }));
 vi.mock("./ImportMemoryCard", () => ({ default: () => <div>import-memory-card</div> }));
 vi.mock("./DangerZone", () => ({ default: () => <div>danger-zone</div> }));
