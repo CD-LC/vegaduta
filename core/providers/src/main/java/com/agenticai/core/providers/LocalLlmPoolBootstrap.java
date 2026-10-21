@@ -136,7 +136,7 @@ public class LocalLlmPoolBootstrap {
         if (now - last < ON_DEMAND_INTERVAL_MILLIS || !lastOnDemand.compareAndSet(last, now)) {
             return false;
         }
-        Outcome outcome = bootstrapOnce();
+        Outcome outcome = bootstrapOnce(true);
         boolean changed =
                 outcome == Outcome.CREATED
                         || outcome == Outcome.MOVED
@@ -195,10 +195,18 @@ public class LocalLlmPoolBootstrap {
         return outcome;
     }
 
-    /** One bootstrap attempt. Never throws. */
+    /** One bootstrap attempt at startup. Never throws. */
     Outcome bootstrapOnce() {
+        return bootstrapOnce(false);
+    }
+
+    /**
+     * One bootstrap attempt; {@code onDemand} is true inside a chat that found the pool empty, the
+     * only moment the pool's master switch may be put back on. Never throws.
+     */
+    Outcome bootstrapOnce(boolean onDemand) {
         try {
-            return doBootstrap();
+            return doBootstrap(onDemand);
         } catch (ProviderValidationException e) {
             // Thrown by the pool service for an SSRF refusal or a failed probe; the message
             // is operator-facing and carries no secrets.
@@ -210,7 +218,7 @@ public class LocalLlmPoolBootstrap {
         }
     }
 
-    private Outcome doBootstrap() {
+    private Outcome doBootstrap(boolean onDemand) {
         if (!StringUtils.hasText(baseUrl) || !StringUtils.hasText(model)) {
             log.warn(
                     "Local LLM pool bootstrap is enabled but app.local-llm.bootstrap.base-url or"
@@ -228,7 +236,7 @@ public class LocalLlmPoolBootstrap {
             if (replacedMissingModel(same, normalizedBase)) {
                 return Outcome.MODEL_REPLACED;
             }
-            if (repairUnusable(same, normalizedBase)) {
+            if (repairUnusable(same, normalizedBase, onDemand)) {
                 return Outcome.REPAIRED;
             }
             log.info(
@@ -401,16 +409,25 @@ public class LocalLlmPoolBootstrap {
      * longer has (an older database kept under a new {@code .env}). Every chat then answers "No
      * platform LLM is configured" while the console shows the model as in use. The local row's key
      * is the configured placeholder, so an enabled row whose key no longer decrypts is always
-     * re-keyed; the pool switch and the row's enabled flag are put back on only when nothing else
-     * in the pool could serve, so an admin's deliberate choice survives a restart. A base URL the
-     * SSRF guard refuses cannot be repaired here and is logged with the host to allow.
+     * re-keyed; the row's enabled flag is put back only when nothing else in the pool could serve,
+     * and the pool's master switch only inside a chat that needs the pool (never at startup), so an
+     * admin's deliberate choice survives a restart. A base URL the SSRF guard refuses cannot be
+     * repaired here and is logged with the host to allow.
      */
-    private boolean repairUnusable(PlatformHostedLlmProvider row, String normalizedBase) {
+    private boolean repairUnusable(
+            PlatformHostedLlmProvider row, String normalizedBase, boolean onDemand) {
         boolean repaired = false;
         HostedLlmPoolSettingsResponse settings = service.getPoolSettings();
         if (settings != null && !settings.enabled()) {
-            // Only when this row is the pool's whole content: an admin who switched the pool off
-            // while a hosted row exists meant it, and a restart must not undo that.
+            // Nothing an admin switched off is switched on because core restarted: the pool comes
+            // back only inside a chat that needs it, and only when this row is the pool's whole
+            // content (an admin who switched it off while a hosted row exists meant it).
+            if (!onDemand) {
+                log.info(
+                        "The platform LLM pool is switched off; the local model row stays unused"
+                                + " until a chat asks for it or an admin switches the pool on.");
+                return false;
+            }
             List<PlatformHostedLlmProvider> enabledRows =
                     repository.findAllByEnabledTrueOrderByPriorityAsc();
             boolean othersEnabled =
