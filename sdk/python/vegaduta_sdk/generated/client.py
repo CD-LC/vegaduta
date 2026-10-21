@@ -2626,6 +2626,25 @@ class ChatImportApi:
         return self._http.request("POST", "/api/chat-import/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
+class ChatThreadApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, *, limit: Optional[int] = None, before: Optional[str] = None) -> m.ChatBranchDtos_ThreadsResponse:
+        """List.
+
+        GET /api/chat/threads
+        """
+        return self._http.request("GET", "/api/chat/threads", query={"limit": limit, "before": before})
+
+    def delete(self, agent_id: str, session_id: str) -> None:
+        """Delete.
+
+        DELETE /api/chat/threads/{agentId}/{sessionId}
+        """
+        return self._http.request("DELETE", f"/api/chat/threads/{quote_path(agent_id)}/{quote_path(session_id)}", response="void")
+
+
 class ChatTranscriptApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -13016,6 +13035,7 @@ class VegadutaClient:
         self.chat_branch_capabilities = ChatBranchCapabilitiesApi(self.http)
         self.chat_export = ChatExportApi(self.http)
         self.chat_import = ChatImportApi(self.http)
+        self.chat_thread = ChatThreadApi(self.http)
         self.chat_transcript = ChatTranscriptApi(self.http)
         self.checkout_session = CheckoutSessionApi(self.http)
         self.code_intel = CodeIntelApi(self.http)

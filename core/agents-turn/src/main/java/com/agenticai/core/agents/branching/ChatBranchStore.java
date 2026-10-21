@@ -37,4 +37,26 @@ public interface ChatBranchStore {
 
     /** Erasure: deletes every session (state row and all its nodes) bound to {@code subject}. Returns the number of sessions removed. */
     int deleteSessionsOwnedBy(String subject);
+
+    /**
+     * One session of a subject's thread list ({@code GET /api/chat/threads}). {@code firstUserMessage}
+     * is the stored content of the session's earliest USER node (null when it has none), untrimmed:
+     * the service cuts it to a title.
+     */
+    record Thread(UUID agentId, String sessionId, String firstUserMessage, Instant createdAt, Instant updatedAt) {
+    }
+
+    /**
+     * The sessions bound to {@code subject}, newest {@code updatedAt} first, at most {@code limit} of them,
+     * only those last touched strictly before {@code before} when it is given. The first user message of
+     * every returned session is fetched in one query for the page, never one per row.
+     */
+    List<Thread> findThreadsOwnedBy(String subject, Instant before, int limit);
+
+    /**
+     * Deletes one session (state row and all its nodes) if, and only if, it is bound to {@code subject}.
+     * Returns false when there is no such session or it belongs to someone else - the caller answers
+     * both the same way.
+     */
+    boolean deleteSessionOwnedBy(UUID agentId, String sessionId, String subject);
 }

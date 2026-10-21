@@ -2,10 +2,12 @@ import type { AssistantTurn, ThreadSummary } from "./assistantTypes";
 import { stripAppContext } from "./needs";
 
 /**
- * The conversation index of the /assistant surface (design doc, gap G1): core has no endpoint that lists
- * a user's chat sessions, so the browser keeps one row per session in IndexedDB - id (the server session
- * id), title (first user line), agent, last activity, pinned. The transcript itself is never stored here;
- * opening a thread re-reads GET /api/agents/{id}/sessions/{sid}/transcript.
+ * The conversation index of the /assistant surface (design doc, gap G1): one row per session in IndexedDB -
+ * id (the server session id), title (first user line), agent, last activity, pinned. It is a CACHE of the
+ * server's list (GET /api/chat/threads, merged in by mergeServerThreads when the rail loads) plus what this
+ * browser knows that the server does not: a local rename, the pin, and sessions of a core that stores
+ * nothing (branching off). The transcript itself is never stored here; opening a thread re-reads
+ * GET /api/agents/{id}/sessions/{sid}/transcript.
  *
  * Same posture as lib/api/persistentCache.ts: scoped by user id, every call best-effort (no IndexedDB in
  * SSR, jsdom or a locked-down browser degrades to an in-memory map for the page's life, never a thrown
@@ -210,6 +212,57 @@ export async function recordThreadActivity(
     : { id, scope, agentId, title: threadTitle(firstUserLine), lastAt: at, createdAt: at, pinned: false };
   await putThread(row);
   return row;
+}
+
+/** What the server knows about one session (lib/api/assistant ServerThread), as the merge needs it. */
+export interface ServerThreadLike {
+  sessionId: string;
+  agentId: string;
+  title: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function ms(iso: string | null | undefined): number {
+  const n = iso ? Date.parse(iso) : NaN;
+  return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * One server session folded into the local index. A session the browser has never seen becomes a row
+ * (title from the server's first user line, not pinned). A row that exists keeps what is local - its
+ * title (a rename, or the same line the server would give), its pin - and only moves forward in time:
+ * lastAt = max(local, server), the agent the server says. Returns null when nothing would change.
+ */
+export function mergeServerThread(local: ThreadRow | null, server: ServerThreadLike, scope: string): ThreadRow | null {
+  const updatedAt = ms(server.updatedAt);
+  if (!local) {
+    return {
+      id: server.sessionId,
+      scope,
+      agentId: server.agentId,
+      title: threadTitle(server.title ?? ""),
+      lastAt: updatedAt,
+      createdAt: ms(server.createdAt) || updatedAt,
+      pinned: false,
+    };
+  }
+  const next: ThreadRow = { ...local, lastAt: Math.max(local.lastAt, updatedAt), agentId: server.agentId || local.agentId };
+  return next.lastAt === local.lastAt && next.agentId === local.agentId ? null : next;
+}
+
+/** Folds a page of server sessions into the index for `scope`; returns how many rows were written. */
+export async function mergeServerThreads(scope: string, rows: readonly ServerThreadLike[]): Promise<number> {
+  let written = 0;
+  for (const server of rows) {
+    if (!server || !server.sessionId || !server.agentId) continue;
+    const merged = mergeServerThread(await getThread(scope, server.sessionId), server, scope);
+    if (merged) {
+      await putThread(merged);
+      written++;
+    }
+  }
+  return written;
 }
 
 export async function deleteThread(scope: string, id: string): Promise<void> {

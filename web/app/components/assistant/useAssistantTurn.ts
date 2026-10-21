@@ -13,6 +13,7 @@ import type { SessionLlmCall } from "../agents/playground/types";
 import { splitForSend, type PendingAttachment } from "../ChatAttachments";
 import type { StreamReconnectingState } from "../StreamReconnectingNotice";
 import type { AssistantTurn } from "./assistantTypes";
+import { persistTurnInBranchTree } from "./branchPersist";
 
 /** What a settled turn tells the pane (thread index, work counts, background offer). */
 export interface TurnOutcome {
@@ -180,7 +181,11 @@ export function useAssistantTurn(agentId: string | null) {
         if (ownSession && newSessionId) setSessionId(newSessionId);
         patchTurn(replyId, { endedAt: Date.now(), ref: turnRef });
         const enrichSid = ownSession ? newSessionId || sessionIdRef.current : null;
-        if (enrichSid) void enrichTurn(target, enrichSid, replyId);
+        if (enrichSid) {
+          void enrichTurn(target, enrichSid, replyId);
+          // Persistence only (the thread list and reopening after 24h); the answer is never applied here.
+          void persistTurnInBranchTree(target, enrichSid);
+        }
         return { ...outcome, sessionId: ownSession ? newSessionId || sessionIdRef.current : null, text, steps, ok: true };
       } catch (err) {
         const cancelled = isCancelledError(err);
