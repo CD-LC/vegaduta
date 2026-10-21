@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -109,6 +110,37 @@ func TestUnpackReleaseStripsTopLevel(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(dir, p)); err != nil {
 			t.Errorf("expected %s unpacked: %v", p, err)
 		}
+	}
+}
+
+// Windows refuses symlinks without admin rights or Developer Mode ("A required
+// privilege is not held by the client"): the link becomes a copy of its file,
+// even when the link comes before its target in the archive.
+func TestUnpackReleaseCopiesSymlinksWindowsRefuses(t *testing.T) {
+	old := symlink
+	symlink = func(string, string) error { return errors.New("A required privilege is not held by the client.") }
+	defer func() { symlink = old }()
+
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	tw.WriteHeader(&tar.Header{Name: "v/deploy/models/catalog.txt", Typeflag: tar.TypeSymlink,
+		Linkname: "../../core/providers/catalog.txt", Mode: 0o777})
+	body := "qwen3.5:4b\n"
+	tw.WriteHeader(&tar.Header{Name: "v/core/providers/catalog.txt", Mode: 0o644, Size: int64(len(body)), Typeflag: tar.TypeReg})
+	tw.Write([]byte(body))
+	tw.Close()
+	gz.Close()
+	tgz := filepath.Join(t.TempDir(), "r.tar.gz")
+	os.WriteFile(tgz, buf.Bytes(), 0o600)
+
+	dir := t.TempDir()
+	if err := unpackRelease(tgz, dir); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(filepath.Join(dir, "deploy", "models", "catalog.txt"))
+	if err != nil || string(got) != body {
+		t.Fatalf("catalog copy = %q, %v; want %q", got, err, body)
 	}
 }
 
