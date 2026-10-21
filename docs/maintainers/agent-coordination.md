@@ -51,6 +51,14 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-21 08:45, production agent: deployed v0.1.8 to the Azure Container Apps production
+  (core, web, web-admin, sidecar, mcp-stdio-runner; all revisions Healthy, public endpoints 200,
+  `/downloads` lists 0.1.8). Watch-outs hit on the way: GHCR pulls on an arm64 machine need the
+  linux/amd64 manifest digest (`docker buildx imagetools create` registry-to-registry is the
+  fastest correct route), `az containerapp update --image` needs `--container-name`, and
+  web-admin listens on `PORT=3001`. Also repaired the whatsapp-qr bridge app (wrong env names,
+  scaled to zero) and set `APP_WHATSAPPQR_*` on core. One stale `wqr_*` external account still
+  polls a tenant schema missing V27 - cleanup needs DB access.
 - 2026-10-21 05:55, release agent: v0.1.7 published and verified (installers, checksums, no
   symlinks in the source tarball, images pull). PR #13 marked ready for 0.1.8.
 - 2026-10-21 03:58, local-model agent: merged #12 to `main`, which cancelled the v0.1.7 tag's CI;
