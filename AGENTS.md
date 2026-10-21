@@ -12,6 +12,10 @@ Instructions for AI coding agents (and humans in a hurry) working in this
 repository. Read this before editing. Human contributors: the full guide is
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
+> **More than one agent works here at once.** Before you push, merge, tag, release or deploy,
+> read [docs/maintainers/agent-coordination.md](docs/maintainers/agent-coordination.md), claim your
+> area there, and log what you did.
+
 ## Layout
 
 ```
