@@ -11,7 +11,7 @@ import { verifyPlatformAdmin } from "../../../../../lib/serverAuth";
 // are admin-facing fulfilment attestations, not learner history). The
 // Academy writes an `admin_history_deleted` telemetry event AFTER the wipe
 // so the audit trail survives the deletion it describes. See
-// vegaduta-webapp/src/learning-portal/admin-learners.ts#deleteLearnerHistory.
+// the Academy service/src/learning-portal/admin-learners.ts#deleteLearnerHistory.
 //
 // SECURITY: same auth requirement as every other route in this proxy family
 // - see app/lib/serverAuth.ts.

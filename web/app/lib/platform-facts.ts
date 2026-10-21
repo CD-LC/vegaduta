@@ -103,8 +103,9 @@ export const PLATFORM_FACTS = {
   // so no two pages can contradict each other.
   builtInToolsFloor: 50,
 
-  // vegaduta-webapp-prototype/vegaduta-webapp/ui/src/lib/curriculum-totals.ts:
-  // LESSONS_PER_LEVEL sums to 288 on 2026-10-03; copy says "280+".
+  // The hosted Academy's lesson total (288 on 2026-10-03); copy says
+  // "280+". The Academy is a separate, proprietary deployable - the
+  // number here is a floor for public copy only.
   academyLessonsFloor: 280,
 
   // Upstream MCP registry size, quoted as 18,000+ across the site
