@@ -1,0 +1,5 @@
+{
+  "name": "vegaduta-reel-recorder",
+  "private": true,
+  "dependencies": { "playwright": "1.56.0" }
+}
