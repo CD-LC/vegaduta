@@ -8,7 +8,7 @@ import { verifyPlatformAdmin } from "../../../../../lib/serverAuth";
 // moderation toggle: hidden=true removes the learner from the public
 // leaderboard only — their learning, XP and admin stats are unaffected, and
 // the toggle is reversible. See
-// vegaduta-webapp/src/learning-portal/admin-learners.ts#setLearnerLeaderboardVisibility.
+// the Academy service/src/learning-portal/admin-learners.ts#setLearnerLeaderboardVisibility.
 //
 // SECURITY: same auth requirement as every other route in this proxy family
 // - see app/lib/serverAuth.ts.

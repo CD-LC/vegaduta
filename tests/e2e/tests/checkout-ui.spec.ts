@@ -6,11 +6,9 @@ import { signUpFreshTenant } from "../helpers/test-tenant";
 // the checkout entry point a Keycloak-authenticated tenant (what
 // signUpFreshTenant provisions) can actually reach.
 //
-// The Academy's OWN separate checkout flow
-// (vegaduta-webapp-prototype/vegaduta-webapp/ui/src/pages/Upgrade.tsx) is
+// The Academy's OWN separate checkout flow is
 // checked, not assumed: it does NOT redirect here. It runs in its own
-// deployable with its own auth (SessionProvider backed by GET /account +
-// /auth/login - see ui/src/lib/session.tsx's useSession(), nothing to do
+// deployable with its own auth (its own session layer, nothing to do
 // with Keycloak) and its own backend checkout endpoint (POST
 // /account/upgrade-checkout, vs. this app's POST /api/tenant/upgrade). This
 // suite's only tenant-provisioning helper (signUpFreshTenant) creates a
