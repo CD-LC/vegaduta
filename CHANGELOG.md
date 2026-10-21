@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-10-21
+
 ### Fixed
 
 - **The first chat no longer waits for the platform model to wake up.** A hosted model that scales to zero took 70 s or more to answer the first message. The console now asks core to load it (`POST /api/platform-llm/warm`, a one-token request to the pool's top row, at most once every 4 minutes per core instance) as soon as someone signs in or opens a chat. If a reply still has not started after 8 seconds, the chat says the model is starting up and that later replies are fast. Off with `APP_PLATFORM_LLM_WARM_ENABLED=false`.
