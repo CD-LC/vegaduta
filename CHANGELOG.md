@@ -8,6 +8,12 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-10-21
+
+### Fixed
+
+- **Windows Setup no longer fails with "A required privilege is not held by the client".** The release package carried one symlink (`deploy/models/catalog.txt`), which Windows only lets administrators or Developer Mode create, so Setup stopped while unpacking. The release now ships the file itself, and Setup copies the file whenever the system refuses a symlink.
+
 ## [0.1.6] - 2026-10-20
 
 ### Fixed
