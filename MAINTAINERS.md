@@ -21,7 +21,7 @@ team. Settle both, then run scripts/dev/set-repo-identity.sh --lead <handle>
 |---|---|---|
 | _open_ | | `core/` (agents, chat, tools, MCP/A2A/AG-UI) |
 | _open_ | | `core/` (workflow, approval, omnichannel) |
-| _open_ | | `web/`, `web-admin/` |
+| _open_ | | `web/` (console, public pages, platform admin) |
 | _open_ | | `services/` (Python) |
 | _open_ | | `deploy/` (Compose, Helm), CI and releases |
 

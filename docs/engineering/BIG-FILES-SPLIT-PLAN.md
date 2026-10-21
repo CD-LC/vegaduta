@@ -2,6 +2,8 @@
 
 > **2026-10-16:** the ratchet now has a hard cap of 700 lines and fails any file over 665 lines (within 5% of the cap) unless baselined; the baseline was regenerated at that threshold and may only shrink. The tables below were measured against the earlier 1,000-line rule.
 
+> **2026-10-21:** `scripts/ci/file-size-baseline.txt` holds no entries any more: every file the ratchet checks is at or under 665 lines (for example `Agent.java` 604, `WorkflowRunWorkflowImpl.java` 454, `AgentChatService.java` 661, `EvalRunService.java` 522). The *partial* and *remaining* rows below are therefore done; the counts in the tables are the 2026-10-15 measurements.
+
 Generated 2026-10-15 from `main` (977b4681f); line counts re-measured on branch `next/phase` after the refactor wave (`wc -l` on the working tree, 2026-10-15). Rule of the repo when measured: a source file over 1,000 lines failed the file-size ratchet unless baselined (now: over 665, see the note above) (`scripts/ci/file-size-baseline.txt`); baselines may only shrink.
 This document lists every tracked source file over 1,000 lines (generated files excluded) with the **design pattern to split it by** for the largest ones. Split by responsibility, not by line count: each new class should have one reason to change and be testable alone. Behaviour must not change: characterisation tests first, then extract.
 
@@ -148,4 +150,4 @@ Measured with the same file selection as `scripts/ci/check-file-size.sh`. Files 
 | `web/app/components/dashboard/dashboard.css` | 1025 | CSS, baselined |
 | `services/mcp-stdio-runner/server.js` | 1164 | JavaScript; the ratchet does not check `*.js` |
 
-Also note `scripts/ci/file-size-baseline.txt` still lists files that are now under the threshold; `scripts/ci/check-file-size.sh` prints a WARN for each. Run `scripts/ci/check-file-size.sh --update` (after review) to drop them.
+On 2026-10-15 `scripts/ci/file-size-baseline.txt` still listed files that were under the threshold. Since then the baseline has been emptied (see the note at the top); the three web files in this table are now 281, 26 and 292 lines. `services/mcp-stdio-runner/server.js` (1,173 lines) is still outside the ratchet, which checks `*.java`, `*.ts`, `*.tsx`, `*.kt`, `*.swift`, `*.py` and `*.css` but not `*.js`.

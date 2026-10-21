@@ -36,7 +36,7 @@ vegaduta/
 │                          the top (cost-and-roi, local-models, edge-relay, sms-channel, ...), with
 │                          pilots/ (30-day pilot process), channels/, compliance/, security/, sdk/,
 │                          architecture/, engineering/ (plans, audits, generated config reference),
-│                          operations/, maintainers/ and api/ (OpenAPI + generated clients)
+│                          operations/, maintainers/ and api/ (OpenAPI and AsyncAPI documents, API guides)
 ├── mkdocs.yml             builds docs/ into the documentation site
 ├── deploy/                Compose tiers and overlays, Helm charts (22), supporting configs (Postgres,
 │                          Keycloak, Prometheus/Grafana/Loki, LiveKit, Temporal, kind, models/catalog.txt),
@@ -194,7 +194,7 @@ tags) and its own API-compatibility gate. `core/` may consume it later
 | Layer | Source | Audience | Published as |
 |---|---|---|---|
 | Documentation site | `docs/**/*.md` + `mkdocs.yml` | operators, integrators, contributors | MkDocs Material site on GitHub Pages |
-| Embedded READMEs | `sdk/java/README.md`, `sdk/README.md`, `examples/sdk/governed-tools/README.md`, `examples/sdk/refund-agent/README.md` | SDK users | pages of the same site, via `scripts/docs/mkdocs_hooks.py` (one source) |
+| Embedded READMEs | `sdk/java/README.md`, `sdk/python-agent/README.md`, `sdk/README.md`, `examples/sdk/governed-tools/README.md`, `examples/sdk/refund-agent/README.md` | SDK users | pages of the same site, via `scripts/docs/mkdocs_hooks.py` (one source) |
 | HTML handbook (legacy) | `docs/platform-documentation/` | architecture and decisions (ADR-0001 to ADR-0010) from the `agentic-ai` era — the Markdown `docs/` tree is the maintained source; keep the handbook for the older ADRs, prefer `docs/` where they disagree | static files inside the site |
 | In-app help | `web/app/help/docs-content.tsx` | console users | `/docs` and `/help/docs` in the console |
 | API reference | `docs/api/openapi.json` | integrators | `/api-reference` in the console; basis of the generated clients |

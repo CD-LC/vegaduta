@@ -124,7 +124,7 @@ How the `mcp` profile and the runner fit together:
 | Variable | What | Notes |
 |---|---|---|
 | `VEGADUTA_SECRETS_KEEP` (environment) | path of the kept copy | default above; tests point it at a temporary file |
-| `VEGADUTA_PERSONAL_PROJECT` (Compose `.env`) | compose project of a personal install | set by `secrets` only in the case above; empty = `vegaduta-personal` |
+| `VEGADUTA_PERSONAL_PROJECT` (Compose `.env`) | compose project of a personal install | set by `secrets` only in the case above; empty = `COMPOSE_PROJECT_NAME`, else `vegaduta-personal` |
 
 ## Database and cache
 
@@ -476,14 +476,14 @@ optional services (app builder, RL trainer), not by core's chat path.
 | `AGENT_JOB_TRIGGERS_ENABLED` | `true` | scheduled agent jobs | |
 | `SIGNUP_DISPOSABLE_EMAIL_BLOCK_ENABLED` | `true` | block disposable email domains at signup | |
 | `NEXT_PUBLIC_BILLING_ENABLED` (web; Compose: `WEB_BILLING_ENABLED`) | off | plans, prices, upgrade prompts and billing pages; off redirects `/billing`, `/features` and `/admin/billing` and hides every upgrade CTA | `1` to turn on (runtime, see `web/docs/RUNTIME-CONFIG.md`) |
-
-The Compose profiles `code-intel`, `sandbox` and `events` start the services
 | `NEXT_PUBLIC_SITE_MODE` (web; Compose: `WEB_SITE_MODE`) | `oss` | which signed-out pages are served: `oss` is the technical open-source landing and About, and redirects the pricing, enterprise, hire, earn, compare and similar sales pages to `/`; `classic` restores the original marketing pages (tag `backup/classic-marketing-pages-2026-10-12`) | `oss` or `classic` (runtime) |
 | `NEXT_PUBLIC_DOCS_URL` (web; Compose: `WEB_DOCS_URL`) | empty | absolute URL of the published documentation site; when set, the public pages' "Docs" links and the in-app help banner point there, otherwise at the in-app `/docs` help ([site modes](site-modes.md)) | a URL (runtime) |
 | `NEXT_PUBLIC_ACADEMY_URL` (web) | `https://academy.vegaduta.ai` | origin of the separate (proprietary) Academy learning portal; compose's `WEB_ACADEMY_URL` defaults to the hosted Academy — point it at a self-hosted Academy, or empty in a fork that does not want the links | a URL (runtime) |
 | `NEXT_PUBLIC_CONTACT_EMAIL` (web; Compose: `WEB_CONTACT_EMAIL`; Helm: `web.env.NEXT_PUBLIC_CONTACT_EMAIL`) | empty | contact address on `/plugins` and `/account-deletion`. Empty shows a placeholder; set an address you own | an e-mail address (runtime) |
 | `NEXT_PUBLIC_CODE_INTEL_URL` (web; Compose: `PUBLIC_CODE_INTEL_URL`) | empty | browser-facing code-intel URL. Leave empty so the web app uses the core proxy; a `localhost` value is baked into the browser bundle and fails for every non-local viewer. Helm sets it from `global.hosts.codeintel` when the code-intel component is on | a public URL, or empty (runtime) |
 | `NEXT_PUBLIC_COMMERCIAL_URL` (web; Compose: `WEB_COMMERCIAL_URL`) | empty | absolute URL of a hosted/commercial offering; when set, the open-source pages show a "Hosted version" link to it, otherwise they show none | a URL (runtime) |
+
+The Compose profiles `code-intel`, `sandbox` and `events` start the services
 and the CLI sets these flags for you.
 
 ## Agent and platform feature flags
@@ -571,7 +571,7 @@ Same conventions as above (Spring property shown as its env name, defaults in
 | `TOOL_HTTP_REQUEST_SAFE_MODE` | `http_request` safe mode: https only, allow-lists, named credentials, gated writes |
 | `APP_CONTEXT_COMPACTION_ENABLED` | context budget planner and compaction in the chat turn (`restore_tool_result` stays on with it) |
 | `APP_CHAT_RESUMABLE_STREAMS_ENABLED` (Helm: `core.resumableStreamsEnabled`) | chat streams that resume after a drop, sleep, refresh or navigation. `APP_CHAT_RESUMABLE_STREAMS_STORE=redis` (set by the chart for 2+ replicas) has no effect while this is off |
-| `APP_CHAT_BRANCHING_ENABLED` (Helm: `core.branchingEnabled`) | keep chat history: each message is stored in Postgres for `app.chat.branching.retention-days` (30) instead of expiring from Redis after 24 h; edit, regenerate and switch between conversation branches. Also powers `/api/chat/threads` (the signed-in user's session list, which the Assistant merges into its thread rail) and the stored-tree fallback of the transcript reload after the 24 h Redis window; those routes answer 404 while off. On by default in every Compose tier and in the chart; the core property itself defaults to off |
+| `APP_CHAT_BRANCHING_ENABLED` (Helm: `core.branchingEnabled`) | keep chat history: each message is stored in Postgres for `app.chat.branching.retention-days` (30) instead of expiring from Redis after 24 h; edit, regenerate and switch between conversation branches. Also powers `/api/chat/threads` (the signed-in user's session list, which the Assistant merges into its thread rail) and the stored-tree fallback of the transcript reload after the 24 h Redis window; those routes answer 404 while off. On by default in `lite.yml`, `docker-compose.yml` and the chart; the core property itself defaults to off, and `personal.yml` does not set it, so a personal install keeps it off unless `deploy/compose/core.env` sets it |
 | `APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED` | prompt directive for the chat artifacts pane |
 | `CHAT_IMPORT_ENABLED`, `CHAT_EXPORT_ENABLED` | import ChatGPT/Claude chats as read-only records; export chats as md/json/txt. Transcript reload, export and branching only ever reach the caller's own conversation: session memory is keyed by tenant + agent + user + client session id, and a session is readable only by the user who started it (see Security Architecture §4.1 in the platform docs) |
 | `APP_MCP_APPS_ENABLED` | host MCP Apps (`ui://` resources); the web side also needs `NEXT_PUBLIC_MCP_APPS=1` |
@@ -728,16 +728,16 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 | `app.workflow.temporal.run-timeout-seconds` | `TEMPORAL_RUN_TIMEOUT_SECONDS` | `600` |
 | `spring.kafka.bootstrap-servers` | `WORKFLOW_KAFKA_BOOTSTRAP_SERVERS` | empty (no Kafka client starts) |
 | `app.workflow.schedule.min-interval-seconds` | `APP_WORKFLOW_SCHEDULE_MIN_INTERVAL_SECONDS` | `60`; the smallest gap between two fires of a workflow schedule. `PUT /api/workflows/{id}/schedule` with a tighter cron is a 400; `0` turns the check off |
-| `app.workflow.poll.enabled` | `WORKFLOW_POLL_ENABLED` | `true` |
-| `app.workflow.poll.tick` | `WORKFLOW_POLL_TICK` | `60s` |
-| `app.workflow.poll.min-interval-seconds` | `WORKFLOW_POLL_MIN_INTERVAL_SECONDS` | `60` |
-| `app.workflow.poll.max-interval-seconds` | `WORKFLOW_POLL_MAX_INTERVAL_SECONDS` | `604800` |
-| `app.workflow.poll.max-items-per-poll` | `WORKFLOW_POLL_MAX_ITEMS_PER_POLL` | `25` |
-| `app.workflow.poll.max-response-bytes` | `WORKFLOW_POLL_MAX_RESPONSE_BYTES` | `1048576` |
-| `app.workflow.poll.seen-ids-cap` | `WORKFLOW_POLL_SEEN_IDS_CAP` | `1000` |
-| `app.workflow.poll.failure-backoff-cap` | `WORKFLOW_POLL_FAILURE_BACKOFF_CAP` | `8` |
-| `app.workflow.poll.connect-timeout` | `WORKFLOW_POLL_CONNECT_TIMEOUT` | `5s` |
-| `app.workflow.poll.response-timeout` | `WORKFLOW_POLL_RESPONSE_TIMEOUT` | `15s` |
+| `app.workflow.poll.enabled` | `APP_WORKFLOW_POLL_ENABLED` | `true` |
+| `app.workflow.poll.tick` | `APP_WORKFLOW_POLL_TICK` | `60s` |
+| `app.workflow.poll.min-interval-seconds` | `APP_WORKFLOW_POLL_MIN_INTERVAL_SECONDS` | `60` |
+| `app.workflow.poll.max-interval-seconds` | `APP_WORKFLOW_POLL_MAX_INTERVAL_SECONDS` | `604800` |
+| `app.workflow.poll.max-items-per-poll` | `APP_WORKFLOW_POLL_MAX_ITEMS_PER_POLL` | `25` |
+| `app.workflow.poll.max-response-bytes` | `APP_WORKFLOW_POLL_MAX_RESPONSE_BYTES` | `1048576` |
+| `app.workflow.poll.seen-ids-cap` | `APP_WORKFLOW_POLL_SEEN_IDS_CAP` | `1000` |
+| `app.workflow.poll.failure-backoff-cap` | `APP_WORKFLOW_POLL_FAILURE_BACKOFF_CAP` | `8` |
+| `app.workflow.poll.connect-timeout` | `APP_WORKFLOW_POLL_CONNECT_TIMEOUT` | `5s` |
+| `app.workflow.poll.response-timeout` | `APP_WORKFLOW_POLL_RESPONSE_TIMEOUT` | `15s` |
 
 `temporal` also needs the `temporal` Spring profile; without it core falls back
 to the in-process engine. Workers run in the `core-worker` shape.
@@ -1186,14 +1186,13 @@ At most 10 drafts wait for review per workspace. See [Personal mode](personal-mo
 | `app.local-models.host-ram-gb` | `HOST_RAM_GB` | `0` | the host's memory in GB, set by `scripts/vegaduta personal` for a containerised core (which would otherwise report its own cgroup limit). `0` measures what core sees |
 | `app.local-models.host-accelerator` | `HOST_ACCELERATOR` | blank | `apple`, or `nvidia:NAME:VRAM_GB`: what the host has, for the same reason. Blank detects from inside core |
 | `app.local-models.allow-uncataloged-pull` | (none) | `false` | allow pulling tags that are not in the catalog |
-| `app.local-models.keep-alive` | (none) | `30m` | Ollama `keep_alive` sent by `POST /api/local-models/warm` (and by the warm-ups core runs itself after a pull, a `/use` switch and the local-LLM bootstrap): how long the loaded model stays in memory. Ollama's own default is five minutes, after which the next chat pays the whole weight load again; `-1` keeps it forever. A chat request sent without the field resets the timer to the server's default, so for a host Ollama also set `OLLAMA_KEEP_ALIVE` on the server (the Compose `local-ai` overlay already does) |
-| `app.llm.ollama.reasoning-effort` | `APP_LLM_OLLAMA_REASONING_EFFORT` | `none` | The thinking switch sent with every chat on the install's own Ollama (the local pool row): `none` turns reasoning off, `low`/`medium`/`high` leave it on at that effort, blank leaves the model's default. Thinking models (qwen3.5, qwen3, deepseek-r1, gpt-oss) reason by default, which on a laptop is most of the wait: a one-line question took 40+ s and 600 tokens of thinking on `qwen3.5:4b` against about 5 s with it off. |
+| `app.local-models.keep-alive` | `APP_LOCAL_MODELS_KEEP_ALIVE` | `30m`; the Compose `local-ai` overlay sets it and Ollama's own `OLLAMA_KEEP_ALIVE` from `OLLAMA_KEEP_ALIVE` (default `-1`) | Ollama `keep_alive` sent by `POST /api/local-models/warm` (and by the warm-ups core runs itself after a pull, a `/use` switch and the local-LLM bootstrap): how long the loaded model stays in memory. Ollama's own default is five minutes, after which the next chat pays the whole weight load again; `-1` keeps it forever. A chat request sent without the field resets the timer to the server's default, so for a host Ollama also set `OLLAMA_KEEP_ALIVE` on the server (the Compose `local-ai` overlay already does) |
+| `app.llm.ollama.reasoning-effort` | `APP_LLM_OLLAMA_REASONING_EFFORT` | `none` for the install's own local model (the platform-pool row Providers -> Local model manages, which can override it per row); blank for agents on an `OLLAMA` provider. The Compose `local-ai` overlay sets `none` (`LOCAL_LLM_REASONING_EFFORT`) | `reasoning_effort` sent to Ollama's OpenAI-compat endpoint: `none` skips the hidden thinking pass of reasoning models (qwen3.5, qwen3, deepseek-r1, gpt-oss), which on a laptop is most of the wait (a one-line question took 40+ s on `qwen3.5:4b` against about 5 s with it off); `low`/`medium`/`high` leave it on at that effort; blank sends nothing (the model's default). An unsupported name falls back to the model's default, so it cannot fail a call |
 | `app.local-models.rate-limit.reads-per-minute` | (none) | `120` | per tenant and caller |
 | `app.local-models.rate-limit.probes-per-minute` | (none) | `6` | |
 | `app.local-models.rate-limit.pulls-per-minute` | (none) | `6` | |
 | `app.llm.ollama.num-ctx` | `APP_LLM_OLLAMA_NUM_CTX` | `32768` | `num_ctx` sent to Ollama per request (its OpenAI-compat `options` field) - the provider default (~4k) silently truncates tool-heavy prompts |
 | `app.llm.ollama.num-batch` | `APP_LLM_OLLAMA_NUM_BATCH` | `0` (server default 512) | `num_batch` sent to Ollama per request - tokens evaluated per prompt step; a larger value (e.g. `2048`, keep `<= num-ctx`) speeds up the multi-thousand-token fixed-prefix eval that dominates turn latency on a local model |
-| `app.llm.ollama.reasoning-effort` | `APP_LLM_OLLAMA_REASONING_EFFORT` | blank (the model's own default); the Compose `local-ai` overlay sets `none` | `reasoning_effort` sent to Ollama's OpenAI-compat endpoint. `none` skips the hidden thinking pass of reasoning models (qwen3.5, gemma4, ...), which on a laptop CPU is most of the wait for the first word; `low`/`medium`/`high` pick a level where the model has them. An unsupported name falls back to the model's default, so it cannot fail a call. `LOCAL_LLM_REASONING_EFFORT` sets it for the overlay |
 | `app.llm.structured-output.ollama-format.enabled` | (none) | `false` | when on, a structured-output request that Ollama refuses (the MLX runner's `json_schema` 400) is retried with the schema in the prompt |
 
 A `LOCAL_OPENAI` provider (vLLM, llama.cpp, LM Studio, Jan, LocalAI) adds no keys. Its server must be listed in
@@ -1275,7 +1274,7 @@ there.
 |---|---|---|
 | Social login | `GOOGLE_CLIENT_ID`/`_SECRET`, `GITHUB_CLIENT_ID`/`_SECRET`, `MICROSOFT_CLIENT_ID`/`_SECRET` | Keycloak identity providers, reconciled into the realm |
 | Email | `KEYCLOAK_SMTP_*` (verification and reset mail), `ALERT_SMTP_*` (Alertmanager) | |
-| Generated secrets | everything in `SECRET_SPECS` of `scripts/vegaduta` (database, Valkey, storage, service tokens, Langfuse, `SEARXNG_SECRET`) | `scripts/vegaduta secrets` fills the empty ones |
+| Generated secrets | everything in `SECRET_SPECS` of `scripts/vegaduta` (database, Valkey, storage, service tokens, Langfuse, `SEARXNG_SECRET`, `WORKSPACE_RUNNER_SECRET`, `WHATSAPP_QR_BRIDGE_SECRET`), plus every secret-like `${X:?}` any file under `deploy/compose` requires (for example the DefectDojo `DD_*` secrets) | `scripts/vegaduta secrets` (and `vegaduta.ps1 secrets`) fills the empty ones. Before starting, `up` runs `docker compose config -q`, generates any secret Compose still reports missing and stops naming any other variable that is empty |
 | Console flags | `WEB_MCP_APPS`, `WEB_TRUSTED_IMAGE_HOSTS`, `WEB_EDGE_AGENTS`, `WEB_FREE_MODE`, `WEB_DEPLOY_ENV` | mapped to the matching `NEXT_PUBLIC_*` at runtime |
 | Tracing | `LANGFUSE_*` | the `tracing` profile |
 | Resource limits | `*_MEM_LIMIT`, `CODE_INTEL_DOCKER_PIDS_LIMIT` | per-container memory ceilings |
@@ -1779,7 +1778,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `fraud-detection.hcaptcha.site-key` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.vpn.score-threshold` | `0.7` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
 
-### Module `app-config` (469)
+### Module `app-config` (467)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -1855,9 +1854,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.billing.razorpay.trial-days` | `${RAZORPAY_TRIAL_DAYS:14}` | all shapes | Days of free trial before the first real charge, applied uniformly across both paid tiers per the "Free trial, card required upfront" billing decision. |
 | `app.billing.razorpay.webhook-secret` | `${RAZORPAY_WEBHOOK_SECRET:}` | all shapes | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayGatewayClient.java`) |
 | `app.billing.stripe.price-id-unlimited` | `${STRIPE_PRICE_ID_UNLIMITED:}` | all shapes | Injected builder for the same reason PhonePeGatewayClient's constructor documents: a hand-built RestClient bypasses Spring's timeout configuration, which parks a checkout request forever on a gateway outage. |
-| `app.chat.branching.artifacts.agent-ids` | `${APP_CHAT_DIRECTIVES_ARTIFACTS_AGENT_IDS:}` | all shapes | Comma-separated agent UUIDs that get the directive (when enabled above and all-agents is false). |
-| `app.chat.branching.artifacts.all-agents` | `${APP_CHAT_DIRECTIVES_ARTIFACTS_ALL_AGENTS:false}` | all shapes | true = every agent gets the directive (when enabled above); false = only the agents listed next. |
-| `app.chat.branching.artifacts.enabled` | `${APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED:false}` | all shapes | The one directive here that is OFF by default (it adds prompt tokens): teaches the model the ```artifact:: fenced-block convention the web Artifacts pane renders (html, svg, markdown, code, mermaid, csv). |
+| `app.chat.branching.artifacts.*` | `${APP_CHAT_DIRECTIVES_ARTIFACTS_*}` | all shapes | Misplaced key in `application.yml` (nested under `branching`); nothing reads it. The settings that take effect are `app.chat.directives.artifacts.enabled` / `all-agents` / `agent-ids` (`AgentChatService`), which the same `APP_CHAT_DIRECTIVES_ARTIFACTS_*` variables still reach through relaxed binding. |
 | `app.chat.branching.retention-purge-interval` | `${APP_CHAT_BRANCHING_RETENTION_PURGE_INTERVAL:6h}` | all shapes | Group `app.chat.branching`: Chat branching (ChatBranchService, core/agents): edit an earlier user message, regenerate a reply, and... (see source: `core/app-config/src/main/resources/application.yml:1228`) |
 | `app.chat.tools.result-clearing.enabled` | `true` | all shapes | Group `app.chat.tools.result-clearing`: In-turn tool-result clearing (gap analysis item 4): once the tool results accumulated in ONE turn exceed... (see source: `core/chat/src/main/java/com/agenticai/core/chat/ResilientToolCallingManagerFactory.java`) |
 | `app.chat.tools.result-clearing.keep-last` | `" + ToolResultClearing.DEFAULT_KEEP_LAST

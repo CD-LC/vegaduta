@@ -22,6 +22,16 @@ Losing it makes those rows unreadable; leaking it means rotating it.
 - Only `tenant_secret` rows are covered. Provider credentials, channel
   secrets and other encrypted columns are re-encrypted only when they are saved
   again through their normal update endpoints.
+- The previous-key fallback is in `EncryptionService` only. Envelope
+  encryption with the default `app.crypto.kms.provider=local`
+  (`LocalKeyManagementProvider`) wraps its data keys with `APP_ENCRYPTION_KEY`
+  and has **no** fallback: after a rotation, data keys wrapped under the old
+  key (today the payment mandate signing keys, `MandateSigningService`) no
+  longer unwrap. With a cloud KMS provider those keys do not depend on
+  `APP_ENCRYPTION_KEY` (see [Configuration](../configuration.md#encryption-key-management-cloud-kms)).
+- Since 0.1.9 a personal install repairs its own local-model pool entry when
+  that entry no longer decrypts (it re-keys it under the current key at start).
+  That covers that one row, not a rotation.
 
 Treat the previous key as live for as long as any row may still depend on it.
 
@@ -50,3 +60,11 @@ Treat the previous key as live for as long as any row may still depend on it.
 The key is not in the database. Keep it in a separate secret store from the
 database dumps, and never in the same folder (`scripts/vegaduta backup` writes
 a copy of `.env` next to the dump; move it).
+
+The launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`) also keep a copy of
+the install's secrets, `APP_ENCRYPTION_KEY` included, outside the install
+folder: `~/.config/vegaduta/secrets.env` (`%LOCALAPPDATA%\VegaDuta\secrets.env`
+on Windows and WSL). A new install reuses it, and the launcher rewrites it from
+`.env` each time it runs, so after a rotation run the launcher once (for
+example `scripts/vegaduta secrets`) to refresh that copy, and protect it like
+the key itself.

@@ -5,10 +5,15 @@ choose; everything else is mechanical.
 
 ## 1. Identity (decision)
 
-The repository carries placeholders for its public identity. They are listed
-in [`scripts/dev/repo-identity.env`](../../scripts/dev/repo-identity.env):
+The repository's public identity is recorded in
+[`scripts/dev/repo-identity.env`](../../scripts/dev/repo-identity.env). It has
+been settled: the repository is `CD-LC/vegaduta` and images and charts are
+published under `ghcr.io/cd-lc`. The table lists the current values. The
+`TODO(maintainers)` notes still in `SECURITY.md`, `MAINTAINERS.md` and
+`.github/CODEOWNERS` mark the values still to confirm (contact address, lead
+handle, maintainers team); rerun the script below to change any of them.
 
-| Placeholder | Used for | Decide |
+| Current value | Used for | Decide |
 |---|---|---|
 | `CD-LC/vegaduta` | GitHub owner/repository: README badges and clone URL, `install.sh`, CITATION.cff, issue-template links, `pom.xml` `<scm>`, Helm chart metadata, theme links | Who owns the `vegaduta` GitHub account. It must be an **organization** (teams, rulesets, org secrets); a user account can be converted under Settings -> Organizations. |
 | `ghcr.io/cd-lc` | image and chart registry namespace | follows the owner |
@@ -63,6 +68,9 @@ remaining notes to delete.
   see the DCO in CONTRIBUTING.md) instead of the import history. If you do,
   re-run the scan and regenerate `.gitleaksignore` (fingerprints include the
   commit id).
+- Done on 2026-10-19: `main` was force-pushed to a clean linear history (see
+  the notice in `AGENTS.md`). Checkouts older than that must reset to
+  `origin/main` rather than pull or merge.
 - Applied Flyway migrations contain comments that name internal documents and
   people. They are checksum-bound (editing an applied migration fails Flyway
   `validate` on every existing install) and are intentionally left as they are.
@@ -80,4 +88,5 @@ git status   # expect a handful of files
 ## 5. First release
 
 See [releasing.md](releasing.md): the first tag must be a stable version, and
-the GHCR packages must be made public after the first run.
+the GHCR packages must be made public after the first run. Done: the first
+stable release was `v0.1.0`.

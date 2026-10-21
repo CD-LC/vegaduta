@@ -17,19 +17,20 @@ things. The unlabelled row above it is **Home**.
 | Data Tables | `/data-tables` | `PERM_MANAGE_WORKFLOWS_ADMIN` and the feature on | writes need `PERM_MANAGE_WORKFLOWS_ADMIN` |
 | Scheduled tasks | `/scheduled` | any member, feature on | signed-in; owner rules in the service |
 | Coding tasks | `/coding` | any member, feature on | signed-in |
-| Research | `/research` | any member | signed-in |
+| Research | `/research` | any member, feature on | signed-in |
 | Studio | `/studio` | any member | signed-in |
 | App Builder | `/build` | any member | signed-in |
 
 ## Home (`/home`)
 
 The classic dashboard, kept one click away. When a signed-in member opens `/` they are sent to `/build` (the
-Build Studio), not here. The row is hidden for tenant-admins.
+Build Studio), or to `/assistant` on a personal install, not here. The row is hidden for tenant-admins.
 
 ## Assistant (`/assistant`)
 
 The single conversation surface — one composer, an agent picker and a mode switch (chat, background job,
-quick task). It absorbed the Playground, Jobs and Quick Task launchers on 2026-10-18; their routes redirect here.
+quick task). On a personal install it absorbed the Playground, Jobs and Quick Task launchers on 2026-10-18; their
+routes redirect here, while other installs keep those pages in [Test and monitor](test-and-monitor.md).
 Threads, attachments, voice calls, the work rail for background runs, the request X-ray and the per-browser
 reasoning and reply-voice toggles are covered in [Assistant](assistant.md).
 
@@ -245,7 +246,8 @@ paged).
 Ask a question and get a report with quoted, linked sources. A run is a background job on the signed-in user's own
 research agent, so it keeps going after the tab closes; the history below is that user's alone and uses the shared
 pager. Availability is server-driven: the page shows exactly what `GET /api/research/status` says (not available,
-switched off, waiting for the platform search key, or ready). `/research/{jobId}` shows live progress and then the
+switched off, waiting for the platform search key, or ready). The sidebar row appears only when research runs are
+on (`app.research.runs.enabled`, default off; a personal install also needs web search). `/research/{jobId}` shows live progress and then the
 cited report. API: `/api/research/runs`, `/api/research/status`.
 
 ## Studio (`/studio`) and Clip Studio (`/clips`)

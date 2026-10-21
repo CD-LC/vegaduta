@@ -118,10 +118,9 @@ A2A card fetch, outbound webhooks, and the Magic Studio fetcher.
   name-only rule are re-evaluated only when next saved.
 - **Legacy tenant schemas** named after an organisation are protected from the
   drop paths but not renamed.
-- **Dependencies:** `bcprov-jdk18on` stays at 1.80 and `poi-ooxml` at 5.3.0
-  (no newer version was available to the offline build). Bump to
-  bcprov >= 1.84 and poi-ooxml >= 5.4. Spring Boot 3.4 -> 3.5 is left to the Boot
-  migration.
+- **Dependencies:** `poi-ooxml` stays at 5.3.0 (`core/documentgen`, `core/omnichannel`);
+  bump it to >= 5.4. Done since this review: `bcprov-jdk18on` is at 1.85
+  (`core/agents-tools`) and core is on Spring Boot 3.5.16.
 - **Core database role:** core still connects as the Postgres superuser in some
   deployments; run it as the non-superuser app role that owns only tenant
   schemas.

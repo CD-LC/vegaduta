@@ -7,6 +7,15 @@ applied" section, and Residual-risk register entries **R1** and **R6**.
 re-litigate H2/M2 (SSRF/DNS rebinding) or the Medium/Low backlog — those have their own fixes
 tracked separately.
 
+> **Current state (checked at v0.1.9).** The runner of §8 is `services/mcp-stdio-runner` (with its
+> `seccomp-profile.json`). Compose files moved: `deploy/docker-compose.yml` and `deploy/.env.example`
+> named below are now `deploy/compose/docker-compose.yml` and `deploy/compose/.env.example`.
+> `MCP_STDIO_SIDECAR_ENABLED` still defaults to `false` in `docker-compose.yml`, `lite.yml` and
+> `personal.yml` (the `vegaduta` CLI exports `true` with the `tools` profile, i.e. the Tools or Browser add-on on a personal install), and
+> `McpStdioSidecarProperties` (`core/agents-tools`) defaults `enabled` to `false`. The web-admin review queue
+> of §7 is now `/platform-admin/mcp-review` in `web/` (web-admin was merged into the console). The rest of this document is the
+> dated record and is unchanged.
+
 ---
 
 ## 1. The problem, restated precisely

@@ -42,13 +42,13 @@ commands reject.
 | Artifact | Where | Tags |
 |---|---|---|
 | 17 multi-arch images (16 repositories: `postgres-cnpg` is published into `postgres`) + the `omnibus` single-container image | `ghcr.io/<owner>/<image>` (`ghcr.io/cd-lc/<image>` for this repository) | `<version>` always; `latest` and `<major>.<minor>` for stable releases; `postgres` also `16`, and the CloudNativePG variant `16-pgvector-age-<version>` / `16-pgvector-age`. `omnibus` is assembled from the published images after `publish` |
-| Helm charts | `oci://ghcr.io/<owner>/charts/<chart>` | chart version = `<version>` |
+| Helm charts | `oci://ghcr.io/<owner>/charts/<chart>`, and the packaged `.tgz` files as release assets | chart version = `<version>` (packaged by `scripts/ci/helm-package.sh`) |
 | Source tarball | release assets `vegaduta-<version>.tar.gz` and `vegaduta.tar.gz` (same content) | the tarball's `deploy/compose/.env.example` has `VEGADUTA_VERSION=<version>` written in |
 | Setup app | `VegaDuta-Setup-<version>.dmg` (macOS, universal), `vegaduta-setup-windows-amd64.zip`, `vegaduta-setup-linux-{amd64,arm64}.tar.gz`, `vegaduta-setup-darwin-{amd64,arm64}.tar.gz` (bare binaries) | built from `installer/` by `installer/package.sh`; unsigned / ad-hoc signed (no Apple notarization or Windows code signing yet) |
 | Checksums | `SHA256SUMS` | GNU `sha256sum` format (`<sha256>  <file>`, bare file names) over every tarball, zip, dmg, chart and SBOM asset |
 | Signatures | `<file>.sigstore.json` (Sigstore bundle), `<file>.sig`, `<file>.pem` for `SHA256SUMS` and both tarballs | keyless, identity `.../.github/workflows/release.yml@refs/tags/v<version>` |
-| Provenance | `vegaduta-<version>.intoto.jsonl` (tarballs); OCI attestations on every image and chart | SLSA build provenance |
-| SBOMs | `sbom-<image>.spdx.json`, and as signed OCI attestations | SPDX JSON (syft) |
+| Provenance | `vegaduta-<version>.intoto.jsonl` (every `.tar.gz` asset); OCI attestations on every image; GitHub attestations (by file digest) on every chart `.tgz` | SLSA build provenance |
+| SBOMs | `sbom-<image>.spdx.json`, and as signed OCI attestations | SPDX JSON (syft); an SBOM still over 16 MiB after compaction (browser images, `omnibus`) is published as an asset but not attested |
 
 Images and charts are signed by digest, so the floating tags added at the end
 are covered by the same signatures. Verification commands are in
