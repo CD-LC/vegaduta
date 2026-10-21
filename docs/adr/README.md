@@ -18,21 +18,30 @@ disagrees with the code, the code wins.
 | 0009 | Untrusted-code sandboxing | verified | [handbook](../platform-documentation/decisions/adr-0009-untrusted-code-sandboxing.html) |
 | 0010 | Secret injection model | verified | [handbook](../platform-documentation/decisions/adr-0010-secret-injection.html) |
 | 0011 | Vendor providers as build-time starters behind a core SPI | phases 0-2 implemented | [architecture/ADR-0011-provider-plugins.md](../architecture/ADR-0011-provider-plugins.md) |
-| 0012 | Spring Boot 4.1 + Spring AI 2.0 migration | see record | [architecture/ADR-0012-spring-ai-2-boot-4.md](../architecture/ADR-0012-spring-ai-2-boot-4.md) |
+| 0012 | Spring Boot 4.1 + Spring AI 2.0 migration | proposed; P1 done on Boot 3.5, Boot 4 / Spring AI 2 not migrated | [architecture/ADR-0012-spring-ai-2-boot-4.md](../architecture/ADR-0012-spring-ai-2-boot-4.md) |
+| 0013 | Embeddable, governance-first Agent SDK for Java | proposed; phase 0 and phase-1 artifacts implemented (`sdk/java`) | [architecture/ADR-0013-embeddable-agent-sdk.md](../architecture/ADR-0013-embeddable-agent-sdk.md) |
 | 0014 | Scale the core by workload class and replica, not by module | accepted, locally verified | [architecture/ADR-0014-horizontal-scaling.md](../architecture/ADR-0014-horizontal-scaling.md) |
 | 0015 | Hybrid tenancy: dedicated schemas plus shared tables with row-level security | proposed, design only | [architecture/ADR-0015-hybrid-tenancy.md](../architecture/ADR-0015-hybrid-tenancy.md) |
 | 0016 | Remove the per-transaction `SET search_path` round trips | proposed, design only | [architecture/ADR-0016-search-path-round-trips.md](../architecture/ADR-0016-search-path-round-trips.md) |
 | 0017 | Connection budget, read replicas and cells | proposed, design only | [architecture/ADR-0017-connections-replicas-cells.md](../architecture/ADR-0017-connections-replicas-cells.md) |
 | 0018 | Ad Studio: a separate-service ad-creative platform | proposed, design only | [architecture/ADR-0018-ad-studio.md](../architecture/ADR-0018-ad-studio.md) |
+| 0019 | Conformance by construction | accepted for the first slice | [architecture/ADR-0019-conformance-by-construction.md](../architecture/ADR-0019-conformance-by-construction.md) |
+| 0020 | Turn journal (append-only, hash-chained turn log) | proposed; first slice behind flag | [architecture/ADR-0020-turn-journal.md](../architecture/ADR-0020-turn-journal.md) |
+| 0021 | Turn inspector (read-only console view of the journal) | proposed; first slice implemented | [architecture/ADR-0021-turn-inspector.md](../architecture/ADR-0021-turn-inspector.md) |
+| 0022 | Explicit TurnContext on the chat turn path | proposed; stages 1-4 and 6 implemented, not benchmarked | [architecture/ADR-0022-explicit-turn-context.md](../architecture/ADR-0022-explicit-turn-context.md) |
+| 0023 | Decompose `core/agents` into modules of at most 300 files | accepted, implemented; step 7 open | [architecture/ADR-0023-agents-module-decomposition.md](../architecture/ADR-0023-agents-module-decomposition.md) |
+| 0024 | Tenant-aware executors | accepted, implemented | [architecture/ADR-0024-tenant-aware-executors.md](../architecture/ADR-0024-tenant-aware-executors.md) |
+| 0025 | Consumer-driven contracts between core and its clients | accepted | [architecture/ADR-0025-consumer-driven-contracts.md](../architecture/ADR-0025-consumer-driven-contracts.md) |
+| 0026 | API styles: OpenAPI-first REST, no general GraphQL layer | accepted | [architecture/ADR-0026-api-styles-and-graphql.md](../architecture/ADR-0026-api-styles-and-graphql.md) |
 | – | Cloud portability through open protocols: managed Postgres, Redis, S3, Kafka on AWS, Azure and GCP | accepted, partially implemented | [architecture/ADR-cloud-portability.md](../architecture/ADR-cloud-portability.md) |
 | – | Durable execution for agent jobs: Temporal vs Postgres | accepted | [architecture/ADR-AGENT-JOB-DURABILITY-2026-08-17.md](../architecture/ADR-AGENT-JOB-DURABILITY-2026-08-17.md) |
-| – | Generic MCP OAuth (RFC 9728/8414/7591, PKCE) | accepted, flag off | [architecture/ADR-mcp-generic-oauth.md](../architecture/ADR-mcp-generic-oauth.md) |
+| – | Generic MCP OAuth (RFC 9728/8414/7591, PKCE) | accepted, wired behind flag (off) | [architecture/ADR-mcp-generic-oauth.md](../architecture/ADR-mcp-generic-oauth.md) |
 | – | Outbound A2A client | first slice, flag off | [plans/adr/a2a-outbound-client.md](../plans/adr/a2a-outbound-client.md) |
 | – | General coding-agent harness | proposed, stage 0 behind flag | [plans/adr/coding-agent-harness.md](../plans/adr/coding-agent-harness.md) |
 | – | Late-interaction retrieval and modern embeddings | proposed | [plans/adr/late-interaction-retrieval.md](../plans/adr/late-interaction-retrieval.md) |
-| – | MCP Apps (`ui://` resources) in chat | proposed, library only | [plans/adr/mcp-apps-ui-resources.md](../plans/adr/mcp-apps-ui-resources.md) |
+| – | MCP Apps (`ui://` resources) in chat | proposed, implemented behind flags (off) | [plans/adr/mcp-apps-ui-resources.md](../plans/adr/mcp-apps-ui-resources.md) |
 | – | OS-level sandbox for custom tools and stdio MCP | accepted, first slice | [plans/adr/os-level-sandbox-custom-tools.md](../plans/adr/os-level-sandbox-custom-tools.md) |
-| – | Stateless MCP, unpinning stdio MCP from one replica | proposed | [plans/adr/stateless-mcp.md](../plans/adr/stateless-mcp.md) |
+| – | Stateless MCP, unpinning stdio MCP from one replica | proposed; first slice behind flag (off) | [plans/adr/stateless-mcp.md](../plans/adr/stateless-mcp.md) |
 | – | Step journal and resumable jobs/swarms | first slice, flags off | [plans/adr/step-journal-resumable-jobs.md](../plans/adr/step-journal-resumable-jobs.md) |
 | – | Swarm goal verifier for `delegate_parallel` | implemented behind flag | [plans/adr/swarm-goal-verifier.md](../plans/adr/swarm-goal-verifier.md) |
 | – | Verifier-escalated model router | first slice, flag off | [plans/adr/verifier-escalated-router.md](../plans/adr/verifier-escalated-router.md) |

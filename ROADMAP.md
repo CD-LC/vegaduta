@@ -28,7 +28,7 @@ it into services is not on this roadmap.
 |---|---|
 | CI on every pull request; CodeQL for Java, TypeScript and Python | done |
 | OpenSSF Scorecard and dependency review on pull requests | done |
-| Release images signed with cosign (keyless), SPDX SBOM and SLSA provenance attestations, Helm charts as signed OCI artifacts | done (first release pending) |
+| Release images signed with cosign (keyless), SPDX SBOM and SLSA provenance attestations, Helm charts as signed OCI artifacts | done (releases published since v0.1.0) |
 | All workflow actions pinned by commit SHA; Dependabot for every ecosystem | done |
 | OpenSSF Best Practices badge (passing) | planned |
 
@@ -42,7 +42,7 @@ it into services is not on this roadmap.
 | Typed client SDKs (TypeScript, Python) generated from the OpenAPI description of the API | done (`sdk/`, regenerated from `docs/api/openapi.json`; drift checked in `make gates`) |
 | Java Agent SDK: governance for agents inside your own Java application ([ADR-0013](docs/architecture/ADR-0013-embeddable-agent-sdk.md)) | in progress (`sdk/java`; Maven Central publication pending) |
 | A navigable documentation site built from `docs/` | done (MkDocs, GitHub Pages workflow; goes live when Pages is enabled) |
-| Per-agent toggle to publish any agent or workflow as its own MCP server and A2A agent | planned |
+| Per-agent toggle to publish any agent or workflow as its own MCP server and A2A agent | in progress ("Expose as MCP tool" switch for agents and workflows on the shared `/mcp` server, off by default: `APP_MCP_SERVER_EXPOSE_AGENTS_ENABLED`; per-agent A2A cards and endpoints) |
 | `good first issue` backlog and GitHub Discussions | planned |
 
 ## 4. Standards conformance
@@ -54,7 +54,7 @@ it into services is not on this roadmap.
 | AG-UI event stream | done |
 | OpenTelemetry GenAI: `invoke_agent` and `execute_tool` spans in addition to `gen_ai.*` chat attributes | done (`AgentInvocationObservation`, `GenAiToolObservationConvention`, `GenAiSpansTest`) |
 | Conformance table for MCP, A2A, AG-UI and OpenTelemetry, generated from source checks | done (`scripts/ci/conformance-report.py` → `docs/api/conformance.md`, `--check` in static gates) |
-| Mapping of the platform's controls to the OWASP guidance for agentic applications | planned |
+| Mapping of the platform's controls to the OWASP guidance for agentic applications | done ([docs/security/owasp-mapping.md](docs/security/owasp-mapping.md)) |
 
 ## 5. Quality
 
@@ -62,8 +62,8 @@ it into services is not on this roadmap.
 |---|---|
 | Raise `core/` line coverage and make coverage a no-regression check | in progress |
 | Nightly Playwright suite against the Compose stack | done (workflow), suite expanding |
-| Promote the advisory Python service test jobs to blocking | planned |
-| Merge the platform-admin console into the main console | planned |
+| Promote the advisory Python service test jobs to blocking | done (`python-extra` in `ci.yml` is blocking through `CI OK`; the whole-tree ruff step is still advisory) |
+| Merge the platform-admin console into the main console | done (`web/app/platform-admin/`) |
 
 ## How the roadmap changes
 

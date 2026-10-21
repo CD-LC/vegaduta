@@ -1,17 +1,19 @@
 # Add-ons
 
-**Add-ons** (`/add-ons`, sidebar label "Add-ons", Configuration group) lists the optional extras of a
-[personal install](../personal-mode.md): the Assistant's build terminal, web search, document reading, the
-Assistant's own browser and free local model packs. Each card says what the add-on gives you and what it costs
-this computer, and has one button to turn it on or off. The page is a view over the add-on registry in core
+**Add-ons** (`/add-ons`, sidebar label "Add-ons", Configuration group) lists the install's optional extras:
+the Assistant's build terminal, web search, document reading, the Assistant's own browser, the tools runner
+for MCP servers and free local model packs. Each card says what the add-on gives you and what it costs this computer, and has one button to
+turn it on or off. The page is for a [personal install](../personal-mode.md) or a lite one, where every card
+applies. On a full install (`NEXT_PUBLIC_DEPLOY_ENV=full`) every add-on already ships, so the row leaves the
+sidebar and the page shows "All add-ons included" instead of switches. The page is a view over the add-on registry in core
 (`core/providers`, package `com.agenticai.core.providers.addons`); it adds no backend of its own.
 
 | | |
 |---|---|
 | Route | `/add-ons` |
-| Sidebar | Configuration group, after "Data & Infrastructure". Shown on a personal install (local sign-in) only; the registry is install-wide and applied on the host, so other installs do not advertise it. A deep link still opens the page |
-| Nav needs | any signed-in user on a personal install |
-| Backend rule | reading needs only a signed-in user. Changing needs `ROLE_platform-admin`, or `ROLE_tenant-admin` when `app.auth.mode=local` (the personal install, where the owner is the tenant admin) or `app.addons.tenant-admin-may-change=true`. Changes are limited to 30 a minute per caller and audited as `addon.enable` and `addon.disable` |
+| Sidebar | Configuration group, after "Data & Infrastructure". Shown on personal and lite installs, not on a full install. A caller without change rights sees the switches disabled rather than a 403 after the click |
+| Nav needs | any signed-in user |
+| Backend rule | reading needs only a signed-in user. Changing needs `ROLE_platform-admin`, or `ROLE_tenant-admin` when `app.auth.mode=local` (the personal install, where the owner is the tenant admin) or `app.addons.tenant-admin-may-change=true` (default on lite, where a tenant admin is usually the box's operator). The overview's `mayChange` carries the verdict so the console can disable the switches up front. Changes are limited to 30 a minute per caller and audited as `addon.enable` and `addon.disable` |
 | API | `GET /api/addons`, `GET /api/addons/{id}`, `POST /api/addons/{id}/enable`, `POST /api/addons/{id}/disable[?cascade=true]` |
 | Page guide | "Add extras to your install" (the page-guide button in the top bar) |
 
@@ -22,13 +24,13 @@ person's sign-in.
 
 Core runs in a container and cannot start containers, so what happens on **Turn on** depends on the add-on:
 
-- **Compose add-ons** (the build terminal, web search, documents, the Assistant browser) are started on the
+- **Compose add-ons** (the build terminal, web search, documents, the Assistant browser, the tools runner) are started on the
   computer. Core records your wish and tells the host exactly what to do. Until the host has applied it, the card
   says it is waiting, never "On". Today you apply a change by re-running **VegaDūta Setup** and ticking the extra
   in its Extras step, or by running the command the page shows; the automatic link between core and Setup is
   built on core's side only (see "Waiting for your computer").
 - **Model packs** are downloaded by core itself through Ollama, with live progress on the card.
-- **Planned** add-ons (a tools runner, local image generation, local spoken replies) are shown as "Coming soon" with
+- **Planned** add-ons (local image generation, local spoken replies) are shown as "Coming soon" with
   no button. They cannot be turned on.
 
 ## What a card shows
@@ -132,5 +134,5 @@ reachable by keyboard: the buttons and chips are native buttons, the confirmatio
 
 ## Not shown
 
-LiveKit voice agent, the MCP stdio runner (listed as "Coming soon"), the WhatsApp QR channel and a containerised
-Ollama are not add-ons today, because the personal stack cannot switch them on.
+LiveKit voice agent, the WhatsApp QR channel and a containerised Ollama are not add-ons today, because the
+personal stack cannot switch them on.

@@ -1,6 +1,6 @@
 # ADR: Generic MCP OAuth (RFC 9728 / 8414 / 7591, PKCE)
 
-Status: accepted for the flag-off slice (`app.mcp.oauth.enabled=false`). Not wired into the connect path.
+Status: accepted; behind `app.mcp.oauth.enabled` (default `false`). Now wired into the remote connect path: `CompositeMcpOAuthTokenSource` (`core/mcp/.../oauth`) routes the generic flow's marker to `McpOAuthService` and is the token source `DynamicMcpConnectionManager` passes to `McpRemoteHeaders` (checked 2026-10-21, v0.1.9).
 
 ## Decisions and trade-offs
 

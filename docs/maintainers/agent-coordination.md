@@ -47,6 +47,16 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
   and that matters.
 - The core image tag in use matches the release you meant to deploy.
 
+### Production setting: the admin host
+
+There is no separate admin app since v0.1.3: the platform-admin console is `web` at
+`/platform-admin`. `admin.vegaduta.ai` works only when the Container App that has that custom
+domain bound sets `PLATFORM_ADMIN_HOST=admin.vegaduta.ai` (`web/proxy.js` then redirects the host
+to `/platform-admin`; the chart and `docker-compose.domain.yml` set it, Container Apps do not).
+Without it the host shows the normal start page. Keycloak's `agentic-ai-web` client must also
+list `https://admin.vegaduta.ai/*` as a redirect URI. Check: `https://admin.vegaduta.ai` lands on
+`/platform-admin`. Until then: `https://app.vegaduta.ai/platform-admin`.
+
 ### Rollout: v0.1.8 (production is Azure Container Apps)
 
 Production (`vegaduta-ai-az-rg`, images in `vegadutaaiazacr.azurecr.io`) runs the Container Apps

@@ -1,9 +1,9 @@
 # Releasing the Java Agent SDK
 
 The Java Agent SDK (`sdk/java`, group `io.vegaduta`) is released on its own cadence, by
-`.github/workflows/sdk-release.yml`, for a tag `sdk-vX.Y.Z`. Like every workflow in this
-repository it is run by hand from the Actions tab (automatic triggers are off, see
-[Releasing](releasing.md)). It does not share a version with the platform (`v*.*.*` tags).
+`.github/workflows/sdk-release.yml`, for a tag `sdk-vX.Y.Z`. Like the
+repository's other release workflows (`release.yml`, `pypi-release.yml`) it is run by hand
+from the Actions tab: it has no tag-push trigger (see [Releasing](releasing.md)). It does not share a version with the platform (`v*.*.*` tags).
 
 ## One-time setup (before the first publish)
 

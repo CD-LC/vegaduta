@@ -9,7 +9,7 @@
 [![Release](https://img.shields.io/github/v/release/CD-LC/vegaduta?sort=semver)](https://github.com/CD-LC/vegaduta/releases)
 [![Helm chart](https://img.shields.io/badge/helm-oci%3A%2F%2Fghcr.io%2Fcd--lc%2Fcharts-0F1689?logo=helm)](deploy/helm/README.md)
 
-VegaDūta is a self-hostable agent platform: a Java 21 / Spring Boot core, one Next.js console (the tenant app, the public pages and the platform-admin area under `/platform-admin`), and eight optional services in Python, Node and the JVM. It speaks the open agent standards (MCP as client and server, A2A, AG-UI, OpenTelemetry `gen_ai` attributes), keeps every tenant in its own Postgres schema, and runs from a five-container laptop install up to a Helm deployment on Kubernetes.
+VegaDūta is a self-hostable agent platform: a Java 21 / Spring Boot core, one Next.js console (the tenant app, the public pages and the platform-admin area under `/platform-admin`), and twelve optional services in Python and Node. It speaks the open agent standards (MCP as client and server, A2A, AG-UI, OpenTelemetry `gen_ai` attributes), keeps every tenant in its own Postgres schema, and runs from a five-container laptop install up to a Helm deployment on Kubernetes.
 
 <!-- Screenshots: add images under docs/assets/ and uncomment.
 ![Agent workbench](docs/assets/screenshot-agent-workbench.png)
@@ -19,54 +19,54 @@ VegaDūta is a self-hostable agent platform: a Java 21 / Spring Boot core, one N
 
 ## Quickstart (Lite)
 
-Requirements: Docker with Compose v2, **8 GB of memory available to Docker** (building the images from source needs it; the running Lite stack uses less), 15 GB of free disk, and an LLM provider key or a local Ollama.
+Requirements: Docker with Compose v2, 15 GB of free disk, and an LLM provider key or a local Ollama. Building the images from source needs **8 GB of memory available to Docker**; the running Lite stack uses less.
 
-No release has been published yet, so the working path today builds every image from your checkout:
+Releases are published on the [Releases](https://github.com/CD-LC/vegaduta/releases) page with signed images. The installer downloads the latest release (or the one you name with `--version X.Y.Z`), checks it against the release's `SHA256SUMS` and starts Lite:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- --lite
+```
+
+Without `--lite` or `--full` the installer sets up Personal mode (below). From a git checkout:
 
 ```sh
 git clone https://github.com/CD-LC/vegaduta.git
 cd vegaduta
-./scripts/vegaduta up --lite --build
+./scripts/vegaduta up --lite
 ```
 
-The first build compiles the Java core and the Next.js console inside Docker. Expect roughly 20 to 40 minutes on a typical laptop, plus a few minutes for the first start (database migrations); later starts take about a minute. These are rough figures, not benchmarks.
+In a checkout with no version pinned, `up` uses the latest published release and writes it to `deploy/compose/.env`. Add `--build` to build every image from your checkout instead. The first build compiles the Java core and the Next.js console inside Docker: expect roughly 20 to 40 minutes on a typical laptop. The first start adds a few minutes (database migrations); later starts take about a minute. These are rough figures, not benchmarks.
 
-`up` generates `deploy/compose/.env` with random secrets, checks your machine (`doctor`), starts the stack and waits until every service is healthy. Then:
+`up` generates `deploy/compose/.env` with every secret the compose files need, checks your machine (`doctor`), asks Docker Compose whether anything is still missing, starts the stack and waits until every service is healthy. Then:
 
 1. Open <http://localhost:3000> and **Sign up**. The first account creates your organisation.
 2. `./scripts/vegaduta make-admin you@example.com` to become the platform operator.
 3. Add an LLM provider key (Anthropic, OpenAI, Gemini, Ollama, ...) in the console and create an agent. No key? Start with `./scripts/vegaduta up --lite --local-ai` to run a free local model, or open `/edge` to run one in your browser: [Run free with local models](docs/local-models.md).
 
-**After the first release** (see [Releases](https://github.com/CD-LC/vegaduta/releases)), skip the build and pull the signed images of a pinned version. The installer downloads that release's tarball, whose `.env.example` is pinned to the release, and starts Lite:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- --version 0.1.0
-```
-
 ### Personal mode (one person, one machine)
 
-**Not a developer? Use the Setup app.** Download `vegaduta-setup` for your system from the [Releases](https://github.com/CD-LC/vegaduta/releases) page (macOS, Windows or Linux), open it, and follow the page that appears in your browser. It checks your computer, installs or starts Docker Desktop when asked, downloads the verified release, starts VegaDūta and hands you the link where you choose your password. The binary is not yet code-signed, so macOS and Windows will warn once: choose "Open anyway". Terminal users get the same result with `curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- personal`. Both need a published release; until then use the build-from-checkout command below.
+**Not a developer? Use the Setup app.** Download it for your system from the [Releases](https://github.com/CD-LC/vegaduta/releases) page: `VegaDuta-Setup-<version>.dmg` on macOS, `vegaduta-setup-windows-amd64.zip` on Windows, `vegaduta-setup-linux-<arch>.tar.gz` on Linux. Open it and follow the page that appears in your browser. It checks your computer, installs and starts Docker Desktop on macOS and Windows (on Windows it also turns on WSL2; on Linux it shows the command to install Docker), downloads the verified release, starts VegaDūta and hands you the link where you choose your password. It also sets up a free local AI model, so you need no account or API key. When a start fails, it finds the usual causes (a busy port, a database left by an earlier install, a missing secret), repairs them and tries again. The app is not yet code-signed, so macOS and Windows will warn once: choose "Open anyway" (macOS) or "More info", then "Run anyway" (Windows). Terminal users get the same result with `curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh`.
 
 If it is just you, skip Keycloak:
 
 ```sh
-./scripts/vegaduta personal --build
+./scripts/vegaduta personal
 ```
 
-It starts Postgres, Valkey, core and web (about 2.4 GB of container limits), then prints a one-time link where you choose the password of the single local account. Add `--native-core` to run core on your machine's JVM (Java 21+) instead of in a container, and `--local-ai=host` to use an Ollama you already run. Requirements, local sign-in, picking a local model, skills, the Signal, Matrix and iMessage channels, sandbox levels and the honest limitations are in [docs/personal-mode.md](docs/personal-mode.md); what taint tracking, the sandbox and pairing do and do not protect against is in [docs/security-model.md](docs/security-model.md). Like the rest of this quickstart it builds from your checkout until a release is published.
+It starts Postgres, Valkey, core and web (about 2.5 GB of container limits), plus private web search and the connector runner. It picks a free local model that fits your computer's memory and downloads it (on macOS and Windows it installs Ollama on the computer when it is missing; `--cloud` skips the model). Then it prints a one-time link where you choose the password of the single local account. Your secrets are also kept outside the install folder (`~/.config/vegaduta/secrets.env`, or `%LOCALAPPDATA%\VegaDuta\secrets.env` on Windows), so a re-install reuses them and can read your data. Add `--native-core` to run core on your machine's JVM (Java 21+) instead of in a container, and `--local-ai=host` to use an Ollama you already run. Requirements, local sign-in, picking a local model, skills, the Signal, Matrix and iMessage channels, sandbox levels and the honest limitations are in [docs/personal-mode.md](docs/personal-mode.md); what taint tracking, the sandbox and pairing do and do not protect against is in [docs/security-model.md](docs/security-model.md). Add `--build` to build the images from your checkout instead of using the published release.
 
-On Windows use `.\scripts\vegaduta.ps1` with the same commands. The full walkthrough is in [docs/getting-started.md](docs/getting-started.md).
+On Windows use `.\scripts\vegaduta.ps1` (the Setup app runs it for you). It has the main commands (`personal`, `up`, `down`, `status`, `logs`, `doctor`, `backup`, `restore`, `upgrade`, `make-admin`) with PowerShell-style flags such as `-Lite`, `-Build`, `-Profile tools` and `-Cloud`; `models`, `restart`, `seed-demo`, `projects` and `--native-core` are bash-only (use WSL2). The full walkthrough is in [docs/getting-started.md](docs/getting-started.md).
 
 ## Install tiers
 
-All four tiers run the same images. Until the first release is published, the Compose tiers build them from source with `--build`; after that, drop `--build` and pin a release version.
+All four tiers run the same images. The Compose tiers use the published release pinned in `deploy/compose/.env` (the latest one when none is pinned); `--build` builds the images from your checkout instead.
 
 | Tier | For | What runs | Command |
 |---|---|---|---|
-| **Personal** | one person on one machine | 3 containers: Postgres (pgvector + Apache AGE), a 64 MB Valkey, core, plus web. No Keycloak: core holds one local account. Taint tracking enforced, an OS sandbox for STDIO MCP servers, skill learning on, billing off. See [Personal mode](docs/personal-mode.md). | `./scripts/vegaduta personal --build` |
-| **Lite** | trying it, local development | 5 containers: Postgres (pgvector + Apache AGE), Valkey, Keycloak (dev mode), core (one process), web. Optional `rag` profile adds the ML sidecar. | `./scripts/vegaduta up --lite --build` |
-| **Full** | self-hosting on one server | Lite plus PgBouncer, S3-compatible storage (SeaweedFS), a Keycloak database and the sidecar. Opt-in profiles: `temporal`, `events`, `jobs`, `observability`, `tracing`, `voice`, `rl`, `code-intel`, `builder`, `sandbox`, `tools`, `browser`. | `./scripts/vegaduta up --full --build --profile temporal` |
-| **Kubernetes** | production, high availability | Umbrella Helm chart `vegaduta` (23 charts under `deploy/helm/charts`, counting the umbrella and the `vegaduta-lib` library chart): core API (scalable), jobs, optional Temporal worker, a migrate Job, every optional service as its own chart, an optional bundled Ollama. Needs published images and charts (first release). | `helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta --version <version>` |
+| **Personal** | one person on one machine | Postgres (pgvector + Apache AGE), a 128 MB Valkey, core and web, plus private web search, the connector runner and a free local model by default. No Keycloak: core holds one local account. Taint tracking enforced, an OS sandbox for STDIO MCP servers, skill learning on, billing off. See [Personal mode](docs/personal-mode.md). | `./scripts/vegaduta personal` |
+| **Lite** | trying it, local development | 5 containers: Postgres (pgvector + Apache AGE), Valkey, Keycloak (dev mode), core (one process), web. Optional `rag` profile adds the ML sidecar. | `./scripts/vegaduta up --lite` |
+| **Full** | self-hosting on one server | Lite plus PgBouncer, S3-compatible storage (SeaweedFS), a Keycloak database and the sidecar. Opt-in profiles: `temporal`, `events`, `jobs`, `observability`, `tracing`, `voice`, `rl`, `code-intel`, `builder`, `sandbox`, `tools`, `browser`. | `./scripts/vegaduta up --full --profile temporal` |
+| **Kubernetes** | production, high availability | Umbrella Helm chart `vegaduta` (22 charts under `deploy/helm/charts`, counting the umbrella and the `vegaduta-lib` library chart): core API (scalable), jobs, optional Temporal worker, a migrate Job, every optional service as its own chart, an optional bundled Ollama. | `helm install vegaduta oci://ghcr.io/cd-lc/charts/vegaduta --version <version>` |
 
 Details, sizing and upgrade paths: [docs/installation.md](docs/installation.md), [deploy/README.md](deploy/README.md), [deploy/helm/README.md](deploy/helm/README.md).
 
@@ -81,7 +81,7 @@ Every item below maps to code in this repository. Paths are relative to the repo
 
 **Agents and tools**
 - Agents with per-agent model, persona, tools, knowledge and skills: `core/agents`.
-- 14 LLM provider integrations behind one factory interface, including Anthropic, OpenAI, Azure OpenAI, Google Vertex and Gemini, AWS Bedrock, Meta, Mistral, DeepSeek, Groq, Grok, OpenRouter, Ollama (local models) and Sarvam: `core/providers` (`ProviderName`), `core/chat` (one chat-client factory per provider). Tenants bring their own keys (BYOK), stored AES-256-GCM encrypted: `core/crypto`.
+- 15 LLM provider integrations behind one factory interface, including Anthropic, OpenAI, Azure OpenAI, Google Vertex and Gemini, AWS Bedrock, Meta, Mistral, DeepSeek, Groq, Grok, OpenRouter, Ollama (local models), any local OpenAI-compatible server, and Sarvam: `core/providers` (`ProviderName`), `core/chat` (one chat-client factory per provider). Tenants bring their own keys (BYOK), stored AES-256-GCM encrypted: `core/crypto`.
 - **MCP client** over stdio, SSE and Streamable HTTP, with per-tenant server registration, a curated catalog and search of the official MCP registry: `core/agents-tools/.../tools/DynamicMcpConnectionManager.java`, `core/mcp`.
 - **MCP server**: every tenant's agents, workflows and knowledge search exposed as MCP tools at `/mcp` (Streamable HTTP, API-key auth; active with the `mcpserver` Spring profile, which the Compose and Helm defaults set). `Origin` validation is on by default; an OAuth 2.1 mode (protected-resource metadata, audience-bound tokens, scopes) exists and is off by default. Remote MCP servers get tool-definition pinning (a hash of each tool list, change audited; default mode `warn`, `enforce` withholds changed tools until an admin approves). Requirement-by-requirement status, including what is not done (the stateless 2026-07-28 revision): [docs/architecture/mcp-spec-alignment.md](docs/architecture/mcp-spec-alignment.md). Code: `core/mcpserver`, `core/mcp`.
 - **OpenAPI tool import**: turn any OpenAPI 3.x or Swagger 2.0 spec into agent tools, with API-key or OAuth2 client-credential auth: `core/agents-tools/.../tools/openapi`.
@@ -106,7 +106,7 @@ Every item below maps to code in this repository. Paths are relative to the repo
 - Graph memory on Apache AGE: `core/graphmemory`.
 
 **Channels**
-- Eleven channel types (`ChannelType`): WhatsApp (Meta Cloud API and Twilio), SMS and voice (Twilio), Telegram, Slack, Discord, Microsoft Teams, Messenger, Instagram, X and email: `core/omnichannel`. Outbound messages go through the same approval gate as other actions.
+- Fifteen channel types (`ChannelType`): WhatsApp (Meta Cloud API and Twilio, or a linked phone by QR code), SMS and voice (Twilio), Telegram, Slack, Discord, Microsoft Teams, Messenger, Instagram, X, email, and Signal, Matrix and iMessage for personal installs: `core/omnichannel`. Outbound messages go through the same approval gate as other actions.
 - **SMS** conversations (a Twilio number and a feature phone are enough; replies are cut to a configurable length): [docs/sms-channel.md](docs/sms-channel.md).
 - **WhatsApp policy guard**: attaching an agent to a WhatsApp number requires a declared task, open-ended agents get a warning, template sends need an opt-in record, and Meta's per-user marketing limit errors pause marketing templates to that recipient. The Meta terms it is based on were read on 2026-10-14 and Meta changes them often: [docs/channels/whatsapp-policy.md](docs/channels/whatsapp-policy.md).
 - **Edge relay**: a signed-in browser with an on-device model can be the model behind the workspace's SMS and WhatsApp numbers, with the hosted model as the fallback on the same thread: `core/omnichannel/.../relay`, [docs/edge-relay.md](docs/edge-relay.md).
@@ -165,31 +165,31 @@ One packaging per target, an open protocol at every boundary, no cloud SDK in th
 
 | Target | How | Verification status |
 |---|---|---|
-| Laptop or one server | Docker Compose, Lite or Full tier | Documented and measured by hand in [docs/operations/local-stack-guide.md](docs/operations/local-stack-guide.md); `make compose-validate` checks the files render. No Compose stack is started by any automated check here. No published release or images yet. |
+| Laptop or one server | Docker Compose, Lite or Full tier | Documented and measured by hand in [docs/operations/local-stack-guide.md](docs/operations/local-stack-guide.md); `make compose-validate` checks the files render. No Compose stack is started by any automated check here. Signed images are published with each release. |
 | Kubernetes | Helm umbrella chart `deploy/helm/charts/vegaduta` | Charts are linted, templated and schema-checked by `make helm-lint` and the `ci.yml` helm job (not by `make gates`); a kind-cluster walkthrough is documented in [docs/architecture/kubernetes.md](docs/architecture/kubernetes.md) with what was observed. Not run on a managed cloud cluster. |
 | Managed Postgres, Redis, object storage, Kafka | Helm `global.*` values (AWS RDS / ElastiCache / S3 / MSK, Azure Flexible Server / Cache / Blob / Event Hubs, GCP Cloud SQL / Memorystore / GCS) | Configuration is implemented and covered by property-binding and emulator tests (for example Azurite for Azure Blob). **No managed cloud service has been exercised against a real account.** Keycloak is still required for identity. |
 | Terraform | `infra/terraform/modules`: 30 modules (9 Azure, 8 GCP, 7 AWS, 5 Cloudflare, `upstash-redis`) | Reference modules, described as community-supported in [infra/terraform/README.md](infra/terraform/README.md); `terraform validate` only, never applied against a real account by CI. |
 
 ## Status and honesty
 
-- **No release is published yet.** Install paths that pull signed images work only after the first release; today you build from source.
+- **Releases are young.** Releases are published from v0.1.0 on (signed images, Helm charts, the Setup app); versions before 1.0 can change between releases. Read [CHANGELOG.md](CHANGELOG.md) before you upgrade.
 - **Compiled is not tested, and tested is not run on a stack.** Unit and Testcontainers tests exist for many modules; end-to-end Playwright tests run nightly and on demand, not on every pull request.
 - **Cloud portability is partial.** See the matrix in the ADR above for what works, what is partial and what is open (database IAM auth, KMS providers, non-Keycloak identity admin).
-- Counts in this README come from the sources named in the table below and were taken on 2026-10-15; if they drift, the code wins.
+- Counts in this README come from the sources named in the table below and were taken on 2026-10-21; if they drift, the code wins.
 - Several recent features are unit-tested only and have not been run against the real third-party service (WhatsApp, Twilio SMS, Google Calendar, an MCP authorization server), or on a running stack. Each feature's page says which; the `[Unreleased]` section of [CHANGELOG.md](CHANGELOG.md) repeats it per item.
 
 | What | Count | Source |
 |---|---:|---|
-| Maven modules in the core reactor | 45 | `<module>` entries in `core/pom.xml` ([module graph](docs/architecture/core-module-graph.md)) |
-| Flyway migration files | 359 (117 control-plane, 242 tenant; highest version V497) | `core/app/src/main/resources/db/migration` |
-| REST operations in the OpenAPI description | 1,298 on 1,059 paths | `docs/api/openapi.json` |
-| LLM providers selectable by a tenant | 14 (`ProviderName` has 15 values; `PLATFORM_HOSTED` is internal) | `core/providers` |
+| Maven modules in the core reactor | 57 | `<module>` entries in `core/pom.xml` ([module graph](docs/architecture/core-module-graph.md)) |
+| Flyway migration files | 382 (125 control-plane, 257 tenant; highest version V661) | `core/app/src/main/resources/db/migration` |
+| REST operations in the OpenAPI description | 1,386 on 1,135 paths | `docs/api/openapi.json` |
+| LLM providers selectable by a tenant | 15 (`ProviderName` has 16 values; `PLATFORM_HOSTED` is internal) | `core/providers` |
 | Workflow node types | 35 | `WorkflowNodeType` |
-| Channel types | 11 | `ChannelType` |
+| Channel types | 15 | `ChannelType` |
 | Built-in skills | 27 | `core/agents-turn/src/main/resources/skills` |
 | Helm charts | 22 (umbrella, library and component charts) | `deploy/helm/charts` |
 | Terraform modules | 30 | `infra/terraform/modules` |
-| Services outside core | 8 | `services/` |
+| Services outside core | 12 | `services/` |
 | Java Agent SDK modules | 7 plus a BOM | `sdk/java/pom.xml` |
 
 ## Standards

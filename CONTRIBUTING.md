@@ -14,8 +14,8 @@ mvn -B -ntp -pl agents test                 # test one module
 cd .. && make gates                         # the static checks (same scripts as the CI static-gates workflow)
 ```
 
-Pick the part you are changing in [Development setup](#development-setup). No release is
-published yet, so every image is built from source.
+Pick the part you are changing in [Development setup](#development-setup). `--build` builds
+every image from your checkout instead of pulling the published release images.
 
 ## License and DCO sign-off
 
@@ -113,7 +113,7 @@ split, `sh scripts/ci/check-file-size.sh --update` lowers or drops the entry.
 ```sh
 cd web
 npm ci
-npm run dev       # :3000 (web-admin: :3001)
+npm run dev       # :3000 (platform admin at /platform-admin)
 npm run lint && npm run typecheck && npm test
 ```
 
@@ -230,36 +230,23 @@ Small, real gaps taken from [ROADMAP.md](ROADMAP.md) and
 open) an issue before starting so work is not duplicated; maintainers label starter
 issues `good first issue`.
 
-1. **Helm values file per cloud.** The ADR lists "a values file per cloud" as open.
-   Add `values-aws.yaml`, `values-azure.yaml` and `values-gcp.yaml` next to
-   `deploy/helm/examples/values-external.yaml` and list them in
-   `deploy/helm/README.md`. Only render-check them (`make helm-lint`); do not claim a cloud run.
-2. **External Secrets example.** The ADR marks it open. Add an example under
-   `deploy/helm/examples/` that creates the Secrets the chart reads through
-   `existingSecret` from an `ExternalSecret`.
-3. **Design note for Redis Cluster.** The ADR lists Cluster and Sentinel as open because the
-   tenant purge (`core/tenancy/.../RedisTenantDataPurgeService.java`) uses `KEYS`, which its source comment
-   documents as a deliberate choice for a non-hot path. Write a short design note (an ADR addendum or an
-   issue) on a per-node `SCAN` purge and what must be proved before changing it: the purge deletes
-   tenant data, so it is tenant-isolation sensitive. Changing the code is a follow-up for a maintainer to approve.
-4. **OpenTelemetry `invoke_agent` and `execute_tool` spans.** Listed as planned. Start
-   from `core/chat/.../GenAiAttributeNames.java` and `LlmMetricsAdvisor.java`; add one span with a test.
-5. **A runnable example per extension point.** ROADMAP item. `examples/` has workflow
-   templates and two MCP servers; add a minimal custom skill (`SKILL.md`) example that follows
+1. **A runnable example per extension point.** ROADMAP item. `examples/` has workflow
+   templates, two MCP servers, agent bundles and the SDK examples; add a minimal custom skill
+   (`SKILL.md`) example that follows
    [docs/extending.md](docs/extending.md#3-add-a-skill-skillmd).
-6. **Slim sidecar image.** Document extraction without PyTorch: split the
+2. **Slim sidecar image.** Document extraction without PyTorch: split the
    requirements in `services/sidecar/requirements.txt` and add an image variant to
    `services/sidecar/Dockerfile`; measure the size difference and state it.
-7. **Promote an advisory Python job to blocking.** Pick one `advisory` job in
+3. **Promote an advisory Python job to blocking.** Pick one `advisory` job in
    `.github/workflows/ci.yml`, fix its findings (`ruff check services/<name>`) and drop the label.
-8. **Unit tests for provider validators.** `core/providers/.../validation` has no test for
+4. **Unit tests for provider validators.** `core/providers/.../validation` has no test for
    the DeepSeek, Groq, Mistral, Ollama, Azure OpenAI, Bedrock or Vertex validators. Pick one and add failure-path tests
    (bad key, timeout, malformed response) with a mocked HTTP server.
-9. **Docs pass.** Follow `docs/getting-started.md` or `docs/operations/local-stack-guide.md`
+5. **Docs pass.** Follow `docs/getting-started.md` or `docs/operations/local-stack-guide.md`
    on a clean machine and fix any command, port or step that is wrong. Run
    `bash scripts/ci/docs-link-check.sh`.
-10. **Record a verification.** Run one row of the ADR matrix you have access to (for
-    example a managed Redis with TLS) and open a PR that updates the "Status" cell with exactly what you ran.
+6. **Record a verification.** Run one row of the ADR matrix you have access to (for
+   example a managed Redis with TLS) and open a PR that updates the "Status" cell with exactly what you ran.
 
 ## Reporting security issues
 

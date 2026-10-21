@@ -37,19 +37,19 @@ appears when the caller is a tenant-admin or holds any permission.
 | Library | [Library](library.md) | Community Templates, Knowledge, Shared with me |
 | Inbox & people | [Inbox and people](inbox-and-people.md) | Channels, Contacts, Inbox, Leads, Approvals, Input requests |
 | AI & engine | [AI and engine](ai-and-engine.md) | Providers, Decision providers, Code Intel, Browser models, Local code |
-| Configuration | [Configuration](configuration.md) | Integrations, Secrets, Data & Infrastructure, [Add-ons](add-ons.md) (personal install only), Troubleshoot |
-| Test & Monitor | [Test and monitor](test-and-monitor.md) | Agent quality, Turn inspector, Insights, Cost & ROI, Usage, Files, Issues, Live activity, Audit log |
+| Configuration | [Configuration](configuration.md) | Integrations, Secrets, Data & Infrastructure, [Add-ons](add-ons.md) (personal and lite installs), Troubleshoot |
+| Test & Monitor | [Test and monitor](test-and-monitor.md) | Playground, Agent quality, Turn inspector, Quick Task, Jobs, Insights, Cost & ROI, Usage, Files, Issues, Live activity, Audit log |
 | Plans & billing | [Plans and billing](plans-and-billing.md) | Plans & Features, Billing |
-| Help & resources | [Help and resources](help-and-resources.md) | Guide, Learn, Docs, Apps & Plugins |
-| Administration | [Administration](administration.md) | Admin, Maintenance, Team access, API keys, Workspace integrations, MCP access, Guardrails, Branding, Data & privacy, Single sign-on, Agent trust, Agent commerce, Agent payments |
+| Help & resources | [Help and resources](help-and-resources.md) | Guide, Docs, Apps & Plugins |
+| Administration | [Administration](administration.md) | Admin, Maintenance, Team access, API keys, Workspace integrations, MCP access, Guardrails, Instructions, Branding, Data & privacy, Single sign-on, Agent trust, Agent commerce, Agent payments |
 
 Rows that appear only under a condition:
 
-- **Home** is hidden for tenant-admins. Signed-in members land on `/build` when they open `/`; Home (`/home`)
-  is the older dashboard, one click away.
-- **Data Tables**, **Scheduled tasks** and **Coding tasks** appear only when the deployment turned the feature on
-  (`DATA_TABLES_ENABLED`, `SCHEDULED_TASKS_ENABLED`, `CODING_HARNESS_ENABLED`; all default off, and Data Tables
-  and Scheduled tasks default **on** in the `personal` profile). The sidebar asks
+- **Home** is hidden for tenant-admins. Signed-in members land on `/build` when they open `/` (on a personal
+  install, on `/assistant`); Home (`/home`) is the older dashboard, one click away.
+- **Data Tables**, **Scheduled tasks**, **Coding tasks** and **Research** appear only when the deployment turned the
+  feature on (`DATA_TABLES_ENABLED`, `SCHEDULED_TASKS_ENABLED`, `CODING_HARNESS_ENABLED`, `app.research.runs.enabled`;
+  all default off, and Data Tables and Scheduled tasks default **on** in the `personal` profile). The sidebar asks
   the backend and hides the row when the answer is no, so there is no dead link. See
   [configuration](../configuration.md).
 - **Plans & Features** and **Billing** are removed when billing is off (the default for self-hosted installs).
@@ -58,6 +58,13 @@ Rows that appear only under a condition:
   the model-spend view).
 - **Integrations** shows a count badge when MCP servers need attention; **Contacts** shows a count badge of
   senders waiting for approval.
+- On a **personal install** (one person, local sign-in) the rail leaves out the screens a single-person install
+  does not use: Shared with me, Agent Directory, Studio, Cost & ROI, Plans & Features, Leads, Agent trust, Agent
+  commerce, Agent payments, Branding, MCP access, API keys and Single sign-on. Playground, Quick Task and Jobs are
+  also left out there, because their routes lead to the [Assistant](assistant.md). The pages still open from a
+  direct link (`web/app/lib/personalInstall.ts`).
+- **Add-ons** is left out on a full install (`NEXT_PUBLIC_DEPLOY_ENV=full`), where every add-on already ships.
+- **Code Intel** appears only when the build has a Code Intel address (`NEXT_PUBLIC_CODE_INTEL_URL`).
 
 ## Cross-cutting behaviour
 
@@ -98,18 +105,18 @@ These exist and are signed-in routes (or redirects) but have no sidebar row:
 | `/notifications` | Full notification history. Reached from the bell. See [Notifications](notifications.md). |
 | `/agents/learning`, `/agents/templates`, `/agents/import` | Sub-pages of Agents. See [Build](build.md). |
 | `/workflows/templates`, `/workflows/import`, `/workflows/{id}`, `/workflows/{id}/runs`, `/workflows/{id}/runs/{runId}` | Sub-pages of Workflows. |
-| `/playground`, `/jobs`, `/quick-task` | Redirect to [Assistant](assistant.md) since 2026-10-18: `?agent=`/`?agentId=`, `?mode=` and `?prompt=` deep links keep working. `/quick-task/history`, `/research/{jobId}`, `/jobs/{agentId}/{jobId}`, `/jobs/all` (tenant-wide ledger) and `/jobs/schedules` remain live pages. |
+| `/playground`, `/jobs`, `/quick-task` | On a personal install these redirect to [Assistant](assistant.md) (since 2026-10-18; `?agent=`/`?agentId=` and `?prompt=` deep links keep working). On other installs they are sidebar rows. `/quick-task/history`, `/research/{jobId}`, `/jobs/{agentId}/{jobId}`, `/jobs/all` (tenant-wide ledger) and `/jobs/schedules` are live pages everywhere. |
 | `/tools/servers`, `/tools/credentials`, `/tools/code` | Sub-pages of Integrations. See [Configuration](configuration.md). |
 | `/ai-models` | Per-feature preferred provider and model overrides. Linked from Providers. See [AI and engine](ai-and-engine.md). |
 | `/clips` | Clip Studio. Linked from Studio and from a file's "Make a clip" action. See [Build](build.md). |
 | `/build/{id}`, `/build/github` | One applied envoy in the App Builder; the connect-GitHub screen. |
-| `/learn/tutor` | The personal tutor. Appears in the command palette; see [Help and resources](help-and-resources.md). |
+| `/learn/tutor` | The personal tutor. Appears in the command palette; see [Help and resources](help-and-resources.md). The rest of `/learn` was removed in 0.1.8: lessons live in the separate Academy. |
 | `/capabilities` | No page of its own; redirects to `/capabilities/decision`. |
 | `/jev` | Old URL; redirects to `/capabilities/decision`. |
 | `/devices` | Redirects to Channels with the Mobile SDK tab (`/admin/channels?channel=mobile-sdk`). |
 | `/view-as` | Landing route for a read-only "view as" link opened by a platform operator. It reads a grant from the URL fragment, activates view-as for that browser tab only, and goes to the app home. |
 | `/platform-admin/**` | The platform operator console. See [Platform admin](platform-admin.md). |
 
-Public pages (marketing, pricing, `/docs`, `/templates` gallery, `/directory`, `/plugins`, `/status`, `/try`,
+Public pages (marketing, pricing, `/docs`, `/downloads`, `/templates` gallery, `/directory`, `/plugins`, `/status`, `/try`,
 shared agent and workflow links and others) are listed in `web/app/lib/publicRoutes.ts` and are covered in
 [site modes and public pages](../site-modes.md), not here.

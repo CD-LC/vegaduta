@@ -1,6 +1,6 @@
 # ADR: Stateless MCP (spec 2026-07-28) and unpinning stdio MCP from one replica
 
-Status: proposed (2026-10-01).
+Status: proposed (2026-10-01); the transport-and-call-hook slice of section 4 is in the code behind `app.mcp.registry-route-tool-calls` (default `false`, checked 2026-10-21, v0.1.9); section 5 is not done.
 
 ## 1. Verified facts (primary sources, checked 2026-10-01)
 

@@ -10,7 +10,7 @@ core controllers  --OpenApiSpecGenerator-->  docs/api/openapi.json  --sdk/genera
 
 ## Regenerate
 
-1. Write the spec. This runs the generator test in "write" mode (JDK 24, one Maven build at a time;
+1. Write the spec. This runs the generator test in "write" mode (JDK 21 or newer, one Maven build at a time;
    `-am` is needed or `app` links against stale module jars):
 
    ```
@@ -127,8 +127,8 @@ and the [pilot kit](../pilots/README.md); the routes in `RoiController` are:
 
 ## Size of the committed contract
 
-Counted from `docs/api/openapi.json` (`info.version` 0.1.0) in this revision: 1,059 paths, 1,298
-operations, 1,326 component schemas, and 5 handlers listed in `info.x-skipped`. These change with every
+Counted from `docs/api/openapi.json` (`info.version` 0.1.0) in this revision: 1,135 paths, 1,386
+operations, 1,432 component schemas, and 5 handlers listed in `info.x-skipped`. These change with every
 regeneration; recount rather than trust this paragraph. Standards conformance (MCP, A2A, AG-UI,
 OpenTelemetry) is a separate, generated page: [Standards conformance](conformance.md).
 
@@ -162,7 +162,7 @@ policy), are in [ADR-0026](../architecture/ADR-0026-api-styles-and-graphql.md).
 
 `docs/api/openapi.json` and the generated SDK sources (`sdk/typescript/src/generated/{types,client}.ts`,
 `sdk/python/vegaduta_sdk/generated/{__init__,models,client}.py`) are produced by the steps above and have to be
-generated on a machine with JDK 24 and Node. They are intentionally not hand-written.
+generated on a machine with JDK 21+ and Node. They are intentionally not hand-written.
 
 ## Checks that keep the contract honest
 

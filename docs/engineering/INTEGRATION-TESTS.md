@@ -21,6 +21,15 @@ throwaway containers.
 | `KnowledgeVectorSearchIT` | The pgvector path: `<=>` cosine ordering in a tenant schema, the HNSW `SET LOCAL` tuning (requires pgvector 0.8.0 or later), and `KnowledgeSearchService.search` end to end against real SQL. Only the embedding call and the JPA collection lookup are stubbed. A near-identical chunk in another tenant's schema must never appear in the results. |
 | `DpdpControlsIT` | The DPDP-oriented controls against Postgres with two migrated tenant schemas, the schema chosen per statement from the `TenantContext`: the consent gate and ledger (hold, agree, language, decline, notice change, withdraw with erasure), nightly retention purge (only the running tenant's expired rows go, an audit event per purge, a failed recording delete is kept for retry), per-contact erase and export (derived knowledge chunks, memory and messages removed, another tenant's identical contact untouched, an incomplete erasure reported), the audit export per tenant and range, and purpose tags. Graph memory, Redis session history and object storage are mocked. |
 
+The folder holds more `*IT` classes than this table describes, among them
+`AddonRegistryIT`, `ApprovalDecisionConcurrencyIT`, `ByokSpendCounterIT`,
+`DpdpErasureAndExportIT`, `DpdpRetentionIT`, `HotPathQueryBudgetIT`,
+`JsonbRoundTripIT` (see [CHARACTERISATION-TESTS.md](CHARACTERISATION-TESTS.md)),
+`KnowledgeIngestionClaimingIT`, `LlmSpendCounterReconcilerIT`, `PilotReportApiIT`,
+`RedisTenantDataPurgeIT`, `ResolutionTenantScopeIT`, `RoiApiIT`, `SkillLifecycleIT`,
+`TenantContextOnAsyncHopsIT` and `TenantContextOnReactiveHopsIT`; each class's
+javadoc says what it proves.
+
 ## Running them
 
 They are excluded from the default build. `mvn test` and `mvn verify` do not
@@ -52,10 +61,10 @@ Requirements: a Docker daemon that Testcontainers can reach (Docker Desktop,
 Rancher Desktop with dockerd, or Linux dockerd). When no daemon is reachable,
 every class is **skipped**, not failed (`@Testcontainers(disabledWithoutDocker = true)`).
 
-Testcontainers is pinned to 1.21.4 in `core/pom.xml` (`testcontainers.version`),
-overriding the 1.20.6 that Boot 3.4.4 manages. 1.20.x speaks Docker API 1.32.
-Docker Engine 29 rejects that version, and every class then skips as if Docker
-were missing.
+Testcontainers is 1.21.4, the version Spring Boot 3.5.16 manages (`core/pom.xml`
+no longer overrides `testcontainers.version`). Do not go back to 1.20.x: it speaks
+Docker API 1.32, Docker Engine 29 rejects that version, and every class then skips
+as if Docker were missing.
 
 Running the suite leaves no containers or built images behind. Ryuk removes
 them when the test JVM exits. Images that were pulled stay in the local cache:

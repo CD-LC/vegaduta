@@ -253,6 +253,10 @@ escaped copy sits in the string it is asserting on.
    is tested, and has zero production call sites; its only KMS provider reads
    the same static key, so it adds shape without isolation. Wiring it is
    blocked on a real cloud KMS, not on this module.
+   **Update (checked 2026-10-21, v0.1.9):** it now has a production caller
+   (`core/payments` `MandateSigningService` stores the mandate signing key with
+   it), and `core/crypto-kms` adds AWS KMS, Azure Key Vault and GCP Cloud KMS
+   providers. Whether the vault itself uses it was not re-checked.
 3. ~~No bulk re-encryption job.~~ **Closed** — `SecretRotationService` drives
    `reencrypt()` across the vault, per tenant schema, leaving any row it cannot
    decrypt untouched rather than overwriting it, and auditing an incomplete run
