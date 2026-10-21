@@ -131,9 +131,10 @@ On the Channels page, the WhatsApp section shows three cards: the binding card (
 the open-ended warning), the phone number quality card, and an **opt-in card**
 (`web/app/components/channels/WhatsAppOptInCard.tsx`) where a tenant records a recipient's opt-in
 (phone number, a source of `website_form`, `inbound_message`, `checkout`, `in_person` or `import`,
-and optional evidence text) or withdraws it by number. The card's table lists the records handled
-in the current browser session; it does not load the full list from the server. Numbers recorded
-earlier can still be revoked by typing them. Opt-in is the tenant's own record of consent: the
+and optional evidence text) or withdraws it by number. The card's table lists the tenant's records
+from `GET /api/channels/whatsapp-compliance/opt-in`, paged by the server; when that endpoint is
+unavailable it falls back to the records handled in the current browser session. Numbers recorded
+earlier can always be revoked by typing them. Opt-in is the tenant's own record of consent: the
 console does not verify that the consent was real, and Meta's rules in section 2 still apply.
 
 See also the [console guide](../console/README.md).

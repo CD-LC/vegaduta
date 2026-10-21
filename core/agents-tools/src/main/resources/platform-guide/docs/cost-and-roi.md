@@ -9,7 +9,9 @@ Open it from the **Cost & ROI** row in the navigation (it needs the *View usage*
 outside the Plans group so it stays reachable when billing is off), from the link on the Insights page,
 or go to `/roi`. A workspace seeded with `scripts/vegaduta seed-demo` shows an *Example* watermark on this
 page. The page also hosts the pilot baseline and the one-page pilot report; see the [pilot kit](pilots/README.md).
-The navigation is defined in `web/app/components/nav/navSections.ts`; see the [console guide](console/README.md).
+On a personal install the row is not in the navigation (the page still opens at `/roi`). The navigation is
+defined in `web/app/components/nav/navSections.ts` (Cost & ROI is in `navSectionsOperate.ts`); see the
+[console guide](console/README.md).
 
 API: `/api/tenant/roi/**` ([OpenAPI](api/README.md)). Reading needs the *View usage* permission;
 changing prices, value assumptions or recording outcomes needs *Manage billing*.

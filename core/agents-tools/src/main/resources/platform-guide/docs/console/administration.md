@@ -12,6 +12,7 @@ only the rows their grants cover (see [Roles and permissions](roles-and-permissi
 | Workspace integrations | `/admin/integrations` | `PERM_MANAGE_INTEGRATIONS` | Google connection and OAuth writes need `PERM_MANAGE_INTEGRATIONS` (and some `PERM_MANAGE_CHANNELS`) |
 | MCP access | `/admin/mcp-servers` | `PERM_MANAGE_INTEGRATIONS` | `/api/mcpserver/grants/**` writes need `PERM_MANAGE_INTEGRATIONS` |
 | Guardrails | `/admin/guardrails` | `PERM_MANAGE_GUARDRAILS` | rule writes need `PERM_MANAGE_GUARDRAILS`; reads are open |
+| Instructions | `/admin/instructions` | `PERM_MANAGE_TENANT_SETTINGS` | `/api/prompt-directives/**` needs the tenant-admin (or platform-admin) role |
 | Branding | `/admin/branding` | `PERM_MANAGE_TENANT_SETTINGS` | `PUT /api/tenant/settings` and the logo routes need `PERM_MANAGE_TENANT_SETTINGS` |
 | Data & privacy | `/admin/data-privacy` | `PERM_MANAGE_DATA_GOVERNANCE` | see [Data and privacy](data-and-privacy.md) |
 | Single sign-on | `/admin/sso` | `PERM_MANAGE_TENANT_SETTINGS` | see [Single sign-on and SCIM](single-sign-on.md) |
@@ -82,6 +83,17 @@ create, edit and delete (shared pager) and the workspace **content policy** for 
 open to everyone, so a member who follows a direct link sees what is being filtered but cannot edit. API:
 `/api/guardrails/rules`, `PUT /api/tenant/llm-gateway/content-policy`, `PUT /api/tenant/settings`; writes need
 `PERM_MANAGE_GUARDRAILS`. See [guardrails](../architecture/GUARDRAILS-AND-INTEGRATION.md).
+
+## Instructions (`/admin/instructions`)
+
+Every instruction the platform gives the model, in one place: read it, switch parts off, or reword it. The
+**Instructions** tab has **Your instructions** (free text added for every agent in the workspace, such as your tone
+or rules to always follow, with a **Use instructions for all agents** switch) and the **Built-in directives**, each
+with an on/off switch, **Show and edit text** and **Restore default**. Directives marked **Safety** ask you to
+confirm the risk before you turn them off or reword them. The **Preview** tab shows what the model receives now.
+The layers combine in order: built-in directives, then these workspace instructions, then each agent's own System
+prompt; the later layer wins. The row also shows on a personal install. API: `GET /api/prompt-directives`,
+`PUT/DELETE /api/prompt-directives/{key}`, `PUT /api/prompt-directives/custom-instructions`.
 
 ## Branding (`/admin/branding`)
 

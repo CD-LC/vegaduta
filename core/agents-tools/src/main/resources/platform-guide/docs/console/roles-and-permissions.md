@@ -35,9 +35,9 @@ Role bundles seeded on first use:
 | `MANAGE_USERS` | Team access, API keys | `/api/admin/users/**` (members, roles, permissions), `/api/tenant/api-keys/**` |
 | `MANAGE_BILLING` | Billing | plan upgrade, invoices, billing profile, subscription cancel, payment checkout, commerce catalog writes, agent payment mandates, **all writes under `/api/tenant/roi/**`** (prices, value assumptions, baseline) |
 | `MANAGE_INTEGRATIONS` | Workspace integrations, MCP access | MCP registry and OAuth writes, approving a changed MCP tool list, `POST /api/providers`, SDLC and OCR credentials, decision-capability credentials, MCP access grants and exposure |
-| `MANAGE_TENANT_SETTINGS` | Branding, Single sign-on | `PUT /api/tenant/settings`, branding logo, AI model preferences, every `/api/tenant/sso/**` call |
+| `MANAGE_TENANT_SETTINGS` | Instructions, Branding, Single sign-on | `PUT /api/tenant/settings`, branding logo, AI model preferences, every `/api/tenant/sso/**` call |
 | `MANAGE_WORKFLOWS_ADMIN` | Data Tables (with the feature on) | workflow webhooks, schedules, poll and channel triggers, workflow import, Data Tables writes |
-| `VIEW_AUDIT_LOG` | Issues, Live activity, Audit log | `/api/audit-log/**`, `/api/admin/issues/**` |
+| `VIEW_AUDIT_LOG` | Turn inspector, Issues, Live activity, Audit log | `/api/audit-log/**`, `/api/admin/issues/**`, turn journals |
 | `MANAGE_APPROVALS` | Approvals, Input requests | `PUT /api/approvals/policy/**` |
 | `MANAGE_DATA_GOVERNANCE` | Data & privacy | `/api/tenant/privacy/**`, data export, data deletion, `GET /api/tenant/data-usage` |
 | `MANAGE_CHANNELS` | Channels, Contacts, Inbox | every channel credential write, default-agent binding, sends, pairing, routing, contacts and groups, WhatsApp opt-in, device pairing, handoff actions |
@@ -58,13 +58,12 @@ role only. **Home** is hidden for tenant-admins.
 ## Rows with no permission
 
 These rows are visible to every signed-in member (the page may still limit writes, see each page): Home, Assistant,
-Agents, Connect, Workflows, Agent Directory, Memory, Skills, Skill library, Scheduled tasks and Coding tasks (when
-the feature is on), Research, Studio,
-App Builder, Community Templates, Knowledge, Shared with me, Providers, Decision providers, Code Intel, Browser
-models, Local
-code, Integrations, Secrets, Data & Infrastructure, Troubleshoot, Agent quality, Turn inspector, Insights, Usage,
-Files,
-Plans & Features (billing on), Guide, Learn, Docs and Apps & Plugins.
+Agents, Connect, Workflows, Agent Directory, Memory, Skills, Skill library, Scheduled tasks, Coding tasks and
+Research (when the feature is on), Studio, App Builder, Community Templates, Knowledge, Shared with me, Providers,
+Decision providers, Code Intel, Browser models, Local code, Integrations, Secrets, Data & Infrastructure, Add-ons
+(personal and lite installs), Troubleshoot, Playground, Quick Task and Jobs (not on a personal install), Agent
+quality, Insights, Usage, Files, Plans & Features (billing on), Guide, Docs and Apps & Plugins. A personal install
+also hides some of these; see [the sidebar](README.md#the-sidebar).
 
 ## Team access (`/admin/access`)
 
