@@ -11,13 +11,15 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Makes the chat-branching routes answer 404 while {@code app.chat.branching.enabled} is off BEFORE Spring
- * binds and validates a request body or path variable. Without this a flag-off POST with a blank message or a
- * missing messageId would answer 400 from bean validation, which tells a caller the route exists.
- * {@link ChatBranchService} still checks the flag itself (defence in depth, and it is the unit-tested seam).
+ * Makes the chat-branching routes answer 404 while {@code app.chat.branching.enabled} is off BEFORE
+ * Spring binds and validates a request body or path variable. Without this a flag-off POST with a
+ * blank message or a missing messageId would answer 400 from bean validation, which tells a caller
+ * the route exists. {@link ChatBranchService} still checks the flag itself (defence in depth, and
+ * it is the unit-tested seam).
  *
- * <p>The thread list ({@link ChatThreadController}, {@code /api/chat/threads}) reads the same tables, so it is
- * gated the same way: the console reads a 404 there as "feature off, keep the local index only".
+ * <p>The thread list ({@link ChatThreadController}, {@code /api/chat/threads}) reads the same
+ * tables, so it is gated the same way: the console reads a 404 there as "feature off, keep the
+ * local index only".
  *
  * <p>The capabilities discovery call lives under another path and is deliberately not gated here.
  */
@@ -44,7 +46,8 @@ public class ChatBranchFlagGate implements HandlerInterceptor, WebMvcConfigurer 
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(
+            HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!enabled) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }

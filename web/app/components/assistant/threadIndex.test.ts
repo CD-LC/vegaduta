@@ -38,7 +38,14 @@ describe("threadTitle / threadScope", () => {
 describe("index rows", () => {
   it("creates a row on first activity and bumps it afterwards", async () => {
     const row = await recordThreadActivity("u1", "s1", "a1", "first question\nmore", 1_000);
-    expect(row).toMatchObject({ id: "s1", scope: "u1", agentId: "a1", title: "first question", lastAt: 1_000, pinned: false });
+    expect(row).toMatchObject({
+      id: "s1",
+      scope: "u1",
+      agentId: "a1",
+      title: "first question",
+      lastAt: 1_000,
+      pinned: false,
+    });
     const bumped = await recordThreadActivity("u1", "s1", "a1", "ignored", 5_000);
     expect(bumped.title).toBe("first question");
     expect(bumped.lastAt).toBe(5_000);
@@ -75,7 +82,9 @@ describe("mergeServerThreads (GET /api/chat/threads into the local cache)", () =
   });
 
   it("adds a session this browser has never seen, titled by the server's first user line", async () => {
-    const written = await mergeServerThreads("u1", [server("new", "2026-10-17T10:00:00Z", "book me a dentist\nnext week")]);
+    const written = await mergeServerThreads("u1", [
+      server("new", "2026-10-17T10:00:00Z", "book me a dentist\nnext week"),
+    ]);
     expect(written).toBe(1);
     const row = await getThread("u1", "new");
     expect(row).toMatchObject({
@@ -119,7 +128,10 @@ describe("mergeServerThreads (GET /api/chat/threads into the local cache)", () =
   it("is pure per row: mergeServerThread returns null when nothing would change", () => {
     const local = { id: "s", scope: "u", agentId: "a1", title: "t", lastAt: 9_000, createdAt: 1_000, pinned: false };
     expect(mergeServerThread(local, server("s", "1970-01-01T00:00:01Z"), "u")).toBeNull();
-    expect(mergeServerThread(local, server("s", "1970-01-01T00:00:01Z", "x", "a2"), "u")).toMatchObject({ agentId: "a2", lastAt: 9_000 });
+    expect(mergeServerThread(local, server("s", "1970-01-01T00:00:01Z", "x", "a2"), "u")).toMatchObject({
+      agentId: "a2",
+      lastAt: 9_000,
+    });
   });
 });
 

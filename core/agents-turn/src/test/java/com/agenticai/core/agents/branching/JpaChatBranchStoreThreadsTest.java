@@ -25,8 +25,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Pageable;
 
 /**
- * The thread-list side of {@link JpaChatBranchStore}: one page query plus ONE title query for the page, the
- * cursor picking the "before" finder, and a delete that touches nothing unless the row is the subject's own.
+ * The thread-list side of {@link JpaChatBranchStore}: one page query plus ONE title query for the
+ * page, the cursor picking the "before" finder, and a delete that touches nothing unless the row is
+ * the subject's own.
  */
 class JpaChatBranchStoreThreadsTest {
 
@@ -46,10 +47,10 @@ class JpaChatBranchStoreThreadsTest {
         ChatBranchSession a = row("a", "alice");
         ChatBranchSession b = row("b", "alice");
         when(sessions.findByOwnerSubjectOrderByUpdatedAtDesc(eq("alice"), any(Pageable.class)))
-            .thenReturn(List.of(a, b));
+                .thenReturn(List.of(a, b));
         // Postgres hands the uuid column back as a UUID; "b" has no user message yet.
         when(nodes.findFirstUserMessageOfSessions(anyList()))
-            .thenReturn(List.<Object[]>of(new Object[] {agentId, "a", "first question"}));
+                .thenReturn(List.<Object[]>of(new Object[] {agentId, "a", "first question"}));
 
         List<Thread> page = store.findThreadsOwnedBy("alice", null, 10);
 
@@ -68,17 +69,20 @@ class JpaChatBranchStoreThreadsTest {
         ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
         verify(sessions).findByOwnerSubjectOrderByUpdatedAtDesc(eq("alice"), pageable.capture());
         assertEquals(10, pageable.getValue().getPageSize());
-        verify(sessions, never()).findByOwnerSubjectAndUpdatedAtBeforeOrderByUpdatedAtDesc(anyString(), any(), any());
+        verify(sessions, never())
+                .findByOwnerSubjectAndUpdatedAtBeforeOrderByUpdatedAtDesc(
+                        anyString(), any(), any());
     }
 
     @Test
     void aCursorUsesTheBeforeFinderAndAStringUuidFromTheDriverIsAccepted() {
         Instant before = Instant.parse("2026-10-20T10:00:00Z");
         ChatBranchSession a = row("a", "alice");
-        when(sessions.findByOwnerSubjectAndUpdatedAtBeforeOrderByUpdatedAtDesc(eq("alice"), eq(before), any(Pageable.class)))
-            .thenReturn(List.of(a));
+        when(sessions.findByOwnerSubjectAndUpdatedAtBeforeOrderByUpdatedAtDesc(
+                        eq("alice"), eq(before), any(Pageable.class)))
+                .thenReturn(List.of(a));
         when(nodes.findFirstUserMessageOfSessions(List.of(a.getId())))
-            .thenReturn(List.<Object[]>of(new Object[] {agentId.toString(), "a", "hello"}));
+                .thenReturn(List.<Object[]>of(new Object[] {agentId.toString(), "a", "hello"}));
 
         List<Thread> page = store.findThreadsOwnedBy("alice", before, 5);
 
@@ -89,7 +93,8 @@ class JpaChatBranchStoreThreadsTest {
 
     @Test
     void anEmptyPageOrABlankSubjectAsksForNoTitles() {
-        when(sessions.findByOwnerSubjectOrderByUpdatedAtDesc(eq("alice"), any(Pageable.class))).thenReturn(List.of());
+        when(sessions.findByOwnerSubjectOrderByUpdatedAtDesc(eq("alice"), any(Pageable.class)))
+                .thenReturn(List.of());
 
         assertTrue(store.findThreadsOwnedBy("alice", null, 10).isEmpty());
         assertTrue(store.findThreadsOwnedBy(" ", null, 10).isEmpty());
