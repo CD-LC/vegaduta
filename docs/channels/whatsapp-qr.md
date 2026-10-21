@@ -75,7 +75,9 @@ devices.
 Bridge side: `WHATSAPP_BRIDGE_PORT` (8080), `WHATSAPP_BRIDGE_DATA_DIR` (`/data`),
 `WHATSAPP_BRIDGE_QUEUE_CAP` (500 undelivered messages per session).
 
-Run the receiver in ONE core process: a session's long-poll hands each message out once.
+Run the receiver in ONE core process: a session's long-poll hands each message out once. The
+jobs and worker shapes already turn it off. With more than one API replica, set
+`APP_WHATSAPPQR_RECEIVE_ENABLED=false` on all but one.
 
 ## API
 

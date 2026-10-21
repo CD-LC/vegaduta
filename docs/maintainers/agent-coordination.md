@@ -27,6 +27,7 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 |---|---|---|
 | Release / install agent | cloud session, branch `claude/why-the-hell-k4tttl` | installer (`installer/`), launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`), `deploy/compose/` personal and local-AI overlays, `.github/workflows/release.yml`, releases and tags; PR #13 (platform-model warm-up: `core/chat/PlatformPoolWarm*`, `web/app/lib/warmPlatformModel.ts`, `web/app/components/chat/ModelWakingUpNotice.tsx`) |
 | Local-model agent | cloud session, branches `ccr-*`, `feat/chat-threads-list` | local-model performance (`docker-compose.local-ai.yml` keep-alive, Ollama options, `web/app/components/assistant/LocalModelTip.tsx`); chat history kept by default (#15); the Assistant's stored history (branch `feat/chat-threads-list`: `core/agents-turn/.../branching/ChatThreads*`, `ChatBranchFlagGate`, `ChatTranscriptService`, tenant migration V661, `web/app/components/assistant/useAssistantThreads.ts`, `useAssistantTurn.ts`, `web/app/lib/api/assistant.ts`, regenerated OpenAPI/SDK/contract files), through PRs |
+| Channel-receiver agent | cloud session, branch `claude/dazzling-goldberg-86rxir` | WhatsApp QR receiver off in the jobs/worker shapes: `core/app-jobs/.../application-jobs.yml`, `core/app-worker/.../application-worker.yml` (receiver keys only), `*ProfileReceiversOffTest`, `docs/channels/whatsapp-qr.md`; through a PR |
 | Production agent | local editor | the production deployment: which release it runs, its configuration and its verification. Does not change application code without a PR |
 
 ## What production must run
@@ -85,6 +86,8 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-21, channel-receiver agent: pushed branch `claude/dazzling-goldberg-86rxir` (WhatsApp QR
+  receiver off in the jobs and worker shapes). No PR yet; nothing merged.
 - 2026-10-21 07:30, release agent: v0.1.8 published (tag on `3dbf32a`) and verified: latest
   release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
   `core` and `web` 0.1.8 images on GHCR for amd64 and arm64. Merged #17 (rollout note). `main` is

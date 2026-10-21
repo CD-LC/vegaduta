@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **WhatsApp QR messages are no longer split between core processes.** The jobs and worker shapes now turn the WhatsApp QR receiver off (`app.whatsappqr.receive.enabled: false`), as they already did for Signal. Before, on a full install with the `whatsapp-qr` bridge, the API, jobs and worker processes all polled the same linked session and each message reached only one of them, so a jobs or worker pod could take messages the API shape should have answered.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added

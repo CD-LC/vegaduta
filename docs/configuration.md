@@ -1209,7 +1209,7 @@ runs in Docker), and `app.llm.tool-call-probe.enabled` (default `true`) governs 
 | `app.signal.receive.poll-seconds` | (none) | `15` | long-poll length, 1 to 25 |
 | `app.signal.max-message-chars` / `app.signal.max-attachment-bytes` | (none) | `3500` / `20971520` | |
 | `app.whatsappqr.bridge-url` / `app.whatsappqr.bridge-secret` | `APP_WHATSAPPQR_BRIDGE_URL` / `APP_WHATSAPPQR_BRIDGE_SECRET` | empty / empty | the whatsapp-qr bridge address and shared token; both empty hides the channel - see [WhatsApp QR](channels/whatsapp-qr.md) |
-| `app.whatsappqr.receive.enabled` | `APP_WHATSAPPQR_RECEIVE_ENABLED` | `true` | the receiver is idle until a session is linked; one process per bridge |
+| `app.whatsappqr.receive.enabled` | `APP_WHATSAPPQR_RECEIVE_ENABLED` | `true` | the receiver is idle until a session is linked; one process per bridge, never the jobs or worker shapes |
 | `app.whatsappqr.receive.poll-seconds` | (none) | `15` | long-poll length, 1 to 20 |
 | `app.whatsappqr.max-message-chars` | (none) | `60000` | |
 | `app.matrix.sync.enabled` | `APP_MATRIX_SYNC_ENABLED` | `false` | run the `/sync` loop in this process; one process per bot. The `personal` profile does not set it |
