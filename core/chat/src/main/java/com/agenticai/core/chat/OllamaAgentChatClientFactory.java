@@ -69,6 +69,13 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
     // installs with a multi-K-token agent prefix can, e.g. 2048 - keep it
     // <= num_ctx, the runner rejects a larger batch).
     private final int numBatch;
+    // Thinking models (qwen3.5 and friends) write a long hidden reasoning pass before the first visible
+    // word; on a laptop CPU that pass is most of the wait. Ollama's OpenAI-compat endpoint maps
+    // reasoning_effort "none" to "do not think" for such models (docs/api/openai-compatibility.mdx) and an
+    // unsupported name falls back to the model default, so a wrong value cannot fail a call. Blank = send
+    // nothing and keep each model's own default; the personal local-AI overlay sets it to "none".
+    @org.springframework.beans.factory.annotation.Value("${app.llm.ollama.reasoning-effort:}")
+    private String reasoningEffort = "";
 
     public OllamaAgentChatClientFactory(
         LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
@@ -147,6 +154,9 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
             .temperature(temperature)
             .topP(topP);
         sampling.applyTo(optionsBuilder);
+        if (reasoningEffort != null && !reasoningEffort.isBlank()) {
+            optionsBuilder.reasoningEffort(reasoningEffort.trim());
+        }
         LlmModelSupport.logDroppedSampling(ProviderName.OLLAMA, model, sampling, "topK");
         // Ollama `format` (json_schema) only when the caller asked for a schema and
         // app.llm.structured-output.ollama-format.enabled is on; otherwise options unchanged.

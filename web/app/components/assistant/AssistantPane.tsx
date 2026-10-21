@@ -27,6 +27,7 @@ import { useConnections } from "./useConnections";
 import { useAssistantTurn } from "./useAssistantTurn";
 import { useAssistantPrefs } from "./assistantPrefs";
 import { useWarmLocalModel } from "../../lib/useWarmLocalModel";
+import LocalModelTip from "./LocalModelTip";
 import AssistantInfoCard from "./AssistantInfoCard";
 import AssistantPalette, { type PaletteItem } from "./AssistantPalette";
 import { usePlatformBusyFlag } from "../../lib/platformBusy";
@@ -519,6 +520,7 @@ export default function AssistantPane() {
           {railButton("right")}
         </header>
 
+        {active && <LocalModelTip agentId={active.id} providerName={active.providerName} />}
         {agentState.status === "loading" && (
           <p className="flex items-center gap-2 px-6 py-3 text-sm text-muted-foreground" role="status">
             <Loader2 size={14} className="animate-spin" aria-hidden="true" />
