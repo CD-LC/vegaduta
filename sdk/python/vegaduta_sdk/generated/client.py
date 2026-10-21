@@ -8114,6 +8114,18 @@ class PlatformOpsApi:
         return self._http.request("GET", "/api/platform/version")
 
 
+class PlatformPoolWarmApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def warm(self, *, idempotency_key: Optional[str] = None) -> Dict[str, bool]:
+        """Warm.
+
+        POST /api/platform-llm/warm
+        """
+        return self._http.request("POST", "/api/platform-llm/warm", headers={"Idempotency-Key": idempotency_key})
+
+
 class PlatformSessionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -13144,6 +13156,7 @@ class VegadutaClient:
         self.platform_impersonation = PlatformImpersonationApi(self.http)
         self.platform_issue = PlatformIssueApi(self.http)
         self.platform_ops = PlatformOpsApi(self.http)
+        self.platform_pool_warm = PlatformPoolWarmApi(self.http)
         self.platform_session = PlatformSessionApi(self.http)
         self.platform_spend = PlatformSpendApi(self.http)
         self.platform_spend_cap = PlatformSpendCapApi(self.http)
