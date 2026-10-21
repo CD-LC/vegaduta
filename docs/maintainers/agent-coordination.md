@@ -85,6 +85,9 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-21, config-docs agent (branch `claude/pensive-hamilton-dnm4az`): moved the misplaced
+  `artifacts:` block in `core/app-config/.../application.yml` from `app.chat.branching` to
+  `app.chat.directives` (keys now match the code; defaults unchanged); config docs regenerated. Pushed, no PR.
 - 2026-10-21 07:30, release agent: v0.1.8 published (tag on `3dbf32a`) and verified: latest
   release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
   `core` and `web` 0.1.8 images on GHCR for amd64 and arm64. Merged #17 (rollout note). `main` is
