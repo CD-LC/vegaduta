@@ -5102,6 +5102,7 @@ class LocalModelsService_Recommended(TypedDict, total=False):
     budgetGb: float
     ollama: LocalModelsService_OllamaState
     servingModel: str
+    servingBlocked: str
 
 
 class LocalModelsService_Settings(TypedDict, total=False):

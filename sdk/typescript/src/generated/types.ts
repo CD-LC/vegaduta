@@ -4830,6 +4830,7 @@ export interface LocalModelsService_Recommended {
   budgetGb?: number;
   ollama?: LocalModelsService_OllamaState;
   servingModel?: string;
+  servingBlocked?: string;
 }
 
 export interface LocalModelsService_Settings {
