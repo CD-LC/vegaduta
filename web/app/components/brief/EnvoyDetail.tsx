@@ -15,7 +15,6 @@ import { useTranslations } from "../../lib/i18n";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import { useAuth } from "../AuthProvider";
-import { LearnLink } from "../../learn/LearnThisButton";
 import CoachButton from "./CoachDrawer";
 import EnvoyGraph from "./EnvoyGraph";
 import NarrativeCard from "./NarrativeCard";
@@ -121,7 +120,6 @@ export default function EnvoyDetail({ id }: { id: string }) {
           <div className="ml-auto flex items-center gap-2">
             {/* l16-9 teaches the brief an envoy is applied from — the trust
                 ladder and proof ledger below are that lesson's machinery. */}
-            <LearnLink lessonId="l16-9" fromPath={`/build/${id}`} label={t("detail.learn")} />
             <CoachButton entityId={agent?.entityId} onChanged={changed} />
           </div>
         </div>

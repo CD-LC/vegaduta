@@ -11,7 +11,6 @@ import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { EmptyState, Section, SECTION_ACTION_GROUP_CLASS } from "../../components/ax/page-kit";
-import { LearnLink } from "../../learn/LearnThisButton";
 import PaginationControls from "../../components/PaginationControls";
 import { usePagination } from "../../lib/usePagination";
 import {
@@ -391,7 +390,6 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
       description="Golden test cases replayed against this agent and scored by the same judges as live turns — so a prompt or model change has a before/after number."
       actions={
         <div className={SECTION_ACTION_GROUP_CLASS}>
-          <LearnLink lessonId="l16-3" fromPath="/agents/quality" />
           <Button variant="outline" size="sm" onClick={refreshDatasets} disabled={loading}>
             <RefreshCw size={14} className={loading ? "animate-spin" : undefined} aria-hidden="true" /> Refresh
           </Button>

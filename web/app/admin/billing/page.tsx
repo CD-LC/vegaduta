@@ -34,7 +34,6 @@ import { toast } from "../../lib/toastBus";
 import { useTranslations } from "../../lib/i18n";
 import { FREE_MODE } from "../../lib/freeMode";
 import { errorMessage } from "../../lib/errors";
-import LearnThisButton from "../../learn/LearnThisButton";
 import { limitRatio, NEAR_LIMIT_RATIO, PLAN_INFO, ProfileRow, type TenantBillingSettings } from "./billingShared";
 import { PlanCard, UsageCard } from "./PlanUsageCards";
 import ReferralCard from "./ReferralCard";
@@ -215,7 +214,6 @@ export default function AdminBillingPage() {
             </span>
           </>
         }
-        actions={<LearnThisButton path="/admin/billing" />}
       />
 
       {loadError && (

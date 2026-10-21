@@ -7,7 +7,6 @@ import { cn } from "../../lib/utils";
 import { RECIPES } from "../../lib/capabilities";
 import { Button } from "../../components/ui/button";
 import { Textarea } from "../../components/ui/textarea";
-import { LearnLink } from "../../learn/LearnThisButton";
 import { pickSurprise } from "../surprisePrompts";
 import { analysePrompt, applyHint } from "../promptHints";
 import { radioGroupKeyDown } from "../radioNav";
@@ -54,7 +53,6 @@ export default function DescribeStage({
             </div>
             {/* l16-9 teaches what this surface produces: a brief applied
                 as an envoy on the trust ladder. */}
-            <LearnLink lessonId="l16-9" fromPath="/build" label="Learn in the Academy" />
           </div>
 
           <div

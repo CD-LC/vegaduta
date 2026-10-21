@@ -18,7 +18,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "When you are happy with it, connect a channel so real people can reach it.",
       ],
       next: { label: "Create your first agent", href: "/agents" },
-      learnLessonId: "l3-1",
+      learnInAcademy: true,
     },
   },
   {
@@ -33,7 +33,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Press Save draft, then test it in the Playground.",
       ],
       next: { label: "Test in Playground", href: "/playground" },
-      learnLessonId: "l3-5",
+      learnInAcademy: true,
     },
   },
   {
@@ -48,7 +48,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Read the policies and reward signals before changing anything.",
         "Adjust only after you can say what the change teaches the agent.",
       ],
-      learnLessonId: "l16-1",
+      learnInAcademy: true,
     },
   },
   {
@@ -62,7 +62,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Read a score with its interval, not as a point — the noise floor says what counts as a real change.",
         "Let the eval gate decide whether a new version promotes.",
       ],
-      learnLessonId: "l22-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -79,7 +79,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       reassurance: "Nothing goes public when you save. People can only reach an agent after you connect a channel.",
       next: { label: "Test it in Playground", href: "/playground" },
-      learnLessonId: "l3-3",
+      learnInAcademy: true,
     },
   },
   {
@@ -93,7 +93,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Give it a name and create it. It opens on the canvas.",
         "Press Run now to watch it work before you change anything.",
       ],
-      learnLessonId: "l3-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -106,7 +106,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Open a run to see its steps in order.",
         "A failed step shows its error. Fix that node on the canvas and run again.",
       ],
-      learnLessonId: "l22-5",
+      learnInAcademy: true,
     },
   },
   {
@@ -122,7 +122,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Press Validate if something is wrong. It lists exactly what to fix. Activate is only needed for a webhook or a schedule.",
       ],
       reassurance: "Run now is a test run. Nothing runs by itself until you Activate the workflow.",
-      learnLessonId: "l4-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -138,7 +138,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       reassurance: "If you have not made an agent yet, do that first. Most workflows hand work to an agent.",
       next: { label: "Browse workflow templates", href: "/workflows/templates" },
-      learnLessonId: "l3-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -152,7 +152,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Add it to your workspace. You get your own copy.",
         "Edit your copy freely. The original is not affected.",
       ],
-      learnLessonId: "l18-2",
+      learnInAcademy: true,
     },
   },
   {
@@ -167,7 +167,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Open your agent and attach the collection to it.",
       ],
       next: { label: "Open Agents", href: "/agents" },
-      learnLessonId: "l3-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -181,7 +181,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "A named project note only joins the conversation when the project is mentioned.",
         "Facts below are things agents saved with remember_fact. Edit or delete any of them.",
       ],
-      learnLessonId: "l1-4",
+      learnInAcademy: true,
     },
   },
   {
@@ -191,7 +191,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Run a one-off task",
       purpose: "Get one job done without building an agent first.",
       steps: ["Describe the task in plain words.", "Run it and read the result.", "Past tasks are kept in History."],
-      learnLessonId: "l3-9",
+      learnInAcademy: true,
     },
   },
   {
@@ -204,7 +204,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Open a row to see its progress and result.",
         "A failed job shows why it failed, so you can fix the agent or workflow behind it.",
       ],
-      learnLessonId: "l16-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -229,7 +229,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Your generated media",
       purpose: "Images, audio and other media your agents produced, in one place.",
       steps: ["Open an item to preview it.", "Download the ones you want to keep."],
-      learnLessonId: "l18-6",
+      learnInAcademy: true,
     },
   },
   {
@@ -239,7 +239,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Shared with you",
       purpose: "Agents, workflows and other items teammates have shared with you.",
       steps: ["Open an item to use it.", "What you can change depends on the access the owner gave you."],
-      learnLessonId: "l18-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -252,7 +252,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Browse the skills installed in this workspace.",
         "Attach one to the agent that needs it from the agent's own page.",
       ],
-      learnLessonId: "l18-1",
+      learnInAcademy: true,
     },
   },
 ];

@@ -28,7 +28,6 @@ import {
 } from "../../components/ui/alert-dialog";
 import { toast } from "../../lib/toastBus";
 import { useTranslations } from "../../lib/i18n";
-import LearnThisButton from "../../learn/LearnThisButton";
 import { SpendBar, fmtTime, statusBadge } from "./trustFormat";
 import { GrantWizard } from "./GrantWizard";
 import { MintTokenPanel } from "./MintTokenPanel";
@@ -138,7 +137,6 @@ export default function AdminAgentTrustPage() {
         <PageHeader
           title={t("pageTitle")}
           subtitle={t("pageSubtitle")}
-          actions={<LearnThisButton path="/admin/agent-trust" />}
         />
 
         <div className="mb-5 max-w-md">

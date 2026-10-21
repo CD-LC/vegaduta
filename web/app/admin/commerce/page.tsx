@@ -18,7 +18,6 @@ import OfferForm from "./OfferForm";
 import { ErrorRetry, FilterPills, ListSkeleton, PagedList } from "./listKit";
 import { toast } from "../../lib/toastBus";
 import { useTranslations } from "../../lib/i18n";
-import LearnThisButton, { LearnLink } from "../../learn/LearnThisButton";
 import { fmtTime, statusBadge } from "./commerceFormat";
 import { WalletSection } from "./WalletSection";
 import { IntentForm } from "./IntentForm";
@@ -118,7 +117,6 @@ export default function AdminCommercePage() {
         <PageHeader
           title={t("pageTitle")}
           subtitle={t("pageSubtitle")}
-          actions={<LearnThisButton path="/admin/commerce" />}
         />
 
         <div className="mb-5 max-w-md">
@@ -180,7 +178,6 @@ export default function AdminCommercePage() {
             <h2 className="text-sm font-semibold">{t("offersHeading")}</h2>
             {/* l4-13 teaches x402 itself — what a slug's paid endpoint is and
                 who pays it — a quieter companion to the header's L17 button. */}
-            <LearnLink lessonId="l4-13" fromPath="/admin/commerce" label="Learn" />
             {agentId && <OfferForm agentId={agentId} onCreated={() => loadForAgent(agentId)} />}
           </div>
           {offers.length === 0 ? (

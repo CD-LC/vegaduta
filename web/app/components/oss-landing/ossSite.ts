@@ -1,4 +1,5 @@
 import { getPublicEnv } from "../../lib/env";
+import { academyHref } from "../../lib/academyUrl";
 import { REPO_URL, docPageHref, docsHref, hasDocsSite } from "../../lib/siteLinks";
 
 export { REPO_URL };
@@ -65,7 +66,7 @@ export const CAPABILITIES: { title: string; body: string }[] = [
   },
   {
     title: "Learning and Academy",
-    body: "Agents learn reusable skills with proposals you approve; the Academy teaches the platform inside the console and on academy.vegaduta.ai.",
+    body: "Agents learn reusable skills with proposals you approve; the hosted Academy at academy.vegaduta.ai teaches the platform end to end.",
   },
 ];
 
@@ -225,6 +226,10 @@ export const DEPENDENCIES: { name: string; coordinates: string; body: string; st
 export function resourceLinks(): { label: string; href: string }[] {
   return [
     { label: "Downloads", href: "/downloads" },
+    // The Academy is a separate, proprietary deployable - the OSS pages link
+    // to it and never carry its content. academyHref() is the configured
+    // origin (hosted academy.vegaduta.ai by default).
+    { label: "Academy", href: academyHref() },
     { label: hasDocsSite() ? "Documentation" : "Help and docs", href: docsHref() },
     { label: "Java Agent SDK", href: docPageHref("javaSdk") },
     { label: "SDKs and dependencies", href: docPageHref("sdkOverview") },

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ExternalLink, Fingerprint } from "lucide-react";
 import LibraryChrome from "../components/library/LibraryChrome";
-import { academyLessonUrl } from "../learn/curriculum";
+import { academyHref } from "../lib/academyUrl";
 import DirectoryBrowser from "../components/directory/DirectoryBrowser";
 import { fetchDirectoryServer } from "../components/directory/serverFetch";
 
@@ -53,10 +53,10 @@ export default async function DirectoryPage() {
             caller verify identity and declared capabilities before delegating work to one.
           </p>
           {/* External anchor to the Academy's own origin (same convention as
-              the per-entry homepage links in DirectoryBrowser): the public
-              Know-Your-Agent lesson explains what a signed manifest proves. */}
+              the per-entry homepage links in DirectoryBrowser): the hosted
+              Academy teaches what a signed manifest proves. */}
           <a
-            href={academyLessonUrl("l18-11", "/directory")}
+            href={academyHref()}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"

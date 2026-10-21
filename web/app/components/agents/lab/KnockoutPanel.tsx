@@ -12,7 +12,6 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "../../../lib/i18n";
 import { api } from "../../../lib/api";
-import { LearnLink } from "../../../learn/LearnThisButton";
 import { Button } from "../../ui/button";
 import { Select } from "../../ui/select";
 import { Textarea } from "../../ui/textarea";
@@ -305,7 +304,6 @@ export default function KnockoutPanel({ agent, capabilities }: KnockoutPanelProp
                 <p className="text-xs text-muted-foreground">
                   {t("koDatasetNone")}{" "}
                   {/* Datasets are built on /agents/quality — l16-3 teaches them. */}
-                  <LearnLink lessonId="l16-3" fromPath="/playground" label={t("koDatasetLearn")} />
                 </p>
               ) : (
                 <div className="space-y-2">

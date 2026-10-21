@@ -6,7 +6,6 @@ import Select from "../../components/Select";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
 import { EmptyState, Section } from "../../components/ax/page-kit";
-import { LearnLink } from "../../learn/LearnThisButton";
 import type { DatasetNoiseFloorResponse, EvalReliabilityReport } from "../../lib/api";
 import type { EvalRunSummary } from "./evalDatasetsApi";
 import { resolveEvalApi } from "./evalDatasetsApi";
@@ -220,7 +219,6 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
       <Section
         title="Honest eval statistics"
         description={sectionDescription}
-        actions={<LearnLink lessonId="l13-3" fromPath="/agents/quality" />}
       >
         <Alert>
           <Info aria-hidden="true" />
@@ -250,7 +248,6 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
       <Section
         title="Honest eval statistics"
         description={sectionDescription}
-        actions={<LearnLink lessonId="l13-3" fromPath="/agents/quality" />}
       >
         <Alert>
           <ShieldAlert aria-hidden="true" />
@@ -271,7 +268,6 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
       <Section
         title="Honest eval statistics"
         description={sectionDescription}
-        actions={<LearnLink lessonId="l13-3" fromPath="/agents/quality" />}
       >
         <EmptyState
           icon={Sigma}
@@ -289,7 +285,6 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
     <Section
       title="Honest eval statistics"
       description={sectionDescription}
-      actions={<LearnLink lessonId="l13-3" fromPath="/agents/quality" />}
     >
       <div className="space-y-8">
         {statsHidden ? null : reportFailed ? (

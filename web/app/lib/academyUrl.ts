@@ -14,9 +14,13 @@ import { getPublicEnv } from "./env";
 // here: every real build already sets it (docker-compose.domain.yml/.gcp.yml pin the per-env
 // academy host). Hosted deployments set NEXT_PUBLIC_ACADEMY_URL
 // to their public academy origin.
-// No default (AGENTS.md rule 4): an OSS install without an Academy must not
-// render a dead http://localhost:4100 link on a public page. Unset = no Academy.
-// Hosted/classic builds set NEXT_PUBLIC_ACADEMY_URL.
+// No localhost default (AGENTS.md rule 4): an OSS build without the env var
+// must never render a dead http://localhost:4100 link. The hosted Academy is
+// the public fallback for call sites that always render the link; compose
+// and Helm already default NEXT_PUBLIC_ACADEMY_URL to it, so the fallback is
+// only what a bare `next build` (no env at all) produces.
+export const HOSTED_ACADEMY_URL = "https://academy.vegaduta.ai";
+
 export function academyUrl(): string {
   return (getPublicEnv("NEXT_PUBLIC_ACADEMY_URL") || "").trim().replace(/\/+$/, "");
 }
@@ -27,7 +31,7 @@ export function hasAcademy(): boolean {
 }
 
 /** For call sites that always render an Academy link: the configured origin,
- *  else the on-domain /learn page (never a dead localhost URL). */
+ *  else the hosted Academy (never a dead localhost URL or a removed route). */
 export function academyHref(): string {
-  return academyUrl() || "/learn";
+  return academyUrl() || HOSTED_ACADEMY_URL;
 }

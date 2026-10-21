@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Sparkles } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
-import { LearnLink } from "../../learn/LearnThisButton";
 import { EmptyState } from "../../components/ax/page-kit";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
@@ -73,7 +72,6 @@ export default function SolutionsTab() {
         {detail && <RungBadge rung={detail.rung} />}
         <div className="ml-auto flex items-center gap-2">
           {/* l16-9 teaches the brief/trust-ladder machinery this ledger shows. */}
-          <LearnLink lessonId="l16-9" fromPath="/agents/quality" label={t("solutions.learn")} />
           {selectedId && (
             <Button asChild variant="outline" size="sm">
               <Link href={`/build/${encodeURIComponent(selectedId)}`}>{t("solutions.openEnvoy")}</Link>

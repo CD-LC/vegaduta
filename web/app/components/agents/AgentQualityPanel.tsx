@@ -10,7 +10,6 @@ import { Badge } from "../ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Section, StatCard, EmptyState } from "../ax/page-kit";
 import { UpgradeLock } from "../ui/upgrade-lock";
-import { LearnLink } from "../../learn/LearnThisButton";
 
 // EvaluationType.name() -> display name, mirroring EvaluationType.getDisplayName()
 // (core/quality) since the summary/config endpoints echo the enum name, not the
@@ -211,7 +210,6 @@ export default function AgentQualityPanel({
                 Test against attacks
               </a>
             )}
-            <LearnLink lessonId="l22-8" fromPath="/agents/quality" />
           </>
         }
       >

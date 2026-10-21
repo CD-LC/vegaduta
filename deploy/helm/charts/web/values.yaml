@@ -119,9 +119,10 @@ env:
   NEXT_PUBLIC_DOCS_URL: ""
   # Absolute URL of a hosted/commercial offering; "" = the OSS pages show no such link.
   NEXT_PUBLIC_COMMERCIAL_URL: ""
-  # Absolute URL of the Academy; "" = the app falls back to its built-in default
-  # (set this on any hosted install: the default is a local-dev address).
-  NEXT_PUBLIC_ACADEMY_URL: ""
+  # Absolute URL of the Academy (a separate, proprietary deployable); defaults
+  # to the hosted academy.vegaduta.ai. Set your own Academy origin, or "" to
+  # hide the links on a fork.
+  NEXT_PUBLIC_ACADEMY_URL: "https://academy.vegaduta.ai"
   # Contact address shown on /plugins and /account-deletion; "" = built-in placeholder.
   # Set it to an address you own.
   NEXT_PUBLIC_CONTACT_EMAIL: ""

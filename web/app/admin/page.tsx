@@ -21,7 +21,6 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Activity, ArrowRight, Bot, Cpu, LayoutTemplate, Radio, Users, Workflow } from "lucide-react";
 import { useTranslations } from "../lib/i18n";
-import LearnThisButton from "../learn/LearnThisButton";
 import { llmProvidersTileSub } from "../lib/llmProviders";
 import "../components/dashboard/dashboardStyles";
 import { TIER_AGENTS, TIER_SEATS, buildSetupSteps, healthChip } from "./_overview/model";
@@ -134,7 +133,6 @@ export default function AdminOverviewPage() {
           title={t("pageTitle")}
           subtitle="A snapshot of this workspace: setup progress, agents, channels, approvals and system health."
           className="mb-0"
-          actions={<LearnThisButton path="/admin" />}
         />
 
         {/* First-run card (see the `firstRun` comment above). The CTA

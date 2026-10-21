@@ -15,7 +15,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Add a provider and paste its key. Keys are stored encrypted.",
         "Pick which model each agent uses from that agent's own page.",
       ],
-      learnLessonId: "l3-2",
+      learnInAcademy: true,
     },
   },
   {
@@ -26,7 +26,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "The plan comparison — Free, Premium and Unlimited side by side, with your own live limits marked.",
       steps: ["Compare the columns to see what each tier unlocks.", "Your own plan's column shows your live limits."],
       next: { label: "Open Billing", href: "/billing" },
-      learnLessonId: "l4-9",
+      learnInAcademy: true,
     },
   },
   {
@@ -39,7 +39,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Read each card: the system, what it holds, and its live stat where one exists.",
         "A system marked available but not engaged is provisioned for you and simply unused.",
       ],
-      learnLessonId: "l22-7",
+      learnInAcademy: true,
     },
   },
   {
@@ -64,7 +64,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Decision providers",
       purpose: "The decision layer this workspace uses — pick which provider is active.",
       steps: ["Read what each provider does.", "Activate the one you want; its settings sit beside it."],
-      learnLessonId: "l18-5",
+      learnInAcademy: true,
     },
   },
   {
@@ -80,7 +80,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       next: { label: "Test in Playground first", href: "/playground" },
-      learnLessonId: "l3-10",
+      learnInAcademy: true,
     },
   },
   {
@@ -96,7 +96,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Clear credentials removes the stored values — the server stays registered and enabled.",
         "Built-in servers are listed read-only: their credentials are wired at deployment, not here.",
       ],
-      learnLessonId: "l17-3",
+      learnInAcademy: true,
     },
   },
   {
@@ -110,7 +110,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "When you need one, switch it on for that agent from the agent's own page.",
         "Tools that reach your own systems ask for a key. Store it under Secrets.",
       ],
-      learnLessonId: "l3-6",
+      learnInAcademy: true,
     },
   },
   {
@@ -123,7 +123,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Add a secret with a name you will recognise.",
         "Pick that secret when a tool or connector asks for a key.",
       ],
-      learnLessonId: "l17-3",
+      learnInAcademy: true,
     },
   },
   {
@@ -133,7 +133,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Ask questions about a codebase",
       purpose: "Connect a repository so agents can answer questions about its code.",
       steps: ["Add a repository.", "Wait until indexing finishes.", "Ask your question."],
-      learnLessonId: "l6-1",
+      learnInAcademy: true,
     },
   },
   // /build is the Build Center (a brief in, an envoy out); the App Builder is
@@ -145,7 +145,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Build an app",
       purpose: "Describe an app and have it generated for you.",
       steps: ["Describe what you want in plain words.", "Review what was generated.", "Ask for changes until it fits."],
-      learnLessonId: "l18-3",
+      learnInAcademy: true,
     },
   },
   {
@@ -161,7 +161,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Trust moves up one step at a time and only when the evidence supports it. A problem moves it back down.",
       ],
       next: { label: "Back to the Build Center", href: "/build" },
-      learnLessonId: "l16-9",
+      learnInAcademy: true,
     },
   },
   {
@@ -178,7 +178,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       reassurance: "Planning creates nothing. Only applying does.",
       next: { label: "Start from a template instead", href: "/templates" },
-      learnLessonId: "l16-9",
+      learnInAcademy: true,
     },
   },
   {
@@ -193,7 +193,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "If this device cannot run a model, nothing breaks. The hosted model keeps answering.",
       ],
       edgeOnly: true,
-      learnLessonId: "l5-14",
+      learnInAcademy: true,
     },
   },
   {
@@ -208,7 +208,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Review every edit before you accept it.",
       ],
       edgeOnly: true,
-      learnLessonId: "l18-4",
+      learnInAcademy: true,
     },
   },
   {
@@ -223,7 +223,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "If an answer is off, change the agent's instructions and try again.",
       ],
       next: { label: "Edit the agent", href: "/agents" },
-      learnLessonId: "l22-3",
+      learnInAcademy: true,
     },
   },
   {
@@ -237,7 +237,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Choose the camera move, then set duration, frame rate and output size.",
         "Press Create clip — it records in real time, so keep this tab visible — then Download the result.",
       ],
-      learnLessonId: "l18-6",
+      learnInAcademy: true,
     },
   },
   {
@@ -247,7 +247,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       title: "Files your agents made",
       purpose: "Documents and other files produced by agents and workflow runs.",
       steps: ["Open or download a file.", "Remove the ones you no longer need."],
-      learnLessonId: "l18-6",
+      learnInAcademy: true,
     },
   },
   {
@@ -260,7 +260,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "See what your agents used over the last 30 days.",
         "Where a limit applies, the bar shows how close you are to it.",
       ],
-      learnLessonId: "l17-4",
+      learnInAcademy: true,
     },
   },
   {
@@ -274,7 +274,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Pick one and complete the payment.",
         "The new limits apply as soon as payment succeeds.",
       ],
-      learnLessonId: "l4-9",
+      learnInAcademy: true,
     },
   },
   {
@@ -289,7 +289,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Add more only when you see a need.",
       ],
       adminOnly: true,
-      learnLessonId: "l4-8",
+      learnInAcademy: true,
     },
   },
   {
@@ -304,7 +304,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Switch those tools on for the agents that need them.",
       ],
       adminOnly: true,
-      learnLessonId: "l4-1",
+      learnInAcademy: true,
     },
   },
   {
@@ -315,7 +315,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Your logo and colours for this workspace.",
       steps: ["Upload a logo.", "Pick your colours.", "Save your changes."],
       adminOnly: true,
-      learnLessonId: "l17-8",
+      learnInAcademy: true,
     },
   },
 ];

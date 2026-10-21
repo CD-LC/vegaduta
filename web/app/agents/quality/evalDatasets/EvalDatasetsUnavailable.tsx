@@ -5,7 +5,6 @@
 
 import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
 import { Section } from "../../../components/ax/page-kit";
-import { LearnLink } from "../../../learn/LearnThisButton";
 
 export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired" | "plan-locked" }) {
   if (reason === "client-not-wired") {
@@ -17,7 +16,6 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
       <Section
         title="Eval datasets & regression runs"
         description="Golden test cases replayed against this agent and scored by the quality judges, run over run."
-        actions={<LearnLink lessonId="l16-3" fromPath="/agents/quality" />}
       >
         <Alert>
           <AlertTitle>Almost there — API client wiring pending</AlertTitle>
@@ -34,7 +32,6 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
   return (
     <Section
       title="Eval datasets & regression runs"
-      actions={<LearnLink lessonId="l16-3" fromPath="/agents/quality" />}
     >
       <Alert>
         <AlertTitle>Premium feature</AlertTitle>

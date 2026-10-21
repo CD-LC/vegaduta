@@ -26,8 +26,7 @@ import { edgeEnabled } from "../../lib/edge/capabilities";
 import { useTour } from "../TourProvider";
 import { copyOrFallback } from "../tour/consumerGuide";
 import { ENTITY_FACTS } from "../../lib/platform-facts";
-import { academyLessonUrl } from "../../learn/curriculum";
-import { hasAcademy } from "../../lib/academyUrl";
+import { academyHref, hasAcademy } from "../../lib/academyUrl";
 import { guideForPath } from "./pageGuides";
 
 export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
@@ -189,13 +188,13 @@ export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
               {copy(`${guide.id}.next`, guide.next.label)} →
             </Link>
           )}
-          {/* The Academy lesson for THIS surface — distinct from `next`, which
-              stays inside the console. Resolved through academyLessonUrl() so
-              the host comes from NEXT_PUBLIC_ACADEMY_URL and the link carries
-              console_from attribution. Opens a new tab: it leaves the app. */}
-          {guide.learnLessonId && hasAcademy() && (
+          {/* The Academy teaches this surface — a plain link to the Academy
+              origin (academyHref(); the OSS console never names private
+              lesson ids). Distinct from `next`, which stays inside the
+              console. Opens a new tab: it leaves the app. */}
+          {guide.learnInAcademy && hasAcademy() && (
             <a
-              href={academyLessonUrl(guide.learnLessonId, pathname ?? undefined)}
+              href={academyHref()}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 block text-xs font-semibold text-primary hover:underline"
