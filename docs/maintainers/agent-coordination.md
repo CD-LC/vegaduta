@@ -95,6 +95,18 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-21 15:05, release agent: the v0.1.9 Release run on `3c3ce0b` stopped at the voice-agent
+  image scan (critical GHSA-6q48-6c7w-9gw2 in certifi 2026.7.22, published after 0.1.8); nothing was
+  published (no draft, floating tags unmoved). Merged #26 and #16, bumped certifi in five service
+  locks; v0.1.9 is re-tagged on the result. Closed #20, its log line is below.
+- 2026-10-21 08:45, production agent: deployed v0.1.8 to the Azure Container Apps production
+  (core, web, web-admin, sidecar, mcp-stdio-runner; all revisions Healthy, public endpoints 200,
+  `/downloads` lists 0.1.8). Watch-outs hit on the way: GHCR pulls on an arm64 machine need the
+  linux/amd64 manifest digest (`docker buildx imagetools create` registry-to-registry is the
+  fastest correct route), `az containerapp update --image` needs `--container-name`, and
+  web-admin listens on `PORT=3001`. Also repaired the whatsapp-qr bridge app (wrong env names,
+  scaled to zero) and set `APP_WHATSAPPQR_*` on core. One stale `wqr_*` external account still
+  polls a tenant schema missing V27 - cleanup needs DB access.
 - 2026-10-21 07:30, release agent: v0.1.8 published (tag on `3dbf32a`) and verified: latest
   release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
   `core` and `web` 0.1.8 images on GHCR for amd64 and arm64. Merged #17 (rollout note). `main` is

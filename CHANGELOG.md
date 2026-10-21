@@ -8,11 +8,6 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-### Fixed
-
-- **WhatsApp QR messages are no longer split between processes.** The jobs and worker shapes ran a second WhatsApp QR receiver next to the API's, so on a full install with the bridge each took a share of a linked number's incoming messages. They now switch it off, like the Signal receiver (`app.whatsappqr.receive.enabled: false` in `application-jobs.yml` and `application-worker.yml`).
-- **The chat artifacts directive keys sit where the code reads them.** The `artifacts` block in `application.yml` was nested under `app.chat.branching`, where nothing reads it; it now sits under `app.chat.directives`. Defaults and the `APP_CHAT_DIRECTIVES_ARTIFACTS_*` variables are unchanged.
-
 ## [0.1.9] - 2026-10-21
 
 ### Added
@@ -21,6 +16,9 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Service images carry certifi 2026.10.19.** certifi 2026.7.22, pinned in the app-builder, code-intel, rl-trainer, sidecar and voice-agent locks, has a critical advisory (GHSA-6q48-6c7w-9gw2) published after v0.1.8, and the release's image scan stopped on it. The five locks now pin 2026.10.19; nothing else changes.
+- **WhatsApp QR messages are no longer split between processes.** The jobs and worker shapes ran a second WhatsApp QR receiver next to the API's, so on a full install with the bridge each took a share of a linked number's incoming messages. They now switch it off, like the Signal receiver (`app.whatsappqr.receive.enabled: false` in `application-jobs.yml` and `application-worker.yml`).
+- **The chat artifacts directive keys sit where the code reads them.** The `artifacts` block in `application.yml` was nested under `app.chat.branching`, where nothing reads it; it now sits under `app.chat.directives`. Defaults and the `APP_CHAT_DIRECTIVES_ARTIFACTS_*` variables are unchanged.
 - **A personal install keeps chat history.** The 0.1.8 note said personal installs already had it on; they did not: `personal.yml` never set `APP_CHAT_BRANCHING_ENABLED` and core defaults it to off, so the Assistant's history stayed in one browser and a conversation expired after 24 h. The `personal` profile now turns it on (`app.chat.branching.enabled`, still `APP_CHAT_BRANCHING_ENABLED=false` in `deploy/compose/core.env` to switch it off). Conversations that had already expired are not recovered.
 - **A personal install's local model answers again by itself after a secrets change.** When the install kept its database but got a new `.env` (a re-install, or a repaired install), the local model's platform-pool entry was still listed as "in use" while every chat answered "No platform LLM is configured": its stored key no longer decrypted under the new `APP_ENCRYPTION_KEY`, so the chat path left it out. Core now repairs that entry (re-keys it, re-enables it, switches the pool back on) at every start and, when a chat still finds the pool empty, on the spot during that chat. The troubleshoot page says why the entry cannot be used instead of calling it in use, and the chat notice points to Troubleshoot.
 - **Windows: the personal install no longer stops with "required variable WORKSPACE_RUNNER_SECRET is missing a value".** The PowerShell launcher (`scripts/vegaduta.ps1`, which the Setup app runs on Windows) generated a shorter list of secrets than `scripts/vegaduta`: it lacked `WORKSPACE_RUNNER_SECRET`, which `personal.yml` and `lite.yml` require, and `SEARXNG_SECRET`, which web search requires. It now generates both, and an existing install gets them on its next start. A test fails CI when the two lists differ again.
