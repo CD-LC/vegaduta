@@ -57,6 +57,7 @@ $SecretSpecs = [ordered]@{
   LANGFUSE_REDIS_AUTH='hex16'; LANGFUSE_S3_SECRET_KEY='hex32'; LANGFUSE_SALT='hex32'; LANGFUSE_ENCRYPTION_KEY='hex32'
   LANGFUSE_NEXTAUTH_SECRET='hex32'; LANGFUSE_INIT_PROJECT_PUBLIC_KEY='lfpk'; LANGFUSE_INIT_PROJECT_SECRET_KEY='lfsk'
   LANGFUSE_INIT_USER_PASSWORD='hex16'; SEARXNG_SECRET='hex32'
+  WHATSAPP_QR_BRIDGE_SECRET='hex32'; DD_ADMIN_PASSWORD='hex16'; DD_SECRET_KEY='hex32'; DD_CREDENTIAL_AES_256_KEY='hex32'; DD_DATABASE_PASSWORD='hex16'
 }
 
 function Say($m)  { Write-Host "==> $m" -ForegroundColor Cyan }
@@ -145,6 +146,29 @@ function New-Secret([string]$kind) {
     default  { Die "unknown secret kind $kind" }
   }
 }
+# A name a compose file requires (${NAME:?...}) that is plainly a secret: generated, never asked for.
+# BASE_DOMAIN, VEGADUTA_VERSION and provider API keys are not (they carry meaning, not entropy).
+function Test-SecretLike([string]$n) {
+  if ($n -match '_API_KEY$') { return ($n -eq 'LIVEKIT_API_KEY') }
+  return [bool]($n -match 'SECRET|_PASSWORD$|_PASS$|_KEY$|_TOKEN$|_AUTH$|_SALT$')
+}
+# The table plus every secret-like variable any compose file under deploy\compose requires (hex32 when
+# the table does not name it). The table decides the format; the scan is the safety net, so an overlay
+# that requires a new secret is served before anyone notices the table was not updated. Compose checks
+# ${X:?} even for a service behind an inactive profile, so every file counts.
+function Get-AllSecretSpecs {
+  $all = [ordered]@{}
+  foreach ($k in $SecretSpecs.Keys) { $all[$k] = $SecretSpecs[$k] }
+  try {
+    foreach ($f in @(Get-ChildItem -Path $ComposeDir -Recurse -File -Include '*.yml','*.yaml' -ErrorAction SilentlyContinue)) {
+      foreach ($m in [regex]::Matches([System.IO.File]::ReadAllText($f.FullName), '\$\{([A-Z0-9_]+):\?')) {
+        $n = $m.Groups[1].Value
+        if (-not $all.Contains($n) -and (Test-SecretLike $n)) { $all[$n] = 'hex32' }
+      }
+    }
+  } catch { }
+  return $all
+}
 function Test-LocalUrl([string]$u) { return ($u -match 'localhost|127\.0\.0\.1|\[::1\]') }
 
 # ----------------------------------------------------------------- secrets
@@ -165,7 +189,7 @@ function Save-KeptSecrets {
   try {
     $f = Get-SecretsKeepFile
     New-Item -ItemType Directory -Force -Path (Split-Path $f) | Out-Null
-    $text = (@(@($SecretSpecs.Keys) + 'VEGADUTA_PERSONAL_PROJECT' | ForEach-Object { $v = Get-EnvValue $_; if ($v) { "$_=$v" } }) -join "`n") + "`n"
+    $text = (@(@((Get-AllSecretSpecs).Keys) + @($script:GuardSecrets) + 'VEGADUTA_PERSONAL_PROJECT' | ForEach-Object { $v = Get-EnvValue $_; if ($v) { "$_=$v" } }) -join "`n") + "`n"
     [System.IO.File]::WriteAllText($f, $text, (New-Object System.Text.UTF8Encoding $false))
     Protect-SecretFile $f
   } catch { }
@@ -196,11 +220,11 @@ function Invoke-Secrets([string]$DomainArg) {
   Protect-SecretFile $EnvFile
   $shipped = Get-ShippedVersion
   if ($shipped) { Set-EnvValue VEGADUTA_VERSION $shipped }
-  $filled = 0; $reused = 0
-  foreach ($k in $SecretSpecs.Keys) {
+  $filled = 0; $reused = 0; $specs = Get-AllSecretSpecs
+  foreach ($k in $specs.Keys) {
     if (-not (Get-EnvValue $k)) {
       $kept = Get-KeptSecret $k
-      if ($kept) { Set-EnvValue $k $kept; $reused++ } else { Set-EnvValue $k (New-Secret $SecretSpecs[$k]); $filled++ }
+      if ($kept) { Set-EnvValue $k $kept; $reused++ } else { Set-EnvValue $k (New-Secret $specs[$k]); $filled++ }
     }
   }
   if ($reused -gt 0) { Say "Reused $reused secret(s) from an earlier install ($(Get-SecretsKeepFile)), so its data still opens." }
@@ -452,8 +476,42 @@ function Prepare { Load-State; Resolve-Profiles; return (Get-ComposeArgs) }
 # new folder's secrets are new: db-roles cannot log in ("password authentication failed") and nothing
 # starts. The postgres container's local socket needs no password, so set the superuser's password to
 # this install's (read there from POSTGRES_PASSWORD, never on a command line). Data is kept.
+# Runs docker compose and returns its stdout+stderr as one string, exit code in $script:DcExit. With
+# $ErrorActionPreference = 'Stop', a bare `& docker ... 2>&1` throws on the first line Compose writes to
+# stderr (the error becomes a NativeCommandError), which is how a missing variable once stopped the
+# installer inside Repair-DbPassword instead of being reported.
+function Get-DcOutput([string[]]$ComposeArgs, [string[]]$More) {
+  $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  try { $out = @(& docker compose @ComposeArgs @More 2>&1 | ForEach-Object { "$_" }); $script:DcExit = $LASTEXITCODE }
+  finally { $ErrorActionPreference = $prev }
+  return ($out -join "`n")
+}
+# Last line of defence before `up`: ask Compose itself which variables it still finds missing (the
+# exact "required variable X is missing a value" that stops every later compose call) and fill the
+# secret-like ones, so no table, scan or hand-edited .env can leave an install stuck on one. Anything
+# else that is missing stops here with the one line that says what to set.
+$script:GuardSecrets = @()   # names Repair-ComposeEnv generated this run, so Save-KeptSecrets copies them too
+function Repair-ComposeEnv([string[]]$ComposeArgs) {
+  $filled = 0
+  for ($round = 0; $round -lt 20; $round++) {
+    $err = Get-DcOutput $ComposeArgs @('config', '-q')
+    if ($script:DcExit -eq 0) { if ($filled -gt 0) { Ok "generated $filled secret(s) the compose files required" }; return }
+    # Compose names every missing variable at once, one line each.
+    $names = @([regex]::Matches($err, 'required variable "?([A-Za-z0-9_]+)"? is missing a value') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    if ($names.Count -eq 0) { return }
+    $plain = @()
+    foreach ($n in $names) {
+      if (Get-EnvValue $n) { return }
+      if (Test-SecretLike $n) { Set-EnvValue $n (New-Secret 'hex32'); $filled++; $script:GuardSecrets += $n }
+      else { $plain += $n }
+    }
+    if ($filled -gt 0) { Save-KeptSecrets }
+    if ($plain.Count -gt 0) { Die ("required by the compose files but empty in ${EnvFile}: " + ($plain -join ' ') + ". Set them there, then re-run. ($err)") }
+  }
+  Warn "still missing variables after $round rounds: $err"
+}
 function Repair-DbPassword([string[]]$ComposeArgs) {
-  $log = (& docker compose @ComposeArgs logs --no-log-prefix db-roles 2>&1) -join "`n"
+  $log = Get-DcOutput $ComposeArgs @('logs', '--no-log-prefix', 'db-roles')
   if ($log -notmatch 'password authentication failed') { return $false }
   Warn "the database was created by an earlier install with another password - switching it to this install's password (data is kept)"
   $sql = "\getenv pw POSTGRES_PASSWORD`nSELECT format('ALTER ROLE %I PASSWORD %L', current_user, :'pw') \gexec`n"
@@ -462,8 +520,9 @@ function Repair-DbPassword([string[]]$ComposeArgs) {
   Ok 'database password updated'
   return $true
 }
-# `up` that repairs what it can (Repair-DbPassword) and tries once more.
+# `up` that repairs what it can (Repair-ComposeEnv, Repair-DbPassword) and tries once more.
 function Invoke-UpHeal([string[]]$ComposeArgs, [string[]]$More) {
+  Repair-ComposeEnv $ComposeArgs
   if ((Invoke-Dc $ComposeArgs $More) -eq 0) { return 0 }
   if (Repair-DbPassword $ComposeArgs) { return (Invoke-Dc $ComposeArgs $More) }
   return 1
@@ -506,7 +565,7 @@ function Invoke-Doctor {
   $freeGb = [math]::Floor($drive.Free / 1GB)
   if ($freeGb -ge $diskNeed) { Ok "Free disk $freeGb GB" } else { Warn "Only $freeGb GB free; $($script:Tier) wants >= $diskNeed GB" }
   if (Test-Path $EnvFile) { Ok ".env present ($EnvFile)" } else { Bad '.env missing - run: .\scripts\vegaduta.ps1 secrets'; return $false }
-  $missing = @($SecretSpecs.Keys | Where-Object { -not (Get-EnvValue $_) })
+  $missing = @((Get-AllSecretSpecs).Keys | Where-Object { -not (Get-EnvValue $_) })
   if ($missing.Count -eq 0) { Ok 'All secrets set' } else { Bad ("Empty secrets: " + ($missing -join ' ') + ' - run: .\scripts\vegaduta.ps1 secrets') }
   # Older .env.example files shipped CADDY_AUTO_HTTPS=on, which is not a Caddy auto_https value
   # (Caddy refuses to start). Empty means automatic HTTPS, which is what "on" meant.
