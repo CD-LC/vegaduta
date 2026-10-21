@@ -4,7 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { assistantApi } from "../../lib/api/assistant";
 import { auth } from "../../lib/auth";
 import type { ThreadSummary } from "./assistantTypes";
-import { deleteThread, listThreads, mergeServerThreads, patchThread, recordThreadActivity, threadScope } from "./threadIndex";
+import {
+  deleteThread,
+  listThreads,
+  mergeServerThreads,
+  patchThread,
+  recordThreadActivity,
+  threadScope,
+} from "./threadIndex";
 
 /**
  * The left rail's data: the local thread index for the signed-in user, kept in sync with what the pane does.

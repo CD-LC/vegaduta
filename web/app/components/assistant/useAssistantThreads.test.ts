@@ -25,8 +25,20 @@ describe("useAssistantThreads", () => {
     await recordThreadActivity("u1", "local", "a1", "typed here", 5_000);
     apiMock.listThreads.mockResolvedValue({
       threads: [
-        { sessionId: "remote", agentId: "a1", title: "from another device", createdAt: "2026-10-17T09:00:00Z", updatedAt: "2026-10-17T10:00:00Z" },
-        { sessionId: "local", agentId: "a1", title: "typed here", createdAt: "1970-01-01T00:00:01Z", updatedAt: "1970-01-01T00:00:02Z" },
+        {
+          sessionId: "remote",
+          agentId: "a1",
+          title: "from another device",
+          createdAt: "2026-10-17T09:00:00Z",
+          updatedAt: "2026-10-17T10:00:00Z",
+        },
+        {
+          sessionId: "local",
+          agentId: "a1",
+          title: "typed here",
+          createdAt: "1970-01-01T00:00:01Z",
+          updatedAt: "1970-01-01T00:00:02Z",
+        },
       ],
       nextBefore: null,
     });

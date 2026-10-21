@@ -20,15 +20,17 @@ import org.springframework.web.util.ServletRequestPathUtils;
 class ChatBranchFlagGateTest {
 
     private final MockHttpServletRequest request =
-        new MockHttpServletRequest("POST", "/api/agents/a/sessions/s/messages/m/edit");
+            new MockHttpServletRequest("POST", "/api/agents/a/sessions/s/messages/m/edit");
     private final MockHttpServletResponse response = new MockHttpServletResponse();
 
     @Test
     void flagOffAnswers404() {
         ChatBranchFlagGate gate = new ChatBranchFlagGate(false);
 
-        ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> gate.preHandle(request, response, new Object()));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> gate.preHandle(request, response, new Object()));
 
         assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
     }
@@ -38,7 +40,10 @@ class ChatBranchFlagGateTest {
         assertTrue(new ChatBranchFlagGate(true).preHandle(request, response, new Object()));
     }
 
-    /** The thread list reads the same tables, so it is behind the same gate; the discovery call is not. */
+    /**
+     * The thread list reads the same tables, so it is behind the same gate; the discovery call is
+     * not.
+     */
     @Test
     void theGateCoversTheBranchingAndThreadRoutesOnly() {
         ExposedRegistry registry = new ExposedRegistry();
