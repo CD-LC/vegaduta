@@ -571,7 +571,7 @@ Same conventions as above (Spring property shown as its env name, defaults in
 | `TOOL_HTTP_REQUEST_SAFE_MODE` | `http_request` safe mode: https only, allow-lists, named credentials, gated writes |
 | `APP_CONTEXT_COMPACTION_ENABLED` | context budget planner and compaction in the chat turn (`restore_tool_result` stays on with it) |
 | `APP_CHAT_RESUMABLE_STREAMS_ENABLED` (Helm: `core.resumableStreamsEnabled`) | chat streams that resume after a drop, sleep, refresh or navigation. `APP_CHAT_RESUMABLE_STREAMS_STORE=redis` (set by the chart for 2+ replicas) has no effect while this is off |
-| `APP_CHAT_BRANCHING_ENABLED` | edit, regenerate and switch between conversation branches |
+| `APP_CHAT_BRANCHING_ENABLED` (Helm: `core.branchingEnabled`) | keep chat history: each message is stored in Postgres for `app.chat.branching.retention-days` (30) instead of expiring from Redis after 24 h; edit, regenerate and switch between conversation branches. On by default in every Compose tier and in the chart; the core property itself defaults to off |
 | `APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED` | prompt directive for the chat artifacts pane |
 | `CHAT_IMPORT_ENABLED`, `CHAT_EXPORT_ENABLED` | import ChatGPT/Claude chats as read-only records; export chats as md/json/txt. Transcript reload, export and branching only ever reach the caller's own conversation: session memory is keyed by tenant + agent + user + client session id, and a session is readable only by the user who started it (see Security Architecture §4.1 in the platform docs) |
 | `APP_MCP_APPS_ENABLED` | host MCP Apps (`ui://` resources); the web side also needs `NEXT_PUBLIC_MCP_APPS=1` |
