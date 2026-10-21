@@ -1304,32 +1304,29 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.keycloak.client-secret` | `${KEYCLOAK_CLIENT_SECRET:}` | profile `security`, shapes that load the module | see source: `core/admin/src/main/java/com/agenticai/core/admin/keycloak/KeycloakAdminClient.java` |
 | `app.security.permission-cache-ttl` | `10s` | all shapes | Filter-chain hot-path cache (2026-09-24 scale work): the time UserPermissionService may serve one user's effective stored grants to GranularPermissionConverter without re-querying. |
 
-### Module `agents` (481)
+### Module `agents` (443)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
 | `app.a2a` |  | shapes that load the module | The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController, A2aJsonRpcController). |
-| `app.a2a.allow-insecure-loopback` |  | shapes that load the module | Permit plain http to a loopback host. |
-| `app.a2a.allowed-hosts` |  | shapes that load the module | Egress allow-list of hosts (exact agents.example.com or *.example.com for subdomains only). |
+| `app.a2a.client.allow-insecure-loopback` |  | shapes that load the module | Permit plain http to a loopback host. |
+| `app.a2a.client.allowed-hosts` |  | shapes that load the module | Egress allow-list of hosts (exact agents.example.com or *.example.com for subdomains only). |
 | `app.a2a.blocking-timeout` |  | shapes that load the module | Upper bound a BLOCKING SendMessage (and each streamed chunk wait) holds the request thread for. |
-| `app.a2a.connect-timeout` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
+| `app.a2a.client.connect-timeout` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
 | `app.a2a.enabled` |  | shapes that load the module | Platform-wide kill switch. |
 | `app.a2a.heartbeat-interval` | `${APP_A2A_HEARTBEAT_INTERVAL:10s}` | all shapes | Redis mode only: how often the owning replica refreshes the heartbeat of its non-terminal task records and checks them for a remote cancel. |
 | `app.a2a.heartbeat-stale-after` | `${APP_A2A_HEARTBEAT_STALE_AFTER:60s}` | all shapes | Redis mode only: a non-terminal record whose heartbeat is older than this and that belongs to ANOTHER instance id (a previous boot or a dead replica) is marked FAILED with "interrupted by restart". |
-| `app.a2a.key-id` |  | shapes that load the module | Optional stable kid; default is a SHA-256 thumbprint of the key. |
-| `app.a2a.max-calls-per-turn` |  | shapes that load the module | Most a2a_call_agent calls one agent turn may make (OWASP ASI07/ASI08: a looping or injected agent must not fan out to remote agents without bound). |
+| `app.a2a.client.max-calls-per-turn` |  | shapes that load the module | Most a2a_call_agent calls one agent turn may make (OWASP ASI07/ASI08: a looping or injected agent must not fan out to remote agents without bound). |
 | `app.a2a.max-concurrent-async-tasks` |  | shapes that load the module | How many non-blocking (returnImmediately/blocking:false) turns may run concurrently. |
-| `app.a2a.max-response-bytes` |  | shapes that load the module | Hard cap on any single remote response body. |
-| `app.a2a.max-result-chars` |  | shapes that load the module | Cap on the text handed back to the model. |
+| `app.a2a.client.max-response-bytes` |  | shapes that load the module | Hard cap on any single remote response body. |
+| `app.a2a.client.max-result-chars` |  | shapes that load the module | Cap on the text handed back to the model. |
 | `app.a2a.max-tasks` |  | shapes that load the module | Hard cap on tasks held in memory (across all tenants). |
-| `app.a2a.max-wait` |  | shapes that load the module | Total time one tool call may wait for the remote task to finish. |
-| `app.a2a.poll-interval` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
-| `app.a2a.private-key-pem` |  | shapes that load the module | PKCS8 PEM (or raw 32-byte seed, base64/hex) of the Ed25519 signing key - the deployment's marketplace identity. |
+| `app.a2a.client.max-wait` |  | shapes that load the module | Total time one tool call may wait for the remote task to finish. |
+| `app.a2a.client.poll-interval` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
 | `app.a2a.public-base-url` |  | shapes that load the module | The externally reachable origin of THIS core service, e.g. |
-| `app.a2a.public-key-pem` |  | shapes that load the module | X.509 PEM of the public half of #privateKeyPem. |
-| `app.a2a.request-timeout` |  | shapes that load the module | Per HTTP request (card, JWKS, send, poll). |
+| `app.a2a.client.request-timeout` |  | shapes that load the module | Per HTTP request (card, JWKS, send, poll). |
 | `app.a2a.require-pinned-key` |  | shapes that load the module | When true, boot FAILS if signing is enabled but no signing.private-key-pem is pinned - an ephemeral per-boot key gives every replica a different marketplace identity. |
-| `app.a2a.require-signed-card` |  | shapes that load the module | Refuse remote cards whose detached JWS does not verify (default true). |
+| `app.a2a.client.require-signed-card` |  | shapes that load the module | Refuse remote cards whose detached JWS does not verify (default true). |
 | `app.a2a.signing` |  | shapes that load the module | Card signing - see A2aCardSigningService's javadoc. |
 | `app.a2a.task-store` | `${APP_A2A_TASK_STORE:memory}` | all shapes | Where A2aTaskStore keeps task records: memory (default, per-JVM, today's behaviour) or redis (a tenant-scoped JSON snapshot mirrored to Redis with #taskTtl, so GetTask / CancelTask work from any core replica). |
 | `app.a2a.task-ttl` | `${APP_A2A_TASK_TTL:24h}` | all shapes | How long a finished task stays retrievable via GetTask / tasks/get. |
@@ -1344,58 +1341,26 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.agent-import.max-payload-bytes` | `1048576` | all shapes | Largest accepted payload (UTF-8 bytes of the exported JSON). |
 | `app.agent-jobs` |  | shapes that load the module | The app.agent-jobs.* block (see application.yml). |
 | `app.agent-jobs.approval` |  | shapes that load the module | Read by the APPROVAL-PARKING half. |
-| `app.agent-jobs.blocked-alert-after` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-jobs.deadline-sweep-interval` | `15s` | all shapes | Backs BOTH the deadline sweep and the orphan sweep. |
-| `app.agent-jobs.dedupe-window-seconds` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-jobs.default-timeout` | `10m` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.duplicate-window` |  | shapes that load the module | How long the ledger suppresses a repeat firing on an IDENTICAL event payload for one trigger. |
 | `app.agent-jobs.durability` |  | shapes that load the module | Read by the DURABILITY half (orphan recovery). |
 | `app.agent-jobs.durability.resume-from-journal` | `false` | all shapes | Group `app.agent-jobs.durability`: Read by the DURABILITY half (orphan recovery). (see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/StepJournal.java`) |
-| `app.agent-jobs.enabled` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-jobs.heartbeat-interval` | `15s` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.heartbeat-seconds` |  | shapes that load the module | How often a running job's lease is renewed. |
 | `app.agent-jobs.interrupt-on-external-terminal` | `true` | profile `shape-api`, profile `shape-jobs-core`, profile `shape-jobs`, shapes that load the module | When true, the heartbeat tick also interrupts a locally-running job whose row another replica has already driven to a terminal status (the deadline sweep's TIMEOUT, the orphan sweep's ORPHANED). |
-| `app.agent-jobs.lease-seconds` |  | shapes that load the module | A RUNNING job whose heartbeat is older than this (plus a small skew grace) is adoptable. |
-| `app.agent-jobs.max-attempts` |  | shapes that load the module | Total claims of one job, INCLUDING the first. |
 | `app.agent-jobs.max-concurrent` | `${AGENT_JOBS_MAX_CONCURRENT:4}` | all shapes | Size of the bounded worker pool - see AgentJobExecutor for why the bound IS the feature. |
 | `app.agent-jobs.max-concurrent-per-tenant` | `2` | all shapes | Ceiling on how many of those workers ONE tenant may occupy, so a single tenant submitting twenty jobs cannot starve every other tenant on the replica. |
-| `app.agent-jobs.max-fires-per-sustained-window` |  | shapes that load the module | The loop guard's SUSTAINED half - the one that actually catches a slow self-triggering cycle. |
-| `app.agent-jobs.max-fires-per-window` |  | shapes that load the module | The loop guard's BURST half. |
-| `app.agent-jobs.max-goal-chars` |  | shapes that load the module | Ceiling on a rendered goal template, so one event cannot mint a huge prompt. |
-| `app.agent-jobs.max-note-chars` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-notes-per-job` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-parks-per-job` |  | shapes that load the module | How many times ONE job may park. |
-| `app.agent-jobs.max-per-tenant` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-repair-attempts` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-schema-bytes` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-tenant-fires-per-sustained-window` |  | shapes that load the module | TENANT-WIDE ceiling inside #sustainedWindow, across all triggers - the tenant-level spend bound the sustained per-trigger cap cannot provide against fan-out. |
-| `app.agent-jobs.max-tenant-fires-per-window` |  | shapes that load the module | TENANT-WIDE ceiling on trigger firings inside #window, across ALL of the tenant's triggers. |
 | `app.agent-jobs.max-timeout` | `60m` | all shapes | Clamped to, never rejected against: a client asking for longer than the platform allows is asking for "as long as you'll give me". |
-| `app.agent-jobs.max-triggers-per-agent` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-triggers-per-event` |  | shapes that load the module | How many triggers ONE event may fan out to. |
 | `app.agent-jobs.max-turns` | `1` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.min-interval-minutes` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-jobs.output-schema` |  | shapes that load the module | Read by the OBSERVABILITY half (structured job output). |
 | `app.agent-jobs.ownership` |  | shapes that load the module | Cross-replica job OWNERSHIP LEASE + adoption (core/agents job/ownership). |
-| `app.agent-jobs.park-timeout` |  | shapes that load the module | How long a parked job waits for a human before it is FAILED with APPROVAL_TIMEOUT. |
 | `app.agent-jobs.poll-interval` | `10s` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-jobs.progress` |  | shapes that load the module | Read by the OBSERVABILITY half (progress notes + the report_progress tool). |
 | `app.agent-jobs.queue-capacity` | `8` | all shapes | Hand-off queue depth in front of the pool. |
 | `app.agent-jobs.queue-ttl` | `1h` | all shapes | A job left QUEUED longer than this is FAILED rather than run. |
-| `app.agent-jobs.requeue-zero-work-orphans` |  | shapes that load the module | Whether an orphan that provably did ZERO chargeable work (no turns used, no tool calls logged for its session) may be re-queued instead of failed. |
-| `app.agent-jobs.resume-from-journal` |  | shapes that load the module | With the journal on, an orphan that already STARTED turns may be re-queued (instead of ORPHANED) when the journal proves its last turn COMPLETED - the resumed attempt reuses that result and charges nothing. |
-| `app.agent-jobs.resume-max-attempts` |  | shapes that load the module | Total claims of one job (including the first) after which the lease sweep stops re-queuing it and FAILS it with RESUME_ATTEMPTS_EXHAUSTED: a poison job must not loop forever. |
-| `app.agent-jobs.resume-rerun-incomplete-turn` |  | shapes that load the module | Also re-queue an orphan whose last turn STARTED but never COMPLETED, re-running that turn. |
+| `app.agent-jobs.durability.requeue-zero-work-orphans` |  | shapes that load the module | Whether an orphan that provably did ZERO chargeable work (no turns used, no tool calls logged for its session) may be re-queued instead of failed. |
 | `app.agent-jobs.schedule` |  | shapes that load the module | Read by the SCHEDULES half. |
-| `app.agent-jobs.skip-notification-threshold` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.step-journal-enabled` |  | shapes that load the module | L1 step journal master switch (default OFF): job turns, DURABLE tool effects and delegate_parallel branches are journaled in Postgres (agent_step_journal, V376). |
-| `app.agent-jobs.step-journal-purge-interval` |  | shapes that load the module | How often the retention purge runs. |
-| `app.agent-jobs.step-journal-retention-days` |  | shapes that load the module | Retention of agent_step_journal rows, in days (floored at 1). |
-| `app.agent-jobs.sustained-window` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.sweep-batch` |  | shapes that load the module | Max expired leases handled per tenant per sweep tick. |
-| `app.agent-jobs.sweep-interval` |  | shapes that load the module | The sweep is the GUARANTEE that an approved job resumes. |
+| `app.agent-jobs.durability.step-journal-enabled` |  | shapes that load the module | L1 step journal master switch (default OFF): job turns, DURABLE tool effects and delegate_parallel branches are journaled in Postgres (agent_step_journal, V376). |
 | `app.agent-jobs.trigger` |  | shapes that load the module | Read by the EVENT-TRIGGERS half. |
-| `app.agent-jobs.window` |  | shapes that load the module | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-lab.free-plan-enabled` | `true` | shapes that load the module | see source: `core/agents-studio/src/main/java/com/agenticai/core/agents/lab/AgentLabRunService.java` |
 | `app.agent.share.max-chats-per-minute-per-ip` | `12` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
 | `app.agent.share.max-vision-sessions-per-minute-per-ip` | `6` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
@@ -1754,9 +1719,6 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.tutor.max-plans-per-user` | `20` | all shapes | Group `app.tutor`: Learn Anything tutor (com.agenticai.core.tutor): per-member study plans for any topic in any language,... (see source: `core/agents-studio/src/main/java/com/agenticai/core/tutor/StudyPlanService.java`) |
 | `app.vision` |  | shapes that load the module | Live Vision ("Sight") - the app.vision.* config block (see application.yml): the platform-wide enable flag plus the per-user-per-day allowances VisionUsageService enforces. |
 | `app.vision.frames` |  | shapes that load the module | Group `app.vision`: Live Vision ("Sight") - the app.vision.* config block (see application.yml): the platform-wide... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/vision/VisionProperties.java`) |
-| `app.vision.free-daily` |  | shapes that load the module | FREE tier's daily server-analyzed frame allowance (its real vision tier is on-device). |
-| `app.vision.minutes-premium-daily` |  | shapes that load the module | Paid tiers' daily WATCH/LIVE minutes. |
-| `app.vision.premium-daily` |  | shapes that load the module | Paid tiers' daily server-analyzed frame allowance. |
 | `app.vision.watch` |  | shapes that load the module | Group `app.vision`: Live Vision ("Sight") - the app.vision.* config block (see application.yml): the platform-wide... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/vision/VisionProperties.java`) |
 | `app.web-search.daily-caps.brave` | `0` | all shapes | Group `app.web-search.daily-caps`: Attempts per 24h window the PLATFORM may make against one provider (Redis counter, fail-open). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/web/WebSearchProviderWiring.java`) |
 | `app.web-search.daily-caps.exa` | `0` | all shapes | Group `app.web-search.daily-caps`: Attempts per 24h window the PLATFORM may make against one provider (Redis counter, fail-open). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/web/WebSearchProviderWiring.java`) |
@@ -1790,7 +1752,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `tool-sandbox.max-tools-per-tenant` | `${TOOL_SANDBOX_MAX_TOOLS_PER_TENANT:25}` | all shapes | Standing cap on saved custom code tools per tenant schema. |
 | `tool-sandbox.request-timeout-millis` | `${TOOL_SANDBOX_REQUEST_TIMEOUT_MS:30000}` | all shapes | Whole-call budget (ms). |
 
-### Module `app` (31)
+### Module `app` (22)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -1812,21 +1774,12 @@ Keep this appendix current: when you add a property, document it in the section 
 | `fraud-detection.auto-block-duration-minutes` | `60` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
 | `fraud-detection.enforce` | `false` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/FraudDetectionInterceptor.java` |
 | `fraud-detection.hcaptcha` |  | shapes that load the module | Configuration properties for hCaptcha integration. |
-| `fraud-detection.hcaptcha.challenge-timestamp` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.hcaptcha.enabled` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.error-codes` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.hostname` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.remote-ip` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.response` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.score` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.score-reason` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.secret` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.hcaptcha.secret-key` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.hcaptcha.site-key` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
-| `fraud-detection.hcaptcha.success` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.vpn.score-threshold` | `0.7` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
 
-### Module `app-config` (466)
+### Module `app-config` (469)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -2309,7 +2262,7 @@ Keep this appendix current: when you add a property, document it in the section 
 |---|---|---|---|
 | `app.workflow.temporal.worker-enabled` | `false` | profile `jobs`, profile `worker` | Polling the Temporal task queue is the app-worker deployable's job. |
 
-### Module `billing` (19)
+### Module `billing` (13)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -2318,13 +2271,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.billing.invoice.seller.gstin` |  | shapes that load the module | Group `app.billing.invoice.seller`: The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config... (see source: `core/billing/src/main/java/com/agenticai/core/billing/invoice/InvoiceSellerProperties.java`) |
 | `app.billing.invoice.seller.name` |  | shapes that load the module | Group `app.billing.invoice.seller`: The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config... (see source: `core/billing/src/main/java/com/agenticai/core/billing/invoice/InvoiceSellerProperties.java`) |
 | `app.billing.razorpay` |  | shapes that load the module | PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay offer_id) - the config-backed catalog of Razorpay dashboard Plan ids per (tier, currency, period), plus the... |
-| `app.billing.razorpay.annual` |  | shapes that load the module | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayPlanCatalog.java`) |
-| `app.billing.razorpay.inr` |  | shapes that load the module | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayPlanCatalog.java`) |
-| `app.billing.razorpay.monthly` |  | shapes that load the module | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayPlanCatalog.java`) |
 | `app.billing.razorpay.plans` |  | shapes that load the module | PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency) + B2 (annual plans): one dashboard-created Razorpay Plan id per tier x currency x billing period, bound by RazorpayPlanCatalog. |
-| `app.billing.razorpay.premium` |  | shapes that load the module | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayPlanCatalog.java`) |
-| `app.billing.razorpay.unlimited` |  | shapes that load the module | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayPlanCatalog.java`) |
-| `app.billing.razorpay.usd` |  | shapes that load the module | Group `app.billing.razorpay`: PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay... (see source: `core/billing/src/main/java/com/agenticai/core/billing/gateway/RazorpayPlanCatalog.java`) |
 | `app.commerce.checkout.expiry-hours` | `24` | shapes that load the module | App-side expiry (see package-info's "known v0 limits") - matches the audit's proposed 24h expire_by for the gateway link. |
 | `app.commerce.checkout.max-amount-paise` | `10000000` | shapes that load the module | UPI's per-transaction ceiling for ordinary merchant collections is Rs 1,00,000 (NPCI; higher caps exist only for specific categories), so anything above it would fail at the customer's bank anyway - better to refuse... |
 | `app.commerce.feed.max-checkouts-per-day` | `100` | shapes that load the module | see source: `core/billing/src/main/java/com/agenticai/core/billing/commerce/ProductCatalogService.java` |
@@ -2342,7 +2289,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.briefs.plan-calls-per-day.premium` | `50` | shapes that load the module | see source: `core/brief/src/main/java/com/agenticai/core/brief/BriefRateLimiter.java` |
 | `app.briefs.plan-calls-per-day.unlimited` | `500` | shapes that load the module | see source: `core/brief/src/main/java/com/agenticai/core/brief/BriefRateLimiter.java` |
 
-### Module `chat` (34)
+### Module `chat` (41)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -2396,7 +2343,7 @@ Keep this appendix current: when you add a property, document it in the section 
 |---|---|---|---|
 | `code-intel.timeout-millis` |  | shapes that load the module | Per-call timeout (ms) for retrieval/graph reads. |
 
-### Module `dbauth` (9)
+### Module `dbauth` (5)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -2404,11 +2351,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.datasource.aws` |  | shapes that load the module | see source: `core/dbauth/src/main/java/com/agenticai/core/dbauth/DbAuthProperties.java` |
 | `app.datasource.azure` |  | shapes that load the module | see source: `core/dbauth/src/main/java/com/agenticai/core/dbauth/DbAuthProperties.java` |
 | `app.datasource.gcp` |  | shapes that load the module | see source: `core/dbauth/src/main/java/com/agenticai/core/dbauth/DbAuthProperties.java` |
-| `app.datasource.region` |  | shapes that load the module | Region of the RDS instance; blank uses the SDK chain (AWS_REGION, profile, instance metadata). |
-| `app.datasource.scope` |  | shapes that load the module | OAuth scope of the token; the default is the public-cloud Azure Database for PostgreSQL scope. |
 | `spring.datasource.hikari` |  | shapes that load the module | Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare default (maximum-pool-size 10, minimum-idle == maximum-pool-size, connection-timeout 30000ms). |
-| `spring.datasource.hikari.connection-details` |  | shapes that load the module | Group `spring.datasource.hikari`: Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare... (see source: `core/dbauth/src/main/java/com/agenticai/core/dbauth/DbAuthConfiguration.java`) |
-| `spring.datasource.hikari.env` |  | shapes that load the module | Group `spring.datasource.hikari`: Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare... (see source: `core/dbauth/src/main/java/com/agenticai/core/dbauth/DbAuthConfiguration.java`) |
 
 ### Module `devices` (3)
 
@@ -2553,7 +2496,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.platform.reliability.slo.retention-hours` | `48` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/SloSampler.java` |
 | `app.platform.reliability.slo.sample-interval-seconds` | `60` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/SloSampler.java` |
 
-### Module `providers` (13)
+### Module `providers` (5)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
@@ -2561,15 +2504,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.providers.rejected-cooldown-hours` | `6` | shapes that load the module | How long a credential the provider refused stays off-limits to BACKGROUND callers (#resolveBest(boolean)), counted from the refusal. |
 | `openai.api-url` | `https://api.openai.com/v1` | shapes that load the module | see source: `core/providers/src/main/java/com/agenticai/core/providers/modality/OpenAIWhisperVideoProvider.java` |
 | `vertex.pool` |  | shapes that load the module | vertex.pool.* - the platform's own Vertex AI credentials (up to 3 GCP projects), used for the platform-subsidized paths that must not depend on any tenant's BYOK key: the anonymous /try sandbox and FREE-plan creative... |
-| `vertex.pool.location` |  | shapes that load the module | Group `vertex.pool`: vertex.pool.* - the platform's own Vertex AI credentials (up to 3 GCP projects), used for the... (see source: `core/providers/src/main/java/com/agenticai/core/providers/VertexPoolProperties.java`) |
-| `vertex.pool.priority` |  | shapes that load the module | Lower tries first, same convention as PlatformHostedLlmProvider#getPriority(). |
-| `vertex.pool.project-id` |  | shapes that load the module | Group `vertex.pool`: vertex.pool.* - the platform's own Vertex AI credentials (up to 3 GCP projects), used for the... (see source: `core/providers/src/main/java/com/agenticai/core/providers/VertexPoolProperties.java`) |
-| `vertex.pool.service-account-key-path` |  | shapes that load the module | Path to a GCP service-account JSON key file, mounted into the container (e.g. |
 | `vertex.pool.slots` |  | shapes that load the module | Group `vertex.pool`: vertex.pool.* - the platform's own Vertex AI credentials (up to 3 GCP projects), used for the... (see source: `core/providers/src/main/java/com/agenticai/core/providers/VertexPoolProperties.java`) |
-| `vertex.pool.supports-image` |  | shapes that load the module | Group `vertex.pool`: vertex.pool.* - the platform's own Vertex AI credentials (up to 3 GCP projects), used for the... (see source: `core/providers/src/main/java/com/agenticai/core/providers/VertexPoolProperties.java`) |
-| `vertex.pool.supports-text` |  | shapes that load the module | Which capabilities this slot's project has been provisioned/allowlisted for - Veo access in particular is not automatic on every GCP project. |
-| `vertex.pool.supports-video` |  | shapes that load the module | Group `vertex.pool`: vertex.pool.* - the platform's own Vertex AI credentials (up to 3 GCP projects), used for the... (see source: `core/providers/src/main/java/com/agenticai/core/providers/VertexPoolProperties.java`) |
-| `vertex.pool.use-application-default-credentials` |  | shapes that load the module | See this class's javadoc "Application Default Credentials" section - true means skip #serviceAccountKeyPath entirely and authenticate via whatever ADC finds in this environment. |
 
 ### Module `quality` (6)
 
@@ -2615,16 +2550,14 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.sharing.rate-limit.max-grant-reads-per-minute` | `120` | shapes that load the module | see source: `core/sharing/src/main/java/com/agenticai/core/sharing/ShareRateLimiter.java` |
 | `app.sharing.rate-limit.max-grant-writes-per-minute` | `20` | shapes that load the module | see source: `core/sharing/src/main/java/com/agenticai/core/sharing/ShareRateLimiter.java` |
 
-### Module `storage` (6)
+### Module `storage` (4)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
 | `app.storage` |  | shapes that load the module | app.storage.* - the only config surface that changes between a local MinIO deployment and production AWS S3/Cloudflare R2. |
 | `app.storage.azure` |  | shapes that load the module | Settings for type=azure-blob; ignored by the other implementations. |
-| `app.storage.connection-string` |  | shapes that load the module | Full connection string, for credentials=static: an account key (not recommended outside development) or the Azurite emulator's well-known development string. |
 | `app.storage.legacy-unprefixed-fallback` |  | shapes that load the module | Whether S3FileStorageService#get/S3FileStorageService#exists may retry the BARE (un-tenant-prefixed) key after the tenant-scoped key misses - the compatibility path for objects written before tenant prefixing landed... |
 | `app.storage.local` |  | shapes that load the module | Settings for type=local; ignored by the S3 implementation. |
-| `app.storage.path` |  | shapes that load the module | Root directory every object is stored under (created on startup if missing). |
 
 ### Module `templates` (2)
 

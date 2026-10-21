@@ -52,6 +52,7 @@ the browser (local sign-in in personal mode). Its navigation is assembled in
 | `services/piece-host` | Node | stdio MCP server that exposes allow-listed Activepieces pieces as tools, run inside the sandboxed `mcp-stdio-runner`; preview, off by default (opt-in Compose overlay `docker-compose.piece-host.yml`) |
 | `services/whatsapp-qr` | Node | WhatsApp linked-device bridge (multi-device protocol): links a tenant's own number as a companion device; dials out only, publishes no port |
 | `services/workspace-runner` | Node | runs the Assistant's `local_shell` commands for personal installs, with only the projects folder mounted; isolates untrusted command execution from core |
+| `services/browser-runner` | Node (Playwright) | the browser behind the personal install's browser add-on (`deploy/compose/browser.yml`); core drives it over `APP_BROWSERUSE_REMOTE_URL` with the same `browser_*` tools as an in-core Chromium; isolates untrusted web content |
 | `services/desktop-agent` | Node | loopback computer-use helper for personal installs (screenshots, accessibility tree, click/type, notifications, clipboard); runs on the laptop itself, never in a container |
 
 Two further optional pieces are not Java and not in `services/`: an Ollama
@@ -263,7 +264,7 @@ contributor meets; each has a step-by-step guide in [Extending](../extending.md)
 | Seam | Where | Pattern | Guide |
 |---|---|---|---|
 | Workflow node execution | `core/workflow`: `NodeHandler`, one handler per node type, looked up by `WorkflowNodeExecutor`; traversal rules shared by the in-process and Temporal engines in `WorkflowTraversalRules` | Strategy registry; functional core | [section 5](../extending.md#5-add-a-workflow-node-type) |
-| Tools offered to an agent turn | `core/agents-tools/.../tools`: `ToolSource` beans (32 today) merged by `ToolResolver` | Composite | [section 10](../extending.md#10-add-a-tool-source) |
+| Tools offered to an agent turn | `core/agents-tools/.../tools`: `ToolSource` beans (33 today, declared in `ToolSourceConfiguration`) merged by `ToolResolver` | Composite | [section 10](../extending.md#10-add-a-tool-source) |
 | Outbound HTTP for agents and workflows | `core/agents-browser/.../tools/web`: validate, resolve secrets, host policy, send, redirect, read and redact | Pipeline of stage classes | [section 11](../extending.md#11-change-the-http-request-pipeline) |
 | Observing every LLM call | `core/chat`: `LlmMetricsAdvisor` builds an `LlmCallObservation`, `LlmCallSink`s consume it | Observer; a failing sink never reaches the call | [section 12](../extending.md#12-add-an-llm-call-sink) |
 | Recording a turn | `core/agents-turn/.../turnjournal`: `TurnJournal` SPI, `TurnRecorder`; off by default | Append-only hash-chained log | [section 13](../extending.md#13-record-more-of-a-turn-in-the-turn-journal), [ADR-0020](ADR-0020-turn-journal.md) |
@@ -280,9 +281,13 @@ direction of travel beyond this (replayable turns, capability tokens, a single p
 
 ## Error responses
 
-Every error the core API maps goes through one `@RestControllerAdvice`,
-`GlobalExceptionHandler` (`core/app/.../common`), and every body it writes is
-built by `ErrorResponseFactory`. The body is an
+Every error the core API maps goes through an ordered chain of
+`@RestControllerAdvice` classes in `core/app/.../common` (which replaced the
+former single `GlobalExceptionHandler`): `ClientRequestExceptionHandler`,
+`RequestBindingExceptionHandler`, `ResourceStateExceptionHandler`,
+`ExecutionPolicyExceptionHandler`, `ServiceCredentialExceptionHandler`,
+`UpstreamDependencyExceptionHandler`, and `FallbackExceptionHandler` last with
+the catch-alls. Every body they write is built by `ErrorResponseFactory`. The body is an
 [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) Problem Details object,
 served as `application/problem+json`, that also carries the members the API
 returned before RFC 9457 support, unchanged:

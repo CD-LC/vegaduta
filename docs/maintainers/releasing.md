@@ -1,8 +1,10 @@
 # Releasing
 
-Releases are built and published by `.github/workflows/release.yml` when a
-`v<major>.<minor>.<patch>[-<pre>]` tag is pushed. Nothing is built or signed on
-a maintainer's machine.
+Releases are built and published by `.github/workflows/release.yml`, run by
+hand (`workflow_dispatch`) **on** a `v<major>.<minor>.<patch>[-<pre>]` tag.
+Pushing a tag alone starts nothing: the workflow has no `push` trigger, because
+a release is a deliberate, human-initiated act. Nothing is built or signed on a
+maintainer's machine.
 
 ## Cutting a release
 
@@ -18,23 +20,32 @@ a maintainer's machine.
    git tag -s v0.1.0 -m "v0.1.0"
    git push origin v0.1.0
    ```
-4. Watch the run. The order is: verify, build every image (amd64 + arm64),
-   publish version-tagged manifests, charts, draft release, promote floating
-   tags, publish the release.
+4. Start the workflow on that tag: Actions -> **Release** -> **Run workflow**,
+   and choose the tag under "Use workflow from" (Tags -> `v0.1.0`), or
+   ```sh
+   gh workflow run release.yml --ref v0.1.0
+   ```
+5. Watch the run. The order is: prepare (validate the tag), verify (`CI OK`
+   and `CodeQL OK` on the tagged commit), build every image (amd64 + arm64,
+   pushed by digest), publish version-tagged manifests (each scanned with
+   grype, failing on a fixable critical vulnerability, before it is signed),
+   the `omnibus` image, charts, the macOS Setup `.dmg`, the draft release
+   (with the Setup binaries), promote floating tags, publish the release.
 
-To re-run a failed release, use **Run workflow** and choose the **tag** in
-"Use workflow from". Runs dispatched from a branch are refused, because their
-signatures would carry a `refs/heads/...` identity that the documented
-verification commands reject.
+To re-run a failed release, run the workflow again the same way, on the
+**tag**. Runs dispatched from a branch are refused, because their signatures
+would carry a `refs/heads/...` identity that the documented verification
+commands reject.
 
 ## What a release publishes
 
 | Artifact | Where | Tags |
 |---|---|---|
-| 17 multi-arch images + the `omnibus` single-container image | `ghcr.io/<owner>/<image>` | `<version>` always; `latest` and `<major>.<minor>` for stable releases; `postgres` also `16`, and the CloudNativePG variant `16-pgvector-age-<version>` / `16-pgvector-age`. `omnibus` is assembled from the published images after `publish` |
+| 17 multi-arch images (16 repositories: `postgres-cnpg` is published into `postgres`) + the `omnibus` single-container image | `ghcr.io/<owner>/<image>` (`ghcr.io/cd-lc/<image>` for this repository) | `<version>` always; `latest` and `<major>.<minor>` for stable releases; `postgres` also `16`, and the CloudNativePG variant `16-pgvector-age-<version>` / `16-pgvector-age`. `omnibus` is assembled from the published images after `publish` |
 | Helm charts | `oci://ghcr.io/<owner>/charts/<chart>` | chart version = `<version>` |
 | Source tarball | release assets `vegaduta-<version>.tar.gz` and `vegaduta.tar.gz` (same content) | the tarball's `deploy/compose/.env.example` has `VEGADUTA_VERSION=<version>` written in |
-| Checksums | `SHA256SUMS` | GNU `sha256sum` format (`<sha256>  <file>`, bare file names) over every tarball, chart and SBOM asset |
+| Setup app | `VegaDuta-Setup-<version>.dmg` (macOS, universal), `vegaduta-setup-windows-amd64.zip`, `vegaduta-setup-linux-{amd64,arm64}.tar.gz`, `vegaduta-setup-darwin-{amd64,arm64}.tar.gz` (bare binaries) | built from `installer/` by `installer/package.sh`; unsigned / ad-hoc signed (no Apple notarization or Windows code signing yet) |
+| Checksums | `SHA256SUMS` | GNU `sha256sum` format (`<sha256>  <file>`, bare file names) over every tarball, zip, dmg, chart and SBOM asset |
 | Signatures | `<file>.sigstore.json` (Sigstore bundle), `<file>.sig`, `<file>.pem` for `SHA256SUMS` and both tarballs | keyless, identity `.../.github/workflows/release.yml@refs/tags/v<version>` |
 | Provenance | `vegaduta-<version>.intoto.jsonl` (tarballs); OCI attestations on every image and chart | SLSA build provenance |
 | SBOMs | `sbom-<image>.spdx.json`, and as signed OCI attestations | SPDX JSON (syft) |
@@ -74,7 +85,7 @@ explicit pre-release version.
 ## One-time setup before the first release
 
 - **GHCR packages are private when first created.** After the first release
-  run, open each package (the 15 image repositories and every chart under
+  run, open each package (the 17 image repositories, `omnibus` included, and every chart under
   `charts/`) in the organization's Packages tab, set its visibility to
   **Public**, and link it to the repository ("Connect repository"), or pulls
   fail with `401`/`denied` for everyone else. Later releases keep the setting.
