@@ -2652,7 +2652,8 @@
     "toolRunningLocalWithArgs": "running {tool} on this device — {args}",
     "toolRound": "{tool} (round {round})",
     "itemLabelCalls": "tool calls",
-    "itemLabelMemories": "memories"
+    "itemLabelMemories": "memories",
+    "modelWakingUp": "The model is starting up - the first reply can take up to a minute. Replies after that are fast."
   },
   "chatResume": {
     "reconnecting": "Reconnecting... (attempt {attempt} of {max})",

@@ -439,6 +439,8 @@ keys in the console (bring your own key); they are stored encrypted with
 | `app.free-tier.monthly-token-limit` | (none) | `400000` | rolling-30-day token quota per FREE tenant on the pool (PREMIUM ×2, UNLIMITED ×3); editable per deployment in Platform Admin |
 | `app.free-tier.meter-zero-cost-rows` | (none) | `false` | see **Zero-cost pool rows** below |
 | Vertex AI pool | `VERTEX_ENABLED`, `VERTEX_POOL_*` | `false` | |
+| `app.platform-llm.warm.enabled` | `APP_PLATFORM_LLM_WARM_ENABLED` | `true` | when someone signs in or opens a chat, the console calls `POST /api/platform-llm/warm`, and core sends the pool's top row a one-token request so a model that scaled to zero is loaded before the first message |
+| `app.platform-llm.warm.interval-seconds` | `APP_PLATFORM_LLM_WARM_INTERVAL_SECONDS` | `240` | at most one warm-up per core instance in this window, however many people sign in |
 
 ### Zero-cost pool rows
 
