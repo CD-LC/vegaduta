@@ -280,19 +280,24 @@ class LocalLlmPoolBootstrapTest {
     }
 
     @Test
-    void poolSwitchedOffIsSwitchedBackOnForTheLocalRow() {
+    void poolSwitchedOffIsSwitchedBackOnOnlyInsideAChatThatNeedsIt() {
         server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
                 .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
         PlatformHostedLlmProvider fine = row(10, "Local model (Ollama)", BASE, 0);
+        when(fine.isEnabled()).thenReturn(true);
         when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(fine));
+        when(repository.findAllByEnabledTrueOrderByPriorityAsc()).thenReturn(List.of(fine));
         when(service.getPoolSettings())
                 .thenReturn(new HostedLlmPoolSettingsResponse(false, null, "admin"));
         usable(fine);
+        LocalLlmPoolBootstrap b = bootstrap("ollama", guard(Set.of("ollama:11434")));
 
-        assertEquals(
-                Outcome.REPAIRED,
-                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+        // Startup: nothing an admin switched off comes back just because core restarted.
+        assertEquals(Outcome.ALREADY_PRESENT, b.bootstrapOnce());
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
 
+        // A chat that found the pool empty: the user is asking for it right now.
+        assertTrue(b.repairOnDemand());
         verify(service).setPoolEnabled(true, "local-llm-pool-bootstrap");
         verify(service, never()).update(any(), any());
     }
@@ -332,9 +337,9 @@ class LocalLlmPoolBootstrapTest {
         when(service.getPoolSettings())
                 .thenReturn(new HostedLlmPoolSettingsResponse(false, null, "admin"));
 
-        assertEquals(
-                Outcome.ALREADY_PRESENT,
-                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+        LocalLlmPoolBootstrap b = bootstrap("ollama", guard(Set.of("ollama:11434")));
+        assertEquals(Outcome.ALREADY_PRESENT, b.bootstrapOnce());
+        assertFalse(b.repairOnDemand(), "even on demand: another row is enabled");
 
         verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
         verify(service, never()).update(any(), any());
