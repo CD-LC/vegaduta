@@ -196,10 +196,19 @@ func portEnv(key string) int {
 func busyPorts(ports []int) []int {
 	var busy []int
 	for _, p := range ports {
-		conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(p)), 300*time.Millisecond)
+		addr := net.JoinHostPort("127.0.0.1", strconv.Itoa(p))
+		conn, err := net.DialTimeout("tcp", addr, 300*time.Millisecond)
 		if err == nil {
 			conn.Close()
 			busy = append(busy, p)
+			continue
+		}
+		// Nothing answers, but the port may still be refused: Windows reserves
+		// ranges for Hyper-V/WinNAT, and Docker then cannot publish there.
+		if l, err := net.Listen("tcp", addr); err != nil {
+			busy = append(busy, p)
+		} else {
+			l.Close()
 		}
 	}
 	return busy

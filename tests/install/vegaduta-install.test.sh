@@ -13,7 +13,7 @@ CLI="$ROOT/scripts/vegaduta"
 PTY="$ROOT/tests/install/pty_run.py"
 PASS=0; FAIL=0
 
-new_home() { WORK="$(mktemp -d)"; export VEGADUTA_ENV_FILE="$WORK/.env" VEGADUTA_STATE_FILE="$WORK/state"; }
+new_home() { WORK="$(mktemp -d)"; export VEGADUTA_ENV_FILE="$WORK/.env" VEGADUTA_STATE_FILE="$WORK/state" VEGADUTA_SECRETS_KEEP="$WORK/kept-secrets.env"; }
 check() { # check NAME CONDITION-EXIT-CODE [DETAIL]
   if [ "$2" = 0 ]; then PASS=$((PASS + 1)); printf '  ok   %s\n' "$1"
   else FAIL=$((FAIL + 1)); printf '  FAIL %s\n%s\n' "$1" "${3:-}"; fi
@@ -28,6 +28,30 @@ check "plan names the choices" "$(has "$out" 'plan: tier=lite profiles=none loca
 check "plan layers the local-ai and search overlays" "$(has "$out" 'docker-compose.local-ai.yml --profile local-ai' && has "$out" 'docker-compose.search.yml' && has "$out" 'docker-compose.search.lite.yml --profile search'; echo $?)" "$out"
 check "state remembers them" "$([ "$(state local_ai)/$(state local_model)/$(state search)" = container/qwen3.5:2b/1 ]; echo $?)"
 check "secrets were generated, none printed" "$(! has "$out" "$(sed -n 's/^APP_ENCRYPTION_KEY=//p' "$VEGADUTA_ENV_FILE")"; echo $?)"
+
+echo "re-install into a new folder"
+keep="$VEGADUTA_SECRETS_KEEP"; key1="$(sed -n 's/^APP_ENCRYPTION_KEY=//p' "$VEGADUTA_ENV_FILE")"; pw1="$(sed -n 's/^POSTGRES_PASSWORD=//p' "$VEGADUTA_ENV_FILE")"
+check "secrets are kept outside the install folder (0600)" "$([ -f "$keep" ] && [ "$(stat -c %a "$keep" 2>/dev/null || stat -f %Lp "$keep")" = 600 ]; echo $?)"
+fresh="$(mktemp -d)"; out="$(VEGADUTA_ENV_FILE="$fresh/.env" "$CLI" secrets 2>&1)"
+check "a new folder reuses the database password and encryption key" "$([ "$(sed -n 's/^APP_ENCRYPTION_KEY=//p' "$fresh/.env")" = "$key1" ] && [ "$(sed -n 's/^POSTGRES_PASSWORD=//p' "$fresh/.env")" = "$pw1" ] && has "$out" 'Reused'; echo $?)" "$out"
+
+echo "an earlier install's data, secrets not kept"
+saved_env="$VEGADUTA_ENV_FILE" saved_state="$VEGADUTA_STATE_FILE" saved_keep="$VEGADUTA_SECRETS_KEEP"
+fake="$(mktemp -d)"; cat > "$fake/docker" <<'FAKE'
+#!/bin/sh
+case "$1 $2" in
+  "volume inspect") [ "$3" = vegaduta-personal_postgres-data ];;
+  "ps -q") echo abc123;;
+  "stop abc123") echo stopped >> "${FAKE_LOG:-/dev/null}";;
+  *) exit 1;;
+esac
+FAKE
+chmod +x "$fake/docker"; new_home
+out="$(FAKE_LOG="$WORK/stops" PATH="$fake:$PATH" "$CLI" secrets 2>&1)"
+check "the old data is left alone and this install gets its own project" "$(grep -qx 'VEGADUTA_PERSONAL_PROJECT=vegaduta-personal-2' "$VEGADUTA_ENV_FILE" && [ -f "$WORK/stops" ] && has "$out" 'kept untouched'; echo $?)" "$out"
+fresh="$(mktemp -d)"; out="$(PATH="$fake:$PATH" VEGADUTA_ENV_FILE="$fresh/.env" "$CLI" secrets 2>&1)"
+check "a later re-install reuses that project with its secrets" "$(grep -qx 'VEGADUTA_PERSONAL_PROJECT=vegaduta-personal-2' "$fresh/.env" && ! has "$out" 'kept untouched'; echo $?)" "$out"
+export VEGADUTA_ENV_FILE="$saved_env" VEGADUTA_STATE_FILE="$saved_state" VEGADUTA_SECRETS_KEEP="$saved_keep"
 
 echo "remembered between runs"
 out="$("$CLI" up --dry-run 2>&1)"

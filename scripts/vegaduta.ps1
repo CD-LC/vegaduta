@@ -148,8 +148,47 @@ function New-Secret([string]$kind) {
 function Test-LocalUrl([string]$u) { return ($u -match 'localhost|127\.0\.0\.1|\[::1\]') }
 
 # ----------------------------------------------------------------- secrets
+# Install secrets are also kept outside the install folder (%LOCALAPPDATA%\VegaDuta\secrets.env, shared
+# with scripts/vegaduta under WSL on the same Docker), so a re-install into a new folder reuses them:
+# Docker keeps the old volumes, and a new database password or APP_ENCRYPTION_KEY would lock this
+# install out of its own data.
+function Get-SecretsKeepFile {
+  if ($env:VEGADUTA_SECRETS_KEEP) { return $env:VEGADUTA_SECRETS_KEEP }
+  return (Join-Path $env:LOCALAPPDATA 'VegaDuta\secrets.env')
+}
+function Get-KeptSecret([string]$Key) {
+  $f = Get-SecretsKeepFile; $v = ''
+  if (Test-Path $f) { foreach ($l in [System.IO.File]::ReadAllLines($f)) { if ($l.StartsWith("$Key=")) { $v = $l.Substring($Key.Length + 1).Trim() } } }
+  return $v
+}
+function Save-KeptSecrets {
+  try {
+    $f = Get-SecretsKeepFile
+    New-Item -ItemType Directory -Force -Path (Split-Path $f) | Out-Null
+    $text = (@(@($SecretSpecs.Keys) + 'VEGADUTA_PERSONAL_PROJECT' | ForEach-Object { $v = Get-EnvValue $_; if ($v) { "$_=$v" } }) -join "`n") + "`n"
+    [System.IO.File]::WriteAllText($f, $text, (New-Object System.Text.UTF8Encoding $false))
+    Protect-SecretFile $f
+  } catch { }
+}
+# A new .env with newly generated secrets, while Docker still holds the data of an earlier personal
+# install (its folder deleted, or one made before secrets were kept): that database and its encrypted
+# values belong to secrets this install does not have. Leave it untouched and give this install a
+# project of its own (personal.yml reads VEGADUTA_PERSONAL_PROJECT), stopping the old containers.
+function Split-FromOldData {
+  if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { return }
+  & docker volume inspect vegaduta-personal_postgres-data *> $null
+  if ($LASTEXITCODE -ne 0) { return }
+  $n = 2
+  while ($true) { & docker volume inspect "vegaduta-personal-$($n)_postgres-data" *> $null; if ($LASTEXITCODE -ne 0) { break }; $n++ }
+  Set-EnvValue VEGADUTA_PERSONAL_PROJECT "vegaduta-personal-$n" -Force
+  $ids = @(& docker ps -q --filter 'label=com.docker.compose.project=vegaduta-personal' 2>$null)
+  if ($ids.Count -gt 0) { & docker stop @ids *> $null }
+  Warn "An earlier VegaDuta install left its data in Docker, made with secrets this install does not have. It is kept untouched; this install starts with its own data (project vegaduta-personal-$n). To delete the old data later: docker volume ls -q --filter name=vegaduta-personal_ (then docker volume rm each)"
+}
 function Invoke-Secrets([string]$DomainArg) {
+  $created = $false
   if (-not (Test-Path $EnvFile)) {
+    $created = $true
     if (-not (Test-Path $EnvExample)) { Die "missing $EnvExample" }
     Write-EnvLines ([System.IO.File]::ReadAllLines($EnvExample))
     Say "Created $EnvFile from .env.example"
@@ -157,10 +196,19 @@ function Invoke-Secrets([string]$DomainArg) {
   Protect-SecretFile $EnvFile
   $shipped = Get-ShippedVersion
   if ($shipped) { Set-EnvValue VEGADUTA_VERSION $shipped }
-  $filled = 0
+  $filled = 0; $reused = 0
   foreach ($k in $SecretSpecs.Keys) {
-    if (-not (Get-EnvValue $k)) { Set-EnvValue $k (New-Secret $SecretSpecs[$k]); $filled++ }
+    if (-not (Get-EnvValue $k)) {
+      $kept = Get-KeptSecret $k
+      if ($kept) { Set-EnvValue $k $kept; $reused++ } else { Set-EnvValue $k (New-Secret $SecretSpecs[$k]); $filled++ }
+    }
   }
+  if ($reused -gt 0) { Say "Reused $reused secret(s) from an earlier install ($(Get-SecretsKeepFile)), so its data still opens." }
+  if ($created) {
+    if ($reused -gt 0) { $kp = Get-KeptSecret 'VEGADUTA_PERSONAL_PROJECT'; if ($kp) { Set-EnvValue VEGADUTA_PERSONAL_PROJECT $kp } }
+    else { Split-FromOldData }
+  }
+  Save-KeptSecrets
   if (-not (Get-EnvValue 'LANGFUSE_OTEL_AUTH_HEADER')) {
     $pair = (Get-EnvValue 'LANGFUSE_INIT_PROJECT_PUBLIC_KEY') + ':' + (Get-EnvValue 'LANGFUSE_INIT_PROJECT_SECRET_KEY')
     Set-EnvValue 'LANGFUSE_OTEL_AUTH_HEADER' ('Basic ' + [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($pair)))
@@ -321,6 +369,8 @@ function Resolve-Profiles {
     }
     # With rag the sidecar exists, so core must use it (the personal profile defaults it off).
     if ($script:Profiles.Contains('rag')) { $env:APP_SIDECAR_ENABLED = 'true' }
+    # STDIO MCP servers run in the mcp-stdio-runner container; core must relay to it (the slim core has no npx/uvx).
+    if ($script:Profiles.Contains('tools') -or $script:Profiles.Contains('browser')) { $env:MCP_STDIO_SIDECAR_ENABLED = 'true' }
     return
   }
   if ($script:Tier -eq 'lite') { return }
@@ -347,7 +397,7 @@ function Get-ComposeArgs {
   if (-not $env:VEGADUTA_VERSION -and -not (Get-EnvValue 'VEGADUTA_VERSION')) { $env:VEGADUTA_VERSION = 'unset' }
   $d = Get-EnvValue 'BASE_DOMAIN'
   if ($script:Tier -eq 'personal') {
-    $a += @('-f', (Join-Path $ComposeDir 'personal.yml'))
+    $a += @('-f', (Join-Path $ComposeDir 'personal.yml'), '--profile', 'valkey')
     if ($script:DoBuild) { $a += @('-f', (Join-Path $ComposeDir 'personal.build.yml')) }
     # The agent's own browser (services/browser-runner): `-Profile browser` layers its overlay; core attaches to it.
     if ($script:Profiles.Contains('browser')) { $a += @('-f', (Join-Path $ComposeDir 'browser.yml')) }
@@ -408,7 +458,7 @@ function Repair-DbPassword([string[]]$ComposeArgs) {
   Warn "the database was created by an earlier install with another password - switching it to this install's password (data is kept)"
   $sql = "\getenv pw POSTGRES_PASSWORD`nSELECT format('ALTER ROLE %I PASSWORD %L', current_user, :'pw') \gexec`n"
   $sql | & docker compose @ComposeArgs exec -T postgres sh -c 'tr -d \\r | psql -X -q -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d postgres' | Out-Null
-  if ($LASTEXITCODE -ne 0) { Warn 'could not reset the database password; to start over with an empty database run: docker volume rm vegaduta-personal_postgres-data'; return $false }
+  if ($LASTEXITCODE -ne 0) { Warn 'could not reset the database password; to start over with an empty database run: docker volume rm <project>_postgres-data (docker volume ls)'; return $false }
   Ok 'database password updated'
   return $true
 }
@@ -422,8 +472,19 @@ function Invoke-UpHeal([string[]]$ComposeArgs, [string[]]$More) {
 # ------------------------------------------------------------------ doctor
 function Test-PortInUse([int]$port) {
   $c = New-Object System.Net.Sockets.TcpClient
-  try { $iar = $c.BeginConnect('127.0.0.1', $port, $null, $null); $okc = $iar.AsyncWaitHandle.WaitOne(300); if ($okc) { $c.EndConnect($iar); return $true }; return $false }
-  catch { return $false } finally { $c.Close() }
+  try { $iar = $c.BeginConnect('127.0.0.1', $port, $null, $null); $okc = $iar.AsyncWaitHandle.WaitOne(300); if ($okc) { $c.EndConnect($iar); return $true } }
+  catch { } finally { $c.Close() }
+  # Nothing answers, but Windows may still refuse the port (a Hyper-V/WinNAT excluded range): try to bind it.
+  $l = $null
+  try { $l = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, $port); $l.Start(); return $false }
+  catch { return $true } finally { if ($l) { $l.Stop() } }
+}
+# Containers of this install's compose project that are running (their ports are ours, not a conflict).
+function Test-OwnStackRunning {
+  $proj = Get-EnvValue 'VEGADUTA_PERSONAL_PROJECT'
+  if (-not $proj) { $proj = $env:COMPOSE_PROJECT_NAME }; if (-not $proj) { $proj = Get-EnvValue 'COMPOSE_PROJECT_NAME' }; if (-not $proj) { $proj = 'vegaduta-personal' }
+  $ids = & docker ps -q --filter "label=com.docker.compose.project=$proj" 2>$null
+  return [bool]$ids
 }
 function Invoke-Doctor {
   $ca = Prepare
@@ -525,7 +586,12 @@ function Invoke-PersonalDoctor {
   foreach ($k in @('POSTGRES_PASSWORD','POSTGRES_APP_PASSWORD','VALKEY_PASSWORD','APP_ENCRYPTION_KEY')) {
     if (-not (Get-EnvValue $k)) { Bad "$k is empty - run .\scripts\vegaduta.ps1 secrets" }
   }
-  foreach ($port in @(3000, 8080)) { if (Test-PortInUse $port) { Bad "Port $port is already in use" } }
+  if (-not (Test-OwnStackRunning)) {
+    foreach ($pk in @(@('WEB_HOST_PORT', 3000), @('CORE_HOST_PORT', 8080))) {
+      $v = Get-EnvValue $pk[0]; $port = if ($v) { [int]$v } else { $pk[1] }
+      if (Test-PortInUse $port) { Bad "Port $port is already in use or reserved by Windows - close the program using it, or set $($pk[0])=<free port> in $EnvFile (a reserved range clears with: net stop winnat; net start winnat, as administrator)" }
+    }
+  }
   if ($script:Failures -gt 0) { return $false }
   return $true
 }
