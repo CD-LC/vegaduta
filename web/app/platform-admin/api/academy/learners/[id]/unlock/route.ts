@@ -8,7 +8,7 @@ import { verifyPlatformAdmin } from "../../../../../lib/serverAuth";
 // their completion history and any other learner are untouched). The
 // Academy records an `admin_course_unlocked` telemetry event so this is
 // always auditable as admin-granted, not earned - see
-// vegaduta-webapp/src/learning-portal/admin-learners.ts for the exact
+// the Academy service/src/learning-portal/admin-learners.ts for the exact
 // semantics this forwards to.
 //
 // This touches nothing about billing/plan: it unlocks the lesson spine for

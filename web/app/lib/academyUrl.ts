@@ -1,6 +1,6 @@
 import { getPublicEnv } from "./env";
 // Where the "Academy · learn free" links point. The Academy learning portal
-// is a separate deployable (vegaduta-webapp-prototype) that runs on :4100
+// is a separate deployable (the Academy service) that runs on :4100
 // locally and on its own public host in a hosted deployment.
 //
 // DETERMINISTIC on both sides of hydration (React #418, 2026-09-25): this

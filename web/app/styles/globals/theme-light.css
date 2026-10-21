@@ -127,7 +127,7 @@
    * wordmark, and they are duplicated verbatim into the three other
    * customer-facing surfaces so all four render one identical brand:
    *   - web-admin/app/globals.css              (platform admin console)
-   *   - vegaduta-webapp/ui/src/index.css       (Academy, Vite+shadcn)
+   *   - the Academy service/ui/src/index.css       (Academy, Vite+shadcn)
    *   - deploy/keycloak/.../login.css          (--aai-brand-accent /
    *                                             --aai-font-wordmark)
    * They are copied rather than imported because these are four separate
