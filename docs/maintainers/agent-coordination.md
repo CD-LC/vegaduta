@@ -33,8 +33,8 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 
 | Release | Status | What it brings |
 |---|---|---|
-| **v0.1.7** | published 2026-10-21, latest | Setup and install fixes. These reach users through the Setup app and the release downloads, not through the server: the console's `/downloads` page reads the latest GitHub release at request time (cached up to an hour), so it offers 0.1.7 without a redeploy. Production should still run the 0.1.7 images. |
-| **v0.1.8** | PR #13 merging, then tag and release | Platform model warm-up: `POST /api/platform-llm/warm` loads the pool model when someone signs in, and the chat says "The model is starting up..." after 8 s without a reply. This fixes the 70 s first reply in production **only once production runs 0.1.8**. |
+| **v0.1.7** | published 2026-10-21 | Setup and install fixes. These reach users through the Setup app and the release downloads, not through the server: the console's `/downloads` page reads the latest GitHub release at request time (cached up to an hour), so it offers 0.1.7 without a redeploy. Production should still run the 0.1.7 images. |
+| **v0.1.8** | published 2026-10-21 07:16 UTC, latest; production deploys it next (*Rollout* below) | Platform model warm-up: `POST /api/platform-llm/warm` loads the pool model when someone signs in, and the chat says "The model is starting up..." after 8 s without a reply. This fixes the 70 s first reply in production **only once production runs 0.1.8**. |
 
 ### After a production deploy, check
 
@@ -85,6 +85,10 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-21 07:30, release agent: v0.1.8 published (tag on `3dbf32a`) and verified: latest
+  release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
+  `core` and `web` 0.1.8 images on GHCR for amd64 and arm64. Merged #17 (rollout note). `main` is
+  open again; #18 waits until production runs 0.1.8, then goes out as 0.1.9.
 - 2026-10-21 05:55, release agent: v0.1.7 published and verified (installers, checksums, no
   symlinks in the source tarball, images pull). PR #13 marked ready for 0.1.8.
 - 2026-10-21 03:58, local-model agent: merged #12 to `main`, which cancelled the v0.1.7 tag's CI;
