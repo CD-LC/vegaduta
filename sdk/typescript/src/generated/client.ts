@@ -9561,6 +9561,22 @@ export class PlatformOpsApi {
   }
 }
 
+export class PlatformPoolWarmApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Warm.
+   * `POST /api/platform-llm/warm`
+   */
+  warm(options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<Record<string, boolean>> {
+    return this.http.request<Record<string, boolean>>({ ...options, method: "POST", path: "/api/platform-llm/warm" });
+  }
+}
+
 export class PlatformSessionApi {
   private readonly http: HttpClient;
 
@@ -15489,6 +15505,7 @@ export class VegadutaClient {
   readonly platformImpersonation: PlatformImpersonationApi;
   readonly platformIssue: PlatformIssueApi;
   readonly platformOps: PlatformOpsApi;
+  readonly platformPoolWarm: PlatformPoolWarmApi;
   readonly platformSession: PlatformSessionApi;
   readonly platformSpend: PlatformSpendApi;
   readonly platformSpendCap: PlatformSpendCapApi;
@@ -15817,6 +15834,7 @@ export class VegadutaClient {
     this.platformImpersonation = new PlatformImpersonationApi(this.http);
     this.platformIssue = new PlatformIssueApi(this.http);
     this.platformOps = new PlatformOpsApi(this.http);
+    this.platformPoolWarm = new PlatformPoolWarmApi(this.http);
     this.platformSession = new PlatformSessionApi(this.http);
     this.platformSpend = new PlatformSpendApi(this.http);
     this.platformSpendCap = new PlatformSpendCapApi(this.http);
