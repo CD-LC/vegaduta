@@ -5,6 +5,7 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.eventbus.WorkflowEventTypes;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -85,8 +86,8 @@ final class AgentMessageEvents {
                                         log.warn(
                                                 "agent.message.completed emission failed for agent {} session {} -"
                                                         + " the reply itself is unaffected",
-                                                agentId,
-                                                sessionId,
+                                                LogSafe.clean(agentId),
+                                                LogSafe.clean(sessionId),
                                                 e);
                                     }
                                 }));

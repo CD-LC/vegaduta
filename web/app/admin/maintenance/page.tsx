@@ -20,6 +20,7 @@ import { useTranslations } from "../../lib/i18n";
 import "../../components/dashboard/dashboardStyles";
 import { llmSpendHref, isBillingEnabled } from "../../lib/billing-flag";
 import { errorMessage } from "../../lib/errors";
+import { channelOffered, isPersonalEdition } from "../../lib/edition";
 
 // Same per-channel credential GETs the Dashboard and ChannelsPanel/
 // SocialChannelsPanel already call (api.js) - every one resolves to null
@@ -35,7 +36,7 @@ interface PlatformStatus {
   connected: boolean | null;
 }
 
-const PLATFORM_CHECKS = [
+const ALL_PLATFORM_CHECKS = [
   { key: "twilio", labelKey: "platformLabelTwilio", fetch: () => api.getTwilioCredential() },
   { key: "meta-whatsapp", labelKey: "platformLabelMetaWhatsapp", fetch: () => api.getMetaWhatsAppCredential() },
   { key: "meta-social", labelKey: "platformLabelMetaSocial", fetch: () => api.getMetaSocialCredential() },
@@ -44,6 +45,11 @@ const PLATFORM_CHECKS = [
   { key: "google", labelKey: "platformLabelGoogle", fetch: () => api.getGoogleConnection() },
   { key: "x", labelKey: "platformLabelX", fetch: () => api.getXCredential() },
 ];
+
+// Only the platforms this install offers: a personal install runs no Slack, Discord or X adapter, so it neither
+// lists them nor fires their credential GETs on every refresh. Read once at module load (lib/env.ts: the
+// public-env head script runs before any client module).
+const PLATFORM_CHECKS = ALL_PLATFORM_CHECKS.filter((p) => channelOffered(p.key));
 
 // Direct response to "there should be some page for platform maintenance,
 // only admin users can log in" - a dedicated, isAdmin-gated view of the same
@@ -92,6 +98,9 @@ export default function PlatformMaintenancePage() {
   const t = useTranslations("adminMaintenancePage");
   const router = useRouter();
   const { isAdmin, hasPermission } = useAuth();
+  // A personal install is one person on one machine: there is no team to list or invite (/admin/users and
+  // /admin/access are not served either), so the Users tab and its listAdminUsers() call are skipped.
+  const showUsers = !isPersonalEdition();
   const [systemStatus, setSystemStatus] = useState(null);
   const [systemStatusError, setSystemStatusError] = useState(null);
   const [platforms, setPlatforms] = useState<PlatformStatus[]>(
@@ -174,9 +183,9 @@ export default function PlatformMaintenancePage() {
   useEffect(() => {
     if (isAdmin) {
       void refresh();
-      void refreshUsers();
+      if (showUsers) void refreshUsers();
     }
-  }, [isAdmin, refresh, refreshUsers]);
+  }, [isAdmin, showUsers, refresh, refreshUsers]);
 
   // Non-admins redirect to "/" (return null below) → ready immediately.
   usePageReady(loaded || !isAdmin);
@@ -213,7 +222,7 @@ export default function PlatformMaintenancePage() {
               className="rounded-full"
               onClick={() => {
                 void refresh();
-                void refreshUsers();
+                if (showUsers) void refreshUsers();
               }}
               disabled={refreshing}
               title={t("refreshButtonTitle")}
@@ -237,9 +246,11 @@ export default function PlatformMaintenancePage() {
           <TabsTrigger value="overview" className="flex-none">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex-none">
-            Users
-          </TabsTrigger>
+          {showUsers && (
+            <TabsTrigger value="users" className="flex-none">
+              Users
+            </TabsTrigger>
+          )}
           <TabsTrigger value="approvals" className="flex-none">
             Approvals
           </TabsTrigger>
@@ -275,16 +286,18 @@ export default function PlatformMaintenancePage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="users">
-          {!usersCoreReachable && (
-            <div className="error-box" style={{ marginTop: "1.25rem" }}>
-              {t("usersApiUnreachablePrefix")}
-              {API_BASE}
-              {t("usersApiUnreachableSuffix", { error: usersLoadError })}
-            </div>
-          )}
-          <AdminUsersPanel users={users} onChanged={refreshUsers} onCreated={handleUserCreated} />
-        </TabsContent>
+        {showUsers && (
+          <TabsContent value="users">
+            {!usersCoreReachable && (
+              <div className="error-box" style={{ marginTop: "1.25rem" }}>
+                {t("usersApiUnreachablePrefix")}
+                {API_BASE}
+                {t("usersApiUnreachableSuffix", { error: usersLoadError })}
+              </div>
+            )}
+            <AdminUsersPanel users={users} onChanged={refreshUsers} onCreated={handleUserCreated} />
+          </TabsContent>
+        )}
 
         <TabsContent value="approvals">
           {/* The prop is still named isAdmin but the panel only uses it to

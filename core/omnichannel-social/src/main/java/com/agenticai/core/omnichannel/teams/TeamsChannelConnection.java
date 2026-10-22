@@ -2,10 +2,13 @@ package com.agenticai.core.omnichannel.teams;
 
 import com.agenticai.core.omnichannel.status.ChannelConnection;
 import com.agenticai.core.omnichannel.status.ChannelNotConnectedException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /** Microsoft Teams' connection state for the Channels screen: the bot's app id. */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsChannelConnection implements ChannelConnection {
 
     private final TeamsCredentialService credentialService;
