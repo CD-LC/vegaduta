@@ -95,6 +95,11 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-22 10:25, release agent: v0.1.9 published (tag on `b6269fd`, Release run 18) and verified:
+  latest release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
+  `application-personal.yml` has chat history on; voice-agent lock has certifi 2026.10.19 and pillow 13.0.0.
+  Earlier attempts stopped at the image scan on advisories published after 0.1.8 (certifi, Pillow; fixed in
+  #28, #29). `main` is open again. Production can deploy 0.1.9 by version.
 - 2026-10-21 15:05, release agent: the v0.1.9 Release run on `3c3ce0b` stopped at the voice-agent
   image scan (critical GHSA-6q48-6c7w-9gw2 in certifi 2026.7.22, published after 0.1.8); nothing was
   published (no draft, floating tags unmoved). Merged #26 and #16, bumped certifi in five service
