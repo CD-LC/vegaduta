@@ -14,6 +14,7 @@ unauthenticated service in the stack, and it was published on host port
 require_internal_token; see require_internal_token below for the
 fail-closed/escape-hatch semantics.
 """
+
 import base64
 import hmac
 import logging
@@ -86,9 +87,9 @@ def require_internal_token(x_internal_token: str = Header(default="")) -> None:
 app = FastAPI(
     title="Agentic AI Platform - ML Sidecar",
     version="0.2.0",
-    docs_url=None,      # no interactive docs on a service published on a host port
-    redoc_url=None,     # (8001) - same posture as tool-sandbox/app/main.py; the
-    openapi_url=None,   # schema would map this service's whole surface for free
+    docs_url=None,  # no interactive docs on a service published on a host port
+    redoc_url=None,  # (8001) - same posture as tool-sandbox/app/main.py; the
+    openapi_url=None,  # schema would map this service's whole surface for free
 )
 
 
@@ -119,7 +120,9 @@ def health() -> dict:
 class EmbedRequest(BaseModel):
     text: str = Field(min_length=1)
     chunk_size: int = Field(default=150, ge=10, le=200, description="Chunk size in words")
-    chunk_overlap: int = Field(default=30, ge=0, description="Overlap between consecutive chunks, in words")  # noqa: E501
+    chunk_overlap: int = Field(
+        default=30, ge=0, description="Overlap between consecutive chunks, in words"
+    )
     # Multi-model ingestion - one of embeddings.MODEL_REGISTRY's keys, or
     # None/omitted for the default model. Field name "model" matches
     # SidecarEmbedRequest's Java record exactly.
@@ -140,15 +143,16 @@ class EmbedResponse(BaseModel):
     chunks: list[Chunk]
 
 
-@app.post("/embed", response_model=EmbedResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post("/embed", response_model=EmbedResponse, dependencies=[Depends(require_internal_token)])
 def embed(request: EmbedRequest) -> EmbedResponse:
     if request.chunk_overlap >= request.chunk_size:
         raise HTTPException(status_code=400, detail="chunk_overlap must be smaller than chunk_size")
 
     texts = chunk_text(request.text, request.chunk_size, request.chunk_overlap)
     if not texts:
-        raise HTTPException(status_code=400, detail="text produced no chunks after stripping whitespace")  # noqa: E501
+        raise HTTPException(
+            status_code=400, detail="text produced no chunks after stripping whitespace"
+        )
 
     try:
         vectors, resolved_model, _native_dims = embed_texts(texts, request.model)
@@ -179,8 +183,11 @@ class EmbedQueryResponse(BaseModel):
     embedding: list[float]
 
 
-@app.post("/embed-query", response_model=EmbedQueryResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/embed-query",
+    response_model=EmbedQueryResponse,
+    dependencies=[Depends(require_internal_token)],
+)
 def embed_query(request: EmbedQueryRequest) -> EmbedQueryResponse:
     # Kept unchanged/unused by the Java core - see SidecarClient's javadoc
     # for the documented interop quirk that made it reuse /embed instead.
@@ -190,7 +197,9 @@ def embed_query(request: EmbedQueryRequest) -> EmbedQueryResponse:
         vectors, resolved_model, _native_dims = embed_texts([request.text], request.model)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))  # noqa: B904
-    return EmbedQueryResponse(model=resolved_model, dimensions=len(vectors[0]), embedding=vectors[0])  # noqa: E501
+    return EmbedQueryResponse(
+        model=resolved_model, dimensions=len(vectors[0]), embedding=vectors[0]
+    )
 
 
 class ExtractRequest(BaseModel):
@@ -216,8 +225,9 @@ class ExtractResponse(BaseModel):
     text: str
 
 
-@app.post("/extract", response_model=ExtractResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/extract", response_model=ExtractResponse, dependencies=[Depends(require_internal_token)]
+)
 def extract(request: ExtractRequest) -> ExtractResponse:
     try:
         content = base64.b64decode(request.content_base64, validate=True)
@@ -250,8 +260,7 @@ class RerankResponse(BaseModel):
     scores: list[float]
 
 
-@app.post("/rerank", response_model=RerankResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post("/rerank", response_model=RerankResponse, dependencies=[Depends(require_internal_token)])
 def rerank_endpoint(request: RerankRequest) -> RerankResponse:
     """
     Master-Roadmap-2026.md item #2. Scores each of `documents` against
@@ -280,8 +289,9 @@ class TranscribeResponse(BaseModel):
     text: str
 
 
-@app.post("/transcribe", response_model=TranscribeResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/transcribe", response_model=TranscribeResponse, dependencies=[Depends(require_internal_token)]
+)
 def transcribe(request: TranscribeRequest) -> TranscribeResponse:
     """
     Knowledge Stage F3c. Called by KnowledgeIngestionJobRunner (a scheduled
@@ -302,7 +312,9 @@ def transcribe(request: TranscribeRequest) -> TranscribeResponse:
         raise HTTPException(status_code=400, detail=str(e))  # noqa: B904
 
     if not text.strip():
-        raise HTTPException(status_code=400, detail="Transcription produced no readable text content")  # noqa: E501
+        raise HTTPException(
+            status_code=400, detail="Transcription produced no readable text content"
+        )
 
     return TranscribeResponse(text=text)
 
@@ -351,8 +363,7 @@ class TtsResponse(BaseModel):
     combined_audio_base64: str | None = None
 
 
-@app.post("/tts", response_model=TtsResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post("/tts", response_model=TtsResponse, dependencies=[Depends(require_internal_token)])
 def tts(request: TtsRequest) -> TtsResponse:
     """
     Video Pipeline Stage 2. Synthesizes one narration segment per beat and
@@ -434,8 +445,9 @@ class CaptionsResponse(BaseModel):
     words: list[dict]
 
 
-@app.post("/captions", response_model=CaptionsResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/captions", response_model=CaptionsResponse, dependencies=[Depends(require_internal_token)]
+)
 def captions(request: CaptionsRequest) -> CaptionsResponse:
     """
     Video Pipeline Stage 2, caption half. A SEPARATE endpoint rather than a
@@ -527,8 +539,12 @@ class RenderJobResponse(BaseModel):
     queue_depth: int = 0
 
 
-@app.post("/render", response_model=RenderJobResponse, status_code=202,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/render",
+    response_model=RenderJobResponse,
+    status_code=202,
+    dependencies=[Depends(require_internal_token)],
+)
 def render_submit(request: RenderRequest) -> RenderJobResponse:
     """
     Video Pipeline Stage 3. Queues a render and returns 202 with a job id.
@@ -554,8 +570,11 @@ def render_submit(request: RenderRequest) -> RenderJobResponse:
     return RenderJobResponse(**snapshot, queue_depth=render_module.queue_depth())
 
 
-@app.get("/render/{job_id}", response_model=RenderJobResponse,
-         dependencies=[Depends(require_internal_token)])
+@app.get(
+    "/render/{job_id}",
+    response_model=RenderJobResponse,
+    dependencies=[Depends(require_internal_token)],
+)
 def render_status(job_id: str) -> RenderJobResponse:
     snapshot = render_module.get_job(job_id)
     if snapshot is None:
@@ -563,8 +582,7 @@ def render_status(job_id: str) -> RenderJobResponse:
     return RenderJobResponse(**snapshot, queue_depth=render_module.queue_depth())
 
 
-@app.get("/render/{job_id}/artifact/{kind}",
-         dependencies=[Depends(require_internal_token)])
+@app.get("/render/{job_id}/artifact/{kind}", dependencies=[Depends(require_internal_token)])
 def render_artifact(job_id: str, kind: str) -> FileResponse:
     """Stream a finished render's mp4 or thumbnail.
 

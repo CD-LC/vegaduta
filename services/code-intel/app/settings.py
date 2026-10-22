@@ -146,18 +146,23 @@ class Settings:
     # quota limits are read in gitops.py (CODE_INTEL_MAX_REPO_MB,
     # CODE_INTEL_MAX_REPO_FILES, CODE_INTEL_TENANT_QUOTA_MB; 0 disables; the tenant quota
     # is OFF unless that variable is set).
-    max_heavy_jobs: int = field(default_factory=lambda: max(1, int(
-        os.environ.get("CODE_INTEL_MAX_HEAVY_JOBS", "4"))))
-    max_tenant_heavy_jobs: int = field(default_factory=lambda: max(1, int(
-        os.environ.get("CODE_INTEL_MAX_TENANT_HEAVY_JOBS", "2"))))
-    heavy_retry_after_seconds: int = field(default_factory=lambda: int(
-        os.environ.get("CODE_INTEL_HEAVY_RETRY_AFTER", "30")))
+    max_heavy_jobs: int = field(
+        default_factory=lambda: max(1, int(os.environ.get("CODE_INTEL_MAX_HEAVY_JOBS", "4")))
+    )
+    max_tenant_heavy_jobs: int = field(
+        default_factory=lambda: max(1, int(os.environ.get("CODE_INTEL_MAX_TENANT_HEAVY_JOBS", "2")))
+    )
+    heavy_retry_after_seconds: int = field(
+        default_factory=lambda: int(os.environ.get("CODE_INTEL_HEAVY_RETRY_AFTER", "30"))
+    )
     # Background indexes allowed to wait for a slot at once (each parks a
     # threadpool thread), and how long each waits before giving up.
-    max_queued_heavy_jobs: int = field(default_factory=lambda: int(
-        os.environ.get("CODE_INTEL_MAX_QUEUED_HEAVY_JOBS", "8")))
-    heavy_queue_wait_seconds: int = field(default_factory=lambda: int(
-        os.environ.get("CODE_INTEL_HEAVY_QUEUE_WAIT", "900")))
+    max_queued_heavy_jobs: int = field(
+        default_factory=lambda: int(os.environ.get("CODE_INTEL_MAX_QUEUED_HEAVY_JOBS", "8"))
+    )
+    heavy_queue_wait_seconds: int = field(
+        default_factory=lambda: int(os.environ.get("CODE_INTEL_HEAVY_QUEUE_WAIT", "900"))
+    )
 
     # CORS: comma-separated allowed origins for browser callers (the web
     # module's /code-intel page calls this service directly with its
