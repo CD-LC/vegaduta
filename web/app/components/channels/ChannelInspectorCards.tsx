@@ -11,6 +11,7 @@ import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { StatusDot as SharedStatusDot } from "../ui/status-dot";
 import { CHANNEL_BRAND, CHANNEL_ICON } from "../BrandIcons";
+import { channelOffered } from "../../lib/edition";
 
 // The channel metadata table and the per-channel inspector building blocks
 // (brand tile header, status dot, labelled input, connected card, test-send,
@@ -73,6 +74,16 @@ export const CHANNEL_ORDER = [
   "signal",
   "mobile-sdk",
 ];
+
+/**
+ * CHANNEL_ORDER minus the channels this install does not run (Slack, Discord, Teams and X on a personal
+ * install; see channelOffered in lib/edition.ts). CHANNEL_ORDER and CHANNEL_META stay complete - the adapter
+ * registry needs an adapter per key and a saved reference to a channel must still resolve - so the hiding
+ * happens here, at render. Evaluated per call, so it follows the edition the page was served with.
+ */
+export function offeredChannelOrder(): string[] {
+  return CHANNEL_ORDER.filter(channelOffered);
+}
 
 // Minimal shape this file actually reads off the agent list
 // (GET /api/agents has no exported TS type yet - see api.ts).

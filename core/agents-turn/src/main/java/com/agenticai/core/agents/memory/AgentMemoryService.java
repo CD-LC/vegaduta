@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.knowledge.SidecarClient;
+import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -217,9 +218,9 @@ public class AgentMemoryService {
         log.debug(
                 "Recalled {} memories for agent {} subject '{}' (query='{}')",
                 results.size(),
-                agentId,
-                subjectKey,
-                query);
+                LogSafe.clean(agentId),
+                LogSafe.clean(subjectKey),
+                LogSafe.clean(query));
         return results;
     }
 
@@ -288,8 +289,8 @@ public class AgentMemoryService {
     }
 
     /**
-     * Up to {@code limit} distinct people (subject keys) who have a private memory in the current tenant. For
-     * background reviews that walk every person; not for request paths.
+     * Up to {@code limit} distinct people (subject keys) who have a private memory in the current
+     * tenant. For background reviews that walk every person; not for request paths.
      */
     public List<String> listSubjects(int limit) {
         String table = AgentMemorySchemaSupport.qualifiedTableName();

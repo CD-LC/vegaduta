@@ -12,6 +12,7 @@ import ModelAndGenerationSection from "./workbench/ModelAndGenerationSection";
 import ReliabilitySection from "./workbench/ReliabilitySection";
 import RoutingSection from "./workbench/RoutingSection";
 import ShareSection from "./workbench/ShareSection";
+import { isPersonalEdition } from "../../lib/edition";
 import ToolsSection from "./workbench/ToolsSection";
 import TranscriptionSection from "./workbench/TranscriptionSection";
 import type { WorkbenchProps } from "./workbench/types";
@@ -73,7 +74,8 @@ export default function AgentWorkbench(props: WorkbenchProps) {
 
             <CapabilitiesSection />
 
-            <ShareSection />
+            {/* Named-teammate grants: one person on one machine has no teammates (lib/edition.ts). */}
+            {!isPersonalEdition() && <ShareSection />}
 
             <VersionsSection />
           </div>

@@ -235,3 +235,36 @@ describe("TourOverlay keyboard control", () => {
     expect(ctx.nextStep).not.toHaveBeenCalled();
   });
 });
+
+describe("TourOverlay Channels step copy per edition", () => {
+  const card = () => document.querySelector("[role='dialog']")?.textContent ?? "";
+
+  it("keeps naming Slack and the free plan on lite, full and an undeclared install", () => {
+    mock.realCopy = true;
+    for (const edition of ["lite", "full", ""]) {
+      vi.stubEnv("NEXT_PUBLIC_EDITION", edition);
+      setTour(activeContext("channels"));
+      render(<TourOverlay />);
+      expect(screen.getByText(String(TOUR_MESSAGES.channelsBody)), edition).toBeInTheDocument();
+      expect(card()).toContain("Slack");
+      cleanup();
+    }
+    vi.unstubAllEnvs();
+  });
+
+  it("names the personal channels, and neither Slack nor a plan, on a personal install", () => {
+    mock.realCopy = true;
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      setTour(activeContext("channels"));
+      render(<TourOverlay />);
+      expect(screen.getByText(String(TOUR_MESSAGES.channelsPersonalBody))).toBeInTheDocument();
+      expect(screen.getByText(String(TOUR_MESSAGES.channelsPersonalPoint1))).toBeInTheDocument();
+      expect(card()).not.toContain("Slack");
+      expect(card()).not.toContain("free plan");
+      for (const name of ["WhatsApp", "Telegram", "Signal", "iMessage"]) expect(card()).toContain(name);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});

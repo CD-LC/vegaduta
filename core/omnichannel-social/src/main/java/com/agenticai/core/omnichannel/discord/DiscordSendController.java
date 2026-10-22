@@ -7,6 +7,8 @@ import com.agenticai.core.omnichannel.session.ChannelSessionService;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.SetDefaultAgentRequest;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Manual/API-triggered Discord send + default-agent - same posture as {@code SlackSendController}.
  */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 @RequestMapping("/api/channels/discord")
 public class DiscordSendController {
 
