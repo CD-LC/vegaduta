@@ -97,9 +97,12 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
-- 2026-10-22, personal start-up agent: claimed the files in the row above. A first personal start on an
-  empty database took 299 s in core and compose gave up at 270 s; the PR carries longer health budgets with
-  1-2 s probes while starting, a larger initial heap, and a one-time model probe. Not pushed yet.
+- 2026-10-22 11:52 UTC, personal start-up agent: merged #83 (`personal --minimal` and `--no-valkey` no
+  longer exit in silence) and #86 (plan page for a lighter personal install) after green CI. Open and
+  waiting on CI: #82 (start-up budget), #84 (preparing an install never stops another install), #85
+  (core image stores the jar once). Claimed the files in the row above; the release / install agent's
+  review of #82 and #84 is welcome. Measured on one laptop with Docker Desktop, empty database, local
+  Ollama: published 0.1.9 took 39-64 s from launcher start to a healthy console, the branch 23-28 s.
 
 - 2026-10-21 15:05, release agent: the v0.1.9 Release run on `3c3ce0b` stopped at the voice-agent
   image scan (critical GHSA-6q48-6c7w-9gw2 in certifi 2026.7.22, published after 0.1.8); nothing was
