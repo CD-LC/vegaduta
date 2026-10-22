@@ -3,10 +3,15 @@ package com.agenticai.core.security;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
@@ -15,40 +20,56 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Keeps {@code /actuator/**} (other than health and info) off the internet
- * without depending on whatever sits in front of core (security audit
- * 2026-09-18).
+ * Keeps {@code /actuator/**} (other than health and info) off the internet without depending on
+ * whatever sits in front of core (security audit 2026-09-18).
  *
- * <p>{@code /actuator/prometheus} is {@code permitAll()} because a Prometheus
- * server scrapes with no JWT, and "not publicly reachable" was delegated to the
- * Caddy route that blocks {@code /actuator/*}. That held on the compose stack.
- * Production moved to Azure Container Apps behind Cloudflare, where there is no
- * Caddy - and {@code api.example.com/actuator/prometheus} served 358 KB of
- * internals (every route, a tenant name, Kafka client ids, the security filter
- * chain layout) to anyone. An edge rule can close that again, but an edge rule
- * is exactly the kind of control that silently stops existing on the next
- * platform move.
+ * <p>{@code /actuator/prometheus} is {@code permitAll()} because a Prometheus server scrapes with
+ * no JWT, and "not publicly reachable" was delegated to the Caddy route that blocks {@code
+ * /actuator/*}. That held on the compose stack. Production moved to Azure Container Apps behind
+ * Cloudflare, where there is no Caddy - and {@code api.example.com/actuator/prometheus} served 358
+ * KB of internals (every route, a tenant name, Kafka client ids, the security filter chain layout)
+ * to anyone. An edge rule can close that again, but an edge rule is exactly the kind of control
+ * that silently stops existing on the next platform move.
  *
- * <p>The test used here is one an outside caller cannot pass: every path from
- * the internet to core goes through a proxy that ADDS a forwarding header
- * (Cloudflare, the Container Apps ingress, Caddy), and a client cannot make a
- * proxy omit it. The in-network scrape ({@code core:8080} from the Prometheus
- * container) carries none. So: forwarded request + non-public actuator path =
- * 404, unless it presents the optional scrape token - which exists for a future
- * scraper that has to come through the ingress.
+ * <p>The test used here is one an outside caller cannot pass: every path from the internet to core
+ * goes through a proxy that ADDS a forwarding header (Cloudflare, the Container Apps ingress,
+ * Caddy), and a client cannot make a proxy omit it. The in-network scrape ({@code core:8080} from
+ * the Prometheus container) carries none. So: forwarded request + non-public actuator path = 404,
+ * unless it presents the optional scrape token - which exists for a future scraper that has to come
+ * through the ingress.
+ *
+ * <p>That test does not cover a core published directly to a network, which is what the Lite and
+ * Personal Compose files do ({@code BIND_ADDR=0.0.0.0}): there is no proxy, so no forwarding
+ * header, and the metrics were readable by anyone who could reach the port. {@code
+ * app.actuator.scrape-token-required=true} closes that: with it, every non-public actuator path
+ * needs the scrape token whether or not a proxy is in front (and with no token configured, none is
+ * reachable). Off by default, because the Full stack's Prometheus scrapes {@code core:8080} without
+ * a token.
+ *
+ * <p>A valid scrape token is a shared secret, not a JWT. It is removed from the request before the
+ * security chain runs, or the resource server would reject it as a malformed bearer token.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class ActuatorEdgeGuardFilter extends OncePerRequestFilter {
 
     private static final String[] FORWARDING_HEADERS = {
-        "X-Forwarded-For", "CF-Connecting-IP", "CF-Ray", "X-Envoy-External-Address", "Forwarded", "Via",
+        "X-Forwarded-For",
+        "CF-Connecting-IP",
+        "CF-Ray",
+        "X-Envoy-External-Address",
+        "Forwarded",
+        "Via",
     };
 
     private final String scrapeToken;
+    private final boolean scrapeTokenRequired;
 
-    public ActuatorEdgeGuardFilter(@Value("${app.actuator.scrape-token:}") String scrapeToken) {
+    public ActuatorEdgeGuardFilter(
+            @Value("${app.actuator.scrape-token:}") String scrapeToken,
+            @Value("${app.actuator.scrape-token-required:false}") boolean scrapeTokenRequired) {
         this.scrapeToken = scrapeToken == null ? "" : scrapeToken.trim();
+        this.scrapeTokenRequired = scrapeTokenRequired;
     }
 
     @Override
@@ -58,36 +79,75 @@ public class ActuatorEdgeGuardFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
         if (classify(request.getRequestURI()) == PathClass.MALFORMED) {
-            // Double-encoded / undecodable path aimed at the actuator (SEC-042): refuse, never guess the route.
+            // Double-encoded / undecodable path aimed at the actuator (SEC-042): refuse, never
+            // guess the route.
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (arrivedThroughAProxy(request) && !presentsScrapeToken(request)) {
+        boolean token = presentsScrapeToken(request);
+        if ((scrapeTokenRequired || arrivedThroughAProxy(request)) && !token) {
             // 404, not 403: there is nothing here as far as the internet is concerned.
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        chain.doFilter(request, response);
+        chain.doFilter(token ? withoutAuthorization(request) : request, response);
+    }
+
+    /**
+     * The scrape token is not a JWT: hide it from the resource server so it is not rejected as one.
+     */
+    private static HttpServletRequest withoutAuthorization(HttpServletRequest request) {
+        return new HttpServletRequestWrapper(request) {
+            @Override
+            public String getHeader(String name) {
+                return "Authorization".equalsIgnoreCase(name) ? null : super.getHeader(name);
+            }
+
+            @Override
+            public Enumeration<String> getHeaders(String name) {
+                return "Authorization".equalsIgnoreCase(name)
+                        ? Collections.emptyEnumeration()
+                        : super.getHeaders(name);
+            }
+
+            @Override
+            public Enumeration<String> getHeaderNames() {
+                List<String> names = new ArrayList<>();
+                for (String n : Collections.list(super.getHeaderNames())) {
+                    if (!"Authorization".equalsIgnoreCase(n)) {
+                        names.add(n);
+                    }
+                }
+                return Collections.enumeration(names);
+            }
+        };
     }
 
     /** How the guard sees a request path. */
-    enum PathClass { NOT_ACTUATOR, PUBLIC_ACTUATOR, GUARDED, MALFORMED }
+    enum PathClass {
+        NOT_ACTUATOR,
+        PUBLIC_ACTUATOR,
+        GUARDED,
+        MALFORMED
+    }
 
     /**
-     * SEC-042: classify on the path the container / Spring MVC will actually route, not the raw request
-     * URI. The raw URI is percent-decoded ONCE, {@code ;path-parameters} are stripped from every segment,
-     * backslashes count as separators, empty and {@code .} segments are dropped, {@code ..} is resolved and
-     * the comparison is case-insensitive. So {@code /%61ctuator/prometheus}, {@code //actuator/env},
-     * {@code /./actuator}, {@code /actuator;jsessionid=x/prometheus}, {@code /actuator/health/..;/prometheus}
-     * and {@code /ACTUATOR/prometheus} are all guarded.
+     * SEC-042: classify on the path the container / Spring MVC will actually route, not the raw
+     * request URI. The raw URI is percent-decoded ONCE, {@code ;path-parameters} are stripped from
+     * every segment, backslashes count as separators, empty and {@code .} segments are dropped,
+     * {@code ..} is resolved and the comparison is case-insensitive. So {@code
+     * /%61ctuator/prometheus}, {@code //actuator/env}, {@code /./actuator}, {@code
+     * /actuator;jsessionid=x/prometheus}, {@code /actuator/health/..;/prometheus} and {@code
+     * /ACTUATOR/prometheus} are all guarded.
      *
-     * <p>The path is never decoded twice for routing; instead a once-decoded path that still carries an
-     * encoded separator ({@code %2F %2E %5C %25}) next to an actuator fragment, or that would decode AGAIN
-     * to an actuator path, is {@link PathClass#MALFORMED} (400). An undecodable path that mentions the
-     * actuator is MALFORMED too.
+     * <p>The path is never decoded twice for routing; instead a once-decoded path that still
+     * carries an encoded separator ({@code %2F %2E %5C %25}) next to an actuator fragment, or that
+     * would decode AGAIN to an actuator path, is {@link PathClass#MALFORMED} (400). An undecodable
+     * path that mentions the actuator is MALFORMED too.
      */
     static PathClass classify(String rawUri) {
         if (rawUri == null || rawUri.isEmpty()) {
@@ -95,26 +155,35 @@ public class ActuatorEdgeGuardFilter extends OncePerRequestFilter {
         }
         String once = percentDecode(rawUri);
         if (once == null) {
-            return rawUri.toLowerCase(Locale.ROOT).contains("ctuator") ? PathClass.MALFORMED : PathClass.NOT_ACTUATOR;
+            return rawUri.toLowerCase(Locale.ROOT).contains("ctuator")
+                    ? PathClass.MALFORMED
+                    : PathClass.NOT_ACTUATOR;
         }
         String normalised = normalise(once);
         if (once.indexOf('%') >= 0) {
             String lower = once.toLowerCase(Locale.ROOT);
-            boolean encodedSeparator = lower.contains("%2f") || lower.contains("%2e")
-                || lower.contains("%5c") || lower.contains("%25");
+            boolean encodedSeparator =
+                    lower.contains("%2f")
+                            || lower.contains("%2e")
+                            || lower.contains("%5c")
+                            || lower.contains("%25");
             String twice = percentDecode(once);
-            boolean hidesActuator = twice == null
-                ? lower.contains("ctuator")
-                : isActuator(normalise(twice));
-            if (hidesActuator || (encodedSeparator && (lower.contains("ctuator") || isActuator(normalised)))) {
+            boolean hidesActuator =
+                    twice == null ? lower.contains("ctuator") : isActuator(normalise(twice));
+            if (hidesActuator
+                    || (encodedSeparator
+                            && (lower.contains("ctuator") || isActuator(normalised)))) {
                 return PathClass.MALFORMED;
             }
         }
         if (!isActuator(normalised)) {
             return PathClass.NOT_ACTUATOR;
         }
-        return normalised.equals("/actuator/health") || normalised.startsWith("/actuator/health/")
-            || normalised.equals("/actuator/info") ? PathClass.PUBLIC_ACTUATOR : PathClass.GUARDED;
+        return normalised.equals("/actuator/health")
+                        || normalised.startsWith("/actuator/health/")
+                        || normalised.equals("/actuator/info")
+                ? PathClass.PUBLIC_ACTUATOR
+                : PathClass.GUARDED;
     }
 
     private static boolean isActuator(String normalisedLowerPath) {
@@ -148,7 +217,10 @@ public class ActuatorEdgeGuardFilter extends OncePerRequestFilter {
         return out.toString(StandardCharsets.UTF_8);
     }
 
-    /** Lower-cased; ;params stripped; //, ., .. resolved; backslash treated as '/'. Always starts with '/'. */
+    /**
+     * Lower-cased; ;params stripped; //, ., .. resolved; backslash treated as '/'. Always starts
+     * with '/'.
+     */
     private static String normalise(String decoded) {
         String p = decoded.replace('\\', '/');
         int q = p.indexOf('?');
@@ -191,8 +263,7 @@ public class ActuatorEdgeGuardFilter extends OncePerRequestFilter {
             return false;
         }
         return MessageDigest.isEqual(
-            authorization.substring("Bearer ".length()).getBytes(StandardCharsets.UTF_8),
-            scrapeToken.getBytes(StandardCharsets.UTF_8)
-        );
+                authorization.substring("Bearer ".length()).getBytes(StandardCharsets.UTF_8),
+                scrapeToken.getBytes(StandardCharsets.UTF_8));
     }
 }

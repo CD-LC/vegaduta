@@ -470,6 +470,7 @@ optional services (app builder, RL trainer), not by core's chat path.
 | `WORKFLOW_KAFKA_ENABLED` | unset: `true` if a bootstrap server resolved, else `false` | `false` keeps the `workflow` profile but starts no Kafka topic admin, outbox relay or consumers, and makes `WORKFLOW_EVENTS_ENABLED` default to `false` (an explicit value still wins). When unset, core decides at start-up: Kafka is on exactly when `spring.kafka.bootstrap-servers` is non-blank, whatever supplied it (`WORKFLOW_KAFKA_BOOTSTRAP_SERVERS`, `SPRING_KAFKA_BOOTSTRAP_SERVERS`, a key in the app Secret, `extraEnvFromSecrets`, `envFrom`, ...); with none it starts no Kafka client and logs one INFO line. The Helm chart never sets this flag (it cannot read Secret contents), so a Secret-held bootstrap is honoured. Only the literal `false` turns it off. The one-shot migrate process always runs with it off. There is no longer an implicit `localhost:9092` default: set `WORKFLOW_KAFKA_BOOTSTRAP_SERVERS` (Compose and `core/.env.example` do). | `WORKFLOW_KAFKA_BOOTSTRAP_SERVERS` |
 | `KNOWLEDGE_RERANK_ENABLED` | `false` | reranking via the sidecar | |
 | `GRAPH_MEMORY_ARBITRATION_ENABLED` | `false` | graph-memory conflict arbitration | |
+| `APP_A2A_ENABLED` | `true` | the inbound A2A surface: agent cards, `/api/a2a` JSON-RPC and REST. `false` turns the whole surface off | |
 | `APP_A2A_SIGNING_ENABLED` | `true` | Ed25519-signed A2A agent cards | |
 | `TOOL_AUTO_SELECTION_ENABLED` | `true` | automatic tool selection per turn | |
 | `APP_VISION_ENABLED` | `true` | image inputs in chat | |
@@ -1278,7 +1279,7 @@ there.
 | Console flags | `WEB_MCP_APPS`, `WEB_TRUSTED_IMAGE_HOSTS`, `WEB_EDGE_AGENTS`, `WEB_FREE_MODE`, `WEB_DEPLOY_ENV` | mapped to the matching `NEXT_PUBLIC_*` at runtime |
 | Tracing | `LANGFUSE_*` | the `tracing` profile |
 | Resource limits | `*_MEM_LIMIT`, `CODE_INTEL_DOCKER_PIDS_LIMIT` | per-container memory ceilings |
-| Network | `BIND_ADDR` (default `127.0.0.1`), `*_HOST_PORT` | host port bindings |
+| Network | `BIND_ADDR` (default `127.0.0.1`), `*_HOST_PORT` | host port bindings. Lite and Personal publish core directly with no reverse proxy: with `BIND_ADDR=0.0.0.0` anyone on the network can read `/actuator/prometheus` (request rates per endpoint, LLM usage per provider and model; no secrets) unless you set `APP_ACTUATOR_SCRAPE_TOKEN` and `APP_ACTUATOR_SCRAPE_TOKEN_REQUIRED=true` in `deploy/compose/core.env` |
 
 ## Appendix: configuration property reference by module
 
@@ -1312,7 +1313,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.a2a.client.allowed-hosts` |  | shapes that load the module | Egress allow-list of hosts (exact agents.example.com or *.example.com for subdomains only). |
 | `app.a2a.blocking-timeout` |  | shapes that load the module | Upper bound a BLOCKING SendMessage (and each streamed chunk wait) holds the request thread for. |
 | `app.a2a.client.connect-timeout` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
-| `app.a2a.enabled` |  | shapes that load the module | Platform-wide kill switch. |
+| `app.a2a.enabled` | `${APP_A2A_ENABLED:true}` | shapes that load the module | Platform-wide kill switch for the inbound A2A surface (agent cards, `/api/a2a`, REST). On by default; `false` removes all three controllers. |
 | `app.a2a.heartbeat-interval` | `${APP_A2A_HEARTBEAT_INTERVAL:10s}` | all shapes | Redis mode only: how often the owning replica refreshes the heartbeat of its non-terminal task records and checks them for a remote cancel. |
 | `app.a2a.heartbeat-stale-after` | `${APP_A2A_HEARTBEAT_STALE_AFTER:60s}` | all shapes | Redis mode only: a non-terminal record whose heartbeat is older than this and that belongs to ANOTHER instance id (a previous boot or a dead replica) is marked FAILED with "interrupted by restart". |
 | `app.a2a.client.max-calls-per-turn` |  | shapes that load the module | Most a2a_call_agent calls one agent turn may make (OWASP ASI07/ASI08: a looping or injected agent must not fan out to remote agents without bound). |
@@ -2533,7 +2534,8 @@ Keep this appendix current: when you add a property, document it in the section 
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
-| `app.actuator.scrape-token` |  | shapes that load the module | see source: `core/security/src/main/java/com/agenticai/core/security/ActuatorEdgeGuardFilter.java` |
+| `app.actuator.scrape-token` | `${APP_ACTUATOR_SCRAPE_TOKEN:}` | shapes that load the module | Shared secret a scraper presents as `Authorization: Bearer <token>` to read `/actuator/prometheus` through a proxy, or directly when `app.actuator.scrape-token-required` is on. Empty: no token accepted. See `ActuatorEdgeGuardFilter`. |
+| `app.actuator.scrape-token-required` | `${APP_ACTUATOR_SCRAPE_TOKEN_REQUIRED:false}` | shapes that load the module | `true`: every non-public actuator path (`/actuator/prometheus`) needs the scrape token, even for a request with no proxy in front. Set it with a token when core is published straight onto a network (Lite or Personal with `BIND_ADDR` other than `127.0.0.1`). Off by default because the Full stack's Prometheus scrapes `core:8080` without a token. |
 | `app.executor.platform.max-concurrency` | `512` | shapes that load the module | see source: `core/security/src/main/java/com/agenticai/core/security/concurrent/PlatformExecutorConfiguration.java` |
 | `app.http.max-body-bytes` | `16777216` | shapes that load the module | Group `app.http`: Per-dependency outbound timeouts for clients that build their own transport (everything else is bounded by... (see source: `core/security/src/main/java/com/agenticai/core/security/RequestBodySizeLimitFilter.java`) |
 | `app.http.small-body-max-bytes` | `65536` | shapes that load the module | Group `app.http`: Per-dependency outbound timeouts for clients that build their own transport (everything else is bounded by... (see source: `core/security/src/main/java/com/agenticai/core/security/RequestBodySizeLimitFilter.java`) |
