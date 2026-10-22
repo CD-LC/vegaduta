@@ -47,4 +47,4 @@ aiohttp==3.14.3
 # (this image's base) but NOT pip-installed/runtime-verified in this pass -
 # see the header comment's re-verify note.
 numpy==2.3.5
-pillow==12.3.0
+pillow==13.0.0

@@ -1,0 +1,10 @@
+# Version overrides applied when services/lock-requirements.sh locks code-intel
+# (uv pip compile --override). Each one forces a version past a dependency's own
+# upper bound; keep a reason and a date, and drop the line once upstream allows it.
+#
+# 2026-10-22: fastembed (0.8.0, and 0.9.0) declares pillow<13, but pillow 12.3.0
+# carries a critical advisory (GHSA-8g5g-8vmr-9782) fixed only in 13.0.0, and the
+# release's grype gate refuses the image. code-intel uses fastembed's TextEmbedding
+# only; pillow is reached by fastembed's image models, which it never loads, and
+# `from fastembed import TextEmbedding, ImageEmbedding` imports cleanly on 13.0.0.
+pillow==13.0.0

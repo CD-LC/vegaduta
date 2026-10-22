@@ -15,7 +15,7 @@ beautifulsoup4==4.12.3
 # wrapper around the tesseract-ocr system binary (see Dockerfile) - this
 # pip package alone is NOT sufficient for OCR to actually work.
 pytesseract==0.3.13
-Pillow==12.3.0
+Pillow==13.0.0
 
 # OCR provider abstraction - Google Vision's REST API is called directly
 # (no google-cloud-vision SDK dependency) since auth here is just a tenant's

@@ -75,4 +75,19 @@ RUN apt-get update     && apt-get install -y --no-install-recommends         bui
 #     superuser-only. The $libdir/plugins/age.so symlink created above is what
 #     makes that work (Postgres lets non-superusers load only from plugins/).
 
+
+# CloudNativePG base only (the official postgres image has no Python): its barman-cloud
+# is pip-installed with pip removed afterwards, so a Python package with a published
+# fix cannot be upgraded the usual way. Replace certifi in place from its hash-pinned
+# wheel when the base ships an older one (2026-10-22: certifi 2026.10.18 in
+# cloudnative-pg/postgresql:16.15-system-trixie carries critical GHSA-6q48-6c7w-9gw2,
+# which the release's grype gate refuses). Drop this once the base image ships >= it.
+ARG CERTIFI_VERSION=2026.10.19
+ARG CERTIFI_SHA256=42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b
+COPY replace-certifi.py /tmp/replace-certifi.py
+RUN if command -v python3 >/dev/null 2>&1 && python3 -c 'import certifi' 2>/dev/null; then \
+      python3 /tmp/replace-certifi.py "${CERTIFI_VERSION}" "${CERTIFI_SHA256}"; \
+    fi \
+    && rm -f /tmp/replace-certifi.py
+
 USER ${FINAL_USER}
