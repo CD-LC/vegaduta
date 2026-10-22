@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.commerce;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -38,6 +40,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CheckoutSessionController {
 
     /** Wire shape - ACP-style lowercase status, amounts in both minor units and a display-only major value. */

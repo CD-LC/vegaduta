@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,10 +44,12 @@ public class X402OfferController {
 
     public X402OfferController(
             X402OfferRepository offerRepository,
-            AgentWalletLedger walletService,
+            ObjectProvider<AgentWalletLedger> walletLedger,
             AgentService agentService) {
         this.offerRepository = offerRepository;
-        this.walletService = walletService;
+        // Absent when the payments module is not wired (BILLING_PAYMENTS off): offers needing a wallet
+        // then answer a "payments disabled" refusal instead of the application failing to start.
+        this.walletService = PaymentsDisabledAgentWalletLedger.orDisabled(walletLedger);
         this.agentService = agentService;
     }
 

@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.billing.email.BillingEmailService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Service;
  * is delegated to tenancy via the application event for the same reason.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class SubscriptionPendingHandler implements BillingEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionPendingHandler.class);

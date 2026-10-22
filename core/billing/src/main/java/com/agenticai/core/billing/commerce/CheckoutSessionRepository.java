@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.commerce;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Repository;
  * gateway id and is only ever called by {@code UpiPaymentConfirmedHandler}.
  */
 @Repository
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CheckoutSessionRepository {
 
     private static final String TABLE = "control_plane.checkout_session";

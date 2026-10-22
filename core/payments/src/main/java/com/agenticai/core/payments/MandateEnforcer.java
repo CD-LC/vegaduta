@@ -1,6 +1,8 @@
 package com.agenticai.core.payments;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
@@ -45,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </ol>
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class MandateEnforcer {
 
     private static final Logger log = LoggerFactory.getLogger(MandateEnforcer.class);

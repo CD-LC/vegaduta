@@ -5,6 +5,8 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.payments.wallet.AgentWallet.Status;
 import com.agenticai.core.payments.wallet.WalletLedgerEntry.EntryKind;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +48,7 @@ import org.springframework.util.StringUtils;
  * {@code WalletController}'s javadoc.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class AgentWalletService {
 
     private static final Logger log = LoggerFactory.getLogger(AgentWalletService.class);

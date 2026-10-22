@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.commerce;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Repository;
  * rows only.
  */
 @Repository
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CommerceProductRepository {
 
     private static final String TABLE = "control_plane.commerce_product";

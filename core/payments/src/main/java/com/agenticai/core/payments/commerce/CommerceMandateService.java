@@ -10,6 +10,8 @@ import com.agenticai.core.payments.wallet.AgentWalletService;
 import com.agenticai.core.payments.wallet.WalletException;
 import com.agenticai.core.payments.wallet.WalletLedgerEntry;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
@@ -47,6 +49,7 @@ import org.springframework.util.StringUtils;
  * sibling set can grow between the two).
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CommerceMandateService {
 
     private static final Logger log = LoggerFactory.getLogger(CommerceMandateService.class);

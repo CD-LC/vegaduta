@@ -2,6 +2,8 @@ package com.agenticai.core.tenancy;
 
 import com.agenticai.core.billing.gateway.SubscriptionPaymentExhaustedEvent;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Component;
  * downgrade cannot be blocked by a gateway outage.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class SubscriptionPaymentExhaustedListener {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionPaymentExhaustedListener.class);

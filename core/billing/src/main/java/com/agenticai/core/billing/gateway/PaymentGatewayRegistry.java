@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.gateway;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
  * silently picking the wrong gateway) would misroute real money.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentGatewayRegistry {
 
     private final Map<String, PaymentGatewayClient> clientsByName;

@@ -8,6 +8,8 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.payments.adapter.UpiAgentProtocolAdapter;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
@@ -62,6 +64,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * action, and the mandate's own signed policy remains authoritative underneath.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentToolService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentToolService.class);

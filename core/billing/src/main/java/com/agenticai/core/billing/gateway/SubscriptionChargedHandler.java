@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.billing.email.BillingEmailService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
  * — this can happen if a webhook is replayed for an old subscription.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class SubscriptionChargedHandler implements BillingEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionChargedHandler.class);

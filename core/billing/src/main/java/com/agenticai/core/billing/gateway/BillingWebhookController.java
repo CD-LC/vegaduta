@@ -1,6 +1,7 @@
 package com.agenticai.core.billing.gateway;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -38,8 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
  * of its own. Throws {@link InvalidWebhookSignatureException} on mismatch.
  */
 @RestController
-@ConditionalOnBillingEdition
 @RequestMapping("/api/billing/webhook")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class BillingWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(BillingWebhookController.class);

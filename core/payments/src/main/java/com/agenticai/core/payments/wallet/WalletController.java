@@ -4,6 +4,8 @@ import com.agenticai.core.payments.wallet.WalletDtos.CreditRequest;
 import com.agenticai.core.payments.wallet.WalletDtos.LedgerEntryResponse;
 import com.agenticai.core.payments.wallet.WalletDtos.OpenWalletRequest;
 import com.agenticai.core.payments.wallet.WalletDtos.WalletResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.ListPaging;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/wallets")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class WalletController {
 
     private final AgentWalletService walletService;
