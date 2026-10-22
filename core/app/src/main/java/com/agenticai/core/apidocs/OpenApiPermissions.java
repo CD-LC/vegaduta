@@ -37,8 +37,9 @@ import org.springframework.util.AntPathMatcher;
 final class OpenApiPermissions {
 
     static final String RESOURCE = "/security/authorization-rule-snapshot.txt";
+    /** {@code PathPattern [GET /api/x/**]} (Spring Security 7's rendering; the method is optional). */
     private static final Pattern RULE =
-            Pattern.compile("^Deferred \\[Mvc \\[pattern='([^']*)'(?:, ([A-Z]+))?].*] => ([Y-]+)$");
+            Pattern.compile("^PathPattern \\[(?:([A-Z]+) )?([^\\]]*)] => ([Y-]+)$");
     private static final AntPathMatcher MATCHER = new AntPathMatcher();
     private static final String MEMBER = "member";
     private static final String COMBINED = "AGENTS+WORKFLOWS_ADMIN";
@@ -76,7 +77,7 @@ final class OpenApiPermissions {
             }
             Matcher m = RULE.matcher(line.strip());
             if (m.matches()) {
-                rules.add(new Rule(m.group(2), m.group(1), m.group(3)));
+                rules.add(new Rule(m.group(1), m.group(2), m.group(3)));
             }
         }
         return new OpenApiPermissions(principals, rules);
