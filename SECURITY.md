@@ -11,12 +11,8 @@ repository's **Security** tab, then **Report a vulnerability**). The report is
 visible only to you and the maintainers, and we can collaborate on the fix and
 the advisory in the same place.
 
-If you cannot use GitHub, email **punith.nagaraju1988@gmail.com** with the subject
+If you cannot use GitHub, email **contact@cdandlc.com** with the subject
 line `SECURITY`.
-<!-- TODO(maintainers): punith.nagaraju1988@gmail.com is a placeholder. Replace it
-with a monitored address before launch (scripts/dev/set-repo-identity.sh
---security-email), and enable private vulnerability reporting in the repository
-settings (Settings -> Code security). -->
 
 Please include what you found, the affected component and version or commit,
 steps to reproduce, and the impact you expect. A proof of concept helps.

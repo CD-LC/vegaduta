@@ -292,7 +292,7 @@ one changes.
 | GitHub plan | organization on the Free plan | branch protection rulesets and GitHub Pages are unavailable for private repositories; see [Branch protection](maintainers/branch-protection.md) |
 | Documentation site | workflow and config exist; deploy job gated by repository variable `DOCS_PUBLISH_PAGES` | set Pages source to "GitHub Actions" and the variable to `true` ([Publishing these docs](maintainers/docs-site.md)) |
 | CODEOWNERS team | `@CD-LC/maintainers`; the organization has no teams yet | create the team, or change it with `scripts/dev/set-repo-identity.sh --team` |
-| Security and conduct contacts | placeholders `punith.nagaraju1988@gmail.com`, `punith.nagaraju1988@gmail.com` | replace with monitored addresses ([Repository setup](maintainers/repo-setup.md)) |
+| Security and conduct contacts | placeholders `contact@cdandlc.com`, `contact@cdandlc.com` | replace with monitored addresses ([Repository setup](maintainers/repo-setup.md)) |
 | GitHub Actions | jobs do not start: the account's payments failed or the spending limit is reached | no remote CI result exists until billing is fixed; run `make gates` and the module builds locally |
 | Java Agent SDK on Maven Central | not published; `0.1.0-SNAPSHOT` builds from source | verify the `io.vegaduta` namespace, then follow [Releasing the SDK](maintainers/releasing-sdk.md) |
 | Python Agent SDK on PyPI | not published (`sdk/python-agent/README.md`: "not yet on PyPI"); `pypi-release.yml` uploads only when `SDK_PUBLISH_PYPI` is `true` | configure PyPI trusted publishing, then tag `pysdk-v*` |

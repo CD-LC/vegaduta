@@ -19,8 +19,8 @@ handle, maintainers team); rerun the script below to change any of them.
 | `ghcr.io/cd-lc` | image and chart registry namespace | follows the owner |
 | `@CD-LC/maintainers` | CODEOWNERS | create the `maintainers` team in the organization, or use a username |
 | `punith-naga` | MAINTAINERS.md | the project lead's GitHub handle (the account that also authors commits) |
-| `punith.nagaraju1988@gmail.com` | SECURITY.md fallback contact | a monitored address |
-| `punith.nagaraju1988@gmail.com` | CODE_OF_CONDUCT.md | a monitored address (can be the same) |
+| `contact@cdandlc.com` | SECURITY.md fallback contact | a monitored address |
+| `contact@cdandlc.com` | CODE_OF_CONDUCT.md | a monitored address (can be the same) |
 
 Then rewrite every occurrence in one step and review the diff:
 
