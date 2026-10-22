@@ -58,7 +58,7 @@ class CodingTaskControllerTest {
 
         assertThatThrownBy(() -> controller.start(UUID.randomUUID().toString(), "x", "mvn test", null, upload,
             null, null, null, null, alice)).isInstanceOfSatisfying(ResponseStatusException.class,
-            e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+            e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
         verify(upload, never()).getBytes();
         verify(service, never()).start(any(), any());
     }

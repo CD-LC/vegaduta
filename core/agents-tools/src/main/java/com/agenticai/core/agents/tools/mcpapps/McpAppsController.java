@@ -132,7 +132,7 @@ public class McpAppsController {
                 switch (e.code()) {
                     case NOT_FOUND -> HttpStatus.NOT_FOUND;
                     case REFUSED -> HttpStatus.FORBIDDEN;
-                    case TOO_LARGE -> HttpStatus.PAYLOAD_TOO_LARGE;
+                    case TOO_LARGE -> HttpStatus.CONTENT_TOO_LARGE;
                     case BAD_REQUEST -> HttpStatus.BAD_REQUEST;
                     case RATE_LIMITED -> HttpStatus.TOO_MANY_REQUESTS;
                     case UNAVAILABLE -> HttpStatus.BAD_GATEWAY;

@@ -115,7 +115,7 @@ class WorkflowWaitWebhookControllerTest {
 
         when(rateLimiter.tryAcquire(anyString(), anyString(), anyLong())).thenReturn(true);
         assertEquals(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 controller(true, 10)
                         .resume(token(), Map.of("data", "x".repeat(100)))
                         .getStatusCode());

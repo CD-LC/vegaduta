@@ -112,7 +112,7 @@ public class AgentTurnController {
         }
         if (chars > MAX_TOTAL_CHARS) {
             throw new ResponseStatusException(
-                    HttpStatus.PAYLOAD_TOO_LARGE,
+                    HttpStatus.CONTENT_TOO_LARGE,
                     "the conversation must be at most "
                             + MAX_TOTAL_CHARS
                             + " characters - the client should trim older tool output");

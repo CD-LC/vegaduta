@@ -147,7 +147,7 @@ public class WorkspaceFolderController {
         List<SavedFile> saved = new ArrayList<>();
         for (MultipartFile upload : uploads) {
             if (upload.getSize() > MAX_UPLOAD_BYTES) {
-                return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE)
                         .body(Map.of("error", "\"" + upload.getOriginalFilename() + "\" is over " + (MAX_UPLOAD_BYTES / 1024 / 1024) + " MB."));
             }
             String name = safeName(upload.getOriginalFilename());

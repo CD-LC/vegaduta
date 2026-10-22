@@ -138,7 +138,7 @@ public class ChatImportController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a conversations file first.");
         }
         if (file.getSize() > importService.maxBytes()) {
-            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "That file is too large to import.");
+            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "That file is too large to import.");
         }
         try {
             return file.getBytes();
@@ -153,7 +153,7 @@ public class ChatImportController {
         }
         // UTF-8 length can exceed the char count; the service re-checks the exact byte size.
         if (body.text().length() > importService.maxBytes()) {
-            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "That file is too large to import.");
+            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "That file is too large to import.");
         }
         return body.text().getBytes(StandardCharsets.UTF_8);
     }

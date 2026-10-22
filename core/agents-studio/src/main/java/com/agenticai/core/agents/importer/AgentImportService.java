@@ -429,7 +429,7 @@ public class AgentImportService {
 
     private ResponseStatusException tooLarge() {
         return new ResponseStatusException(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 "The payload is larger than the import limit of " + maxPayloadBytes + " bytes.");
     }
 

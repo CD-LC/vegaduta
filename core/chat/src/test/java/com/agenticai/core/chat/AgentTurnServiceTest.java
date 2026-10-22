@@ -476,7 +476,7 @@ class AgentTurnServiceTest {
                                 null,
                                 null)));
         assertEquals(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 statusOf(
                         new AgentTurn.Request(
                                 List.of(

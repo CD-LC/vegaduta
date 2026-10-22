@@ -177,8 +177,8 @@ class ChatImportServiceTest {
     void anOversizedFileIs413BeforeAnyParsing() {
         ChatImportService svc = service();
         byte[] big = new byte[1_000_001];
-        assertStatus(HttpStatus.PAYLOAD_TOO_LARGE, () -> svc.preview("alice", big));
-        assertStatus(HttpStatus.PAYLOAD_TOO_LARGE, () -> svc.importChats("alice", big, List.of("x")));
+        assertStatus(HttpStatus.CONTENT_TOO_LARGE, () -> svc.preview("alice", big));
+        assertStatus(HttpStatus.CONTENT_TOO_LARGE, () -> svc.importChats("alice", big, List.of("x")));
         assertStatus(HttpStatus.BAD_REQUEST, () -> svc.preview("alice", new byte[0]));
     }
 

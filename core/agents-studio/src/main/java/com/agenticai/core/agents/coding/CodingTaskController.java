@@ -78,7 +78,7 @@ public class CodingTaskController {
         byte[] bytes = null;
         if (archive != null && !archive.isEmpty()) {
             if (archive.getSize() > settings.maxArchiveBytes()) {
-                throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,
+                throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE,
                     "The archive is larger than the " + (settings.maxArchiveBytes() >> 20) + " MB limit.");
             }
             try {
