@@ -1,6 +1,8 @@
 package com.agenticai.core.payments;
 
 import com.agenticai.core.crypto.EnvelopeEncryptionService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  * protocols converge on.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class MandateSigningService {
 
     private static final Logger log = LoggerFactory.getLogger(MandateSigningService.class);

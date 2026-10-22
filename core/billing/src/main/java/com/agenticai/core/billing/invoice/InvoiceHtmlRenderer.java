@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.invoice;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
  * (billing name/address, GSTIN) land in this markup.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class InvoiceHtmlRenderer {
 
     /** SAC for information-technology / cloud services. */

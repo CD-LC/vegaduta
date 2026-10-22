@@ -7,6 +7,8 @@ import com.agenticai.core.payments.PaymentDtos.MandateSpendResponse;
 import com.agenticai.core.payments.PaymentDtos.RevokeMandateRequest;
 import com.agenticai.core.payments.PaymentDtos.TransactionResponse;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +40,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/api/payments")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentController {
 
     private final PaymentMandateService mandateService;

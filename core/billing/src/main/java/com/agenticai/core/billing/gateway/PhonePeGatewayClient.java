@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -82,6 +84,7 @@ import org.springframework.web.client.RestClientException;
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PhonePeGatewayClient implements PaymentGatewayClient {
 
     private static final Logger log = LoggerFactory.getLogger(PhonePeGatewayClient.class);

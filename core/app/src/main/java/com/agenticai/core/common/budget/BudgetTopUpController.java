@@ -1,7 +1,8 @@
 package com.agenticai.core.common.budget;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.security.Principal;
 import org.springframework.context.annotation.Profile;
 import org.springframework.util.StringUtils;
@@ -34,9 +35,9 @@ import org.springframework.web.bind.annotation.RestController;
  * billing beans, same as {@code RazorpayWebhookController}.
  */
 @RestController
-@ConditionalOnBillingEdition
 @RequestMapping("/api/budget/top-up")
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class BudgetTopUpController {
 
     private final BudgetTopUpService budgetTopUpService;

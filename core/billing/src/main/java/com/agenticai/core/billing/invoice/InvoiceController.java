@@ -1,7 +1,8 @@
 package com.agenticai.core.billing.invoice;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -36,8 +37,8 @@ import org.springframework.web.server.ResponseStatusException;
  * {@code POST /api/tenant/upgrade}.
  */
 @RestController
-@ConditionalOnBillingEdition
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class InvoiceController {
 
     /** List-row shape for {@code GET /api/tenant/invoices}. */

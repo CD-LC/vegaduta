@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.commerce;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.razorpay.RazorpayException;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class RazorpayPaidPaymentLookup implements PaidPaymentLookup {
 
     private static final Logger log = LoggerFactory.getLogger(RazorpayPaidPaymentLookup.class);

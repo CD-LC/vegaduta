@@ -1,5 +1,7 @@
 package com.agenticai.core.payments;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Duration;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
  * still correct, just at DB latency rather than cache latency.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class MandateRevocationCache {
 
     private static final Logger log = LoggerFactory.getLogger(MandateRevocationCache.class);

@@ -4,6 +4,8 @@ import com.agenticai.core.billing.gateway.PaymentGatewayClient;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.dto.TenantSubscriptionStatusResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class TenantSubscriptionService {
 
     private static final Logger log = LoggerFactory.getLogger(TenantSubscriptionService.class);

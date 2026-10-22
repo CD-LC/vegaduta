@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.commerce;
 
 import com.agenticai.core.billing.commerce.ProductCatalogService.CartItem;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -44,6 +46,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @Profile("security")
 @RequestMapping("/api/commerce/feed")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class ProductFeedController {
 
     public record CartLine(@NotNull UUID product_id, @Min(1) @Max(99) int quantity) {

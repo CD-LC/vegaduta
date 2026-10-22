@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.gateway;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
  * row-level idempotent, so the redelivery cannot double-apply.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class BillingEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(BillingEventDispatcher.class);

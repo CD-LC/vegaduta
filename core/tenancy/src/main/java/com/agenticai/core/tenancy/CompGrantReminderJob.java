@@ -1,8 +1,9 @@
 package com.agenticai.core.tenancy;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.billing.email.BillingEmailService;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -34,8 +35,8 @@ import org.springframework.stereotype.Component;
  * transaction is held across the SMTP sends: each tenant is saved on its own after its mail.
  */
 @Component
-@ConditionalOnBillingEdition
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CompGrantReminderJob {
 
     private static final Logger log = LoggerFactory.getLogger(CompGrantReminderJob.class);

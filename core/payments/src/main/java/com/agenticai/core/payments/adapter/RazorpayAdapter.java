@@ -3,6 +3,8 @@ package com.agenticai.core.payments.adapter;
 import com.agenticai.core.billing.gateway.GatewayUpiCollectRequest;
 import com.agenticai.core.billing.gateway.PaymentGatewayClient;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.razorpay.RazorpayException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class RazorpayAdapter implements UpiAgentProtocolAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(RazorpayAdapter.class);

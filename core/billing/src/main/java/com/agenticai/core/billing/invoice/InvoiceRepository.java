@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.invoice;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Repository;
  * current-schema state.
  */
 @Repository
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class InvoiceRepository {
 
     private static final String COLUMNS =
