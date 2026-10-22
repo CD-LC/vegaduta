@@ -1,5 +1,6 @@
 package com.agenticai.core.tenancy;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,7 +8,6 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -216,9 +216,9 @@ public class PgAdvisoryJobLock {
             lastSkipWarnNanos.put(jobName, now);
             log.warn(
                     "Job '{}' tick skipped: this JVM already holds the max concurrent locked jobs"
-                        + " (app.scheduling.max-concurrent-locked-jobs); sustained skips mean"
-                        + " long-running locked jobs are hogging the permits (logged at most once a"
-                        + " minute per job)",
+                            + " (app.scheduling.max-concurrent-locked-jobs); sustained skips mean"
+                            + " long-running locked jobs are hogging the permits (logged at most once a"
+                            + " minute per job)",
                     jobName);
         }
     }
