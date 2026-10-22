@@ -157,12 +157,12 @@ public class EmailCredentialService {
             inbox.close(false);
         } catch (Exception e) {
             // The mail client's message can reveal what answered on the other end (timeouts,
-            // banners,
-            // refused ports), so it stays in the server log and the caller gets a fixed text.
+            // banners, refused ports) and usually names the tenant-typed host, so neither the
+            // caller nor the log gets it: the log carries a fixed text and the exception class.
             log.warn(
                     "IMAP connect probe failed for {}: {}",
                     LogMasking.email(username),
-                    e.toString());
+                    e.getClass().getSimpleName());
             throw new ChannelConfigurationException(
                     "email",
                     "Could not connect to this IMAP mailbox. Check the host, port, SSL setting,"

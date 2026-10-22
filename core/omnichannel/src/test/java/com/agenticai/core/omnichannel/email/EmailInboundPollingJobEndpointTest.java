@@ -1,6 +1,9 @@
 package com.agenticai.core.omnichannel.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -9,6 +12,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.crypto.EncryptionService;
@@ -25,6 +31,7 @@ import java.net.SocketTimeoutException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 /**
  * A mailbox saved before the outbound policy existed (or one the operator's allow-list no longer
@@ -74,11 +81,33 @@ class EmailInboundPollingJobEndpointTest {
                             mock(WorkflowTriggerPort.class),
                             mock(InboundMessageDedupService.class));
 
-            job.pollAllTenants();
+            Logger jobLog = (Logger) LoggerFactory.getLogger(EmailInboundPollingJob.class);
+            ListAppender<ILoggingEvent> appender = new ListAppender<>();
+            appender.start();
+            jobLog.addAppender(appender);
+            try {
+                job.pollAllTenants();
+            } finally {
+                jobLog.detachAppender(appender);
+            }
 
             assertThrows(
                     SocketTimeoutException.class, listener::accept, "no connection may be opened");
             verify(repository, never()).save(any());
+            // The skip is logged with a fixed text: the refusal reason names the tenant-typed
+            // host, so neither it nor the exception (and its stack trace) may reach the log.
+            assertEquals(1, appender.list.size());
+            ILoggingEvent skipped = appender.list.get(0);
+            assertTrue(
+                    skipped.getFormattedMessage().startsWith("Skipping email poll for mailbox"),
+                    skipped.getFormattedMessage());
+            assertFalse(
+                    skipped.getFormattedMessage().contains("127.0.0.1"),
+                    skipped.getFormattedMessage());
+            assertTrue(
+                    skipped.getFormattedMessage().contains("ChannelConfigurationException"),
+                    skipped.getFormattedMessage());
+            assertEquals(null, skipped.getThrowableProxy(), "no exception text or stack trace");
         }
     }
 }
