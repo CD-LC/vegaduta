@@ -79,10 +79,19 @@ jobs:
               # ConsumerContractVerificationTest and OpenApiSpecFreshnessTest (ADR-0025)
               - 'contracts/consumers/**'
               - 'docs/api/openapi.json'
+              # AuditOutcomeAlignmentTest reads contracts/outbound/audit-event.schema.json
+              # and pins the SDK enums (sdk/java agent-api, sdk/python-agent audit.py)
+              - 'contracts/outbound/**'
+              - 'sdk/java/agent-api/**'
+              - 'sdk/python-agent/vegaduta_agent/audit.py'
             sdk:
               - *ci
               - 'sdk/java/**'
               - 'examples/sdk/**'
+              # agent-testkit CoreConsumerContractTest reads contracts/consumers/sdk-java
+              # and contracts/outbound/audit-event.schema.json
+              - 'contracts/consumers/sdk-java/**'
+              - 'contracts/outbound/**'
             sdk-clients:
               - *ci
               - 'sdk/generate.mjs'
@@ -113,6 +122,9 @@ jobs:
               - *ci
               - 'services/mcp-stdio-runner/**'
               - 'services/piece-host/**'
+              - 'services/workspace-runner/**'
+              - 'services/whatsapp-qr/**'
+              - 'services/desktop-agent/**'
               - 'examples/mcp-servers/**'
             shell:
               - *ci
@@ -420,8 +432,10 @@ jobs:
 
       # Ruff config lives in each service's pyproject.toml (sidecar, code-intel);
       # the other services use ruff's defaults. Blocking gate = lint + format of
-      # the .py files this PR adds or modifies, in any service. The whole-tree
-      # run below is advisory until the existing findings are burned down.
+      # the .py files this PR adds or modifies, in any service, and the whole
+      # tree of sidecar and code-intel (the same command as `make lint`). The
+      # other four services' whole-tree run is advisory until their existing
+      # findings are burned down.
       - name: Install ruff
         run: pip install ruff==0.12.4
       - name: Ruff lint + format (changed files)
@@ -431,9 +445,11 @@ jobs:
           if [ "${#files[@]}" -eq 0 ]; then echo "No changed Python files."; exit 0; fi
           ruff check --force-exclude "${files[@]}"
           ruff format --check --force-exclude "${files[@]}"
-      - name: Ruff whole tree (all services, advisory)
+      - name: Ruff whole tree (sidecar, code-intel)
+        run: ruff check services/sidecar services/code-intel
+      - name: Ruff whole tree (other services, advisory)
         continue-on-error: true
-        run: ruff check services/sidecar services/code-intel services/app-builder services/voice-agent services/rl-trainer services/tool-sandbox
+        run: ruff check services/app-builder services/voice-agent services/rl-trainer services/tool-sandbox
 
       # The same hash-locked install as the sidecar Dockerfile: the torch
       # block of requirements.lock first, --no-deps, from the CPU-only index,
@@ -464,16 +480,14 @@ jobs:
 
       # NOT pytest. code-intel/tests are framework-free scripts on a hand-rolled
       # check() harness that reports failures only through main()'s exit code;
-      # pytest would error on collection or pass vacuously. Invoke each module
-      # and rely on its exit code.
+      # pytest would error on collection or pass vacuously. Invoke every
+      # tests/test_*.py module (a new one is picked up without editing this
+      # file) and rely on its exit code.
       - name: code-intel tests (script harness, not pytest)
         working-directory: services/code-intel
         run: |
-          for m in test_auth test_service test_guardrails test_agent \
-                   test_approval_reconcile test_exec_and_mcp \
-                   test_gitops_auth_token test_gitops_confinement \
-                   test_run_modes test_store_search; do
-            python -m "tests.$m" || exit 1
+          for f in tests/test_*.py; do
+            python -m "tests.$(basename "$f" .py)" || exit 1
           done
 
   python-locks:
@@ -527,6 +541,9 @@ jobs:
             test: pip install pytest==8.3.2 && python -m pytest tests/ -q
           - service: voice-agent
             test: python -m pytest tests/ -q
+          - service: rl-trainer
+            # pytest comes from requirements-dev.txt (installed by the Install step).
+            test: python -m pytest tests/ -q
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -546,7 +563,7 @@ jobs:
         run: bash -c "$TEST_CMD"
 
   node-services:
-    name: Node services (mcp-stdio-runner, piece-host, example MCP servers)
+    name: Node services (mcp-stdio-runner, piece-host, workspace-runner, whatsapp-qr, desktop-agent, example MCP servers)
     needs: changes
     if: needs.changes.outputs.node-services == 'true' || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -558,9 +575,21 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+      # Plain `node --test` runs every *.test.js (server.test.js and
+      # server.limits.test.js); naming one file skipped the limits suite.
       - name: mcp-stdio-runner (node:test)
         working-directory: services/mcp-stdio-runner
-        run: node --test server.test.js
+        run: node --test
+      # The next three have no runtime dependencies the tests load: no npm install.
+      - name: workspace-runner (node:test)
+        working-directory: services/workspace-runner
+        run: node --test
+      - name: whatsapp-qr (node:test)
+        working-directory: services/whatsapp-qr
+        run: node --test
+      - name: desktop-agent (node:test)
+        working-directory: services/desktop-agent
+        run: node --test
       # Zero runtime dependencies; the tests need no npm install.
       - name: piece-host (node:test)
         working-directory: services/piece-host

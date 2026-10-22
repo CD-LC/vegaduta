@@ -8,6 +8,12 @@
 # opens them as soon as an advisory is published.
 #
 # Labels used below must exist in the repository (docs/maintainers/repo-setup.md).
+#
+# Coverage is checked by scripts/ci/dependabot-coverage.sh (static gates): every
+# package.json, go.mod and Dockerfile directory is listed here or exempted in
+# that script with a reason. Not listed on purpose: /installer (Go, stdlib only:
+# go.mod has no `require`, so add a gomod entry when the first dependency lands)
+# and /services/desktop-agent (npm, no dependencies).
 version: 2
 
 updates:
@@ -104,6 +110,8 @@ updates:
       - /examples/mcp-servers/http-gateway
       - /examples/mcp-servers/home-assistant
       - /services/piece-host
+      - /services/whatsapp-qr
+      - /services/browser-runner
       - /sdk/typescript
     schedule:
       interval: weekly
@@ -115,6 +123,12 @@ updates:
     labels: [dependencies]
     commit-message:
       prefix: "build(deps)"
+    ignore:
+      # browser-runner: the Playwright server version must equal the Playwright
+      # Java client pinned in core/agents-browser/pom.xml (and the base image tag
+      # in its Dockerfile); bump them together by hand. Patch updates only.
+      - dependency-name: playwright
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       npm-tooling-minor-patch:
         update-types: [minor, patch]
@@ -178,7 +192,11 @@ updates:
       app-builder-templates-pip:
         patterns: ["*"]
 
-  # Base images, one entry per Dockerfile directory
+  # Base images, one entry per Dockerfile directory. Dependabot reads literal
+  # FROM lines and may not resolve an image behind `FROM ${ARG}` (workspace-runner,
+  # whatsapp-qr and browser-runner pin theirs through ARG defaults; deploy/omnibus's
+  # `${REGISTRY}/...` stages are our own images and its jre/node stages are literal).
+  # If one of those is never bumped, move its image into a literal FROM stage.
   - package-ecosystem: docker
     directories:
       - /core
@@ -193,6 +211,10 @@ updates:
       - /services/voice-agent
       - /services/rl-trainer
       - /services/piece-host
+      - /services/workspace-runner
+      - /services/whatsapp-qr
+      - /services/browser-runner
+      - /deploy/omnibus
       - /examples/mcp-servers/http-gateway
       - /core/sdlc/e2b-template
       - /infra/keycloak/phase1-realm
