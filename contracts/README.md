@@ -15,8 +15,9 @@ B9-PR4 (`VegaDuta-PR-Prompts-B9-A1.md`). Two things live here:
    it was derived from and when, so a future change to that file is the signal to
    re-derive the schema, not the other way around.
 2. **Fixtures** — real (or deliberately-malformed) example payloads that validate (or
-   are asserted to fail) against those schemas, and that the corresponding contract
-   test replays against the real handler code.
+   are asserted to fail) against those schemas. A unit test checks each fixture against its
+   schema (`contracts/consumers/tools/test_inbound_fixtures.py`). Replaying them against the
+   real handlers is not done yet; see [What is verified](#what-is-verified).
 
 ## Layout
 
@@ -102,23 +103,41 @@ values inlined, `payload` genuinely nullable per that field's own javadoc). Both
 schemas were derived from the DTO `record`s Jackson actually serializes (`from(...)`
 factory methods), not the JPA entities behind them.
 
+## What is verified
+
+Every contract file here is checked by something in CI, except where the last column says so.
+
+| Contract | Checked by | Runs in | Not checked |
+|---|---|---|---|
+| `consumers/web/*` | core `ConsumerContractVerificationTest` (every interaction exists in the generated OpenAPI document, with its status and fields); `node web/scripts/api-contract.mjs --check` and `web/app/lib/api/consumerContract.test.ts` (the console calls nothing outside the contract) | core job, web job (`make contracts`) | 2 console fallback probes, listed in `consumers/web/uncontracted.json` |
+| `consumers/sdk-typescript`, `sdk-python` | the same core test; `sdk/test/consumer-contract.test.mjs` and `sdk/python/tests/test_contracts.py` (the README examples call only contracted endpoints) | core job, `sdk-clients` job | |
+| `consumers/sdk-python-agent` | the same core test; `sdk/python-agent/tests/test_contracts.py` (no network client is imported, emitted records validate against `outbound/*.schema.json`) | core job, `sdk-clients` job | |
+| `consumers/sdk-java` | the same core test; `CoreConsumerContractTest` in `sdk/java/agent-testkit` | core job, `sdk` job | |
+| `outbound/audit-event.schema.json` | the Python Agent SDK's emitted records validate against it; core `AuditOutcomeAlignmentTest` pins its `outcome` enum to core's `AuditOutcome` | `sdk-clients` job, core job | core's `AuditLogEntryResponse` JSON is not validated against the whole schema |
+| `outbound/approval-callback.schema.json` | the Python Agent SDK's approval records validate against it | `sdk-clients` job | core's `ApprovalRequestResponse` JSON is not validated against it |
+| `inbound/razorpay`, `inbound/twilio-conversation-relay` | `contracts/consumers/tools/test_inbound_fixtures.py`: each fixture validates against the schema for its event or message type, the malformed fixture fails, every schema has a fixture; the Twilio schemas also feed `scripts/docs/asyncapi.mjs` | `sdk-clients` job, `make test-sdk-clients` | the schemas were read from `RazorpayGatewayClient` and `VoiceRelayWebSocketHandler`, and nothing replays the fixtures through those classes, so a handler change does not fail a contract test |
+| `inbound/slack`, `inbound/telegram` | nothing: reserved, empty directories | | |
+
 ## Running these locally
 
-No Docker/full-stack needed — these are unit/schema-validation tests only (see
-`.github/workflows/contract.yml`'s own header comment for why this job is deliberately
-NOT part of `stack.yml`/`e2e.yml`). From `core/`:
-
 ```
-mvn -pl omnichannel,billing,audit,approval -am test -Dgroups=contract
+make contracts                                  # web contract is current, then core verifies every consumer
+node --test sdk/test/*.test.mjs                 # sdk-typescript contract and the README examples
+python -m unittest discover -s contracts/consumers/tools -p 'test_*.py'   # inbound fixtures against their schemas
+(cd sdk/python-agent && python -m pytest tests/ -q)                      # sdk-python-agent contract, outbound schemas
+mvn -B -ntp -pl app -am test -Dtest='ConsumerContractVerificationTest,AuditOutcomeAlignmentTest' \
+    -Dsurefire.failIfNoSpecifiedTests=false      # from core/: provider side (`make contracts` runs the first one)
 ```
 
-## Known gap, not fixed in this PR
+No Docker or full stack is needed. The schema checks use the small JSON Schema subset in
+`contracts/consumers/tools/consumer_contract.py` (type, enum, const, pattern, required, properties,
+`additionalProperties: false`, minimum, `allOf` and a relative-file `$ref`); a schema that uses another
+keyword is not enforced for it, so extend `validate` before relying on one.
 
-No JSON Schema validator dependency (`networknt json-schema-validator` or similar)
-exists anywhere in `core/`'s poms yet (checked `core/pom.xml` and `core/app/pom.xml` —
-zero hits for `json-schema`/`networknt`/`everit`). The schema-validation JUnit test
-drafted alongside these fixtures (delivered separately, not committed into `core/`
-directly from this sandboxed thread — see `AGENT-COORDINATION-2026-07-18.md` §12 for
-why) assumes that dependency gets added to whichever module hosts it. Whoever lands
-these files for real needs to add it to that module's `pom.xml` first, or the
-schema-validation test won't compile.
+## Known gaps
+
+- Nothing replays the Razorpay and Twilio fixtures through the handlers that parse them, and core's own
+  JSON for `AuditLogEntryResponse` and `ApprovalRequestResponse` is not validated against the outbound
+  schemas. Both need a JSON Schema validator in core's tests: `com.networknt:json-schema-validator` is
+  declared by `core/agents-jobs/pom.xml`, but not by the modules that hold those handlers and DTOs.
+- Adding that dependency to a test scope is a build change for the maintainer to approve, so it is not done here.

@@ -45,11 +45,16 @@ exposure, produced from the code as it is.
    Maven plugin goal, see the status table):
 
    ```bash
-   java -cp target/classes:vegaduta-agent-scanner-0.1.0.jar \
+   java -cp target/classes:vegaduta-agent-scanner-<version>-cli.jar \
        io.vegaduta.agent.scanner.Main --package com.acme.agent --format md > risk-map.md
    # or, on a packaged jar:
-   java -jar vegaduta-agent-scanner-0.1.0.jar --jar target/app.jar --format md > risk-map.md
+   java -jar vegaduta-agent-scanner-<version>-cli.jar --jar target/app.jar --format md > risk-map.md
    ```
+
+   Use the `-cli` jar from the SDK release (the first release after 0.1.0 has it): it carries its own
+   dependencies. The plain scanner jar is the library and cannot be run with `java -jar`; for 0.1.0, which
+   ships only that jar, use the full class-path command in the
+   [Java SDK README](https://github.com/CD-LC/vegaduta/blob/main/sdk/java/README.md#scan-before-you-integrate).
 
    It lists every `@Tool` / `ToolCallback` / `ToolCallbackProvider` it can see, whether it
    carries `@Governed`, the inferred classification where it does not (HTTP client in the
@@ -287,7 +292,7 @@ production under `STRICT`.
 | Week | Milestone |
 |---|---|
 | 1-2 | Partner onboarding; the five-day playbook run with each |
-| 3-6 | Partners in shadow or `STRICT`; weekly calls; fixes shipped as `0.x` snapshots |
+| 3-6 | Partners in shadow or `STRICT`; weekly calls; fixes shipped as `0.x` releases |
 | 7-10 | Second agent at each partner on the SDK without hands-on help (the "does it stand alone" test) |
 | 11-12 | Reference write-up; retrospective; roadmap adjusted from the three sign-off checklists |
 

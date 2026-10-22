@@ -108,10 +108,7 @@ class RiskMap:
             ]
         if self.asi_exposure:
             lines += ["", "## OWASP ASI exposure", "", "| Item | Title | Tools |", "|---|---|---|"]
-            lines += [
-                f"| {i} | {title} | {', '.join(names)} |"
-                for i, title, names in self.asi_exposure
-            ]
+            lines += [f"| {i} | {title} | {', '.join(names)} |" for i, title, names in self.asi_exposure]
         return "\n".join(lines) + "\n"
 
 
@@ -125,11 +122,7 @@ def risk_map(
     tools at or above it (plus CRITICAL, plus ``requires_approval``) count as
     gated."""
     if not isinstance(source, Iterable) or isinstance(source, (str, bytes)):
-        members = [
-            (n, m)
-            for n, m in inspect.getmembers(source)
-            if callable(m) and not n.startswith("_")
-        ]
+        members = [(n, m) for n, m in inspect.getmembers(source) if callable(m) and not n.startswith("_")]
     else:
         members = [
             (getattr(m, "__name__", type(m).__name__), m)
@@ -198,8 +191,7 @@ def risk_map(
                 Deduction(
                     "UNGATED_SINK",
                     UNGATED_SINK_POINTS,
-                    "Exfiltration sink(s) without approval while the trifecta holds: "
-                    + ", ".join(ungated),
+                    "Exfiltration sink(s) without approval while the trifecta holds: " + ", ".join(ungated),
                 )
             )
     no_tags = sum(1 for t in tools if t.classified and not t.classification.risks)
@@ -214,9 +206,7 @@ def risk_map(
         )
     deductions.sort(key=lambda d: -d.points)
 
-    asi = tuple(
-        (r.id, r.title, tuple(exposure[r])) for r in AsiRisk if exposure[r]
-    )
+    asi = tuple((r.id, r.title, tuple(exposure[r])) for r in AsiRisk if exposure[r])
     score = max(0, 100 - sum(d.points for d in deductions))
     return RiskMap(
         tools=tuple(tools),

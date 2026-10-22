@@ -65,7 +65,7 @@ contracts/            API/contract files;  docs/  documentation
 |---|---|---|---|
 | core | `cd core && mvn -B -ntp -DskipTests package` | `mvn -B -ntp -pl <module> test`; full: `mvn -B -ntp verify` | (compiler; `make gates`) |
 | sdk/java | `cd sdk/java && mvn -B -ntp -DskipTests package` (JDK 17+) | `mvn -B -ntp verify` | `mvn spotless:check` (google-java-format, Google style; run it on JDK 21, it does not start on JDK 17.0.20's javac) |
-| sdk/python-agent | `cd sdk/python-agent && pip install -e '.[dev]'` (Python 3.10+) | `python -m pytest tests/ -q` | `ruff check vegaduta_agent tests` |
+| sdk/python-agent | `cd sdk/python-agent && pip install -e '.[dev]'` (Python 3.10+) | `python -m pytest tests/ -q` | `ruff check vegaduta_agent tests && ruff format --check vegaduta_agent tests` |
 | web | `cd web && npm ci && npm run build` | `npm test` (vitest) | `npm run lint && npm run typecheck` |
 | services/sidecar | `pip install -r requirements.txt -r requirements-dev.txt` | `python -m pytest tests/ -q` | `ruff check services/sidecar` |
 | services/code-intel | `pip install -r requirements.txt` | `python -m tests.<module>` per module (**not pytest**) | `ruff check services/code-intel` |

@@ -605,14 +605,19 @@ jobs:
       - name: Python client and sdk-python consumer contract (unittest)
         working-directory: sdk/python
         run: python -m unittest discover -s tests
+      - name: Inbound webhook fixtures validate against contracts/inbound schemas (unittest)
+        run: python -m unittest discover -s contracts/consumers/tools -p 'test_*.py'
       - name: python-agent tests, incl. sdk-python-agent consumer contract (pytest)
         working-directory: sdk/python-agent
         run: |
           pip install -e '.[dev]'
           python -m pytest tests/ -q
-      - name: python-agent lint (ruff)
+      - name: python-agent lint and format check (ruff)
         working-directory: sdk/python-agent
-        run: ruff check vegaduta_agent tests
+        # pypi-release.yml runs the same two commands, so a release can no longer fail on formatting.
+        run: |
+          ruff check vegaduta_agent tests
+          ruff format --check vegaduta_agent tests
 
   shellcheck:
     name: shellcheck

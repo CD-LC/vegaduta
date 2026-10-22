@@ -48,7 +48,7 @@ class TimedCall:
 
 class OtelToolCallObserver:
     """Emits one ``execute_tool`` span per tool call when
-    ``opentelemetry-api`` is installed (``pip install vegaduta-agent[otel]``).
+    ``opentelemetry-api`` is installed (the ``otel`` extra).
     Attribute names follow the OTel GenAI ``execute_tool`` conventions."""
 
     def __init__(self, tracer_name: str = "vegaduta.agent") -> None:
@@ -56,7 +56,7 @@ class OtelToolCallObserver:
             from opentelemetry import trace  # noqa: PLC0415
         except ImportError as exc:
             raise ImportError(
-                "OtelToolCallObserver needs the otel extra: pip install vegaduta-agent[otel]"
+                "OtelToolCallObserver needs opentelemetry-api (the otel extra): pip install opentelemetry-api"
             ) from exc
         self._trace = trace
         self._tracer = trace.get_tracer(tracer_name)
