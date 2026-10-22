@@ -236,4 +236,32 @@ class ContentGuardrailsImplementationTest {
         }
         assertThat(piiGuardrail.evaluate("write to jane.doe@example.com").isPassed()).isFalse();
     }
+
+    @Test
+    @DisplayName("PII: an address is detected whatever the length of its local part")
+    void piiEmailWithAnOverLongLocalPartIsStillDetected() {
+        for (int length : new int[] {63, 64, 65, 70, 300, 5_000}) {
+            String address = "a".repeat(length) + "@example.com";
+            assertThat(piiGuardrail.evaluate(address).isPassed())
+                    .as("local part of %d characters", length)
+                    .isFalse();
+            assertThat(piiGuardrail.evaluate("write to " + address + " today").isPassed())
+                    .as("local part of %d characters in a sentence", length)
+                    .isFalse();
+        }
+    }
+
+    @Test
+    @DisplayName("PII: a 50k-character adversarial text finishes quickly")
+    void piiEmailScanIsLinearOnAdversarialText() {
+        for (String hostile :
+                new String[] {
+                    "a".repeat(50_000),
+                    "a@".repeat(25_000),
+                    "a".repeat(63) + "@" + "b.".repeat(25_000),
+                    "a@b." + "c".repeat(50_000) + "_"
+                }) {
+            assertTimeoutPreemptively(Duration.ofSeconds(2), () -> piiGuardrail.evaluate(hostile));
+        }
+    }
 }

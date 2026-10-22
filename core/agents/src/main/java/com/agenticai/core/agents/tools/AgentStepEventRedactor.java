@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.TextRedaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -105,9 +106,9 @@ public final class AgentStepEventRedactor {
     /**
      * Copied from {@code PatternBasedGuardrailService#REDACTION_PATTERNS} - see this class's
      * javadoc for why it is a copy and not an import. If that list gains a pattern, this one should
-     * too. One deliberate difference: a PEM body may not contain another BEGIN line, so a text with
-     * many BEGIN lines and no END is scanned once rather than once per line (this input is not
-     * length-capped here, the guardrail's is).
+     * too. The PEM private-key block is the one entry that is not a regular expression: it is found
+     * in code ({@link TextRedaction#redactPrivateKeyBlocks}) because the pattern was quadratic on a
+     * text with many BEGIN lines (this input is not length-capped here, the guardrail's is).
      */
     private static final List<Pattern> SECRET_VALUE_PATTERNS =
             List.of(
@@ -116,9 +117,6 @@ public final class AgentStepEventRedactor {
                     Pattern.compile("gh[pousr]_[A-Za-z0-9]{36,}"),
                     Pattern.compile("xox[baprs]-[A-Za-z0-9-]{10,}"),
                     Pattern.compile("sk-[A-Za-z0-9]{20,}"),
-                    Pattern.compile(
-                            "-----BEGIN [A-Z ]*PRIVATE KEY-----(?:(?!-----BEGIN"
-                                    + " )[\\s\\S])*?-----END [A-Z ]*PRIVATE KEY-----"),
                     Pattern.compile(
                             "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"));
 
@@ -222,7 +220,7 @@ public final class AgentStepEventRedactor {
     }
 
     private static String redactSecretValues(String value) {
-        String out = value;
+        String out = TextRedaction.redactPrivateKeyBlocks(value, REDACTED);
         for (Pattern pattern : SECRET_VALUE_PATTERNS) {
             out = pattern.matcher(out).replaceAll(REDACTED);
         }

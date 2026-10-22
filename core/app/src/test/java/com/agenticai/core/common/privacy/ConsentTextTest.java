@@ -114,4 +114,59 @@ class ConsentTextTest {
         assertThat(intent("yes" + " ".repeat(2_000)))
                 .isEqualTo(Intent.ACCEPT); // trailing blanks are trimmed first
     }
+
+    /** The pre-cap implementation of {@link ConsentText#normalize}, verbatim. */
+    private static String normalizeBeforeTheCap(String message) {
+        String s = message.trim().toLowerCase(java.util.Locale.ROOT);
+        s = s.replaceAll("[\\p{Punct}।!]+$", "").trim();
+        return s.replaceAll("\\s+", " ");
+    }
+
+    @Test
+    void ordinaryRepliesAreNormalisedExactlyAsBeforeTheCap() {
+        String[] replies = {
+            "YES",
+            "  Yes! ",
+            "I agree.",
+            "I AGREE!!!",
+            "हाँ।",
+            "सहमत !",
+            "no...",
+            "Nahi?!",
+            "STOP.",
+            "opt   out",
+            "withdraw\tconsent\n",
+            "LANG hi",
+            "language   ta.",
+            "lang en-in!",
+            "yes but only for support.",
+            "stop calling me about offers!!",
+            "  ok  ",
+            "",
+            "   ",
+            "?!.,",
+            "A longer ordinary question: can you tell me, in a few words, what you do with my"
+                    + " name and phone number, and for how long you keep them?"
+        };
+        for (String reply : replies) {
+            assertThat(ConsentText.normalize(reply))
+                    .as("reply %s", reply)
+                    .isEqualTo(normalizeBeforeTheCap(reply));
+        }
+        assertThat(ConsentText.normalize(null)).isEmpty();
+        // Exactly at the cap is still cleaned up the old way; one past it is returned as read.
+        String atCap = "yes" + "!".repeat(ConsentText.MAX_NORMALIZED_CHARS - 3);
+        assertThat(atCap).hasSize(ConsentText.MAX_NORMALIZED_CHARS);
+        assertThat(ConsentText.normalize(atCap)).isEqualTo(normalizeBeforeTheCap(atCap));
+        assertThat(intent(atCap)).isEqualTo(Intent.ACCEPT);
+    }
+
+    @Test
+    void everyBuiltInKeywordStillParsesWithTheCap() {
+        assertThat(intent("Yes.")).isEqualTo(Intent.ACCEPT);
+        assertThat(intent("No!")).isEqualTo(Intent.DECLINE);
+        assertThat(intent("Unsubscribe")).isEqualTo(Intent.WITHDRAW);
+        assertThat(intent("opt out")).isEqualTo(Intent.WITHDRAW);
+        assertThat(intent("I   consent")).isEqualTo(Intent.ACCEPT);
+    }
 }

@@ -3,6 +3,7 @@ package com.agenticai.core.guardrails.impl;
 import com.agenticai.core.guardrails.ContentGuardrail;
 import com.agenticai.core.guardrails.ContentGuardrailResult;
 import com.agenticai.core.guardrails.ContentGuardrailType;
+import com.agenticai.core.security.TextRedaction;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
@@ -27,9 +28,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PiiGuardrail implements ContentGuardrail {
 
-    // Email pattern (simplified - not RFC-complete but good enough for filtering)
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("\\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+    // Email address (simplified - not RFC-complete but good enough for filtering): found by
+    // core/security's TextRedaction, which is linear time on hostile text and still matches an
+    // address whose local part is longer than 64 characters.
 
     // Phone numbers.
     //
@@ -83,7 +84,7 @@ public class PiiGuardrail implements ContentGuardrail {
         }
 
         // Check for email addresses
-        if (EMAIL_PATTERN.matcher(content).find()) {
+        if (TextRedaction.containsEmail(content)) {
             return ContentGuardrailResult.fail(
                     ContentGuardrailType.PII,
                     "Response contains email addresses. Please remove personally identifiable"
