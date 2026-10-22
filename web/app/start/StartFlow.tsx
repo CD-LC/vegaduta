@@ -36,6 +36,7 @@ import { MISSING_SETUP_HREF, UNKNOWN_SIGNALS, evaluateGoal, type WorkspaceSignal
 import { probeE2bCredential, probeMcpServers } from "./probes";
 import { loadWorkspaceSignals } from "./signals";
 import { sendOnboardingEvent } from "./telemetry";
+import { isPersonalEdition } from "../lib/edition";
 
 type StartAgent = { id: string; name?: string; [key: string]: unknown };
 
@@ -384,9 +385,11 @@ export default function StartFlow() {
                   </Button>
                 )
               ) : card.kind === "locked" ? (
-                <Button asChild>
-                  <Link href="/features">{t("seePlans")}</Link>
-                </Button>
+                isPersonalEdition() ? null : (
+                  <Button asChild>
+                    <Link href="/features">{t("seePlans")}</Link>
+                  </Button>
+                )
               ) : card.action.type === "agent" ? (
                 <Button type="button" onClick={() => void handleCreate(agentKey)} disabled={busy || !agentKey}>
                   {busy ? (

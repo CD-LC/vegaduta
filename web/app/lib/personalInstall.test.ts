@@ -1,5 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, localModelAllowed, poolLabel, showPlatformPoolToggle, tierCommand, workflowNodeOffered } from "./personalInstall";
+import {
+  LOCAL_MODEL_LABEL,
+  hiddenOnPersonalInstall,
+  isPersonalInstall,
+  localModelAllowed,
+  poolLabel,
+  showPlatformPoolToggle,
+  tierCommand,
+  workflowNodeOffered,
+} from "./personalInstall";
 
 // getPublicEnv reads NEXT_PUBLIC_AUTH_MODE from the public runtime config; the
 // test setup leaves it unset, which is the hosted/Keycloak default. Local-auth
@@ -46,6 +55,9 @@ describe("hiddenOnPersonalInstall", () => {
       "/admin/sso",
       "/admin/leads",
       "/features",
+      // Team access: one person on one machine (owner decision assumed per the lean-edition plan).
+      "/admin/access",
+      "/admin/users",
     ]) {
       expect(hiddenOnPersonalInstall(href), href).toBe(true);
     }
@@ -72,7 +84,6 @@ describe("hiddenOnPersonalInstall", () => {
       "/knowledge",
       "/secrets",
       "/admin/channels",
-      "/admin/access",
       "/usage",
       "/learn",
       "/help",
@@ -135,6 +146,43 @@ describe("hiddenOnPersonalInstall", () => {
     expect(localModelAllowed()).toBe(false);
     full();
     expect(localModelAllowed()).toBe(false);
+  });
+});
+
+describe("edition seed", () => {
+  // NEXT_PUBLIC_EDITION wins over the deploy-env derivation the other cases stub; local auth stays personal
+  // whatever it says (that is what local auth meant before NEXT_PUBLIC_EDITION existed).
+  const seeded = (edition: string, auth: boolean) => {
+    vi.mocked(isLocalAuth).mockReturnValue(auth);
+    vi.mocked(getPublicEnv).mockImplementation((key) => (key === "NEXT_PUBLIC_EDITION" ? edition : undefined));
+  };
+
+  it("makes the install personal from NEXT_PUBLIC_EDITION alone", () => {
+    seeded("personal", false);
+    expect(isPersonalInstall()).toBe(true);
+    expect(localModelAllowed()).toBe(true);
+    expect(hiddenOnPersonalInstall("/admin/payments")).toBe(true);
+    expect(workflowNodeOffered("voice_menu")).toBe(false);
+    expect(tierCommand("")).toBe("scripts/vegaduta personal");
+  });
+
+  it("keeps a local-auth install personal even when NEXT_PUBLIC_EDITION says lite or full", () => {
+    seeded("lite", true);
+    expect(isPersonalInstall()).toBe(true);
+    seeded("full", true);
+    expect(isPersonalInstall()).toBe(true);
+    expect(tierCommand("")).toBe("scripts/vegaduta personal");
+  });
+
+  it("makes the install lite or full from NEXT_PUBLIC_EDITION when sign-in is not local", () => {
+    seeded("lite", false);
+    expect(isPersonalInstall()).toBe(false);
+    expect(tierCommand("--browser")).toBe("scripts/vegaduta up --lite --browser");
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    seeded("full", false);
+    expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);
+    expect(hiddenOnPersonalInstall("/admin/payments")).toBe(false);
+    expect(tierCommand("")).toBe("scripts/vegaduta up --full");
   });
 });
 

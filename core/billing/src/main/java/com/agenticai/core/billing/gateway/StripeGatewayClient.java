@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -22,65 +24,60 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 /**
- * {@link PaymentGatewayClient} backed by Stripe's REST API directly (no
- * stripe-java dependency - the calls this platform needs are three small
- * form-encoded POSTs plus webhook HMAC verification, and keeping the client
- * dependency-free mirrors {@link PhonePeGatewayClient}'s posture and avoids
+ * {@link PaymentGatewayClient} backed by Stripe's REST API directly (no stripe-java dependency -
+ * the calls this platform needs are three small form-encoded POSTs plus webhook HMAC verification,
+ * and keeping the client dependency-free mirrors {@link PhonePeGatewayClient}'s posture and avoids
  * pinning a new SDK to this module).
  *
- * <p><b>Configuration posture (credentials pending):</b> every property is
- * blank-by-default in {@code application.yml} and {@code deploy/.env.example}
- * because no Stripe account exists yet. Consequences are deliberate:
+ * <p><b>Configuration posture (credentials pending):</b> every property is blank-by-default in
+ * {@code application.yml} and {@code deploy/.env.example} because no Stripe account exists yet.
+ * Consequences are deliberate:
+ *
  * <ul>
- *   <li>{@link #isConfigured} reports {@code false} on an empty {@code
- *       secret-key}, so {@code TenantUpgradeService} rejects a {@code
- *       gateway=stripe} upgrade with an actionable billing error instead of
- *       an opaque Stripe 401.</li>
- *   <li>{@link #verifyWebhookSignature} fail-closes on an empty {@code
- *       webhook-secret}: Stripe's signed payload is {@code
- *       "{t}.{rawBody}"} HMACed with the secret, and an empty secret makes
- *       that signature publicly computable - a forged {@code invoice.paid}
- *       would otherwise flip a tenant to a paid plan for free. Missing
- *       secret or missing {@code Stripe-Signature} header both reject.</li>
- *   <li>{@link #createSubscriptionWithTrial} resolves the bare plan name it
- *       receives ({@code "PREMIUM"}/{@code "UNLIMITED"} - the non-Razorpay
- *       contract {@code TenantUpgradeService#resolvePlanId} defines) through
- *       {@code app.billing.stripe.price-id-premium}/{@code -unlimited} and
- *       fails loudly naming the missing key - same posture as {@link
- *       RazorpayPlanCatalog}'s unconfigured-combination error.</li>
+ *   <li>{@link #isConfigured} reports {@code false} on an empty {@code secret-key}, so {@code
+ *       TenantUpgradeService} rejects a {@code gateway=stripe} upgrade with an actionable billing
+ *       error instead of an opaque Stripe 401.
+ *   <li>{@link #verifyWebhookSignature} fail-closes on an empty {@code webhook-secret}: Stripe's
+ *       signed payload is {@code "{t}.{rawBody}"} HMACed with the secret, and an empty secret makes
+ *       that signature publicly computable - a forged {@code invoice.paid} would otherwise flip a
+ *       tenant to a paid plan for free. Missing secret or missing {@code Stripe-Signature} header
+ *       both reject.
+ *   <li>{@link #createSubscriptionWithTrial} resolves the bare plan name it receives ({@code
+ *       "PREMIUM"}/{@code "UNLIMITED"} - the non-Razorpay contract {@code
+ *       TenantUpgradeService#resolvePlanId} defines) through {@code
+ *       app.billing.stripe.price-id-premium}/{@code -unlimited} and fails loudly naming the missing
+ *       key - same posture as {@link RazorpayPlanCatalog}'s unconfigured-combination error.
  * </ul>
  *
- * <p><b>Checkout shape.</b> Stripe subscriptions with {@code
- * payment_behavior=default_incomplete} stay {@code incomplete} until the
- * first invoice is paid; the invoice's {@code hosted_invoice_url} is a
- * Stripe-hosted page that takes the card, so it is returned as {@link
- * GatewaySubscription#checkoutUrl} - the redirect-style checkout PhonePe
- * established for this interface, with no client-side widget requirement
- * (Elements integration can come later if the product wants embedded
- * checkout).
+ * <p><b>Checkout shape.</b> Stripe subscriptions with {@code payment_behavior=default_incomplete}
+ * stay {@code incomplete} until the first invoice is paid; the invoice's {@code hosted_invoice_url}
+ * is a Stripe-hosted page that takes the card, so it is returned as {@link
+ * GatewaySubscription#checkoutUrl} - the redirect-style checkout PhonePe established for this
+ * interface, with no client-side widget requirement (Elements integration can come later if the
+ * product wants embedded checkout).
  *
- * <p><b>Webhook mapping</b> onto this app's existing {@link BillingEventType}
- * vocabulary (the lifecycle handler is gateway-agnostic):
+ * <p><b>Webhook mapping</b> onto this app's existing {@link BillingEventType} vocabulary (the
+ * lifecycle handler is gateway-agnostic):
+ *
  * <ul>
- *   <li>{@code invoice.paid} with a subscription -> SUBSCRIPTION_CHARGED
- *       (carries the captured-payment details for invoicing)</li>
- *   <li>{@code invoice.payment_failed} -> SUBSCRIPTION_PENDING (dunning)</li>
- *   <li>{@code customer.subscription.created/updated} -> AUTHENTICATED /
- *       UPDATED</li>
- *   <li>{@code customer.subscription.deleted} -> SUBSCRIPTION_CANCELLED</li>
- *   <li>{@code customer.subscription.paused/resumed} -> PAUSED / RESUMED</li>
- *   <li>anything else -> UNKNOWN (never guessed - same safe-default posture
- *       as {@code PhonePeGatewayClient#mapEventType})</li>
+ *   <li>{@code invoice.paid} with a subscription -> SUBSCRIPTION_CHARGED (carries the
+ *       captured-payment details for invoicing)
+ *   <li>{@code invoice.payment_failed} -> SUBSCRIPTION_PENDING (dunning)
+ *   <li>{@code customer.subscription.created/updated} -> AUTHENTICATED / UPDATED
+ *   <li>{@code customer.subscription.deleted} -> SUBSCRIPTION_CANCELLED
+ *   <li>{@code customer.subscription.paused/resumed} -> PAUSED / RESUMED
+ *   <li>anything else -> UNKNOWN (never guessed - same safe-default posture as {@code
+ *       PhonePeGatewayClient#mapEventType})
  * </ul>
  *
- * <p>Not yet exercised against a real Stripe account - same honest-status
- * note RazorpayGatewayClient's header carries. The signature scheme and API
- * shapes below follow Stripe's published webhook-signature and Subscriptions
- * documentation, but live verification is part of the pending Stripe account
- * setup, not assumed here.
+ * <p>Not yet exercised against a real Stripe account - same honest-status note
+ * RazorpayGatewayClient's header carries. The signature scheme and API shapes below follow Stripe's
+ * published webhook-signature and Subscriptions documentation, but live verification is part of the
+ * pending Stripe account setup, not assumed here.
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class StripeGatewayClient implements PaymentGatewayClient {
 
     private static final Logger log = LoggerFactory.getLogger(StripeGatewayClient.class);
@@ -97,18 +94,17 @@ public class StripeGatewayClient implements PaymentGatewayClient {
     private final String priceIdUnlimited;
 
     public StripeGatewayClient(
-        RestClient.Builder restClientBuilder,
-        // Injected builder for the same reason PhonePeGatewayClient's
-        // constructor documents: a hand-built RestClient bypasses Spring's
-        // timeout configuration, which parks a checkout request forever on a
-        // gateway outage.
-        @Value("${app.billing.stripe.api-base-url:https://api.stripe.com}") String apiBaseUrl,
-        @Value("${app.billing.stripe.secret-key:}") String secretKey,
-        @Value("${app.billing.stripe.publishable-key:}") String publishableKey,
-        @Value("${app.billing.stripe.webhook-secret:}") String webhookSecret,
-        @Value("${app.billing.stripe.price-id-premium:}") String priceIdPremium,
-        @Value("${app.billing.stripe.price-id-unlimited:}") String priceIdUnlimited
-    ) {
+            RestClient.Builder restClientBuilder,
+            // Injected builder for the same reason PhonePeGatewayClient's
+            // constructor documents: a hand-built RestClient bypasses Spring's
+            // timeout configuration, which parks a checkout request forever on a
+            // gateway outage.
+            @Value("${app.billing.stripe.api-base-url:https://api.stripe.com}") String apiBaseUrl,
+            @Value("${app.billing.stripe.secret-key:}") String secretKey,
+            @Value("${app.billing.stripe.publishable-key:}") String publishableKey,
+            @Value("${app.billing.stripe.webhook-secret:}") String webhookSecret,
+            @Value("${app.billing.stripe.price-id-premium:}") String priceIdPremium,
+            @Value("${app.billing.stripe.price-id-unlimited:}") String priceIdUnlimited) {
         this.apiClient = restClientBuilder.clone().baseUrl(apiBaseUrl).build();
         this.secretKey = secretKey;
         this.publishableKey = publishableKey;
@@ -118,12 +114,14 @@ public class StripeGatewayClient implements PaymentGatewayClient {
     }
 
     /**
-     * Truthful, not aspirational: subscriptions and usage add-ons are implemented end to end (webhook-confirmed).
-     * One-off orders are NOT advertised until a Checkout Session payment flow and its webhook crediting exist.
+     * Truthful, not aspirational: subscriptions and usage add-ons are implemented end to end
+     * (webhook-confirmed). One-off orders are NOT advertised until a Checkout Session payment flow
+     * and its webhook crediting exist.
      */
     @Override
     public java.util.Set<GatewayCapability> capabilities() {
-        return java.util.EnumSet.of(GatewayCapability.SUBSCRIPTIONS, GatewayCapability.USAGE_ADDONS);
+        return java.util.EnumSet.of(
+                GatewayCapability.SUBSCRIPTIONS, GatewayCapability.USAGE_ADDONS);
     }
 
     @Override
@@ -153,15 +151,17 @@ public class StripeGatewayClient implements PaymentGatewayClient {
 
     @Override
     public GatewaySubscription createSubscriptionWithTrial(
-        String tenantId, String planId, int trialDays, String customerEmail, String customerName
-    ) {
+            String tenantId,
+            String planId,
+            int trialDays,
+            String customerEmail,
+            String customerName) {
         if (!isConfigured()) {
             throw new PaymentGatewayException(
-                "Stripe is not configured in this deployment - set STRIPE_SECRET_KEY "
-                    + "(app.billing.stripe.secret-key) to enable Stripe upgrades; until then pay via "
-                    + "the default gateway or stay on the free tier.",
-                null
-            );
+                    "Stripe is not configured in this deployment - set STRIPE_SECRET_KEY "
+                            + "(app.billing.stripe.secret-key) to enable Stripe upgrades; until then pay via "
+                            + "the default gateway or stay on the free tier.",
+                    null);
         }
         String priceId = resolvePriceId(planId);
         try {
@@ -200,48 +200,50 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             JsonNode subscription = postForm("/v1/subscriptions", form);
             String subscriptionId = subscription.path("id").asText(null);
             String status = subscription.path("status").asText("incomplete");
-            String checkoutUrl = subscription.path("latest_invoice")
-                .path("hosted_invoice_url").asText(null);
+            String checkoutUrl =
+                    subscription.path("latest_invoice").path("hosted_invoice_url").asText(null);
             if (subscriptionId == null || subscriptionId.isBlank()) {
-                throw new PaymentGatewayException("Stripe subscription creation returned no id", null);
+                throw new PaymentGatewayException(
+                        "Stripe subscription creation returned no id", null);
             }
             return new GatewaySubscription(subscriptionId, checkoutUrl, status);
         } catch (RestClientException e) {
-            throw new PaymentGatewayException("Could not create Stripe subscription: " + e.getMessage(), e);
+            throw new PaymentGatewayException(
+                    "Could not create Stripe subscription: " + e.getMessage(), e);
         }
     }
 
     /**
-     * The bare plan name {@code TenantUpgradeService} passes to non-Razorpay
-     * gateways resolved to a Stripe Price id. Fails loudly naming the
-     * missing configuration property - never sends an empty {@code price}
-     * to Stripe the way the pre-B1 Razorpay path once sent an empty plan id.
+     * The bare plan name {@code TenantUpgradeService} passes to non-Razorpay gateways resolved to a
+     * Stripe Price id. Fails loudly naming the missing configuration property - never sends an
+     * empty {@code price} to Stripe the way the pre-B1 Razorpay path once sent an empty plan id.
      */
     private String resolvePriceId(String planId) {
-        String configured = switch (planId == null ? "" : planId.trim().toUpperCase()) {
-            case "PREMIUM" -> priceIdPremium;
-            case "UNLIMITED" -> priceIdUnlimited;
-            default -> null;
-        };
+        String configured =
+                switch (planId == null ? "" : planId.trim().toUpperCase()) {
+                    case "PREMIUM" -> priceIdPremium;
+                    case "UNLIMITED" -> priceIdUnlimited;
+                    default -> null;
+                };
         if (configured == null || configured.isBlank()) {
             throw new PaymentGatewayException(
-                "No Stripe Price id configured for plan '" + planId + "' - set "
-                    + ("PREMIUM".equalsIgnoreCase(planId)
-                        ? "STRIPE_PRICE_ID_PREMIUM (app.billing.stripe.price-id-premium)"
-                        : "STRIPE_PRICE_ID_UNLIMITED (app.billing.stripe.price-id-unlimited)")
-                    + " to a Price created in the Stripe dashboard.",
-                null
-            );
+                    "No Stripe Price id configured for plan '"
+                            + planId
+                            + "' - set "
+                            + ("PREMIUM".equalsIgnoreCase(planId)
+                                    ? "STRIPE_PRICE_ID_PREMIUM (app.billing.stripe.price-id-premium)"
+                                    : "STRIPE_PRICE_ID_UNLIMITED (app.billing.stripe.price-id-unlimited)")
+                            + " to a Price created in the Stripe dashboard.",
+                    null);
         }
         return configured;
     }
 
     /**
      * Stripe's {@code Stripe-Signature} scheme: the header is {@code
-     * "t=<unixSeconds>,v1=<hexHmac>[,v1=...]"} and the signed payload is the
-     * literal string {@code "<t>.<rawBody>"}. Verified with a constant-time
-     * compare plus a timestamp tolerance so a replayed-but-once-valid
-     * signature outside the window still rejects.
+     * "t=<unixSeconds>,v1=<hexHmac>[,v1=...]"} and the signed payload is the literal string {@code
+     * "<t>.<rawBody>"}. Verified with a constant-time compare plus a timestamp tolerance so a
+     * replayed-but-once-valid signature outside the window still rejects.
      */
     @Override
     public void verifyWebhookSignature(String rawBody, String signatureHeader) {
@@ -249,11 +251,12 @@ public class StripeGatewayClient implements PaymentGatewayClient {
         // webhook secret makes the v1 HMAC publicly computable.
         if (webhookSecret == null || webhookSecret.isBlank()) {
             throw new InvalidWebhookSignatureException(
-                "Stripe webhook secret is not configured - set STRIPE_WEBHOOK_SECRET "
-                    + "(app.billing.stripe.webhook-secret); refusing every delivery until then");
+                    "Stripe webhook secret is not configured - set STRIPE_WEBHOOK_SECRET "
+                            + "(app.billing.stripe.webhook-secret); refusing every delivery until then");
         }
         if (signatureHeader == null || signatureHeader.isBlank()) {
-            throw new InvalidWebhookSignatureException("Stripe webhook request carried no Stripe-Signature header");
+            throw new InvalidWebhookSignatureException(
+                    "Stripe webhook request carried no Stripe-Signature header");
         }
         Long timestamp = null;
         String signature = null;
@@ -275,17 +278,19 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             }
         }
         if (timestamp == null || signature == null || signature.isBlank()) {
-            throw new InvalidWebhookSignatureException("Stripe-Signature header carried no t=/v1= pair");
+            throw new InvalidWebhookSignatureException(
+                    "Stripe-Signature header carried no t=/v1= pair");
         }
         if (Math.abs(Instant.now().getEpochSecond() - timestamp) > SIGNATURE_TOLERANCE_SECONDS) {
             throw new InvalidWebhookSignatureException(
-                "Stripe webhook timestamp outside the " + SIGNATURE_TOLERANCE_SECONDS + "s tolerance - likely a replay");
+                    "Stripe webhook timestamp outside the "
+                            + SIGNATURE_TOLERANCE_SECONDS
+                            + "s tolerance - likely a replay");
         }
         String expected = hmacSha256Hex(webhookSecret, timestamp + "." + rawBody);
         if (!MessageDigest.isEqual(
-            expected.getBytes(StandardCharsets.UTF_8),
-            signature.getBytes(StandardCharsets.UTF_8)
-        )) {
+                expected.getBytes(StandardCharsets.UTF_8),
+                signature.getBytes(StandardCharsets.UTF_8))) {
             throw new InvalidWebhookSignatureException("Stripe webhook signature did not match");
         }
     }
@@ -311,8 +316,11 @@ public class StripeGatewayClient implements PaymentGatewayClient {
         if (rawEventName.startsWith("customer.subscription.")) {
             subscriptionId = object.path("id").asText(null);
         } else if (rawEventName.startsWith("invoice.")) {
-            subscriptionId = object.path("parent").path("subscription_details")
-                .path("subscription").asText(null);
+            subscriptionId =
+                    object.path("parent")
+                            .path("subscription_details")
+                            .path("subscription")
+                            .asText(null);
             if (subscriptionId == null) {
                 subscriptionId = object.path("subscription").asText(null);
             }
@@ -326,12 +334,19 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             long amountMinor = object.path("amount_paid").asLong(-1L);
             String currency = object.path("currency").asText(null);
             if (paymentRef != null && !paymentRef.isBlank() && amountMinor >= 0) {
-                capturedPayment = new CapturedPaymentDetails(
-                    paymentRef, amountMinor, currency == null ? null : currency.toUpperCase());
+                capturedPayment =
+                        new CapturedPaymentDetails(
+                                paymentRef,
+                                amountMinor,
+                                currency == null ? null : currency.toUpperCase());
             }
         }
         return new BillingEvent(
-            mapEventType(rawEventName), subscriptionId, rawEventName, gatewayName(), capturedPayment);
+                mapEventType(rawEventName),
+                subscriptionId,
+                rawEventName,
+                gatewayName(),
+                capturedPayment);
     }
 
     private static BillingEventType mapEventType(String rawEventName) {
@@ -348,19 +363,21 @@ public class StripeGatewayClient implements PaymentGatewayClient {
     }
 
     /**
-     * The Stripe counterpart of Razorpay's Addon: a pending InvoiceItem
-     * scoped to the subscription, which Stripe folds into the next
-     * recurring invoice. {@code unit_amount} is an integer in the
-     * currency's smallest unit - the interface's {@code amountInSubunits}
-     * contract maps onto it exactly, no conversion.
+     * The Stripe counterpart of Razorpay's Addon: a pending InvoiceItem scoped to the subscription,
+     * which Stripe folds into the next recurring invoice. {@code unit_amount} is an integer in the
+     * currency's smallest unit - the interface's {@code amountInSubunits} contract maps onto it
+     * exactly, no conversion.
      */
     @Override
     public void createOverageAddon(
-        String gatewaySubscriptionId, String description, long amountInSubunits, String currency
-    ) {
+            String gatewaySubscriptionId,
+            String description,
+            long amountInSubunits,
+            String currency) {
         if (!isConfigured()) {
             throw new PaymentGatewayException(
-                "Stripe is not configured in this deployment - cannot report an overage charge.", null);
+                    "Stripe is not configured in this deployment - cannot report an overage charge.",
+                    null);
         }
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
@@ -371,7 +388,8 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             form.add("currency", currency == null ? "inr" : currency.toLowerCase());
             postForm("/v1/invoiceitems", form);
         } catch (RestClientException e) {
-            throw new PaymentGatewayException("Could not create Stripe overage invoice item: " + e.getMessage(), e);
+            throw new PaymentGatewayException(
+                    "Could not create Stripe overage invoice item: " + e.getMessage(), e);
         }
     }
 
@@ -379,7 +397,8 @@ public class StripeGatewayClient implements PaymentGatewayClient {
     public String cancelSubscription(String gatewaySubscriptionId, boolean cancelAtCycleEnd) {
         if (!isConfigured()) {
             throw new PaymentGatewayException(
-                "Stripe is not configured in this deployment - cannot cancel a Stripe subscription.", null);
+                    "Stripe is not configured in this deployment - cannot cancel a Stripe subscription.",
+                    null);
         }
         try {
             if (cancelAtCycleEnd) {
@@ -390,30 +409,37 @@ public class StripeGatewayClient implements PaymentGatewayClient {
                 // side).
                 MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
                 form.add("cancel_at_period_end", "true");
-                JsonNode subscription = postForm("/v1/subscriptions/" + gatewaySubscriptionId, form);
+                JsonNode subscription =
+                        postForm("/v1/subscriptions/" + gatewaySubscriptionId, form);
                 return subscription.path("status").asText("active");
             }
-            JsonNode deleted = apiClient.delete()
-                .uri("/v1/subscriptions/" + gatewaySubscriptionId)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
-                .retrieve()
-                .body(JsonNode.class);
+            JsonNode deleted =
+                    apiClient
+                            .delete()
+                            .uri("/v1/subscriptions/" + gatewaySubscriptionId)
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
+                            .retrieve()
+                            .body(JsonNode.class);
             return deleted != null ? deleted.path("status").asText("canceled") : "canceled";
         } catch (RestClientException e) {
-            throw new PaymentGatewayException("Could not cancel Stripe subscription: " + e.getMessage(), e);
+            throw new PaymentGatewayException(
+                    "Could not cancel Stripe subscription: " + e.getMessage(), e);
         }
     }
 
     private JsonNode postForm(String path, MultiValueMap<String, String> form) {
-        JsonNode response = apiClient.post()
-            .uri(path)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(form)
-            .retrieve()
-            .body(JsonNode.class);
+        JsonNode response =
+                apiClient
+                        .post()
+                        .uri(path)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .body(form)
+                        .retrieve()
+                        .body(JsonNode.class);
         if (response == null) {
-            throw new PaymentGatewayException("Stripe returned an empty response for " + path, null);
+            throw new PaymentGatewayException(
+                    "Stripe returned an empty response for " + path, null);
         }
         return response;
     }
@@ -424,8 +450,8 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             return HexFormat.of().formatHex(mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            throw new InvalidWebhookSignatureException("Could not compute Stripe webhook signature: " + e.getMessage());
+            throw new InvalidWebhookSignatureException(
+                    "Could not compute Stripe webhook signature: " + e.getMessage());
         }
     }
-
 }
