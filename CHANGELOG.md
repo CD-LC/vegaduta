@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **The Node runner images no longer ship High-severity npm advisories.** The npm CLI inside `node:22.23.3-trixie-slim` bundles brace-expansion 2.0.2 (five advisories), ip-address 10.1.0, picomatch 4.0.3, pacote 19.0.2/20.0.1 and sigstore 3.1.0, none fixed in any `node:22` tag yet. `workspace-runner`, `mcp-stdio-runner` (both variants) and `core-full` run npm/npx, so each now replaces it with the pinned npm 11.21.1 (`NPM_VERSION`, same value in all three Dockerfiles, checked by `services/mcp-stdio-runner/dockerfile-npm.test.js`). `mcp-stdio-runner-browser` also deletes its build-time npx cache, which nothing reads (every connection has its own cache) and which carried `@modelcontextprotocol/sdk` 1.0.1 (GHSA-w48q-cv73-mx4w) and basic-ftp 5.3.1 (GHSA-c475-qrg2-pj4r) from the deprecated `server-puppeteer`; `core-full` keeps that cache, because core runs `npx` against it, and pins both packages to fixed releases (1.32.1, 6.2.1) there. `workspace-runner`'s JDK base is now pinned by digest like every other base image (the same Temurin 21.0.12.1 as before).
+
 ### Fixed
 
 - **`scripts/vegaduta personal --minimal` (and `--no-valkey`) no longer exits in silence.** The Valkey step ended with a test that returns failure when Valkey is off, and under `set -e` that stopped the whole run before it printed its plan or started anything. `tests/install` now covers it.
