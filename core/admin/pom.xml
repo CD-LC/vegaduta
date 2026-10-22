@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
     <!-- WebAuthn (passkey) verification for local sign-in. Attestation is requested as "none", so no
          metadata or certificate-trust module is needed; webauthn4j-core parses the CBOR/COSE structures
@@ -60,7 +60,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-test-classic</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

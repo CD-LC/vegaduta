@@ -10,7 +10,7 @@
 #     reads those commands.
 #   - AuthModeEnvironmentPostProcessor: a blank or padded app.auth.mode means what an unset
 #     one means (keycloak), so @ConditionalOnProperty on the mode behaves the same as the default.
-org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.boot.EnvironmentPostProcessor=\
 com.agenticai.core.TimeZoneEnvironmentPostProcessor,\
 com.agenticai.core.McpWindowsCommandEnvironmentPostProcessor,\
 com.agenticai.core.MigrateOnlyEnvironmentPostProcessor,\

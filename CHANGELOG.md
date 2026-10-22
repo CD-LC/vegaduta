@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Core is ported to Spring Boot 4.1 and Spring AI 2.0 (ADR-0012 P2/P3).** `core/` moves from Spring Boot 3.5.16 to 4.1.1 and Spring AI 1.1.8 to 2.0.1: OpenAI and Anthropic calls run on the vendors' Java SDKs behind one pooled HTTP transport, the tool loop runs in Spring AI's `ToolCallingAdvisor`, MCP uses SDK 2.0, and our own JSON code uses Jackson 3 (`tools.jackson`) with the Jackson 2 wire defaults held on explicitly. Boot 4 renamed some settings: the OTLP tracing switches and endpoint now live under `management.tracing.export.otlp.*` and `management.opentelemetry.tracing.export.otlp.*`, and `management.tracing.enabled` is `management.tracing.export.enabled` (see [configuration](docs/configuration.md)). The Tomcat and Netty version overrides added for the release image scan are dropped, because Boot 4 manages different lines of both.
+
 ### Fixed
 
 - **`scripts/vegaduta personal --minimal` (and `--no-valkey`) no longer exits in silence.** The Valkey step ended with a test that returns failure when Valkey is off, and under `set -e` that stopped the whole run before it printed its plan or started anything. `tests/install` now covers it.

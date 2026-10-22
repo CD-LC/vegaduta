@@ -795,9 +795,10 @@ Billing UI also needs `WEB_BILLING_ENABLED=1`.
 | Property | Env | Default |
 |---|---|---|
 | `management.tracing.sampling.probability` | `TRACING_SAMPLING_PROBABILITY` | `0.1` (Lite: tracing off) |
-| `management.otlp.tracing.export.enabled` | `OTLP_TRACING_EXPORT_ENABLED` | `true` |
-| `management.otlp.tracing.endpoint` | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | Langfuse's OTLP endpoint in the `tracing` profile |
-| OTLP auth header | `LANGFUSE_OTEL_AUTH_HEADER` | empty |
+| `management.tracing.export.otlp.enabled` | `OTLP_TRACING_EXPORT_ENABLED` | `true` (Boot 4 name; was `management.otlp.tracing.export.enabled`) |
+| `management.opentelemetry.tracing.export.otlp.endpoint` | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | Langfuse's OTLP endpoint in the `tracing` profile (Boot 4 name; was `management.otlp.tracing.endpoint`) |
+| `management.opentelemetry.tracing.export.otlp.headers.Authorization` | `LANGFUSE_OTEL_AUTH_HEADER` | empty (Boot 4 name; was `management.otlp.tracing.headers.Authorization`) |
+| `management.tracing.export.enabled` | `MANAGEMENT_TRACING_EXPORT_ENABLED` | `true`; Lite sets `false`. Was `management.tracing.enabled` / `MANAGEMENT_TRACING_ENABLED`, which Boot 4 no longer reads |
 | `logging.structured.format.console` | `LOG_FORMAT` | empty = plain-text pattern; `ecs`, `logstash` or `gelf` = one JSON object per line. The shipped compose (`CORE_LOG_FORMAT`, default `ecs`) and Helm charts set `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs`, which takes precedence |
 | `server.shutdown` | `APP_SHUTDOWN_MODE` | `graceful`: on SIGTERM new requests are refused and in-flight ones (SSE streams, LLM calls) may finish; `immediate` cuts them |
 | `server.compression.enabled` | `APP_SERVER_COMPRESSION_ENABLED` | `true`: gzip for `application/json` and `application/problem+json` responses of at least `APP_SERVER_COMPRESSION_MIN_SIZE` bytes (default `1024`). `text/event-stream` (SSE) is never compressed. Set `false` when an ingress already compresses |

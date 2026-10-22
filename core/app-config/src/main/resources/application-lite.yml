@@ -23,13 +23,12 @@
 
 management:
   tracing:
-    enabled: false
+    export:
+      enabled: false
+      otlp:
+        enabled: false
     sampling:
       probability: 0.0
-  otlp:
-    tracing:
-      export:
-        enabled: false
 
 app:
   storage:

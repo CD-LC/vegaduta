@@ -34,21 +34,27 @@ Consequences pinned by the metering tests: a tool turn is one log row with cumul
 completion tokens; Anthropic cache read/write counts exist only on single-call turns and are absent
 (`null`, no meter series) on tool turns.
 
-### What P3 is expected to change (read this before fixing a red metering test)
+### What P3 changed (outcome, Spring AI 2.0.1)
 
-Two tests are marked `P3-DECISION` in `MeteringCharacterisationTest`:
+The tool loop now lives in the ChatClient's tool advisor, not in the model. Decisions taken (ADR-0012 P3):
 
-1. **Row count and totals of a tool turn.** In Spring AI 2 the `ToolCallingAdvisor` runs the loop and
-   accumulates usage. The asserted totals (one row, 450 prompt / 50 completion for the scripted
-   turn) stay valid only if the metering advisors are ordered **outside** the tool advisor. If they end
-   up inside it, the failing assertion is the row count: three rows (one per iteration), or three
-   cumulative rows that double count.
-2. **Cache counters on a tool turn.** They are absent today. If Spring AI 2 accumulates native usage
-   they become non-null, which changes the cost estimate; decide deliberately.
+1. **Row count and totals of a tool turn: unchanged.** The tool advisor is seated at order 1000
+   (`LlmModelSupport#TOOL_CALLING_ADVISOR_ORDER`), i.e. INSIDE every advisor this codebase registers (content
+   policy -1500, system-message merge -1000, metrics / free-tier / per-user budget 0, default advisors such as RL
+   100). They see one call carrying the turn's accumulated usage - one row, 450 prompt / 50 completion - and never
+   both the accumulated and the per-iteration numbers. Spring AI's own default (order HIGHEST_PRECEDENCE + 300)
+   would have put the loop outside all of them.
+2. **Cache counters on a tool turn: intended improvement.** Spring AI 2 carries cache read/write counts on the
+   `Usage` interface and sums them across the loop, and `LlmMetricsAdvisor` passes the provider to
+   `CacheTokenAccounting.from(usage, provider)` (the summed usage has no native object to infer the billing
+   convention from). `toolTurnSumsAnthropicCacheCountersAcrossIterationsAndKeepsCumulativeTokens` (was
+   `toolTurnDropsAnthropicCacheCountersButKeepsCumulativeTokens`) now expects write 100 / read 400 instead of null.
+   Prompt/completion stay 350 / 40. This is the only assertion changed in the P0 suites.
 
-`ScriptedChatModel` and `ToolLoopHarness#client` are the only places that need adapting for P3 (drop
-the internal loop, hand the manager to the advisor). The assertions should not change except for the
-two decisions above.
+`ScriptedChatModel` no longer runs a loop (it returns one scripted response per call, like a real 2.0 model) and
+`ToolLoopHarness#client` hands its manager to the advisor via `chatClientBuilder(model, manager)`. Streaming
+cancellation while a tool runs needed a small subclass (`CancellationAwareToolCallingAdvisor`): Spring AI 2's
+advisor otherwise starts one more (billed) model round after the subscriber is gone.
 
 ## Running
 
