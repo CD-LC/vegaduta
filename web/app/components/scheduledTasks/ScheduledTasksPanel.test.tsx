@@ -34,17 +34,39 @@ const toastInfo = vi.fn();
 
 vi.mock("../../lib/api", () => ({
   api: {
-    get getScheduledTasksConfig() { return getScheduledTasksConfig; },
-    get listScheduledTasks() { return listScheduledTasks; },
-    get listAgents() { return listAgents; },
-    get createScheduledTask() { return createScheduledTask; },
-    get updateScheduledTask() { return updateScheduledTask; },
-    get pauseScheduledTask() { return pauseScheduledTask; },
-    get resumeScheduledTask() { return resumeScheduledTask; },
-    get runScheduledTaskNow() { return runScheduledTaskNow; },
-    get deleteScheduledTask() { return deleteScheduledTask; },
-    get listScheduledTaskRuns() { return listScheduledTaskRuns; },
-    get previewScheduledTaskSchedule() { return previewScheduledTaskSchedule; },
+    get getScheduledTasksConfig() {
+      return getScheduledTasksConfig;
+    },
+    get listScheduledTasks() {
+      return listScheduledTasks;
+    },
+    get listAgents() {
+      return listAgents;
+    },
+    get createScheduledTask() {
+      return createScheduledTask;
+    },
+    get updateScheduledTask() {
+      return updateScheduledTask;
+    },
+    get pauseScheduledTask() {
+      return pauseScheduledTask;
+    },
+    get resumeScheduledTask() {
+      return resumeScheduledTask;
+    },
+    get runScheduledTaskNow() {
+      return runScheduledTaskNow;
+    },
+    get deleteScheduledTask() {
+      return deleteScheduledTask;
+    },
+    get listScheduledTaskRuns() {
+      return listScheduledTaskRuns;
+    },
+    get previewScheduledTaskSchedule() {
+      return previewScheduledTaskSchedule;
+    },
   },
 }));
 
@@ -54,8 +76,12 @@ vi.mock("../../lib/i18n", () => ({
 
 vi.mock("../../lib/toastBus", () => ({
   toast: {
-    get success() { return toastSuccess; },
-    get info() { return toastInfo; },
+    get success() {
+      return toastSuccess;
+    },
+    get info() {
+      return toastInfo;
+    },
     error: vi.fn(),
   },
 }));
@@ -152,7 +178,16 @@ describe("ScheduledTasksPanel states", () => {
 
   it("lists the tasks with their state and next run", async () => {
     getScheduledTasksConfig.mockResolvedValue(config());
-    listScheduledTasks.mockResolvedValue([task(), task({ id: "t2", name: "Weekly report", enabled: false, nextRunAt: null, disabledReason: "Paused automatically after 3 failed runs in a row." })]);
+    listScheduledTasks.mockResolvedValue([
+      task(),
+      task({
+        id: "t2",
+        name: "Weekly report",
+        enabled: false,
+        nextRunAt: null,
+        disabledReason: "Paused automatically after 3 failed runs in a row.",
+      }),
+    ]);
     render(<ScheduledTasksPanel />);
 
     expect(await screen.findByText("Morning digest")).toBeTruthy();
@@ -205,7 +240,11 @@ describe("task actions", () => {
   });
 
   it("explains a run-now the overlap guard refused instead of pretending it started", async () => {
-    runScheduledTaskNow.mockResolvedValue({ id: "r1", status: "SKIPPED", error: "The previous run is still in progress (RUNNING)." });
+    runScheduledTaskNow.mockResolvedValue({
+      id: "r1",
+      status: "SKIPPED",
+      error: "The previous run is still in progress (RUNNING).",
+    });
     render(<ScheduledTasksPanel />);
 
     fireEvent.click(await screen.findByText("runNow"));
@@ -229,12 +268,30 @@ describe("task actions", () => {
   it("shows the run history of a task", async () => {
     listScheduledTaskRuns.mockResolvedValue([
       {
-        id: "r1", taskId: "t1", trigger: "SCHEDULE", status: "SUCCEEDED", attempt: 1, startedAt: "2026-10-05T08:00:00Z",
-        finishedAt: "2026-10-05T08:01:00Z", jobId: "j1", costUsd: 0.1234, deliveryStatus: "DELIVERED", error: null,
+        id: "r1",
+        taskId: "t1",
+        trigger: "SCHEDULE",
+        status: "SUCCEEDED",
+        attempt: 1,
+        startedAt: "2026-10-05T08:00:00Z",
+        finishedAt: "2026-10-05T08:01:00Z",
+        jobId: "j1",
+        costUsd: 0.1234,
+        deliveryStatus: "DELIVERED",
+        error: null,
       },
       {
-        id: "r2", taskId: "t1", trigger: "RETRY", status: "FAILED", attempt: 2, startedAt: "2026-10-04T08:00:00Z",
-        finishedAt: null, jobId: "j2", costUsd: null, deliveryStatus: null, error: "EXECUTION_FAILED: model timeout",
+        id: "r2",
+        taskId: "t1",
+        trigger: "RETRY",
+        status: "FAILED",
+        attempt: 2,
+        startedAt: "2026-10-04T08:00:00Z",
+        finishedAt: null,
+        jobId: "j2",
+        costUsd: null,
+        deliveryStatus: null,
+        error: "EXECUTION_FAILED: model timeout",
       },
     ]);
     render(<ScheduledTasksPanel />);
@@ -308,7 +365,9 @@ describe("create form", () => {
 
   it("shows a plan-limit refusal inline with an upgrade link and keeps the form open", async () => {
     createScheduledTask.mockRejectedValue(
-      Object.assign(new Error("This workspace already has the maximum of 3 scheduled tasks on the free plan."), { status: 403 })
+      Object.assign(new Error("This workspace already has the maximum of 3 scheduled tasks on the free plan."), {
+        status: 403,
+      })
     );
     await openForm();
     fillBasics();
@@ -319,6 +378,21 @@ describe("create form", () => {
     expect(card.textContent).toContain("maximum of 3 scheduled tasks");
     expect(screen.getByText("upgradeLink").closest("a")?.getAttribute("href")).toBe("/admin/billing");
     expect(screen.getByTestId("scheduled-task-form")).toBeTruthy();
+  });
+
+  it("shows the plan-limit refusal without an upgrade link on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      createScheduledTask.mockRejectedValue(Object.assign(new Error("Maximum of 3 scheduled tasks."), { status: 403 }));
+      await openForm();
+      fillBasics();
+      fireEvent.click(screen.getByText("save"));
+      const card = await screen.findByTestId("scheduled-task-plan-limit");
+      expect(card.textContent).toContain("Maximum of 3 scheduled tasks.");
+      expect(screen.queryByText("upgradeLink")).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("does not submit while the name or prompt is missing", async () => {
@@ -356,7 +430,13 @@ describe("create form", () => {
     fireEvent.change(screen.getByLabelText("timezoneLabel"), { target: { value: "UTC" } });
     fireEvent.change(screen.getByLabelText("cronLabel"), { target: { value: "0 8 * * 1-5" } });
 
-    await waitFor(() => expect(previewScheduledTaskSchedule).toHaveBeenCalledWith({ frequency: "custom", cron: "0 8 * * 1-5", timezone: "UTC" }));
+    await waitFor(() =>
+      expect(previewScheduledTaskSchedule).toHaveBeenCalledWith({
+        frequency: "custom",
+        cron: "0 8 * * 1-5",
+        timezone: "UTC",
+      })
+    );
     await waitFor(() => expect(screen.getByTestId("scheduled-task-preview").querySelectorAll("li")).toHaveLength(3));
   });
 
@@ -376,7 +456,9 @@ describe("create form", () => {
     fireEvent.click(screen.getByText("save"));
 
     await waitFor(() => expect(createScheduledTask).toHaveBeenCalledTimes(1));
-    expect(createScheduledTask).toHaveBeenCalledWith(expect.objectContaining({ delivery: "whatsapp", deliveryTo: "+919876543210" }));
+    expect(createScheduledTask).toHaveBeenCalledWith(
+      expect.objectContaining({ delivery: "whatsapp", deliveryTo: "+919876543210" })
+    );
   });
 
   it("only offers the delivery channels the server allows", async () => {
@@ -393,11 +475,16 @@ describe("create form", () => {
     render(<ScheduledTasksPanel />);
 
     fireEvent.click(await screen.findByText("edit"));
-    expect((await screen.findByLabelText("agentLabel") as HTMLButtonElement).disabled).toBe(true);
+    expect(((await screen.findByLabelText("agentLabel")) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(screen.getByLabelText("nameLabel"), { target: { value: "Renamed" } });
     fireEvent.click(screen.getByText("saveChanges"));
 
-    await waitFor(() => expect(updateScheduledTask).toHaveBeenCalledWith("t1", expect.objectContaining({ name: "Renamed", frequency: "weekdays", time: "08:00" })));
+    await waitFor(() =>
+      expect(updateScheduledTask).toHaveBeenCalledWith(
+        "t1",
+        expect.objectContaining({ name: "Renamed", frequency: "weekdays", time: "08:00" })
+      )
+    );
     expect(createScheduledTask).not.toHaveBeenCalled();
   });
 });
