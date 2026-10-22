@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Code scanning reports on what ships.** CodeQL now reads `.github/codeql/codeql-config.yml`, which leaves test, tooling and sample code (`tests/`, `web/e2e/`, `**/src/test/`, `*.test.ts(x)`, `web/scripts/`, `examples/`, bundled doc assets) out of the alerts; the query suite is still `security-extended` and the check still runs on every pull request. Trivy reads `trivy.yaml`, which skips `deploy/helm/examples` and `tests/load` (64 example and load-test manifest findings); the Terraform reference modules stay in the scan. See `docs/security/scanning.md`.
+
 ### Fixed
 
 - **`scripts/vegaduta personal --minimal` (and `--no-valkey`) no longer exits in silence.** The Valkey step ended with a test that returns failure when Valkey is off, and under `set -e` that stopped the whole run before it printed its plan or started anything. `tests/install` now covers it.
