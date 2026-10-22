@@ -12,6 +12,7 @@ import { classifyAiCrawler, classifyAiReferral } from "./app/lib/ai-crawlers";
 import { matchesPublicRoute } from "./app/lib/publicRoutes";
 import { isOssSite, isCommercialRoute } from "./app/lib/siteMode";
 import { isBillingEnabled, isBillingRoute, billingOffRedirect } from "./app/lib/billing-flag";
+import { declaredEdition, isPersonalDenied, isPersonalPlatformAdminAllowed, parseEdition } from "./app/lib/edition";
 import {
   NONCE_HEADER,
   buildPageCsp,
@@ -141,6 +142,24 @@ export function isPlatformAdminPrivilegedApiPath(pathname) {
   return (
     pathname === "/platform-admin/api/academy" || pathname.startsWith("/platform-admin/api/academy/")
   );
+}
+
+// True when this install is the personal edition, read from the container's REAL environment.
+// NOT lib/edition.ts's edition(): that goes through getPublicEnv, and the proxy bundle's `process`
+// shim may hold only build-time values (see the PLATFORM_ADMIN_HOST note in route()), so a runtime-only
+// NEXT_PUBLIC_EDITION=personal would be invisible to it. `node:process` is the live process. Same
+// precedence as declaredEdition(): an explicit NEXT_PUBLIC_EDITION, else local auth means personal, else
+// NEXT_PUBLIC_DEPLOY_ENV=lite|full names a shared tier; only when the runtime env says nothing at all
+// does it fall back to declaredEdition() (the build-time baked values). Everything non-personal
+// returns false here, so the 404 block in route() never runs for lite, full or an undeclared install.
+export function isPersonalEditionAtRuntime() {
+  const env = nodeProcess.env;
+  const explicit = parseEdition(env.NEXT_PUBLIC_EDITION);
+  if (explicit) return explicit === "personal";
+  if ((env.NEXT_PUBLIC_AUTH_MODE || "").trim().toLowerCase() === "local") return true;
+  const deploy = parseEdition(env.NEXT_PUBLIC_DEPLOY_ENV);
+  if (deploy === "lite" || deploy === "full") return false;
+  return declaredEdition() === "personal";
 }
 
 export async function proxy(request) {
@@ -324,6 +343,19 @@ function route(request, csp) {
       target.pathname = billingOffRedirect(billingPath);
       target.search = "";
       return NextResponse.redirect(target, 307);
+    }
+  }
+
+  // Personal edition: the pages a personal install does not have answer a real 404, not just a client
+  // gate (components/shell/FeatureGate stays as defence in depth). Placed after the billing block so
+  // /billing and /admin/billing keep their redirect (those rows are deny:false in the table). Two sources, both from lib/edition.ts:
+  // the EDITION_ROUTES deny rows (console pages, sign-up, /try, /view-as, the A2A discovery files)
+  // and /platform-admin paths outside the personal allowlist. lite, full and undeclared installs
+  // skip the whole block.
+  if (isPersonalEditionAtRuntime()) {
+    const personalPath = splitLocalePrefix(request.nextUrl.pathname).pathname;
+    if (isPersonalDenied(personalPath) || !isPersonalPlatformAdminAllowed(personalPath)) {
+      return new NextResponse(null, { status: 404 });
     }
   }
 
