@@ -9,7 +9,6 @@ import com.agenticai.core.mcp.McpServerType;
 import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.security.net.GuardedHttpClientBuilder;
-import com.agenticai.core.security.net.SsrfGuard;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import io.modelcontextprotocol.client.McpClient;
@@ -17,13 +16,11 @@ import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpClientTransport;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -96,9 +93,7 @@ class McpGuardedSocketTest {
     }
 
     private static GuardedHttpClientBuilder loopbackAllowed() {
-        return GuardedHttpClientBuilder.forGuard(
-                SsrfGuard.of(Set.of("127.0.0.1"), Set.of(), InetAddress::getAllByName),
-                Duration.ofSeconds(30));
+        return LoopbackMcpClients.builder();
     }
 
     private static McpSyncClient client(McpClientTransport transport) {
