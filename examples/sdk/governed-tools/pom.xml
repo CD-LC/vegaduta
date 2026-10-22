@@ -15,13 +15,13 @@
 
   <groupId>io.vegaduta.examples</groupId>
   <artifactId>governed-tools</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <name>VegaDuta Agent SDK example :: governed tools</name>
 
   <properties>
     <java.version>17</java.version>
     <spring-ai.version>2.0.1</spring-ai.version>
-    <vegaduta-agent.version>0.1.0-SNAPSHOT</vegaduta-agent.version>
+    <vegaduta-agent.version>0.1.0</vegaduta-agent.version>
   </properties>
 
   <dependencyManagement>

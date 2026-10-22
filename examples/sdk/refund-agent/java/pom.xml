@@ -9,14 +9,14 @@
        WithoutSdk (plain dispatch) and WithSdk (governed dispatch). -->
   <groupId>io.vegaduta.examples</groupId>
   <artifactId>refund-agent</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <name>VegaDuta Agent SDK example :: refund agent</name>
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <vegaduta-agent.version>0.1.0-SNAPSHOT</vegaduta-agent.version>
+    <vegaduta-agent.version>0.1.0</vegaduta-agent.version>
     <slf4j.version>2.0.16</slf4j.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
