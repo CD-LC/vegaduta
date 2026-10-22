@@ -19,6 +19,10 @@ Release notes on GitHub are generated from the section for each version.
 
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
 
+### Changed
+
+- **The core image is about 340 MB smaller.** The application jar was copied as root and then rewritten by a recursive `chown`, so it was stored in two layers. It is now copied with its owner set.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added
