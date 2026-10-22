@@ -3,6 +3,7 @@ package com.agenticai.core.common.systemstatus;
 import com.agenticai.core.platform.ops.PlatformBroadcastService;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicAnnouncement;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicMaintenance;
+import com.agenticai.core.security.edition.EditionInfo;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -52,6 +53,11 @@ import org.springframework.web.client.RestClient;
  * PublicEndpointRateLimitFilter}; CORS is the global {@code /api/**} mapping in {@code WebConfig}
  * ({@code app.web.allowed-origins}).
  *
+ * <p><b>Edition (lean-edition contract).</b> The response also carries {@code
+ * edition:{tier,billingEnabled,authMode,features}} ({@link EditionInfo}) so the web console can check that
+ * the edition it was built for matches the core it talks to. Fixed for the life of the process, so it adds
+ * nothing to the 15 s cache cost, and it names no secret, version or tenant.
+ *
  * <p>Not profile-gated, same as {@link SystemStatusController}: with the {@code security} profile
  * off, the main chain's {@code anyRequest().authenticated()} doesn't exist anyway and the permitAll
  * rule is a no-op.
@@ -70,7 +76,8 @@ public class PublicStatusController {
             Instant checkedAt,
             List<Component> components,
             PublicMaintenance maintenance,
-            PublicAnnouncement announcement) {}
+            PublicAnnouncement announcement,
+            EditionInfo edition) {}
 
     static final Duration CACHE_TTL = Duration.ofSeconds(15);
 
@@ -83,6 +90,7 @@ public class PublicStatusController {
     private final String sidecarBaseUrl;
     private final RestClient healthProbeClient;
     private final ObjectProvider<PlatformBroadcastService> broadcast;
+    private final EditionInfo edition;
 
     public PublicStatusController(
             HealthContributorRegistry healthContributorRegistry,
@@ -90,8 +98,10 @@ public class PublicStatusController {
             ObjectProvider<KafkaAdmin> kafkaAdmin,
             // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED / UNKNOWN), not as an outage.
             @Value("#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}") String sidecarBaseUrl,
-            ObjectProvider<PlatformBroadcastService> broadcast) {
+            ObjectProvider<PlatformBroadcastService> broadcast,
+            EditionInfo edition) {
         this.broadcast = broadcast;
+        this.edition = edition;
         this.healthContributorRegistry = healthContributorRegistry;
         this.workflowEventsEnabled = workflowEventsEnabled;
         this.kafkaAdmin = kafkaAdmin;
@@ -160,7 +170,8 @@ public class PublicStatusController {
                 Instant.now(),
                 components,
                 safe(this::maintenance, new PublicMaintenance(false, "", null)),
-                safe(this::announcement, null));
+                safe(this::announcement, null),
+                edition);
     }
 
     private PublicMaintenance maintenance() {
