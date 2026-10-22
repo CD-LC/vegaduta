@@ -317,9 +317,9 @@ jobs:
         working-directory: sdk/java
         run: |
           set -euo pipefail
-          sha256sum */target/*-SNAPSHOT.jar */target/*-sources.jar | sort > /tmp/build-1.sha256
+          find . -path '*/target/*.jar' ! -name '*-javadoc.jar' -print0 | sort -z | xargs -0 sha256sum > /tmp/build-1.sha256
           mvn -B -ntp -q -DskipTests clean package
-          sha256sum */target/*-SNAPSHOT.jar */target/*-sources.jar | sort > /tmp/build-2.sha256
+          find . -path '*/target/*.jar' ! -name '*-javadoc.jar' -print0 | sort -z | xargs -0 sha256sum > /tmp/build-2.sha256
           diff /tmp/build-1.sha256 /tmp/build-2.sha256
 
       # The examples consume the SDK the way a user does: from the local repository.
