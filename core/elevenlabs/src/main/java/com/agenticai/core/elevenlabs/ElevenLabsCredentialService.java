@@ -1,9 +1,11 @@
 package com.agenticai.core.elevenlabs;
 
-import com.agenticai.core.security.HotpathLookups;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.elevenlabs.dto.ElevenLabsCredentialActivationRequest;
 import com.agenticai.core.elevenlabs.dto.ElevenLabsCredentialResponse;
+import com.agenticai.core.security.HotpathLookups;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * tenant, not a shared one filtered by a tenant column.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsCredentialService {
 
     private final ElevenLabsCredentialRepository repository;

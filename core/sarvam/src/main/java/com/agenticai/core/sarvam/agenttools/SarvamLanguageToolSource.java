@@ -8,6 +8,8 @@ import com.agenticai.core.sarvam.SarvamSpeechToTextClient;
 import com.agenticai.core.sarvam.SarvamTextToSpeechClient;
 import com.agenticai.core.sarvam.SarvamTranslateClient;
 import com.agenticai.core.sarvam.SarvamTransliterationClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.ai.tool.ToolCallback;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Component;
  * them.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamLanguageToolSource implements MediaToolSource {
 
     private final ObjectProvider<SarvamCredentialService> credentialService;

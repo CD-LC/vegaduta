@@ -26,7 +26,9 @@ const baseApi = vi.hoisted(() => ({ listAgents: vi.fn(), listCollections: vi.fn(
 vi.mock("../../lib/api/privacy", async (orig) => ({ ...((await orig()) as object), privacyApi: priv }));
 vi.mock("../../lib/api", () => ({ api: baseApi }));
 vi.mock("../../lib/api/core", () => ({ triggerBrowserDownload: vi.fn() }));
-vi.mock("../../components/AppShell", () => ({ default: ({ children }: { children?: ReactNode }) => <div>{children}</div> }));
+vi.mock("../../components/AppShell", () => ({
+  default: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../../components/RouteTransition", () => ({ usePageReady: (): void => undefined }));
 vi.mock("../../components/useRequireScope", () => ({ useRequireScope: () => true }));
 vi.mock("../../components/DataPrivacySection", () => ({ default: () => <div>workspace-section</div> }));
@@ -54,15 +56,32 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const policy = (over: Record<string, unknown> = {}) => ({
-  agentId: "a1", enabled: true, purpose: "support", noticeVersion: 2, defaultLanguage: "en", notices: { en: "Hello" },
-  instructions: {} as Record<string, string>, keywords: { accept: ["yes"] }, eraseOnWithdrawal: false, updatedBy: "admin", updatedAt: "2026-10-01T00:00:00Z", ...over,
+  agentId: "a1",
+  enabled: true,
+  purpose: "support",
+  noticeVersion: 2,
+  defaultLanguage: "en",
+  notices: { en: "Hello" },
+  instructions: {} as Record<string, string>,
+  keywords: { accept: ["yes"] },
+  eraseOnWithdrawal: false,
+  updatedBy: "admin",
+  updatedAt: "2026-10-01T00:00:00Z",
+  ...over,
 });
 
 describe("page", () => {
   it("shows the tabs and switches to the workspace section", async () => {
     priv.getConsentPolicy.mockResolvedValue(null);
     render(<Page />);
-    for (const name of ["Consent policy", "Retention policy", "Purposes", "Contact requests", "Audit export", "Workspace"]) {
+    for (const name of [
+      "Consent policy",
+      "Retention policy",
+      "Purposes",
+      "Contact requests",
+      "Audit export",
+      "Workspace",
+    ]) {
       expect(screen.getByRole("tab", { name })).toBeTruthy();
     }
     expect(screen.getByText(/not legal advice/)).toBeTruthy();
@@ -73,7 +92,13 @@ describe("page", () => {
 
 describe("consent policy tab", () => {
   it("validates like the server", () => {
-    const base = { enabled: true, purpose: "support", defaultLanguage: "en", notices: [{ lang: "en", text: "x" }], instructions: [] as { lang: string; text: string }[] };
+    const base = {
+      enabled: true,
+      purpose: "support",
+      defaultLanguage: "en",
+      notices: [{ lang: "en", text: "x" }],
+      instructions: [] as { lang: string; text: string }[],
+    };
     expect(validateConsent(base)).toBeNull();
     expect(validateConsent({ ...base, purpose: "Bad Purpose" })).toBe("errPurpose");
     expect(validateConsent({ ...base, defaultLanguage: "english" })).toBe("errDefaultLanguage");
@@ -91,7 +116,12 @@ describe("consent policy tab", () => {
     await screen.findByText(/Notice version 2/);
     fireEvent.click(screen.getByRole("button", { name: "Save consent policy" }));
     await screen.findByText("Consent policy saved.");
-    expect(priv.putConsentPolicy.mock.calls[0][1]).toMatchObject({ enabled: true, purpose: "support", notices: { en: "Hello" }, keywords: { accept: ["yes"] } });
+    expect(priv.putConsentPolicy.mock.calls[0][1]).toMatchObject({
+      enabled: true,
+      purpose: "support",
+      notices: { en: "Hello" },
+      keywords: { accept: ["yes"] },
+    });
   });
 
   it("blocks saving an enabled policy with no notice", async () => {
@@ -116,7 +146,14 @@ describe("consent policy tab", () => {
 });
 
 describe("retention tab", () => {
-  const rule = { channel: "*", dataClass: "TRANSCRIPT", enabled: true, retentionDays: 90, updatedBy: "a", updatedAt: null as string | null };
+  const rule = {
+    channel: "*",
+    dataClass: "TRANSCRIPT",
+    enabled: true,
+    retentionDays: 90,
+    updatedBy: "a",
+    updatedAt: null as string | null,
+  };
   it("lists rules and saves a new one", async () => {
     priv.listRetention.mockResolvedValue([rule]);
     priv.putRetention.mockResolvedValue({ rule, warnings: ["Heads up"] });
@@ -125,7 +162,12 @@ describe("retention tab", () => {
     fireEvent.change(screen.getByLabelText("Keep for (days)"), { target: { value: "30" } });
     fireEvent.click(screen.getByRole("button", { name: "Save rule" }));
     await screen.findByText("Retention rule saved.");
-    expect(priv.putRetention).toHaveBeenCalledWith({ channel: "*", dataClass: "TRANSCRIPT", enabled: true, retentionDays: 30 });
+    expect(priv.putRetention).toHaveBeenCalledWith({
+      channel: "*",
+      dataClass: "TRANSCRIPT",
+      enabled: true,
+      retentionDays: 30,
+    });
     expect(screen.getByText("Heads up")).toBeTruthy();
   });
   it("rejects extracted fields for a single channel and out-of-range days", async () => {
@@ -141,6 +183,27 @@ describe("retention tab", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save rule" }));
     await screen.findByText(/must be a whole number between 1 and 3650/);
     expect(priv.putRetention).not.toHaveBeenCalled();
+  });
+  it("offers Slack, Discord, X and Teams as rule channels, except on a personal install", async () => {
+    priv.listRetention.mockResolvedValue([]);
+    const channelOptions = async () => {
+      render(<RetentionTab />);
+      await screen.findByText("No retention rules");
+      fireEvent.click(screen.getByLabelText("Channel"));
+      const names = screen.getAllByRole("option").map((o) => o.textContent);
+      cleanup();
+      return names;
+    };
+    const shared = await channelOptions();
+    for (const c of ["SLACK", "DISCORD", "X", "TEAMS", "EMAIL"]) expect(shared).toContain(c);
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      const personal = await channelOptions();
+      for (const c of ["SLACK", "DISCORD", "X", "TEAMS"]) expect(personal).not.toContain(c);
+      for (const c of ["WHATSAPP", "TELEGRAM", "EMAIL", "SIGNAL"]) expect(personal).toContain(c);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
   it("shows an error with retry", async () => {
     priv.listRetention.mockRejectedValueOnce(new Error("nope")).mockResolvedValue([]);
@@ -173,8 +236,14 @@ describe("purposes tab", () => {
 describe("contacts tab", () => {
   it("needs an identifier, then erases only after confirmation", async () => {
     priv.eraseContact.mockResolvedValue({
-      channel: "WHATSAPP", subjectMasked: "+91*****21", erasedAt: "2026-10-14T00:00:00Z", complete: false,
-      erased: { messages: 3 }, failures: ["memory"], consentProofKept: true, notReached: ["Voice recordings"],
+      channel: "WHATSAPP",
+      subjectMasked: "+91*****21",
+      erasedAt: "2026-10-14T00:00:00Z",
+      complete: false,
+      erased: { messages: 3 },
+      failures: ["memory"],
+      consentProofKept: true,
+      notReached: ["Voice recordings"],
     });
     render(<ContactsTab />);
     fireEvent.click(screen.getByRole("button", { name: "Erase contact data" }));
@@ -185,12 +254,23 @@ describe("contacts tab", () => {
     expect(priv.eraseContact).not.toHaveBeenCalled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Erase permanently" }));
     await screen.findByText(/Erasure is incomplete/);
-    expect(priv.eraseContact).toHaveBeenCalledWith({ channel: "WHATSAPP", externalId: "+919999999921", includeLeads: false, keepConsentProof: true });
+    expect(priv.eraseContact).toHaveBeenCalledWith({
+      channel: "WHATSAPP",
+      externalId: "+919999999921",
+      includeLeads: false,
+      keepConsentProof: true,
+    });
     expect(screen.getByText("memory")).toBeTruthy();
     expect(screen.getByText("Voice recordings")).toBeTruthy();
   });
   it("exports and shows what was not included", async () => {
-    priv.exportContact.mockResolvedValue({ channel: "EMAIL", subjectMasked: "a***@x.com", generatedAt: "2026-10-14T00:00:00Z", data: { messages: [1, 2] }, notIncluded: ["Device data"] });
+    priv.exportContact.mockResolvedValue({
+      channel: "EMAIL",
+      subjectMasked: "a***@x.com",
+      generatedAt: "2026-10-14T00:00:00Z",
+      data: { messages: [1, 2] },
+      notIncluded: ["Device data"],
+    });
     render(<ContactsTab />);
     fireEvent.change(screen.getByLabelText("Contact identifier"), { target: { value: "a@x.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Export contact data" }));
@@ -198,7 +278,20 @@ describe("contacts tab", () => {
     expect(screen.getByText("messages: 2")).toBeTruthy();
   });
   it("lists consent history", async () => {
-    priv.consentRecords.mockResolvedValue([{ id: "r1", channel: "EMAIL", externalId: "x", agentId: null, purpose: "support", noticeVersion: 1, noticeLanguage: "en", noticeSha256: null, decision: "GRANTED", decidedAt: "2026-10-01T00:00:00Z" }]);
+    priv.consentRecords.mockResolvedValue([
+      {
+        id: "r1",
+        channel: "EMAIL",
+        externalId: "x",
+        agentId: null,
+        purpose: "support",
+        noticeVersion: 1,
+        noticeLanguage: "en",
+        noticeSha256: null,
+        decision: "GRANTED",
+        decidedAt: "2026-10-01T00:00:00Z",
+      },
+    ]);
     render(<ContactsTab />);
     fireEvent.change(screen.getByLabelText("Contact identifier"), { target: { value: "x" } });
     fireEvent.click(screen.getByRole("button", { name: "View consent history" }));
@@ -208,7 +301,10 @@ describe("contacts tab", () => {
 
 describe("audit export tab", () => {
   it("computes the half-open range and enforces 366 days", () => {
-    expect(auditRange("2026-01-01", "2026-01-01")).toEqual({ from: "2026-01-01T00:00:00.000Z", to: "2026-01-02T00:00:00.000Z" });
+    expect(auditRange("2026-01-01", "2026-01-01")).toEqual({
+      from: "2026-01-01T00:00:00.000Z",
+      to: "2026-01-02T00:00:00.000Z",
+    });
     expect(auditRange("2026-01-02", "2026-01-01")).toBe("order");
     expect(auditRange("2025-01-01", "2026-01-02")).toBe("range");
     expect(auditRange("2025-01-01", "2025-12-31")).not.toBe("range");
@@ -222,7 +318,11 @@ describe("audit export tab", () => {
     pick("Format", "JSON");
     fireEvent.click(screen.getByRole("button", { name: "Download export" }));
     await screen.findByText("Export downloaded.");
-    expect(priv.downloadAuditExport).toHaveBeenCalledWith("2026-09-01T00:00:00.000Z", "2026-10-01T00:00:00.000Z", "json");
+    expect(priv.downloadAuditExport).toHaveBeenCalledWith(
+      "2026-09-01T00:00:00.000Z",
+      "2026-10-01T00:00:00.000Z",
+      "json"
+    );
   });
   it("refuses a range over the limit without calling the API", async () => {
     render(<AuditExportTab />);

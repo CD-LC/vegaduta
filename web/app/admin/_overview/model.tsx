@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { CircleCheck, CircleX, TriangleAlert } from "lucide-react";
 import { api } from "../../lib/api";
-import { isLocalAuth } from "../../lib/authMode";
+import { channelOffered, isPersonalEdition } from "../../lib/edition";
 import type { SystemStatusSummary } from "../../components/dashboard/SystemStatusPanel";
 
 // Same t(key, values?) shape useTranslations() actually returns (see
@@ -84,7 +84,7 @@ export interface PlatformCheck {
 // Dashboard's own PLATFORM_CHECKS and /admin/maintenance's copy. Every one
 // resolves to null when nothing's activated yet, so "connected" is real,
 // never guessed.
-export const PLATFORM_CHECKS: PlatformCheck[] = [
+const ALL_PLATFORM_CHECKS: PlatformCheck[] = [
   { key: "twilio", label: "Twilio WhatsApp", fetch: () => api.getTwilioCredential() },
   { key: "meta-whatsapp", label: "Meta WhatsApp Cloud", fetch: () => api.getMetaWhatsAppCredential() },
   { key: "meta-social", label: "Messenger / Instagram", fetch: () => api.getMetaSocialCredential() },
@@ -93,6 +93,11 @@ export const PLATFORM_CHECKS: PlatformCheck[] = [
   { key: "google", label: "Google Workspace", fetch: () => api.getGoogleConnection() },
   { key: "x", label: "X (Twitter) DMs", fetch: () => api.getXCredential() },
 ];
+
+// Only the platforms this install offers: a personal install runs no Slack, Discord or X adapter, so its
+// dashboard neither lists them as "not connected" nor fires their credential GETs on every refresh. Read once
+// at module load, which is safe for a public-env key (see lib/env.ts: the head script runs first).
+export const PLATFORM_CHECKS: PlatformCheck[] = ALL_PLATFORM_CHECKS.filter((p) => channelOffered(p.key));
 
 // i18n key per PLATFORM_CHECKS.key - PLATFORM_CHECKS.label above stays as the
 // internal/fallback identifier threaded through refresh()'s platformResults
@@ -142,9 +147,9 @@ export function buildSetupSteps(stats: AdminStats, t: TFunction) {
       done: stats.channelConnected,
     },
   ];
-  // A personal install (local auth) is one person by design: "invite a teammate" is not a setup
-  // step there, and leaving it in kept the checklist from ever finishing.
-  if (!isLocalAuth()) {
+  // A personal install is one person by design: "invite a teammate" is not a setup
+  // step there (the Users tab it points at is hidden too), and leaving it in kept the checklist from ever finishing.
+  if (!isPersonalEdition()) {
     steps.push({
       key: "user",
       href: "/admin/maintenance",
