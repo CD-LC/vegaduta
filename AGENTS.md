@@ -112,8 +112,12 @@ Docker with Compose v2.
    with two constructors and no `@Autowired`**, compile and unit-test cleanly but
    crash core at startup. `InjectableConstructorTest` and `UniqueBeanNamesTest` (core/app,
    part of `mvn verify`; alone: `make spring-wiring`) catch both from bytecode, and
-   `bash scripts/ci/entity-name-lint.sh` covers tables and controller base paths;
-   before shipping a change to Spring wiring or migrations, boot the real jar with
+   `bash scripts/ci/entity-name-lint.sh` covers tables and controller base paths. The
+   jobs and worker shapes scan no REST controllers, so a component that **requires** a
+   bean only a controller provides starts in the API and crash-loops in `core-jobs` and
+   `core-worker` (v0.1.9: `ApiSpecProvider`); `ShapeInjectionPointsTest` catches that
+   (inject it as an `ObjectProvider` if it may be absent). Before shipping a change to
+   Spring wiring or migrations, boot the real jars (api, migrate-only, jobs, worker) with
    `bash scripts/ci/boot-check.sh`.
 10. **No secrets in the repo**, including `.env*.example`, fixtures and docs.
     `bash scripts/ci/secret-scan.sh` runs gitleaks over new commits.

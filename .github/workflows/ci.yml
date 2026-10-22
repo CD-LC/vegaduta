@@ -242,12 +242,14 @@ jobs:
         # own containers on random ports (the pg container above is untouched).
         run: mvn -B -ntp -Pcoverage,it verify -Dvegaduta.test.postgres.image=vegaduta-postgres:ci
 
-      # The integration suite above boots a Spring test context. This boots the packaged jar
-      # (the artifact the image ships) against the same Postgres image and Redis, waits for
-      # readiness and probes routes that must answer 401. It reuses the jar `verify` just built.
+      # The integration suite above boots a Spring test context. This boots the packaged jars
+      # (the artifacts the images ship: api, a migrate-only run, jobs and worker) against the
+      # same Postgres image and Redis, waits for readiness and probes api routes that must answer
+      # 401. The jobs and worker shapes scan no controllers and failed to start in v0.1.9 while
+      # the api booted. It reuses the jars `verify` just built.
       # Advisory for now: it has run locally but not yet on a runner. Remove continue-on-error
       # once it has been green on main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
-      - name: Boot check (packaged jar, Postgres + Redis)
+      - name: Boot check (packaged jars: api, migrate-only, jobs, worker; Postgres + Redis)
         continue-on-error: true
         env:
           BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
