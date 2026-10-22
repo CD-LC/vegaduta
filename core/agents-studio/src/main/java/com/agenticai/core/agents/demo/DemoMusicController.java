@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,6 +60,12 @@ import org.springframework.web.bind.annotation.RestController;
  * clip is ~$0.04, and {@code demo.music.global-daily-cap} (40) bounds the whole endpoint at
  * ~$1.50/day. The response names the model and says it was the low-cost pick, so the page can tell
  * the visitor so honestly.
+ *
+ * <p><b>No composer.</b> The only {@link MusicComposer} is the ElevenLabs one, which a lean (personal)
+ * install does not register (edition feature {@code CLOUD_SPEECH}). It is therefore injected lazily:
+ * with none present the controller still exists and answers exactly like a missing platform key
+ * (HTTP 200, {@code simulated: true}, "paused"), and {@code /music/status} says {@code enabled:
+ * false}.
  */
 @RestController
 @RequestMapping("/api/demo")
@@ -71,7 +78,7 @@ public class DemoMusicController {
     private final DemoSessionService demoSessionService;
     private final DemoMusicService demoMusicService;
     private final DemoSessionRateLimiter rateLimiter;
-    private final MusicComposer elevenLabsClient;
+    private final ObjectProvider<MusicComposer> musicComposer;
     private final PlatformToolCredentialService platformCredentials;
     private final MediaModelCostService modelCosts;
 
@@ -79,13 +86,13 @@ public class DemoMusicController {
             DemoSessionService demoSessionService,
             DemoMusicService demoMusicService,
             DemoSessionRateLimiter rateLimiter,
-            MusicComposer elevenLabsClient,
+            ObjectProvider<MusicComposer> musicComposer,
             PlatformToolCredentialService platformCredentials,
             MediaModelCostService modelCosts) {
         this.demoSessionService = demoSessionService;
         this.demoMusicService = demoMusicService;
         this.rateLimiter = rateLimiter;
-        this.elevenLabsClient = elevenLabsClient;
+        this.musicComposer = musicComposer;
         this.platformCredentials = platformCredentials;
         this.modelCosts = modelCosts;
     }
@@ -133,8 +140,9 @@ public class DemoMusicController {
         }
         DemoSession session = found.get();
 
+        MusicComposer composer = musicComposer.getIfAvailable();
         Optional<String> platformKey =
-                demoMusicService.isEnabled()
+                composer != null && demoMusicService.isEnabled()
                         ? platformCredentials.resolveActiveApiKey(PlatformToolKey.ELEVENLABS)
                         : Optional.empty();
         if (platformKey.isEmpty()) {
@@ -196,7 +204,7 @@ public class DemoMusicController {
         int used = session.getMusicCount() + 1;
 
         try {
-            ComposedClip clip = compose(prompt, seconds, platformKey.get());
+            ComposedClip clip = compose(composer, prompt, seconds, platformKey.get());
             UUID musicId =
                     demoMusicService.store(
                             session, clip.bytes(), prompt, clip.model(), seconds, clientIp);
@@ -253,6 +261,7 @@ public class DemoMusicController {
         }
         boolean enabled =
                 limit > 0
+                        && musicComposer.getIfAvailable() != null
                         && demoMusicService.isEnabled()
                         && platformCredentials
                                 .resolveActiveApiKey(PlatformToolKey.ELEVENLABS)
@@ -283,14 +292,15 @@ public class DemoMusicController {
      * Cheapest listed music model first; a model/request-shaped 4xx moves to the next one, anything
      * else stops - same rule as {@code MusicGenerationService}.
      */
-    private ComposedClip compose(String prompt, int seconds, String apiKey) {
+    private ComposedClip compose(
+            MusicComposer composer, String prompt, int seconds, String apiKey) {
         List<MediaModelCostService.ModelChoice> candidates =
                 modelCosts.cheapestFirst(MediaModality.MUSIC, PROVIDER);
         MusicComposer.ComposeFailedException lastFailure = null;
         for (MediaModelCostService.ModelChoice candidate : candidates) {
             try {
                 return new ComposedClip(
-                        elevenLabsClient.compose(
+                        composer.compose(
                                 prompt, seconds * 1000, candidate.modelId(), false, apiKey),
                         candidate.modelId());
             } catch (MusicComposer.ComposeFailedException e) {
