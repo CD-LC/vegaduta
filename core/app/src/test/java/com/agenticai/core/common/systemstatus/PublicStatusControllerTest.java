@@ -31,21 +31,29 @@ class PublicStatusControllerTest {
         return controller(broadcast, EditionInfo.from(new StandardEnvironment()));
     }
 
-    private PublicStatusController controller(PlatformBroadcastService broadcast, EditionInfo edition) {
+    private PublicStatusController controller(
+            PlatformBroadcastService broadcast, EditionInfo edition) {
         StaticListableBeanFactory beans = new StaticListableBeanFactory();
         if (broadcast != null) {
             beans.addBean("broadcast", broadcast);
         }
-        return new PublicStatusController(registry, false, beans.getBeanProvider(KafkaAdmin.class), "",
-            beans.getBeanProvider(PlatformBroadcastService.class), edition);
+        return new PublicStatusController(
+                registry,
+                false,
+                beans.getBeanProvider(KafkaAdmin.class),
+                "",
+                beans.getBeanProvider(PlatformBroadcastService.class),
+                edition);
     }
 
     @Test
     void carriesMaintenanceAndAnnouncementAndKeepsTheOriginalFields() {
         PlatformBroadcastService broadcast = mock(PlatformBroadcastService.class);
         Instant ends = Instant.parse("2026-10-09T12:00:00Z");
-        when(broadcast.publicMaintenance()).thenReturn(new PublicMaintenance(true, "Upgrading", ends));
-        when(broadcast.publicAnnouncement()).thenReturn(new PublicAnnouncement(true, "New", "info", null, null));
+        when(broadcast.publicMaintenance())
+                .thenReturn(new PublicMaintenance(true, "Upgrading", ends));
+        when(broadcast.publicAnnouncement())
+                .thenReturn(new PublicAnnouncement(true, "New", "info", null, null));
 
         PublicStatusController.PublicStatusResponse r = controller(broadcast).get();
 
@@ -77,10 +85,13 @@ class PublicStatusControllerTest {
     void reportsTheEditionTheCoreRunsAs() {
         StandardEnvironment env = new StandardEnvironment();
         env.getPropertySources()
-            .addFirst(new MapPropertySource("test", Map.of(
-                "app.edition.tier", "personal",
-                "app.edition.billing-enabled", "false",
-                "app.auth.mode", "local")));
+                .addFirst(
+                        new MapPropertySource(
+                                "test",
+                                Map.of(
+                                        "app.edition.tier", "personal",
+                                        "app.edition.billing-enabled", "false",
+                                        "app.auth.mode", "local")));
 
         EditionInfo edition = controller(null, EditionInfo.from(env)).get().edition();
 

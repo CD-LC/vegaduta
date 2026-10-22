@@ -12,19 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Settles {@code payment_transaction} rows off the two confirmation events
- * {@code payment_link.paid} / {@code qr_code.credited} - registered through
- * billing's {@link RoutedBillingEventHandler} fan-out seam (the primary
- * {@code UpiPaymentConfirmedHandler} still owns the control-plane
- * checkout-session path; this is a second, independent consumer of the same
+ * Settles {@code payment_transaction} rows off the two confirmation events {@code
+ * payment_link.paid} / {@code qr_code.credited} - registered through billing's {@link
+ * RoutedBillingEventHandler} fan-out seam (the primary {@code UpiPaymentConfirmedHandler} still
+ * owns the control-plane checkout-session path; this is a second, independent consumer of the same
  * already-signature-verified event).
  *
- * <p>The webhook thread carries no {@code TenantContext} and the
- * transaction rows are tenant-schema-scoped, so the gateway reference id
- * ({@code plink_...}/{@code qr_...} on {@link BillingEvent#gatewaySubscriptionId})
- * is resolved by iterating active tenant schemas until a row matches -
- * the same pattern every cross-tenant lookup in this codebase uses. Stops
- * early once a tenant claims the reference.
+ * <p>The webhook thread carries no {@code TenantContext} and the transaction rows are
+ * tenant-schema-scoped, so the gateway reference id ({@code plink_...}/{@code qr_...} on {@link
+ * BillingEvent#gatewaySubscriptionId}) is resolved by iterating active tenant schemas until a row
+ * matches - the same pattern every cross-tenant lookup in this codebase uses. Stops early once a
+ * tenant claims the reference.
  */
 @Component
 @ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
@@ -37,10 +35,9 @@ public class MandateUpiPaymentHandler implements RoutedBillingEventHandler {
     private final PaymentExecutionService executionService;
 
     public MandateUpiPaymentHandler(
-        TenantSchemaIterator schemaIterator,
-        PaymentTransactionRepository transactionRepository,
-        PaymentExecutionService executionService
-    ) {
+            TenantSchemaIterator schemaIterator,
+            PaymentTransactionRepository transactionRepository,
+            PaymentExecutionService executionService) {
         this.schemaIterator = schemaIterator;
         this.transactionRepository = transactionRepository;
         this.executionService = executionService;
@@ -49,7 +46,7 @@ public class MandateUpiPaymentHandler implements RoutedBillingEventHandler {
     @Override
     public boolean routes(BillingEventType type) {
         return type == BillingEventType.PAYMENT_LINK_PAID
-            || type == BillingEventType.QR_CODE_PAYMENT_RECEIVED;
+                || type == BillingEventType.QR_CODE_PAYMENT_RECEIVED;
     }
 
     @Override
@@ -59,22 +56,28 @@ public class MandateUpiPaymentHandler implements RoutedBillingEventHandler {
             return;
         }
         AtomicBoolean claimed = new AtomicBoolean(false);
-        schemaIterator.forEachActiveTenantSchema(schema -> {
-            if (claimed.get()) {
-                return;
-            }
-            PaymentTransaction txn = transactionRepository.findByRazorpayEntityId(referenceId).orElse(null);
-            if (txn == null) {
-                return;
-            }
-            // A signature-verified gateway "paid" event is the authoritative
-            // capture signal; amount is re-checked against the row inside.
-            boolean handled = executionService.settleCaptured(txn.getId(), null, null);
-            if (handled) {
-                claimed.set(true);
-                log.info("Mandate payment transaction {} (schema {}) captured via {} (reference {})",
-                    txn.getId(), schema, event.rawEventName(), referenceId);
-            }
-        });
+        schemaIterator.forEachActiveTenantSchema(
+                schema -> {
+                    if (claimed.get()) {
+                        return;
+                    }
+                    PaymentTransaction txn =
+                            transactionRepository.findByRazorpayEntityId(referenceId).orElse(null);
+                    if (txn == null) {
+                        return;
+                    }
+                    // A signature-verified gateway "paid" event is the authoritative
+                    // capture signal; amount is re-checked against the row inside.
+                    boolean handled = executionService.settleCaptured(txn.getId(), null, null);
+                    if (handled) {
+                        claimed.set(true);
+                        log.info(
+                                "Mandate payment transaction {} (schema {}) captured via {} (reference {})",
+                                txn.getId(),
+                                schema,
+                                event.rawEventName(),
+                                referenceId);
+                    }
+                });
     }
 }

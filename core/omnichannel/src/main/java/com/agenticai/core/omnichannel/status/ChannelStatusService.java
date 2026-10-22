@@ -28,8 +28,8 @@ import org.springframework.stereotype.Service;
  * latency numbers (this platform has never measured per-message round-trip time for any channel, so
  * that mockup field is deliberately omitted rather than faked).
  *
- * <p>Served by {@link ChannelStatusController} and read by the agent control port. It is a service so
- * non-web code never injects a controller: the jobs and worker shapes do not load controllers.
+ * <p>Served by {@link ChannelStatusController} and read by the agent control port. It is a service
+ * so non-web code never injects a controller: the jobs and worker shapes do not load controllers.
  */
 @Service
 public class ChannelStatusService {

@@ -1,15 +1,15 @@
 package com.agenticai.core.tenancy;
 
+import com.agenticai.core.billing.email.BillingEmailService;
+import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.agenticai.core.billing.email.BillingEmailService;
-import com.agenticai.core.security.TenantPlan;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,30 +18,26 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Academy Fast-Track Scholarship one-click fulfilment - the auto-reverter for
- * complimentary plan grants (CORE-COMP-GRANT-CONTRACT.md: "On expiry the plan
- * should revert"). Ticks hourly and drops any tenant whose {@code
- * comp_plan_expires_at} has passed back to {@code FREE}, clearing the comp-grant
- * bookkeeping (see {@link Tenant#revertComplimentaryGrant}).
+ * Academy Fast-Track Scholarship one-click fulfilment - the auto-reverter for complimentary plan
+ * grants (CORE-COMP-GRANT-CONTRACT.md: "On expiry the plan should revert"). Ticks hourly and drops
+ * any tenant whose {@code comp_plan_expires_at} has passed back to {@code FREE}, clearing the
+ * comp-grant bookkeeping (see {@link Tenant#revertComplimentaryGrant}).
  *
- * <p>Unlike {@code WorkflowScheduler} (which iterates per-tenant schemas), this
- * job queries the single {@code control_plane.tenant} table directly - a comp
- * grant lives on that shared control-plane row, not in any per-tenant schema, so
- * one plain repository query covers every tenant. Not {@code @Profile}-gated, so
- * it runs whenever the app runs; it is a no-op on any deployment that has never
- * issued a comp grant (the {@code expires_at < now} filter excludes the NULL
- * majority).
+ * <p>Unlike {@code WorkflowScheduler} (which iterates per-tenant schemas), this job queries the
+ * single {@code control_plane.tenant} table directly - a comp grant lives on that shared
+ * control-plane row, not in any per-tenant schema, so one plain repository query covers every
+ * tenant. Not {@code @Profile}-gated, so it runs whenever the app runs; it is a no-op on any
+ * deployment that has never issued a comp grant (the {@code expires_at < now} filter excludes the
+ * NULL majority).
  *
- * <p>Multi-replica: each tick runs under {@link PgAdvisoryJobLock} as
- * belt-and-braces, not for correctness - the revert itself was and remains
- * idempotent (a second revert lands an already-FREE tenant on FREE again),
- * so the lock only spares concurrent replicas from redundant scans and from
+ * <p>Multi-replica: each tick runs under {@link PgAdvisoryJobLock} as belt-and-braces, not for
+ * correctness - the revert itself was and remains idempotent (a second revert lands an already-FREE
+ * tenant on FREE again), so the lock only spares concurrent replicas from redundant scans and from
  * two sessions flushing the same tenant rows in the same instant.
  *
- * <p>An hourly tick means a grant can outlive its exact expiry by up to ~an hour
- * - an accepted trade-off for a background reverter, identical in spirit to
- * {@code WorkflowScheduler}'s stated one-minute slack, and generous for a
- * months-long comp grant.
+ * <p>An hourly tick means a grant can outlive its exact expiry by up to ~an hour - an accepted
+ * trade-off for a background reverter, identical in spirit to {@code WorkflowScheduler}'s stated
+ * one-minute slack, and generous for a months-long comp grant.
  */
 @Component
 @ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
@@ -56,15 +52,15 @@ public class CompGrantExpiryReverter {
     private final PgAdvisoryJobLock jobLock;
 
     /**
-     * Optional (field-injected so the two-argument constructor tests rely on is unchanged): when present, a tenant
-     * that lands on FREE gets the "your workspace is now on Free - here is how to get the full plan back" mail,
-     * AFTER the revert has committed. Absent (plain unit tests) = no mail.
+     * Optional (field-injected so the two-argument constructor tests rely on is unchanged): when
+     * present, a tenant that lands on FREE gets the "your workspace is now on Free - here is how to
+     * get the full plan back" mail, AFTER the revert has committed. Absent (plain unit tests) = no
+     * mail.
      */
     @Autowired(required = false)
     private BillingEmailService billingEmailService;
 
-    private record Ended(UUID id, String name) {
-    }
+    private record Ended(UUID id, String name) {}
 
     public CompGrantExpiryReverter(TenantRepository tenantRepository, PgAdvisoryJobLock jobLock) {
         this.tenantRepository = tenantRepository;
@@ -93,8 +89,10 @@ public class CompGrantExpiryReverter {
         }
         List<Ended> landedOnFree = new ArrayList<>();
         for (Tenant tenant : expired) {
-            log.info("Reverting expired comp grant to FREE: tenant={} expiredAt={}",
-                tenant.getId(), tenant.getCompPlanExpiresAt());
+            log.info(
+                    "Reverting expired comp grant to FREE: tenant={} expiredAt={}",
+                    tenant.getId(),
+                    tenant.getCompPlanExpiresAt());
             tenant.revertComplimentaryGrant();
             if (tenant.getPlan() == TenantPlan.FREE) {
                 landedOnFree.add(new Ended(tenant.getId(), tenant.getName()));
@@ -104,27 +102,35 @@ public class CompGrantExpiryReverter {
         notifyEnded(landedOnFree);
     }
 
-    /** Mails only after the revert commits (never while the DB transaction is open, never for a rolled-back one). */
+    /**
+     * Mails only after the revert commits (never while the DB transaction is open, never for a
+     * rolled-back one).
+     */
     private void notifyEnded(List<Ended> ended) {
         if (ended.isEmpty() || billingEmailService == null) {
             return;
         }
-        Runnable send = () -> {
-            for (Ended e : ended) {
-                try {
-                    billingEmailService.sendCompGrantEndedEmail(e.id(), e.name());
-                } catch (RuntimeException ex) {
-                    log.warn("Comp-grant-ended email failed for tenant {}: {}", e.id(), ex.getMessage());
-                }
-            }
-        };
+        Runnable send =
+                () -> {
+                    for (Ended e : ended) {
+                        try {
+                            billingEmailService.sendCompGrantEndedEmail(e.id(), e.name());
+                        } catch (RuntimeException ex) {
+                            log.warn(
+                                    "Comp-grant-ended email failed for tenant {}: {}",
+                                    e.id(),
+                                    ex.getMessage());
+                        }
+                    }
+                };
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    send.run();
-                }
-            });
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            send.run();
+                        }
+                    });
         } else {
             send.run();
         }

@@ -52,7 +52,8 @@ class ChannelStatusServiceTest {
                         List.of(
                                 connection("telegram", ChannelConnection.Summary.connected("@bot")),
                                 connection(
-                                        "imessage", ChannelConnection.Summary.notConnected("+ connect"))));
+                                        "imessage",
+                                        ChannelConnection.Summary.notConnected("+ connect"))));
 
         List<String> keys = keys(service);
 
@@ -65,7 +66,10 @@ class ChannelStatusServiceTest {
     @Test
     void totalCountsOnlyTheTilesThatAreShown() {
         ChannelStatusService service =
-                service(List.of(connection("telegram", ChannelConnection.Summary.connected("@bot"))));
+                service(
+                        List.of(
+                                connection(
+                                        "telegram", ChannelConnection.Summary.connected("@bot"))));
 
         ChannelStatusService.ChannelStatusResponse response = service.status();
 
@@ -97,7 +101,9 @@ class ChannelStatusServiceTest {
                                 .map(
                                         k ->
                                                 connection(
-                                                        k, ChannelConnection.Summary.notConnected("+ connect")))
+                                                        k,
+                                                        ChannelConnection.Summary.notConnected(
+                                                                "+ connect")))
                                 .toList());
 
         List<String> keys = keys(service);

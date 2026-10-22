@@ -47,7 +47,8 @@ public class X402OfferController {
             ObjectProvider<AgentWalletLedger> walletLedger,
             AgentService agentService) {
         this.offerRepository = offerRepository;
-        // Absent when the payments module is not wired (BILLING_PAYMENTS off): offers needing a wallet
+        // Absent when the payments module is not wired (BILLING_PAYMENTS off): offers needing a
+        // wallet
         // then answer a "payments disabled" refusal instead of the application failing to start.
         this.walletService = PaymentsDisabledAgentWalletLedger.orDisabled(walletLedger);
         this.agentService = agentService;
@@ -143,13 +144,19 @@ public class X402OfferController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> list(@PathVariable UUID agentId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<Map<String, Object>>> list(
+            @PathVariable UUID agentId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return ListPaging.window(
-            offerRepository.findByAgentIdOrderByCreatedAtDesc(agentId).stream()
-                .map(this::toResponse)
-                .toList(),
-            limit, offset, 50, 500);
+                offerRepository.findByAgentIdOrderByCreatedAtDesc(agentId).stream()
+                        .map(this::toResponse)
+                        .toList(),
+                limit,
+                offset,
+                50,
+                500);
     }
 
     @PostMapping("/{offerId}/disable")

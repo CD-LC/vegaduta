@@ -189,8 +189,8 @@ public class LiveKitEgressService {
                 || !"static".equalsIgnoreCase(properties.getCredentials())) {
             throw new LiveKitEgressException(
                     "Call recording needs app.storage.type=s3 with app.storage.credentials=static"
-                        + " (LiveKit Egress uploads with an S3 access key and secret it is given)."
-                        + " It is not supported with type="
+                            + " (LiveKit Egress uploads with an S3 access key and secret it is given)."
+                            + " It is not supported with type="
                             + properties.getType()
                             + ", credentials="
                             + properties.getCredentials()

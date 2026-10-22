@@ -30,14 +30,12 @@ import org.springframework.web.server.ResponseStatusException;
  * The public agent directory.
  *
  * <ul>
- *   <li>{@code POST /api/agents/{id}/directory/publish|unpublish} - the owning
- *       tenant's management surface (EDITOR access on the agent, same gate as
- *       every other mutating agent endpoint).</li>
- *   <li>{@code GET /api/directory/agents[?q=]} and {@code GET
- *       /api/directory/agents/{agentId}} - the PUBLIC read surface, permitAll
- *       in {@code SecurityConfig}: discovery necessarily precedes
- *       authentication, and every field served was explicitly published by
- *       the tenant (signed snapshots, not live tenant data).</li>
+ *   <li>{@code POST /api/agents/{id}/directory/publish|unpublish} - the owning tenant's management
+ *       surface (EDITOR access on the agent, same gate as every other mutating agent endpoint).
+ *   <li>{@code GET /api/directory/agents[?q=]} and {@code GET /api/directory/agents/{agentId}} -
+ *       the PUBLIC read surface, permitAll in {@code SecurityConfig}: discovery necessarily
+ *       precedes authentication, and every field served was explicitly published by the tenant
+ *       (signed snapshots, not live tenant data).
  * </ul>
  */
 @ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
@@ -50,37 +48,35 @@ public class AgentDirectoryController {
     private final ObjectMapper objectMapper = JsonMappers.plain();
 
     public AgentDirectoryController(
-        AgentDirectoryService directoryService,
-        AgentService agentService,
-        A2aAgentCardService cardService
-    ) {
+            AgentDirectoryService directoryService,
+            AgentService agentService,
+            A2aAgentCardService cardService) {
         this.directoryService = directoryService;
         this.agentService = agentService;
         this.cardService = cardService;
     }
 
     public record PublishRequest(
-        @Size(max = 200) String displayName,
-        @Size(max = 4000) String description,
-        @Size(max = 50) List<@Size(max = 128) String> capabilities,
-        @Size(max = 1024) String homepageUrl
-    ) {
-    }
+            @Size(max = 200) String displayName,
+            @Size(max = 4000) String description,
+            @Size(max = 50) List<@Size(max = 128) String> capabilities,
+            @Size(max = 1024) String homepageUrl) {}
 
     @PostMapping("/api/agents/{agentId}/directory/publish")
     public Map<String, Object> publish(
-        @PathVariable UUID agentId, @RequestBody(required = false) @Valid PublishRequest body,
-        HttpServletRequest request
-    ) {
+            @PathVariable UUID agentId,
+            @RequestBody(required = false) @Valid PublishRequest body,
+            HttpServletRequest request) {
         Agent agent = agentService.requireAccess(agentId, PermissionLevel.EDITOR);
         String base = cardService.resolvePublicBaseUrl(request);
-        AgentDirectoryEntry entry = directoryService.publish(
-            agent,
-            body == null ? null : body.displayName(),
-            body == null ? null : body.description(),
-            body == null ? null : body.capabilities(),
-            body == null ? null : body.homepageUrl(),
-            base);
+        AgentDirectoryEntry entry =
+                directoryService.publish(
+                        agent,
+                        body == null ? null : body.displayName(),
+                        body == null ? null : body.description(),
+                        body == null ? null : body.capabilities(),
+                        body == null ? null : body.homepageUrl(),
+                        base);
         return toResponse(entry, true);
     }
 
@@ -96,13 +92,15 @@ public class AgentDirectoryController {
     /** Tenant view: this tenant's directory entries, any status. */
     @GetMapping("/api/agents/directory/mine")
     public ResponseEntity<List<Map<String, Object>>> mine(
-        @RequestParam(required = false) Integer limit,
-        @RequestParam(required = false) Long offset
-    ) {
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         // No params = every entry, as before; limit 1..200 / offset window the updatedAt-DESC list.
         return ListPaging.window(
-            directoryService.listForTenant().stream().map(e -> toResponse(e, false)).toList(),
-            limit, offset, 50, 200);
+                directoryService.listForTenant().stream().map(e -> toResponse(e, false)).toList(),
+                limit,
+                offset,
+                50,
+                200);
     }
 
     // ---------------------------------------------------------- public surface
@@ -114,18 +112,18 @@ public class AgentDirectoryController {
      */
     @GetMapping("/api/directory/agents")
     public ResponseEntity<Map<String, Object>> list(
-        @RequestParam(required = false) String q,
-        @RequestParam(defaultValue = "50") int limit,
-        @RequestParam(required = false) Long offset
-    ) {
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "50") int limit,
+            @RequestParam(required = false) Long offset) {
         long skip = Math.min(Math.max(offset == null ? 0L : offset, 0L), 1_000_000_000L);
         List<AgentDirectoryEntry> rows = directoryService.listPublished(q, limit, skip);
         List<Map<String, Object>> entries = rows.stream().map(e -> toResponse(e, false)).toList();
         int size = Math.max(1, Math.min(limit, AgentDirectoryService.MAX_LIST_LIMIT));
         long seen = skip + entries.size();
-        long total = (skip == 0 && entries.size() < size)
-            ? seen
-            : Math.max(directoryService.countPublished(q), seen);
+        long total =
+                (skip == 0 && entries.size() < size)
+                        ? seen
+                        : Math.max(directoryService.countPublished(q), seen);
         boolean hasMore = total > seen;
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("entries", entries);
@@ -134,20 +132,24 @@ public class AgentDirectoryController {
         body.put("offset", skip);
         body.put("hasMore", hasMore);
         return ResponseEntity.ok()
-            .header("X-Total-Count", String.valueOf(total))
-            .header("X-Has-More", String.valueOf(hasMore))
-            .body(body);
+                .header("X-Total-Count", String.valueOf(total))
+                .header("X-Has-More", String.valueOf(hasMore))
+                .body(body);
     }
 
     /**
-     * One published agent's full record - including the signed card and
-     * manifest snapshots. An unpublished or unknown id 404s (never reveals
-     * that a listing existed once).
+     * One published agent's full record - including the signed card and manifest snapshots. An
+     * unpublished or unknown id 404s (never reveals that a listing existed once).
      */
     @GetMapping("/api/directory/agents/{agentId}")
     public Map<String, Object> get(@PathVariable UUID agentId) {
-        AgentDirectoryEntry entry = directoryService.findPublished(agentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no such listing"));
+        AgentDirectoryEntry entry =
+                directoryService
+                        .findPublished(agentId)
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND, "no such listing"));
         return toResponse(entry, true);
     }
 

@@ -21,9 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * The x402 beans must still construct when the payments module is not wired (the BILLING_PAYMENTS edition
- * feature is off): the ledger arrives through an {@link ObjectProvider} and, when absent, every wallet call
- * answers one explicit "payments disabled" refusal instead of the application failing to start.
+ * The x402 beans must still construct when the payments module is not wired (the BILLING_PAYMENTS
+ * edition feature is off): the ledger arrives through an {@link ObjectProvider} and, when absent,
+ * every wallet call answers one explicit "payments disabled" refusal instead of the application
+ * failing to start.
  */
 class PaymentsDisabledAgentWalletLedgerTest {
 
@@ -59,8 +60,10 @@ class PaymentsDisabledAgentWalletLedgerTest {
         AgentWalletLedger ledger = PaymentsDisabledAgentWalletLedger.orDisabled(provider(null));
         UUID id = UUID.randomUUID();
 
-        assertThatThrownBy(() -> ledger.getOrCreate(id, "INR")).satisfies(PaymentsDisabledAgentWalletLedgerTest::assertRefusal);
-        assertThatThrownBy(() -> ledger.findById(id)).satisfies(PaymentsDisabledAgentWalletLedgerTest::assertRefusal);
+        assertThatThrownBy(() -> ledger.getOrCreate(id, "INR"))
+                .satisfies(PaymentsDisabledAgentWalletLedgerTest::assertRefusal);
+        assertThatThrownBy(() -> ledger.findById(id))
+                .satisfies(PaymentsDisabledAgentWalletLedgerTest::assertRefusal);
         assertThatThrownBy(() -> ledger.credit(id, 1, "k", "x402", "r", "n"))
                 .satisfies(PaymentsDisabledAgentWalletLedgerTest::assertRefusal);
         assertThatThrownBy(() -> ledger.debit(id, 1, "k", "x402", "r", "n"))
@@ -101,19 +104,8 @@ class PaymentsDisabledAgentWalletLedgerTest {
                                 controller.create(
                                         UUID.randomUUID(),
                                         new X402OfferController.CreateOfferRequest(
-                                                "weather",
-                                                "Weather",
-                                                null,
-                                                100,
-                                                "INR",
-                                                null,
-                                                null,
-                                                null,
-                                                null,
-                                                null,
-                                                null,
-                                                null,
-                                                "{}")))
+                                                "weather", "Weather", null, 100, "INR", null, null,
+                                                null, null, null, null, null, "{}")))
                 .satisfies(PaymentsDisabledAgentWalletLedgerTest::assertRefusal);
         verify(offers, never()).save(any());
     }

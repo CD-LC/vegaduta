@@ -24,10 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Platform console: start / end / list read-only "view as user" sessions.
- * Role-gated by the blanket {@code /api/platform/** -> ROLE_platform-admin}
- * rule; starting one additionally needs {@code X-Master-Key}
- * ({@link TenantDeletionController#authenticateMasterKey}). Ending one does not
+ * Platform console: start / end / list read-only "view as user" sessions. Role-gated by the blanket
+ * {@code /api/platform/** -> ROLE_platform-admin} rule; starting one additionally needs {@code
+ * X-Master-Key} ({@link TenantDeletionController#authenticateMasterKey}). Ending one does not
  * (ending only ever reduces access). See {@link ImpersonationService}.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
@@ -39,27 +38,31 @@ public class PlatformImpersonationController {
     private final ImpersonationService impersonation;
     private final String masterKey;
 
-    public PlatformImpersonationController(ImpersonationService impersonation,
-                                           @Value("${app.platform.master-key:}") String masterKey) {
+    public PlatformImpersonationController(
+            ImpersonationService impersonation,
+            @Value("${app.platform.master-key:}") String masterKey) {
         this.impersonation = impersonation;
         this.masterKey = masterKey;
     }
 
-    public record StartRequest(UUID tenantId, String userId, String reason) {
-    }
+    public record StartRequest(UUID tenantId, String userId, String reason) {}
 
     @PostMapping
     public ResponseEntity<StartedSession> start(
-        @RequestHeader(value = "X-Master-Key", required = false) String presentedMasterKey,
-        @RequestBody StartRequest body
-    ) {
+            @RequestHeader(value = "X-Master-Key", required = false) String presentedMasterKey,
+            @RequestBody StartRequest body) {
         TenantDeletionController.authenticateMasterKey(masterKey, presentedMasterKey);
         if (body == null) {
             throw new IllegalArgumentException("Request body is required.");
         }
         Admin admin = currentAdmin();
-        StartedSession started = impersonation.start(admin.subject(), admin.email(), body.tenantId(), body.userId(),
-            body.reason());
+        StartedSession started =
+                impersonation.start(
+                        admin.subject(),
+                        admin.email(),
+                        body.tenantId(),
+                        body.userId(),
+                        body.reason());
         return ResponseEntity.status(HttpStatus.CREATED).body(started);
     }
 
@@ -71,14 +74,14 @@ public class PlatformImpersonationController {
     }
 
     @GetMapping
-    public SessionPage list(@RequestParam(name = "active", required = false) Boolean active,
-                            @RequestParam(name = "page", required = false) Integer page,
-                            @RequestParam(name = "limit", required = false) Integer limit) {
+    public SessionPage list(
+            @RequestParam(name = "active", required = false) Boolean active,
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "limit", required = false) Integer limit) {
         return impersonation.list(active, page, limit);
     }
 
-    record Admin(String subject, String email) {
-    }
+    record Admin(String subject, String email) {}
 
     static Admin currentAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

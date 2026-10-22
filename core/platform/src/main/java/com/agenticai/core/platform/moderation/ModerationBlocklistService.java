@@ -12,15 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Inbound blocklists for users, phone numbers, domains and regions, behind
- * {@code GET/PUT /api/platform/moderation/blocklists}.
+ * Inbound blocklists for users, phone numbers, domains and regions, behind {@code GET/PUT
+ * /api/platform/moderation/blocklists}.
  *
- * <p>Values are NORMALISED on write so that a lookup is a plain equality match
- * and near-duplicates cannot accumulate: {@code "Example.COM "} and
- * {@code "example.com"} must not be two separate blocks, one of which someone
- * later removes believing the domain is now allowed. Phone numbers keep only
- * their digits and a leading {@code +} for the same reason - the same number
- * written three ways is one block.
+ * <p>Values are NORMALISED on write so that a lookup is a plain equality match and near-duplicates
+ * cannot accumulate: {@code "Example.COM "} and {@code "example.com"} must not be two separate
+ * blocks, one of which someone later removes believing the domain is now allowed. Phone numbers
+ * keep only their digits and a leading {@code +} for the same reason - the same number written
+ * three ways is one block.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
@@ -37,31 +36,40 @@ public class ModerationBlocklistService {
     @Transactional(readOnly = true)
     public List<ModerationBlocklistEntry> list(ModerationBlocklistType type) {
         return type == null
-            ? repository.findByOrderByCreatedAtDesc()
-            : repository.findByEntryTypeOrderByCreatedAtDesc(type);
+                ? repository.findByOrderByCreatedAtDesc()
+                : repository.findByEntryTypeOrderByCreatedAtDesc(type);
     }
 
     /**
-     * Adds or updates one entry, keyed on (type, normalised value). Setting
-     * {@code active=false} is the supported way to unblock: the row stays, so
-     * the audit trail of "this was blocked, then unblocked by X" survives.
-     * Genuine deletion is not offered here for that reason.
+     * Adds or updates one entry, keyed on (type, normalised value). Setting {@code active=false} is
+     * the supported way to unblock: the row stays, so the audit trail of "this was blocked, then
+     * unblocked by X" survives. Genuine deletion is not offered here for that reason.
      */
     @Transactional
-    public ModerationBlocklistEntry upsert(ModerationBlocklistType type, String rawValue,
-                                           boolean active, String reason, String actor) {
+    public ModerationBlocklistEntry upsert(
+            ModerationBlocklistType type,
+            String rawValue,
+            boolean active,
+            String reason,
+            String actor) {
         String value = normalise(type, rawValue);
         if (value.isEmpty()) {
             throw new IllegalArgumentException("Blocklist value must not be blank");
         }
 
-        ModerationBlocklistEntry entry = repository.findByEntryTypeAndValue(type, value)
-            .map(existing -> {
-                existing.apply(active, reason, actor);
-                return existing;
-            })
-            .orElseGet(() -> repository.save(
-                new ModerationBlocklistEntry(type, value, reason, actor)));
+        ModerationBlocklistEntry entry =
+                repository
+                        .findByEntryTypeAndValue(type, value)
+                        .map(
+                                existing -> {
+                                    existing.apply(active, reason, actor);
+                                    return existing;
+                                })
+                        .orElseGet(
+                                () ->
+                                        repository.save(
+                                                new ModerationBlocklistEntry(
+                                                        type, value, reason, actor)));
 
         if (!active) {
             entry.apply(false, reason, actor);
@@ -71,13 +79,15 @@ public class ModerationBlocklistService {
         return entry;
     }
 
-    /** The active set for one type, for an enforcement path that wants to check membership cheaply. */
+    /**
+     * The active set for one type, for an enforcement path that wants to check membership cheaply.
+     */
     @Transactional(readOnly = true)
     public Set<String> activeValues(ModerationBlocklistType type) {
         return repository.findByActiveTrue().stream()
-            .filter(e -> e.getEntryType() == type)
-            .map(ModerationBlocklistEntry::getValue)
-            .collect(Collectors.toSet());
+                .filter(e -> e.getEntryType() == type)
+                .map(ModerationBlocklistEntry::getValue)
+                .collect(Collectors.toSet());
     }
 
     /** True when the given raw value is currently blocked for that type. */
@@ -86,15 +96,16 @@ public class ModerationBlocklistService {
         if (rawValue == null || rawValue.isBlank()) {
             return false;
         }
-        return repository.findByEntryTypeAndValue(type, normalise(type, rawValue))
-            .map(ModerationBlocklistEntry::isActive)
-            .orElse(false);
+        return repository
+                .findByEntryTypeAndValue(type, normalise(type, rawValue))
+                .map(ModerationBlocklistEntry::isActive)
+                .orElse(false);
     }
 
     /**
-     * Type-aware normalisation. Kept package-private and unit-tested rather than
-     * inlined, because the read path and the write path MUST agree exactly - if
-     * they ever diverge, entries are written that can never be matched.
+     * Type-aware normalisation. Kept package-private and unit-tested rather than inlined, because
+     * the read path and the write path MUST agree exactly - if they ever diverge, entries are
+     * written that can never be matched.
      */
     static String normalise(ModerationBlocklistType type, String raw) {
         if (raw == null) {
@@ -110,9 +121,10 @@ public class ModerationBlocklistService {
             }
             // Strip a scheme/path if someone pastes a URL, and lower-case.
             case DOMAIN -> {
-                String host = trimmed.toLowerCase(Locale.ROOT)
-                    .replaceFirst("^[a-z]+://", "")
-                    .replaceFirst("/.*$", "");
+                String host =
+                        trimmed.toLowerCase(Locale.ROOT)
+                                .replaceFirst("^[a-z]+://", "")
+                                .replaceFirst("/.*$", "");
                 yield host.startsWith("www.") ? host.substring(4) : host;
             }
             case USER, REGION -> trimmed.toLowerCase(Locale.ROOT);

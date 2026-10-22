@@ -12,19 +12,17 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * Wraps {@code POST /transliterate}
- * - converts script while preserving pronunciation (e.g. {@code नमस्ते} ->
- * {@code namaste}), distinct from {@link SarvamTranslateClient} which
- * converts meaning. No {@code model} parameter exists for this endpoint (one
- * model, no version selection) - {@link SarvamCallLog#getModel()} is always
- * null for {@code TRANSLITERATION} rows, same as {@link SarvamLanguageIdClient}.
+ * Wraps {@code POST /transliterate} - converts script while preserving pronunciation (e.g. {@code
+ * नमस्ते} -> {@code namaste}), distinct from {@link SarvamTranslateClient} which converts meaning.
+ * No {@code model} parameter exists for this endpoint (one model, no version selection) - {@link
+ * SarvamCallLog#getModel()} is always null for {@code TRANSLITERATION} rows, same as {@link
+ * SarvamLanguageIdClient}.
  *
- * <p>Thinner wrapper than translate/STT/TTS per the build plan ("thinner
- * wrappers, same pattern, lower priority... but cheap to build alongside
- * them since they share all the same plumbing") - same credential-
- * resolution/error-translation/call-logging contract as {@link
- * SarvamTranslateClient}; see that class's javadoc for the {@link
- * SarvamNotConfiguredException} vs {@link SarvamApiException} note.
+ * <p>Thinner wrapper than translate/STT/TTS per the build plan ("thinner wrappers, same pattern,
+ * lower priority... but cheap to build alongside them since they share all the same plumbing") -
+ * same credential- resolution/error-translation/call-logging contract as {@link
+ * SarvamTranslateClient}; see that class's javadoc for the {@link SarvamNotConfiguredException} vs
+ * {@link SarvamApiException} note.
  */
 @Component
 @ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
@@ -38,16 +36,16 @@ public class SarvamTransliterationClient {
     private final SarvamCallLogService callLogService;
 
     public SarvamTransliterationClient(
-        RestClient.Builder restClientBuilder,
-        SarvamCredentialService credentialService,
-        SarvamCallLogService callLogService
-    ) {
+            RestClient.Builder restClientBuilder,
+            SarvamCredentialService credentialService,
+            SarvamCallLogService callLogService) {
         this.restClient = restClientBuilder.build();
         this.credentialService = credentialService;
         this.callLogService = callLogService;
     }
 
-    public TransliterationResult transliterate(String input, String sourceLanguageCode, String targetLanguageCode) {
+    public TransliterationResult transliterate(
+            String input, String sourceLanguageCode, String targetLanguageCode) {
         Instant startedAt = Instant.now();
         long startNanos = System.nanoTime();
         boolean success = false;
@@ -58,29 +56,38 @@ public class SarvamTransliterationClient {
             body.put("input", input);
             body.put("source_language_code", sourceLanguageCode);
             body.put("target_language_code", targetLanguageCode);
-            JsonNode response = restClient.post()
-                .uri(URL)
-                .header(API_SUBSCRIPTION_KEY_HEADER, apiKey)
-                .body(body)
-                .retrieve()
-                .body(JsonNode.class);
+            JsonNode response =
+                    restClient
+                            .post()
+                            .uri(URL)
+                            .header(API_SUBSCRIPTION_KEY_HEADER, apiKey)
+                            .body(body)
+                            .retrieve()
+                            .body(JsonNode.class);
             success = true;
             return new TransliterationResult(
-                response.path("transliterated_text").asText(null),
-                response.path("source_language_code").asText(null)
-            );
+                    response.path("transliterated_text").asText(null),
+                    response.path("source_language_code").asText(null));
         } catch (RestClientResponseException e) {
             errorMessage = SarvamTranslateClient.describeError(e);
-            throw new SarvamApiException(e.getStatusCode().value(), "Sarvam transliteration call failed: " + errorMessage);
+            throw new SarvamApiException(
+                    e.getStatusCode().value(),
+                    "Sarvam transliteration call failed: " + errorMessage);
         } catch (RestClientException e) {
             errorMessage = e.getMessage();
-            throw new SarvamApiException(0, "Could not reach Sarvam's transliteration endpoint: " + e.getMessage());
+            throw new SarvamApiException(
+                    0, "Could not reach Sarvam's transliteration endpoint: " + e.getMessage());
         } finally {
             long latencyMs = (System.nanoTime() - startNanos) / 1_000_000;
-            callLogService.record(SarvamCallCapability.TRANSLITERATION, null, success, errorMessage, latencyMs, startedAt);
+            callLogService.record(
+                    SarvamCallCapability.TRANSLITERATION,
+                    null,
+                    success,
+                    errorMessage,
+                    latencyMs,
+                    startedAt);
         }
     }
 
-    public record TransliterationResult(String transliteratedText, String sourceLanguageCode) {
-    }
+    public record TransliterationResult(String transliteratedText, String sourceLanguageCode) {}
 }

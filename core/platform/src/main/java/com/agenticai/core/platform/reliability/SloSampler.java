@@ -35,35 +35,32 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Turns this replica's in-memory Micrometer counters into a time series the
- * SLO view can window. Micrometer only holds totals since process start, so a
- * "last 24 hours" figure needs two readings 24 hours apart: this class takes a
- * reading of the cumulative counters every {@code sample-interval-seconds}
- * (default 60) into a bounded in-memory ring (default 48 h), and the SLO
+ * Turns this replica's in-memory Micrometer counters into a time series the SLO view can window.
+ * Micrometer only holds totals since process start, so a "last 24 hours" figure needs two readings
+ * 24 hours apart: this class takes a reading of the cumulative counters every {@code
+ * sample-interval-seconds} (default 60) into a bounded in-memory ring (default 48 h), and the SLO
  * service differences two of them.
  *
- * <p><b>What is read</b> (everything already exists; nothing new is recorded on
- * any request path): {@code http.server.requests} (count, status, URI template,
- * and duration histogram buckets when the {@code latency-histograms} profile is
- * on), {@code agentic.chat.ttft}, {@code llm.calls} / {@code llm.call.errors}
- * by provider, and {@code agent.job.completed} by outcome.
+ * <p><b>What is read</b> (everything already exists; nothing new is recorded on any request path):
+ * {@code http.server.requests} (count, status, URI template, and duration histogram buckets when
+ * the {@code latency-histograms} profile is on), {@code agentic.chat.ttft}, {@code llm.calls} /
+ * {@code llm.call.errors} by provider, and {@code agent.job.completed} by outcome.
  *
- * <p><b>Replicas.</b> The ring is per JVM. With
- * {@code app.platform.reliability.slo.aggregate-via-redis=true} each replica
- * also publishes a thinned copy of its samples (every {@code redis-publish-seconds},
- * default 300) to a Redis sorted set keyed by a random per-boot instance id, and
- * a read sums every instance's (newest - window-start) delta. Because the id is
- * new on every boot, a restart can never look like a counter reset, and a
- * replica that died inside the window still contributes what it served. Default
- * OFF: with it off (or when Redis fails) the answer covers only the replica that
- * served the request, and the response says so. The job and worker deployables
- * run this too, so agent-job counters are captured wherever those jobs run.
+ * <p><b>Replicas.</b> The ring is per JVM. With {@code
+ * app.platform.reliability.slo.aggregate-via-redis=true} each replica also publishes a thinned copy
+ * of its samples (every {@code redis-publish-seconds}, default 300) to a Redis sorted set keyed by
+ * a random per-boot instance id, and a read sums every instance's (newest - window-start) delta.
+ * Because the id is new on every boot, a restart can never look like a counter reset, and a replica
+ * that died inside the window still contributes what it served. Default OFF: with it off (or when
+ * Redis fails) the answer covers only the replica that served the request, and the response says
+ * so. The job and worker deployables run this too, so agent-job counters are captured wherever
+ * those jobs run.
  *
- * <p><b>Not</b> a scheduled job in the advisory-lock sense: it is intentionally
- * per replica (each JVM holds its own counters), reads no database and iterates
- * no tenant, so neither {@code PgAdvisoryJobLock} nor {@code TenantSchemaIterator}
- * applies. It runs on its own daemon thread, so it also works in deployables
- * without {@code @EnableScheduling}. Failures are logged once and never propagate.
+ * <p><b>Not</b> a scheduled job in the advisory-lock sense: it is intentionally per replica (each
+ * JVM holds its own counters), reads no database and iterates no tenant, so neither {@code
+ * PgAdvisoryJobLock} nor {@code TenantSchemaIterator} applies. It runs on its own daemon thread, so
+ * it also works in deployables without {@code @EnableScheduling}. Failures are logged once and
+ * never propagate.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
@@ -76,8 +73,7 @@ public class SloSampler {
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     /** The readings behind one window answer. */
-    record WindowRead(List<InstanceWindow> windows, boolean aggregated, List<String> notes) {
-    }
+    record WindowRead(List<InstanceWindow> windows, boolean aggregated, List<String> notes) {}
 
     private final ObjectProvider<MeterRegistry> registryProvider;
     private final ObjectProvider<StringRedisTemplate> redisProvider;
@@ -99,14 +95,15 @@ public class SloSampler {
     private volatile boolean warnedRedis;
 
     public SloSampler(
-        ObjectProvider<MeterRegistry> registryProvider,
-        ObjectProvider<StringRedisTemplate> redisProvider,
-        @Value("${app.platform.reliability.enabled:true}") boolean enabled,
-        @Value("${app.platform.reliability.slo.sample-interval-seconds:60}") long intervalSeconds,
-        @Value("${app.platform.reliability.slo.retention-hours:48}") long retentionHours,
-        @Value("${app.platform.reliability.slo.aggregate-via-redis:false}") boolean viaRedis,
-        @Value("${app.platform.reliability.slo.redis-publish-seconds:300}") long redisPublishSeconds
-    ) {
+            ObjectProvider<MeterRegistry> registryProvider,
+            ObjectProvider<StringRedisTemplate> redisProvider,
+            @Value("${app.platform.reliability.enabled:true}") boolean enabled,
+            @Value("${app.platform.reliability.slo.sample-interval-seconds:60}")
+                    long intervalSeconds,
+            @Value("${app.platform.reliability.slo.retention-hours:48}") long retentionHours,
+            @Value("${app.platform.reliability.slo.aggregate-via-redis:false}") boolean viaRedis,
+            @Value("${app.platform.reliability.slo.redis-publish-seconds:300}")
+                    long redisPublishSeconds) {
         this.registryProvider = registryProvider;
         this.redisProvider = redisProvider;
         this.enabled = enabled;
@@ -128,7 +125,8 @@ public class SloSampler {
             log.info("SLO sampler not started: no MeterRegistry bean");
             return;
         }
-        tick(); // the baseline reading: a window that reaches back past this process's start begins here
+        tick(); // the baseline reading: a window that reaches back past this process's start begins
+        // here
         executor = TenantAwareExecutors.newSingleThreadScheduledExecutor("slo-sampler", true);
         executor.scheduleWithFixedDelay(this::tick, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
     }
@@ -155,12 +153,16 @@ public class SloSampler {
         } catch (RuntimeException e) {
             if (!warnedSample) {
                 warnedSample = true;
-                log.warn("SLO sampler tick failed ({}); it will keep trying every interval", e.getClass().getSimpleName());
+                log.warn(
+                        "SLO sampler tick failed ({}); it will keep trying every interval",
+                        e.getClass().getSimpleName());
             }
         }
     }
 
-    /** Appends to the ring and drops samples older than the retention. Package-private for tests. */
+    /**
+     * Appends to the ring and drops samples older than the retention. Package-private for tests.
+     */
     void record(SloSample sample) {
         synchronized (ring) {
             ring.addLast(sample);
@@ -172,8 +174,9 @@ public class SloSampler {
     }
 
     /**
-     * Reads the cumulative counters of {@code registry} into a sample. Series that do not exist yet read as
-     * absent/zero. Package-private static so it can be tested against a {@code SimpleMeterRegistry}.
+     * Reads the cumulative counters of {@code registry} into a sample. Series that do not exist yet
+     * read as absent/zero. Package-private static so it can be tested against a {@code
+     * SimpleMeterRegistry}.
      */
     static SloSample collect(MeterRegistry registry, long nowMs) {
         double req = 0;
@@ -193,7 +196,8 @@ public class SloSampler {
             if (SloMath.isChatTurn(uri)) {
                 chat.add(timer);
             } else if (!SloMath.isLongLived(uri)) {
-                // Long-lived streams still count for availability above; their duration is not an API-latency signal.
+                // Long-lived streams still count for availability above; their duration is not an
+                // API-latency signal.
                 api.add(timer);
             }
         }
@@ -224,9 +228,16 @@ public class SloSampler {
         }
 
         return new SloSample(
-            SloSample.CURRENT_VERSION, nowMs, req, err,
-            histOf(chat), histOf(api), histOf(registry.find("agentic.chat.ttft").timers()),
-            llm, jobOk, jobFailed);
+                SloSample.CURRENT_VERSION,
+                nowMs,
+                req,
+                err,
+                histOf(chat),
+                histOf(api),
+                histOf(registry.find("agentic.chat.ttft").timers()),
+                llm,
+                jobOk,
+                jobFailed);
     }
 
     /** Merges timers into one cumulative histogram; null when there are none. */
@@ -285,9 +296,10 @@ public class SloSampler {
     }
 
     /**
-     * The per-replica windows covering the last {@code window}. Always includes this replica (from its own
-     * ring plus a fresh reading); with Redis aggregation on it also includes every other replica that published
-     * samples. Never throws: a Redis failure falls back to this replica alone and says so in the notes.
+     * The per-replica windows covering the last {@code window}. Always includes this replica (from
+     * its own ring plus a fresh reading); with Redis aggregation on it also includes every other
+     * replica that published samples. Never throws: a Redis failure falls back to this replica
+     * alone and says so in the notes.
      */
     WindowRead read(Duration window) {
         List<String> notes = new ArrayList<>();
@@ -305,25 +317,33 @@ public class SloSampler {
         try {
             StringRedisTemplate redis = redisProvider.getIfAvailable();
             if (redis == null) {
-                notes.add("Cross-replica aggregation is enabled but Redis is not available; these figures cover only "
-                    + "the replica that answered.");
+                notes.add(
+                        "Cross-replica aggregation is enabled but Redis is not available; these figures cover only "
+                                + "the replica that answered.");
                 return new WindowRead(windows, false, notes);
             }
             int unreadable = 0;
-            Set<String> ids = redis.opsForZSet().rangeByScore(INSTANCES_KEY, now - retentionMs, Double.POSITIVE_INFINITY);
+            Set<String> ids =
+                    redis.opsForZSet()
+                            .rangeByScore(
+                                    INSTANCES_KEY, now - retentionMs, Double.POSITIVE_INFINITY);
             if (ids != null) {
                 for (String id : ids) {
                     if (instanceId.equals(id)) {
                         continue;
                     }
                     String key = SAMPLES_KEY_PREFIX + id;
-                    Set<String> first = redis.opsForZSet().rangeByScore(key, start, Double.POSITIVE_INFINITY, 0, 1);
+                    Set<String> first =
+                            redis.opsForZSet()
+                                    .rangeByScore(key, start, Double.POSITIVE_INFINITY, 0, 1);
                     Set<String> last = redis.opsForZSet().reverseRange(key, 0, 0);
                     SloSample base = parseFirst(first);
                     SloSample latest = parseFirst(last);
                     if (base == null || latest == null) {
-                        // An empty set just means the replica went away before the window began (or its data
-                        // expired); a member that is present but does not parse is the unreadable case.
+                        // An empty set just means the replica went away before the window began (or
+                        // its data
+                        // expired); a member that is present but does not parse is the unreadable
+                        // case.
                         boolean firstBroken = first != null && !first.isEmpty() && base == null;
                         boolean lastBroken = last != null && !last.isEmpty() && latest == null;
                         if (firstBroken || lastBroken) {
@@ -335,16 +355,20 @@ public class SloSampler {
                 }
             }
             if (unreadable > 0) {
-                notes.add(unreadable + " replica sample set(s) could not be read and were left out.");
+                notes.add(
+                        unreadable + " replica sample set(s) could not be read and were left out.");
             }
             warnedRedis = false;
             return new WindowRead(windows, true, notes);
         } catch (RuntimeException e) {
             if (!warnedRedis) {
                 warnedRedis = true;
-                log.warn("SLO cross-replica read failed ({}); answering from this replica only", e.getClass().getSimpleName());
+                log.warn(
+                        "SLO cross-replica read failed ({}); answering from this replica only",
+                        e.getClass().getSimpleName());
             }
-            notes.add("Cross-replica aggregation failed just now; these figures cover only the replica that answered.");
+            notes.add(
+                    "Cross-replica aggregation failed just now; these figures cover only the replica that answered.");
             List<InstanceWindow> onlyOwn = new ArrayList<>();
             if (own != null) {
                 onlyOwn.add(own);
@@ -413,8 +437,9 @@ public class SloSampler {
         } catch (Exception e) {
             if (!warnedRedis) {
                 warnedRedis = true;
-                log.warn("SLO sample publish to Redis failed ({}); keeping the local ring only",
-                    e.getClass().getSimpleName());
+                log.warn(
+                        "SLO sample publish to Redis failed ({}); keeping the local ring only",
+                        e.getClass().getSimpleName());
             }
         }
     }

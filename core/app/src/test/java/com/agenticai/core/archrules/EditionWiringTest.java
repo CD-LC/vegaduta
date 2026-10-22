@@ -25,19 +25,20 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
- * Every class carrying {@link ConditionalOnEditionFeature} is discovered from the production bytecode (no
- * table to edit when a package gates a class) and its real {@code @Conditional} is evaluated against the
- * edition property sets: tier {@code personal} registers none of the gated classes (billing: when
- * {@code app.edition.billing-enabled} is false too), the default and {@code lite}/{@code full} register
- * all of them, and an explicit {@code app.edition.features.<name>.enabled} wins both ways.
+ * Every class carrying {@link ConditionalOnEditionFeature} is discovered from the production
+ * bytecode (no table to edit when a package gates a class) and its real {@code @Conditional} is
+ * evaluated against the edition property sets: tier {@code personal} registers none of the gated
+ * classes (billing: when {@code app.edition.billing-enabled} is false too), the default and {@code
+ * lite}/{@code full} register all of them, and an explicit {@code
+ * app.edition.features.<name>.enabled} wins both ways.
  *
- * <p>Evaluating the condition on the class's own metadata needs no database or Redis and ignores any other
- * condition or profile on the class, so it holds for classes that are also {@code @Profile}-gated. The
- * registration check ({@code AnnotatedBeanDefinitionReader}, like {@link BillingEditionWiringTest}) runs on the
- * fixtures, whose only condition is the edition one.
+ * <p>Evaluating the condition on the class's own metadata needs no database or Redis and ignores
+ * any other condition or profile on the class, so it holds for classes that are also
+ * {@code @Profile}-gated. The registration check ({@code AnnotatedBeanDefinitionReader}, like
+ * {@link BillingEditionWiringTest}) runs on the fixtures, whose only condition is the edition one.
  *
- * <p>Passes vacuously on the production tree until a package gates its first class; the fixtures keep the
- * test honest meanwhile. {@link BillingEditionWiringTest} keeps covering the nine {@code
+ * <p>Passes vacuously on the production tree until a package gates its first class; the fixtures
+ * keep the test honest meanwhile. {@link BillingEditionWiringTest} keeps covering the nine {@code
  * ConditionalOnBillingEdition} leaf beans.
  */
 class EditionWiringTest {
@@ -69,7 +70,8 @@ class EditionWiringTest {
     private static boolean conditionMatches(JavaClass c, Map<String, Object> props) {
         ConditionContext context = mock(ConditionContext.class);
         when(context.getEnvironment()).thenReturn(env(props));
-        return new EditionFeatureCondition().matches(context, AnnotationMetadata.introspect(c.reflect()));
+        return new EditionFeatureCondition()
+                .matches(context, AnnotationMetadata.introspect(c.reflect()));
     }
 
     private static EditionFeature featureOf(JavaClass c) {
@@ -79,12 +81,17 @@ class EditionWiringTest {
     private static int registered(Map<String, Object> props, List<JavaClass> classes) {
         GenericApplicationContext ctx = new GenericApplicationContext();
         ctx.setEnvironment(env(props));
-        new AnnotatedBeanDefinitionReader(ctx).register(classes.stream().map(JavaClass::reflect).toArray(Class<?>[]::new));
+        new AnnotatedBeanDefinitionReader(ctx)
+                .register(classes.stream().map(JavaClass::reflect).toArray(Class<?>[]::new));
         try (ctx) {
             return (int)
                     Arrays.stream(ctx.getBeanDefinitionNames())
                             .map(n -> ctx.getBeanDefinition(n).getBeanClassName())
-                            .filter(c -> c != null && classes.stream().anyMatch(k -> k.getName().equals(c)))
+                            .filter(
+                                    c ->
+                                            c != null
+                                                    && classes.stream()
+                                                            .anyMatch(k -> k.getName().equals(c)))
                             .count();
         }
     }
@@ -92,7 +99,9 @@ class EditionWiringTest {
     @Test
     void defaultKeepsEveryGatedClass() {
         for (JavaClass c : productionGated) {
-            assertThat(conditionMatches(c, Map.of())).as("%s with no edition property", c.getName()).isTrue();
+            assertThat(conditionMatches(c, Map.of()))
+                    .as("%s with no edition property", c.getName())
+                    .isTrue();
         }
         assertThat(registered(Map.of(), fixtureGated)).isEqualTo(fixtureGated.size());
     }
@@ -105,7 +114,8 @@ class EditionWiringTest {
                         .as("%s on %s", c.getName(), tier)
                         .isTrue();
             }
-            assertThat(registered(Map.of("app.edition.tier", tier), fixtureGated)).isEqualTo(fixtureGated.size());
+            assertThat(registered(Map.of("app.edition.tier", tier), fixtureGated))
+                    .isEqualTo(fixtureGated.size());
         }
     }
 
@@ -119,13 +129,17 @@ class EditionWiringTest {
 
     @Test
     void personalWithBillingOnKeepsOnlyTheBillingClasses() {
-        Map<String, Object> props = Map.of("app.edition.tier", "personal", "app.edition.billing-enabled", "true");
+        Map<String, Object> props =
+                Map.of("app.edition.tier", "personal", "app.edition.billing-enabled", "true");
         for (JavaClass c : productionGated) {
             assertThat(conditionMatches(c, props))
                     .as("%s on personal with billing on", c.getName())
                     .isEqualTo(featureOf(c) == EditionFeature.BILLING_PAYMENTS);
         }
-        long billing = fixtureGated.stream().filter(c -> featureOf(c) == EditionFeature.BILLING_PAYMENTS).count();
+        long billing =
+                fixtureGated.stream()
+                        .filter(c -> featureOf(c) == EditionFeature.BILLING_PAYMENTS)
+                        .count();
         assertThat(billing).isPositive();
         assertThat(registered(props, fixtureGated)).isEqualTo((int) billing);
     }
@@ -144,13 +158,17 @@ class EditionWiringTest {
                         .as("%s with %s forced off, default tier", c.getName(), feature.id())
                         .isEqualTo(featureOf(c) != feature);
             }
-            List<JavaClass> ofFeature = fixtureGated.stream().filter(c -> featureOf(c) == feature).toList();
-            assertThat(registered(on, fixtureGated)).as("fixtures with %s forced on", feature.id()).isEqualTo(ofFeature.size());
+            List<JavaClass> ofFeature =
+                    fixtureGated.stream().filter(c -> featureOf(c) == feature).toList();
+            assertThat(registered(on, fixtureGated))
+                    .as("fixtures with %s forced on", feature.id())
+                    .isEqualTo(ofFeature.size());
         }
     }
 
     @Test
     void theFixturesCoverMoreThanOneFeature() {
-        assertThat(fixtureGated.stream().map(EditionWiringTest::featureOf).distinct().count()).isGreaterThan(1);
+        assertThat(fixtureGated.stream().map(EditionWiringTest::featureOf).distinct().count())
+                .isGreaterThan(1);
     }
 }

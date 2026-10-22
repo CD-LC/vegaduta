@@ -12,8 +12,8 @@ import org.springframework.core.env.StandardEnvironment;
 
 /**
  * Evaluates the real {@code @Conditional} on one probe bean per {@link EditionFeature} against the
- * property combinations the edition contract defines. Registration only evaluates conditions, so no bean is
- * instantiated and no database or Redis is needed.
+ * property combinations the edition contract defines. Registration only evaluates conditions, so no
+ * bean is instantiated and no database or Redis is needed.
  */
 class EditionFeatureConditionTest {
 
@@ -41,15 +41,16 @@ class EditionFeatureConditionTest {
     @ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
     static class VideoProbe {}
 
-    private static final Map<EditionFeature, Class<?>> PROBES = Map.of(
-            EditionFeature.BILLING_PAYMENTS, BillingProbe.class,
-            EditionFeature.SOCIAL_CHANNELS, SocialProbe.class,
-            EditionFeature.A2A_DIRECTORY, A2aProbe.class,
-            EditionFeature.MCP_SERVER_EXPOSURE, McpProbe.class,
-            EditionFeature.OPERATOR_CONSOLE, OperatorProbe.class,
-            EditionFeature.CLOUD_SPEECH, SpeechProbe.class,
-            EditionFeature.VOICE_REALTIME_SHARE, VoiceProbe.class,
-            EditionFeature.VIDEO_DEMO_MEDIA, VideoProbe.class);
+    private static final Map<EditionFeature, Class<?>> PROBES =
+            Map.of(
+                    EditionFeature.BILLING_PAYMENTS, BillingProbe.class,
+                    EditionFeature.SOCIAL_CHANNELS, SocialProbe.class,
+                    EditionFeature.A2A_DIRECTORY, A2aProbe.class,
+                    EditionFeature.MCP_SERVER_EXPOSURE, McpProbe.class,
+                    EditionFeature.OPERATOR_CONSOLE, OperatorProbe.class,
+                    EditionFeature.CLOUD_SPEECH, SpeechProbe.class,
+                    EditionFeature.VOICE_REALTIME_SHARE, VoiceProbe.class,
+                    EditionFeature.VIDEO_DEMO_MEDIA, VideoProbe.class);
 
     private static boolean registered(EditionFeature feature, Map<String, Object> props) {
         GenericApplicationContext ctx = new GenericApplicationContext();
@@ -59,7 +60,11 @@ class EditionFeatureConditionTest {
         new AnnotatedBeanDefinitionReader(ctx).register(PROBES.get(feature));
         try (ctx) {
             return List.of(ctx.getBeanDefinitionNames()).stream()
-                    .anyMatch(n -> PROBES.get(feature).getName().equals(ctx.getBeanDefinition(n).getBeanClassName()));
+                    .anyMatch(
+                            n ->
+                                    PROBES.get(feature)
+                                            .getName()
+                                            .equals(ctx.getBeanDefinition(n).getBeanClassName()));
         }
     }
 
@@ -90,12 +95,18 @@ class EditionFeatureConditionTest {
     void personalDropsEveryFeatureExceptBillingWhichFollowsItsOwnProperty() {
         Map<String, Object> personal = Map.of("app.edition.tier", "personal");
         for (EditionFeature feature : EditionFeature.values()) {
-            boolean expected = feature == EditionFeature.BILLING_PAYMENTS; // billing-enabled defaults to true
-            assertThat(registered(feature, personal)).as("%s on personal", feature).isEqualTo(expected);
+            boolean expected =
+                    feature == EditionFeature.BILLING_PAYMENTS; // billing-enabled defaults to true
+            assertThat(registered(feature, personal))
+                    .as("%s on personal", feature)
+                    .isEqualTo(expected);
         }
-        Map<String, Object> personalNoBilling = Map.of("app.edition.tier", "personal", "app.edition.billing-enabled", "false");
+        Map<String, Object> personalNoBilling =
+                Map.of("app.edition.tier", "personal", "app.edition.billing-enabled", "false");
         for (EditionFeature feature : EditionFeature.values()) {
-            assertThat(registered(feature, personalNoBilling)).as("%s on personal, billing off", feature).isFalse();
+            assertThat(registered(feature, personalNoBilling))
+                    .as("%s on personal, billing off", feature)
+                    .isFalse();
         }
     }
 
@@ -113,7 +124,16 @@ class EditionFeatureConditionTest {
         for (EditionFeature feature : EditionFeature.values()) {
             String property = "app.edition.features." + feature.id() + ".enabled";
             assertThat(property).isEqualTo(feature.propertyName());
-            assertThat(registered(feature, Map.of("app.edition.tier", "personal", "app.edition.billing-enabled", "false", property, "true")))
+            assertThat(
+                            registered(
+                                    feature,
+                                    Map.of(
+                                            "app.edition.tier",
+                                            "personal",
+                                            "app.edition.billing-enabled",
+                                            "false",
+                                            property,
+                                            "true")))
                     .as("%s forced on", feature)
                     .isTrue();
             assertThat(registered(feature, Map.of(property, "false")))
@@ -124,48 +144,89 @@ class EditionFeatureConditionTest {
 
     @Test
     void theFlagNameIsKebabCase() {
-        assertThat(EditionFeature.CLOUD_SPEECH.propertyName()).isEqualTo("app.edition.features.cloud-speech.enabled");
+        assertThat(EditionFeature.CLOUD_SPEECH.propertyName())
+                .isEqualTo("app.edition.features.cloud-speech.enabled");
         assertThat(EditionFeature.VOICE_REALTIME_SHARE.id()).isEqualTo("voice-realtime-share");
     }
 
     @Test
     void billingPaymentsFollowsTheExistingBillingProperty() {
-        assertThat(registered(EditionFeature.BILLING_PAYMENTS, Map.of("app.edition.billing-enabled", "false"))).isFalse();
-        assertThat(registered(EditionFeature.BILLING_PAYMENTS, Map.of("app.edition.billing-enabled", "true"))).isTrue();
-        // On personal, billing-enabled stays authoritative: the override path the install can still use.
-        assertThat(registered(EditionFeature.BILLING_PAYMENTS, Map.of("app.edition.tier", "personal", "app.edition.billing-enabled", "true")))
+        assertThat(
+                        registered(
+                                EditionFeature.BILLING_PAYMENTS,
+                                Map.of("app.edition.billing-enabled", "false")))
+                .isFalse();
+        assertThat(
+                        registered(
+                                EditionFeature.BILLING_PAYMENTS,
+                                Map.of("app.edition.billing-enabled", "true")))
+                .isTrue();
+        // On personal, billing-enabled stays authoritative: the override path the install can still
+        // use.
+        assertThat(
+                        registered(
+                                EditionFeature.BILLING_PAYMENTS,
+                                Map.of(
+                                        "app.edition.tier",
+                                        "personal",
+                                        "app.edition.billing-enabled",
+                                        "true")))
                 .isTrue();
         // A tier alone does not switch billing off on a non-personal tier.
-        assertThat(registered(EditionFeature.BILLING_PAYMENTS, Map.of("app.edition.tier", "full"))).isTrue();
+        assertThat(registered(EditionFeature.BILLING_PAYMENTS, Map.of("app.edition.tier", "full")))
+                .isTrue();
     }
 
     @Test
     void anExplicitBillingFlagBeatsTheBillingProperty() {
-        assertThat(registered(
-                        EditionFeature.BILLING_PAYMENTS,
-                        Map.of("app.edition.billing-enabled", "true", "app.edition.features.billing-payments.enabled", "false")))
+        assertThat(
+                        registered(
+                                EditionFeature.BILLING_PAYMENTS,
+                                Map.of(
+                                        "app.edition.billing-enabled",
+                                        "true",
+                                        "app.edition.features.billing-payments.enabled",
+                                        "false")))
                 .isFalse();
-        assertThat(registered(
-                        EditionFeature.BILLING_PAYMENTS,
-                        Map.of("app.edition.billing-enabled", "false", "app.edition.features.billing-payments.enabled", "true")))
+        assertThat(
+                        registered(
+                                EditionFeature.BILLING_PAYMENTS,
+                                Map.of(
+                                        "app.edition.billing-enabled",
+                                        "false",
+                                        "app.edition.features.billing-payments.enabled",
+                                        "true")))
                 .isTrue();
     }
 
-    /** The boolean conversion every other edition switch uses, so the spellings agree everywhere. */
+    /**
+     * The boolean conversion every other edition switch uses, so the spellings agree everywhere.
+     */
     @Test
     void everyBooleanSpellingIsUnderstood() {
         for (String off : List.of("false", "FALSE", "0", "off", "no")) {
-            assertThat(registered(EditionFeature.CLOUD_SPEECH, Map.of("app.edition.features.cloud-speech.enabled", off)))
+            assertThat(
+                            registered(
+                                    EditionFeature.CLOUD_SPEECH,
+                                    Map.of("app.edition.features.cloud-speech.enabled", off)))
                     .as("flag=%s", off)
                     .isFalse();
-            assertThat(registered(EditionFeature.BILLING_PAYMENTS, Map.of("app.edition.billing-enabled", off)))
+            assertThat(
+                            registered(
+                                    EditionFeature.BILLING_PAYMENTS,
+                                    Map.of("app.edition.billing-enabled", off)))
                     .as("billing-enabled=%s", off)
                     .isFalse();
         }
         for (String on : List.of("true", "TRUE", "1", "on", "yes")) {
-            assertThat(registered(
-                            EditionFeature.CLOUD_SPEECH,
-                            Map.of("app.edition.tier", "personal", "app.edition.features.cloud-speech.enabled", on)))
+            assertThat(
+                            registered(
+                                    EditionFeature.CLOUD_SPEECH,
+                                    Map.of(
+                                            "app.edition.tier",
+                                            "personal",
+                                            "app.edition.features.cloud-speech.enabled",
+                                            on)))
                     .as("flag=%s", on)
                     .isTrue();
         }
@@ -173,34 +234,52 @@ class EditionFeatureConditionTest {
 
     @Test
     void aBlankFlagCountsAsUnset() {
-        // Compose writes APP_EDITION_FEATURES_X_ENABLED: ${...:-} as an empty string when the operator sets nothing.
-        assertThat(registered(EditionFeature.CLOUD_SPEECH, Map.of("app.edition.tier", "personal", "app.edition.features.cloud-speech.enabled", "")))
+        // Compose writes APP_EDITION_FEATURES_X_ENABLED: ${...:-} as an empty string when the
+        // operator sets nothing.
+        assertThat(
+                        registered(
+                                EditionFeature.CLOUD_SPEECH,
+                                Map.of(
+                                        "app.edition.tier",
+                                        "personal",
+                                        "app.edition.features.cloud-speech.enabled",
+                                        "")))
                 .isFalse();
-        assertThat(registered(EditionFeature.CLOUD_SPEECH, Map.of("app.edition.features.cloud-speech.enabled", ""))).isTrue();
+        assertThat(
+                        registered(
+                                EditionFeature.CLOUD_SPEECH,
+                                Map.of("app.edition.features.cloud-speech.enabled", "")))
+                .isTrue();
     }
 
     @Test
     void editionInfoReportsTheSameDecisionsTheConditionsMake() {
         StandardEnvironment env = new StandardEnvironment();
         env.getPropertySources()
-                .addFirst(new MapPropertySource(
-                        "test",
-                        Map.of(
-                                "app.edition.tier", "personal",
-                                "app.edition.billing-enabled", "false",
-                                "app.auth.mode", " LOCAL ",
-                                "app.edition.features.cloud-speech.enabled", "true")));
+                .addFirst(
+                        new MapPropertySource(
+                                "test",
+                                Map.of(
+                                        "app.edition.tier", "personal",
+                                        "app.edition.billing-enabled", "false",
+                                        "app.auth.mode", " LOCAL ",
+                                        "app.edition.features.cloud-speech.enabled", "true")));
 
         EditionInfo info = EditionInfo.from(env);
 
         assertThat(info.tier()).isEqualTo("personal");
         assertThat(info.billingEnabled()).isFalse();
         assertThat(info.authMode()).isEqualTo("local");
-        assertThat(info.features()).containsEntry("cloud-speech", true).containsEntry("social-channels", false);
+        assertThat(info.features())
+                .containsEntry("cloud-speech", true)
+                .containsEntry("social-channels", false);
         assertThat(info.features().keySet())
-                .containsExactlyElementsOf(List.of(EditionFeature.values()).stream().map(EditionFeature::id).toList());
+                .containsExactlyElementsOf(
+                        List.of(EditionFeature.values()).stream().map(EditionFeature::id).toList());
         for (EditionFeature feature : EditionFeature.values()) {
-            assertThat(info.features()).as(feature.id()).containsEntry(feature.id(), registered(feature, env));
+            assertThat(info.features())
+                    .as(feature.id())
+                    .containsEntry(feature.id(), registered(feature, env));
         }
     }
 
@@ -220,7 +299,11 @@ class EditionFeatureConditionTest {
         new AnnotatedBeanDefinitionReader(ctx).register(PROBES.get(feature));
         try (ctx) {
             return List.of(ctx.getBeanDefinitionNames()).stream()
-                    .anyMatch(n -> PROBES.get(feature).getName().equals(ctx.getBeanDefinition(n).getBeanClassName()));
+                    .anyMatch(
+                            n ->
+                                    PROBES.get(feature)
+                                            .getName()
+                                            .equals(ctx.getBeanDefinition(n).getBeanClassName()));
         }
     }
 }

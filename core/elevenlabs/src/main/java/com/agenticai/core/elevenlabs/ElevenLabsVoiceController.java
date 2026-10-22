@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Voice cloning setup UI's backend - upload a sample clip, get a cloned
- * voice back. A real multipart upload endpoint rather than a tool call - see
- * {@code core/elevenlabs} module's javadoc for why. Mirrors the shape of
- * {@code ChatAttachmentService}'s multipart handling ({@code MultipartFile}
- * in, bytes out) already established in {@code core/agents}.
+ * Voice cloning setup UI's backend - upload a sample clip, get a cloned voice back. A real
+ * multipart upload endpoint rather than a tool call - see {@code core/elevenlabs} module's javadoc
+ * for why. Mirrors the shape of {@code ChatAttachmentService}'s multipart handling ({@code
+ * MultipartFile} in, bytes out) already established in {@code core/agents}.
  */
 @RestController
 @ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
@@ -37,22 +36,26 @@ public class ElevenLabsVoiceController {
 
     @PostMapping
     public ResponseEntity<ElevenLabsVoiceResponse> clone(
-        @RequestParam("name") String name,
-        @RequestParam("file") MultipartFile file
-    ) {
+            @RequestParam("name") String name, @RequestParam("file") MultipartFile file) {
         try {
-            ElevenLabsVoice voice = voiceService.cloneVoice(
-                name, file.getBytes(), file.getContentType(), file.getOriginalFilename()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(ElevenLabsVoiceResponse.from(voice));
+            ElevenLabsVoice voice =
+                    voiceService.cloneVoice(
+                            name,
+                            file.getBytes(),
+                            file.getContentType(),
+                            file.getOriginalFilename());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ElevenLabsVoiceResponse.from(voice));
         } catch (IOException e) {
-            throw new ElevenLabsApiException(0, "Could not read the uploaded sample file: " + e.getMessage());
+            throw new ElevenLabsApiException(
+                    0, "Could not read the uploaded sample file: " + e.getMessage());
         }
     }
 
     @GetMapping
     public ResponseEntity<List<ElevenLabsVoiceResponse>> list() {
-        return ResponseEntity.ok(voiceService.list().stream().map(ElevenLabsVoiceResponse::from).toList());
+        return ResponseEntity.ok(
+                voiceService.list().stream().map(ElevenLabsVoiceResponse::from).toList());
     }
 
     @DeleteMapping("/{id}")

@@ -1,9 +1,9 @@
 package com.agenticai.core.omnichannel.x;
 
+import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;

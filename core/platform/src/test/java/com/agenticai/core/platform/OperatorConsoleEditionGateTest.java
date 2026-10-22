@@ -26,22 +26,26 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.stereotype.Component;
 
 /**
- * Pins which platform beans the personal edition keeps. {@code PlatformController} (the LLM-pool and tenant
- * endpoints a personal owner with {@code ROLE_platform-admin} still drives), the usage rollup, the broadcast
- * and maintenance pair the public status page reads, and the spend-cap controller and notifier are the keep
- * list; every other platform bean is the operator console and carries
- * {@code @ConditionalOnEditionFeature(OPERATOR_CONSOLE)}.
+ * Pins which platform beans the personal edition keeps. {@code PlatformController} (the LLM-pool
+ * and tenant endpoints a personal owner with {@code ROLE_platform-admin} still drives), the usage
+ * rollup, the broadcast and maintenance pair the public status page reads, and the spend-cap
+ * controller and notifier are the keep list; every other platform bean is the operator console and
+ * carries {@code @ConditionalOnEditionFeature(OPERATOR_CONSOLE)}.
  *
- * <p>The keep list is spelled out, so a bean added to {@code core.platform} later fails this test until it is
- * either gated or deliberately added here, and a bean on the keep list can never come to inject a gated one
- * (which would crash core at startup on personal: "No qualifying bean"). {@code EditionClosureRulesTest} in
- * core/app proves the same from bytecode for the whole reactor; this one fails inside the module.
+ * <p>The keep list is spelled out, so a bean added to {@code core.platform} later fails this test
+ * until it is either gated or deliberately added here, and a bean on the keep list can never come
+ * to inject a gated one (which would crash core at startup on personal: "No qualifying bean").
+ * {@code EditionClosureRulesTest} in core/app proves the same from bytecode for the whole reactor;
+ * this one fails inside the module.
  */
 class OperatorConsoleEditionGateTest {
 
     private static final String PACKAGE = "com.agenticai.core.platform";
 
-    /** The beans that stay on personal: PlatformController's whole constructor closure plus the rest. */
+    /**
+     * The beans that stay on personal: PlatformController's whole constructor closure plus the
+     * rest.
+     */
     private static final Set<String> KEPT =
             new TreeSet<>(
                     Set.of(
@@ -61,7 +65,8 @@ class OperatorConsoleEditionGateTest {
                             "SpendCapAlertNotifier"));
 
     private static Set<Class<?>> components() throws ClassNotFoundException {
-        // Conditions are evaluated by the scanner: switch on the profile and the two property-gated beans so the
+        // Conditions are evaluated by the scanner: switch on the profile and the two property-gated
+        // beans so the
         // list is every operator-console class, whatever its other conditions.
         MockEnvironment env =
                 new MockEnvironment()
@@ -75,7 +80,11 @@ class OperatorConsoleEditionGateTest {
         for (BeanDefinition d : scanner.findCandidateComponents(PACKAGE)) {
             Class<?> type = Class.forName(d.getBeanClassName());
             // Test fixtures live in the same package tree but are not production beans.
-            if (type.getProtectionDomain().getCodeSource().getLocation().getPath().contains("test-classes")) {
+            if (type.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .getPath()
+                    .contains("test-classes")) {
                 continue;
             }
             found.add(type);
@@ -100,7 +109,8 @@ class OperatorConsoleEditionGateTest {
 
     @Test
     void theOperatorConsoleIsAlmostEverythingElse() throws ClassNotFoundException {
-        long gatedCount = components().stream().filter(OperatorConsoleEditionGateTest::gated).count();
+        long gatedCount =
+                components().stream().filter(OperatorConsoleEditionGateTest::gated).count();
         assertThat(gatedCount).isGreaterThanOrEqualTo(55);
     }
 
@@ -114,7 +124,8 @@ class OperatorConsoleEditionGateTest {
             while (!queue.isEmpty()) {
                 Class<?> c = queue.poll();
                 for (Constructor<?> k : c.getDeclaredConstructors()) {
-                    if (c.getDeclaredConstructors().length > 1 && !k.isAnnotationPresent(Autowired.class)) {
+                    if (c.getDeclaredConstructors().length > 1
+                            && !k.isAnnotationPresent(Autowired.class)) {
                         continue;
                     }
                     for (Class<?> p : k.getParameterTypes()) {
@@ -134,19 +145,21 @@ class OperatorConsoleEditionGateTest {
 
     @Test
     void theGateIsOffOnPersonalAndOnForEveryOtherEdition() {
-        MockEnvironment personal = new MockEnvironment().withProperty("app.edition.tier", "personal");
+        MockEnvironment personal =
+                new MockEnvironment().withProperty("app.edition.tier", "personal");
         assertThat(EditionFeature.OPERATOR_CONSOLE.isEnabled(personal)).isFalse();
         for (String tier : new String[] {"lite", "full"}) {
-            assertThat(EditionFeature.OPERATOR_CONSOLE.isEnabled(
-                            new MockEnvironment().withProperty("app.edition.tier", tier)))
+            assertThat(
+                            EditionFeature.OPERATOR_CONSOLE.isEnabled(
+                                    new MockEnvironment().withProperty("app.edition.tier", tier)))
                     .isTrue();
         }
         assertThat(EditionFeature.OPERATOR_CONSOLE.isEnabled(new MockEnvironment())).isTrue();
     }
 
     /**
-     * Component-scans {@code core.platform} the way core does (conditions evaluated, nothing instantiated, no
-     * database) and returns the registered bean names.
+     * Component-scans {@code core.platform} the way core does (conditions evaluated, nothing
+     * instantiated, no database) and returns the registered bean names.
      */
     private static Set<String> scannedBeanNames(MockEnvironment env) {
         env.setActiveProfiles("security");
@@ -159,7 +172,9 @@ class OperatorConsoleEditionGateTest {
 
     @Test
     void personalRegistersTheKeepListAndNoOperatorConsoleBean() {
-        Set<String> beans = scannedBeanNames(new MockEnvironment().withProperty("app.edition.tier", "personal"));
+        Set<String> beans =
+                scannedBeanNames(
+                        new MockEnvironment().withProperty("app.edition.tier", "personal"));
         assertThat(beans)
                 .contains(
                         "platformController",
@@ -187,7 +202,9 @@ class OperatorConsoleEditionGateTest {
 
     @Test
     void personalDropsExactlyTheGatedClasses() throws ClassNotFoundException {
-        Set<String> beans = scannedBeanNames(new MockEnvironment().withProperty("app.edition.tier", "personal"));
+        Set<String> beans =
+                scannedBeanNames(
+                        new MockEnvironment().withProperty("app.edition.tier", "personal"));
         Set<String> gatedNames =
                 components().stream()
                         .filter(OperatorConsoleEditionGateTest::gated)
@@ -203,7 +220,8 @@ class OperatorConsoleEditionGateTest {
                         .filter(OperatorConsoleEditionGateTest::gated)
                         .map(c -> java.beans.Introspector.decapitalize(c.getSimpleName()))
                         .collect(Collectors.toCollection(TreeSet::new));
-        // The two property-gated ones (LandingEventBuffer, WebhookAbuseAlertSink) have their own switch, which
+        // The two property-gated ones (LandingEventBuffer, WebhookAbuseAlertSink) have their own
+        // switch, which
         // is not what this checks.
         gatedNames.removeAll(Set.of("landingEventBuffer", "webhookAbuseAlertSink"));
         assertThat(scannedBeanNames(new MockEnvironment())).containsAll(gatedNames);
@@ -219,13 +237,16 @@ class OperatorConsoleEditionGateTest {
                 scannedBeanNames(
                         new MockEnvironment()
                                 .withProperty("app.edition.tier", "personal")
-                                .withProperty("app.edition.features.operator-console.enabled", "true"));
-        assertThat(beans).contains("platformUserController", "impersonationService", "abuseSignalService");
+                                .withProperty(
+                                        "app.edition.features.operator-console.enabled", "true"));
+        assertThat(beans)
+                .contains("platformUserController", "impersonationService", "abuseSignalService");
     }
 
     @Test
     void thePublicStatusPageStillHasItsAnnouncementSource() {
-        // PublicStatusController (core/app) injects PlatformBroadcastService and MaintenanceModeFilter reads it:
+        // PublicStatusController (core/app) injects PlatformBroadcastService and
+        // MaintenanceModeFilter reads it:
         // gating either would break the status endpoint every edition serves.
         assertThat(gated(PlatformBroadcastService.class)).isFalse();
         assertThat(gated(MaintenanceModeFilter.class)).isFalse();

@@ -12,11 +12,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
- * Bytecode fixtures for {@code EditionWiringTest} and {@code EditionClosureRulesTest}: gated beans, beans
- * that may and may not inject them. Never instantiated by Spring - this package is deliberately outside
- * {@code com.agenticai.core}, the component-scan root of every application and test context, so the
- * deliberately broken ones here cannot break a context. Only read as bytecode (and registered by hand in the
- * wiring test, where only conditions are evaluated).
+ * Bytecode fixtures for {@code EditionWiringTest} and {@code EditionClosureRulesTest}: gated beans,
+ * beans that may and may not inject them. Never instantiated by Spring - this package is
+ * deliberately outside {@code com.agenticai.core}, the component-scan root of every application and
+ * test context, so the deliberately broken ones here cannot break a context. Only read as bytecode
+ * (and registered by hand in the wiring test, where only conditions are evaluated).
  */
 @SuppressWarnings("unused")
 public final class EditionFixtures {
@@ -95,8 +95,7 @@ public final class EditionFixtures {
 
     @Component
     public static class UngatedFieldInjection {
-        @Autowired
-        GatedSpeech speech;
+        @Autowired GatedSpeech speech;
     }
 
     @Component

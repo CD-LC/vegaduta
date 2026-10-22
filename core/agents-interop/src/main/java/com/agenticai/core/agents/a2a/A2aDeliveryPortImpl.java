@@ -24,11 +24,18 @@ public class A2aDeliveryPortImpl implements A2aDeliveryPort {
     public A2aSendResult send(String cardUrl, String message, String requestedBy) {
         A2aClientService.Result result = client.send(cardUrl, message);
         String state = result.state() == null ? "unknown" : result.state();
-        String detail = result.success()
-            ? "remote task " + state + (result.text() == null || result.text().isBlank()
-                ? "" : ": " + result.text())
-            : "remote task " + state + (result.text() == null || result.text().isBlank()
-                ? "" : " - " + result.text());
+        String detail =
+                result.success()
+                        ? "remote task "
+                                + state
+                                + (result.text() == null || result.text().isBlank()
+                                        ? ""
+                                        : ": " + result.text())
+                        : "remote task "
+                                + state
+                                + (result.text() == null || result.text().isBlank()
+                                        ? ""
+                                        : " - " + result.text());
         return new A2aSendResult(result.success(), detail);
     }
 }

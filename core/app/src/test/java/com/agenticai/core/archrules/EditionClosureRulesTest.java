@@ -26,23 +26,27 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * The edition closure rule (AGENTS.md rule 9, for the lean edition): a bean gated by
- * {@link ConditionalOnEditionFeature} may be injected only by beans gated by the SAME feature, or through
- * {@code ObjectProvider}, {@code Optional} or a collection. Anything else compiles, unit-tests cleanly and
- * crashes core at startup on the edition that drops the gated bean ("No qualifying bean of type ...").
+ * The edition closure rule (AGENTS.md rule 9, for the lean edition): a bean gated by {@link
+ * ConditionalOnEditionFeature} may be injected only by beans gated by the SAME feature, or through
+ * {@code ObjectProvider}, {@code Optional} or a collection. Anything else compiles, unit-tests
+ * cleanly and crashes core at startup on the edition that drops the gated bean ("No qualifying bean
+ * of type ...").
  *
- * <p>ArchUnit over the production bytecode of every core module on core/app's classpath, no context, no
- * database. Gated classes are discovered by the annotation, so a package that gates a class never edits this
- * test. A required dependency is, in a Spring component or {@code @Configuration}: a parameter of the
- * constructor Spring will use (the only one, or the marked one), of an {@code @Autowired}/{@code @Inject}
- * method, or of a {@code @Bean} method; or an {@code @Autowired}/{@code @Inject}/{@code @Resource} field.
- * Those are exempt when {@code @Nullable} or {@code @Autowired(required = false)}. A {@code @Bean} method
- * counts as gated when it carries the annotation itself.
+ * <p>ArchUnit over the production bytecode of every core module on core/app's classpath, no
+ * context, no database. Gated classes are discovered by the annotation, so a package that gates a
+ * class never edits this test. A required dependency is, in a Spring component or
+ * {@code @Configuration}: a parameter of the constructor Spring will use (the only one, or the
+ * marked one), of an {@code @Autowired}/{@code @Inject} method, or of a {@code @Bean} method; or an
+ * {@code @Autowired}/{@code @Inject}/{@code @Resource} field. Those are exempt when
+ * {@code @Nullable} or {@code @Autowired(required = false)}. A {@code @Bean} method counts as gated
+ * when it carries the annotation itself.
  *
- * <p>What it does not see: a dependency on an interface or superclass whose only implementation is gated, and
- * a bean fetched by name or from the {@code ApplicationContext}. Those stay a review concern.
+ * <p>What it does not see: a dependency on an interface or superclass whose only implementation is
+ * gated, and a bean fetched by name or from the {@code ApplicationContext}. Those stay a review
+ * concern.
  *
- * <p>Vacuous until a package gates its first class, and proven against {@link EditionFixtures} either way.
+ * <p>Vacuous until a package gates its first class, and proven against {@link EditionFixtures}
+ * either way.
  */
 class EditionClosureRulesTest {
 
@@ -83,7 +87,8 @@ class EditionClosureRulesTest {
     void reportsEveryRequiredDependencyOnAGatedBeanFromOutsideItsFeature() {
         assertThat(violations(fixtures))
                 .containsExactlyInAnyOrder(
-                        EditionFixtures.UngatedConstructorInjection.class.getName() + " -> constructor",
+                        EditionFixtures.UngatedConstructorInjection.class.getName()
+                                + " -> constructor",
                         EditionFixtures.OtherFeatureConstructorInjection.class.getName()
                                 + " -> constructor",
                         EditionFixtures.UngatedFieldInjection.class.getName() + " -> field speech",
@@ -106,12 +111,15 @@ class EditionClosureRulesTest {
                         EditionFixtures.SameFeatureConsumer.class.getName() + " -> constructor",
                         EditionFixtures.OptionalAccess.class.getName() + " -> constructor",
                         EditionFixtures.NotRequiredField.class.getName() + " -> field social",
-                        EditionFixtures.ConfigWithGatedBeanMethod.class.getName() + " -> gatedBean");
+                        EditionFixtures.ConfigWithGatedBeanMethod.class.getName()
+                                + " -> gatedBean");
     }
 
     // ---- the model -----------------------------------------------------------------------
 
-    /** Every required dependency of a component on a class gated by a different feature (or none). */
+    /**
+     * Every required dependency of a component on a class gated by a different feature (or none).
+     */
     static List<String> violations(JavaClasses classes) {
         List<String> found = new ArrayList<>();
         for (JavaClass c : classes) {
@@ -137,7 +145,9 @@ class EditionClosureRulesTest {
             }
             for (JavaField f : c.getFields()) {
                 if (isRequiredInjectedField(f)
-                        && gatedFeatureOf(f.getRawType()).filter(g -> !own.equals(Optional.of(g))).isPresent()) {
+                        && gatedFeatureOf(f.getRawType())
+                                .filter(g -> !own.equals(Optional.of(g)))
+                                .isPresent()) {
                     found.add(c.getName() + " -> field " + f.getName());
                 }
             }
@@ -158,7 +168,8 @@ class EditionClosureRulesTest {
         return all.stream().filter(SpringWiring::isInjectionMarked).toList();
     }
 
-    private static boolean dependsOnForeignGatedClass(JavaCodeUnit unit, Optional<EditionFeature> consumerGate) {
+    private static boolean dependsOnForeignGatedClass(
+            JavaCodeUnit unit, Optional<EditionFeature> consumerGate) {
         for (JavaParameter p : unit.getParameters()) {
             if (isNullable(p)) {
                 continue;

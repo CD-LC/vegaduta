@@ -19,10 +19,10 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
 /**
- * Edition gating of the inbound MCP server surface: the developer API and the exposure controller/service
- * follow {@link EditionFeature#MCP_SERVER_EXPOSURE}; the grants controller also stays while the
- * OpenAI-compatible API is on, because its keys are minted through the grants. Registration only evaluates
- * the conditions, so no bean is instantiated.
+ * Edition gating of the inbound MCP server surface: the developer API and the exposure
+ * controller/service follow {@link EditionFeature#MCP_SERVER_EXPOSURE}; the grants controller also
+ * stays while the OpenAI-compatible API is on, because its keys are minted through the grants.
+ * Registration only evaluates the conditions, so no bean is instantiated.
  */
 class McpServerEditionGateTest {
 
@@ -32,7 +32,8 @@ class McpServerEditionGateTest {
                     McpToolExposureController.class,
                     McpToolExposureService.class);
 
-    private static GenericApplicationContext register(Map<String, Object> props, Class<?>... classes) {
+    private static GenericApplicationContext register(
+            Map<String, Object> props, Class<?>... classes) {
         GenericApplicationContext ctx = new GenericApplicationContext();
         StandardEnvironment env = new StandardEnvironment();
         env.getPropertySources().addFirst(new MapPropertySource("test", props));
@@ -54,14 +55,19 @@ class McpServerEditionGateTest {
 
     @Test
     void exposureBeansCarryTheMcpFeatureGate() {
-        // McpExposureConfig is also profile- and property-gated, so only its edition gate is asserted: it
-        // injects McpToolExposureService, so it must follow the same feature (EditionClosureRulesTest).
+        // McpExposureConfig is also profile- and property-gated, so only its edition gate is
+        // asserted: it
+        // injects McpToolExposureService, so it must follow the same feature
+        // (EditionClosureRulesTest).
         List<Class<?>> gated = new ArrayList<>(EXPOSURE_BEANS);
         gated.add(McpExposureConfig.class);
         for (Class<?> bean : gated) {
-            ConditionalOnEditionFeature gate = bean.getAnnotation(ConditionalOnEditionFeature.class);
+            ConditionalOnEditionFeature gate =
+                    bean.getAnnotation(ConditionalOnEditionFeature.class);
             assertThat(gate).as(bean.getSimpleName()).isNotNull();
-            assertThat(gate.value()).as(bean.getSimpleName()).isEqualTo(EditionFeature.MCP_SERVER_EXPOSURE);
+            assertThat(gate.value())
+                    .as(bean.getSimpleName())
+                    .isEqualTo(EditionFeature.MCP_SERVER_EXPOSURE);
         }
     }
 
@@ -69,7 +75,9 @@ class McpServerEditionGateTest {
     void exposureBeansExistWithoutAnEditionProperty() {
         for (Class<?> bean : EXPOSURE_BEANS) {
             assertThat(registered(bean, Map.of())).as(bean.getSimpleName()).isTrue();
-            assertThat(registered(bean, Map.of("app.edition.tier", "lite"))).as(bean.getSimpleName()).isTrue();
+            assertThat(registered(bean, Map.of("app.edition.tier", "lite")))
+                    .as(bean.getSimpleName())
+                    .isTrue();
         }
     }
 
@@ -87,7 +95,11 @@ class McpServerEditionGateTest {
     @Test
     void exposureBeansReturnWithTheEscapeHatch() {
         Map<String, Object> props =
-                Map.of("app.edition.tier", "personal", "app.edition.features.mcp-server-exposure.enabled", "true");
+                Map.of(
+                        "app.edition.tier",
+                        "personal",
+                        "app.edition.features.mcp-server-exposure.enabled",
+                        "true");
         for (Class<?> bean : EXPOSURE_BEANS) {
             assertThat(registered(bean, props)).as(bean.getSimpleName()).isTrue();
         }
@@ -100,16 +112,31 @@ class McpServerEditionGateTest {
         assertThat(registered(grants, Map.of("app.edition.tier", "lite"))).isTrue();
         assertThat(registered(grants, Map.of("app.edition.tier", "full"))).isTrue();
         assertThat(registered(grants, Map.of("app.edition.tier", "personal"))).isFalse();
-        assertThat(registered(grants, Map.of("app.edition.tier", "personal", "app.openai-compat.enabled", "false")))
+        assertThat(
+                        registered(
+                                grants,
+                                Map.of(
+                                        "app.edition.tier",
+                                        "personal",
+                                        "app.openai-compat.enabled",
+                                        "false")))
                 .isFalse();
-        assertThat(registered(grants, Map.of("app.edition.tier", "personal", "app.openai-compat.enabled", "true")))
+        assertThat(
+                        registered(
+                                grants,
+                                Map.of(
+                                        "app.edition.tier",
+                                        "personal",
+                                        "app.openai-compat.enabled",
+                                        "true")))
                 .isTrue();
         assertThat(
                         registered(
                                 grants,
                                 Map.of(
                                         "app.edition.tier", "personal",
-                                        "app.edition.features.mcp-server-exposure.enabled", "true")))
+                                        "app.edition.features.mcp-server-exposure.enabled",
+                                                "true")))
                 .isTrue();
     }
 
@@ -125,10 +152,14 @@ class McpServerEditionGateTest {
                 .run(
                         context -> {
                             assertThat(context).hasNotFailed();
-                            assertThat(context.getBeanNamesForType(DeveloperApiController.class)).isEmpty();
-                            assertThat(context.getBeanNamesForType(McpToolExposureController.class)).isEmpty();
-                            assertThat(context.getBeanNamesForType(McpToolExposureService.class)).isEmpty();
-                            assertThat(context.getBeanNamesForType(McpServerAccessController.class)).isEmpty();
+                            assertThat(context.getBeanNamesForType(DeveloperApiController.class))
+                                    .isEmpty();
+                            assertThat(context.getBeanNamesForType(McpToolExposureController.class))
+                                    .isEmpty();
+                            assertThat(context.getBeanNamesForType(McpToolExposureService.class))
+                                    .isEmpty();
+                            assertThat(context.getBeanNamesForType(McpServerAccessController.class))
+                                    .isEmpty();
                         });
     }
 }

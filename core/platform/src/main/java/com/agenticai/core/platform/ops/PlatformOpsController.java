@@ -18,10 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Read-mostly operations views for the platform console: deployed versions,
- * scheduled jobs (with an allowlisted, master-key-gated "run now") and
- * migration status. Role-gated by the blanket {@code /api/platform/** ->
- * ROLE_platform-admin} rule.
+ * Read-mostly operations views for the platform console: deployed versions, scheduled jobs (with an
+ * allowlisted, master-key-gated "run now") and migration status. Role-gated by the blanket {@code
+ * /api/platform/** -> ROLE_platform-admin} rule.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
@@ -33,9 +32,11 @@ public class PlatformOpsController {
     private final PlatformMigrationService migrations;
     private final String masterKey;
 
-    public PlatformOpsController(PlatformVersionService versions, ScheduledJobRegistryService jobs,
-                                 PlatformMigrationService migrations,
-                                 @Value("${app.platform.master-key:}") String masterKey) {
+    public PlatformOpsController(
+            PlatformVersionService versions,
+            ScheduledJobRegistryService jobs,
+            PlatformMigrationService migrations,
+            @Value("${app.platform.master-key:}") String masterKey) {
         this.versions = versions;
         this.jobs = jobs;
         this.migrations = migrations;
@@ -48,8 +49,8 @@ public class PlatformOpsController {
     }
 
     /**
-     * Scheduled jobs registered on the replica that answers, with that replica's
-     * in-memory last-run state (see {@link ScheduledJobRegistryService}).
+     * Scheduled jobs registered on the replica that answers, with that replica's in-memory last-run
+     * state (see {@link ScheduledJobRegistryService}).
      */
     @GetMapping("/jobs")
     public List<JobView> jobs() {
@@ -59,9 +60,8 @@ public class PlatformOpsController {
     /** Starts an allowlisted job asynchronously; 403 for any other job. */
     @PostMapping("/jobs/{id}/run")
     public Map<String, Boolean> runJob(
-        @PathVariable("id") String id,
-        @RequestHeader(value = "X-Master-Key", required = false) String presentedMasterKey
-    ) {
+            @PathVariable("id") String id,
+            @RequestHeader(value = "X-Master-Key", required = false) String presentedMasterKey) {
         TenantDeletionController.authenticateMasterKey(masterKey, presentedMasterKey);
         String actor = TenantContext.current().map(TenantContext::getSubject).orElse(null);
         jobs.runNow(id, actor);

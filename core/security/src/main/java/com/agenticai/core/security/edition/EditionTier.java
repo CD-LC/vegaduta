@@ -4,12 +4,12 @@ import java.util.Locale;
 import org.springframework.core.env.PropertyResolver;
 
 /**
- * The edition tier an install runs as ({@value #PROPERTY}): one switch that decides the default of every
- * {@link EditionFeature}.
+ * The edition tier an install runs as ({@value #PROPERTY}): one switch that decides the default of
+ * every {@link EditionFeature}.
  *
  * <ul>
- *   <li>{@link #PERSONAL}: one person, one laptop. Features that only make sense for an operator or a
- *       multi-tenant business default to OFF.
+ *   <li>{@link #PERSONAL}: one person, one laptop. Features that only make sense for an operator or
+ *       a multi-tenant business default to OFF.
  *   <li>{@link #LITE} and {@link #FULL}: every feature is ON, exactly today's behaviour.
  * </ul>
  *

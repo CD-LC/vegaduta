@@ -81,15 +81,15 @@ public class PlatformBillingService {
                 jdbc
                         .queryForList(
                                 "SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE"
-                                    + " t.comp_plan_expires_at > now()) AS comp_active, COUNT(*)"
-                                    + " FILTER (WHERE t.comp_plan_expires_at > now()   AND"
-                                    + " t.comp_plan_expires_at <= now() + interval '7 days') AS"
-                                    + " comp_expiring_7d, COUNT(*) FILTER (WHERE"
-                                    + " t.comp_plan_expires_at <= now()) AS comp_overdue_revert,"
-                                    + " COUNT(*) FILTER (WHERE t.past_due_since IS NOT NULL) AS"
-                                    + " past_due, COUNT(*) FILTER (WHERE t.cancel_scheduled) AS"
-                                    + " cancel_scheduled, COUNT(*) FILTER (WHERE t.pending_plan IS"
-                                    + " NOT NULL) AS pending_upgrade "
+                                        + " t.comp_plan_expires_at > now()) AS comp_active, COUNT(*)"
+                                        + " FILTER (WHERE t.comp_plan_expires_at > now()   AND"
+                                        + " t.comp_plan_expires_at <= now() + interval '7 days') AS"
+                                        + " comp_expiring_7d, COUNT(*) FILTER (WHERE"
+                                        + " t.comp_plan_expires_at <= now()) AS comp_overdue_revert,"
+                                        + " COUNT(*) FILTER (WHERE t.past_due_since IS NOT NULL) AS"
+                                        + " past_due, COUNT(*) FILTER (WHERE t.cancel_scheduled) AS"
+                                        + " cancel_scheduled, COUNT(*) FILTER (WHERE t.pending_plan IS"
+                                        + " NOT NULL) AS pending_upgrade "
                                         + LIVE_TENANTS)
                         .stream()
                         .findFirst()
@@ -99,12 +99,12 @@ public class PlatformBillingService {
         for (Map<String, Object> r :
                 jdbc.queryForList(
                         "SELECT COALESCE(currency, '?') AS currency, COUNT(*) AS n,"
-                            + " COALESCE(SUM(amount_minor), 0) AS amount,"
-                            + " COALESCE(SUM(gst_amount_minor), 0) AS gst, COUNT(*) FILTER (WHERE"
-                            + " issued_at >= now() - interval '30 days') AS n30,"
-                            + " COALESCE(SUM(amount_minor) FILTER (WHERE issued_at >= now() -"
-                            + " interval '30 days'), 0) AS amount30 FROM"
-                            + " control_plane.billing_invoice GROUP BY 1 ORDER BY 1")) {
+                                + " COALESCE(SUM(amount_minor), 0) AS amount,"
+                                + " COALESCE(SUM(gst_amount_minor), 0) AS gst, COUNT(*) FILTER (WHERE"
+                                + " issued_at >= now() - interval '30 days') AS n30,"
+                                + " COALESCE(SUM(amount_minor) FILTER (WHERE issued_at >= now() -"
+                                + " interval '30 days'), 0) AS amount30 FROM"
+                                + " control_plane.billing_invoice GROUP BY 1 ORDER BY 1")) {
             invoiceTotals.add(
                     new CurrencyTotal(
                             String.valueOf(r.get("currency")),
@@ -139,11 +139,11 @@ public class PlatformBillingService {
         StringBuilder sql =
                 new StringBuilder(
                                 "SELECT t.id, t.name, t.plan, t.payment_gateway,"
-                                    + " t.gateway_subscription_id, t.subscription_status,"
-                                    + " t.trial_ends_at, t.current_period_end, t.past_due_since,"
-                                    + " t.cancel_scheduled, t.pending_plan, t.comp_plan_expires_at,"
-                                    + " t.comp_plan_granted_at, t.comp_plan_reason,"
-                                    + " t.plan_before_comp_grant, t.created_at ")
+                                        + " t.gateway_subscription_id, t.subscription_status,"
+                                        + " t.trial_ends_at, t.current_period_end, t.past_due_since,"
+                                        + " t.cancel_scheduled, t.pending_plan, t.comp_plan_expires_at,"
+                                        + " t.comp_plan_granted_at, t.comp_plan_reason,"
+                                        + " t.plan_before_comp_grant, t.created_at ")
                         .append(LIVE_TENANTS);
         if (plan != null && !plan.isBlank()) {
             sql.append(" AND t.plan = ?");
@@ -279,9 +279,9 @@ public class PlatformBillingService {
         int cap = Math.max(1, Math.min(limit, 200));
         String sql =
                 "SELECT i.id, i.tenant_id, t.name AS tenant_name, i.invoice_number, i.gateway,"
-                    + " i.gateway_payment_id, i.plan, i.period, i.currency, i.amount_minor,"
-                    + " i.gst_amount_minor, i.issued_at FROM control_plane.billing_invoice i LEFT"
-                    + " JOIN control_plane.tenant t ON t.id = i.tenant_id";
+                        + " i.gateway_payment_id, i.plan, i.period, i.currency, i.amount_minor,"
+                        + " i.gst_amount_minor, i.issued_at FROM control_plane.billing_invoice i LEFT"
+                        + " JOIN control_plane.tenant t ON t.id = i.tenant_id";
         List<Map<String, Object>> rows;
         if (tenantId != null && !tenantId.isBlank()) {
             UUID id;
