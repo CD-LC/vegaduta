@@ -20,6 +20,9 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,6 +62,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@link #handleMessage}).
  */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 @RequestMapping("/webhook/teams")
 public class TeamsWebhookController {
 
@@ -118,7 +122,9 @@ public class TeamsWebhookController {
         Optional<String> tenantSchema =
                 tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.TEAMS, appId);
         if (tenantSchema.isEmpty()) {
-            log.warn("No tenant link found for Teams bot appId ***{} - ignoring.", lastFour(appId));
+            log.warn(
+                    "No tenant link found for Teams bot appId ***{} - ignoring.",
+                    LogSafe.clean(lastFour(appId)));
             // 200, not 401: Bot Framework retries hard on non-2xx and an
             // unlinked appId can never become valid by retrying.
             return ResponseEntity.ok().build();
@@ -133,7 +139,7 @@ public class TeamsWebhookController {
                 log.warn(
                         "Rejected Teams inbound: appId ***{} does not match the connected"
                                 + " credential",
-                        lastFour(appId));
+                        LogSafe.clean(lastFour(appId)));
                 return ResponseEntity.status(403).build();
             }
             String bearer = bearerToken(authorization);
@@ -143,7 +149,7 @@ public class TeamsWebhookController {
             if (!jwtValidator.isValid(bearer, appId, activity.path("serviceUrl").asText(null))) {
                 log.warn(
                         "Rejected Teams inbound with invalid Bot Framework JWT for appId ***{}",
-                        lastFour(appId));
+                        LogSafe.clean(lastFour(appId)));
                 return ResponseEntity.status(403).build();
             }
             // Bot Framework redelivers on timeout; activity.id is its own
@@ -154,7 +160,7 @@ public class TeamsWebhookController {
                 log.info(
                         "Ignoring duplicate Teams activity id {} for bot ***{}",
                         activityId,
-                        lastFour(appId));
+                        LogSafe.clean(lastFour(appId)));
                 return ResponseEntity.ok().build();
             }
             handleActivity(activity);
