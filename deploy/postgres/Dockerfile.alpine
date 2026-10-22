@@ -33,13 +33,16 @@ ARG AGE_VERSION=PG16/v1.6.0-rc0
 ARG AGE_COMMIT=2db2f060c4c9265a14d40f007eb8c56febf31e4c
 ARG PG_CONFIG=/usr/local/bin/pg_config
 
+# OPTFLAGS="" : pgvector defaults to -march=native (the build host CPU), which SIGILLs on other
+# CPUs; see the note in Dockerfile.
+
 # hadolint ignore=DL3018
 RUN apk add --no-cache --virtual .build-deps \
         build-base git flex bison readline-dev zlib-dev linux-headers perl \
     && git clone --branch "${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector \
     && test "$(git -C /tmp/pgvector rev-parse HEAD)" = "${PGVECTOR_COMMIT}" \
-    && make -C /tmp/pgvector PG_CONFIG="${PG_CONFIG}" with_llvm=no \
-    && make -C /tmp/pgvector install PG_CONFIG="${PG_CONFIG}" with_llvm=no \
+    && make -C /tmp/pgvector PG_CONFIG="${PG_CONFIG}" with_llvm=no OPTFLAGS="" \
+    && make -C /tmp/pgvector install PG_CONFIG="${PG_CONFIG}" with_llvm=no OPTFLAGS="" \
     && git clone --branch "${AGE_VERSION}" --depth 1 https://github.com/apache/age.git /tmp/age \
     && test "$(git -C /tmp/age rev-parse HEAD)" = "${AGE_COMMIT}" \
     && make -C /tmp/age PG_CONFIG="${PG_CONFIG}" with_llvm=no \

@@ -142,6 +142,7 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	sh scripts/ci/check-file-size.sh
 	sh scripts/ci/check-module-size.sh
 	sh scripts/ci/dockerfile-poms.sh
+	sh scripts/ci/postgres-portable-build.sh
 	python3 core/tools/module-graph/gen_module_graph.py --check
 	node sdk/generate.mjs --check
 	node scripts/docs/asyncapi.mjs --check
