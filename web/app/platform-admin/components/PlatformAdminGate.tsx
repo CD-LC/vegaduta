@@ -1,9 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { AuthContext } from "../../components/AuthProvider";
 import { auth } from "../../lib/auth";
+import { isPersonalEdition, isPersonalPlatformAdminAllowed } from "../../lib/edition";
 import Logo from "./Logo";
+import NotFound from "../not-found";
 
 // Platform-admin access gate for the merged console (2026 merge of the
 // standalone web-admin app into web/app/platform-admin).
@@ -52,6 +55,7 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
   // render routes don't include /platform-admin), but fail closed anyway -
   // a gate that can't see the session must never render children.
   const ctx = useContext(AuthContext);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Defence-in-depth: if this ever mounts without an authenticated
@@ -74,6 +78,13 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
         </div>
       </main>
     );
+  }
+
+  // Personal edition: only the LLM pools, tool credentials and settings exist in this section (the rest is
+  // fleet tooling whose endpoints a personal core does not run). The proxy answers 404 for the same list;
+  // this is the client-side defence for a navigation that never reaches it.
+  if (isPersonalEdition() && pathname && !isPersonalPlatformAdminAllowed(pathname)) {
+    return <NotFound />;
   }
 
   if (!ctx.isPlatformAdmin) {
