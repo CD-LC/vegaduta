@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Download, Files as FilesIcon, Loader2, Search } from "lucide-react";
 import { api } from "../lib/api";
+import { cloudSpeechOffered } from "../lib/cloudSpeech";
 import { usePagination } from "../lib/usePagination";
 import AppShell from "../components/AppShell";
 import PageHeader from "../components/ax/PageHeader";
@@ -161,6 +162,7 @@ export default function FilesPage() {
     setArtifactsCapped(false);
     setArtifactPartialFailureCount(0);
     // The unpaged lists (images, speech, video) are flagged when one reaches the cap: it may have been truncated.
+    const speech = cloudSpeechOffered();
     const capSeen = { value: false };
     const noteCap = (list: any[]) => {
       if (list.length >= ARTIFACT_LIST_CAP) capSeen.value = true;
@@ -168,8 +170,14 @@ export default function FilesPage() {
     };
     Promise.allSettled([
       api.listGeneratedImages().then((r: any) => noteCap(r || []).map((x: any) => normalizeImage(x, t))),
-      api.listElevenLabsAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeElevenLabsAudio(x, t))),
-      api.listSarvamAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeSarvamAudio(x, t))),
+      // The two speech listings belong to core's CLOUD_SPEECH feature. Where it is off (a personal install) the
+      // routes do not exist, and a 404 here would show the partial-failure banner for a list nobody has.
+      ...(speech
+        ? [
+            api.listElevenLabsAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeElevenLabsAudio(x, t))),
+            api.listSarvamAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeSarvamAudio(x, t))),
+          ]
+        : []),
       api.listVideoGenerationJobs().then((r: any) => noteCap(r || []).map((x: any) => normalizeVideoJob(x, t))),
       api.listGeneratedDocuments({ page: 0, size: 200 }).then((r: any) => {
         const shown = (r?.content || []).length;
@@ -185,7 +193,7 @@ export default function FilesPage() {
         setArtifactRows(merged);
         setArtifactsCapped(capSeen.value);
         setArtifactPartialFailureCount(failed);
-        // All five failing at once reads as a real outage, not a partial gap.
+        // Every list failing at once reads as a real outage, not a partial gap.
         if (failed === results.length) setArtifactsFailed(true);
       })
       .catch(() => {
