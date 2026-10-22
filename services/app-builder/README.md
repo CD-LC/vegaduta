@@ -198,6 +198,14 @@ dependencies: `POST /projects/{id}/preview/start` then reads the project's
 manifest, registers a code-intel workspace from the real checkout, starts
 the install+run command as a long-running process, and returns a URL.
 
+Preview routes are namespaced per tenant, because project ids are unique
+only within a tenant: the Caddy route id is `preview-<tenant_key>-<project_id>`
+and the URL is `<base>/preview/<tenant_key>/<project_id>/` (or, in
+`subdomain` mode, `https://<tenant_key>-<project_id>.<preview domain>`), where
+`<tenant_key>` is 16 hex characters derived from the tenant id. A preview
+started before this change keeps working and is removed by `preview/stop` as
+before; only its URL has the old, un-namespaced shape.
+
 ## BaaS (optional per-project Postgres)
 
 `POST /projects/{id}/backend/provision` creates a Postgres schema
@@ -206,7 +214,10 @@ schema-scoped `DATABASE_URL` (via `options=-csearch_path=<schema>`).
 Fully optional — a project scaffolds and previews with no database at
 all; if `APP_BUILDER_ADMIN_DATABASE_URL` isn't configured,
 `provision_backend()` returns a clear `{"provisioned": false, "reason":
-...}` instead of crashing the service. See `app/baas.py`'s module
+...}` instead of crashing the service. A database error is logged by the
+service and reported to the caller as a generic reason with the SQLSTATE
+code (for example `schema apply failed (SQLSTATE 42601); see the app-builder
+service log`), never the driver's message. See `app/baas.py`'s module
 docstring for the isolation caveat (below).
 
 ## Run

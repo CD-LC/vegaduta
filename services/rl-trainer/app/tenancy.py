@@ -30,7 +30,7 @@ class TenantContext:
 
 
 def validate_tenant_id(tenant_id: str) -> str:
-    if not tenant_id or not _TENANT_ID_RX.match(tenant_id):
+    if not tenant_id or not _TENANT_ID_RX.fullmatch(tenant_id):
         raise TenantValidationError(f"invalid tenant id: {tenant_id!r}")
     return tenant_id
 

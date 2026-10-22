@@ -26,6 +26,13 @@ Release notes on GitHub are generated from the section for each version.
 
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
 
+### Security
+
+- **Tenant, project, workspace and git-ref ids no longer accept a trailing newline.** The allowlist checks in app-builder, code-intel and rl-trainer used `re.match` with a `$` anchor, which also matches before a final newline, so `abc\n` passed as a valid id; they now use `re.fullmatch`.
+- **Two tenants with the same project id can no longer share an app-builder preview route.** With the legacy local preview on (`APP_BUILDER_LOCAL_PREVIEW_ENABLED`, off by default), the Caddy route was keyed by the project id alone, and project ids are unique only per tenant, so tenant B starting `shop` replaced tenant A's `shop` route. Routes, preview paths and preview hosts now carry a per-tenant prefix: the URL is `<base>/preview/<tenant key>/<project id>/` (or `https://<tenant key>-<project id>.<preview domain>`). A preview started before the upgrade keeps running and is removed by `preview/stop`.
+- **app-builder no longer returns database error text to the caller.** `backend/provision`, `backend/schema` and `backend/tables` put the Postgres driver's message (role, schema and connection details) in the response `reason`; they now log it and return a generic reason with the SQLSTATE code, for example `schema apply failed (SQLSTATE 42601); see the app-builder service log`.
+- **Caller-controlled values are logged without CR/LF** in app-builder's preview ingress and tool-sandbox's execute and error logs (`toolName` and the request path could forge a second log line).
+
 ## [0.1.9] - 2026-10-21
 
 ### Added
