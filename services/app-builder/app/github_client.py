@@ -110,7 +110,7 @@ class InvalidRepoNameError(ValueError):
 
 def validate_repo_full_name(repo_full_name: str) -> str:
     name = (repo_full_name or "").strip().strip("/")
-    if ".." in name or not _REPO_FULL_NAME_RX.match(name):
+    if ".." in name or not _REPO_FULL_NAME_RX.fullmatch(name):
         raise InvalidRepoNameError(
             f"not a valid GitHub repository (expected owner/repo): {repo_full_name!r}"
         )
@@ -119,7 +119,7 @@ def validate_repo_full_name(repo_full_name: str) -> str:
 
 def validate_branch(branch: str) -> str:
     b = (branch or "").strip()
-    if ".." in b or not _BRANCH_RX.match(b):
+    if ".." in b or not _BRANCH_RX.fullmatch(b):
         raise InvalidRepoNameError(f"not a valid branch name: {branch!r}")
     return b
 

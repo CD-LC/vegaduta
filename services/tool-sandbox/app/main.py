@@ -183,7 +183,7 @@ async def execute(
         log.info(
             "tool execution failed tool=%s language=%s type=%s duration=%dms",
             clean(request.toolName),
-            request.language,
+            clean(request.language),
             outcome.error_type,
             outcome.duration_ms,
         )
