@@ -15,6 +15,7 @@ import { usePagination } from "../../lib/usePagination";
 import { Skeleton } from "../ui/skeleton";
 import CodingTaskDetail from "./CodingTaskDetail";
 import CodingTaskForm, { type AgentOption } from "./CodingTaskForm";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * /coding: start a coding task, follow it live, read the diff and approve / reject it, roll back.
@@ -174,9 +175,11 @@ export default function CodingTasksPanel({ onLoaded }: { onLoaded?: () => void }
           <AlertTriangle aria-hidden="true" />
           <AlertDescription>
             {cfg.reason === "PLAN" ? t("planBody") : t("setupBody")}{" "}
-            <Link href={cfg.reason === "PLAN" ? "/admin/billing" : "/providers"} className="font-semibold underline">
-              {t(cfg.reason === "PLAN" ? "upgradeLink" : "providersLink")}
-            </Link>
+            {(cfg.reason !== "PLAN" || !isPersonalEdition()) && (
+              <Link href={cfg.reason === "PLAN" ? "/admin/billing" : "/providers"} className="font-semibold underline">
+                {t(cfg.reason === "PLAN" ? "upgradeLink" : "providersLink")}
+              </Link>
+            )}
           </AlertDescription>
         </Alert>
       )}

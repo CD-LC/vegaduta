@@ -7,16 +7,17 @@ import static com.agenticai.core.agents.turn.ChatPromptDirectives.isKnownThought
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
+import com.agenticai.core.security.logging.LogSafe;
 import org.springframework.ai.chat.client.ChatClient;
 import reactor.core.publisher.Flux;
 
 /**
- * The FAST stream's recovery ladder, moved out of {@link ChatTurnExecutor#streamFast}
- * (extract-only split). {@link FastStreamTurn#stream} chains the three branches as {@code
- * onErrorResume} operators in this order: the same-provider tools-disabled retry for the known
- * Gemini thought_signature bug, the one-shot fallback-provider retry, and the graceful close of a
- * stream that fails after text already reached the client. The first two only ever fire before
- * any token has streamed.
+ * The FAST stream's recovery ladder, moved out of {@link ChatTurnExecutor#streamFast} (extract-only
+ * split). {@link FastStreamTurn#stream} chains the three branches as {@code onErrorResume}
+ * operators in this order: the same-provider tools-disabled retry for the known Gemini
+ * thought_signature bug, the one-shot fallback-provider retry, and the graceful close of a stream
+ * that fails after text already reached the client. The first two only ever fire before any token
+ * has streamed.
  */
 final class FastStreamRecovery {
 
@@ -39,9 +40,9 @@ final class FastStreamRecovery {
      * turn, SAME provider/model, with tools disabled - the bug only triggers when a functionCall
      * part is present, so removing tools from this one retry sidesteps it entirely. Same "only
      * before any token has streamed" safety gate as the fallback-provider branch below, and tried
-     * FIRST (this branch is earlier in the chain) since it's a same-provider,
-     * no-credential-lookup, cheaper retry than switching providers - see that branch's own comment
-     * for why the token gate is required either way.
+     * FIRST (this branch is earlier in the chain) since it's a same-provider, no-credential-lookup,
+     * cheaper retry than switching providers - see that branch's own comment for why the token gate
+     * is required either way.
      */
     Flux<String> retryWithoutToolsOnThoughtSignatureBug(Throwable e) {
         Agent agent = t.agent;
@@ -57,9 +58,9 @@ final class FastStreamRecovery {
                         + " (spring-projects/spring-ai#5466) - retrying"
                         + " once on the same provider/model with tools"
                         + " disabled for this turn",
-                agent.getProviderName(),
-                t.agentId,
-                t.sessionId);
+                LogSafe.clean(agent.getProviderName()),
+                LogSafe.clean(t.agentId),
+                LogSafe.clean(t.sessionId));
         // Not presented as a normal turn any more (2026-09-28): the answer that follows was
         // produced with NONE of the agent's tools, so a step-event consumer is told so, and the
         // degradation is counted.
@@ -79,13 +80,12 @@ final class FastStreamRecovery {
 
     /**
      * #815 Gap 4 - graceful degradation. Only ever fires when NO tokens have streamed yet
-     * (accumulated.isEmpty()): once even one token has reached the client, the HTTP/SSE response
-     * is already committed to this provider's output - switching providers mid-stream would
-     * interleave two different models' text, not fix anything. That means this only helps the
-     * common failure shape (auth/billing/rate-limit/model-not-found errors, which reject before
-     * any output), not a provider that dies mid-answer - an honest limitation, not an oversight
-     * (the "inherent limit of HTTP streaming" note in {@link FastStreamTurn#stream}, same root
-     * cause).
+     * (accumulated.isEmpty()): once even one token has reached the client, the HTTP/SSE response is
+     * already committed to this provider's output - switching providers mid-stream would interleave
+     * two different models' text, not fix anything. That means this only helps the common failure
+     * shape (auth/billing/rate-limit/model-not-found errors, which reject before any output), not a
+     * provider that dies mid-answer - an honest limitation, not an oversight (the "inherent limit
+     * of HTTP streaming" note in {@link FastStreamTurn#stream}, same root cause).
      */
     Flux<String> retryOnFallbackProvider(Throwable e) {
         Agent agent = t.agent;
@@ -106,21 +106,21 @@ final class FastStreamRecovery {
                             + " non-retryable (input-shaped) error ({}) -"
                             + " not retrying on fallback provider {}, it"
                             + " would reject this the same way",
-                    agent.getProviderName(),
-                    t.agentId,
-                    t.sessionId,
-                    e.getMessage(),
-                    agent.getFallbackProviderName());
+                    LogSafe.clean(agent.getProviderName()),
+                    LogSafe.clean(t.agentId),
+                    LogSafe.clean(t.sessionId),
+                    LogSafe.clean(e.getMessage()),
+                    LogSafe.clean(agent.getFallbackProviderName()));
             return Flux.error(e);
         }
         ChatTurnExecutor.log.warn(
                 "Provider {} failed for agent {} session {} ({}),"
                         + " retrying once on fallback provider {}",
-                agent.getProviderName(),
-                t.agentId,
-                t.sessionId,
-                e.getMessage(),
-                agent.getFallbackProviderName());
+                LogSafe.clean(agent.getProviderName()),
+                LogSafe.clean(t.agentId),
+                LogSafe.clean(t.sessionId),
+                LogSafe.clean(e.getMessage()),
+                LogSafe.clean(agent.getFallbackProviderName()));
         ChatClient fallbackClient;
         // This onErrorResume callback runs on a Reactor scheduler thread, not the servlet request
         // thread that set TenantContext - the same ThreadLocal-doesn't-survive-a-reactive-hop gap
@@ -133,8 +133,7 @@ final class FastStreamRecovery {
         // masking the real failure with a second, spurious one and defeating the entire failover
         // path.
         try {
-            fallbackClient =
-                    t.context.scope().get(() -> resolveFallbackClient(agent));
+            fallbackClient = t.context.scope().get(() -> resolveFallbackClient(agent));
         } catch (RuntimeException fallbackSetupFailure) {
             // The fallback itself isn't configured correctly (e.g. its provider was never
             // activated) - surface the ORIGINAL error, not this one, since that's what actually
@@ -204,31 +203,30 @@ final class FastStreamRecovery {
      * deliberately gated on accumulated.isEmpty() (switching provider/model mid-stream, or
      * replaying tools-disabled, would interleave a second independent answer after tokens already
      * committed to the client, not extend the first one cleanly) - so this is the one realistic
-     * failure shape neither branch was ever meant to cover. Before this operator, that left
-     * exactly one outcome: Flux.error(e) propagates raw and the SSE stream just stops
-     * mid-sentence - the "half response"/dead-stream bug users reported. A clean retry isn't safe
-     * here for the same reason the branches above refuse one (both rebuild the ENTIRE prompt from
-     * scratch via a brand-new provider call; there is no "resume from where we left off"
-     * primitive on this path), so instead of retrying, close the stream the way a human would:
-     * say the lookup failed and complete normally rather than dying silently. Reuses
-     * INTERRUPTED_REPLY_MARKER - the exact same honest-truncation wording {@code
-     * persistInterruptedAssistantTurn} already writes to session memory on a hard error/cancel -
-     * rather than inventing new user-facing copy for what is, from the user's perspective, the
-     * same "your reply got cut off" situation. Completing normally (Flux.just + implicit
-     * onComplete) instead of erroring also means withAssistantTurnPersistence's ordinary
-     * doOnComplete path persists the marked text itself; doOnError's own
-     * persistInterruptedAssistantTurn is untouched for every failure that still reaches it
-     * (anything before a single token streams, or a genuine cancel) - ADR-007's persistence
-     * contract is unchanged, this only changes what the CLIENT sees once text was already in
-     * flight.
+     * failure shape neither branch was ever meant to cover. Before this operator, that left exactly
+     * one outcome: Flux.error(e) propagates raw and the SSE stream just stops mid-sentence - the
+     * "half response"/dead-stream bug users reported. A clean retry isn't safe here for the same
+     * reason the branches above refuse one (both rebuild the ENTIRE prompt from scratch via a
+     * brand-new provider call; there is no "resume from where we left off" primitive on this path),
+     * so instead of retrying, close the stream the way a human would: say the lookup failed and
+     * complete normally rather than dying silently. Reuses INTERRUPTED_REPLY_MARKER - the exact
+     * same honest-truncation wording {@code persistInterruptedAssistantTurn} already writes to
+     * session memory on a hard error/cancel - rather than inventing new user-facing copy for what
+     * is, from the user's perspective, the same "your reply got cut off" situation. Completing
+     * normally (Flux.just + implicit onComplete) instead of erroring also means
+     * withAssistantTurnPersistence's ordinary doOnComplete path persists the marked text itself;
+     * doOnError's own persistInterruptedAssistantTurn is untouched for every failure that still
+     * reaches it (anything before a single token streams, or a genuine cancel) - ADR-007's
+     * persistence contract is unchanged, this only changes what the CLIENT sees once text was
+     * already in flight.
      *
      * <p>Deliberately not narrowed to UpstreamProviderException / a tool-specific exception type:
-     * by this point in the chain the upstream onErrorMap has already made the one routing
-     * decision that matters (GuardrailViolationException/ToolStepLimitExceededException pass
-     * through untranslated, everything else becomes an UpstreamProviderException), and once
-     * accumulated is non-empty every remaining error - regardless of which subsystem raised it -
-     * produces the identical "half response" symptom for the user, so the safe-completion
-     * behavior below applies uniformly.
+     * by this point in the chain the upstream onErrorMap has already made the one routing decision
+     * that matters (GuardrailViolationException/ToolStepLimitExceededException pass through
+     * untranslated, everything else becomes an UpstreamProviderException), and once accumulated is
+     * non-empty every remaining error - regardless of which subsystem raised it - produces the
+     * identical "half response" symptom for the user, so the safe-completion behavior below applies
+     * uniformly.
      */
     Flux<String> closeHalfResponse(Throwable e) {
         if (t.accumulated.isEmpty()) {
@@ -239,9 +237,9 @@ final class FastStreamRecovery {
                         + " already streamed to the client ({}) - closing"
                         + " the stream gracefully instead of propagating"
                         + " the raw error",
-                t.agentId,
-                t.sessionId,
-                e.getMessage(),
+                LogSafe.clean(t.agentId),
+                LogSafe.clean(t.sessionId),
+                LogSafe.clean(e.getMessage()),
                 e);
         return Flux.just(INTERRUPTED_REPLY_MARKER);
     }

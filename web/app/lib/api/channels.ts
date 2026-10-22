@@ -1,6 +1,6 @@
 import { apiFetch, toJson, toJsonQuietOn, jsonBody } from "./core";
 import type { AuthorizeUrlResponse, ChannelsStatusResponse, ContactGroup, DtmfMapping } from "./types";
-import { getPublicEnv } from "../env";
+import { getPublicPolicy } from "../env";
 import { pagedQuery, toPaged } from "./paged";
 
 // ok=false carries code/message/reasons (a flat shape: the web tsconfig is not strict, so a
@@ -23,7 +23,7 @@ export type WhatsAppQuality = { available: boolean; qualityRating: string | null
 // carries a fresh single-use state, so it must never be served from the GET
 // dedupe/SWR cache.
 function oauthAuthorizeUrl(path: string): Promise<AuthorizeUrlResponse> {
-  const withCookie = getPublicEnv("NEXT_PUBLIC_OAUTH_STATE_COOKIE") === "1";
+  const withCookie = getPublicPolicy("NEXT_PUBLIC_OAUTH_STATE_COOKIE") === "1";
   return apiFetch(path, { skipGetCache: true, ...(withCookie ? { credentials: "include" as const } : {}) }).then(
     toJson<AuthorizeUrlResponse>
   );
@@ -149,7 +149,9 @@ export const channelsApi = {
   getGoogleConnection: () =>
     apiFetch(`/api/channels/google/status`).then((res) => (res.status === 204 ? null : toJson(res))),
   getGoogleOAuthConfig: (): Promise<{ configured: boolean; redirectUri: string; mode?: string; problem?: string }> =>
-    apiFetch(`/api/channels/google/oauth-config`).then((res) => toJson(res) as Promise<{ configured: boolean; redirectUri: string; mode?: string; problem?: string }>),
+    apiFetch(`/api/channels/google/oauth-config`).then(
+      (res) => toJson(res) as Promise<{ configured: boolean; redirectUri: string; mode?: string; problem?: string }>
+    ),
   disconnectGoogle: () =>
     apiFetch(`/api/channels/google/connection`, { method: "DELETE" }).then((res) =>
       res.status === 204 ? null : toJson(res)
@@ -253,8 +255,7 @@ export const channelsApi = {
   // install. GET /session returns {status, bridgeStatus, qr, phoneNumber, configured} or 204.
   getWhatsAppQrSession: () =>
     apiFetch(`/api/channels/whatsapp-qr/session`).then((res) => (res.status === 204 ? null : toJson(res))),
-  connectWhatsAppQrSession: () =>
-    apiFetch(`/api/channels/whatsapp-qr/session`, { method: "POST" }).then(toJson),
+  connectWhatsAppQrSession: () => apiFetch(`/api/channels/whatsapp-qr/session`, { method: "POST" }).then(toJson),
   disconnectWhatsAppQrSession: () =>
     apiFetch(`/api/channels/whatsapp-qr/session`, { method: "DELETE" }).then((res) =>
       res.status === 204 ? null : toJson(res)
@@ -433,7 +434,7 @@ export const channelsApi = {
   setWhatsAppDefaultAgent: async (
     agentId: string,
     task: string,
-    acknowledgeOpenEnded = false,
+    acknowledgeOpenEnded = false
   ): Promise<WhatsAppBindResult> => {
     const res = await apiFetch(`/api/channels/whatsapp/default-agent`, {
       method: "PUT",
@@ -459,7 +460,7 @@ export const channelsApi = {
   },
   whatsAppQuality: () =>
     apiFetch(`/api/channels/whatsapp-compliance/quality`).then(
-      toJsonQuietOn([400, 404, 502, 503]) as (r: Response) => Promise<WhatsAppQuality>,
+      toJsonQuietOn([400, 404, 502, 503]) as (r: Response) => Promise<WhatsAppQuality>
     ),
   recordWhatsAppOptIn: (phone: string, source: string, evidence?: string) =>
     apiFetch(`/api/channels/whatsapp-compliance/opt-in`, {
