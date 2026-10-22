@@ -32,6 +32,18 @@ The `license-scan` workflow covers the files we redistribute (vendored JS,
 bundled fonts, the Keycloak theme) and fails when ScanCode detects a license
 id outside `scripts/ci/license-allowlist.txt`.
 
+**The web image carries no package manager.** The release gate stops only on a
+fixable *critical* finding, so High advisories need their own guard. The node
+base image ships npm, corepack and yarn with bundled dependencies that have
+fixable High advisories no base-image bump has cleared, and the console never
+runs them (`HEALTHCHECK` and `CMD` call `node` only), so the runtime stage of
+`web/Dockerfile` deletes them. `scripts/ci/web-image-deps.sh` (in
+`static-gates.yml` and `make gates`) fails when that `rm` disappears or when
+`web/package-lock.json` resolves `next` or `sharp` below the patched versions
+(raise the floors in the script when a newer advisory lands). The Node
+service images that must keep npm (`mcp-stdio-runner`, `workspace-runner`,
+`browser-runner`) are not covered by this guard.
+
 ## DefectDojo (all findings, one dashboard)
 
 [DefectDojo](https://www.defectdojo.com/) is the optional aggregation layer:
