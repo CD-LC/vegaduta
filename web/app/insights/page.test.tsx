@@ -103,7 +103,10 @@ beforeEach(() => {
   authState.isAdmin = true;
   authState.permissions = ["VIEW_USAGE", "VIEW_AUDIT_LOG"];
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+});
 
 describe("InsightsPage - zero-data workspace", () => {
   beforeEach(() => {
@@ -349,5 +352,24 @@ describe("InsightsPage - errors", () => {
     api.listAgents.mockRejectedValue(new Error("boom"));
     render(<InsightsPage />);
     expect(await screen.findByText("Agent a1 has the highest estimated cost: $4.00 of $5.50 in total (3 ranked).")).toBeInTheDocument();
+  });
+});
+
+describe("InsightsPage - /roi links", () => {
+  beforeEach(() => mockAdminData());
+
+  it("links to /roi on a shared install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "full");
+    const { container } = render(<InsightsPage />);
+    await screen.findByTestId("insights-kpis");
+    expect(container.querySelectorAll("a[href='/roi']").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("has no link to the billing pages on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    const { container } = render(<InsightsPage />);
+    await screen.findByTestId("insights-kpis");
+    expect(container.querySelectorAll("a[href='/roi']")).toHaveLength(0);
+    expect(container.querySelector("a[href='/usage']")).not.toBeNull();
   });
 });

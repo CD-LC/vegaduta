@@ -4,6 +4,7 @@
 // Strings live in the roiFamily namespace (messages/patches/insights-roi-misc.json).
 import Link from "next/link";
 import PaginationControls from "../components/PaginationControls";
+import { hiddenOnPersonalInstall } from "../lib/personalInstall";
 import { useTranslations } from "../lib/i18n";
 import { usePagination } from "../lib/usePagination";
 
@@ -19,6 +20,8 @@ export function FamilyLinks() {
 
 export function SeeCostPerAgentLink() {
   const tf = useTranslations("roiFamily");
+  // /roi is a billing page a personal install does not have (lib/edition.ts EDITION_ROUTES): no dead link.
+  if (hiddenOnPersonalInstall("/roi")) return null;
   return <Link href="/roi" className="text-primary underline-offset-4 hover:underline">{tf("seeCostPerAgent")}</Link>;
 }
 
