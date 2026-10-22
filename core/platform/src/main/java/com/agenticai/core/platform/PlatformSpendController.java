@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.platform.PlatformSpendService.Range;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Locale;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  * takes an optional {@code tenantId} (tenant UUID) restricting the report to that one tenant; an
  * unknown id is a 404.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/spend")
 @Profile("security")

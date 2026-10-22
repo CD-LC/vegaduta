@@ -4,6 +4,8 @@ import com.agenticai.core.agents.capability.AgentCapability;
 import com.agenticai.core.agents.capability.CapabilityAvailability;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.sarvam.SarvamCredentialService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
  * + this per-agent flag" double gate.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamToolsCapability implements AgentCapability {
 
     private final ObjectProvider<SarvamCredentialService> sarvamCredentialService;

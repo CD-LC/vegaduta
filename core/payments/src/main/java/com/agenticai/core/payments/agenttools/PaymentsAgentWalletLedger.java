@@ -4,6 +4,8 @@ import com.agenticai.core.agentspi.AgentWalletLedger;
 import com.agenticai.core.payments.wallet.AgentWallet;
 import com.agenticai.core.payments.wallet.AgentWalletService;
 import com.agenticai.core.payments.wallet.WalletException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
  * AgentWalletService}.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentsAgentWalletLedger implements AgentWalletLedger {
 
     private final AgentWalletService walletService;

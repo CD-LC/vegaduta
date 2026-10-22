@@ -2,6 +2,8 @@ package com.agenticai.core.omnichannel.teams;
 
 import com.agenticai.core.omnichannel.teams.dto.TeamsActivationRequest;
 import com.agenticai.core.omnichannel.teams.dto.TeamsCredentialResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 @RequestMapping("/api/channels/teams/credential")
 public class TeamsCredentialController {
 
