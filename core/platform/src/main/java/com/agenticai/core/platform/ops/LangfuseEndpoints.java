@@ -12,8 +12,7 @@ public final class LangfuseEndpoints {
     /** Langfuse's documented native OTLP ingestion path - see application.yml's management.otlp.tracing.endpoint. */
     static final String OTLP_TRACES_SUFFIX = "/api/public/otel/v1/traces";
 
-    private LangfuseEndpoints() {
-    }
+    private LangfuseEndpoints() {}
 
     /**
      * {@code explicitBaseUrl} when set, otherwise the OTLP traces endpoint minus
@@ -33,14 +32,18 @@ public final class LangfuseEndpoints {
         if (!endpoint.endsWith(OTLP_TRACES_SUFFIX)) {
             return null;
         }
-        return validHttp(endpoint.substring(0, endpoint.length() - OTLP_TRACES_SUFFIX.length()).replaceAll("/+$", ""));
+        return validHttp(
+                endpoint.substring(0, endpoint.length() - OTLP_TRACES_SUFFIX.length())
+                        .replaceAll("/+$", ""));
     }
 
     private static String validHttp(String raw) {
         try {
             URI uri = URI.create(raw);
             String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
-            return (scheme.equals("http") || scheme.equals("https")) && uri.getHost() != null ? raw : null;
+            return (scheme.equals("http") || scheme.equals("https")) && uri.getHost() != null
+                    ? raw
+                    : null;
         } catch (IllegalArgumentException e) {
             return null;
         }
