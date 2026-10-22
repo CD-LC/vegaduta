@@ -248,6 +248,17 @@ final class WorkspaceFiles {
      * (2).ext"). Returns the relative path.
      */
     String saveUpload(String folder, String name, byte[] bytes) throws IOException {
+        // The controller's safeName already reduces a name to a bare file name; this is the second
+        // lock.
+        if (name == null
+                || name.isBlank()
+                || name.equals(".")
+                || name.equals("..")
+                || name.indexOf('/') >= 0
+                || name.indexOf('\\') >= 0
+                || name.indexOf('\0') >= 0) {
+            throw new IOException("'" + name + "' is not a plain file name.");
+        }
         Path dir = resolve(folder);
         if (Files.exists(dir) && !Files.isDirectory(dir)) {
             throw new IOException("'" + folder + "' is not a folder.");

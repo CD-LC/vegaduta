@@ -168,4 +168,23 @@ class WorkspaceFileToolCallbackTest {
         assertThat(WorkspaceFolderController.safeName("../../etc/.passwd")).isEqualTo("passwd");
         assertThat(WorkspaceFolderController.safeName("  ")).isEqualTo("attachment");
     }
+
+    @Test
+    void saveUploadRefusesANameThatIsNotAPlainFileName() throws Exception {
+        for (String bad :
+                new String[] {
+                    "../escape.txt", "..", ".", "a/b.txt", "a\\b.txt", "/abs.txt", "", "  ", "x\0y"
+                }) {
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    java.io.IOException.class,
+                    () -> files.saveUpload("Chat uploads", bad, "x".getBytes()),
+                    bad);
+        }
+        org.junit.jupiter.api.Assertions.assertThrows(
+                java.io.IOException.class,
+                () -> files.saveUpload("Chat uploads", null, "x".getBytes()));
+        assertThat(root.resolve("escape.txt")).doesNotExist();
+        assertThat(files.saveUpload("Chat uploads", "fine (1).txt", "ok".getBytes()))
+                .isEqualTo("Chat uploads/fine (1).txt");
+    }
 }

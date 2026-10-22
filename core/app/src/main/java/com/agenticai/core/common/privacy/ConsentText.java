@@ -55,6 +55,13 @@ final class ConsentText {
                     + " Reply LANG <code> (for example LANG hi) to read this notice in another"
                     + " language.";
 
+    /**
+     * Longest text {@link #normalize} cleans up. A consent keyword is a word or two; anything
+     * longer can never be one, and the trailing-punctuation pattern below is quadratic on a long
+     * run of punctuation, which arrives unbounded from inbound channel text.
+     */
+    static final int MAX_NORMALIZED_CHARS = 512;
+
     private ConsentText() {}
 
     static String normalize(String message) {
@@ -62,6 +69,11 @@ final class ConsentText {
             return "";
         }
         String s = message.trim().toLowerCase(Locale.ROOT);
+        if (s.length() > MAX_NORMALIZED_CHARS) {
+            // Not truncated: cutting a long message down could leave a bare "yes" and read as
+            // consent.
+            return s;
+        }
         s = s.replaceAll("[\\p{Punct}।!]+$", "").trim();
         return s.replaceAll("\\s+", " ");
     }

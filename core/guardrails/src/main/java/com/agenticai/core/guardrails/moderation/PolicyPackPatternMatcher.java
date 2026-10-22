@@ -74,7 +74,7 @@ public class PolicyPackPatternMatcher {
                                     new NamedPattern(
                                             "email",
                                             Pattern.compile(
-                                                    "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")),
+                                                    "[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")),
                                     // US SSN shape.
                                     new NamedPattern(
                                             "ssn",

@@ -2,8 +2,10 @@ package com.agenticai.core.chat.gateway;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -109,5 +111,21 @@ class LlmGatewayPiiRedactorTest {
                         EnumSet.allOf(LlmGatewayPiiCategory.class));
         assertTrue(result.contains("[REDACTED_EMAIL]"));
         assertTrue(result.contains("[REDACTED_CARD]"));
+    }
+
+    @Test
+    void longTextFullOfEmailCharactersButNoAtSignIsRedactedInLinearTime() {
+        for (String unit : new String[] {"b.", "b-", "b"}) {
+            String hostile = unit.repeat(25_000);
+            assertTimeoutPreemptively(
+                    Duration.ofSeconds(2),
+                    () ->
+                            LlmGatewayPiiRedactor.redact(
+                                    hostile, Set.of(LlmGatewayPiiCategory.EMAIL)));
+        }
+        assertEquals(
+                "[REDACTED_EMAIL]",
+                LlmGatewayPiiRedactor.redact(
+                        "first.last+tag@sub.example.co.in", Set.of(LlmGatewayPiiCategory.EMAIL)));
     }
 }
