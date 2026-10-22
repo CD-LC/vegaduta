@@ -420,7 +420,7 @@ services:
     networks: [data-tier, seaweedfs-metrics]
 
   keycloak-db:
-    image: postgres:16.15-alpine
+    image: postgres:18.4-alpine
     <<: [*restart, *logging, *nnp]
     environment:
       POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
@@ -695,7 +695,7 @@ services:
     networks: [data-tier, agent-io, observability, mcp-stdio-net]
 
   temporal-postgresql:
-    image: postgres:16.15-alpine
+    image: postgres:18.4-alpine
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -1023,7 +1023,7 @@ services:
   # Self-hosted Langfuse v3 (MIT). Its own Postgres/ClickHouse/Valkey/S3 —
   # never shared with the app's data tier. Timezones MUST be UTC.
   langfuse-postgres:
-    image: postgres:17.11-alpine
+    image: postgres:18.4-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     environment:
