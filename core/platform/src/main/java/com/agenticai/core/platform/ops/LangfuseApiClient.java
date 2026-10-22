@@ -32,7 +32,7 @@ import tools.jackson.databind.ObjectMapper;
  *
  * <p><b>Config reuse.</b> Same posture as {@code LangfuseScoreClient} (core/chat): with no explicit
  * {@code app.langfuse.base-url} the base URL is derived from {@code
- * management.otlp.tracing.endpoint} (the OTLP exporter's target, minus Langfuse's documented {@code
+ * management.opentelemetry.tracing.export.otlp.endpoint} (the OTLP exporter's target, minus Langfuse's documented {@code
  * /api/public/otel/v1/traces} suffix), and {@code app.langfuse.auth-header} defaults to the same
  * {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic base64(pk:sk)" value the exporter already sends -
  * Langfuse's public API accepts that pair on every endpoint. No new required configuration.
@@ -91,7 +91,8 @@ public class LangfuseApiClient {
     @Autowired
     public LangfuseApiClient(
             @Value("${app.langfuse.base-url:}") String explicitBaseUrl,
-            @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+            @Value("${management.opentelemetry.tracing.export.otlp.endpoint:}")
+                    String otlpTracesEndpoint,
             @Value("${app.langfuse.auth-header:${LANGFUSE_OTEL_AUTH_HEADER:}}") String authHeader) {
         this(
                 LangfuseEndpoints.baseUrl(explicitBaseUrl, otlpTracesEndpoint),
