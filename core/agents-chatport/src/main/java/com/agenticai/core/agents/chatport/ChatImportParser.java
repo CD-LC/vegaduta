@@ -181,6 +181,13 @@ public final class ChatImportParser {
         } catch (ChatImportReader.LimitExceededException e) {
             throw new IllegalArgumentException(e.getMessage());
         } catch (JacksonException e) {
+            // Jackson 3 wraps an IOException thrown by the underlying stream (the zip-bomb budget
+            // is enforced in a stream) in an unchecked JacksonIOException: unwrap our own limit.
+            for (Throwable t = e.getCause(); t != null; t = t.getCause()) {
+                if (t instanceof ChatImportReader.LimitExceededException limit) {
+                    throw new IllegalArgumentException(limit.getMessage());
+                }
+            }
             throw new IllegalArgumentException(
                     "That file is not valid chat-export JSON, or it nests or stores values beyond the safe limits.");
         } catch (IOException e) {
