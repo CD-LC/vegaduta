@@ -4,22 +4,24 @@ import java.net.URI;
 import java.util.Locale;
 
 /**
- * Where Langfuse lives, derived from configuration core already has. Shared by
- * the trace proxy ({@link LangfuseApiClient}) and the dependency-health probe.
+ * Where Langfuse lives, derived from configuration core already has. Shared by the trace proxy
+ * ({@link LangfuseApiClient}) and the dependency-health probe.
  */
 public final class LangfuseEndpoints {
 
-    /** Langfuse's documented native OTLP ingestion path - see application.yml's management.opentelemetry.tracing.export.otlp.endpoint. */
+    /**
+     * Langfuse's documented native OTLP ingestion path - see application.yml's
+     * management.opentelemetry.tracing.export.otlp.endpoint.
+     */
     static final String OTLP_TRACES_SUFFIX = "/api/public/otel/v1/traces";
 
     private LangfuseEndpoints() {}
 
     /**
-     * {@code explicitBaseUrl} when set, otherwise the OTLP traces endpoint minus
-     * Langfuse's OTLP suffix. Null when neither yields an http(s) URL with a host,
-     * or when the OTLP endpoint is not a Langfuse one (no suffix to strip - it
-     * then points at some other collector, whose root is not Langfuse's API).
-     * Trailing slashes are removed.
+     * {@code explicitBaseUrl} when set, otherwise the OTLP traces endpoint minus Langfuse's OTLP
+     * suffix. Null when neither yields an http(s) URL with a host, or when the OTLP endpoint is not
+     * a Langfuse one (no suffix to strip - it then points at some other collector, whose root is
+     * not Langfuse's API). Trailing slashes are removed.
      */
     public static String baseUrl(String explicitBaseUrl, String otlpTracesEndpoint) {
         if (explicitBaseUrl != null && !explicitBaseUrl.isBlank()) {

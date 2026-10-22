@@ -32,10 +32,11 @@ import tools.jackson.databind.ObjectMapper;
  *
  * <p><b>Config reuse.</b> Same posture as {@code LangfuseScoreClient} (core/chat): with no explicit
  * {@code app.langfuse.base-url} the base URL is derived from {@code
- * management.opentelemetry.tracing.export.otlp.endpoint} (the OTLP exporter's target, minus Langfuse's documented {@code
- * /api/public/otel/v1/traces} suffix), and {@code app.langfuse.auth-header} defaults to the same
- * {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic base64(pk:sk)" value the exporter already sends -
- * Langfuse's public API accepts that pair on every endpoint. No new required configuration.
+ * management.opentelemetry.tracing.export.otlp.endpoint} (the OTLP exporter's target, minus
+ * Langfuse's documented {@code /api/public/otel/v1/traces} suffix), and {@code
+ * app.langfuse.auth-header} defaults to the same {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic
+ * base64(pk:sk)" value the exporter already sends - Langfuse's public API accepts that pair on
+ * every endpoint. No new required configuration.
  *
  * <p><b>Bounded.</b> Every request has a 5 s connect and response timeout, redirects are not
  * followed, and successful answers are cached in memory for 30 s per URL (at most {@link

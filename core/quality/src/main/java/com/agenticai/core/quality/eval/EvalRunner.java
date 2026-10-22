@@ -430,8 +430,8 @@ public final class EvalRunner {
      * correlation even when nothing is actually reachable to export to - e.g. a plain CI runner
      * with no Langfuse deployed. If the configured endpoint genuinely isn't reachable, the OTLP
      * exporter's own built-in failure handling (log a warning, never throw) absorbs it silently,
-     * exactly like {@code management.opentelemetry.tracing.export.otlp.endpoint} being unreachable would in core/app -
-     * this run's actual pass/fail result is never affected either way.
+     * exactly like {@code management.opentelemetry.tracing.export.otlp.endpoint} being unreachable
+     * would in core/app - this run's actual pass/fail result is never affected either way.
      */
     private static OpenTelemetrySdk buildOpenTelemetry() {
         String endpoint =
