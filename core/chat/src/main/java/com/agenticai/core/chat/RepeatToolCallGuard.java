@@ -1,11 +1,7 @@
 package com.agenticai.core.chat;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import com.agenticai.core.json.JsonMappers;
+
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
@@ -14,9 +10,16 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolExecutionResult;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Stops a model from asking for the same lookup twice in one reply.
@@ -47,17 +50,20 @@ import tools.jackson.databind.SerializationFeature;
  */
 final class RepeatToolCallGuard {
 
+    /** Writes the arguments with object keys ordered, so key order never hides a repeat. */
+    private static final ObjectMapper CANONICAL = JsonMappers.sortedMapKeys();
+
     /** Default of {@code app.chat.tools.repeat-guard.tools}. */
     static final String DEFAULT_TOOLS =
             "web_search,fetch_web_page,search_knowledge_base,list_knowledge_collections,"
-                    + "search_conversation_history,recall_related_facts,vegaduta_api_guide,vegaduta_setup_guide";
+                + "search_conversation_history,recall_related_facts,vegaduta_api_guide,vegaduta_setup_guide";
 
     static final String DUPLICATE_MARKER = "duplicate_tool_call";
     static final String METRIC = "chat.tool.repeat_blocked";
 
     static final String STOP_REPLY =
-            "I stopped here: I kept asking for the same lookup. Please rephrase or narrow the request, "
-                    + "or ask me to continue.";
+            "I stopped here: I kept asking for the same lookup. Please rephrase or narrow the"
+                + " request, or ask me to continue.";
 
     private static final RepeatToolCallGuard DISABLED = new RepeatToolCallGuard(Set.of(), false);
 
@@ -159,9 +165,10 @@ final class RepeatToolCallGuard {
         String text =
                 "You already called "
                         + tool
-                        + " with exactly these arguments in this reply, so it was NOT run again: its result is above. "
-                        + "Use that result and answer the user now. If it did not help, call it with a different "
-                        + "query, or answer with what you have and say what is missing.";
+                        + " with exactly these arguments in this reply, so it was NOT run again:"
+                        + " its result is above. Use that result and answer the user now. If it did"
+                        + " not help, call it with a different query, or answer with what you have"
+                        + " and say what is missing.";
         try {
             return mapper.writeValueAsString(Map.of("error", DUPLICATE_MARKER, "result", text));
         } catch (Exception e) {
@@ -190,10 +197,7 @@ final class RepeatToolCallGuard {
         String canonical = arguments;
         try {
             JsonNode tree = mapper.readTree(arguments.isEmpty() ? "{}" : arguments);
-            canonical =
-                    mapper.copy()
-                            .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
-                            .writeValueAsString(mapper.convertValue(tree, Object.class));
+            canonical = CANONICAL.writeValueAsString(mapper.convertValue(tree, Object.class));
         } catch (Exception ignored) {
             // not JSON: compare the text as it came
         }

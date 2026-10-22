@@ -2,22 +2,27 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.ProviderName;
+
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
+import okio.Buffer;
+
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.http.okhttp.OpenAiHttpClientBuilderCustomizer;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okio.Buffer;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.http.okhttp.OpenAiHttpClientBuilderCustomizer;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The single place every OpenAI-compatible chat factory in this package (Azure OpenAI, DeepSeek,
@@ -233,11 +238,15 @@ final class OpenAiCompatModelBuilder {
         }
 
         /**
-         * Extra request-body rewrite applied after the legacy-wire normalisation (xAI server
-         * tools).
+         * Extra request-body rewrite applied after the legacy-wire normalisation (xAI server tools,
+         * OpenAI strict tool schemas); several compose in registration order.
          */
         Api bodyTransform(UnaryOperator<byte[]> transform) {
-            this.bodyTransform = transform;
+            UnaryOperator<byte[]> before = this.bodyTransform;
+            this.bodyTransform =
+                    before == null || transform == null
+                            ? (transform == null ? before : transform)
+                            : bytes -> transform.apply(before.apply(bytes));
             return this;
         }
 

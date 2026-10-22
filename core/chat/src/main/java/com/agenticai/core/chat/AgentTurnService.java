@@ -9,10 +9,7 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.security.TenantLimitExceededException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -29,9 +26,15 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 /**
  * One model turn for a CLIENT-SIDE tool-calling agent, served from the platform's hosted LLM pool:
@@ -39,10 +42,10 @@ import tools.jackson.databind.ObjectMapper;
  * or its own key.
  *
  * <p><b>The server never runs the tools.</b> The request carries tool definitions; the call goes
- * out with {@code internalToolExecutionEnabled(false)} and definition-only {@link ToolCallback}s
- * whose {@code call} can never succeed, so a model-requested call comes back to the client as data.
- * (Spring AI's default is to execute registered callbacks itself and loop; that default would be
- * the bug here - the files and the shell live on the user's machine.)
+ * out marked {@link CallerRunsToolLoop} and with definition-only {@link ToolCallback}s whose {@code
+ * call} can never succeed, so a model-requested call comes back to the client as data. (Spring AI's
+ * default is to execute registered callbacks itself and loop; that default would be the bug here -
+ * the files and the shell live on the user's machine.)
  *
  * <p><b>Governed like hosted chat.</b> It reuses, rather than reimplements:
  *
@@ -119,8 +122,10 @@ public class AgentTurnService {
         this.entitlements = entitlements.getIfAvailable();
         if (this.entitlements == null) {
             log.error(
-                    "No FimCompletionEntitlements bean is registered - POST /api/completions/agent-turn will refuse "
-                            + "every request until one appears; it spends platform-paid hosted inference and must not run unmetered.");
+                    "No FimCompletionEntitlements bean is registered - POST"
+                        + " /api/completions/agent-turn will refuse every request until one"
+                        + " appears; it spends platform-paid hosted inference and must not run"
+                        + " unmetered.");
         }
     }
 
@@ -156,8 +161,8 @@ public class AgentTurnService {
         FimCompletionEntitlements adapter = entitlements();
         if (adapter == null) {
             throw new EntitlementsUnavailableException(
-                    "Hosted agent turns are unavailable: no entitlements adapter is registered, and this endpoint "
-                            + "must not serve platform-paid inference unmetered.");
+                    "Hosted agent turns are unavailable: no entitlements adapter is registered, and"
+                        + " this endpoint must not serve platform-paid inference unmetered.");
         }
         int maxTokens = clampMaxTokens(request.maxTokens());
         double temperature =
@@ -172,7 +177,8 @@ public class AgentTurnService {
         if (!concurrency.tryAcquire()) {
             lease.abandon();
             throw new BusyException(
-                    "The hosted agent is handling its maximum number of turns - retry in a moment.");
+                    "The hosted agent is handling its maximum number of turns - retry in a"
+                        + " moment.");
         }
         try {
             return runChain(request, maxTokens, temperature, lease);
@@ -247,7 +253,7 @@ public class AgentTurnService {
             ChatClient client,
             List<org.springframework.ai.chat.messages.Message> messages,
             ToolCallingChatOptions options) {
-        return client.prompt().messages(messages).options(options).call().chatResponse();
+        return client.prompt().messages(messages).options(options.mutate()).call().chatResponse();
     }
 
     private ChatClient buildClient(
@@ -394,11 +400,9 @@ public class AgentTurnService {
                 callbacks.add(new DefinitionOnlyToolCallback(tool));
             }
         }
-        // internalToolExecutionEnabled(false) is the whole feature: the model's tool calls
-        // are returned to the caller instead of being run (and looped on) by Spring AI.
-        return ToolCallingChatOptions.builder()
-                .toolCallbacks(callbacks)
-                .internalToolExecutionEnabled(false)
+        // The CallerRunsToolLoop marker is the whole feature: the model's tool calls are
+        // returned to the caller instead of being run (and looped on) by Spring AI's advisor.
+        return CallerRunsToolLoop.mark(ToolCallingChatOptions.builder().toolCallbacks(callbacks))
                 .build();
     }
 
@@ -463,9 +467,7 @@ public class AgentTurnService {
         }
     }
 
-    /**
-     * Never executed: {@code internalToolExecutionEnabled(false)} keeps Spring AI from calling it.
-     */
+    /** Never executed: the {@link CallerRunsToolLoop} marker keeps Spring AI from calling it. */
     private record DefinitionOnlyToolCallback(Tool tool) implements ToolCallback {
 
         @Override

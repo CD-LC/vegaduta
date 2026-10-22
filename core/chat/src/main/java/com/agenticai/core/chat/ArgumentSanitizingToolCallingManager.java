@@ -1,11 +1,7 @@
 package com.agenticai.core.chat;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -14,7 +10,6 @@ import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
@@ -22,7 +17,14 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.execution.ToolExecutionException;
+
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Wraps a {@link ToolCallingManager} to repair tool-call {@code arguments} that aren't valid JSON
@@ -108,8 +110,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
     static final String ARGUMENT_REJECTED_METRIC = "chat.tool.argument_rejected";
 
     static final String HARD_STOP_REPLY =
-            "I had to stop here: this request needed more tool calls than a single reply is allowed to make. "
-                    + "Please narrow the request, or ask me to continue from where I left off.";
+            "I had to stop here: this request needed more tool calls than a single reply is allowed"
+                + " to make. Please narrow the request, or ask me to continue from where I left"
+                + " off.";
 
     private final ToolCallingManager delegate;
     private final ObjectMapper objectMapper;
@@ -306,8 +309,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
 
         if (!softStopAlreadySent) {
             log.warn(
-                    "Tool loop limit reached (reason={} round={} maxRounds={} unknownCalls={} maxUnknown={}) - "
-                            + "answering {} tool call(s) with a budget-exhausted result instead of executing them",
+                    "Tool loop limit reached (reason={} round={} maxRounds={} unknownCalls={}"
+                        + " maxUnknown={}) - answering {} tool call(s) with a budget-exhausted"
+                        + " result instead of executing them",
                     reason,
                     round,
                     maxToolRounds,
@@ -328,8 +332,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         }
 
         log.warn(
-                "Model kept calling tools after the budget-exhausted notice (reason={} round={}) - ending the tool "
-                        + "loop with returnDirect",
+                "Model kept calling tools after the budget-exhausted notice (reason={} round={}) -"
+                    + " ending the tool loop with returnDirect",
                 reason,
                 round);
         increment(LOOP_LIMIT_METRIC, 1, "stage", "hard", "reason", reason);
@@ -353,9 +357,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         String instruction =
                 "Tool budget for this reply is exhausted after "
                         + roundsUsed
-                        + " tool round(s), so "
-                        + "this call was NOT executed. Do not call any more tools. Answer the user now using only what you "
-                        + "already have, and say briefly if anything is incomplete.";
+                        + " tool round(s), so this call was NOT executed. Do not call any more"
+                        + " tools. Answer the user now using only what you already have, and say"
+                        + " briefly if anything is incomplete.";
         try {
             return objectMapper.writeValueAsString(
                     Map.of("error", TOOL_BUDGET_EXHAUSTED, "result", instruction));
@@ -456,17 +460,14 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         if (!changed) {
             return prompt;
         }
-        ChatOptions copied = ChatOptionsCopy.of(options);
-        if (!(copied instanceof ToolCallingChatOptions copiedToolOptions)) {
-            return prompt;
-        }
-        copiedToolOptions.setToolCallbacks(wrapped);
-        return new Prompt(prompt.getInstructions(), copiedToolOptions);
+        ToolCallingChatOptions rewrapped = options.mutate().toolCallbacks(wrapped).build();
+        return new Prompt(prompt.getInstructions(), rewrapped);
     }
 
     private void onArgumentsRejected(String toolName, ToolArgumentValidator.Result result) {
         log.warn(
-                "Tool call rejected before execution, the model gets the schema back: tool={} problems={} unknownKeys={}",
+                "Tool call rejected before execution, the model gets the schema back: tool={}"
+                    + " problems={} unknownKeys={}",
                 toolName,
                 result.problems(),
                 result.unknownKeys());
@@ -566,8 +567,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             }
             UnavailableToolCallback fallback = UnavailableToolCallback.forToolName(name);
             log.warn(
-                    "Model requested a tool that was not offered to it: name={} knownTools={} - answering with an "
-                            + "explanation instead of failing the turn. Reply to the model: {}",
+                    "Model requested a tool that was not offered to it: name={} knownTools={} -"
+                        + " answering with an explanation instead of failing the turn. Reply to the"
+                        + " model: {}",
                     name,
                     known,
                     fallback.message());
@@ -629,7 +631,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             }
             changed = true;
             log.warn(
-                    "Repairing non-JSON tool-call arguments before replay: tool={} argumentsPreview={}",
+                    "Repairing non-JSON tool-call arguments before replay: tool={}"
+                        + " argumentsPreview={}",
                     toolCall.name(),
                     preview(toolCall.arguments()));
             repaired.add(

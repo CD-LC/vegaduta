@@ -8,10 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.providers.ToolRouterMode;
+
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -26,12 +25,18 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
 import reactor.core.publisher.Flux;
+
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Through the real {@link ArgumentSanitizingToolCallingManager}, against a scripted provider model,
@@ -66,11 +71,9 @@ class ConstrainedToolRouterChatModelTest {
         Prompt sent = provider.prompts.get(0);
         OpenAiChatOptions options = (OpenAiChatOptions) sent.getOptions();
         assertTrue(options.getToolCallbacks().isEmpty(), "tools are not sent in FORMAT mode");
-        assertEquals(Boolean.FALSE, options.getInternalToolExecutionEnabled());
         assertEquals(ResponseFormat.Type.JSON_SCHEMA, options.getResponseFormat().getType());
         assertTrue(
-                String.valueOf(options.getResponseFormat().getJsonSchema().getSchema())
-                        .contains("generate_document"),
+                options.getResponseFormat().getJsonSchema().contains("generate_document"),
                 "the tool enum names the offered tool");
         assertEquals(
                 MessageType.SYSTEM,
@@ -161,7 +164,9 @@ class ConstrainedToolRouterChatModelTest {
                 new ScriptedModel(
                         List.of(
                                 reply(
-                                        "```json\n{\"name\":\"generate_document\",\"arguments\":{\"type\":\"PDF\",\"filename\":\"r.pdf\"}}\n```"),
+                                        "```json\n"
+                                            + "{\"name\":\"generate_document\",\"arguments\":{\"type\":\"PDF\",\"filename\":\"r.pdf\"}}\n"
+                                            + "```"),
                                 reply("Plain prose, no JSON.")));
 
         ChatResponse out = router(provider, ToolRouterMode.FORMAT, 6).call(prompt(tool));
@@ -278,7 +283,6 @@ class ConstrainedToolRouterChatModelTest {
         assertEquals(1, tool.calls.get());
         OpenAiChatOptions options = (OpenAiChatOptions) provider.prompts.get(0).getOptions();
         assertEquals("required", options.getToolChoice());
-        assertEquals(Boolean.FALSE, options.getInternalToolExecutionEnabled());
         assertEquals(
                 List.of("generate_document", ConstrainedToolRouterChatModel.FINAL_ANSWER_TOOL),
                 options.getToolCallbacks().stream()
@@ -314,7 +318,7 @@ class ConstrainedToolRouterChatModelTest {
                         OpenAiChatOptions.builder()
                                 .model("m")
                                 .toolCallbacks(new CountingTool())
-                                .internalToolExecutionEnabled(false)
+                                .toolContext(CallerRunsToolLoop.CONTEXT_KEY, true)
                                 .build());
         routed.call(ownLoop);
         assertSame(ownLoop, provider.prompts.get(1));
@@ -428,7 +432,7 @@ class ConstrainedToolRouterChatModelTest {
                         .description("Generate a document.")
                         .inputSchema(
                                 "{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\"},"
-                                        + "\"filename\":{\"type\":\"string\"}},\"required\":[\"type\",\"filename\"]}")
+                                    + "\"filename\":{\"type\":\"string\"}},\"required\":[\"type\",\"filename\"]}")
                         .build();
 
         @Override

@@ -1,12 +1,11 @@
 package com.agenticai.core.chat.structured;
 
+import com.agenticai.core.chat.CallerRunsToolLoop;
 import com.agenticai.core.json.JsonMappers;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Function;
+import com.anthropic.models.messages.ToolChoice;
+import com.anthropic.models.messages.ToolChoiceTool;
+
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -16,12 +15,18 @@ import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * The one place "ask a model for JSON, get JSON back" is implemented. Before this class existed, a
@@ -204,7 +209,8 @@ public final class StructuredOutput {
                                         new StructuredOutputException(
                                                 (raw == null || raw.isBlank()
                                                                 ? "The reply was empty"
-                                                                : "The reply did not contain valid JSON")
+                                                                : "The reply did not contain valid"
+                                                                      + " JSON")
                                                         + " - expected a JSON document for "
                                                         + typeName
                                                         + ".",
@@ -273,7 +279,9 @@ public final class StructuredOutput {
                 new StringBuilder("Your previous reply could not be used: ")
                         .append(error.getMessage())
                         .append(
-                                "\nReply again with ONLY the corrected JSON - no markdown code fences, no commentary.");
+                                "\n"
+                                    + "Reply again with ONLY the corrected JSON - no markdown code"
+                                    + " fences, no commentary.");
         if (formatInstructions != null && !formatInstructions.isBlank()) {
             sb.append("\n\n").append(formatInstructions);
         }
@@ -433,7 +441,7 @@ public final class StructuredOutput {
             return withJsonMode(options);
         }
         if (options.getClass() == OpenAiChatOptions.class) {
-            return withOpenAiSchema(options, JsonSchemaRules.schema);
+            return withOpenAiSchema(options, schema);
         }
         return withGeminiSchema(options, schema);
     }
@@ -554,8 +562,8 @@ public final class StructuredOutput {
      * Native structured output for Anthropic by FORCED TOOL USE: returns a COPY of {@code options}
      * that offers one tool named {@code toolName} whose {@code input_schema} is {@code inputSchema}
      * and forces it with {@code tool_choice: {type: tool, name}}; the model's tool input is then
-     * the structured result (see {@link #unwrapForcedTool}). Internal tool execution is switched
-     * off so the framework never tries to "run" the pseudo-tool.
+     * the structured result (see {@link #unwrapForcedTool}). The request is marked {@link
+     * CallerRunsToolLoop} so the framework never tries to "run" the pseudo-tool.
      *
      * <p>Returns {@code options} UNCHANGED (the caller falls back to prompt-and-validate) when: not
      * an Anthropic options type / model ({@link #supportsAnthropicToolForcing}); no usable schema;
@@ -574,20 +582,25 @@ public final class StructuredOutput {
         }
         AnthropicChatOptions aco = (AnthropicChatOptions) options;
         var thinking = aco.getThinking();
-        if (thinking != null && thinking.type() != AnthropicApi.ThinkingType.DISABLED) {
+        if (thinking != null && !thinking.isDisabled()) {
             return options;
         }
         if (aco.getToolChoice() != null
-                || (aco.getToolCallbacks() != null && !aco.getToolCallbacks().isEmpty())
-                || (aco.getToolNames() != null && !aco.getToolNames().isEmpty())) {
+                || (aco.getToolCallbacks() != null && !aco.getToolCallbacks().isEmpty())) {
             return options;
         }
-        AnthropicChatOptions copy = aco.copy();
-        copy.setThinking(null);
-        copy.setToolCallbacks(List.of(new ForcedStructuredTool(toolName, inputSchema.toString())));
-        copy.setToolChoice(new AnthropicApi.ToolChoiceTool(toolName, Boolean.TRUE));
-        copy.setInternalToolExecutionEnabled(false);
-        return (O) copy;
+        AnthropicChatOptions.Builder copy = aco.mutate();
+        copy.toolCallbacks(
+                List.<org.springframework.ai.tool.ToolCallback>of(
+                        new ForcedStructuredTool(toolName, inputSchema.toString())));
+        copy.toolChoice(
+                ToolChoice.ofTool(
+                        ToolChoiceTool.builder()
+                                .name(toolName)
+                                .disableParallelToolUse(true)
+                                .build()));
+        CallerRunsToolLoop.mark(copy);
+        return (O) copy.build();
     }
 
     /**
@@ -658,18 +671,17 @@ public final class StructuredOutput {
                 && existing.getType() != ResponseFormat.Type.TEXT) {
             return options;
         }
-        ResponseFormat.JsonSchema js =
-                ResponseFormat.JsonSchema.builder()
-                        .name(JsonSchemaRules.sanitizeSchemaName(schemaName))
-                        .schema(schema.toString())
-                        .strict(false)
+        // Spring AI 2 (official OpenAI SDK model): the schema travels as a JSON string and the SDK
+        // model supplies the schema name itself, so schemaName is not sent from here.
+        OpenAiChatOptions copy =
+                openAi.mutate()
+                        .responseFormat(
+                                ResponseFormat.builder()
+                                        .type(ResponseFormat.Type.JSON_SCHEMA)
+                                        .jsonSchema(schema.toString())
+                                        .strict(false)
+                                        .build())
                         .build();
-        OpenAiChatOptions copy = openAi.copy();
-        copy.setResponseFormat(
-                ResponseFormat.builder()
-                        .type(ResponseFormat.Type.JSON_SCHEMA)
-                        .jsonSchema(js)
-                        .build());
         return (O) copy;
     }
 }

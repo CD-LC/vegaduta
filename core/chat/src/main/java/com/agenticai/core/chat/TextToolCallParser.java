@@ -1,5 +1,12 @@
 package com.agenticai.core.chat;
 
+import org.springframework.ai.chat.messages.AssistantMessage;
+
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,11 +16,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Recognises a tool call that a model wrote as <em>text</em> instead of sending it through the
@@ -328,7 +330,8 @@ final class TextToolCallParser {
         if (args == null) {
             // {"name": "search", "query": "..."}: the remaining fields are the arguments.
             ObjectNode rest = objectMapper.createObjectNode();
-            for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
+            for (Iterator<Map.Entry<String, JsonNode>> it = node.properties().iterator();
+                    it.hasNext(); ) {
                 Map.Entry<String, JsonNode> field = it.next();
                 if (!STRUCTURAL_KEYS.contains(field.getKey())) {
                     rest.set(field.getKey(), field.getValue());

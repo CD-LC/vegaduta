@@ -13,11 +13,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.providers.ProviderName;
+
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.search.MeterNotFoundException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.util.List;
-import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.chat.client.ChatClientRequest;
@@ -30,6 +30,9 @@ import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Covers the cached-vs-uncached token accounting {@link LlmMetricsAdvisor} emits, kept in its own
@@ -117,16 +120,9 @@ class LlmMetricsAdvisorCacheMetricsTest {
     @Test
     void reasoningTokensGetTheirOwnCounterLabelledIncludedOrAdditionalAndAbsentMeansNoSeries() {
         // OpenAI: 400 of the 500 completion tokens are reasoning, already inside completion.
-        OpenAiApi.Usage included =
-                new OpenAiApi.Usage(
-                        500,
-                        100,
-                        600,
-                        null,
-                        new OpenAiApi.Usage.CompletionTokenDetails(400, null, null, null));
         runSuccessfulCall(
                 advisorFor(ProviderName.OPENAI, "gpt-5"),
-                new DefaultUsage(100, 500, 600, included));
+                SdkUsageFixtures.openAiWithReasoning(100, 500, 600, 400));
         assertEquals(
                 400.0,
                 meterRegistry
@@ -136,16 +132,9 @@ class LlmMetricsAdvisorCacheMetricsTest {
                         .count());
 
         // Gemini-compat shape: total proves the 300 thoughts sit outside completion.
-        OpenAiApi.Usage additional =
-                new OpenAiApi.Usage(
-                        50,
-                        100,
-                        450,
-                        null,
-                        new OpenAiApi.Usage.CompletionTokenDetails(300, null, null, null));
         runSuccessfulCall(
                 advisorFor(ProviderName.OPENAI, "gpt-5"),
-                new DefaultUsage(100, 50, 450, additional));
+                SdkUsageFixtures.openAiWithReasoning(100, 50, 450, 300));
         assertEquals(
                 300.0,
                 meterRegistry
@@ -186,7 +175,8 @@ class LlmMetricsAdvisorCacheMetricsTest {
                     "system",
                     meter.getId().getTag("tenant"),
                     name
-                            + " must fall back to the literal \"system\" tenant tag, never omit the tag");
+                            + " must fall back to the literal \"system\" tenant tag, never omit the"
+                            + " tag");
             assertEquals(
                     "ANTHROPIC",
                     meter.getId().getTag("provider"),
@@ -243,10 +233,12 @@ class LlmMetricsAdvisorCacheMetricsTest {
         assertEquals(
                 400.0,
                 counterTotal("llm.input.tokens.uncached"),
-                "prompt_tokens already contains the cached ones, so the uncached bucket is the remainder");
+                "prompt_tokens already contains the cached ones, so the uncached bucket is the"
+                    + " remainder");
         assertNull(
                 counterTotal("llm.input.tokens.cache.write"),
-                "OpenAI reports no cache-write count - the series must not exist rather than read zero");
+                "OpenAI reports no cache-write count - the series must not exist rather than read"
+                    + " zero");
     }
 
     @Test

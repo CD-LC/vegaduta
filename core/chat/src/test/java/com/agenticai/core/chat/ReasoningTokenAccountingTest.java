@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.genai.types.GenerateContentResponseUsageMetadata;
 import com.openai.models.completions.CompletionUsage;
-import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.google.genai.metadata.GoogleGenAiUsage;
+
+import java.math.BigDecimal;
 
 /**
  * Per-provider usage shapes for reasoning tokens, built from the real Spring AI 2 SDK usage /
@@ -186,14 +188,7 @@ class ReasoningTokenAccountingTest {
         // completion 100, reasoning 400, total 1000 = prompt 500 + completion 100 + reasoning 400:
         // the usage block itself proves the thoughts sit OUTSIDE completion (Gemini OpenAI-compat
         // shape).
-        OpenAiApi.Usage nativeUsage =
-                new OpenAiApi.Usage(
-                        100,
-                        500,
-                        1000,
-                        null,
-                        new OpenAiApi.Usage.CompletionTokenDetails(400, null, null, null));
-        Usage usage = new DefaultUsage(500, 100, 1000, nativeUsage);
+        Usage usage = SdkUsageFixtures.openAiWithReasoning(500, 100, 1000, 400);
 
         ReasoningTokenAccounting accounting = ReasoningTokenAccounting.from(usage);
 
@@ -203,15 +198,10 @@ class ReasoningTokenAccountingTest {
 
     @Test
     void openAiWithNoUsableTotalKeepsTheSubsetRule() {
-        OpenAiApi.Usage nativeUsage =
-                new OpenAiApi.Usage(
-                        100,
-                        500,
-                        null,
-                        null,
-                        new OpenAiApi.Usage.CompletionTokenDetails(400, null, null, null));
+        // No usable total (0): the subset rule applies, nothing is billed on top.
         assertNull(
-                ReasoningTokenAccounting.from(new DefaultUsage(500, 100, null, nativeUsage))
+                ReasoningTokenAccounting.from(
+                                SdkUsageFixtures.openAiWithReasoning(500, 100, 0, 400))
                         .billableReasoningTokens());
     }
 
@@ -220,7 +210,7 @@ class ReasoningTokenAccountingTest {
         // 5000 output tokens, of which most are thinking: Anthropic bills all of them at the output
         // rate and the API reports no separate bucket, so the output count IS the
         // thinking-inclusive count.
-        Usage usage = new DefaultUsage(1000, 5000, 6000, new AnthropicApi.Usage(1000, 5000, 0, 0));
+        Usage usage = SdkUsageFixtures.anthropic(1000, 5000, 0, 0);
         ReasoningTokenAccounting accounting = ReasoningTokenAccounting.from(usage);
         assertNull(accounting.billableReasoningTokens());
 
