@@ -21,6 +21,7 @@ name: Static gates
 #                         paths/operations/response properties, renamed operationIds,
 #                         newly required inputs, narrowed enums, changed types
 #                         (escape hatch: scripts/ci/openapi-breaking-allowlist.txt)
+#   channel-docs-check    every ChannelType value has a row in docs/channels/README.md
 #   docs-link-check       relative links and #anchors in README, CONTRIBUTING and docs/
 #                         (offline; ci.yml also runs lychee over the same files)
 #                         must stay byte-identical
@@ -129,6 +130,9 @@ jobs:
       - name: Docs links and anchors
         if: always()
         run: bash scripts/ci/docs-link-check.sh
+      - name: Every channel type is in the channels overview
+        if: always()
+        run: bash scripts/ci/channel-docs-check.sh
       - name: Internal planning jargon ratchet
         run: bash scripts/ci/internal-reference-lint.sh
       - name: No telemetry
