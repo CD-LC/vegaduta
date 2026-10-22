@@ -32,7 +32,7 @@
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-test-classic</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

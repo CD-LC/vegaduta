@@ -8,29 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.agenticai.core.agents.tools.AgentStepEventEmitter;
-import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
-import com.agenticai.core.guardrails.ToolDispatchGate;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * {@link HookEngine} at the after-tool, model and informational points. Split out of {@link

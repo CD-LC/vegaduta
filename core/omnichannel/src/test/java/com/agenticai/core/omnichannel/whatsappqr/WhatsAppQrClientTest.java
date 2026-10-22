@@ -3,16 +3,16 @@ package com.agenticai.core.omnichannel.whatsappqr;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** The client against a fake bridge: session lifecycle, the event poll, send and the secret. */
 class WhatsAppQrClientTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String KEY = "3f6f1b0c-7d4a-4b2c-9e8f-1a2b3c4d5e6f";
     private static final String SECRET = "bridge-secret-0123";
 
@@ -41,10 +41,10 @@ class WhatsAppQrClientTest {
     @Test
     void ensureCreatesAndResumesASession() {
         JsonNode first = client.ensureSession(KEY);
-        assertThat(first.path("status").asText()).isEqualTo("QR_PENDING");
-        assertThat(first.path("qr").asText()).isEqualTo("2@test-qr-payload");
+        assertThat(first.path("status").asString()).isEqualTo("QR_PENDING");
+        assertThat(first.path("qr").asString()).isEqualTo("2@test-qr-payload");
         // Second call resumes, not recreates.
-        assertThat(client.ensureSession(KEY).path("status").asText()).isEqualTo("QR_PENDING");
+        assertThat(client.ensureSession(KEY).path("status").asString()).isEqualTo("QR_PENDING");
         assertThat(bridge.authHeaders).allMatch(h -> ("Bearer " + SECRET).equals(h));
     }
 
@@ -58,8 +58,8 @@ class WhatsAppQrClientTest {
 
         JsonNode status = client.sessionStatus(KEY);
 
-        assertThat(status.path("status").asText()).isEqualTo("CONNECTED");
-        assertThat(status.path("phoneNumber").asText()).isEqualTo("4915112345678");
+        assertThat(status.path("status").asString()).isEqualTo("CONNECTED");
+        assertThat(status.path("phoneNumber").asString()).isEqualTo("4915112345678");
     }
 
     @Test
@@ -72,8 +72,8 @@ class WhatsAppQrClientTest {
 
         JsonNode result = client.receive(KEY, 1);
 
-        assertThat(result.path("status").asText()).isEqualTo("CONNECTED");
-        assertThat(result.path("events").get(0).path("text").asText()).isEqualTo("hi");
+        assertThat(result.path("status").asString()).isEqualTo("CONNECTED");
+        assertThat(result.path("events").get(0).path("text").asString()).isEqualTo("hi");
         assertThat(bridge.requestLines.getLast()).contains("/sessions/" + KEY + "/events");
     }
 
@@ -83,7 +83,7 @@ class WhatsAppQrClientTest {
                 .isInstanceOf(WhatsAppQrApiException.class)
                 .hasMessageContaining("404");
         // ... and ensureSession brings it back after a bridge restart.
-        assertThat(client.ensureSession(KEY).path("status").asText()).isEqualTo("QR_PENDING");
+        assertThat(client.ensureSession(KEY).path("status").asString()).isEqualTo("QR_PENDING");
     }
 
     @Test
@@ -93,7 +93,9 @@ class WhatsAppQrClientTest {
 
         client.send(KEY, "4915100000000", "hello");
 
-        assertThat(bridge.sentBodies.getLast()).contains("\"to\":\"4915100000000\"").contains("\"text\":\"hello\"");
+        assertThat(bridge.sentBodies.getLast())
+                .contains("\"to\":\"4915100000000\"")
+                .contains("\"text\":\"hello\"");
     }
 
     @Test

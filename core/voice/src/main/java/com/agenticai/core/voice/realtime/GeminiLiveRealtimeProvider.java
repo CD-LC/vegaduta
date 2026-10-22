@@ -3,9 +3,6 @@ package com.agenticai.core.voice.realtime;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
@@ -18,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Gemini Live API ({@code BidiGenerateContent}) realtime provider - Google's native audio-to-audio
@@ -199,7 +199,7 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
                 if (root.has("setupComplete")) {
                     setupDone.countDown();
                 } else if (root.has("error")) {
-                    String msg = root.path("error").path("message").asText("unknown");
+                    String msg = root.path("error").path("message").asString("unknown");
                     if (setupDone.getCount() > 0) {
                         setupError = msg;
                         setupDone.countDown();
@@ -215,14 +215,14 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
                         JsonNode inline = part.path("inlineData");
                         if (inline.has("data")) {
                             listener.onAudioChunk(
-                                    Base64.getDecoder().decode(inline.get("data").asText()));
+                                    Base64.getDecoder().decode(inline.get("data").asString()));
                         }
                     }
-                    String in = content.path("inputTranscription").path("text").asText("");
+                    String in = content.path("inputTranscription").path("text").asString("");
                     if (!in.isBlank()) {
                         listener.onInputTranscript(in);
                     }
-                    String out = content.path("outputTranscription").path("text").asText("");
+                    String out = content.path("outputTranscription").path("text").asString("");
                     if (!out.isBlank()) {
                         listener.onOutputTranscript(out);
                     }

@@ -9,14 +9,17 @@ import org.junit.jupiter.api.Test;
 
 class AgentImportHelpersTest {
 
-    // ---- text ------------------------------------------------------------------------------------------
+    // ---- text
+    // ------------------------------------------------------------------------------------------
 
     @Test
     void sanitizeNameStripsControlAndAngleBracketsAndCaps() {
-        assertThat(AgentImportText.sanitizeName("  My\u0000 <b>Agent</b>\n\tv2 ", "x")).isEqualTo("My b Agent /b v2");
+        assertThat(AgentImportText.sanitizeName("  My\u0000 <b>Agent</b>\n\tv2 ", "x"))
+                .isEqualTo("My b Agent /b v2");
         assertThat(AgentImportText.sanitizeName("\u0001\u0002", "fallback")).isEqualTo("fallback");
         assertThat(AgentImportText.sanitizeName(null, "fallback")).isEqualTo("fallback");
-        assertThat(AgentImportText.sanitizeName("a".repeat(500), "x")).hasSize(AgentImportText.NAME_MAX);
+        assertThat(AgentImportText.sanitizeName("a".repeat(500), "x"))
+                .hasSize(AgentImportText.NAME_MAX);
     }
 
     @Test
@@ -29,7 +32,8 @@ class AgentImportHelpersTest {
 
     @Test
     void htmlToTextOnlyTouchesRealHtml() {
-        assertThat(AgentImportText.htmlToText("<p>Hi &amp; <em>bye</em></p><p>Next</p>")).isEqualTo("Hi & bye\nNext");
+        assertThat(AgentImportText.htmlToText("<p>Hi &amp; <em>bye</em></p><p>Next</p>"))
+                .isEqualTo("Hi & bye\nNext");
         // plain prompts with XML-ish tags must survive untouched
         String plain = "Use <context>...</context> to answer.";
         assertThat(AgentImportText.htmlToText(plain)).isEqualTo(plain);
@@ -51,7 +55,8 @@ class AgentImportHelpersTest {
         assertThat(s).doesNotContain("\n").hasSizeLessThanOrEqualTo(120);
     }
 
-    // ---- json / credentials ------------------------------------------------------------------------------
+    // ---- json / credentials
+    // ------------------------------------------------------------------------------
 
     @Test
     void numberAcceptsNumericStringsButNothingElse() {
@@ -77,8 +82,11 @@ class AgentImportHelpersTest {
 
     @Test
     void credentialCountSkipsEmptyValuesAndNeverRecursesDeeplyOnTheStack() {
-        assertThat(AgentImportJson.countCredentialFields(parse(
-            "{\"a\":{\"credential\":\"\",\"apiKey\":null,\"b\":[{\"token\":\"t\"},{\"password\":\"p\"}]}}"))).isEqualTo(2);
+        assertThat(
+                        AgentImportJson.countCredentialFields(
+                                parse(
+                                        "{\"a\":{\"credential\":\"\",\"apiKey\":null,\"b\":[{\"token\":\"t\"},{\"password\":\"p\"}]}}")))
+                .isEqualTo(2);
         // 5,000 levels deep: the scan is iterative, so this cannot overflow the call stack
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5000; i++) {
@@ -88,26 +96,39 @@ class AgentImportHelpersTest {
         for (int i = 0; i < 5000; i++) {
             sb.append("}");
         }
-        com.fasterxml.jackson.databind.ObjectMapper deep = new com.fasterxml.jackson.databind.ObjectMapper();
-        deep.getFactory().setStreamReadConstraints(
-            com.fasterxml.jackson.core.StreamReadConstraints.builder().maxNestingDepth(10_000).build());
+        tools.jackson.databind.ObjectMapper deep =
+                com.agenticai.core.json.JsonMappers.withFactory(
+                        tools.jackson.core.json.JsonFactory.builder()
+                                .streamReadConstraints(
+                                        tools.jackson.core.StreamReadConstraints.builder()
+                                                .maxNestingDepth(10_000)
+                                                .build())
+                                .build());
         try {
-            assertThat(AgentImportJson.countCredentialFields(deep.readTree(sb.toString()))).isZero();
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            assertThat(AgentImportJson.countCredentialFields(deep.readTree(sb.toString())))
+                    .isZero();
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    // ---- detector / source / providers ---------------------------------------------------------------------
+    // ---- detector / source / providers
+    // ---------------------------------------------------------------------
 
     @Test
     void detectorRecognisesEachFixtureShape() {
-        assertThat(AgentImportDetector.detect(json("openai-assistant.json"))).contains(AgentImportSource.OPENAI_ASSISTANT);
-        assertThat(AgentImportDetector.detect(json("openai-agents-sdk.json"))).contains(AgentImportSource.OPENAI_AGENTS);
-        assertThat(AgentImportDetector.detect(json("flowise-tool-agent.json"))).contains(AgentImportSource.FLOWISE);
-        assertThat(AgentImportDetector.detect(json("flowise-agentflow-v2.json"))).contains(AgentImportSource.FLOWISE);
-        assertThat(AgentImportDetector.detect(parse("{\"id\":\"asst_1\"}"))).contains(AgentImportSource.OPENAI_ASSISTANT);
-        assertThat(AgentImportDetector.detect(parse("{\"flowData\":\"{}\"}"))).contains(AgentImportSource.FLOWISE);
+        assertThat(AgentImportDetector.detect(json("openai-assistant.json")))
+                .contains(AgentImportSource.OPENAI_ASSISTANT);
+        assertThat(AgentImportDetector.detect(json("openai-agents-sdk.json")))
+                .contains(AgentImportSource.OPENAI_AGENTS);
+        assertThat(AgentImportDetector.detect(json("flowise-tool-agent.json")))
+                .contains(AgentImportSource.FLOWISE);
+        assertThat(AgentImportDetector.detect(json("flowise-agentflow-v2.json")))
+                .contains(AgentImportSource.FLOWISE);
+        assertThat(AgentImportDetector.detect(parse("{\"id\":\"asst_1\"}")))
+                .contains(AgentImportSource.OPENAI_ASSISTANT);
+        assertThat(AgentImportDetector.detect(parse("{\"flowData\":\"{}\"}")))
+                .contains(AgentImportSource.FLOWISE);
     }
 
     @Test
@@ -119,8 +140,10 @@ class AgentImportHelpersTest {
 
     @Test
     void sourceParsingAcceptsAliasesAndAuto() {
-        assertThat(AgentImportSource.parse("OpenAI_Assistant")).contains(AgentImportSource.OPENAI_ASSISTANT);
-        assertThat(AgentImportSource.parse("agent-builder")).contains(AgentImportSource.OPENAI_AGENTS);
+        assertThat(AgentImportSource.parse("OpenAI_Assistant"))
+                .contains(AgentImportSource.OPENAI_ASSISTANT);
+        assertThat(AgentImportSource.parse("agent-builder"))
+                .contains(AgentImportSource.OPENAI_AGENTS);
         assertThat(AgentImportSource.parse("flowise")).contains(AgentImportSource.FLOWISE);
         assertThat(AgentImportSource.parse("zapier")).isEmpty();
         assertThat(AgentImportSource.isAuto("AUTO")).isTrue();
@@ -131,7 +154,8 @@ class AgentImportHelpersTest {
     @Test
     void providerHintsMapToRealProvidersOnly() {
         assertThat(AgentImportProviders.fromHint("OpenAI")).contains(ProviderName.OPENAI);
-        assertThat(AgentImportProviders.fromHint("google_vertex")).contains(ProviderName.GOOGLE_VERTEX);
+        assertThat(AgentImportProviders.fromHint("google_vertex"))
+                .contains(ProviderName.GOOGLE_VERTEX);
         assertThat(AgentImportProviders.fromHint("xai")).contains(ProviderName.GROK);
         assertThat(AgentImportProviders.fromHint("cohere")).isEmpty();
         assertThat(AgentImportProviders.fromHint(null)).isEmpty();
@@ -140,7 +164,8 @@ class AgentImportHelpersTest {
         assertThat(AgentImportProviders.flowiseProviderHint("somethingElse")).isNull();
     }
 
-    // ---- finalizer -------------------------------------------------------------------------------------
+    // ---- finalizer
+    // -------------------------------------------------------------------------------------
 
     @Test
     void finalizerTruncatesLongInstructionsAndSaysSo() {

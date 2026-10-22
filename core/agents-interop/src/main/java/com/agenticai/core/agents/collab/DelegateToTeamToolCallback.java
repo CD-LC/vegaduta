@@ -5,7 +5,6 @@ import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Swarm primitive - parallel subagent fan-out with isolated contexts and a shared run trace. One
@@ -262,7 +262,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         // shutdownNow() in the finally, not close(): close() would block on a branch that
         // ignores interrupts past the branch timeout (java:S2095 only recognises close()).
         @SuppressWarnings("java:S2095")
-        ExecutorService pool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("delegate-to-team-tool-callback-");
+        ExecutorService pool =
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                        "delegate-to-team-tool-callback-");
         try {
             List<Future<Map<String, Object>>> futures = new ArrayList<>();
             List<Member> dispatched = new ArrayList<>();
@@ -368,7 +370,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                         Map<Integer, SwarmVerifier.Item> fresh = new LinkedHashMap<>();
                         // Same shutdownNow()-in-finally lifecycle as pool above (java:S2095).
                         @SuppressWarnings("java:S2095")
-                        ExecutorService repairPool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("delegate-to-team-tool-callback-");
+                        ExecutorService repairPool =
+                                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                                        "delegate-to-team-tool-callback-");
                         try {
                             Map<Integer, Future<Map<String, Object>>> futures =
                                     new LinkedHashMap<>();

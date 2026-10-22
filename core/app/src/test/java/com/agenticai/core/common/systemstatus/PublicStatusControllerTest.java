@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import org.springframework.boot.actuate.health.HealthContributorRegistry;
+import org.springframework.boot.health.registry.HealthContributorRegistry;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.kafka.core.KafkaAdmin;

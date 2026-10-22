@@ -1,7 +1,5 @@
 package com.agenticai.core.apidocs;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Resolves the JSONPath-ish field names of a consumer contract ({@code $.a.b}, {@code
@@ -61,7 +60,7 @@ final class ContractSchemaFields {
         JsonNode s = schema == null ? MissingSchema.EMPTY : schema;
         Set<String> seen = new HashSet<>();
         while (s.has("$ref")) {
-            String ref = s.get("$ref").asText();
+            String ref = s.get("$ref").asString();
             if (!seen.add(ref)) {
                 return MissingSchema.EMPTY;
             }
@@ -158,11 +157,11 @@ final class ContractSchemaFields {
     private static Set<String> types(JsonNode s) {
         Set<String> out = new HashSet<>();
         JsonNode t = s.path("type");
-        if (t.isTextual()) {
-            out.add(t.asText());
+        if (t.isString()) {
+            out.add(t.asString());
         } else if (t.isArray()) {
             for (JsonNode x : t) {
-                out.add(x.asText());
+                out.add(x.asString());
             }
         }
         return out;
@@ -180,7 +179,7 @@ final class ContractSchemaFields {
         }
         JsonNode json = content.path("application/json");
         if (json.isMissingNode()) {
-            Iterator<Map.Entry<String, JsonNode>> it = content.fields();
+            Iterator<Map.Entry<String, JsonNode>> it = content.properties().iterator();
             json = it.next().getValue();
         }
         JsonNode schema = json.path("schema");

@@ -2,7 +2,6 @@ package com.agenticai.core.templates;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.core.Agent;
@@ -18,16 +17,16 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link CommunityTemplateService} test classes: mocks, a REAL {@link
  * TemplateSnapshotService} (so create -&gt; store -&gt; import round-trips exercise the allow-list
- * snapshot and its reconstruction), and template/caller builders. Plain JUnit5 + Mockito, no
- * Spring context.
+ * snapshot and its reconstruction), and template/caller builders. Plain JUnit5 + Mockito, no Spring
+ * context.
  */
 abstract class CommunityTemplateServiceTestBase {
 
@@ -38,12 +37,11 @@ abstract class CommunityTemplateServiceTestBase {
     final AgentService agentService = mock(AgentService.class);
     final AgentRepository agentRepository = mock(AgentRepository.class);
     final WorkflowService workflowService = mock(WorkflowService.class);
-    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     final TemplateSnapshotService snapshotService = new TemplateSnapshotService(mapper);
     // A Mockito mock's void assertWithinDailyCap is a no-op - the daily import
     // cap never trips in these tests, which exercise the lifecycle, not the limiter.
-    final TemplateImportRateLimiter importRateLimiter =
-            mock(TemplateImportRateLimiter.class);
+    final TemplateImportRateLimiter importRateLimiter = mock(TemplateImportRateLimiter.class);
 
     // Import applies a template's tool allow-list and guardrails after create,
     // through the same public services the UI uses. A mock is right here: the

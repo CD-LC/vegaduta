@@ -10,11 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Thin-adapter contract for {@link DelegateToSpecialistToolCallback}, mirroring {@code
@@ -26,14 +26,15 @@ import org.junit.jupiter.api.Test;
  */
 class DelegateToSpecialistToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final AgentChatService chatService = mock(AgentChatService.class);
     private final UUID rootAgentId = UUID.randomUUID();
     private final HandoffChain chain = HandoffChain.root("session-1", rootAgentId);
 
     private DelegateToSpecialistToolCallback callback() {
-        return new DelegateToSpecialistToolCallback(chatService, List.of("billing", "legal-review"), chain);
+        return new DelegateToSpecialistToolCallback(
+                chatService, List.of("billing", "legal-review"), chain);
     }
 
     @Test
@@ -47,21 +48,26 @@ class DelegateToSpecialistToolCallbackTest {
 
     @Test
     void callParsesArgumentsAndDelegatesWithTheBoundChain() throws Exception {
-        when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("refund question"), eq("prior context")))
-            .thenReturn("Refund approved.");
+        when(chatService.delegateToSpecialist(
+                        eq(chain), eq("billing"), eq("refund question"), eq("prior context")))
+                .thenReturn("Refund approved.");
 
-        String out = callback().call(
-            "{\"capability\":\"billing\",\"subTask\":\"refund question\",\"contextSummary\":\"prior context\"}");
+        String out =
+                callback()
+                        .call(
+                                "{\"capability\":\"billing\",\"subTask\":\"refund question\",\"contextSummary\":\"prior context\"}");
 
         JsonNode root = MAPPER.readTree(out);
-        assertEquals("billing", root.get("capability").asText());
-        assertEquals("Refund approved.", root.get("answer").asText());
-        verify(chatService).delegateToSpecialist(chain, "billing", "refund question", "prior context");
+        assertEquals("billing", root.get("capability").asString());
+        assertEquals("Refund approved.", root.get("answer").asString());
+        verify(chatService)
+                .delegateToSpecialist(chain, "billing", "refund question", "prior context");
     }
 
     @Test
     void callToleratesAMissingOptionalContextSummary() {
-        when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("q"), eq(null))).thenReturn("ok");
+        when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("q"), eq(null)))
+                .thenReturn("ok");
 
         callback().call("{\"capability\":\"billing\",\"subTask\":\"q\"}");
 
@@ -88,7 +94,7 @@ class DelegateToSpecialistToolCallbackTest {
     @Test
     void callSurfacesADelegationFailureAsAToolResultRatherThanThrowing() {
         when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("q"), eq(null)))
-            .thenThrow(new RuntimeException("provider down"));
+                .thenThrow(new RuntimeException("provider down"));
 
         String out = callback().call("{\"capability\":\"billing\",\"subTask\":\"q\"}");
 

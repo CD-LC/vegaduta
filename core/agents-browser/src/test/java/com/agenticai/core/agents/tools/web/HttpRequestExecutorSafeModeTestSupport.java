@@ -4,10 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.agenticai.core.secrets.SecretRedactor;
 import com.agenticai.core.secrets.SecretReferenceResolver;
 import com.agenticai.core.secrets.SecretVaultService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,8 +26,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
-/** Shared doubles and builders for the {@link HttpRequestExecutor} safe-mode tests. Split from the former HttpRequestExecutorSafeModeTest. */
+/**
+ * Shared doubles and builders for the {@link HttpRequestExecutor} safe-mode tests. Split from the
+ * former HttpRequestExecutorSafeModeTest.
+ */
 abstract class HttpRequestExecutorSafeModeTestSupport {
 
     static final String HOST = "203.0.113.10";
@@ -36,7 +40,7 @@ abstract class HttpRequestExecutorSafeModeTestSupport {
 
     static final String SECRET = "sk_live_9f8e7d6c5b4a3210";
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     // ------------------------------------------------------------------ test doubles
 

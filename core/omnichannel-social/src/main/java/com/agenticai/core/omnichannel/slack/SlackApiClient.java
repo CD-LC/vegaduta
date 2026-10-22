@@ -5,8 +5,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,6 +16,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for the handful of Slack Web API calls this platform needs -
@@ -71,12 +71,13 @@ public class SlackApiClient {
         if (!node.path("ok").asBoolean(false)) {
             throw new ChannelConfigurationException(
                     "slack",
-                    "Slack rejected this Bot Token: " + node.path("error").asText("unknown error"));
+                    "Slack rejected this Bot Token: "
+                            + node.path("error").asString("unknown error"));
         }
         return new AuthInfo(
-                node.path("team_id").asText(null),
-                node.path("team").asText(null),
-                node.path("user_id").asText(null));
+                node.path("team_id").asString(null),
+                node.path("team").asString(null),
+                node.path("user_id").asString(null));
     }
 
     /**
@@ -91,7 +92,8 @@ public class SlackApiClient {
         if (!node.path("ok").asBoolean(false)) {
             throw new ChannelDeliveryException(
                     "slack",
-                    "Slack chat.postMessage failed: " + node.path("error").asText("unknown error"));
+                    "Slack chat.postMessage failed: "
+                            + node.path("error").asString("unknown error"));
         }
         return "Sent Slack message to " + channelOrUserId + ".";
     }
@@ -114,10 +116,10 @@ public class SlackApiClient {
             throw new ChannelDeliveryException(
                     "slack",
                     "Slack files.getUploadURLExternal failed: "
-                            + node.path("error").asText("unknown error"));
+                            + node.path("error").asString("unknown error"));
         }
         return new UploadUrlInfo(
-                node.path("upload_url").asText(null), node.path("file_id").asText(null));
+                node.path("upload_url").asString(null), node.path("file_id").asString(null));
     }
 
     /**
@@ -172,7 +174,7 @@ public class SlackApiClient {
             throw new ChannelDeliveryException(
                     "slack",
                     "Slack files.completeUploadExternal failed: "
-                            + node.path("error").asText("unknown error"));
+                            + node.path("error").asString("unknown error"));
         }
     }
 

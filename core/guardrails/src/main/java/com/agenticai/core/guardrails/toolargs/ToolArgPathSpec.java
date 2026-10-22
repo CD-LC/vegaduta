@@ -1,41 +1,46 @@
 package com.agenticai.core.guardrails.toolargs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A tiny, safe path into a tool's JSON arguments: {@code a.b[*].c[2]}.
  *
  * <ul>
- *   <li>{@code name} - an object field.</li>
- *   <li>{@code [n]} - array element n (0-based, at most 4 digits).</li>
- *   <li>{@code [*]} - EVERY element of an array (the rule then applies to each one).</li>
+ *   <li>{@code name} - an object field.
+ *   <li>{@code [n]} - array element n (0-based, at most 4 digits).
+ *   <li>{@code [*]} - EVERY element of an array (the rule then applies to each one).
  * </ul>
  *
- * <p>There is deliberately no recursive descent, filter or script syntax: a path is a fixed sequence of at
- * most {@value #MAX_STEPS} steps, resolved iteratively, with a hard cap on how many elements a wildcard may
- * fan out to. Pure and immutable.
+ * <p>There is deliberately no recursive descent, filter or script syntax: a path is a fixed
+ * sequence of at most {@value #MAX_STEPS} steps, resolved iteratively, with a hard cap on how many
+ * elements a wildcard may fan out to. Pure and immutable.
  */
 public final class ToolArgPathSpec {
 
     public static final int MAX_LENGTH = 128;
     public static final int MAX_STEPS = 12;
-    /** Elements a single wildcard rule will look at; more than this and the evaluation reports it cannot verify. */
+
+    /**
+     * Elements a single wildcard rule will look at; more than this and the evaluation reports it
+     * cannot verify.
+     */
     public static final int MAX_FAN_OUT = 1000;
 
-    enum Kind { FIELD, INDEX, ALL }
-
-    record Step(Kind kind, String field, int index) {
+    enum Kind {
+        FIELD,
+        INDEX,
+        ALL
     }
+
+    record Step(Kind kind, String field, int index) {}
 
     /** One resolved location: the concrete path (indexes filled in) and the value found there. */
-    public record Hit(String path, JsonNode value) {
-    }
+    public record Hit(String path, JsonNode value) {}
 
     /** Resolution result; {@code truncated} is true when a wildcard hit {@link #MAX_FAN_OUT}. */
-    public record Resolution(List<Hit> hits, boolean truncated) {
-    }
+    public record Resolution(List<Hit> hits, boolean truncated) {}
 
     private final String text;
     private final List<Step> steps;
@@ -66,14 +71,16 @@ public final class ToolArgPathSpec {
     }
 
     /**
-     * @throws IllegalArgumentException with a message naming the problem when the text is not a valid path
+     * @throws IllegalArgumentException with a message naming the problem when the text is not a
+     *     valid path
      */
     public static ToolArgPathSpec parse(String text) {
         if (text == null || text.isBlank()) {
             throw new IllegalArgumentException("'path' must not be empty.");
         }
         if (text.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException("'path' is limited to " + MAX_LENGTH + " characters.");
+            throw new IllegalArgumentException(
+                    "'path' is limited to " + MAX_LENGTH + " characters.");
         }
         List<Step> out = new ArrayList<>();
         int i = 0;
@@ -95,7 +102,9 @@ public final class ToolArgPathSpec {
                 String inner = text.substring(i + 1, close);
                 if (inner.equals("*")) {
                     out.add(new Step(Kind.ALL, null, -1));
-                } else if (!inner.isEmpty() && inner.length() <= 4 && inner.chars().allMatch(c -> c >= '0' && c <= '9')) {
+                } else if (!inner.isEmpty()
+                        && inner.length() <= 4
+                        && inner.chars().allMatch(c -> c >= '0' && c <= '9')) {
                     out.add(new Step(Kind.INDEX, null, Integer.parseInt(inner)));
                 } else {
                     throw bad(text, "use [*] or [number] inside brackets");
@@ -104,7 +113,9 @@ public final class ToolArgPathSpec {
             }
             if (i < n) {
                 if (text.charAt(i) != '.') {
-                    throw bad(text, "unexpected character '" + text.charAt(i) + "' at position " + (i + 1));
+                    throw bad(
+                            text,
+                            "unexpected character '" + text.charAt(i) + "' at position " + (i + 1));
                 }
                 i++;
                 if (i == n) {
@@ -119,11 +130,17 @@ public final class ToolArgPathSpec {
     }
 
     private static boolean isNameChar(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$' || c == '-';
+        return (c >= 'a' && c <= 'z')
+                || (c >= 'A' && c <= 'Z')
+                || (c >= '0' && c <= '9')
+                || c == '_'
+                || c == '$'
+                || c == '-';
     }
 
     private static IllegalArgumentException bad(String text, String why) {
-        return new IllegalArgumentException("Invalid 'path' \"" + abbreviate(text) + "\": " + why + ".");
+        return new IllegalArgumentException(
+                "Invalid 'path' \"" + abbreviate(text) + "\": " + why + ".");
     }
 
     private static String abbreviate(String s) {
@@ -131,9 +148,10 @@ public final class ToolArgPathSpec {
     }
 
     /**
-     * Resolves this path against the arguments object. A step that does not fit the value in hand (field on a
-     * non-object, index past the end, wildcard on a non-array) simply yields no hit for that branch - absence
-     * is reported by the caller's {@code required} handling, never as an exception.
+     * Resolves this path against the arguments object. A step that does not fit the value in hand
+     * (field on a non-object, index past the end, wildcard on a non-array) simply yields no hit for
+     * that branch - absence is reported by the caller's {@code required} handling, never as an
+     * exception.
      */
     public Resolution resolve(JsonNode root) {
         List<Hit> frontier = List.of(new Hit("", root));
@@ -145,13 +163,19 @@ public final class ToolArgPathSpec {
                 switch (step.kind()) {
                     case FIELD -> {
                         if (node != null && node.isObject() && node.has(step.field())) {
-                            String child = hit.path().isEmpty() ? step.field() : hit.path() + "." + step.field();
+                            String child =
+                                    hit.path().isEmpty()
+                                            ? step.field()
+                                            : hit.path() + "." + step.field();
                             next.add(new Hit(child, node.get(step.field())));
                         }
                     }
                     case INDEX -> {
                         if (node != null && node.isArray() && step.index() < node.size()) {
-                            next.add(new Hit(hit.path() + "[" + step.index() + "]", node.get(step.index())));
+                            next.add(
+                                    new Hit(
+                                            hit.path() + "[" + step.index() + "]",
+                                            node.get(step.index())));
                         }
                     }
                     case ALL -> {

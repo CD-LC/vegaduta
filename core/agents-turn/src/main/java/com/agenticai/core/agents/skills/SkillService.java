@@ -3,8 +3,6 @@ package com.agenticai.core.agents.skills;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.HotpathLookups;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,6 +21,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Agent Skills - the one place that knows a skill can come from two sources (the classpath catalog
@@ -84,10 +84,10 @@ public class SkillService {
     }
 
     /**
-     * Whether {@code load_skill} counts uses. Wired from {@code app.skills.learning.enabled}
-     * (false by default): the counter is one extra bulk UPDATE of the same skill row per load, so
-     * installs that do not use the learning loop keep the pre-lifecycle hot path. The field
-     * defaults to true only for code that builds the service by hand (tests).
+     * Whether {@code load_skill} counts uses. Wired from {@code app.skills.learning.enabled} (false
+     * by default): the counter is one extra bulk UPDATE of the same skill row per load, so installs
+     * that do not use the learning loop keep the pre-lifecycle hot path. The field defaults to true
+     * only for code that builds the service by hand (tests).
      */
     private boolean countUsage = true;
 
@@ -290,7 +290,7 @@ public class SkillService {
                     validFiles.isEmpty()
                             ? null
                             : JsonMappers.plain().writeValueAsString(validFiles);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new SkillValidationException("The staged files could not be serialized.");
         }
         skill.stageImprovement(validDescription, validBody, filesJson, cleanRationale, proposedBy);
@@ -332,7 +332,7 @@ public class SkillService {
                                         .readValue(
                                                 skill.getPendingFilesJson(),
                                                 new TypeReference<Map<String, String>>() {}));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new SkillValidationException(
                         "The staged files are unreadable - discard this improvement instead.");
             }
@@ -385,7 +385,8 @@ public class SkillService {
                 skills.findByIdWithFiles(id)
                         .orElseThrow(() -> new SkillNotFoundException(id.toString()));
         skill.updateContent(
-                SkillMarkdownParser.validateDescription(description), SkillContentRules.validateBody(body));
+                SkillMarkdownParser.validateDescription(description),
+                SkillContentRules.validateBody(body));
         if (files != null) {
             skill.replaceFiles(SkillContentRules.validateFiles(files));
         }
@@ -672,5 +673,4 @@ public class SkillService {
                 .filter(s -> s != null && !s.isBlank())
                 .orElse("unknown");
     }
-
 }

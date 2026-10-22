@@ -22,10 +22,6 @@ import com.agenticai.core.agents.tools.web.BraveWebSearchClient;
 import com.agenticai.core.agents.tools.web.DeepResearchConfig;
 import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A research run's tool path, end to end, with no network and no model: the tools are resolved
@@ -55,7 +55,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class DeepResearchJobFlowTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String PAGE =
             "Intro text here. Solid-state batteries reach 400 Wh/kg in lab cells. Other sentence follows.";
     private static final String QUOTE = "Solid-state batteries reach 400 Wh/kg in lab cells.";
@@ -117,8 +117,7 @@ class DeepResearchJobFlowTest {
         DeepResearchConfig config = new DeepResearchConfig(true, 6, 8, 12000, 3, 2, 6, 45, 2);
         // The web tools are core/agents-browser's BuiltInWebTools behind the kernel's WebToolPort.
         BuiltInWebTools webTools =
-                new BuiltInWebTools(
-                        agents, credentialProvider, mock(ObjectProvider.class), config);
+                new BuiltInWebTools(agents, credentialProvider, mock(ObjectProvider.class), config);
         ObjectProvider<WebToolPort> port = mock(ObjectProvider.class);
         when(port.getIfAvailable()).thenReturn(webTools);
         resolver =
@@ -209,7 +208,7 @@ class DeepResearchJobFlowTest {
         assertEquals(2, research.get("searchLimit").asInt());
         assertEquals(3, research.get("fetchesUsed").asInt());
         assertEquals(3, research.get("fetchLimit").asInt());
-        assertEquals("S1", research.get("sources").get(0).get("id").asText());
+        assertEquals("S1", research.get("sources").get(0).get("id").asString());
 
         // 3. Progress went to THIS job's trail, in phase order, as platform (RUNTIME) notes.
         InOrder trail = inOrder(progress);
@@ -227,14 +226,14 @@ class DeepResearchJobFlowTest {
         List<ToolCallback> again = resolve(turn);
         JsonNode verified = MAPPER.readTree(tool(again, "verify_citations").call(citations("S1")));
         assertEquals(1, verified.get("verified").asInt());
-        assertEquals("SUPPORTED", verified.get("results").get(0).get("verdict").asText());
+        assertEquals("SUPPORTED", verified.get("results").get(0).get("verdict").asString());
 
         // 5. Ceilings hold across calls: a second deep_research gets no more searches and no more
         // reads.
         JsonNode second =
                 MAPPER.readTree(
                         tool(again, "deep_research").call("{\"question\":\"one more angle\"}"));
-        assertTrue(second.get("error").asText().contains("search ceiling"));
+        assertTrue(second.get("error").asString().contains("search ceiling"));
         assertEquals(2, searches.get());
         assertEquals(3, fetches.get());
         assertEquals(2, second.get("searchesUsed").asInt());
@@ -247,12 +246,12 @@ class DeepResearchJobFlowTest {
         ArrayNode sources = answer.putArray("sources");
         ObjectNode source = sources.addObject();
         source.put("id", "S1");
-        source.put("url", research.get("sources").get(0).get("url").asText());
-        source.put("title", research.get("sources").get(0).get("title").asText());
+        source.put("url", research.get("sources").get(0).get("url").asString());
+        source.put("title", research.get("sources").get(0).get("title").asString());
         ObjectNode quote = source.putArray("quotes").addObject();
         quote.put("quote", QUOTE);
         quote.put("claim", CLAIM);
-        quote.put("verdict", verified.get("results").get(0).get("verdict").asText());
+        quote.put("verdict", verified.get("results").get(0).get("verdict").asString());
         answer.putArray("unanswered").add("lithium battery");
         answer.put("partial", false);
         JobResultSchemaValidator validator =
@@ -274,7 +273,7 @@ class DeepResearchJobFlowTest {
         JsonNode verify = MAPPER.readTree(tool(tools, "verify_citations").call(citations("S1")));
         assertTrue(
                 verify.get("error")
-                        .asText()
+                        .asString()
                         .contains("no deep_research results exist in this turn"));
         // ...and the new turn has its own search allowance.
         JsonNode research =
@@ -294,7 +293,7 @@ class DeepResearchJobFlowTest {
                 MAPPER.readTree(
                         tool(resolve(turn), "deep_research")
                                 .call("{\"question\":\"battery progress\"}"));
-        assertEquals(RunBudget.STOP_REASON, refused.get("stopReason").asText());
+        assertEquals(RunBudget.STOP_REASON, refused.get("stopReason").asString());
         assertEquals(0, searches.get(), "a refused call must not spend platform-paid searches");
         assertEquals(0, fetches.get());
     }

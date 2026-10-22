@@ -1,14 +1,14 @@
 package com.agenticai.core.quality.grader;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Finds the JSON value an agent answered with. Models routinely wrap JSON in
- * prose or a markdown fence, and a grader that demanded a bare document would
- * grade formatting habits instead of content. Order: the whole trimmed text;
- * then the first balanced {@code {...}} or {@code [...]} span that parses.
+ * Finds the JSON value an agent answered with. Models routinely wrap JSON in prose or a markdown
+ * fence, and a grader that demanded a bare document would grade formatting habits instead of
+ * content. Order: the whole trimmed text; then the first balanced {@code {...}} or {@code [...]}
+ * span that parses.
  */
 final class JsonExtract {
 
@@ -17,10 +17,11 @@ final class JsonExtract {
     /** Cap on candidate spans tried per response (model output is untrusted). */
     private static final int MAX_ATTEMPTS = 50;
 
-    private JsonExtract() {
-    }
+    private JsonExtract() {}
 
-    /** @return the parsed value, or null when the text holds no parseable JSON object/array/scalar */
+    /**
+     * @return the parsed value, or null when the text holds no parseable JSON object/array/scalar
+     */
     static JsonNode firstJson(String text) {
         if (text == null || text.isBlank()) {
             return null;
@@ -53,7 +54,10 @@ final class JsonExtract {
         return null;
     }
 
-    /** Index of the bracket closing the one at {@code start}, string/escape aware; -1 when unbalanced. */
+    /**
+     * Index of the bracket closing the one at {@code start}, string/escape aware; -1 when
+     * unbalanced.
+     */
     private static int balancedEnd(String s, int start) {
         int depth = 0;
         boolean inString = false;

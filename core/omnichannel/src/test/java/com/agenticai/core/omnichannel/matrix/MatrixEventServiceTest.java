@@ -23,8 +23,6 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,11 +32,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Routing of one sync batch: policy, rooms, pairing, threads, encryption notice, invites. */
 class MatrixEventServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BOT = "@bot:hs";
     private static final String ROOM = "!room:hs";
 
@@ -55,9 +55,13 @@ class MatrixEventServiceTest {
     void setUp() throws Exception {
         TenantContext.set(TenantContext.of("tenant_test", "test", Set.of()));
         server = new FakeHomeserver();
-        server.on("GET /_matrix/client/v3/rooms/!room:hs/joined_members", 200,
+        server.on(
+                "GET /_matrix/client/v3/rooms/!room:hs/joined_members",
+                200,
                 "{\"joined\":{\"@bot:hs\":{},\"@alice:hs\":{}}}");
-        server.on("GET /_matrix/client/v3/rooms/!group:hs/joined_members", 200,
+        server.on(
+                "GET /_matrix/client/v3/rooms/!group:hs/joined_members",
+                200,
                 "{\"joined\":{\"@bot:hs\":{},\"@alice:hs\":{},\"@carol:hs\":{}}}");
         server.on("PUT /_matrix/client/v3/rooms/", 200, "{}");
         server.on("POST /_matrix/client/v3/rooms/", 200, "{\"room_id\":\"x\"}");
@@ -77,7 +81,8 @@ class MatrixEventServiceTest {
         when(session.getAgentId()).thenReturn(UUID.randomUUID());
         when(session.getSessionId()).thenReturn("s-1");
         when(session.getExternalId()).thenReturn(ROOM);
-        when(sessions.resolveOrCreate(eq(ChannelType.MATRIX), anyString(), anyString())).thenReturn(session);
+        when(sessions.resolveOrCreate(eq(ChannelType.MATRIX), anyString(), anyString()))
+                .thenReturn(session);
 
         service =
                 new MatrixEventService(
@@ -100,15 +105,20 @@ class MatrixEventServiceTest {
     private MatrixCredentialService.ActiveConnection connection(
             MatrixSenderMode mode, MatrixJoinPolicy join, String allowed) {
         return new MatrixCredentialService.ActiveConnection(
-                server.endpoint("tok"), BOT, null, new MatrixSenderPolicy(BOT, mode, join, allowed));
+                server.endpoint("tok"),
+                BOT,
+                null,
+                new MatrixSenderPolicy(BOT, mode, join, allowed));
     }
 
     private MatrixCredentialService.ActiveConnection defaults() {
         return connection(MatrixSenderMode.PAIRING, MatrixJoinPolicy.OFF, "");
     }
 
-    private static RoomEvent message(String room, String eventId, String sender, String contentJson) throws Exception {
-        return new RoomEvent(room, eventId, sender, "m.room.message", MAPPER.readTree(contentJson), 1L);
+    private static RoomEvent message(String room, String eventId, String sender, String contentJson)
+            throws Exception {
+        return new RoomEvent(
+                room, eventId, sender, "m.room.message", MAPPER.readTree(contentJson), 1L);
     }
 
     private static Batch batch(RoomEvent... events) {
@@ -117,25 +127,44 @@ class MatrixEventServiceTest {
 
     private JsonNode lastGatePayload() throws Exception {
         ArgumentCaptor<String> payload = ArgumentCaptor.forClass(String.class);
-        verify(gate, times(1)).evaluate(eq(MatrixChannelAdapter.ACTION_TYPE), anyString(), payload.capture(), anyString());
+        verify(gate, times(1))
+                .evaluate(
+                        eq(MatrixChannelAdapter.ACTION_TYPE),
+                        anyString(),
+                        payload.capture(),
+                        anyString());
         return MAPPER.readTree(payload.getValue());
     }
 
     @Test
     void aFailingEventDoesNotStopTheRestOfTheBatchOrMakeItRetriedForEver() throws Exception {
-        when(dedup.tryClaim(ChannelType.MATRIX, "$bad")).thenThrow(new IllegalStateException("redis down"));
+        when(dedup.tryClaim(ChannelType.MATRIX, "$bad"))
+                .thenThrow(new IllegalStateException("redis down"));
 
         boolean ok =
                 service.process(
                         defaults(),
                         batch(
-                                message(ROOM, "$bad", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"one\"}"),
-                                message(ROOM, "$good", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"two\"}")),
+                                message(
+                                        ROOM,
+                                        "$bad",
+                                        "@alice:hs",
+                                        "{\"msgtype\":\"m.text\",\"body\":\"one\"}"),
+                                message(
+                                        ROOM,
+                                        "$good",
+                                        "@alice:hs",
+                                        "{\"msgtype\":\"m.text\",\"body\":\"two\"}")),
                         true);
 
         // true = the position may advance; the second event was still answered.
         assertThat(ok).isTrue();
-        verify(gate, times(1)).evaluate(eq(MatrixChannelAdapter.ACTION_TYPE), anyString(), anyString(), anyString());
+        verify(gate, times(1))
+                .evaluate(
+                        eq(MatrixChannelAdapter.ACTION_TYPE),
+                        anyString(),
+                        anyString(),
+                        anyString());
     }
 
     @Test
@@ -143,16 +172,22 @@ class MatrixEventServiceTest {
         boolean ok =
                 service.process(
                         defaults(),
-                        batch(message(ROOM, "$e1", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"ping?\"}")),
+                        batch(
+                                message(
+                                        ROOM,
+                                        "$e1",
+                                        "@alice:hs",
+                                        "{\"msgtype\":\"m.text\",\"body\":\"ping?\"}")),
                         true);
 
         assertThat(ok).isTrue();
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("to").asText()).isEqualTo(ROOM);
-        assertThat(payload.path("body").asText()).isEqualTo("pong");
+        assertThat(payload.path("to").asString()).isEqualTo(ROOM);
+        assertThat(payload.path("body").asString()).isEqualTo("pong");
         // A direct chat needs no quote.
         assertThat(payload.path("replyToEventId").isNull()).isTrue();
-        assertThat(server.requestsTo("PUT", "/_matrix/client/v3/rooms/!room:hs/typing/")).hasSize(1);
+        assertThat(server.requestsTo("PUT", "/_matrix/client/v3/rooms/!room:hs/typing/"))
+                .hasSize(1);
     }
 
     @Test
@@ -161,10 +196,18 @@ class MatrixEventServiceTest {
         when(session.isPairingNoticeSent()).thenReturn(false);
         when(session.getPairingCode()).thenReturn("ABC123");
 
-        service.process(defaults(), batch(message(ROOM, "$e1", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")), true);
+        service.process(
+                defaults(),
+                batch(
+                        message(
+                                ROOM,
+                                "$e1",
+                                "@alice:hs",
+                                "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
+                true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("body").asText()).contains("ABC123").contains("approve");
+        assertThat(payload.path("body").asString()).contains("ABC123").contains("approve");
         verify(sessions).markPairingNoticeSent(session.getId());
         verify(agent, never()).chat(any(), any());
     }
@@ -173,7 +216,12 @@ class MatrixEventServiceTest {
     void aSenderOutsideTheAllowListIsIgnoredWithoutASessionOrAReply() throws Exception {
         service.process(
                 connection(MatrixSenderMode.ALLOWLIST, MatrixJoinPolicy.OFF, "@friend:hs"),
-                batch(message(ROOM, "$e1", "@stranger:hs", "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
+                batch(
+                        message(
+                                ROOM,
+                                "$e1",
+                                "@stranger:hs",
+                                "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
                 true);
 
         verify(sessions, never()).resolveOrCreate(any(), anyString(), anyString());
@@ -186,7 +234,11 @@ class MatrixEventServiceTest {
                 defaults(),
                 batch(
                         message(ROOM, "$e1", BOT, "{\"msgtype\":\"m.text\",\"body\":\"echo\"}"),
-                        message(ROOM, "$e2", "@alice:hs", "{\"msgtype\":\"m.notice\",\"body\":\"other bot\"}"),
+                        message(
+                                ROOM,
+                                "$e2",
+                                "@alice:hs",
+                                "{\"msgtype\":\"m.notice\",\"body\":\"other bot\"}"),
                         message(
                                 ROOM,
                                 "$e3",
@@ -198,22 +250,33 @@ class MatrixEventServiceTest {
     }
 
     @Test
-    void aGroupRoomIsAnsweredOnlyWhenTheBotIsMentionedAndTheReplyQuotesTheMessage() throws Exception {
+    void aGroupRoomIsAnsweredOnlyWhenTheBotIsMentionedAndTheReplyQuotesTheMessage()
+            throws Exception {
         String group = "!group:hs";
         when(session.getExternalId()).thenReturn(group);
         service.process(
                 defaults(),
-                batch(message(group, "$g1", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"just talking\"}")),
+                batch(
+                        message(
+                                group,
+                                "$g1",
+                                "@alice:hs",
+                                "{\"msgtype\":\"m.text\",\"body\":\"just talking\"}")),
                 true);
         verify(gate, never()).evaluate(anyString(), anyString(), anyString(), anyString());
 
         service.process(
                 defaults(),
-                batch(message(group, "$g2", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"@bot: what time is it\"}")),
+                batch(
+                        message(
+                                group,
+                                "$g2",
+                                "@alice:hs",
+                                "{\"msgtype\":\"m.text\",\"body\":\"@bot: what time is it\"}")),
                 true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("replyToEventId").asText()).isEqualTo("$g2");
+        assertThat(payload.path("replyToEventId").asString()).isEqualTo("$g2");
         assertThat(payload.path("threadRootEventId").isNull()).isTrue();
     }
 
@@ -230,15 +293,23 @@ class MatrixEventServiceTest {
                 true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("threadRootEventId").asText()).isEqualTo("$root");
-        assertThat(payload.path("replyToEventId").asText()).isEqualTo("$t1");
+        assertThat(payload.path("threadRootEventId").asString()).isEqualTo("$root");
+        assertThat(payload.path("replyToEventId").asString()).isEqualTo("$t1");
     }
 
     @Test
     void aDuplicateEventIsANoOp() throws Exception {
         when(dedup.tryClaim(ChannelType.MATRIX, "$dup")).thenReturn(false);
 
-        service.process(defaults(), batch(message(ROOM, "$dup", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")), true);
+        service.process(
+                defaults(),
+                batch(
+                        message(
+                                ROOM,
+                                "$dup",
+                                "@alice:hs",
+                                "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
+                true);
 
         verify(sessions, never()).resolveOrCreate(any(), anyString(), anyString());
     }
@@ -246,22 +317,33 @@ class MatrixEventServiceTest {
     @Test
     void anEncryptedRoomGetsTheUnsupportedNoticeExactlyOnce() throws Exception {
         when(notices.recordIfAbsent(ROOM, MatrixRoomNotice.KIND_ENCRYPTED)).thenReturn(1, 0);
-        RoomEvent encrypted = new RoomEvent(ROOM, "$x1", "@alice:hs", "m.room.encrypted", MAPPER.readTree("{}"), 1L);
-        RoomEvent encrypted2 = new RoomEvent(ROOM, "$x2", "@alice:hs", "m.room.encrypted", MAPPER.readTree("{}"), 2L);
+        RoomEvent encrypted =
+                new RoomEvent(
+                        ROOM, "$x1", "@alice:hs", "m.room.encrypted", MAPPER.readTree("{}"), 1L);
+        RoomEvent encrypted2 =
+                new RoomEvent(
+                        ROOM, "$x2", "@alice:hs", "m.room.encrypted", MAPPER.readTree("{}"), 2L);
 
         service.process(defaults(), batch(encrypted, encrypted2), true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("body").asText()).contains("end-to-end encrypted").contains("not support");
+        assertThat(payload.path("body").asString())
+                .contains("end-to-end encrypted")
+                .contains("not support");
         verify(sessions, never()).resolveOrCreate(any(), anyString(), anyString());
         verify(agent, never()).chat(any(), any());
     }
 
     @Test
     void anEncryptedRoomIsSilentForASenderThePolicyDrops() throws Exception {
-        RoomEvent encrypted = new RoomEvent(ROOM, "$x1", "@stranger:hs", "m.room.encrypted", MAPPER.readTree("{}"), 1L);
+        RoomEvent encrypted =
+                new RoomEvent(
+                        ROOM, "$x1", "@stranger:hs", "m.room.encrypted", MAPPER.readTree("{}"), 1L);
 
-        service.process(connection(MatrixSenderMode.ALLOWLIST, MatrixJoinPolicy.OFF, "@friend:hs"), batch(encrypted), true);
+        service.process(
+                connection(MatrixSenderMode.ALLOWLIST, MatrixJoinPolicy.OFF, "@friend:hs"),
+                batch(encrypted),
+                true);
 
         verify(notices, never()).recordIfAbsent(anyString(), anyString());
         verify(gate, never()).evaluate(anyString(), anyString(), anyString(), anyString());
@@ -269,9 +351,13 @@ class MatrixEventServiceTest {
 
     @Test
     void invitesAreIgnoredByDefault() {
-        Batch invites = new Batch("n", List.of(new Invite("!inv:hs", "@alice:hs")), List.of(), Map.of());
+        Batch invites =
+                new Batch("n", List.of(new Invite("!inv:hs", "@alice:hs")), List.of(), Map.of());
 
-        service.process(connection(MatrixSenderMode.PAIRING, MatrixJoinPolicy.OFF, "@alice:hs"), invites, true);
+        service.process(
+                connection(MatrixSenderMode.PAIRING, MatrixJoinPolicy.OFF, "@alice:hs"),
+                invites,
+                true);
 
         assertThat(server.requestsTo("POST", "/_matrix/client/v3/rooms/")).isEmpty();
     }
@@ -281,19 +367,31 @@ class MatrixEventServiceTest {
         Batch invites =
                 new Batch(
                         "n",
-                        List.of(new Invite("!ok:hs", "@alice:hs"), new Invite("!no:hs", "@stranger:hs")),
+                        List.of(
+                                new Invite("!ok:hs", "@alice:hs"),
+                                new Invite("!no:hs", "@stranger:hs")),
                         List.of(),
                         Map.of());
 
-        service.process(connection(MatrixSenderMode.PAIRING, MatrixJoinPolicy.ALLOWLIST, "@alice:hs"), invites, true);
+        service.process(
+                connection(MatrixSenderMode.PAIRING, MatrixJoinPolicy.ALLOWLIST, "@alice:hs"),
+                invites,
+                true);
 
         assertThat(server.requestsTo("POST", "/_matrix/client/v3/rooms/")).hasSize(1);
-        assertThat(server.requestsTo("POST", "/_matrix/client/v3/rooms/").get(0).path()).contains("!ok:hs/join");
+        assertThat(server.requestsTo("POST", "/_matrix/client/v3/rooms/").get(0).path())
+                .contains("!ok:hs/join");
     }
 
     @Test
     void theInitialSyncOnlyHandlesInvitesAndSkipsHistory() throws Exception {
-        Batch history = batch(message(ROOM, "$old", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"old\"}"));
+        Batch history =
+                batch(
+                        message(
+                                ROOM,
+                                "$old",
+                                "@alice:hs",
+                                "{\"msgtype\":\"m.text\",\"body\":\"old\"}"));
 
         boolean ok = service.process(defaults(), history, false);
 
@@ -307,12 +405,24 @@ class MatrixEventServiceTest {
         InboundChannelExecutor full = mock(InboundChannelExecutor.class); // acquire() returns null
         MatrixEventService shedding =
                 new MatrixEventService(
-                        sessions, agent, gate, mock(AuditLogService.class), dedup, server.client(), full, notices);
+                        sessions,
+                        agent,
+                        gate,
+                        mock(AuditLogService.class),
+                        dedup,
+                        server.client(),
+                        full,
+                        notices);
 
         boolean ok =
                 shedding.process(
                         defaults(),
-                        batch(message(ROOM, "$e1", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
+                        batch(
+                                message(
+                                        ROOM,
+                                        "$e1",
+                                        "@alice:hs",
+                                        "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
                         true);
 
         assertThat(ok).isFalse();
@@ -363,26 +473,47 @@ class MatrixEventServiceTest {
     }
 
     @Test
-    void mentionDetectionMatchesTheUserIdTheLocalpartAndMentionsButNotLookalikes() throws Exception {
-        assertThat(MatrixEventService.mentionsBot(MAPPER.readTree("{\"body\":\"hey @bot:hs\"}"), BOT)).isTrue();
-        assertThat(MatrixEventService.mentionsBot(MAPPER.readTree("{\"body\":\"@Bot, ping\"}"), BOT)).isTrue();
+    void mentionDetectionMatchesTheUserIdTheLocalpartAndMentionsButNotLookalikes()
+            throws Exception {
         assertThat(
                         MatrixEventService.mentionsBot(
-                                MAPPER.readTree("{\"body\":\"x\",\"m.mentions\":{\"user_ids\":[\"@bot:hs\"]}}"), BOT))
+                                MAPPER.readTree("{\"body\":\"hey @bot:hs\"}"), BOT))
                 .isTrue();
-        assertThat(MatrixEventService.mentionsBot(MAPPER.readTree("{\"body\":\"@bottle is here\"}"), BOT)).isFalse();
-        assertThat(MatrixEventService.mentionsBot(MAPPER.readTree("{\"body\":\"nothing\"}"), BOT)).isFalse();
+        assertThat(
+                        MatrixEventService.mentionsBot(
+                                MAPPER.readTree("{\"body\":\"@Bot, ping\"}"), BOT))
+                .isTrue();
+        assertThat(
+                        MatrixEventService.mentionsBot(
+                                MAPPER.readTree(
+                                        "{\"body\":\"x\",\"m.mentions\":{\"user_ids\":[\"@bot:hs\"]}}"),
+                                BOT))
+                .isTrue();
+        assertThat(
+                        MatrixEventService.mentionsBot(
+                                MAPPER.readTree("{\"body\":\"@bottle is here\"}"), BOT))
+                .isFalse();
+        assertThat(MatrixEventService.mentionsBot(MAPPER.readTree("{\"body\":\"nothing\"}"), BOT))
+                .isFalse();
     }
 
     @Test
     void aSessionHeldByAHumanSwallowsTheMessage() throws Exception {
-        var held = new com.agenticai.core.omnichannel.session.ConversationHeldByHumanException(session);
-        when(sessions.resolveOrCreate(eq(ChannelType.MATRIX), anyString(), anyString())).thenThrow(held);
+        var held =
+                new com.agenticai.core.omnichannel.session.ConversationHeldByHumanException(
+                        session);
+        when(sessions.resolveOrCreate(eq(ChannelType.MATRIX), anyString(), anyString()))
+                .thenThrow(held);
 
         boolean ok =
                 service.process(
                         defaults(),
-                        batch(message(ROOM, "$h1", "@alice:hs", "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
+                        batch(
+                                message(
+                                        ROOM,
+                                        "$h1",
+                                        "@alice:hs",
+                                        "{\"msgtype\":\"m.text\",\"body\":\"hi\"}")),
                         true);
 
         assertThat(ok).isTrue();

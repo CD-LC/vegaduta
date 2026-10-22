@@ -70,7 +70,7 @@ class PlatformHostedLlmProviderKeylessTest {
         mockServer
                 .expect(requestTo("https://ollama.example/v1/models"))
                 .andExpect(method(HttpMethod.GET))
-                .andExpect(r -> assertFalse(r.getHeaders().containsKey("Authorization")))
+                .andExpect(r -> assertFalse(r.getHeaders().containsHeader("Authorization")))
                 .andRespond(withSuccess());
 
         service.createAllowingBlankKey(request("  "));

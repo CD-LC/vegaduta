@@ -1,24 +1,24 @@
 package com.agenticai.core.mcpserver.expose;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Pure helpers for the {@code workflow_<slug>} tools' arguments.
  *
- * <p><b>Honest scope:</b> a workflow's trigger takes ONE plain-string input today
- * ({@code WorkflowService#run(id, input, requestedBy)}) - the engine has no typed input contract.
- * So the JSON Schema advertised to the MCP client is derived from the Trigger node's config only
- * when its author declared one ({@code inputSchema} holding a JSON-Schema-like object, or a
- * {@code fields} list of {@code {key|name, type, required, label}}); otherwise it is an open
- * object. Either way the arguments are handed to the workflow as text: a lone {@code input} string
- * is passed through verbatim, anything else is passed as its JSON text.
+ * <p><b>Honest scope:</b> a workflow's trigger takes ONE plain-string input today ({@code
+ * WorkflowService#run(id, input, requestedBy)}) - the engine has no typed input contract. So the
+ * JSON Schema advertised to the MCP client is derived from the Trigger node's config only when its
+ * author declared one ({@code inputSchema} holding a JSON-Schema-like object, or a {@code fields}
+ * list of {@code {key|name, type, required, label}}); otherwise it is an open object. Either way
+ * the arguments are handed to the workflow as text: a lone {@code input} string is passed through
+ * verbatim, anything else is passed as its JSON text.
  */
 public final class McpWorkflowInputSchema {
 
@@ -32,10 +32,14 @@ public final class McpWorkflowInputSchema {
     public static String openSchemaJson() {
         ObjectNode root = MAPPER.createObjectNode();
         root.put("type", "object");
-        root.put("description", "Input for the workflow. Pass {\"input\": \"some text\"} to give the trigger a plain string; "
-            + "any other JSON object is handed to the trigger as its JSON text.");
+        root.put(
+                "description",
+                "Input for the workflow. Pass {\"input\": \"some text\"} to give the trigger a plain string; "
+                        + "any other JSON object is handed to the trigger as its JSON text.");
         ObjectNode properties = root.putObject("properties");
-        properties.putObject("input").put("description", "Plain-text input for the workflow's trigger (optional).");
+        properties
+                .putObject("input")
+                .put("description", "Plain-text input for the workflow's trigger (optional).");
         root.put("additionalProperties", true);
         return root.toString();
     }
@@ -51,7 +55,8 @@ public final class McpWorkflowInputSchema {
         }
         try {
             Object declared = triggerConfig.get("inputSchema");
-            if (declared instanceof Map<?, ?> declaredMap && declaredMap.get("properties") instanceof Map<?, ?>) {
+            if (declared instanceof Map<?, ?> declaredMap
+                    && declaredMap.get("properties") instanceof Map<?, ?>) {
                 ObjectNode root = MAPPER.createObjectNode();
                 root.put("type", "object");
                 root.set("properties", MAPPER.valueToTree(declaredMap.get("properties")));
@@ -76,13 +81,19 @@ public final class McpWorkflowInputSchema {
                     if (!(field instanceof Map<?, ?> fieldMap)) {
                         continue;
                     }
-                    Object key = fieldMap.get("key") != null ? fieldMap.get("key") : fieldMap.get("name");
+                    Object key =
+                            fieldMap.get("key") != null
+                                    ? fieldMap.get("key")
+                                    : fieldMap.get("name");
                     if (!(key instanceof String keyText) || keyText.isBlank()) {
                         continue;
                     }
                     ObjectNode property = properties.putObject(keyText);
                     property.put("type", jsonType(fieldMap.get("type")));
-                    Object label = fieldMap.get("label") != null ? fieldMap.get("label") : fieldMap.get("description");
+                    Object label =
+                            fieldMap.get("label") != null
+                                    ? fieldMap.get("label")
+                                    : fieldMap.get("description");
                     if (label instanceof String labelText && !labelText.isBlank()) {
                         property.put("description", labelText);
                     }
@@ -127,8 +138,11 @@ public final class McpWorkflowInputSchema {
         if (arguments == null || arguments.isNull() || arguments.isMissingNode()) {
             return "";
         }
-        if (arguments.isObject() && arguments.size() == 1 && arguments.has("input") && arguments.get("input").isTextual()) {
-            return arguments.get("input").asText();
+        if (arguments.isObject()
+                && arguments.size() == 1
+                && arguments.has("input")
+                && arguments.get("input").isString()) {
+            return arguments.get("input").asString();
         }
         if (arguments.isObject() && arguments.isEmpty()) {
             return "";

@@ -1,9 +1,5 @@
 package com.agenticai.core.workflow.portability;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -17,6 +13,10 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 import org.yaml.snakeyaml.representer.Representer;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Reads untrusted YAML (a Dify DSL file) into a Jackson tree without ever constructing an

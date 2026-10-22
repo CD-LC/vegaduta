@@ -20,8 +20,6 @@ import com.agenticai.core.agents.tools.classification.ToolTrustTier;
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -29,6 +27,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * schedule_task: the model proposes (arguments in), the service validates and creates (identity
@@ -37,7 +37,7 @@ import org.mockito.ArgumentCaptor;
  */
 class ScheduleTaskToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final UUID agentId = UUID.randomUUID();
     private ScheduledTaskService service;
@@ -105,7 +105,18 @@ class ScheduleTaskToolCallbackTest {
                 .containsExactly("daily", "weekdays", "weekly", "monthly", "custom");
         assertThat(schema.at("/properties/delivery/enum"))
                 .extracting(JsonNode::asText)
-                .containsExactly("in_app", "email", "whatsapp", "whatsapp_qr", "telegram", "slack", "signal", "matrix", "imessage", "a2a", "voice");
+                .containsExactly(
+                        "in_app",
+                        "email",
+                        "whatsapp",
+                        "whatsapp_qr",
+                        "telegram",
+                        "slack",
+                        "signal",
+                        "matrix",
+                        "imessage",
+                        "a2a",
+                        "voice");
         // Identity is never an argument.
         assertThat(schema.at("/properties").has("agentId")).isFalse();
         assertThat(schema.at("/properties").has("owner")).isFalse();
@@ -148,7 +159,7 @@ class ScheduleTaskToolCallbackTest {
         assertThat(r.deliveryTo()).isEqualTo("+919876543210");
         JsonNode json = MAPPER.readTree(out);
         assertThat(json.get("scheduled").asBoolean()).isTrue();
-        assertThat(json.get("when").asText()).contains("Every weekday");
+        assertThat(json.get("when").asString()).contains("Every weekday");
         assertThat(json.get("nextRuns")).hasSize(2);
     }
 

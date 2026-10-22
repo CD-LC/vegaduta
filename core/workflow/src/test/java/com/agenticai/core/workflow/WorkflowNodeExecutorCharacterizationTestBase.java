@@ -26,14 +26,16 @@ import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
 import com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequestService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** Shared fixture of the {@link WorkflowNodeExecutor} characterisation tests: every collaborator mocked. */
+/**
+ * Shared fixture of the {@link WorkflowNodeExecutor} characterisation tests: every collaborator
+ * mocked.
+ */
 @SuppressWarnings("unchecked")
 abstract class WorkflowNodeExecutorCharacterizationTestBase {
 
@@ -110,7 +112,7 @@ abstract class WorkflowNodeExecutorCharacterizationTestBase {
                 toolLogs,
                 devices,
                 toolProvider,
-                new ObjectMapper(),
+                com.agenticai.core.json.JsonMappers.plain(),
                 workflowService,
                 cache,
                 classifier,
@@ -127,8 +129,7 @@ abstract class WorkflowNodeExecutorCharacterizationTestBase {
     }
 
     static WorkflowNodeDto node(String type, Map<String, Object> config) {
-        return new WorkflowNodeDto(
-                "n1", type, Map.of(), Map.of("config", config, "label", "Node"));
+        return new WorkflowNodeDto("n1", type, Map.of(), Map.of("config", config, "label", "Node"));
     }
 
     NodeExecutionResult run(WorkflowNodeDto node, String input) {

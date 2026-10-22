@@ -201,7 +201,8 @@ public class ClientRequestExceptionHandler {
     }
 
     // core/omnichannel - the per-sender / per-channel turn cap every inbound channel shares
-    // (InboundRateLimiter, raised from ChannelSessionService#resolveOrCreate). 429 with Retry-After;
+    // (InboundRateLimiter, raised from ChannelSessionService#resolveOrCreate). 429 with
+    // Retry-After;
     // the message is the constant friendly text, never the limit or the count.
     @ExceptionHandler(InboundRateLimitedException.class)
     public ResponseEntity<Map<String, Object>> handleInboundRateLimited(
@@ -280,7 +281,7 @@ public class ClientRequestExceptionHandler {
     @ExceptionHandler(AttachmentPayloadTooLargeException.class)
     public ResponseEntity<Map<String, Object>> handleAttachmentPayloadTooLarge(
             AttachmentPayloadTooLargeException e) {
-        return errorResponse(e, HttpStatus.PAYLOAD_TOO_LARGE, e.getMessage());
+        return errorResponse(e, HttpStatus.CONTENT_TOO_LARGE, e.getMessage());
     }
 
     @ExceptionHandler(AttachmentModalityNotSupportedException.class)

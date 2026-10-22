@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -10,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Builds the single-line JSON payloads {@link AgentStepEventEmitter} puts on the wire, one factory
@@ -20,9 +20,9 @@ import java.util.UUID;
  *
  * <h2>Framing: the repo's existing in-band sentinel convention, not a new one</h2>
  *
- * {@link AgentStepEventEmitter#STEP_EVENT_MARKER} is a sibling of {@code AgentController#STREAM_ERROR_MARKER} and
- * follows exactly the same rules that marker established, deliberately rather than inventing a
- * second scheme:
+ * {@link AgentStepEventEmitter#STEP_EVENT_MARKER} is a sibling of {@code
+ * AgentController#STREAM_ERROR_MARKER} and follows exactly the same rules that marker established,
+ * deliberately rather than inventing a second scheme:
  *
  * <ul>
  *   <li>It is an <b>in-band chunk prefix</b>, not an SSE {@code event:} name. Spring's {@code
@@ -55,12 +55,17 @@ final class AgentStepEventPayloads {
 
     private AgentStepEventPayloads() {}
 
-    /** One payload as single-line JSON (the part after {@link AgentStepEventEmitter#STEP_EVENT_MARKER}). */
-    static String toJson(Map<String, Object> event) throws JsonProcessingException {
+    /**
+     * One payload as single-line JSON (the part after {@link
+     * AgentStepEventEmitter#STEP_EVENT_MARKER}).
+     */
+    static String toJson(Map<String, Object> event) throws JacksonException {
         return MAPPER.writeValueAsString(event);
     }
 
-    /** A liveness beat: {@code type} plus elapsed {@code ms} since {@code runStartedAt}, when known. */
+    /**
+     * A liveness beat: {@code type} plus elapsed {@code ms} since {@code runStartedAt}, when known.
+     */
     static Map<String, Object> heartbeat(Instant runStartedAt) {
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("type", "heartbeat");

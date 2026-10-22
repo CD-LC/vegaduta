@@ -2,13 +2,13 @@ package com.agenticai.core.common.apicontract;
 
 import com.agenticai.core.common.ErrorResponseFactory;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Writes an error from a servlet filter in the same shape {@code ErrorResponseFactory} gives the
@@ -36,6 +36,8 @@ final class ProblemResponses {
                         : MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter()
-                .write(MAPPER.writeValueAsString(errors.body(status, message, typeSlug, extensions)));
+                .write(
+                        MAPPER.writeValueAsString(
+                                errors.body(status, message, typeSlug, extensions)));
     }
 }

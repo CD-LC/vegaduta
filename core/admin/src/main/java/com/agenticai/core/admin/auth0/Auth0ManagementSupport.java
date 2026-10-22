@@ -4,8 +4,6 @@ import com.agenticai.core.admin.keycloak.KeycloakAdminException;
 import com.agenticai.core.admin.keycloak.KeycloakUserConflictException;
 import com.agenticai.core.admin.keycloak.KeycloakUserValidationException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,27 +18,27 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * HTTP plumbing shared by the Auth0 Management API adapter: the cached client_credentials token,
  * bearer headers, upstream-failure translation (generic and create-user specific), paged user and
- * role reads, and Lucene escaping. Package-private, the Auth0 counterpart of the Keycloak
- * adapter's {@code KeycloakAdminSupport}; the public surface is {@link Auth0UserAdminClient}.
+ * role reads, and Lucene escaping. Package-private, the Auth0 counterpart of the Keycloak adapter's
+ * {@code KeycloakAdminSupport}; the public surface is {@link Auth0UserAdminClient}.
  */
 abstract class Auth0ManagementSupport {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMappers.plain();
 
-    /**
-     * {@code per_page} ceiling of {@code GET /api/v2/users} (Auth0's documented maximum).
-     */
+    /** {@code per_page} ceiling of {@code GET /api/v2/users} (Auth0's documented maximum). */
     static final int USER_PAGE_SIZE = 100;
 
     /**
      * Hard ceiling on user-list pages. Auth0's search endpoint returns at most 1000 users for a
-     * query (its documented search limit), so ten full pages is every user Auth0 will ever hand
-     * out for one call anyway; the ceiling also guarantees termination against a misbehaving
-     * server, same as the Keycloak adapter's {@code MAX_USER_PAGES}.
+     * query (its documented search limit), so ten full pages is every user Auth0 will ever hand out
+     * for one call anyway; the ceiling also guarantees termination against a misbehaving server,
+     * same as the Keycloak adapter's {@code MAX_USER_PAGES}.
      */
     static final int MAX_USER_PAGES = 10;
 
@@ -69,8 +67,8 @@ abstract class Auth0ManagementSupport {
 
     /**
      * @param restClientBuilder the AUTO-CONFIGURED builder - injected, never a bare {@code
-     *     RestClient.builder()}, so {@code spring.http.client.*} timeouts apply (same fix as
-     *     {@link com.agenticai.core.admin.keycloak.KeycloakAdminClient}'s constructor javadoc).
+     *     RestClient.builder()}, so {@code spring.http.client.*} timeouts apply (same fix as {@link
+     *     com.agenticai.core.admin.keycloak.KeycloakAdminClient}'s constructor javadoc).
      * @param domain the Auth0 tenant domain; a bare host ({@code my-tenant.auth0.com}) or a full
      *     URL ({@code https://my-tenant.auth0.com}) - normalized in the constructor.
      */
@@ -86,8 +84,7 @@ abstract class Auth0ManagementSupport {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.connection = connection;
-        this.audience =
-                audience == null || audience.isBlank() ? baseUrl + "/api/v2/" : audience;
+        this.audience = audience == null || audience.isBlank() ? baseUrl + "/api/v2/" : audience;
     }
 
     static String normalizeDomain(String domain) {
@@ -135,8 +132,7 @@ abstract class Auth0ManagementSupport {
         long ttlSeconds = expiresIn instanceof Number number ? number.longValue() : 86_400L;
         cachedToken = String.valueOf(response.get("access_token"));
         tokenExpiresAt =
-                Instant.now()
-                        .plusSeconds(Math.max(0L, ttlSeconds - TOKEN_EXPIRY_SKEW_SECONDS));
+                Instant.now().plusSeconds(Math.max(0L, ttlSeconds - TOKEN_EXPIRY_SKEW_SECONDS));
         return cachedToken;
     }
 
@@ -292,14 +288,12 @@ abstract class Auth0ManagementSupport {
         return idsByName;
     }
 
-    final List<String> resolveRoleIds(
-            Set<String> roleNames, Map<String, String> roleIdsByName) {
+    final List<String> resolveRoleIds(Set<String> roleNames, Map<String, String> roleIdsByName) {
         List<String> ids = new ArrayList<>(roleNames.size());
         for (String roleName : roleNames) {
             String id = roleIdsByName.get(roleName);
             if (id == null) {
-                throw new KeycloakAdminException(
-                        "Auth0 role '" + roleName + "' does not exist");
+                throw new KeycloakAdminException("Auth0 role '" + roleName + "' does not exist");
             }
             ids.add(id);
         }
@@ -331,10 +325,7 @@ abstract class Auth0ManagementSupport {
         if (status == 409) {
             String message = extractAuth0Message(body);
             return new KeycloakUserConflictException(
-                    message != null
-                            ? message
-                            : "A user with these details already exists.",
-                    e);
+                    message != null ? message : "A user with these details already exists.", e);
         }
         if (status == 400) {
             String message = extractAuth0Message(body);
@@ -356,13 +347,13 @@ abstract class Auth0ManagementSupport {
 
     /**
      * Auth0's error bodies carry the human-readable reason in {@code "message"} ({@code
-     * {"statusCode":409,"error":"Conflict","message":"The user already exists."}}). Returns null
-     * on any unparseable/other shape - never throws.
+     * {"statusCode":409,"error":"Conflict","message":"The user already exists."}}). Returns null on
+     * any unparseable/other shape - never throws.
      */
     private static String extractAuth0Message(String body) {
         try {
             JsonNode node = OBJECT_MAPPER.readTree(body);
-            String message = node.path("message").asText(null);
+            String message = node.path("message").asString(null);
             return message == null || message.isBlank() ? null : message;
         } catch (Exception ignored) {
             return null;
@@ -370,9 +361,9 @@ abstract class Auth0ManagementSupport {
     }
 
     /**
-     * Minimal Lucene-term escaping for user-supplied values embedded in a quoted {@code q}
-     * string (tenant ids and emails - neither legitimately contains {@code "} or {@code \}, but
-     * a crafted value must not break the query syntax).
+     * Minimal Lucene-term escaping for user-supplied values embedded in a quoted {@code q} string
+     * (tenant ids and emails - neither legitimately contains {@code "} or {@code \}, but a crafted
+     * value must not break the query syntax).
      */
     static String escapeLucene(String value) {
         return value.replace("\\", "\\\\").replace("\"", "\\\"");

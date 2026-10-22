@@ -21,8 +21,6 @@ import com.agenticai.core.quality.dataset.dto.EvalDatasetDtos.RunResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,11 +28,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Wave E wiring: the calibration-set run dispatch on {@code EvalCredibilityController}, and the additive
- * {@code judgeCalibration} stamp on run responses and bundles. The point of most tests is the FLAG-OFF
- * guarantee: with the feature off, nothing about a run response or a bundle changes.
+ * Wave E wiring: the calibration-set run dispatch on {@code EvalCredibilityController}, and the
+ * additive {@code judgeCalibration} stamp on run responses and bundles. The point of most tests is
+ * the FLAG-OFF guarantee: with the feature off, nothing about a run response or a bundle changes.
  */
 class JudgeTrustWiringTest {
 
@@ -66,7 +66,12 @@ class JudgeTrustWiringTest {
 
     private EvalCredibilityController credibility() {
         return new EvalCredibilityController(
-            datasetService, runService, mock(ResearchSeedService.class), calibration, setService, limits);
+                datasetService,
+                runService,
+                mock(ResearchSeedService.class),
+                calibration,
+                setService,
+                limits);
     }
 
     private static EvalRun runWithJudge(String judgeModel) {
@@ -85,8 +90,12 @@ class JudgeTrustWiringTest {
         CalibrationResponse expected = new CalibrationResponse("J", "A", null, null, "m");
         when(calibration.calibrate(AGENT, pairs)).thenReturn(expected);
 
-        CalibrationResponse body = credibility()
-            .calibrate(AGENT, new EvalCredibilityController.CalibrationRequest(pairs, null)).getBody();
+        CalibrationResponse body =
+                credibility()
+                        .calibrate(
+                                AGENT,
+                                new EvalCredibilityController.CalibrationRequest(pairs, null))
+                        .getBody();
 
         assertEquals(expected, body);
         verify(setService, never()).calibrateSet(any(), any());
@@ -94,12 +103,16 @@ class JudgeTrustWiringTest {
 
     @Test
     void aCalibrationSetIdRunsTheStoredSet() {
-        CalibrationResponse recorded = new CalibrationResponse("J", "A", null, null, "m")
-            .withRecord(SET, UUID.randomUUID(), java.time.Instant.now());
+        CalibrationResponse recorded =
+                new CalibrationResponse("J", "A", null, null, "m")
+                        .withRecord(SET, UUID.randomUUID(), java.time.Instant.now());
         when(setService.calibrateSet(AGENT, SET)).thenReturn(recorded);
 
-        CalibrationResponse body = credibility()
-            .calibrate(AGENT, new EvalCredibilityController.CalibrationRequest(null, SET)).getBody();
+        CalibrationResponse body =
+                credibility()
+                        .calibrate(
+                                AGENT, new EvalCredibilityController.CalibrationRequest(null, SET))
+                        .getBody();
 
         assertEquals(recorded, body);
         verify(calibration, never()).calibrate(any(), any());
@@ -107,16 +120,30 @@ class JudgeTrustWiringTest {
 
     @Test
     void anEmptyExamplesListAlongsideASetIdIsAccepted() {
-        when(setService.calibrateSet(AGENT, SET)).thenReturn(new CalibrationResponse("J", "A", null, null, "m"));
-        assertNotNull(credibility()
-            .calibrate(AGENT, new EvalCredibilityController.CalibrationRequest(List.of(), SET)).getBody());
+        when(setService.calibrateSet(AGENT, SET))
+                .thenReturn(new CalibrationResponse("J", "A", null, null, "m"));
+        assertNotNull(
+                credibility()
+                        .calibrate(
+                                AGENT,
+                                new EvalCredibilityController.CalibrationRequest(List.of(), SET))
+                        .getBody());
     }
 
     @Test
     void sendingBothInlineExamplesAndASetIsA400() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> credibility().calibrate(
-            AGENT, new EvalCredibilityController.CalibrationRequest(
-                List.of(new LabeledPair("p", "q", "a", "b", "A")), SET)));
+        IllegalArgumentException e =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                credibility()
+                                        .calibrate(
+                                                AGENT,
+                                                new EvalCredibilityController.CalibrationRequest(
+                                                        List.of(
+                                                                new LabeledPair(
+                                                                        "p", "q", "a", "b", "A")),
+                                                        SET)));
         assertTrue(e.getMessage().contains("not both"));
         verify(setService, never()).calibrateSet(any(), any());
         verify(calibration, never()).calibrate(any(), any());
@@ -124,16 +151,21 @@ class JudgeTrustWiringTest {
 
     @Test
     void theInlineResponseJsonIsUnchangedByTheNewOptionalFields() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
         JsonNode inline = mapper.valueToTree(new CalibrationResponse("J", "A", null, null, "m"));
         assertFalse(inline.has("calibrationSetId"));
         assertFalse(inline.has("resultId"));
         assertFalse(inline.has("recordedAt"));
         assertTrue(inline.has("judgeModel"));
 
-        JsonNode stored = mapper.valueToTree(new CalibrationResponse("J", "A", null, null, "m")
-            .withRecord(SET, UUID.randomUUID(), java.time.Instant.parse("2026-10-05T00:00:00Z")));
-        assertEquals(SET.toString(), stored.get("calibrationSetId").asText());
+        JsonNode stored =
+                mapper.valueToTree(
+                        new CalibrationResponse("J", "A", null, null, "m")
+                                .withRecord(
+                                        SET,
+                                        UUID.randomUUID(),
+                                        java.time.Instant.parse("2026-10-05T00:00:00Z")));
+        assertEquals(SET.toString(), stored.get("calibrationSetId").asString());
         assertTrue(stored.has("resultId"));
         assertTrue(stored.has("recordedAt"));
     }
@@ -141,7 +173,8 @@ class JudgeTrustWiringTest {
     // ---- run response stamp -------------------------------------------
 
     private EvalDatasetController datasetController(JudgeCalibrationSetService trust) {
-        EvalDatasetController controller = new EvalDatasetController(datasetService, runService, limits, false);
+        EvalDatasetController controller =
+                new EvalDatasetController(datasetService, runService, limits, false);
         controller.setJudgeTrust(trust);
         return controller;
     }
@@ -157,13 +190,17 @@ class JudgeTrustWiringTest {
     void flagOffRunResponsesCarryNoJudgeCalibrationAtAll() throws Exception {
         // The service is present but the feature is off: trustFor answers empty.
         when(setService.trustFor("OPENAI/judge")).thenReturn(Optional.empty());
-        RunResponse withService = listedRun(datasetController(setService), runWithJudge("OPENAI/judge"));
-        RunResponse withoutService = listedRun(datasetController(null), runWithJudge("OPENAI/judge"));
+        RunResponse withService =
+                listedRun(datasetController(setService), runWithJudge("OPENAI/judge"));
+        RunResponse withoutService =
+                listedRun(datasetController(null), runWithJudge("OPENAI/judge"));
 
         assertNull(withService.judgeCalibration());
         assertNull(withoutService.judgeCalibration());
-        JsonNode json = new ObjectMapper().findAndRegisterModules().valueToTree(withService);
-        assertFalse(json.has("judgeCalibration"), "absent, not null, so the flag-off JSON is unchanged");
+        JsonNode json = com.agenticai.core.json.JsonMappers.withJavaTime().valueToTree(withService);
+        assertFalse(
+                json.has("judgeCalibration"),
+                "absent, not null, so the flag-off JSON is unchanged");
     }
 
     @Test
@@ -176,20 +213,23 @@ class JudgeTrustWiringTest {
 
     @Test
     void anUncalibratedJudgeIsStamped() throws Exception {
-        when(setService.trustFor("OPENAI/judge")).thenReturn(Optional.of(new JudgeTrust("UNCALIBRATED", null, null)));
+        when(setService.trustFor("OPENAI/judge"))
+                .thenReturn(Optional.of(new JudgeTrust("UNCALIBRATED", null, null)));
 
         RunResponse r = listedRun(datasetController(setService), runWithJudge("OPENAI/judge"));
 
         assertEquals("UNCALIBRATED", r.judgeCalibration().status());
         assertNull(r.judgeCalibration().kappa());
-        JsonNode json = new ObjectMapper().findAndRegisterModules().valueToTree(r);
-        assertEquals("UNCALIBRATED", json.get("judgeCalibration").get("status").asText());
+        JsonNode json = com.agenticai.core.json.JsonMappers.withJavaTime().valueToTree(r);
+        assertEquals("UNCALIBRATED", json.get("judgeCalibration").get("status").asString());
     }
 
     @Test
     void aLowAndAnOkJudgeCarryKappaAndN() {
-        when(setService.trustFor("OPENAI/low")).thenReturn(Optional.of(new JudgeTrust("LOW", 0.31, 24)));
-        when(setService.trustFor("OPENAI/ok")).thenReturn(Optional.of(new JudgeTrust("OK", 0.82, 30)));
+        when(setService.trustFor("OPENAI/low"))
+                .thenReturn(Optional.of(new JudgeTrust("LOW", 0.31, 24)));
+        when(setService.trustFor("OPENAI/ok"))
+                .thenReturn(Optional.of(new JudgeTrust("OK", 0.82, 30)));
 
         RunResponse low = listedRun(datasetController(setService), runWithJudge("OPENAI/low"));
         RunResponse ok = listedRun(datasetController(setService), runWithJudge("OPENAI/ok"));
@@ -203,7 +243,8 @@ class JudgeTrustWiringTest {
 
     @Test
     void theStampNeverChangesPassFailFields() {
-        when(setService.trustFor("OPENAI/judge")).thenReturn(Optional.of(new JudgeTrust("LOW", 0.1, 20)));
+        when(setService.trustFor("OPENAI/judge"))
+                .thenReturn(Optional.of(new JudgeTrust("LOW", 0.1, 20)));
         EvalRun run = runWithJudge("OPENAI/judge");
         RunResponse stamped = listedRun(datasetController(setService), run);
         RunResponse plain = listedRun(datasetController(null), run);
@@ -222,7 +263,8 @@ class JudgeTrustWiringTest {
 
     @Test
     void theBundleOmitsJudgeCalibrationWhenThereIsNone() {
-        EvalRunBundle.Bundle bundle = EvalRunBundle.build(dataset(), List.of(), runWithJudge("OPENAI/judge"), List.of());
+        EvalRunBundle.Bundle bundle =
+                EvalRunBundle.build(dataset(), List.of(), runWithJudge("OPENAI/judge"), List.of());
         assertFalse(bundle.live().containsKey("judgeCalibration"));
         assertFalse(bundle.content().toString().contains("judgeCalibration"));
     }
@@ -232,15 +274,20 @@ class JudgeTrustWiringTest {
         EvalDataset dataset = dataset();
         EvalRun run = runWithJudge("OPENAI/judge");
         EvalRunBundle.Bundle plain = EvalRunBundle.build(dataset, List.of(), run, List.of());
-        EvalRunBundle.Bundle stamped = EvalRunBundle.build(dataset, List.of(), run, List.of(),
-            new JudgeTrust("LOW", 0.42, 22));
+        EvalRunBundle.Bundle stamped =
+                EvalRunBundle.build(
+                        dataset, List.of(), run, List.of(), new JudgeTrust("LOW", 0.42, 22));
 
         @SuppressWarnings("unchecked")
-        java.util.Map<String, Object> trust = (java.util.Map<String, Object>) stamped.live().get("judgeCalibration");
+        java.util.Map<String, Object> trust =
+                (java.util.Map<String, Object>) stamped.live().get("judgeCalibration");
         assertEquals("LOW", trust.get("status"));
         assertEquals(0.42, trust.get("kappa"));
         assertEquals(22, trust.get("n"));
-        assertEquals(plain.sha256(), stamped.sha256(), "calibration status is mutable and must not move the digest");
+        assertEquals(
+                plain.sha256(),
+                stamped.sha256(),
+                "calibration status is mutable and must not move the digest");
         assertEquals(plain.content(), stamped.content());
     }
 
@@ -253,7 +300,8 @@ class JudgeTrustWiringTest {
         when(datasetService.listCases(DATASET)).thenReturn(List.of());
         when(runService.requireRun(DATASET, runId)).thenReturn(run);
         when(runService.listCaseResults(runId)).thenReturn(List.of());
-        when(setService.trustFor("OPENAI/judge")).thenReturn(Optional.of(new JudgeTrust("OK", 0.9, 30)));
+        when(setService.trustFor("OPENAI/judge"))
+                .thenReturn(Optional.of(new JudgeTrust("OK", 0.9, 30)));
 
         EvalRunBundle.Bundle bundle = credibility().runBundle(AGENT, DATASET, runId).getBody();
 

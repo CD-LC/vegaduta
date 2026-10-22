@@ -5,7 +5,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Receives Matrix messages by the Client-Server API's {@code /sync} long poll, the only way a
@@ -26,11 +26,11 @@ import org.springframework.stereotype.Component;
  * iteration, so no thread is ever left holding a tenant.
  *
  * <p>Off unless {@code app.matrix.sync.enabled=true}. Run it in ONE process per bot: two syncing
- * processes would each answer every message. The position ({@code next_batch}) is persisted after
- * a batch has been handled, so a restart resumes instead of replaying; the very first sync of a
- * connection only records the position and skips history. Failures back off exponentially (honouring
- * the homeserver's {@code retry_after_ms}), and a rejected token ends the loop and marks the
- * credential invalid instead of hammering the homeserver.
+ * processes would each answer every message. The position ({@code next_batch}) is persisted after a
+ * batch has been handled, so a restart resumes instead of replaying; the very first sync of a
+ * connection only records the position and skips history. Failures back off exponentially
+ * (honouring the homeserver's {@code retry_after_ms}), and a rejected token ends the loop and marks
+ * the credential invalid instead of hammering the homeserver.
  */
 @Component
 @ConditionalOnProperty(name = "app.matrix.sync.enabled", havingValue = "true")
@@ -47,6 +47,7 @@ public class MatrixSyncService {
     private final MatrixApiClient apiClient;
     private final MatrixEventService eventService;
     private final Map<String, Syncer> syncers = new ConcurrentHashMap<>();
+
     /** Test seam: shortens the long poll. */
     private final int syncTimeoutMs;
 
@@ -98,7 +99,9 @@ public class MatrixSyncService {
                 });
     }
 
-    /** A new connection replaces the old one: the loop restarts on the new credential and position. */
+    /**
+     * A new connection replaces the old one: the loop restarts on the new credential and position.
+     */
     public void restartSync(String botUserId, String tenantSchema) {
         stopSync(botUserId);
         ensureSyncing(botUserId, tenantSchema);
@@ -151,7 +154,9 @@ public class MatrixSyncService {
                     Optional<MatrixCredentialService.ActiveConnection> active =
                             credentialService.activeFor(botUserId);
                     if (active.isEmpty()) {
-                        log.info("Matrix sync stopped for bot ***{}: credential no longer active", lastFour(botUserId));
+                        log.info(
+                                "Matrix sync stopped for bot ***{}: credential no longer active",
+                                lastFour(botUserId));
                         syncers.remove(botUserId, this);
                         return;
                     }
@@ -161,9 +166,12 @@ public class MatrixSyncService {
                         sinceLoaded = true;
                     }
                     boolean initial = since == null;
-                    JsonNode response = apiClient.sync(connection.endpoint(), since, initial ? 0 : syncTimeoutMs);
+                    JsonNode response =
+                            apiClient.sync(
+                                    connection.endpoint(), since, initial ? 0 : syncTimeoutMs);
                     if (stopped.get()) {
-                        // Replaced or disconnected while the long poll was open: a newer loop owns this
+                        // Replaced or disconnected while the long poll was open: a newer loop owns
+                        // this
                         // bot now, so this response must not be handled or its position saved.
                         return;
                     }
@@ -174,7 +182,9 @@ public class MatrixSyncService {
                         continue;
                     }
                     if (batch.nextBatch() != null
-                            && (initial || !batch.events().isEmpty() || !batch.invites().isEmpty())) {
+                            && (initial
+                                    || !batch.events().isEmpty()
+                                    || !batch.invites().isEmpty())) {
                         credentialService.saveSinceToken(botUserId, batch.nextBatch());
                     }
                     if (batch.nextBatch() != null) {
@@ -186,27 +196,39 @@ public class MatrixSyncService {
                         return;
                     }
                     if (e.isUnknownToken()) {
-                        log.warn("Matrix homeserver rejected the token for bot ***{}; sync stopped", lastFour(botUserId));
+                        log.warn(
+                                "Matrix homeserver rejected the token for bot ***{}; sync stopped",
+                                lastFour(botUserId));
                         credentialService.markInvalid(botUserId);
                         syncers.remove(botUserId, this);
                         return;
                     }
                     if (since != null && e.status() == 400 && "M_UNKNOWN_POS".equals(e.errcode())) {
                         // The homeserver forgot our position: start over without replaying history.
-                        log.warn("Matrix sync position expired for bot ***{}; resyncing from now", lastFour(botUserId));
+                        log.warn(
+                                "Matrix sync position expired for bot ***{}; resyncing from now",
+                                lastFour(botUserId));
                         since = null;
                         credentialService.saveSinceToken(botUserId, null);
                         continue;
                     }
                     failures++;
-                    log.warn("Matrix sync failed for bot ***{} ({} in a row): {}", lastFour(botUserId), failures, e.getMessage());
+                    log.warn(
+                            "Matrix sync failed for bot ***{} ({} in a row): {}",
+                            lastFour(botUserId),
+                            failures,
+                            e.getMessage());
                     sleep(Math.max(e.retryAfterMs(), backoffMs(failures)));
                 } catch (RuntimeException e) {
                     if (stopped.get()) {
                         return;
                     }
                     failures++;
-                    log.warn("Matrix sync failed for bot ***{} ({} in a row): {}", lastFour(botUserId), failures, e.getMessage());
+                    log.warn(
+                            "Matrix sync failed for bot ***{} ({} in a row): {}",
+                            lastFour(botUserId),
+                            failures,
+                            e.getMessage());
                     sleep(backoffMs(failures));
                 } finally {
                     TenantContext.clear();

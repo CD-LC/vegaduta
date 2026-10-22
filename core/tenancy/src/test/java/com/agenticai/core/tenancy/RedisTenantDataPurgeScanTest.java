@@ -11,7 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +53,8 @@ class RedisTenantDataPurgeScanTest {
                             deleteCalls.add(new ArrayList<>(keys));
                             return (long) keys.size();
                         });
-        service = new RedisTenantDataPurgeService(redis, new ObjectMapper());
+        service =
+                new RedisTenantDataPurgeService(redis, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static List<String> keys(int n) {

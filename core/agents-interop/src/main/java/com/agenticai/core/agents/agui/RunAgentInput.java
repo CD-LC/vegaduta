@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.agui;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * AG-UI's {@code RunAgentInput} - the request body every AG-UI client ({@code
@@ -37,49 +37,48 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record RunAgentInput(
-    String threadId,
-    String runId,
-    String parentRunId,
-    JsonNode state,
-    List<InputMessage> messages,
-    List<Tool> tools,
-    List<ContextItem> context,
-    JsonNode forwardedProps
-) {
+        String threadId,
+        String runId,
+        String parentRunId,
+        JsonNode state,
+        List<InputMessage> messages,
+        List<Tool> tools,
+        List<ContextItem> context,
+        JsonNode forwardedProps) {
 
     /**
-     * One entry of {@code messages}. {@code content} is a {@link JsonNode}
-     * rather than a {@code String} because the protocol allows a user message's
-     * content to be either a plain string or an {@code InputContent[]} of typed
-     * parts ({@code {type:"text", text}}, plus binary parts this server does not
-     * consume) - see {@link #text()}.
+     * One entry of {@code messages}. {@code content} is a {@link JsonNode} rather than a {@code
+     * String} because the protocol allows a user message's content to be either a plain string or
+     * an {@code InputContent[]} of typed parts ({@code {type:"text", text}}, plus binary parts this
+     * server does not consume) - see {@link #text()}.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record InputMessage(
-        String id,
-        String role,
-        JsonNode content,
-        List<JsonNode> toolCalls,
-        String toolCallId,
-        String name
-    ) {
+            String id,
+            String role,
+            JsonNode content,
+            List<JsonNode> toolCalls,
+            String toolCallId,
+            String name) {
         /**
-         * The message's text: the string itself, or every {@code text} part of
-         * a parts array joined with newlines (binary parts contribute nothing).
-         * Empty, never null, for a message with no usable text.
+         * The message's text: the string itself, or every {@code text} part of a parts array joined
+         * with newlines (binary parts contribute nothing). Empty, never null, for a message with no
+         * usable text.
          */
         public String text() {
             if (content == null || content.isNull()) {
                 return "";
             }
-            if (content.isTextual()) {
-                return content.asText();
+            if (content.isString()) {
+                return content.asString();
             }
             if (content.isArray()) {
                 StringBuilder joined = new StringBuilder();
                 for (JsonNode part : content) {
-                    if (part != null && part.isObject() && "text".equals(part.path("type").asText(null))) {
-                        String text = part.path("text").asText("");
+                    if (part != null
+                            && part.isObject()
+                            && "text".equals(part.path("type").asString(null))) {
+                        String text = part.path("text").asString("");
                         if (!text.isEmpty()) {
                             if (!joined.isEmpty()) {
                                 joined.append('\n');
@@ -94,20 +93,24 @@ public record RunAgentInput(
         }
     }
 
-    /** A client-side tool definition ({@code name}, {@code description}, JSON-schema {@code parameters}). Accepted, not used - see the class javadoc. */
+    /**
+     * A client-side tool definition ({@code name}, {@code description}, JSON-schema {@code
+     * parameters}). Accepted, not used - see the class javadoc.
+     */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Tool(String name, String description, JsonNode parameters) {
-    }
-
-    /** A {@code context} entry ({@code description}, {@code value}). Accepted, not used - see the class javadoc. */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record ContextItem(String description, String value) {
-    }
+    public record Tool(String name, String description, JsonNode parameters) {}
 
     /**
-     * The text of the last {@code user}-role message, or {@code null} when the
-     * input carries none (an empty {@code messages}, or only assistant/system/
-     * tool messages) - the controller turns that into a 400.
+     * A {@code context} entry ({@code description}, {@code value}). Accepted, not used - see the
+     * class javadoc.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record ContextItem(String description, String value) {}
+
+    /**
+     * The text of the last {@code user}-role message, or {@code null} when the input carries none
+     * (an empty {@code messages}, or only assistant/system/ tool messages) - the controller turns
+     * that into a 400.
      */
     public String lastUserMessageText() {
         if (messages == null) {

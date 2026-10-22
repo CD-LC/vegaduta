@@ -3,12 +3,12 @@ package com.agenticai.core.workflow.expression;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.json.JsonMappers;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Spec 3.1 golden replay: every template string harvested from the repo
@@ -32,8 +32,8 @@ class GoldenTemplateReplayTest {
         List<String> templates = new ArrayList<>();
         try (InputStream in = getClass().getResourceAsStream("/golden/template-strings.json")) {
             assertTrue(in != null, "golden/template-strings.json must be on the test classpath");
-            for (JsonNode e : new ObjectMapper().readTree(in)) {
-                templates.add(e.get("template").asText());
+            for (JsonNode e : JsonMappers.plain().readTree(in)) {
+                templates.add(e.get("template").asString());
             }
         }
         assertTrue(templates.size() >= 15, "golden file looks truncated: " + templates.size());

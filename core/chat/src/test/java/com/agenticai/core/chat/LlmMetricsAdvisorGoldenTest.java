@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
@@ -106,8 +105,10 @@ class LlmMetricsAdvisorGoldenTest {
                             // 19 agentVersionId 20 billableReasoning
                             String stack = a[11] == null ? "null" : "present";
                             List<Object> parts = new ArrayList<>();
-                            for (int i : new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 14, 15, 16, 17,
-                                18, 19, 20}) {
+                            for (int i :
+                                    new int[] {
+                                        0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 14, 15, 16, 17, 18, 19, 20
+                                    }) {
                                 parts.add(a[i]);
                             }
                             recorded.add(parts + " stack=" + stack);
@@ -115,15 +116,33 @@ class LlmMetricsAdvisorGoldenTest {
                         })
                 .when(service)
                 .record(
-                        any(), any(), any(), any(), any(), any(), any(), Mockito.anyBoolean(),
-                        any(), any(), any(), any(), Mockito.anyLong(), any(), any(), any(), any(),
-                        any(), any(), any(), any(), any());
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        Mockito.anyBoolean(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        Mockito.anyLong(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any());
         return service;
     }
 
     private static Usage anthropicUsage(int in, int out, Integer write, Integer read) {
-        return new DefaultUsage(
-                in, out, in + out, new AnthropicApi.Usage(in, out, write, read));
+        return SdkUsageFixtures.anthropic(in, out, write, read);
     }
 
     private static ChatClientResponse responseWith(Usage usage) {
@@ -146,7 +165,10 @@ class LlmMetricsAdvisorGoldenTest {
 
     private ChatClientRequest request() {
         Prompt prompt =
-                new Prompt(List.of(new SystemMessage("You are a helpful bot."), new UserMessage("hi")));
+                new Prompt(
+                        List.of(
+                                new SystemMessage("You are a helpful bot."),
+                                new UserMessage("hi")));
         return new ChatClientRequest(
                 prompt,
                 Map.of(
@@ -243,99 +265,129 @@ class LlmMetricsAdvisorGoldenTest {
     }
 
     private static final String GOLDEN_SUCCESS =
-            "SPAN\n" +
-            "gen_ai.agent.id=11111111-1111-1111-1111-111111111111\n" +
-            "gen_ai.agent.version=22222222-2222-2222-2222-222222222222\n" +
-            "gen_ai.conversation.id=sess-1\n" +
-            "gen_ai.operation.name=chat\n" +
-            "gen_ai.provider.name=anthropic\n" +
-            "gen_ai.request.model=claude-sonnet-4-5\n" +
-            "gen_ai.system=anthropic\n" +
-            "gen_ai.usage.input_tokens=200\n" +
-            "gen_ai.usage.output_tokens=120\n" +
-            "langfuse.session.id=sess-1\n" +
-            "langfuse.trace.metadata.agentId=11111111-1111-1111-1111-111111111111\n" +
-            "langfuse.trace.metadata.agentVersionId=22222222-2222-2222-2222-222222222222\n" +
-            "langfuse.trace.metadata.cacheHitRatio=0.2952755905511811\n" +
-            "langfuse.trace.metadata.cacheReadInputTokens=1800\n" +
-            "langfuse.trace.metadata.cacheWriteInputTokens=4096\n" +
-            "langfuse.trace.metadata.estimatedCostUsd=0.018300\n" +
-            "langfuse.trace.metadata.model=claude-sonnet-4-5\n" +
-            "langfuse.trace.metadata.promptVersion=pv-7\n" +
-            "langfuse.trace.metadata.tenantId=tenant-9\n" +
-            "langfuse.trace.metadata.uncachedInputTokens=200\n" +
-            "langfuse.trace.tags=[provider:ANTHROPIC]\n" +
-            "langfuse.user.id=user-42\n" +
-            "vegaduta.prompt.version=pv-7\n" +
-            "vegaduta.tenant.id=tenant-9\n" +
-            "LOG\n" +
-            "[11111111-1111-1111-1111-111111111111, sess-1, ANTHROPIC, claude-sonnet-4-5, 200, 120, 320, true, null, null, flag=b, 0af7651916cd43dd8448eb211c80319c, b7ad6b7169203331, 4096, 1800, 22222222-2222-2222-2222-222222222222, null] stack=null\n" +
-            "METERS\n" +
-            "llm.cache.accounted.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1.0\n" +
-            "llm.cache.hit.ratio{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} summary count=1 total=0.2952755905511811\n" +
-            "llm.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1.0\n" +
-            "llm.cost.usd{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 0.0183\n" +
-            "llm.input.tokens.cache.read{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1800.0\n" +
-            "llm.input.tokens.cache.write{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 4096.0\n" +
-            "llm.input.tokens.uncached{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 200.0\n" +
-            "llm.latency{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} timer count=1\n" +
-            "llm.prompt.prefix.tokens{model=claude-sonnet-4-5,provider=ANTHROPIC} summary count=1 total=5.0";
+            "SPAN\n"
+                    + "gen_ai.agent.id=11111111-1111-1111-1111-111111111111\n"
+                    + "gen_ai.agent.version=22222222-2222-2222-2222-222222222222\n"
+                    + "gen_ai.conversation.id=sess-1\n"
+                    + "gen_ai.operation.name=chat\n"
+                    + "gen_ai.provider.name=anthropic\n"
+                    + "gen_ai.request.model=claude-sonnet-4-5\n"
+                    + "gen_ai.system=anthropic\n"
+                    + "gen_ai.usage.input_tokens=200\n"
+                    + "gen_ai.usage.output_tokens=120\n"
+                    + "langfuse.session.id=sess-1\n"
+                    + "langfuse.trace.metadata.agentId=11111111-1111-1111-1111-111111111111\n"
+                    + "langfuse.trace.metadata.agentVersionId=22222222-2222-2222-2222-222222222222\n"
+                    + "langfuse.trace.metadata.cacheHitRatio=0.2952755905511811\n"
+                    + "langfuse.trace.metadata.cacheReadInputTokens=1800\n"
+                    + "langfuse.trace.metadata.cacheWriteInputTokens=4096\n"
+                    + "langfuse.trace.metadata.estimatedCostUsd=0.018300\n"
+                    + "langfuse.trace.metadata.model=claude-sonnet-4-5\n"
+                    + "langfuse.trace.metadata.promptVersion=pv-7\n"
+                    + "langfuse.trace.metadata.tenantId=tenant-9\n"
+                    + "langfuse.trace.metadata.uncachedInputTokens=200\n"
+                    + "langfuse.trace.tags=[provider:ANTHROPIC]\n"
+                    + "langfuse.user.id=user-42\n"
+                    + "vegaduta.prompt.version=pv-7\n"
+                    + "vegaduta.tenant.id=tenant-9\n"
+                    + "LOG\n"
+                    + "[11111111-1111-1111-1111-111111111111, sess-1, ANTHROPIC, claude-sonnet-4-5,"
+                    + " 200, 120, 320, true, null, null, flag=b, 0af7651916cd43dd8448eb211c80319c,"
+                    + " b7ad6b7169203331, 4096, 1800, 22222222-2222-2222-2222-222222222222, null]"
+                    + " stack=null\n"
+                    + "METERS\n"
+                    + "llm.cache.accounted.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " counter 1.0\n"
+                    + "llm.cache.hit.ratio{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " summary count=1 total=0.2952755905511811\n"
+                    + "llm.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter"
+                    + " 1.0\n"
+                    + "llm.cost.usd{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter"
+                    + " 0.0183\n"
+                    + "llm.input.tokens.cache.read{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " counter 1800.0\n"
+                    + "llm.input.tokens.cache.write{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " counter 4096.0\n"
+                    + "llm.input.tokens.uncached{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " counter 200.0\n"
+                    + "llm.latency{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} timer"
+                    + " count=1\n"
+                    + "llm.prompt.prefix.tokens{model=claude-sonnet-4-5,provider=ANTHROPIC} summary"
+                    + " count=1 total=5.0";
     private static final String GOLDEN_FAILURE =
-            "SPAN\n" +
-            "error.type=java.lang.IllegalStateException\n" +
-            "gen_ai.agent.id=11111111-1111-1111-1111-111111111111\n" +
-            "gen_ai.agent.version=22222222-2222-2222-2222-222222222222\n" +
-            "gen_ai.conversation.id=sess-1\n" +
-            "gen_ai.operation.name=chat\n" +
-            "gen_ai.provider.name=anthropic\n" +
-            "gen_ai.request.model=claude-sonnet-4-5\n" +
-            "gen_ai.system=anthropic\n" +
-            "langfuse.session.id=sess-1\n" +
-            "langfuse.trace.metadata.agentId=11111111-1111-1111-1111-111111111111\n" +
-            "langfuse.trace.metadata.agentVersionId=22222222-2222-2222-2222-222222222222\n" +
-            "langfuse.trace.metadata.model=claude-sonnet-4-5\n" +
-            "langfuse.trace.metadata.promptVersion=pv-7\n" +
-            "langfuse.trace.metadata.tenantId=tenant-9\n" +
-            "langfuse.trace.tags=[provider:ANTHROPIC]\n" +
-            "langfuse.user.id=user-42\n" +
-            "vegaduta.prompt.version=pv-7\n" +
-            "vegaduta.tenant.id=tenant-9\n" +
-            "LOG\n" +
-            "[11111111-1111-1111-1111-111111111111, sess-1, ANTHROPIC, claude-sonnet-4-5, null, null, null, false, boom, java.lang.IllegalStateException, flag=b, 0af7651916cd43dd8448eb211c80319c, b7ad6b7169203331, null, null, 22222222-2222-2222-2222-222222222222, null] stack=present\n" +
-            "METERS\n" +
-            "llm.call.errors{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1.0\n" +
-            "llm.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1.0\n" +
-            "llm.latency{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} timer count=1\n" +
-            "llm.prompt.prefix.tokens{model=claude-sonnet-4-5,provider=ANTHROPIC} summary count=1 total=5.0";
+            "SPAN\n"
+                    + "error.type=java.lang.IllegalStateException\n"
+                    + "gen_ai.agent.id=11111111-1111-1111-1111-111111111111\n"
+                    + "gen_ai.agent.version=22222222-2222-2222-2222-222222222222\n"
+                    + "gen_ai.conversation.id=sess-1\n"
+                    + "gen_ai.operation.name=chat\n"
+                    + "gen_ai.provider.name=anthropic\n"
+                    + "gen_ai.request.model=claude-sonnet-4-5\n"
+                    + "gen_ai.system=anthropic\n"
+                    + "langfuse.session.id=sess-1\n"
+                    + "langfuse.trace.metadata.agentId=11111111-1111-1111-1111-111111111111\n"
+                    + "langfuse.trace.metadata.agentVersionId=22222222-2222-2222-2222-222222222222\n"
+                    + "langfuse.trace.metadata.model=claude-sonnet-4-5\n"
+                    + "langfuse.trace.metadata.promptVersion=pv-7\n"
+                    + "langfuse.trace.metadata.tenantId=tenant-9\n"
+                    + "langfuse.trace.tags=[provider:ANTHROPIC]\n"
+                    + "langfuse.user.id=user-42\n"
+                    + "vegaduta.prompt.version=pv-7\n"
+                    + "vegaduta.tenant.id=tenant-9\n"
+                    + "LOG\n"
+                    + "[11111111-1111-1111-1111-111111111111, sess-1, ANTHROPIC, claude-sonnet-4-5,"
+                    + " null, null, null, false, boom, java.lang.IllegalStateException, flag=b,"
+                    + " 0af7651916cd43dd8448eb211c80319c, b7ad6b7169203331, null, null,"
+                    + " 22222222-2222-2222-2222-222222222222, null] stack=present\n"
+                    + "METERS\n"
+                    + "llm.call.errors{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " counter 1.0\n"
+                    + "llm.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter"
+                    + " 1.0\n"
+                    + "llm.latency{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} timer"
+                    + " count=1\n"
+                    + "llm.prompt.prefix.tokens{model=claude-sonnet-4-5,provider=ANTHROPIC} summary"
+                    + " count=1 total=5.0";
     private static final String GOLDEN_CANCEL =
-            "SPAN\n" +
-            "error.type=java.util.concurrent.CancellationException\n" +
-            "gen_ai.agent.id=11111111-1111-1111-1111-111111111111\n" +
-            "gen_ai.agent.version=22222222-2222-2222-2222-222222222222\n" +
-            "gen_ai.conversation.id=sess-1\n" +
-            "gen_ai.operation.name=chat\n" +
-            "gen_ai.provider.name=anthropic\n" +
-            "gen_ai.request.model=claude-sonnet-4-5\n" +
-            "gen_ai.system=anthropic\n" +
-            "gen_ai.usage.input_tokens=800\n" +
-            "gen_ai.usage.output_tokens=25\n" +
-            "langfuse.session.id=sess-1\n" +
-            "langfuse.trace.metadata.agentId=11111111-1111-1111-1111-111111111111\n" +
-            "langfuse.trace.metadata.agentVersionId=22222222-2222-2222-2222-222222222222\n" +
-            "langfuse.trace.metadata.estimatedCostUsd=0.002775\n" +
-            "langfuse.trace.metadata.model=claude-sonnet-4-5\n" +
-            "langfuse.trace.metadata.promptVersion=pv-7\n" +
-            "langfuse.trace.metadata.tenantId=tenant-9\n" +
-            "langfuse.trace.tags=[provider:ANTHROPIC]\n" +
-            "langfuse.user.id=user-42\n" +
-            "vegaduta.prompt.version=pv-7\n" +
-            "vegaduta.tenant.id=tenant-9\n" +
-            "LOG\n" +
-            "[11111111-1111-1111-1111-111111111111, sess-1, ANTHROPIC, claude-sonnet-4-5, 800, 25, 825, false, CANCELLED: stream cancelled by the consumer after N ms (client disconnect or stream-idle timeout); token counts are the usage reported before cancellation and may undercount output, java.util.concurrent.CancellationException, flag=b, 0af7651916cd43dd8448eb211c80319c, b7ad6b7169203331, null, null, 22222222-2222-2222-2222-222222222222, null] stack=present\n" +
-            "METERS\n" +
-            "llm.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1.0\n" +
-            "llm.cost.usd{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 0.002775\n" +
-            "llm.latency{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} timer count=1\n" +
-            "llm.prompt.prefix.tokens{model=claude-sonnet-4-5,provider=ANTHROPIC} summary count=1 total=5.0\n" +
-            "llm.stream.cancelled{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter 1.0";
+            "SPAN\n"
+                    + "error.type=java.util.concurrent.CancellationException\n"
+                    + "gen_ai.agent.id=11111111-1111-1111-1111-111111111111\n"
+                    + "gen_ai.agent.version=22222222-2222-2222-2222-222222222222\n"
+                    + "gen_ai.conversation.id=sess-1\n"
+                    + "gen_ai.operation.name=chat\n"
+                    + "gen_ai.provider.name=anthropic\n"
+                    + "gen_ai.request.model=claude-sonnet-4-5\n"
+                    + "gen_ai.system=anthropic\n"
+                    + "gen_ai.usage.input_tokens=800\n"
+                    + "gen_ai.usage.output_tokens=25\n"
+                    + "langfuse.session.id=sess-1\n"
+                    + "langfuse.trace.metadata.agentId=11111111-1111-1111-1111-111111111111\n"
+                    + "langfuse.trace.metadata.agentVersionId=22222222-2222-2222-2222-222222222222\n"
+                    + "langfuse.trace.metadata.estimatedCostUsd=0.002775\n"
+                    + "langfuse.trace.metadata.model=claude-sonnet-4-5\n"
+                    + "langfuse.trace.metadata.promptVersion=pv-7\n"
+                    + "langfuse.trace.metadata.tenantId=tenant-9\n"
+                    + "langfuse.trace.tags=[provider:ANTHROPIC]\n"
+                    + "langfuse.user.id=user-42\n"
+                    + "vegaduta.prompt.version=pv-7\n"
+                    + "vegaduta.tenant.id=tenant-9\n"
+                    + "LOG\n"
+                    + "[11111111-1111-1111-1111-111111111111, sess-1, ANTHROPIC, claude-sonnet-4-5,"
+                    + " 800, 25, 825, false, CANCELLED: stream cancelled by the consumer after N ms"
+                    + " (client disconnect or stream-idle timeout); token counts are the usage reported"
+                    + " before cancellation and may undercount output,"
+                    + " java.util.concurrent.CancellationException, flag=b,"
+                    + " 0af7651916cd43dd8448eb211c80319c, b7ad6b7169203331, null, null,"
+                    + " 22222222-2222-2222-2222-222222222222, null] stack=present\n"
+                    + "METERS\n"
+                    + "llm.calls{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter"
+                    + " 1.0\n"
+                    + "llm.cost.usd{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} counter"
+                    + " 0.002775\n"
+                    + "llm.latency{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9} timer"
+                    + " count=1\n"
+                    + "llm.prompt.prefix.tokens{model=claude-sonnet-4-5,provider=ANTHROPIC} summary"
+                    + " count=1 total=5.0\n"
+                    + "llm.stream.cancelled{model=claude-sonnet-4-5,provider=ANTHROPIC,tenant=tenant-9}"
+                    + " counter 1.0";
 }

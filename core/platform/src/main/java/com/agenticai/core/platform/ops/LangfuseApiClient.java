@@ -3,8 +3,6 @@ package com.agenticai.core.platform.ops;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
@@ -25,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Read-only client for Langfuse's public REST API ({@code /api/public/**}), used by the
@@ -33,10 +34,11 @@ import org.springframework.stereotype.Component;
  *
  * <p><b>Config reuse.</b> Same posture as {@code LangfuseScoreClient} (core/chat): with no explicit
  * {@code app.langfuse.base-url} the base URL is derived from {@code
- * management.otlp.tracing.endpoint} (the OTLP exporter's target, minus Langfuse's documented {@code
- * /api/public/otel/v1/traces} suffix), and {@code app.langfuse.auth-header} defaults to the same
- * {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic base64(pk:sk)" value the exporter already sends -
- * Langfuse's public API accepts that pair on every endpoint. No new required configuration.
+ * management.opentelemetry.tracing.export.otlp.endpoint} (the OTLP exporter's target, minus
+ * Langfuse's documented {@code /api/public/otel/v1/traces} suffix), and {@code
+ * app.langfuse.auth-header} defaults to the same {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic
+ * base64(pk:sk)" value the exporter already sends - Langfuse's public API accepts that pair on
+ * every endpoint. No new required configuration.
  *
  * <p><b>Bounded.</b> Every request has a 5 s connect and response timeout, redirects are not
  * followed, and successful answers are cached in memory for 30 s per URL (at most {@link
@@ -93,7 +95,8 @@ public class LangfuseApiClient {
     @Autowired
     public LangfuseApiClient(
             @Value("${app.langfuse.base-url:}") String explicitBaseUrl,
-            @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+            @Value("${management.opentelemetry.tracing.export.otlp.endpoint:}")
+                    String otlpTracesEndpoint,
             @Value("${app.langfuse.auth-header:${LANGFUSE_OTEL_AUTH_HEADER:}}") String authHeader) {
         this(
                 LangfuseEndpoints.baseUrl(explicitBaseUrl, otlpTracesEndpoint),
@@ -173,7 +176,7 @@ public class LangfuseApiClient {
         JsonNode body;
         try {
             body = JSON.readTree(response.body() == null ? "" : response.body());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new LangfuseUnavailableException(
                     "Langfuse answered with something that is not JSON.", response.status());
         }
@@ -193,7 +196,8 @@ public class LangfuseApiClient {
             return "Langfuse rejected the configured API credential (HTTP " + status + ").";
         }
         if (status == 404) {
-            return "Langfuse answered HTTP 404 (not found, or this API is not available on the deployed Langfuse version).";
+            return "Langfuse answered HTTP 404 (not found, or this API is not available on the"
+                    + " deployed Langfuse version).";
         }
         if (status == 429) {
             return "Langfuse is rate limiting this server (HTTP 429); try again shortly.";

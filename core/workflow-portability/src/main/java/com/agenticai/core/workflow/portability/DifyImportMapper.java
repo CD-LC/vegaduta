@@ -9,9 +9,6 @@ import com.agenticai.core.workflow.portability.DifyImportModel.Ctx;
 import com.agenticai.core.workflow.portability.DifyImportModel.Exit;
 import com.agenticai.core.workflow.portability.DifyImportModel.Level;
 import com.agenticai.core.workflow.portability.DifyImportModel.Mapped;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +17,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Best-effort import of a Dify app DSL ({@code kind: app}, {@code workflow.graph.nodes/edges}, as
@@ -105,8 +105,9 @@ public final class DifyImportMapper {
                             + (mode == null
                                     ? ""
                                     : " (app mode '" + AgentImportText.inline(mode, 30) + "')")
-                            + ". Only Dify workflow and chatflow apps can be imported here; a plain chat or agent app is better "
-                            + "recreated as an agent (Agents > Import).");
+                            + ". Only Dify workflow and chatflow apps can be imported here; a plain"
+                            + " chat or agent app is better recreated as an agent (Agents >"
+                            + " Import).");
         }
         JsonNode nodes = AgentImportJson.arr(graph, "nodes");
         if (nodes == null || nodes.isEmpty()) {
@@ -206,7 +207,8 @@ public final class DifyImportMapper {
         if (conversation != null && !conversation.isEmpty()) {
             wf.report.unsupported(
                     "Conversation variables (" + conversation.size() + ")",
-                    "Chatflow conversation memory has no equivalent here; references to it are left as written.");
+                    "Chatflow conversation memory has no equivalent here; references to it are left"
+                            + " as written.");
         }
         return wf;
     }
@@ -229,14 +231,16 @@ public final class DifyImportMapper {
                         "secret:" + name, PlaceholderRegistry.SECRET, name, "", "environment");
                 wf.report.needsManual(
                         "Secret variable '" + AgentImportText.inline(name, 60) + "'",
-                        "Dify secret values are never exported and never imported; only the name is kept.",
+                        "Dify secret values are never exported and never imported; only the name is"
+                                + " kept.",
                         "Create a vault secret with this name; HTTP nodes refer to it as {{secret."
                                 + name
                                 + "}}.");
             } else {
                 wf.report.unsupported(
                         "Environment variable '" + AgentImportText.inline(name, 60) + "'",
-                        "Plain environment variables have no equivalent store here; references to it become {{ $vars."
+                        "Plain environment variables have no equivalent store here; references to"
+                                + " it become {{ $vars."
                                 + name
                                 + " }} and need a value.");
             }
@@ -287,7 +291,8 @@ public final class DifyImportMapper {
                                         + n.type()
                                         + ")",
                                 String.join(" ", m.notes),
-                                "Open the node on the canvas and check it before activating the workflow.");
+                                "Open the node on the canvas and check it before activating the"
+                                        + " workflow.");
                     }
                     default -> {
                         wf.fidelity.placeholders++;
@@ -298,8 +303,8 @@ public final class DifyImportMapper {
                                         + n.type()
                                         + ")",
                                 m.reason
-                                        + " Kept as an inert pass-through placeholder with its original title, type and "
-                                        + "data (credentials removed).");
+                                        + " Kept as an inert pass-through placeholder with its"
+                                        + " original title, type and data (credentials removed).");
                     }
                 }
             }
@@ -354,11 +359,11 @@ public final class DifyImportMapper {
         if (v == null || v.isNull()) {
             return null;
         }
-        if (v.isTextual()) {
-            String s = v.asText().trim();
+        if (v.isString()) {
+            String s = v.asString().trim();
             return s.isEmpty() ? null : s;
         }
-        return v.isIntegralNumber() ? v.asText() : null;
+        return v.isIntegralNumber() ? v.asString() : null;
     }
 
     private boolean isInternalMarker(
@@ -442,8 +447,9 @@ public final class DifyImportMapper {
             c.lose(
                     "Input variables ("
                             + String.join(", ", names)
-                            + ") are not declared here: the trigger's payload is "
-                            + "the node output, and references to them were rewritten to $node[...] reads of its fields.");
+                            + ") are not declared here: the trigger's payload is the node output,"
+                            + " and references to them were rewritten to $node[...] reads of its"
+                            + " fields.");
         }
         return factory.single(c, "trigger", c.node.title(), new LinkedHashMap<>(), Level.EXACT);
     }
@@ -525,9 +531,9 @@ public final class DifyImportMapper {
         c.lose(
                 "Choose the agent that should run this step (placeholder "
                         + key
-                        + "). The Dify prompt, model and "
-                        + "settings were not applied: they are kept as importedPrompt / importedInstructions / importedModel. "
-                        + "The agent receives this node's input.");
+                        + "). The Dify prompt, model and settings were not applied: they are kept"
+                        + " as importedPrompt / importedInstructions / importedModel. The agent"
+                        + " receives this node's input.");
         return factory.single(c, "agent", c.node.title(), config, Level.APPROXIMATE);
     }
 
@@ -562,8 +568,8 @@ public final class DifyImportMapper {
             config.put("topK", topK.intValue());
         }
         c.lose(
-                "The search query is this node's input, not the Dify query variable; reranking and score thresholds "
-                        + "were not carried over.");
+                "The search query is this node's input, not the Dify query variable; reranking and"
+                        + " score thresholds were not carried over.");
         return factory.single(c, "knowledge", c.node.title(), config, Level.APPROXIMATE);
     }
 
@@ -599,9 +605,9 @@ public final class DifyImportMapper {
                     config);
         }
         c.lose(
-                "JavaScript is never executed on this platform. The original source is kept in the node's "
-                        + "importedSource field and the node passes its input through unchanged until you replace it with a "
-                        + "Transform, Agent or Tool step.");
+                "JavaScript is never executed on this platform. The original source is kept in the"
+                        + " node's importedSource field and the node passes its input through unchanged"
+                        + " until you replace it with a Transform, Agent or Tool step.");
         return factory.single(
                 c, "code", "[Needs review] " + c.node.title(), config, Level.APPROXIMATE);
     }
@@ -624,20 +630,20 @@ public final class DifyImportMapper {
         ObjectNode args = mapper.createObjectNode();
         JsonNode params = c.data.get("tool_parameters");
         if (params != null && params.isObject()) {
-            java.util.Iterator<Map.Entry<String, JsonNode>> it = params.fields();
+            java.util.Iterator<Map.Entry<String, JsonNode>> it = params.properties().iterator();
             while (it.hasNext()) {
                 Map.Entry<String, JsonNode> entry = it.next();
                 JsonNode value = entry.getValue().get("value");
                 if (value == null || value.isNull()) {
                     continue;
                 }
-                if (value.isTextual()) {
-                    args.put(entry.getKey(), c.text(value.asText()));
+                if (value.isString()) {
+                    args.put(entry.getKey(), c.text(value.asString()));
                 } else if (value.isArray()) {
                     String expression = references.selectorExpression(c, value);
                     args.put(entry.getKey(), expression == null ? "" : "{{ " + expression + " }}");
                 } else {
-                    args.put(entry.getKey(), value.asText());
+                    args.put(entry.getKey(), value.asString());
                 }
             }
         }
@@ -645,9 +651,8 @@ public final class DifyImportMapper {
         c.lose(
                 "Pick the agent whose tool catalog should be used (placeholder "
                         + key
-                        + "). The tool name was copied "
-                        + "as written and may not exist under that name here; the Dify tool provider's credentials were not "
-                        + "imported.");
+                        + "). The tool name was copied as written and may not exist under that name"
+                        + " here; the Dify tool provider's credentials were not imported.");
         return factory.single(c, "tool", c.node.title(), config, Level.APPROXIMATE);
     }
 
@@ -677,12 +682,13 @@ public final class DifyImportMapper {
         if (iterator != null
                 && iterator.isArray()
                 && iterator.size() >= 2
-                && iterator.get(iterator.size() - 1).isTextual()) {
-            config.put("itemsField", iterator.get(iterator.size() - 1).asText());
+                && iterator.get(iterator.size() - 1).isString()) {
+            config.put("itemsField", iterator.get(iterator.size() - 1).asString());
         }
         c.lose(
-                "The Sub-Flow repeats the body once per item of the input field named by itemsField; check that "
-                        + "field, the parallel/error settings (not carried) and how the body's result is collected.");
+                "The Sub-Flow repeats the body once per item of the input field named by"
+                        + " itemsField; check that field, the parallel/error settings (not carried) and"
+                        + " how the body's result is collected.");
         return factory.single(c, "sub_flow", c.node.title(), config, Level.APPROXIMATE);
     }
 }

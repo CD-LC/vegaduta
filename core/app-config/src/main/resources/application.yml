@@ -80,6 +80,9 @@ server:
 spring:
   application:
     name: agentic-ai-core
+  jackson:
+    # ADR-0012 P2: keep the Jackson 2 wire behaviour (dates as timestamps, unsorted properties, ...).
+    use-jackson2-defaults: true
 
   # Per-phase cap for graceful shutdown (see server.shutdown). Keep it below the
   # orchestrator's grace period minus any preStop sleep. Fed by app.shutdown.drain-seconds
@@ -128,7 +131,7 @@ spring:
   # gives the provider clients their own, much longer read timeout - see
   # app.llm.http below and that class's javadoc.
   http:
-    client:
+    clients:
       connect-timeout: ${HTTP_CLIENT_CONNECT_TIMEOUT:10s}
       read-timeout: ${HTTP_CLIENT_READ_TIMEOUT:120s}
 
@@ -1360,7 +1363,7 @@ app:
         effort: ${LLM_ANTHROPIC_THINKING_EFFORT:}
     # Outbound HTTP timeouts for the LLM provider calls specifically - see
     # LlmHttpClientFactory (core/chat). Deliberately SEPARATE from
-    # spring.http.client.* above, because the two have opposite failure modes:
+    # spring.http.clients.* above, because the two have opposite failure modes:
     # a 120s cap is a safe backstop for a REST control-plane call but would
     # kill a legitimate long completion (extended-thinking / reasoning models
     # regularly spend several minutes before the first byte of a non-streamed
@@ -3362,13 +3365,25 @@ management:
   tracing:
     sampling:
       probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
-  otlp:
+    export:
+      otlp:
+        enabled: ${OTLP_TRACING_EXPORT_ENABLED:true}
+  # Boot 4 property names (was management.otlp.tracing.*): endpoint/headers live under
+  # management.opentelemetry.tracing.export.otlp, the on/off switch under management.tracing.export.otlp.
+  opentelemetry:
     tracing:
       export:
-        enabled: ${OTLP_TRACING_EXPORT_ENABLED:true}
-      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://langfuse-web:3000/api/public/otel/v1/traces}
-      headers:
-        Authorization: ${LANGFUSE_OTEL_AUTH_HEADER:}
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://langfuse-web:3000/api/public/otel/v1/traces}
+          headers:
+            Authorization: ${LANGFUSE_OTEL_AUTH_HEADER:}
+  # Boot 4's OpenTelemetry starter also brings the OTLP metrics registry, which is ON by default and
+  # pushes every meter once a minute to http://localhost:4318/v1/metrics. Boot 3.5 had no such registry
+  # here (metrics are scraped from /actuator/prometheus), so keep it off unless an operator opts in.
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTLP_METRICS_EXPORT_ENABLED:false}
 
 # Direct feedback ("Store sufficient context for future analysis, including:
 # Timestamp, User/request ID, Provider name, Request correlation ID,

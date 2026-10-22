@@ -28,8 +28,6 @@ import com.agenticai.core.workflow.dto.WorkflowExpressionApi.UpstreamSchemaRespo
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.expression.BuiltIns;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,17 +38,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Evaluate / lint / upstream-schema / function registry behaviour and the exact JSON of their DTOs.
  *
- * <p>Graph used throughout: {@code start (trigger) -> fetch (http) -> price (code)}, plus {@code side} (code,
- * not connected to {@code price}) for the NOT_UPSTREAM case.
+ * <p>Graph used throughout: {@code start (trigger) -> fetch (http) -> price (code)}, plus {@code
+ * side} (code, not connected to {@code price}) for the NOT_UPSTREAM case.
  */
 class WorkflowExpressionServiceTest {
 
     private static final UUID WF = UUID.randomUUID();
-    private static final String ORDER = "{\"items\":[{\"price\":10,\"sku\":\"a\"},{\"price\":20,\"sku\":\"b\"}],\"customer\":{\"name\":\"Ada\"}}";
+    private static final String ORDER =
+            "{\"items\":[{\"price\":10,\"sku\":\"a\"},{\"price\":20,\"sku\":\"b\"}],\"customer\":{\"name\":\"Ada\"}}";
 
     private WorkflowService workflowService;
     private WorkflowPinStore pinStore;
@@ -60,7 +61,8 @@ class WorkflowExpressionServiceTest {
     private WorkflowExpressionService service;
     private final ObjectMapper mapper = PinTestSupport.appMapper();
 
-    private static WorkflowNodeDto node(String id, String type, String label, Map<String, Object> config) {
+    private static WorkflowNodeDto node(
+            String id, String type, String label, Map<String, Object> config) {
         return new WorkflowNodeDto(id, type, Map.of(), Map.of("label", label, "config", config));
     }
 
@@ -72,13 +74,26 @@ class WorkflowExpressionServiceTest {
 
     @BeforeEach
     void setUp() {
-        graph = new WorkflowGraphDto(
-            List.of(
-                node("start", "trigger", "Start", Map.of()),
-                node("fetch", "http", "Fetch", Map.of("url", "https://api.example.com/orders", "method", "GET")),
-                node("price", "code", "Price", Map.of("operation", "template", "template", "x")),
-                node("side", "code", "Side", Map.of())),
-            List.of(edge("start", "fetch"), edge("fetch", "price")));
+        graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                node("start", "trigger", "Start", Map.of()),
+                                node(
+                                        "fetch",
+                                        "http",
+                                        "Fetch",
+                                        Map.of(
+                                                "url",
+                                                "https://api.example.com/orders",
+                                                "method",
+                                                "GET")),
+                                node(
+                                        "price",
+                                        "code",
+                                        "Price",
+                                        Map.of("operation", "template", "template", "x")),
+                                node("side", "code", "Side", Map.of())),
+                        List.of(edge("start", "fetch"), edge("fetch", "price")));
         workflowService = mock(WorkflowService.class);
         WorkflowDefinition def = mock(WorkflowDefinition.class);
         when(def.getName()).thenReturn("Orders");
@@ -94,7 +109,8 @@ class WorkflowExpressionServiceTest {
     }
 
     private WorkflowExpressionService newService(boolean enabled) {
-        return new WorkflowExpressionService(workflowService, pinStore, runData, runs, limiter, mapper, enabled, false);
+        return new WorkflowExpressionService(
+                workflowService, pinStore, runData, runs, limiter, mapper, enabled, false);
     }
 
     private void pin(String nodeId, String data) {
@@ -146,7 +162,11 @@ class WorkflowExpressionServiceTest {
         pin("start", "{\"event\":\"order.created\"}");
         pin("fetch", ORDER);
 
-        EvaluateResponse r = eval("{{ $node[\"Fetch\"].customer.name }} / {{ $trigger.event }}", "price", "pinned");
+        EvaluateResponse r =
+                eval(
+                        "{{ $node[\"Fetch\"].customer.name }} / {{ $trigger.event }}",
+                        "price",
+                        "pinned");
 
         assertEquals("Ada / order.created", r.value());
         assertEquals(Set.of("fetch", "start"), Set.copyOf(r.sources()));
@@ -159,13 +179,16 @@ class WorkflowExpressionServiceTest {
         assertTrue(r.ok());
         assertEquals("null", r.type());
         assertEquals("", r.rendered());
-        assertTrue(r.warnings().stream().anyMatch(w -> w.contains("'Fetch'")), r.warnings().toString());
+        assertTrue(
+                r.warnings().stream().anyMatch(w -> w.contains("'Fetch'")),
+                r.warnings().toString());
     }
 
     @Test
     void aFeedingNodeWithoutDataIsWarnedAbout() {
         EvaluateResponse r = eval("{{ $json.a }}", "price", "pinned");
-        assertTrue(r.warnings().stream().anyMatch(w -> w.contains("$json")), r.warnings().toString());
+        assertTrue(
+                r.warnings().stream().anyMatch(w -> w.contains("$json")), r.warnings().toString());
     }
 
     @Test
@@ -182,7 +205,9 @@ class WorkflowExpressionServiceTest {
         assertFalse(r.error().message().isBlank());
         int open = template.indexOf("{{");
         int close = template.indexOf("}}") + 2;
-        assertTrue(r.error().start() >= open && r.error().start() <= close, "start " + r.error().start());
+        assertTrue(
+                r.error().start() >= open && r.error().start() <= close,
+                "start " + r.error().start());
         assertTrue(r.error().end() > r.error().start() || r.error().end() == r.error().start());
         assertTrue(r.error().end() <= template.length());
         assertEquals(List.of(), r.sources());
@@ -197,7 +222,9 @@ class WorkflowExpressionServiceTest {
         assertFalse(r.ok());
         int second = template.indexOf("parseJson");
         assertTrue(r.error().start() >= template.indexOf("{{", 3), "start " + r.error().start());
-        assertTrue(r.error().start() >= second - 3 && r.error().end() <= template.length(), r.error().toString());
+        assertTrue(
+                r.error().start() >= second - 3 && r.error().end() <= template.length(),
+                r.error().toString());
     }
 
     @Test
@@ -213,23 +240,38 @@ class WorkflowExpressionServiceTest {
         EvaluateResponse r = eval("{{ " + "1+".repeat(600) + "1 }}", null, "supplied");
         assertFalse(r.ok());
         assertNotNull(r.error());
-        assertTrue(r.error().message().toLowerCase().contains("complex") || r.error().message().toLowerCase().contains("node")
-            || r.error().message().toLowerCase().contains("large") || r.error().message().toLowerCase().contains("long"), r.error().message());
+        assertTrue(
+                r.error().message().toLowerCase().contains("complex")
+                        || r.error().message().toLowerCase().contains("node")
+                        || r.error().message().toLowerCase().contains("large")
+                        || r.error().message().toLowerCase().contains("long"),
+                r.error().message());
     }
 
     @Test
     void suppliedDataFeedsJsonAndNodesByLabel() {
-        EvaluateResponse r = service.evaluate(WF, new EvaluateRequest(
-            "{{ $json.a }}-{{ $node[\"Fetch\"].b }}", "price", "supplied",
-            new Supplied("{\"a\":1}", Map.of("Fetch", "{\"b\":2}"))));
+        EvaluateResponse r =
+                service.evaluate(
+                        WF,
+                        new EvaluateRequest(
+                                "{{ $json.a }}-{{ $node[\"Fetch\"].b }}",
+                                "price",
+                                "supplied",
+                                new Supplied("{\"a\":1}", Map.of("Fetch", "{\"b\":2}"))));
         assertTrue(r.ok());
         assertEquals("1-2", r.value());
     }
 
     @Test
     void suppliedNodeOutputsAreUsedForTheFeedingNodeWhenNoInputIsGiven() {
-        EvaluateResponse r = service.evaluate(WF, new EvaluateRequest(
-            "{{ $json.b }}", "price", "supplied", new Supplied(null, Map.of("Fetch", "{\"b\":7}"))));
+        EvaluateResponse r =
+                service.evaluate(
+                        WF,
+                        new EvaluateRequest(
+                                "{{ $json.b }}",
+                                "price",
+                                "supplied",
+                                new Supplied(null, Map.of("Fetch", "{\"b\":7}"))));
         assertEquals(7, ((Number) r.value()).intValue());
     }
 
@@ -237,9 +279,12 @@ class WorkflowExpressionServiceTest {
     void lastRunDataComesFromTheRunDataStoreOfTheNewestRun() {
         UUID runId = UUID.randomUUID();
         WorkflowRun run = new WorkflowRun(runId, WF, "Orders", "u");
-        when(runs.findFirstByWorkflowIdOrderByStartedAtDesc(WF)).thenReturn(java.util.Optional.of(run));
-        when(runData.latestById(runId, "fetch")).thenReturn(
-            new RunDataStore.Stored("fetch", "Fetch", 0, "OK", "{\"total\":99}", false));
+        when(runs.findFirstByWorkflowIdOrderByStartedAtDesc(WF))
+                .thenReturn(java.util.Optional.of(run));
+        when(runData.latestById(runId, "fetch"))
+                .thenReturn(
+                        new RunDataStore.Stored(
+                                "fetch", "Fetch", 0, "OK", "{\"total\":99}", false));
 
         EvaluateResponse r = eval("{{ $json.total }}", "price", "lastRun");
 
@@ -249,27 +294,57 @@ class WorkflowExpressionServiceTest {
 
     @Test
     void lastRunWithNoRunsYetSaysSo() {
-        when(runs.findFirstByWorkflowIdOrderByStartedAtDesc(WF)).thenReturn(java.util.Optional.empty());
+        when(runs.findFirstByWorkflowIdOrderByStartedAtDesc(WF))
+                .thenReturn(java.util.Optional.empty());
         EvaluateResponse r = eval("{{ $json.total }}", "price", "lastRun");
         assertTrue(r.ok());
-        assertTrue(r.warnings().stream().anyMatch(w -> w.contains("not been run")), r.warnings().toString());
+        assertTrue(
+                r.warnings().stream().anyMatch(w -> w.contains("not been run")),
+                r.warnings().toString());
     }
 
     @Test
     void badRequestsAre400() {
-        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
-            () -> service.evaluate(WF, new EvaluateRequest(null, null, "pinned", null))).getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
-            () -> service.evaluate(WF, new EvaluateRequest("{{ 1 }}", null, "bogus", null))).getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
-            () -> service.evaluate(WF, new EvaluateRequest("x".repeat(20_001), null, "pinned", null))).getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
-            () -> service.evaluate(WF, null)).getStatusCode());
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                assertThrows(
+                                ResponseStatusException.class,
+                                () ->
+                                        service.evaluate(
+                                                WF,
+                                                new EvaluateRequest(null, null, "pinned", null)))
+                        .getStatusCode());
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                assertThrows(
+                                ResponseStatusException.class,
+                                () ->
+                                        service.evaluate(
+                                                WF,
+                                                new EvaluateRequest(
+                                                        "{{ 1 }}", null, "bogus", null)))
+                        .getStatusCode());
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                assertThrows(
+                                ResponseStatusException.class,
+                                () ->
+                                        service.evaluate(
+                                                WF,
+                                                new EvaluateRequest(
+                                                        "x".repeat(20_001), null, "pinned", null)))
+                        .getStatusCode());
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                assertThrows(ResponseStatusException.class, () -> service.evaluate(WF, null))
+                        .getStatusCode());
     }
 
     @Test
     void evaluateNeedsEditAndIsRateLimited() {
-        doThrow(new ResourceAccessDeniedException()).when(workflowService).requireAccess(WF, PermissionLevel.EDITOR);
+        doThrow(new ResourceAccessDeniedException())
+                .when(workflowService)
+                .requireAccess(WF, PermissionLevel.EDITOR);
         assertThrows(ResourceAccessDeniedException.class, () -> eval("{{ 1 }}", null, "supplied"));
         verify(limiter, never()).check();
 
@@ -277,9 +352,13 @@ class WorkflowExpressionServiceTest {
         WorkflowDefinition def = mock(WorkflowDefinition.class);
         when(workflowService.requireAccess(any(), any())).thenReturn(def);
         when(workflowService.graph(WF)).thenReturn(graph);
-        doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "slow down")).when(limiter).check();
-        assertEquals(HttpStatus.TOO_MANY_REQUESTS,
-            assertThrows(ResponseStatusException.class, () -> eval("{{ 1 }}", null, "supplied")).getStatusCode());
+        doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "slow down"))
+                .when(limiter)
+                .check();
+        assertEquals(
+                HttpStatus.TOO_MANY_REQUESTS,
+                assertThrows(ResponseStatusException.class, () -> eval("{{ 1 }}", null, "supplied"))
+                        .getStatusCode());
     }
 
     // ---- kill switch
@@ -288,10 +367,23 @@ class WorkflowExpressionServiceTest {
     void whenExpressionsAreSwitchedOffEvaluateAndLintAnswer409WithAMessage() {
         WorkflowExpressionService off = newService(false);
 
-        ResponseStatusException ev = assertThrows(ResponseStatusException.class,
-            () -> off.evaluate(WF, new EvaluateRequest("{{ 1 }}", null, "supplied", null)));
-        ResponseStatusException li = assertThrows(ResponseStatusException.class,
-            () -> off.lint(WF, new LintRequest(List.of(new LintItem("price", "template", "{{ 1 }}")))));
+        ResponseStatusException ev =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                off.evaluate(
+                                        WF,
+                                        new EvaluateRequest("{{ 1 }}", null, "supplied", null)));
+        ResponseStatusException li =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                off.lint(
+                                        WF,
+                                        new LintRequest(
+                                                List.of(
+                                                        new LintItem(
+                                                                "price", "template", "{{ 1 }}")))));
 
         assertEquals(HttpStatus.CONFLICT, ev.getStatusCode());
         assertEquals(HttpStatus.CONFLICT, li.getStatusCode());
@@ -305,7 +397,9 @@ class WorkflowExpressionServiceTest {
     // ---- lint
 
     private List<LintDiagnostic> lint(String nodeId, String template) {
-        return service.lint(WF, new LintRequest(List.of(new LintItem(nodeId, "template", template)))).diagnostics();
+        return service.lint(
+                        WF, new LintRequest(List.of(new LintItem(nodeId, "template", template))))
+                .diagnostics();
     }
 
     private static LintDiagnostic only(List<LintDiagnostic> d, String code) {
@@ -317,7 +411,11 @@ class WorkflowExpressionServiceTest {
     @Test
     void aCleanTemplateHasNoDiagnostics() {
         pin("fetch", ORDER);
-        assertEquals(List.of(), lint("price", "{{ $json.items[0].price }} and {{ $node[\"Fetch\"].customer.name }}"));
+        assertEquals(
+                List.of(),
+                lint(
+                        "price",
+                        "{{ $json.items[0].price }} and {{ $node[\"Fetch\"].customer.name }}"));
     }
 
     @Test
@@ -342,7 +440,9 @@ class WorkflowExpressionServiceTest {
         LintDiagnostic d = only(lint("price", template), "UNKNOWN_NODE");
         assertEquals("error", d.severity());
         assertTrue(d.message().contains("Fetch"), d.message());
-        assertTrue(template.substring(d.start(), d.end()).contains("Fetsh"), "position of the reference");
+        assertTrue(
+                template.substring(d.start(), d.end()).contains("Fetsh"),
+                "position of the reference");
     }
 
     @Test
@@ -354,16 +454,24 @@ class WorkflowExpressionServiceTest {
         // The same label from a node that does have it upstream is fine.
         assertEquals(List.of(), lint("price", "{{ $node[\"Fetch\"].v }}"));
         // A node is never upstream of itself.
-        assertEquals("NOT_UPSTREAM", only(lint("fetch", "{{ $node[\"Fetch\"].v }}"), "NOT_UPSTREAM").code());
+        assertEquals(
+                "NOT_UPSTREAM",
+                only(lint("fetch", "{{ $node[\"Fetch\"].v }}"), "NOT_UPSTREAM").code());
         // An id reference is checked the same way.
-        assertEquals("NOT_UPSTREAM", only(lint("price", "{{ $node.id(\"side\").v }}"), "NOT_UPSTREAM").code());
+        assertEquals(
+                "NOT_UPSTREAM",
+                only(lint("price", "{{ $node.id(\"side\").v }}"), "NOT_UPSTREAM").code());
     }
 
     @Test
     void lintReportsAmbiguousLabels() {
-        graph = new WorkflowGraphDto(
-            List.of(node("a", "code", "Twin", Map.of()), node("b", "code", "Twin", Map.of()), node("c", "code", "C", Map.of())),
-            List.of(edge("a", "c"), edge("b", "c")));
+        graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                node("a", "code", "Twin", Map.of()),
+                                node("b", "code", "Twin", Map.of()),
+                                node("c", "code", "C", Map.of())),
+                        List.of(edge("a", "c"), edge("b", "c")));
         when(workflowService.graph(WF)).thenReturn(graph);
 
         LintDiagnostic d = only(lint("c", "{{ $node[\"Twin\"].x }}"), "AMBIGUOUS_LABEL");
@@ -377,29 +485,49 @@ class WorkflowExpressionServiceTest {
         pin("fetch", ORDER);
         LintDiagnostic d = only(lint("price", "{{ totl }}"), "LEGACY_UNKNOWN_NAME");
         assertEquals("warning", d.severity());
-        assertEquals(List.of(), lint("price", "{{ customer }}"), "a field the pinned output has is fine");
+        assertEquals(
+                List.of(),
+                lint("price", "{{ customer }}"),
+                "a field the pinned output has is fine");
     }
 
     @Test
     void lintFlagsAPinWhoseNodeConfigChangedSinceItWasPinned() {
         pin("fetch", ORDER); // no hash recorded by this helper
-        assertEquals(List.of(), lint("price", "{{ $node[\"Fetch\"].customer.name }}"), "no recorded hash -> nothing to compare");
+        assertEquals(
+                List.of(),
+                lint("price", "{{ $node[\"Fetch\"].customer.name }}"),
+                "no recorded hash -> nothing to compare");
 
-        pinStore.save(WF, "fetch", ORDER, "manual", null, "ann", "0123456789abcdef0123456789abcdef");
+        pinStore.save(
+                WF, "fetch", ORDER, "manual", null, "ann", "0123456789abcdef0123456789abcdef");
         String template = "{{ $node[\"Fetch\"].customer.name }}";
         LintDiagnostic stale = only(lint("price", template), "STALE_PIN");
         assertEquals("warning", stale.severity());
         assertEquals("$node[\"Fetch\"]", template.substring(stale.start(), stale.end()));
 
         // Pinned with the node's CURRENT config hash: not stale.
-        pinStore.save(WF, "fetch", ORDER, "manual", null, "ann", WorkflowPinService.configHash(graph.nodes().get(1)));
+        pinStore.save(
+                WF,
+                "fetch",
+                ORDER,
+                "manual",
+                null,
+                "ann",
+                WorkflowPinService.configHash(graph.nodes().get(1)));
         assertEquals(List.of(), lint("price", template));
     }
 
     @Test
     void lintKeepsTheItemIdentityAndSkipsEmptyTemplates() {
-        List<LintDiagnostic> d = service.lint(WF, new LintRequest(List.of(
-            new LintItem("price", "template", ""), new LintItem("fetch", "url", "{{ 1 + }}")))).diagnostics();
+        List<LintDiagnostic> d =
+                service.lint(
+                                WF,
+                                new LintRequest(
+                                        List.of(
+                                                new LintItem("price", "template", ""),
+                                                new LintItem("fetch", "url", "{{ 1 + }}"))))
+                        .diagnostics();
         assertEquals(1, d.size());
         assertEquals("fetch", d.get(0).nodeId());
         assertEquals("url", d.get(0).field());
@@ -413,18 +541,25 @@ class WorkflowExpressionServiceTest {
 
     @Test
     void lintNeedsOnlyViewAndHasARequestCap() {
-        doThrow(new ResourceAccessDeniedException()).when(workflowService).requireAccess(WF, PermissionLevel.VIEWER);
+        doThrow(new ResourceAccessDeniedException())
+                .when(workflowService)
+                .requireAccess(WF, PermissionLevel.VIEWER);
         assertThrows(ResourceAccessDeniedException.class, () -> lint("price", "{{ 1 }}"));
 
         org.mockito.Mockito.reset(workflowService);
-        when(workflowService.requireAccess(any(), any())).thenReturn(mock(WorkflowDefinition.class));
+        when(workflowService.requireAccess(any(), any()))
+                .thenReturn(mock(WorkflowDefinition.class));
         when(workflowService.graph(WF)).thenReturn(graph);
         List<LintItem> tooMany = new ArrayList<>();
         for (int i = 0; i < 201; i++) {
             tooMany.add(new LintItem("price", "f", "{{ 1 }}"));
         }
-        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
-            () -> service.lint(WF, new LintRequest(tooMany))).getStatusCode());
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                assertThrows(
+                                ResponseStatusException.class,
+                                () -> service.lint(WF, new LintRequest(tooMany)))
+                        .getStatusCode());
     }
 
     @Test
@@ -439,15 +574,18 @@ class WorkflowExpressionServiceTest {
     void theSchemaListsEveryAncestorNearestFirstWithPinBeforeLastRunBeforeNone() {
         UUID runId = UUID.randomUUID();
         when(runs.findFirstByWorkflowIdOrderByStartedAtDesc(WF))
-            .thenReturn(java.util.Optional.of(new WorkflowRun(runId, WF, "Orders", "u")));
-        when(runData.latestById(runId, "fetch")).thenReturn(
-            new RunDataStore.Stored("fetch", "Fetch", 0, "OK", "{\"from\":\"last run\"}", false));
+                .thenReturn(java.util.Optional.of(new WorkflowRun(runId, WF, "Orders", "u")));
+        when(runData.latestById(runId, "fetch"))
+                .thenReturn(
+                        new RunDataStore.Stored(
+                                "fetch", "Fetch", 0, "OK", "{\"from\":\"last run\"}", false));
         when(runData.latestById(runId, "start")).thenReturn(null);
         pin("fetch", "{\"from\":\"pin\"}");
 
         UpstreamSchemaResponse r = service.upstreamSchema(WF, "price");
 
-        assertEquals(List.of("fetch", "start"), r.nodes().stream().map(SchemaNode::nodeId).toList());
+        assertEquals(
+                List.of("fetch", "start"), r.nodes().stream().map(SchemaNode::nodeId).toList());
         SchemaNode fetch = r.nodes().get(0);
         assertEquals("Fetch", fetch.label());
         assertEquals("pinned", fetch.source(), "a pin beats the last run");
@@ -462,9 +600,10 @@ class WorkflowExpressionServiceTest {
     void theLastRunIsUsedWhenThereIsNoPin() {
         UUID runId = UUID.randomUUID();
         when(runs.findFirstByWorkflowIdOrderByStartedAtDesc(WF))
-            .thenReturn(java.util.Optional.of(new WorkflowRun(runId, WF, "Orders", "u")));
-        when(runData.latestById(runId, "fetch")).thenReturn(
-            new RunDataStore.Stored("fetch", "Fetch", 0, "OK", "{\"total\":5}", false));
+                .thenReturn(java.util.Optional.of(new WorkflowRun(runId, WF, "Orders", "u")));
+        when(runData.latestById(runId, "fetch"))
+                .thenReturn(
+                        new RunDataStore.Stored("fetch", "Fetch", 0, "OK", "{\"total\":5}", false));
 
         SchemaNode fetch = service.upstreamSchema(WF, "price").nodes().get(0);
 
@@ -476,15 +615,24 @@ class WorkflowExpressionServiceTest {
     @Test
     void onlyAncestorsAreListedAndAnUnsavedNodeIs404() {
         assertEquals(List.of(), service.upstreamSchema(WF, "start").nodes());
-        assertFalse(service.upstreamSchema(WF, "price").nodes().stream().anyMatch(n -> n.nodeId().equals("side")));
-        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
-            () -> service.upstreamSchema(WF, "nope")).getStatusCode());
+        assertFalse(
+                service.upstreamSchema(WF, "price").nodes().stream()
+                        .anyMatch(n -> n.nodeId().equals("side")));
+        assertEquals(
+                HttpStatus.NOT_FOUND,
+                assertThrows(
+                                ResponseStatusException.class,
+                                () -> service.upstreamSchema(WF, "nope"))
+                        .getStatusCode());
     }
 
     @Test
     void theSchemaNeedsEdit() {
-        doThrow(new ResourceAccessDeniedException()).when(workflowService).requireAccess(WF, PermissionLevel.EDITOR);
-        assertThrows(ResourceAccessDeniedException.class, () -> service.upstreamSchema(WF, "price"));
+        doThrow(new ResourceAccessDeniedException())
+                .when(workflowService)
+                .requireAccess(WF, PermissionLevel.EDITOR);
+        assertThrows(
+                ResourceAccessDeniedException.class, () -> service.upstreamSchema(WF, "price"));
     }
 
     // ---- functions
@@ -493,32 +641,47 @@ class WorkflowExpressionServiceTest {
     void theFunctionListIsTheRegistryWithContractCategories() {
         List<FunctionDoc> docs = service.functions();
         assertEquals(BuiltIns.registry().size(), docs.size());
-        Set<String> categories = Set.of("string", "number", "array", "object", "date", "type", "logic");
+        Set<String> categories =
+                Set.of("string", "number", "array", "object", "date", "type", "logic");
         for (FunctionDoc d : docs) {
             assertTrue(categories.contains(d.category()), d.toString());
-            assertFalse(d.name().isBlank() || d.signature().isBlank() || d.doc().isBlank() || d.example().isBlank(), d.toString());
+            assertFalse(
+                    d.name().isBlank()
+                            || d.signature().isBlank()
+                            || d.doc().isBlank()
+                            || d.example().isBlank(),
+                    d.toString());
         }
-        assertTrue(docs.stream().anyMatch(d -> d.name().equals("round") && d.category().equals("number")));
+        assertTrue(
+                docs.stream()
+                        .anyMatch(d -> d.name().equals("round") && d.category().equals("number")));
     }
 
     // ---- JSON contract
 
     private static TreeSet<String> keys(JsonNode n) {
         TreeSet<String> names = new TreeSet<>();
-        n.fieldNames().forEachRemaining(names::add);
+        n.propertyNames().forEach(names::add);
         return names;
     }
 
     @Test
     void evaluateSerialisesWithExactlyTheContractFields() throws Exception {
         pin("fetch", ORDER);
-        JsonNode ok = mapper.readTree(mapper.writeValueAsString(eval("{{ $json.items[0].price }}", "price", "pinned")));
-        assertEquals(new TreeSet<>(Set.of("ok", "value", "type", "rendered", "error", "sources", "warnings")), keys(ok));
+        JsonNode ok =
+                mapper.readTree(
+                        mapper.writeValueAsString(
+                                eval("{{ $json.items[0].price }}", "price", "pinned")));
+        assertEquals(
+                new TreeSet<>(
+                        Set.of("ok", "value", "type", "rendered", "error", "sources", "warnings")),
+                keys(ok));
         assertTrue(ok.get("ok").asBoolean());
         assertTrue(ok.get("error").isNull());
         assertTrue(ok.get("sources").isArray() && ok.get("warnings").isArray());
 
-        JsonNode bad = mapper.readTree(mapper.writeValueAsString(eval("{{ 1 + }}", null, "supplied")));
+        JsonNode bad =
+                mapper.readTree(mapper.writeValueAsString(eval("{{ 1 + }}", null, "supplied")));
         assertFalse(bad.get("ok").asBoolean());
         assertTrue(bad.get("value").isNull());
         assertEquals(new TreeSet<>(Set.of("message", "start", "end")), keys(bad.get("error")));
@@ -527,9 +690,11 @@ class WorkflowExpressionServiceTest {
 
     @Test
     void evaluateReadsTheContractRequestBody() throws Exception {
-        EvaluateRequest r = mapper.readValue(
-            "{\"template\":\"{{ 1 }}\",\"nodeId\":\"price\",\"dataSource\":\"supplied\","
-                + "\"supplied\":{\"input\":\"{}\",\"nodes\":{\"Fetch\":\"{}\"}}}", EvaluateRequest.class);
+        EvaluateRequest r =
+                mapper.readValue(
+                        "{\"template\":\"{{ 1 }}\",\"nodeId\":\"price\",\"dataSource\":\"supplied\","
+                                + "\"supplied\":{\"input\":\"{}\",\"nodes\":{\"Fetch\":\"{}\"}}}",
+                        EvaluateRequest.class);
         assertEquals("{{ 1 }}", r.template());
         assertEquals("price", r.nodeId());
         assertEquals("supplied", r.dataSource());
@@ -539,35 +704,52 @@ class WorkflowExpressionServiceTest {
 
     @Test
     void lintSerialisesWithExactlyTheContractFields() throws Exception {
-        String json = mapper.writeValueAsString(service.lint(WF, new LintRequest(List.of(
-            new LintItem("price", "template", "{{ frobnicate(1) }}")))));
+        String json =
+                mapper.writeValueAsString(
+                        service.lint(
+                                WF,
+                                new LintRequest(
+                                        List.of(
+                                                new LintItem(
+                                                        "price",
+                                                        "template",
+                                                        "{{ frobnicate(1) }}")))));
         JsonNode root = mapper.readTree(json);
         assertEquals(new TreeSet<>(Set.of("diagnostics")), keys(root));
         JsonNode d = root.get("diagnostics").get(0);
-        assertEquals(new TreeSet<>(Set.of("nodeId", "field", "severity", "code", "message", "start", "end")), keys(d));
-        assertEquals("error", d.get("severity").asText());
-        LintRequest parsed = mapper.readValue(
-            "{\"items\":[{\"nodeId\":\"a\",\"field\":\"url\",\"template\":\"t\"}]}", LintRequest.class);
+        assertEquals(
+                new TreeSet<>(
+                        Set.of("nodeId", "field", "severity", "code", "message", "start", "end")),
+                keys(d));
+        assertEquals("error", d.get("severity").asString());
+        LintRequest parsed =
+                mapper.readValue(
+                        "{\"items\":[{\"nodeId\":\"a\",\"field\":\"url\",\"template\":\"t\"}]}",
+                        LintRequest.class);
         assertEquals(new LintItem("a", "url", "t"), parsed.items().get(0));
     }
 
     @Test
     void theSchemaSerialisesWithExactlyTheContractFields() throws Exception {
         pin("fetch", ORDER);
-        JsonNode root = mapper.readTree(mapper.writeValueAsString(service.upstreamSchema(WF, "price")));
+        JsonNode root =
+                mapper.readTree(mapper.writeValueAsString(service.upstreamSchema(WF, "price")));
         assertEquals(new TreeSet<>(Set.of("nodes")), keys(root));
         JsonNode node = root.get("nodes").get(0);
         assertEquals(new TreeSet<>(Set.of("nodeId", "label", "source", "paths")), keys(node));
         JsonNode path = node.get("paths").get(0);
         assertEquals(new TreeSet<>(Set.of("path", "type", "sample")), keys(path));
-        JsonNode container = node.get("paths").get(0); // "items" is an array: sample is present and null
-        assertEquals("items", container.get("path").asText());
+        JsonNode container =
+                node.get("paths").get(0); // "items" is an array: sample is present and null
+        assertEquals("items", container.get("path").asString());
         assertTrue(container.has("sample") && container.get("sample").isNull());
     }
 
     @Test
     void theFunctionListSerialisesWithExactlyTheContractFields() throws Exception {
         JsonNode first = mapper.readTree(mapper.writeValueAsString(service.functions())).get(0);
-        assertEquals(new TreeSet<>(Set.of("name", "category", "signature", "doc", "example")), keys(first));
+        assertEquals(
+                new TreeSet<>(Set.of("name", "category", "signature", "doc", "example")),
+                keys(first));
     }
 }

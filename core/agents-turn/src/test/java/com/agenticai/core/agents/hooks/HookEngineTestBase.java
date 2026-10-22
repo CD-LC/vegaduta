@@ -1,24 +1,10 @@
 package com.agenticai.core.agents.hooks;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.audit.AuditLogService;
-import com.agenticai.core.audit.AuditOutcome;
-import com.agenticai.core.guardrails.ToolDispatchGate;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
@@ -29,8 +15,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link HookEngine} tests: a fake webhook transport, a fake clock and an
@@ -39,7 +25,7 @@ import org.springframework.beans.factory.ObjectProvider;
 abstract class HookEngineTestBase {
 
     static final UUID AGENT = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     static final String ALLOW = "{\"decision\":\"allow\"}";
 
     final AuditLogService audit = mock(AuditLogService.class);

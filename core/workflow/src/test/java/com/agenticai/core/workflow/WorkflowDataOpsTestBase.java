@@ -3,17 +3,19 @@ package com.agenticai.core.workflow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-/** Shared fixture of the {@link WorkflowDataOps} tests: JSON builders and a small filter data set. */
+/**
+ * Shared fixture of the {@link WorkflowDataOps} tests: JSON builders and a small filter data set.
+ */
 abstract class WorkflowDataOpsTestBase {
 
-    static final ObjectMapper M = new ObjectMapper();
+    static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
     final WorkflowDataOps ops = new WorkflowDataOps(M);
 
     // ---- helpers
@@ -55,13 +57,17 @@ abstract class WorkflowDataOpsTestBase {
         return out;
     }
 
-    static final String F = "[{\"n\":\"a\",\"p\":5,\"t\":\"x@y.com\",\"d\":\"2024-01-05\"},"
-        + "{\"n\":\"b\",\"p\":15,\"t\":\"\",\"d\":\"2024-03-01\"},"
-        + "{\"n\":\"c\",\"p\":null,\"t\":\"z@y.org\",\"d\":\"2023-12-31\"},"
-        + "{\"n\":\"A\",\"p\":\"20\"}]";
+    static final String F =
+            "[{\"n\":\"a\",\"p\":5,\"t\":\"x@y.com\",\"d\":\"2024-01-05\"},"
+                    + "{\"n\":\"b\",\"p\":15,\"t\":\"\",\"d\":\"2024-03-01\"},"
+                    + "{\"n\":\"c\",\"p\":null,\"t\":\"z@y.org\",\"d\":\"2023-12-31\"},"
+                    + "{\"n\":\"A\",\"p\":\"20\"}]";
 
     List<String> filterNames(String op, String field, String value, boolean ignoreCase) {
-        Outcome o = ops.filter(m("conditions", List.of(cond(field, op, value)), "ignoreCase", ignoreCase), F);
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond(field, op, value)), "ignoreCase", ignoreCase),
+                        F);
         return col(o.output(), "n");
     }
 }

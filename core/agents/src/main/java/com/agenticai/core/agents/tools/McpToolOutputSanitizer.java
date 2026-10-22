@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Injection/flooding caps for content that crosses from a dynamic MCP server into the agent loop

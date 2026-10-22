@@ -6,7 +6,6 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.SpeechTextNormalizer;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.core.io.ByteArrayResource;
@@ -18,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Thin wrapper around ElevenLabs' REST API - Master-Roadmap-2026.md item #4 (voice cloning). Three
@@ -113,7 +113,7 @@ public class ElevenLabsClient {
                             .body(body)
                             .retrieve()
                             .body(JsonNode.class);
-            String voiceId = response == null ? null : response.path("voice_id").asText(null);
+            String voiceId = response == null ? null : response.path("voice_id").asString(null);
             if (voiceId == null || voiceId.isBlank()) {
                 throw new ElevenLabsApiException(
                         0, "ElevenLabs voice clone returned no voice_id in the response.");

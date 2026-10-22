@@ -7,30 +7,29 @@ import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Backs Simple-mode generation tuning (see {@link TuningMode}'s javadoc):
- * one small, non-streaming LLM call that reads an agent's system prompt and
- * proposes temperature/topP/maxTokens for it, so a customer never has to
- * understand what those three sliders mean. Same "one tiny completion, no
+ * Backs Simple-mode generation tuning (see {@link TuningMode}'s javadoc): one small, non-streaming
+ * LLM call that reads an agent's system prompt and proposes temperature/topP/maxTokens for it, so a
+ * customer never has to understand what those three sliders mean. Same "one tiny completion, no
  * session, no tools, no persisted agent" shape as {@code
- * com.agenticai.core.agents.assist.AssistService}, and deliberately reuses
- * that class's exact FREE-tier-aware client-building branch (a FREE tenant
- * has no BYOK provider to resolve - see that class's javadoc) rather than
- * the agent's own configured provider, since this is an internal platform
- * utility call, not a message the agent itself sends or receives.
+ * com.agenticai.core.agents.assist.AssistService}, and deliberately reuses that class's exact
+ * FREE-tier-aware client-building branch (a FREE tenant has no BYOK provider to resolve - see that
+ * class's javadoc) rather than the agent's own configured provider, since this is an internal
+ * platform utility call, not a message the agent itself sends or receives.
  */
 @Service
 public class GenerationParamsInferenceService {
 
-    private static final Logger log = LoggerFactory.getLogger(GenerationParamsInferenceService.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(GenerationParamsInferenceService.class);
 
     // Conservative floor/ceiling so a malformed or wildly-extreme model
     // response never produces an unusable agent - same spirit as
@@ -51,14 +50,13 @@ public class GenerationParamsInferenceService {
     private final int defaultMaxTokens;
 
     public GenerationParamsInferenceService(
-        ProviderCredentialResolver credentialResolver,
-        com.agenticai.core.chat.ChatClientRegistry chatClientRegistry,
-        com.agenticai.core.chat.gateway.LlmGatewayService llmGatewayService,
-        TenantLimits tenantLimits,
-        FreeTierChatClientService freeTierChatClientService,
-        ObjectMapper objectMapper,
-        @Value("${app.agents.default-max-tokens:1024}") int defaultMaxTokens
-    ) {
+            ProviderCredentialResolver credentialResolver,
+            com.agenticai.core.chat.ChatClientRegistry chatClientRegistry,
+            com.agenticai.core.chat.gateway.LlmGatewayService llmGatewayService,
+            TenantLimits tenantLimits,
+            FreeTierChatClientService freeTierChatClientService,
+            ObjectMapper objectMapper,
+            @Value("${app.agents.default-max-tokens:1024}") int defaultMaxTokens) {
         this.credentialResolver = credentialResolver;
         this.chatClientRegistry = chatClientRegistry;
         this.llmGatewayService = llmGatewayService;
@@ -69,32 +67,29 @@ public class GenerationParamsInferenceService {
     }
 
     /**
-     * Infers temperature/topP/maxTokens from a system prompt's apparent
-     * purpose (creative vs deterministic, short-answer vs long-form, etc).
-     * Never throws - a provider error or an unparseable response falls back
-     * to a conservative fixed default, so switching an agent into Simple
-     * mode always leaves it in a usable state even when inference itself
-     * fails.
+     * Infers temperature/topP/maxTokens from a system prompt's apparent purpose (creative vs
+     * deterministic, short-answer vs long-form, etc). Never throws - a provider error or an
+     * unparseable response falls back to a conservative fixed default, so switching an agent into
+     * Simple mode always leaves it in a usable state even when inference itself fails.
      *
-     * <p>Bug fix (direct feedback: "claude-sonnet-4-5 is not a valid model
-     * ID" 400 thrown from here even though the tenant never chose that
-     * model) - {@code buildChatClient} used to send a single hardcoded
-     * {@code app.agents.default-model} string to WHICHEVER provider {@link
-     * ProviderCredentialResolver#resolveAnyActiveKey} happened to pick (tie-
-     * broken by earliest-activated, per that method's own javadoc) -
-     * "claude-sonnet-4-5" is a raw Anthropic-style slug that most other
-     * providers/gateways (OpenRouter, Grok, Gemini, a self-hosted OpenAI-
-     * compatible endpoint...) simply reject with exactly this error, because
-     * a global default model string can never be valid across every
-     * provider a tenant might have BYOK-activated. Fixed by requiring the
-     * caller to pass the SAME provider/model the agent itself already runs
-     * on (already validated for compatibility at agent create/update time -
-     * see {@code AgentModelNotSupportedException}) instead of guessing.
+     * <p>Bug fix (direct feedback: "claude-sonnet-4-5 is not a valid model ID" 400 thrown from here
+     * even though the tenant never chose that model) - {@code buildChatClient} used to send a
+     * single hardcoded {@code app.agents.default-model} string to WHICHEVER provider {@link
+     * ProviderCredentialResolver#resolveAnyActiveKey} happened to pick (tie- broken by
+     * earliest-activated, per that method's own javadoc) - "claude-sonnet-4-5" is a raw
+     * Anthropic-style slug that most other providers/gateways (OpenRouter, Grok, Gemini, a
+     * self-hosted OpenAI- compatible endpoint...) simply reject with exactly this error, because a
+     * global default model string can never be valid across every provider a tenant might have
+     * BYOK-activated. Fixed by requiring the caller to pass the SAME provider/model the agent
+     * itself already runs on (already validated for compatibility at agent create/update time - see
+     * {@code AgentModelNotSupportedException}) instead of guessing.
      */
-    public InferredParams infer(String systemPrompt, ProviderName agentProviderName, String agentModel) {
+    public InferredParams infer(
+            String systemPrompt, ProviderName agentProviderName, String agentModel) {
         try {
             ChatClient chatClient = buildChatClient(agentProviderName, agentModel);
-            String system = """
+            String system =
+                    """
                 You configure generation parameters for an AI agent based on
                 its system prompt. Reply with ONLY a JSON object (no markdown
                 fences, no explanation) with exactly these three fields:
@@ -115,7 +110,9 @@ public class GenerationParamsInferenceService {
             String raw = chatClient.prompt().system(system).user(user).call().content();
             return parse(raw);
         } catch (Exception e) {
-            log.warn("Generation-params inference failed - falling back to conservative defaults", e);
+            log.warn(
+                    "Generation-params inference failed - falling back to conservative defaults",
+                    e);
             return FALLBACK_ON_FAILURE;
         }
     }
@@ -134,7 +131,12 @@ public class GenerationParamsInferenceService {
         }
         double temperature = clamp(node.path("temperature").asDouble(0.7), 0.0, 1.0);
         double topP = clamp(node.path("topP").asDouble(1.0), 0.0, 1.0);
-        int maxTokens = (int) clamp(node.path("maxTokens").asInt(defaultMaxTokens), MIN_MAX_TOKENS, MAX_MAX_TOKENS);
+        int maxTokens =
+                (int)
+                        clamp(
+                                node.path("maxTokens").asInt(defaultMaxTokens),
+                                MIN_MAX_TOKENS,
+                                MAX_MAX_TOKENS);
         return new InferredParams(maxTokens, temperature, topP);
     }
 
@@ -143,35 +145,42 @@ public class GenerationParamsInferenceService {
     }
 
     /**
-     * Mirrors {@code AgentChatService#buildChatClientFor}'s exact routing
-     * split by asking the same {@code TenantLimits#usesPlatformPool} it does
-     * (FREE tenant, a paid tenant opted into {@code
-     * TenantLimits#usePlatformLlm}, or a live complimentary grant -> the
-     * hosted pool, which resolves its
-     * own valid model internally and never needs one passed in; everyone
-     * else -> BYOK using THIS agent's own already-validated provider/model)
-     * so this internal utility call can never hand a provider a model ID
-     * that provider doesn't recognize - see {@link #infer}'s javadoc for the
-     * bug this replaced.
+     * Mirrors {@code AgentChatService#buildChatClientFor}'s exact routing split by asking the same
+     * {@code TenantLimits#usesPlatformPool} it does (FREE tenant, a paid tenant opted into {@code
+     * TenantLimits#usePlatformLlm}, or a live complimentary grant -> the hosted pool, which
+     * resolves its own valid model internally and never needs one passed in; everyone else -> BYOK
+     * using THIS agent's own already-validated provider/model) so this internal utility call can
+     * never hand a provider a model ID that provider doesn't recognize - see {@link #infer}'s
+     * javadoc for the bug this replaced.
      */
     private ChatClient buildChatClient(ProviderName agentProviderName, String agentModel) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         TenantPlan plan = tenantId != null ? tenantLimits.plan(tenantId) : null;
         if (tenantLimits.usesPlatformPool(tenantId, plan)) {
-            return freeTierChatClientService.buildClientForFreeTenant(tenantId, plan, defaultMaxTokens, 0.3, 1.0);
+            return freeTierChatClientService.buildClientForFreeTenant(
+                    tenantId, plan, defaultMaxTokens, 0.3, 1.0);
         }
         String apiKey = credentialResolver.resolveActiveKey(agentProviderName);
         // Tool-free utility call with a fixed reply shape: ask OpenAI/Gemini/Vertex to enforce it
         // natively (other providers ignore the option and rely on the prompt + tolerant parse).
-        return llmGatewayService.resolveClient(tenantId, new com.agenticai.core.chat.gateway.GatewayCallSpec(
-            agentProviderName, apiKey, agentModel, defaultMaxTokens, 0.3, 1.0, null,
-            com.agenticai.core.chat.structured.StructuredSchemaSpec.options("generation_params", PARAMS_SCHEMA)
-        ));
+        return llmGatewayService.resolveClient(
+                tenantId,
+                new com.agenticai.core.chat.gateway.GatewayCallSpec(
+                        agentProviderName,
+                        apiKey,
+                        agentModel,
+                        defaultMaxTokens,
+                        0.3,
+                        1.0,
+                        null,
+                        com.agenticai.core.chat.structured.StructuredSchemaSpec.options(
+                                "generation_params", PARAMS_SCHEMA)));
     }
 
-    private static final String PARAMS_SCHEMA = "{\"type\":\"object\",\"properties\":{"
-        + "\"temperature\":{\"type\":\"number\"},\"topP\":{\"type\":\"number\"},\"maxTokens\":{\"type\":\"integer\"}},"
-        + "\"required\":[\"temperature\",\"topP\",\"maxTokens\"],\"additionalProperties\":false}";
+    private static final String PARAMS_SCHEMA =
+            "{\"type\":\"object\",\"properties\":{"
+                    + "\"temperature\":{\"type\":\"number\"},\"topP\":{\"type\":\"number\"},\"maxTokens\":{\"type\":\"integer\"}},"
+                    + "\"required\":[\"temperature\",\"topP\",\"maxTokens\"],\"additionalProperties\":false}";
 
     public record InferredParams(int maxTokens, double temperature, double topP) {}
 }

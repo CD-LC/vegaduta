@@ -4,7 +4,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Locale;
@@ -21,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pulls Signal messages from the operator's signal-cli REST API. Signal has no push to a public
@@ -28,10 +28,10 @@ import org.springframework.stereotype.Component;
  * is handed to {@link SignalInboundService}.
  *
  * <p>How it receives follows signal-cli's mode, read from {@code GET /v1/about}: long polling
- * {@code GET /v1/receive/{number}} for "normal" and "native", the receive websocket for
- * "json-rpc". {@code app.signal.receive.mode} forces {@code poll} or {@code websocket}; the
- * default {@code auto} asks the server. Failures back off exponentially (1 s up to 60 s) and the
- * receiver reconnects by itself, so a signal-cli restart needs no action here.
+ * {@code GET /v1/receive/{number}} for "normal" and "native", the receive websocket for "json-rpc".
+ * {@code app.signal.receive.mode} forces {@code poll} or {@code websocket}; the default {@code
+ * auto} asks the server. Failures back off exponentially (1 s up to 60 s) and the receiver
+ * reconnects by itself, so a signal-cli restart needs no action here.
  *
  * <p>signal-cli removes a message once it has been delivered, so a message that could not be
  * handled because the inbound executor was full is offered again a few times before it is dropped
@@ -46,7 +46,10 @@ import org.springframework.stereotype.Component;
  * app.signal.receive.enabled=false} removes it (for example in a process that must not receive).
  */
 @Component
-@ConditionalOnProperty(name = "app.signal.receive.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "app.signal.receive.enabled",
+        havingValue = "true",
+        matchIfMissing = true)
 public class SignalReceiveService {
 
     private static final Logger log = LoggerFactory.getLogger(SignalReceiveService.class);
@@ -87,7 +90,8 @@ public class SignalReceiveService {
         this.credentialService = credentialService;
         this.apiClient = apiClient;
         this.inboundService = inboundService;
-        this.configuredMode = configuredMode == null ? "auto" : configuredMode.strip().toLowerCase(Locale.ROOT);
+        this.configuredMode =
+                configuredMode == null ? "auto" : configuredMode.strip().toLowerCase(Locale.ROOT);
         this.pollSeconds = Math.max(1, Math.min(pollSeconds, 25));
     }
 
@@ -105,7 +109,9 @@ public class SignalReceiveService {
         }
     }
 
-    /** Starts receiving for this number unless it already is. Safe to call again on reactivation. */
+    /**
+     * Starts receiving for this number unless it already is. Safe to call again on reactivation.
+     */
     public void ensureReceiving(String number, String tenantSchema) {
         receivers.compute(
                 number,
@@ -116,7 +122,8 @@ public class SignalReceiveService {
                     Receiver receiver = new Receiver(number, tenantSchema);
                     receiver.thread =
                             TenantAwareExecutors.startVirtualThread(
-                                    "signal-receive-" + SignalAddress.mask(number).substring(3), receiver::run);
+                                    "signal-receive-" + SignalAddress.mask(number).substring(3),
+                                    receiver::run);
                     log.info("Signal receiving started for {}", SignalAddress.mask(number));
                     return receiver;
                 });
@@ -130,7 +137,9 @@ public class SignalReceiveService {
         }
     }
 
-    /** A short description of what is wrong with this number's receiver, or null when it is healthy. */
+    /**
+     * A short description of what is wrong with this number's receiver, or null when it is healthy.
+     */
     public String problem(String number) {
         return problems.get(number);
     }
@@ -146,7 +155,11 @@ public class SignalReceiveService {
         private final String tenantSchema;
         private final AtomicBoolean stopped = new AtomicBoolean();
         private volatile Thread thread;
-        /** Consecutive failures; a connection that came up (poll answered, websocket opened) resets it. */
+
+        /**
+         * Consecutive failures; a connection that came up (poll answered, websocket opened) resets
+         * it.
+         */
         private int failures;
 
         Receiver(String number, String tenantSchema) {
@@ -169,11 +182,17 @@ public class SignalReceiveService {
         void run() {
             Mode mode = null;
             while (!stopped.get()) {
-                TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + SignalAddress.mask(number), Set.of()));
+                TenantContext.set(
+                        TenantContext.of(
+                                tenantSchema,
+                                REQUESTED_BY_PREFIX + SignalAddress.mask(number),
+                                Set.of()));
                 try {
                     SignalConnection connection = currentConnection();
                     if (connection == null) {
-                        log.info("Signal receiving stopped for {}: connection no longer active", SignalAddress.mask(number));
+                        log.info(
+                                "Signal receiving stopped for {}: connection no longer active",
+                                SignalAddress.mask(number));
                         receivers.remove(number, this);
                         problems.remove(number);
                         return;
@@ -193,7 +212,8 @@ public class SignalReceiveService {
                         return;
                     }
                     failures++;
-                    mode = null; // re-read the server's mode: it may have been restarted in another one
+                    mode = null; // re-read the server's mode: it may have been restarted in
+                    // another one
                     if (failures >= PROBLEM_AFTER_FAILURES) {
                         problems.put(number, "signal-cli not reachable: " + brief(e));
                     }
@@ -210,7 +230,8 @@ public class SignalReceiveService {
         }
 
         private SignalConnection currentConnection() {
-            Optional<SignalCredential> credential = credentialRepository.findFirstByOrderByCreatedAtAsc();
+            Optional<SignalCredential> credential =
+                    credentialRepository.findFirstByOrderByCreatedAtAsc();
             if (credential.isEmpty()
                     || credential.get().getStatus() != SignalCredentialStatus.ACTIVE
                     || !number.equals(credential.get().getAccountNumber())) {
@@ -223,7 +244,8 @@ public class SignalReceiveService {
             return switch (configuredMode) {
                 case "poll" -> Mode.POLL;
                 case "websocket" -> Mode.WEBSOCKET;
-                default -> apiClient.about(connection).websocketReceive() ? Mode.WEBSOCKET : Mode.POLL;
+                default ->
+                        apiClient.about(connection).websocketReceive() ? Mode.WEBSOCKET : Mode.POLL;
             };
         }
 
@@ -240,12 +262,16 @@ public class SignalReceiveService {
             }
         }
 
-        /** Holds the websocket open, handing each frame over on this thread, until it closes or the credential changes. */
+        /**
+         * Holds the websocket open, handing each frame over on this thread, until it closes or the
+         * credential changes.
+         */
         private void streamLoop(SignalConnection initial) {
             SignalConnection connection = initial;
             long lastRefresh = System.currentTimeMillis();
             try (SignalStream stream = apiClient.openStream(connection)) {
-                // Up: whatever drops it later is a new incident, not another step of the old backoff.
+                // Up: whatever drops it later is a new incident, not another step of the old
+                // backoff.
                 failures = 0;
                 problems.remove(number);
                 while (!stopped.get()) {
@@ -276,13 +302,18 @@ public class SignalReceiveService {
                         return;
                     }
                 } catch (RuntimeException e) {
-                    log.warn("Failed to process Signal message for {}: {}", SignalAddress.mask(number), brief(e));
+                    log.warn(
+                            "Failed to process Signal message for {}: {}",
+                            SignalAddress.mask(number),
+                            brief(e));
                     return;
                 }
                 sleep(SHED_BACKOFF_MS);
             }
             if (!stopped.get()) {
-                log.warn("Dropped a Signal message for {}: the inbound executor stayed full", SignalAddress.mask(number));
+                log.warn(
+                        "Dropped a Signal message for {}: the inbound executor stayed full",
+                        SignalAddress.mask(number));
             }
         }
 

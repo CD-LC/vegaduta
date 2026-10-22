@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +121,8 @@ class TeamsBotFrameworkJwtValidatorTest {
 
     @Test
     void apiClientRefusesToSendTheBotTokenToANonAllowlistedServiceUrl() {
-        TeamsApiClient client = new TeamsApiClient(new ObjectMapper(), policy);
+        TeamsApiClient client =
+                new TeamsApiClient(com.agenticai.core.json.JsonMappers.plain(), policy);
         // Fails before any token mint or network call.
         assertThatThrownBy(
                         () ->

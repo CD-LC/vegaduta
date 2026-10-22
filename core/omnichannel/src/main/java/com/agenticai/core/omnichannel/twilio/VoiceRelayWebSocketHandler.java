@@ -14,9 +14,6 @@ import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
 import com.agenticai.core.speech.SpeechStreamNormalizer;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -34,6 +31,10 @@ import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorato
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Master Roadmap 2026 item #17 (real-time voice agents) - bridges Twilio Conversation Relay's
@@ -136,14 +137,14 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
         JsonNode node;
         try {
             node = MAPPER.readTree(message.getPayload());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn(
                     "Malformed Conversation Relay message on session {}: {}",
                     session.getId(),
                     e.getMessage());
             return;
         }
-        String type = node.path("type").asText("");
+        String type = node.path("type").asString("");
         switch (type) {
             case "setup" -> handleSetup(session, node);
             case "prompt" -> handlePrompt(session, node);
@@ -153,7 +154,7 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
                     log.warn(
                             "Conversation Relay reported an error on session {}: {}",
                             session.getId(),
-                            node.path("description").asText(""));
+                            node.path("description").asString(""));
             default ->
                     log.debug(
                             "Unhandled Conversation Relay message type '{}' on session {}",
@@ -175,14 +176,14 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
         // more. The tenant, call and caller come from the admission ticket the
         // signature-verified inbound-call webhook minted; a socket without a
         // valid one is closed before any tenant is resolved.
-        String presented = node.path("customParameters").path("ticket").asText("");
+        String presented = node.path("customParameters").path("ticket").asString("");
         if (presented.isBlank()) {
             presented = queryParam(session.getUri(), "ticket").orElse("");
         }
         Optional<VoiceRelayTicketService.Admission> admission =
                 voiceRelayTicketService.verify(presented);
         if (admission.isEmpty()
-                || !admission.get().callSid().equals(node.path("callSid").asText(""))) {
+                || !admission.get().callSid().equals(node.path("callSid").asString(""))) {
             log.warn(
                     "Rejected voice relay setup on session {} - missing, expired or mismatched"
                             + " admission ticket",
@@ -290,7 +291,7 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
         if (!node.path("last").asBoolean(false)) {
             return;
         }
-        String text = node.path("voicePrompt").asText("");
+        String text = node.path("voicePrompt").asString("");
         if (text.isBlank()) {
             return;
         }
@@ -365,7 +366,7 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
      * row (see {@link VoiceDtmfMapping}'s javadoc) - the switch is scoped to this one call.
      */
     private void handleDtmf(WebSocketSession session, JsonNode node) {
-        String digit = node.path("digit").asText("");
+        String digit = node.path("digit").asString("");
         var attrs = session.getAttributes();
         String tenantSchema = (String) attrs.get(ATTR_TENANT_SCHEMA);
         if (tenantSchema == null || digit.isBlank()) {
@@ -413,7 +414,7 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
      * the latter would have turned an unauthenticated socket into "reach any agent in the tenant".
      */
     private String resolveDialedNumber(WebSocketSession session, JsonNode node) {
-        String fromSetup = node.path("to").asText("");
+        String fromSetup = node.path("to").asString("");
         if (!fromSetup.isBlank()) {
             return fromSetup;
         }
@@ -487,7 +488,7 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
             safe.sendMessage(new TextMessage(MAPPER.writeValueAsString(payload)));
-        } catch (IOException e) {
+        } catch (java.io.IOException | JacksonException e) {
             log.warn(
                     "Failed to send Conversation Relay message on session {}: {}",
                     session.getId(),

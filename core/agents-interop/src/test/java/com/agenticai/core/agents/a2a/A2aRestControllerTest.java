@@ -16,8 +16,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.Duration;
@@ -30,6 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The A2A 1.0 HTTP+JSON/REST binding (spec section 11): success shapes, the section 5.4 HTTP status
@@ -41,7 +41,7 @@ class A2aRestControllerTest {
     private static final UUID AGENT_ID = UUID.randomUUID();
     private static final UUID FORBIDDEN_AGENT_ID = UUID.randomUUID();
     private static final Principal ALICE = () -> "alice";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
     private static final String V1 = "1.0";
 
     private AgentChatService chat;
@@ -101,11 +101,11 @@ class A2aRestControllerTest {
         assertEquals("application/a2a+json", r.getContentType().split(";")[0].trim());
         JsonNode error = body(r).get("error");
         assertEquals(http, error.get("code").asInt());
-        assertEquals(status, error.get("status").asText());
+        assertEquals(status, error.get("status").asString());
         JsonNode info = error.get("details").get(0);
-        assertEquals("type.googleapis.com/google.rpc.ErrorInfo", info.get("@type").asText());
-        assertEquals(reason, info.get("reason").asText());
-        assertEquals("a2a-protocol.org", info.get("domain").asText());
+        assertEquals("type.googleapis.com/google.rpc.ErrorInfo", info.get("@type").asString());
+        assertEquals(reason, info.get("reason").asString());
+        assertEquals("a2a-protocol.org", info.get("domain").asString());
     }
 
     @Test
@@ -117,10 +117,10 @@ class A2aRestControllerTest {
         assertEquals("application/a2a+json", r.getContentType().split(";")[0].trim());
         assertEquals(V1, r.getHeader("A2A-Version"));
         JsonNode task = body(r).get("task");
-        assertEquals("TASK_STATE_COMPLETED", task.get("status").get("state").asText());
+        assertEquals("TASK_STATE_COMPLETED", task.get("status").get("state").asString());
         assertEquals(
                 "Hello world",
-                task.get("artifacts").get(0).get("parts").get(0).get("text").asText());
+                task.get("artifacts").get(0).get("parts").get(0).get("text").asString());
         assertTrue(!task.has("kind"), "1.0 drops the kind discriminator");
     }
 
@@ -144,7 +144,7 @@ class A2aRestControllerTest {
     void getAndCancelUseTheSection54Statuses() throws IOException {
         MockHttpServletResponse sent = new MockHttpServletResponse();
         rest.sendMessage(AGENT_ID, message("hi", null), V1, ALICE, sent);
-        String taskId = body(sent).get("task").get("id").asText();
+        String taskId = body(sent).get("task").get("id").asString();
 
         MockHttpServletResponse got = new MockHttpServletResponse();
         rest.getTask(taskId, 1, V1, ALICE, got);
@@ -162,7 +162,7 @@ class A2aRestControllerTest {
                         .get(0)
                         .get("metadata")
                         .get("taskId")
-                        .asText());
+                        .asString());
 
         MockHttpServletResponse cancel = new MockHttpServletResponse();
         rest.cancelTask(taskId, V1, ALICE, cancel);
@@ -213,7 +213,7 @@ class A2aRestControllerTest {
         JsonNode last = JSON.readTree(blocks[blocks.length - 1].substring("data: ".length()));
         assertEquals(
                 "TASK_STATE_COMPLETED",
-                last.get("statusUpdate").get("status").get("state").asText());
+                last.get("statusUpdate").get("status").get("state").asString());
         assertTrue(r.getContentAsString().contains("\"artifactUpdate\""));
     }
 

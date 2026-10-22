@@ -4,9 +4,6 @@ import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
@@ -27,6 +24,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The A2A 1.0 HTTP+JSON/REST binding (spec section 11).
@@ -328,7 +328,7 @@ public class A2aRestController {
         JsonNode node;
         try {
             node = mapper.readTree(body == null ? "" : body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw A2aError.parseError(e.getOriginalMessage());
         }
         if (node == null || !node.isObject()) {

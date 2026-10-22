@@ -4,8 +4,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for the two X API v2 endpoints {@code XDmPollingJob}/{@code
@@ -49,7 +49,7 @@ public class XApiClient {
                 root.path("data").isArray() && root.path("data").size() > 0
                         ? root.path("data").get(0)
                         : null;
-        return first == null ? null : first.path("id").asText(null);
+        return first == null ? null : first.path("id").asString(null);
     }
 
     /**
@@ -69,7 +69,7 @@ public class XApiClient {
         if (data.isArray()) {
             for (int i = 0; i < data.size(); i++) {
                 JsonNode node = data.get(i);
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (i == 0 && id != null) {
                     newCursor = id;
                 }
@@ -77,12 +77,12 @@ public class XApiClient {
                     sawCursor = true;
                     break; // everything from here back was already processed
                 }
-                if (!"MessageCreate".equals(node.path("event_type").asText())) {
+                if (!"MessageCreate".equals(node.path("event_type").asString())) {
                     continue;
                 }
-                String senderId = node.path("sender_id").asText(null);
-                String text = node.path("text").asText(null);
-                String conversationId = node.path("dm_conversation_id").asText(null);
+                String senderId = node.path("sender_id").asString(null);
+                String text = node.path("text").asString(null);
+                String conversationId = node.path("dm_conversation_id").asString(null);
                 if (senderId == null
                         || text == null
                         || conversationId == null

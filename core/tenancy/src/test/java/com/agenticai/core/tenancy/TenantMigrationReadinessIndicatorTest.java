@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.health.contributor.Status;
 
 /** The readiness gate's three answers: still migrating, migrated, budget elapsed. */
 class TenantMigrationReadinessIndicatorTest {
@@ -22,7 +22,7 @@ class TenantMigrationReadinessIndicatorTest {
     void outOfServiceWhileMigratingInsideTheBudget() {
         TenantMigrationGate gate = new TenantMigrationGate(true, 60, at(T0));
         TenantMigrationReadinessIndicator indicator =
-            new TenantMigrationReadinessIndicator(gate, at(T0.plus(Duration.ofSeconds(10))));
+                new TenantMigrationReadinessIndicator(gate, at(T0.plus(Duration.ofSeconds(10))));
 
         assertEquals(Status.OUT_OF_SERVICE, indicator.health().getStatus());
         assertEquals("migrating", indicator.health().getDetails().get("tenantSchemas"));
@@ -33,23 +33,29 @@ class TenantMigrationReadinessIndicatorTest {
         TenantMigrationGate gate = new TenantMigrationGate(true, 60, at(T0));
         gate.markMigrated();
 
-        assertEquals(Status.UP, new TenantMigrationReadinessIndicator(gate, at(T0)).health().getStatus());
+        assertEquals(
+                Status.UP,
+                new TenantMigrationReadinessIndicator(gate, at(T0)).health().getStatus());
     }
 
     @Test
     void upAgainAfterTheBudgetElapsesEvenIfStillMigrating() {
         TenantMigrationGate gate = new TenantMigrationGate(true, 60, at(T0));
         TenantMigrationReadinessIndicator indicator =
-            new TenantMigrationReadinessIndicator(gate, at(T0.plus(Duration.ofSeconds(61))));
+                new TenantMigrationReadinessIndicator(gate, at(T0.plus(Duration.ofSeconds(61))));
 
         assertEquals(Status.UP, indicator.health().getStatus());
-        assertEquals("migrating (gate budget elapsed)", indicator.health().getDetails().get("tenantSchemas"));
+        assertEquals(
+                "migrating (gate budget elapsed)",
+                indicator.health().getDetails().get("tenantSchemas"));
     }
 
     @Test
     void upImmediatelyWhenMigrateOnBootIsOff() {
         TenantMigrationGate gate = new TenantMigrationGate(false, 60, at(T0));
 
-        assertEquals(Status.UP, new TenantMigrationReadinessIndicator(gate, at(T0)).health().getStatus());
+        assertEquals(
+                Status.UP,
+                new TenantMigrationReadinessIndicator(gate, at(T0)).health().getStatus());
     }
 }

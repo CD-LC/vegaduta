@@ -2,7 +2,6 @@ package com.agenticai.core.omnichannel.relay;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Edge relay (2026-10-14): a signed-in browser with a warm on-device model registers as the
@@ -34,10 +34,10 @@ import org.springframework.stereotype.Service;
  * which the same thread answers on the hosted path. There is no scheduler and no new job pool.
  *
  * <p><b>Storage.</b> Valkey, keyed per tenant: a hash of registered relays, a per-relay liveness
- * key refreshed by heartbeats, one queue list per channel (so a relay serving only SMS never
- * claims a WhatsApp message), a JSON job key with a lease, and a per-job reply list the waiting
- * thread blocks on. Every Valkey failure degrades to "no relay online", which is the hosted path,
- * so a Valkey outage can never lose a message.
+ * key refreshed by heartbeats, one queue list per channel (so a relay serving only SMS never claims
+ * a WhatsApp message), a JSON job key with a lease, and a per-job reply list the waiting thread
+ * blocks on. Every Valkey failure degrades to "no relay online", which is the hosted path, so a
+ * Valkey outage can never lose a message.
  *
  * <p><b>Trust.</b> The relay is a tenant user holding {@code PERM_MANAGE_CHANNELS} (the same
  * permission that sets the channel's default agent); it sees the inbound text of its own tenant's
@@ -62,8 +62,10 @@ public class EdgeRelayService {
     public EdgeRelayService(
             StringRedisTemplate redis,
             @Value("${app.omnichannel.edge-relay.enabled:true}") boolean enabled,
-            @Value("${app.omnichannel.edge-relay.heartbeat-ttl-seconds:45}") long heartbeatTtlSeconds,
-            @Value("${app.omnichannel.edge-relay.claim-wait-seconds-max:25}") int claimWaitSecondsMax,
+            @Value("${app.omnichannel.edge-relay.heartbeat-ttl-seconds:45}")
+                    long heartbeatTtlSeconds,
+            @Value("${app.omnichannel.edge-relay.claim-wait-seconds-max:25}")
+                    int claimWaitSecondsMax,
             @Value("${app.omnichannel.edge-relay.reply-wait-seconds:60}") long replyWaitSeconds,
             @Value("${app.omnichannel.edge-relay.lease-seconds:90}") long leaseSeconds,
             @Value("${app.omnichannel.edge-relay.queue-max:100}") int queueMax) {
@@ -110,7 +112,8 @@ public class EdgeRelayService {
             String modelLabel,
             String deviceLabel) {
         if (!enabled) {
-            throw new IllegalStateException("edge relay is disabled (app.omnichannel.edge-relay.enabled)");
+            throw new IllegalStateException(
+                    "edge relay is disabled (app.omnichannel.edge-relay.enabled)");
         }
         if (channels == null || channels.isEmpty()) {
             throw new IllegalArgumentException("a relay must serve at least one channel");
@@ -134,7 +137,10 @@ public class EdgeRelayService {
         return info;
     }
 
-    /** @return false when the relay is unknown (expired or never registered), so the browser re-registers. */
+    /**
+     * @return false when the relay is unknown (expired or never registered), so the browser
+     *     re-registers.
+     */
     public boolean heartbeat(String tenantId, String relayId) {
         if (!Boolean.TRUE.equals(redis.opsForHash().hasKey(relaysKey(tenantId), relayId))) {
             return false;
@@ -149,7 +155,9 @@ public class EdgeRelayService {
         log.info("Edge relay {} unregistered for tenant {}", relayId, tenantId);
     }
 
-    /** Registered relays whose heartbeat is still alive; stale registrations are pruned on the way. */
+    /**
+     * Registered relays whose heartbeat is still alive; stale registrations are pruned on the way.
+     */
     public List<RelayInfo> onlineRelays(String tenantId) {
         if (!enabled) {
             return List.of();
@@ -170,7 +178,10 @@ public class EdgeRelayService {
             }
             return online;
         } catch (RuntimeException e) {
-            log.warn("Edge relay registry unavailable for tenant {} - treating as offline: {}", tenantId, e.getMessage());
+            log.warn(
+                    "Edge relay registry unavailable for tenant {} - treating as offline: {}",
+                    tenantId,
+                    e.getMessage());
             return List.of();
         }
     }
@@ -196,9 +207,9 @@ public class EdgeRelayService {
     // --- server side: hand a message off and wait -----------------------------------------------
 
     /**
-     * Queues a message for the relays serving {@code channel}. Empty when the relay is disabled,
-     * no relay is online for the channel, the queue is full or Valkey is unavailable: in every
-     * case the caller answers on the hosted path.
+     * Queues a message for the relays serving {@code channel}. Empty when the relay is disabled, no
+     * relay is online for the channel, the queue is full or Valkey is unavailable: in every case
+     * the caller answers on the hosted path.
      */
     public Optional<RelayJob> enqueue(
             String tenantId,
@@ -215,7 +226,11 @@ public class EdgeRelayService {
             String queueKey = queueKey(tenantId, channel);
             Long size = redis.opsForList().size(queueKey);
             if (size != null && size >= queueMax) {
-                log.warn("Edge relay queue for tenant {} channel {} is full ({}); answering hosted", tenantId, channel, size);
+                log.warn(
+                        "Edge relay queue for tenant {} channel {} is full ({}); answering hosted",
+                        tenantId,
+                        channel,
+                        size);
                 return Optional.empty();
             }
             RelayJob job =
@@ -236,7 +251,10 @@ public class EdgeRelayService {
             redis.expire(queueKey, Duration.ofHours(1));
             return Optional.of(job);
         } catch (RuntimeException e) {
-            log.warn("Edge relay enqueue failed for tenant {} - answering hosted: {}", tenantId, e.getMessage());
+            log.warn(
+                    "Edge relay enqueue failed for tenant {} - answering hosted: {}",
+                    tenantId,
+                    e.getMessage());
             return Optional.empty();
         }
     }
@@ -251,17 +269,29 @@ public class EdgeRelayService {
             if (raw != null) {
                 Reply reply = read(raw, Reply.class);
                 cleanup(tenantId, jobId);
-                if (reply != null && reply.ok() && reply.text() != null && !reply.text().isBlank()) {
+                if (reply != null
+                        && reply.ok()
+                        && reply.text() != null
+                        && !reply.text().isBlank()) {
                     return Optional.of(reply.text());
                 }
-                log.info("Edge relay declined job {} ({}); answering hosted", jobId, reply == null ? "unreadable" : reply.reason());
+                log.info(
+                        "Edge relay declined job {} ({}); answering hosted",
+                        jobId,
+                        reply == null ? "unreadable" : reply.reason());
                 return Optional.empty();
             }
             cancel(tenantId, jobId);
-            log.info("Edge relay did not answer job {} within {}s; answering hosted", jobId, replyWait.toSeconds());
+            log.info(
+                    "Edge relay did not answer job {} within {}s; answering hosted",
+                    jobId,
+                    replyWait.toSeconds());
             return Optional.empty();
         } catch (RuntimeException e) {
-            log.warn("Edge relay wait failed for job {} - answering hosted: {}", jobId, e.getMessage());
+            log.warn(
+                    "Edge relay wait failed for job {} - answering hosted: {}",
+                    jobId,
+                    e.getMessage());
             cancel(tenantId, jobId);
             return Optional.empty();
         }
@@ -271,7 +301,11 @@ public class EdgeRelayService {
         try {
             RelayJob job = loadJob(tenantId, jobId);
             if (job != null && !RelayJob.DONE.equals(job.status())) {
-                redis.opsForValue().set(jobKey(tenantId, jobId), write(job.withStatus(RelayJob.CANCELLED, job.claimedBy())), lease);
+                redis.opsForValue()
+                        .set(
+                                jobKey(tenantId, jobId),
+                                write(job.withStatus(RelayJob.CANCELLED, job.claimedBy())),
+                                lease);
             }
             redis.delete(replyKey(tenantId, jobId));
         } catch (RuntimeException e) {
@@ -311,7 +345,10 @@ public class EdgeRelayService {
                 List<byte[]> popped =
                         redis.execute(
                                 (RedisCallback<List<byte[]>>)
-                                        connection -> connection.listCommands().bLPop((int) remaining, keys));
+                                        connection ->
+                                                connection
+                                                        .listCommands()
+                                                        .bLPop((int) remaining, keys));
                 if (popped == null || popped.size() < 2) {
                     return Optional.empty();
                 }
@@ -334,12 +371,17 @@ public class EdgeRelayService {
         }
     }
 
-    /** @return false when the job is unknown, cancelled, or claimed by another relay (the reply is dropped). */
+    /**
+     * @return false when the job is unknown, cancelled, or claimed by another relay (the reply is
+     *     dropped).
+     */
     public boolean complete(String tenantId, String relayId, String jobId, String text) {
         return finish(tenantId, relayId, jobId, new Reply(true, text, null));
     }
 
-    /** The relay could not answer (no local tier, model error): the server answers hosted at once. */
+    /**
+     * The relay could not answer (no local tier, model error): the server answers hosted at once.
+     */
     public boolean fail(String tenantId, String relayId, String jobId, String reason) {
         return finish(tenantId, relayId, jobId, new Reply(false, null, trimToNull(reason)));
     }
@@ -347,10 +389,16 @@ public class EdgeRelayService {
     private boolean finish(String tenantId, String relayId, String jobId, Reply reply) {
         try {
             RelayJob job = loadJob(tenantId, jobId);
-            if (job == null || !RelayJob.CLAIMED.equals(job.status()) || !relayId.equals(job.claimedBy())) {
+            if (job == null
+                    || !RelayJob.CLAIMED.equals(job.status())
+                    || !relayId.equals(job.claimedBy())) {
                 return false;
             }
-            redis.opsForValue().set(jobKey(tenantId, jobId), write(job.withStatus(RelayJob.DONE, relayId)), lease);
+            redis.opsForValue()
+                    .set(
+                            jobKey(tenantId, jobId),
+                            write(job.withStatus(RelayJob.DONE, relayId)),
+                            lease);
             String replyKey = replyKey(tenantId, jobId);
             redis.opsForList().rightPush(replyKey, write(reply));
             redis.expire(replyKey, lease);
@@ -413,7 +461,10 @@ public class EdgeRelayService {
         try {
             return MAPPER.readValue(raw, type);
         } catch (Exception e) {
-            log.warn("Edge relay could not read a {} record: {}", type.getSimpleName(), e.getMessage());
+            log.warn(
+                    "Edge relay could not read a {} record: {}",
+                    type.getSimpleName(),
+                    e.getMessage());
             return null;
         }
     }
@@ -423,6 +474,8 @@ public class EdgeRelayService {
             return null;
         }
         String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed.length() > 120 ? trimmed.substring(0, 120) : trimmed;
+        return trimmed.isEmpty()
+                ? null
+                : trimmed.length() > 120 ? trimmed.substring(0, 120) : trimmed;
     }
 }

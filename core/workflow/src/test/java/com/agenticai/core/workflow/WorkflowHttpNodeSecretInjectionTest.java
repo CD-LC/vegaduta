@@ -17,7 +17,6 @@ import com.agenticai.core.secrets.SecretVaultService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -51,7 +50,7 @@ class WorkflowHttpNodeSecretInjectionTest {
     private final List<Map<String, String>> sentHeaders = new ArrayList<>();
     private WorkflowHttpMediaNodeHandler handler;
     private final WorkflowExpressionResolver resolver =
-            WorkflowExpressionResolver.standalone(new ObjectMapper());
+            WorkflowExpressionResolver.standalone(com.agenticai.core.json.JsonMappers.plain());
     private static final WorkflowExpressionResolver.NodeEvalInfo INFO =
             new WorkflowExpressionResolver.NodeEvalInfo(
                     java.util.UUID.randomUUID().toString(),
@@ -96,7 +95,9 @@ class WorkflowHttpNodeSecretInjectionTest {
                 };
         handler =
                 new WorkflowHttpMediaNodeHandler(
-                        provider(executor), provider((SidecarClient) null), new ObjectMapper());
+                        provider(executor),
+                        provider((SidecarClient) null),
+                        com.agenticai.core.json.JsonMappers.plain());
         // Anonymous webhook caller.
         TenantContext.set(TenantContext.of("tenant-a", "system:workflow-webhook:ab12", Set.of()));
     }

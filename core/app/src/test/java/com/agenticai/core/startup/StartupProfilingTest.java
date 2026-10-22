@@ -2,8 +2,6 @@ package com.agenticai.core.startup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,16 +15,19 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.metrics.StartupStep;
+import tools.jackson.databind.JsonNode;
 
 /**
- * Cold-start lane: start-up profiling is OFF by default (zero behaviour change), and when ON it ranks steps by
- * SELF time and can dump the same JSON shape as Spring Boot's {@code /actuator/startup}.
+ * Cold-start lane: start-up profiling is OFF by default (zero behaviour change), and when ON it
+ * ranks steps by SELF time and can dump the same JSON shape as Spring Boot's {@code
+ * /actuator/startup}.
  */
 class StartupProfilingTest {
 
     private static final long MS = 1_000_000L;
 
-    // ---- initializer: off by default, on when asked --------------------------------------------------
+    // ---- initializer: off by default, on when asked
+    // --------------------------------------------------
 
     @Test
     void initializerLeavesSpringsDefaultNoOpStartupWhenTheFlagIsOff() {
@@ -34,7 +35,8 @@ class StartupProfilingTest {
 
         new StartupProfilingInitializer().initialize(context);
 
-        assertThat(context.getApplicationStartup()).isNotInstanceOf(BufferingApplicationStartup.class);
+        assertThat(context.getApplicationStartup())
+                .isNotInstanceOf(BufferingApplicationStartup.class);
     }
 
     @Test
@@ -47,19 +49,26 @@ class StartupProfilingTest {
         assertThat(context.getApplicationStartup()).isInstanceOf(BufferingApplicationStartup.class);
     }
 
-    // ---- summary: self time, not total time ----------------------------------------------------------
+    // ---- summary: self time, not total time
+    // ----------------------------------------------------------
 
     @Test
     void summaryRanksStepsBySelfTimeSoAParentDoesNotOutrankTheChildThatActuallyWasSlow() {
-        // A (100 ms total) spent 90 ms inside its child B, so A's own cost is only 10 ms; C is a plain 50 ms step.
-        List<StartupProfilingReporter.Step> steps = List.of(
-            new StartupProfilingReporter.Step(1, null, "spring.beans.instantiate", "beanName=A", 100 * MS),
-            new StartupProfilingReporter.Step(2, 1L, "spring.beans.instantiate", "beanName=B", 90 * MS),
-            new StartupProfilingReporter.Step(3, null, "spring.beans.instantiate", "beanName=C", 50 * MS));
+        // A (100 ms total) spent 90 ms inside its child B, so A's own cost is only 10 ms; C is a
+        // plain 50 ms step.
+        List<StartupProfilingReporter.Step> steps =
+                List.of(
+                        new StartupProfilingReporter.Step(
+                                1, null, "spring.beans.instantiate", "beanName=A", 100 * MS),
+                        new StartupProfilingReporter.Step(
+                                2, 1L, "spring.beans.instantiate", "beanName=B", 90 * MS),
+                        new StartupProfilingReporter.Step(
+                                3, null, "spring.beans.instantiate", "beanName=C", 50 * MS));
 
         List<String> lines = StartupProfilingReporter.summarize(steps, 3, 4321, 1000);
 
-        assertThat(lines.get(0)).isEqualTo("startup-profile: ready in 4321 ms; 3 steps recorded (capacity 1000)");
+        assertThat(lines.get(0))
+                .isEqualTo("startup-profile: ready in 4321 ms; 3 steps recorded (capacity 1000)");
         List<String> top = lines.stream().filter(l -> l.contains("top#")).toList();
         assertThat(top).hasSize(3);
         assertThat(top.get(0)).contains("top#1 self=90.0 ms total=90.0 ms").contains("beanName=B");
@@ -69,23 +78,36 @@ class StartupProfilingTest {
 
     @Test
     void summaryAggregatesSelfTimeAndCountPerStepName() {
-        List<StartupProfilingReporter.Step> steps = List.of(
-            new StartupProfilingReporter.Step(1, null, "spring.beans.instantiate", "", 30 * MS),
-            new StartupProfilingReporter.Step(2, null, "spring.beans.instantiate", "", 20 * MS),
-            new StartupProfilingReporter.Step(3, null, "spring.context.component-scan", "", 5 * MS));
+        List<StartupProfilingReporter.Step> steps =
+                List.of(
+                        new StartupProfilingReporter.Step(
+                                1, null, "spring.beans.instantiate", "", 30 * MS),
+                        new StartupProfilingReporter.Step(
+                                2, null, "spring.beans.instantiate", "", 20 * MS),
+                        new StartupProfilingReporter.Step(
+                                3, null, "spring.context.component-scan", "", 5 * MS));
 
         List<String> lines = StartupProfilingReporter.summarize(steps, 1, 1, 1000);
 
-        assertThat(lines).anyMatch(l -> l.equals("startup-profile: by-name self=50.0 ms count=2 spring.beans.instantiate"));
-        assertThat(lines).anyMatch(l -> l.equals("startup-profile: by-name self=5.0 ms count=1 spring.context.component-scan"));
+        assertThat(lines)
+                .anyMatch(
+                        l ->
+                                l.equals(
+                                        "startup-profile: by-name self=50.0 ms count=2 spring.beans.instantiate"));
+        assertThat(lines)
+                .anyMatch(
+                        l ->
+                                l.equals(
+                                        "startup-profile: by-name self=5.0 ms count=1 spring.context.component-scan"));
         assertThat(lines.stream().filter(l -> l.contains("top#"))).hasSize(1);
     }
 
     @Test
     void summaryWarnsWhenTheBufferFilledUpAndLaterStepsWereDropped() {
-        List<StartupProfilingReporter.Step> steps = List.of(
-            new StartupProfilingReporter.Step(1, null, "a", "", MS),
-            new StartupProfilingReporter.Step(2, null, "b", "", MS));
+        List<StartupProfilingReporter.Step> steps =
+                List.of(
+                        new StartupProfilingReporter.Step(1, null, "a", "", MS),
+                        new StartupProfilingReporter.Step(2, null, "b", "", MS));
 
         List<String> lines = StartupProfilingReporter.summarize(steps, 5, 1, 2);
 
@@ -94,14 +116,16 @@ class StartupProfilingTest {
 
     @Test
     void aParentShorterThanItsChildrenNeverGoesNegative() {
-        List<StartupProfilingReporter.Step> steps = List.of(
-            new StartupProfilingReporter.Step(1, null, "parent", "", 10 * MS),
-            new StartupProfilingReporter.Step(2, 1L, "child", "", 12 * MS));
+        List<StartupProfilingReporter.Step> steps =
+                List.of(
+                        new StartupProfilingReporter.Step(1, null, "parent", "", 10 * MS),
+                        new StartupProfilingReporter.Step(2, 1L, "child", "", 12 * MS));
 
         assertThat(StartupProfilingReporter.selfNanosById(steps).get(1L)).isZero();
     }
 
-    // ---- real recorder: parent links, tags, JSON ------------------------------------------------------
+    // ---- real recorder: parent links, tags, JSON
+    // ------------------------------------------------------
 
     private static BufferingApplicationStartup recordedStartup() {
         BufferingApplicationStartup startup = new BufferingApplicationStartup(100);
@@ -116,12 +140,15 @@ class StartupProfilingTest {
 
     @Test
     void toStepsKeepsTheParentLinkAndTagsOfARealRecording() {
-        List<StartupProfilingReporter.Step> steps = StartupProfilingReporter.toSteps(
-            recordedStartup().getBufferedTimeline().getEvents());
+        List<StartupProfilingReporter.Step> steps =
+                StartupProfilingReporter.toSteps(
+                        recordedStartup().getBufferedTimeline().getEvents());
 
         assertThat(steps).hasSize(2);
-        StartupProfilingReporter.Step child = steps.stream().filter(s -> s.parentId() != null).findFirst().orElseThrow();
-        StartupProfilingReporter.Step parent = steps.stream().filter(s -> s.parentId() == null).findFirst().orElseThrow();
+        StartupProfilingReporter.Step child =
+                steps.stream().filter(s -> s.parentId() != null).findFirst().orElseThrow();
+        StartupProfilingReporter.Step parent =
+                steps.stream().filter(s -> s.parentId() == null).findFirst().orElseThrow();
         assertThat(child.parentId()).isEqualTo(parent.id());
         assertThat(parent.tags()).isEqualTo("beanName=parentBean");
     }
@@ -130,27 +157,32 @@ class StartupProfilingTest {
     void jsonDumpIsValidJsonInTheActuatorStartupShapeAndEscapesTags() throws Exception {
         String json = StartupProfilingReporter.toJson(recordedStartup().getBufferedTimeline());
 
-        JsonNode root = new ObjectMapper().readTree(json);
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(json);
         JsonNode events = root.path("timeline").path("events");
         assertThat(events.isArray()).isTrue();
         assertThat(events).hasSize(2);
         JsonNode first = events.get(0);
-        assertThat(first.path("startupStep").path("name").asText()).isEqualTo("spring.beans.instantiate");
-        assertThat(first.path("duration").asText()).startsWith("PT");
-        assertThat(first.path("startupStep").path("tags").get(0).path("value").asText()).isEqualTo("quote\"and\nnewline");
+        assertThat(first.path("startupStep").path("name").asString())
+                .isEqualTo("spring.beans.instantiate");
+        assertThat(first.path("duration").asString()).startsWith("PT");
+        assertThat(first.path("startupStep").path("tags").get(0).path("value").asString())
+                .isEqualTo("quote\"and\nnewline");
         assertThat(first.path("startupStep").has("parentId")).isTrue();
     }
 
-    // ---- reporter: inert unless profiling is on, writes the dump when asked --------------------------
+    // ---- reporter: inert unless profiling is on, writes the dump when asked
+    // --------------------------
 
     private static ApplicationReadyEvent readyEvent(GenericApplicationContext context) {
-        return new ApplicationReadyEvent(new SpringApplication(), new String[0], context, Duration.ofMillis(1500));
+        return new ApplicationReadyEvent(
+                new SpringApplication(), new String[0], context, Duration.ofMillis(1500));
     }
 
     @Test
     void reporterDoesNothingAndNeverThrowsWhenProfilingIsOff() {
         GenericApplicationContext context = new GenericApplicationContext();
-        TestPropertyValues.of("app.startup.profiling.dump-file=should-not-be-written.json").applyTo(context);
+        TestPropertyValues.of("app.startup.profiling.dump-file=should-not-be-written.json")
+                .applyTo(context);
 
         new StartupProfilingReporter().onApplicationEvent(readyEvent(context));
 
@@ -162,15 +194,18 @@ class StartupProfilingTest {
         Path dump = dir.resolve("nested").resolve("startup.json");
         GenericApplicationContext context = new GenericApplicationContext();
         TestPropertyValues.of(
-            "app.startup.profiling.enabled=true",
-            "app.startup.profiling.dump-file=" + dump.toString().replace('\\', '/')).applyTo(context);
+                        "app.startup.profiling.enabled=true",
+                        "app.startup.profiling.dump-file=" + dump.toString().replace('\\', '/'))
+                .applyTo(context);
         new StartupProfilingInitializer().initialize(context);
         context.getApplicationStartup().start("spring.beans.instantiate").end();
 
         new StartupProfilingReporter().onApplicationEvent(readyEvent(context));
 
         assertThat(dump).exists();
-        JsonNode root = new ObjectMapper().readTree(Files.readString(dump, StandardCharsets.UTF_8));
+        JsonNode root =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(Files.readString(dump, StandardCharsets.UTF_8));
         assertThat(root.path("timeline").path("events")).hasSize(1);
     }
 }

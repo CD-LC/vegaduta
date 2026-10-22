@@ -4,14 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class ArgMatcherTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static JsonNode json(String s) {
         try {
@@ -70,7 +70,8 @@ class ArgMatcherTest {
         ArgMatcher m = matcher("{\"regex\":\"refund\\\\s+order\"}");
         assertTrue(m.matches(json("\"please refund   order 12\"")));
         assertFalse(m.matches(json("\"Refund order\"")));
-        assertTrue(matcher("{\"regex\":\"refund\",\"ignoreCase\":true}").matches(json("\"REFUND\"")));
+        assertTrue(
+                matcher("{\"regex\":\"refund\",\"ignoreCase\":true}").matches(json("\"REFUND\"")));
         // Non-text scalars match on their text; containers on their JSON.
         assertTrue(matcher("{\"regex\":\"^42$\"}").matches(json("42")));
         assertTrue(matcher("{\"regex\":\"\\\"id\\\":7\"}").matches(json("{\"id\":7}")));
@@ -80,8 +81,10 @@ class ArgMatcherTest {
     @Test
     void aValueTooLongForRegexMatchingNeverMatches() {
         ArgMatcher m = matcher("{\"regex\":\"a\"}");
-        assertTrue(m.matches(json("\"" + "b".repeat(ArgMatcher.MAX_REGEX_INPUT_CHARS - 10) + "a\"")));
-        assertFalse(m.matches(json("\"" + "a".repeat(ArgMatcher.MAX_REGEX_INPUT_CHARS + 1) + "\"")));
+        assertTrue(
+                m.matches(json("\"" + "b".repeat(ArgMatcher.MAX_REGEX_INPUT_CHARS - 10) + "a\"")));
+        assertFalse(
+                m.matches(json("\"" + "a".repeat(ArgMatcher.MAX_REGEX_INPUT_CHARS + 1) + "\"")));
     }
 
     @Test
@@ -92,7 +95,8 @@ class ArgMatcherTest {
         long start = System.nanoTime();
         assertFalse(BoundedRegexMatcher.find(hostile, value, 100_000));
         assertTrue((System.nanoTime() - start) / 1_000_000L < 5_000);
-        // Deterministic proof the budget is enforced: a tiny budget turns a would-be match into "no match".
+        // Deterministic proof the budget is enforced: a tiny budget turns a would-be match into "no
+        // match".
         assertTrue(BoundedRegexMatcher.find(Pattern.compile("a"), "a", 10));
         assertFalse(BoundedRegexMatcher.find(Pattern.compile("z"), "a".repeat(1_000), 10));
         assertFalse(BoundedRegexMatcher.find(Pattern.compile("a$"), "b".repeat(1_000) + "a", 10));
@@ -102,8 +106,11 @@ class ArgMatcherTest {
     void malformedMatchersAreRejected() {
         assertThrows(IllegalArgumentException.class, () -> matcher("{\"regex\":\"(\"}"));
         assertThrows(IllegalArgumentException.class, () -> matcher("{\"regex\":5}"));
-        assertThrows(IllegalArgumentException.class, () -> matcher("{\"regex\":\"a\",\"absent\":true}"));
-        assertThrows(IllegalArgumentException.class, () -> matcher("{\"regex\":\"a\",\"ignoreCase\":\"yes\"}"));
+        assertThrows(
+                IllegalArgumentException.class, () -> matcher("{\"regex\":\"a\",\"absent\":true}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> matcher("{\"regex\":\"a\",\"ignoreCase\":\"yes\"}"));
         assertThrows(IllegalArgumentException.class, () -> matcher("{\"absent\":false}"));
         assertThrows(IllegalArgumentException.class, () -> matcher("{\"regex\":\"a\",\"nope\":1}"));
     }

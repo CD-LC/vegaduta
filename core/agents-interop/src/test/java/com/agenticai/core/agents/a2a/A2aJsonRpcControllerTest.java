@@ -22,8 +22,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.Duration;
@@ -36,6 +34,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 import reactor.core.publisher.Flux;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The JSON-RPC binding end to end against a mocked {@link AgentChatService}: method-name aliasing
@@ -49,7 +50,7 @@ class A2aJsonRpcControllerTest {
     private static final UUID AGENT_ID = UUID.randomUUID();
     private static final UUID FORBIDDEN_AGENT_ID = UUID.randomUUID();
     private static final Principal ALICE = () -> "alice";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     private AgentChatService chat;
     private AuditLogService audit;
@@ -124,7 +125,7 @@ class A2aJsonRpcControllerTest {
                 "JSON-RPC errors travel in the envelope, never the HTTP status");
         try {
             return JSON.readTree(response.getContentAsString());
-        } catch (IOException e) {
+        } catch (java.io.UnsupportedEncodingException | JacksonException e) {
             throw new AssertionError(e);
         }
     }
@@ -167,7 +168,7 @@ class A2aJsonRpcControllerTest {
                 assertTrue(block.startsWith("data: "), "every frame is data-only: " + block);
                 frames.add(JSON.readTree(block.substring("data: ".length())));
             }
-        } catch (IOException e) {
+        } catch (java.io.UnsupportedEncodingException | JacksonException e) {
             throw new AssertionError(e);
         }
         return frames;
@@ -176,7 +177,7 @@ class A2aJsonRpcControllerTest {
     private JsonNode pollUntilTerminal(String taskId) throws InterruptedException {
         for (int i = 0; i < 100; i++) {
             JsonNode task = rpc(null, "1.0", taskBody("GetTask", taskId)).get("result");
-            String state = task.get("status").get("state").asText();
+            String state = task.get("status").get("state").asString();
             if (!state.equals("TASK_STATE_SUBMITTED") && !state.equals("TASK_STATE_WORKING")) {
                 return task;
             }
@@ -200,18 +201,19 @@ class A2aJsonRpcControllerTest {
         JsonNode task = envelope.get("result").get("task");
         assertNotNull(task, "1.0 wraps the result in {task: ...}");
         assertFalse(task.has("kind"), "no 0.3 discriminators in the 1.0 dialect");
-        assertEquals("TASK_STATE_COMPLETED", task.get("status").get("state").asText());
+        assertEquals("TASK_STATE_COMPLETED", task.get("status").get("state").asString());
         assertNotNull(task.get("status").get("timestamp"));
         assertEquals(
-                "Hello", task.get("artifacts").get(0).get("parts").get(0).get("text").asText());
-        assertEquals("response", task.get("artifacts").get(0).get("name").asText());
-        assertEquals("ROLE_USER", task.get("history").get(0).get("role").asText());
-        assertEquals("m-1", task.get("history").get(0).get("messageId").asText());
-        assertEquals("ROLE_AGENT", task.get("history").get(1).get("role").asText());
-        assertEquals("Hello", task.get("history").get(1).get("parts").get(0).get("text").asText());
-        assertEquals(AGENT_ID.toString(), task.get("metadata").get("agentId").asText());
+                "Hello", task.get("artifacts").get(0).get("parts").get(0).get("text").asString());
+        assertEquals("response", task.get("artifacts").get(0).get("name").asString());
+        assertEquals("ROLE_USER", task.get("history").get(0).get("role").asString());
+        assertEquals("m-1", task.get("history").get(0).get("messageId").asString());
+        assertEquals("ROLE_AGENT", task.get("history").get(1).get("role").asString());
+        assertEquals(
+                "Hello", task.get("history").get(1).get("parts").get(0).get("text").asString());
+        assertEquals(AGENT_ID.toString(), task.get("metadata").get("agentId").asString());
         // contextId minted server-side when the client sent none, and it is the chat sessionId.
-        String contextId = task.get("contextId").asText();
+        String contextId = task.get("contextId").asString();
         verify(chat)
                 .chat(
                         any(TurnContext.class),
@@ -238,13 +240,14 @@ class A2aJsonRpcControllerTest {
 
         assertEquals(
                 "task",
-                task.get("kind").asText(),
+                task.get("kind").asString(),
                 "0.3 result is the bare Task with its kind discriminator");
-        assertEquals("completed", task.get("status").get("state").asText());
-        assertEquals("text", task.get("artifacts").get(0).get("parts").get(0).get("kind").asText());
-        assertEquals("user", task.get("history").get(0).get("role").asText());
-        assertEquals("message", task.get("history").get(0).get("kind").asText());
-        assertEquals("agent", task.get("history").get(1).get("role").asText());
+        assertEquals("completed", task.get("status").get("state").asString());
+        assertEquals(
+                "text", task.get("artifacts").get(0).get("parts").get(0).get("kind").asString());
+        assertEquals("user", task.get("history").get(0).get("role").asString());
+        assertEquals("message", task.get("history").get(0).get("kind").asString());
+        assertEquals("agent", task.get("history").get(1).get("role").asString());
     }
 
     @Test
@@ -252,14 +255,14 @@ class A2aJsonRpcControllerTest {
         replyWith(Flux.just("ok"));
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"contextId\":\"conv-42\",\"parts\":[{\"text\":\"again\"}]},"
-                    + "\"configuration\":{\"historyLength\":1},\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"contextId\":\"conv-42\",\"parts\":[{\"text\":\"again\"}]},"
+                        + "\"configuration\":{\"historyLength\":1},\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
 
         JsonNode task = rpc(null, "1.0", body).get("result").get("task");
 
-        assertEquals("conv-42", task.get("contextId").asText());
+        assertEquals("conv-42", task.get("contextId").asString());
         verify(chat)
                 .chat(
                         any(TurnContext.class),
@@ -274,7 +277,7 @@ class A2aJsonRpcControllerTest {
                                                 && r.attachmentKey() == null
                                                 && r.attachmentMimeType() == null));
         assertEquals(1, task.get("history").size(), "historyLength keeps the most recent N");
-        assertEquals("ROLE_AGENT", task.get("history").get(0).get("role").asText());
+        assertEquals("ROLE_AGENT", task.get("history").get(0).get("role").asString());
     }
 
     // ------------------------------------------------------- method aliases
@@ -289,28 +292,26 @@ class A2aJsonRpcControllerTest {
                         .get("result")
                         .get("task")
                         .get("id")
-                        .asText();
+                        .asString();
         String v03Task =
                 rpc(null, null, sendBody("SendMessage", AGENT_ID, "b", null))
                         .get("result")
                         .get("id")
-                        .asText();
-
+                        .asString();
         assertEquals(
                 "TASK_STATE_COMPLETED",
                 rpc(null, "1.0", taskBody("tasks/get", v1Task))
                         .get("result")
                         .get("status")
                         .get("state")
-                        .asText());
+                        .asString());
         assertEquals(
                 "completed",
                 rpc(null, null, taskBody("GetTask", v03Task))
                         .get("result")
                         .get("status")
                         .get("state")
-                        .asText());
-
+                        .asString());
         // Cancel on a finished task is TaskNotCancelable under either name.
         assertError(
                 rpc(null, "1.0", taskBody("tasks/cancel", v1Task)), A2aError.TASK_NOT_CANCELABLE);
@@ -377,8 +378,8 @@ class A2aJsonRpcControllerTest {
     void filePartsAreContentTypeNotSupported() {
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"parts\":[{\"kind\":\"file\",\"file\":{\"uri\":\"https://x/y.pdf\"}}]},"
-                    + "\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"parts\":[{\"kind\":\"file\",\"file\":{\"uri\":\"https://x/y.pdf\"}}]},"
+                        + "\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
         assertError(rpc(null, "1.0", body), A2aError.CONTENT_TYPE_NOT_SUPPORTED);
@@ -388,7 +389,7 @@ class A2aJsonRpcControllerTest {
     void unknownTaskIsTaskNotFound() {
         JsonNode envelope = rpc(null, "1.0", taskBody("GetTask", "does-not-exist"));
         assertError(envelope, A2aError.TASK_NOT_FOUND);
-        assertEquals("does-not-exist", envelope.get("error").get("data").get("taskId").asText());
+        assertEquals("does-not-exist", envelope.get("error").get("data").get("taskId").asString());
         assertError(
                 rpc(null, "1.0", taskBody("CancelTask", "does-not-exist")),
                 A2aError.TASK_NOT_FOUND);
@@ -415,7 +416,7 @@ class A2aJsonRpcControllerTest {
                 rpc(null, "1.0", sendBody("SendMessage", FORBIDDEN_AGENT_ID, "hi", null));
         assertError(envelope, A2aError.INVALID_PARAMS);
         assertEquals(
-                "Invalid params: unknown agentId", envelope.get("error").get("message").asText());
+                "Invalid params: unknown agentId", envelope.get("error").get("message").asString());
         verify(chat, never())
                 .chat(
                         any(TurnContext.class),
@@ -430,13 +431,13 @@ class A2aJsonRpcControllerTest {
     void multiTurnTaskContinuationIsRejectedWithGuidance() {
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"taskId\":\"t-1\",\"parts\":[{\"text\":\"more\"}]},"
-                    + "\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"taskId\":\"t-1\",\"parts\":[{\"text\":\"more\"}]},"
+                        + "\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
         JsonNode envelope = rpc(null, "1.0", body);
         assertError(envelope, A2aError.INVALID_PARAMS);
-        assertTrue(envelope.get("error").get("message").asText().contains("contextId"));
+        assertTrue(envelope.get("error").get("message").asString().contains("contextId"));
     }
 
     // ------------------------------------------------------ agent-scoped route
@@ -449,8 +450,7 @@ class A2aJsonRpcControllerTest {
                 rpc(AGENT_ID, "1.0", sendBody("SendMessage", null, "hi", null))
                         .get("result")
                         .get("task");
-        assertEquals(AGENT_ID.toString(), task.get("metadata").get("agentId").asText());
-
+        assertEquals(AGENT_ID.toString(), task.get("metadata").get("agentId").asString());
         assertError(
                 rpc(AGENT_ID, "1.0", sendBody("SendMessage", UUID.randomUUID(), "hi", null)),
                 A2aError.INVALID_PARAMS);
@@ -473,14 +473,13 @@ class A2aJsonRpcControllerTest {
                                         "\"configuration\":{\"returnImmediately\":true}"))
                         .get("result")
                         .get("task");
-        String state = submitted.get("status").get("state").asText();
+        String state = submitted.get("status").get("state").asString();
         assertTrue(
                 state.equals("TASK_STATE_SUBMITTED") || state.equals("TASK_STATE_WORKING"), state);
-
-        JsonNode done = pollUntilTerminal(submitted.get("id").asText());
-        assertEquals("TASK_STATE_COMPLETED", done.get("status").get("state").asText());
+        JsonNode done = pollUntilTerminal(submitted.get("id").asString());
+        assertEquals("TASK_STATE_COMPLETED", done.get("status").get("state").asString());
         assertEquals(
-                "slowly", done.get("artifacts").get(0).get("parts").get(0).get("text").asText());
+                "slowly", done.get("artifacts").get(0).get("parts").get(0).get("text").asString());
     }
 
     @Test
@@ -497,14 +496,14 @@ class A2aJsonRpcControllerTest {
                                         "hi",
                                         "\"configuration\":{\"blocking\":false}"))
                         .get("result");
-        String state = submitted.get("status").get("state").asText();
+        String state = submitted.get("status").get("state").asString();
         assertTrue(state.equals("submitted") || state.equals("working"), state);
         assertEquals(
                 "TASK_STATE_COMPLETED",
-                pollUntilTerminal(submitted.get("id").asText())
+                pollUntilTerminal(submitted.get("id").asString())
                         .get("status")
                         .get("state")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -523,7 +522,7 @@ class A2aJsonRpcControllerTest {
                                         "\"configuration\":{\"returnImmediately\":true}"))
                         .get("result")
                         .get("task");
-        String taskId = submitted.get("id").asText();
+        String taskId = submitted.get("id").asString();
         // Let the async subscription start and deliver the first token.
         for (int i = 0;
                 i < 100
@@ -537,10 +536,10 @@ class A2aJsonRpcControllerTest {
         }
 
         JsonNode canceled = rpc(null, "1.0", taskBody("CancelTask", taskId)).get("result");
-        assertEquals("TASK_STATE_CANCELED", canceled.get("status").get("state").asText());
+        assertEquals("TASK_STATE_CANCELED", canceled.get("status").get("state").asString());
         assertEquals(
                 "partial",
-                canceled.get("artifacts").get(0).get("parts").get(0).get("text").asText());
+                canceled.get("artifacts").get(0).get("parts").get(0).get("text").asString());
         assertEquals(
                 1, canceled.get("history").size(), "no agent reply in history for a canceled task");
 
@@ -551,7 +550,7 @@ class A2aJsonRpcControllerTest {
                         .get("result")
                         .get("status")
                         .get("state")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -565,14 +564,14 @@ class A2aJsonRpcControllerTest {
                 rpc(null, "1.0", sendBody("SendMessage", AGENT_ID, "hi", null))
                         .get("result")
                         .get("task");
-
-        assertEquals("TASK_STATE_FAILED", task.get("status").get("state").asText());
-        String reason = task.get("status").get("message").get("parts").get(0).get("text").asText();
+        assertEquals("TASK_STATE_FAILED", task.get("status").get("state").asString());
+        String reason =
+                task.get("status").get("message").get("parts").get(0).get("text").asString();
         assertEquals("Something went wrong finishing this reply. Please try again.", reason);
         assertFalse(
                 reason.contains("internal detail"),
                 "raw exception text never reaches a peer agent");
-        assertEquals("ROLE_AGENT", task.get("status").get("message").get("role").asText());
+        assertEquals("ROLE_AGENT", task.get("status").get("message").get("role").asString());
         assertEquals(1, task.get("history").size());
         verify(audit)
                 .record(
@@ -602,7 +601,7 @@ class A2aJsonRpcControllerTest {
                 rpc(null, "1.0", sendBody("SendMessage", AGENT_ID, "hi", null))
                         .get("result")
                         .get("task");
-        assertEquals("TASK_STATE_FAILED", task.get("status").get("state").asText());
+        assertEquals("TASK_STATE_FAILED", task.get("status").get("state").asString());
     }
 
     @Test
@@ -615,8 +614,7 @@ class A2aJsonRpcControllerTest {
                         .get("result")
                         .get("task")
                         .get("id")
-                        .asText();
-
+                        .asString();
         TenantContext.set(TenantContext.of("tenant_b", "alice", Set.of()));
         assertError(rpc(null, "1.0", taskBody("GetTask", taskId)), A2aError.TASK_NOT_FOUND);
         assertError(rpc(null, "1.0", taskBody("CancelTask", taskId)), A2aError.TASK_NOT_FOUND);
@@ -631,7 +629,7 @@ class A2aJsonRpcControllerTest {
                         .get("parts")
                         .get(0)
                         .get("text")
-                        .asText());
+                        .asString());
     }
 
     // ------------------------------------------------------------ streaming
@@ -649,34 +647,34 @@ class A2aJsonRpcControllerTest {
         frames.forEach(frame -> assertEquals(7, frame.get("id").asInt()));
 
         JsonNode task = frames.get(0).get("result").get("task");
-        assertEquals("TASK_STATE_SUBMITTED", task.get("status").get("state").asText());
-        String taskId = task.get("id").asText();
+        assertEquals("TASK_STATE_SUBMITTED", task.get("status").get("state").asString());
+        String taskId = task.get("id").asString();
 
         JsonNode working = frames.get(1).get("result").get("statusUpdate");
-        assertEquals("TASK_STATE_WORKING", working.get("status").get("state").asText());
-        assertEquals(taskId, working.get("taskId").asText());
+        assertEquals("TASK_STATE_WORKING", working.get("status").get("state").asString());
+        assertEquals(taskId, working.get("taskId").asString());
         assertFalse(working.get("final").asBoolean());
 
         JsonNode first = frames.get(2).get("result").get("artifactUpdate");
-        assertEquals("Hel", first.get("artifact").get("parts").get(0).get("text").asText());
+        assertEquals("Hel", first.get("artifact").get("parts").get(0).get("text").asString());
         assertFalse(first.get("append").asBoolean(), "first chunk starts the artifact");
         assertFalse(first.get("lastChunk").asBoolean());
-        String artifactId = first.get("artifact").get("artifactId").asText();
+        String artifactId = first.get("artifact").get("artifactId").asString();
 
         JsonNode second = frames.get(3).get("result").get("artifactUpdate");
-        assertEquals("lo", second.get("artifact").get("parts").get(0).get("text").asText());
+        assertEquals("lo", second.get("artifact").get("parts").get(0).get("text").asString());
         assertTrue(second.get("append").asBoolean());
         assertEquals(
                 artifactId,
-                second.get("artifact").get("artifactId").asText(),
+                second.get("artifact").get("artifactId").asString(),
                 "one artifact across all chunks");
 
         JsonNode last = frames.get(4).get("result").get("artifactUpdate");
-        assertEquals("", last.get("artifact").get("parts").get(0).get("text").asText());
+        assertEquals("", last.get("artifact").get("parts").get(0).get("text").asString());
         assertTrue(last.get("lastChunk").asBoolean());
 
         JsonNode completed = frames.get(5).get("result").get("statusUpdate");
-        assertEquals("TASK_STATE_COMPLETED", completed.get("status").get("state").asText());
+        assertEquals("TASK_STATE_COMPLETED", completed.get("status").get("state").asString());
         assertTrue(completed.get("final").asBoolean());
 
         // And the finished task is retrievable afterwards with the full text.
@@ -689,7 +687,7 @@ class A2aJsonRpcControllerTest {
                         .get("parts")
                         .get(0)
                         .get("text")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -698,12 +696,12 @@ class A2aJsonRpcControllerTest {
 
         List<JsonNode> frames =
                 sseFrames(call(null, null, sendBody("SendStreamingMessage", AGENT_ID, "hi", null)));
-
-        assertEquals("task", frames.get(0).get("result").get("kind").asText());
-        assertEquals("submitted", frames.get(0).get("result").get("status").get("state").asText());
-        assertEquals("status-update", frames.get(1).get("result").get("kind").asText());
-        assertEquals("working", frames.get(1).get("result").get("status").get("state").asText());
-        assertEquals("artifact-update", frames.get(2).get("result").get("kind").asText());
+        assertEquals("task", frames.get(0).get("result").get("kind").asString());
+        assertEquals(
+                "submitted", frames.get(0).get("result").get("status").get("state").asString());
+        assertEquals("status-update", frames.get(1).get("result").get("kind").asString());
+        assertEquals("working", frames.get(1).get("result").get("status").get("state").asString());
+        assertEquals("artifact-update", frames.get(2).get("result").get("kind").asString());
         assertEquals(
                 "text",
                 frames.get(2)
@@ -712,10 +710,10 @@ class A2aJsonRpcControllerTest {
                         .get("parts")
                         .get(0)
                         .get("kind")
-                        .asText());
+                        .asString());
         JsonNode terminal = frames.get(frames.size() - 1).get("result");
-        assertEquals("status-update", terminal.get("kind").asText());
-        assertEquals("completed", terminal.get("status").get("state").asText());
+        assertEquals("status-update", terminal.get("kind").asString());
+        assertEquals("completed", terminal.get("status").get("state").asString());
         assertTrue(terminal.get("final").asBoolean());
     }
 
@@ -730,7 +728,7 @@ class A2aJsonRpcControllerTest {
         // for a turn that never got going, no lastChunk artifact for no artifact.
         assertEquals(2, frames.size(), frames.toString());
         JsonNode failed = frames.get(1).get("result").get("statusUpdate");
-        assertEquals("TASK_STATE_FAILED", failed.get("status").get("state").asText());
+        assertEquals("TASK_STATE_FAILED", failed.get("status").get("state").asString());
         assertTrue(failed.get("final").asBoolean());
         assertNotNull(failed.get("status").get("message"));
     }
@@ -749,7 +747,7 @@ class A2aJsonRpcControllerTest {
     private static JsonNode readJson(MockHttpServletResponse response) {
         try {
             return JSON.readTree(response.getContentAsString());
-        } catch (IOException e) {
+        } catch (java.io.UnsupportedEncodingException | JacksonException e) {
             throw new AssertionError(e);
         }
     }

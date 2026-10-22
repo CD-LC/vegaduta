@@ -20,8 +20,6 @@ import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code call_agent} is the one MCP tool that triggers real, governed agent behavior for an
@@ -42,7 +42,7 @@ import reactor.core.publisher.Flux;
  */
 class McpCallAgentToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private AgentChatService agentChatService;
     private AuditLogService auditLogService;
@@ -94,7 +94,7 @@ class McpCallAgentToolCallbackTest {
     @Test
     void malformedAgentIdReturnsAGuidingErrorNotAStackTrace() throws Exception {
         JsonNode result = call("{\"agent_id\": \"not-a-uuid\", \"message\": \"hi\"}");
-        assertTrue(result.get("error").asText().contains("list_my_agents"));
+        assertTrue(result.get("error").asString().contains("list_my_agents"));
         verify(agentChatService, never())
                 .chat(
                         any(TurnContext.class),
@@ -114,7 +114,7 @@ class McpCallAgentToolCallbackTest {
 
         JsonNode result = call("{\"agent_id\": \"" + unexposedAgentId + "\", \"message\": \"hi\"}");
 
-        assertTrue(result.get("error").asText().contains("not authorized"));
+        assertTrue(result.get("error").asString().contains("not authorized"));
         verify(agentChatService, never())
                 .chat(
                         any(TurnContext.class),
@@ -152,7 +152,7 @@ class McpCallAgentToolCallbackTest {
         JsonNode result = call("{\"agent_id\": \"" + exposedAgentId + "\", \"message\": \"hi\"}");
 
         // Chunks are joined into MCP's single synchronous reply.
-        assertEquals("Hello world", result.get("reply").asText());
+        assertEquals("Hello world", result.get("reply").asString());
         // The minted session id carries the grant id - the schema-free
         // traceability convention tool_call_log rows lean on.
         ArgumentCaptor<ChatTurnRequest> turns = ArgumentCaptor.forClass(ChatTurnRequest.class);
@@ -169,7 +169,7 @@ class McpCallAgentToolCallbackTest {
         assertTrue(turns.getValue().sessionId().startsWith("mcp-" + grantId + "-"));
         assertEquals(
                 turns.getValue().sessionId(),
-                result.get("session_id").asText(),
+                result.get("session_id").asString(),
                 "the caller must get back the session id to echo on follow-ups");
         verify(auditLogService)
                 .record(
@@ -201,8 +201,7 @@ class McpCallAgentToolCallbackTest {
                         "{\"agent_id\": \""
                                 + exposedAgentId
                                 + "\", \"message\": \"hi\", \"session_id\": \"my-session\"}");
-
-        assertEquals("my-session", result.get("session_id").asText());
+        assertEquals("my-session", result.get("session_id").asString());
         verify(agentChatService)
                 .chat(
                         any(TurnContext.class),
@@ -232,7 +231,7 @@ class McpCallAgentToolCallbackTest {
 
         JsonNode result = call("{\"agent_id\": \"" + exposedAgentId + "\", \"message\": \"hi\"}");
 
-        assertTrue(result.get("error").asText().contains("Agent call failed"));
+        assertTrue(result.get("error").asString().contains("Agent call failed"));
     }
 
     @Test
@@ -252,7 +251,7 @@ class McpCallAgentToolCallbackTest {
 
         JsonNode result = call("{\"agent_id\": \"" + exposedAgentId + "\", \"message\": \"hi\"}");
 
-        assertEquals("", result.get("reply").asText());
+        assertEquals("", result.get("reply").asString());
         assertNull(result.get("error"));
     }
 
@@ -277,7 +276,7 @@ class McpCallAgentToolCallbackTest {
 
         JsonNode result = call("{\"agent_id\": \"" + exposedAgentId + "\", \"message\": \"hi\"}");
 
-        assertEquals("delivered", result.get("reply").asText());
+        assertEquals("delivered", result.get("reply").asString());
         assertNull(result.get("error"));
     }
 }

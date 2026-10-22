@@ -1,15 +1,15 @@
 package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.workflow.WorkflowPortabilityRedactor;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Builds the VegaDuta workflow DSL v1 document for one saved workflow. Pure: the caller hands over
@@ -125,11 +125,12 @@ public final class WorkflowDslExporter {
      */
     public static String toJson(ObjectMapper mapper, JsonNode doc) {
         try {
-            DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
             DefaultIndenter indenter = new DefaultIndenter("  ", "\n");
-            printer.indentObjectsWith(indenter);
-            printer.indentArraysWith(indenter);
-            return mapper.writer(printer).writeValueAsString(doc) + "\n";
+            DefaultPrettyPrinter printer =
+                    new DefaultPrettyPrinter()
+                            .withObjectIndenter(indenter)
+                            .withArrayIndenter(indenter);
+            return mapper.writer().with(printer).writeValueAsString(doc) + "\n";
         } catch (Exception e) {
             throw new IllegalStateException("Could not serialise the workflow file.", e);
         }
@@ -168,11 +169,11 @@ public final class WorkflowDslExporter {
      */
     private static void tokenise(
             ObjectMapper mapper, ObjectNode node, PlaceholderRegistry registry) {
-        String id = node.path("id").asText("");
-        String type = node.path("type").asText("").toLowerCase(Locale.ROOT);
+        String id = node.path("id").asString("");
+        String type = node.path("type").asString("").toLowerCase(Locale.ROOT);
         JsonNode data = node.get("data");
         String label =
-                data != null && data.path("label").isTextual() ? data.path("label").asText() : id;
+                data != null && data.path("label").isString() ? data.path("label").asString() : id;
         JsonNode configNode = data == null ? null : data.get("config");
         if (configNode != null && configNode.isObject()) {
             ObjectNode config = (ObjectNode) configNode;
@@ -181,12 +182,12 @@ public final class WorkflowDslExporter {
                 for (String[] field : fields) {
                     JsonNode value = config.get(field[0]);
                     if (value != null
-                            && value.isTextual()
-                            && !value.asText().isBlank()
-                            && !value.asText().contains("{{")
-                            && PlaceholderRegistry.keyOfToken(value.asText()) == null) {
+                            && value.isString()
+                            && !value.asString().isBlank()
+                            && !value.asString().contains("{{")
+                            && PlaceholderRegistry.keyOfToken(value.asString()) == null) {
                         String key =
-                                registry.register(field[1], value.asText(), label, id, field[0]);
+                                registry.register(field[1], value.asString(), label, id, field[0]);
                         config.put(field[0], PlaceholderRegistry.token(key));
                     }
                 }

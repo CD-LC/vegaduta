@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +34,7 @@ class WorkflowEventPublisherTenantScopeTest {
             WorkflowEventOutboxRepository outbox,
             boolean enabled) {
         return new WorkflowEventPublisher(
-                outbox, new ObjectMapper().registerModule(new JavaTimeModule()), enabled, events);
+                outbox, com.agenticai.core.json.JsonMappers.withJavaTime(), enabled, events);
     }
 
     @Test

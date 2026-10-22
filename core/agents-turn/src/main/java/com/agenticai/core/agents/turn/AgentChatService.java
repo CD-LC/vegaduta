@@ -25,7 +25,6 @@ import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.FeatureFlagService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Orchestrates one chat turn: resolve the agent's active provider key, build a ChatClient for it,

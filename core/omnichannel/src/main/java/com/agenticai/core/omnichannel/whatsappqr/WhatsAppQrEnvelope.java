@@ -1,13 +1,13 @@
 package com.agenticai.core.omnichannel.whatsappqr;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
- * One inbound message as the bridge queues it (see {@code services/whatsapp-qr/server.js}):
- * a direct chat's text (or an attachment note). Groups, broadcasts and the account's own echoes
- * are dropped on the bridge; anything still malformed or unsendable-to is dropped here too, so
- * the rest of the pipeline only sees a message a person sent to the linked number.
+ * One inbound message as the bridge queues it (see {@code services/whatsapp-qr/server.js}): a
+ * direct chat's text (or an attachment note). Groups, broadcasts and the account's own echoes are
+ * dropped on the bridge; anything still malformed or unsendable-to is dropped here too, so the rest
+ * of the pipeline only sees a message a person sent to the linked number.
  *
  * @param externalId session/send key - digits, or {@code <digits>@lid} for a hidden-number sender
  * @param senderNumber the dialable digits when known (null for a LID sender)
@@ -24,7 +24,9 @@ public record WhatsAppQrEnvelope(
     /** Longest text handed to the agent; the bridge caps at 8000, this is a second abuse cap. */
     static final int MAX_TEXT_CHARS = 8_000;
 
-    /** Idempotency key: the bridge drains its queue once, but Baileys can redeliver on reconnect. */
+    /**
+     * Idempotency key: the bridge drains its queue once, but Baileys can redeliver on reconnect.
+     */
     public String dedupKey() {
         return externalId + ":" + messageId;
     }
@@ -33,28 +35,28 @@ public record WhatsAppQrEnvelope(
         if (event == null || !event.isObject()) {
             return Optional.empty();
         }
-        String externalId = WhatsAppQrAddress.externalId(event.path("chatJid").asText(null));
+        String externalId = WhatsAppQrAddress.externalId(event.path("chatJid").asString(null));
         if (externalId == null) {
             return Optional.empty();
         }
-        String text = sanitize(event.path("text").asText(""));
+        String text = sanitize(event.path("text").asString(""));
         if (text.isBlank()) {
             return Optional.empty();
         }
         if (text.length() > MAX_TEXT_CHARS) {
             text = text.substring(0, MAX_TEXT_CHARS);
         }
-        String messageId = event.path("id").asText("");
+        String messageId = event.path("id").asString("");
         if (messageId.isBlank() || messageId.length() > 80) {
             // No stable id means no dedup and the message is replayed on every reconnect - drop it.
             return Optional.empty();
         }
         String senderNumber = null;
-        String raw = event.path("senderNumber").asText(null);
+        String raw = event.path("senderNumber").asString(null);
         if (raw != null && raw.matches("[0-9]{5,20}")) {
             senderNumber = raw;
         }
-        String pushName = event.path("pushName").asText(null);
+        String pushName = event.path("pushName").asString(null);
         if (pushName != null) {
             pushName = cap(sanitize(pushName).replace('\n', ' '), 100);
             if (pushName.isBlank()) {

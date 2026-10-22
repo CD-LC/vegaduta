@@ -7,26 +7,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** attachSpans on/off, and the NON_NULL omission of span fields in JSON. */
 class KnowledgeSearchSpanCitationsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String CONTENT = "Refunds are issued within 14 days. Shipping to Canada takes 5 to 7 business days.";
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
+    private static final String CONTENT =
+            "Refunds are issued within 14 days. Shipping to Canada takes 5 to 7 business days.";
 
     private KnowledgeSearchService service;
 
     @BeforeEach
     void setUp() {
-        service = new KnowledgeSearchService(mock(SidecarClient.class), mock(JdbcTemplate.class),
-            mock(KnowledgeCollectionRepository.class), mock(KnowledgeDocumentRepository.class), false);
+        service =
+                new KnowledgeSearchService(
+                        mock(SidecarClient.class),
+                        mock(JdbcTemplate.class),
+                        mock(KnowledgeCollectionRepository.class),
+                        mock(KnowledgeDocumentRepository.class),
+                        false);
     }
 
     private static SearchResultResponse hit() {
@@ -54,7 +60,8 @@ class KnowledgeSearchSpanCitationsTest {
     @Test
     void flagOnWithNoOverlapKeepsChunkLevelCitation() {
         service.setSpanCitationsEnabled(true);
-        SearchResultResponse r = service.attachSpans("quantum chromodynamics", List.of(hit())).get(0);
+        SearchResultResponse r =
+                service.attachSpans("quantum chromodynamics", List.of(hit())).get(0);
         assertNull(r.quote());
     }
 
@@ -66,9 +73,10 @@ class KnowledgeSearchSpanCitationsTest {
         assertFalse(plain.has("quote"));
         assertTrue(plain.has("sourceUrl"));
 
-        JsonNode spanned = MAPPER.readTree(MAPPER.writeValueAsString(hit().withSpan(0, 7, "Refunds")));
+        JsonNode spanned =
+                MAPPER.readTree(MAPPER.writeValueAsString(hit().withSpan(0, 7, "Refunds")));
         assertEquals(0, spanned.get("startChar").asInt());
         assertEquals(7, spanned.get("endChar").asInt());
-        assertEquals("Refunds", spanned.get("quote").asText());
+        assertEquals("Refunds", spanned.get("quote").asString());
     }
 }

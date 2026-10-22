@@ -1,10 +1,9 @@
 package com.agenticai.core.workflow.output;
 
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.outbound.TenantBotToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Output node "telegram" destination (#154). Outbound-send-only (no inbound webhook, no pairing

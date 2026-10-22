@@ -1,11 +1,11 @@
 package com.agenticai.core.workflow;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The kill-switch fallbacks: the placeholder algorithms fields used before expressions existed
@@ -14,8 +14,7 @@ import java.util.regex.Pattern;
  */
 final class WorkflowLegacyTemplates {
 
-    static final Pattern CRM_PLACEHOLDER =
-        Pattern.compile("\\{\\{\\s*([A-Za-z0-9_.-]+)\\s*}}");
+    static final Pattern CRM_PLACEHOLDER = Pattern.compile("\\{\\{\\s*([A-Za-z0-9_.-]+)\\s*}}");
 
     private final ObjectMapper objectMapper;
 
@@ -37,8 +36,14 @@ final class WorkflowLegacyTemplates {
         try {
             JsonNode root = objectMapper.readTree(raw.isBlank() ? "{}" : raw);
             if (root.isObject()) {
-                root.fields().forEachRemaining(e ->
-                    values.put(e.getKey(), e.getValue().isTextual() ? e.getValue().asText() : e.getValue().toString()));
+                root.properties()
+                        .forEach(
+                                e ->
+                                        values.put(
+                                                e.getKey(),
+                                                e.getValue().isString()
+                                                        ? e.getValue().asString()
+                                                        : e.getValue().toString()));
             }
         } catch (Exception ignored) {
             // Not JSON: only "input" resolves.
@@ -64,7 +69,7 @@ final class WorkflowLegacyTemplates {
                 replacement = input == null ? "" : input;
             } else if (json != null && json.has(key) && !json.get(key).isNull()) {
                 JsonNode v = json.get(key);
-                replacement = v.isValueNode() ? v.asText() : v.toString();
+                replacement = v.isValueNode() ? v.asString() : v.toString();
             } else {
                 replacement = "";
             }

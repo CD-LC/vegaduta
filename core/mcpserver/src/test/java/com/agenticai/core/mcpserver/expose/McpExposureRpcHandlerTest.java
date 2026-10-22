@@ -13,8 +13,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.mcpserver.McpCallerContext;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The JSON-RPC hook that serves the per-caller dynamic tools. The properties that matter: with
@@ -34,7 +34,7 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  */
 class McpExposureRpcHandlerTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private McpExposedToolCatalog catalog;
     private McpExposedToolInvoker invoker;
@@ -50,13 +50,24 @@ class McpExposureRpcHandlerTest {
         catalog = mock(McpExposedToolCatalog.class);
         invoker = mock(McpExposedToolInvoker.class);
         ToolCallback staticTool = mock(ToolCallback.class);
-        when(staticTool.getToolDefinition()).thenReturn(ToolDefinition.builder()
-            .name("call_agent").description("static one").inputSchema("{\"type\":\"object\"}").build());
+        when(staticTool.getToolDefinition())
+                .thenReturn(
+                        ToolDefinition.builder()
+                                .name("call_agent")
+                                .description("static one")
+                                .inputSchema("{\"type\":\"object\"}")
+                                .build());
         handler = new McpExposureRpcHandler(() -> List.of(staticTool), catalog, invoker);
         McpCallerContextTestAccess.set(grantId, Set.of(agentId), Set.of(), Set.of());
         caller = McpCallerContext.current().orElseThrow();
-        agentTool = new McpExposedTool("agent_helper", "Helper tool", "{\"type\":\"object\",\"properties\":{}}",
-            McpExposedTool.Target.AGENT, agentId, "Helper");
+        agentTool =
+                new McpExposedTool(
+                        "agent_helper",
+                        "Helper tool",
+                        "{\"type\":\"object\",\"properties\":{}}",
+                        McpExposedTool.Target.AGENT,
+                        agentId,
+                        "Helper");
     }
 
     @AfterEach
@@ -84,73 +95,94 @@ class McpExposureRpcHandlerTest {
     void toolsListAddsTheCallersDynamicToolsAfterTheStaticOnesAndEchoesTheId() throws Exception {
         when(catalog.forCaller(caller)).thenReturn(List.of(agentTool));
 
-        JsonNode response = parse(send("{\"jsonrpc\":\"2.0\",\"id\":\"req-7\",\"method\":\"tools/list\",\"params\":{}}"));
+        JsonNode response =
+                parse(
+                        send(
+                                "{\"jsonrpc\":\"2.0\",\"id\":\"req-7\",\"method\":\"tools/list\",\"params\":{}}"));
 
-        assertEquals("2.0", response.get("jsonrpc").asText());
-        assertEquals("req-7", response.get("id").asText());
+        assertEquals("2.0", response.get("jsonrpc").asString());
+        assertEquals("req-7", response.get("id").asString());
         JsonNode tools = response.get("result").get("tools");
         assertEquals(2, tools.size());
-        assertEquals("call_agent", tools.get(0).get("name").asText());
-        assertEquals("agent_helper", tools.get(1).get("name").asText());
-        assertEquals("Helper tool", tools.get(1).get("description").asText());
-        assertEquals("object", tools.get(1).get("inputSchema").get("type").asText());
+        assertEquals("call_agent", tools.get(0).get("name").asString());
+        assertEquals("agent_helper", tools.get(1).get("name").asString());
+        assertEquals("Helper tool", tools.get(1).get("description").asString());
+        assertEquals("object", tools.get(1).get("inputSchema").get("type").asString());
     }
 
     @Test
     void aBrokenToolSchemaFallsBackToAnEmptyObjectSchema() throws Exception {
-        McpExposedTool broken = new McpExposedTool("agent_broken", "d", "not json", McpExposedTool.Target.AGENT, agentId, "B");
+        McpExposedTool broken =
+                new McpExposedTool(
+                        "agent_broken", "d", "not json", McpExposedTool.Target.AGENT, agentId, "B");
         when(catalog.forCaller(caller)).thenReturn(List.of(broken));
 
-        JsonNode tools = parse(send("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}")).get("result").get("tools");
+        JsonNode tools =
+                parse(send("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}"))
+                        .get("result")
+                        .get("tools");
 
-        assertEquals("object", tools.get(1).get("inputSchema").get("type").asText());
+        assertEquals("object", tools.get(1).get("inputSchema").get("type").asString());
     }
 
     @Test
     void callsToStaticToolsAreNeverIntercepted() {
-        assertTrue(send("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"call_agent\",\"arguments\":{}}}").isEmpty());
-        assertTrue(send("{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"search_knowledge\"}}").isEmpty());
+        assertTrue(
+                send("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"call_agent\",\"arguments\":{}}}")
+                        .isEmpty());
+        assertTrue(
+                send("{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"search_knowledge\"}}")
+                        .isEmpty());
         verifyNoInteractions(catalog, invoker);
     }
 
     @Test
     void aDynamicCallRunsThroughTheInvokerAndReturnsMcpContent() throws Exception {
         when(catalog.find(caller, "agent_helper")).thenReturn(Optional.of(agentTool));
-        when(invoker.invoke(eq(caller), eq(agentTool), any())).thenReturn(McpToolResult.ok("the reply", "meta line"));
+        when(invoker.invoke(eq(caller), eq(agentTool), any()))
+                .thenReturn(McpToolResult.ok("the reply", "meta line"));
 
-        JsonNode response = parse(send(
-            "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_helper\",\"arguments\":{\"message\":\"hi\"}}}"));
+        JsonNode response =
+                parse(
+                        send(
+                                "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_helper\",\"arguments\":{\"message\":\"hi\"}}}"));
 
         assertEquals(5, response.get("id").asInt());
         JsonNode result = response.get("result");
         assertFalse(result.get("isError").asBoolean());
-        assertEquals("text", result.get("content").get(0).get("type").asText());
-        assertEquals("the reply", result.get("content").get(0).get("text").asText());
-        assertEquals("meta line", result.get("content").get(1).get("text").asText());
+        assertEquals("text", result.get("content").get(0).get("type").asString());
+        assertEquals("the reply", result.get("content").get(0).get("text").asString());
+        assertEquals("meta line", result.get("content").get(1).get("text").asString());
     }
 
     @Test
     void aToolLevelFailureIsAnIsErrorResultNotAJsonRpcError() throws Exception {
         when(catalog.find(caller, "agent_helper")).thenReturn(Optional.of(agentTool));
-        when(invoker.invoke(eq(caller), eq(agentTool), any())).thenReturn(McpToolResult.failure("budget gone"));
+        when(invoker.invoke(eq(caller), eq(agentTool), any()))
+                .thenReturn(McpToolResult.failure("budget gone"));
 
-        JsonNode response = parse(send(
-            "{\"jsonrpc\":\"2.0\",\"id\":6,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_helper\",\"arguments\":{\"message\":\"hi\"}}}"));
+        JsonNode response =
+                parse(
+                        send(
+                                "{\"jsonrpc\":\"2.0\",\"id\":6,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_helper\",\"arguments\":{\"message\":\"hi\"}}}"));
 
         assertFalse(response.has("error"));
         assertTrue(response.get("result").get("isError").asBoolean());
-        assertEquals("budget gone", response.get("result").get("content").get(0).get("text").asText());
+        assertEquals(
+                "budget gone", response.get("result").get("content").get(0).get("text").asString());
     }
 
     @Test
     void aDynamicNameNotInThisCallersCatalogIsUnknownAuditedAndNeverExecuted() throws Exception {
         when(catalog.find(caller, "agent_someone_elses")).thenReturn(Optional.empty());
 
-        JsonNode response = parse(send(
-            "{\"jsonrpc\":\"2.0\",\"id\":8,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_someone_elses\",\"arguments\":{\"message\":\"hi\"}}}"));
+        JsonNode response =
+                parse(
+                        send(
+                                "{\"jsonrpc\":\"2.0\",\"id\":8,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_someone_elses\",\"arguments\":{\"message\":\"hi\"}}}"));
 
         assertEquals(-32602, response.get("error").get("code").asInt());
-        assertEquals("Unknown tool", response.get("error").get("message").asText());
+        assertEquals("Unknown tool", response.get("error").get("message").asString());
         verify(invoker).recordDenied(caller, "agent_someone_elses");
         verify(invoker, never()).invoke(any(), any(), any());
     }
@@ -159,8 +191,10 @@ class McpExposureRpcHandlerTest {
     void getRunIsTreatedAsADynamicName() throws Exception {
         when(catalog.find(caller, "get_run")).thenReturn(Optional.empty());
 
-        JsonNode response = parse(send(
-            "{\"jsonrpc\":\"2.0\",\"id\":9,\"method\":\"tools/call\",\"params\":{\"name\":\"get_run\",\"arguments\":{\"run_id\":\"x\"}}}"));
+        JsonNode response =
+                parse(
+                        send(
+                                "{\"jsonrpc\":\"2.0\",\"id\":9,\"method\":\"tools/call\",\"params\":{\"name\":\"get_run\",\"arguments\":{\"run_id\":\"x\"}}}"));
 
         assertEquals(-32602, response.get("error").get("code").asInt());
         verify(invoker, never()).invoke(any(), any(), any());
@@ -170,8 +204,10 @@ class McpExposureRpcHandlerTest {
     void nonObjectArgumentsAreAToolErrorAndNothingRuns() throws Exception {
         when(catalog.find(caller, "agent_helper")).thenReturn(Optional.of(agentTool));
 
-        JsonNode response = parse(send(
-            "{\"jsonrpc\":\"2.0\",\"id\":10,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_helper\",\"arguments\":\"hi\"}}"));
+        JsonNode response =
+                parse(
+                        send(
+                                "{\"jsonrpc\":\"2.0\",\"id\":10,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_helper\",\"arguments\":\"hi\"}}"));
 
         assertTrue(response.get("result").get("isError").asBoolean());
         verify(invoker, never()).invoke(any(), any(), any());
@@ -180,7 +216,9 @@ class McpExposureRpcHandlerTest {
     @Test
     void notificationsOtherMethodsAndGarbageAreLeftAlone() {
         assertTrue(send("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\"}").isEmpty());
-        assertTrue(send("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}").isEmpty());
+        assertTrue(
+                send("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}")
+                        .isEmpty());
         assertTrue(send("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}").isEmpty());
         assertTrue(send("[{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}]").isEmpty());
         assertTrue(send("not json at all").isEmpty());
@@ -200,9 +238,12 @@ class McpExposureRpcHandlerTest {
     void anUnexpectedFailureBecomesAToolErrorNeverAnException() throws Exception {
         when(catalog.forCaller(caller)).thenThrow(new IllegalStateException("db down"));
 
-        JsonNode response = parse(send("{\"jsonrpc\":\"2.0\",\"id\":11,\"method\":\"tools/list\"}"));
+        JsonNode response =
+                parse(send("{\"jsonrpc\":\"2.0\",\"id\":11,\"method\":\"tools/list\"}"));
 
         assertTrue(response.get("result").get("isError").asBoolean());
-        assertFalse(response.toString().contains("db down"), "internal error text must not reach the client");
+        assertFalse(
+                response.toString().contains("db down"),
+                "internal error text must not reach the client");
     }
 }

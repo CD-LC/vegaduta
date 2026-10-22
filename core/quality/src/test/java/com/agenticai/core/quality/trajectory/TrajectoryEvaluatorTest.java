@@ -5,24 +5,32 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class TrajectoryEvaluatorTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final double EPS = 1e-9;
 
-    /** Spec from a compact step list: "a", "b" or "a{\"q\":...}" style is overkill - tools only unless given raw JSON. */
+    /**
+     * Spec from a compact step list: "a", "b" or "a{\"q\":...}" style is overkill - tools only
+     * unless given raw JSON.
+     */
     private static TrajectorySpec spec(String mode, String... stepJson) {
         return specWith("\"mode\":\"" + mode + "\"", stepJson);
     }
 
     private static TrajectorySpec specWith(String extra, String... stepJson) {
-        return TrajectorySpec.parse("{\"type\":\"trajectory\"," + extra + ",\"steps\":[" + String.join(",", stepJson) + "]}");
+        return TrajectorySpec.parse(
+                "{\"type\":\"trajectory\","
+                        + extra
+                        + ",\"steps\":["
+                        + String.join(",", stepJson)
+                        + "]}");
     }
 
     private static String step(String tool) {
@@ -57,7 +65,8 @@ class TrajectoryEvaluatorTest {
         return TrajectoryEvaluator.evaluate(spec, calls(tools));
     }
 
-    // ------------------------------------------------------------------ exact / in-order / any-order
+    // ------------------------------------------------------------------ exact / in-order /
+    // any-order
 
     @Test
     void identicalTrajectoriesMatchEveryWay() {
@@ -74,7 +83,9 @@ class TrajectoryEvaluatorTest {
         assertEquals(1.0, r.metrics().efficiency(), EPS);
         assertEquals(1.0, r.score(), EPS);
         assertTrue(r.passed());
-        assertEquals(List.of("match", "match", "match"), r.expected().stream().map(TrajectoryReport.ExpectedRow::status).toList());
+        assertEquals(
+                List.of("match", "match", "match"),
+                r.expected().stream().map(TrajectoryReport.ExpectedRow::status).toList());
     }
 
     @Test
@@ -106,7 +117,8 @@ class TrajectoryEvaluatorTest {
         assertEquals(0.5, r.score(), EPS); // longest in-order matching is 1 of 2
         assertFalse(r.passed());
         // One of the pair is "match" (the in-order one), the other "out_of_order".
-        long outOfOrder = r.expected().stream().filter(x -> x.status().equals("out_of_order")).count();
+        long outOfOrder =
+                r.expected().stream().filter(x -> x.status().equals("out_of_order")).count();
         assertEquals(1, outOfOrder);
 
         TrajectoryReport any = run(spec("any_order", step("a"), step("b")), "b", "a");
@@ -123,7 +135,8 @@ class TrajectoryEvaluatorTest {
         assertEquals(0.5, one.score(), EPS);
         assertEquals(0.5, one.metrics().toolRecall(), EPS);
         assertEquals(1.0, one.metrics().toolPrecision(), EPS);
-        // One duplicate step is matched, the other has no call left to match: exactly one "missing" row.
+        // One duplicate step is matched, the other has no call left to match: exactly one "missing"
+        // row.
         assertEquals(1, one.expected().stream().filter(x -> x.status().equals("missing")).count());
         assertEquals(1, one.expected().stream().filter(x -> x.status().equals("match")).count());
 
@@ -170,12 +183,14 @@ class TrajectoryEvaluatorTest {
         assertEquals(0.0, exact.metrics().efficiency(), EPS);
         assertEquals(1, exact.metrics().extraCalls());
 
-        // In-order with nothing expected is vacuously satisfied; maxExtraCalls is how to say "no tools".
+        // In-order with nothing expected is vacuously satisfied; maxExtraCalls is how to say "no
+        // tools".
         TrajectoryReport vacuous = run(spec("in_order"), "a");
         assertEquals(1.0, vacuous.score(), EPS);
         assertTrue(vacuous.passed());
-        TrajectoryReport capped = TrajectoryEvaluator.evaluate(
-            specWith("\"mode\":\"in_order\",\"maxExtraCalls\":0"), calls("a"));
+        TrajectoryReport capped =
+                TrajectoryEvaluator.evaluate(
+                        specWith("\"mode\":\"in_order\",\"maxExtraCalls\":0"), calls("a"));
         assertFalse(capped.passed());
     }
 
@@ -191,7 +206,9 @@ class TrajectoryEvaluatorTest {
         assertEquals(0.0, r.metrics().efficiency(), EPS);
         assertEquals(0.0, r.metrics().extraCallPenalty(), EPS);
         assertNull(r.metrics().argMatchRate());
-        assertEquals(List.of("missing", "missing"), r.expected().stream().map(TrajectoryReport.ExpectedRow::status).toList());
+        assertEquals(
+                List.of("missing", "missing"),
+                r.expected().stream().map(TrajectoryReport.ExpectedRow::status).toList());
         // Null actual list behaves as empty.
         assertEquals(0.0, TrajectoryEvaluator.evaluate(s, null).score(), EPS);
     }
@@ -210,15 +227,22 @@ class TrajectoryEvaluatorTest {
         assertEquals(f1, r.score(), EPS);
         assertFalse(r.passed()); // minScore defaults to 1.0
 
-        TrajectoryReport lenient = TrajectoryEvaluator.evaluate(
-            specWith("\"mode\":\"f1\",\"minScore\":0.5", step("a"), step("b"), step("c")), calls("a", "a", "c", "z"));
+        TrajectoryReport lenient =
+                TrajectoryEvaluator.evaluate(
+                        specWith(
+                                "\"mode\":\"f1\",\"minScore\":0.5",
+                                step("a"),
+                                step("b"),
+                                step("c")),
+                        calls("a", "a", "c", "z"));
         assertTrue(lenient.passed());
     }
 
     @Test
     void f1IgnoresOrderAndArguments() {
         TrajectorySpec s = specWith("\"mode\":\"f1\"", stepArgs("a", "{\"x\":1}"), step("b"));
-        TrajectoryReport r = TrajectoryEvaluator.evaluate(s, List.of(call("b"), call("a", "{\"x\":999}")));
+        TrajectoryReport r =
+                TrajectoryEvaluator.evaluate(s, List.of(call("b"), call("a", "{\"x\":999}")));
         assertEquals(1.0, r.score(), EPS);
         assertTrue(r.passed());
     }
@@ -227,22 +251,25 @@ class TrajectoryEvaluatorTest {
 
     @Test
     void argumentMatchersLiteralRegexPresentAbsentAndNested() {
-        String expectedArgs = "{\"limit\":5,\"query\":{\"regex\":\"refund\",\"ignoreCase\":true},"
-            + "\"id\":{\"present\":true},\"debug\":{\"absent\":true},\"opts.retries\":3,\"tags\":[\"a\",\"b\"]}";
+        String expectedArgs =
+                "{\"limit\":5,\"query\":{\"regex\":\"refund\",\"ignoreCase\":true},"
+                        + "\"id\":{\"present\":true},\"debug\":{\"absent\":true},\"opts.retries\":3,\"tags\":[\"a\",\"b\"]}";
         TrajectorySpec s = specWith("\"mode\":\"exact\"", stepArgs("search", expectedArgs));
-        String good = "{\"limit\":5.0,\"query\":\"Where is my REFUND?\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"],\"extra\":1}";
+        String good =
+                "{\"limit\":5.0,\"query\":\"Where is my REFUND?\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"],\"extra\":1}";
         TrajectoryReport ok = TrajectoryEvaluator.evaluate(s, List.of(call("search", good)));
         assertTrue(ok.passed(), ok.summary());
         assertEquals(1.0, ok.metrics().argMatchRate(), EPS);
 
-        for (String bad : new String[] {
-            "{\"limit\":6,\"query\":\"refund\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
-            "{\"limit\":5,\"query\":\"hello\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
-            "{\"limit\":5,\"query\":\"refund\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
-            "{\"limit\":5,\"query\":\"refund\",\"id\":\"x\",\"debug\":true,\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
-            "{\"limit\":5,\"query\":\"refund\",\"id\":\"x\",\"opts\":{\"retries\":4},\"tags\":[\"a\",\"b\"]}",
-            "{\"limit\":5,\"query\":\"refund\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"b\",\"a\"]}"
-        }) {
+        for (String bad :
+                new String[] {
+                    "{\"limit\":6,\"query\":\"refund\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
+                    "{\"limit\":5,\"query\":\"hello\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
+                    "{\"limit\":5,\"query\":\"refund\",\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
+                    "{\"limit\":5,\"query\":\"refund\",\"id\":\"x\",\"debug\":true,\"opts\":{\"retries\":3},\"tags\":[\"a\",\"b\"]}",
+                    "{\"limit\":5,\"query\":\"refund\",\"id\":\"x\",\"opts\":{\"retries\":4},\"tags\":[\"a\",\"b\"]}",
+                    "{\"limit\":5,\"query\":\"refund\",\"id\":\"x\",\"opts\":{\"retries\":3},\"tags\":[\"b\",\"a\"]}"
+                }) {
             TrajectoryReport r = TrajectoryEvaluator.evaluate(s, List.of(call("search", bad)));
             assertFalse(r.passed(), bad);
             assertEquals("args_mismatch", r.expected().get(0).status(), bad);
@@ -255,9 +282,13 @@ class TrajectoryEvaluatorTest {
 
     @Test
     void aWrongArgumentsCallNamesTheFailingArguments() {
-        TrajectorySpec s = specWith("\"mode\":\"in_order\"",
-            stepArgs("search", "{\"limit\":5,\"query\":\"refund\"}"));
-        TrajectoryReport r = TrajectoryEvaluator.evaluate(s, List.of(call("search", "{\"limit\":9,\"query\":\"hello\"}")));
+        TrajectorySpec s =
+                specWith(
+                        "\"mode\":\"in_order\"",
+                        stepArgs("search", "{\"limit\":5,\"query\":\"refund\"}"));
+        TrajectoryReport r =
+                TrajectoryEvaluator.evaluate(
+                        s, List.of(call("search", "{\"limit\":9,\"query\":\"hello\"}")));
         assertEquals("arguments differ: limit, query", r.expected().get(0).detail());
         assertTrue(r.summary().contains("wrong arguments: search"), r.summary());
     }
@@ -265,8 +296,12 @@ class TrajectoryEvaluatorTest {
     @Test
     void theRightArgumentsOnALaterCallStillMatch() {
         TrajectorySpec s = specWith("\"mode\":\"in_order\"", stepArgs("search", "{\"q\":\"x\"}"));
-        TrajectoryReport r = TrajectoryEvaluator.evaluate(s,
-            List.of(call("search", "{\"q\":\"wrong\"}"), call("search", "{\"q\":\"x\"}")));
+        TrajectoryReport r =
+                TrajectoryEvaluator.evaluate(
+                        s,
+                        List.of(
+                                call("search", "{\"q\":\"wrong\"}"),
+                                call("search", "{\"q\":\"x\"}")));
         assertTrue(r.passed());
         assertEquals("extra", r.actual().get(0).status());
         assertEquals("match", r.actual().get(1).status());
@@ -276,31 +311,52 @@ class TrajectoryEvaluatorTest {
     @Test
     void unparseableRecordedArgumentsFailAnyMatcherButAnArglessStepStillMatches() {
         TrajectoryToolCall noJson = new TrajectoryToolCall("search", null, true);
-        assertFalse(TrajectoryEvaluator.evaluate(
-            specWith("\"mode\":\"exact\"", stepArgs("search", "{\"q\":\"x\"}")), List.of(noJson)).passed());
-        assertTrue(TrajectoryEvaluator.evaluate(
-            specWith("\"mode\":\"exact\"", step("search")), List.of(noJson)).passed());
-        assertTrue(TrajectoryEvaluator.evaluate(
-            specWith("\"mode\":\"exact\"", stepArgs("search", "{\"q\":{\"absent\":true}}")), List.of(noJson)).passed());
+        assertFalse(
+                TrajectoryEvaluator.evaluate(
+                                specWith("\"mode\":\"exact\"", stepArgs("search", "{\"q\":\"x\"}")),
+                                List.of(noJson))
+                        .passed());
+        assertTrue(
+                TrajectoryEvaluator.evaluate(
+                                specWith("\"mode\":\"exact\"", step("search")), List.of(noJson))
+                        .passed());
+        assertTrue(
+                TrajectoryEvaluator.evaluate(
+                                specWith(
+                                        "\"mode\":\"exact\"",
+                                        stepArgs("search", "{\"q\":{\"absent\":true}}")),
+                                List.of(noJson))
+                        .passed());
     }
 
     // ------------------------------------------------------------------ caps, efficiency, failures
 
     @Test
     void maxExtraCallsAndMinEfficiencyAreHardConditionsOnTopOfTheScore() {
-        TrajectorySpec capped = specWith("\"mode\":\"in_order\",\"maxExtraCalls\":1", step("a"), step("b"));
+        TrajectorySpec capped =
+                specWith("\"mode\":\"in_order\",\"maxExtraCalls\":1", step("a"), step("b"));
         assertTrue(TrajectoryEvaluator.evaluate(capped, calls("a", "x", "b")).passed());
         assertFalse(TrajectoryEvaluator.evaluate(capped, calls("a", "x", "y", "b")).passed());
 
-        TrajectorySpec efficient = specWith("\"mode\":\"in_order\",\"minEfficiency\":0.75", step("a"), step("b"), step("c"));
-        assertTrue(TrajectoryEvaluator.evaluate(efficient, calls("a", "b", "c", "x")).passed()); // 3/4 = 0.75
-        assertFalse(TrajectoryEvaluator.evaluate(efficient, calls("a", "b", "c", "x", "y")).passed()); // 0.6
+        TrajectorySpec efficient =
+                specWith(
+                        "\"mode\":\"in_order\",\"minEfficiency\":0.75",
+                        step("a"),
+                        step("b"),
+                        step("c"));
+        assertTrue(
+                TrajectoryEvaluator.evaluate(efficient, calls("a", "b", "c", "x"))
+                        .passed()); // 3/4 = 0.75
+        assertFalse(
+                TrajectoryEvaluator.evaluate(efficient, calls("a", "b", "c", "x", "y"))
+                        .passed()); // 0.6
     }
 
     @Test
     void failedCallsAreCountedAndStillParticipate() {
         TrajectorySpec s = spec("in_order", step("a"), step("b"));
-        List<TrajectoryToolCall> actual = List.of(call("a"), new TrajectoryToolCall("b", MAPPER.createObjectNode(), false));
+        List<TrajectoryToolCall> actual =
+                List.of(call("a"), new TrajectoryToolCall("b", MAPPER.createObjectNode(), false));
         TrajectoryReport r = TrajectoryEvaluator.evaluate(s, actual);
         assertEquals(1, r.metrics().failedCalls());
         assertTrue(r.passed());
@@ -324,15 +380,21 @@ class TrajectoryEvaluatorTest {
 
     @Test
     void anyOrderFindsTheMaximumMatchingNotJustAGreedyOne() {
-        // Expected: [a(x=1), a]. Actual: [a(x=1), a(x=2)]... greedy pairing of step 2 (any a) with the FIRST
+        // Expected: [a(x=1), a]. Actual: [a(x=1), a(x=2)]... greedy pairing of step 2 (any a) with
+        // the FIRST
         // call would strand step 1; a maximum matching pairs them crosswise.
-        TrajectorySpec s = specWith("\"mode\":\"any_order\"", stepArgs("a", "{\"x\":1}"), step("a"));
-        TrajectoryReport r = TrajectoryEvaluator.evaluate(s, List.of(call("a", "{\"x\":1}"), call("a", "{\"x\":2}")));
+        TrajectorySpec s =
+                specWith("\"mode\":\"any_order\"", stepArgs("a", "{\"x\":1}"), step("a"));
+        TrajectoryReport r =
+                TrajectoryEvaluator.evaluate(
+                        s, List.of(call("a", "{\"x\":1}"), call("a", "{\"x\":2}")));
         assertTrue(r.metrics().anyOrderMatch());
         assertEquals(1.0, r.score(), EPS);
 
         // Reverse the actual order so the specific step can only match the second call.
-        TrajectoryReport reversed = TrajectoryEvaluator.evaluate(s, List.of(call("a", "{\"x\":2}"), call("a", "{\"x\":1}")));
+        TrajectoryReport reversed =
+                TrajectoryEvaluator.evaluate(
+                        s, List.of(call("a", "{\"x\":2}"), call("a", "{\"x\":1}")));
         assertTrue(reversed.metrics().anyOrderMatch());
         assertFalse(reversed.metrics().inOrderMatch() && reversed.metrics().exactMatch());
     }
@@ -352,6 +414,6 @@ class TrajectoryEvaluatorTest {
         assertTrue(r.summary().contains("1 extra call"), r.summary());
         assertTrue(r.summary().endsWith("- failed"), r.summary());
         JsonNode asJson = MAPPER.valueToTree(m);
-        assertEquals("a", asJson.get("expected").get(0).get("tool").asText());
+        assertEquals("a", asJson.get("expected").get(0).get("tool").asString());
     }
 }

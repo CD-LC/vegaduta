@@ -12,8 +12,6 @@ import com.agenticai.core.tables.DataTableDtos.RowView;
 import com.agenticai.core.tables.DataTableDtos.TableView;
 import com.agenticai.core.tables.DataTableFilter.Condition;
 import com.agenticai.core.tables.DataTableQueryBuilder.Where;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,6 +23,8 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Gate, caps and shared helpers behind {@link DataTableService}: the feature flag and plan check,
@@ -204,8 +204,7 @@ final class DataTableAccess {
         }
     }
 
-    static void requireFilterOrConfirm(
-            List<Condition> filter, boolean confirmAll, String verb) {
+    static void requireFilterOrConfirm(List<Condition> filter, boolean confirmAll, String verb) {
         if ((filter == null || filter.isEmpty()) && !confirmAll) {
             throw new IllegalArgumentException(
                     "Refusing to "
@@ -279,7 +278,7 @@ final class DataTableAccess {
     static String toJson(Map<String, Object> m) {
         try {
             return MAPPER.writeValueAsString(m);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("The values are not valid JSON");
         }
     }

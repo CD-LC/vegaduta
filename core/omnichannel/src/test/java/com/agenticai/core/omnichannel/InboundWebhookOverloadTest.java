@@ -45,7 +45,6 @@ import com.agenticai.core.omnichannel.whatsappvoice.WhatsAppVoiceNoteService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +56,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Overload behaviour of every inbound channel webhook that uses {@link InboundChannelExecutor}.
@@ -68,7 +68,7 @@ import reactor.core.publisher.Flux;
  */
 class InboundWebhookOverloadTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String FROM = "15550001111";
 
     private final InboundMessageDedupService dedup = mock(InboundMessageDedupService.class);
@@ -393,7 +393,7 @@ class InboundWebhookOverloadTest {
                 api);
     }
 
-    private static com.fasterxml.jackson.databind.JsonNode update() throws Exception {
+    private static tools.jackson.databind.JsonNode update() throws Exception {
         return MAPPER.readTree(
                 "{\"update_id\":\"42\",\"message\":{\"chat\":{\"id\":\"chat-1\"},\"from\":{\"id\":\"u1\"},\"text\":\"hi\"}}");
     }

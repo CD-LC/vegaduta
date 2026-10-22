@@ -1,21 +1,20 @@
 package com.agenticai.core.codeintel;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * {@code code_graph_stats} - repo-wide summary of the deterministic code
- * graph: file/symbol/edge counts, broken down by edge type, parser engine,
- * and call-resolution confidence. Read-only. Use to sanity-check that a repo
- * has actually been graph-indexed (and how richly) before relying on
- * {@code code_callers}/{@code code_callees}/{@code code_impact} results, or
- * to get a quick size/shape overview of an unfamiliar repo.
+ * {@code code_graph_stats} - repo-wide summary of the deterministic code graph: file/symbol/edge
+ * counts, broken down by edge type, parser engine, and call-resolution confidence. Read-only. Use
+ * to sanity-check that a repo has actually been graph-indexed (and how richly) before relying on
+ * {@code code_callers}/{@code code_callees}/{@code code_impact} results, or to get a quick
+ * size/shape overview of an unfamiliar repo.
  */
 public class CodeGraphStatsToolCallback implements ToolCallback {
 
@@ -29,7 +28,10 @@ public class CodeGraphStatsToolCallback implements ToolCallback {
         this(client, Set.of());
     }
 
-    /** EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s constructor javadoc for why. */
+    /**
+     * EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s
+     * constructor javadoc for why.
+     */
     public CodeGraphStatsToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
         this.allowedRepoIds = allowedRepoIds == null ? Set.of() : allowedRepoIds;
@@ -38,15 +40,16 @@ public class CodeGraphStatsToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("code_graph_stats")
-            .description(
-                "Returns repo-wide code graph statistics: total indexed files and symbols, edge counts "
-                    + "grouped by edge type (e.g. calls/inherits), files grouped by parser engine, and "
-                    + "call edges grouped by resolution confidence (local/global/ambiguous). Use this to "
-                    + "check whether a repo's code graph is built/populated before trusting other graph "
-                    + "tools' results, or to get a quick overview of an unfamiliar repo's size and shape. "
-                    + "Requires the repo_id.")
-            .inputSchema("""
+                .name("code_graph_stats")
+                .description(
+                        "Returns repo-wide code graph statistics: total indexed files and symbols, edge counts "
+                                + "grouped by edge type (e.g. calls/inherits), files grouped by parser engine, and "
+                                + "call edges grouped by resolution confidence (local/global/ambiguous). Use this to "
+                                + "check whether a repo's code graph is built/populated before trusting other graph "
+                                + "tools' results, or to get a quick overview of an unfamiliar repo's size and shape. "
+                                + "Requires the repo_id.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -58,7 +61,7 @@ public class CodeGraphStatsToolCallback implements ToolCallback {
                     "required": ["repo_id"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -76,7 +79,9 @@ public class CodeGraphStatsToolCallback implements ToolCallback {
             return client.graphStats(repoId.toString());
         } catch (Exception e) {
             log.warn("code_graph_stats tool call failed", e);
-            return "{\"error\": \"code_graph_stats failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"code_graph_stats failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 }

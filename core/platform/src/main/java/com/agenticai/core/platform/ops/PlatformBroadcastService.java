@@ -3,8 +3,6 @@ package com.agenticai.core.platform.ops;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -17,6 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Platform-wide maintenance mode and announcement banner, each stored as ONE JSON document in a
@@ -47,11 +48,7 @@ public class PlatformBroadcastService {
     static final int MAX_MESSAGE_CHARS = 1000;
     static final int MAX_URL_CHARS = 2000;
     private static final Set<String> LEVELS = Set.of("info", "warning", "critical");
-    private static final ObjectMapper JSON =
-            JsonMappers.withJavaTime()
-                    .disable(
-                            com.fasterxml.jackson.databind.SerializationFeature
-                                    .WRITE_DATES_AS_TIMESTAMPS);
+    private static final ObjectMapper JSON = JsonMappers.isoDates();
 
     /**
      * {@code GET/PUT /api/platform/maintenance}. {@code startedAt} is set by the server when it is
@@ -262,7 +259,7 @@ public class PlatformBroadcastService {
     private void write(String key, Object state, String actor) {
         try {
             settings.update(key, JSON.writeValueAsString(state), actor);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException("Could not serialise " + key, e);
         }
     }
@@ -281,7 +278,7 @@ public class PlatformBroadcastService {
         }
         return new MaintenanceState(
                 n.path("enabled").asBoolean(false),
-                n.path("message").asText(""),
+                n.path("message").asString(""),
                 instantOrNull(n.path("endsAt")),
                 instantOrNull(n.path("startedAt")));
     }
@@ -291,11 +288,11 @@ public class PlatformBroadcastService {
         if (n == null) {
             return AnnouncementState.OFF;
         }
-        String level = n.path("level").asText("info");
-        String link = n.path("linkUrl").isTextual() ? n.path("linkUrl").asText() : null;
+        String level = n.path("level").asString("info");
+        String link = n.path("linkUrl").isString() ? n.path("linkUrl").asString() : null;
         return new AnnouncementState(
                 n.path("enabled").asBoolean(false),
-                n.path("message").asText(""),
+                n.path("message").asString(""),
                 LEVELS.contains(level) ? level : "info",
                 link == null || link.isBlank() ? null : link,
                 instantOrNull(n.path("expiresAt")));
@@ -308,7 +305,7 @@ public class PlatformBroadcastService {
         try {
             JsonNode n = JSON.readTree(raw);
             return n != null && n.isObject() ? n : null;
-        } catch (java.io.IOException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }
@@ -324,7 +321,7 @@ public class PlatformBroadcastService {
                     (long) Math.floor(seconds), Math.round((seconds % 1) * 1_000_000_000L));
         }
         try {
-            return Instant.parse(n.asText());
+            return Instant.parse(n.asString());
         } catch (DateTimeParseException e) {
             return null;
         }

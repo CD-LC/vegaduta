@@ -23,7 +23,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
 import com.agenticai.core.tenancy.AppUser;
 import com.agenticai.core.tenancy.AppUserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +41,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Simple mode's Quick Task feature - "let them type what they want without worrying about the

@@ -1,6 +1,8 @@
 package com.agenticai.core.workflow;
 
+import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
+
 import com.agenticai.core.agents.tools.web.HttpRequestExecutor;
 import com.agenticai.core.agents.tools.web.HttpRequestResult;
 import com.agenticai.core.agents.tools.web.HttpRequestSpec;
@@ -8,8 +10,6 @@ import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.workflow.WorkflowDocumentText.DocumentExtractionException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
@@ -19,12 +19,14 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Resolves the {@code document_extractor} source (config text, or the node input) to a classified reference - URL,
- * uploaded-file key or raw text - and reads it safely: the storage key shape is checked, size caps apply, and a URL
- * containing a template reference is refused. Extracted from {@link WorkflowAiNodeHandler}.
+ * Resolves the {@code document_extractor} source (config text, or the node input) to a classified
+ * reference - URL, uploaded-file key or raw text - and reads it safely: the storage key shape is
+ * checked, size caps apply, and a URL containing a template reference is refused. Extracted from
+ * {@link WorkflowAiNodeHandler}.
  */
 final class AiReferenceResolver {
     private static final Logger log = LoggerFactory.getLogger(AiReferenceResolver.class);
@@ -105,8 +107,8 @@ final class AiReferenceResolver {
     private static String firstText(JsonNode json, String... keys) {
         for (String key : keys) {
             JsonNode value = json.get(key);
-            if (value != null && value.isTextual() && !value.asText().isBlank()) {
-                return value.asText().strip();
+            if (value != null && value.isString() && !value.asString().isBlank()) {
+                return value.asString().strip();
             }
         }
         return "";

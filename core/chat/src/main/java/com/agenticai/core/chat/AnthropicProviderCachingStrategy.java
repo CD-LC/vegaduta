@@ -2,32 +2,32 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ProviderName;
 import java.util.Locale;
+import org.springframework.ai.anthropic.AnthropicCacheOptions;
+import org.springframework.ai.anthropic.AnthropicCacheStrategy;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.api.AnthropicCacheOptions;
-import org.springframework.ai.anthropic.api.AnthropicCacheStrategy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
  * Real cache-object lifecycle strategy for Anthropic prompt caching
- * (platform.claude.com/docs/en/build-with-claude/prompt-caching), wired
- * through Spring AI 1.1's own {@link AnthropicCacheOptions} rather than
- * hand-built {@code cache_control} JSON. Extracted verbatim (behavior
- * unchanged) from {@link AnthropicAgentChatClientFactory}, which owned this
- * inline before {@link ProviderCachingStrategy} existed - see that class's
- * git history for the original javadoc on why {@code SYSTEM_AND_TOOLS} is
- * the default and why {@code multiBlockSystemCaching} is unconditional.
+ * (platform.claude.com/docs/en/build-with-claude/prompt-caching), wired through Spring AI 1.1's own
+ * {@link AnthropicCacheOptions} rather than hand-built {@code cache_control} JSON. Extracted
+ * verbatim (behavior unchanged) from {@link AnthropicAgentChatClientFactory}, which owned this
+ * inline before {@link ProviderCachingStrategy} existed - see that class's git history for the
+ * original javadoc on why {@code SYSTEM_AND_TOOLS} is the default and why {@code
+ * multiBlockSystemCaching} is unconditional.
  */
 @Component
-public class AnthropicProviderCachingStrategy implements ProviderCachingStrategy<AnthropicChatOptions.Builder> {
+public class AnthropicProviderCachingStrategy
+        implements ProviderCachingStrategy<AnthropicChatOptions.Builder> {
 
     private final boolean enabled;
     private final AnthropicCacheStrategy strategy;
 
     public AnthropicProviderCachingStrategy(
-        @Value("${app.llm.anthropic.prompt-caching.enabled:true}") boolean enabled,
-        @Value("${app.llm.anthropic.prompt-caching.strategy:SYSTEM_AND_TOOLS}") String strategy
-    ) {
+            @Value("${app.llm.anthropic.prompt-caching.enabled:true}") boolean enabled,
+            @Value("${app.llm.anthropic.prompt-caching.strategy:SYSTEM_AND_TOOLS}")
+                    String strategy) {
         this.enabled = enabled;
         this.strategy = parseStrategy(strategy);
     }
@@ -54,13 +54,15 @@ public class AnthropicProviderCachingStrategy implements ProviderCachingStrategy
     }
 
     @Override
-    public AnthropicChatOptions.Builder apply(AnthropicChatOptions.Builder optionsBuilder, ProviderCachingContext context) {
+    public AnthropicChatOptions.Builder apply(
+            AnthropicChatOptions.Builder optionsBuilder, ProviderCachingContext context) {
         if (!isEnabled(context.model())) {
             return optionsBuilder;
         }
-        return optionsBuilder.cacheOptions(AnthropicCacheOptions.builder()
-            .strategy(strategy)
-            .multiBlockSystemCaching(true)
-            .build());
+        return optionsBuilder.cacheOptions(
+                AnthropicCacheOptions.builder()
+                        .strategy(strategy)
+                        .multiBlockSystemCaching(true)
+                        .build());
     }
 }

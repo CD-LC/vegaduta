@@ -468,8 +468,7 @@ class KeycloakAdminClientTest {
                         List.of(),
                         Map.of(),
                         List.of());
-        String json =
-                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(outbound);
+        String json = com.agenticai.core.json.JsonMappers.plain().writeValueAsString(outbound);
         org.junit.jupiter.api.Assertions.assertFalse(json.contains("createdTimestamp"), json);
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.google.genai.common.GoogleGenAiThinkingLevel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -87,7 +86,8 @@ public class HostedLlmChatClientFactory {
     // The install's local model server, to recognise its pool row (see isLocalOllamaRow), and
     // the Ollama context window OllamaAgentChatClientFactory also applies. Field-injected so the
     // one constructor - and every caller that builds this factory by hand - stays as it is.
-    @Value("${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
+    @Value(
+            "${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
     private String localOllamaBaseUrl = "";
 
     @Value("${app.llm.ollama.num-ctx:32768}")
@@ -191,36 +191,23 @@ public class HostedLlmChatClientFactory {
         }
         ResolvedEndpoint endpoint = resolveEndpoint(provider);
         String model = resolveModel(provider);
-        OpenAiCompatModelBuilder.Api apiBuilder = modelBuilder.api(endpoint.baseUrl());
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(endpoint.baseUrl());
         // The install's own Ollama (LocalLlmPoolBootstrap / LocalModelsService rows) gets what a
-        // tenant OLLAMA provider row already gets in OllamaAgentChatClientFactory: the
-        // reasoning-field alias, so a thinking model's reasoning reaches the `thinking` step
-        // events instead of being dropped, and the num_ctx override below. Other pool rows are
-        // untouched: a cloud provider can 400 on an unknown body field.
+        // tenant OLLAMA provider row already gets in OllamaAgentChatClientFactory: the num_ctx
+        // override below (Spring AI 2's OpenAI model reads Ollama's "reasoning" field itself, so a
+        // thinking model's reasoning reaches the `thinking` step events with no wire rewrite; see
+        // OllamaWireBehaviourTest). Other pool rows are untouched: a cloud provider can 400 on an
+        // unknown body field.
         boolean localOllama = isLocalOllamaRow(provider);
-        if (localOllama) {
-            apiBuilder =
-                    apiBuilder
-                            .webClientBuilder(
-                                    modelBuilder
-                                            .webClientBuilder()
-                                            .filter(OllamaReasoningAlias.streamFilter()))
-                            .restClientBuilder(
-                                    modelBuilder
-                                            .restClientBuilder()
-                                            .requestInterceptor(
-                                                    OllamaReasoningAlias.restInterceptor()));
-        }
         // Keyless rows (a local Ollama / llama.cpp / vLLM entry made by the local-LLM bootstrap)
         // send no Authorization header at all, like OllamaAgentChatClientFactory. Trimmed for the
         // same reason the model is (see resolveModel): the key is decrypted straight out of the
         // row, and rows written before the upsert DTO started trimming can carry a pasted
         // trailing newline, which would go out in the Authorization header verbatim.
-        apiBuilder =
-                isKeyless(decryptedApiKey)
-                        ? apiBuilder.noApiKey()
-                        : apiBuilder.apiKey(decryptedApiKey.trim());
-        OpenAiApi openAiApi = apiBuilder.completionsPath(endpoint.completionsPath()).build();
+        openAiApi =
+                openAiApi
+                        .apiKey(isKeyless(decryptedApiKey) ? null : decryptedApiKey.trim())
+                        .completionsPath(endpoint.completionsPath());
 
         OpenAiChatOptions.Builder optionsBuilder =
                 openAiCompatOptionsBuilder(
@@ -248,17 +235,19 @@ public class HostedLlmChatClientFactory {
             // the reasoning sets app.llm.ollama.reasoning-effort to low, medium or high.
             optionsBuilder.reasoningEffort(effectiveReasoningEffort(provider));
         }
-        OpenAiChatOptions options = optionsBuilder.build();
         if (localOllama && ollamaNumCtx > 0) {
-            options.setExtraBody(Map.of("options", Map.of("num_ctx", ollamaNumCtx)));
+            optionsBuilder.extraBody(
+                    Map.<String, Object>of("options", Map.of("num_ctx", ollamaNumCtx)));
         }
+        OpenAiChatOptions options = optionsBuilder.build();
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
                 // V500 - a row graded TEXT/NONE on a server that can enforce a schema or
                 // tool_choice=required gets the constrained tool router; null for every other row.
-                .chatClientBuilder(chatModel, provider.effectiveToolRouterMode())
+                .chatClientBuilder(
+                        chatModel, toolCallingManagers.create(), provider.effectiveToolRouterMode())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(
@@ -286,9 +275,9 @@ public class HostedLlmChatClientFactory {
      * ProviderName#GOOGLE_VERTEX}.
      */
     /**
-     * True for the pool row that serves this install's own Ollama: a row whose {@code
-     * providerName} says OLLAMA, or whose base URL is the operator-configured local model server
-     * ({@code app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
+     * True for the pool row that serves this install's own Ollama: a row whose {@code providerName}
+     * says OLLAMA, or whose base URL is the operator-configured local model server ({@code
+     * app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
      */
     boolean isLocalOllamaRow(PlatformHostedLlmProvider provider) {
         if (provider == null) {
@@ -304,10 +293,14 @@ public class HostedLlmChatClientFactory {
 
     /**
      * The thinking switch for a local Ollama row: the row's own setting (Providers -> Local model),
-     * else {@code app.llm.ollama.reasoning-effort}. Null or blank means "leave the model's default".
+     * else {@code app.llm.ollama.reasoning-effort}. Null or blank means "leave the model's
+     * default".
      */
     String effectiveReasoningEffort(PlatformHostedLlmProvider provider) {
-        String value = provider.getReasoningEffort() != null ? provider.getReasoningEffort() : ollamaReasoningEffort;
+        String value =
+                provider.getReasoningEffort() != null
+                        ? provider.getReasoningEffort()
+                        : ollamaReasoningEffort;
         return value == null || value.isBlank() ? null : value.trim();
     }
 
@@ -409,14 +402,14 @@ public class HostedLlmChatClientFactory {
         GoogleGenAiChatModel chatModel =
                 GoogleGenAiChatModel.builder()
                         .genAiClient(genAiClient)
-                        .defaultOptions(options)
+                        .options(options)
                         .toolCallingManager(toolCallingManagers.create())
                         .retryTemplate(modelSupport.retryTemplate())
                         .observationRegistry(modelSupport.observationRegistry())
                         .build();
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 // Gemini rejects >1 system message; the platform routinely sends
@@ -451,7 +444,9 @@ public class HostedLlmChatClientFactory {
      * catalog, where an unknown model still gets the conservative fallback rate.
      */
     private LlmPricingCatalog pricingCatalogFor(PlatformHostedLlmProvider provider) {
-        return provider != null && provider.isZeroCost() ? LlmPricingCatalog.zeroCost() : pricingCatalog;
+        return provider != null && provider.isZeroCost()
+                ? LlmPricingCatalog.zeroCost()
+                : pricingCatalog;
     }
 
     private static String resolveModel(PlatformHostedLlmProvider provider) {

@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,10 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-/** Agent Lab lives only in Redis; with Redis down every entry point answers 503, not an unmapped exception. */
+/**
+ * Agent Lab lives only in Redis; with Redis down every entry point answers 503, not an unmapped
+ * exception.
+ */
 class RedisAgentLabRunStoreOutageTest {
 
     private RedisAgentLabRunStore store;
@@ -27,35 +29,38 @@ class RedisAgentLabRunStoreOutageTest {
     void setUp() {
         StringRedisTemplate redis = mock(StringRedisTemplate.class);
         ValueOperations<String, String> ops = mock(ValueOperations.class);
-        RedisConnectionFailureException down = new RedisConnectionFailureException("Unable to connect to Redis");
+        RedisConnectionFailureException down =
+                new RedisConnectionFailureException("Unable to connect to Redis");
         when(redis.opsForValue()).thenReturn(ops);
         when(ops.get(anyString())).thenThrow(down);
         when(ops.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenThrow(down);
         when(redis.hasKey(anyString())).thenThrow(down);
-        store = new RedisAgentLabRunStore(redis, new ObjectMapper());
+        store = new RedisAgentLabRunStore(redis, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static void assertServiceUnavailable(Throwable e) {
         assertThat(e).isInstanceOf(ResponseStatusException.class);
-        assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(((ResponseStatusException) e).getStatusCode())
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @Test
     void pollingARunIsAServiceUnavailable() {
-        assertThatThrownBy(() -> store.find("tenant", "run")).satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+        assertThatThrownBy(() -> store.find("tenant", "run"))
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
     }
 
     @Test
     void startingARunIsAServiceUnavailable() {
         assertThatThrownBy(() -> store.acquireLock("tenant", "user", "run"))
-            .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
     }
 
     @Test
     void livenessAndCancelChecksAreAServiceUnavailable() {
         assertThatThrownBy(() -> store.isAlive("tenant", "run"))
-            .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
         assertThatThrownBy(() -> store.isCancelRequested("tenant", "run"))
-            .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
     }
 }

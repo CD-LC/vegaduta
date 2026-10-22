@@ -1,21 +1,21 @@
 package com.agenticai.core.chat.structured;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
- * JSON Schema checks and rewrites behind {@link StructuredOutput}'s native structured-output switches: parsing a
- * caller's schema, OpenAI strict-mode compatibility, the Gemini keyword strip, Anthropic's local-{@code $ref} rule
- * and the provider-safe schema/tool name. Schema-aware walks: a property NAMED like a keyword is never a keyword.
+ * JSON Schema checks and rewrites behind {@link StructuredOutput}'s native structured-output
+ * switches: parsing a caller's schema, OpenAI strict-mode compatibility, the Gemini keyword strip,
+ * Anthropic's local-{@code $ref} rule and the provider-safe schema/tool name. Schema-aware walks: a
+ * property NAMED like a keyword is never a keyword.
  */
 final class JsonSchemaRules {
 
-    private JsonSchemaRules() {
-    }
+    private JsonSchemaRules() {}
 
     static JsonNode parseSchema(String jsonSchema) {
         if (jsonSchema == null || jsonSchema.isBlank()) {
@@ -33,7 +33,10 @@ final class JsonSchemaRules {
         return n.length() > 64 ? n.substring(0, 64) : n;
     }
 
-    /** OpenAI strict mode: every object has additionalProperties:false and lists all its properties as required. */
+    /**
+     * OpenAI strict mode: every object has additionalProperties:false and lists all its properties
+     * as required.
+     */
     static boolean isStrictCompatible(JsonNode node) {
         if (node == null || !node.isObject()) {
             return true;
@@ -54,10 +57,10 @@ final class JsonSchemaRules {
             Set<String> required = new HashSet<>();
             JsonNode req = node.get("required");
             if (req != null && req.isArray()) {
-                req.forEach(r -> required.add(r.asText()));
+                req.forEach(r -> required.add(r.asString()));
             }
             Set<String> names = new HashSet<>();
-            props.fieldNames().forEachRemaining(names::add);
+            props.propertyNames().forEach(names::add);
             if (!required.containsAll(names)) {
                 return false;
             }
@@ -80,12 +83,12 @@ final class JsonSchemaRules {
         if (type == null) {
             return false;
         }
-        if (type.isTextual()) {
-            return "object".equals(type.asText());
+        if (type.isString()) {
+            return "object".equals(type.asString());
         }
         if (type.isArray()) {
             for (JsonNode t : type) {
-                if ("object".equals(t.asText())) {
+                if ("object".equals(t.asString())) {
                     return true;
                 }
             }
@@ -93,7 +96,10 @@ final class JsonSchemaRules {
         return false;
     }
 
-    /** Schemas nested under the applicator keywords other than "properties": items, anyOf/allOf/oneOf, $defs. */
+    /**
+     * Schemas nested under the applicator keywords other than "properties": items,
+     * anyOf/allOf/oneOf, $defs.
+     */
     static List<JsonNode> subSchemas(JsonNode schema) {
         List<JsonNode> out = new ArrayList<>();
         JsonNode items = schema.get("items");
@@ -131,7 +137,9 @@ final class JsonSchemaRules {
         return false;
     }
 
-    /** Removes the JSON-Schema-only keywords Gemini rejects, walking schemas (not property names). */
+    /**
+     * Removes the JSON-Schema-only keywords Gemini rejects, walking schemas (not property names).
+     */
     static void stripKeys(JsonNode node) {
         if (!(node instanceof ObjectNode obj)) {
             return;
@@ -148,7 +156,7 @@ final class JsonSchemaRules {
     static boolean hasNonLocalRef(JsonNode node) {
         if (node.isObject()) {
             JsonNode ref = node.get("$ref");
-            if (ref != null && ref.isTextual() && !ref.asText().startsWith("#")) {
+            if (ref != null && ref.isString() && !ref.asString().startsWith("#")) {
                 return true;
             }
         }

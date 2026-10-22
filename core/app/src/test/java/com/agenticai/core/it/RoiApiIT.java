@@ -17,8 +17,6 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Set;
@@ -30,11 +28,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Every {@code /api/tenant/roi/**} endpoint against a real Postgres with two tenant schemas, A and
@@ -56,7 +56,7 @@ class RoiApiIT extends AbstractContextIT {
     @Autowired private JdbcTemplate jdbc;
     @Autowired private RoiController controller;
     @Autowired private RoiBudgetService budget;
-    @Autowired private ObjectMapper mapper;
+    @Autowired private JsonMapper mapper;
 
     private MockMvc mvc;
     private final String today = LocalDate.now(ZoneOffset.UTC).toString();
@@ -97,7 +97,7 @@ class RoiApiIT extends AbstractContextIT {
                 MockMvcBuilders.standaloneSetup(controller)
                         .setMessageConverters(
                                 new ByteArrayHttpMessageConverter(),
-                                new MappingJackson2HttpMessageConverter(mapper))
+                                new JacksonJsonHttpMessageConverter(mapper))
                         .build();
     }
 
@@ -109,7 +109,8 @@ class RoiApiIT extends AbstractContextIT {
 
     private void setFreeMode(boolean on) {
         jdbc.update(
-                "UPDATE control_plane.platform_setting SET value = ? WHERE key = 'platform.free-mode.enabled'",
+                "UPDATE control_plane.platform_setting SET value = ? WHERE key ="
+                        + " 'platform.free-mode.enabled'",
                 String.valueOf(on));
     }
 
@@ -121,8 +122,9 @@ class RoiApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens, temperature,"
-                        + " knowledge_base_enabled, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,now(),now())",
+                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens,"
+                        + " temperature, knowledge_base_enabled, created_at, updated_at) VALUES"
+                        + " (?,?,?,?,?,?,?,?,now(),now())",
                 id,
                 name,
                 "p",
@@ -144,8 +146,9 @@ class RoiApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".llm_call_log (id, agent_id, session_id, provider_name, model, prompt_tokens,"
-                        + " completion_tokens, total_tokens, success, latency_ms, started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
+                        + ".llm_call_log (id, agent_id, session_id, provider_name, model,"
+                        + " prompt_tokens, completion_tokens, total_tokens, success, latency_ms,"
+                        + " started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
                 UUID.randomUUID(),
                 agent,
                 "s-" + UUID.randomUUID(),
@@ -164,7 +167,8 @@ class RoiApiIT extends AbstractContextIT {
 
     private static final String PRICE =
             """
-        {"providerName":"ANTHROPIC","modelPrefix":"claude","inputPerMillion":3,"outputPerMillion":15}""";
+{"providerName":"ANTHROPIC","modelPrefix":"claude","inputPerMillion":3,"outputPerMillion":15}\
+""";
 
     @Test
     void pricesAreVersionedPerTenantAndNeverSeededOrShared() throws Exception {
@@ -192,7 +196,7 @@ class RoiApiIT extends AbstractContextIT {
         as(B);
         mvc.perform(get("/api/tenant/roi/prices"))
                 .andExpect(jsonPath("$.prices.length()").value(0));
-        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asText()))
+        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asString()))
                 .andExpect(status().isNotFound());
 
         as(A);
@@ -202,7 +206,7 @@ class RoiApiIT extends AbstractContextIT {
                                 .content(
                                         "{\"providerName\":\"ANTHROPIC\",\"modelPrefix\":\"claude\",\"inputPerMillion\":-1}"))
                 .andExpect(status().isBadRequest());
-        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asText()))
+        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asString()))
                 .andExpect(status().isNoContent());
         mvc.perform(get("/api/tenant/roi/prices"))
                 .andExpect(jsonPath("$.prices.length()").value(1));
@@ -230,12 +234,12 @@ class RoiApiIT extends AbstractContextIT {
         assertThat(report.at("/total/pricedCalls").asInt()).isEqualTo(1);
         assertThat(report.at("/total/unpricedCalls").asInt()).isEqualTo(1);
         assertThat(report.at("/total/costComplete").asBoolean()).isFalse();
-        assertThat(report.at("/rows/0/label").asText()).isEqualTo("Support bot");
-        assertThat(report.get("costBasis").asText()).contains("estimated");
+        assertThat(report.at("/rows/0/label").asString()).isEqualTo("Support bot");
+        assertThat(report.get("costBasis").asString()).contains("estimated");
 
         JsonNode prices = json(mvc.perform(get("/api/tenant/roi/prices")));
-        assertThat(prices.at("/unpricedModels/0/model").asText()).isEqualTo("gpt-unlisted");
-        assertThat(prices.at("/unpricedModels/0/reason").asText()).isEqualTo("NO_PRICE");
+        assertThat(prices.at("/unpricedModels/0/model").asString()).isEqualTo("gpt-unlisted");
+        assertThat(prices.at("/unpricedModels/0/reason").asString()).isEqualTo("NO_PRICE");
 
         for (String dim : new String[] {"workflow", "channel", "owner", "day"}) {
             mvc.perform(get("/api/tenant/roi/costs?groupBy=" + dim)).andExpect(status().isOk());
@@ -296,7 +300,7 @@ class RoiApiIT extends AbstractContextIT {
                 json(mvc.perform(get("/api/tenant/roi/agents")).andExpect(status().isOk()));
         assertThat(empty.at("/agents/0/handoverRate").isNull()).isTrue();
         assertThat(empty.at("/agents/0/estimatedCostPerResolvedUsd").isNull()).isTrue();
-        assertThat(empty.at("/agents/0/roiNote").asText()).isEqualTo("NO_ASSUMPTIONS");
+        assertThat(empty.at("/agents/0/roiNote").asString()).isEqualTo("NO_ASSUMPTIONS");
 
         mvc.perform(
                         post("/api/tenant/roi/prices")
@@ -355,7 +359,8 @@ class RoiApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + A
-                        + ".turn_feedback (id, agent_id, session_id, turn_ref, signal, created_at) VALUES (?,?,?,?,?,now())",
+                        + ".turn_feedback (id, agent_id, session_id, turn_ref, signal, created_at)"
+                        + " VALUES (?,?,?,?,?,now())",
                 UUID.randomUUID(),
                 agentA,
                 "c2",
@@ -366,7 +371,8 @@ class RoiApiIT extends AbstractContextIT {
             jdbc.update(
                     "INSERT INTO "
                             + A
-                            + ".approval_request (id, action_type, status, requested_by, created_at, retry_count) VALUES (?,?,?,?,now(),0)",
+                            + ".approval_request (id, action_type, status, requested_by,"
+                            + " created_at, retry_count) VALUES (?,?,?,?,now(),0)",
                     UUID.randomUUID(),
                     "mcp_tool.x",
                     st,
@@ -474,8 +480,8 @@ class RoiApiIT extends AbstractContextIT {
             jdbc.update(
                     "INSERT INTO "
                             + schema
-                            + ".llm_spend_month (month_start, cost_usd) VALUES (?, ?)"
-                            + " ON CONFLICT (month_start) DO UPDATE SET cost_usd = EXCLUDED.cost_usd",
+                            + ".llm_spend_month (month_start, cost_usd) VALUES (?, ?) ON CONFLICT"
+                            + " (month_start) DO UPDATE SET cost_usd = EXCLUDED.cost_usd",
                     java.sql.Date.valueOf(month),
                     java.math.BigDecimal.valueOf(usd));
         }

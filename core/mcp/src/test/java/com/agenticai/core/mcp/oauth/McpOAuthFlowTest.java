@@ -17,7 +17,6 @@ import com.agenticai.core.mcp.McpRemoteUrlGuard;
 import com.agenticai.core.mcp.oauth.McpOAuthConnectionStore.McpOAuthConnection;
 import com.agenticai.core.mcp.oauth.OAuthProviderTestSupport.MutableClock;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -27,11 +26,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * The generic remote-MCP OAuth flow end to end against {@link FakeAuthorizationServer}, which enforces PKCE,
- * redirect-uri, RFC 8707 resource, rotation and CIMD semantics - so a green test means the client sent the
- * right thing, not that a canned response matched.
+ * The generic remote-MCP OAuth flow end to end against {@link FakeAuthorizationServer}, which
+ * enforces PKCE, redirect-uri, RFC 8707 resource, rotation and CIMD semantics - so a green test
+ * means the client sent the right thing, not that a canned response matched.
  */
 class McpOAuthFlowTest {
 
@@ -39,7 +39,8 @@ class McpOAuthFlowTest {
     private static final String ISSUER = "https://auth.example.com";
     private static final String CALLBACK = "https://api.example.com/oauth/mcp/remote/callback";
     private static final String CONSOLE = "https://app.example.com/tools";
-    private static final String CIMD_URL = "https://api.example.com/oauth/mcp/remote/client-metadata.json";
+    private static final String CIMD_URL =
+            "https://api.example.com/oauth/mcp/remote/client-metadata.json";
 
     private FakeAuthorizationServer as;
     private InMemoryMcpOAuthConnectionStore store;
@@ -72,15 +73,30 @@ class McpOAuthFlowTest {
     }
 
     private McpOAuthService newService(boolean enabled, McpOAuthClientMetadata cimd) {
-        ObjectMapper om = new ObjectMapper();
-        return new McpOAuthService(new McpOAuthDiscovery(as, om), new McpOAuthClient(as, om), store, encryption, cimd,
-            new McpRemoteUrlGuard(), enabled, CALLBACK,
-            new OAuthRedirectPolicy(CONSOLE, ""), clock, 600);
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
+        return new McpOAuthService(
+                new McpOAuthDiscovery(as, om),
+                new McpOAuthClient(as, om),
+                store,
+                encryption,
+                cimd,
+                new McpRemoteUrlGuard(),
+                enabled,
+                CALLBACK,
+                new OAuthRedirectPolicy(CONSOLE, ""),
+                clock,
+                600);
     }
 
     private McpOAuthClientMetadata activeCimd() {
-        return new McpOAuthClientMetadata(McpRemoteUrlGuard.withDenylist(List.of("postgres")),
-            true, CIMD_URL, McpOAuthClientMetadata.DEFAULT_PATH, "VegaDuta", "", CALLBACK);
+        return new McpOAuthClientMetadata(
+                McpRemoteUrlGuard.withDenylist(List.of("postgres")),
+                true,
+                CIMD_URL,
+                McpOAuthClientMetadata.DEFAULT_PATH,
+                "VegaDuta",
+                "",
+                CALLBACK);
     }
 
     /** begin -> user consents at the AS -> callback. */
@@ -97,14 +113,17 @@ class McpOAuthFlowTest {
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         assertEquals("dcr", start.clientMode());
         assertEquals(MCP, start.resourceUrl());
-        Map<String, String> q = FakeAuthorizationServer.query(java.net.URI.create(start.authorizationUrl()).getRawQuery());
+        Map<String, String> q =
+                FakeAuthorizationServer.query(
+                        java.net.URI.create(start.authorizationUrl()).getRawQuery());
         assertEquals(MCP, q.get("resource"));
         assertEquals("S256", q.get("code_challenge_method"));
         assertEquals(CALLBACK, q.get("redirect_uri"));
         assertEquals("read write", q.get("scope"));
 
         Map<String, String> cb = as.consent(start.authorizationUrl());
-        McpOAuthService.CompletedConnection done = service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
+        McpOAuthService.CompletedConnection done =
+                service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
         assertEquals("tenant-a", done.tenantId());
         assertEquals("user-1", done.userId());
         assertEquals(MCP, done.resourceUrl());
@@ -115,7 +134,9 @@ class McpOAuthFlowTest {
         assertNotNull(stored.encryptedRefreshToken());
         assertTrue(encryption.decrypt(stored.encryptedRefreshToken()).startsWith("rt-"));
         assertEquals("dcr-secret-1", encryption.decrypt(stored.encryptedClientSecret()));
-        assertNull(stored.encryptedAccessToken(), "a refreshable access token must never be persisted");
+        assertNull(
+                stored.encryptedAccessToken(),
+                "a refreshable access token must never be persisted");
         assertFalse(stored.encryptedRefreshToken().startsWith("rt-"), "ciphertext, not the token");
 
         String token = service.currentAccessToken(MCP);
@@ -130,8 +151,16 @@ class McpOAuthFlowTest {
         connect();
         String body = as.tokenRequestBodies.get(0);
         assertTrue(body.contains("grant_type=authorization_code"));
-        assertTrue(body.contains("redirect_uri=" + java.net.URLEncoder.encode(CALLBACK, java.nio.charset.StandardCharsets.UTF_8)));
-        assertTrue(body.contains("resource=" + java.net.URLEncoder.encode(MCP, java.nio.charset.StandardCharsets.UTF_8)));
+        assertTrue(
+                body.contains(
+                        "redirect_uri="
+                                + java.net.URLEncoder.encode(
+                                        CALLBACK, java.nio.charset.StandardCharsets.UTF_8)));
+        assertTrue(
+                body.contains(
+                        "resource="
+                                + java.net.URLEncoder.encode(
+                                        MCP, java.nio.charset.StandardCharsets.UTF_8)));
         assertTrue(body.contains("code_verifier="));
     }
 
@@ -158,11 +187,20 @@ class McpOAuthFlowTest {
 
     @Test
     void statusIsUnknownWhenTheServerCannotBeReached() {
-        McpOAuthHttp unreachable = (m, u, h, b) -> {
-            throw new McpOAuthException("Could not reach " + u);
-        };
-        McpOAuthService s = new McpOAuthService(new McpOAuthDiscovery(unreachable, new ObjectMapper()),
-            new McpOAuthClient(unreachable, new ObjectMapper()), store, encryption, true, CALLBACK);
+        McpOAuthHttp unreachable =
+                (m, u, h, b) -> {
+                    throw new McpOAuthException("Could not reach " + u);
+                };
+        McpOAuthService s =
+                new McpOAuthService(
+                        new McpOAuthDiscovery(
+                                unreachable, com.agenticai.core.json.JsonMappers.plain()),
+                        new McpOAuthClient(
+                                unreachable, com.agenticai.core.json.JsonMappers.plain()),
+                        store,
+                        encryption,
+                        true,
+                        CALLBACK);
         assertEquals(McpOAuthService.State.UNKNOWN, s.status(MCP).state());
     }
 
@@ -172,13 +210,17 @@ class McpOAuthFlowTest {
     void cimdIsUsedAsTheClientIdWhenTheServerSupportsItAndNoRegistrationHappens() {
         service = newService(true, activeCimd());
         as.cimdSupported = true;
-        as.cimdDocuments.put(CIMD_URL, new ObjectMapper().valueToTree(activeCimd().document()));
+        as.cimdDocuments.put(
+                CIMD_URL,
+                com.agenticai.core.json.JsonMappers.plain().valueToTree(activeCimd().document()));
 
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         assertEquals("cimd", start.clientMode());
         assertEquals(0, as.registrations, "CIMD means no dynamic registration call");
         assertFalse(as.requests.contains("POST " + ISSUER + "/register"));
-        Map<String, String> q = FakeAuthorizationServer.query(java.net.URI.create(start.authorizationUrl()).getRawQuery());
+        Map<String, String> q =
+                FakeAuthorizationServer.query(
+                        java.net.URI.create(start.authorizationUrl()).getRawQuery());
         assertEquals(CIMD_URL, q.get("client_id"));
 
         Map<String, String> cb = as.consent(start.authorizationUrl());
@@ -204,8 +246,15 @@ class McpOAuthFlowTest {
         as.cimdSupported = true;
         assertEquals("dcr", service.beginAuthorization(MCP, null).clientMode());
         // enabled but misconfigured (client id URL on localhost) stays inactive too
-        McpOAuthClientMetadata bad = new McpOAuthClientMetadata(new McpRemoteUrlGuard(),
-            true, "https://localhost/oauth/mcp/remote/client-metadata.json", McpOAuthClientMetadata.DEFAULT_PATH, "V", "", CALLBACK);
+        McpOAuthClientMetadata bad =
+                new McpOAuthClientMetadata(
+                        new McpRemoteUrlGuard(),
+                        true,
+                        "https://localhost/oauth/mcp/remote/client-metadata.json",
+                        McpOAuthClientMetadata.DEFAULT_PATH,
+                        "V",
+                        "",
+                        CALLBACK);
         assertFalse(bad.active());
         store = new InMemoryMcpOAuthConnectionStore();
         service = newService(true, bad);
@@ -215,7 +264,8 @@ class McpOAuthFlowTest {
     @Test
     void aServerWithNeitherDcrNorCimdIsRefusedWithAClearMessage() {
         as.hasRegistrationEndpoint = false;
-        McpOAuthException e = assertThrows(McpOAuthException.class, () -> service.beginAuthorization(MCP, null));
+        McpOAuthException e =
+                assertThrows(McpOAuthException.class, () -> service.beginAuthorization(MCP, null));
         assertTrue(e.getMessage().contains("dynamic client registration"));
     }
 
@@ -227,7 +277,8 @@ class McpOAuthFlowTest {
     }
 
     @Test
-    void cimdAuthorizationFailsAtTheAsIfTheRedirectIsNotInTheDocumentSoOnlyTheConfiguredCallbackIsPublished() {
+    void
+            cimdAuthorizationFailsAtTheAsIfTheRedirectIsNotInTheDocumentSoOnlyTheConfiguredCallbackIsPublished() {
         Map<String, Object> doc = activeCimd().document();
         assertEquals(List.of(CALLBACK), doc.get("redirect_uris"));
         assertEquals(CIMD_URL, doc.get("client_id"));
@@ -241,16 +292,23 @@ class McpOAuthFlowTest {
         as.expiresIn = 3600;
         connect();
         String first = service.currentAccessToken(MCP);
-        String rt1 = encryption.decrypt(store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken());
+        String rt1 =
+                encryption.decrypt(
+                        store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken());
 
-        clock.advance(Duration.ofSeconds(3600 - 30)); // inside the 60s safety margin, before real expiry
+        clock.advance(
+                Duration.ofSeconds(3600 - 30)); // inside the 60s safety margin, before real expiry
         String second = service.currentAccessToken(MCP);
         assertNotEquals(first, second);
-        String rt2 = encryption.decrypt(store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken());
+        String rt2 =
+                encryption.decrypt(
+                        store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken());
         assertNotEquals(rt1, rt2, "the rotated refresh token is persisted");
         assertEquals(2, as.tokenRequestBodies.size());
         assertTrue(as.tokenRequestBodies.get(1).contains("grant_type=refresh_token"));
-        assertTrue(as.tokenRequestBodies.get(1).contains("resource="), "refresh is audience-bound too");
+        assertTrue(
+                as.tokenRequestBodies.get(1).contains("resource="),
+                "refresh is audience-bound too");
     }
 
     @Test
@@ -259,7 +317,8 @@ class McpOAuthFlowTest {
         as.revokeAll();
         clock.advance(Duration.ofSeconds(4000));
 
-        McpOAuthException e = assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP));
+        McpOAuthException e =
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP));
         assertEquals("reauth_required", e.getOauthErrorCode());
         McpOAuthConnection stored = store.find("tenant-a", MCP).orElseThrow();
         assertTrue(stored.needsReauth());
@@ -268,7 +327,10 @@ class McpOAuthFlowTest {
         assertEquals(McpOAuthService.State.NEEDS_REAUTH, service.status(MCP).state());
         // stays failing loudly, without hammering the AS again
         int tokenCalls = as.tokenRequestBodies.size();
-        assertEquals("reauth_required", assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP)).getOauthErrorCode());
+        assertEquals(
+                "reauth_required",
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP))
+                        .getOauthErrorCode());
         assertEquals(tokenCalls, as.tokenRequestBodies.size());
     }
 
@@ -290,7 +352,8 @@ class McpOAuthFlowTest {
         connect();
         as.refreshTransientStatus = 503;
         clock.advance(Duration.ofSeconds(4000));
-        McpOAuthException e = assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP));
+        McpOAuthException e =
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP));
         assertNotEquals("reauth_required", e.getOauthErrorCode());
         McpOAuthConnection stored = store.find("tenant-a", MCP).orElseThrow();
         assertTrue(stored.isConnected());
@@ -312,8 +375,10 @@ class McpOAuthFlowTest {
         assertTrue(service.currentAccessToken(MCP).startsWith("at-"));
 
         clock.advance(Duration.ofSeconds(3600));
-        assertEquals("reauth_required",
-            assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP)).getOauthErrorCode());
+        assertEquals(
+                "reauth_required",
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP))
+                        .getOauthErrorCode());
         assertTrue(store.find("tenant-a", MCP).orElseThrow().needsReauth());
     }
 
@@ -321,32 +386,54 @@ class McpOAuthFlowTest {
 
     @Test
     void theTenantTypedUrlIsRefusedForEveryInternalOrObfuscatedHostWithoutANetworkCall() {
-        List<String> bad = List.of(
-            "https://127.0.0.1/mcp", "https://169.254.169.254/latest/meta-data", "https://10.0.0.5/mcp",
-            "https://192.168.1.10/mcp", "https://[::1]/mcp", "https://localhost/mcp", "https://postgres/mcp",
-            "https://2130706433/mcp", "https://0x7f000001/mcp",
-            "https://metadata.google.internal/computeMetadata/v1/");
+        List<String> bad =
+                List.of(
+                        "https://127.0.0.1/mcp",
+                        "https://169.254.169.254/latest/meta-data",
+                        "https://10.0.0.5/mcp",
+                        "https://192.168.1.10/mcp",
+                        "https://[::1]/mcp",
+                        "https://localhost/mcp",
+                        "https://postgres/mcp",
+                        "https://2130706433/mcp",
+                        "https://0x7f000001/mcp",
+                        "https://metadata.google.internal/computeMetadata/v1/");
         for (String url : bad) {
             as.requests.clear();
-            McpOAuthException e = assertThrows(McpOAuthException.class, () -> service.beginAuthorization(url, null), url);
+            McpOAuthException e =
+                    assertThrows(
+                            McpOAuthException.class,
+                            () -> service.beginAuthorization(url, null),
+                            url);
             assertTrue(e instanceof McpOAuthBlockedException, url + " -> " + e.getMessage());
-            assertTrue(as.requests.isEmpty() || as.requests.stream().noneMatch(r -> r.contains("127.") || r.contains("169.254")),
-                "no request may reach " + url);
+            assertTrue(
+                    as.requests.isEmpty()
+                            || as.requests.stream()
+                                    .noneMatch(r -> r.contains("127.") || r.contains("169.254")),
+                    "no request may reach " + url);
         }
     }
 
     @Test
     void plainHttpAndCredentialUrlsAreRefused() {
-        assertThrows(McpOAuthException.class, () -> service.beginAuthorization("http://mcp.example.com/mcp", null));
-        assertThrows(McpOAuthException.class, () -> service.beginAuthorization("https://user:pw@mcp.example.com/mcp", null));
-        assertThrows(McpOAuthException.class, () -> service.beginAuthorization("https://mcp.example.com/mcp#frag", null));
+        assertThrows(
+                McpOAuthException.class,
+                () -> service.beginAuthorization("http://mcp.example.com/mcp", null));
+        assertThrows(
+                McpOAuthException.class,
+                () -> service.beginAuthorization("https://user:pw@mcp.example.com/mcp", null));
+        assertThrows(
+                McpOAuthException.class,
+                () -> service.beginAuthorization("https://mcp.example.com/mcp#frag", null));
     }
 
     @Test
     void aMetadataDocumentPointingTheAuthorizationServerAtAnInternalHostIsRefused() {
         as.prmAuthorizationServer = "https://169.254.169.254";
         assertThrows(McpOAuthBlockedException.class, () -> service.beginAuthorization(MCP, null));
-        assertTrue(as.requests.stream().noneMatch(r -> r.contains("169.254.169.254")), "never fetched");
+        assertTrue(
+                as.requests.stream().noneMatch(r -> r.contains("169.254.169.254")),
+                "never fetched");
     }
 
     @Test
@@ -356,7 +443,9 @@ class McpOAuthFlowTest {
         as.tokenEndpointOverride = null;
         as.registrationEndpointOverride = "https://postgres/register";
         assertThrows(McpOAuthBlockedException.class, () -> service.beginAuthorization(MCP, null));
-        assertTrue(as.requests.stream().noneMatch(r -> r.contains("10.1.2.3") || r.contains("postgres")));
+        assertTrue(
+                as.requests.stream()
+                        .noneMatch(r -> r.contains("10.1.2.3") || r.contains("postgres")));
     }
 
     @Test
@@ -371,8 +460,12 @@ class McpOAuthFlowTest {
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         Map<String, String> cb = as.consent(start.authorizationUrl());
         service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
-        OAuthStateException e = assertThrows(OAuthStateException.class,
-            () -> service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss")));
+        OAuthStateException e =
+                assertThrows(
+                        OAuthStateException.class,
+                        () ->
+                                service.completeAuthorization(
+                                        cb.get("code"), cb.get("state"), cb.get("iss")));
         assertEquals(OAuthStateException.REPLAYED, e.reason());
     }
 
@@ -382,13 +475,18 @@ class McpOAuthFlowTest {
         Map<String, String> cb = as.consent(start.authorizationUrl());
 
         TenantContext.set(TenantContext.of("tenant-b", "mallory", Set.of()));
-        OAuthStateException e = assertThrows(OAuthStateException.class,
-            () -> service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss")));
+        OAuthStateException e =
+                assertThrows(
+                        OAuthStateException.class,
+                        () ->
+                                service.completeAuthorization(
+                                        cb.get("code"), cb.get("state"), cb.get("iss")));
         assertEquals(OAuthStateException.TENANT_MISMATCH, e.reason());
         assertTrue(store.find("tenant-b", MCP).isEmpty(), "nothing is stored for the other tenant");
 
         TenantContext.clear(); // the genuine redirect carries no session
-        McpOAuthService.CompletedConnection done = service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
+        McpOAuthService.CompletedConnection done =
+                service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
         assertEquals("tenant-a", done.tenantId());
         assertTrue(store.find("tenant-a", MCP).orElseThrow().isConnected());
         assertTrue(store.find("tenant-b", MCP).isEmpty());
@@ -398,8 +496,10 @@ class McpOAuthFlowTest {
     void tenantsNeverSeeEachOthersConnections() {
         connect();
         TenantContext.set(TenantContext.of("tenant-b", "u", Set.of()));
-        assertEquals("not_connected",
-            assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP)).getOauthErrorCode());
+        assertEquals(
+                "not_connected",
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP))
+                        .getOauthErrorCode());
         assertEquals(McpOAuthService.State.NEEDS_SIGNIN, service.status(MCP).state());
     }
 
@@ -407,20 +507,46 @@ class McpOAuthFlowTest {
     void aForgedTamperedOrForeignKeyStateIsRejected() {
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         String state = as.consent(start.authorizationUrl()).get("state");
-        String tampered = state.substring(0, state.length() - 4) + (state.endsWith("AAAA") ? "BBBB" : "AAAA");
-        assertEquals(OAuthStateException.INVALID,
-            assertThrows(OAuthStateException.class, () -> service.completeAuthorization("c", tampered, null)).reason());
+        String tampered =
+                state.substring(0, state.length() - 4) + (state.endsWith("AAAA") ? "BBBB" : "AAAA");
+        assertEquals(
+                OAuthStateException.INVALID,
+                assertThrows(
+                                OAuthStateException.class,
+                                () -> service.completeAuthorization("c", tampered, null))
+                        .reason());
 
-        // a state minted under a different APP_ENCRYPTION_KEY (e.g. another deployment) cannot be decrypted
+        // a state minted under a different APP_ENCRYPTION_KEY (e.g. another deployment) cannot be
+        // decrypted
         EncryptionService other = OAuthProviderTestSupport.encryption((byte) 9);
-        String foreign = new McpOAuthStateCodec(other, clock, 600)
-            .encode("tenant-b", "u", MCP, "verifier", CONSOLE, ISSUER, false, "cid", CALLBACK);
-        assertEquals(OAuthStateException.INVALID,
-            assertThrows(OAuthStateException.class, () -> service.completeAuthorization("c", foreign, null)).reason());
+        String foreign =
+                new McpOAuthStateCodec(other, clock, 600)
+                        .encode(
+                                "tenant-b",
+                                "u",
+                                MCP,
+                                "verifier",
+                                CONSOLE,
+                                ISSUER,
+                                false,
+                                "cid",
+                                CALLBACK);
+        assertEquals(
+                OAuthStateException.INVALID,
+                assertThrows(
+                                OAuthStateException.class,
+                                () -> service.completeAuthorization("c", foreign, null))
+                        .reason());
         // a state for the PROVIDER flow is a different format and is refused too
-        String providerState = new OAuthStateCodec(encryption, clock, 600).encode("github", "tenant-a", "u", "v", CONSOLE);
-        assertEquals(OAuthStateException.INVALID,
-            assertThrows(OAuthStateException.class, () -> service.completeAuthorization("c", providerState, null)).reason());
+        String providerState =
+                new OAuthStateCodec(encryption, clock, 600)
+                        .encode("github", "tenant-a", "u", "v", CONSOLE);
+        assertEquals(
+                OAuthStateException.INVALID,
+                assertThrows(
+                                OAuthStateException.class,
+                                () -> service.completeAuthorization("c", providerState, null))
+                        .reason());
     }
 
     @Test
@@ -428,8 +554,14 @@ class McpOAuthFlowTest {
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         Map<String, String> cb = as.consent(start.authorizationUrl());
         clock.advance(Duration.ofSeconds(601));
-        assertEquals(OAuthStateException.EXPIRED,
-            assertThrows(OAuthStateException.class, () -> service.completeAuthorization(cb.get("code"), cb.get("state"), null)).reason());
+        assertEquals(
+                OAuthStateException.EXPIRED,
+                assertThrows(
+                                OAuthStateException.class,
+                                () ->
+                                        service.completeAuthorization(
+                                                cb.get("code"), cb.get("state"), null))
+                        .reason());
     }
 
     @Test
@@ -446,12 +578,30 @@ class McpOAuthFlowTest {
     void aStateWhosePendingClientWasReplacedInTheMeantimeIsRefused() {
         McpOAuthService.AuthorizationStart first = service.beginAuthorization(MCP, null);
         Map<String, String> cb = as.consent(first.authorizationUrl());
-        // another flow re-registers a different client for the same resource (e.g. issuer changed / client dropped)
+        // another flow re-registers a different client for the same resource (e.g. issuer changed /
+        // client dropped)
         McpOAuthConnection pending = store.find("tenant-a", MCP).orElseThrow();
-        store.save(new McpOAuthConnection("tenant-a", MCP, pending.issuer(), pending.authorizationEndpoint(),
-            pending.tokenEndpoint(), "someone-elses-client", null, "none", CALLBACK, null, null));
-        assertEquals(OAuthStateException.NO_PENDING_CONNECTION,
-            assertThrows(OAuthStateException.class, () -> service.completeAuthorization(cb.get("code"), cb.get("state"), null)).reason());
+        store.save(
+                new McpOAuthConnection(
+                        "tenant-a",
+                        MCP,
+                        pending.issuer(),
+                        pending.authorizationEndpoint(),
+                        pending.tokenEndpoint(),
+                        "someone-elses-client",
+                        null,
+                        "none",
+                        CALLBACK,
+                        null,
+                        null));
+        assertEquals(
+                OAuthStateException.NO_PENDING_CONNECTION,
+                assertThrows(
+                                OAuthStateException.class,
+                                () ->
+                                        service.completeAuthorization(
+                                                cb.get("code"), cb.get("state"), null))
+                        .reason());
     }
 
     // ----------------------------------------------------------- issuer (9207)
@@ -461,10 +611,18 @@ class McpOAuthFlowTest {
         as.issParameterSupported = true;
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         Map<String, String> cb = as.consent(start.authorizationUrl());
-        OAuthStateException e = assertThrows(OAuthStateException.class,
-            () -> service.completeAuthorization(cb.get("code"), cb.get("state"), "https://evil.example.net"));
+        OAuthStateException e =
+                assertThrows(
+                        OAuthStateException.class,
+                        () ->
+                                service.completeAuthorization(
+                                        cb.get("code"),
+                                        cb.get("state"),
+                                        "https://evil.example.net"));
         assertEquals(OAuthStateException.ISSUER_MISMATCH, e.reason());
-        assertTrue(store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken() == null, "no tokens stored");
+        assertTrue(
+                store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken() == null,
+                "no tokens stored");
     }
 
     @Test
@@ -472,14 +630,21 @@ class McpOAuthFlowTest {
         as.issParameterSupported = true;
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         Map<String, String> cb = as.consent(start.authorizationUrl());
-        assertEquals(OAuthStateException.ISSUER_MISMATCH,
-            assertThrows(OAuthStateException.class, () -> service.completeAuthorization(cb.get("code"), cb.get("state"), null)).reason());
+        assertEquals(
+                OAuthStateException.ISSUER_MISMATCH,
+                assertThrows(
+                                OAuthStateException.class,
+                                () ->
+                                        service.completeAuthorization(
+                                                cb.get("code"), cb.get("state"), null))
+                        .reason());
     }
 
     @Test
     void aCorrectIssIsAcceptedAndAMissingOneIsFineWhenNeverPromised() {
         as.issParameterSupported = true;
-        assertEquals(MCP, connect().resourceUrl()); // consent() sends iss because the AS supports it
+        assertEquals(
+                MCP, connect().resourceUrl()); // consent() sends iss because the AS supports it
 
         TenantContext.set(TenantContext.of("tenant-c", "u", Set.of()));
         as.issParameterSupported = false;
@@ -503,28 +668,53 @@ class McpOAuthFlowTest {
         as.prmResource = "https://mcp.example.com";
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         assertEquals("https://mcp.example.com", start.resourceUrl());
-        Map<String, String> q = FakeAuthorizationServer.query(java.net.URI.create(start.authorizationUrl()).getRawQuery());
+        Map<String, String> q =
+                FakeAuthorizationServer.query(
+                        java.net.URI.create(start.authorizationUrl()).getRawQuery());
         assertEquals("https://mcp.example.com", q.get("resource"));
         Map<String, String> cb = as.consent(start.authorizationUrl());
         service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
 
         assertTrue(service.currentAccessToken(MCP).startsWith("at-"));
-        assertTrue(service.currentAccessToken("https://mcp.example.com/other/path").startsWith("at-"));
+        assertTrue(
+                service.currentAccessToken("https://mcp.example.com/other/path").startsWith("at-"));
         // a different host never gets it
-        assertEquals("not_connected", assertThrows(McpOAuthException.class,
-            () -> service.currentAccessToken("https://mcp.example.net/mcp")).getOauthErrorCode());
-        assertEquals("not_connected", assertThrows(McpOAuthException.class,
-            () -> service.currentAccessToken("https://mcp.example.com:8443/mcp")).getOauthErrorCode());
+        assertEquals(
+                "not_connected",
+                assertThrows(
+                                McpOAuthException.class,
+                                () -> service.currentAccessToken("https://mcp.example.net/mcp"))
+                        .getOauthErrorCode());
+        assertEquals(
+                "not_connected",
+                assertThrows(
+                                McpOAuthException.class,
+                                () ->
+                                        service.currentAccessToken(
+                                                "https://mcp.example.com:8443/mcp"))
+                        .getOauthErrorCode());
     }
 
     @Test
     void aPathLevelResourceDoesNotReleaseTheTokenToASiblingPath() {
         connect();
-        assertEquals("not_connected", assertThrows(McpOAuthException.class,
-            () -> service.currentAccessToken("https://mcp.example.com/mcp-evil")).getOauthErrorCode());
-        assertEquals("not_connected", assertThrows(McpOAuthException.class,
-            () -> service.currentAccessToken("https://mcp.example.com/")).getOauthErrorCode());
-        assertTrue(service.currentAccessToken("https://MCP.example.com:443/mcp/").startsWith("at-"), "same server, other spelling");
+        assertEquals(
+                "not_connected",
+                assertThrows(
+                                McpOAuthException.class,
+                                () ->
+                                        service.currentAccessToken(
+                                                "https://mcp.example.com/mcp-evil"))
+                        .getOauthErrorCode());
+        assertEquals(
+                "not_connected",
+                assertThrows(
+                                McpOAuthException.class,
+                                () -> service.currentAccessToken("https://mcp.example.com/"))
+                        .getOauthErrorCode());
+        assertTrue(
+                service.currentAccessToken("https://MCP.example.com:443/mcp/").startsWith("at-"),
+                "same server, other spelling");
     }
 
     // ------------------------------------------------------------------ scope
@@ -533,13 +723,21 @@ class McpOAuthFlowTest {
     void theChallengeScopeWinsOverScopesSupported() {
         as.challengeScope = "files:read";
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
-        assertEquals("files:read", FakeAuthorizationServer.query(java.net.URI.create(start.authorizationUrl()).getRawQuery()).get("scope"));
+        assertEquals(
+                "files:read",
+                FakeAuthorizationServer.query(
+                                java.net.URI.create(start.authorizationUrl()).getRawQuery())
+                        .get("scope"));
     }
 
     @Test
     void aCallerMayNarrowButNeverWidenTheScopes() {
         McpOAuthService.AuthorizationStart narrowed = service.beginAuthorization(MCP, "read");
-        assertEquals("read", FakeAuthorizationServer.query(java.net.URI.create(narrowed.authorizationUrl()).getRawQuery()).get("scope"));
+        assertEquals(
+                "read",
+                FakeAuthorizationServer.query(
+                                java.net.URI.create(narrowed.authorizationUrl()).getRawQuery())
+                        .get("scope"));
         assertThrows(McpOAuthException.class, () -> service.beginAuthorization(MCP, "read admin"));
     }
 
@@ -547,7 +745,10 @@ class McpOAuthFlowTest {
     void noScopeParameterWhenTheServerDeclaresNone() {
         as.scopesSupported = List.of();
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
-        assertFalse(FakeAuthorizationServer.query(java.net.URI.create(start.authorizationUrl()).getRawQuery()).containsKey("scope"));
+        assertFalse(
+                FakeAuthorizationServer.query(
+                                java.net.URI.create(start.authorizationUrl()).getRawQuery())
+                        .containsKey("scope"));
         assertThrows(McpOAuthException.class, () -> service.beginAuthorization(MCP, "read"));
     }
 
@@ -555,10 +756,16 @@ class McpOAuthFlowTest {
 
     @Test
     void returnToMustBeOnTheAllowList() {
-        assertThrows(IllegalArgumentException.class, () -> service.beginAuthorization(MCP, null, "https://evil.example.net/phish"));
-        McpOAuthService.AuthorizationStart ok = service.beginAuthorization(MCP, null, CONSOLE + "?tab=servers");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.beginAuthorization(MCP, null, "https://evil.example.net/phish"));
+        McpOAuthService.AuthorizationStart ok =
+                service.beginAuthorization(MCP, null, CONSOLE + "?tab=servers");
         Map<String, String> cb = as.consent(ok.authorizationUrl());
-        assertEquals(CONSOLE + "?tab=servers", service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss")).returnUrl());
+        assertEquals(
+                CONSOLE + "?tab=servers",
+                service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"))
+                        .returnUrl());
     }
 
     @Test
@@ -567,7 +774,10 @@ class McpOAuthFlowTest {
         assertTrue(service.currentAccessToken(MCP).startsWith("at-"));
         assertEquals(List.of(MCP), service.disconnect(MCP));
         assertTrue(store.find("tenant-a", MCP).isEmpty());
-        assertEquals("not_connected", assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP)).getOauthErrorCode());
+        assertEquals(
+                "not_connected",
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP))
+                        .getOauthErrorCode());
         assertEquals(List.of(), service.disconnect(MCP));
     }
 
@@ -577,7 +787,10 @@ class McpOAuthFlowTest {
         McpOAuthConnection c = store.find("tenant-a", MCP).orElseThrow();
         store.save(c.withRefreshToken("not-valid-ciphertext"));
         clock.advance(Duration.ofSeconds(4000));
-        assertEquals("token_unreadable", assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP)).getOauthErrorCode());
+        assertEquals(
+                "token_unreadable",
+                assertThrows(McpOAuthException.class, () -> service.currentAccessToken(MCP))
+                        .getOauthErrorCode());
     }
 
     @Test
@@ -589,15 +802,35 @@ class McpOAuthFlowTest {
         assertThrows(McpOAuthException.class, () -> off.status(MCP));
         assertThrows(McpOAuthException.class, () -> off.completeAuthorization("c", "s", null));
         // on, but the callback is not a public https URL (localhost) -> not usable
-        ObjectMapper om = new ObjectMapper();
-        McpOAuthService local = new McpOAuthService(new McpOAuthDiscovery(as, om), new McpOAuthClient(as, om), store,
-            encryption, null, McpRemoteUrlGuard.withDenylist(List.of()), true, "http://localhost:8080/oauth/mcp/remote/callback",
-            new OAuthRedirectPolicy(CONSOLE, ""), clock, 600);
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
+        McpOAuthService local =
+                new McpOAuthService(
+                        new McpOAuthDiscovery(as, om),
+                        new McpOAuthClient(as, om),
+                        store,
+                        encryption,
+                        null,
+                        McpRemoteUrlGuard.withDenylist(List.of()),
+                        true,
+                        "http://localhost:8080/oauth/mcp/remote/callback",
+                        new OAuthRedirectPolicy(CONSOLE, ""),
+                        clock,
+                        600);
         assertFalse(local.isEnabled());
         // on, but there is no console to return to
-        McpOAuthService noConsole = new McpOAuthService(new McpOAuthDiscovery(as, om), new McpOAuthClient(as, om), store,
-            encryption, null, McpRemoteUrlGuard.withDenylist(List.of()), true, CALLBACK,
-            new OAuthRedirectPolicy("", ""), clock, 600);
+        McpOAuthService noConsole =
+                new McpOAuthService(
+                        new McpOAuthDiscovery(as, om),
+                        new McpOAuthClient(as, om),
+                        store,
+                        encryption,
+                        null,
+                        McpRemoteUrlGuard.withDenylist(List.of()),
+                        true,
+                        CALLBACK,
+                        new OAuthRedirectPolicy("", ""),
+                        clock,
+                        600);
         assertFalse(noConsole.isEnabled());
     }
 
@@ -608,7 +841,9 @@ class McpOAuthFlowTest {
         Map<String, String> cb = as.consent(start.authorizationUrl());
         service.completeAuthorization(cb.get("code"), cb.get("state"), cb.get("iss"));
         String accessToken = service.currentAccessToken(MCP);
-        String refreshToken = encryption.decrypt(store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken());
+        String refreshToken =
+                encryption.decrypt(
+                        store.find("tenant-a", MCP).orElseThrow().encryptedRefreshToken());
         clock.advance(Duration.ofSeconds(4000));
         service.currentAccessToken(MCP);
         as.revokeAll();
@@ -617,8 +852,18 @@ class McpOAuthFlowTest {
 
         assertFalse(logs.list.isEmpty(), "the flow does log (connected / marked needs-reauth)");
         for (ILoggingEvent event : logs.list) {
-            String line = event.getFormattedMessage() + (event.getThrowableProxy() == null ? "" : event.getThrowableProxy().getMessage());
-            for (String secret : List.of(accessToken, refreshToken, "dcr-secret-1", cb.get("code"), cb.get("state"))) {
+            String line =
+                    event.getFormattedMessage()
+                            + (event.getThrowableProxy() == null
+                                    ? ""
+                                    : event.getThrowableProxy().getMessage());
+            for (String secret :
+                    List.of(
+                            accessToken,
+                            refreshToken,
+                            "dcr-secret-1",
+                            cb.get("code"),
+                            cb.get("state"))) {
                 assertFalse(line.contains(secret), "secret leaked into log: " + line);
             }
             assertFalse(line.contains("code_verifier"), line);
@@ -627,7 +872,8 @@ class McpOAuthFlowTest {
 
     @Test
     void connectionsAreStoredByCanonicalUrlSoSpellingDoesNotDuplicateThem() {
-        McpOAuthService.AuthorizationStart start = service.beginAuthorization("https://MCP.example.com:443/mcp/", null);
+        McpOAuthService.AuthorizationStart start =
+                service.beginAuthorization("https://MCP.example.com:443/mcp/", null);
         assertEquals(MCP, start.resourceUrl());
     }
 }

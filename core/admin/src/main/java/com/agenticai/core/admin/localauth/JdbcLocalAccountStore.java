@@ -1,9 +1,6 @@
 package com.agenticai.core.admin.localauth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -21,16 +18,19 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link LocalAccountStore} on the control-plane tables from migration V510. Plain JDBC rather than
  * JPA entities on purpose: these rows live outside any tenant schema, are only read in local mode,
- * and every operation is a single statement (the rotating-refresh claim and the one-time setup-token
- * consume are each ONE conditional UPDATE, which is what makes them race-free without a
+ * and every operation is a single statement (the rotating-refresh claim and the one-time
+ * setup-token consume are each ONE conditional UPDATE, which is what makes them race-free without a
  * transaction).
  *
- * <p>Only present with {@code app.auth.mode=local}; in the default mode the tables are empty and this
- * bean does not exist.
+ * <p>Only present with {@code app.auth.mode=local}; in the default mode the tables are empty and
+ * this bean does not exist.
  */
 @Repository
 @ConditionalOnProperty(name = "app.auth.mode", havingValue = "local")
@@ -58,7 +58,8 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
 
     @Override
     public long countAccounts() {
-        Long n = jdbc.queryForObject("SELECT count(*) FROM control_plane.local_account", Long.class);
+        Long n =
+                jdbc.queryForObject("SELECT count(*) FROM control_plane.local_account", Long.class);
         return n == null ? 0 : n;
     }
 
@@ -73,8 +74,11 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
 
     @Override
     public Optional<LocalAccount> findById(String id) {
-        return jdbc.query(
-                        "SELECT " + ACCOUNT_COLUMNS + " FROM control_plane.local_account WHERE id = ?",
+        return jdbc
+                .query(
+                        "SELECT "
+                                + ACCOUNT_COLUMNS
+                                + " FROM control_plane.local_account WHERE id = ?",
                         ACCOUNT_MAPPER,
                         uuid(id))
                 .stream()
@@ -86,8 +90,11 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
         if (email == null) {
             return Optional.empty();
         }
-        return jdbc.query(
-                        "SELECT " + ACCOUNT_COLUMNS + " FROM control_plane.local_account WHERE email_lower = ?",
+        return jdbc
+                .query(
+                        "SELECT "
+                                + ACCOUNT_COLUMNS
+                                + " FROM control_plane.local_account WHERE email_lower = ?",
                         ACCOUNT_MAPPER,
                         email.trim().toLowerCase(Locale.ROOT))
                 .stream()
@@ -97,14 +104,17 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
     @Override
     public List<LocalAccount> listAll() {
         return jdbc.query(
-                "SELECT " + ACCOUNT_COLUMNS + " FROM control_plane.local_account ORDER BY created_at",
+                "SELECT "
+                        + ACCOUNT_COLUMNS
+                        + " FROM control_plane.local_account ORDER BY created_at",
                 ACCOUNT_MAPPER);
     }
 
     @Override
     public List<LocalAccount> listByTenant(String tenantId) {
         return jdbc.query(
-                "SELECT " + ACCOUNT_COLUMNS
+                "SELECT "
+                        + ACCOUNT_COLUMNS
                         + " FROM control_plane.local_account WHERE tenant_id = ? ORDER BY created_at",
                 ACCOUNT_MAPPER,
                 tenantId);
@@ -135,7 +145,8 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
                     ts(now),
                     a.passwordHash() == null ? null : ts(now));
         } catch (DuplicateKeyException e) {
-            throw new DuplicateAccountException("An account with this e-mail address already exists", e);
+            throw new DuplicateAccountException(
+                    "An account with this e-mail address already exists", e);
         }
     }
 
@@ -165,7 +176,8 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
                     ts(now),
                     uuid(a.id()));
         } catch (DuplicateKeyException e) {
-            throw new DuplicateAccountException("An account with this e-mail address already exists", e);
+            throw new DuplicateAccountException(
+                    "An account with this e-mail address already exists", e);
         }
     }
 
@@ -176,7 +188,10 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
 
     @Override
     public void touchLogin(String id, Instant at) {
-        jdbc.update("UPDATE control_plane.local_account SET last_login_at = ? WHERE id = ?", ts(at), uuid(id));
+        jdbc.update(
+                "UPDATE control_plane.local_account SET last_login_at = ? WHERE id = ?",
+                ts(at),
+                uuid(id));
     }
 
     // ------------------------------------------------------------------ refresh tokens
@@ -184,7 +199,8 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
     @Override
     public void insertRefresh(RefreshRecord r) {
         jdbc.update(
-                "INSERT INTO control_plane.local_refresh_token (" + REFRESH_COLUMNS
+                "INSERT INTO control_plane.local_refresh_token ("
+                        + REFRESH_COLUMNS
                         + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 uuid(r.id()),
                 uuid(r.accountId()),
@@ -201,8 +217,10 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
 
     @Override
     public Optional<RefreshRecord> findRefreshByHash(String tokenHash) {
-        return jdbc.query(
-                        "SELECT " + REFRESH_COLUMNS
+        return jdbc
+                .query(
+                        "SELECT "
+                                + REFRESH_COLUMNS
                                 + " FROM control_plane.local_refresh_token WHERE token_hash = ?",
                         REFRESH_MAPPER,
                         tokenHash)
@@ -251,13 +269,15 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
     @Override
     public int purgeRefreshExpiredBefore(Instant cutoff) {
         return jdbc.update(
-                "DELETE FROM control_plane.local_refresh_token WHERE family_expires_at < ?", ts(cutoff));
+                "DELETE FROM control_plane.local_refresh_token WHERE family_expires_at < ?",
+                ts(cutoff));
     }
 
     // ------------------------------------------------------------------ setup tokens
 
     @Override
-    public void insertSetupToken(String accountId, String tokenHash, Instant createdAt, Instant expiresAt) {
+    public void insertSetupToken(
+            String accountId, String tokenHash, Instant createdAt, Instant expiresAt) {
         // One live setup token per account: a re-issued link replaces the printed one.
         jdbc.update(
                 "UPDATE control_plane.local_setup_token SET consumed_at = ?"
@@ -276,7 +296,8 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
 
     @Override
     public Optional<String> findSetupAccount(String tokenHash, Instant now) {
-        return jdbc.query(
+        return jdbc
+                .query(
                         "SELECT account_id::text FROM control_plane.local_setup_token"
                                 + " WHERE token_hash = ? AND consumed_at IS NULL AND expires_at > ?",
                         (rs, i) -> rs.getString(1),
@@ -288,7 +309,8 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
 
     @Override
     public Optional<String> consumeSetupToken(String tokenHash, Instant now) {
-        return jdbc.query(
+        return jdbc
+                .query(
                         "UPDATE control_plane.local_setup_token SET consumed_at = ?"
                                 + " WHERE token_hash = ? AND consumed_at IS NULL AND expires_at > ?"
                                 + " RETURNING account_id::text",
@@ -355,13 +377,14 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
         if (csv == null || csv.isBlank()) {
             return Set.of();
         }
-        return new LinkedHashSet<>(Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
+        return new LinkedHashSet<>(
+                Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
     }
 
     private static String attributesJson(LocalAccount account) {
         try {
             return JSON.writeValueAsString(account.attributes());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("could not serialise account attributes", e);
         }
     }
@@ -372,7 +395,7 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
         }
         try {
             return JSON.readValue(json, ATTRIBUTES);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return Map.of();
         }
     }

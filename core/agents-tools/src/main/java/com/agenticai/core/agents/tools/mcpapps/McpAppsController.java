@@ -4,7 +4,6 @@ import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tenant-scoped surface for MCP Apps ({@code app.mcp.apps.enabled}, default off - with the flag off
@@ -132,7 +132,7 @@ public class McpAppsController {
                 switch (e.code()) {
                     case NOT_FOUND -> HttpStatus.NOT_FOUND;
                     case REFUSED -> HttpStatus.FORBIDDEN;
-                    case TOO_LARGE -> HttpStatus.PAYLOAD_TOO_LARGE;
+                    case TOO_LARGE -> HttpStatus.CONTENT_TOO_LARGE;
                     case BAD_REQUEST -> HttpStatus.BAD_REQUEST;
                     case RATE_LIMITED -> HttpStatus.TOO_MANY_REQUESTS;
                     case UNAVAILABLE -> HttpStatus.BAD_GATEWAY;

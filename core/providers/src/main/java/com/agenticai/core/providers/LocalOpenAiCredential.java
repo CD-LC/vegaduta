@@ -1,13 +1,13 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.Locale;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * BYOK credential for {@link ProviderName#LOCAL_OPENAI}: the base URL of a model server that
- * speaks the OpenAI chat-completions dialect (vLLM, llama.cpp {@code llama-server}, LM Studio, Jan,
+ * BYOK credential for {@link ProviderName#LOCAL_OPENAI}: the base URL of a model server that speaks
+ * the OpenAI chat-completions dialect (vLLM, llama.cpp {@code llama-server}, LM Studio, Jan,
  * LocalAI, ...) and an optional bearer key. Most local servers have no auth at all; the key exists
  * for one fronted by an auth proxy, or started with {@code --api-key}.
  *
@@ -18,8 +18,8 @@ import java.util.Locale;
  * <p><b>Base URL shapes.</b> Every server documents its endpoint with the {@code /v1} suffix
  * ({@code http://localhost:8000/v1}), while Spring AI's OpenAI client appends {@code
  * /v1/chat/completions} itself. {@link #apiRoot} therefore strips a trailing {@code /v1}, so both
- * {@code http://host:8000} and {@code http://host:8000/v1} work and a sub-path
- * ({@code https://gw.example.com/openai/v1}) is preserved.
+ * {@code http://host:8000} and {@code http://host:8000/v1} work and a sub-path ({@code
+ * https://gw.example.com/openai/v1}) is preserved.
  */
 public record LocalOpenAiCredential(String baseUrl, String apiKey) {
 
@@ -29,7 +29,8 @@ public record LocalOpenAiCredential(String baseUrl, String apiKey) {
         try {
             return MAPPER.writeValueAsString(this);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to encode local OpenAI-compatible credential", e);
+            throw new IllegalStateException(
+                    "Failed to encode local OpenAI-compatible credential", e);
         }
     }
 
@@ -86,7 +87,10 @@ public record LocalOpenAiCredential(String baseUrl, String apiKey) {
             if (uri.getHost() == null) {
                 return null;
             }
-            int port = uri.getPort() >= 0 ? uri.getPort() : ("https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80);
+            int port =
+                    uri.getPort() >= 0
+                            ? uri.getPort()
+                            : ("https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80);
             return uri.getHost().toLowerCase(Locale.ROOT) + ":" + port;
         } catch (IllegalArgumentException e) {
             return null;
@@ -94,8 +98,9 @@ public record LocalOpenAiCredential(String baseUrl, String apiKey) {
     }
 
     /**
-     * True for the host names that mean "this machine": from inside a container that is the container
-     * itself, so a platform running in Docker reaches the host's servers at {@code host.docker.internal}.
+     * True for the host names that mean "this machine": from inside a container that is the
+     * container itself, so a platform running in Docker reaches the host's servers at {@code
+     * host.docker.internal}.
      */
     public boolean pointsAtLoopback() {
         try {
@@ -104,8 +109,11 @@ public record LocalOpenAiCredential(String baseUrl, String apiKey) {
                 return false;
             }
             String h = host.toLowerCase(Locale.ROOT);
-            return h.equals("localhost") || h.equals("127.0.0.1") || h.equals("[::1]") || h.equals("::1")
-                || h.endsWith(".localhost");
+            return h.equals("localhost")
+                    || h.equals("127.0.0.1")
+                    || h.equals("[::1]")
+                    || h.equals("::1")
+                    || h.endsWith(".localhost");
         } catch (IllegalArgumentException e) {
             return false;
         }

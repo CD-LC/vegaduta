@@ -8,7 +8,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -16,12 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE}: every agent reply, pairing notice and
- * manual send reaches WhatsApp only through here, after the approval gate has let it through -
- * the same posture as {@code SignalChannelAdapter}. {@code to} is the stored external id
- * ({@code <digits>} or {@code <digits>@lid}); the bridge maps it back to a JID.
+ * manual send reaches WhatsApp only through here, after the approval gate has let it through - the
+ * same posture as {@code SignalChannelAdapter}. {@code to} is the stored external id ({@code
+ * <digits>} or {@code <digits>@lid}); the bridge maps it back to a JID.
  */
 @Component
 public class WhatsAppQrChannelAdapter implements ApprovalActionExecutor {
@@ -63,7 +63,10 @@ public class WhatsAppQrChannelAdapter implements ApprovalActionExecutor {
             }
             log.info("Sent WhatsApp QR message to {}", WhatsAppQrAddress.mask(payload.to()));
             outboundLogger.recordSent(
-                    ChannelType.WHATSAPP_QR, payload.to(), payload.body(), request.getRequestedBy());
+                    ChannelType.WHATSAPP_QR,
+                    payload.to(),
+                    payload.body(),
+                    request.getRequestedBy());
         } catch (WhatsAppQrApiException e) {
             // 4xx (unknown recipient, bad request) can never succeed on retry; network and 5xx can.
             if (e.retryable()) {
@@ -79,7 +82,8 @@ public class WhatsAppQrChannelAdapter implements ApprovalActionExecutor {
 
     private SendPayload parsePayload(String payloadJson) {
         if (payloadJson == null || payloadJson.isBlank()) {
-            throw new ChannelDeliveryException("whatsapp-qr", "Approval request has no payload to send");
+            throw new ChannelDeliveryException(
+                    "whatsapp-qr", "Approval request has no payload to send");
         }
         try {
             SendPayload payload = MAPPER.readValue(payloadJson, SendPayload.class);
@@ -92,7 +96,9 @@ public class WhatsAppQrChannelAdapter implements ApprovalActionExecutor {
             throw e;
         } catch (Exception e) {
             throw new ChannelDeliveryException(
-                    "whatsapp-qr", "Could not parse WhatsApp QR send payload: " + e.getMessage(), e);
+                    "whatsapp-qr",
+                    "Could not parse WhatsApp QR send payload: " + e.getMessage(),
+                    e);
         }
     }
 
@@ -127,6 +133,9 @@ public class WhatsAppQrChannelAdapter implements ApprovalActionExecutor {
         return text.lastIndexOf(separator, max);
     }
 
-    /** {@code to} is the stored external id: digits, or {@code <digits>@lid} (see {@link WhatsAppQrAddress}). */
+    /**
+     * {@code to} is the stored external id: digits, or {@code <digits>@lid} (see {@link
+     * WhatsAppQrAddress}).
+     */
     public record SendPayload(String to, String body) {}
 }

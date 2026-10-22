@@ -3,13 +3,13 @@ package com.agenticai.core.templates;
 import com.agenticai.core.templates.dto.TemplateReadinessReport;
 import com.agenticai.core.templates.dto.TemplateReadinessReport.Issue;
 import com.agenticai.core.templates.dto.TemplateRequirement;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The marketplace quality bar, and the single place that works out what an importer has to
@@ -51,8 +51,8 @@ public class TemplateReadinessService {
     private static final Pattern BUILD_BRIEF =
             Pattern.compile(
                     "\\b(create|build|develop|generate|design)\\b.{0,60}\\b(web ?site|web"
-                        + " ?app(lication)?|landing page|mobile app|full[- ]stack|frontend|react"
-                        + " app)\\b",
+                            + " ?app(lication)?|landing page|mobile app|full[- ]stack|frontend|react"
+                            + " app)\\b",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern HONESTY =
@@ -68,7 +68,7 @@ public class TemplateReadinessService {
     private static final Pattern HIGH_STAKES =
             Pattern.compile(
                     "\\b(medical|diagnos\\w*|legal"
-                        + " advice|lawyer|tax|invest\\w*|prescri\\w*|clinical|insurance claim)\\b",
+                            + " advice|lawyer|tax|invest\\w*|prescri\\w*|clinical|insurance claim)\\b",
                     Pattern.CASE_INSENSITIVE);
     private static final Pattern PROFESSIONAL_HANDOFF =
             Pattern.compile(
@@ -78,7 +78,7 @@ public class TemplateReadinessService {
     private static final Pattern CLAIMS_ACTIONS =
             Pattern.compile(
                     "\\b(sends?|emails?|books?|schedules?|posts?|publish\\w*|pays?|orders?|syncs?|integrat\\w*|automat\\w*|takes?"
-                        + " action|manages? (your )?(inbox|calendar|files|tasks))\\b",
+                            + " action|manages? (your )?(inbox|calendar|files|tasks))\\b",
                     Pattern.CASE_INSENSITIVE);
 
     /**
@@ -93,12 +93,12 @@ public class TemplateReadinessService {
     private static final Pattern SECRET =
             Pattern.compile(
                     "(sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|"
-                        + "(?i:bearer)\\s+[A-Za-z0-9._-]{20,}|(?i:(api[_-]?key|secret|password|token))\\s*[:=]\\s*\\S{8,})");
+                            + "(?i:bearer)\\s+[A-Za-z0-9._-]{20,}|(?i:(api[_-]?key|secret|password|token))\\s*[:=]\\s*\\S{8,})");
     private static final Pattern EMAIL = Pattern.compile("[\\w.+-]+@[\\w-]+\\.[\\w.-]+");
     private static final Pattern ACTION_TOOL =
             Pattern.compile(
                     "(^|_)(send|create|update|delete|remove|post|publish|pay|book|schedule|write|approve|submit|cancel|"
-                        + "transfer)(_|$)");
+                            + "transfer)(_|$)");
 
     private static final Set<String> GOOGLE_TOOLS_PREFIX = Set.of("google_");
 
@@ -221,10 +221,10 @@ public class TemplateReadinessService {
 
     private void assessAgent(
             String summary, JsonNode config, List<Issue> blockers, List<Issue> advisories) {
-        String prompt = config.path("systemPrompt").asText("");
+        String prompt = config.path("systemPrompt").asString("");
         String authored = authoredPrompt(prompt);
         Set<String> tools = TemplateRequirements.toolNames(TemplateKind.AGENT, config);
-        String tier = config.path("autonomyTier").asText("");
+        String tier = config.path("autonomyTier").asString("");
         boolean actionCapable = tools.stream().anyMatch(TemplateReadinessService::isActionTool);
 
         // -- Clear role and scope
@@ -320,8 +320,8 @@ public class TemplateReadinessService {
                             "EMPTY_TOOL_ALLOWLIST",
                             "Least privilege",
                             "No tool allow-list. The platform treats an empty list as \"no"
-                                + " restriction\", so importers' agents may be able to use every"
-                                + " tool in their workspace.",
+                                    + " restriction\", so importers' agents may be able to use every"
+                                    + " tool in their workspace.",
                             "List only the tools this agent needs; for a pure chat assistant, keep"
                                     + " the tier Supervised."));
         }
@@ -390,13 +390,14 @@ public class TemplateReadinessService {
         boolean actionTool = false;
         if (nodes.isArray()) {
             for (JsonNode n : nodes) {
-                String type = n.path("type").asText("");
+                String type = n.path("type").asString("");
                 hasTrigger |= "trigger".equals(type);
                 hasOutput |= "output".equals(type);
                 hasApproval |= "approval".equals(type);
                 if ("tool".equals(type)) {
                     actionTool |=
-                            isActionTool(n.path("data").path("config").path("toolName").asText(""));
+                            isActionTool(
+                                    n.path("data").path("config").path("toolName").asString(""));
                 }
             }
         }
@@ -416,7 +417,7 @@ public class TemplateReadinessService {
                             "The workflow has no output node, so results go nowhere.",
                             "Add an output node."));
         }
-        String description = config.path("description").asText("");
+        String description = config.path("description").asString("");
         if (description.trim().length() < 40) {
             advisories.add(
                     new Issue(

@@ -6,24 +6,23 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
  * {@link ProviderName#LOCAL_OPENAI}: a model server the tenant runs themselves that speaks the
  * OpenAI chat-completions dialect - vLLM, llama.cpp {@code llama-server}, LM Studio, Jan, LocalAI,
- * or any proxy in front of one. Built exactly like {@link OllamaAgentChatClientFactory} (Spring AI's
- * OpenAI module over the shared {@link OpenAiCompatModelBuilder}, per-tenant base URL decoded from
- * the {@link LocalOpenAiCredential} JSON blob that {@code apiKey} carries, no {@code Authorization}
- * header when no key was given), with three differences:
+ * or any proxy in front of one. Built exactly like {@link OllamaAgentChatClientFactory} (Spring
+ * AI's OpenAI module over the shared {@link OpenAiCompatModelBuilder}, per-tenant base URL decoded
+ * from the {@link LocalOpenAiCredential} JSON blob that {@code apiKey} carries, no {@code
+ * Authorization} header when no key was given), with three differences:
  *
  * <ul>
  *   <li>the base URL is whatever the server documents, usually with a {@code /v1} suffix ({@code
  *       http://localhost:8000/v1}); {@link LocalOpenAiCredential#apiRoot()} normalises it because
  *       Spring AI appends {@code /v1/chat/completions} itself;
- *   <li>calls are metered at zero cost ({@link LlmPricingCatalog#zeroCost()}): there is no per-token
- *       bill, and the unknown-model fallback rate would otherwise invent one in {@code llm_call_log}
- *       and the spend counters;
+ *   <li>calls are metered at zero cost ({@link LlmPricingCatalog#zeroCost()}): there is no
+ *       per-token bill, and the unknown-model fallback rate would otherwise invent one in {@code
+ *       llm_call_log} and the spend counters;
  *   <li>no Ollama-specific {@code format} handling - these servers take OpenAI {@code
  *       response_format} natively and sampling is limited to what the OpenAI surface documents
  *       ({@code stop}, {@code seed}, penalties; {@code top_k} is not part of it).
@@ -45,20 +44,24 @@ public class LocalOpenAiAgentChatClientFactory implements AgentChatClientFactory
     private final LlmHttpClientFactory llmHttpClientFactory;
     private final LlmModelSupport modelSupport;
     private final OpenAiCompatModelBuilder modelBuilder;
+    private final ResilientToolCallingManagerFactory toolCallingManagers;
 
     public LocalOpenAiAgentChatClientFactory(
-        LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
-        MeterRegistry meterRegistry,
-        LlmHttpClientFactory llmHttpClientFactory,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        LlmModelSupport modelSupport
-    ) {
+            LlmCallMetricsService llmCallMetricsService,
+            LlmCallLogService llmCallLogService,
+            MeterRegistry meterRegistry,
+            LlmHttpClientFactory llmHttpClientFactory,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            LlmModelSupport modelSupport) {
         this.llmCallMetricsService = llmCallMetricsService;
         this.llmCallLogService = llmCallLogService;
         this.meterRegistry = meterRegistry;
         this.llmHttpClientFactory = llmHttpClientFactory;
         this.modelSupport = modelSupport;
-        this.modelBuilder = new OpenAiCompatModelBuilder(llmHttpClientFactory, toolCallingManagers, modelSupport);
+        this.toolCallingManagers = toolCallingManagers;
+        this.modelBuilder =
+                new OpenAiCompatModelBuilder(
+                        llmHttpClientFactory, toolCallingManagers, modelSupport);
     }
 
     @Override
@@ -67,38 +70,54 @@ public class LocalOpenAiAgentChatClientFactory implements AgentChatClientFactory
     }
 
     @Override
-    public ChatClient create(String apiKey, String model, int maxTokens, double temperature, double topP) {
+    public ChatClient create(
+            String apiKey, String model, int maxTokens, double temperature, double topP) {
         return create(apiKey, model, maxTokens, temperature, topP, java.util.Map.of());
     }
 
     @Override
     public ChatClient create(
-        String apiKey, String model, int maxTokens, double temperature, double topP,
-        java.util.Map<String, Object> providerOptions
-    ) {
+            String apiKey,
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
         LocalOpenAiCredential credential = LocalOpenAiCredential.decode(apiKey);
         String root = credential.apiRoot();
-        // SEC-023: checked at USE time (a row saved before a guard change, or a DNS record repointed
+        // SEC-023: checked at USE time (a row saved before a guard change, or a DNS record
+        // repointed
         // since, is refused here) and the transports below are the guarded ones.
         llmHttpClientFactory.requireAllowedTenantBaseUrl(root);
 
         OpenAiCompatModelBuilder.Api apiBuilder = modelBuilder.api(root).guarded();
-        apiBuilder = credential.hasApiKey() ? apiBuilder.apiKey(credential.apiKey().trim()) : apiBuilder.noApiKey();
-        OpenAiApi openAiApi = apiBuilder.build();
+        apiBuilder =
+                credential.hasApiKey()
+                        ? apiBuilder.apiKey(credential.apiKey().trim())
+                        : apiBuilder.noApiKey();
 
-        OpenAiChatOptions.Builder optionsBuilder = modelBuilder.options(ProviderName.LOCAL_OPENAI, model)
-            .maxTokens(maxTokens)
-            .temperature(temperature)
-            .topP(topP);
+        OpenAiChatOptions.Builder optionsBuilder =
+                modelBuilder
+                        .options(ProviderName.LOCAL_OPENAI, model)
+                        .maxTokens(maxTokens)
+                        .temperature(temperature)
+                        .topP(topP);
         sampling.applyTo(optionsBuilder);
         LlmModelSupport.logDroppedSampling(ProviderName.LOCAL_OPENAI, model, sampling, "topK");
-        OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, optionsBuilder.build());
+        OpenAiChatModel chatModel = modelBuilder.chatModel(apiBuilder, optionsBuilder.build());
 
-        return modelSupport.chatClientBuilder(chatModel)
-            .defaultAdvisors(modelSupport.advisors(new LlmMetricsAdvisor(
-                llmCallMetricsService, llmCallLogService, ProviderName.LOCAL_OPENAI, model, meterRegistry,
-                zeroCostPricing)))
-            .build();
+        return modelSupport
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
+                .defaultAdvisors(
+                        modelSupport.advisors(
+                                new LlmMetricsAdvisor(
+                                        llmCallMetricsService,
+                                        llmCallLogService,
+                                        ProviderName.LOCAL_OPENAI,
+                                        model,
+                                        meterRegistry,
+                                        zeroCostPricing)))
+                .build();
     }
 }

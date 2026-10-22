@@ -30,7 +30,6 @@ import com.agenticai.core.tutor.dto.TutorDtos.QuizAnswerResult;
 import com.agenticai.core.tutor.dto.TutorDtos.QuizInput;
 import com.agenticai.core.tutor.dto.TutorDtos.QuizQuestionView;
 import com.agenticai.core.tutor.dto.TutorDtos.ReviewAnswerResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -48,7 +47,10 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-/** Owner isolation, caps, deterministic grading and the "no answer before an attempt" rule, with an in-memory repository. */
+/**
+ * Owner isolation, caps, deterministic grading and the "no answer before an attempt" rule, with an
+ * in-memory repository.
+ */
 class StudyPlanServiceTest {
 
     private static final Instant T0 = Instant.parse("2026-10-03T10:00:00Z");
@@ -80,64 +82,106 @@ class StudyPlanServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(repository.saveAndFlush(any(StudyPlan.class))).thenAnswer(inv -> {
-            StudyPlan plan = inv.getArgument(0);
-            rows.put(plan.getId(), plan);
-            return plan;
-        });
-        when(repository.save(any(StudyPlan.class))).thenAnswer(inv -> {
-            StudyPlan plan = inv.getArgument(0);
-            rows.put(plan.getId(), plan);
-            return plan;
-        });
-        when(repository.findByIdAndOwnerSubject(any(UUID.class), anyString())).thenAnswer(inv -> {
-            StudyPlan plan = rows.get(inv.<UUID>getArgument(0));
-            return plan != null && plan.getOwnerSubject().equals(inv.<String>getArgument(1))
-                ? Optional.of(plan) : Optional.empty();
-        });
-        when(repository.findByOwnerSubjectOrderByUpdatedAtDesc(anyString())).thenAnswer(inv -> {
-            List<StudyPlan> out = new ArrayList<>();
-            for (StudyPlan plan : rows.values()) {
-                if (plan.getOwnerSubject().equals(inv.<String>getArgument(0))) {
-                    out.add(plan);
-                }
-            }
-            return out;
-        });
-        when(repository.countByOwnerSubject(anyString())).thenAnswer(inv ->
-            rows.values().stream().filter(p -> p.getOwnerSubject().equals(inv.<String>getArgument(0))).count());
-        // The review-only projections: text columns, decks with at least one card, keyset-paged by id.
-        when(repository.findReviewDecksAfter(anyString(), anyInt())).thenAnswer(inv -> {
-            String after = inv.getArgument(0);
-            int pageSize = inv.getArgument(1);
-            List<Object[]> out = new ArrayList<>();
-            rows.values().stream()
-                .filter(StudyPlanServiceTest::hasCards)
-                .filter(plan -> plan.getId().toString().compareTo(after) > 0)
-                .sorted(Comparator.comparing((StudyPlan plan) -> plan.getId().toString()))
-                .limit(pageSize)
-                .forEach(plan -> out.add(new Object[] {
-                    plan.getId().toString(), plan.getOwnerSubject(), plan.getTopic(), plan.getReviewJson()}));
-            return out;
-        });
-        when(repository.findReviewDecksOfOwner(anyString())).thenAnswer(inv -> {
-            List<Object[]> out = new ArrayList<>();
-            for (StudyPlan plan : rows.values()) {
-                if (plan.getOwnerSubject().equals(inv.<String>getArgument(0)) && hasCards(plan)) {
-                    out.add(new Object[] {plan.getId().toString(), plan.getReviewJson()});
-                }
-            }
-            return out;
-        });
-        when(repository.stampReminded(anyString(), anyString())).thenAnswer(inv -> {
-            StudyPlan plan = rows.get(UUID.fromString(inv.<String>getArgument(0)));
-            if (plan == null) {
-                return 0;
-            }
-            plan.updateReviewQuietly(StudyPlanDocs.write(new StudyPlanDocs.ReviewDeck(
-                StudyPlanDocs.readReview(plan.getReviewJson()).cards(), inv.<String>getArgument(1))));
-            return 1;
-        });
+        when(repository.saveAndFlush(any(StudyPlan.class)))
+                .thenAnswer(
+                        inv -> {
+                            StudyPlan plan = inv.getArgument(0);
+                            rows.put(plan.getId(), plan);
+                            return plan;
+                        });
+        when(repository.save(any(StudyPlan.class)))
+                .thenAnswer(
+                        inv -> {
+                            StudyPlan plan = inv.getArgument(0);
+                            rows.put(plan.getId(), plan);
+                            return plan;
+                        });
+        when(repository.findByIdAndOwnerSubject(any(UUID.class), anyString()))
+                .thenAnswer(
+                        inv -> {
+                            StudyPlan plan = rows.get(inv.<UUID>getArgument(0));
+                            return plan != null
+                                            && plan.getOwnerSubject()
+                                                    .equals(inv.<String>getArgument(1))
+                                    ? Optional.of(plan)
+                                    : Optional.empty();
+                        });
+        when(repository.findByOwnerSubjectOrderByUpdatedAtDesc(anyString()))
+                .thenAnswer(
+                        inv -> {
+                            List<StudyPlan> out = new ArrayList<>();
+                            for (StudyPlan plan : rows.values()) {
+                                if (plan.getOwnerSubject().equals(inv.<String>getArgument(0))) {
+                                    out.add(plan);
+                                }
+                            }
+                            return out;
+                        });
+        when(repository.countByOwnerSubject(anyString()))
+                .thenAnswer(
+                        inv ->
+                                rows.values().stream()
+                                        .filter(
+                                                p ->
+                                                        p.getOwnerSubject()
+                                                                .equals(inv.<String>getArgument(0)))
+                                        .count());
+        // The review-only projections: text columns, decks with at least one card, keyset-paged by
+        // id.
+        when(repository.findReviewDecksAfter(anyString(), anyInt()))
+                .thenAnswer(
+                        inv -> {
+                            String after = inv.getArgument(0);
+                            int pageSize = inv.getArgument(1);
+                            List<Object[]> out = new ArrayList<>();
+                            rows.values().stream()
+                                    .filter(StudyPlanServiceTest::hasCards)
+                                    .filter(plan -> plan.getId().toString().compareTo(after) > 0)
+                                    .sorted(
+                                            Comparator.comparing(
+                                                    (StudyPlan plan) -> plan.getId().toString()))
+                                    .limit(pageSize)
+                                    .forEach(
+                                            plan ->
+                                                    out.add(
+                                                            new Object[] {
+                                                                plan.getId().toString(),
+                                                                plan.getOwnerSubject(),
+                                                                plan.getTopic(),
+                                                                plan.getReviewJson()
+                                                            }));
+                            return out;
+                        });
+        when(repository.findReviewDecksOfOwner(anyString()))
+                .thenAnswer(
+                        inv -> {
+                            List<Object[]> out = new ArrayList<>();
+                            for (StudyPlan plan : rows.values()) {
+                                if (plan.getOwnerSubject().equals(inv.<String>getArgument(0))
+                                        && hasCards(plan)) {
+                                    out.add(
+                                            new Object[] {
+                                                plan.getId().toString(), plan.getReviewJson()
+                                            });
+                                }
+                            }
+                            return out;
+                        });
+        when(repository.stampReminded(anyString(), anyString()))
+                .thenAnswer(
+                        inv -> {
+                            StudyPlan plan = rows.get(UUID.fromString(inv.<String>getArgument(0)));
+                            if (plan == null) {
+                                return 0;
+                            }
+                            plan.updateReviewQuietly(
+                                    StudyPlanDocs.write(
+                                            new StudyPlanDocs.ReviewDeck(
+                                                    StudyPlanDocs.readReview(plan.getReviewJson())
+                                                            .cards(),
+                                                    inv.<String>getArgument(1))));
+                            return 1;
+                        });
         service = new StudyPlanService(repository, 2, 60, 400_000, clock);
     }
 
@@ -150,13 +194,25 @@ class StudyPlanServiceTest {
     }
 
     private static CreatePlanRequest request(String topic) {
-        LessonInput withQuiz = new LessonInput(
-            "Light and leaves", "Know what a leaf needs",
-            new LessonContentInput("Plants make food from light.", List.of("Light", "Water"), "A leaf in the sun."),
-            List.of(question("What do plants need?", 2), question("Where does it happen?", 1)));
-        LessonInput outlineOnly = new LessonInput("The dark reactions", "Explain the Calvin cycle", null, null);
-        return new CreatePlanRequest(topic, "hi", "Beginner", "Pass my exam",
-            List.of(new ModuleInput("Basics", List.of(withQuiz, outlineOnly))));
+        LessonInput withQuiz =
+                new LessonInput(
+                        "Light and leaves",
+                        "Know what a leaf needs",
+                        new LessonContentInput(
+                                "Plants make food from light.",
+                                List.of("Light", "Water"),
+                                "A leaf in the sun."),
+                        List.of(
+                                question("What do plants need?", 2),
+                                question("Where does it happen?", 1)));
+        LessonInput outlineOnly =
+                new LessonInput("The dark reactions", "Explain the Calvin cycle", null, null);
+        return new CreatePlanRequest(
+                topic,
+                "hi",
+                "Beginner",
+                "Pass my exam",
+                List.of(new ModuleInput("Basics", List.of(withQuiz, outlineOnly))));
     }
 
     private static int status(Runnable call) {
@@ -195,7 +251,9 @@ class StudyPlanServiceTest {
             assertNull(q.explanation());
             assertNull(q.selectedIndex());
         }
-        String json = new ObjectMapper().findAndRegisterModules().writeValueAsString(service.get("alice", plan.id()));
+        String json =
+                com.agenticai.core.json.JsonMappers.withJavaTime()
+                        .writeValueAsString(service.get("alice", plan.id()));
         assertFalse(json.contains("correctIndex"), json);
         assertFalse(json.contains("Because of"), json);
     }
@@ -259,13 +317,18 @@ class StudyPlanServiceTest {
     void gradingRefusesAnOutOfRangeOrMissingSelection() {
         PlanView plan = service.create("alice", request("Photosynthesis"));
 
-        assertThrows(IllegalArgumentException.class,
-            () -> service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", 9));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", null));
-        assertEquals(404, status(() -> service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q99", 0)));
-        assertEquals(404, status(() -> service.submitQuizAnswer("alice", plan.id(), "m1-l2", "q1", 0)));
-        assertEquals(404, status(() -> service.submitQuizAnswer("alice", plan.id(), "nope", "q1", 0)));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", 9));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", null));
+        assertEquals(
+                404, status(() -> service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q99", 0)));
+        assertEquals(
+                404, status(() -> service.submitQuizAnswer("alice", plan.id(), "m1-l2", "q1", 0)));
+        assertEquals(
+                404, status(() -> service.submitQuizAnswer("alice", plan.id(), "nope", "q1", 0)));
     }
 
     @Test
@@ -276,7 +339,9 @@ class StudyPlanServiceTest {
 
         assertEquals(404, status(() -> service.get("mallory", plan.id())));
         assertEquals(404, status(() -> service.delete("mallory", plan.id())));
-        assertEquals(404, status(() -> service.submitQuizAnswer("mallory", plan.id(), "m1-l1", "q1", 2)));
+        assertEquals(
+                404,
+                status(() -> service.submitQuizAnswer("mallory", plan.id(), "m1-l1", "q1", 2)));
         assertEquals(404, status(() -> service.completeLesson("mallory", plan.id(), "m1-l1")));
         assertEquals(404, status(() -> service.answerReview("mallory", plan.id(), "m1-l1:q1", 2)));
         assertEquals(404, status(() -> service.requireLesson("mallory", plan.id(), "m1-l1")));
@@ -291,7 +356,9 @@ class StudyPlanServiceTest {
         service.create("alice", request("One"));
         service.create("alice", request("Two"));
 
-        assertEquals(HttpStatus.CONFLICT.value(), status(() -> service.create("alice", request("Three"))));
+        assertEquals(
+                HttpStatus.CONFLICT.value(),
+                status(() -> service.create("alice", request("Three"))));
         assertEquals(HttpStatus.CONFLICT.value(), status(() -> service.assertCanCreate("alice")));
         // A different member is not affected by alice's count.
         assertEquals("One", service.create("bob", request("One")).topic());
@@ -300,13 +367,24 @@ class StudyPlanServiceTest {
     @Test
     void lessonAndSizeCapsAreEnforced() {
         StudyPlanService small = new StudyPlanService(repository, 20, 1, 400_000, clock);
-        assertThrows(IllegalArgumentException.class, () -> small.create("alice", request("Photosynthesis")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> small.create("alice", request("Photosynthesis")));
 
         StudyPlanService tiny = new StudyPlanService(repository, 20, 60, 10_000, clock);
-        LessonInput huge = new LessonInput("Big", "o",
-            new LessonContentInput("x".repeat(15_000), List.of(), null), null);
-        CreatePlanRequest big = new CreatePlanRequest("Big topic", null, null, null,
-            List.of(new ModuleInput("M", List.of(huge))));
+        LessonInput huge =
+                new LessonInput(
+                        "Big",
+                        "o",
+                        new LessonContentInput("x".repeat(15_000), List.of(), null),
+                        null);
+        CreatePlanRequest big =
+                new CreatePlanRequest(
+                        "Big topic",
+                        null,
+                        null,
+                        null,
+                        List.of(new ModuleInput("M", List.of(huge))));
         assertThrows(IllegalArgumentException.class, () -> tiny.create("alice", big));
         assertTrue(rows.isEmpty());
     }
@@ -314,18 +392,54 @@ class StudyPlanServiceTest {
     @Test
     void invalidInputIsRefused() {
         assertThrows(IllegalArgumentException.class, () -> service.create("alice", null));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("alice", new CreatePlanRequest(" ", null, null, null, request("x y").modules())));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("alice", new CreatePlanRequest("Topic", "not a language!", null, null, request("x y").modules())));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("alice", new CreatePlanRequest("Topic", null, "wizard", null, request("x y").modules())));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("alice", new CreatePlanRequest("Topic", null, null, null, List.of())));
-        LessonInput badKey = new LessonInput("L", "o", new LessonContentInput("text", null, null),
-            List.of(new QuizInput("Q?", List.of("A", "B"), 2, "e")));
-        assertThrows(IllegalArgumentException.class, () -> service.create("alice",
-            new CreatePlanRequest("Topic", null, null, null, List.of(new ModuleInput("M", List.of(badKey))))));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service.create(
+                                "alice",
+                                new CreatePlanRequest(
+                                        " ", null, null, null, request("x y").modules())));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service.create(
+                                "alice",
+                                new CreatePlanRequest(
+                                        "Topic",
+                                        "not a language!",
+                                        null,
+                                        null,
+                                        request("x y").modules())));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service.create(
+                                "alice",
+                                new CreatePlanRequest(
+                                        "Topic", null, "wizard", null, request("x y").modules())));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service.create(
+                                "alice",
+                                new CreatePlanRequest("Topic", null, null, null, List.of())));
+        LessonInput badKey =
+                new LessonInput(
+                        "L",
+                        "o",
+                        new LessonContentInput("text", null, null),
+                        List.of(new QuizInput("Q?", List.of("A", "B"), 2, "e")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service.create(
+                                "alice",
+                                new CreatePlanRequest(
+                                        "Topic",
+                                        null,
+                                        null,
+                                        null,
+                                        List.of(new ModuleInput("M", List.of(badKey))))));
     }
 
     @Test
@@ -363,7 +477,9 @@ class StudyPlanServiceTest {
         assertEquals(0, wrong.remainingDue());
 
         assertEquals(404, status(() -> service.answerReview("alice", plan.id(), "m1-l1:q9", 0)));
-        assertThrows(IllegalArgumentException.class, () -> service.answerReview("alice", plan.id(), "m1-l1:q1", null));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.answerReview("alice", plan.id(), "m1-l1:q1", null));
     }
 
     @Test
@@ -371,24 +487,39 @@ class StudyPlanServiceTest {
         PlanView plan = service.create("alice", request("Photosynthesis"));
         List<QuizItem> quiz = List.of(new QuizItem("q1", "Q?", List.of("A", "B"), 1, "why", null));
 
-        LessonView stored = service.storeLessonContent(
-            "alice", plan.id(), "m1-l2", new LessonContent("First text", List.of("k"), null), quiz);
-        LessonView again = service.storeLessonContent(
-            "alice", plan.id(), "m1-l2", new LessonContent("Second text", List.of(), null), quiz);
+        LessonView stored =
+                service.storeLessonContent(
+                        "alice",
+                        plan.id(),
+                        "m1-l2",
+                        new LessonContent("First text", List.of("k"), null),
+                        quiz);
+        LessonView again =
+                service.storeLessonContent(
+                        "alice",
+                        plan.id(),
+                        "m1-l2",
+                        new LessonContent("Second text", List.of(), null),
+                        quiz);
 
         assertTrue(stored.generated());
         assertEquals("First text", stored.content().explanation());
         assertEquals("First text", again.content().explanation());
         assertNull(stored.quiz().get(0).correctIndex());
-        assertEquals(1, service.requireLesson("alice", plan.id(), "m1-l2").quiz().get(0).correctIndex());
+        assertEquals(
+                1, service.requireLesson("alice", plan.id(), "m1-l2").quiz().get(0).correctIndex());
     }
 
     @Test
     void aConcurrentEditSurfacesAs409() {
         PlanView plan = service.create("alice", request("Photosynthesis"));
-        doThrow(new OptimisticLockingFailureException("stale")).when(repository).saveAndFlush(any(StudyPlan.class));
+        doThrow(new OptimisticLockingFailureException("stale"))
+                .when(repository)
+                .saveAndFlush(any(StudyPlan.class));
 
-        assertEquals(HttpStatus.CONFLICT.value(), status(() -> service.completeLesson("alice", plan.id(), "m1-l1")));
+        assertEquals(
+                HttpStatus.CONFLICT.value(),
+                status(() -> service.completeLesson("alice", plan.id(), "m1-l1")));
     }
 
     @Test
@@ -399,7 +530,9 @@ class StudyPlanServiceTest {
         PlanView bob = service.create("bob", request("Algebra"));
         service.submitQuizAnswer("bob", bob.id(), "m1-l1", "q1", 2);
 
-        assertTrue(service.claimDueReminders(Duration.ofHours(20)).isEmpty(), "nothing is due on day 0");
+        assertTrue(
+                service.claimDueReminders(Duration.ofHours(20)).isEmpty(),
+                "nothing is due on day 0");
 
         clock.now = T0.plus(Duration.ofDays(1));
         List<ReviewReminder> first = service.claimDueReminders(Duration.ofHours(20));
@@ -410,7 +543,9 @@ class StudyPlanServiceTest {
         assertEquals(1, first.get(0).planCount());
 
         clock.now = clock.now.plus(Duration.ofHours(1));
-        assertTrue(service.claimDueReminders(Duration.ofHours(20)).isEmpty(), "already reminded within the gap");
+        assertTrue(
+                service.claimDueReminders(Duration.ofHours(20)).isEmpty(),
+                "already reminded within the gap");
 
         clock.now = clock.now.plus(Duration.ofHours(20));
         assertEquals(1, service.claimDueReminders(Duration.ofHours(20)).size());
@@ -421,7 +556,9 @@ class StudyPlanServiceTest {
         PlanView plan = service.create("alice", request("Photosynthesis"));
         service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", 0);
         service.completeLesson("alice", plan.id(), "m1-l1");
-        assertEquals(StudyPlan.STATUS_COMPLETED, service.completeLesson("alice", plan.id(), "m1-l2").status());
+        assertEquals(
+                StudyPlan.STATUS_COMPLETED,
+                service.completeLesson("alice", plan.id(), "m1-l2").status());
 
         clock.now = T0.plus(Duration.ofDays(1));
         Instant updatedBefore = rows.get(plan.id()).getUpdatedAt();
@@ -487,7 +624,8 @@ class StudyPlanServiceTest {
         PlanView plan = service.create("alice", request("Photosynthesis"));
         assertFalse(service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", 0).correct());
 
-        // The key is known now; resubmitting the right option is graded but does not rewrite the record.
+        // The key is known now; resubmitting the right option is graded but does not rewrite the
+        // record.
         QuizAnswerResult retry = service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", 2);
 
         assertTrue(retry.correct());
@@ -505,13 +643,17 @@ class StudyPlanServiceTest {
         service.submitQuizAnswer("alice", plan.id(), "m1-l1", "q1", 0);
 
         // Not due yet on day 0.
-        assertEquals(HttpStatus.CONFLICT.value(), status(() -> service.answerReview("alice", plan.id(), "m1-l1:q1", 2)));
+        assertEquals(
+                HttpStatus.CONFLICT.value(),
+                status(() -> service.answerReview("alice", plan.id(), "m1-l1:q1", 2)));
 
         clock.now = T0.plus(Duration.ofDays(1));
         ReviewAnswerResult first = service.answerReview("alice", plan.id(), "m1-l1:q1", 2);
         assertEquals(1, first.intervalDays());
         // Straight away again: refused, and the interval has not been stretched.
-        assertEquals(HttpStatus.CONFLICT.value(), status(() -> service.answerReview("alice", plan.id(), "m1-l1:q1", 2)));
+        assertEquals(
+                HttpStatus.CONFLICT.value(),
+                status(() -> service.answerReview("alice", plan.id(), "m1-l1:q1", 2)));
         clock.now = clock.now.plus(Duration.ofDays(1));
         assertEquals(1, service.dueReviews("alice").totalDue());
     }

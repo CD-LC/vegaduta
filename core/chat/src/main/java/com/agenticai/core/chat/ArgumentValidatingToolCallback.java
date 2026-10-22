@@ -1,17 +1,17 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.BiConsumer;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Runs {@link ToolArgumentValidator} on the input and, when it fails, returns the feedback as
- * the tool's result instead of calling the tool. Delegates {@link #getToolMetadata()} so {@code
- * returnDirect} is preserved and forwards the {@link ToolContext}. Installed per request by
- * {@link ArgumentSanitizingToolCallingManager#withArgumentValidation(org.springframework.ai.chat.prompt.Prompt)}.
+ * Runs {@link ToolArgumentValidator} on the input and, when it fails, returns the feedback as the
+ * tool's result instead of calling the tool. Delegates {@link #getToolMetadata()} so {@code
+ * returnDirect} is preserved and forwards the {@link ToolContext}. Installed per request by {@link
+ * ArgumentSanitizingToolCallingManager#withArgumentValidation(org.springframework.ai.chat.prompt.Prompt)}.
  */
 final class ArgumentValidatingToolCallback implements ToolCallback {
 
@@ -20,9 +20,9 @@ final class ArgumentValidatingToolCallback implements ToolCallback {
     private final BiConsumer<String, ToolArgumentValidator.Result> onRejected;
 
     ArgumentValidatingToolCallback(
-        ToolCallback delegate, ObjectMapper objectMapper,
-        BiConsumer<String, ToolArgumentValidator.Result> onRejected
-    ) {
+            ToolCallback delegate,
+            ObjectMapper objectMapper,
+            BiConsumer<String, ToolArgumentValidator.Result> onRejected) {
         this.delegate = delegate;
         this.objectMapper = objectMapper;
         this.onRejected = onRejected;
@@ -53,11 +53,12 @@ final class ArgumentValidatingToolCallback implements ToolCallback {
     private String reject(String toolInput) {
         ToolDefinition definition = delegate.getToolDefinition();
         ToolArgumentValidator.Result result =
-            ToolArgumentValidator.validate(toolInput, definition.inputSchema(), objectMapper);
+                ToolArgumentValidator.validate(toolInput, definition.inputSchema(), objectMapper);
         if (result.valid()) {
             return null;
         }
         onRejected.accept(definition.name(), result);
-        return ToolArgumentValidator.feedback(definition.name(), result, definition.inputSchema(), objectMapper);
+        return ToolArgumentValidator.feedback(
+                definition.name(), result, definition.inputSchema(), objectMapper);
     }
 }

@@ -7,8 +7,8 @@ import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Hand-wires a {@link WorkflowService} facade and its capability services from the collaborators

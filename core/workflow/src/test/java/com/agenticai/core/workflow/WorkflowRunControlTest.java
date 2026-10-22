@@ -15,13 +15,11 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.agenticai.core.sharing.ResourceAccessService;
-import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,16 +30,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Pause/resume + paused-cancel (V261) on the service seam - all collaborators
- * mocked. Pins the operator-facing contract:
+ * Pause/resume + paused-cancel (V261) on the service seam - all collaborators mocked. Pins the
+ * operator-facing contract:
+ *
  * <ul>
- *   <li>{@code pauseRun} only signals a RUNNING run (anything else is a
- *       no-op returning the current row - same contract as Stop);</li>
- *   <li>{@code cancelRun} on a PAUSED run is a guarded CAS to CANCELLED -
- *       no engine signal (nothing is in flight), envelope cleared;</li>
- *   <li>{@code resumeRun} on PAUSED claims PAUSED&rarr;RUNNING via CAS,
- *       clears the envelope, and re-enters the engine at the parked node
- *       with its recorded input; any other state is a no-op.</li>
+ *   <li>{@code pauseRun} only signals a RUNNING run (anything else is a no-op returning the current
+ *       row - same contract as Stop);
+ *   <li>{@code cancelRun} on a PAUSED run is a guarded CAS to CANCELLED - no engine signal (nothing
+ *       is in flight), envelope cleared;
+ *   <li>{@code resumeRun} on PAUSED claims PAUSED&rarr;RUNNING via CAS, clears the envelope, and
+ *       re-enters the engine at the parked node with its recorded input; any other state is a
+ *       no-op.
  * </ul>
  */
 class WorkflowRunControlTest {
@@ -68,27 +67,40 @@ class WorkflowRunControlTest {
         when(temporal.getIfAvailable()).thenReturn(null);
 
         com.agenticai.core.workflow.version.WorkflowVersionService versionService =
-            mock(com.agenticai.core.workflow.version.WorkflowVersionService.class);
+                mock(com.agenticai.core.workflow.version.WorkflowVersionService.class);
         // C1: unpinned lookups fall back to the definition's own graph -
         // the mock returns null otherwise, which readGraph rejects.
         when(versionService.resolveRunGraphJson(any(WorkflowDefinition.class)))
-            .thenAnswer(inv -> inv.getArgument(0, WorkflowDefinition.class).getGraphJson());
-        when(versionService.getOptional(any(), any(int.class)))
-            .thenReturn(Optional.empty());
+                .thenAnswer(inv -> inv.getArgument(0, WorkflowDefinition.class).getGraphJson());
+        when(versionService.getOptional(any(), any(int.class))).thenReturn(Optional.empty());
 
-        service = WorkflowServiceFixture.of(
-            definitionRepository, runRepository, mock(OrchestratorService.class),
-            executionEngine, new ObjectMapper(), mock(TenantResolutionService.class),
-            mock(TenantSchemaResolver.class), mock(TenantLimits.class), mock(WorkflowTriggerNodeService.class),
-            temporal, mock(EncryptionService.class), cancellationService,
-            pauseService, mock(ResourceAccessService.class), mock(WorkflowExecutionParamsInferenceService.class),
-            versionService
-        );
+        service =
+                WorkflowServiceFixture.of(
+                        definitionRepository,
+                        runRepository,
+                        mock(OrchestratorService.class),
+                        executionEngine,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        mock(TenantResolutionService.class),
+                        mock(TenantSchemaResolver.class),
+                        mock(TenantLimits.class),
+                        mock(WorkflowTriggerNodeService.class),
+                        temporal,
+                        mock(EncryptionService.class),
+                        cancellationService,
+                        pauseService,
+                        mock(ResourceAccessService.class),
+                        mock(WorkflowExecutionParamsInferenceService.class),
+                        versionService);
 
         // The background service wraps the SAME service instance so its
         // getRunEntity/readGraph calls exercise the real (mocked-repo) path.
-        backgroundRunService = new WorkflowBackgroundRunService(
-            service, executionEngine, runRepository, new ObjectMapper());
+        backgroundRunService =
+                new WorkflowBackgroundRunService(
+                        service,
+                        executionEngine,
+                        runRepository,
+                        com.agenticai.core.json.JsonMappers.plain());
     }
 
     private WorkflowRun run(WorkflowRunStatus status) {
@@ -122,7 +134,8 @@ class WorkflowRunControlTest {
         run(WorkflowRunStatus.COMPLETED);
 
         ResponseStatusException e =
-            assertThrows(ResponseStatusException.class, () -> service.pauseRun(WORKFLOW_ID, RUN_ID));
+                assertThrows(
+                        ResponseStatusException.class, () -> service.pauseRun(WORKFLOW_ID, RUN_ID));
 
         assertEquals(HttpStatus.CONFLICT, e.getStatusCode());
         assertTrue(e.getReason().contains("COMPLETED"), e.getReason());
@@ -131,12 +144,17 @@ class WorkflowRunControlTest {
 
     @Test
     void cancelOnFinishedRunIs409WithTheCurrentStatus() {
-        for (WorkflowRunStatus terminal : List.of(
-                WorkflowRunStatus.COMPLETED, WorkflowRunStatus.FAILED, WorkflowRunStatus.CANCELLED)) {
+        for (WorkflowRunStatus terminal :
+                List.of(
+                        WorkflowRunStatus.COMPLETED,
+                        WorkflowRunStatus.FAILED,
+                        WorkflowRunStatus.CANCELLED)) {
             run(terminal);
 
             ResponseStatusException e =
-                assertThrows(ResponseStatusException.class, () -> service.cancelRun(WORKFLOW_ID, RUN_ID));
+                    assertThrows(
+                            ResponseStatusException.class,
+                            () -> service.cancelRun(WORKFLOW_ID, RUN_ID));
 
             assertEquals(HttpStatus.CONFLICT, e.getStatusCode());
             assertTrue(e.getReason().contains(terminal.name()), e.getReason());
@@ -163,8 +181,9 @@ class WorkflowRunControlTest {
     @Test
     void cancelOnPausedRunIsAPlainStatusTransition() {
         WorkflowRun run = run(WorkflowRunStatus.PAUSED);
-        when(runRepository.compareAndSetStatus(RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.CANCELLED))
-            .thenReturn(1);
+        when(runRepository.compareAndSetStatus(
+                        RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.CANCELLED))
+                .thenReturn(1);
 
         WorkflowRunResponse response = service.cancelRun(WORKFLOW_ID, RUN_ID);
 
@@ -179,8 +198,9 @@ class WorkflowRunControlTest {
     @Test
     void cancelOnPausedRunThatLostTheCasRaceIsANoOp() {
         run(WorkflowRunStatus.PAUSED);
-        when(runRepository.compareAndSetStatus(RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.CANCELLED))
-            .thenReturn(0); // a resume got there first
+        when(runRepository.compareAndSetStatus(
+                        RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.CANCELLED))
+                .thenReturn(0); // a resume got there first
 
         service.cancelRun(WORKFLOW_ID, RUN_ID);
 
@@ -194,7 +214,9 @@ class WorkflowRunControlTest {
     @Test
     void resumeOnFinishedRunIs409AndOnARunningRunIsANoOp() {
         run(WorkflowRunStatus.COMPLETED);
-        assertThrows(ResponseStatusException.class, () -> backgroundRunService.resumeRun(WORKFLOW_ID, RUN_ID));
+        assertThrows(
+                ResponseStatusException.class,
+                () -> backgroundRunService.resumeRun(WORKFLOW_ID, RUN_ID));
 
         run(WorkflowRunStatus.RUNNING);
         backgroundRunService.resumeRun(WORKFLOW_ID, RUN_ID);
@@ -206,8 +228,9 @@ class WorkflowRunControlTest {
     @Test
     void resumeClaimsTheRunAndReEntersAtTheParkedNode() {
         WorkflowRun run = run(WorkflowRunStatus.PAUSED);
-        when(runRepository.compareAndSetStatus(RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.RUNNING))
-            .thenReturn(1);
+        when(runRepository.compareAndSetStatus(
+                        RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.RUNNING))
+                .thenReturn(1);
         WorkflowDefinition definition = mock(WorkflowDefinition.class);
         when(definition.getGraphJson()).thenReturn("{\"nodes\":[],\"edges\":[]}");
         when(definitionRepository.findById(WORKFLOW_ID)).thenReturn(Optional.of(definition));
@@ -220,9 +243,15 @@ class WorkflowRunControlTest {
         verify(runRepository).save(run);
         assertNull(run.getPausedNodeId());
         assertNull(run.getPausedNodeInput());
-        verify(executionEngine, timeout(2000)).resume(
-            eq(definition), any(), eq(run), any(List.class),
-            eq("node-7"), eq("previous node output"), eq("user@example.com"));
+        verify(executionEngine, timeout(2000))
+                .resume(
+                        eq(definition),
+                        any(),
+                        eq(run),
+                        any(List.class),
+                        eq("node-7"),
+                        eq("previous node output"),
+                        eq("user@example.com"));
         assertEquals(WorkflowRunStatus.RUNNING, response.status());
     }
 
@@ -233,8 +262,9 @@ class WorkflowRunControlTest {
         // strand PAUSED forever.
         WorkflowRun run = run(WorkflowRunStatus.PAUSED);
         run.clearPauseEnvelope();
-        when(runRepository.compareAndSetStatus(RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.RUNNING))
-            .thenReturn(1);
+        when(runRepository.compareAndSetStatus(
+                        RUN_ID, WorkflowRunStatus.PAUSED, WorkflowRunStatus.RUNNING))
+                .thenReturn(1);
 
         WorkflowRunResponse response = backgroundRunService.resumeRun(WORKFLOW_ID, RUN_ID);
 

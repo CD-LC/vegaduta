@@ -1,7 +1,6 @@
 package com.agenticai.core.workflow.expression;
 
 import com.agenticai.core.workflow.expression.Values.NodeRef;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tree-walking interpreter. One instance per public engine call (it owns that call's step/time
@@ -281,7 +281,7 @@ final class Evaluator {
         if (t != null && t.isObject()) {
             JsonNode f = t.get(name);
             if (f != null) {
-                return f.isTextual() ? f.asText() : f.toString();
+                return f.isString() ? f.asString() : f.toString();
             }
         }
         if ("input".equals(name)) {

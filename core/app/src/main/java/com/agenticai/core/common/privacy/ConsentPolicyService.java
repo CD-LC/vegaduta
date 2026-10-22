@@ -1,9 +1,6 @@
 package com.agenticai.core.common.privacy;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -16,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Per-agent consent policy: whether a channel conversation starts with a notice and consent step,
@@ -27,7 +27,8 @@ public class ConsentPolicyService {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final TypeReference<Map<String, String>> STRING_MAP = new TypeReference<>() {};
-    private static final TypeReference<Map<String, List<String>>> LIST_MAP = new TypeReference<>() {};
+    private static final TypeReference<Map<String, List<String>>> LIST_MAP =
+            new TypeReference<>() {};
     static final Pattern LANGUAGE_TAG = Pattern.compile("[a-z]{2,3}(-[a-z0-9]{2,8})?");
     static final Pattern PURPOSE = Pattern.compile("[a-z0-9][a-z0-9_-]{0,63}");
     private static final int MAX_NOTICE_CHARS = 3000;
@@ -99,7 +100,8 @@ public class ConsentPolicyService {
      */
     public Policy put(UUID agentId, Request req, String actor) {
         Integer agentExists =
-                jdbc.queryForObject("SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
         if (agentExists == null || agentExists == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such agent");
         }
@@ -114,7 +116,11 @@ public class ConsentPolicyService {
 
         Optional<Policy> existing = find(agentId);
         int version =
-                existing.map(p -> p.notices().equals(notices) ? p.noticeVersion() : p.noticeVersion() + 1)
+                existing.map(
+                                p ->
+                                        p.notices().equals(notices)
+                                                ? p.noticeVersion()
+                                                : p.noticeVersion() + 1)
                         .orElse(1);
         boolean erase = req.eraseOnWithdrawal() == null || req.eraseOnWithdrawal();
         jdbc.update(
@@ -171,7 +177,10 @@ public class ConsentPolicyService {
             }
         }
         if (enabled && !notices.containsKey(defaultLanguage)) {
-            throw bad("enabling consent needs a notice in the default language '" + defaultLanguage + "'");
+            throw bad(
+                    "enabling consent needs a notice in the default language '"
+                            + defaultLanguage
+                            + "'");
         }
     }
 
@@ -195,7 +204,7 @@ public class ConsentPolicyService {
     private static String json(Object o) {
         try {
             return MAPPER.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -203,7 +212,7 @@ public class ConsentPolicyService {
     private static Map<String, String> readStrings(String json) {
         try {
             return MAPPER.readValue(json, STRING_MAP);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Unreadable consent policy JSON", e);
         }
     }
@@ -211,7 +220,7 @@ public class ConsentPolicyService {
     private static Map<String, List<String>> readLists(String json) {
         try {
             return MAPPER.readValue(json, LIST_MAP);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Unreadable consent policy JSON", e);
         }
     }

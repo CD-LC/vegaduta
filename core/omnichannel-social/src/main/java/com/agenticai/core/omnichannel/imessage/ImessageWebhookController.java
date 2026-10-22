@@ -4,7 +4,6 @@ import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Receives BlueBubbles webhook events, one URL per tenant: {@code
@@ -58,14 +58,17 @@ public class ImessageWebhookController {
             @PathVariable String webhookId,
             @RequestBody JsonNode event,
             @RequestParam(value = "token", required = false) String queryToken,
-            @RequestHeader(value = "X-Imessage-Webhook-Token", required = false) String headerToken) {
+            @RequestHeader(value = "X-Imessage-Webhook-Token", required = false)
+                    String headerToken) {
         Optional<String> tenantSchema =
-                tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.IMESSAGE, webhookId);
+                tenantResolutionService.resolveTenantSchema(
+                        ExternalAccountProvider.IMESSAGE, webhookId);
         if (tenantSchema.isEmpty()) {
             log.warn("Rejected iMessage webhook call for an unknown webhook id");
             return ResponseEntity.status(403).build();
         }
-        TenantContext.set(TenantContext.of(tenantSchema.get(), REQUESTED_BY_PREFIX + "webhook", Set.of()));
+        TenantContext.set(
+                TenantContext.of(tenantSchema.get(), REQUESTED_BY_PREFIX + "webhook", Set.of()));
         try {
             String token = headerToken != null && !headerToken.isEmpty() ? headerToken : queryToken;
             if (!credentialService.webhookTokenMatches(webhookId, token)) {
@@ -74,7 +77,9 @@ public class ImessageWebhookController {
             }
             if (!updateService.acceptVerified(event)) {
                 // shed-mode=retry (default): 503 so BlueBubbles retries; ack: 200 and drop.
-                return inboundExecutor.shedAcks() ? ResponseEntity.ok().build() : ResponseEntity.status(503).build();
+                return inboundExecutor.shedAcks()
+                        ? ResponseEntity.ok().build()
+                        : ResponseEntity.status(503).build();
             }
         } catch (RuntimeException e) {
             log.warn("Failed to process iMessage webhook event: {}", e.getMessage());

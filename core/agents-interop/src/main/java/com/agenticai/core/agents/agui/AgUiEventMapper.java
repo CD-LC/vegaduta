@@ -4,8 +4,6 @@ import com.agenticai.core.agents.core.AgentController;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.turn.AgentChatStreamResponder;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +14,8 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Maps the platform's chat stream - plain text tokens interleaved with single-line {@link
@@ -223,7 +223,7 @@ public final class AgUiEventMapper {
             if (event == null || !event.isObject()) {
                 return;
             }
-            String type = event.path("type").asText("");
+            String type = event.path("type").asString("");
             switch (type) {
                 case "tool_call" -> {
                     // A tool call breaks the assistant's text run - close it so
@@ -242,8 +242,13 @@ public final class AgUiEventMapper {
                     long now = clock.getAsLong();
                     out.add(
                             AgUiEvent.toolCallStart(
-                                    toolCallId, event.path("tool").asText(""), lastMessageId, now));
-                    out.add(AgUiEvent.toolCallArgs(toolCallId, event.path("args").asText(""), now));
+                                    toolCallId,
+                                    event.path("tool").asString(""),
+                                    lastMessageId,
+                                    now));
+                    out.add(
+                            AgUiEvent.toolCallArgs(
+                                    toolCallId, event.path("args").asString(""), now));
                     out.add(AgUiEvent.toolCallEnd(toolCallId, now));
                 }
                 case "tool_result" ->
@@ -251,14 +256,14 @@ public final class AgUiEventMapper {
                                 AgUiEvent.toolCallResult(
                                         ids.get(),
                                         toolCallIdFor(event),
-                                        event.path("preview").asText(""),
+                                        event.path("preview").asString(""),
                                         clock.getAsLong()));
                 case "error" ->
                         out.add(
                                 AgUiEvent.toolCallResult(
                                         ids.get(),
                                         toolCallIdFor(event),
-                                        "Error: " + event.path("message").asText(""),
+                                        "Error: " + event.path("message").asString(""),
                                         clock.getAsLong()));
                 case "plan" ->
                         out.add(AgUiEvent.custom("plan", fields(event, "text"), clock.getAsLong()));
@@ -336,7 +341,7 @@ public final class AgUiEventMapper {
         for (String name : names) {
             JsonNode field = event.get(name);
             if (field != null && !field.isNull()) {
-                value.put(name, field.isTextual() ? field.asText() : field.toString());
+                value.put(name, field.isString() ? field.asString() : field.toString());
             }
         }
         return value;

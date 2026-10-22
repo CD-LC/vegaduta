@@ -1,8 +1,8 @@
 package com.agenticai.core.workflow;
 
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /** Graph (de)serialisation shared by the workflow capability services. */
 @Component

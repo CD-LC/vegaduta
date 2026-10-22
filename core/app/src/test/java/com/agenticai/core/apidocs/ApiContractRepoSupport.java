@@ -1,8 +1,5 @@
 package com.agenticai.core.apidocs;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared plumbing for the tests that compare the generated OpenAPI document with files committed at
@@ -22,7 +21,7 @@ import java.util.regex.Pattern;
  */
 final class ApiContractRepoSupport {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static String specJson;
     private static JsonNode specDoc;

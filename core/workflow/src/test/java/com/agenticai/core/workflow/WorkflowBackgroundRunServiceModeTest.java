@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -23,9 +22,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * The background start path is what the canvas Run button really uses (background: true, mode "draft"), so
- * which graph it executes and which mode it stamps on the row are pinned here against the real service with
- * a mocked workflow service and engine. Mutating either choice used to leave every other test green.
+ * The background start path is what the canvas Run button really uses (background: true, mode
+ * "draft"), so which graph it executes and which mode it stamps on the row are pinned here against
+ * the real service with a mocked workflow service and engine. Mutating either choice used to leave
+ * every other test green.
  */
 class WorkflowBackgroundRunServiceModeTest {
 
@@ -49,21 +49,30 @@ class WorkflowBackgroundRunServiceModeTest {
         when(workflowService.get(WF)).thenReturn(definition);
         when(workflowService.readGraph("{\"live\":true}")).thenReturn(live);
         when(workflowService.resolveRunGraph(definition)).thenReturn(snapshot);
-        service = new WorkflowBackgroundRunService(
-            workflowService, engine, mock(WorkflowRunRepository.class), new ObjectMapper());
+        service =
+                new WorkflowBackgroundRunService(
+                        workflowService,
+                        engine,
+                        mock(WorkflowRunRepository.class),
+                        com.agenticai.core.json.JsonMappers.plain());
     }
 
-    /** Stubs prepareRun for either overload and captures the graph continueRun receives on the worker thread. */
+    /**
+     * Stubs prepareRun for either overload and captures the graph continueRun receives on the
+     * worker thread.
+     */
     private AtomicReference<WorkflowGraphDto> captureContinueGraph(CountDownLatch done) {
         WorkflowRun run = new WorkflowRun(UUID.randomUUID(), WF, "wf", "ann");
         when(engine.prepareRun(any(), any(), any(), any())).thenReturn(run);
         when(engine.prepareRun(any(), any(), any(), any(), any())).thenReturn(run);
         AtomicReference<WorkflowGraphDto> seen = new AtomicReference<>();
-        when(engine.continueRun(any(), any(), any(), any(), any(), any(), anyList())).thenAnswer(inv -> {
-            seen.set(inv.getArgument(1));
-            done.countDown();
-            return run;
-        });
+        when(engine.continueRun(any(), any(), any(), any(), any(), any(), anyList()))
+                .thenAnswer(
+                        inv -> {
+                            seen.set(inv.getArgument(1));
+                            done.countDown();
+                            return run;
+                        });
         return seen;
     }
 
@@ -77,9 +86,13 @@ class WorkflowBackgroundRunServiceModeTest {
         assertTrue(done.await(5, TimeUnit.SECONDS), "the traversal must be handed to the worker");
         verify(workflowService).readGraph("{\"live\":true}");
         verify(workflowService, never()).resolveRunGraph(any());
-        verify(engine).prepareRun(eq(definition), same(live), isNull(), eq("ann"), eq(RunMode.DRAFT));
+        verify(engine)
+                .prepareRun(eq(definition), same(live), isNull(), eq("ann"), eq(RunMode.DRAFT));
         verify(engine, never()).prepareRun(any(), any(), any(), any());
-        assertSame(live, continued.get(), "the worker runs the graph being edited, not the promoted snapshot");
+        assertSame(
+                live,
+                continued.get(),
+                "the worker runs the graph being edited, not the promoted snapshot");
     }
 
     @Test
@@ -107,8 +120,11 @@ class WorkflowBackgroundRunServiceModeTest {
 
         assertTrue(done.await(5, TimeUnit.SECONDS));
         verify(workflowService, never()).readGraph(any());
-        assertEquals(2, org.mockito.Mockito.mockingDetails(workflowService).getInvocations().stream()
-            .filter(i -> i.getMethod().getName().equals("resolveRunGraph")).count());
+        assertEquals(
+                2,
+                org.mockito.Mockito.mockingDetails(workflowService).getInvocations().stream()
+                        .filter(i -> i.getMethod().getName().equals("resolveRunGraph"))
+                        .count());
     }
 
     private static <T> T same(T value) {

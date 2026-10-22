@@ -2,8 +2,6 @@ package com.agenticai.core.chat.structured;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,23 +17,29 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-/** OpenAI strict function calling: schema eligibility, body rewriting, and the blocking + streaming HTTP wiring. */
+/**
+ * OpenAI strict function calling: schema eligibility, body rewriting, and the blocking + streaming
+ * HTTP wiring.
+ */
 class ToolStrictModeTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     static final String STRICT_PARAMS =
-        "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
-            + "\"properties\":{\"city\":{\"type\":\"string\"},\"days\":{\"type\":\"integer\"}},"
-            + "\"required\":[\"city\",\"days\"],\"additionalProperties\":false}";
+            "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
+                    + "\"properties\":{\"city\":{\"type\":\"string\"},\"days\":{\"type\":\"integer\"}},"
+                    + "\"required\":[\"city\",\"days\"],\"additionalProperties\":false}";
     static final String OPEN_PARAMS =
-        "{\"type\":\"object\",\"properties\":{\"q\":{\"type\":\"string\"}},\"required\":[\"q\"]}";
+            "{\"type\":\"object\",\"properties\":{\"q\":{\"type\":\"string\"}},\"required\":[\"q\"]}";
 
     private static JsonNode json(String s) {
         try {
             return MAPPER.readTree(s);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -46,52 +50,88 @@ class ToolStrictModeTest {
     void closedAllRequiredObjectIsEligible() {
         assertThat(ToolStrictMode.eligible(json(STRICT_PARAMS))).isTrue();
         // an already-closed no-argument tool qualifies
-        assertThat(ToolStrictMode.eligible(json("{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}"))).isTrue();
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json(
+                                        "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}")))
+                .isTrue();
     }
 
     @Test
     void openOrPartiallyRequiredOrNonObjectSchemasAreNotEligible() {
-        assertThat(ToolStrictMode.eligible(json(OPEN_PARAMS))).isFalse(); // no additionalProperties:false
-        assertThat(ToolStrictMode.eligible(json(
-            "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}},"
-                + "\"required\":[\"a\"],\"additionalProperties\":false}"))).isFalse(); // b optional
-        assertThat(ToolStrictMode.eligible(json("{\"type\":\"object\",\"properties\":{}}"))).isFalse(); // open no-arg
-        assertThat(ToolStrictMode.eligible(json("{\"type\":\"array\",\"items\":{\"type\":\"string\"}}"))).isFalse();
+        assertThat(ToolStrictMode.eligible(json(OPEN_PARAMS)))
+                .isFalse(); // no additionalProperties:false
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json(
+                                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}},"
+                                                + "\"required\":[\"a\"],\"additionalProperties\":false}")))
+                .isFalse(); // b optional
+        assertThat(ToolStrictMode.eligible(json("{\"type\":\"object\",\"properties\":{}}")))
+                .isFalse(); // open no-arg
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json("{\"type\":\"array\",\"items\":{\"type\":\"string\"}}")))
+                .isFalse();
         assertThat(ToolStrictMode.eligible(json("{\"properties\":{}}"))).isFalse(); // no type
-        assertThat(ToolStrictMode.eligible(json(
-            "{\"type\":\"object\",\"anyOf\":[{\"type\":\"object\"}],\"additionalProperties\":false}"))).isFalse();
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json(
+                                        "{\"type\":\"object\",\"anyOf\":[{\"type\":\"object\"}],\"additionalProperties\":false}")))
+                .isFalse();
         assertThat(ToolStrictMode.eligible(null)).isFalse();
         assertThat(ToolStrictMode.eligible(json("\"x\""))).isFalse();
     }
 
     @Test
     void nestedOpenObjectDisqualifies() {
-        assertThat(ToolStrictMode.eligible(json(
-            "{\"type\":\"object\",\"properties\":{\"o\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
-                + "\"required\":[\"x\"]}},\"required\":[\"o\"],\"additionalProperties\":false}"))).isFalse();
-        assertThat(ToolStrictMode.eligible(json(
-            "{\"type\":\"object\",\"properties\":{\"o\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
-                + "\"required\":[\"x\"],\"additionalProperties\":false}},\"required\":[\"o\"],\"additionalProperties\":false}"))).isTrue();
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json(
+                                        "{\"type\":\"object\",\"properties\":{\"o\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
+                                                + "\"required\":[\"x\"]}},\"required\":[\"o\"],\"additionalProperties\":false}")))
+                .isFalse();
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json(
+                                        "{\"type\":\"object\",\"properties\":{\"o\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
+                                                + "\"required\":[\"x\"],\"additionalProperties\":false}},\"required\":[\"o\"],\"additionalProperties\":false}")))
+                .isTrue();
     }
 
     @Test
     void unsupportedKeywordsDisqualifyEvenWhenTheObjectIsClosed() {
-        for (String kw : new String[] {
-            "\"minLength\":1", "\"maxLength\":9", "\"pattern\":\"^a\"", "\"format\":\"email\"", "\"minimum\":0",
-            "\"default\":\"x\"", "\"minItems\":1", "\"uniqueItems\":true"}) {
-            String s = "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"," + kw + "}},"
-                + "\"required\":[\"a\"],\"additionalProperties\":false}";
+        for (String kw :
+                new String[] {
+                    "\"minLength\":1",
+                    "\"maxLength\":9",
+                    "\"pattern\":\"^a\"",
+                    "\"format\":\"email\"",
+                    "\"minimum\":0",
+                    "\"default\":\"x\"",
+                    "\"minItems\":1",
+                    "\"uniqueItems\":true"
+                }) {
+            String s =
+                    "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\","
+                            + kw
+                            + "}},"
+                            + "\"required\":[\"a\"],\"additionalProperties\":false}";
             assertThat(ToolStrictMode.eligible(json(s))).as(kw).isFalse();
         }
-        assertThat(ToolStrictMode.eligible(json(
-            "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"],"
-                + "\"additionalProperties\":false,\"patternProperties\":{}}"))).isFalse();
+        assertThat(
+                        ToolStrictMode.eligible(
+                                json(
+                                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"],"
+                                                + "\"additionalProperties\":false,\"patternProperties\":{}}")))
+                .isFalse();
     }
 
     @Test
     void aPropertyNamedLikeAKeywordIsJustAName() {
-        String s = "{\"type\":\"object\",\"properties\":{\"default\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"}},"
-            + "\"required\":[\"default\",\"format\"],\"additionalProperties\":false}";
+        String s =
+                "{\"type\":\"object\",\"properties\":{\"default\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"}},"
+                        + "\"required\":[\"default\",\"format\"],\"additionalProperties\":false}";
         assertThat(ToolStrictMode.eligible(json(s))).isTrue();
     }
 
@@ -103,11 +143,15 @@ class ToolStrictModeTest {
             if (i > 0) {
                 tools.append(',');
             }
-            tools.append("{\"type\":\"function\",\"function\":{\"name\":\"t").append(i)
-                .append("\",\"description\":\"d\",\"parameters\":").append(toolParams[i]).append("}}");
+            tools.append("{\"type\":\"function\",\"function\":{\"name\":\"t")
+                    .append(i)
+                    .append("\",\"description\":\"d\",\"parameters\":")
+                    .append(toolParams[i])
+                    .append("}}");
         }
         return "{\"model\":\"gpt-4o\",\"temperature\":0.2,\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}],\"tools\":["
-            + tools + "]}";
+                + tools
+                + "]}";
     }
 
     @Test
@@ -122,20 +166,22 @@ class ToolStrictModeTest {
         assertThat(t0.get("parameters").has("$schema")).isFalse();
         assertThat(t1.has("strict")).isFalse();
         assertThat(t1.get("parameters")).isEqualTo(json(OPEN_PARAMS));
-        assertThat(root.get("model").asText()).isEqualTo("gpt-4o");
+        assertThat(root.get("model").asString()).isEqualTo("gpt-4o");
         assertThat(root.get("temperature").asDouble()).isEqualTo(0.2);
-        assertThat(root.get("messages").get(0).get("content").asText()).isEqualTo("hi");
+        assertThat(root.get("messages").get(0).get("content").asString()).isEqualTo("hi");
     }
 
     @Test
     void bodyWithNothingToChangeIsReturnedAsTheSameBytes() {
-        for (String b : new String[] {
-            body(OPEN_PARAMS),                                                    // no eligible tool
-            "{\"model\":\"gpt-4o\",\"messages\":[]}",                            // no tools at all
-            "{\"tools\":[]}",
-            "[1,2]",
-            "not json at all \"tools\"",
-            body(STRICT_PARAMS).replace("\"parameters\"", "\"strict\":false,\"parameters\"")}) { // explicit strict kept
+        for (String b :
+                new String[] {
+                    body(OPEN_PARAMS), // no eligible tool
+                    "{\"model\":\"gpt-4o\",\"messages\":[]}", // no tools at all
+                    "{\"tools\":[]}",
+                    "[1,2]",
+                    "not json at all \"tools\"",
+                    body(STRICT_PARAMS).replace("\"parameters\"", "\"strict\":false,\"parameters\"")
+                }) { // explicit strict kept
             byte[] in = b.getBytes(StandardCharsets.UTF_8);
             assertThat(ToolStrictMode.rewrite(in)).as(b).isSameAs(in);
         }
@@ -146,7 +192,10 @@ class ToolStrictModeTest {
 
     @Test
     void nonFunctionToolsAreNotTouched() throws Exception {
-        String b = "{\"tools\":[{\"type\":\"web_search\",\"function\":{\"name\":\"x\",\"parameters\":" + STRICT_PARAMS + "}}]}";
+        String b =
+                "{\"tools\":[{\"type\":\"web_search\",\"function\":{\"name\":\"x\",\"parameters\":"
+                        + STRICT_PARAMS
+                        + "}}]}";
         byte[] in = b.getBytes(StandardCharsets.UTF_8);
         assertThat(ToolStrictMode.rewrite(in)).isSameAs(in);
     }
@@ -168,16 +217,21 @@ class ToolStrictModeTest {
     @BeforeEach
     void startServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/echo", exchange -> {
-            String cl = exchange.getRequestHeaders().getFirst("Content-Length");
-            declaredLengths.add(cl == null ? -1L : Long.parseLong(cl));
-            bodies.add(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
-            byte[] out = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, out.length);
-            exchange.getResponseBody().write(out);
-            exchange.close();
-        });
+        server.createContext(
+                "/echo",
+                exchange -> {
+                    String cl = exchange.getRequestHeaders().getFirst("Content-Length");
+                    declaredLengths.add(cl == null ? -1L : Long.parseLong(cl));
+                    bodies.add(
+                            new String(
+                                    exchange.getRequestBody().readAllBytes(),
+                                    StandardCharsets.UTF_8));
+                    byte[] out = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(200, out.length);
+                    exchange.getResponseBody().write(out);
+                    exchange.close();
+                });
         server.start();
     }
 
@@ -198,55 +252,98 @@ class ToolStrictModeTest {
 
     @Test
     void blockingPathSendsStrictAndAConsistentContentLength() throws Exception {
-        RestClient client = RestClient.builder()
-            .requestFactory(new JdkClientHttpRequestFactory())
-            .requestInterceptor(ToolStrictMode.restInterceptor())
-            .build();
-        client.post().uri(url()).contentType(MediaType.APPLICATION_JSON).body(requestMap(STRICT_PARAMS)).retrieve().toBodilessEntity();
+        RestClient client =
+                RestClient.builder()
+                        .requestFactory(new JdkClientHttpRequestFactory())
+                        .requestInterceptor(ToolStrictMode.restInterceptor())
+                        .build();
+        client.post()
+                .uri(url())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestMap(STRICT_PARAMS))
+                .retrieve()
+                .toBodilessEntity();
 
         assertThat(bodies).hasSize(1);
         JsonNode sent = MAPPER.readTree(bodies.get(0));
         assertThat(sent.get("tools").get(0).get("function").get("strict").asBoolean()).isTrue();
-        assertThat(declaredLengths.get(0)).isIn(-1L, (long) bodies.get(0).getBytes(StandardCharsets.UTF_8).length);
+        assertThat(declaredLengths.get(0))
+                .isIn(-1L, (long) bodies.get(0).getBytes(StandardCharsets.UTF_8).length);
     }
 
     @Test
     void blockingPathLeavesIneligibleRequestsExactlyAsSerialized() throws Exception {
-        RestClient plain = RestClient.builder().requestFactory(new JdkClientHttpRequestFactory()).build();
-        RestClient strict = RestClient.builder().requestFactory(new JdkClientHttpRequestFactory())
-            .requestInterceptor(ToolStrictMode.restInterceptor()).build();
-        plain.post().uri(url()).contentType(MediaType.APPLICATION_JSON).body(requestMap(OPEN_PARAMS)).retrieve().toBodilessEntity();
-        strict.post().uri(url()).contentType(MediaType.APPLICATION_JSON).body(requestMap(OPEN_PARAMS)).retrieve().toBodilessEntity();
+        RestClient plain =
+                RestClient.builder().requestFactory(new JdkClientHttpRequestFactory()).build();
+        RestClient strict =
+                RestClient.builder()
+                        .requestFactory(new JdkClientHttpRequestFactory())
+                        .requestInterceptor(ToolStrictMode.restInterceptor())
+                        .build();
+        plain.post()
+                .uri(url())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestMap(OPEN_PARAMS))
+                .retrieve()
+                .toBodilessEntity();
+        strict.post()
+                .uri(url())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestMap(OPEN_PARAMS))
+                .retrieve()
+                .toBodilessEntity();
         assertThat(bodies).hasSize(2);
         assertThat(bodies.get(1)).isEqualTo(bodies.get(0));
     }
 
     @Test
     void streamingPathSendsStrictAndAConsistentContentLength() throws Exception {
-        WebClient client = WebClient.builder()
-            .clientConnector(new JdkClientHttpConnector())
-            .filter(ToolStrictMode.webFilter())
-            .build();
-        String reply = client.post().uri(url()).contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestMap(STRICT_PARAMS)).retrieve().bodyToMono(String.class).block();
+        WebClient client =
+                WebClient.builder()
+                        .clientConnector(new JdkClientHttpConnector())
+                        .filter(ToolStrictMode.webFilter())
+                        .build();
+        String reply =
+                client.post()
+                        .uri(url())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(requestMap(STRICT_PARAMS))
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
 
         assertThat(reply).contains("ok");
         assertThat(bodies).hasSize(1);
         JsonNode sent = MAPPER.readTree(bodies.get(0));
         assertThat(sent.get("tools").get(0).get("function").get("strict").asBoolean()).isTrue();
-        assertThat(sent.get("tools").get(0).get("function").get("parameters").has("$schema")).isFalse();
-        assertThat(declaredLengths.get(0)).isIn(-1L, (long) bodies.get(0).getBytes(StandardCharsets.UTF_8).length);
+        assertThat(sent.get("tools").get(0).get("function").get("parameters").has("$schema"))
+                .isFalse();
+        assertThat(declaredLengths.get(0))
+                .isIn(-1L, (long) bodies.get(0).getBytes(StandardCharsets.UTF_8).length);
     }
 
     @Test
     void streamingPathLeavesIneligibleRequestsExactlyAsSerialized() throws Exception {
         WebClient plain = WebClient.builder().clientConnector(new JdkClientHttpConnector()).build();
-        WebClient strict = WebClient.builder().clientConnector(new JdkClientHttpConnector())
-            .filter(ToolStrictMode.webFilter()).build();
-        plain.post().uri(url()).contentType(MediaType.APPLICATION_JSON).bodyValue(requestMap(OPEN_PARAMS))
-            .retrieve().bodyToMono(String.class).block();
-        strict.post().uri(url()).contentType(MediaType.APPLICATION_JSON).bodyValue(requestMap(OPEN_PARAMS))
-            .retrieve().bodyToMono(String.class).block();
+        WebClient strict =
+                WebClient.builder()
+                        .clientConnector(new JdkClientHttpConnector())
+                        .filter(ToolStrictMode.webFilter())
+                        .build();
+        plain.post()
+                .uri(url())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestMap(OPEN_PARAMS))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        strict.post()
+                .uri(url())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestMap(OPEN_PARAMS))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
         assertThat(bodies).hasSize(2);
         assertThat(bodies.get(1)).isEqualTo(bodies.get(0));
     }

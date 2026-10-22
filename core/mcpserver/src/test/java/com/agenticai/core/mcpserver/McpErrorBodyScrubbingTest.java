@@ -7,9 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpError;
+import io.modelcontextprotocol.spec.McpSchema.JSONRPCResponse.JSONRPCError;
 import jakarta.servlet.FilterChain;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -21,15 +20,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * B11: the MCP transport answers e.g. a missing Mcp-Session-Id with a 400 whose body is a Jackson-serialized Java
- * exception - stackTrace, class names, line numbers. Through the real auth filter that body must now be a plain
- * JSON-RPC error.
+ * B11: the MCP transport answers e.g. a missing Mcp-Session-Id with a 400 whose body is a
+ * Jackson-serialized Java exception - stackTrace, class names, line numbers. Through the real auth
+ * filter that body must now be a plain JSON-RPC error.
  */
 class McpErrorBodyScrubbingTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private McpApiKeyAuthFilter filter;
     private MockHttpServletRequest request;
@@ -40,8 +41,9 @@ class McpErrorBodyScrubbingTest {
         McpServerAccessGrantService grants = mock(McpServerAccessGrantService.class);
         McpServerRateLimiter limiter = mock(McpServerRateLimiter.class);
         UUID grantId = UUID.randomUUID();
-        McpServerAccessGrant grant = new McpServerAccessGrant(
-            "ci", McpApiKeyHasher.sha256Hex("vmcp_raw"), "rawrawra", "[]", "[]", "[]");
+        McpServerAccessGrant grant =
+                new McpServerAccessGrant(
+                        "ci", McpApiKeyHasher.sha256Hex("vmcp_raw"), "rawrawra", "[]", "[]", "[]");
         ReflectionTestUtils.setField(grant, "id", grantId);
         when(grants.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
         when(grants.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grant));
@@ -66,14 +68,22 @@ class McpErrorBodyScrubbingTest {
         return (req, res) -> {
             ((jakarta.servlet.http.HttpServletResponse) res).setStatus(400);
             res.setContentType("application/json");
-            res.getOutputStream().write(MAPPER.writeValueAsBytes(new McpError("Session ID missing")));
+            res.getOutputStream()
+                    .write(
+                            MAPPER.writeValueAsBytes(
+                                    new McpError(new JSONRPCError(-32600, "Session ID missing"))));
         };
     }
 
     @Test
     void aSerializedExceptionBodyIsReplacedByAPlainJsonRpcError() throws Exception {
         // sanity: the transport's body really does carry the trace this fix exists to remove
-        assertTrue(new String(MAPPER.writeValueAsBytes(new McpError("x")), StandardCharsets.UTF_8).contains("stackTrace"));
+        assertTrue(
+                new String(
+                                MAPPER.writeValueAsBytes(
+                                        new McpError(new JSONRPCError(-32600, "x"))),
+                                StandardCharsets.UTF_8)
+                        .contains("stackTrace"));
 
         filter.doFilter(request, response, transportAnswering400WithSerializedException());
 
@@ -84,18 +94,22 @@ class McpErrorBodyScrubbingTest {
         assertFalse(body.contains("java."), body);
         assertFalse(body.contains("lineNumber"), body);
         JsonNode json = MAPPER.readTree(body);
-        assertEquals("2.0", json.path("jsonrpc").asText());
+        assertEquals("2.0", json.path("jsonrpc").asString());
         assertEquals(-32600, json.path("error").path("code").asInt());
-        assertEquals("Session ID missing", json.path("error").path("message").asText());
+        assertEquals("Session ID missing", json.path("error").path("message").asString());
         assertEquals(response.getContentAsByteArray().length, response.getContentLength());
     }
 
     @Test
     void aSuccessResponseIsNotBufferedOrAltered() throws Exception {
-        FilterChain chain = (req, res) -> {
-            res.setContentType("application/json");
-            res.getOutputStream().write("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}".getBytes(StandardCharsets.UTF_8));
-        };
+        FilterChain chain =
+                (req, res) -> {
+                    res.setContentType("application/json");
+                    res.getOutputStream()
+                            .write(
+                                    "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}"
+                                            .getBytes(StandardCharsets.UTF_8));
+                };
         filter.doFilter(request, response, chain);
         assertEquals(200, response.getStatus());
         assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}", response.getContentAsString());
@@ -103,10 +117,12 @@ class McpErrorBodyScrubbingTest {
 
     @Test
     void anErrorBodyThatIsNotASerializedExceptionIsForwardedAsIs() throws Exception {
-        FilterChain chain = (req, res) -> {
-            ((jakarta.servlet.http.HttpServletResponse) res).setStatus(429);
-            res.getOutputStream().write("{\"error\":\"rate limited\"}".getBytes(StandardCharsets.UTF_8));
-        };
+        FilterChain chain =
+                (req, res) -> {
+                    ((jakarta.servlet.http.HttpServletResponse) res).setStatus(429);
+                    res.getOutputStream()
+                            .write("{\"error\":\"rate limited\"}".getBytes(StandardCharsets.UTF_8));
+                };
         filter.doFilter(request, response, chain);
         assertEquals(429, response.getStatus());
         assertEquals("{\"error\":\"rate limited\"}", response.getContentAsString());
@@ -114,8 +130,9 @@ class McpErrorBodyScrubbingTest {
 
     @Test
     void aMessageNamingAJavaClassIsNotEchoed() {
-        byte[] body = "{\"message\":\"java.lang.IllegalStateException: boom\",\"stackTrace\":[]}"
-            .getBytes(StandardCharsets.UTF_8);
+        byte[] body =
+                "{\"message\":\"java.lang.IllegalStateException: boom\",\"stackTrace\":[]}"
+                        .getBytes(StandardCharsets.UTF_8);
         String out = new String(McpErrorScrubbingResponse.scrub(body, 400), StandardCharsets.UTF_8);
         assertFalse(out.contains("IllegalStateException"), out);
         assertTrue(out.contains("Bad request"), out);
@@ -123,7 +140,9 @@ class McpErrorBodyScrubbingTest {
 
     @Test
     void aServerErrorNeverEchoesItsMessage() {
-        byte[] body = "{\"message\":\"NPE at Foo.bar\",\"stackTrace\":[]}".getBytes(StandardCharsets.UTF_8);
+        byte[] body =
+                "{\"message\":\"NPE at Foo.bar\",\"stackTrace\":[]}"
+                        .getBytes(StandardCharsets.UTF_8);
         String out = new String(McpErrorScrubbingResponse.scrub(body, 500), StandardCharsets.UTF_8);
         assertTrue(out.contains("Internal error"), out);
         assertFalse(out.contains("Foo"), out);

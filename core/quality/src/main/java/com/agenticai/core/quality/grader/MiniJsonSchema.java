@@ -1,58 +1,71 @@
 package com.agenticai.core.quality.grader;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
- * A deliberately small JSON-Schema validator for code graders (this module
- * does not depend on a schema library, and a grader's whole value is that its
- * verdict is predictable).
+ * A deliberately small JSON-Schema validator for code graders (this module does not depend on a
+ * schema library, and a grader's whole value is that its verdict is predictable).
  *
  * <p>Supported keywords: {@code type} (string or array of
- * string/integer/number/boolean/object/array/null), {@code enum},
- * {@code const}, {@code properties}, {@code required},
- * {@code additionalProperties} (boolean only), {@code items} (single schema),
- * {@code minItems}, {@code maxItems}, {@code minLength}, {@code maxLength},
- * {@code minimum}, {@code maximum}, {@code pattern}, {@code anyOf}. Pure
- * annotations ({@code $schema, title, description, $comment, default,
- * examples}) are ignored.
+ * string/integer/number/boolean/object/array/null), {@code enum}, {@code const}, {@code
+ * properties}, {@code required}, {@code additionalProperties} (boolean only), {@code items} (single
+ * schema), {@code minItems}, {@code maxItems}, {@code minLength}, {@code maxLength}, {@code
+ * minimum}, {@code maximum}, {@code pattern}, {@code anyOf}. Pure annotations ({@code $schema,
+ * title, description, $comment, default, examples}) are ignored.
  *
- * <p>Any OTHER keyword is rejected by {@link #assertSupported} when the grader
- * is saved: silently ignoring {@code oneOf} or {@code $ref} would turn a
- * stricter-than-supported schema into a grader that passes things it should
- * fail.
+ * <p>Any OTHER keyword is rejected by {@link #assertSupported} when the grader is saved: silently
+ * ignoring {@code oneOf} or {@code $ref} would turn a stricter-than-supported schema into a grader
+ * that passes things it should fail.
  */
 final class MiniJsonSchema {
 
     private static final Set<String> ANNOTATIONS =
-        Set.of("$schema", "title", "description", "$comment", "default", "examples");
+            Set.of("$schema", "title", "description", "$comment", "default", "examples");
 
-    private static final Set<String> KEYWORDS = Set.of(
-        "type", "enum", "const", "properties", "required", "additionalProperties", "items",
-        "minItems", "maxItems", "minLength", "maxLength", "minimum", "maximum", "pattern", "anyOf");
+    private static final Set<String> KEYWORDS =
+            Set.of(
+                    "type",
+                    "enum",
+                    "const",
+                    "properties",
+                    "required",
+                    "additionalProperties",
+                    "items",
+                    "minItems",
+                    "maxItems",
+                    "minLength",
+                    "maxLength",
+                    "minimum",
+                    "maximum",
+                    "pattern",
+                    "anyOf");
 
     private static final int MAX_DEPTH = 20;
 
-    private MiniJsonSchema() {
-    }
+    private MiniJsonSchema() {}
 
-    /** @throws IllegalArgumentException on an unsupported keyword or malformed supported keyword */
+    /**
+     * @throws IllegalArgumentException on an unsupported keyword or malformed supported keyword
+     */
     static void assertSupported(JsonNode schema) {
         assertSupported(schema, 0);
     }
 
     private static void assertSupported(JsonNode schema, int depth) {
         if (depth > MAX_DEPTH) {
-            throw new IllegalArgumentException("Schema is nested too deeply (max " + MAX_DEPTH + ").");
+            throw new IllegalArgumentException(
+                    "Schema is nested too deeply (max " + MAX_DEPTH + ").");
         }
         if (!schema.isObject()) {
             throw new IllegalArgumentException("Every (sub)schema must be a JSON object.");
         }
-        Iterator<Map.Entry<String, JsonNode>> fields = schema.fields();
+        Iterator<Map.Entry<String, JsonNode>> fields =
+                com.agenticai.core.json.JsonNodes.fields(schema);
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> field = fields.next();
             String key = field.getKey();
@@ -61,7 +74,11 @@ final class MiniJsonSchema {
             }
             if (!KEYWORDS.contains(key)) {
                 throw new IllegalArgumentException(
-                    "Unsupported schema keyword '" + key + "'. Supported: " + new java.util.TreeSet<>(KEYWORDS) + ".");
+                        "Unsupported schema keyword '"
+                                + key
+                                + "'. Supported: "
+                                + new java.util.TreeSet<>(KEYWORDS)
+                                + ".");
             }
             JsonNode value = field.getValue();
             switch (key) {
@@ -78,7 +95,8 @@ final class MiniJsonSchema {
                     break;
                 case "anyOf":
                     if (!value.isArray() || value.isEmpty()) {
-                        throw new IllegalArgumentException("'anyOf' must be a non-empty array of schemas.");
+                        throw new IllegalArgumentException(
+                                "'anyOf' must be a non-empty array of schemas.");
                     }
                     for (JsonNode sub : value) {
                         assertSupported(sub, depth + 1);
@@ -86,7 +104,8 @@ final class MiniJsonSchema {
                     break;
                 case "required":
                     if (!value.isArray()) {
-                        throw new IllegalArgumentException("'required' must be an array of property names.");
+                        throw new IllegalArgumentException(
+                                "'required' must be an array of property names.");
                     }
                     break;
                 case "enum":
@@ -96,23 +115,27 @@ final class MiniJsonSchema {
                     break;
                 case "additionalProperties":
                     if (!value.isBoolean()) {
-                        throw new IllegalArgumentException("'additionalProperties' must be true or false.");
+                        throw new IllegalArgumentException(
+                                "'additionalProperties' must be true or false.");
                     }
                     break;
                 case "pattern":
-                    if (value.asText().length() > CodeGrader.MAX_PATTERN_LENGTH) {
+                    if (value.asString().length() > CodeGrader.MAX_PATTERN_LENGTH) {
                         throw new IllegalArgumentException(
-                            "Schema 'pattern' is limited to " + CodeGrader.MAX_PATTERN_LENGTH + " characters.");
+                                "Schema 'pattern' is limited to "
+                                        + CodeGrader.MAX_PATTERN_LENGTH
+                                        + " characters.");
                     }
                     try {
-                        Pattern.compile(value.asText());
+                        Pattern.compile(value.asString());
                     } catch (RuntimeException e) {
                         throw new IllegalArgumentException("Invalid 'pattern' regex in schema.");
                     }
                     break;
                 case "type":
-                    if (!value.isTextual() && !value.isArray()) {
-                        throw new IllegalArgumentException("'type' must be a string or an array of strings.");
+                    if (!value.isString() && !value.isArray()) {
+                        throw new IllegalArgumentException(
+                                "'type' must be a string or an array of strings.");
                     }
                     break;
                 case "minItems":
@@ -137,7 +160,8 @@ final class MiniJsonSchema {
             return;
         }
         if (schema.has("type") && !typeMatches(schema.get("type"), data)) {
-            errors.add(path + ": expected type " + schema.get("type") + " but got " + typeName(data));
+            errors.add(
+                    path + ": expected type " + schema.get("type") + " but got " + typeName(data));
             return;
         }
         if (schema.has("const") && !schema.get("const").equals(data)) {
@@ -169,17 +193,22 @@ final class MiniJsonSchema {
                 errors.add(path + ": value matches none of the anyOf alternatives");
             }
         }
-        if (data.isTextual()) {
-            String s = data.asText();
+        if (data.isString()) {
+            String s = data.asString();
             if (schema.has("minLength") && s.length() < schema.get("minLength").asInt()) {
-                errors.add(path + ": string shorter than minLength " + schema.get("minLength").asInt());
+                errors.add(
+                        path
+                                + ": string shorter than minLength "
+                                + schema.get("minLength").asInt());
             }
             if (schema.has("maxLength") && s.length() > schema.get("maxLength").asInt()) {
-                errors.add(path + ": string longer than maxLength " + schema.get("maxLength").asInt());
+                errors.add(
+                        path + ": string longer than maxLength " + schema.get("maxLength").asInt());
             }
             if (schema.has("pattern")) {
                 try {
-                    if (!CodeGrader.matchBounded(Pattern.compile(schema.get("pattern").asText()), s, false)) {
+                    if (!CodeGrader.matchBounded(
+                            Pattern.compile(schema.get("pattern").asString()), s, false)) {
                         errors.add(path + ": string does not match pattern");
                     }
                 } catch (CodeGrader.BudgetExceeded | StackOverflowError e) {
@@ -189,28 +218,30 @@ final class MiniJsonSchema {
         }
         if (data.isNumber()) {
             if (schema.has("minimum") && data.asDouble() < schema.get("minimum").asDouble()) {
-                errors.add(path + ": number below minimum " + schema.get("minimum").asText());
+                errors.add(path + ": number below minimum " + schema.get("minimum").asString());
             }
             if (schema.has("maximum") && data.asDouble() > schema.get("maximum").asDouble()) {
-                errors.add(path + ": number above maximum " + schema.get("maximum").asText());
+                errors.add(path + ": number above maximum " + schema.get("maximum").asString());
             }
         }
         if (data.isObject()) {
             JsonNode properties = schema.path("properties");
             if (schema.has("required")) {
                 for (JsonNode name : schema.get("required")) {
-                    if (!data.has(name.asText())) {
-                        errors.add(path + ": missing required property '" + name.asText() + "'");
+                    if (!data.has(name.asString())) {
+                        errors.add(path + ": missing required property '" + name.asString() + "'");
                     }
                 }
             }
-            Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
+            Iterator<Map.Entry<String, JsonNode>> fields =
+                    com.agenticai.core.json.JsonNodes.fields(data);
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 JsonNode sub = properties.get(field.getKey());
                 if (sub != null) {
                     validate(sub, field.getValue(), path + "." + field.getKey(), errors);
-                } else if (schema.has("additionalProperties") && !schema.get("additionalProperties").asBoolean(true)) {
+                } else if (schema.has("additionalProperties")
+                        && !schema.get("additionalProperties").asBoolean(true)) {
                     errors.add(path + ": unexpected property '" + field.getKey() + "'");
                 }
             }
@@ -241,9 +272,9 @@ final class MiniJsonSchema {
             }
             return false;
         }
-        switch (typeSpec.asText()) {
+        switch (typeSpec.asString()) {
             case "string":
-                return data.isTextual();
+                return data.isString();
             case "boolean":
                 return data.isBoolean();
             case "object":
@@ -256,14 +287,14 @@ final class MiniJsonSchema {
                 return data.isNumber();
             case "integer":
                 return data.isIntegralNumber()
-                    || (data.isNumber() && data.asDouble() == Math.rint(data.asDouble()));
+                        || (data.isNumber() && data.asDouble() == Math.rint(data.asDouble()));
             default:
                 return false;
         }
     }
 
     private static String typeName(JsonNode data) {
-        if (data.isTextual()) {
+        if (data.isString()) {
             return "string";
         }
         if (data.isBoolean()) {

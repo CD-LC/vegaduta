@@ -4,16 +4,16 @@ import com.agenticai.core.documentgen.generator.DocumentGenerator;
 import com.agenticai.core.documentgen.model.DocumentContent;
 import com.agenticai.core.documentgen.model.DocumentGenerationRequest;
 import com.agenticai.core.documentgen.model.DocumentType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
 
 /**
- * Renders a {@link DocumentContent} into pretty-printed JSON bytes. Prefers
- * {@link DocumentContent#json()} when present - that value is serialized
- * verbatim as the entire file; otherwise falls back to pretty-printing the
- * whole {@link DocumentContent} (title/sections/table/rawText) as JSON.
+ * Renders a {@link DocumentContent} into pretty-printed JSON bytes. Prefers {@link
+ * DocumentContent#json()} when present - that value is serialized verbatim as the entire file;
+ * otherwise falls back to pretty-printing the whole {@link DocumentContent}
+ * (title/sections/table/rawText) as JSON.
  */
 @Component
 public class JsonDocumentGenerator implements DocumentGenerator {

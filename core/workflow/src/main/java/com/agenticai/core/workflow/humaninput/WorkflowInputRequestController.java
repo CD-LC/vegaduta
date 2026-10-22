@@ -5,8 +5,6 @@ import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.workflow.WorkflowApprovalResumeException;
 import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.WorkflowRunnerAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The console surface for paused runs waiting on structured human input - the sibling of the HITL
@@ -66,7 +66,8 @@ public class WorkflowInputRequestController {
     public ResponseEntity<List<InputRequestView>> list(
             @RequestParam(required = false) WorkflowInputRequestStatus status,
             @RequestParam(required = false) UUID runId,
-            @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         // Default to the actionable queue - a bare GET means "what needs a human".
         WorkflowInputRequestStatus effective =
                 status == null && runId == null ? WorkflowInputRequestStatus.PENDING : status;

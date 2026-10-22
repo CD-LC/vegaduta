@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class ToolArgPathSpecTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static JsonNode json(String s) throws Exception {
         return MAPPER.readTree(s);
@@ -29,13 +29,33 @@ class ToolArgPathSpecTest {
 
     @Test
     void rejectsMalformedPaths() {
-        for (String bad : new String[] {"", "  ", ".a", "a.", "a..b", "a[", "a[]", "a[x]", "a[12345]", "a[*", "a b", "a/b",
-            "[0]", "a[*]b", "a.b[*]c"}) {
-            assertThrows(IllegalArgumentException.class, () -> ToolArgPathSpec.parse(bad), "should reject '" + bad + "'");
+        for (String bad :
+                new String[] {
+                    "",
+                    "  ",
+                    ".a",
+                    "a.",
+                    "a..b",
+                    "a[",
+                    "a[]",
+                    "a[x]",
+                    "a[12345]",
+                    "a[*",
+                    "a b",
+                    "a/b",
+                    "[0]",
+                    "a[*]b",
+                    "a.b[*]c"
+                }) {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> ToolArgPathSpec.parse(bad),
+                    "should reject '" + bad + "'");
         }
         assertThrows(IllegalArgumentException.class, () -> ToolArgPathSpec.parse(null));
-        assertThrows(IllegalArgumentException.class,
-            () -> ToolArgPathSpec.parse("a".repeat(ToolArgPathSpec.MAX_LENGTH + 1)));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ToolArgPathSpec.parse("a".repeat(ToolArgPathSpec.MAX_LENGTH + 1)));
         StringBuilder deep = new StringBuilder("a");
         for (int i = 0; i < ToolArgPathSpec.MAX_STEPS; i++) {
             deep.append(".a");

@@ -6,7 +6,6 @@ import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.mcp.oauth.McpOAuthTokenSource;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
 import io.modelcontextprotocol.client.transport.ServerParameters;
@@ -28,7 +27,6 @@ import org.springframework.beans.factory.ObjectProvider;
 final class McpTransportFactory {
 
     private static final Logger log = LoggerFactory.getLogger(McpTransportFactory.class);
-    private static final ObjectMapper JSON_MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final AtlassianOAuthService atlassianOAuthService;
     private final ObjectProvider<AgentAttestationService> agentAttestation;
@@ -82,7 +80,8 @@ final class McpTransportFactory {
         }
         return HttpClientStreamableHttpTransport.builder(url)
                 .httpRequestCustomizer(
-                        McpOriginPinning.requestCustomizer(url, routingHeaders.wrap(requestHeaders)))
+                        McpOriginPinning.requestCustomizer(
+                                url, routingHeaders.wrap(requestHeaders)))
                 .customizeClient(cb -> cb.followRedirects(HttpClient.Redirect.NEVER))
                 .build();
     }
@@ -120,24 +119,20 @@ final class McpTransportFactory {
 
     // L2 hardening (2026-08-14): no raw-StdioClientTransport fallback - failing closed is strictly
     // safer than leaking core's whole process env into the spawned child (see
-    // EnvIsolatedStdioClientTransport). Callers treat this method as fallible.
+    // EnvIsolatedStdioClientTransport). Until MCP SDK 2.0 (ADR-0012 P3) the constructor was looked
+    // up reflectively because the JSON adapter lived in an optional module; the SDK's
+    // (ServerParameters, McpJsonMapper) constructor is now called directly with the Jackson 3
+    // mapper the SDK itself discovers (mcp-json-jackson3). Callers treat this method as fallible.
     McpClientTransport constructStdioTransport(ServerParameters params) {
         try {
-            Class<?> jacksonAdapter =
-                    Class.forName("io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper");
-            Object mcpJsonMapper =
-                    jacksonAdapter.getConstructor(ObjectMapper.class).newInstance(JSON_MAPPER);
             return new EnvIsolatedStdioClientTransport(
-                    params, (io.modelcontextprotocol.json.McpJsonMapper) mcpJsonMapper);
-        } catch (ClassNotFoundException | NoSuchMethodException | LinkageError e) {
+                    params, io.modelcontextprotocol.json.McpJsonDefaults.getMapper());
+        } catch (LinkageError | RuntimeException e) {
             throw new IllegalStateException(
-                    "EnvIsolatedStdioClientTransport construction failed - the bundled MCP SDK no longer exposes the "
-                            + "(ServerParameters, McpJsonMapper) constructor this class's env isolation depends on. Refusing "
-                            + "to fall back to an un-isolated StdioClientTransport.",
+                    "EnvIsolatedStdioClientTransport construction failed - the MCP SDK's JSON mapper"
+                            + " (mcp-json-jackson3) is not available. Refusing to fall back to an"
+                            + " un-isolated StdioClientTransport.",
                     e);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(
-                    "StdioClientTransport(ServerParameters, McpJsonMapper) construction failed", e);
         }
     }
 }

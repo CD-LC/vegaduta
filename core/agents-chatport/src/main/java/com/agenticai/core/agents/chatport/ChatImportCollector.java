@@ -5,16 +5,16 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_WARNINGS;
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParseResult;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
- * The state of one {@link ChatImportParser#parse} call: receives each conversation tree from {@link ChatImportReader},
- * picks its {@link ChatImportFormat}, de-duplicates by key, honours the selection and the conversation and
- * per-import character caps, and collects capped warnings.
+ * The state of one {@link ChatImportParser#parse} call: receives each conversation tree from {@link
+ * ChatImportReader}, picks its {@link ChatImportFormat}, de-duplicates by key, honours the
+ * selection and the conversation and per-import character caps, and collects capped warnings.
  */
 final class ChatImportCollector {
 
@@ -25,8 +25,10 @@ final class ChatImportCollector {
     private final Set<String> seen = new HashSet<>();
     private final List<String> warnings = new ArrayList<>();
     private int total;
+
     /** Conversations not usable; the reader also counts the ones it could not read. */
     int skipped;
+
     private int index;
     private int found;
     private long keptChars;
@@ -49,7 +51,8 @@ final class ChatImportCollector {
     }
 
     ParseResult result() {
-        return new ParseResult(List.copyOf(chats), total, skipped, capReached, List.copyOf(warnings));
+        return new ParseResult(
+                List.copyOf(chats), total, skipped, capReached, List.copyOf(warnings));
     }
 
     void accept(JsonNode conv) {
@@ -91,7 +94,8 @@ final class ChatImportCollector {
         }
         if (keepMessages && keptChars + chat.chars() > limits.maxCharsPerImport()) {
             skipped++;
-            warn("Some conversations were left out because the import would be too large; import them in a smaller batch.");
+            warn(
+                    "Some conversations were left out because the import would be too large; import them in a smaller batch.");
             return;
         }
         if (keepMessages) {

@@ -1,18 +1,17 @@
 package com.agenticai.core.codeintel;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * {@code code_callers} - who calls a given symbol, from the deterministic
- * AST-derived code graph. Read-only. Use before changing a function to see
- * everywhere it is used.
+ * {@code code_callers} - who calls a given symbol, from the deterministic AST-derived code graph.
+ * Read-only. Use before changing a function to see everywhere it is used.
  */
 public class CodeCallersToolCallback implements ToolCallback {
 
@@ -26,7 +25,10 @@ public class CodeCallersToolCallback implements ToolCallback {
         this(client, Set.of());
     }
 
-    /** EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s constructor javadoc for why. */
+    /**
+     * EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s
+     * constructor javadoc for why.
+     */
     public CodeCallersToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
         this.allowedRepoIds = allowedRepoIds == null ? Set.of() : allowedRepoIds;
@@ -35,12 +37,13 @@ public class CodeCallersToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("code_callers")
-            .description(
-                "Lists every place that calls a given function/method/symbol, from the deterministic "
-                    + "code graph (not a guess). Use before modifying a symbol to understand its usage. "
-                    + "Requires the repo_id the symbol lives in.")
-            .inputSchema("""
+                .name("code_callers")
+                .description(
+                        "Lists every place that calls a given function/method/symbol, from the deterministic "
+                                + "code graph (not a guess). Use before modifying a symbol to understand its usage. "
+                                + "Requires the repo_id the symbol lives in.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -56,7 +59,7 @@ public class CodeCallersToolCallback implements ToolCallback {
                     "required": ["symbol", "repo_id"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -78,7 +81,9 @@ public class CodeCallersToolCallback implements ToolCallback {
             return client.callers(repoId.toString(), symbol.toString());
         } catch (Exception e) {
             log.warn("code_callers tool call failed", e);
-            return "{\"error\": \"code_callers failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"code_callers failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 }

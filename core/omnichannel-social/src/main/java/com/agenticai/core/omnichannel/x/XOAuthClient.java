@@ -3,8 +3,6 @@ package com.agenticai.core.omnichannel.x;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -16,6 +14,8 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Base64;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} calls against X's OAuth 2.0 endpoints - same "a handful of REST calls
@@ -148,16 +148,16 @@ public class XOAuthClient {
                         failureContext + " (" + response.statusCode() + "): " + response.body());
             }
             JsonNode node = objectMapper.readTree(response.body());
-            String accessToken = node.path("access_token").asText(null);
+            String accessToken = node.path("access_token").asString(null);
             if (accessToken == null) {
                 throw new XApiException(
                         "X's token response had no access_token: " + response.body());
             }
             return new TokenResponse(
                     accessToken,
-                    node.path("refresh_token").asText(null),
+                    node.path("refresh_token").asString(null),
                     node.path("expires_in").asInt(7200),
-                    node.path("scope").asText(""));
+                    node.path("scope").asString(""));
         } catch (XApiException e) {
             throw e;
         } catch (Exception e) {
@@ -185,11 +185,11 @@ public class XOAuthClient {
                                 + response.body());
             }
             JsonNode data = objectMapper.readTree(response.body()).path("data");
-            String id = data.path("id").asText(null);
+            String id = data.path("id").asString(null);
             if (id == null) {
                 throw new XApiException("X's users/me response had no id: " + response.body());
             }
-            return new MeResponse(id, data.path("username").asText(null));
+            return new MeResponse(id, data.path("username").asString(null));
         } catch (XApiException e) {
             throw e;
         } catch (Exception e) {

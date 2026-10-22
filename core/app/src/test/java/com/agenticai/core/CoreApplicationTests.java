@@ -1,14 +1,13 @@
 package com.agenticai.core;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Stage 1 smoke test: confirms the Spring context loads cleanly.
@@ -75,7 +74,7 @@ import java.sql.DriverManager;
             "app.storage.type=local",
             "app.storage.local.path=${java.io.tmpdir}/vegaduta-smoke-storage",
             "management.tracing.sampling.probability=0.0",
-            "management.otlp.tracing.export.enabled=false",
+            "management.tracing.export.otlp.enabled=false",
             // TEST-ONLY throwaway AES key, committed to the repo so `mvn clean install`
             // boots the context with no manual env export. Because it lives in git
             // history forever, it is PERMANENTLY BURNED as a real key: it must NEVER

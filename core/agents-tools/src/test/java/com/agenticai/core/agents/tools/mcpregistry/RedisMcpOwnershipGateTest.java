@@ -137,7 +137,7 @@ class RedisMcpOwnershipGateTest {
     void testIsRoutedToTheOwnerAndItsResultReturned() throws Exception {
         when(registry.ownerOf("t1", reg)).thenReturn(Optional.of("peer"));
         String json =
-                new com.fasterxml.jackson.databind.ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .writeValueAsString(McpConnectionTestResult.success(3));
         when(bus.sendAndAwait(eq("peer"), eq(McpCommand.Op.TEST), eq("t1"), eq(reg), any()))
                 .thenReturn(Optional.of(json));

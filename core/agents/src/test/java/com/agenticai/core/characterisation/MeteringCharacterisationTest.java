@@ -7,8 +7,8 @@ import static com.agenticai.core.characterisation.ToolLoopHarness.usage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.agenticai.core.agents.budget.PerUserBudgetService.Modality;
 import com.agenticai.core.agents.budget.PerUserBudgetService;
+import com.agenticai.core.agents.budget.PerUserBudgetService.Modality;
 import com.agenticai.core.agents.budget.PerUserBudgetTrackingAdvisor;
 import com.agenticai.core.agents.hosted.FreeTierTokenTrackingAdvisor;
 import com.agenticai.core.agents.quota.FreeTierUsageLimiterService;
@@ -25,7 +25,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
@@ -33,30 +32,32 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * P0 characterisation (ADR-0012, section 6 P0.4, the most important suite): the token totals that the
- * four metering consumers record for a plain turn and for a 3-iteration tool turn, streaming and
- * non-streaming, with a scripted model that reports a KNOWN usage on every model call.
+ * P0 characterisation (ADR-0012, section 6 P0.4, the most important suite): the token totals that
+ * the four metering consumers record for a plain turn and for a 3-iteration tool turn, streaming
+ * and non-streaming, with a scripted model that reports a KNOWN usage on every model call.
  *
  * <p>Consumers under test, wired exactly as a provider factory wires them (default advisors of one
- * ChatClient): {@link LlmMetricsAdvisor} (llm_call_log row + Micrometer meters, including
- * {@code CacheTokenAccounting}), {@link FreeTierTokenTrackingAdvisor} (token-window reconcile) and
- * {@link PerUserBudgetTrackingAdvisor} (per-user spend reconcile).
+ * ChatClient): {@link LlmMetricsAdvisor} (llm_call_log row + Micrometer meters, including {@code
+ * CacheTokenAccounting}), {@link FreeTierTokenTrackingAdvisor} (token-window reconcile) and {@link
+ * PerUserBudgetTrackingAdvisor} (per-user spend reconcile).
  *
  * <h2>What is pinned today (Spring AI 1.1.7)</h2>
- * Each provider {@code ChatModel} runs the tool loop internally and hands back ONE final
- * {@code ChatResponse} whose usage is already the cumulative sum over the loop
- * ({@code UsageCalculator.getCumulativeUsage}), with the provider-native usage payload discarded. The
+ *
+ * Each provider {@code ChatModel} runs the tool loop internally and hands back ONE final {@code
+ * ChatResponse} whose usage is already the cumulative sum over the loop ({@code
+ * UsageCalculator.getCumulativeUsage}), with the provider-native usage payload discarded. The
  * advisors sit around that single call, so a turn is recorded exactly ONCE with the cumulative
  * totals: 3 iterations of (100,10), (150,10), (200,30) prompt/completion tokens are one row of
- * 450/50/500. Anthropic cache read/write counters survive only on a single-call turn; on a tool turn
- * the native usage is gone, so they read as ABSENT (null, no meter series), not zero.
+ * 450/50/500. Anthropic cache read/write counters survive only on a single-call turn; on a tool
+ * turn the native usage is gone, so they read as ABSENT (null, no meter series), not zero.
  *
  * <h2>What P3 is expected to change (so a failure here is explainable)</h2>
- * In Spring AI 2 the loop runs in the ChatClient's {@code ToolCallingAdvisor} and it, not the model,
- * accumulates usage across all internal calls. The totals asserted here stay valid ONLY if the
- * metering advisors are ordered OUTSIDE the tool advisor (they then see the accumulated total once).
- * If they end up INSIDE it, the failing assertion is the row count: {@code rowsOf(...)} becomes 3
- * (one per iteration, prompt 100/150/200) or, worse, 3 cumulative rows (100/250/450) that
+ *
+ * In Spring AI 2 the loop runs in the ChatClient's {@code ToolCallingAdvisor} and it, not the
+ * model, accumulates usage across all internal calls. The totals asserted here stay valid ONLY if
+ * the metering advisors are ordered OUTSIDE the tool advisor (they then see the accumulated total
+ * once). If they end up INSIDE it, the failing assertion is the row count: {@code rowsOf(...)}
+ * becomes 3 (one per iteration, prompt 100/150/200) or, worse, 3 cumulative rows (100/250/450) that
  * double-count. The other value that may legitimately change is the tool-turn cache accounting (the
  * accumulated usage may now carry native usage, so {@code cacheReadTokens} could become non-null).
  * Decide deliberately and update the two tests marked "P3-DECISION".
@@ -69,13 +70,25 @@ class MeteringCharacterisationTest {
     private static final long FREE_TIER_RESERVED = 5_000L;
     private static final long BUDGET_RESERVED_MICRO_CENTS = 150_000L;
 
-    /** One captured {@code LlmCallLogService.record(...)} invocation (any of the 21+ arg forms; captured indices are the same in all of them). */
-    private record LogRow(Long prompt, Long completion, Long total, boolean success, Long cacheCreation, Long cacheRead) {}
+    /**
+     * One captured {@code LlmCallLogService.record(...)} invocation (any of the 21+ arg forms;
+     * captured indices are the same in all of them).
+     */
+    private record LogRow(
+            Long prompt,
+            Long completion,
+            Long total,
+            boolean success,
+            Long cacheCreation,
+            Long cacheRead) {}
 
     /** One captured {@code reconcileTokenReservation}. */
     private record FreeTierReconcile(String tenant, long reserved, long actual) {}
 
-    /** One captured {@code reconcileSpendReservationForCall} / {@code reconcileSpendReservationForUsage}. */
+    /**
+     * One captured {@code reconcileSpendReservationForCall} / {@code
+     * reconcileSpendReservationForUsage}.
+     */
     private record BudgetReconcile(long reserved, Long prompt, Long completion) {}
 
     private final List<LogRow> rows = new CopyOnWriteArrayList<>();
@@ -87,47 +100,93 @@ class MeteringCharacterisationTest {
     // --------------------------------------------------------------- rig
 
     private ChatClient rig(ScriptedChatModel model) {
-        LlmCallLogService logService = Mockito.mock(LlmCallLogService.class, invocation -> {
-            Object[] a = invocation.getArguments();
-            if ("record".equals(invocation.getMethod().getName()) && a.length >= 21) {
-                rows.add(new LogRow((Long) a[4], (Long) a[5], (Long) a[6], (Boolean) a[7], (Long) a[17], (Long) a[18]));
-            }
-            return null;
-        });
-        FreeTierUsageLimiterService limiter = Mockito.mock(FreeTierUsageLimiterService.class, invocation -> {
-            Object[] a = invocation.getArguments();
-            if ("reconcileTokenReservation".equals(invocation.getMethod().getName())) {
-                freeTier.add(new FreeTierReconcile((String) a[0], (Long) a[1], (Long) a[2]));
-            }
-            return null;
-        });
-        PerUserBudgetService budgetService = Mockito.mock(PerUserBudgetService.class, invocation -> {
-            Object[] a = invocation.getArguments();
-            if ("reconcileSpendReservationForCall".equals(invocation.getMethod().getName())) {
-                budget.add(new BudgetReconcile((Long) a[3], (Long) a[5], (Long) a[6]));
-            } else if ("reconcileSpendReservationForUsage".equals(invocation.getMethod().getName())) {
-                // The Usage-carrying twin (prices reasoning tokens too); same reservation contract.
-                org.springframework.ai.chat.metadata.Usage usage = (org.springframework.ai.chat.metadata.Usage) a[5];
-                budget.add(new BudgetReconcile((Long) a[3],
-                    usage == null || usage.getPromptTokens() == null ? null : usage.getPromptTokens().longValue(),
-                    usage == null || usage.getCompletionTokens() == null ? null : usage.getCompletionTokens().longValue()));
-            }
-            return null;
-        });
-        return ToolLoopHarness.client(model,
-            new LlmMetricsAdvisor(new LlmCallMetricsService(), logService, ProviderName.ANTHROPIC, MODEL,
-                meters, new LlmPricingCatalog()),
-            new FreeTierTokenTrackingAdvisor(limiter, TENANT, FREE_TIER_RESERVED),
-            new PerUserBudgetTrackingAdvisor(budgetService, TENANT, USER, Modality.TEXT, MODEL,
-                BUDGET_RESERVED_MICRO_CENTS, TenantPlan.FREE));
+        LlmCallLogService logService =
+                Mockito.mock(
+                        LlmCallLogService.class,
+                        invocation -> {
+                            Object[] a = invocation.getArguments();
+                            if ("record".equals(invocation.getMethod().getName())
+                                    && a.length >= 21) {
+                                rows.add(
+                                        new LogRow(
+                                                (Long) a[4],
+                                                (Long) a[5],
+                                                (Long) a[6],
+                                                (Boolean) a[7],
+                                                (Long) a[17],
+                                                (Long) a[18]));
+                            }
+                            return null;
+                        });
+        FreeTierUsageLimiterService limiter =
+                Mockito.mock(
+                        FreeTierUsageLimiterService.class,
+                        invocation -> {
+                            Object[] a = invocation.getArguments();
+                            if ("reconcileTokenReservation"
+                                    .equals(invocation.getMethod().getName())) {
+                                freeTier.add(
+                                        new FreeTierReconcile(
+                                                (String) a[0], (Long) a[1], (Long) a[2]));
+                            }
+                            return null;
+                        });
+        PerUserBudgetService budgetService =
+                Mockito.mock(
+                        PerUserBudgetService.class,
+                        invocation -> {
+                            Object[] a = invocation.getArguments();
+                            if ("reconcileSpendReservationForCall"
+                                    .equals(invocation.getMethod().getName())) {
+                                budget.add(
+                                        new BudgetReconcile((Long) a[3], (Long) a[5], (Long) a[6]));
+                            } else if ("reconcileSpendReservationForUsage"
+                                    .equals(invocation.getMethod().getName())) {
+                                // The Usage-carrying twin (prices reasoning tokens too); same
+                                // reservation contract.
+                                org.springframework.ai.chat.metadata.Usage usage =
+                                        (org.springframework.ai.chat.metadata.Usage) a[5];
+                                budget.add(
+                                        new BudgetReconcile(
+                                                (Long) a[3],
+                                                usage == null || usage.getPromptTokens() == null
+                                                        ? null
+                                                        : usage.getPromptTokens().longValue(),
+                                                usage == null || usage.getCompletionTokens() == null
+                                                        ? null
+                                                        : usage.getCompletionTokens().longValue()));
+                            }
+                            return null;
+                        });
+        return ToolLoopHarness.client(
+                model,
+                new LlmMetricsAdvisor(
+                        new LlmCallMetricsService(),
+                        logService,
+                        ProviderName.ANTHROPIC,
+                        MODEL,
+                        meters,
+                        new LlmPricingCatalog()),
+                new FreeTierTokenTrackingAdvisor(limiter, TENANT, FREE_TIER_RESERVED),
+                new PerUserBudgetTrackingAdvisor(
+                        budgetService,
+                        TENANT,
+                        USER,
+                        Modality.TEXT,
+                        MODEL,
+                        BUDGET_RESERVED_MICRO_CENTS,
+                        TenantPlan.FREE));
     }
 
     private ToolCallback tool() {
         return new ToolCallback() {
             @Override
             public ToolDefinition getToolDefinition() {
-                return ToolDefinition.builder().name("lookup").description("lookup")
-                    .inputSchema("{\"type\":\"object\",\"properties\":{}}").build();
+                return ToolDefinition.builder()
+                        .name("lookup")
+                        .description("lookup")
+                        .inputSchema("{\"type\":\"object\",\"properties\":{}}")
+                        .build();
             }
 
             @Override
@@ -177,7 +236,9 @@ class MeteringCharacterisationTest {
         List<LogRow> logged = rowsOf(1);
         settle();
         logged = List.copyOf(rows);
-        assertThat(logged).as("one llm_call_log row per user turn - never one per loop iteration").hasSize(1);
+        assertThat(logged)
+                .as("one llm_call_log row per user turn - never one per loop iteration")
+                .hasSize(1);
         assertThat(logged.get(0).success()).isTrue();
         assertThat(logged.get(0).prompt()).isEqualTo(prompt);
         assertThat(logged.get(0).completion()).isEqualTo(completion);
@@ -224,9 +285,9 @@ class MeteringCharacterisationTest {
     /** Iteration usages: (100,10) + (150,10) + (200,30) = 450 prompt, 50 completion, 500 total. */
     private ScriptedChatModel threeIterations() {
         return model(
-            toolCalls(usage(100, 10), call("c1", "lookup", "{}")),
-            toolCalls(usage(150, 10), call("c2", "lookup", "{}")),
-            text(usage(200, 30), "final ", "answer"));
+                toolCalls(usage(100, 10), call("c1", "lookup", "{}")),
+                toolCalls(usage(150, 10), call("c2", "lookup", "{}")),
+                text(usage(200, 30), "final ", "answer"));
     }
 
     /**
@@ -244,7 +305,10 @@ class MeteringCharacterisationTest {
         assertTurnTotals(450, 50);
     }
 
-    /** P3-DECISION: same as above for the streaming path (the FAST reasoning depth, i.e. most traffic). */
+    /**
+     * P3-DECISION: same as above for the streaming path (the FAST reasoning depth, i.e. most
+     * traffic).
+     */
     @Test
     void threeIterationToolTurnStreamingIsOneRowOfCumulativeTotals() throws Exception {
         ScriptedChatModel model = threeIterations();
@@ -276,13 +340,25 @@ class MeteringCharacterisationTest {
     // -------------------------------------------------------- cache tokens
 
     /**
-     * Anthropic-shaped usage: promptTokens is the uncached input only, the cache counters live in the
-     * native payload. P3 touch point: {@code AnthropicApi.Usage} moves package in Spring AI 2 (the
-     * official anthropic-java SDK), so this helper is the only line to adapt.
+     * Anthropic-shaped usage: promptTokens is the uncached input only, the cache counters live in
+     * the native SDK payload AND (Spring AI 2) on the Usage interface itself.
      */
     private static Usage anthropicUsage(int input, int output, int cacheWrite, int cacheRead) {
-        return new DefaultUsage(input, output, input + output,
-            new AnthropicApi.Usage(input, output, cacheWrite, cacheRead));
+        com.anthropic.models.messages.Usage nativeUsage =
+                com.anthropic.models.messages.Usage.builder()
+                        .cacheCreation(java.util.Optional.empty())
+                        .cacheCreationInputTokens(java.util.Optional.of((long) cacheWrite))
+                        .cacheReadInputTokens(java.util.Optional.of((long) cacheRead))
+                        .inferenceGeo(java.util.Optional.empty())
+                        .inputTokens((long) input)
+                        .outputTokens((long) output)
+                        .outputTokensDetails(java.util.Optional.empty())
+                        .serverToolUse(java.util.Optional.empty())
+                        .serviceTier(java.util.Optional.empty())
+                        .build();
+        // Exactly what Spring AI 2's AnthropicChatModel#getDefaultUsage builds.
+        return new DefaultUsage(
+                input, output, input + output, nativeUsage, (long) cacheRead, (long) cacheWrite);
     }
 
     @Test
@@ -303,16 +379,24 @@ class MeteringCharacterisationTest {
     }
 
     /**
-     * P3-DECISION: today a tool turn loses the provider-native usage (UsageCalculator builds a plain
-     * DefaultUsage), so cache counters are ABSENT - null on the row and no cache meter series at all -
-     * while prompt/completion stay cumulative. If Spring AI 2 accumulates native usage, cacheRead
-     * becomes non-null here; that is an improvement, but the cost estimate then changes, so decide.
+     * P3-DECISION (intended improvement, ADR-0012 P3): on Spring AI 1.1 a tool turn lost the
+     * provider-native usage (UsageCalculator built a plain DefaultUsage), so the cache counters
+     * were ABSENT (null, no meter series) while prompt/completion stayed cumulative. Spring AI 2
+     * carries the cache read/write counts on the Usage interface and sums them across the tool
+     * loop, and LlmMetricsAdvisor now hands CacheTokenAccounting the provider (the
+     * exclusive/inclusive billing convention can no longer be read off a native object that the
+     * summed usage does not have). So the row now records the SUM of the per-iteration counters:
+     * write 100+0, read 0+400, with the uncached prompt tokens still 300+50 (Anthropic prompt
+     * tokens exclude the cache buckets). Every other assertion is unchanged; single-call turns
+     * behave exactly as before.
      */
     @Test
-    void toolTurnDropsAnthropicCacheCountersButKeepsCumulativeTokens() throws Exception {
-        ScriptedChatModel model = model(
-            toolCalls(anthropicUsage(300, 10, 100, 0), call("c1", "lookup", "{}")),
-            text(anthropicUsage(50, 30, 0, 400), "final answer"));
+    void toolTurnSumsAnthropicCacheCountersAcrossIterationsAndKeepsCumulativeTokens()
+            throws Exception {
+        ScriptedChatModel model =
+                model(
+                        toolCalls(anthropicUsage(300, 10, 100, 0), call("c1", "lookup", "{}")),
+                        text(anthropicUsage(50, 30, 0, 400), "final answer"));
 
         runNonStreaming(rig(model), true);
 
@@ -321,9 +405,15 @@ class MeteringCharacterisationTest {
         assertThat(rows).hasSize(1);
         assertThat(logged.get(0).prompt()).isEqualTo(350);
         assertThat(logged.get(0).completion()).isEqualTo(40);
-        assertThat(logged.get(0).cacheCreation()).as("absent, not zero").isNull();
-        assertThat(logged.get(0).cacheRead()).as("absent, not zero").isNull();
-        assertThat(meters.find("llm.cache.accounted.calls").counters()).as("no series for unmeasured cache").isEmpty();
+        assertThat(logged.get(0).cacheCreation())
+                .as("100 written in iteration 1, 0 in iteration 2")
+                .isEqualTo(100);
+        assertThat(logged.get(0).cacheRead())
+                .as("0 read in iteration 1, 400 in iteration 2")
+                .isEqualTo(400);
+        assertThat(meters.find("llm.cache.accounted.calls").counters())
+                .as("the tool turn is now a measured call")
+                .isNotEmpty();
     }
 
     // -------------------------------------------------------- cancellation
@@ -332,12 +422,18 @@ class MeteringCharacterisationTest {
     void aCancelledStreamStillWritesExactlyOneRowAndReleasesTheReservationOnce() throws Exception {
         ScriptedChatModel model = model(text(usage(100, 20), "one ", "two ", "three"));
 
-        rig(model).prompt().user("hello").stream().content().take(1).collectList().block(Duration.ofSeconds(10));
+        rig(model).prompt().user("hello").stream()
+                .content()
+                .take(1)
+                .collectList()
+                .block(Duration.ofSeconds(10));
 
         rowsOf(1);
         settle();
         assertThat(rows).as("cancel writes one llm_call_log row").hasSize(1);
-        assertThat(rows.get(0).success()).as("a cancelled stream is recorded as not successful").isFalse();
+        assertThat(rows.get(0).success())
+                .as("a cancelled stream is recorded as not successful")
+                .isFalse();
         assertThat(freeTier).as("cancel releases the token reservation exactly once").hasSize(1);
         assertThat(freeTier.get(0).reserved()).isEqualTo(FREE_TIER_RESERVED);
         assertThat(budget).hasSize(1);

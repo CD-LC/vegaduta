@@ -19,6 +19,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
@@ -34,7 +35,8 @@ import org.springframework.beans.factory.ObjectProvider;
 class McpAnnotationCaptureTest {
 
     private static McpSchema.Tool tool(String name, McpSchema.ToolAnnotations annotations) {
-        return new McpSchema.Tool(name, null, "a tool", null, null, annotations, null);
+        return new McpSchema.Tool(
+                name, null, "a tool", Map.of("type", "object"), null, annotations, null);
     }
 
     private static McpSchema.ToolAnnotations hints(
@@ -140,7 +142,8 @@ class McpAnnotationCaptureTest {
         List<McpSchema.Tool> tools = new ArrayList<>();
         tools.add(tool("x", hints(false, true, null)));
         tools.add(null);
-        tools.add(tool(null, hints(false, true, null)));
+        // MCP SDK 2 refuses a Tool without a name at construction, so a nameless tool can no longer
+        // reach capture(); only a null list entry is left to skip.
 
         assertDoesNotThrow(() -> McpAnnotationCapture.capture(null, "t1", "s", tools));
         assertDoesNotThrow(() -> McpAnnotationCapture.capture(disabled, "t1", "s", tools));
@@ -154,8 +157,7 @@ class McpAnnotationCaptureTest {
                                 new McpAnnotationClassifier(true), "t1", "s", null));
         assertFalse(disabled.classify("t1", "mcp__s__x").isPresent());
 
-        // A null tool or a null tool name in an otherwise valid list is skipped, the rest still
-        // recorded.
+        // A null tool in an otherwise valid list is skipped, the rest still recorded.
         McpAnnotationClassifier enabled = new McpAnnotationClassifier(true);
         McpAnnotationCapture.capture(enabled, "t1", "s", tools);
         assertTrue(enabled.classify("t1", "mcp__s__x").isPresent());

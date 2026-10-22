@@ -3,8 +3,8 @@ package com.agenticai.core.workflow.portability;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Hostile and ordinary YAML: only plain data may come out, and nothing may be constructed or
@@ -30,14 +30,14 @@ class SafeYamlLoaderTest {
               k: v
             """,
                         100_000);
-        assertThat(tree.get("name").asText()).isEqualTo("demo");
+        assertThat(tree.get("name").asString()).isEqualTo("demo");
         assertThat(tree.get("count").asInt()).isEqualTo(3);
         assertThat(tree.get("ratio").asDouble()).isEqualTo(1.5);
         assertThat(tree.get("flag").asBoolean()).isTrue();
         assertThat(tree.get("nothing").isNull()).isTrue();
-        assertThat(tree.get("when").isTextual()).isTrue();
+        assertThat(tree.get("when").isString()).isTrue();
         assertThat(tree.get("list")).hasSize(2);
-        assertThat(tree.get("nested").get("k").asText()).isEqualTo("v");
+        assertThat(tree.get("nested").get("k").asString()).isEqualTo("v");
     }
 
     @Test

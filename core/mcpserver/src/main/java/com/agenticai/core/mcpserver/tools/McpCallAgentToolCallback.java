@@ -8,14 +8,14 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.McpCallerContext;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The one real "do something" MCP tool this server exposes - routes an external MCP client's call
@@ -66,9 +66,9 @@ public class McpCallAgentToolCallback implements ToolCallback {
                 .name("call_agent")
                 .description(
                         "Sends a message to one of your organization's agents (see list_my_agents"
-                            + " for valid agent_id values) and returns its reply. Pass the same"
-                            + " session_id on a follow-up call to continue the same conversation"
-                            + " with short-term memory; omit it to start a fresh conversation.")
+                                + " for valid agent_id values) and returns its reply. Pass the same"
+                                + " session_id on a follow-up call to continue the same conversation"
+                                + " with short-term memory; omit it to start a fresh conversation.")
                 .inputSchema(
                         """
 {
@@ -92,9 +92,9 @@ public class McpCallAgentToolCallback implements ToolCallback {
                                 () ->
                                         new IllegalStateException(
                                                 "call_agent invoked with no McpCallerContext set -"
-                                                    + " McpApiKeyAuthFilter should have rejected"
-                                                    + " this request before it ever reached tool"
-                                                    + " dispatch."));
+                                                        + " McpApiKeyAuthFilter should have rejected"
+                                                        + " this request before it ever reached tool"
+                                                        + " dispatch."));
         try {
             JsonNode input = MAPPER.readTree(toolInput);
             String agentIdRaw = textOrNull(input, "agent_id");
@@ -232,7 +232,7 @@ public class McpCallAgentToolCallback implements ToolCallback {
 
     private static String textOrNull(JsonNode node, String field) {
         JsonNode value = node.get(field);
-        return value == null || value.isNull() ? null : value.asText();
+        return value == null || value.isNull() ? null : value.asString();
     }
 
     private String errorJson(String message) {

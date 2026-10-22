@@ -2,6 +2,7 @@ package com.agenticai.core;
 
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.util.Map;
+import org.springframework.ai.mcp.server.common.autoconfigure.StatelessToolCallbackConverterAutoConfiguration;
 import org.springframework.ai.mcp.server.common.autoconfigure.ToolCallbackConverterAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -52,7 +53,15 @@ import org.springframework.web.bind.annotation.RestController;
  * Boot's executor backs off when any {@code Executor} bean exists, and {@code @Qualifier
  * ("applicationTaskExecutor")} injection points would then fail to boot.
  */
-@SpringBootApplication(exclude = {ToolCallbackConverterAutoConfiguration.class})
+@SpringBootApplication(
+        exclude = {
+            ToolCallbackConverterAutoConfiguration.class,
+            // Spring AI 2.0 (ADR-0012 P3) added a stateless twin of the converter above with the
+            // same context-wide
+            // ToolCallback aggregation; inactive under protocol STREAMABLE but excluded so a
+            // protocol flip cannot leak tools.
+            StatelessToolCallbackConverterAutoConfiguration.class
+        })
 @ComponentScan(
         basePackages = "com.agenticai.core",
         excludeFilters =

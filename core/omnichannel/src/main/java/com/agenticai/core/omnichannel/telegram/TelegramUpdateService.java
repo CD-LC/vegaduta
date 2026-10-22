@@ -20,13 +20,13 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * What happens to a Telegram update once its origin is trusted: the webhook secret matched ({@link
@@ -94,7 +94,7 @@ public class TelegramUpdateService {
         // Claimed BEFORE any processing (pairing notice, workflow
         // trigger, agent reply) so a duplicate delivery is a true no-op,
         // not just a duplicate reply.
-        String updateId = update.path("update_id").asText(null);
+        String updateId = update.path("update_id").asString(null);
         if (!dedupService.tryClaim(ChannelType.TELEGRAM, updateId)) {
             log.info(
                     "Ignoring duplicate Telegram update_id {} for bot ***{}",
@@ -130,9 +130,9 @@ public class TelegramUpdateService {
             // Non-message updates (edited_message, callback_query, etc.) - nothing to route yet.
             return true;
         }
-        String chatId = message.path("chat").path("id").asText(null);
-        String fromId = message.path("from").path("id").asText(null);
-        String text = message.path("text").asText(null);
+        String chatId = message.path("chat").path("id").asString(null);
+        String fromId = message.path("from").path("id").asString(null);
+        String text = message.path("text").asString(null);
         if (chatId == null || text == null) {
             return true;
         }

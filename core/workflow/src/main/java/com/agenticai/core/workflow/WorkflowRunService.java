@@ -6,7 +6,6 @@ import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -16,11 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Run / cancel / pause / list-runs, split out of {@link WorkflowService}. Every run path (human,
- * cron, webhook, channel, sub-workflow) goes through {@link #run}; see its javadoc for why it has no
- * access check.
+ * cron, webhook, channel, sub-workflow) goes through {@link #run}; see its javadoc for why it has
+ * no access check.
  */
 @Service
 class WorkflowRunService {
@@ -38,10 +38,10 @@ class WorkflowRunService {
     private final WorkflowVersionRestoreService versions;
 
     /**
-     * Workflow engine selector. {@code legacy} (the default) runs every step
-     * in-process, synchronously. {@code temporal} routes through {@link
-     * TemporalWorkflowExecutionEngine} - same external contract, durable execution underneath. Only
-     * takes effect if the "temporal" profile is also active; otherwise the run falls back to legacy.
+     * Workflow engine selector. {@code legacy} (the default) runs every step in-process,
+     * synchronously. {@code temporal} routes through {@link TemporalWorkflowExecutionEngine} - same
+     * external contract, durable execution underneath. Only takes effect if the "temporal" profile
+     * is also active; otherwise the run falls back to legacy.
      */
     @Value("${app.workflow.execution-engine:legacy}")
     private String executionEngineMode;
@@ -251,7 +251,7 @@ class WorkflowRunService {
             }
             log.warn(
                     "app.workflow.execution-engine=temporal but the 'temporal' profile is not"
-                        + " active - falling back to the legacy in-process engine for this run.");
+                            + " active - falling back to the legacy in-process engine for this run.");
         }
         if (mode == RunMode.PRODUCTION && comment == null) {
             return executionEngine.execute(
@@ -372,8 +372,8 @@ class WorkflowRunService {
      * request, which marks the run FAILED - see {@code WorkflowApprovalActionExecutor#onRejected} -
      * and a run RESUMED from approval is RUNNING again and cancellable here like any other). All
      * four read as a no-op - this returns the run's current, unchanged status rather than an error.
-     * The exception (SE-54) is a run that already finished (COMPLETED, FAILED, CANCELLED): that is a
-     * 409 naming its status, so a caller is not told 200 for a stop that stopped nothing.
+     * The exception (SE-54) is a run that already finished (COMPLETED, FAILED, CANCELLED): that is
+     * a 409 naming its status, so a caller is not told 200 for a stop that stopped nothing.
      *
      * <p>This signals BOTH mechanisms unconditionally rather than trying to determine which engine
      * actually executed this run (that isn't recorded per-row anywhere, and {@code
@@ -431,7 +431,8 @@ class WorkflowRunService {
             temporal.cancelRun(runId);
         }
         WorkflowRun refreshed = runRepository.findByIdAndWorkflowId(runId, workflowId).orElse(run);
-        // SE-54: the row still reads RUNNING (cancellation is observed between nodes); say the stop was
+        // SE-54: the row still reads RUNNING (cancellation is observed between nodes); say the stop
+        // was
         // accepted instead of returning what looks like a no-op.
         return refreshed.getStatus() == WorkflowRunStatus.RUNNING
                 ? WorkflowRunResponse.cancelRequested(refreshed, objectMapper)

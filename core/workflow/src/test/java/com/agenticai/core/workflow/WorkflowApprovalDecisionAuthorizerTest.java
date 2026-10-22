@@ -11,7 +11,6 @@ import com.agenticai.core.approval.ApprovalNotAuthorizedException;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,8 @@ class WorkflowApprovalDecisionAuthorizerTest {
     private final WorkflowRunRepository runs = mock(WorkflowRunRepository.class);
     private final WorkflowService workflows = mock(WorkflowService.class);
     private final WorkflowApprovalDecisionAuthorizer authorizer =
-            new WorkflowApprovalDecisionAuthorizer(runs, workflows, new ObjectMapper());
+            new WorkflowApprovalDecisionAuthorizer(
+                    runs, workflows, com.agenticai.core.json.JsonMappers.plain());
     private final UUID runId = UUID.randomUUID();
     private final UUID workflowId = UUID.randomUUID();
 

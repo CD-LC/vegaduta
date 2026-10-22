@@ -1,7 +1,8 @@
 package com.agenticai.core.agents.tools;
 
+import io.modelcontextprotocol.client.McpClient;
 import java.time.Duration;
-import org.springframework.ai.mcp.customizer.McpSyncClientCustomizer;
+import org.springframework.ai.mcp.customizer.McpClientCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,14 +28,10 @@ import org.springframework.context.annotation.Configuration;
  * on a machine, which routinely exceeds 20s even on a decent connection.
  *
  * <p>The one supported extension point for this is registering a {@code
- * McpSyncClientCustomizer} bean here - Spring AI applies every one found in
- * the context to each client's spec right before {@code .build()}. Note:
- * this project's spring-ai-mcp version (1.1.7) still has the separate,
- * non-generic {@code McpSyncClientCustomizer}/{@code McpAsyncClientCustomizer}
- * interfaces (confirmed against the 1.1.2 javadoc, same package) - a first
- * attempt at this fix used the generic {@code McpClientCustomizer<T>} form
- * from spring-ai's unreleased `main` branch source, which doesn't exist yet
- * in 1.1.7 and failed to compile ("cannot find symbol").
+ * McpClientCustomizer<McpClient.SyncSpec>} bean here - Spring AI applies every one found in
+ * the context to each client's spec right before {@code .build()}. (Spring AI 1.1 had the
+ * separate, non-generic {@code McpSyncClientCustomizer}; Spring AI 2.0 replaced both the
+ * sync and async forms with the generic {@code McpClientCustomizer<B>}, ADR-0012 P3.)
  *
  * <p>This alone doesn't make a cold Chromium download fast - see
  * {@code scripts/dev/prewarm-mcp-servers.ps1} (given directly to the user
@@ -51,7 +48,7 @@ import org.springframework.context.annotation.Configuration;
 public class McpClientTimeoutConfig {
 
     @Bean
-    public McpSyncClientCustomizer mcpSyncClientInitializationTimeoutCustomizer(
+    public McpClientCustomizer<McpClient.SyncSpec> mcpSyncClientInitializationTimeoutCustomizer(
             @Value("${app.mcp.client-initialization-timeout-seconds:120}")
                     long initializationTimeoutSeconds) {
         Duration timeout = Duration.ofSeconds(initializationTimeoutSeconds);

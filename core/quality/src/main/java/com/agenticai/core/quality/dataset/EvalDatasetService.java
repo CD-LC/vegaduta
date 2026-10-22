@@ -4,8 +4,6 @@ import com.agenticai.core.chat.LlmCallLogService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -19,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * CRUD + validation for {@link EvalDataset} / {@link EvalDatasetCase}.
@@ -66,9 +66,7 @@ public class EvalDatasetService {
      * the merge). {@code GoldenSeedTest} pins the file's shape so a stale/malformed edit fails the
      * free CI job.
      */
-    static final String[] GOLDEN_DATASET_RESOURCES = {
-        "/golden-dataset.json"
-    };
+    static final String[] GOLDEN_DATASET_RESOURCES = {"/golden-dataset.json"};
 
     /**
      * Name the seed endpoint gives the created dataset; also the per-agent idempotency key (409 on
@@ -112,7 +110,7 @@ public class EvalDatasetService {
             ApplicationContext applicationContext,
             @Value("${LANGFUSE_HOST:}") String langfuseHost,
             @Value(
-                            "${management.otlp.tracing.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}")
+                            "${management.opentelemetry.tracing.export.otlp.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}")
                     String otlpTracesEndpoint,
             @Value("${LANGFUSE_OTEL_AUTH_HEADER:}") String langfuseAuthHeader,
             @Value("${LANGFUSE_INIT_PROJECT_ID:}") String langfuseProjectId) {
@@ -457,8 +455,8 @@ public class EvalDatasetService {
     /**
      * One entry of this module's {@code golden-dataset.json} - the same six fields as {@code
      * com.agenticai.core.quality.eval.EvalCase}, re-declared here as a deliberate projection: the
-     * seed only needs these fields, and unknown properties (e.g. {@code feasibility}, which the
-     * CLI runner consumes) are ignored so a field added to the JSON never breaks the seed.
+     * seed only needs these fields, and unknown properties (e.g. {@code feasibility}, which the CLI
+     * runner consumes) are ignored so a field added to the JSON never breaks the seed.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record GoldenCase(
@@ -589,7 +587,9 @@ public class EvalDatasetService {
         return traceLinks.traceIdForRunCase(runId, index);
     }
 
-    /** See {@link EvalTraceLinks#langfuseTraceUrl(String)}: null when Langfuse is not configured. */
+    /**
+     * See {@link EvalTraceLinks#langfuseTraceUrl(String)}: null when Langfuse is not configured.
+     */
     public String langfuseTraceUrl(String traceId) {
         return traceLinks.langfuseTraceUrl(traceId);
     }

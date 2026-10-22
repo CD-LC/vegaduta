@@ -5,20 +5,17 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
- * Bonus OpenAI-compatible provider (provider fan-out, July 2026) - DeepSeek's
- * API is OpenAI-chat-completions-compatible, so this reuses Spring AI's
- * {@code spring-ai-starter-model-openai} module with a fixed {@code
- * baseUrl}, the exact same shape as {@link OpenRouterAgentChatClientFactory}/
- * {@link GrokAgentChatClientFactory} (no dedicated Spring AI starter exists
- * for DeepSeek either).
+ * Bonus OpenAI-compatible provider (provider fan-out, July 2026) - DeepSeek's API is
+ * OpenAI-chat-completions-compatible, so this reuses Spring AI's {@code
+ * spring-ai-starter-model-openai} module with a fixed {@code baseUrl}, the exact same shape as
+ * {@link OpenRouterAgentChatClientFactory}/ {@link GrokAgentChatClientFactory} (no dedicated Spring
+ * AI starter exists for DeepSeek either).
  *
- * <p>Model id is the agent's free-text {@code model} field, e.g. {@code
- * "deepseek-chat"} or {@code "deepseek-reasoner"} - see DeepSeek's own model
- * list at api-docs.deepseek.com.
+ * <p>Model id is the agent's free-text {@code model} field, e.g. {@code "deepseek-chat"} or {@code
+ * "deepseek-reasoner"} - see DeepSeek's own model list at api-docs.deepseek.com.
  */
 @Component
 public class DeepSeekAgentChatClientFactory implements AgentChatClientFactory {
@@ -43,16 +40,18 @@ public class DeepSeekAgentChatClientFactory implements AgentChatClientFactory {
     // Bounded retries, real ObservationRegistry, default advisors, stream usage -
     // see LlmModelSupport.
     private final LlmModelSupport modelSupport;
-    // Shared OpenAI-compatible transport/model construction (ADR-0012 P1b) - see OpenAiCompatModelBuilder.
+    // Shared OpenAI-compatible transport/model construction (ADR-0012 P1b) - see
+    // OpenAiCompatModelBuilder.
     private final OpenAiCompatModelBuilder modelBuilder;
 
     public DeepSeekAgentChatClientFactory(
-        LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
-        MeterRegistry meterRegistry, LlmPricingCatalog pricingCatalog,
-        LlmHttpClientFactory llmHttpClientFactory,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        LlmModelSupport modelSupport
-    ) {
+            LlmCallMetricsService llmCallMetricsService,
+            LlmCallLogService llmCallLogService,
+            MeterRegistry meterRegistry,
+            LlmPricingCatalog pricingCatalog,
+            LlmHttpClientFactory llmHttpClientFactory,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            LlmModelSupport modelSupport) {
         this.modelSupport = modelSupport;
         this.llmCallMetricsService = llmCallMetricsService;
         this.llmCallLogService = llmCallLogService;
@@ -60,7 +59,9 @@ public class DeepSeekAgentChatClientFactory implements AgentChatClientFactory {
         this.pricingCatalog = pricingCatalog;
         this.llmHttpClientFactory = llmHttpClientFactory;
         this.toolCallingManagers = toolCallingManagers;
-        this.modelBuilder = new OpenAiCompatModelBuilder(llmHttpClientFactory, toolCallingManagers, modelSupport);
+        this.modelBuilder =
+                new OpenAiCompatModelBuilder(
+                        llmHttpClientFactory, toolCallingManagers, modelSupport);
     }
 
     @Override
@@ -69,32 +70,49 @@ public class DeepSeekAgentChatClientFactory implements AgentChatClientFactory {
     }
 
     @Override
-    public ChatClient create(String apiKey, String model, int maxTokens, double temperature, double topP) {
+    public ChatClient create(
+            String apiKey, String model, int maxTokens, double temperature, double topP) {
         return create(apiKey, model, maxTokens, temperature, topP, java.util.Map.of());
     }
 
-    /** Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields are omitted. */
+    /**
+     * Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields
+     * are omitted.
+     */
     @Override
     public ChatClient create(
-        String apiKey, String model, int maxTokens, double temperature, double topP,
-        java.util.Map<String, Object> providerOptions
-    ) {
+            String apiKey,
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        OpenAiApi openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey).build();
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey);
 
-        var optionsBuilder = modelBuilder.options(ProviderName.DEEPSEEK, model)
-            .maxTokens(maxTokens)
-            .temperature(temperature)
-            .topP(topP);
+        var optionsBuilder =
+                modelBuilder
+                        .options(ProviderName.DEEPSEEK, model)
+                        .maxTokens(maxTokens)
+                        .temperature(temperature)
+                        .topP(topP);
         sampling.applyTo(optionsBuilder);
         LlmModelSupport.logDroppedSampling(ProviderName.DEEPSEEK, model, sampling, "topK");
         OpenAiChatOptions options = optionsBuilder.build();
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
-            .defaultAdvisors(modelSupport.advisors(
-                new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.DEEPSEEK, model, meterRegistry, pricingCatalog)))
-            .build();
+        return modelSupport
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
+                .defaultAdvisors(
+                        modelSupport.advisors(
+                                new LlmMetricsAdvisor(
+                                        llmCallMetricsService,
+                                        llmCallLogService,
+                                        ProviderName.DEEPSEEK,
+                                        model,
+                                        meterRegistry,
+                                        pricingCatalog)))
+                .build();
     }
 }

@@ -24,8 +24,6 @@ import com.agenticai.core.workflow.expression.ExpressionException;
 import com.agenticai.core.workflow.expression.Limits;
 import com.agenticai.core.workflow.expression.LintContext;
 import com.agenticai.core.workflow.expression.NodeOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,22 +41,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * The read-only expression tooling behind the canvas editor (spec 6): live preview ({@link #evaluate}), the
- * linter ({@link #lint}), the data-picker schema ({@link #upstreamSchema}) and the function registry
- * ({@link #functions}). Nothing here executes a node or writes anything.
+ * The read-only expression tooling behind the canvas editor (spec 6): live preview ({@link
+ * #evaluate}), the linter ({@link #lint}), the data-picker schema ({@link #upstreamSchema}) and the
+ * function registry ({@link #functions}). Nothing here executes a node or writes anything.
  *
- * <p><b>Permissions.</b> {@code evaluate} and {@code upstreamSchema} return values read from pins or from the
- * last run, which is run data (often real customer data): EDITOR, the same bar as reading a pin. {@code lint}
- * sees only the saved graph and whether a pin is stale, so VIEWER is enough. Callers below that level get the
- * usual access-denied response of {@link WorkflowService#requireAccess}.
+ * <p><b>Permissions.</b> {@code evaluate} and {@code upstreamSchema} return values read from pins
+ * or from the last run, which is run data (often real customer data): EDITOR, the same bar as
+ * reading a pin. {@code lint} sees only the saved graph and whether a pin is stale, so VIEWER is
+ * enough. Callers below that level get the usual access-denied response of {@link
+ * WorkflowService#requireAccess}.
  *
- * <p><b>Kill switch.</b> {@code app.workflow.expressions.enabled=false} makes evaluate and lint answer 409 with a
- * clear message (the runtime resolver is off too); pins and the schema/function reads keep working.
+ * <p><b>Kill switch.</b> {@code app.workflow.expressions.enabled=false} makes evaluate and lint
+ * answer 409 with a clear message (the runtime resolver is off too); pins and the schema/function
+ * reads keep working.
  *
- * <p><b>Limits.</b> Evaluation uses exactly the engine limits a run uses (spec 3.5), plus a per-user rate limit
- * ({@link WorkflowExpressionRateLimiter}) and the request caps below.
+ * <p><b>Limits.</b> Evaluation uses exactly the engine limits a run uses (spec 3.5), plus a
+ * per-user rate limit ({@link WorkflowExpressionRateLimiter}) and the request caps below.
  */
 @Service
 public class WorkflowExpressionService {
@@ -81,15 +83,14 @@ public class WorkflowExpressionService {
     private final boolean enabled;
 
     public WorkflowExpressionService(
-        WorkflowService workflowService,
-        WorkflowPinStore pinStore,
-        RunDataStore runData,
-        WorkflowRunRepository runs,
-        WorkflowExpressionRateLimiter rateLimiter,
-        ObjectMapper objectMapper,
-        @Value("${app.workflow.expressions.enabled:true}") boolean enabled,
-        @Value("${app.workflow.expressions.strict:false}") boolean strict
-    ) {
+            WorkflowService workflowService,
+            WorkflowPinStore pinStore,
+            RunDataStore runData,
+            WorkflowRunRepository runs,
+            WorkflowExpressionRateLimiter rateLimiter,
+            ObjectMapper objectMapper,
+            @Value("${app.workflow.expressions.enabled:true}") boolean enabled,
+            @Value("${app.workflow.expressions.strict:false}") boolean strict) {
         this.workflowService = workflowService;
         this.pinStore = pinStore;
         this.runData = runData;
@@ -105,7 +106,8 @@ public class WorkflowExpressionService {
     // ---- evaluate
 
     public EvaluateResponse evaluate(UUID workflowId, EvaluateRequest request) {
-        WorkflowDefinition definition = workflowService.requireAccess(workflowId, PermissionLevel.EDITOR);
+        WorkflowDefinition definition =
+                workflowService.requireAccess(workflowId, PermissionLevel.EDITOR);
         requireEnabled();
         rateLimiter.check();
         if (request == null || request.template() == null) {
@@ -113,7 +115,12 @@ public class WorkflowExpressionService {
         }
         String template = request.template();
         if (template.length() > MAX_TEMPLATE_CHARS) {
-            throw bad("The template is " + template.length() + " characters; the limit is " + MAX_TEMPLATE_CHARS + ".");
+            throw bad(
+                    "The template is "
+                            + template.length()
+                            + " characters; the limit is "
+                            + MAX_TEMPLATE_CHARS
+                            + ".");
         }
         String dataSource = request.dataSource() == null ? "" : request.dataSource();
         if (!Set.of("pinned", "lastRun", "supplied").contains(dataSource)) {
@@ -127,11 +134,12 @@ public class WorkflowExpressionService {
         WorkflowGraphDto graph = workflowService.graph(workflowId);
         WorkflowNodeDto node = request.nodeId() == null ? null : findNode(graph, request.nodeId());
         Set<String> warnings = new LinkedHashSet<>();
-        ExpressionPreviewSources.Source source = switch (dataSource) {
-            case "pinned" -> sources.pinned(workflowId, graph);
-            case "lastRun" -> sources.lastRun(workflowId, graph, warnings);
-            default -> sources.supplied(graph, supplied);
-        };
+        ExpressionPreviewSources.Source source =
+                switch (dataSource) {
+                    case "pinned" -> sources.pinned(workflowId, graph);
+                    case "lastRun" -> sources.lastRun(workflowId, graph, warnings);
+                    default -> sources.supplied(graph, supplied);
+                };
 
         String input = "";
         String inputSourceId = null;
@@ -149,7 +157,10 @@ public class WorkflowExpressionService {
                 }
             }
             if (inputSourceId == null && hasIncoming(graph, node.id())) {
-                warnings.add("No " + source.label() + " data for the node feeding this one, so $json is empty.");
+                warnings.add(
+                        "No "
+                                + source.label()
+                                + " data for the node feeding this one, so $json is empty.");
             }
         }
 
@@ -163,32 +174,62 @@ public class WorkflowExpressionService {
         wf.put("name", definition.getName());
         wf.put("version", null);
 
-        ExpressionPreviewSources.SourceContext ctx = new ExpressionPreviewSources.SourceContext(input, inputSourceId, source, graph, run, wf, warnings);
-        boolean legacy = node != null && ExpressionFields.of(node.type()).stream()
-            .anyMatch(f -> f.legacy() != ExpressionFields.Legacy.NONE);
+        ExpressionPreviewSources.SourceContext ctx =
+                new ExpressionPreviewSources.SourceContext(
+                        input, inputSourceId, source, graph, run, wf, warnings);
+        boolean legacy =
+                node != null
+                        && ExpressionFields.of(node.type()).stream()
+                                .anyMatch(f -> f.legacy() != ExpressionFields.Legacy.NONE);
         try {
             Object value = engine.renderValue(template, ctx, legacy);
             String rendered = engine.render(template, ctx, legacy);
             Object safe = serialisable(value, rendered);
-            return new EvaluateResponse(true, safe, typeName(safe), rendered, null,
-                new ArrayList<>(ctx.sources), new ArrayList<>(warnings));
+            return new EvaluateResponse(
+                    true,
+                    safe,
+                    typeName(safe),
+                    rendered,
+                    null,
+                    new ArrayList<>(ctx.sources),
+                    new ArrayList<>(warnings));
         } catch (ExpressionException e) {
             return failure(template, e.getMessage(), e.start(), e.end(), ctx, warnings);
         } catch (RuntimeException e) {
-            // Nothing but ExpressionException is meant to escape the engine; if something does, the preview
+            // Nothing but ExpressionException is meant to escape the engine; if something does, the
+            // preview
             // reports it instead of turning a typing-debounce call into a 500.
-            log.warn("Expression preview failed unexpectedly for workflow {}: {}", workflowId, e.toString());
-            return failure(template, "The expression could not be evaluated.", 0, template.length(), ctx, warnings);
+            log.warn(
+                    "Expression preview failed unexpectedly for workflow {}: {}",
+                    workflowId,
+                    e.toString());
+            return failure(
+                    template,
+                    "The expression could not be evaluated.",
+                    0,
+                    template.length(),
+                    ctx,
+                    warnings);
         }
     }
 
     private EvaluateResponse failure(
-        String template, String message, int start, int end, ExpressionPreviewSources.SourceContext ctx, Set<String> warnings
-    ) {
+            String template,
+            String message,
+            int start,
+            int end,
+            ExpressionPreviewSources.SourceContext ctx,
+            Set<String> warnings) {
         int s = start < 0 ? 0 : Math.min(start, template.length());
         int e = end < 0 ? template.length() : Math.min(Math.max(end, s), template.length());
-        return new EvaluateResponse(false, null, "null", "", new EvaluateError(message, s, e),
-            new ArrayList<>(ctx.sources), new ArrayList<>(warnings));
+        return new EvaluateResponse(
+                false,
+                null,
+                "null",
+                "",
+                new EvaluateError(message, s, e),
+                new ArrayList<>(ctx.sources),
+                new ArrayList<>(warnings));
     }
 
     private Object serialisable(Object value, String rendered) {
@@ -223,7 +264,8 @@ public class WorkflowExpressionService {
     }
 
     private void validateSupplied(Supplied supplied) {
-        if (supplied.input() != null && supplied.input().length() > WorkflowPinStore.MAX_PIN_CHARS) {
+        if (supplied.input() != null
+                && supplied.input().length() > WorkflowPinStore.MAX_PIN_CHARS) {
             throw bad("supplied.input is too large.");
         }
         if (supplied.nodes() != null) {
@@ -244,7 +286,8 @@ public class WorkflowExpressionService {
         workflowService.requireAccess(workflowId, PermissionLevel.VIEWER);
         requireEnabled();
         rateLimiter.check();
-        List<LintItem> items = request == null || request.items() == null ? List.of() : request.items();
+        List<LintItem> items =
+                request == null || request.items() == null ? List.of() : request.items();
         if (items.size() > MAX_LINT_ITEMS) {
             throw bad("At most " + MAX_LINT_ITEMS + " fields can be checked in one request.");
         }
@@ -256,17 +299,20 @@ public class WorkflowExpressionService {
             byId.put(n.id(), n);
             labelCounts.merge(n.label(), 1, Integer::sum);
             if (labelToId.putIfAbsent(n.label(), n.id()) != null) {
-                // A second node with the same label: its id is only addressable as $node.id("..."), and the
-                // linter checks ids against the map's VALUES, so carry it under a key no label can equal.
+                // A second node with the same label: its id is only addressable as $node.id("..."),
+                // and the
+                // linter checks ids against the map's VALUES, so carry it under a key no label can
+                // equal.
                 labelToId.put("\u0000id:" + n.id(), n.id());
             }
         }
         Set<String> ambiguous = new HashSet<>();
-        labelCounts.forEach((label, count) -> {
-            if (count > 1) {
-                ambiguous.add(label);
-            }
-        });
+        labelCounts.forEach(
+                (label, count) -> {
+                    if (count > 1) {
+                        ambiguous.add(label);
+                    }
+                });
         Map<String, List<String>> incoming = ExpressionNodeRefs.incomingEdges(graph);
         Map<String, WorkflowNodePin> pins = null;
 
@@ -277,9 +323,18 @@ public class WorkflowExpressionService {
             }
             String template = item.template();
             if (template.length() > MAX_TEMPLATE_CHARS) {
-                out.add(diag(item, "error", "PARSE_ERROR",
-                    "The field is " + template.length() + " characters; expressions are checked up to " + MAX_TEMPLATE_CHARS + ".",
-                    0, 0));
+                out.add(
+                        diag(
+                                item,
+                                "error",
+                                "PARSE_ERROR",
+                                "The field is "
+                                        + template.length()
+                                        + " characters; expressions are checked up to "
+                                        + MAX_TEMPLATE_CHARS
+                                        + ".",
+                                0,
+                                0));
                 continue;
             }
             WorkflowNodeDto owner = item.nodeId() == null ? null : byId.get(item.nodeId());
@@ -289,33 +344,57 @@ public class WorkflowExpressionService {
                     pins.put(p.getNodeId(), p);
                 }
             }
-            Set<String> knownFields = owner == null ? null : knownInputFields(owner, incoming, pins);
+            Set<String> knownFields =
+                    owner == null ? null : knownInputFields(owner, incoming, pins);
             LintContext lc = new LintContext(labelToId, ambiguous, knownFields);
             for (Diagnostic d : engine.lint(template, lc)) {
-                out.add(diag(item, d.severity().name().toLowerCase(Locale.ROOT), mapCode(d.code()), d.message(),
-                    d.start(), d.end()));
+                out.add(
+                        diag(
+                                item,
+                                d.severity().name().toLowerCase(Locale.ROOT),
+                                mapCode(d.code()),
+                                d.message(),
+                                d.start(),
+                                d.end()));
             }
             if (owner != null) {
-                out.addAll(referenceDiagnostics(item, owner, graph, incoming, pins == null ? Map.of() : pins));
+                out.addAll(
+                        referenceDiagnostics(
+                                item, owner, graph, incoming, pins == null ? Map.of() : pins));
             }
         }
         return new LintResponse(out);
     }
 
-    /** The linter's own code for "two nodes share this label" is AMBIGUOUS_NODE; the API contract calls it AMBIGUOUS_LABEL. */
+    /**
+     * The linter's own code for "two nodes share this label" is AMBIGUOUS_NODE; the API contract
+     * calls it AMBIGUOUS_LABEL.
+     */
     static String mapCode(String code) {
         return "AMBIGUOUS_NODE".equals(code) ? "AMBIGUOUS_LABEL" : code;
     }
 
-    private static LintDiagnostic diag(LintItem item, String severity, String code, String message, int start, int end) {
-        return new LintDiagnostic(item.nodeId(), item.field(), severity, code, message, Math.max(start, 0), Math.max(end, 0));
+    private static LintDiagnostic diag(
+            LintItem item, String severity, String code, String message, int start, int end) {
+        return new LintDiagnostic(
+                item.nodeId(),
+                item.field(),
+                severity,
+                code,
+                message,
+                Math.max(start, 0),
+                Math.max(end, 0));
     }
 
-    /** NOT_UPSTREAM and STALE_PIN for each {@code $node[...]} reference the expression really makes. */
+    /**
+     * NOT_UPSTREAM and STALE_PIN for each {@code $node[...]} reference the expression really makes.
+     */
     private List<LintDiagnostic> referenceDiagnostics(
-        LintItem item, WorkflowNodeDto owner, WorkflowGraphDto graph, Map<String, List<String>> incoming,
-        Map<String, WorkflowNodePin> pins
-    ) {
+            LintItem item,
+            WorkflowNodeDto owner,
+            WorkflowGraphDto graph,
+            Map<String, List<String>> incoming,
+            Map<String, WorkflowNodePin> pins) {
         List<LintDiagnostic> out = new ArrayList<>();
         Set<String> astLabels = engine.referencedNodeLabels(item.template());
         Set<String> astIds = engine.referencedNodeIds(item.template());
@@ -340,19 +419,34 @@ public class WorkflowExpressionService {
             boolean anyUpstream = targets.stream().anyMatch(n -> ancestors.contains(n.id()));
             if (!anyUpstream) {
                 String name = targets.get(0).label();
-                out.add(diag(item, "error", "NOT_UPSTREAM",
-                    "'" + name + "' is not upstream of this node, so it has never run when this field is evaluated.",
-                    ref.start(), ref.end()));
+                out.add(
+                        diag(
+                                item,
+                                "error",
+                                "NOT_UPSTREAM",
+                                "'"
+                                        + name
+                                        + "' is not upstream of this node, so it has never run when this field is evaluated.",
+                                ref.start(),
+                                ref.end()));
                 continue;
             }
             for (WorkflowNodeDto n : targets) {
                 WorkflowNodePin pin = ancestors.contains(n.id()) ? pins.get(n.id()) : null;
-                if (pin != null && pin.getConfigHash() != null
-                    && !pin.getConfigHash().equals(WorkflowPinService.configHash(n))) {
-                    out.add(diag(item, "warning", "STALE_PIN",
-                        "The pinned data for '" + n.label() + "' was captured before its configuration changed, "
-                            + "so it may no longer match what the node produces. Re-pin it from a fresh run.",
-                        ref.start(), ref.end()));
+                if (pin != null
+                        && pin.getConfigHash() != null
+                        && !pin.getConfigHash().equals(WorkflowPinService.configHash(n))) {
+                    out.add(
+                            diag(
+                                    item,
+                                    "warning",
+                                    "STALE_PIN",
+                                    "The pinned data for '"
+                                            + n.label()
+                                            + "' was captured before its configuration changed, "
+                                            + "so it may no longer match what the node produces. Re-pin it from a fresh run.",
+                                    ref.start(),
+                                    ref.end()));
                     break;
                 }
             }
@@ -360,10 +454,14 @@ public class WorkflowExpressionService {
         return out;
     }
 
-    /** Top-level fields of the first directly-upstream pinned output that is a JSON object; null when unknown. */
+    /**
+     * Top-level fields of the first directly-upstream pinned output that is a JSON object; null
+     * when unknown.
+     */
     private Set<String> knownInputFields(
-        WorkflowNodeDto owner, Map<String, List<String>> incoming, Map<String, WorkflowNodePin> pins
-    ) {
+            WorkflowNodeDto owner,
+            Map<String, List<String>> incoming,
+            Map<String, WorkflowNodePin> pins) {
         if (pins == null || pins.isEmpty()) {
             return null;
         }
@@ -376,7 +474,7 @@ public class WorkflowExpressionService {
                 JsonNode tree = objectMapper.readTree(pin.getDataText());
                 if (tree != null && tree.isObject()) {
                     Set<String> names = new HashSet<>();
-                    tree.fieldNames().forEachRemaining(names::add);
+                    tree.propertyNames().forEach(names::add);
                     return names;
                 }
             } catch (Exception ignored) {
@@ -393,8 +491,11 @@ public class WorkflowExpressionService {
         WorkflowGraphDto graph = workflowService.graph(workflowId);
         WorkflowNodeDto node = findNode(graph, nodeId);
         if (node == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Node '" + nodeId + "' is not in this workflow's saved graph - save the canvas first.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Node '"
+                            + nodeId
+                            + "' is not in this workflow's saved graph - save the canvas first.");
         }
         Map<String, WorkflowNodeDto> byId = new HashMap<>();
         for (WorkflowNodeDto n : graph.nodes()) {
@@ -405,10 +506,15 @@ public class WorkflowExpressionService {
             pins.put(p.getNodeId(), p);
         }
         UUID lastRunId = null;
-        List<String> upstream = ExpressionNodeRefs.orderedAncestors(nodeId, ExpressionNodeRefs.incomingEdges(graph));
+        List<String> upstream =
+                ExpressionNodeRefs.orderedAncestors(
+                        nodeId, ExpressionNodeRefs.incomingEdges(graph));
         boolean needsLastRun = upstream.stream().anyMatch(id -> !pins.containsKey(id));
         if (needsLastRun) {
-            lastRunId = runs.findFirstByWorkflowIdOrderByStartedAtDesc(workflowId).map(WorkflowRun::getId).orElse(null);
+            lastRunId =
+                    runs.findFirstByWorkflowIdOrderByStartedAtDesc(workflowId)
+                            .map(WorkflowRun::getId)
+                            .orElse(null);
         }
 
         List<SchemaNode> nodes = new ArrayList<>();
@@ -442,7 +548,13 @@ public class WorkflowExpressionService {
     public List<FunctionDoc> functions() {
         List<FunctionDoc> out = new ArrayList<>();
         for (BuiltIn b : BuiltIns.registry().values()) {
-            out.add(new FunctionDoc(b.name(), b.category().toLowerCase(Locale.ROOT), b.signature(), b.doc(), b.example()));
+            out.add(
+                    new FunctionDoc(
+                            b.name(),
+                            b.category().toLowerCase(Locale.ROOT),
+                            b.signature(),
+                            b.doc(),
+                            b.example()));
         }
         return out;
     }
@@ -451,8 +563,9 @@ public class WorkflowExpressionService {
 
     private void requireEnabled() {
         if (!enabled) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Workflow expressions are switched off on this deployment (app.workflow.expressions.enabled=false).");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Workflow expressions are switched off on this deployment (app.workflow.expressions.enabled=false).");
         }
     }
 
@@ -469,7 +582,6 @@ public class WorkflowExpressionService {
         return null;
     }
 
-
     private static boolean hasIncoming(WorkflowGraphDto graph, String nodeId) {
         for (WorkflowEdgeDto e : graph.edges()) {
             if (nodeId.equals(e.target())) {
@@ -478,5 +590,4 @@ public class WorkflowExpressionService {
         }
         return false;
     }
-
 }

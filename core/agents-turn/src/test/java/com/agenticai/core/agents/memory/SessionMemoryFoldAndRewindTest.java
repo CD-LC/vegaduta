@@ -8,34 +8,20 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 /**
  * {@link SessionMemoryService}: summarisation when turns leave the replay window, rewind, and the
- * Redis-down paths. Split out of {@link SessionMemoryServiceTest}; see its javadoc for the contract.
+ * Redis-down paths. Split out of {@link SessionMemoryServiceTest}; see its javadoc for the
+ * contract.
  */
 class SessionMemoryFoldAndRewindTest extends SessionMemoryServiceTestBase {
 
@@ -167,7 +153,7 @@ class SessionMemoryFoldAndRewindTest extends SessionMemoryServiceTestBase {
         assertTrue(executedScripts().isEmpty());
         verify(listOps).trim(REDIS_KEY, -SessionMemoryService.MAX_STORED_ENTRIES, -1);
         verify(redisTemplate).expire(eq(REDIS_KEY), eq(TTL));
-        verify(valueOps, never()).getAndExpire(anyString(), any());
+        verify(valueOps, never()).getAndExpire(anyString(), any(java.time.Duration.class));
     }
 
     @Test

@@ -1,13 +1,11 @@
 com.agenticai.core.agents.tools.web.HttpWebTaskBackend builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.agents.tools.web.WebSearchHttp builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
-com.agenticai.core.chat.LlmHttpClientFactory builds a raw outbound HTTP client with WebClient.builder instead of SafeHttpClients
+com.agenticai.core.chat.LlmHttpClientFactory builds a raw outbound HTTP client with new OkHttpClient instead of SafeHttpClients
 com.agenticai.core.knowledge.SidecarClient builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.platform.ops.LangfuseApiClient builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.platform.ops.PlatformVersionService builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.platform.reliability.DependencyHealthService builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.providers.modality.SidecarWhisperProvider builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
-com.agenticai.core.quality.eval.EvalLlmHttp builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
-com.agenticai.core.quality.eval.EvalLlmHttp builds a raw outbound HTTP client with WebClient.builder instead of SafeHttpClients
 com.agenticai.core.quality.eval.LangfuseEvalClient builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.voice.LiveKitEgressService builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients
 com.agenticai.core.voice.realtime.GeminiLiveRealtimeProvider builds a raw outbound HTTP client with HttpClient.newBuilder instead of SafeHttpClients

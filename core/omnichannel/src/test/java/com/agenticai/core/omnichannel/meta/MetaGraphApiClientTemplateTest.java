@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.omnichannel.WhatsAppDispatchService;
 import com.agenticai.core.omnichannel.whatsapp.WhatsAppTemplate;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The wire shape of a WhatsApp template send and the parsing of Meta's template listing - the two
@@ -28,7 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 class MetaGraphApiClientTemplateTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     // --- send payload ---
 
@@ -39,19 +39,19 @@ class MetaGraphApiClientTemplateTest {
                         "919999900000", "invoice_reminder", "en_US", List.of("Asha", "INV-42"));
 
         JsonNode json = MAPPER.readTree(MAPPER.writeValueAsString(payload));
-        assertEquals("whatsapp", json.path("messaging_product").asText());
-        assertEquals("919999900000", json.path("to").asText());
-        assertEquals("template", json.path("type").asText());
-        assertEquals("invoice_reminder", json.path("template").path("name").asText());
-        assertEquals("en_US", json.path("template").path("language").path("code").asText());
+        assertEquals("whatsapp", json.path("messaging_product").asString());
+        assertEquals("919999900000", json.path("to").asString());
+        assertEquals("template", json.path("type").asString());
+        assertEquals("invoice_reminder", json.path("template").path("name").asString());
+        assertEquals("en_US", json.path("template").path("language").path("code").asString());
         JsonNode components = json.path("template").path("components");
         assertEquals(1, components.size());
-        assertEquals("body", components.get(0).path("type").asText());
+        assertEquals("body", components.get(0).path("type").asString());
         JsonNode parameters = components.get(0).path("parameters");
         assertEquals(2, parameters.size());
-        assertEquals("text", parameters.get(0).path("type").asText());
-        assertEquals("Asha", parameters.get(0).path("text").asText());
-        assertEquals("INV-42", parameters.get(1).path("text").asText());
+        assertEquals("text", parameters.get(0).path("type").asString());
+        assertEquals("Asha", parameters.get(0).path("text").asString());
+        assertEquals("INV-42", parameters.get(1).path("text").asString());
         assertFalse(json.has("text"), "a template send carries no free-text body");
     }
 
@@ -78,9 +78,9 @@ class MetaGraphApiClientTemplateTest {
         JsonNode parameters = blanks.path("template").path("components").get(0).path("parameters");
         assertEquals(
                 " ",
-                parameters.get(0).path("text").asText(),
+                parameters.get(0).path("text").asString(),
                 "Meta rejects an empty text parameter");
-        assertEquals(" ", parameters.get(1).path("text").asText());
+        assertEquals(" ", parameters.get(1).path("text").asString());
     }
 
     // --- listing ---
@@ -185,10 +185,10 @@ class MetaGraphApiClientTemplateTest {
                                 MetaGraphApiClient.templatePayload(
                                         "1555", "t", "en", List.of("line one\nline two", "\n"))));
         JsonNode parameters = json.path("template").path("components").get(0).path("parameters");
-        assertEquals("line one line two", parameters.get(0).path("text").asText());
+        assertEquals("line one line two", parameters.get(0).path("text").asString());
         assertEquals(
                 " ",
-                parameters.get(1).path("text").asText(),
+                parameters.get(1).path("text").asString(),
                 "a value that is only whitespace still fills the slot");
     }
 
@@ -219,7 +219,8 @@ class MetaGraphApiClientTemplateTest {
                         .getStatusCode());
         assertEquals(
                 HttpStatus.FORBIDDEN,
-                assertThrows(ResponseStatusException.class, () -> on.list(null, null, null)).getStatusCode());
+                assertThrows(ResponseStatusException.class, () -> on.list(null, null, null))
+                        .getStatusCode());
         verifyNoInteractions(dispatch);
     }
 
@@ -239,7 +240,8 @@ class MetaGraphApiClientTemplateTest {
                                 new WhatsAppTemplate(
                                         "invoice_reminder", "en_US", "UTILITY", "Hi {{1}}", 1),
                                 new WhatsAppTemplate("long_one", "en", null, longBody, 0)));
-        List<WhatsAppTemplateController.WhatsAppTemplateResponse> listed = controller.list(admin, null, null).getBody();
+        List<WhatsAppTemplateController.WhatsAppTemplateResponse> listed =
+                controller.list(admin, null, null).getBody();
         assertEquals(
                 new WhatsAppTemplateController.WhatsAppTemplateResponse(
                         "invoice_reminder", "en_US", 1, "Hi {{1}}", "UTILITY"),

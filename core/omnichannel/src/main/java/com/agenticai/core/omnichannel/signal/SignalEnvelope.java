@@ -1,9 +1,9 @@
 package com.agenticai.core.omnichannel.signal;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The part of a signal-cli envelope the agent acts on: a plain text message from a person (direct
@@ -41,15 +41,18 @@ public record SignalEnvelope(
         return isGroup() ? SignalAddress.groupExternalId(groupId) : senderId();
     }
 
-    /** Idempotency key: signal-cli redelivers on reconnect, the same sender never reuses a timestamp. */
+    /**
+     * Idempotency key: signal-cli redelivers on reconnect, the same sender never reuses a
+     * timestamp.
+     */
     public String dedupKey() {
         return conversationId() + ":" + senderId() + ":" + timestamp;
     }
 
     /**
-     * @param wrapper an element of {@code GET /v1/receive} or a websocket frame:
-     *     {@code {"envelope":{...},"account":"+..."}} (a bare envelope and a JSON-RPC style {@code
-     *     params} wrapper are accepted too)
+     * @param wrapper an element of {@code GET /v1/receive} or a websocket frame: {@code
+     *     {"envelope":{...},"account":"+..."}} (a bare envelope and a JSON-RPC style {@code params}
+     *     wrapper are accepted too)
      * @param accountNumber the connected number, to drop the account's own echoes
      */
     public static Optional<SignalEnvelope> parse(JsonNode wrapper, String accountNumber) {
@@ -62,7 +65,9 @@ public record SignalEnvelope(
         if (!data.isObject()) {
             return Optional.empty();
         }
-        if (data.hasNonNull("reaction") || data.hasNonNull("remoteDelete") || data.hasNonNull("storyContext")) {
+        if (data.hasNonNull("reaction")
+                || data.hasNonNull("remoteDelete")
+                || data.hasNonNull("storyContext")) {
             return Optional.empty();
         }
         String number = blankToNull(firstText(envelope, "sourceNumber", "source"));
@@ -72,7 +77,7 @@ public record SignalEnvelope(
         }
         String uuid = blankToNull(firstText(envelope, "sourceUuid", "sourceAci"));
         if (uuid == null && number == null) {
-            String source = blankToNull(envelope.path("source").asText(null));
+            String source = blankToNull(envelope.path("source").asString(null));
             uuid = source;
         }
         // Both end up as a session key and a send recipient: only well-formed values are routed.
@@ -89,20 +94,25 @@ public record SignalEnvelope(
             return Optional.empty();
         }
 
-        String text = sanitize(data.path("message").asText(""));
+        String text = sanitize(data.path("message").asString(""));
         List<String> notes = new ArrayList<>();
         for (JsonNode attachment : data.path("attachments")) {
             if (notes.size() >= 10) {
                 break;
             }
             // Both come from the sender: no line breaks, and short.
-            String type = sanitize(attachment.path("contentType").asText("file")).replace('\n', ' ');
+            String type =
+                    sanitize(attachment.path("contentType").asString("file")).replace('\n', ' ');
             type = type.isEmpty() ? "file" : cap(type, 100);
-            String name = cap(sanitize(attachment.path("filename").asText("")).replace('\n', ' '), 100);
+            String name =
+                    cap(sanitize(attachment.path("filename").asString("")).replace('\n', ' '), 100);
             notes.add("[attachment: " + type + (name.isEmpty() ? "" : " " + name) + "]");
         }
         if (!notes.isEmpty()) {
-            text = text.isEmpty() ? String.join("\n", notes) : text + "\n" + String.join("\n", notes);
+            text =
+                    text.isEmpty()
+                            ? String.join("\n", notes)
+                            : text + "\n" + String.join("\n", notes);
         }
         if (text.isBlank()) {
             return Optional.empty();
@@ -114,7 +124,7 @@ public record SignalEnvelope(
         String groupId = null;
         JsonNode groupInfo = data.path("groupInfo");
         if (groupInfo.isObject()) {
-            groupId = blankToNull(groupInfo.path("groupId").asText(null));
+            groupId = blankToNull(groupInfo.path("groupId").asString(null));
             if (!SignalAddress.validGroupInternalId(groupId)) {
                 // A group id that cannot be stored or addressed is not routed at all.
                 return Optional.empty();
@@ -129,17 +139,17 @@ public record SignalEnvelope(
 
     private static boolean addressedTo(JsonNode data, String accountNumber) {
         for (JsonNode mention : data.path("mentions")) {
-            if (accountNumber.equals(mention.path("number").asText(null))) {
+            if (accountNumber.equals(mention.path("number").asString(null))) {
                 return true;
             }
         }
-        return accountNumber.equals(data.path("quote").path("authorNumber").asText(null))
-                || accountNumber.equals(data.path("quote").path("author").asText(null));
+        return accountNumber.equals(data.path("quote").path("authorNumber").asString(null))
+                || accountNumber.equals(data.path("quote").path("author").asString(null));
     }
 
     private static String firstText(JsonNode node, String... fields) {
         for (String field : fields) {
-            String value = node.path(field).asText(null);
+            String value = node.path(field).asString(null);
             if (value != null && !value.isBlank()) {
                 return value;
             }

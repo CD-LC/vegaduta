@@ -1,14 +1,13 @@
 package com.agenticai.core.workflow;
 
-
+import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.agenticai.core.approval.ApprovalReplayGrant;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** "voice_menu": halts for a DTMF digit and routes on the matched branch when resumed. */
 @Component
@@ -18,6 +17,7 @@ class VoiceMenuNodeHandler implements NodeHandler {
                     com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequestService>
             voiceMenuRequestService;
     private final ObjectMapper objectMapper;
+
     VoiceMenuNodeHandler(
             ObjectProvider<com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequestService>
                     voiceMenuRequestService,
@@ -73,8 +73,8 @@ class VoiceMenuNodeHandler implements NodeHandler {
             try {
                 JsonNode envelope = objectMapper.readTree(input);
                 String branch =
-                        envelope.hasNonNull("branch") ? envelope.get("branch").asText() : null;
-                String digits = envelope.path("digits").asText("");
+                        envelope.hasNonNull("branch") ? envelope.get("branch").asString() : null;
+                String digits = envelope.path("digits").asString("");
                 return NodeExecutionResult.ok(
                         input,
                         digits.isBlank()

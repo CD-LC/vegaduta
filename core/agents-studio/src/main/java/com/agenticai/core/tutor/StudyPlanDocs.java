@@ -3,19 +3,20 @@ package com.agenticai.core.tutor;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * The shape of the two JSONB documents on {@link StudyPlan} and the one codec for them. These records
- * are the STORED form - they carry the quiz answer key - and never leave the server: every API
- * response goes through the views in {@code dto.TutorDtos}, which only reveal an answer after the
- * learner has attempted the question.
+ * The shape of the two JSONB documents on {@link StudyPlan} and the one codec for them. These
+ * records are the STORED form - they carry the quiz answer key - and never leave the server: every
+ * API response goes through the views in {@code dto.TutorDtos}, which only reveal an answer after
+ * the learner has attempted the question.
  *
- * <p>Timestamps inside the documents are ISO-8601 strings so the codec needs no Jackson time module.
+ * <p>Timestamps inside the documents are ISO-8601 strings so the codec needs no Jackson time
+ * module.
  */
 public final class StudyPlanDocs {
 
@@ -28,8 +29,7 @@ public final class StudyPlanDocs {
 
     private static final ObjectMapper MAPPER = JsonMappers.lenient();
 
-    private StudyPlanDocs() {
-    }
+    private StudyPlanDocs() {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Curriculum(List<Module> modules) {
@@ -45,10 +45,18 @@ public final class StudyPlanDocs {
         }
     }
 
-    /** {@code content} and {@code quiz} are null until the lesson has been generated (or supplied). */
+    /**
+     * {@code content} and {@code quiz} are null until the lesson has been generated (or supplied).
+     */
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record Lesson(String id, String title, String objective, String status, LessonContent content, List<QuizItem> quiz) {
+    public record Lesson(
+            String id,
+            String title,
+            String objective,
+            String status,
+            LessonContent content,
+            List<QuizItem> quiz) {
         public Lesson {
             status = status == null ? LESSON_NOT_STARTED : status;
             quiz = quiz == null ? null : List.copyOf(quiz);
@@ -79,10 +87,19 @@ public final class StudyPlanDocs {
         }
     }
 
-    /** {@code answeredIndex} is the learner's FIRST answer (the recorded attempt), null until they attempt the question. */
+    /**
+     * {@code answeredIndex} is the learner's FIRST answer (the recorded attempt), null until they
+     * attempt the question.
+     */
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record QuizItem(String id, String question, List<String> options, int correctIndex, String explanation, Integer answeredIndex) {
+    public record QuizItem(
+            String id,
+            String question,
+            List<String> options,
+            int correctIndex,
+            String explanation,
+            Integer answeredIndex) {
         public QuizItem {
             options = options == null ? List.of() : List.copyOf(options);
         }
@@ -104,9 +121,18 @@ public final class StudyPlanDocs {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Card(
-        String id, String lessonId, String question, List<String> options, int correctIndex, String explanation,
-        double ease, int intervalDays, int reps, int lapses, String dueAt, String lastResult
-    ) {
+            String id,
+            String lessonId,
+            String question,
+            List<String> options,
+            int correctIndex,
+            String explanation,
+            double ease,
+            int intervalDays,
+            int reps,
+            int lapses,
+            String dueAt,
+            String lastResult) {
         public Card {
             options = options == null ? List.of() : List.copyOf(options);
         }
@@ -120,9 +146,19 @@ public final class StudyPlanDocs {
         }
 
         public Card rescheduled(SpacedRepetition.Schedule schedule, String result) {
-            return new Card(id, lessonId, question, options, correctIndex, explanation,
-                schedule.ease(), schedule.intervalDays(), schedule.reps(), schedule.lapses(),
-                schedule.dueAt().toString(), result);
+            return new Card(
+                    id,
+                    lessonId,
+                    question,
+                    options,
+                    correctIndex,
+                    explanation,
+                    schedule.ease(),
+                    schedule.intervalDays(),
+                    schedule.reps(),
+                    schedule.lapses(),
+                    schedule.dueAt().toString(),
+                    result);
         }
     }
 
@@ -133,7 +169,7 @@ public final class StudyPlanDocs {
         try {
             Curriculum parsed = MAPPER.readValue(json, Curriculum.class);
             return parsed == null ? new Curriculum(List.of()) : parsed;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Stored study plan curriculum is not valid JSON", e);
         }
     }
@@ -145,7 +181,7 @@ public final class StudyPlanDocs {
         try {
             ReviewDeck parsed = MAPPER.readValue(json, ReviewDeck.class);
             return parsed == null ? new ReviewDeck(List.of(), null) : parsed;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Stored study plan review deck is not valid JSON", e);
         }
     }
@@ -153,7 +189,7 @@ public final class StudyPlanDocs {
     public static String write(Object document) {
         try {
             return MAPPER.writeValueAsString(document);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not serialise a study plan document", e);
         }
     }

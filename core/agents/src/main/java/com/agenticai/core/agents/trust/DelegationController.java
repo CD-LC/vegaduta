@@ -14,7 +14,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.tenancy.ListPaging;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tenant-facing REST for agent delegation (agent identity acting on behalf of a user). Creating a
@@ -123,11 +123,17 @@ public class DelegationController {
     }
 
     @GetMapping("/{agentId}/delegations")
-    public ResponseEntity<List<GrantResponse>> list(@PathVariable UUID agentId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<GrantResponse>> list(
+            @PathVariable UUID agentId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return ListPaging.window(
-            delegationService.listGrants(agentId).stream().map(this::toResponse).toList(),
-            limit, offset, 50, 500);
+                delegationService.listGrants(agentId).stream().map(this::toResponse).toList(),
+                limit,
+                offset,
+                50,
+                500);
     }
 
     @PostMapping("/{agentId}/delegations/{grantId}/revoke")

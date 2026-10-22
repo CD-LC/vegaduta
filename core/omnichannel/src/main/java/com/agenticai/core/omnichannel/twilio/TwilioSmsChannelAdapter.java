@@ -8,11 +8,11 @@ import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.SmsDispatchService;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Approval-gated plain-SMS send (2026-10-14) - the SMS sibling of {@link
@@ -20,8 +20,9 @@ import org.springframework.stereotype.Component;
  * like every other channel. {@code TwilioSmsWebhookController} never sends inline TwiML: an agent's
  * reply goes through {@code HumanApprovalGateService.evaluate(ACTION_TYPE, ...)} and reaches this
  * class only once approved (or auto-approved by policy), so the Stage 1 "no side channel around the
- * gate" rule holds for SMS too. {@code channel.*.send} is a sensitive pattern by default, so a fresh
- * tenant's first SMS reply waits for an approval unless the tenant auto-approves the action type.
+ * gate" rule holds for SMS too. {@code channel.*.send} is a sensitive pattern by default, so a
+ * fresh tenant's first SMS reply waits for an approval unless the tenant auto-approves the action
+ * type.
  *
  * <p><b>Why the body is cut here, not in the agent.</b> A carrier concatenates at most about ten
  * segments (1,600 GSM-7 characters; Indic and other non-Latin scripts fall back to UCS-2, 70
@@ -69,7 +70,8 @@ public class TwilioSmsChannelAdapter implements ApprovalActionExecutor {
         try {
             String result = dispatchService.send(payload.to(), body);
             log.info("{} (recipient {})", result, maskRecipient(payload.to()));
-            outboundLogger.recordSent(ChannelType.SMS, payload.to(), body, request.getRequestedBy());
+            outboundLogger.recordSent(
+                    ChannelType.SMS, payload.to(), body, request.getRequestedBy());
         } catch (RuntimeException e) {
             // Same retry posture (and the same honest double-send caveat) as the
             // WhatsApp adapter: a carrier or Twilio hiccup is plausibly transient.

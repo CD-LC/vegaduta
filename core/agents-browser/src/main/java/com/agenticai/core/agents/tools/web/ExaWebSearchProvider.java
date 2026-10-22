@@ -1,13 +1,13 @@
 package com.agenticai.core.agents.tools.web;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Exa Search adapter ({@code POST https://api.exa.ai/search}).
@@ -96,11 +96,11 @@ public class ExaWebSearchProvider extends AbstractKeyedSearchProvider {
         if (highlights.isArray() && !highlights.isEmpty()) {
             StringBuilder joined = new StringBuilder();
             for (JsonNode h : highlights) {
-                if (h.isTextual() && !h.asText().isBlank()) {
+                if (h.isString() && !h.asString().isBlank()) {
                     if (joined.length() > 0) {
                         joined.append(" ... ");
                     }
-                    joined.append(h.asText().strip());
+                    joined.append(h.asString().strip());
                 }
             }
             if (joined.length() > 0) {

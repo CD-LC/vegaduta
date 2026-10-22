@@ -4,11 +4,6 @@ import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SafeWebSockets;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -37,24 +32,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Client for the signal-cli REST API (bbernhard/signal-cli-rest-api) the operator runs. Every REST
- * call goes through an address-pinned, proxy-free, redirect-free client built on {@link
- * SsrfGuard}: a private signal-cli host works only when the operator lists it in {@code
+ * call goes through an address-pinned, proxy-free, redirect-free client built on {@link SsrfGuard}:
+ * a private signal-cli host works only when the operator lists it in {@code
  * app.security.outbound.allowed-private-hosts}, exactly like a self-hosted Ollama or MCP server.
- * The URL is also re-validated before every call, which enforces the {@code host:port} form of
- * that list (the resolver only sees the host).
+ * The URL is also re-validated before every call, which enforces the {@code host:port} form of that
+ * list (the resolver only sees the host).
  *
  * <p>The optional bearer token (for a reverse proxy in front of signal-cli) is sent only over
  * https, or to a host the operator allow-listed. It is never part of a URL, a log line or an
  * exception message.
  *
  * <p>Two ways to receive, chosen by the caller from {@link #about}: {@link #receive} polls {@code
- * GET /v1/receive/{number}} (signal-cli "normal" and "native" modes), {@link #openStream} holds
- * the websocket the same path becomes in "json-rpc" mode. The websocket uses the JDK client, which
- * has no pluggable resolver: the URL is validated just before connecting, which covers address
- * ranges but not a DNS answer that changes between that check and the connect.
+ * GET /v1/receive/{number}} (signal-cli "normal" and "native" modes), {@link #openStream} holds the
+ * websocket the same path becomes in "json-rpc" mode. The websocket uses the JDK client, which has
+ * no pluggable resolver: the URL is validated just before connecting, which covers address ranges
+ * but not a DNS answer that changes between that check and the connect.
  */
 @Component
 public class SignalApiClient {
@@ -63,6 +63,7 @@ public class SignalApiClient {
 
     static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
     static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
+
     /** Activation and probe run while someone waits on a spinner. */
     static final Duration VALIDATE_TIMEOUT = Duration.ofSeconds(8);
 
@@ -101,7 +102,7 @@ public class SignalApiClient {
 
     public About about(SignalConnection c) {
         JsonNode body = call(c, "GET", "/v1/about", null, VALIDATE_TIMEOUT);
-        return new About(body.path("mode").asText(""), body.path("version").asText(""));
+        return new About(body.path("mode").asString(""), body.path("version").asString(""));
     }
 
     /** The numbers registered with this signal-cli. */
@@ -109,7 +110,7 @@ public class SignalApiClient {
         JsonNode body = call(c, "GET", "/v1/accounts", null, VALIDATE_TIMEOUT);
         List<String> numbers = new ArrayList<>();
         for (JsonNode item : body) {
-            String number = item.isTextual() ? item.asText() : item.path("number").asText("");
+            String number = item.isString() ? item.asString() : item.path("number").asString("");
             if (!number.isBlank()) {
                 numbers.add(number);
             }
@@ -149,12 +150,15 @@ public class SignalApiClient {
         }
         try {
             call(c, "POST", "/v2/send", objectMapper.writeValueAsString(body), REQUEST_TIMEOUT);
-        } catch (JsonProcessingException e) {
-            throw new SignalApiException(SignalApiException.IO, "Could not build the Signal send request.", e);
+        } catch (JacksonException e) {
+            throw new SignalApiException(
+                    SignalApiException.IO, "Could not build the Signal send request.", e);
         }
     }
 
-    /** Shows "typing..." to the recipient. Best effort: a UX nicety, never a reason to fail a reply. */
+    /**
+     * Shows "typing..." to the recipient. Best effort: a UX nicety, never a reason to fail a reply.
+     */
     public void sendTypingIndicator(SignalConnection c, String recipient) {
         try {
             ObjectNode body = objectMapper.createObjectNode();
@@ -194,18 +198,23 @@ public class SignalApiClient {
         }
         stream.http = http;
         try {
-            stream.socket = builder.buildAsync(uri, stream).get(CONNECT_TIMEOUT.toSeconds() + 5, TimeUnit.SECONDS);
+            stream.socket =
+                    builder.buildAsync(uri, stream)
+                            .get(CONNECT_TIMEOUT.toSeconds() + 5, TimeUnit.SECONDS);
             return stream;
         } catch (InterruptedException e) {
             stream.close();
             Thread.currentThread().interrupt();
-            throw new SignalApiException(SignalApiException.IO, "Interrupted while connecting to signal-cli.", e);
+            throw new SignalApiException(
+                    SignalApiException.IO, "Interrupted while connecting to signal-cli.", e);
         } catch (ExecutionException | TimeoutException e) {
             stream.close();
-            Throwable cause = e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
+            Throwable cause =
+                    e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
             throw new SignalApiException(
                     SignalApiException.IO,
-                    "Could not open the signal-cli receive websocket: " + cause.getClass().getSimpleName(),
+                    "Could not open the signal-cli receive websocket: "
+                            + cause.getClass().getSimpleName(),
                     cause);
         }
     }
@@ -216,7 +225,11 @@ public class SignalApiClient {
         private final StringBuilder partial = new StringBuilder();
         private volatile boolean open = true;
         private volatile WebSocket socket;
-        /** One client per connection: released with the stream so reconnects do not pile up selector threads. */
+
+        /**
+         * One client per connection: released with the stream so reconnects do not pile up selector
+         * threads.
+         */
         private volatile HttpClient http;
 
         @Override
@@ -239,7 +252,7 @@ public class SignalApiClient {
                 partial.setLength(0);
                 try {
                     queue.put(objectMapper.readTree(frame));
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     log.debug("Ignoring a non-JSON Signal websocket frame");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -277,7 +290,8 @@ public class SignalApiClient {
             }
             if (next == closed) {
                 queue.offer(closed); // stay closed for any later poll
-                throw new SignalApiException(SignalApiException.IO, "signal-cli closed the receive websocket.");
+                throw new SignalApiException(
+                        SignalApiException.IO, "signal-cli closed the receive websocket.");
             }
             return (JsonNode) next;
         }
@@ -346,9 +360,11 @@ public class SignalApiClient {
 
     private record Raw(int status, String body) {}
 
-    private JsonNode call(SignalConnection c, String method, String path, String jsonBody, Duration timeout) {
+    private JsonNode call(
+            SignalConnection c, String method, String path, String jsonBody, Duration timeout) {
         validate(c);
-        HttpUriRequestBase request = new HttpUriRequestBase(method, URI.create(trimTrailingSlash(c.baseUrl()) + path));
+        HttpUriRequestBase request =
+                new HttpUriRequestBase(method, URI.create(trimTrailingSlash(c.baseUrl()) + path));
         request.setHeader("Accept", "application/json");
         if (c.hasAuthToken()) {
             request.setHeader("Authorization", "Bearer " + c.authToken());
@@ -366,8 +382,10 @@ public class SignalApiClient {
                                     response -> {
                                         String body = "";
                                         if (response.getEntity() != null) {
-                                            try (InputStream in = response.getEntity().getContent()) {
-                                                byte[] bytes = in.readNBytes(MAX_RESPONSE_BYTES + 1);
+                                            try (InputStream in =
+                                                    response.getEntity().getContent()) {
+                                                byte[] bytes =
+                                                        in.readNBytes(MAX_RESPONSE_BYTES + 1);
                                                 if (bytes.length > MAX_RESPONSE_BYTES) {
                                                     throw new IOException("response too large");
                                                 }
@@ -384,21 +402,23 @@ public class SignalApiClient {
         }
         if (raw.status() < 200 || raw.status() >= 300) {
             throw new SignalApiException(
-                    raw.status(), "signal-cli answered HTTP " + raw.status() + errorText(raw.body()));
+                    raw.status(),
+                    "signal-cli answered HTTP " + raw.status() + errorText(raw.body()));
         }
         if (raw.body().isBlank()) {
             return objectMapper.nullNode();
         }
         try {
             return objectMapper.readTree(raw.body());
-        } catch (JsonProcessingException e) {
-            throw new SignalApiException(raw.status(), "signal-cli sent a response that is not JSON.", e);
+        } catch (JacksonException e) {
+            throw new SignalApiException(
+                    raw.status(), "signal-cli sent a response that is not JSON.", e);
         }
     }
 
     private String errorText(String body) {
         try {
-            String error = objectMapper.readTree(body).path("error").asText("");
+            String error = objectMapper.readTree(body).path("error").asString("");
             if (!error.isBlank()) {
                 return ": " + (error.length() > 200 ? error.substring(0, 200) : error);
             }
@@ -410,7 +430,9 @@ public class SignalApiClient {
 
     private static String describe(IOException e) {
         String message = e.getMessage();
-        return message == null || message.isBlank() ? "" : " (" + (message.length() > 120 ? message.substring(0, 120) : message) + ")";
+        return message == null || message.isBlank()
+                ? ""
+                : " (" + (message.length() > 120 ? message.substring(0, 120) : message) + ")";
     }
 
     /** {@code data:<type>;filename=<name>;base64,<data>}, the form signal-cli-rest-api takes. */
@@ -419,7 +441,8 @@ public class SignalApiClient {
                 file.contentType() == null || file.contentType().isBlank()
                         ? "application/octet-stream"
                         : file.contentType().replaceAll("[^A-Za-z0-9.+/_-]", "");
-        String name = file.filename() == null ? "" : file.filename().replaceAll("[^A-Za-z0-9._ -]", "_");
+        String name =
+                file.filename() == null ? "" : file.filename().replaceAll("[^A-Za-z0-9._ -]", "_");
         return "data:"
                 + type.toLowerCase(Locale.ROOT)
                 + (name.isBlank() ? "" : ";filename=" + name)

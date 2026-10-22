@@ -350,7 +350,9 @@ services:
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
       LIVEKIT_URL: ${PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
       MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
-      MANAGEMENT_TRACING_ENABLED: "false"
+      # Boot 4 renamed management.tracing.enabled to management.tracing.export.enabled (ADR-0012 P2/P3);
+      # the old env name is silently ignored now. application-lite.yml sets the same value.
+      MANAGEMENT_TRACING_EXPORT_ENABLED: "false"
       SPRING_MAIL_HOST: ${SMTP_HOST:-}
       SPRING_MAIL_PORT: ${SMTP_PORT:-587}
       SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}

@@ -7,8 +7,6 @@ import com.agenticai.core.rl.domain.RewardRecord;
 import com.agenticai.core.rl.domain.RewardSource;
 import com.agenticai.core.rl.repo.EpisodeRepository;
 import com.agenticai.core.rl.repo.RewardRecordRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -21,27 +19,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Computes an {@link Episode}'s VERIFIABLE COMPOSITE reward and persists it.
  *
- * <p>The reward is a weighted mean of the non-{@link RewardSource#SAFETY}
- * components (each {@link RewardRecord} carries its own weight), then CLIPPED
- * to the configured [{@code clipMin}, {@code clipMax}] range for the bandit,
- * then subjected to a SAFETY VETO: any SAFETY-source violation (value &gt; 0)
- * caps the final reward at {@code rl.reward.safety-veto-cap} (&le; 0.1 by
- * default). The raw per-source breakdown is stored on the episode as
- * {@code rewardBreakdownJson} so the scalar is always auditable back to its
- * parts - the anti-reward-hacking posture (verifiable composite + clipping +
- * safety veto).
+ * <p>The reward is a weighted mean of the non-{@link RewardSource#SAFETY} components (each {@link
+ * RewardRecord} carries its own weight), then CLIPPED to the configured [{@code clipMin}, {@code
+ * clipMax}] range for the bandit, then subjected to a SAFETY VETO: any SAFETY-source violation
+ * (value &gt; 0) caps the final reward at {@code rl.reward.safety-veto-cap} (&le; 0.1 by default).
+ * The raw per-source breakdown is stored on the episode as {@code rewardBreakdownJson} so the
+ * scalar is always auditable back to its parts - the anti-reward-hacking posture (verifiable
+ * composite + clipping + safety veto).
  *
- * <p><b>Langfuse score push (infrastructure audit fix).</b> {@link
- * #computeReward} now also pushes the final clipped reward to Langfuse as a
- * session-scoped NUMERIC score via {@link LangfuseScoreClient} - see that
- * call site's own comment for why session-scoped (an episode's trajectory
- * can span multiple LLM calls/traces) and why a fixed score id is used
- * (idempotent upsert across recomputation). This closes the "core/rl's
- * reward signal never writes back to Langfuse" gap.
+ * <p><b>Langfuse score push (infrastructure audit fix).</b> {@link #computeReward} now also pushes
+ * the final clipped reward to Langfuse as a session-scoped NUMERIC score via {@link
+ * LangfuseScoreClient} - see that call site's own comment for why session-scoped (an episode's
+ * trajectory can span multiple LLM calls/traces) and why a fixed score id is used (idempotent
+ * upsert across recomputation). This closes the "core/rl's reward signal never writes back to
+ * Langfuse" gap.
  */
 @Service
 public class RewardService {
@@ -55,11 +52,10 @@ public class RewardService {
     private final LangfuseScoreClient langfuseScoreClient;
 
     public RewardService(
-        EpisodeRepository episodeRepository,
-        RewardRecordRepository rewardRecordRepository,
-        RlRewardProperties properties,
-        LangfuseScoreClient langfuseScoreClient
-    ) {
+            EpisodeRepository episodeRepository,
+            RewardRecordRepository rewardRecordRepository,
+            RlRewardProperties properties,
+            LangfuseScoreClient langfuseScoreClient) {
         this.episodeRepository = episodeRepository;
         this.rewardRecordRepository = rewardRecordRepository;
         this.properties = properties;
@@ -67,20 +63,22 @@ public class RewardService {
     }
 
     /**
-     * Records one reward component on an episode. {@code weight} may be null,
-     * in which case the configured default weight for the source is used.
+     * Records one reward component on an episode. {@code weight} may be null, in which case the
+     * configured default weight for the source is used.
      */
     @Transactional
-    public RewardRecord addRewardRecord(UUID episodeId, RewardSource source, BigDecimal value, BigDecimal weight) {
-        BigDecimal effectiveWeight = weight != null ? weight : BigDecimal.valueOf(defaultWeightFor(source));
-        return rewardRecordRepository.save(new RewardRecord(episodeId, source, value, effectiveWeight, Instant.now()));
+    public RewardRecord addRewardRecord(
+            UUID episodeId, RewardSource source, BigDecimal value, BigDecimal weight) {
+        BigDecimal effectiveWeight =
+                weight != null ? weight : BigDecimal.valueOf(defaultWeightFor(source));
+        return rewardRecordRepository.save(
+                new RewardRecord(episodeId, source, value, effectiveWeight, Instant.now()));
     }
 
     /**
-     * Recomputes the composite reward for an episode from its current reward
-     * records, writing both the clipped scalar and the raw breakdown JSON onto
-     * the episode. Returns the clipped reward in [clipMin, clipMax], or null if
-     * the episode does not exist.
+     * Recomputes the composite reward for an episode from its current reward records, writing both
+     * the clipped scalar and the raw breakdown JSON onto the episode. Returns the clipped reward in
+     * [clipMin, clipMax], or null if the episode does not exist.
      */
     @Transactional
     public Double computeReward(UUID episodeId) {
@@ -151,10 +149,15 @@ public class RewardService {
         // accumulating duplicates - Langfuse's ingestion docs describe
         // repeat submission of the same score id as an upsert.
         langfuseScoreClient.pushScore(
-            "rl-reward-" + episode.getId(), null, episode.getSessionId(), "rl_reward",
-            LangfuseScoreClient.ScoreDataType.NUMERIC, finalReward,
-            safetyViolation ? "safety veto applied (cap " + properties.getSafetyVetoCap() + ")" : null
-        );
+                "rl-reward-" + episode.getId(),
+                null,
+                episode.getSessionId(),
+                "rl_reward",
+                LangfuseScoreClient.ScoreDataType.NUMERIC,
+                finalReward,
+                safetyViolation
+                        ? "safety veto applied (cap " + properties.getSafetyVetoCap() + ")"
+                        : null);
 
         return finalReward;
     }
@@ -180,7 +183,7 @@ public class RewardService {
     private static String toJson(Map<String, Object> breakdown) {
         try {
             return MAPPER.writeValueAsString(breakdown);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to serialize reward breakdown - storing null", e);
             return null;
         }

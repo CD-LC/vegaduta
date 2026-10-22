@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +26,7 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Zero test coverage existed for {@link RedisTenantDataPurgeService} before this. Every key family
@@ -104,7 +104,9 @@ class RedisTenantDataPurgeServiceTest {
         when(valueOperations.get(anyString()))
                 .thenAnswer(invocation -> values.get(invocation.getArgument(0, String.class)));
 
-        service = new RedisTenantDataPurgeService(redisTemplate, new ObjectMapper());
+        service =
+                new RedisTenantDataPurgeService(
+                        redisTemplate, com.agenticai.core.json.JsonMappers.plain());
     }
 
     /**

@@ -3,9 +3,9 @@ package com.agenticai.core.agents.tools.device;
 import com.agenticai.core.devices.DeviceDataIngestionService;
 import com.agenticai.core.devices.MobileDevice;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Small shared helpers for the four {@code read_device_*} tool callbacks (#157 follow-up) - device

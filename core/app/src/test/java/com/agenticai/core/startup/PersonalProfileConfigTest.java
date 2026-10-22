@@ -128,7 +128,8 @@ class PersonalProfileConfigTest {
 
         assertThat(env.getProperty("app.storage.type")).isEqualTo("local");
         assertThat(env.getProperty("app.workflow.execution-engine")).isEqualTo("legacy");
-        assertThat(env.getProperty("management.tracing.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("management.tracing.export.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("management.tracing.export.otlp.enabled")).isEqualTo("false");
         assertThat(env.getProperty("spring.data.redis.timeout")).isEqualTo("2s");
         assertThat(env.getProperty("spring.datasource.hikari.maximum-pool-size")).isEqualTo("10");
         assertThat(env.getProperty("spring.datasource.hikari.minimum-idle")).isEqualTo("2");

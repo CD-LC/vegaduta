@@ -10,7 +10,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.OffsetLimitRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Publish/unpublish/read for the public agent directory (Know-Your-Agent discovery). Publish
@@ -90,7 +90,7 @@ public class AgentDirectoryService {
                     capabilities == null ? null : objectMapper.writeValueAsString(capabilities));
             entry.setCardSnapshot(objectMapper.writeValueAsString(card));
             entry.setManifestSnapshot(objectMapper.writeValueAsString(manifest));
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException("directory snapshot serialization failed", e);
         }
         if (entry.getStatus() != AgentDirectoryEntry.Status.PUBLISHED

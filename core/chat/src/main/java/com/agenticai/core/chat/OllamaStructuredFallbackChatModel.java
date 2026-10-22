@@ -4,9 +4,6 @@ import com.agenticai.core.chat.structured.JsonSchemaCheck;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.chat.structured.StructuredOutputException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +21,11 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Keeps a structured-output request alive on an Ollama model whose server refuses {@code
@@ -36,10 +35,10 @@ import reactor.core.publisher.Flux;
  *
  * <ol>
  *   <li>The request goes out unchanged (schema-constrained decoding is the better path).
- *   <li>On a 4xx that names the constraint ({@link ConstrainedToolRouterChatModel#isConstraintRefusal}),
- *       the model is remembered as refusing until core restarts, and the same request is sent again
- *       <b>without</b> the response format, with the schema written into the system message instead
- *       (prompt-based JSON).
+ *   <li>On a 4xx that names the constraint ({@link
+ *       ConstrainedToolRouterChatModel#isConstraintRefusal}), the model is remembered as refusing
+ *       until core restarts, and the same request is sent again <b>without</b> the response format,
+ *       with the schema written into the system message instead (prompt-based JSON).
  *   <li>The reply is parsed ({@link StructuredOutput#extractJson}) and checked against the schema
  *       ({@link JsonSchemaCheck}). A reply that does not fit gets exactly one repair turn that says
  *       what was wrong ({@link StructuredOutput#repairPrompt}).
@@ -54,9 +53,12 @@ import reactor.core.publisher.Flux;
  */
 final class OllamaStructuredFallbackChatModel implements ChatModel {
 
-    private static final Logger log = LoggerFactory.getLogger(OllamaStructuredFallbackChatModel.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(OllamaStructuredFallbackChatModel.class);
 
-    /** Models whose server refused the response format; process-wide, like the tool router's set. */
+    /**
+     * Models whose server refused the response format; process-wide, like the tool router's set.
+     */
     static final Set<String> FORMAT_REFUSED = ConcurrentHashMap.newKeySet();
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
@@ -70,7 +72,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         JsonNode parsed = null;
         try {
             parsed = MAPPER.readTree(jsonSchema);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             // an unusable schema still works as prompt text; it just cannot be checked
         }
         this.schema = parsed != null && parsed.isObject() ? parsed : null;
@@ -79,7 +81,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
 
     @Override
     public ChatResponse call(Prompt prompt) {
-        if (!(prompt != null && prompt.getOptions() instanceof OpenAiChatOptions options) || !asksForSchema(options)) {
+        if (!(prompt != null && prompt.getOptions() instanceof OpenAiChatOptions options)
+                || !asksForSchema(options)) {
             return delegate.call(prompt);
         }
         String model = options.getModel() == null ? "" : options.getModel();
@@ -91,8 +94,11 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
                     throw e;
                 }
                 FORMAT_REFUSED.add(model);
-                log.warn("Ollama refused the reply schema for model '{}'; structured replies use prompt-based JSON"
-                        + " with validation until core restarts. Message: {}", model, e.getMessage());
+                log.warn(
+                        "Ollama refused the reply schema for model '{}'; structured replies use"
+                                + " prompt-based JSON with validation until core restarts. Message: {}",
+                        model,
+                        e.getMessage());
             }
         }
         return promptBased(prompt, options);
@@ -104,8 +110,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     }
 
     @Override
-    public ChatOptions getDefaultOptions() {
-        return delegate.getDefaultOptions();
+    public ChatOptions getOptions() {
+        return delegate.getOptions();
     }
 
     private static boolean asksForSchema(OpenAiChatOptions options) {
@@ -116,8 +122,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     // --- the fallback -------------------------------------------------------------------
 
     private ChatResponse promptBased(Prompt original, OpenAiChatOptions options) {
-        OpenAiChatOptions plain = options.copy();
-        plain.setResponseFormat(null);
+        OpenAiChatOptions plain = options.mutate().responseFormat(null).build();
         List<Message> messages = withSchemaInstruction(original.getInstructions());
         ChatResponse response = delegate.call(new Prompt(messages, plain));
         String text = textOf(response);
@@ -125,22 +130,33 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         if (problem == null) {
             return withText(response, StructuredOutput.extractJson(text).orElse(text));
         }
-        log.info("Prompt-based structured reply did not fit the schema ({}); asking once more.", problem);
+        log.info(
+                "Prompt-based structured reply did not fit the schema ({}); asking once more.",
+                problem);
         List<Message> repair = new ArrayList<>(messages);
         repair.add(new AssistantMessage(text));
-        repair.add(new UserMessage(StructuredOutput.repairPrompt(
-                new StructuredOutputException(problem, text), schemaInstruction())));
-        ChatResponse second = TextToolCallRecoveringChatModel.withCumulativeUsage(
-                delegate.call(new Prompt(repair, plain)), response);
+        repair.add(
+                new UserMessage(
+                        StructuredOutput.repairPrompt(
+                                new StructuredOutputException(problem, text),
+                                schemaInstruction())));
+        ChatResponse second =
+                TextToolCallRecoveringChatModel.withCumulativeUsage(
+                        delegate.call(new Prompt(repair, plain)), response);
         String repairedText = textOf(second);
         if (problemWith(repairedText) == null) {
-            return withText(second, StructuredOutput.extractJson(repairedText).orElse(repairedText));
+            return withText(
+                    second, StructuredOutput.extractJson(repairedText).orElse(repairedText));
         }
-        log.warn("Prompt-based structured reply still does not fit the schema after one repair: {}", problem);
+        log.warn(
+                "Prompt-based structured reply still does not fit the schema after one repair: {}",
+                problem);
         return second;
     }
 
-    /** The schema as an extra paragraph of the first system message (a new one when there is none). */
+    /**
+     * The schema as an extra paragraph of the first system message (a new one when there is none).
+     */
     private List<Message> withSchemaInstruction(List<Message> original) {
         List<Message> messages = new ArrayList<>(original);
         String instruction = schemaInstruction();
@@ -153,8 +169,10 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     }
 
     private String schemaInstruction() {
-        return "Reply with ONLY one JSON value that is valid for the JSON Schema below. No markdown code fences,"
-                + " no commentary before or after.\nJSON Schema: " + schemaText;
+        return "Reply with ONLY one JSON value that is valid for the JSON Schema below. No markdown"
+                + " code fences, no commentary before or after.\n"
+                + "JSON Schema: "
+                + schemaText;
     }
 
     /** Null when {@code text} holds JSON that fits the schema; otherwise what is wrong with it. */
@@ -169,13 +187,15 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         try {
             List<String> problems = JsonSchemaCheck.problems(schema, MAPPER.readTree(json.get()));
             return problems.isEmpty() ? null : String.join("; ", problems);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             return "the reply was not valid JSON";
         }
     }
 
     private static String textOf(ChatResponse response) {
-        if (response == null || response.getResult() == null || response.getResult().getOutput() == null) {
+        if (response == null
+                || response.getResult() == null
+                || response.getResult().getOutput() == null) {
             return "";
         }
         String text = response.getResult().getOutput().getText();
@@ -187,7 +207,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
             return response;
         }
         ChatGenerationMetadata meta = response.getResult().getMetadata();
-        Generation generation = new Generation(AssistantMessage.builder().content(text).build(), meta);
+        Generation generation =
+                new Generation(AssistantMessage.builder().content(text).build(), meta);
         return ChatResponse.builder().from(response).generations(List.of(generation)).build();
     }
 }

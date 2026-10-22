@@ -1,11 +1,11 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Type-tolerant accessors over untrusted JSON. A wrong type or a missing field yields null / empty
@@ -15,13 +15,14 @@ import java.util.regex.Pattern;
  */
 public final class AgentImportJson {
 
-    private AgentImportJson() {
-    }
+    private AgentImportJson() {}
 
     /** Keys whose values are credentials or credential references; never read, only counted. */
-    private static final Pattern SECRET_KEY = Pattern.compile(
-        "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_ ]?token|access[-_ ]?token"
-            + "|refresh[-_ ]?token|private[-_ ]?key|session[-_ ]?token|^token$|^key$)");
+    private static final Pattern SECRET_KEY =
+            Pattern.compile(
+                    "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_"
+                            + " ]?token|access[-_ ]?token|refresh[-_ ]?token|private[-_"
+                            + " ]?key|session[-_ ]?token|^token$|^key$)");
 
     /** Upper bound on nodes visited when scanning for credential fields. */
     private static final int SCAN_NODE_CAP = 200_000;
@@ -46,10 +47,10 @@ public final class AgentImportJson {
 
     /** {@code v}'s text, trimmed, or null when {@code v} is absent, not textual, or blank. */
     public static String textOf(JsonNode v) {
-        if (v == null || !v.isTextual()) {
+        if (v == null || !v.isString()) {
             return null;
         }
-        String s = v.asText().trim();
+        String s = v.asString().trim();
         return s.isEmpty() ? null : s;
     }
 
@@ -79,8 +80,8 @@ public final class AgentImportJson {
         Double d = null;
         if (v.isNumber()) {
             d = v.asDouble();
-        } else if (v.isTextual()) {
-            String s = v.asText().trim();
+        } else if (v.isString()) {
+            String s = v.asString().trim();
             if (!s.isEmpty() && s.length() <= 32) {
                 try {
                     d = Double.valueOf(s);
@@ -109,10 +110,10 @@ public final class AgentImportJson {
         if (v == null || v.isNull() || v.isMissingNode()) {
             return false;
         }
-        if (v.isTextual()) {
-            return !v.asText().isBlank();
+        if (v.isString()) {
+            return !v.asString().isBlank();
         }
-        if (v.isContainerNode()) {
+        if (v.isContainer()) {
             return v.size() > 0;
         }
         return true;
@@ -133,7 +134,7 @@ public final class AgentImportJson {
         JsonNode o = obj(node, field);
         List<String> out = new ArrayList<>();
         if (o != null) {
-            o.fieldNames().forEachRemaining(out::add);
+            o.propertyNames().forEach(out::add);
         }
         return out;
     }
@@ -144,10 +145,10 @@ public final class AgentImportJson {
     }
 
     /**
-     * Counts fields anywhere under {@code root} whose NAME looks like a credential and whose value is
-     * non-empty. Values are never read into the result and nothing is copied - this exists only so
-     * the report can say "N credential fields were found and not imported". Iterative (no recursion
-     * depth risk) and bounded by {@link #SCAN_NODE_CAP}.
+     * Counts fields anywhere under {@code root} whose NAME looks like a credential and whose value
+     * is non-empty. Values are never read into the result and nothing is copied - this exists only
+     * so the report can say "N credential fields were found and not imported". Iterative (no
+     * recursion depth risk) and bounded by {@link #SCAN_NODE_CAP}.
      */
     public static int countCredentialFields(JsonNode root) {
         if (root == null) {
@@ -161,13 +162,13 @@ public final class AgentImportJson {
             JsonNode n = stack.pop();
             visited++;
             if (n.isObject()) {
-                var it = n.fields();
+                var it = n.properties().iterator();
                 while (it.hasNext()) {
                     var e = it.next();
                     JsonNode v = e.getValue();
                     if (isSecretKey(e.getKey()) && isNonEmptyValue(v)) {
                         count++;
-                    } else if (v.isContainerNode()) {
+                    } else if (v.isContainer()) {
                         stack.push(v);
                     }
                 }
@@ -182,10 +183,10 @@ public final class AgentImportJson {
         if (v == null || v.isNull() || v.isMissingNode()) {
             return false;
         }
-        if (v.isTextual()) {
-            return !v.asText().isBlank();
+        if (v.isString()) {
+            return !v.asString().isBlank();
         }
-        if (v.isContainerNode()) {
+        if (v.isContainer()) {
             return v.size() > 0;
         }
         return true;

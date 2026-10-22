@@ -2,45 +2,49 @@ package com.agenticai.core.agents.openai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
- * The subset of an OpenAI {@code POST /v1/chat/completions} body this platform
- * honours. Unknown fields ({@code temperature}, {@code tools}, {@code
- * max_tokens}, ...) are accepted and ignored so an unmodified OpenAI SDK never
- * gets a 400 for a field the agent owns anyway: the agent's own system prompt,
- * model, sampling and server-side tools run exactly as on the chat endpoint.
+ * The subset of an OpenAI {@code POST /v1/chat/completions} body this platform honours. Unknown
+ * fields ({@code temperature}, {@code tools}, {@code max_tokens}, ...) are accepted and ignored so
+ * an unmodified OpenAI SDK never gets a 400 for a field the agent owns anyway: the agent's own
+ * system prompt, model, sampling and server-side tools run exactly as on the chat endpoint.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record OpenAiChatRequest(
-    String model,
-    List<Message> messages,
-    Boolean stream,
-    @JsonProperty("stream_options") StreamOptions streamOptions
-) {
+        String model,
+        List<Message> messages,
+        Boolean stream,
+        @JsonProperty("stream_options") StreamOptions streamOptions) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Message(String role, JsonNode content, String name) {
-        /** String content, or every {@code text} part of a parts array joined by newlines; never null. */
+        /**
+         * String content, or every {@code text} part of a parts array joined by newlines; never
+         * null.
+         */
         public String text() {
             if (content == null || content.isNull()) {
                 return "";
             }
-            if (content.isTextual()) {
-                return content.asText();
+            if (content.isString()) {
+                return content.asString();
             }
             if (content.isArray()) {
                 StringBuilder joined = new StringBuilder();
                 for (JsonNode part : content) {
                     JsonNode type = part.get("type");
                     JsonNode text = part.get("text");
-                    if (type != null && "text".equals(type.asText()) && text != null && text.isTextual()) {
+                    if (type != null
+                            && "text".equals(type.asString())
+                            && text != null
+                            && text.isString()) {
                         if (joined.length() > 0) {
                             joined.append('\n');
                         }
-                        joined.append(text.asText());
+                        joined.append(text.asString());
                     }
                 }
                 return joined.toString();
@@ -61,20 +65,19 @@ public record OpenAiChatRequest(
     }
 
     /**
-     * Folds the OpenAI message list into the single user turn the agent chat
-     * service takes.
+     * Folds the OpenAI message list into the single user turn the agent chat service takes.
      *
-     * @param serverHoldsHistory true when the caller supplied a session id, so
-     *     the platform already holds earlier turns and only the last user
-     *     message is sent (replaying the client's copy would double every turn,
-     *     the same posture as the AG-UI endpoint). When false the call is
-     *     stateless, as OpenAI clients expect, so earlier turns are rendered
-     *     into the prompt as a transcript.
+     * @param serverHoldsHistory true when the caller supplied a session id, so the platform already
+     *     holds earlier turns and only the last user message is sent (replaying the client's copy
+     *     would double every turn, the same posture as the AG-UI endpoint). When false the call is
+     *     stateless, as OpenAI clients expect, so earlier turns are rendered into the prompt as a
+     *     transcript.
      * @throws IllegalArgumentException when there is no user message with text
      */
     public String toPrompt(boolean serverHoldsHistory) {
         if (messages == null || messages.isEmpty()) {
-            throw new IllegalArgumentException("'messages' is required and must contain at least one message");
+            throw new IllegalArgumentException(
+                    "'messages' is required and must contain at least one message");
         }
         int lastUser = -1;
         for (int i = messages.size() - 1; i >= 0; i--) {
@@ -85,7 +88,8 @@ public record OpenAiChatRequest(
             }
         }
         if (lastUser < 0) {
-            throw new IllegalArgumentException("'messages' must contain at least one user message with text content");
+            throw new IllegalArgumentException(
+                    "'messages' must contain at least one user message with text content");
         }
         String finalText = messages.get(lastUser).text();
         if (serverHoldsHistory) {
@@ -103,7 +107,7 @@ public record OpenAiChatRequest(
                 case "user" -> transcript.add("User: " + m.text());
                 case "assistant" -> transcript.add("Assistant: " + m.text());
                 case "tool" -> transcript.add("Tool result: " + m.text());
-                default -> { }
+                default -> {}
             }
         }
         if (system.isEmpty() && transcript.isEmpty()) {
@@ -111,10 +115,14 @@ public record OpenAiChatRequest(
         }
         StringBuilder prompt = new StringBuilder();
         if (!system.isEmpty()) {
-            prompt.append("Instructions from the caller:\n").append(String.join("\n", system)).append("\n\n");
+            prompt.append("Instructions from the caller:\n")
+                    .append(String.join("\n", system))
+                    .append("\n\n");
         }
         if (!transcript.isEmpty()) {
-            prompt.append("Conversation so far:\n").append(String.join("\n", transcript)).append("\n\n");
+            prompt.append("Conversation so far:\n")
+                    .append(String.join("\n", transcript))
+                    .append("\n\n");
             prompt.append("Latest user message:\n");
         }
         return prompt.append(finalText).toString();

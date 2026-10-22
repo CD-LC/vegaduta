@@ -21,7 +21,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.WorkflowStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.List;
@@ -33,11 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Unit coverage for the {@code voice_menu} node's halt/resume pair - see
- * {@link WorkflowVoiceMenuRequestService}'s javadoc for the design this
- * mirrors ({@code WorkflowInputRequestService}'s, which has no equivalent
- * test of its own; this class establishes the pattern for that whole
- * halt/resume family rather than reusing an existing one).
+ * Unit coverage for the {@code voice_menu} node's halt/resume pair - see {@link
+ * WorkflowVoiceMenuRequestService}'s javadoc for the design this mirrors ({@code
+ * WorkflowInputRequestService}'s, which has no equivalent test of its own; this class establishes
+ * the pattern for that whole halt/resume family rather than reusing an existing one).
  */
 class WorkflowVoiceMenuRequestServiceTest {
 
@@ -56,21 +54,38 @@ class WorkflowVoiceMenuRequestServiceTest {
         executionEngine = mock(WorkflowExecutionEngine.class);
         ObjectProvider<WorkflowExecutionEngine> engineProvider = mock(ObjectProvider.class);
         when(engineProvider.getObject()).thenReturn(executionEngine);
-        service = new WorkflowVoiceMenuRequestService(
-            requestRepository, runRepository, definitionRepository, engineProvider, new ObjectMapper().findAndRegisterModules());
+        service =
+                new WorkflowVoiceMenuRequestService(
+                        requestRepository,
+                        runRepository,
+                        definitionRepository,
+                        engineProvider,
+                        com.agenticai.core.json.JsonMappers.withJavaTime());
 
         when(requestRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
     void createPendingSnapshotsNodeConfigWithDefaultsApplied() {
-        WorkflowNodeDto node = menuNode("n1", Map.of(
-            "prompt", "Press 1 for sales, 2 for support",
-            "branches", List.of(Map.of("digit", "1", "label", "sales"), Map.of("digit", "2", "label", "support"))
-        ));
+        WorkflowNodeDto node =
+                menuNode(
+                        "n1",
+                        Map.of(
+                                "prompt",
+                                "Press 1 for sales, 2 for support",
+                                "branches",
+                                List.of(
+                                        Map.of("digit", "1", "label", "sales"),
+                                        Map.of("digit", "2", "label", "support"))));
 
-        WorkflowVoiceMenuRequest request = service.createPending(
-            UUID.randomUUID(), UUID.randomUUID(), "My IVR", node, "upstream output", "system:test");
+        WorkflowVoiceMenuRequest request =
+                service.createPending(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        "My IVR",
+                        node,
+                        "upstream output",
+                        "system:test");
 
         assertEquals("Press 1 for sales, 2 for support", request.getPromptText());
         assertEquals("#", request.getFinishOnKey(), "finishOnKey should default to '#'");
@@ -85,16 +100,26 @@ class WorkflowVoiceMenuRequestServiceTest {
 
     @Test
     void createPendingHonorsExplicitConfigAndClampsOutOfRangeValues() {
-        WorkflowNodeDto node = menuNode("n1", Map.of(
-            "prompt", "Enter your PIN",
-            "numDigits", 4,
-            "finishOnKey", "*",
-            "timeoutSeconds", 999, // above the 60s ceiling - must clamp, not fail
-            "maxRetries", -1 // below the 0 floor - must clamp, not fail
-        ));
+        WorkflowNodeDto node =
+                menuNode(
+                        "n1",
+                        Map.of(
+                                "prompt", "Enter your PIN",
+                                "numDigits", 4,
+                                "finishOnKey", "*",
+                                "timeoutSeconds",
+                                        999, // above the 60s ceiling - must clamp, not fail
+                                "maxRetries", -1 // below the 0 floor - must clamp, not fail
+                                ));
 
-        WorkflowVoiceMenuRequest request = service.createPending(
-            UUID.randomUUID(), UUID.randomUUID(), "PIN entry", node, "{}", "system:test");
+        WorkflowVoiceMenuRequest request =
+                service.createPending(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        "PIN entry",
+                        node,
+                        "{}",
+                        "system:test");
 
         assertEquals(4, request.getNumDigits());
         assertEquals("*", request.getFinishOnKey());
@@ -106,31 +131,51 @@ class WorkflowVoiceMenuRequestServiceTest {
     void collectDigitsMatchingABranchResumesTheRunAndReturnsItsOutput() {
         UUID runId = UUID.randomUUID();
         UUID workflowId = UUID.randomUUID();
-        WorkflowVoiceMenuRequest request = pendingRequest(runId, workflowId,
-            List.of(Map.of("digit", "1", "label", "sales"), Map.of("digit", "2", "label", "support")));
+        WorkflowVoiceMenuRequest request =
+                pendingRequest(
+                        runId,
+                        workflowId,
+                        List.of(
+                                Map.of("digit", "1", "label", "sales"),
+                                Map.of("digit", "2", "label", "support")));
         UUID requestId = request.getId();
         when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
         WorkflowRun run = awaitingVoiceInputRun(runId, workflowId);
         when(runRepository.findById(runId)).thenReturn(Optional.of(run));
-        when(runRepository.compareAndSetStatus(runId, WorkflowRunStatus.AWAITING_VOICE_INPUT, WorkflowRunStatus.RUNNING))
-            .thenReturn(1);
+        when(runRepository.compareAndSetStatus(
+                        runId, WorkflowRunStatus.AWAITING_VOICE_INPUT, WorkflowRunStatus.RUNNING))
+                .thenReturn(1);
 
-        WorkflowDefinition definition = new WorkflowDefinition("My IVR", "d", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.ACTIVE);
+        WorkflowDefinition definition =
+                new WorkflowDefinition(
+                        "My IVR", "d", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.ACTIVE);
         when(definitionRepository.findById(workflowId)).thenReturn(Optional.of(definition));
 
         WorkflowRun resumedRun = new WorkflowRun(runId, workflowId, "My IVR", "system:test");
-        resumedRun.complete(WorkflowRunStatus.COMPLETED,
-            writeTrace(new NodeTraceEntry("out1", "output", "Output", "OK", "Routed to sales.", Instant.now(), Instant.now())),
-            null);
-        when(executionEngine.resume(eq(definition), any(), any(), any(), eq("n1"), any(), any())).thenReturn(resumedRun);
+        resumedRun.complete(
+                WorkflowRunStatus.COMPLETED,
+                writeTrace(
+                        new NodeTraceEntry(
+                                "out1",
+                                "output",
+                                "Output",
+                                "OK",
+                                "Routed to sales.",
+                                Instant.now(),
+                                Instant.now())),
+                null);
+        when(executionEngine.resume(eq(definition), any(), any(), any(), eq("n1"), any(), any()))
+                .thenReturn(resumedRun);
 
         WorkflowSyncTriggerResult result = service.collectDigits(requestId, "1", "system:dtmf");
 
         assertTrue(result.succeeded());
         assertNull(result.pendingVoiceMenu());
         assertEquals("Routed to sales.", result.outputText());
-        verify(runRepository).compareAndSetStatus(runId, WorkflowRunStatus.AWAITING_VOICE_INPUT, WorkflowRunStatus.RUNNING);
+        verify(runRepository)
+                .compareAndSetStatus(
+                        runId, WorkflowRunStatus.AWAITING_VOICE_INPUT, WorkflowRunStatus.RUNNING);
         verify(executionEngine).resume(eq(definition), any(), any(), any(), eq("n1"), any(), any());
     }
 
@@ -138,8 +183,8 @@ class WorkflowVoiceMenuRequestServiceTest {
     void collectDigitsWithNoMatchAndRetriesRemainingRePromptsWithoutResuming() {
         UUID runId = UUID.randomUUID();
         UUID workflowId = UUID.randomUUID();
-        WorkflowVoiceMenuRequest request = pendingRequest(runId, workflowId,
-            List.of(Map.of("digit", "1", "label", "sales")));
+        WorkflowVoiceMenuRequest request =
+                pendingRequest(runId, workflowId, List.of(Map.of("digit", "1", "label", "sales")));
         UUID requestId = request.getId();
         when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
         WorkflowRun run = awaitingVoiceInputRun(runId, workflowId);
@@ -150,7 +195,9 @@ class WorkflowVoiceMenuRequestServiceTest {
         WorkflowSyncTriggerResult result = service.collectDigits(requestId, "9", "system:dtmf");
 
         assertTrue(result.succeeded());
-        assertNotNull(result.pendingVoiceMenu(), "an unmatched digit with retries remaining should re-prompt, not finish");
+        assertNotNull(
+                result.pendingVoiceMenu(),
+                "an unmatched digit with retries remaining should re-prompt, not finish");
         assertEquals(requestId.toString(), result.pendingVoiceMenu().requestId());
         assertEquals(2, request.getAttempt(), "attempt should have incremented");
         verify(runRepository, never()).compareAndSetStatus(any(), any(), any());
@@ -161,21 +208,26 @@ class WorkflowVoiceMenuRequestServiceTest {
     void collectDigitsWithBlankDigitsAfterRetriesExhaustedResolvesToTimeoutBranch() {
         UUID runId = UUID.randomUUID();
         UUID workflowId = UUID.randomUUID();
-        WorkflowVoiceMenuRequest request = pendingRequest(runId, workflowId,
-            List.of(Map.of("digit", "1", "label", "sales")));
-        setMaxRetries(request, 0); // no retries left - the very first blank gather already exhausts them
+        WorkflowVoiceMenuRequest request =
+                pendingRequest(runId, workflowId, List.of(Map.of("digit", "1", "label", "sales")));
+        setMaxRetries(
+                request, 0); // no retries left - the very first blank gather already exhausts them
         UUID requestId = request.getId();
         when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
         WorkflowRun run = awaitingVoiceInputRun(runId, workflowId);
         when(runRepository.findById(runId)).thenReturn(Optional.of(run));
-        when(runRepository.compareAndSetStatus(runId, WorkflowRunStatus.AWAITING_VOICE_INPUT, WorkflowRunStatus.RUNNING))
-            .thenReturn(1);
-        WorkflowDefinition definition = new WorkflowDefinition("My IVR", "d", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.ACTIVE);
+        when(runRepository.compareAndSetStatus(
+                        runId, WorkflowRunStatus.AWAITING_VOICE_INPUT, WorkflowRunStatus.RUNNING))
+                .thenReturn(1);
+        WorkflowDefinition definition =
+                new WorkflowDefinition(
+                        "My IVR", "d", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.ACTIVE);
         when(definitionRepository.findById(workflowId)).thenReturn(Optional.of(definition));
         WorkflowRun resumedRun = new WorkflowRun(runId, workflowId, "My IVR", "system:test");
         resumedRun.complete(WorkflowRunStatus.COMPLETED, "[]", null);
-        when(executionEngine.resume(any(), any(), any(), any(), any(), any(), any())).thenReturn(resumedRun);
+        when(executionEngine.resume(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(resumedRun);
 
         service.collectDigits(requestId, "", "system:dtmf");
 
@@ -185,24 +237,29 @@ class WorkflowVoiceMenuRequestServiceTest {
 
     @Test
     void collectDigitsForAnAlreadyResolvedRequestThrows() {
-        WorkflowVoiceMenuRequest request = pendingRequest(UUID.randomUUID(), UUID.randomUUID(), List.of());
+        WorkflowVoiceMenuRequest request =
+                pendingRequest(UUID.randomUUID(), UUID.randomUUID(), List.of());
         request.markResolved("1", "sales");
         when(requestRepository.findById(request.getId())).thenReturn(Optional.of(request));
 
-        org.junit.jupiter.api.Assertions.assertThrows(WorkflowVoiceMenuRequestStateException.class,
-            () -> service.collectDigits(request.getId(), "1", "system:test"));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                WorkflowVoiceMenuRequestStateException.class,
+                () -> service.collectDigits(request.getId(), "1", "system:test"));
     }
 
     // --- fixtures ---
 
     private static WorkflowNodeDto menuNode(String id, Map<String, Object> config) {
-        return new WorkflowNodeDto(id, "voice_menu", Map.of(), Map.of("config", config, "label", "Menu"));
+        return new WorkflowNodeDto(
+                id, "voice_menu", Map.of(), Map.of("config", config, "label", "Menu"));
     }
 
-    private WorkflowVoiceMenuRequest pendingRequest(UUID runId, UUID workflowId, List<Map<String, String>> branches) {
-        WorkflowNodeDto node = menuNode("n1", Map.of(
-            "prompt", "Press 1 for sales", "branches", branches));
-        WorkflowVoiceMenuRequest request = service.createPending(runId, workflowId, "My IVR", node, "{}", "system:test");
+    private WorkflowVoiceMenuRequest pendingRequest(
+            UUID runId, UUID workflowId, List<Map<String, String>> branches) {
+        WorkflowNodeDto node =
+                menuNode("n1", Map.of("prompt", "Press 1 for sales", "branches", branches));
+        WorkflowVoiceMenuRequest request =
+                service.createPending(runId, workflowId, "My IVR", node, "{}", "system:test");
         setId(request, UUID.randomUUID());
         return request;
     }
@@ -215,13 +272,17 @@ class WorkflowVoiceMenuRequestServiceTest {
 
     private String writeTrace(NodeTraceEntry entry) {
         try {
-            return new ObjectMapper().findAndRegisterModules().writeValueAsString(List.of(entry));
+            return com.agenticai.core.json.JsonMappers.withJavaTime()
+                    .writeValueAsString(List.of(entry));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    /** {@code WorkflowVoiceMenuRequest.id} is JPA-generated with no setter - reflection is the only way to give a detached test instance a stable id. */
+    /**
+     * {@code WorkflowVoiceMenuRequest.id} is JPA-generated with no setter - reflection is the only
+     * way to give a detached test instance a stable id.
+     */
     private static void setId(WorkflowVoiceMenuRequest request, UUID id) {
         setField(request, "id", id);
     }

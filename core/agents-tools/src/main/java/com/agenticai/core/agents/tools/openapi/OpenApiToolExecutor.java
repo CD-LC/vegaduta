@@ -21,10 +21,6 @@ import com.agenticai.core.json.JsonNodes;
 import com.agenticai.core.secrets.SecretReferenceResolver;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -48,6 +44,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Turns one {@link OpenApiTool} call back into the HTTP request its operation describes, sends it,
@@ -226,8 +226,8 @@ public class OpenApiToolExecutor {
             Set<String> consumed = new HashSet<>();
 
             for (JsonNode p : parameters) {
-                String name = p.path("name").asText("");
-                String in = p.path("in").asText("");
+                String name = p.path("name").asString("");
+                String in = p.path("in").asString("");
                 boolean required = p.path("required").asBoolean(false);
                 JsonNode value = input.get(name);
                 boolean present = value != null && !value.isNull();
@@ -494,10 +494,10 @@ public class OpenApiToolExecutor {
         JsonNode parsed;
         try {
             parsed = MAPPER.readTree(text);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new OpenApiToolException("The token endpoint did not return JSON.");
         }
-        String token = parsed.path("access_token").asText("");
+        String token = parsed.path("access_token").asString("");
         if (!StringUtils.hasText(token)) {
             throw new OpenApiToolException(
                     "The token endpoint's response contained no access_token.");

@@ -7,10 +7,10 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class ImessageApiClientTest {
 
@@ -21,7 +21,8 @@ class ImessageApiClientTest {
     @Test
     void fetchServerInfoReadsTheServerAndSendsThePasswordAsQueryParameter() throws Exception {
         try (FakeBlueBubbles bb = new FakeBlueBubbles().on("GET /api/v1/server/info", 200, INFO)) {
-            ImessageApiClient.ServerInfo info = bb.client().fetchServerInfo(bb.url(), FakeBlueBubbles.PASSWORD);
+            ImessageApiClient.ServerInfo info =
+                    bb.client().fetchServerInfo(bb.url(), FakeBlueBubbles.PASSWORD);
 
             assertThat(info.serverVersion()).isEqualTo("1.9.9");
             assertThat(info.privateApi()).isTrue();
@@ -51,7 +52,8 @@ class ImessageApiClientTest {
                                 "{\"status\":500,\"error\":{\"type\":\"x\",\"error\":\"boom "
                                         + FakeBlueBubbles.PASSWORD
                                         + " boom\"}}")) {
-            assertThatThrownBy(() -> bb.client().fetchServerInfo(bb.url(), FakeBlueBubbles.PASSWORD))
+            assertThatThrownBy(
+                            () -> bb.client().fetchServerInfo(bb.url(), FakeBlueBubbles.PASSWORD))
                     .isInstanceOf(ChannelConfigurationException.class)
                     .hasMessageContaining("HTTP 500")
                     .hasMessageNotContaining(FakeBlueBubbles.PASSWORD);
@@ -60,26 +62,34 @@ class ImessageApiClientTest {
 
     @Test
     void sendTextPostsTheChatGuidAndTheMessage() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles()
+                        .on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
             String result =
                     bb.client()
-                            .sendText(bb.url(), FakeBlueBubbles.PASSWORD, "iMessage;-;+15550100100", "hello there");
+                            .sendText(
+                                    bb.url(),
+                                    FakeBlueBubbles.PASSWORD,
+                                    "iMessage;-;+15550100100",
+                                    "hello there");
 
             JsonNode body = JsonMappers.plain().readTree(bb.requests.get(0).bodyText());
-            assertThat(body.path("chatGuid").asText()).isEqualTo("iMessage;-;+15550100100");
-            assertThat(body.path("message").asText()).isEqualTo("hello there");
-            assertThat(body.path("tempGuid").asText()).isNotBlank();
+            assertThat(body.path("chatGuid").asString()).isEqualTo("iMessage;-;+15550100100");
+            assertThat(body.path("message").asString()).isEqualTo("hello there");
+            assertThat(body.path("tempGuid").asString()).isNotBlank();
             assertThat(result).doesNotContain("+15550100100");
         }
     }
 
     @Test
     void sendTextToABareNumberMapsToTheDirectChatGuid() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles()
+                        .on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
             bb.client().sendText(bb.url(), FakeBlueBubbles.PASSWORD, "+1 (555) 010-0100", "hi");
 
             JsonNode body = JsonMappers.plain().readTree(bb.requests.get(0).bodyText());
-            assertThat(body.path("chatGuid").asText()).isEqualTo("iMessage;-;+15550100100");
+            assertThat(body.path("chatGuid").asString()).isEqualTo("iMessage;-;+15550100100");
         }
     }
 
@@ -87,30 +97,53 @@ class ImessageApiClientTest {
     void sendTextToANumberWithNoChatYetStartsOne() throws Exception {
         try (FakeBlueBubbles bb =
                 new FakeBlueBubbles()
-                        .on("POST /api/v1/message/text", 500, "{\"status\":500,\"error\":{\"error\":\"Chat does not exist\"}}")
+                        .on(
+                                "POST /api/v1/message/text",
+                                500,
+                                "{\"status\":500,\"error\":{\"error\":\"Chat does not exist\"}}")
                         .on("POST /api/v1/chat/new", 200, "{\"status\":200,\"data\":{}}")) {
             // 500 is not retried as a new chat; only 4xx "no such chat" answers are.
-            assertThatThrownBy(() -> bb.client().sendText(bb.url(), FakeBlueBubbles.PASSWORD, "+15550100100", "hi"))
+            assertThatThrownBy(
+                            () ->
+                                    bb.client()
+                                            .sendText(
+                                                    bb.url(),
+                                                    FakeBlueBubbles.PASSWORD,
+                                                    "+15550100100",
+                                                    "hi"))
                     .isInstanceOf(ChannelDeliveryException.class);
             bb.requests.clear();
 
-            bb.on("POST /api/v1/message/text", 404, "{\"status\":404,\"error\":{\"error\":\"Chat does not exist\"}}");
+            bb.on(
+                    "POST /api/v1/message/text",
+                    404,
+                    "{\"status\":404,\"error\":{\"error\":\"Chat does not exist\"}}");
             bb.client().sendText(bb.url(), FakeBlueBubbles.PASSWORD, "+15550100100", "hi");
 
-            assertThat(bb.requests).extracting(FakeBlueBubbles.Req::path)
+            assertThat(bb.requests)
+                    .extracting(FakeBlueBubbles.Req::path)
                     .containsExactly("/api/v1/message/text", "/api/v1/chat/new");
             JsonNode body = JsonMappers.plain().readTree(bb.requests.get(1).bodyText());
-            assertThat(body.path("addresses").get(0).asText()).isEqualTo("+15550100100");
-            assertThat(body.path("message").asText()).isEqualTo("hi");
+            assertThat(body.path("addresses").get(0).asString()).isEqualTo("+15550100100");
+            assertThat(body.path("message").asString()).isEqualTo("hi");
         }
     }
 
     @Test
     void aGroupGuidIsNeverTurnedIntoANewChat() throws Exception {
         try (FakeBlueBubbles bb = new FakeBlueBubbles()) {
-            assertThatThrownBy(() -> bb.client().sendText(bb.url(), FakeBlueBubbles.PASSWORD, "iMessage;+;chat123", "hi"))
+            assertThatThrownBy(
+                            () ->
+                                    bb.client()
+                                            .sendText(
+                                                    bb.url(),
+                                                    FakeBlueBubbles.PASSWORD,
+                                                    "iMessage;+;chat123",
+                                                    "hi"))
                     .isInstanceOf(ChannelDeliveryException.class);
-            assertThat(bb.requests).extracting(FakeBlueBubbles.Req::path).containsExactly("/api/v1/message/text");
+            assertThat(bb.requests)
+                    .extracting(FakeBlueBubbles.Req::path)
+                    .containsExactly("/api/v1/message/text");
         }
     }
 
@@ -135,9 +168,12 @@ class ImessageApiClientTest {
             assertThat(upload.contentType()).startsWith("multipart/form-data; boundary=");
             String text = upload.bodyText();
             assertThat(text).contains("name=\"chatGuid\"").contains("iMessage;-;+15550100100");
-            assertThat(text).contains("filename=\"chart.png\"").contains("Content-Type: image/png").contains("PNGDATA");
+            assertThat(text)
+                    .contains("filename=\"chart.png\"")
+                    .contains("Content-Type: image/png")
+                    .contains("PNGDATA");
             JsonNode caption = JsonMappers.plain().readTree(bb.requests.get(1).bodyText());
-            assertThat(caption.path("message").asText()).isEqualTo("Here is the chart");
+            assertThat(caption.path("message").asString()).isEqualTo("Here is the chart");
         }
     }
 
@@ -149,12 +185,15 @@ class ImessageApiClientTest {
                                 "POST /api/v1/message/query",
                                 200,
                                 "{\"status\":200,\"data\":[{\"guid\":\"a\",\"dateCreated\":5},{\"guid\":\"b\",\"dateCreated\":6}]}")) {
-            List<JsonNode> messages = bb.client().queryMessages(bb.url(), FakeBlueBubbles.PASSWORD, 4L, 100);
+            List<JsonNode> messages =
+                    bb.client().queryMessages(bb.url(), FakeBlueBubbles.PASSWORD, 4L, 100);
 
-            assertThat(messages).extracting(m -> m.path("guid").asText()).containsExactly("a", "b");
+            assertThat(messages)
+                    .extracting(m -> m.path("guid").asString())
+                    .containsExactly("a", "b");
             JsonNode body = JsonMappers.plain().readTree(bb.requests.get(0).bodyText());
             assertThat(body.path("after").asLong()).isEqualTo(4L);
-            assertThat(body.path("sort").asText()).isEqualTo("ASC");
+            assertThat(body.path("sort").asString()).isEqualTo("ASC");
             assertThat(body.path("limit").asInt()).isEqualTo(100);
         }
     }
@@ -162,7 +201,8 @@ class ImessageApiClientTest {
     @Test
     void aPrivateAddressIsRefusedUnlessTheOperatorAllowListsIt() throws Exception {
         try (FakeBlueBubbles bb = new FakeBlueBubbles().on("GET /api/v1/server/info", 200, INFO)) {
-            ImessageApiClient strict = new ImessageApiClient(JsonMappers.plain(), SsrfGuard::strict);
+            ImessageApiClient strict =
+                    new ImessageApiClient(JsonMappers.plain(), SsrfGuard::strict);
 
             assertThatThrownBy(() -> strict.fetchServerInfo(bb.url(), FakeBlueBubbles.PASSWORD))
                     .isInstanceOf(ChannelConfigurationException.class)
@@ -198,20 +238,33 @@ class ImessageApiClientTest {
     @Test
     void aServerAddressWithAQueryOrFragmentIsRefusedBeforeAnyRequest() throws Exception {
         try (FakeBlueBubbles bb = new FakeBlueBubbles().on("GET /api/v1/server/info", 200, INFO)) {
-            assertThatThrownBy(() -> bb.client().fetchServerInfo(bb.url() + "/?x=1", FakeBlueBubbles.PASSWORD))
+            assertThatThrownBy(
+                            () ->
+                                    bb.client()
+                                            .fetchServerInfo(
+                                                    bb.url() + "/?x=1", FakeBlueBubbles.PASSWORD))
                     .isInstanceOf(ChannelConfigurationException.class)
                     .hasMessageContaining("base URL")
                     .hasMessageNotContaining(FakeBlueBubbles.PASSWORD);
-            assertThatThrownBy(() -> bb.client().fetchServerInfo(bb.url() + "/#frag", FakeBlueBubbles.PASSWORD))
+            assertThatThrownBy(
+                            () ->
+                                    bb.client()
+                                            .fetchServerInfo(
+                                                    bb.url() + "/#frag", FakeBlueBubbles.PASSWORD))
                     .isInstanceOf(ChannelConfigurationException.class);
             assertThat(bb.requests).isEmpty();
         }
     }
 
     @Test
-    void aLineBreakInTheRecipientCannotForgeMultipartPartsAndAHostileContentTypeIsNeutralised() throws Exception {
+    void aLineBreakInTheRecipientCannotForgeMultipartPartsAndAHostileContentTypeIsNeutralised()
+            throws Exception {
         try (FakeBlueBubbles bb =
-                new FakeBlueBubbles().on("POST /api/v1/message/attachment", 200, "{\"status\":200,\"data\":{}}")) {
+                new FakeBlueBubbles()
+                        .on(
+                                "POST /api/v1/message/attachment",
+                                200,
+                                "{\"status\":200,\"data\":{}}")) {
             assertThatThrownBy(
                             () ->
                                     bb.client()

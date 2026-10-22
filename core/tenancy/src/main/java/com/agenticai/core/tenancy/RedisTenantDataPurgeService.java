@@ -1,7 +1,5 @@
 package com.agenticai.core.tenancy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,14 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Platform-admin "delete tenant completely" control - best-effort purge of every Redis key this
  * platform's ~12 rate-limit/quota/session services scatter across a tenant's lifetime. None of
  * these keys are durable data (every family here carries its own TTL and would self-expire
  * eventually) so a miss on any one family never aborts the caller's larger deletion - same
- * fail-open posture {@link com.agenticai.core.agents.quota.FreeTierUsageLimiterService#increment} already
- * takes for this exact class of state on a Redis outage.
+ * fail-open posture {@link com.agenticai.core.agents.quota.FreeTierUsageLimiterService#increment}
+ * already takes for this exact class of state on a Redis outage.
  *
  * <p><b>Deliberately excluded (researched, not forgotten):</b> {@code SignupRateLimiter} and {@code
  * DemoSessionRateLimiter}/{@code DemoChannelRateLimiter}'s six families are keyed by client IP or
@@ -264,7 +264,7 @@ public class RedisTenantDataPurgeService {
                 return false;
             }
             JsonNode node = objectMapper.readTree(json);
-            if (tenantSchema.equals(node.path("tenantId").asText(null))) {
+            if (tenantSchema.equals(node.path("tenantId").asString(null))) {
                 redisTemplate.delete(key);
                 return true;
             }

@@ -30,9 +30,6 @@ import com.agenticai.core.workflow.output.PdfOutputRenderer;
 import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +37,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Run-level fields on the synchronous engine: the max-steps ERROR trace row names the node about to
@@ -60,7 +59,7 @@ class WorkflowExecutionEngineRunFieldsTest {
      * NodeTraceEntry's Instants.
      */
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.withJavaTime();
     }
 
     @BeforeEach
@@ -182,12 +181,13 @@ class WorkflowExecutionEngineRunFieldsTest {
         JsonNode trace = readTrace(run);
         assertEquals(3, trace.size(), run.getTraceJson());
         JsonNode last = trace.get(2);
-        assertEquals("ERROR", last.get("status").asText());
-        assertEquals("a2", last.get("nodeId").asText(), "the row must carry the node about to run");
-        assertEquals("a1", trace.get(1).get("nodeId").asText());
+        assertEquals("ERROR", last.get("status").asString());
+        assertEquals(
+                "a2", last.get("nodeId").asString(), "the row must carry the node about to run");
+        assertEquals("a1", trace.get(1).get("nodeId").asString());
         assertEquals(
                 "OK",
-                trace.get(1).get("status").asText(),
+                trace.get(1).get("status").asString(),
                 "the previous node's own row is not duplicated");
     }
 

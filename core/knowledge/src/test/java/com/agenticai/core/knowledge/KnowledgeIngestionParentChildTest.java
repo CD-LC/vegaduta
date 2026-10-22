@@ -18,8 +18,6 @@ import com.agenticai.core.knowledge.ocr.OcrProviderConfigService;
 import com.agenticai.core.knowledge.rag.KnowledgeRagSettingsService;
 import com.agenticai.core.knowledge.rag.ParentChildChunker;
 import com.agenticai.core.knowledge.rag.ParentChunkStore;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,13 +26,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Ingestion with parent-child on (collection opted in) and the unchanged flat path otherwise. */
 class KnowledgeIngestionParentChildTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String TEXT = "# Refunds\nRefunds are issued within 14 days. Contact support first.\n\n"
-        + "# Shipping\nShipping takes 5 days. Express takes 2 days.\n\nTracking numbers are emailed.";
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
+    private static final String TEXT =
+            "# Refunds\nRefunds are issued within 14 days. Contact support first.\n\n"
+                    + "# Shipping\nShipping takes 5 days. Express takes 2 days.\n\nTracking numbers are emailed.";
 
     private SidecarClient sidecarClient;
     private JdbcTemplate jdbcTemplate;
@@ -54,25 +55,34 @@ class KnowledgeIngestionParentChildTest {
         when(collection.getTextSearchConfig()).thenReturn("simple");
         when(collections.findById(collectionId)).thenReturn(Optional.of(collection));
 
-        when(sidecarClient.embedPreChunked(anyList(), anyString())).thenAnswer(inv -> {
-            List<String> pieces = inv.getArgument(0);
-            embeddedPieces = pieces;
-            List<SidecarChunk> chunks = new ArrayList<>();
-            for (int i = 0; i < pieces.size(); i++) {
-                chunks.add(new SidecarChunk(i, pieces.get(i), List.of(0.1, 0.2)));
-            }
-            return new SidecarEmbedResponse("minilm-l6-v2", 768, 200, 0, chunks);
-        });
-        when(jdbcTemplate.update(anyString(), any(Object[].class))).thenAnswer(inv -> {
-            String sql = inv.getArgument(0);
-            if (sql.startsWith("INSERT INTO")) {
-                insertedChunks.add(inv.getArguments());
-            }
-            return 1;
-        });
+        when(sidecarClient.embedPreChunked(anyList(), anyString()))
+                .thenAnswer(
+                        inv -> {
+                            List<String> pieces = inv.getArgument(0);
+                            embeddedPieces = pieces;
+                            List<SidecarChunk> chunks = new ArrayList<>();
+                            for (int i = 0; i < pieces.size(); i++) {
+                                chunks.add(new SidecarChunk(i, pieces.get(i), List.of(0.1, 0.2)));
+                            }
+                            return new SidecarEmbedResponse("minilm-l6-v2", 768, 200, 0, chunks);
+                        });
+        when(jdbcTemplate.update(anyString(), any(Object[].class)))
+                .thenAnswer(
+                        inv -> {
+                            String sql = inv.getArgument(0);
+                            if (sql.startsWith("INSERT INTO")) {
+                                insertedChunks.add(inv.getArguments());
+                            }
+                            return 1;
+                        });
 
-        service = new KnowledgeIngestionService(
-            sidecarClient, jdbcTemplate, collections, mock(KnowledgeDocumentService.class), mock(OcrProviderConfigService.class));
+        service =
+                new KnowledgeIngestionService(
+                        sidecarClient,
+                        jdbcTemplate,
+                        collections,
+                        mock(KnowledgeDocumentService.class),
+                        mock(OcrProviderConfigService.class));
     }
 
     @Test
@@ -82,7 +92,10 @@ class KnowledgeIngestionParentChildTest {
         assertEquals(Chunker.chunk(TEXT, new Chunker.Settings(150, 30)), embeddedPieces);
         assertEquals(embeddedPieces.size(), r.chunkCount());
         for (Object[] row : insertedChunks) {
-            assertEquals("{\"source_type\":\"text\"}", row[row.length - 1], "metadata exactly as before");
+            assertEquals(
+                    "{\"source_type\":\"text\"}",
+                    row[row.length - 1],
+                    "metadata exactly as before");
         }
     }
 
@@ -106,19 +119,26 @@ class KnowledgeIngestionParentChildTest {
     @SuppressWarnings("unchecked")
     void optedInCollectionsEmbedChildrenStoreParentsAndLinkEachChildToItsParent() throws Exception {
         KnowledgeRagSettingsService settings = mock(KnowledgeRagSettingsService.class);
-        when(settings.parentChildIngestSettings(collectionId)).thenReturn(Optional.of(new ParentChildChunker.Settings(10, 20)));
+        when(settings.parentChildIngestSettings(collectionId))
+                .thenReturn(Optional.of(new ParentChildChunker.Settings(10, 20)));
         ParentChunkStore store = mock(ParentChunkStore.class);
         service.setParentChild(settings, store);
 
         IngestResponse r = service.ingest("policy.md", TEXT, 150, 30, collectionId);
 
         // Only the small children are embedded.
-        List<ParentChildChunker.Parent> expected = ParentChildChunker.chunk(TEXT, new ParentChildChunker.Settings(10, 20));
-        List<String> expectedChildren = expected.stream().flatMap(p -> p.children().stream()).map(ParentChildChunker.Child::text).toList();
+        List<ParentChildChunker.Parent> expected =
+                ParentChildChunker.chunk(TEXT, new ParentChildChunker.Settings(10, 20));
+        List<String> expectedChildren =
+                expected.stream()
+                        .flatMap(p -> p.children().stream())
+                        .map(ParentChildChunker.Child::text)
+                        .toList();
         assertEquals(expectedChildren, embeddedPieces);
         assertEquals(expectedChildren.size(), r.chunkCount());
 
-        // The parents are persisted once each, with this collection and no document (raw text ingest).
+        // The parents are persisted once each, with this collection and no document (raw text
+        // ingest).
         ArgumentCaptor<List<ParentChunkStore.ParentRow>> rows = ArgumentCaptor.forClass(List.class);
         verify(store).insertAll(eq(collectionId), eq((UUID) null), rows.capture());
         assertEquals(2, rows.getValue().size());
@@ -132,15 +152,22 @@ class KnowledgeIngestionParentChildTest {
             for (ParentChildChunker.Child child : expected.get(p).children()) {
                 Object[] row = insertedChunks.get(childNumber++);
                 JsonNode metadata = MAPPER.readTree((String) row[row.length - 1]);
-                assertEquals("text", metadata.get("source_type").asText());
-                assertEquals(rows.getValue().get(p).id().toString(), metadata.get("parent_id").asText());
+                assertEquals("text", metadata.get("source_type").asString());
+                assertEquals(
+                        rows.getValue().get(p).id().toString(),
+                        metadata.get("parent_id").asString());
                 assertEquals(child.startInParent(), metadata.get("child_start").asInt());
                 assertEquals(child.endInParent(), metadata.get("child_end").asInt());
                 String content = (String) row[4]; // sql, id, source, chunk_index, content, ...
                 assertEquals(child.text(), content);
                 assertEquals(
-                    content,
-                    rows.getValue().get(p).content().substring(metadata.get("child_start").asInt(), metadata.get("child_end").asInt()));
+                        content,
+                        rows.getValue()
+                                .get(p)
+                                .content()
+                                .substring(
+                                        metadata.get("child_start").asInt(),
+                                        metadata.get("child_end").asInt()));
             }
         }
         assertTrue(childNumber > 0);
@@ -149,10 +176,12 @@ class KnowledgeIngestionParentChildTest {
     @Test
     void anEmptyParentChildResultFallsBackToTheNormalNoChunksError() {
         KnowledgeRagSettingsService settings = mock(KnowledgeRagSettingsService.class);
-        when(settings.parentChildIngestSettings(collectionId)).thenReturn(Optional.of(new ParentChildChunker.Settings(10, 20)));
+        when(settings.parentChildIngestSettings(collectionId))
+                .thenReturn(Optional.of(new ParentChildChunker.Settings(10, 20)));
         service.setParentChild(settings, mock(ParentChunkStore.class));
 
         org.junit.jupiter.api.Assertions.assertThrows(
-            InvalidKnowledgeUploadException.class, () -> service.ingest("empty.md", "   ", 150, 30, collectionId));
+                InvalidKnowledgeUploadException.class,
+                () -> service.ingest("empty.md", "   ", 150, 30, collectionId));
     }
 }

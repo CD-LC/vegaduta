@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.quality.dataset.AgentTurnReplayer.ReplayedToolCall;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class TrajectoryCaseGraderTest {
 
-    private static final String SPEC = "{\"type\":\"trajectory\",\"mode\":\"in_order\",\"steps\":[{\"tool\":\"a\"},{\"tool\":\"b\"}]}";
+    private static final String SPEC =
+            "{\"type\":\"trajectory\",\"mode\":\"in_order\",\"steps\":[{\"tool\":\"a\"},{\"tool\":\"b\"}]}";
 
     private static ReplayedToolCall call(String tool) {
         return new ReplayedToolCall(tool, "{}", "ok");
@@ -23,20 +23,27 @@ class TrajectoryCaseGraderTest {
     @Test
     void aSpecThatIsNotATrajectoryIsLeftAlone() {
         assertNull(TrajectoryCaseGrader.grade(null, List.of(call("a"))));
-        assertNull(TrajectoryCaseGrader.grade("{\"type\":\"exact\",\"value\":\"a\"}", List.of(call("a"))));
-        assertFalse(TrajectoryCaseGrader.isTrajectorySpec("{\"type\":\"regex\",\"pattern\":\"a\"}"));
+        assertNull(
+                TrajectoryCaseGrader.grade(
+                        "{\"type\":\"exact\",\"value\":\"a\"}", List.of(call("a"))));
+        assertFalse(
+                TrajectoryCaseGrader.isTrajectorySpec("{\"type\":\"regex\",\"pattern\":\"a\"}"));
         assertTrue(TrajectoryCaseGrader.isTrajectorySpec(SPEC));
     }
 
     @Test
     void aCorruptTrajectorySpecIsNotGradedAndDoesNotThrow() {
-        assertNull(TrajectoryCaseGrader.grade("{\"type\":\"trajectory\",\"mode\":\"nope\",\"steps\":[]}", List.of(call("a"))));
+        assertNull(
+                TrajectoryCaseGrader.grade(
+                        "{\"type\":\"trajectory\",\"mode\":\"nope\",\"steps\":[]}",
+                        List.of(call("a"))));
         assertNull(TrajectoryCaseGrader.grade("{\"type\":\"trajectory\"}", List.of()));
     }
 
     @Test
     void gradingProducesTheVerdictScoreAndTheStoredDimension() {
-        TrajectoryCaseGrader.Graded ok = TrajectoryCaseGrader.grade(SPEC, List.of(call("a"), call("b")));
+        TrajectoryCaseGrader.Graded ok =
+                TrajectoryCaseGrader.grade(SPEC, List.of(call("a"), call("b")));
         assertNotNull(ok);
         assertTrue(ok.passed());
         assertEquals(1.0, ok.score(), 1e-9);
@@ -68,13 +75,26 @@ class TrajectoryCaseGraderTest {
     @Test
     void theDimensionIsDetectedInAStoredScoresDocument() throws Exception {
         TrajectoryCaseGrader.Graded g = TrajectoryCaseGrader.grade(SPEC, List.of(call("a")));
-        String scores = new ObjectMapper().writeValueAsString(Map.of(
-            "ACCURACY", Map.of("score", 0.9, "status", "EVALUATED", "feedback", "fine"),
-            TrajectoryCaseGrader.DIMENSION, g.dimension()));
+        String scores =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .writeValueAsString(
+                                Map.of(
+                                        "ACCURACY",
+                                        Map.of(
+                                                "score",
+                                                0.9,
+                                                "status",
+                                                "EVALUATED",
+                                                "feedback",
+                                                "fine"),
+                                        TrajectoryCaseGrader.DIMENSION,
+                                        g.dimension()));
         assertTrue(TrajectoryCaseGrader.hasTrajectoryDimension(scores), scores);
         assertFalse(TrajectoryCaseGrader.hasTrajectoryDimension("{\"ACCURACY\":{\"score\":0.9}}"));
         // The word appearing only inside another dimension's feedback is not the dimension.
-        assertFalse(TrajectoryCaseGrader.hasTrajectoryDimension("{\"ACCURACY\":{\"feedback\":\"TRAJECTORY looked odd\"}}"));
+        assertFalse(
+                TrajectoryCaseGrader.hasTrajectoryDimension(
+                        "{\"ACCURACY\":{\"feedback\":\"TRAJECTORY looked odd\"}}"));
         assertFalse(TrajectoryCaseGrader.hasTrajectoryDimension(null));
         assertFalse(TrajectoryCaseGrader.hasTrajectoryDimension(""));
         assertFalse(TrajectoryCaseGrader.hasTrajectoryDimension("not json TRAJECTORY"));

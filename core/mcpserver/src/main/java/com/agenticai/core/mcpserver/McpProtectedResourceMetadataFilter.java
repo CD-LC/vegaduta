@@ -1,8 +1,5 @@
 package com.agenticai.core.mcpserver;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +9,9 @@ import java.net.URI;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Serves this MCP server's OAuth 2.0 Protected Resource Metadata (RFC 9728), which the MCP
@@ -41,7 +41,9 @@ class McpProtectedResourceMetadataFilter extends OncePerRequestFilter {
         this.json = doc.toString();
     }
 
-    /** The RFC 9728 well-known URL for {@code resource}: path inserted after the well-known segment. */
+    /**
+     * The RFC 9728 well-known URL for {@code resource}: path inserted after the well-known segment.
+     */
     static String metadataUrl(String resource) {
         URI uri = URI.create(resource);
         String path = uri.getRawPath() == null ? "" : uri.getRawPath();
@@ -53,8 +55,9 @@ class McpProtectedResourceMetadataFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             response.setHeader("Allow", "GET");

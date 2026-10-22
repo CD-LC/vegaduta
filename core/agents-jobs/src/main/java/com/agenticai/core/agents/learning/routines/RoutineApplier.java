@@ -9,7 +9,6 @@ import com.agenticai.core.agents.scheduledtask.ScheduledTaskDtos.TaskResponse;
 import com.agenticai.core.agents.scheduledtask.ScheduledTaskService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantLimitExceededException;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Locale;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -18,15 +17,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
 
 /**
- * Approved ROUTINE: creates the scheduled task through {@link ScheduledTaskService#create}, the same path the
- * console form and the {@code schedule_task} tool use, so every rule applies (the agent must be usable by the
- * approver, the plan's task cap, the minimum interval, unattended-safe autonomy). In-app delivery.
+ * Approved ROUTINE: creates the scheduled task through {@link ScheduledTaskService#create}, the
+ * same path the console form and the {@code schedule_task} tool use, so every rule applies (the
+ * agent must be usable by the approver, the plan's task cap, the minimum interval, unattended-safe
+ * autonomy). In-app delivery.
  *
- * <p>The proposal body reads {@code "<schedule in words>.\nTask: <prompt>"}. If the person edited it, the text
- * after {@code Task:} (or, with no marker, the whole edit) becomes the prompt; the schedule is the proposal's own
- * and is changed afterwards on the Scheduled page. Runs on the approving person's request thread; keeps no state.
+ * <p>The proposal body reads {@code "<schedule in words>.\nTask: <prompt>"}. If the person edited
+ * it, the text after {@code Task:} (or, with no marker, the whole edit) becomes the prompt; the
+ * schedule is the proposal's own and is changed afterwards on the Scheduled page. Runs on the
+ * approving person's request thread; keeps no state.
  */
 @Component
 @ConditionalOnProperty(
@@ -51,7 +53,8 @@ public class RoutineApplier implements LearningProposalApplier {
     }
 
     @Override
-    public void apply(LearningProposal proposal, String text) throws LearningProposalApplyException {
+    public void apply(LearningProposal proposal, String text)
+            throws LearningProposalApplyException {
         JsonNode payload;
         try {
             payload = JsonMappers.plain().readTree(proposal.getPayload());
@@ -59,8 +62,8 @@ public class RoutineApplier implements LearningProposalApplier {
             throw new LearningProposalApplyException("This routine has no usable schedule.");
         }
         UUID agentId = agentOf(proposal, payload);
-        String frequency = payload.path("frequency").asText("");
-        String time = payload.path("time").asText("");
+        String frequency = payload.path("frequency").asString("");
+        String time = payload.path("time").asString("");
         if (frequency.isBlank() || time.isBlank()) {
             throw new LearningProposalApplyException("This routine has no usable schedule.");
         }
@@ -68,8 +71,8 @@ public class RoutineApplier implements LearningProposalApplier {
         if (prompt.length() < 3) {
             throw new LearningProposalApplyException("Say what the routine should do.");
         }
-        String day = payload.path("day").asText(null);
-        String timezone = payload.path("timezone").asText(null);
+        String day = payload.path("day").asString(null);
+        String timezone = payload.path("timezone").asString(null);
         try {
             for (TaskResponse existing : scheduledTasks.list()) {
                 if (agentId.equals(existing.agentId())
@@ -78,7 +81,9 @@ public class RoutineApplier implements LearningProposalApplier {
                                         RoutineDetector.tokens(existing.prompt()))
                                 >= RoutineLearningService.SAME_AS_EXISTING) {
                     throw new LearningProposalApplyException(
-                            "You already have a scheduled task for this (\"" + existing.name() + "\").");
+                            "You already have a scheduled task for this (\""
+                                    + existing.name()
+                                    + "\").");
                 }
             }
             scheduledTasks.create(
@@ -118,17 +123,21 @@ public class RoutineApplier implements LearningProposalApplier {
             return proposal.getAgentId();
         }
         try {
-            return UUID.fromString(payload.path("agentId").asText(""));
+            return UUID.fromString(payload.path("agentId").asString(""));
         } catch (RuntimeException e) {
-            throw new LearningProposalApplyException("This routine does not say which agent should run it.");
+            throw new LearningProposalApplyException(
+                    "This routine does not say which agent should run it.");
         }
     }
 
-    /** The prompt to schedule: the stored one when the text is untouched, else what the person wrote. */
+    /**
+     * The prompt to schedule: the stored one when the text is untouched, else what the person
+     * wrote.
+     */
     static String promptOf(LearningProposal proposal, JsonNode payload, String text) {
         String edited = text == null ? "" : text.strip();
         if (edited.equals(proposal.getBody() == null ? "" : proposal.getBody().strip())) {
-            return payload.path("prompt").asText("").strip();
+            return payload.path("prompt").asString("").strip();
         }
         int at = edited.toLowerCase(Locale.ROOT).indexOf(TASK_MARKER.toLowerCase(Locale.ROOT));
         return (at >= 0 ? edited.substring(at + TASK_MARKER.length()) : edited).strip();

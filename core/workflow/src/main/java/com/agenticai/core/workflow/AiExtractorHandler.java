@@ -1,18 +1,16 @@
 package com.agenticai.core.workflow;
 
+import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.fence;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.intConfig;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.listOfMaps;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.listOfStrings;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.oneLine;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
+
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,14 +18,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.beans.factory.ObjectProvider;
-import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
- * The {@code parameter_extractor} node: typed JSON extraction with strict validation, ONE repair retry on an
- * unusable or ill-typed reply, and required-but-absent parameters listed under {@code _missing}. The model call and
- * repair loop is the shared {@link AskAndValidate} template. Extracted from {@link WorkflowAiNodeHandler}.
+ * The {@code parameter_extractor} node: typed JSON extraction with strict validation, ONE repair
+ * retry on an unusable or ill-typed reply, and required-but-absent parameters listed under {@code
+ * _missing}. The model call and repair loop is the shared {@link AskAndValidate} template.
+ * Extracted from {@link WorkflowAiNodeHandler}.
  */
 final class AiExtractorHandler {
 
@@ -49,7 +51,10 @@ final class AiExtractorHandler {
         this.maxInputChars = maxInputChars;
     }
 
-    /** The extractor's {@link AskAndValidate}: validate + coerce against the parameters, ONE repair retry. */
+    /**
+     * The extractor's {@link AskAndValidate}: validate + coerce against the parameters, ONE repair
+     * retry.
+     */
     private final class Asker extends AskAndValidate<Extraction> {
         private final List<AiParam> params;
 
@@ -70,7 +75,8 @@ final class AiExtractorHandler {
         @Override
         Extraction validate(String reply) {
             Optional<JsonNode> parsed = StructuredOutput.readObject(objectMapper, reply);
-            return parsed.map(obj -> AiOutputValidator.validate(obj, params, objectMapper)).orElse(null);
+            return parsed.map(obj -> AiOutputValidator.validate(obj, params, objectMapper))
+                    .orElse(null);
         }
 
         @Override
@@ -161,7 +167,7 @@ final class AiExtractorHandler {
         }
         List<String> missing = new ArrayList<>();
         for (JsonNode n : output.get("_missing")) {
-            missing.add(n.asText());
+            missing.add(n.asString());
         }
         String summary =
                 "Extracted "

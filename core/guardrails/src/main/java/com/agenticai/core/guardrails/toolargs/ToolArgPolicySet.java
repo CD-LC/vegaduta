@@ -1,15 +1,15 @@
 package com.agenticai.core.guardrails.toolargs;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A validated, immutable set of per-tool argument policies for ONE agent.
@@ -23,12 +23,13 @@ import java.util.Set;
  * ]}
  * </pre>
  *
- * {@code tool} is an exact tool name or a glob ({@code *}, {@code ?}). A call is allowed only when EVERY
- * matching policy's rules pass - policies can only tighten, never grant anything. Parsing validates every key
- * (unknown keys are rejected), every pattern (compiled up front) and every size cap, so a stored set is
- * always one the evaluator can run.
+ * {@code tool} is an exact tool name or a glob ({@code *}, {@code ?}). A call is allowed only when
+ * EVERY matching policy's rules pass - policies can only tighten, never grant anything. Parsing
+ * validates every key (unknown keys are rejected), every pattern (compiled up front) and every size
+ * cap, so a stored set is always one the evaluator can run.
  *
- * <p>Pure: no Spring, no I/O. The agents module stores the JSON text; this class owns what it may contain.
+ * <p>Pure: no Spring, no I/O. The agents module stores the JSON text; this class owns what it may
+ * contain.
  */
 public final class ToolArgPolicySet {
 
@@ -39,6 +40,7 @@ public final class ToolArgPolicySet {
     public static final int MAX_STRING_LIST = 50;
     public static final int MAX_LITERAL_LENGTH = 512;
     public static final int MAX_PATTERN_LENGTH = 200;
+
     /** Upper bound on the stored document, in characters. */
     public static final int MAX_DOCUMENT_CHARS = 65_536;
 
@@ -81,19 +83,20 @@ public final class ToolArgPolicySet {
     /**
      * Parses and validates a stored/submitted document.
      *
-     * @throws IllegalArgumentException with a precise message when the text is not valid JSON, is too large,
-     *     or breaks any rule above
+     * @throws IllegalArgumentException with a precise message when the text is not valid JSON, is
+     *     too large, or breaks any rule above
      */
     public static ToolArgPolicySet parse(String json) {
         if (json == null || json.isBlank()) {
             return EMPTY;
         }
         if (json.length() > MAX_DOCUMENT_CHARS) {
-            throw new IllegalArgumentException("The policy document is limited to " + MAX_DOCUMENT_CHARS + " characters.");
+            throw new IllegalArgumentException(
+                    "The policy document is limited to " + MAX_DOCUMENT_CHARS + " characters.");
         }
         try {
             return parse(MAPPER.readTree(json));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("The policy document is not valid JSON.");
         }
     }
@@ -104,12 +107,14 @@ public final class ToolArgPolicySet {
             return EMPTY;
         }
         if (!root.isObject()) {
-            throw new IllegalArgumentException("The policy document must be a JSON object with a 'policies' array.");
+            throw new IllegalArgumentException(
+                    "The policy document must be a JSON object with a 'policies' array.");
         }
-        for (Iterator<String> it = root.fieldNames(); it.hasNext();) {
+        for (Iterator<String> it = root.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!key.equals("policies")) {
-                throw new IllegalArgumentException("Unknown top-level key '" + clip(key) + "'. Only 'policies' is allowed.");
+                throw new IllegalArgumentException(
+                        "Unknown top-level key '" + clip(key) + "'. Only 'policies' is allowed.");
             }
         }
         JsonNode list = root.get("policies");
@@ -120,10 +125,12 @@ public final class ToolArgPolicySet {
             throw new IllegalArgumentException("'policies' must be an array.");
         }
         if (list.size() > MAX_POLICIES) {
-            throw new IllegalArgumentException("At most " + MAX_POLICIES + " policies are allowed.");
+            throw new IllegalArgumentException(
+                    "At most " + MAX_POLICIES + " policies are allowed.");
         }
         if (root.toString().length() > MAX_DOCUMENT_CHARS) {
-            throw new IllegalArgumentException("The policy document is limited to " + MAX_DOCUMENT_CHARS + " characters.");
+            throw new IllegalArgumentException(
+                    "The policy document is limited to " + MAX_DOCUMENT_CHARS + " characters.");
         }
         List<ToolPolicy> out = new ArrayList<>();
         int index = 0;
@@ -139,33 +146,49 @@ public final class ToolArgPolicySet {
         if (!p.isObject()) {
             throw new IllegalArgumentException(where + "must be a JSON object.");
         }
-        for (Iterator<String> it = p.fieldNames(); it.hasNext();) {
+        for (Iterator<String> it = p.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!POLICY_KEYS.contains(key)) {
-                throw new IllegalArgumentException(where + "unknown key '" + clip(key) + "'. Allowed: tool, rules, denyUnlistedArgs.");
+                throw new IllegalArgumentException(
+                        where
+                                + "unknown key '"
+                                + clip(key)
+                                + "'. Allowed: tool, rules, denyUnlistedArgs.");
             }
         }
         JsonNode toolNode = p.get("tool");
-        if (toolNode == null || !toolNode.isTextual() || toolNode.asText().isBlank()) {
+        if (toolNode == null || !toolNode.isString() || toolNode.asString().isBlank()) {
             throw new IllegalArgumentException(where + "'tool' must be a tool name or glob.");
         }
-        String tool = toolNode.asText().trim();
+        String tool = toolNode.asString().trim();
         if (tool.length() > MAX_TOOL_PATTERN_LENGTH) {
-            throw new IllegalArgumentException(where + "'tool' is limited to " + MAX_TOOL_PATTERN_LENGTH + " characters.");
+            throw new IllegalArgumentException(
+                    where + "'tool' is limited to " + MAX_TOOL_PATTERN_LENGTH + " characters.");
         }
         for (int i = 0; i < tool.length(); i++) {
             char c = tool.charAt(i);
-            boolean ok = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
-                || c == '_' || c == '-' || c == '.' || c == ':' || c == '*' || c == '?';
+            boolean ok =
+                    (c >= 'a' && c <= 'z')
+                            || (c >= 'A' && c <= 'Z')
+                            || (c >= '0' && c <= '9')
+                            || c == '_'
+                            || c == '-'
+                            || c == '.'
+                            || c == ':'
+                            || c == '*'
+                            || c == '?';
             if (!ok) {
-                throw new IllegalArgumentException(where + "'tool' may contain letters, digits and _ - . : and the glob characters * ?.");
+                throw new IllegalArgumentException(
+                        where
+                                + "'tool' may contain letters, digits and _ - . : and the glob characters * ?.");
             }
         }
         JsonNode rulesNode = p.get("rules");
         boolean deny = false;
         if (p.has("denyUnlistedArgs")) {
             if (!p.get("denyUnlistedArgs").isBoolean()) {
-                throw new IllegalArgumentException(where + "'denyUnlistedArgs' must be true or false.");
+                throw new IllegalArgumentException(
+                        where + "'denyUnlistedArgs' must be true or false.");
             }
             deny = p.get("denyUnlistedArgs").asBoolean();
         }
@@ -175,7 +198,8 @@ public final class ToolArgPolicySet {
                 throw new IllegalArgumentException(where + "'rules' must be an array.");
             }
             if (rulesNode.size() > MAX_RULES_PER_POLICY) {
-                throw new IllegalArgumentException(where + "at most " + MAX_RULES_PER_POLICY + " rules per tool.");
+                throw new IllegalArgumentException(
+                        where + "at most " + MAX_RULES_PER_POLICY + " rules per tool.");
             }
             for (JsonNode r : rulesNode) {
                 try {
@@ -186,7 +210,8 @@ public final class ToolArgPolicySet {
             }
         }
         if (rules.isEmpty() && !deny) {
-            throw new IllegalArgumentException(where + "needs at least one rule (or 'denyUnlistedArgs': true).");
+            throw new IllegalArgumentException(
+                    where + "needs at least one rule (or 'denyUnlistedArgs': true).");
         }
         return new ToolPolicy(tool, rules, deny);
     }

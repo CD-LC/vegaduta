@@ -1,9 +1,5 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +10,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Recognises a tool call that a model wrote as <em>text</em> instead of sending it through the
@@ -23,9 +23,9 @@ import org.springframework.ai.chat.messages.AssistantMessage;
  * <p>Small and self-hosted models (the free Ollama pool, Groq's 8B tier, OpenRouter {@code :free}
  * rows) routinely do this: the reply is the literal {@code {"name": "generate_document",
  * "parameters": {...}}}, a {@code <tool_call>...</tool_call>} block (Qwen, Hermes), a {@code
- * <function=name>...</function>} block (Llama 3.x), a Mistral {@code [TOOL_CALLS] [...]} prefix,
- * or any of these inside a Markdown code fence. Spring AI only runs calls that arrive structured,
- * so the user saw the raw JSON as the answer (incident: the Documents Agent in the playground on
+ * <function=name>...</function>} block (Llama 3.x), a Mistral {@code [TOOL_CALLS] [...]} prefix, or
+ * any of these inside a Markdown code fence. Spring AI only runs calls that arrive structured, so
+ * the user saw the raw JSON as the answer (incident: the Documents Agent in the playground on
  * 2026-10-15, "0 tool calls", the reply was exactly that JSON).
  *
  * <p>Deliberately strict so that it never touches an ordinary reply:
@@ -56,18 +56,30 @@ final class TextToolCallParser {
     private static final String FENCE = "```";
 
     private static final Pattern TOOL_CALL_BLOCK =
-        Pattern.compile("<tool_call>\\s*(.*?)\\s*</tool_call>", Pattern.DOTALL);
+            Pattern.compile("<tool_call>\\s*(.*?)\\s*</tool_call>", Pattern.DOTALL);
     private static final Pattern FUNCTION_BLOCK =
-        Pattern.compile("<function=([A-Za-z0-9_.:-]+)>\\s*(.*?)\\s*</function>", Pattern.DOTALL);
+            Pattern.compile(
+                    "<function=([A-Za-z0-9_.:-]+)>\\s*(.*?)\\s*</function>", Pattern.DOTALL);
 
     private static final Pattern PARAMETER_BLOCK =
-        Pattern.compile("<parameter=([A-Za-z0-9_.:-]+)>\\s*?\\n?(.*?)\\n?\\s*</parameter>", Pattern.DOTALL);
+            Pattern.compile(
+                    "<parameter=([A-Za-z0-9_.:-]+)>\\s*?\\n?(.*?)\\n?\\s*</parameter>",
+                    Pattern.DOTALL);
 
-    private static final List<String> NAME_KEYS = List.of("name", "tool", "tool_name", "function_name");
+    private static final List<String> NAME_KEYS =
+            List.of("name", "tool", "tool_name", "function_name");
     private static final List<String> ARGS_KEYS =
-        List.of("parameters", "arguments", "args", "input", "params", "tool_input");
+            List.of("parameters", "arguments", "args", "input", "params", "tool_input");
     private static final Set<String> STRUCTURAL_KEYS =
-        Set.of("name", "tool", "tool_name", "function_name", "function", "type", "id", "call_id");
+            Set.of(
+                    "name",
+                    "tool",
+                    "tool_name",
+                    "function_name",
+                    "function",
+                    "type",
+                    "id",
+                    "call_id");
 
     private TextToolCallParser() {}
 
@@ -87,9 +99,10 @@ final class TextToolCallParser {
             case '{' -> true;
             case '[' -> prefixOrStartsWith(s, MISTRAL_PREFIX) || nextNonWhitespaceIs(s, 1, '{');
             case '`' -> prefixOrStartsWith(s, FENCE) && fenceBodyCouldBeToolCall(s);
-            case '<' -> prefixOrStartsWith(s, TOOL_CALL_OPEN)
-                || prefixOrStartsWith(s, FUNCTION_OPEN)
-                || prefixOrStartsWith(s, PYTHON_TAG);
+            case '<' ->
+                    prefixOrStartsWith(s, TOOL_CALL_OPEN)
+                            || prefixOrStartsWith(s, FUNCTION_OPEN)
+                            || prefixOrStartsWith(s, PYTHON_TAG);
             default -> leadInCouldPrecedeTag(s);
         };
     }
@@ -105,7 +118,10 @@ final class TextToolCallParser {
             return infoString.isEmpty() || infoString.chars().allMatch(Character::isLetterOrDigit);
         }
         String body = stripLeading(s.substring(newline + 1));
-        return body.isEmpty() || body.charAt(0) == '{' || body.charAt(0) == '[' || body.charAt(0) == '<';
+        return body.isEmpty()
+                || body.charAt(0) == '{'
+                || body.charAt(0) == '['
+                || body.charAt(0) == '<';
     }
 
     /**
@@ -153,7 +169,8 @@ final class TextToolCallParser {
      * The tool calls encoded in {@code text}, or an empty list when it is not (entirely) a
      * text-form tool call to tools in {@code knownTools}. Never throws.
      */
-    static List<AssistantMessage.ToolCall> parse(String text, Set<String> knownTools, ObjectMapper objectMapper) {
+    static List<AssistantMessage.ToolCall> parse(
+            String text, Set<String> knownTools, ObjectMapper objectMapper) {
         if (text == null || knownTools == null || knownTools.isEmpty()) {
             return List.of();
         }
@@ -170,18 +187,22 @@ final class TextToolCallParser {
         }
     }
 
-    private static List<AssistantMessage.ToolCall> parseUnchecked(String text, ObjectMapper objectMapper) {
+    private static List<AssistantMessage.ToolCall> parseUnchecked(
+            String text, ObjectMapper objectMapper) {
         String s = text.strip();
         s = stripPrefix(s, PYTHON_TAG);
         s = stripPrefix(s, MISTRAL_PREFIX);
         s = unfence(s);
 
         if (s.contains(FUNCTION_OPEN)) {
-            // Qwen wraps <function=...> blocks in <tool_call> ... </tool_call> (and sometimes leaves a
+            // Qwen wraps <function=...> blocks in <tool_call> ... </tool_call> (and sometimes
+            // leaves a
             // stray closing tag): the wrapper carries no information, the function blocks do.
             return taggedCalls(
-                s.replace(TOOL_CALL_OPEN, "").replace(TOOL_CALL_CLOSE, "").strip(),
-                FUNCTION_BLOCK, true, objectMapper);
+                    s.replace(TOOL_CALL_OPEN, "").replace(TOOL_CALL_CLOSE, "").strip(),
+                    FUNCTION_BLOCK,
+                    true,
+                    objectMapper);
         }
         if (s.contains(TOOL_CALL_OPEN)) {
             return taggedCalls(s, TOOL_CALL_BLOCK, false, objectMapper);
@@ -199,8 +220,7 @@ final class TextToolCallParser {
      * blocks means the reply was prose that happened to contain one, and nothing is recovered.
      */
     private static List<AssistantMessage.ToolCall> taggedCalls(
-        String s, Pattern block, boolean nameInTag, ObjectMapper objectMapper
-    ) {
+            String s, Pattern block, boolean nameInTag, ObjectMapper objectMapper) {
         Matcher matcher = block.matcher(s);
         List<AssistantMessage.ToolCall> calls = new ArrayList<>();
         int consumedTo = -1;
@@ -241,9 +261,9 @@ final class TextToolCallParser {
     }
 
     /**
-     * Arguments written as {@code <parameter=path>value</parameter>} blocks (the Qwen coder format);
-     * {@code null} when the body is anything else. Values are kept as the text between the tags, one
-     * leading and one trailing line break removed.
+     * Arguments written as {@code <parameter=path>value</parameter>} blocks (the Qwen coder
+     * format); {@code null} when the body is anything else. Values are kept as the text between the
+     * tags, one leading and one trailing line break removed.
      */
     private static JsonNode parameterTags(String body, ObjectMapper objectMapper) {
         if (body == null || !body.contains("<parameter=")) {
@@ -263,7 +283,8 @@ final class TextToolCallParser {
     }
 
     /** One object, an array of objects, or {@code {"tool_calls": [...]}}. */
-    private static List<AssistantMessage.ToolCall> callsFrom(JsonNode root, ObjectMapper objectMapper) {
+    private static List<AssistantMessage.ToolCall> callsFrom(
+            JsonNode root, ObjectMapper objectMapper) {
         List<AssistantMessage.ToolCall> calls = new ArrayList<>();
         if (root.isArray()) {
             for (JsonNode element : root) {
@@ -287,14 +308,15 @@ final class TextToolCallParser {
     }
 
     /** {@code null} when {@code node} does not carry a tool name and object arguments. */
-    private static AssistantMessage.ToolCall singleCall(JsonNode node, int index, ObjectMapper objectMapper) {
+    private static AssistantMessage.ToolCall singleCall(
+            JsonNode node, int index, ObjectMapper objectMapper) {
         if (node == null || !node.isObject()) {
             return null;
         }
         JsonNode function = node.get("function");
         String name = textOfFirst(node, NAME_KEYS);
         if (name == null && function != null) {
-            name = function.isTextual() ? function.asText() : textOfFirst(function, NAME_KEYS);
+            name = function.isString() ? function.asString() : textOfFirst(function, NAME_KEYS);
         }
         if (name == null || name.isBlank()) {
             return null;
@@ -306,15 +328,16 @@ final class TextToolCallParser {
         if (args == null) {
             // {"name": "search", "query": "..."}: the remaining fields are the arguments.
             ObjectNode rest = objectMapper.createObjectNode();
-            for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
+            for (Iterator<Map.Entry<String, JsonNode>> it = node.properties().iterator();
+                    it.hasNext(); ) {
                 Map.Entry<String, JsonNode> field = it.next();
                 if (!STRUCTURAL_KEYS.contains(field.getKey())) {
                     rest.set(field.getKey(), field.getValue());
                 }
             }
             args = rest;
-        } else if (args.isTextual()) {
-            JsonNode unwrapped = readJson(args.asText(), objectMapper);
+        } else if (args.isString()) {
+            JsonNode unwrapped = readJson(args.asString(), objectMapper);
             if (unwrapped == null || !unwrapped.isObject()) {
                 return null;
             }
@@ -326,7 +349,8 @@ final class TextToolCallParser {
         return toolCall(name.trim(), args, index, objectMapper);
     }
 
-    private static AssistantMessage.ToolCall toolCall(String name, JsonNode args, int index, ObjectMapper objectMapper) {
+    private static AssistantMessage.ToolCall toolCall(
+            String name, JsonNode args, int index, ObjectMapper objectMapper) {
         String arguments;
         try {
             arguments = objectMapper.writeValueAsString(args);
@@ -348,7 +372,10 @@ final class TextToolCallParser {
             return null;
         }
         try {
-            return objectMapper.reader().with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readTree(s);
+            return objectMapper
+                    .reader()
+                    .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                    .readTree(s);
         } catch (Exception e) {
             return null;
         }
@@ -356,7 +383,7 @@ final class TextToolCallParser {
 
     private static String textOfFirst(JsonNode node, List<String> keys) {
         JsonNode value = firstPresent(node, keys);
-        return value != null && value.isTextual() ? value.asText() : null;
+        return value != null && value.isString() ? value.asString() : null;
     }
 
     private static JsonNode firstPresent(JsonNode node, List<String> keys) {

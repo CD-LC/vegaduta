@@ -29,14 +29,14 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Post-blackout-audit fix verification (see {@code AgentEventTriggerDispatcher}'s javadoc). A
@@ -48,7 +48,7 @@ class TelegramWebhookControllerTriggerAndAgentEventBothFireTest {
 
     private static final String BOT_USER_ID = "999888777";
     private static final String SECRET = "webhook-secret";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private WorkflowEventPublisher workflowEventPublisher;
     private WorkflowTriggerPort workflowTriggerPort;

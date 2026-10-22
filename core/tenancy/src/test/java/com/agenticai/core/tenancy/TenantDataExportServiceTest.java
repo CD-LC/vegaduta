@@ -17,8 +17,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,31 +31,29 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Zero test coverage existed for {@link TenantDataExportService} before this
- * - the class behind {@code POST /api/tenant/data-export}, which hands a
- * tenant-admin a full JSON dump of "their" data. Two ways it is risk-bearing.
- * First, WHICH tenant gets dumped is derived solely from {@link
- * TenantContext} - there is deliberately no schema/tenant parameter anywhere
- * a request body could smuggle one in through, and these tests pin that a
- * missing context (or a context naming a schema with no Tenant row) is a
- * hard failure, never a fallback to some default schema's data. Second, the
- * {@code EXPORT_TABLES} allowlist IS the security control: the class javadoc
- * documents that auto-discovering tables would ship every {@code
- * *_credential} table's encrypted provider secrets out the door in a
- * customer-downloadable file. The allowlist-invariant test below exists to
- * fail loudly the day someone "helpfully" adds a table - forcing them to
- * re-read that javadoc before widening the export surface.
+ * Zero test coverage existed for {@link TenantDataExportService} before this - the class behind
+ * {@code POST /api/tenant/data-export}, which hands a tenant-admin a full JSON dump of "their"
+ * data. Two ways it is risk-bearing. First, WHICH tenant gets dumped is derived solely from {@link
+ * TenantContext} - there is deliberately no schema/tenant parameter anywhere a request body could
+ * smuggle one in through, and these tests pin that a missing context (or a context naming a schema
+ * with no Tenant row) is a hard failure, never a fallback to some default schema's data. Second,
+ * the {@code EXPORT_TABLES} allowlist IS the security control: the class javadoc documents that
+ * auto-discovering tables would ship every {@code *_credential} table's encrypted provider secrets
+ * out the door in a customer-downloadable file. The allowlist-invariant test below exists to fail
+ * loudly the day someone "helpfully" adds a table - forcing them to re-read that javadoc before
+ * widening the export surface.
  *
- * <p>Same idiom as {@link TenantDataErasureServiceTest}: real {@link
- * TenantContext} static holder with an {@code @AfterEach} clear, JDBC mocked
- * at the DataSource-&gt;Connection-&gt;PreparedStatement-&gt;ResultSet boundary, a
- * real {@link ObjectMapper} (serialization is part of the behaviour under
- * test). {@link Tenant} is the one mock that deviates: a real {@code new
- * Tenant(...)} has a null JPA-generated id until persisted, and this service
- * reads {@code tenant.getId()} to build the object-storage key - a mock
- * supplies a stable id without needing a database.
+ * <p>Same idiom as {@link TenantDataErasureServiceTest}: real {@link TenantContext} static holder
+ * with an {@code @AfterEach} clear, JDBC mocked at the
+ * DataSource-&gt;Connection-&gt;PreparedStatement-&gt;ResultSet boundary, a real {@link
+ * ObjectMapper} (serialization is part of the behaviour under test). {@link Tenant} is the one mock
+ * that deviates: a real {@code new Tenant(...)} has a null JPA-generated id until persisted, and
+ * this service reads {@code tenant.getId()} to build the object-storage key - a mock supplies a
+ * stable id without needing a database.
  */
 class TenantDataExportServiceTest {
 
@@ -65,27 +61,25 @@ class TenantDataExportServiceTest {
     private static final UUID TENANT_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
 
     /**
-     * The exact allowlist {@link TenantDataExportService} ships today,
-     * duplicated here ON PURPOSE (not read via reflection): the duplication
-     * is what makes adding a table to the export a two-file change that
-     * forces whoever does it past this class's javadoc - and past the main
-     * class's own DELIBERATELY EXCLUDED comment - before the suite goes
-     * green again.
+     * The exact allowlist {@link TenantDataExportService} ships today, duplicated here ON PURPOSE
+     * (not read via reflection): the duplication is what makes adding a table to the export a
+     * two-file change that forces whoever does it past this class's javadoc - and past the main
+     * class's own DELIBERATELY EXCLUDED comment - before the suite goes green again.
      */
-    private static final List<String> EXPECTED_EXPORT_TABLES = List.of(
-        "agent",
-        "prompt_version",
-        "user_tool_script",
-        "workflow_definition",
-        "workflow_run",
-        "knowledge_collection",
-        "knowledge_document",
-        "channel_session",
-        "channel_message_log",
-        "audit_log_entry",
-        "study_plan",
-        "imported_chat"
-    );
+    private static final List<String> EXPECTED_EXPORT_TABLES =
+            List.of(
+                    "agent",
+                    "prompt_version",
+                    "user_tool_script",
+                    "workflow_definition",
+                    "workflow_run",
+                    "knowledge_collection",
+                    "knowledge_document",
+                    "channel_session",
+                    "channel_message_log",
+                    "audit_log_entry",
+                    "study_plan",
+                    "imported_chat");
 
     private TenantRepository tenantRepository;
     private DataSource dataSource;
@@ -124,9 +118,13 @@ class TenantDataExportServiceTest {
         when(tenant.getSchemaName()).thenReturn(SCHEMA_NAME);
         when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(tenant));
 
-        service = new TenantDataExportService(
-            tenantRepository, dataSource, fileStorageService, auditLogService, new ObjectMapper()
-        );
+        service =
+                new TenantDataExportService(
+                        tenantRepository,
+                        dataSource,
+                        fileStorageService,
+                        auditLogService,
+                        com.agenticai.core.json.JsonMappers.plain());
 
         TenantContext.set(TenantContext.of(SCHEMA_NAME, "user-123", Set.of("tenant-admin")));
     }
@@ -141,23 +139,27 @@ class TenantDataExportServiceTest {
     // ------------------------------------------------------------------
 
     @Test
-    void everyDumpedTableIsQualifiedWithTheTenantContextsResolvedSchemaInAllowlistOrder() throws SQLException {
+    void everyDumpedTableIsQualifiedWithTheTenantContextsResolvedSchemaInAllowlistOrder()
+            throws SQLException {
         service.exportCurrentTenantData();
 
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(connection, times(EXPECTED_EXPORT_TABLES.size())).prepareStatement(sqlCaptor.capture());
+        verify(connection, times(EXPECTED_EXPORT_TABLES.size()))
+                .prepareStatement(sqlCaptor.capture());
         // Exact SQL, quoted identifiers, ONLY the context's schema - a bare
         // unqualified "SELECT * FROM agent" would dump whatever schema the
         // connection's search_path happened to point at, i.e. potentially
         // another tenant's rows.
-        List<String> expectedSql = EXPECTED_EXPORT_TABLES.stream()
-            .map(table -> "SELECT * FROM \"" + SCHEMA_NAME + "\".\"" + table + "\"")
-            .toList();
+        List<String> expectedSql =
+                EXPECTED_EXPORT_TABLES.stream()
+                        .map(table -> "SELECT * FROM \"" + SCHEMA_NAME + "\".\"" + table + "\"")
+                        .toList();
         assertEquals(expectedSql, sqlCaptor.getAllValues());
     }
 
     @Test
-    void missingTenantContextIsAHardFailureThatTouchesNeitherTheDatabaseNorObjectStorage() throws SQLException {
+    void missingTenantContextIsAHardFailureThatTouchesNeitherTheDatabaseNorObjectStorage()
+            throws SQLException {
         TenantContext.clear();
 
         assertThrows(IllegalStateException.class, service::exportCurrentTenantData);
@@ -184,17 +186,20 @@ class TenantDataExportServiceTest {
     // ------------------------------------------------------------------
 
     @Test
-    void theExportAllowlistNeverContainsCredentialTablesOrTheExplicitlyExcludedOnes() throws SQLException {
+    void theExportAllowlistNeverContainsCredentialTablesOrTheExplicitlyExcludedOnes()
+            throws SQLException {
         service.exportCurrentTenantData();
 
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(connection, times(EXPECTED_EXPORT_TABLES.size())).prepareStatement(sqlCaptor.capture());
+        verify(connection, times(EXPECTED_EXPORT_TABLES.size()))
+                .prepareStatement(sqlCaptor.capture());
         // Recover the dumped table names from the observable SQL rather than
         // reflecting on the private constant - what actually reaches the
         // database is the behaviour that matters.
-        List<String> dumpedTables = sqlCaptor.getAllValues().stream()
-            .map(sql -> sql.substring(sql.lastIndexOf(".\"") + 2, sql.length() - 1))
-            .toList();
+        List<String> dumpedTables =
+                sqlCaptor.getAllValues().stream()
+                        .map(sql -> sql.substring(sql.lastIndexOf(".\"") + 2, sql.length() - 1))
+                        .toList();
 
         // Exact pin first: ANY addition or removal fails here, forcing a
         // deliberate two-file change (see EXPECTED_EXPORT_TABLES's comment).
@@ -204,9 +209,8 @@ class TenantDataExportServiceTest {
         // differ": no *_credential table (encrypted provider/channel
         // secrets) may EVER leave in a customer-downloadable export...
         assertTrue(
-            dumpedTables.stream().noneMatch(table -> table.endsWith("_credential")),
-            "a *_credential table reached the data export - encrypted provider secrets would leave the system"
-        );
+                dumpedTables.stream().noneMatch(table -> table.endsWith("_credential")),
+                "a *_credential table reached the data export - encrypted provider secrets would leave the system");
         // ...and the three excluded-by-name tables stay excluded.
         assertFalse(dumpedTables.contains("knowledge_chunks"));
         assertFalse(dumpedTables.contains("llm_call_log"));
@@ -218,17 +222,20 @@ class TenantDataExportServiceTest {
     // ------------------------------------------------------------------
 
     @Test
-    void aTableThatThrowsSqlExceptionContributesAnEmptyListInsteadOfAbortingTheWholeExport() throws Exception {
+    void aTableThatThrowsSqlExceptionContributesAnEmptyListInsteadOfAbortingTheWholeExport()
+            throws Exception {
         // "agent" (the first table) is missing/broken; every later table
         // must still be dumped - same one-bad-part-doesn't-sink-everything
         // posture TenantSchemaIterator uses per-tenant, here per-table.
-        when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
-            String sql = invocation.getArgument(0, String.class);
-            if (sql.equals("SELECT * FROM \"" + SCHEMA_NAME + "\".\"agent\"")) {
-                throw new SQLException("relation does not exist");
-            }
-            return preparedStatement;
-        });
+        when(connection.prepareStatement(anyString()))
+                .thenAnswer(
+                        invocation -> {
+                            String sql = invocation.getArgument(0, String.class);
+                            if (sql.equals("SELECT * FROM \"" + SCHEMA_NAME + "\".\"agent\"")) {
+                                throw new SQLException("relation does not exist");
+                            }
+                            return preparedStatement;
+                        });
         // One row, consumed by the first table that queries successfully
         // (prompt_version, since agent threw) - the same shared-single-
         // ResultSet trade-off TenantDataErasureServiceTest documents.
@@ -237,11 +244,12 @@ class TenantDataExportServiceTest {
 
         TenantDataExportService.ExportResult result = service.exportCurrentTenantData();
 
-        JsonNode tables = new ObjectMapper().readTree(result.bytes()).path("tables");
+        JsonNode tables =
+                com.agenticai.core.json.JsonMappers.plain().readTree(result.bytes()).path("tables");
         assertTrue(tables.path("agent").isArray());
         assertEquals(0, tables.path("agent").size());
         // The export carried on past the failure and kept real data.
-        assertEquals("row-1", tables.path("prompt_version").get(0).path("id").asText());
+        assertEquals("row-1", tables.path("prompt_version").get(0).path("id").asString());
         assertEquals("tenant-data-export-" + SCHEMA_NAME + ".json", result.filename());
     }
 
@@ -260,9 +268,13 @@ class TenantDataExportServiceTest {
 
         // A data export is itself a privacy-relevant event - the audit entry
         // must name the acting subject and the tenant it exported.
-        verify(auditLogService).record(
-            eq("user-123"), eq("tenant.data_export.request"), eq("tenant"), eq(TENANT_ID.toString()),
-            eq(AuditOutcome.SUCCESS), anyString()
-        );
+        verify(auditLogService)
+                .record(
+                        eq("user-123"),
+                        eq("tenant.data_export.request"),
+                        eq("tenant"),
+                        eq(TENANT_ID.toString()),
+                        eq(AuditOutcome.SUCCESS),
+                        anyString());
     }
 }

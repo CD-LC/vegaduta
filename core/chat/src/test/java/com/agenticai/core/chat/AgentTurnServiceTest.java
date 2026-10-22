@@ -1,7 +1,6 @@
 package com.agenticai.core.chat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,12 +43,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Locks in the three things that make this endpoint safe and useful: (1) the model's tool
- * calls come back to the caller UNEXECUTED, (2) every reservation reaches exactly one terminal
- * call and the gate runs before any provider is touched, (3) failover walks the pool but never
- * re-asks another model about a forbidden prompt. The provider call is stubbed through the
- * package-private {@code callModel} seam rather than mocking ChatClient's fluent chain - same
- * approach as {@code FimCompletionServiceTest}.
+ * Locks in the three things that make this endpoint safe and useful: (1) the model's tool calls
+ * come back to the caller UNEXECUTED, (2) every reservation reaches exactly one terminal call and
+ * the gate runs before any provider is touched, (3) failover walks the pool but never re-asks
+ * another model about a forbidden prompt. The provider call is stubbed through the package-private
+ * {@code callModel} seam rather than mocking ChatClient's fluent chain - same approach as {@code
+ * FimCompletionServiceTest}.
  */
 class AgentTurnServiceTest {
 
@@ -61,13 +60,17 @@ class AgentTurnServiceTest {
     void setUp() {
         hostedProviders = mock(PlatformHostedLlmProviderService.class);
         chatClientFactory = mock(HostedLlmChatClientFactory.class);
-        when(chatClientFactory.create(any(), any(), anyInt(), anyDouble(), anyDouble())).thenReturn(mock(ChatClient.class));
+        when(chatClientFactory.create(any(), any(), anyInt(), anyDouble(), anyDouble()))
+                .thenReturn(mock(ChatClient.class));
         entitlements = new RecordingEntitlements();
     }
 
     // ---- helpers -----------------------------------------------------------
 
-    /** Rows are built BEFORE the stubbing call - creating a mock inside thenReturn(...) breaks Mockito. */
+    /**
+     * Rows are built BEFORE the stubbing call - creating a mock inside thenReturn(...) breaks
+     * Mockito.
+     */
     private void givenPool(String... models) {
         List<HostedProviderSelection> rows = new ArrayList<>();
         for (String model : models) {
@@ -87,7 +90,8 @@ class AgentTurnServiceTest {
         ObjectProvider<T> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(value);
         // A fresh Stream per call, like the real ObjectProvider - a shared one is single-use.
-        when(provider.orderedStream()).thenAnswer(invocation -> value == null ? Stream.empty() : Stream.of(value));
+        when(provider.orderedStream())
+                .thenAnswer(invocation -> value == null ? Stream.empty() : Stream.of(value));
         return provider;
     }
 
@@ -96,44 +100,61 @@ class AgentTurnServiceTest {
     }
 
     private static ChatResponse toolCallResponse() {
-        AssistantMessage message = AssistantMessage.builder()
-            .content("")
-            .toolCalls(List.of(new AssistantMessage.ToolCall("call_1", "function", "read_file", "{\"path\":\"a.ts\"}")))
-            .build();
+        AssistantMessage message =
+                AssistantMessage.builder()
+                        .content("")
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall(
+                                                "call_1",
+                                                "function",
+                                                "read_file",
+                                                "{\"path\":\"a.ts\"}")))
+                        .build();
         return new ChatResponse(
-            List.of(new Generation(message)),
-            ChatResponseMetadata.builder().usage(new DefaultUsage(1200, 40)).build());
+                List.of(new Generation(message)),
+                ChatResponseMetadata.builder().usage(new DefaultUsage(1200, 40)).build());
     }
 
     private static ChatResponse textResponse(String text) {
         return new ChatResponse(
-            List.of(new Generation(new AssistantMessage(text))),
-            ChatResponseMetadata.builder().usage(new DefaultUsage(10, 5)).build());
+                List.of(new Generation(new AssistantMessage(text))),
+                ChatResponseMetadata.builder().usage(new DefaultUsage(10, 5)).build());
     }
 
     private static AgentTurn.Request request(String preferredModel) {
         return new AgentTurn.Request(
-            List.of(new Message("system", "be useful", null, null, null), new Message("user", "fix it", null, null, null)),
-            List.of(new Tool("read_file", "Read a file", Map.of("type", "object"))),
-            null, null, preferredModel);
+                List.of(
+                        new Message("system", "be useful", null, null, null),
+                        new Message("user", "fix it", null, null, null)),
+                List.of(new Tool("read_file", "Read a file", Map.of("type", "object"))),
+                null,
+                null,
+                preferredModel);
     }
 
     /** Stubs the provider call; records every invocation. */
     private static final class Stub extends AgentTurnService {
         final List<ToolCallingChatOptions> optionsSeen = new ArrayList<>();
-        final List<List<org.springframework.ai.chat.messages.Message>> messagesSeen = new ArrayList<>();
+        final List<List<org.springframework.ai.chat.messages.Message>> messagesSeen =
+                new ArrayList<>();
         final List<ChatClient> clientsSeen = new ArrayList<>();
         java.util.function.Function<Integer, ChatResponse> behaviour = n -> textResponse("ok");
         int calls;
 
-        Stub(ObjectProvider<FimCompletionEntitlements> e, PlatformHostedLlmProviderService p,
-             HostedLlmChatClientFactory f, int maxConcurrent) {
+        Stub(
+                ObjectProvider<FimCompletionEntitlements> e,
+                PlatformHostedLlmProviderService p,
+                HostedLlmChatClientFactory f,
+                int maxConcurrent) {
             super(e, p, f, noAdvisors(), 2048, 4096, 0.2, maxConcurrent);
         }
 
         @Override
-        ChatResponse callModel(ChatClient client, List<org.springframework.ai.chat.messages.Message> messages,
-                               ToolCallingChatOptions options) {
+        ChatResponse callModel(
+                ChatClient client,
+                List<org.springframework.ai.chat.messages.Message> messages,
+                ToolCallingChatOptions options) {
             calls++;
             optionsSeen.add(options);
             messagesSeen.add(messages);
@@ -164,8 +185,9 @@ class AgentTurnServiceTest {
         assertEquals("model-a", result.model());
 
         ToolCallingChatOptions options = service.optionsSeen.get(0);
-        assertFalse(options.getInternalToolExecutionEnabled(),
-            "the server must never run the tools - the files and the shell are on the client");
+        assertTrue(
+                CallerRunsToolLoop.isSet(options),
+                "the server must never run the tools - the files and the shell are on the client");
         assertEquals(1, options.getToolCallbacks().size());
         assertEquals("read_file", options.getToolCallbacks().get(0).getToolDefinition().name());
 
@@ -178,8 +200,10 @@ class AgentTurnServiceTest {
 
     @Test
     void aDefinitionOnlyCallbackCanNeverSucceed() {
-        ToolCallingChatOptions options = AgentTurnService.toolOptions(List.of(new Tool("x", "d", Map.of())));
-        assertThrows(IllegalStateException.class, () -> options.getToolCallbacks().get(0).call("{}"));
+        ToolCallingChatOptions options =
+                AgentTurnService.toolOptions(List.of(new Tool("x", "d", Map.of())));
+        assertThrows(
+                IllegalStateException.class, () -> options.getToolCallbacks().get(0).call("{}"));
     }
 
     @Test
@@ -195,15 +219,21 @@ class AgentTurnServiceTest {
 
     @Test
     void consecutiveToolResultsMergeIntoOneToolResponseMessage() {
-        List<Message> wire = List.of(
-            new Message("system", "s", null, null, null),
-            new Message("user", "u", null, null, null),
-            new Message("assistant", "", List.of(
-                new ToolCall("c1", "read_file", Map.of("path", "a")),
-                new ToolCall("c2", "read_file", Map.of("path", "b"))), null, null),
-            new Message("tool", "A", null, "c1", "read_file"),
-            new Message("tool", "B", null, "c2", "read_file"),
-            new Message("user", "go on", null, null, null));
+        List<Message> wire =
+                List.of(
+                        new Message("system", "s", null, null, null),
+                        new Message("user", "u", null, null, null),
+                        new Message(
+                                "assistant",
+                                "",
+                                List.of(
+                                        new ToolCall("c1", "read_file", Map.of("path", "a")),
+                                        new ToolCall("c2", "read_file", Map.of("path", "b"))),
+                                null,
+                                null),
+                        new Message("tool", "A", null, "c1", "read_file"),
+                        new Message("tool", "B", null, "c2", "read_file"),
+                        new Message("user", "go on", null, null, null));
 
         var mapped = AgentTurnService.toSpringMessages(wire);
 
@@ -212,14 +242,18 @@ class AgentTurnServiceTest {
         assertEquals(2, assistant.getToolCalls().size());
         assertEquals("{\"path\":\"a\"}", assistant.getToolCalls().get(0).arguments());
         ToolResponseMessage tools = assertInstanceOf(ToolResponseMessage.class, mapped.get(3));
-        assertEquals(List.of("c1", "c2"), tools.getResponses().stream().map(ToolResponseMessage.ToolResponse::id).toList());
+        assertEquals(
+                List.of("c1", "c2"),
+                tools.getResponses().stream().map(ToolResponseMessage.ToolResponse::id).toList());
     }
 
     @Test
     void aTrailingRunOfToolResultsIsFlushed() {
-        var mapped = AgentTurnService.toSpringMessages(List.of(
-            new Message("user", "u", null, null, null),
-            new Message("tool", "A", null, "c1", "t")));
+        var mapped =
+                AgentTurnService.toSpringMessages(
+                        List.of(
+                                new Message("user", "u", null, null, null),
+                                new Message("tool", "A", null, "c1", "t")));
         assertInstanceOf(ToolResponseMessage.class, mapped.get(1));
     }
 
@@ -234,7 +268,9 @@ class AgentTurnServiceTest {
     @Test
     void withNoEntitlementsAdapterTheServiceRefusesAndTouchesNoProvider() {
         Stub service = new Stub(providerOf(null), hostedProviders, chatClientFactory, 4);
-        assertThrows(AgentTurnService.EntitlementsUnavailableException.class, () -> service.turn(request(null)));
+        assertThrows(
+                AgentTurnService.EntitlementsUnavailableException.class,
+                () -> service.turn(request(null)));
         verify(hostedProviders, never()).resolveEnabledChain();
         assertEquals(0, service.calls);
     }
@@ -244,7 +280,8 @@ class AgentTurnServiceTest {
         RuntimeException rejection = new IllegalArgumentException("over quota");
         entitlements.rejectWith = rejection;
         Stub service = service();
-        assertSame(rejection, assertThrows(RuntimeException.class, () -> service.turn(request(null))));
+        assertSame(
+                rejection, assertThrows(RuntimeException.class, () -> service.turn(request(null))));
         verify(hostedProviders, never()).resolveEnabledChain();
         assertEquals(0, entitlements.abandoned);
     }
@@ -253,19 +290,25 @@ class AgentTurnServiceTest {
     void reservationCoversEstimatedPromptPlusTheClampedCompletion() {
         givenPool("m");
         Stub service = service();
-        AgentTurn.Request asksForTooMuch = new AgentTurn.Request(
-            request(null).messages(), request(null).tools(), 1_000_000, null, null);
+        AgentTurn.Request asksForTooMuch =
+                new AgentTurn.Request(
+                        request(null).messages(), request(null).tools(), 1_000_000, null, null);
 
         service.turn(asksForTooMuch);
 
         int prompt = AgentTurnService.estimatePromptTokens(asksForTooMuch);
-        assertEquals(prompt + 4096, entitlements.reserved, "the caller's maxTokens is honoured only downwards");
+        assertEquals(
+                prompt + 4096,
+                entitlements.reserved,
+                "the caller's maxTokens is honoured only downwards");
     }
 
     @Test
     void anEmptyPoolAbandonsTheLeaseAndSaysSo() {
         givenPool();
-        assertThrows(AgentTurnService.NoModelAvailableException.class, () -> service().turn(request(null)));
+        assertThrows(
+                AgentTurnService.NoModelAvailableException.class,
+                () -> service().turn(request(null)));
         assertEquals(1, entitlements.abandoned);
         assertEquals(0, entitlements.settled);
     }
@@ -276,12 +319,13 @@ class AgentTurnServiceTest {
     void aFailingRowFailsOverToTheNextAndTheLeaseIsSettledOnce() {
         givenPool("flaky", "steady");
         Stub service = service();
-        service.behaviour = n -> {
-            if (n == 1) {
-                throw new IllegalStateException("502 from provider");
-            }
-            return textResponse("done");
-        };
+        service.behaviour =
+                n -> {
+                    if (n == 1) {
+                        throw new IllegalStateException("502 from provider");
+                    }
+                    return textResponse("done");
+                };
 
         AgentTurn.Result result = service.turn(request(null));
 
@@ -296,10 +340,12 @@ class AgentTurnServiceTest {
     void whenEveryRowFailsTheLeaseIsAbandonedAndTheErrorIsBadGatewayMaterial() {
         givenPool("a", "b");
         Stub service = service();
-        service.behaviour = n -> {
-            throw new IllegalStateException("down");
-        };
-        assertThrows(AgentTurnService.UpstreamFailedException.class, () -> service.turn(request(null)));
+        service.behaviour =
+                n -> {
+                    throw new IllegalStateException("down");
+                };
+        assertThrows(
+                AgentTurnService.UpstreamFailedException.class, () -> service.turn(request(null)));
         assertEquals(2, service.calls);
         assertEquals(1, entitlements.abandoned);
         assertEquals(0, entitlements.settled);
@@ -309,10 +355,12 @@ class AgentTurnServiceTest {
     void aContentPolicyBlockIsNotFailedOverToAnotherModel() {
         givenPool("a", "b");
         Stub service = service();
-        service.behaviour = n -> {
-            throw new LlmGatewayContentPolicyViolationException("blocked by policy");
-        };
-        assertThrows(LlmGatewayContentPolicyViolationException.class, () -> service.turn(request(null)));
+        service.behaviour =
+                n -> {
+                    throw new LlmGatewayContentPolicyViolationException("blocked by policy");
+                };
+        assertThrows(
+                LlmGatewayContentPolicyViolationException.class, () -> service.turn(request(null)));
         assertEquals(1, service.calls, "another model would answer the same forbidden prompt");
         assertEquals(1, entitlements.abandoned);
     }
@@ -329,9 +377,13 @@ class AgentTurnServiceTest {
     void aClientCanSteerToAnEnabledRowButNotNameAnArbitraryModel() {
         List<HostedProviderSelection> chain = List.of(row("a"), row("b"), row("c"));
         assertEquals("c", AgentTurnService.orderChain(chain, " c ").get(0).provider().getModel());
-        assertEquals(chain, AgentTurnService.orderChain(chain, "not-in-the-pool"),
-            "an unknown id leaves the operator's order alone");
-        assertEquals("a", AgentTurnService.orderChain(chain, "not-in-the-pool").get(0).provider().getModel());
+        assertEquals(
+                chain,
+                AgentTurnService.orderChain(chain, "not-in-the-pool"),
+                "an unknown id leaves the operator's order alone");
+        assertEquals(
+                "a",
+                AgentTurnService.orderChain(chain, "not-in-the-pool").get(0).provider().getModel());
     }
 
     // ---- concurrency -------------------------------------------------------
@@ -342,17 +394,19 @@ class AgentTurnServiceTest {
         CountDownLatch inCall = new CountDownLatch(1);
         CountDownLatch release = new CountDownLatch(1);
         Stub service = new Stub(providerOf(entitlements), hostedProviders, chatClientFactory, 1);
-        service.behaviour = n -> {
-            inCall.countDown();
-            try {
-                release.await(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return textResponse("late");
-        };
+        service.behaviour =
+                n -> {
+                    inCall.countDown();
+                    try {
+                        release.await(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    return textResponse("late");
+                };
 
-        CompletableFuture<AgentTurn.Result> first = CompletableFuture.supplyAsync(() -> service.turn(request(null)));
+        CompletableFuture<AgentTurn.Result> first =
+                CompletableFuture.supplyAsync(() -> service.turn(request(null)));
         assertTrue(inCall.await(5, TimeUnit.SECONDS));
 
         assertThrows(AgentTurnService.BusyException.class, () -> service.turn(request(null)));
@@ -366,36 +420,94 @@ class AgentTurnServiceTest {
     // ---- controller bounds -------------------------------------------------
 
     private static HttpStatus statusOf(AgentTurn.Request request) {
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> AgentTurnController.validate(request));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class, () -> AgentTurnController.validate(request));
         return HttpStatus.valueOf(e.getStatusCode().value());
     }
 
     @Test
     void theControllerRejectsMalformedRequestsBeforeAnythingIsReserved() {
-        assertEquals(HttpStatus.BAD_REQUEST, statusOf(new AgentTurn.Request(List.of(), null, null, null, null)));
-        assertEquals(HttpStatus.BAD_REQUEST, statusOf(new AgentTurn.Request(
-            List.of(new Message("assistant", "hi", null, null, null)), null, null, null, null)));
-        assertEquals(HttpStatus.BAD_REQUEST, statusOf(new AgentTurn.Request(
-            List.of(new Message("tool", "x", null, null, "t")), null, null, null, null)));
-        assertEquals(HttpStatus.BAD_REQUEST, statusOf(new AgentTurn.Request(
-            List.of(new Message("user", "hi", null, null, null)),
-            List.of(new Tool("bad name!", "d", Map.of())), null, null, null)));
-        assertEquals(HttpStatus.BAD_REQUEST, statusOf(new AgentTurn.Request(
-            List.of(new Message("user", "hi", List.of(new ToolCall("1", "t", Map.of())), null, null)), null, null, null, null)));
-        assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, statusOf(new AgentTurn.Request(
-            List.of(new Message("user", "x".repeat(AgentTurnController.MAX_TOTAL_CHARS + 1), null, null, null)),
-            null, null, null, null)));
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                statusOf(new AgentTurn.Request(List.of(), null, null, null, null)));
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                statusOf(
+                        new AgentTurn.Request(
+                                List.of(new Message("assistant", "hi", null, null, null)),
+                                null,
+                                null,
+                                null,
+                                null)));
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                statusOf(
+                        new AgentTurn.Request(
+                                List.of(new Message("tool", "x", null, null, "t")),
+                                null,
+                                null,
+                                null,
+                                null)));
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                statusOf(
+                        new AgentTurn.Request(
+                                List.of(new Message("user", "hi", null, null, null)),
+                                List.of(new Tool("bad name!", "d", Map.of())),
+                                null,
+                                null,
+                                null)));
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                statusOf(
+                        new AgentTurn.Request(
+                                List.of(
+                                        new Message(
+                                                "user",
+                                                "hi",
+                                                List.of(new ToolCall("1", "t", Map.of())),
+                                                null,
+                                                null)),
+                                null,
+                                null,
+                                null,
+                                null)));
+        assertEquals(
+                HttpStatus.CONTENT_TOO_LARGE,
+                statusOf(
+                        new AgentTurn.Request(
+                                List.of(
+                                        new Message(
+                                                "user",
+                                                "x".repeat(AgentTurnController.MAX_TOTAL_CHARS + 1),
+                                                null,
+                                                null,
+                                                null)),
+                                null,
+                                null,
+                                null,
+                                null)));
     }
 
     @Test
     void aWellFormedRequestPassesValidation() {
         AgentTurnController.validate(request(null));
-        AgentTurnController.validate(new AgentTurn.Request(
-            List.of(
-                new Message("user", "u", null, null, null),
-                new Message("assistant", "", List.of(new ToolCall("c1", "read_file", Map.of())), null, null),
-                new Message("tool", "out", null, "c1", "read_file")),
-            null, null, null, null));
+        AgentTurnController.validate(
+                new AgentTurn.Request(
+                        List.of(
+                                new Message("user", "u", null, null, null),
+                                new Message(
+                                        "assistant",
+                                        "",
+                                        List.of(new ToolCall("c1", "read_file", Map.of())),
+                                        null,
+                                        null),
+                                new Message("tool", "out", null, "c1", "read_file")),
+                        null,
+                        null,
+                        null,
+                        null));
     }
 
     // ---- fake entitlements -------------------------------------------------

@@ -1,41 +1,31 @@
 package com.agenticai.core.agents.memory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link SessionMemoryService} tests: manual {@link StringRedisTemplate}
- * mocks, settings and summariser stubs. See {@link SessionMemoryServiceTest} for the contract pinned.
+ * mocks, settings and summariser stubs. See {@link SessionMemoryServiceTest} for the contract
+ * pinned.
  */
 abstract class SessionMemoryServiceTestBase {
 
@@ -52,7 +42,7 @@ abstract class SessionMemoryServiceTestBase {
     // Same ObjectMapper shape the service gets from Spring (jsr310 present on
     // the Boot classpath) - ChatTurn carries an Instant, so the plain
     // new ObjectMapper() would fail to serialize it.
-    final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.withJavaTime();
 
     StringRedisTemplate redisTemplate;
     ListOperations<String, String> listOps;
@@ -113,8 +103,7 @@ abstract class SessionMemoryServiceTestBase {
         return newService(maxTurns, maxChars, 8000, configCacheMs);
     }
 
-    SessionMemoryService newService(
-            int maxTurns, int maxChars, int maxTokens, long configCacheMs) {
+    SessionMemoryService newService(int maxTurns, int maxChars, int maxTokens, long configCacheMs) {
         return new SessionMemoryService(
                 redisTemplate,
                 objectMapper,
@@ -154,6 +143,7 @@ abstract class SessionMemoryServiceTestBase {
                         .toList();
         when(listOps.range(REDIS_KEY, -maxTurns, -1)).thenReturn(tail);
     }
+
     // ---- summarisation when turns leave the replay window ------------------
 
     /** Sets a real tenant on the calling thread, as the user-turn append path has. */

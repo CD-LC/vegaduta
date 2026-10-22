@@ -1,12 +1,11 @@
 package com.agenticai.core;
 
+import java.util.Map;
+import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
-
-import java.util.Map;
 
 /**
  * Quiets the background consumers when {@code app.tenancy.migrate-only=true} (the one-shot

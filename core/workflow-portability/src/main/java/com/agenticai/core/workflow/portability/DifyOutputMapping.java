@@ -6,7 +6,6 @@ import com.agenticai.core.workflow.portability.DifyImportModel.Ctx;
 import com.agenticai.core.workflow.portability.DifyImportModel.Exit;
 import com.agenticai.core.workflow.portability.DifyImportModel.Level;
 import com.agenticai.core.workflow.portability.DifyImportModel.Mapped;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Maps the Dify nodes that produce text for {@link DifyImportMapper}: a template transform becomes

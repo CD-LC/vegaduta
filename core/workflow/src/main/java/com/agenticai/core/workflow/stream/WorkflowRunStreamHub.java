@@ -2,7 +2,6 @@ package com.agenticai.core.workflow.stream;
 
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.Instant;
@@ -24,68 +23,63 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Live event stream for workflow runs - the backend of the canvas's
- * agent-native run view (phase 3): token-by-token agent output inside a node,
- * tool calls as child rows, a visible approval/input pause, and per-node plus
- * running cost. Served by {@code GET /api/workflows/{id}/runs/{runId}/events}
- * as Server-Sent Events.
+ * Live event stream for workflow runs - the backend of the canvas's agent-native run view (phase
+ * 3): token-by-token agent output inside a node, tool calls as child rows, a visible approval/input
+ * pause, and per-node plus running cost. Served by {@code GET
+ * /api/workflows/{id}/runs/{runId}/events} as Server-Sent Events.
  *
  * <h2>Event vocabulary (the {@code event:} name; {@code data:} is one JSON object)</h2>
- * Every payload carries {@code seq}, {@code type}, {@code runId}, {@code ts}
- * and, for node events, {@code nodeId}; the rest is in {@code data}.
+ *
+ * Every payload carries {@code seq}, {@code type}, {@code runId}, {@code ts} and, for node events,
+ * {@code nodeId}; the rest is in {@code data}.
+ *
  * <ul>
- *   <li>{@code snapshot} - the run as {@code GET .../runs/{runId}} returns it
- *       (status + full persisted trace). Sent first on every connect, and by
- *       the poll fallback whenever the stored run changes.</li>
- *   <li>{@code run.started} / {@code run.resumed} - traversal began / continued
- *       after an approval.</li>
- *   <li>{@code node.started} - {@code nodeType}, {@code label}, {@code attempt}
- *       (retries emit it again with a higher attempt).</li>
- *   <li>{@code node.token} - {@code delta} to append, or {@code reset:true}
- *       + {@code text} to replace, or {@code capped:true}. Already
- *       secret-redacted - see {@link NodeStreamSink}.</li>
- *   <li>{@code node.tool_call} ({@code id}, {@code tool}, {@code args}),
- *       {@code node.tool_result} ({@code id}, {@code tool}, {@code preview},
- *       {@code ms}), {@code node.tool_error} ({@code id}, {@code tool},
- *       {@code message}, {@code ms}), {@code node.agent_event} (plan /
- *       guardrail / handoff / ...: {@code kind} + fields) - the agent step
- *       events {@code AgentStepEventEmitter} already produces for the chat UI.</li>
- *   <li>{@code node.completed} - {@code entry}: the exact {@code
- *       NodeTraceEntry} the trace stores (status, durationMs, inputJson,
- *       outputJson, tokensIn/Out, costUsd, toolCalls), plus {@code runTotals}
- *       ({@code tokensIn}, {@code tokensOut}, {@code costUsd} summed over the
- *       trace so far; null parts = unknown).</li>
- *   <li>{@code run.awaiting} - the run halted for a person: {@code status}
- *       (AWAITING_APPROVAL / AWAITING_INPUT / PAUSED), {@code nodeId},
- *       {@code label}, {@code summary}, {@code requestId} when the summary
- *       names one. The stream stays open; approval resumes it.</li>
- *   <li>{@code run.finished} - {@code status}, {@code error}. Terminal: the
- *       server closes the stream after it.</li>
+ *   <li>{@code snapshot} - the run as {@code GET .../runs/{runId}} returns it (status + full
+ *       persisted trace). Sent first on every connect, and by the poll fallback whenever the stored
+ *       run changes.
+ *   <li>{@code run.started} / {@code run.resumed} - traversal began / continued after an approval.
+ *   <li>{@code node.started} - {@code nodeType}, {@code label}, {@code attempt} (retries emit it
+ *       again with a higher attempt).
+ *   <li>{@code node.token} - {@code delta} to append, or {@code reset:true} + {@code text} to
+ *       replace, or {@code capped:true}. Already secret-redacted - see {@link NodeStreamSink}.
+ *   <li>{@code node.tool_call} ({@code id}, {@code tool}, {@code args}), {@code node.tool_result}
+ *       ({@code id}, {@code tool}, {@code preview}, {@code ms}), {@code node.tool_error} ({@code
+ *       id}, {@code tool}, {@code message}, {@code ms}), {@code node.agent_event} (plan / guardrail
+ *       / handoff / ...: {@code kind} + fields) - the agent step events {@code
+ *       AgentStepEventEmitter} already produces for the chat UI.
+ *   <li>{@code node.completed} - {@code entry}: the exact {@code NodeTraceEntry} the trace stores
+ *       (status, durationMs, inputJson, outputJson, tokensIn/Out, costUsd, toolCalls), plus {@code
+ *       runTotals} ({@code tokensIn}, {@code tokensOut}, {@code costUsd} summed over the trace so
+ *       far; null parts = unknown).
+ *   <li>{@code run.awaiting} - the run halted for a person: {@code status} (AWAITING_APPROVAL /
+ *       AWAITING_INPUT / PAUSED), {@code nodeId}, {@code label}, {@code summary}, {@code requestId}
+ *       when the summary names one. The stream stays open; approval resumes it.
+ *   <li>{@code run.finished} - {@code status}, {@code error}. Terminal: the server closes the
+ *       stream after it.
  * </ul>
- * Heartbeats are SSE comments ({@code :hb}) every {@link #HEARTBEAT_SECONDS}
- * s - under Cloudflare's 100 s idle cut and Azure's 4-minute NAT idle drop.
- * Each event's SSE {@code id} is its {@code seq}; reconnect with
- * {@code Last-Event-ID} to replay what was missed (bounded buffer).
+ *
+ * Heartbeats are SSE comments ({@code :hb}) every {@link #HEARTBEAT_SECONDS} s - under Cloudflare's
+ * 100 s idle cut and Azure's 4-minute NAT idle drop. Each event's SSE {@code id} is its {@code
+ * seq}; reconnect with {@code Last-Event-ID} to replay what was missed (bounded buffer).
  *
  * <h2>Scope: one JVM, with a DB fallback</h2>
- * Channels live in this process's memory, which matches today's deployment
- * (core runs as a single replica). A subscriber whose run is NOT executing in
- * this JVM - Temporal-engine runs, a second replica, a run that already
- * finished - is served by polling the stored run every
- * {@link #POLL_INTERVAL_SECONDS} s and emitting a {@code snapshot} on change,
- * so the endpoint never lies by going silent; it just degrades from live
- * tokens to per-node granularity.
+ *
+ * Channels live in this process's memory, which matches today's deployment (core runs as a single
+ * replica). A subscriber whose run is NOT executing in this JVM - Temporal-engine runs, a second
+ * replica, a run that already finished - is served by polling the stored run every {@link
+ * #POLL_INTERVAL_SECONDS} s and emitting a {@code snapshot} on change, so the endpoint never lies
+ * by going silent; it just degrades from live tokens to per-node granularity.
  *
  * <h2>Isolation</h2>
- * Channels are keyed by run id but carry the tenant and workflow the ENGINE
- * attached; a subscriber only receives events when both match its own
- * (tenant from its token, workflow from the path it passed VIEWER on). A
- * client may subscribe BEFORE its run starts (sync runs with a
- * {@code clientRunId}); that pending subscription is bound to the tenant and
- * workflow it claimed, and is dropped with an error if the run that starts
- * under that id belongs to anyone else.
+ *
+ * Channels are keyed by run id but carry the tenant and workflow the ENGINE attached; a subscriber
+ * only receives events when both match its own (tenant from its token, workflow from the path it
+ * passed VIEWER on). A client may subscribe BEFORE its run starts (sync runs with a {@code
+ * clientRunId}); that pending subscription is bound to the tenant and workflow it claimed, and is
+ * dropped with an error if the run that starts under that id belongs to anyone else.
  */
 @Component
 public class WorkflowRunStreamHub {
@@ -110,8 +104,10 @@ public class WorkflowRunStreamHub {
 
     public WorkflowRunStreamHub(ObjectMapper mapper) {
         this.mapper = mapper;
-        this.scheduler = TenantAwareExecutors.newSingleThreadScheduledExecutor("workflow-run-stream", true);
-        scheduler.scheduleWithFixedDelay(this::heartbeatAndEvict, HEARTBEAT_SECONDS, HEARTBEAT_SECONDS, TimeUnit.SECONDS);
+        this.scheduler =
+                TenantAwareExecutors.newSingleThreadScheduledExecutor("workflow-run-stream", true);
+        scheduler.scheduleWithFixedDelay(
+                this::heartbeatAndEvict, HEARTBEAT_SECONDS, HEARTBEAT_SECONDS, TimeUnit.SECONDS);
     }
 
     @PreDestroy
@@ -124,33 +120,46 @@ public class WorkflowRunStreamHub {
     // ------------------------------------------------------------------
 
     /**
-     * The engine is about to traverse run {@code runId} (fresh or resumed).
-     * Attaches (or re-attaches) the live channel; a pending channel claimed by
-     * a different tenant/workflow is torn down first.
+     * The engine is about to traverse run {@code runId} (fresh or resumed). Attaches (or
+     * re-attaches) the live channel; a pending channel claimed by a different tenant/workflow is
+     * torn down first.
      */
     public void runStarted(String runId, String tenantId, String workflowId, boolean resumed) {
         if (runId == null) {
             return;
         }
-        Channel channel = channels.compute(runId, (id, existing) -> {
-            if (existing != null && existing.engineAttached
-                && Objects.equals(existing.tenantId, tenantId) && Objects.equals(existing.workflowId, workflowId)) {
-                return existing;
-            }
-            if (existing != null && !(Objects.equals(existing.tenantId, tenantId)
-                && Objects.equals(existing.workflowId, workflowId))) {
-                existing.failAll("This run id belongs to a different workflow.");
-                existing = null;
-            }
-            Channel c = existing != null ? existing : new Channel(id, tenantId, workflowId);
-            return c;
-        });
+        Channel channel =
+                channels.compute(
+                        runId,
+                        (id, existing) -> {
+                            if (existing != null
+                                    && existing.engineAttached
+                                    && Objects.equals(existing.tenantId, tenantId)
+                                    && Objects.equals(existing.workflowId, workflowId)) {
+                                return existing;
+                            }
+                            if (existing != null
+                                    && !(Objects.equals(existing.tenantId, tenantId)
+                                            && Objects.equals(existing.workflowId, workflowId))) {
+                                existing.failAll("This run id belongs to a different workflow.");
+                                existing = null;
+                            }
+                            Channel c =
+                                    existing != null
+                                            ? existing
+                                            : new Channel(id, tenantId, workflowId);
+                            return c;
+                        });
         synchronized (channel) {
             channel.engineAttached = true;
             channel.ended = false;
             channel.stopPolling();
         }
-        publish(runId, resumed ? "run.resumed" : "run.started", null, Map.of("workflowId", String.valueOf(workflowId)));
+        publish(
+                runId,
+                resumed ? "run.resumed" : "run.started",
+                null,
+                Map.of("workflowId", String.valueOf(workflowId)));
         evictIfOverCapacity();
     }
 
@@ -158,11 +167,14 @@ public class WorkflowRunStreamHub {
     public NodeStreamSink nodeSink(String runId, String nodeId) {
         Channel channel = runId == null ? null : channels.get(runId);
         return channel == null || !channel.engineAttached
-            ? NodeStreamSink.NOOP
-            : new NodeStreamSink(this, runId, nodeId, System::currentTimeMillis);
+                ? NodeStreamSink.NOOP
+                : new NodeStreamSink(this, runId, nodeId, System::currentTimeMillis);
     }
 
-    /** Appends one event to the run's channel and fans it out. No-op without an engine-attached channel. */
+    /**
+     * Appends one event to the run's channel and fans it out. No-op without an engine-attached
+     * channel.
+     */
     public void publish(String runId, String type, String nodeId, Map<String, ?> data) {
         Channel channel = runId == null ? null : channels.get(runId);
         if (channel == null || !channel.engineAttached) {
@@ -182,7 +194,11 @@ public class WorkflowRunStreamHub {
             try {
                 json = mapper.writeValueAsString(payload);
             } catch (Exception e) {
-                log.debug("Dropping unserializable {} event for run {}: {}", type, runId, e.getMessage());
+                log.debug(
+                        "Dropping unserializable {} event for run {}: {}",
+                        type,
+                        runId,
+                        e.getMessage());
                 return;
             }
             Event event = new Event(channel.seq, type, json);
@@ -197,8 +213,8 @@ public class WorkflowRunStreamHub {
     }
 
     /**
-     * The traversal leg returned. Terminal statuses end the stream; awaiting
-     * ones publish {@code run.awaiting} and keep it open for the resume.
+     * The traversal leg returned. Terminal statuses end the stream; awaiting ones publish {@code
+     * run.awaiting} and keep it open for the resume.
      */
     public void runSettled(String runId, String status, Map<String, ?> data) {
         Channel channel = runId == null ? null : channels.get(runId);
@@ -224,17 +240,19 @@ public class WorkflowRunStreamHub {
     // ------------------------------------------------------------------
 
     /**
-     * Opens an SSE stream for a caller who already passed VIEWER on
-     * {@code workflowId}.
+     * Opens an SSE stream for a caller who already passed VIEWER on {@code workflowId}.
      *
      * @param snapshot the stored run, or null if no row exists (yet)
-     * @param poller   reloads the stored run (null when gone) - used when the
-     *                 run is not executing in this JVM
+     * @param poller reloads the stored run (null when gone) - used when the run is not executing in
+     *     this JVM
      */
     public SseEmitter subscribe(
-        String tenantId, String workflowId, String runId, Long lastEventId,
-        WorkflowRunResponse snapshot, Supplier<WorkflowRunResponse> poller
-    ) {
+            String tenantId,
+            String workflowId,
+            String runId,
+            Long lastEventId,
+            WorkflowRunResponse snapshot,
+            Supplier<WorkflowRunResponse> poller) {
         SseEmitter emitter = newEmitter();
         Subscriber sub = new Subscriber(emitter);
         if (snapshot != null) {
@@ -243,7 +261,8 @@ public class WorkflowRunStreamHub {
 
         Channel channel = channels.get(runId);
         if (channel != null && channel.engineAttached) {
-            if (!Objects.equals(channel.tenantId, tenantId) || !Objects.equals(channel.workflowId, workflowId)) {
+            if (!Objects.equals(channel.tenantId, tenantId)
+                    || !Objects.equals(channel.workflowId, workflowId)) {
                 sub.fail("Run not found for this workflow.");
                 return emitter;
             }
@@ -277,8 +296,10 @@ public class WorkflowRunStreamHub {
                 return emitter;
             }
         }
-        Channel pending = channels.computeIfAbsent(runId, id -> new Channel(id, tenantId, workflowId));
-        if (!Objects.equals(pending.tenantId, tenantId) || !Objects.equals(pending.workflowId, workflowId)) {
+        Channel pending =
+                channels.computeIfAbsent(runId, id -> new Channel(id, tenantId, workflowId));
+        if (!Objects.equals(pending.tenantId, tenantId)
+                || !Objects.equals(pending.workflowId, workflowId)) {
             sub.fail("Run not found for this workflow.");
             return emitter;
         }
@@ -329,8 +350,10 @@ public class WorkflowRunStreamHub {
                 }
                 channel.subscribers.removeIf(sub -> sub.dead);
                 boolean endedLongAgo = channel.ended && now - channel.endedAt > RETAIN_ENDED_MS;
-                boolean stalePending = !channel.engineAttached && channel.subscribers.isEmpty()
-                    && now - channel.createdAt > PENDING_TTL_MS;
+                boolean stalePending =
+                        !channel.engineAttached
+                                && channel.subscribers.isEmpty()
+                                && now - channel.createdAt > PENDING_TTL_MS;
                 if (endedLongAgo || stalePending) {
                     channel.stopPolling();
                     channels.remove(channel.runId, channel);
@@ -361,8 +384,7 @@ public class WorkflowRunStreamHub {
         }
     }
 
-    record Event(long seq, String type, String json) {
-    }
+    record Event(long seq, String type, String json) {}
 
     private final class Channel {
         final String runId;
@@ -389,8 +411,12 @@ public class WorkflowRunStreamHub {
                 return;
             }
             lastPolledFingerprint = fingerprint(initial);
-            pollTask = scheduler.scheduleWithFixedDelay(() -> poll(poller),
-                POLL_INTERVAL_SECONDS, POLL_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            pollTask =
+                    scheduler.scheduleWithFixedDelay(
+                            () -> poll(poller),
+                            POLL_INTERVAL_SECONDS,
+                            POLL_INTERVAL_SECONDS,
+                            TimeUnit.SECONDS);
         }
 
         synchronized void stopPolling() {
@@ -460,8 +486,11 @@ public class WorkflowRunStreamHub {
         }
 
         void send(Event event) {
-            write(SseEmitter.event().id(Long.toString(event.seq())).name(event.type())
-                .data(event.json(), MediaType.APPLICATION_JSON));
+            write(
+                    SseEmitter.event()
+                            .id(Long.toString(event.seq()))
+                            .name(event.type())
+                            .data(event.json(), MediaType.APPLICATION_JSON));
         }
 
         void sendSnapshot(WorkflowRunResponse run) {
@@ -471,7 +500,12 @@ public class WorkflowRunStreamHub {
                 payload.put("runId", run.id() == null ? null : run.id().toString());
                 payload.put("ts", Instant.now());
                 payload.put("data", run);
-                write(SseEmitter.event().name("snapshot").data(mapper.writeValueAsString(payload), MediaType.APPLICATION_JSON));
+                write(
+                        SseEmitter.event()
+                                .name("snapshot")
+                                .data(
+                                        mapper.writeValueAsString(payload),
+                                        MediaType.APPLICATION_JSON));
             } catch (Exception e) {
                 log.debug("Could not serialize run snapshot: {}", e.getMessage());
             }
@@ -483,8 +517,13 @@ public class WorkflowRunStreamHub {
 
         void fail(String message) {
             try {
-                write(SseEmitter.event().name("error").data(
-                    mapper.writeValueAsString(Map.of("type", "error", "message", message)), MediaType.APPLICATION_JSON));
+                write(
+                        SseEmitter.event()
+                                .name("error")
+                                .data(
+                                        mapper.writeValueAsString(
+                                                Map.of("type", "error", "message", message)),
+                                        MediaType.APPLICATION_JSON));
             } catch (Exception ignored) {
                 // Fall through to complete.
             }

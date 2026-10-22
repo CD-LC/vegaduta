@@ -1,6 +1,5 @@
 package com.agenticai.core.omnichannel.imessage;
 
-import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,8 +20,8 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.ConversationHeldByHumanException;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
+import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 class ImessageUpdateServiceTest {
 
@@ -59,8 +59,14 @@ class ImessageUpdateServiceTest {
         when(chat.chat(any(), any())).thenReturn(Flux.just("Hi ", "there"));
         service =
                 new ImessageUpdateService(
-                        sessions, chat, gate, mock(AuditLogService.class), dedup,
-                        InboundChannelExecutor.synchronous(), credentials, limiter);
+                        sessions,
+                        chat,
+                        gate,
+                        mock(AuditLogService.class),
+                        dedup,
+                        InboundChannelExecutor.synchronous(),
+                        credentials,
+                        limiter);
     }
 
     @AfterEach
@@ -70,15 +76,27 @@ class ImessageUpdateServiceTest {
 
     private void settings(Set<String> allowed, boolean groups, UnknownSenderPolicy policy) {
         when(credentials.inboundSettings())
-                .thenReturn(Optional.of(new ImessageCredentialService.InboundSettings(allowed, groups, policy)));
+                .thenReturn(
+                        Optional.of(
+                                new ImessageCredentialService.InboundSettings(
+                                        allowed, groups, policy)));
     }
 
-    private static JsonNode event(String guid, String chatGuid, int style, String sender, String text) throws Exception {
+    private static JsonNode event(
+            String guid, String chatGuid, int style, String sender, String text) throws Exception {
         return JsonMappers.plain()
                 .readTree(
-                        "{\"type\":\"new-message\",\"data\":{\"guid\":\"" + guid + "\",\"text\":\"" + text
-                                + "\",\"isFromMe\":false,\"handle\":{\"address\":\"" + sender
-                                + "\"},\"chats\":[{\"guid\":\"" + chatGuid + "\",\"style\":" + style + "}]}}");
+                        "{\"type\":\"new-message\",\"data\":{\"guid\":\""
+                                + guid
+                                + "\",\"text\":\""
+                                + text
+                                + "\",\"isFromMe\":false,\"handle\":{\"address\":\""
+                                + sender
+                                + "\"},\"chats\":[{\"guid\":\""
+                                + chatGuid
+                                + "\",\"style\":"
+                                + style
+                                + "}]}}");
     }
 
     private ChannelSession session(boolean paired, boolean noticeSent) {
@@ -95,7 +113,12 @@ class ImessageUpdateServiceTest {
 
     private String sentPayload() {
         ArgumentCaptor<String> payload = ArgumentCaptor.forClass(String.class);
-        verify(gate).evaluate(eq(ImessageChannelAdapter.ACTION_TYPE), anyString(), payload.capture(), anyString());
+        verify(gate)
+                .evaluate(
+                        eq(ImessageChannelAdapter.ACTION_TYPE),
+                        anyString(),
+                        payload.capture(),
+                        anyString());
         return payload.getValue();
     }
 
@@ -170,7 +193,8 @@ class ImessageUpdateServiceTest {
     void inAnEnabledGroupAListedSpeakerIsAnswered() throws Exception {
         settings(Set.of(SENDER), true, UnknownSenderPolicy.PAIR);
         ChannelSession paired = session(true, false);
-        when(sessions.resolveOrCreate(ChannelType.IMESSAGE, "iMessage;+;chat1", "hello")).thenReturn(paired);
+        when(sessions.resolveOrCreate(ChannelType.IMESSAGE, "iMessage;+;chat1", "hello"))
+                .thenReturn(paired);
 
         service.acceptVerified(event("m1", "iMessage;+;chat1", 43, SENDER, "hello"));
 
@@ -185,7 +209,12 @@ class ImessageUpdateServiceTest {
 
         service.acceptVerified(event("m1", CHAT, 45, "+1 (555) 010-0100", "hello"));
 
-        verify(gate).evaluate(eq(ImessageChannelAdapter.ACTION_TYPE), anyString(), anyString(), anyString());
+        verify(gate)
+                .evaluate(
+                        eq(ImessageChannelAdapter.ACTION_TYPE),
+                        anyString(),
+                        anyString(),
+                        anyString());
     }
 
     @Test
@@ -204,8 +233,14 @@ class ImessageUpdateServiceTest {
         limiter = new ImessageRateLimiter(1, 30, System::currentTimeMillis);
         service =
                 new ImessageUpdateService(
-                        sessions, chat, gate, mock(AuditLogService.class), dedup,
-                        InboundChannelExecutor.synchronous(), credentials, limiter);
+                        sessions,
+                        chat,
+                        gate,
+                        mock(AuditLogService.class),
+                        dedup,
+                        InboundChannelExecutor.synchronous(),
+                        credentials,
+                        limiter);
         ChannelSession paired = session(true, false);
         when(sessions.resolveOrCreate(any(), anyString(), anyString())).thenReturn(paired);
 
@@ -223,7 +258,9 @@ class ImessageUpdateServiceTest {
                 JsonMappers.plain()
                         .readTree(
                                 "{\"type\":\"new-message\",\"data\":{\"guid\":\"o1\",\"text\":\"my reply\",\"isFromMe\":true,"
-                                        + "\"chats\":[{\"guid\":\"" + CHAT + "\",\"style\":45}]}}");
+                                        + "\"chats\":[{\"guid\":\""
+                                        + CHAT
+                                        + "\",\"style\":45}]}}");
 
         assertThat(service.acceptVerified(own)).isTrue();
 
@@ -242,7 +279,8 @@ class ImessageUpdateServiceTest {
     @Test
     void aConversationHeldByAHumanDoesNotInvokeTheAgent() throws Exception {
         settings(Set.of(SENDER), false, UnknownSenderPolicy.PAIR);
-        ConversationHeldByHumanException held = new ConversationHeldByHumanException(session(true, false));
+        ConversationHeldByHumanException held =
+                new ConversationHeldByHumanException(session(true, false));
         when(sessions.resolveOrCreate(ChannelType.IMESSAGE, CHAT, "hello")).thenThrow(held);
 
         assertThat(service.acceptVerified(event("m1", CHAT, 45, SENDER, "hello"))).isTrue();
@@ -257,7 +295,14 @@ class ImessageUpdateServiceTest {
         when(full.acquire(anyString())).thenReturn(null);
         service =
                 new ImessageUpdateService(
-                        sessions, chat, gate, mock(AuditLogService.class), dedup, full, credentials, limiter);
+                        sessions,
+                        chat,
+                        gate,
+                        mock(AuditLogService.class),
+                        dedup,
+                        full,
+                        credentials,
+                        limiter);
 
         assertThat(service.acceptVerified(event("m1", CHAT, 45, SENDER, "hello"))).isFalse();
 

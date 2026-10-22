@@ -42,9 +42,6 @@ import com.agenticai.core.workflow.output.PdfOutputRenderer;
 import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
@@ -56,6 +53,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Dry run of sends (request {@code mode: "draft"} + {@code simulateSends: true}): the request is
@@ -98,7 +97,7 @@ class WorkflowDryRunTest {
                         mock(ToolCallLogRepository.class),
                         mock(DeviceCommandService.class),
                         mock(AgentToolProvider.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(ObjectProvider.class),
                         mock(LlmResponseCacheService.class),
                         mock(QueryComplexityClassifier.class),
@@ -431,7 +430,7 @@ class WorkflowDryRunTest {
 
     @Test
     void traceEntriesCarryDryRunOnlyWhenSimulatedAndReadBackCleanly() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
         Instant now = Instant.parse("2026-10-03T09:00:00Z");
         NodeTraceEntry simulated =
                 new NodeTraceEntry(

@@ -28,14 +28,14 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * ADR-0022 stage 4: both Telegram delivery modes end in {@code
@@ -47,7 +47,7 @@ class TelegramTurnContextTest {
 
     private static final String BOT_USER_ID = "999888777";
     private static final String SECRET = "webhook-secret";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String UPDATE =
             """
             {"update_id":12345,"message":{"chat":{"id":"chat-1"},"from":{"id":"user-1"},"text":"hello"}}

@@ -2,13 +2,15 @@ package com.agenticai.core.workflow;
 
 import com.agenticai.core.workflow.expression.EvalContext;
 import com.agenticai.core.workflow.expression.NodeOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
-/** The node context with the input's top-level fields replaced by one bulk_email recipient's fields. */
+/**
+ * The node context with the input's top-level fields replaced by one bulk_email recipient's fields.
+ */
 final class WorkflowRecipientEvalContext implements EvalContext {
 
     private final ObjectMapper objectMapper;
@@ -17,7 +19,11 @@ final class WorkflowRecipientEvalContext implements EvalContext {
     private final int index;
     private JsonNode tree;
 
-    WorkflowRecipientEvalContext(ObjectMapper objectMapper, WorkflowNodeEvalContext base, Map<String, String> vars, int index) {
+    WorkflowRecipientEvalContext(
+            ObjectMapper objectMapper,
+            WorkflowNodeEvalContext base,
+            Map<String, String> vars,
+            int index) {
         this.objectMapper = objectMapper;
         this.base = base;
         this.vars = vars;

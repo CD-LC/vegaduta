@@ -17,28 +17,27 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.knowledge.KnowledgeSearchService;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * {@code search_knowledge}'s one load-bearing subtlety is the INVERTED
- * empty-set convention (its class javadoc walks through it): inside
- * core/knowledge an empty allow-list means "search everything", but on this
- * external grant surface an empty set means the admin shared NOTHING - so a
- * regression that forwards an empty set into {@link KnowledgeSearchService}
- * would silently hand every MCP key tenant-wide knowledge access. That
- * deny-by-default branch is the headline test here, alongside the top_k
- * clamping that stops an external caller running up embedding/rerank cost.
+ * {@code search_knowledge}'s one load-bearing subtlety is the INVERTED empty-set convention (its
+ * class javadoc walks through it): inside core/knowledge an empty allow-list means "search
+ * everything", but on this external grant surface an empty set means the admin shared NOTHING - so
+ * a regression that forwards an empty set into {@link KnowledgeSearchService} would silently hand
+ * every MCP key tenant-wide knowledge access. That deny-by-default branch is the headline test
+ * here, alongside the top_k clamping that stops an external caller running up embedding/rerank
+ * cost.
  */
 class McpSearchKnowledgeToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private KnowledgeSearchService knowledgeSearchService;
     private AuditLogService auditLogService;
@@ -87,27 +86,38 @@ class McpSearchKnowledgeToolCallbackTest {
 
         JsonNode result = call("{\"query\": \"quarterly report\"}");
 
-        assertTrue(result.get("error").asText().contains("tenant admin"));
+        assertTrue(result.get("error").asString().contains("tenant admin"));
         verify(knowledgeSearchService, never()).search(anyString(), anyInt(), anySet());
         // A deny-by-default rejection is itself compliance-relevant, same posture as the
         // other MCP tool callbacks' rejection branches.
-        verify(auditLogService).record(
-            eq("mcp-external:" + grantId), eq("mcp.grant.search_knowledge"), eq("McpServerAccessGrant"),
-            eq(grantId.toString()), eq(AuditOutcome.FAILURE), anyString());
+        verify(auditLogService)
+                .record(
+                        eq("mcp-external:" + grantId),
+                        eq("mcp.grant.search_knowledge"),
+                        eq("McpServerAccessGrant"),
+                        eq(grantId.toString()),
+                        eq(AuditOutcome.FAILURE),
+                        anyString());
     }
 
     @Test
     void searchIsScopedToExactlyTheGrantsExposedCollections() throws Exception {
-        when(knowledgeSearchService.search(eq("quarterly report"), anyInt(), eq(Set.of(exposedCollectionId))))
-            .thenReturn(List.of());
+        when(knowledgeSearchService.search(
+                        eq("quarterly report"), anyInt(), eq(Set.of(exposedCollectionId))))
+                .thenReturn(List.of());
 
         call("{\"query\": \"quarterly report\"}");
 
         // Never a superset, never a tenant-wide wildcard.
         verify(knowledgeSearchService).search("quarterly report", 5, Set.of(exposedCollectionId));
-        verify(auditLogService).record(
-            eq("mcp-external:" + grantId), eq("mcp.grant.search_knowledge"), eq("McpServerAccessGrant"),
-            eq(grantId.toString()), eq(AuditOutcome.SUCCESS), anyString());
+        verify(auditLogService)
+                .record(
+                        eq("mcp-external:" + grantId),
+                        eq("mcp.grant.search_knowledge"),
+                        eq("McpServerAccessGrant"),
+                        eq(grantId.toString()),
+                        eq(AuditOutcome.SUCCESS),
+                        anyString());
     }
 
     @Test
@@ -153,22 +163,28 @@ class McpSearchKnowledgeToolCallbackTest {
     @Test
     void aSearchFailureBecomesAnErrorPayloadNotAThrownException() throws Exception {
         when(knowledgeSearchService.search(anyString(), anyInt(), anySet()))
-            .thenThrow(new RuntimeException("embedding sidecar down"));
+                .thenThrow(new RuntimeException("embedding sidecar down"));
 
         JsonNode result = call("{\"query\": \"q\"}");
 
-        assertTrue(result.get("error").asText().contains("Knowledge search failed"));
-        verify(auditLogService).record(
-            eq("mcp-external:" + grantId), eq("mcp.grant.search_knowledge"), eq("McpServerAccessGrant"),
-            eq(grantId.toString()), eq(AuditOutcome.FAILURE), anyString());
+        assertTrue(result.get("error").asString().contains("Knowledge search failed"));
+        verify(auditLogService)
+                .record(
+                        eq("mcp-external:" + grantId),
+                        eq("mcp.grant.search_knowledge"),
+                        eq("McpServerAccessGrant"),
+                        eq(grantId.toString()),
+                        eq(AuditOutcome.FAILURE),
+                        anyString());
     }
 
     @Test
     void anAuditLoggingFailureNeverChangesTheSuccessfulResult() throws Exception {
         // "Never let logging break the real call" - same posture McpCallAgentToolCallback pins.
         when(knowledgeSearchService.search(anyString(), anyInt(), anySet())).thenReturn(List.of());
-        doThrow(new RuntimeException("audit table unavailable")).when(auditLogService)
-            .record(anyString(), anyString(), anyString(), any(), any(), anyString());
+        doThrow(new RuntimeException("audit table unavailable"))
+                .when(auditLogService)
+                .record(anyString(), anyString(), anyString(), any(), any(), anyString());
 
         JsonNode result = call("{\"query\": \"q\"}");
 

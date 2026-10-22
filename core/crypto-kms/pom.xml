@@ -40,7 +40,7 @@
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <!-- AWS KMS: GenerateDataKey / Decrypt. Default credential chain (IRSA, Pod Identity, instance role). -->
@@ -89,7 +89,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-test-classic</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -3,8 +3,6 @@ package com.agenticai.core.agents.memory;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +13,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Redis-backed, per-session conversation memory.
@@ -87,8 +87,8 @@ import org.springframework.stereotype.Component;
  * <p>Independently of all this, {@link #appendTurn} still LTRIMs the stored list to the newest
  * {@value #MAX_STORED_ENTRIES} entries so the Redis value itself can never grow without limit - the
  * window bounds the prompt, the trim bounds the storage, and the fold now happens well before the
- * trim ever touches anything (see {@link SessionSummaryFolder#foldWindowTurns} for why the fold window is capped so
- * this holds for every admin window setting).
+ * trim ever touches anything (see {@link SessionSummaryFolder#foldWindowTurns} for why the fold
+ * window is capped so this holds for every admin window setting).
  *
  * <p>Residual gaps, stated rather than hidden: (1) the fold is keyed on the TURN cap only; a turn
  * that is inside the turn cap but dropped from this particular read by the char/token budget is not
@@ -254,7 +254,11 @@ public class SessionMemoryService {
         this.sessionTtl = Duration.ofHours(sessionTtlHours);
         this.folder =
                 new SessionSummaryFolder(
-                        redisTemplate, sessionTtl, summaryService, windowSettings, this::deserialize);
+                        redisTemplate,
+                        sessionTtl,
+                        summaryService,
+                        windowSettings,
+                        this::deserialize);
         this.owners = new SessionOwnerRecords(redisTemplate, sessionTtl);
     }
 
@@ -286,10 +290,10 @@ public class SessionMemoryService {
      * never sees a conversation that opens with its own reply to a question it can't see.
      *
      * <p>When turns have left the replay window at some point and a rolling summary exists, it is
-     * injected AHEAD of the window — see {@link SessionSummaryFolder#withSummary}. Injection happens after all the
-     * windowing above, on purpose: the summary must not be charged against the char/token budgets
-     * (it is already bounded on its own by {@code SessionSummaryService}'s {@code
-     * history-summary-max-chars}, and it is the cheapest context in the prompt per unit of
+     * injected AHEAD of the window — see {@link SessionSummaryFolder#withSummary}. Injection
+     * happens after all the windowing above, on purpose: the summary must not be charged against
+     * the char/token budgets (it is already bounded on its own by {@code SessionSummaryService}'s
+     * {@code history-summary-max-chars}, and it is the cheapest context in the prompt per unit of
      * conversation it stands for) and must not be reachable by the orphaned-assistant boundary
      * rule.
      *
@@ -349,7 +353,8 @@ public class SessionMemoryService {
         if (turns.size() - start > 1 && turns.get(start).role() == MessageRole.ASSISTANT) {
             start++;
         }
-        return folder.withSummary(sessionId, start == 0 ? turns : turns.subList(start, turns.size()));
+        return folder.withSummary(
+                sessionId, start == 0 ? turns : turns.subList(start, turns.size()));
     }
 
     /**
@@ -520,7 +525,9 @@ public class SessionMemoryService {
                                 ? SessionAppendScript.Mode.MARKER_AWARE_TRIM
                                 : SessionAppendScript.Mode.CLAIM_AND_TRIM;
         boolean claiming = mode == SessionAppendScript.Mode.CLAIM_AND_TRIM;
-        String owner = tenant.map(t -> SessionOwnerRecords.ownerValue(t.getTenantId(), t.getSubject())).orElse(null);
+        String owner =
+                tenant.map(t -> SessionOwnerRecords.ownerValue(t.getTenantId(), t.getSubject()))
+                        .orElse(null);
         List<Object> claimed;
         try {
             claimed =
@@ -590,7 +597,7 @@ public class SessionMemoryService {
     private String serialize(ChatTurn turn) {
         try {
             return objectMapper.writeValueAsString(turn);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize chat turn", e);
         }
     }
@@ -598,7 +605,7 @@ public class SessionMemoryService {
     private ChatTurn deserialize(String json) {
         try {
             return objectMapper.readValue(json, ChatTurn.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // A corrupt/unreadable entry shouldn't take down the whole conversation history.
             log.warn("Skipping unreadable chat turn in session history", e);
             return null;

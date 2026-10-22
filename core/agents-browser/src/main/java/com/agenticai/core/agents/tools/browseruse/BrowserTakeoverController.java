@@ -7,7 +7,6 @@ import com.agenticai.core.agents.tools.browseruse.BrowserTakeoverDtos.TokenRefre
 import com.agenticai.core.agents.tools.browseruse.BrowserTakeoverDtos.View;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The person's side of browser takeover: see where a takeover stands, pause a session, take
@@ -58,8 +58,7 @@ public class BrowserTakeoverController {
     private final ObjectMapper mapper;
     private final ScheduledExecutorService pumps =
             TenantAwareExecutors.newScheduledThreadPool(
-                    2,
-                    TenantAwareExecutors.threadFactory("browser-takeover-stream", true));
+                    2, TenantAwareExecutors.threadFactory("browser-takeover-stream", true));
 
     public BrowserTakeoverController(BrowserTakeoverService service, ObjectMapper mapper) {
         this.service = service;
@@ -72,8 +71,9 @@ public class BrowserTakeoverController {
     }
 
     /**
-     * Always 200: {@code {"enabled":true,...}} when takeover is on, {@code {"enabled":false}} when it is off
-     * (the web hides the panel on enabled:false), so a switched-off deployment does not log a 404 per page.
+     * Always 200: {@code {"enabled":true,...}} when takeover is on, {@code {"enabled":false}} when
+     * it is off (the web hides the panel on enabled:false), so a switched-off deployment does not
+     * log a 404 per page.
      */
     @GetMapping("/capabilities")
     public Map<String, Object> capabilities() {

@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Rolling-deploy compatibility of the cross-replica command JSON: a control command must not carry
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 class McpCommandJsonTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     @Test
     void controlCommandOmitsThePayloadProperty() throws Exception {
@@ -29,8 +29,8 @@ class McpCommandJsonTest {
 
         assertFalse(json.has("payload"), json.toString());
         assertFalse(json.has("replyKey"), json.toString());
-        assertEquals("DISCONNECT", json.get("op").asText());
-        assertEquals(id.toString(), json.get("registrationId").asText());
+        assertEquals("DISCONNECT", json.get("op").asString());
+        assertEquals(id.toString(), json.get("registrationId").asString());
     }
 
     @Test

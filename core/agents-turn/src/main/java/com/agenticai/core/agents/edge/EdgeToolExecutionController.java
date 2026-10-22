@@ -7,9 +7,6 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.devices.DeviceAuthResolver;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.List;
 import java.util.Set;
@@ -30,10 +27,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * The propose/execute split's server half. An on-device (VegaDuta Edge) model <em>proposes</em> a tool
- * call in the visitor's browser; this endpoint is the only way that proposal ever
+ * The propose/execute split's server half. An on-device (VegaDuta Edge) model <em>proposes</em> a
+ * tool call in the visitor's browser; this endpoint is the only way that proposal ever
  * <em>executes</em>, and it runs the call through the same guarded resolution/decorator stack a
  * hosted chat turn uses ({@code AgentToolProvider#resolveToolCandidatesFor} - the same merge,
  * allow-list filtering, and {@code GuardedToolCallback}/{@code LoggingToolCallback} wrapping {@link
@@ -65,16 +65,16 @@ import org.springframework.web.bind.annotation.RestController;
  * <p><b>Authorization layers, in order:</b>
  *
  * <ol>
- *   <li>Authenticated + tenant-scoped, via EITHER credential form: a
- *       Keycloak JWT (the original browser path - the normal bearer + {@code TenantContextFilter}
- *       flow applies, {@code TenantContext} already populated before this controller runs) OR an
- *       {@code X-Device-Token} header (new - a desktop daemon has no Keycloak session, same posture
- *       as {@code DeviceGatewayController}'s poll/result endpoints; {@link DeviceAuthResolver#run}
- *       resolves the token to a tenant schema and populates {@code TenantContext} itself for the
- *       duration of the call). See {@code SecurityConfig}'s matchers for this path - permitAll() at
- *       that layer, verified here, same split as {@code DeviceGatewayController}. Neither
- *       credential present or valid -&gt; 401 before either agent lookup below runs. See {@link
- *       #withCallerSubject} for exactly how the two forms are told apart.
+ *   <li>Authenticated + tenant-scoped, via EITHER credential form: a Keycloak JWT (the original
+ *       browser path - the normal bearer + {@code TenantContextFilter} flow applies, {@code
+ *       TenantContext} already populated before this controller runs) OR an {@code X-Device-Token}
+ *       header (new - a desktop daemon has no Keycloak session, same posture as {@code
+ *       DeviceGatewayController}'s poll/result endpoints; {@link DeviceAuthResolver#run} resolves
+ *       the token to a tenant schema and populates {@code TenantContext} itself for the duration of
+ *       the call). See {@code SecurityConfig}'s matchers for this path - permitAll() at that layer,
+ *       verified here, same split as {@code DeviceGatewayController}. Neither credential present or
+ *       valid -&gt; 401 before either agent lookup below runs. See {@link #withCallerSubject} for
+ *       exactly how the two forms are told apart.
  *   <li>{@link AgentService#requireAccess} at {@code RUNNER} - the same "can this human actually
  *       use this agent" gate {@code AgentController#chat} enforces, 404 (never 403,
  *       anti-enumeration) for a missing, cross-tenant, or unshared private agent. A

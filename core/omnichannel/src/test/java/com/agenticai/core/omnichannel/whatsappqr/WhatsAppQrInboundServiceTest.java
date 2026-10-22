@@ -21,8 +21,6 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -31,11 +29,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Default deny, pairing and the reply path of an inbound WhatsApp QR message. */
 class WhatsAppQrInboundServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SENDER = "4917600000001";
 
     private ChannelSessionService sessions;
@@ -55,8 +55,14 @@ class WhatsAppQrInboundServiceTest {
         dedup = mock(InboundMessageDedupService.class);
         when(dedup.tryClaim(eq(ChannelType.WHATSAPP_QR), any())).thenReturn(true);
         when(sessions.consumeAiDisclosurePrefix(any())).thenReturn("");
-        service = new WhatsAppQrInboundService(
-                sessions, agentChat, gate, audit, dedup, InboundChannelExecutor.synchronous());
+        service =
+                new WhatsAppQrInboundService(
+                        sessions,
+                        agentChat,
+                        gate,
+                        audit,
+                        dedup,
+                        InboundChannelExecutor.synchronous());
     }
 
     @AfterEach
@@ -64,11 +70,16 @@ class WhatsAppQrInboundServiceTest {
         TenantContext.clear();
     }
 
-    private static JsonNode event(String chatJid, String senderNumber, String text) throws Exception {
+    private static JsonNode event(String chatJid, String senderNumber, String text)
+            throws Exception {
         return MAPPER.readTree(
-                "{\"id\":\"MSG1\",\"chatJid\":\"" + chatJid + "\",\"senderNumber\":"
+                "{\"id\":\"MSG1\",\"chatJid\":\""
+                        + chatJid
+                        + "\",\"senderNumber\":"
                         + (senderNumber == null ? "null" : "\"" + senderNumber + "\"")
-                        + ",\"pushName\":\"Ann\",\"text\":\"" + text + "\",\"timestampMs\":11}");
+                        + ",\"pushName\":\"Ann\",\"text\":\""
+                        + text
+                        + "\",\"timestampMs\":11}");
     }
 
     private ChannelSession session(boolean paired, boolean noticeSent, String externalId) {
@@ -102,7 +113,8 @@ class WhatsAppQrInboundServiceTest {
     @Test
     void anUnknownSenderGetsOnePairingCodeAndTheAgentStaysSilent() throws Exception {
         ChannelSession unpaired = session(false, false, SENDER);
-        when(sessions.resolveOrCreate(eq(ChannelType.WHATSAPP_QR), eq(SENDER), eq("hi"), eq(SENDER)))
+        when(sessions.resolveOrCreate(
+                        eq(ChannelType.WHATSAPP_QR), eq(SENDER), eq("hi"), eq(SENDER)))
                 .thenReturn(unpaired);
 
         assertThat(service.accept(event(SENDER + "@s.whatsapp.net", SENDER, "hi"))).isTrue();
@@ -136,7 +148,9 @@ class WhatsAppQrInboundServiceTest {
         assertThat(service.accept(event(SENDER + "@s.whatsapp.net", SENDER, "what time is it")))
                 .isTrue();
 
-        assertThat(lastGatePayload()).contains("half past nine").contains("\"to\":\"" + SENDER + "\"");
+        assertThat(lastGatePayload())
+                .contains("half past nine")
+                .contains("\"to\":\"" + SENDER + "\"");
     }
 
     @Test
@@ -167,5 +181,4 @@ class WhatsAppQrInboundServiceTest {
         assertThat(service.accept(MAPPER.readTree("{\"status\":\"CONNECTED\"}"))).isTrue();
         verify(sessions, never()).resolveOrCreate(any(), any(), any(), any());
     }
-
 }

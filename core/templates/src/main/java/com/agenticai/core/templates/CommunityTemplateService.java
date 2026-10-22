@@ -18,7 +18,6 @@ import com.agenticai.core.templates.dto.TemplateSummary;
 import com.agenticai.core.templates.dto.TemplateUpdateRequest;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -28,10 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Lifecycle + moderation + snapshot orchestration + import for community templates. Every state
@@ -92,7 +92,8 @@ public class CommunityTemplateService {
         this.importRateLimiter = importRateLimiter;
         this.mapper = new CommunityTemplateMapper(snapshotService, readinessService, objectMapper);
         this.reviewRunner =
-                new TemplateReviewRunner(snapshotService, readinessService, aiReviewService, mapper);
+                new TemplateReviewRunner(
+                        snapshotService, readinessService, aiReviewService, mapper);
         this.instantiator =
                 new TemplateInstantiator(
                         snapshotService, agentService, agentGuardrailService, workflowService);
@@ -173,11 +174,13 @@ public class CommunityTemplateService {
             throw new TemplateNotReadyException(review.rules());
         }
         if (!review.ai().blockers().isEmpty()) {
-            throw new TemplateNotReadyException(TemplateReviewRunner.mergeAi(review.rules(), review.ai()));
+            throw new TemplateNotReadyException(
+                    TemplateReviewRunner.mergeAi(review.rules(), review.ai()));
         }
         transition(template, TemplateStatus.PENDING, subject, null);
         template.recordReview(
-                mapper.writeJson(review), reviewRunner.mergedTags(template, review.rules().derivedTags()));
+                mapper.writeJson(review),
+                reviewRunner.mergedTags(template, review.rules().derivedTags()));
         audit(
                 subject,
                 "template.submit",
@@ -527,7 +530,8 @@ public class CommunityTemplateService {
             throw new TemplateNotFoundException();
         }
         String createdBy = definition.getCreatedBy();
-        boolean visible = createdBy == null || createdBy.equals(subject) || TemplateAccess.isAdmin();
+        boolean visible =
+                createdBy == null || createdBy.equals(subject) || TemplateAccess.isAdmin();
         if (!visible) {
             throw new TemplateNotFoundException();
         }

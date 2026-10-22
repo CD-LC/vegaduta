@@ -5,25 +5,31 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_ATTACHMENT
 import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_ID_CHARS;
 import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_TITLE_CHARS;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
-/** Field readers and cleaners shared by every {@link ChatImportFormat}. Every value read here is untrusted. */
+/**
+ * Field readers and cleaners shared by every {@link ChatImportFormat}. Every value read here is
+ * untrusted.
+ */
 final class ChatImportFields {
 
     /** 2100-01-01T00:00:00Z: a conversation timestamp beyond this is garbage, not a date. */
     private static final double MAX_EPOCH_SECONDS = 4_102_444_800d;
 
-    private ChatImportFields() {
-    }
+    private ChatImportFields() {}
 
     static void addAttachment(List<String> out, String rawName) {
         if (rawName == null || out.size() >= MAX_ATTACHMENTS_PER_MESSAGE) {
             return;
         }
-        String name = ChatPortText.truncate(ChatPortText.oneLine(ChatPortText.clean(rawName)), MAX_ATTACHMENT_NAME_CHARS, false);
+        String name =
+                ChatPortText.truncate(
+                        ChatPortText.oneLine(ChatPortText.clean(rawName)),
+                        MAX_ATTACHMENT_NAME_CHARS,
+                        false);
         if (!name.isEmpty()) {
             out.add(name);
         }
@@ -34,7 +40,7 @@ final class ChatImportFields {
             return null;
         }
         JsonNode v = node.get(field);
-        return v != null && v.isTextual() ? v.asText() : null;
+        return v != null && v.isString() ? v.asString() : null;
     }
 
     static String cleanId(String primary, String fallback) {
@@ -42,7 +48,9 @@ final class ChatImportFields {
         if (raw == null) {
             return null;
         }
-        String id = ChatPortText.truncate(ChatPortText.oneLine(ChatPortText.clean(raw)), MAX_ID_CHARS, false);
+        String id =
+                ChatPortText.truncate(
+                        ChatPortText.oneLine(ChatPortText.clean(raw)), MAX_ID_CHARS, false);
         return id.isEmpty() ? null : id;
     }
 
@@ -57,7 +65,10 @@ final class ChatImportFields {
         return ChatPortText.truncate(t, MAX_TITLE_CHARS, false);
     }
 
-    /** ChatGPT timestamps are epoch seconds (a double); anything non-finite, non-positive or past 2100 is dropped. */
+    /**
+     * ChatGPT timestamps are epoch seconds (a double); anything non-finite, non-positive or past
+     * 2100 is dropped.
+     */
     static Instant epochSeconds(JsonNode v) {
         if (v == null || !v.isNumber()) {
             return null;

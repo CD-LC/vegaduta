@@ -1,8 +1,6 @@
 package com.agenticai.core.audit.seal;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -10,15 +8,18 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Server-side check of a seal's JWS signature (Ed25519, JDK built-in). Public-key only, pure and
- * thread-safe. A seal verifies only if the signature is valid under the key the seal itself carries AND the
- * signed payload binds this exact seal ({@code seal_hash}, {@code seq}, tenant scope) - so a valid signature
- * lifted from another seal does not transfer.
+ * thread-safe. A seal verifies only if the signature is valid under the key the seal itself carries
+ * AND the signed payload binds this exact seal ({@code seal_hash}, {@code seq}, tenant scope) - so
+ * a valid signature lifted from another seal does not transfer.
  *
- * <p>Note the trust boundary: the key embedded in a seal is only as trustworthy as the database. The
- * offline script lets the customer pin the platform's published key instead.
+ * <p>Note the trust boundary: the key embedded in a seal is only as trustworthy as the database.
+ * The offline script lets the customer pin the platform's published key instead.
  */
 public final class AuditSealSignatures {
 
@@ -29,13 +30,14 @@ public final class AuditSealSignatures {
 
     private static final ObjectMapper JSON = JsonMappers.plain();
 
-    private AuditSealSignatures() {
-    }
+    private AuditSealSignatures() {}
 
     /** True iff the seal's signature verifies under its embedded key and binds this seal. */
     public static boolean verify(AuditSealRecord seal) {
-        if (seal.signature() == null || seal.signature().isBlank()
-            || seal.publicKey() == null || seal.publicKey().isBlank()) {
+        if (seal.signature() == null
+                || seal.signature().isBlank()
+                || seal.publicKey() == null
+                || seal.publicKey().isBlank()) {
             return false;
         }
         try {
@@ -46,11 +48,12 @@ public final class AuditSealSignatures {
             Base64.Decoder decoder = Base64.getUrlDecoder();
             JsonNode header = JSON.readTree(decoder.decode(parts[0]));
             JsonNode payload = JSON.readTree(decoder.decode(parts[1]));
-            if (!"EdDSA".equals(header.path("alg").asText())) {
+            if (!"EdDSA".equals(header.path("alg").asString())) {
                 return false;
             }
-            if (seal.keyId() != null && header.hasNonNull("kid")
-                && !seal.keyId().equals(header.get("kid").asText())) {
+            if (seal.keyId() != null
+                    && header.hasNonNull("kid")
+                    && !seal.keyId().equals(header.get("kid").asString())) {
                 return false;
             }
             PublicKey key = publicKeyOf(decoder.decode(seal.publicKey()));
@@ -60,11 +63,11 @@ public final class AuditSealSignatures {
             if (!verifier.verify(decoder.decode(parts[2]))) {
                 return false;
             }
-            return seal.sealHash().equals(payload.path("seal_hash").asText())
-                && payload.path("seq").canConvertToLong()
-                && payload.path("seq").asLong() == seal.seq()
-                && seal.tenantScope().equals(payload.path("tenant").asText());
-        } catch (GeneralSecurityException | java.io.IOException | IllegalArgumentException e) {
+            return seal.sealHash().equals(payload.path("seal_hash").asString())
+                    && payload.path("seq").canConvertToLong()
+                    && payload.path("seq").asLong() == seal.seq()
+                    && seal.tenantScope().equals(payload.path("tenant").asString());
+        } catch (GeneralSecurityException | JacksonException | IllegalArgumentException e) {
             return false; // malformed material fails closed
         }
     }

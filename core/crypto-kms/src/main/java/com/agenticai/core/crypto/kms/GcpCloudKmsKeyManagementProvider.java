@@ -1,11 +1,9 @@
 package com.agenticai.core.crypto.kms;
 
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.crypto.KeyManagementProvider;
 import com.agenticai.core.crypto.WrappedDataKey;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Google Cloud KMS {@link KeyManagementProvider} ({@code app.crypto.kms.provider=gcp}). A fresh
@@ -170,7 +171,7 @@ public class GcpCloudKmsKeyManagementProvider implements KeyManagementProvider {
                                     Base64.getEncoder().encodeToString(plaintext),
                                     "additionalAuthenticatedData",
                                     AAD));
-            String ciphertext = r.path("ciphertext").asText("");
+            String ciphertext = r.path("ciphertext").asString("");
             if (ciphertext.isEmpty()) {
                 throw new IllegalStateException("Cloud KMS encrypt returned no ciphertext");
             }
@@ -192,7 +193,7 @@ public class GcpCloudKmsKeyManagementProvider implements KeyManagementProvider {
                                 Base64.getEncoder().encodeToString(wrappedKey),
                                 "additionalAuthenticatedData",
                                 AAD));
-        String plaintext = r.path("plaintext").asText("");
+        String plaintext = r.path("plaintext").asString("");
         if (plaintext.isEmpty()) {
             throw new IllegalStateException("Cloud KMS decrypt returned no plaintext");
         }
@@ -223,7 +224,7 @@ public class GcpCloudKmsKeyManagementProvider implements KeyManagementProvider {
                                 + "': HTTP "
                                 + response.statusCode()
                                 + " "
-                                + json.path("error").path("message").asText(""));
+                                + json.path("error").path("message").asString(""));
             }
             return json;
         } catch (IOException e) {
@@ -242,7 +243,7 @@ public class GcpCloudKmsKeyManagementProvider implements KeyManagementProvider {
     private static JsonNode parse(String body) {
         try {
             return body == null || body.isBlank() ? JSON.createObjectNode() : JSON.readTree(body);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return JSON.createObjectNode();
         }
     }

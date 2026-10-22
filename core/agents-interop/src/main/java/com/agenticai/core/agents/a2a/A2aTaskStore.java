@@ -6,8 +6,6 @@ import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.logging.LogSafe;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +32,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * TTL-bounded registry of A2A tasks: an in-memory map that is ALWAYS the source of truth for tasks
@@ -338,7 +338,7 @@ public class A2aTaskStore {
         Stored failed = stored.interrupted(instanceId, now);
         try {
             redis.opsForValue().set(key, JSON.writeValueAsString(failed), ttl);
-        } catch (RuntimeException | JsonProcessingException e) {
+        } catch (RuntimeException e) {
             REDIS_DOWN_LOG.warnf(
                     "A2A orphaned task {} could not be marked failed in Redis", stored.id(), e);
         }
@@ -389,7 +389,7 @@ public class A2aTaskStore {
             if (task.snapshot().state() == A2aTaskState.CANCELED) {
                 redis.convertAndSend(CANCEL_CHANNEL, key);
             }
-        } catch (RuntimeException | JsonProcessingException e) {
+        } catch (RuntimeException e) {
             REDIS_DOWN_LOG.warnf(
                     "A2A task {} could not be mirrored to Redis - keeping the in-memory copy only",
                     task.id(),
@@ -481,7 +481,7 @@ public class A2aTaskStore {
         }
         try {
             return JSON.readValue(json, Stored.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Unreadable A2A task record at " + key, e);
         }
     }

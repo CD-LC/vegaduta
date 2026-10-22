@@ -10,23 +10,22 @@ import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * THE acceptance test for this module's single most important correctness
- * property: the {@code config_json} snapshot is an ALLOW-LIST that carries only
- * safe design fields and strips every secret / identity / tenant-scoped value.
- * Plain JUnit5, no Spring context, same style as {@code ResourceAccessServiceTest}
- * in the sibling module.
+ * THE acceptance test for this module's single most important correctness property: the {@code
+ * config_json} snapshot is an ALLOW-LIST that carries only safe design fields and strips every
+ * secret / identity / tenant-scoped value. Plain JUnit5, no Spring context, same style as {@code
+ * ResourceAccessServiceTest} in the sibling module.
  */
 class TemplateSnapshotServiceTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final TemplateSnapshotService service = new TemplateSnapshotService(mapper);
 
     // Sentinel secrets/identity/tenant values that MUST NEVER appear in a snapshot.
@@ -34,8 +33,10 @@ class TemplateSnapshotServiceTest {
     private static final String SECRET_TENANT_ID = "tenant-DEADBEEF-do-not-leak";
     private static final String SECRET_PROVIDER_KEY = "sk-ant-REALPROVIDERKEY-must-not-leak";
     private static final String SECRET_CHANNEL_TOKEN = "whatsapp-channel-secret-do-not-leak";
-    private static final UUID SECRET_COLLECTION_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    private static final UUID SECRET_COLLABORATOR_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID SECRET_COLLECTION_ID =
+            UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID SECRET_COLLABORATOR_ID =
+            UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final String SECRET_REPO_ID = "tenant-private-repo-do-not-leak";
 
     @Test
@@ -45,24 +46,36 @@ class TemplateSnapshotServiceTest {
 
         // ---- the security property: none of these ever enter the snapshot ----
         assertThat(configJson)
-            .doesNotContain(SECRET_CREATED_BY)
-            .doesNotContain(SECRET_TENANT_ID)
-            .doesNotContain(SECRET_PROVIDER_KEY)
-            .doesNotContain(SECRET_CHANNEL_TOKEN)
-            .doesNotContain(SECRET_COLLECTION_ID.toString())
-            .doesNotContain(SECRET_COLLABORATOR_ID.toString())
-            .doesNotContain(SECRET_REPO_ID);
+                .doesNotContain(SECRET_CREATED_BY)
+                .doesNotContain(SECRET_TENANT_ID)
+                .doesNotContain(SECRET_PROVIDER_KEY)
+                .doesNotContain(SECRET_CHANNEL_TOKEN)
+                .doesNotContain(SECRET_COLLECTION_ID.toString())
+                .doesNotContain(SECRET_COLLABORATOR_ID.toString())
+                .doesNotContain(SECRET_REPO_ID);
 
         // ---- the allow-list: only safe design keys are present ----
         JsonNode config = parse(configJson);
         List<String> keys = fieldNames(config);
         assertThat(keys)
-            // identity / instance / tenant-scoped fields are excluded by name
-            .doesNotContain("createdBy", "id", "createdAt", "updatedAt",
-                "allowedCodeIntelRepoIds", "collaboratorAgentIds", "sourceTenantId", "tenantId")
-            // safe design fields are present
-            .contains("systemPrompt", "providerName", "model", "allowedToolNames",
-                "enabledGuardrails", "reasoningDepth");
+                // identity / instance / tenant-scoped fields are excluded by name
+                .doesNotContain(
+                        "createdBy",
+                        "id",
+                        "createdAt",
+                        "updatedAt",
+                        "allowedCodeIntelRepoIds",
+                        "collaboratorAgentIds",
+                        "sourceTenantId",
+                        "tenantId")
+                // safe design fields are present
+                .contains(
+                        "systemPrompt",
+                        "providerName",
+                        "model",
+                        "allowedToolNames",
+                        "enabledGuardrails",
+                        "reasoningDepth");
 
         // allowedKnowledgeCollectionIds: the KEY is retained (renderer compatibility)
         // but the tenant-scoped UUIDs are stripped - the value is always an empty array.
@@ -70,9 +83,10 @@ class TemplateSnapshotServiceTest {
         assertThat(config.get("allowedKnowledgeCollectionIds")).isEmpty();
 
         // The design content the user deliberately authored IS carried through.
-        assertThat(config.get("systemPrompt").asText()).isEqualTo("You are a helpful returns assistant.");
-        assertThat(config.get("model").asText()).isEqualTo("claude-sonnet-4-5");
-        assertThat(config.get("providerName").asText()).isEqualTo("ANTHROPIC");
+        assertThat(config.get("systemPrompt").asString())
+                .isEqualTo("You are a helpful returns assistant.");
+        assertThat(config.get("model").asString()).isEqualTo("claude-sonnet-4-5");
+        assertThat(config.get("providerName").asString()).isEqualTo("ANTHROPIC");
         // An unconfigured optional design field is present-but-null (Jackson emits the
         // record component), never omitted and never defaulted to something misleading.
         assertThat(config.hasNonNull("economyModel")).isFalse();
@@ -84,7 +98,8 @@ class TemplateSnapshotServiceTest {
         Agent agent = fullyPopulatedAgent();
         String configJson = service.snapshotAgent(agent);
 
-        AgentCreateRequest request = service.toAgentCreateRequest(configJson, "Imported Returns Bot");
+        AgentCreateRequest request =
+                service.toAgentCreateRequest(configJson, "Imported Returns Bot");
 
         assertThat(request.name()).isEqualTo("Imported Returns Bot");
         assertThat(request.systemPrompt()).isEqualTo("You are a helpful returns assistant.");
@@ -98,7 +113,8 @@ class TemplateSnapshotServiceTest {
     void workflowSnapshot_carriesOnlyTheGraphNotTheWebhookSecretOrOwner() throws Exception {
         String graphJson = "{\"nodes\":[{\"id\":\"n1\",\"type\":\"agent\"}],\"edges\":[]}";
         WorkflowDefinition definition =
-            new WorkflowDefinition("Order triage", "Triages inbound orders", graphJson, WorkflowStatus.ACTIVE);
+                new WorkflowDefinition(
+                        "Order triage", "Triages inbound orders", graphJson, WorkflowStatus.ACTIVE);
         // Live per-instance secrets that must NOT be snapshotted. The webhook
         // token/hash used to live on this entity but moved to the per-node
         // WorkflowTriggerNode (see WorkflowDefinition's per-node-triggers
@@ -110,32 +126,32 @@ class TemplateSnapshotServiceTest {
         String configJson = service.snapshotWorkflow(definition);
 
         assertThat(configJson)
-            .doesNotContain(SECRET_CHANNEL_TOKEN)
-            .doesNotContain("hash-should-not-leak")
-            .doesNotContain(SECRET_CREATED_BY);
+                .doesNotContain(SECRET_CHANNEL_TOKEN)
+                .doesNotContain("hash-should-not-leak")
+                .doesNotContain(SECRET_CREATED_BY);
 
         JsonNode config = parse(configJson);
         assertThat(fieldNames(config)).containsExactlyInAnyOrder("name", "description", "graph");
         // The design graph itself is preserved intact.
-        assertThat(config.get("graph").get("nodes").get(0).get("id").asText()).isEqualTo("n1");
+        assertThat(config.get("graph").get("nodes").get(0).get("id").asString()).isEqualTo("n1");
     }
 
     // ------------------------------------------------------------------
 
     private Agent fullyPopulatedAgent() {
-        Agent agent = new Agent(
-            "Returns Bot",
-            "You are a helpful returns assistant.",
-            ProviderName.ANTHROPIC,
-            "claude-sonnet-4-5",
-            2048,
-            0.4,
-            0.9,
-            true,
-            ExperienceMode.ADVANCED,
-            ReasoningDepth.FAST,
-            TuningMode.MANUAL
-        );
+        Agent agent =
+                new Agent(
+                        "Returns Bot",
+                        "You are a helpful returns assistant.",
+                        ProviderName.ANTHROPIC,
+                        "claude-sonnet-4-5",
+                        2048,
+                        0.4,
+                        0.9,
+                        true,
+                        ExperienceMode.ADVANCED,
+                        ReasoningDepth.FAST,
+                        TuningMode.MANUAL);
         // Identity + tenant-scoped fields that MUST be stripped:
         agent.setCreatedBy(SECRET_CREATED_BY);
         agent.setAllowedKnowledgeCollectionIds(Set.of(SECRET_COLLECTION_ID));
@@ -158,7 +174,7 @@ class TemplateSnapshotServiceTest {
 
     private static List<String> fieldNames(JsonNode node) {
         List<String> names = new java.util.ArrayList<>();
-        node.fieldNames().forEachRemaining(names::add);
+        node.propertyNames().iterator().forEachRemaining(names::add);
         return names;
     }
 

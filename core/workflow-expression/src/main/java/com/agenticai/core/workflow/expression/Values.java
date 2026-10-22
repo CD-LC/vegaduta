@@ -1,8 +1,6 @@
 package com.agenticai.core.workflow.expression;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -11,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runtime value model and conversions. Values are plain Java: null, Boolean, Long, Double, String,
@@ -60,8 +60,8 @@ final class Values {
         if (n.isNumber()) {
             return n.doubleValue();
         }
-        if (n.isTextual()) {
-            return n.textValue();
+        if (n.isString()) {
+            return n.stringValue();
         }
         if (n.isArray()) {
             List<Object> out = new ArrayList<>(n.size());
@@ -103,7 +103,7 @@ final class Values {
     }
 
     /** Strict JSON parse for parseJson(); throws on invalid input. */
-    static Object parseStrict(String s) throws com.fasterxml.jackson.core.JsonProcessingException {
+    static Object parseStrict(String s) throws tools.jackson.core.JacksonException {
         return fromJson(STRICT.readTree(s));
     }
 

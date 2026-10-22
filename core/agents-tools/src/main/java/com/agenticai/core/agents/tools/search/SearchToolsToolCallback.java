@@ -3,8 +3,6 @@ package com.agenticai.core.agents.tools.search;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.ToolSearchToolNames;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code search_tools}: finds tools that were left out of this turn's tool list (see {@code
@@ -88,7 +88,7 @@ public class SearchToolsToolCallback implements ToolCallback {
         try {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            query = args.path("query").asText("").trim();
+            query = args.path("query").asString("").trim();
             limit = args.path("limit").asInt(ToolSearchService.DEFAULT_LIMIT);
         } catch (Exception e) {
             return "Could not search tools: the tool input was not valid JSON. Call search_tools with {\"query\": \"keywords\"}.";

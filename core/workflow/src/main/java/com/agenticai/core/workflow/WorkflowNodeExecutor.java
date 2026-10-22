@@ -4,17 +4,16 @@ import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Single-node execution logic, extracted out of {@link WorkflowExecutionEngine} so it has exactly
- * one home shared by both execution paths this codebase now
- * has:
+ * one home shared by both execution paths this codebase now has:
  *
  * <ul>
  *   <li>{@link WorkflowExecutionEngine} - the original synchronous, in-process path (still the
@@ -71,8 +70,8 @@ public class WorkflowNodeExecutor {
     static final java.util.Set<String> PIN_NOT_HONOURED_TYPES =
             java.util.Set.of("condition", "supervisor", "switch", "question_classifier");
 
-
-    // nlflow W5: WhatsApp approved-template sends from the Output node. Field-injected (default off)
+    // nlflow W5: WhatsApp approved-template sends from the Output node. Field-injected (default
+    // off)
     // and handed to handlers through the NodeInvocation; off = a node's template config is ignored
     // and plain text is sent, exactly as before.
     @org.springframework.beans.factory.annotation.Value(
@@ -264,7 +263,8 @@ public class WorkflowNodeExecutor {
                                     + ").");
                 }
                 if ("approval".equalsIgnoreCase(node.type())) {
-                    // SE-52: name what auto-approved it. The approval gate does not report which policy
+                    // SE-52: name what auto-approved it. The approval gate does not report which
+                    // policy
                     // matched, so state the action type it evaluated and that no human was asked.
                     return NodeExecutionResult.ok(
                             input,

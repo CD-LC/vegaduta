@@ -7,65 +7,69 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The exportable, self-describing record of one eval run: everything needed
- * to audit or reproduce its score outside the platform, with a SHA-256 over
- * the canonical form of the content so a copy can be checked for tampering or
- * accidental edits.
+ * The exportable, self-describing record of one eval run: everything needed to audit or reproduce
+ * its score outside the platform, with a SHA-256 over the canonical form of the content so a copy
+ * can be checked for tampering or accidental edits.
  *
  * <p>Schema v2: the hashed {@code content} no longer contains the live dataset cases (moved to the
  * unhashed {@code live}); digests of v1 bundles do not verify against v2 content and must be
  * verified against the v1 layout they were exported with.
  *
- * <p>{@code content} holds: the run (status, verdict, score, threshold,
- * repeats, judge model, dataset hash, cost, timestamps), the agent-config
- * snapshot (model, temperature, seed, prompt hash, tool allow-list - null on
- * runs that predate V375), the dataset's immutable identity (id + the content
- * hash recorded at run time), and every case result (case id, the case content
- * recorded at run time, response, tool calls, per-dimension scores). The
- * dataset as it stands NOW (name, live cases with graders, drift flag) is
- * returned separately as {@code live} and is deliberately NOT hashed, so
- * renaming or editing the dataset never changes an exported run's digest.
- * Limit: a case's grader spec is not stored on its result row (no schema
- * change), so it appears only in {@code live}; the grader's per-case verdict
- * is in each result's scores. {@code sha256} is computed over {@link CanonicalJson#write} of
- * {@code content}; to verify, re-serialise {@code content} with keys sorted
- * and compact separators and hash the UTF-8 bytes. The system prompt itself is
- * NOT exported (only its hash), and the requesting user's identity is omitted.
+ * <p>{@code content} holds: the run (status, verdict, score, threshold, repeats, judge model,
+ * dataset hash, cost, timestamps), the agent-config snapshot (model, temperature, seed, prompt
+ * hash, tool allow-list - null on runs that predate V375), the dataset's immutable identity (id +
+ * the content hash recorded at run time), and every case result (case id, the case content recorded
+ * at run time, response, tool calls, per-dimension scores). The dataset as it stands NOW (name,
+ * live cases with graders, drift flag) is returned separately as {@code live} and is deliberately
+ * NOT hashed, so renaming or editing the dataset never changes an exported run's digest. Limit: a
+ * case's grader spec is not stored on its result row (no schema change), so it appears only in
+ * {@code live}; the grader's per-case verdict is in each result's scores. {@code sha256} is
+ * computed over {@link CanonicalJson#write} of {@code content}; to verify, re-serialise {@code
+ * content} with keys sorted and compact separators and hash the UTF-8 bytes. The system prompt
+ * itself is NOT exported (only its hash), and the requesting user's identity is omitted.
  *
- * <p>Honest limit: a bundle proves WHAT was recorded, not that the model is
- * deterministic - LLM sampling is not reproducible even at a fixed seed on most
- * providers. That is why the repeats and the snapshot are recorded.
+ * <p>Honest limit: a bundle proves WHAT was recorded, not that the model is deterministic - LLM
+ * sampling is not reproducible even at a fixed seed on most providers. That is why the repeats and
+ * the snapshot are recorded.
  */
 public final class EvalRunBundle {
 
     public static final String SCHEMA = "vegaduta.eval-run-bundle/v2";
 
-    private EvalRunBundle() {
-    }
+    private EvalRunBundle() {}
 
     /** The response body: the canonicalised content and its digest. */
     public record Bundle(
-        String schema, String hashAlgorithm, String sha256, Map<String, Object> content,
-        /** The dataset as it stands NOW (name, live cases with graders, drift flag). NOT covered by sha256. */
-        Map<String, Object> live
-    ) {
-    }
+            String schema,
+            String hashAlgorithm,
+            String sha256,
+            Map<String, Object> content,
+            /**
+             * The dataset as it stands NOW (name, live cases with graders, drift flag). NOT covered
+             * by sha256.
+             */
+            Map<String, Object> live) {}
 
     public static Bundle build(
-        EvalDataset dataset, List<EvalDatasetCase> cases, EvalRun run, List<EvalRunCaseResult> results
-    ) {
+            EvalDataset dataset,
+            List<EvalDatasetCase> cases,
+            EvalRun run,
+            List<EvalRunCaseResult> results) {
         return build(dataset, cases, run, results, null);
     }
 
     /**
-     * {@code judgeTrust} (wave E, null = omit): whether the LLM judge that scored this run was ever calibrated
-     * against human labels, as of NOW. It goes in the unhashed {@code live} section: calibration status changes
-     * after the run, so putting it under {@code content} would make one run's digest change between exports.
+     * {@code judgeTrust} (wave E, null = omit): whether the LLM judge that scored this run was ever
+     * calibrated against human labels, as of NOW. It goes in the unhashed {@code live} section:
+     * calibration status changes after the run, so putting it under {@code content} would make one
+     * run's digest change between exports.
      */
     public static Bundle build(
-        EvalDataset dataset, List<EvalDatasetCase> cases, EvalRun run, List<EvalRunCaseResult> results,
-        JudgeCalibrationSetService.JudgeTrust judgeTrust
-    ) {
+            EvalDataset dataset,
+            List<EvalDatasetCase> cases,
+            EvalRun run,
+            List<EvalRunCaseResult> results,
+            JudgeCalibrationSetService.JudgeTrust judgeTrust) {
         Map<String, Object> runDoc = new LinkedHashMap<>();
         runDoc.put("id", str(run.getId()));
         runDoc.put("status", run.getStatus().name());
@@ -82,7 +86,9 @@ public final class EvalRunBundle {
         runDoc.put("strictJudge", run.isStrictJudge());
         runDoc.put("datasetHashAtRun", run.getDatasetHash());
         runDoc.put("agentVersionId", str(run.getAgentVersionId()));
-        runDoc.put("budgetUsd", run.getBudgetUsd() != null ? run.getBudgetUsd().toPlainString() : null);
+        runDoc.put(
+                "budgetUsd",
+                run.getBudgetUsd() != null ? run.getBudgetUsd().toPlainString() : null);
         runDoc.put("costUsd", run.getCostUsd() != null ? run.getCostUsd().toPlainString() : null);
         runDoc.put("errorMessage", run.getErrorMessage());
         runDoc.put("createdAt", str(run.getCreatedAt()));
@@ -110,9 +116,11 @@ public final class EvalRunBundle {
         live.put("passThreshold", dataset.getPassThreshold());
         live.put("toolExecutionEnabled", dataset.isToolExecutionEnabled());
         live.put("currentContentHash", dataset.getContentHash());
-        live.put("changedSinceRun",
-            run.getDatasetHash() != null && dataset.getContentHash() != null
-                && !run.getDatasetHash().equals(dataset.getContentHash()));
+        live.put(
+                "changedSinceRun",
+                run.getDatasetHash() != null
+                        && dataset.getContentHash() != null
+                        && !run.getDatasetHash().equals(dataset.getContentHash()));
         List<Object> liveCases = new ArrayList<>();
         for (EvalDatasetCase c : cases) {
             Map<String, Object> doc = new LinkedHashMap<>();
@@ -164,16 +172,20 @@ public final class EvalRunBundle {
         // exactly the tree the digest was computed over.
         String canonical = CanonicalJson.write(content);
         Map<String, Object> normalised = parseMap(canonical);
-        return new Bundle(SCHEMA, "SHA-256 over canonical JSON (sorted keys, compact) of 'content'",
-            CanonicalJson.sha256Hex(canonical), normalised, live);
+        return new Bundle(
+                SCHEMA,
+                "SHA-256 over canonical JSON (sorted keys, compact) of 'content'",
+                CanonicalJson.sha256Hex(canonical),
+                normalised,
+                live);
     }
 
     private static String str(Object o) {
         return o == null ? null : o.toString();
     }
 
-    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER =
-        new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final tools.jackson.databind.ObjectMapper MAPPER =
+            com.agenticai.core.json.JsonMappers.plain();
 
     private static Object parseOrNull(String json) {
         if (json == null || json.isBlank()) {
@@ -182,7 +194,8 @@ public final class EvalRunBundle {
         try {
             return MAPPER.readValue(json, Object.class);
         } catch (Exception e) {
-            return null; // Stored provenance text that no longer parses: absent, not an export failure.
+            return null; // Stored provenance text that no longer parses: absent, not an export
+            // failure.
         }
     }
 

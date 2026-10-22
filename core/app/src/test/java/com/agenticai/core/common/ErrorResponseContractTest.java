@@ -22,8 +22,6 @@ import com.agenticai.core.chat.gateway.LlmGatewayLimitExceededException;
 import com.agenticai.core.security.RequestCorrelationFilter;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.WorkflowValidationException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -35,7 +33,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -43,6 +41,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wire contract of every error body the ordered @RestControllerAdvice chain (see
@@ -114,7 +114,7 @@ class ErrorResponseContractTest {
         }
     }
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     private MockMvc mvc(boolean problemDetails) {
         ErrorResponseFactory errors =
@@ -135,7 +135,7 @@ class ErrorResponseContractTest {
                 .setControllerAdvice(advices)
                 // Boot orders the JSON converter ahead of the XML one; standalone
                 // MockMvc does not, so pin JSON-only to mirror the real app.
-                .setMessageConverters(new MappingJackson2HttpMessageConverter())
+                .setMessageConverters(new JacksonJsonHttpMessageConverter())
                 .build();
     }
 
@@ -145,7 +145,7 @@ class ErrorResponseContractTest {
 
     private static List<String> keys(JsonNode n) {
         List<String> out = new ArrayList<>();
-        n.fieldNames().forEachRemaining(out::add);
+        n.propertyNames().iterator().forEachRemaining(out::add);
         return out;
     }
 
@@ -191,12 +191,12 @@ class ErrorResponseContractTest {
                                     jsonPath("$.error")
                                             .value(
                                                     "No agent found with id"
-                                                        + " 00000000-0000-0000-0000-000000000001"))
+                                                            + " 00000000-0000-0000-0000-000000000001"))
                             .andExpect(
                                     jsonPath("$.detail")
                                             .value(
                                                     "No agent found with id"
-                                                        + " 00000000-0000-0000-0000-000000000001"))
+                                                            + " 00000000-0000-0000-0000-000000000001"))
                             .andReturn();
             JsonNode b = body(r);
             assertEquals(true, keys(b).containsAll(LEGACY_BASE));
@@ -324,7 +324,7 @@ class ErrorResponseContractTest {
                                     jsonPath("$.error")
                                             .value(
                                                     "No agent found with id"
-                                                        + " 00000000-0000-0000-0000-000000000001"))
+                                                            + " 00000000-0000-0000-0000-000000000001"))
                             .andExpect(jsonPath("$.type").doesNotExist())
                             .andExpect(jsonPath("$.requestId").doesNotExist())
                             .andReturn();

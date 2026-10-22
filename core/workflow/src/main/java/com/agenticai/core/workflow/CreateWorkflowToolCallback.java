@@ -8,15 +8,15 @@ import com.agenticai.core.workflow.dto.GenerateGraphResponse;
 import com.agenticai.core.workflow.dto.ValidationResult;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@code create_workflow} - turns a plain-language instruction into a DRAFT workflow the person can
@@ -29,8 +29,8 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * workflow created in the console. The draft is never activated, scheduled or run here. The
  * generator runs first, so a failed generation leaves no empty draft behind.
  *
- * <p>Identity never travels as an argument: the owner is the tenant context's subject. Failures come
- * back as an {@code {"error": ...}} envelope for the model to relay, never as exceptions.
+ * <p>Identity never travels as an argument: the owner is the tenant context's subject. Failures
+ * come back as an {@code {"error": ...}} envelope for the model to relay, never as exceptions.
  */
 public class CreateWorkflowToolCallback implements ToolCallback {
 
@@ -93,7 +93,8 @@ public class CreateWorkflowToolCallback implements ToolCallback {
             name = text(args, "name");
             instruction = text(args, "instruction");
         } catch (Exception e) {
-            return error("could not parse the input - expected {\"name\":\"...\",\"instruction\":\"...\"}");
+            return error(
+                    "could not parse the input - expected {\"name\":\"...\",\"instruction\":\"...\"}");
         }
         if (name.isEmpty()) {
             return error("name is required");
@@ -150,7 +151,9 @@ public class CreateWorkflowToolCallback implements ToolCallback {
         return out.toString();
     }
 
-    /** Problems the saved draft still has, from the same check the console's Validate button runs. */
+    /**
+     * Problems the saved draft still has, from the same check the console's Validate button runs.
+     */
     private List<String> warnings(WorkflowDefinition saved) {
         try {
             ValidationResult result = crud.validate(saved.getId());
@@ -197,7 +200,7 @@ public class CreateWorkflowToolCallback implements ToolCallback {
 
     private static String text(JsonNode args, String field) {
         JsonNode value = args == null ? null : args.get(field);
-        return value == null || value.isNull() ? "" : value.asText("").trim();
+        return value == null || value.isNull() ? "" : value.asString("").trim();
     }
 
     private static String message(RuntimeException e) {

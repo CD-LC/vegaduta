@@ -21,7 +21,6 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -95,7 +94,10 @@ class TeamsWebhookControllerTurnContextTest {
 
     @Test
     void theTurnContextCarriesTheTenantResolvedFromTheBotOnAThreadWithNoTenant() throws Exception {
-        controller.inbound(APP_ID, new ObjectMapper().readTree(ACTIVITY), "Bearer token");
+        controller.inbound(
+                APP_ID,
+                com.agenticai.core.json.JsonMappers.plain().readTree(ACTIVITY),
+                "Bearer token");
 
         probe.assertTenant("tenant_teams", "system:teams-inbound:" + APP_ID);
         TurnContextProbe.assertThreadClean();
@@ -105,7 +107,10 @@ class TeamsWebhookControllerTurnContextTest {
     void aTenantAlreadyOnTheRequestThreadIsNotWhatTheTurnRunsUnder() throws Exception {
         TenantContext.set(TenantContext.of("tenant_other", "someone", Set.of()));
 
-        controller.inbound(APP_ID, new ObjectMapper().readTree(ACTIVITY), "Bearer token");
+        controller.inbound(
+                APP_ID,
+                com.agenticai.core.json.JsonMappers.plain().readTree(ACTIVITY),
+                "Bearer token");
 
         probe.assertTenant("tenant_teams", "system:teams-inbound:" + APP_ID);
     }

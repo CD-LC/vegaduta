@@ -3,10 +3,10 @@ package com.agenticai.core.workflow.portability;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.portability.DifyImportMapper.DNode;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import tools.jackson.databind.JsonNode;
 
 /** The value types shared by {@link DifyImportMapper} and its node-mapping collaborators. */
 final class DifyImportModel {

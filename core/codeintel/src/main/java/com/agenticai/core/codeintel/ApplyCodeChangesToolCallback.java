@@ -4,7 +4,6 @@ import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,36 +11,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * {@code apply_code_changes} - writes full file contents (or deletes) into
- * an EXISTING code-intel scratch workspace (see {@code
- * create_code_workspace}). This is a consequential write action, so unlike
- * every read-only tool in this package it does NOT call {@link
- * CodeIntelClient} directly: it ALWAYS routes through {@link
- * HumanApprovalGateService#evaluate} first, for {@link
- * ApplyCodeWorkspaceApprovalExecutor#ACTION_TYPE}, and the actual write
- * only happens later, when a tenant-admin approves the resulting request
- * from this platform's REAL Approvals screen - or, if an operator has
- * explicitly configured an {@code ApprovalPolicyOverride} to skip approval
- * for this action type, immediately and synchronously inside {@code
- * evaluate()} itself (see {@code HumanApprovalGateService}'s javadoc for
- * that auto-approve path). This routing is unconditional: it happens
- * regardless of what code-intel's OWN internal guardrail policy ({@code
- * policy.py}) would independently decide for this same apply - see {@link
- * RunCodeWorkspaceApprovalExecutor}'s javadoc for why two independent gates
- * here is deliberate, not redundant.
+ * {@code apply_code_changes} - writes full file contents (or deletes) into an EXISTING code-intel
+ * scratch workspace (see {@code create_code_workspace}). This is a consequential write action, so
+ * unlike every read-only tool in this package it does NOT call {@link CodeIntelClient} directly: it
+ * ALWAYS routes through {@link HumanApprovalGateService#evaluate} first, for {@link
+ * ApplyCodeWorkspaceApprovalExecutor#ACTION_TYPE}, and the actual write only happens later, when a
+ * tenant-admin approves the resulting request from this platform's REAL Approvals screen - or, if
+ * an operator has explicitly configured an {@code ApprovalPolicyOverride} to skip approval for this
+ * action type, immediately and synchronously inside {@code evaluate()} itself (see {@code
+ * HumanApprovalGateService}'s javadoc for that auto-approve path). This routing is unconditional:
+ * it happens regardless of what code-intel's OWN internal guardrail policy ({@code policy.py})
+ * would independently decide for this same apply - see {@link RunCodeWorkspaceApprovalExecutor}'s
+ * javadoc for why two independent gates here is deliberate, not redundant.
  *
- * <p>Because approval may be asynchronous, this tool call NEVER returns the
- * outcome of the write inline - only whether a request is now pending, or
- * (only when a tenant admin has explicitly opted out of approval for this
- * action type) that it already executed. Call {@code diff_code_workspace}
+ * <p>Because approval may be asynchronous, this tool call NEVER returns the outcome of the write
+ * inline - only whether a request is now pending, or (only when a tenant admin has explicitly opted
+ * out of approval for this action type) that it already executed. Call {@code diff_code_workspace}
  * afterward to see what actually landed.
  *
  * <p>The stored payload is marked {@code adminOnly: true} - see {@code
- * ApprovalController#enforceApproverAuthorization} - so only a
- * ROLE_tenant-admin, not any authenticated tenant member, can approve an
- * agent writing arbitrary file contents into a workspace.
+ * ApprovalController#enforceApproverAuthorization} - so only a ROLE_tenant-admin, not any
+ * authenticated tenant member, can approve an agent writing arbitrary file contents into a
+ * workspace.
  */
 public class ApplyCodeChangesToolCallback implements ToolCallback {
 
@@ -57,15 +51,14 @@ public class ApplyCodeChangesToolCallback implements ToolCallback {
     }
 
     /**
-     * @param allowedRepoIds the calling agent's {@code
-     *     Agent.allowedCodeIntelRepoIds} - EMPTY means deny-all here, same
-     *     "opposite of the knowledge-collection convention" reasoning as
-     *     {@link CreateCodeWorkspaceToolCallback}. Enforced BEFORE {@code
-     *     gateService.evaluate} is ever called, so a disallowed repo never
-     *     even files an approval request a tenant-admin could mistakenly
-     *     approve - see migration V103's header comment.
+     * @param allowedRepoIds the calling agent's {@code Agent.allowedCodeIntelRepoIds} - EMPTY means
+     *     deny-all here, same "opposite of the knowledge-collection convention" reasoning as {@link
+     *     CreateCodeWorkspaceToolCallback}. Enforced BEFORE {@code gateService.evaluate} is ever
+     *     called, so a disallowed repo never even files an approval request a tenant-admin could
+     *     mistakenly approve - see migration V103's header comment.
      */
-    public ApplyCodeChangesToolCallback(HumanApprovalGateService gateService, Set<String> allowedRepoIds) {
+    public ApplyCodeChangesToolCallback(
+            HumanApprovalGateService gateService, Set<String> allowedRepoIds) {
         this.gateService = gateService;
         this.allowedRepoIds = allowedRepoIds == null ? Set.of() : allowedRepoIds;
     }
@@ -73,15 +66,16 @@ public class ApplyCodeChangesToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("apply_code_changes")
-            .description(
-                "Writes full file contents (or deletes files) into an EXISTING code workspace created by "
-                    + "create_code_workspace. This ALWAYS requires a tenant-admin's sign-off on this "
-                    + "platform's Approvals screen before anything is written - this call only files the "
-                    + "request and returns immediately; it does not write anything itself and does not "
-                    + "return the outcome. After a human approves, the write happens automatically; call "
-                    + "diff_code_workspace afterward to see the result.")
-            .inputSchema("""
+                .name("apply_code_changes")
+                .description(
+                        "Writes full file contents (or deletes files) into an EXISTING code workspace created by "
+                                + "create_code_workspace. This ALWAYS requires a tenant-admin's sign-off on this "
+                                + "platform's Approvals screen before anything is written - this call only files the "
+                                + "request and returns immediately; it does not write anything itself and does not "
+                                + "return the outcome. After a human approves, the write happens automatically; call "
+                                + "diff_code_workspace afterward to see the result.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -119,7 +113,7 @@ public class ApplyCodeChangesToolCallback implements ToolCallback {
                     "required": ["repo_id", "workspace_id", "files"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -148,20 +142,34 @@ public class ApplyCodeChangesToolCallback implements ToolCallback {
             }
 
             ApplyCodeWorkspaceApprovalExecutor.ApplyPayload payload =
-                new ApplyCodeWorkspaceApprovalExecutor.ApplyPayload(
-                    repoId.toString(), workspaceId.toString(), files, true);
+                    new ApplyCodeWorkspaceApprovalExecutor.ApplyPayload(
+                            repoId.toString(), workspaceId.toString(), files, true);
             String payloadJson = MAPPER.writeValueAsString(payload);
-            String summary = "Apply " + files.size() + " file change(s) to code workspace "
-                + workspaceId + " (repo " + repoId + "): " + summarizePaths(files);
-            String requestedBy = TenantContext.current().map(TenantContext::getSubject).orElse(null);
+            String summary =
+                    "Apply "
+                            + files.size()
+                            + " file change(s) to code workspace "
+                            + workspaceId
+                            + " (repo "
+                            + repoId
+                            + "): "
+                            + summarizePaths(files);
+            String requestedBy =
+                    TenantContext.current().map(TenantContext::getSubject).orElse(null);
 
-            ApprovalEvaluation evaluation = gateService.evaluate(
-                ApplyCodeWorkspaceApprovalExecutor.ACTION_TYPE, summary, payloadJson, requestedBy);
+            ApprovalEvaluation evaluation =
+                    gateService.evaluate(
+                            ApplyCodeWorkspaceApprovalExecutor.ACTION_TYPE,
+                            summary,
+                            payloadJson,
+                            requestedBy);
 
             return responseJson(evaluation);
         } catch (Exception e) {
             log.warn("apply_code_changes tool call failed", e);
-            return "{\"error\": \"apply_code_changes failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"apply_code_changes failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 
@@ -184,14 +192,16 @@ public class ApplyCodeChangesToolCallback implements ToolCallback {
     private String responseJson(ApprovalEvaluation evaluation) {
         if (evaluation.approved()) {
             return "{\"status\": \"auto_approved_and_executed\", "
-                + "\"message\": \"This tenant's policy does not require approval for this action type, "
-                + "so it already ran. This tool does not return live output - call diff_code_workspace "
-                + "to see the resulting change.\"}";
+                    + "\"message\": \"This tenant's policy does not require approval for this action type, "
+                    + "so it already ran. This tool does not return live output - call diff_code_workspace "
+                    + "to see the resulting change.\"}";
         }
         return "{\"status\": \"pending_approval\", "
-            + "\"approval_request_id\": \"" + evaluation.pendingRequestId() + "\", "
-            + "\"message\": \"This write requires a tenant-admin's approval on the platform's Approvals "
-            + "screen before it runs. It will execute automatically once approved - no further tool call "
-            + "is needed. Call diff_code_workspace afterward to see the result.\"}";
+                + "\"approval_request_id\": \""
+                + evaluation.pendingRequestId()
+                + "\", "
+                + "\"message\": \"This write requires a tenant-admin's approval on the platform's Approvals "
+                + "screen before it runs. It will execute automatically once approved - no further tool call "
+                + "is needed. Call diff_code_workspace afterward to see the result.\"}";
     }
 }

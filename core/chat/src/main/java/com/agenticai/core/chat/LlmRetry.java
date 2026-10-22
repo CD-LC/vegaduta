@@ -1,16 +1,21 @@
 package com.agenticai.core.chat;
 
+import java.time.Duration;
 import java.util.function.Supplier;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.core.retry.RetryTemplate;
 
 /**
- * The bounded retry policy for LLM calls, behind an internal interface (ADR-0012 P1b) so that the
- * {@code spring-retry} to Spring Framework 7 core-retry move (Boot 4 / Spring AI 2) touches the
- * implementation ({@link SpringRetryLlmRetry}) and {@link #forSpringAi()} only, not every model
- * builder and {@link GeminiMixedContentToolCallChatModel}.
+ * The bounded retry policy for LLM calls, behind an internal interface (ADR-0012 P1b). Since P3 it
+ * is built on Spring Framework 7's {@code org.springframework.core.retry.RetryTemplate}
+ * (spring-retry is gone in Spring AI 2). It is applied at two levels: {@link #execute} / {@link
+ * #forSpringAi()} for models that still take a retry template (google-genai), and - for the
+ * OpenAI/Anthropic SDK models, which have no retry template - inside the shared OkHttp transport
+ * ({@link LlmRetryInterceptor}) using {@link #maxAttempts()}, {@link #backoff(int)} and {@link
+ * #isTransient(Throwable)}.
  *
- * <p>The policy itself lives in {@link LlmModelSupport} docs: few attempts, short capped exponential
- * backoff, transient errors only, never after a read timeout; each transient failure is logged.
+ * <p>The policy itself lives in {@link LlmModelSupport} docs: few attempts, short capped
+ * exponential backoff, transient errors only, never after a read timeout; each transient failure is
+ * logged.
  */
 public interface LlmRetry {
 
@@ -21,8 +26,17 @@ public interface LlmRetry {
     int maxAttempts();
 
     /**
-     * Adapter for Spring AI 1.x model builders, which take a spring-retry {@link RetryTemplate}.
-     * The only method that exposes a spring-retry type; it goes away with Spring AI 1.x.
+     * Delay to wait before retry number {@code retryNumber} (1 = the first retry), exponential and
+     * capped.
+     */
+    Duration backoff(int retryNumber);
+
+    /** Whether {@code failure} is worth another attempt under this policy. */
+    boolean isTransient(Throwable failure);
+
+    /**
+     * The same policy as a Spring Framework 7 {@link RetryTemplate}, for Spring AI models that take
+     * one.
      */
     RetryTemplate forSpringAi();
 }

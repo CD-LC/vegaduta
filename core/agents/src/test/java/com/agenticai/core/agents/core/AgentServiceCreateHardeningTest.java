@@ -37,10 +37,10 @@ import org.mockito.ArgumentCaptor;
 
 /**
  * Covers the 2026-10-02 creation-path hardening (see the audit notes on {@link
- * AgentService#create}): the model-catalog allowlist {@code updateModel} already
- * enforced is now applied at create time for platform-pool tenants, every new
- * agent is seeded with the operator-configured default guardrail set instead of
- * being born unguarded, and {@code updatedBy} is stamped on the first save.
+ * AgentService#create}): the model-catalog allowlist {@code updateModel} already enforced is now
+ * applied at create time for platform-pool tenants, every new agent is seeded with the
+ * operator-configured default guardrail set instead of being born unguarded, and {@code updatedBy}
+ * is stamped on the first save.
  */
 class AgentServiceCreateHardeningTest {
 
@@ -70,47 +70,59 @@ class AgentServiceCreateHardeningTest {
     /** The full (Spring-shaped) constructor, so {@code defaultGuardrails} is exercisable. */
     private AgentService newAgentService(String defaultGuardrails) {
         return AgentServiceTestFactory.create(
-            repository,
-            tenantLimits,
-            mock(GenerationParamsInferenceService.class),
-            providerModelCatalogService,
-            mock(ModelModalitiesService.class),
-            mock(PromptVersionRepository.class),
-            mock(VoiceProviderValidator.class),
-            mock(VideoProviderValidator.class),
-            mock(TextModelProviderValidator.class),
-            mock(TextToSpeechProviderValidator.class),
-            mock(ResourceAccessService.class),
-            mock(AgentSchemaService.class),
-            AgentVersionSnapshotService.disabled(),
-            new AgentConfigSnapshotCodec(new com.fasterxml.jackson.databind.ObjectMapper()),
-            new AgentCapabilityRegistry(List.of()),
-            "claude-sonnet-5",
-            1024,
-            0.7,
-            1.0,
-            defaultGuardrails
-        );
+                repository,
+                tenantLimits,
+                mock(GenerationParamsInferenceService.class),
+                providerModelCatalogService,
+                mock(ModelModalitiesService.class),
+                mock(PromptVersionRepository.class),
+                mock(VoiceProviderValidator.class),
+                mock(VideoProviderValidator.class),
+                mock(TextModelProviderValidator.class),
+                mock(TextToSpeechProviderValidator.class),
+                mock(ResourceAccessService.class),
+                mock(AgentSchemaService.class),
+                AgentVersionSnapshotService.disabled(),
+                new AgentConfigSnapshotCodec(com.agenticai.core.json.JsonMappers.plain()),
+                new AgentCapabilityRegistry(List.of()),
+                "claude-sonnet-5",
+                1024,
+                0.7,
+                1.0,
+                defaultGuardrails);
     }
 
     private static AgentCreateRequest createRequest(String model) {
         return new AgentCreateRequest(
-            "Test Agent", "You are helpful.", ProviderName.ANTHROPIC, model,
-            null, null, null, null, null, null, null, null,
-            null, null, null, null, null, null
-        );
+                "Test Agent",
+                "You are helpful.",
+                ProviderName.ANTHROPIC,
+                model,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     @Test
     void platformPoolTenantOffCatalogModelIsRejectedAtCreate() {
         when(tenantLimits.usesPlatformPool("acme")).thenReturn(true);
         when(providerModelCatalogService.findModel(ProviderName.ANTHROPIC, "claude-made-up-9"))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
         assertThrows(
-            AgentModelNotSupportedException.class,
-            () -> service.create(createRequest("claude-made-up-9"))
-        );
+                AgentModelNotSupportedException.class,
+                () -> service.create(createRequest("claude-made-up-9")));
         verify(repository, never()).save(any(Agent.class));
     }
 
@@ -118,7 +130,7 @@ class AgentServiceCreateHardeningTest {
     void platformPoolTenantOnCatalogModelIsAcceptedAtCreate() {
         when(tenantLimits.usesPlatformPool("acme")).thenReturn(true);
         when(providerModelCatalogService.findModel(ProviderName.ANTHROPIC, "claude-sonnet-5"))
-            .thenReturn(Optional.of(mock(ProviderModelResponse.class)));
+                .thenReturn(Optional.of(mock(ProviderModelResponse.class)));
 
         AgentResponse response = service.create(createRequest("claude-sonnet-5"));
 

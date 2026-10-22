@@ -3,11 +3,6 @@ package com.agenticai.core.apidocs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.audit.AuditOutcome;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,6 +13,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pins core's {@link AuditOutcome} to the audit vocabulary of the two Agent SDKs and to the
@@ -27,12 +25,13 @@ import java.util.stream.Collectors;
  * an SDK-side tool cannot parse).
  *
  * <p>The SDK enums are read from source (they live in separate builds): {@code sdk/java/agent-api}
- * {@code io.vegaduta.agent.api.audit.AuditOutcome} and {@code sdk/python-agent}
- * {@code vegaduta_agent/audit.py}. Adding an outcome means adding it to all four places.
+ * {@code io.vegaduta.agent.api.audit.AuditOutcome} and {@code sdk/python-agent} {@code
+ * vegaduta_agent/audit.py}. Adding an outcome means adding it to all four places.
  */
 class AuditOutcomeAlignmentTest {
 
-    private static final Pattern JAVA_CONSTANT = Pattern.compile("^\\s*([A-Z][A-Z0-9_]*)\\s*[,;]?\\s*$");
+    private static final Pattern JAVA_CONSTANT =
+            Pattern.compile("^\\s*([A-Z][A-Z0-9_]*)\\s*[,;]?\\s*$");
     private static final Pattern PY_MEMBER =
             Pattern.compile("^\\s{4}([A-Z][A-Z0-9_]*)\\s*=\\s*\"([A-Z0-9_]+)\"\\s*$");
 
@@ -56,7 +55,10 @@ class AuditOutcomeAlignmentTest {
                 ApiContractRepoSupport.MAPPER.readTree(
                         root.resolve("contracts/outbound/audit-event.schema.json").toFile());
         Set<String> published = new TreeSet<>();
-        schema.path("properties").path("outcome").path("enum").forEach(n -> published.add(n.asText()));
+        schema.path("properties")
+                .path("outcome")
+                .path("enum")
+                .forEach(n -> published.add(n.asString()));
         assertThat(published).isEqualTo(core());
     }
 

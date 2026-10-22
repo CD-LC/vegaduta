@@ -21,8 +21,6 @@ import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Inbound Slack Events API - structurally different from the Meta/Twilio webhooks in two ways worth
@@ -117,11 +117,11 @@ public class SlackWebhookController {
             return ResponseEntity.ok().build();
         }
 
-        String teamId = root.path("team_id").asText(null);
+        String teamId = root.path("team_id").asString(null);
         if (teamId == null) {
             log.info(
                     "Ignoring Slack webhook payload with no team_id (type={})",
-                    root.path("type").asText());
+                    root.path("type").asString());
             return ResponseEntity.ok().build();
         }
 
@@ -140,12 +140,12 @@ public class SlackWebhookController {
             signatureValidator.validateOrThrow(
                     rawBody, timestampHeader, signatureHeader, credential.signingSecret());
 
-            if ("url_verification".equals(root.path("type").asText())) {
+            if ("url_verification".equals(root.path("type").asString())) {
                 return ResponseEntity.ok()
                         .contentType(MediaType.TEXT_PLAIN)
-                        .body(root.path("challenge").asText(""));
+                        .body(root.path("challenge").asString(""));
             }
-            if ("event_callback".equals(root.path("type").asText())) {
+            if ("event_callback".equals(root.path("type").asString())) {
                 // Master-Roadmap-2026.md item #1, gap (b)#3 - the same fix
                 // every other inbound controller here carries. Slack retries
                 // a delivery (tagged X-Slack-Retry-Num: 1..3) whenever the
@@ -165,10 +165,11 @@ public class SlackWebhookController {
                 // url_verification has no event_id and must always be
                 // answered. A duplicate still gets the same fast 200 as a
                 // success, which is exactly what stops Slack retrying.
-                if (!dedupService.tryClaim(ChannelType.SLACK, root.path("event_id").asText(null))) {
+                if (!dedupService.tryClaim(
+                        ChannelType.SLACK, root.path("event_id").asString(null))) {
                     log.info(
                             "Ignoring duplicate Slack event id {} for team ***{}",
-                            root.path("event_id").asText(),
+                            root.path("event_id").asString(),
                             lastFour(teamId));
                     return ResponseEntity.ok().build();
                 }
@@ -184,7 +185,7 @@ public class SlackWebhookController {
 
     private void handleEvent(
             SlackCredentialService.DecryptedCredential credential, JsonNode event) {
-        if (!"message".equals(event.path("type").asText())) {
+        if (!"message".equals(event.path("type").asString())) {
             return;
         }
         // Drop the bot's own messages (see class javadoc) and any message
@@ -193,9 +194,9 @@ public class SlackWebhookController {
         if (event.has("bot_id") || !event.path("subtype").isMissingNode()) {
             return;
         }
-        String senderId = event.path("user").asText(null);
-        String channelId = event.path("channel").asText(null);
-        String text = event.path("text").asText(null);
+        String senderId = event.path("user").asString(null);
+        String channelId = event.path("channel").asString(null);
+        String text = event.path("text").asString(null);
         if (senderId == null
                 || channelId == null
                 || text == null

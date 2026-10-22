@@ -1,28 +1,35 @@
 package com.agenticai.core.agents.coding;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-/** Parsing helpers shared by the LLM fixer and reviewer: tolerant of fences/prose around the one JSON object we asked for. */
+/**
+ * Parsing helpers shared by the LLM fixer and reviewer: tolerant of fences/prose around the one
+ * JSON object we asked for.
+ */
 final class CodingModelSupport {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
-    private static final Pattern DIFF_HEADER = Pattern.compile("^diff --git a/(.+?) b/(.+)$", Pattern.MULTILINE);
-    private static final Pattern TEST_PATH = Pattern.compile(
-        "(^|/)(tests?|__tests__|spec|specs)/|(^|/)test_[^/]*\\.py$|_test\\.(go|py)$|[._-](test|spec)\\.[A-Za-z]+$"
-            + "|(?-i:(Test|Tests|IT)\\.(java|kt))$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DIFF_HEADER =
+            Pattern.compile("^diff --git a/(.+?) b/(.+)$", Pattern.MULTILINE);
+    private static final Pattern TEST_PATH =
+            Pattern.compile(
+                    "(^|/)(tests?|__tests__|spec|specs)/|(^|/)test_[^/]*\\.py$|_test\\.(go|py)$|[._-](test|spec)\\.[A-Za-z]+$"
+                            + "|(?-i:(Test|Tests|IT)\\.(java|kt))$",
+                    Pattern.CASE_INSENSITIVE);
 
-    private CodingModelSupport() {
-    }
+    private CodingModelSupport() {}
 
-    /** The first balanced {...} object in the text (string-aware), parsed; empty when there is none. */
+    /**
+     * The first balanced {...} object in the text (string-aware), parsed; empty when there is none.
+     */
     static Optional<JsonNode> extractObject(String text) {
         if (text == null) {
             return Optional.empty();
@@ -72,7 +79,9 @@ final class CodingModelSupport {
         return -1;
     }
 
-    /** Paths in a unified diff that look like test files (so the reviewer and the human are told). */
+    /**
+     * Paths in a unified diff that look like test files (so the reviewer and the human are told).
+     */
     static List<String> touchedTestFiles(String diff) {
         if (diff == null || diff.isEmpty()) {
             return List.of();

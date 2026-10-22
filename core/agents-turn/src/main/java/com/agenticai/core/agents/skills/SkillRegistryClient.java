@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.skills;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -22,6 +20,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The public Agent Skills registry, the skills counterpart of the MCP registry: search a public
@@ -101,7 +101,8 @@ public class SkillRegistryClient {
         return cachedSearch(q, Math.max(1, Math.min(page, 50)), () -> fetchSearch(query, page));
     }
 
-    SearchResult cachedSearch(String q, int page, java.util.function.Supplier<SearchResult> loader) {
+    SearchResult cachedSearch(
+            String q, int page, java.util.function.Supplier<SearchResult> loader) {
         String key = page + "|" + q.toLowerCase(java.util.Locale.ROOT);
         long now = nanoClock.getAsLong();
         CachedSearch hit = searchCache.get(key);
@@ -143,18 +144,18 @@ public class SkillRegistryClient {
         JsonNode data = root.path("data");
         List<RegistrySkill> out = new ArrayList<>();
         for (JsonNode s : data.path("skills")) {
-            String github = s.path("githubUrl").asText("");
+            String github = s.path("githubUrl").asString("");
             if (!GITHUB_TREE.matcher(github).matches()) {
                 continue;
             }
             out.add(
                     new RegistrySkill(
-                            s.path("id").asText(),
-                            s.path("name").asText(),
-                            s.path("author").asText(),
-                            s.path("description").asText(),
+                            s.path("id").asString(),
+                            s.path("name").asString(),
+                            s.path("author").asString(),
+                            s.path("description").asString(),
                             github,
-                            s.path("skillUrl").asText(""),
+                            s.path("skillUrl").asString(""),
                             s.path("stars").asLong(0)));
         }
         JsonNode p = data.path("pagination");
@@ -245,8 +246,8 @@ public class SkillRegistryClient {
         }
         long total = files.values().stream().mapToLong(b -> b.length).sum();
         for (JsonNode entry : listing) {
-            String type = entry.path("type").asText();
-            String entryPath = entry.path("path").asText();
+            String type = entry.path("type").asString();
+            String entryPath = entry.path("path").asString();
             if ("dir".equals(type)) {
                 collect(owner, repo, ref, root, entryPath, files, depth + 1);
             } else if ("file".equals(type)) {

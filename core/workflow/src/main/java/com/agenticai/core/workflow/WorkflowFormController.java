@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * {@code /api/public/workflow-forms/{token}} - the PUBLIC half of a hosted-form trigger. No auth of any kind:
- * possession of the opaque per-node token is the whole credential (the webhook trigger's posture; see {@link
- * WorkflowFormService}). Lives under {@code /api/**} so the browser form page on the web origin passes CORS; only
- * the {@code GET} and {@code POST} on exactly this path are {@code permitAll} in SecurityConfig. Thin: every
- * decision (flag, limits, validation) is the service's. Unknown/disabled/inactive all answer the same 404.
+ * {@code /api/public/workflow-forms/{token}} - the PUBLIC half of a hosted-form trigger. No auth of
+ * any kind: possession of the opaque per-node token is the whole credential (the webhook trigger's
+ * posture; see {@link WorkflowFormService}). Lives under {@code /api/**} so the browser form page
+ * on the web origin passes CORS; only the {@code GET} and {@code POST} on exactly this path are
+ * {@code permitAll} in SecurityConfig. Thin: every decision (flag, limits, validation) is the
+ * service's. Unknown/disabled/inactive all answer the same 404.
  */
 @RestController
 @RequestMapping("/api/public/workflow-forms")
@@ -34,7 +35,8 @@ public class WorkflowFormController {
     @GetMapping("/{token}")
     public ResponseEntity<?> view(@PathVariable String token, HttpServletRequest request) {
         if (!formService.allowView(request.getRemoteAddr())) {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", "rate_limited"));
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("error", "rate_limited"));
         }
         Optional<WorkflowFormService.FormView> view = formService.view(token);
         if (view.isEmpty()) {
@@ -46,9 +48,11 @@ public class WorkflowFormController {
     /** One submission: {@code {"values": {key: value}, "_hp": ""}}. */
     @PostMapping("/{token}")
     public ResponseEntity<?> submit(
-        @PathVariable String token, @RequestBody(required = false) Map<String, Object> body, HttpServletRequest request
-    ) {
-        WorkflowFormService.Submission result = formService.submit(token, body, request.getRemoteAddr());
+            @PathVariable String token,
+            @RequestBody(required = false) Map<String, Object> body,
+            HttpServletRequest request) {
+        WorkflowFormService.Submission result =
+                formService.submit(token, body, request.getRemoteAddr());
         return switch (result.status()) {
             case OK -> {
                 Map<String, Object> ok = new LinkedHashMap<>();
@@ -57,10 +61,17 @@ public class WorkflowFormController {
                 ok.put("redirectUrl", result.redirectUrl());
                 yield ResponseEntity.ok(ok);
             }
-            case INVALID -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("ok", false, "errors", result.errors()));
-            case RATE_LIMITED -> ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", "rate_limited"));
-            case TOO_LARGE -> ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(Map.of("error", "payload_too_large"));
-            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "not_found"));
+            case INVALID ->
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("ok", false, "errors", result.errors()));
+            case RATE_LIMITED ->
+                    ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                            .body(Map.of("error", "rate_limited"));
+            case TOO_LARGE ->
+                    ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE)
+                            .body(Map.of("error", "payload_too_large"));
+            case NOT_FOUND ->
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "not_found"));
         };
     }
 }

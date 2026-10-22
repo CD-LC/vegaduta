@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.workflow.OrchestratorService;
 import com.agenticai.core.workflow.RunMode;
 import com.agenticai.core.workflow.WorkflowDefinition;
@@ -17,7 +18,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.version.WorkflowVersion;
 import com.agenticai.core.workflow.version.WorkflowVersionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.testing.TestWorkflowEnvironment;
 import io.temporal.worker.Worker;
 import java.util.ArrayList;
@@ -32,10 +32,11 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * {@code TemporalWorkflowExecutionEngine.execute(..., RunMode)} against Temporal's in-memory test environment.
- * The engine is the only place that decides which graph a Temporal run executes (live for DRAFT, the promoted
- * snapshot for PRODUCTION), stamps the mode on the run row, and carries it into the workflow input; mutating any
- * of the three used to leave every test green because the workflow tests build their inputs by hand.
+ * {@code TemporalWorkflowExecutionEngine.execute(..., RunMode)} against Temporal's in-memory test
+ * environment. The engine is the only place that decides which graph a Temporal run executes (live
+ * for DRAFT, the promoted snapshot for PRODUCTION), stamps the mode on the run row, and carries it
+ * into the workflow input; mutating any of the three used to leave every test green because the
+ * workflow tests build their inputs by hand.
  */
 class TemporalWorkflowExecutionEngineTest {
 
@@ -52,7 +53,10 @@ class TemporalWorkflowExecutionEngineTest {
 
     private static WorkflowGraphDto graphWith(String triggerId) {
         return new WorkflowGraphDto(
-            List.of(new WorkflowNodeDto(triggerId, "trigger", Map.of(), Map.of("label", "Start"))), List.of());
+                List.of(
+                        new WorkflowNodeDto(
+                                triggerId, "trigger", Map.of(), Map.of("label", "Start"))),
+                List.of());
     }
 
     @SuppressWarnings("unchecked")
@@ -71,16 +75,24 @@ class TemporalWorkflowExecutionEngineTest {
         versions = mock(WorkflowVersionService.class);
         WorkflowVersion snapshot = mock(WorkflowVersion.class);
         when(snapshot.getVersionNumber()).thenReturn(3);
-        when(snapshot.getGraphJson()).thenReturn(new ObjectMapper().writeValueAsString(graphWith("snapshot-trigger")));
+        when(snapshot.getGraphJson())
+                .thenReturn(JsonMappers.plain().writeValueAsString(graphWith("snapshot-trigger")));
         when(versions.resolveRunVersion(WF)).thenReturn(Optional.of(snapshot));
         when(versions.currentVersionNumber(WF)).thenReturn(7);
         ObjectProvider<WorkflowVersionService> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(versions);
 
-        engine = new TemporalWorkflowExecutionEngine(runRepository, mock(OrchestratorService.class),
-            mock(WorkflowEventPublisher.class), testEnv.getWorkflowClient(), provider);
-        // @Value is not applied outside Spring; without a wait the engine would return before the run finishes.
-        java.lang.reflect.Field timeout = TemporalWorkflowExecutionEngine.class.getDeclaredField("runTimeoutSeconds");
+        engine =
+                new TemporalWorkflowExecutionEngine(
+                        runRepository,
+                        mock(OrchestratorService.class),
+                        mock(WorkflowEventPublisher.class),
+                        testEnv.getWorkflowClient(),
+                        provider);
+        // @Value is not applied outside Spring; without a wait the engine would return before the
+        // run finishes.
+        java.lang.reflect.Field timeout =
+                TemporalWorkflowExecutionEngine.class.getDeclaredField("runTimeoutSeconds");
         timeout.setAccessible(true);
         timeout.setLong(engine, 30L);
 
@@ -109,7 +121,8 @@ class TemporalWorkflowExecutionEngineTest {
 
         assertThat(activities.calls).hasSize(1);
         assertThat(activities.calls.get(0).node().id())
-            .as("a draft run must not be swapped for the promoted snapshot").isEqualTo("live-trigger");
+                .as("a draft run must not be swapped for the promoted snapshot")
+                .isEqualTo("live-trigger");
         assertThat(activities.calls.get(0).expressionScope()).isNotNull();
         assertThat(activities.calls.get(0).expressionScope().mode()).isEqualTo("draft");
         WorkflowRun run = savedRun();
@@ -119,7 +132,8 @@ class TemporalWorkflowExecutionEngineTest {
 
     @Test
     void aProductionRunStillExecutesThePromotedSnapshotAndBindsNoScope() {
-        engine.execute(definition, live, null, "hello", "ann", UUID.randomUUID(), RunMode.PRODUCTION);
+        engine.execute(
+                definition, live, null, "hello", "ann", UUID.randomUUID(), RunMode.PRODUCTION);
 
         assertThat(activities.calls).hasSize(1);
         assertThat(activities.calls.get(0).node().id()).isEqualTo("snapshot-trigger");
@@ -138,12 +152,14 @@ class TemporalWorkflowExecutionEngineTest {
     }
 
     private static class RecordingActivities implements WorkflowNodeActivities {
-        final List<NodeExecutionActivityInput> calls = java.util.Collections.synchronizedList(new ArrayList<>());
+        final List<NodeExecutionActivityInput> calls =
+                java.util.Collections.synchronizedList(new ArrayList<>());
 
         @Override
         public NodeExecutionActivityResult executeNode(NodeExecutionActivityInput input) {
             calls.add(input);
-            return new NodeExecutionActivityResult("out", "OK", "ok", null, null, List.of(), null, null, 1000L, 2000L);
+            return new NodeExecutionActivityResult(
+                    "out", "OK", "ok", null, null, List.of(), null, null, 1000L, 2000L);
         }
 
         @Override

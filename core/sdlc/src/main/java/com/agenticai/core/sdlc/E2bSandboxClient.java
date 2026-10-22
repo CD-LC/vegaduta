@@ -3,7 +3,6 @@ package com.agenticai.core.sdlc;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
 import com.agenticai.core.resilience.DependencyUnavailableException;
 import com.agenticai.core.resilience.ResilienceGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps E2B's platform REST API (base {@code https://api.e2b.app}), confirmed live against E2B's
@@ -73,6 +73,7 @@ public class E2bSandboxClient {
      * https://{port}-{sandboxId}.e2b.app} is reachable by anyone who learns the sandbox id.
      */
     private static final String NETWORK_FIELD = "network";
+
     private static final String ALLOW_PUBLIC_TRAFFIC_FIELD = "allowPublicTraffic";
     private static final String TRAFFIC_ACCESS_TOKEN_FIELD = "trafficAccessToken";
     public static final String TRAFFIC_ACCESS_TOKEN_HEADER = "e2b-traffic-access-token";
@@ -89,7 +90,9 @@ public class E2bSandboxClient {
      */
     private volatile CircuitBreakerRegistry breakerRegistry;
 
-    /** Restricted public traffic (the production default); kept for hand-built instances in tests. */
+    /**
+     * Restricted public traffic (the production default); kept for hand-built instances in tests.
+     */
     public E2bSandboxClient(
             RestClient.Builder restClientBuilder, E2bCredentialService credentialService) {
         this(restClientBuilder, credentialService, true);
@@ -193,8 +196,7 @@ public class E2bSandboxClient {
                             .retrieve()
                             .body(JsonNode.class);
             call.success();
-
-            String sandboxId = response.path("sandboxID").asText(null);
+            String sandboxId = response.path("sandboxID").asString(null);
             String trafficAccessToken = optionalText(response.path(TRAFFIC_ACCESS_TOKEN_FIELD));
             if (restrictPublicTraffic && trafficAccessToken == null) {
                 // E2B accepted the restriction but handed back no token that gates the sandbox
@@ -216,8 +218,8 @@ public class E2bSandboxClient {
 
             return new SandboxHandle(
                     sandboxId,
-                    response.path("templateID").asText(null),
-                    response.path("envdVersion").asText(null),
+                    response.path("templateID").asString(null),
+                    response.path("envdVersion").asString(null),
                     optionalText(response.path("envdAccessToken")),
                     trafficAccessToken);
         } catch (RestClientResponseException e) {
@@ -294,11 +296,11 @@ public class E2bSandboxClient {
                     .map(
                             node ->
                                     new ListedSandbox(
-                                            node.path("sandboxID").asText(null),
-                                            node.path("templateID").asText(null),
-                                            node.path("state").asText(null),
-                                            parseInstant(node.path("startedAt").asText(null)),
-                                            parseInstant(node.path("endAt").asText(null))))
+                                            node.path("sandboxID").asString(null),
+                                            node.path("templateID").asString(null),
+                                            node.path("state").asString(null),
+                                            parseInstant(node.path("startedAt").asString(null)),
+                                            parseInstant(node.path("endAt").asString(null))))
                     .toList();
         } catch (RestClientResponseException e) {
             throw new E2bApiException(
@@ -310,7 +312,10 @@ public class E2bSandboxClient {
         }
     }
 
-    /** Best-effort teardown of a sandbox this client refuses to hand out; the TTL reaps it otherwise. */
+    /**
+     * Best-effort teardown of a sandbox this client refuses to hand out; the TTL reaps it
+     * otherwise.
+     */
     private void killQuietly(String apiKey, String sandboxId) {
         if (sandboxId == null || sandboxId.isBlank()) {
             return;
@@ -318,7 +323,8 @@ public class E2bSandboxClient {
         try {
             killSandbox(apiKey, sandboxId);
         } catch (RuntimeException e) {
-            // The create error below is the one worth surfacing; the sandbox's own TTL is the backstop.
+            // The create error below is the one worth surfacing; the sandbox's own TTL is the
+            // backstop.
         }
     }
 
@@ -327,7 +333,7 @@ public class E2bSandboxClient {
         if (node == null || node.isMissingNode() || node.isNull()) {
             return null;
         }
-        String text = node.asText();
+        String text = node.asString();
         return text == null || text.isBlank() ? null : text;
     }
 
@@ -353,8 +359,8 @@ public class E2bSandboxClient {
      * was created secure (this scaffold never sets {@code secure: true}, so it is always null
      * today; kept on the record for when a later stage adds that option). {@code
      * trafficAccessToken} is the {@link E2bSandboxClient#TRAFFIC_ACCESS_TOKEN_HEADER} value every
-     * request to the sandbox's own host must carry; null only when the client was built with
-     * {@code restrictPublicTraffic=false}.
+     * request to the sandbox's own host must carry; null only when the client was built with {@code
+     * restrictPublicTraffic=false}.
      */
     public record SandboxHandle(
             String sandboxId,

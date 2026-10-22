@@ -3,12 +3,12 @@ package com.agenticai.core.omnichannel.matrix;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.omnichannel.matrix.MatrixSyncParser.Batch;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class MatrixSyncParserTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BOT = "@bot:example.org";
 
     @Test
@@ -39,12 +39,13 @@ class MatrixSyncParserTest {
 
         assertThat(batch.nextBatch()).isEqualTo("s2");
         assertThat(batch.invites())
-                .containsExactly(new MatrixSyncParser.Invite("!inv:example.org", "@alice:example.org"));
+                .containsExactly(
+                        new MatrixSyncParser.Invite("!inv:example.org", "@alice:example.org"));
         assertThat(batch.joinedCounts()).containsEntry("!room:example.org", 2);
         assertThat(batch.events()).hasSize(2);
         assertThat(batch.events().get(0).type()).isEqualTo("m.room.encryption");
         assertThat(batch.events().get(1).eventId()).isEqualTo("$e1");
-        assertThat(batch.events().get(1).content().path("body").asText()).isEqualTo("hi");
+        assertThat(batch.events().get(1).content().path("body").asString()).isEqualTo("hi");
     }
 
     @Test

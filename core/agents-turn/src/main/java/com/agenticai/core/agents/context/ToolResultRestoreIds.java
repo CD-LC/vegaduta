@@ -1,37 +1,34 @@
 package com.agenticai.core.agents.context;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The pointer a cleared tool result carries and {@code restore_tool_result} resolves: {@code
  * <toolName>#<argsDigest>} (the digest is a short SHA-256 of the canonical JSON of the call's
- * arguments, so two calls of the same tool with the same arguments share a pointer and the latest one
- * wins), or the raw {@code tool_call_log} row id when the model already holds one.
+ * arguments, so two calls of the same tool with the same arguments share a pointer and the latest
+ * one wins), or the raw {@code tool_call_log} row id when the model already holds one.
  *
  * <p>The digest is computed on both sides - when the placeholder is written (from the assistant
- * message's tool call) and when the stored row is searched (from {@code tool_call_log.tool_input}) -
- * over the CANONICAL form of the JSON (sorted keys, no whitespace), so a harmless re-serialisation
- * between the model's call and the logged input cannot make a pointer miss its row. A digest is not a
- * credential and not an access path: the lookup that follows is still bound to the calling tenant, agent
- * and session.
+ * message's tool call) and when the stored row is searched (from {@code tool_call_log.tool_input})
+ * - over the CANONICAL form of the JSON (sorted keys, no whitespace), so a harmless
+ * re-serialisation between the model's call and the logged input cannot make a pointer miss its
+ * row. A digest is not a credential and not an access path: the lookup that follows is still bound
+ * to the calling tenant, agent and session.
  */
 public final class ToolResultRestoreIds {
 
-    private static final ObjectMapper CANONICAL = JsonMappers.plain()
-        .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+    private static final ObjectMapper CANONICAL = JsonMappers.sortedMapKeys();
     private static final int DIGEST_BYTES = 6;
 
-    private ToolResultRestoreIds() {
-    }
+    private ToolResultRestoreIds() {}
 
     /** What a model-supplied {@code stepId} resolves to. */
     public record Parsed(UUID logId, String toolName, String argsDigest) {
@@ -49,19 +46,25 @@ public final class ToolResultRestoreIds {
     public static String digest(String toolInput) {
         String canonical = canonical(toolInput);
         try {
-            byte[] hash = MessageDigest.getInstance("SHA-256").digest(canonical.getBytes(StandardCharsets.UTF_8));
+            byte[] hash =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(canonical.getBytes(StandardCharsets.UTF_8));
             StringBuilder hex = new StringBuilder(DIGEST_BYTES * 2);
             for (int i = 0; i < DIGEST_BYTES; i++) {
                 hex.append(String.format(Locale.ROOT, "%02x", hash[i]));
             }
             return hex.toString();
         } catch (NoSuchAlgorithmException e) {
-            // SHA-256 is mandatory on every JVM; falling back keeps the pointer deterministic anyway.
+            // SHA-256 is mandatory on every JVM; falling back keeps the pointer deterministic
+            // anyway.
             return Integer.toHexString(canonical.hashCode());
         }
     }
 
-    /** Sorted-key, whitespace-free JSON when {@code toolInput} parses as JSON, else the trimmed text. */
+    /**
+     * Sorted-key, whitespace-free JSON when {@code toolInput} parses as JSON, else the trimmed
+     * text.
+     */
     static String canonical(String toolInput) {
         if (toolInput == null || toolInput.isBlank()) {
             return "{}";
@@ -79,7 +82,9 @@ public final class ToolResultRestoreIds {
         }
     }
 
-    /** Parses a model-supplied step id; empty when it is neither a log id nor {@code tool#digest}. */
+    /**
+     * Parses a model-supplied step id; empty when it is neither a log id nor {@code tool#digest}.
+     */
     public static Optional<Parsed> parse(String stepId) {
         if (stepId == null || stepId.isBlank()) {
             return Optional.empty();

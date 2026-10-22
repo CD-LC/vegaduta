@@ -2,7 +2,6 @@ package com.agenticai.core.sarvam;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /translate}. Two models, exposed as a parameter rather than hidden per the
@@ -95,8 +95,8 @@ public class SarvamTranslateClient {
                             .body(JsonNode.class);
             success = true;
             return new TranslationResult(
-                    response.path("translated_text").asText(null),
-                    response.path("source_language_code").asText(null));
+                    response.path("translated_text").asString(null),
+                    response.path("source_language_code").asString(null));
         } catch (RestClientResponseException e) {
             errorMessage = describeError(e);
             throw new SarvamApiException(

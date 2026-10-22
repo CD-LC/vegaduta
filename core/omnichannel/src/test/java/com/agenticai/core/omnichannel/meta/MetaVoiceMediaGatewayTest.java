@@ -12,14 +12,13 @@ import com.agenticai.core.omnichannel.whatsappvoice.TestAudio;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceMediaGateway;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteException;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteOutcome;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.http.HttpClient;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Real Meta is not reachable from here, so this pins the request SHAPES and every guard against a
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
  */
 class MetaVoiceMediaGatewayTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String TOKEN = "tok-123";
 
     private HttpServer server;
@@ -58,8 +58,11 @@ class MetaVoiceMediaGatewayTest {
 
     private MetaVoiceMediaGateway gateway(String base) {
         // Raw transport: the fixture is loopback, which the SSRF guard rightly refuses.
-        return new MetaVoiceMediaGateway(MAPPER, base, mock(MetaMediaGraphApiClient.class),
-            HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build());
+        return new MetaVoiceMediaGateway(
+                MAPPER,
+                base,
+                mock(MetaMediaGraphApiClient.class),
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build());
     }
 
     private void respond(HttpExchange ex, int status, String contentType, byte[] body)

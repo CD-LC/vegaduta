@@ -19,22 +19,23 @@ import com.agenticai.core.workflow.dto.ValidationResult;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** {@code create_workflow}: generate, save as a draft, report; never activate or run. */
 class CreateWorkflowToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final WorkflowCrudService crud = mock(WorkflowCrudService.class);
-    private final WorkflowGraphGeneratorService generator = mock(WorkflowGraphGeneratorService.class);
+    private final WorkflowGraphGeneratorService generator =
+            mock(WorkflowGraphGeneratorService.class);
     private final UUID workflowId = UUID.randomUUID();
     private final WorkflowGraphDto graph =
             new WorkflowGraphDto(
@@ -65,14 +66,14 @@ class CreateWorkflowToolCallbackTest {
                         tool.call(
                                 "{\"name\":\"Weekly digest\",\"instruction\":\"every Monday summarise sales\"}"));
 
-        assertEquals(workflowId.toString(), out.get("workflowId").asText());
-        assertEquals("DRAFT", out.get("status").asText());
-        assertEquals("/workflows/" + workflowId, out.get("path").asText());
+        assertEquals(workflowId.toString(), out.get("workflowId").asString());
+        assertEquals("DRAFT", out.get("status").asString());
+        assertEquals("/workflows/" + workflowId, out.get("path").asString());
         assertEquals(2, out.get("nodes").size());
-        assertEquals("agent", out.get("nodes").get(1).get("type").asText());
-        assertEquals("Summarise sales", out.get("nodes").get(1).get("label").asText());
+        assertEquals("agent", out.get("nodes").get(1).get("type").asString());
+        assertEquals("Summarise sales", out.get("nodes").get(1).get("label").asString());
         assertEquals(1, out.get("edgeCount").asInt());
-        assertEquals("picked the first agent", out.get("notes").get(0).asText());
+        assertEquals("picked the first agent", out.get("notes").get(0).asString());
         assertEquals(0, out.get("warnings").size());
         assertFalse(out.has("error"));
         verify(crud).create(eq("Weekly digest"), eq("every Monday summarise sales"), eq(graph));
@@ -83,13 +84,14 @@ class CreateWorkflowToolCallbackTest {
     @Test
     void validationProblemsOfTheSavedDraftComeBackAsWarnings() throws Exception {
         when(crud.validate(workflowId))
-                .thenReturn(ValidationResult.failed(List.of("Agent node n2 has no agent selected")));
+                .thenReturn(
+                        ValidationResult.failed(List.of("Agent node n2 has no agent selected")));
 
         JsonNode out = MAPPER.readTree(tool.call("{\"name\":\"W\",\"instruction\":\"do it\"}"));
 
         assertEquals(1, out.get("warnings").size());
-        assertTrue(out.get("warnings").get(0).asText().contains("no agent selected"));
-        assertEquals("DRAFT", out.get("status").asText());
+        assertTrue(out.get("warnings").get(0).asString().contains("no agent selected"));
+        assertEquals("DRAFT", out.get("status").asString());
     }
 
     @Test
@@ -99,7 +101,7 @@ class CreateWorkflowToolCallbackTest {
 
         JsonNode out = MAPPER.readTree(tool.call("{\"name\":\"W\",\"instruction\":\"do it\"}"));
 
-        assertTrue(out.get("error").asText().contains("model unavailable"));
+        assertTrue(out.get("error").asString().contains("model unavailable"));
         verify(crud, never()).create(any(), any(), any());
     }
 
@@ -110,18 +112,19 @@ class CreateWorkflowToolCallbackTest {
 
         JsonNode out = MAPPER.readTree(tool.call("{\"name\":\"W\",\"instruction\":\"do it\"}"));
 
-        assertTrue(out.get("error").asText().contains("no trigger node"));
+        assertTrue(out.get("error").asString().contains("no trigger node"));
         verify(crud, never()).create(any(), any(), any());
     }
 
     @Test
     void theTenantWorkflowLimitIsRelayedAsTheError() throws Exception {
         when(crud.create(anyString(), anyString(), any()))
-                .thenThrow(new TenantLimitExceededException("The FREE plan allows up to 3 workflows"));
+                .thenThrow(
+                        new TenantLimitExceededException("The FREE plan allows up to 3 workflows"));
 
         JsonNode out = MAPPER.readTree(tool.call("{\"name\":\"W\",\"instruction\":\"do it\"}"));
 
-        assertTrue(out.get("error").asText().contains("allows up to 3 workflows"));
+        assertTrue(out.get("error").asString().contains("allows up to 3 workflows"));
     }
 
     @Test
@@ -150,7 +153,8 @@ class CreateWorkflowToolCallbackTest {
     @Test
     void theFactoryBuildsTheToolOnlyWhenEnabledAndTheServicesExist() {
         ObjectProvider<WorkflowCrudService> crudProvider = mock(ObjectProvider.class);
-        ObjectProvider<WorkflowGraphGeneratorService> generatorProvider = mock(ObjectProvider.class);
+        ObjectProvider<WorkflowGraphGeneratorService> generatorProvider =
+                mock(ObjectProvider.class);
         when(crudProvider.getIfAvailable()).thenReturn(crud);
         when(generatorProvider.getIfAvailable()).thenReturn(generator);
 

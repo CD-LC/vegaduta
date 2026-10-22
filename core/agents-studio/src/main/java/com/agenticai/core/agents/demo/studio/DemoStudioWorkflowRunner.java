@@ -5,8 +5,6 @@ import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,6 +27,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The studio's workflow runner: a small, honest, sequential engine that runs the visitor's REAL
@@ -149,7 +149,7 @@ public class DemoStudioWorkflowRunner {
         try {
             Definition def = objectMapper.readValue(json, Definition.class);
             return def == null || def.steps() == null ? new Definition(List.of()) : def;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new DemoStudioService.StudioException(
                     "invalid", 400, "The workflow definition isn't valid.");
         }
@@ -158,7 +158,7 @@ public class DemoStudioWorkflowRunner {
     public String serialize(Definition def) {
         try {
             return objectMapper.writeValueAsString(def);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new DemoStudioService.StudioException(
                     "invalid", 400, "The workflow definition can't be stored.");
         }
@@ -236,8 +236,8 @@ public class DemoStudioWorkflowRunner {
         int charged = 0;
         String previous = input;
         String output = null;
-        boolean markedPending =
-                false; // true only after this run parked on an approval step (and marked it in
+        boolean markedPending = false;
+        // true only after this run parked on an approval step (and marked it in
         // Redis)
         DemoStudioRun.Status status = DemoStudioRun.Status.COMPLETED;
         out.emit(

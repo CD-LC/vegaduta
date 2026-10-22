@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.approval.ApprovalPolicyService;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Duration;
 import java.util.UUID;
@@ -78,7 +77,7 @@ class VisionRedisOutageTest {
         sessions =
                 new VisionSessionService(
                         redisTemplate,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         new VisionProperties(),
                         usage,
                         tenantLimits,
@@ -104,7 +103,7 @@ class VisionRedisOutageTest {
         sessions =
                 new VisionSessionService(
                         redisTemplate,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         new VisionProperties(),
                         usage,
                         mock(TenantLimits.class),
@@ -122,7 +121,7 @@ class VisionRedisOutageTest {
         sessions =
                 new VisionSessionService(
                         redisTemplate,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         new VisionProperties(),
                         usage,
                         mock(TenantLimits.class),

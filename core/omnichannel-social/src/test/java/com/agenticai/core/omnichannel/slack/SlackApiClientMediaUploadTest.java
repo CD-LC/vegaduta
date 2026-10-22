@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -18,6 +16,8 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Covers the 3-step media-upload flow this class added on top of {@link SlackApiClient}'s existing
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
  */
 class SlackApiClientMediaUploadTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BOT_TOKEN = "xoxb-dummy-token";
 
     private HttpServer server;
@@ -47,8 +47,12 @@ class SlackApiClientMediaUploadTest {
     private SlackApiClient clientFor(HttpServer server) {
         String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
         // Raw transport: the fixture is loopback, which the SSRF guard rightly refuses.
-        return new SlackApiClient(MAPPER, baseUrl,
-            java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build());
+        return new SlackApiClient(
+                MAPPER,
+                baseUrl,
+                java.net.http.HttpClient.newBuilder()
+                        .connectTimeout(java.time.Duration.ofSeconds(10))
+                        .build());
     }
 
     private static HttpServer startServer() throws IOException {
@@ -98,7 +102,7 @@ class SlackApiClientMediaUploadTest {
         assertEquals("http://127.0.0.1:9/upload-raw", info.uploadUrl());
         assertEquals("F123", info.fileId());
         assertEquals("Bearer " + BOT_TOKEN, capturedAuth[0]);
-        assertEquals("photo.png", capturedBody[0].path("filename").asText());
+        assertEquals("photo.png", capturedBody[0].path("filename").asString());
         assertEquals(42, capturedBody[0].path("length").asInt());
     }
 
@@ -202,10 +206,10 @@ class SlackApiClientMediaUploadTest {
         client.completeUpload(BOT_TOKEN, "F123", "photo.png", "C0123", "here you go");
 
         JsonNode file = capturedBody[0].path("files").get(0);
-        assertEquals("F123", file.path("id").asText());
-        assertEquals("photo.png", file.path("title").asText());
-        assertEquals("C0123", capturedBody[0].path("channel_id").asText());
-        assertEquals("here you go", capturedBody[0].path("initial_comment").asText());
+        assertEquals("F123", file.path("id").asString());
+        assertEquals("photo.png", file.path("title").asString());
+        assertEquals("C0123", capturedBody[0].path("channel_id").asString());
+        assertEquals("here you go", capturedBody[0].path("initial_comment").asString());
     }
 
     @Test

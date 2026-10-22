@@ -14,7 +14,6 @@ import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -34,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Maps Langfuse's public API onto the platform console's trace contract (see {@link
@@ -310,7 +310,7 @@ public class PlatformTraceService {
         Map<String, double[]> models = new LinkedHashMap<>();
         Map<String, boolean[]> modelHasCost = new LinkedHashMap<>();
         for (JsonNode d : daily.path("data")) {
-            String date = d.path("date").asText("");
+            String date = d.path("date").asString("");
             String day = date.length() >= 10 ? date.substring(0, 10) : date;
             Long[] lat = latency.get(day);
             byDay.add(
@@ -321,7 +321,7 @@ public class PlatformTraceService {
                             lat == null ? null : lat[0],
                             lat == null ? null : lat[1]));
             for (JsonNode u : d.path("usage")) {
-                String model = u.path("model").asText(null);
+                String model = u.path("model").asString(null);
                 if (model == null || model.isBlank()) {
                     model = "(unknown)";
                 }
@@ -369,7 +369,7 @@ public class PlatformTraceService {
         try {
             JsonNode body = langfuse.get("/api/public/metrics", Map.of("query", query));
             for (JsonNode r : body.path("data")) {
-                String t = r.path("time_dimension").asText("");
+                String t = r.path("time_dimension").asString("");
                 if (t.length() < 10) {
                     continue;
                 }
@@ -397,13 +397,13 @@ public class PlatformTraceService {
         if (t.path("tags").isArray()) {
             tags = new ArrayList<>();
             for (JsonNode tag : t.path("tags")) {
-                tags.add(tag.asText());
+                tags.add(tag.asString());
             }
         }
         JsonNode latency = t.path("latency");
         Long latencyMs = latency.isNumber() ? Math.round(latency.asDouble() * 1000d) : null;
         return new TraceRow(
-                t.path("id").asText(),
+                t.path("id").asString(),
                 textOrNull(t.path("name")),
                 textOrNull(t.path("timestamp")),
                 textOrNull(t.path("userId")),
@@ -440,7 +440,7 @@ public class PlatformTraceService {
             cost = doubleOrNull(o.path("totalPrice"));
         }
         return new ObservationRow(
-                o.path("id").asText(),
+                o.path("id").asString(),
                 textOrNull(o.path("type")),
                 textOrNull(o.path("name")),
                 textOrNull(o.path("startTime")),
@@ -479,14 +479,14 @@ public class PlatformTraceService {
         if (node == null || node.isMissingNode() || node.isNull()) {
             return null;
         }
-        return node.isTextual() ? node.asText() : node.toString();
+        return node.isString() ? node.asString() : node.toString();
     }
 
     private static String textOrNull(JsonNode node) {
         if (node == null || node.isMissingNode() || node.isNull()) {
             return null;
         }
-        String s = node.isTextual() ? node.asText() : node.toString();
+        String s = node.isString() ? node.asString() : node.toString();
         return s.isBlank() ? null : s;
     }
 

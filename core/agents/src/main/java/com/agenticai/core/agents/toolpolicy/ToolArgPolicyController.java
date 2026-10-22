@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.toolpolicy;
 
 import com.agenticai.core.agents.toolpolicy.ToolArgPolicyDtos.PoliciesResponse;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.UUID;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,12 +8,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Per-agent tool ARGUMENT policies: {@code GET} reads them, {@code PUT} replaces them (an empty
- * {@code policies} list clears). Thin on purpose - access, validation, the feature flag and status codes are
- * decided in {@link ToolArgPolicyService}. The body is a JSON object with a {@code policies} array, each entry
- * naming a tool (or glob) and its {@code rules}; see {@code ToolArgPolicySet} for the full grammar.
+ * {@code policies} list clears). Thin on purpose - access, validation, the feature flag and status
+ * codes are decided in {@link ToolArgPolicyService}. The body is a JSON object with a {@code
+ * policies} array, each entry naming a tool (or glob) and its {@code rules}; see {@code
+ * ToolArgPolicySet} for the full grammar.
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/tool-policies")

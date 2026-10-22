@@ -4,7 +4,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The polling fallback: asks the tenant's BlueBubbles server for new messages every few seconds
@@ -77,7 +77,10 @@ public class ImessagePollingService {
         this.intervalMs = Math.max(1_000, intervalMs);
     }
 
-    /** Restores a poller for every connected tenant after a restart (a poller for a webhook-mode tenant exits at once). */
+    /**
+     * Restores a poller for every connected tenant after a restart (a poller for a webhook-mode
+     * tenant exits at once).
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void startAll() {
         for (TenantResolutionService.AccountTenant account :
@@ -96,8 +99,10 @@ public class ImessagePollingService {
                     }
                     Poller poller = new Poller(webhookId, tenantSchema);
                     poller.thread =
-                            TenantAwareExecutors.startVirtualThread("imessage-poll-" + abbreviate(webhookId), poller::run);
-                    log.info("iMessage polling started for connection ***{}", abbreviate(webhookId));
+                            TenantAwareExecutors.startVirtualThread(
+                                    "imessage-poll-" + abbreviate(webhookId), poller::run);
+                    log.info(
+                            "iMessage polling started for connection ***{}", abbreviate(webhookId));
                     return poller;
                 });
     }
@@ -120,7 +125,8 @@ public class ImessagePollingService {
      * so tests can drive a round without a thread.
      */
     Round pollOnce(String webhookId) {
-        Optional<ImessageCredentialService.PollTarget> target = credentialService.pollTarget(webhookId);
+        Optional<ImessageCredentialService.PollTarget> target =
+                credentialService.pollTarget(webhookId);
         if (target.isEmpty()) {
             return Round.STOP;
         }
@@ -130,7 +136,8 @@ public class ImessagePollingService {
             return Round.IDLE;
         }
         long cursor = t.cursorMs();
-        List<JsonNode> messages = apiClient.queryMessages(t.serverUrl(), t.password(), cursor, PAGE_SIZE);
+        List<JsonNode> messages =
+                apiClient.queryMessages(t.serverUrl(), t.password(), cursor, PAGE_SIZE);
         long newest = cursor;
         Round result = Round.IDLE;
         for (JsonNode message : messages) {
@@ -173,11 +180,14 @@ public class ImessagePollingService {
             int failures = 0;
             while (!stopped.get()) {
                 long pause = intervalMs;
-                TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + "poller", Set.of()));
+                TenantContext.set(
+                        TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + "poller", Set.of()));
                 try {
                     Round round = pollOnce(webhookId);
                     if (round == Round.STOP) {
-                        log.info("iMessage polling stopped for connection ***{}: not in polling mode any more", abbreviate(webhookId));
+                        log.info(
+                                "iMessage polling stopped for connection ***{}: not in polling mode any more",
+                                abbreviate(webhookId));
                         pollers.remove(webhookId, this);
                         return;
                     }

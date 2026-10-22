@@ -1,26 +1,25 @@
 package com.agenticai.core.admin.keycloak;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * User-write plumbing of the Keycloak Admin API adapter: the create-user sequence (POST, re-fetch,
  * reset-password, field re-assertion, cleanup on a failed follow-up), the create-time rejection
  * translation, single-user fetch and realm-role resolution. Package-private, like {@link
- * KeycloakAdminSupport}; {@link KeycloakAdminClient} extends it and exposes the public port
- * methods built on these helpers.
+ * KeycloakAdminSupport}; {@link KeycloakAdminClient} extends it and exposes the public port methods
+ * built on these helpers.
  */
 abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
 
@@ -39,11 +38,12 @@ abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
     public abstract void deleteUser(String userId);
 
     /**
-     * Token-reusing variant of {@link KeycloakAdminClient#getUserById}, so {@link KeycloakAdminClient#setUserAttributes}'s
-     * read-then-write pair costs one admin token rather than two (this class fetches a fresh token
-     * per public method call - see the class javadoc). Unlike the bulk list endpoint, the
-     * single-user GET returns the FULL representation including {@code attributes}, with no {@code
-     * briefRepresentation} parameter needed (cf. {@link KeycloakAdminClient#listUsers}).
+     * Token-reusing variant of {@link KeycloakAdminClient#getUserById}, so {@link
+     * KeycloakAdminClient#setUserAttributes}'s read-then-write pair costs one admin token rather
+     * than two (this class fetches a fresh token per public method call - see the class javadoc).
+     * Unlike the bulk list endpoint, the single-user GET returns the FULL representation including
+     * {@code attributes}, with no {@code briefRepresentation} parameter needed (cf. {@link
+     * KeycloakAdminClient#listUsers}).
      */
     final KeycloakUserRepresentation fetchUser(String userId, String token) {
         KeycloakUserRepresentation user =
@@ -202,11 +202,12 @@ abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
     /**
      * Creation-time only - {@link #createUser} is its sole caller, and that is what keeps it safe.
      * It sends the same "attributes map alongside a partial root body" shape that made {@link
-     * KeycloakAdminClient#setUserAttributes} destructive (see that method's javadoc: since Keycloak 24.0.4 an {@code
-     * attributes} map in the body IS the user's whole attribute set), but here the target is a user
-     * created seconds earlier with exactly this attribute set, so there is nothing pre-existing to
-     * drop, and the three root fields it does carry are the very ones being repaired. Do NOT reuse
-     * this to update an already-live user; use {@link KeycloakAdminClient#setUserAttributes}, which merges.
+     * KeycloakAdminClient#setUserAttributes} destructive (see that method's javadoc: since Keycloak
+     * 24.0.4 an {@code attributes} map in the body IS the user's whole attribute set), but here the
+     * target is a user created seconds earlier with exactly this attribute set, so there is nothing
+     * pre-existing to drop, and the three root fields it does carry are the very ones being
+     * repaired. Do NOT reuse this to update an already-live user; use {@link
+     * KeycloakAdminClient#setUserAttributes}, which merges.
      */
     private void patchUserFields(
             String userId,
@@ -349,8 +350,8 @@ abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
     private static String describeUserProfileError(String body) {
         try {
             JsonNode node = OBJECT_MAPPER.readTree(body);
-            String field = node.path("field").asText(null);
-            String errorMessage = node.path("errorMessage").asText(null);
+            String field = node.path("field").asString(null);
+            String errorMessage = node.path("errorMessage").asString(null);
             JsonNode params = node.path("params");
             if ("error-invalid-length".equals(errorMessage)
                     && params.isArray()
@@ -358,9 +359,9 @@ abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
                 String label = field == null || field.isBlank() ? "This field" : capitalize(field);
                 return label
                         + " must be between "
-                        + params.get(1).asText()
+                        + params.get(1).asString()
                         + " and "
-                        + params.get(2).asText()
+                        + params.get(2).asString()
                         + " characters.";
             }
             if (field != null && !field.isBlank()) {

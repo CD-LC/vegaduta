@@ -2,8 +2,6 @@ package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.tenancy.replica.ReplicaMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -28,40 +26,36 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Signs A2A Agent Cards and verifies cards signed elsewhere - the trust
- * primitive a cross-tenant "callable agents" marketplace needs before cards
- * can carry any weight: an unsigned card proves nothing about who published
- * it, a signed one chains to a key the operator pinned in config.
+ * Signs A2A Agent Cards and verifies cards signed elsewhere - the trust primitive a cross-tenant
+ * "callable agents" marketplace needs before cards can carry any weight: an unsigned card proves
+ * nothing about who published it, a signed one chains to a key the operator pinned in config.
  *
- * <p>Wire shape follows the A2A spec's {@code signatures} field on AgentCard:
- * each entry is a JWS over the card with detached content -
+ * <p>Wire shape follows the A2A spec's {@code signatures} field on AgentCard: each entry is a JWS
+ * over the card with detached content -
  *
  * <pre>
  *   { "protected": base64url(JWS header), "signature": base64url(sig), "header": {"kid": ...} }
  * </pre>
  *
- * <p>where the signing input is {@code base64url(protected) + "." +
- * base64url(canonicalCardJson)} and {@code canonicalCardJson} is the card MINUS
- * its {@code signatures} field, serialized with sorted keys and no whitespace
- * (the JCS/RFC-8785 shape for the field types this card carries: strings,
- * booleans, nested maps, lists - the card contains no floats, so JCS number
+ * <p>where the signing input is {@code base64url(protected) + "." + base64url(canonicalCardJson)}
+ * and {@code canonicalCardJson} is the card MINUS its {@code signatures} field, serialized with
+ * sorted keys and no whitespace (the JCS/RFC-8785 shape for the field types this card carries:
+ * strings, booleans, nested maps, lists - the card contains no floats, so JCS number
  * canonicalization never comes into play).
  *
- * <p>Key management: {@code app.a2a.signing.private-key-pem} is THE operator
- * identity - pin it for any real deployment (and especially anything
- * multi-replica). Generate a pair with
- * {@code openssl genpkey -algorithm ed25519 -out a2a-signing.pem} +
- * {@code openssl pkey -in a2a-signing.pem -pubout -out a2a-signing.pub} and set
- * BOTH PEMs (the JDK does not expose public-key derivation from a PKCS8
- * Ed25519 private, so a private key alone is rejected at boot rather than
- * silently half-configured). When no key is configured and signing is enabled,
- * an ephemeral key is generated at boot with a loud warning: cards still
- * verify against this instance's JWKS, but the identity resets on restart -
- * fine for dev, meaningless for a marketplace listing. The public key is
- * served at {@code /.well-known/jwks.json} so verifiers resolve {@code kid}
- * against the same origin that served the card.
+ * <p>Key management: {@code app.a2a.signing.private-key-pem} is THE operator identity - pin it for
+ * any real deployment (and especially anything multi-replica). Generate a pair with {@code openssl
+ * genpkey -algorithm ed25519 -out a2a-signing.pem} + {@code openssl pkey -in a2a-signing.pem
+ * -pubout -out a2a-signing.pub} and set BOTH PEMs (the JDK does not expose public-key derivation
+ * from a PKCS8 Ed25519 private, so a private key alone is rejected at boot rather than silently
+ * half-configured). When no key is configured and signing is enabled, an ephemeral key is generated
+ * at boot with a loud warning: cards still verify against this instance's JWKS, but the identity
+ * resets on restart - fine for dev, meaningless for a marketplace listing. The public key is served
+ * at {@code /.well-known/jwks.json} so verifiers resolve {@code kid} against the same origin that
+ * served the card.
  */
 @Service
 public class A2aCardSigningService {
@@ -69,6 +63,7 @@ public class A2aCardSigningService {
     private static final Logger log = LoggerFactory.getLogger(A2aCardSigningService.class);
 
     private final A2aProperties properties;
+
     /** Sorted-keys compact writer - the canonicalizer the signature covers. */
     private final ObjectMapper canonical = JsonMappers.sortedMapKeys();
 
@@ -76,10 +71,9 @@ public class A2aCardSigningService {
     private volatile String keyId;
 
     /**
-     * Deployment-shape hint ({@code app.replica-mode}: e.g. {@code api},
-     * {@code worker}, {@code jobs}, {@code multi}); blank / {@code single} =
-     * one replica. Only used to decide whether an ephemeral signing key is
-     * worth a startup WARN.
+     * Deployment-shape hint ({@code app.replica-mode}: e.g. {@code api}, {@code worker}, {@code
+     * jobs}, {@code multi}); blank / {@code single} = one replica. Only used to decide whether an
+     * ephemeral signing key is worth a startup WARN.
      */
     @Value("${app.replica-mode:}")
     private String replicaMode = "";
@@ -94,13 +88,11 @@ public class A2aCardSigningService {
     }
 
     /**
-     * Startup check for the ephemeral-key trap: with no pinned key each
-     * replica (and each restart) mints a DIFFERENT Ed25519 identity, so cards
-     * signed by replica A fail verification against replica B's JWKS.
-     * {@code app.a2a.require-pinned-key=true} turns that into a boot failure;
-     * otherwise it is a WARN, and only when {@code app.replica-mode} hints at
-     * more than one replica (the lazy WARN in {@link #ensureKeys()} still
-     * fires on first use either way).
+     * Startup check for the ephemeral-key trap: with no pinned key each replica (and each restart)
+     * mints a DIFFERENT Ed25519 identity, so cards signed by replica A fail verification against
+     * replica B's JWKS. {@code app.a2a.require-pinned-key=true} turns that into a boot failure;
+     * otherwise it is a WARN, and only when {@code app.replica-mode} hints at more than one replica
+     * (the lazy WARN in {@link #ensureKeys()} still fires on first use either way).
      */
     @PostConstruct
     void checkKeyPinning() {
@@ -109,16 +101,19 @@ public class A2aCardSigningService {
         }
         if (properties.isRequirePinnedKey()) {
             throw new IllegalStateException(
-                "app.a2a.require-pinned-key=true but app.a2a.signing.private-key-pem is empty - set "
-                + "APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY (or disable signing).");
+                    "app.a2a.require-pinned-key=true but app.a2a.signing.private-key-pem is empty - set "
+                            + "APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY (or disable signing).");
         }
         String mode = replicaMode == null ? "" : replicaMode.strip();
-        // One definition of "multi" (blank/single = one replica, anything else = more than one): ReplicaMode.
+        // One definition of "multi" (blank/single = one replica, anything else = more than one):
+        // ReplicaMode.
         if (ReplicaMode.parse(mode).isMulti()) {
-            log.warn("app.a2a.signing: running with app.replica-mode={} but NO pinned signing key - each replica "
-                + "will sign with its own ephemeral Ed25519 key and cards will not verify across replicas. Pin "
-                + "APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY (or set app.a2a.require-pinned-key=true "
-                + "to fail fast).", mode);
+            log.warn(
+                    "app.a2a.signing: running with app.replica-mode={} but NO pinned signing key - each replica "
+                            + "will sign with its own ephemeral Ed25519 key and cards will not verify across replicas. Pin "
+                            + "APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY (or set app.a2a.require-pinned-key=true "
+                            + "to fail fast).",
+                    mode);
         }
     }
 
@@ -127,10 +122,9 @@ public class A2aCardSigningService {
     }
 
     /**
-     * Signs a card. {@code card} must NOT already contain a {@code signatures}
-     * field (the payload is the card as the caller built it); the returned
-     * list is what the caller sets as {@code card.put("signatures", ...)}.
-     * Returns an empty list when signing is disabled.
+     * Signs a card. {@code card} must NOT already contain a {@code signatures} field (the payload
+     * is the card as the caller built it); the returned list is what the caller sets as {@code
+     * card.put("signatures", ...)}. Returns an empty list when signing is disabled.
      */
     public List<Map<String, Object>> sign(Map<String, Object> card) {
         if (!isEnabled()) {
@@ -156,7 +150,7 @@ public class A2aCardSigningService {
             entry.put("signature", base64url(signer.sign()));
             entry.put("header", Map.of("kid", keyId()));
             return List.of(entry);
-        } catch (GeneralSecurityException | com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (GeneralSecurityException | tools.jackson.core.JacksonException e) {
             // A signing failure must not break discovery - an unsigned card is
             // still a valid card; log loudly so an operator notices the key is
             // broken rather than silently shipping unsigned cards.
@@ -166,11 +160,10 @@ public class A2aCardSigningService {
     }
 
     /**
-     * Signs an arbitrary payload as a compact JWS ({@code header.payload.sig})
-     * over the same operator key - the signing primitive {@code
-     * AgentAttestationService} (KYA-style outbound identity) builds its JWT on.
-     * Returns null when signing is disabled, so a caller that needs a signature
-     * can distinguish "not configured" from a real token.
+     * Signs an arbitrary payload as a compact JWS ({@code header.payload.sig}) over the same
+     * operator key - the signing primitive {@code AgentAttestationService} (KYA-style outbound
+     * identity) builds its JWT on. Returns null when signing is disabled, so a caller that needs a
+     * signature can distinguish "not configured" from a real token.
      */
     public String signCompactJws(Map<String, Object> protectedHeader, Map<String, Object> payload) {
         if (!isEnabled()) {
@@ -180,25 +173,25 @@ public class A2aCardSigningService {
             Map<String, Object> header = new LinkedHashMap<>(protectedHeader);
             header.putIfAbsent("alg", "EdDSA");
             header.putIfAbsent("kid", keyId());
-            String signingInputB64 = base64url(canonical.writeValueAsBytes(header))
-                + "." + base64url(canonical.writeValueAsBytes(payload));
+            String signingInputB64 =
+                    base64url(canonical.writeValueAsBytes(header))
+                            + "."
+                            + base64url(canonical.writeValueAsBytes(payload));
             Signature signer = Signature.getInstance("Ed25519");
             signer.initSign(keyPair().getPrivate());
             signer.update(signingInputB64.getBytes(StandardCharsets.US_ASCII));
             return signingInputB64 + "." + base64url(signer.sign());
-        } catch (GeneralSecurityException | com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (GeneralSecurityException | tools.jackson.core.JacksonException e) {
             log.error("Compact JWS signing failed", e);
             return null;
         }
     }
 
     /**
-     * Verifies a card's {@code signatures} against {@code publicKey} - the
-     * inbound direction of the marketplace (verifying a card fetched from
-     * another deployment). Strips the {@code signatures} field,
-     * re-canonicalizes, and re-checks every entry; returns true only if at
-     * least one verifies. Tampered cards, wrong keys and malformed entries all
-     * fail closed to false.
+     * Verifies a card's {@code signatures} against {@code publicKey} - the inbound direction of the
+     * marketplace (verifying a card fetched from another deployment). Strips the {@code signatures}
+     * field, re-canonicalizes, and re-checks every entry; returns true only if at least one
+     * verifies. Tampered cards, wrong keys and malformed entries all fail closed to false.
      */
     public boolean verify(Map<String, Object> card, PublicKey publicKey) {
         Object signatures = card.get("signatures");
@@ -214,7 +207,7 @@ public class A2aCardSigningService {
                     continue;
                 }
                 if (!(entry.get("protected") instanceof String protectedB64)
-                    || !(entry.get("signature") instanceof String sigB64)) {
+                        || !(entry.get("signature") instanceof String sigB64)) {
                     continue;
                 }
                 Signature verifier = Signature.getInstance("Ed25519");
@@ -224,8 +217,9 @@ public class A2aCardSigningService {
                     return true;
                 }
             }
-        } catch (GeneralSecurityException | com.fasterxml.jackson.core.JsonProcessingException
-            | IllegalArgumentException e) {
+        } catch (GeneralSecurityException
+                | tools.jackson.core.JacksonException
+                | IllegalArgumentException e) {
             return false;
         }
         return false;
@@ -275,23 +269,31 @@ public class A2aCardSigningService {
             if (StringUtils.hasText(cfg.getPrivateKeyPem())) {
                 if (!StringUtils.hasText(cfg.getPublicKeyPem())) {
                     throw new IllegalStateException(
-                        "app.a2a.signing.private-key-pem is set without public-key-pem - the JDK "
-                        + "cannot derive an Ed25519 public key from a PKCS8 private; set both "
-                        + "(openssl pkey -in <key> -pubout).");
+                            "app.a2a.signing.private-key-pem is set without public-key-pem - the JDK "
+                                    + "cannot derive an Ed25519 public key from a PKCS8 private; set both "
+                                    + "(openssl pkey -in <key> -pubout).");
                 }
-                generated = new KeyPair(parsePublicKey(cfg.getPublicKeyPem()), parsePrivateKey(cfg.getPrivateKeyPem()));
+                generated =
+                        new KeyPair(
+                                parsePublicKey(cfg.getPublicKeyPem()),
+                                parsePrivateKey(cfg.getPrivateKeyPem()));
             } else {
                 generated = KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
-                log.warn("app.a2a.signing: no private-key-pem configured - generated an EPHEMERAL "
-                    + "Ed25519 key for this boot. Signed cards verify against this instance's JWKS "
-                    + "only until restart; pin APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY "
-                    + "for a stable identity (required for anything multi-replica or marketplace-facing).");
+                log.warn(
+                        "app.a2a.signing: no private-key-pem configured - generated an EPHEMERAL "
+                                + "Ed25519 key for this boot. Signed cards verify against this instance's JWKS "
+                                + "only until restart; pin APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY "
+                                + "for a stable identity (required for anything multi-replica or marketplace-facing).");
             }
         } catch (GeneralSecurityException e) {
-            throw new IllegalStateException("app.a2a.signing key material is not usable Ed25519 PEM", e);
+            throw new IllegalStateException(
+                    "app.a2a.signing key material is not usable Ed25519 PEM", e);
         }
         String configuredKid = cfg.getKeyId();
-        keyId = StringUtils.hasText(configuredKid) ? configuredKid : thumbprintKid(generated.getPublic());
+        keyId =
+                StringUtils.hasText(configuredKid)
+                        ? configuredKid
+                        : thumbprintKid(generated.getPublic());
         keyPair = generated;
     }
 
@@ -311,20 +313,23 @@ public class A2aCardSigningService {
         byte[] der = pemToDer(pemOrSeed);
         if (der.length == 32) {
             return KeyFactory.getInstance("Ed25519")
-                .generatePrivate(new EdECPrivateKeySpec(NamedParameterSpec.ED25519, der));
+                    .generatePrivate(new EdECPrivateKeySpec(NamedParameterSpec.ED25519, der));
         }
         return KeyFactory.getInstance("Ed25519").generatePrivate(new PKCS8EncodedKeySpec(der));
     }
 
     static PublicKey parsePublicKey(String pem) throws GeneralSecurityException {
-        return KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(pemToDer(pem)));
+        return KeyFactory.getInstance("Ed25519")
+                .generatePublic(new X509EncodedKeySpec(pemToDer(pem)));
     }
 
     static byte[] pemToDer(String pemOrBare) {
-        String s = pemOrBare.strip()
-            .replaceAll("-----BEGIN [^-]+-----", "")
-            .replaceAll("-----END [^-]+-----", "")
-            .replaceAll("\\s", "");
+        String s =
+                pemOrBare
+                        .strip()
+                        .replaceAll("-----BEGIN [^-]+-----", "")
+                        .replaceAll("-----END [^-]+-----", "")
+                        .replaceAll("\\s", "");
         try {
             return Base64.getDecoder().decode(s);
         } catch (IllegalArgumentException notBase64) {

@@ -1,26 +1,25 @@
 package com.agenticai.core.codeintel;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * {@code delete_code_workspace} - tears down a scratch workspace (git
- * worktree remove + directory delete) once it is no longer needed. Only
- * removes the disposable scratch copy - it can never touch the primary
- * checkout or any other workspace, so this is intentionally NOT gated
- * behind human approval, same as {@code create_code_workspace}: this is a
- * risk-REDUCING cleanup action (freeing disk, removing a stale worktree),
- * not a write to anything that matters.
+ * {@code delete_code_workspace} - tears down a scratch workspace (git worktree remove + directory
+ * delete) once it is no longer needed. Only removes the disposable scratch copy - it can never
+ * touch the primary checkout or any other workspace, so this is intentionally NOT gated behind
+ * human approval, same as {@code create_code_workspace}: this is a risk-REDUCING cleanup action
+ * (freeing disk, removing a stale worktree), not a write to anything that matters.
  */
 public class DeleteCodeWorkspaceToolCallback implements ToolCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(DeleteCodeWorkspaceToolCallback.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(DeleteCodeWorkspaceToolCallback.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     private final CodeIntelClient client;
@@ -31,11 +30,9 @@ public class DeleteCodeWorkspaceToolCallback implements ToolCallback {
     }
 
     /**
-     * @param allowedRepoIds the calling agent's {@code
-     *     Agent.allowedCodeIntelRepoIds} - EMPTY means deny-all here, same
-     *     "opposite of the knowledge-collection convention" reasoning as
-     *     {@link CreateCodeWorkspaceToolCallback}. See migration V103's
-     *     header comment.
+     * @param allowedRepoIds the calling agent's {@code Agent.allowedCodeIntelRepoIds} - EMPTY means
+     *     deny-all here, same "opposite of the knowledge-collection convention" reasoning as {@link
+     *     CreateCodeWorkspaceToolCallback}. See migration V103's header comment.
      */
     public DeleteCodeWorkspaceToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
@@ -45,12 +42,13 @@ public class DeleteCodeWorkspaceToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("delete_code_workspace")
-            .description(
-                "Tears down a scratch code workspace once you're done with it (removes the git worktree "
-                    + "or scratch copy). Does not touch the primary checkout or any other workspace. Use "
-                    + "this to clean up after finishing a change.")
-            .inputSchema("""
+                .name("delete_code_workspace")
+                .description(
+                        "Tears down a scratch code workspace once you're done with it (removes the git worktree "
+                                + "or scratch copy). Does not touch the primary checkout or any other workspace. Use "
+                                + "this to clean up after finishing a change.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -66,7 +64,7 @@ public class DeleteCodeWorkspaceToolCallback implements ToolCallback {
                     "required": ["repo_id", "workspace_id"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -88,7 +86,9 @@ public class DeleteCodeWorkspaceToolCallback implements ToolCallback {
             return client.deleteWorkspace(repoId.toString(), workspaceId.toString());
         } catch (Exception e) {
             log.warn("delete_code_workspace tool call failed", e);
-            return "{\"error\": \"delete_code_workspace failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"delete_code_workspace failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 }

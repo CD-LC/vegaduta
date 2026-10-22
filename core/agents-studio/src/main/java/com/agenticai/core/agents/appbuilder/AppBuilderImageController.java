@@ -2,8 +2,6 @@ package com.agenticai.core.agents.appbuilder;
 
 import com.agenticai.core.agentspi.ImageGenerator;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
@@ -18,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code POST /api/internal/app-builder/generate-image} - image/logo generation for generated apps.
@@ -59,8 +59,8 @@ public class AppBuilderImageController {
         String size;
         try {
             JsonNode node = objectMapper.readTree(rawBody == null ? "" : rawBody);
-            prompt = node.path("prompt").asText("");
-            size = node.hasNonNull("size") ? node.get("size").asText() : null;
+            prompt = node.path("prompt").asString("");
+            size = node.hasNonNull("size") ? node.get("size").asString() : null;
         } catch (Exception e) {
             throw new AppBuilderValidationException(
                     "The request body is missing or not valid JSON for this endpoint.");

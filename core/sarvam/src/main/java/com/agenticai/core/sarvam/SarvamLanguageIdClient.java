@@ -2,13 +2,13 @@ package com.agenticai.core.sarvam;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /text-lid} - identifies both the language (e.g. {@code hi-IN}) and script (e.g.
@@ -58,8 +58,8 @@ public class SarvamLanguageIdClient {
                             .body(JsonNode.class);
             success = true;
             return new LanguageIdResult(
-                    response.path("language_code").asText(null),
-                    response.path("script_code").asText(null));
+                    response.path("language_code").asString(null),
+                    response.path("script_code").asString(null));
         } catch (RestClientResponseException e) {
             errorMessage = SarvamTranslateClient.describeError(e);
             throw new SarvamApiException(

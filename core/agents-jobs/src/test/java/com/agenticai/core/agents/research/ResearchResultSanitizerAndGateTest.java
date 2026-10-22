@@ -17,19 +17,19 @@ import com.agenticai.core.agents.capability.AgentCapabilityStateId;
 import com.agenticai.core.agents.capability.AgentCapabilityStateRepository;
 import com.agenticai.core.agents.capability.DeepResearchCapability;
 import com.agenticai.core.agents.tools.web.DeepResearchSession;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Result-source sanitising and the submit gate that applies the run cap to direct jobs. */
 class ResearchResultSanitizerAndGateTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static JsonNode result(String... urls) throws Exception {
         StringBuilder sources = new StringBuilder();
@@ -65,8 +65,8 @@ class ResearchResultSanitizerAndGateTest {
                                 "https:///nohost"),
                         null);
         assertEquals(2, count(out));
-        assertEquals("https://ok.example/a", out.get("sources").get(0).get("url").asText());
-        assertEquals("http://ok.example/b", out.get("sources").get(1).get("url").asText());
+        assertEquals("https://ok.example/a", out.get("sources").get(0).get("url").asString());
+        assertEquals("http://ok.example/b", out.get("sources").get(1).get("url").asString());
     }
 
     @Test
@@ -78,7 +78,7 @@ class ResearchResultSanitizerAndGateTest {
                         result("https://read.example/page", "https://invented.example/never-read"),
                         session.fetchedUrls());
         assertEquals(1, count(out));
-        assertEquals("https://read.example/page", out.get("sources").get(0).get("url").asText());
+        assertEquals("https://read.example/page", out.get("sources").get(0).get("url").asString());
     }
 
     @Test
@@ -101,7 +101,8 @@ class ResearchResultSanitizerAndGateTest {
         AgentCapabilityStateRepository states = mock(AgentCapabilityStateRepository.class);
         ResearchRunUsageService usage = usage();
         UUID agentId = UUID.randomUUID();
-        when(states.findById(new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(
                         Optional.of(
                                 new AgentCapabilityState(
@@ -121,7 +122,8 @@ class ResearchResultSanitizerAndGateTest {
         AgentCapabilityStateRepository states = mock(AgentCapabilityStateRepository.class);
         ResearchRunUsageService usage = usage();
         UUID agentId = UUID.randomUUID();
-        when(states.findById(new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(
                         Optional.of(
                                 new AgentCapabilityState(
@@ -146,12 +148,15 @@ class ResearchResultSanitizerAndGateTest {
         ResearchRunUsageService usage = usage();
         UUID plain = UUID.randomUUID();
         UUID off = UUID.randomUUID();
-        when(states.findById(new AgentCapabilityStateId(plain, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(plain, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(Optional.empty());
-        when(states.findById(new AgentCapabilityStateId(off, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(off, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(
                         Optional.of(
-                                new AgentCapabilityState(off, DeepResearchCapability.CAPABILITY_KEY, false)));
+                                new AgentCapabilityState(
+                                        off, DeepResearchCapability.CAPABILITY_KEY, false)));
         ResearchAgentSubmitGate gate = new ResearchAgentSubmitGate(states, usage);
 
         assertNull(gate.reserve(plain, "t1", "alice"));

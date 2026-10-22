@@ -9,6 +9,7 @@ import com.agenticai.core.agents.tools.classification.McpAnnotationClassifier;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 
@@ -24,11 +25,22 @@ class AgentMcpToolResolverStaticAnnotationNamesTest {
     private static McpSyncClient clientWithTool(
             String toolName, McpSchema.ToolAnnotations annotations) {
         McpSyncClient client = mock(McpSyncClient.class);
-        McpSchema.JsonSchema schema =
-                new McpSchema.JsonSchema("object", null, null, null, null, null);
         McpSchema.Tool tool =
-                new McpSchema.Tool(toolName, null, "a tool", schema, null, annotations, null);
+                new McpSchema.Tool(
+                        toolName,
+                        null,
+                        "a tool",
+                        Map.of("type", "object"),
+                        null,
+                        annotations,
+                        null);
         when(client.listTools()).thenReturn(new McpSchema.ListToolsResult(List.of(tool), null));
+        // Spring AI 2's provider reads the connection details off the client.
+        when(client.getClientCapabilities())
+                .thenReturn(McpSchema.ClientCapabilities.builder().build());
+        when(client.getClientInfo()).thenReturn(new McpSchema.Implementation("test", "1.0"));
+        when(client.getCurrentInitializationResult())
+                .thenReturn(mock(McpSchema.InitializeResult.class));
         return client;
     }
 

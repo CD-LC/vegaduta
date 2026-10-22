@@ -1,17 +1,16 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
- * Detects which platform a payload came from when the request says {@code source: "auto"}. Pure, and
- * deliberately conservative: it answers only on distinctive markers and otherwise returns empty so the
- * caller can ask the user to pick a source rather than mis-convert.
+ * Detects which platform a payload came from when the request says {@code source: "auto"}. Pure,
+ * and deliberately conservative: it answers only on distinctive markers and otherwise returns empty
+ * so the caller can ask the user to pick a source rather than mis-convert.
  */
 public final class AgentImportDetector {
 
-    private AgentImportDetector() {
-    }
+    private AgentImportDetector() {}
 
     public static Optional<AgentImportSource> detect(JsonNode root) {
         if (root == null || !root.isObject()) {
@@ -31,10 +30,16 @@ public final class AgentImportDetector {
             return Optional.of(AgentImportSource.OPENAI_ASSISTANT);
         }
         // Agents SDK style: Agent(...) keyword arguments.
-        if (root.has("instructions") || root.has("handoffs") || root.has("model_settings")
-            || root.has("modelSettings") || root.has("input_guardrails") || root.has("inputGuardrails")
-            || root.has("output_guardrails") || root.has("outputGuardrails") || root.has("handoff_description")
-            || root.has("handoffDescription")) {
+        if (root.has("instructions")
+                || root.has("handoffs")
+                || root.has("model_settings")
+                || root.has("modelSettings")
+                || root.has("input_guardrails")
+                || root.has("inputGuardrails")
+                || root.has("output_guardrails")
+                || root.has("outputGuardrails")
+                || root.has("handoff_description")
+                || root.has("handoffDescription")) {
             return Optional.of(AgentImportSource.OPENAI_AGENTS);
         }
         return Optional.empty();

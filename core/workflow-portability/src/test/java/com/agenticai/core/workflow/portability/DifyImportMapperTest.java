@@ -6,11 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.agenticai.core.agents.importer.AgentImportDtos.ConversionReport;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Golden fixture for the Dify DSL importer: a small support-triage app written for this test in the
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  */
 class DifyImportMapperTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BEARER = "abcdefghijklmnopqrstuvwxyz0123456789";
 
     private static final String SUPPORT_TRIAGE =

@@ -20,7 +20,13 @@ import java.util.function.Function;
  */
 final class FakeHomeserver implements AutoCloseable {
 
-    record Request(String method, String path, String rawPath, String query, Map<String, String> headers, byte[] body) {
+    record Request(
+            String method,
+            String path,
+            String rawPath,
+            String query,
+            Map<String, String> headers,
+            byte[] body) {
         String bodyText() {
             return new String(body, StandardCharsets.UTF_8);
         }
@@ -53,7 +59,9 @@ final class FakeHomeserver implements AutoCloseable {
                     requests.add(request);
                     Response response = handle(request);
                     exchange.getResponseHeaders().add("Content-Type", response.contentType());
-                    exchange.sendResponseHeaders(response.status(), response.body().length == 0 ? -1 : response.body().length);
+                    exchange.sendResponseHeaders(
+                            response.status(),
+                            response.body().length == 0 ? -1 : response.body().length);
                     if (response.body().length > 0) {
                         exchange.getResponseBody().write(response.body());
                     }
@@ -72,7 +80,8 @@ final class FakeHomeserver implements AutoCloseable {
         String key = request.method() + " " + request.path();
         String best = null;
         for (String registered : handlers.keySet()) {
-            if (key.startsWith(registered) && (best == null || registered.length() > best.length())) {
+            if (key.startsWith(registered)
+                    && (best == null || registered.length() > best.length())) {
                 best = registered;
             }
         }
@@ -97,12 +106,13 @@ final class FakeHomeserver implements AutoCloseable {
 
     /** The real guard, told that this one private address is the operator's homeserver. */
     SsrfGuard guard() {
-        return SsrfGuard.of(Set.of("127.0.0.1:" + server.getAddress().getPort()), InetAddress::getAllByName);
+        return SsrfGuard.of(
+                Set.of("127.0.0.1:" + server.getAddress().getPort()), InetAddress::getAllByName);
     }
 
     MatrixApiClient client() {
         SsrfGuard guard = guard();
-        return new MatrixApiClient(new com.fasterxml.jackson.databind.ObjectMapper(), () -> guard);
+        return new MatrixApiClient(com.agenticai.core.json.JsonMappers.plain(), () -> guard);
     }
 
     MatrixApiClient.Endpoint endpoint(String token) {
@@ -110,7 +120,9 @@ final class FakeHomeserver implements AutoCloseable {
     }
 
     List<Request> requestsTo(String method, String pathPrefix) {
-        return requests.stream().filter(r -> r.method().equals(method) && r.path().startsWith(pathPrefix)).toList();
+        return requests.stream()
+                .filter(r -> r.method().equals(method) && r.path().startsWith(pathPrefix))
+                .toList();
     }
 
     @Override

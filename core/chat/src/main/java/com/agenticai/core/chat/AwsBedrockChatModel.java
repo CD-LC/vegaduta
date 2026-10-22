@@ -36,41 +36,35 @@ import software.amazon.awssdk.services.bedrockruntime.model.SystemContentBlock;
 import software.amazon.awssdk.services.bedrockruntime.model.TokenUsage;
 
 /**
- * Minimal, hand-rolled {@link ChatModel} over AWS Bedrock's Converse API
- * (via {@code software.amazon.awssdk:bedrockruntime}'s {@link
- * BedrockRuntimeClient#converse} / {@link
- * BedrockRuntimeAsyncClient#converseStream}), NOT a Spring AI Bedrock
- * starter - this platform's Spring AI BOM pin (1.1.7, see {@code
- * core/pom.xml}) was not confidently verified to resolve a {@code
- * spring-ai-starter-model-bedrock-*} artifact with a known-correct
- * autoconfiguration class name to add to {@code CoreApplication}'s exclude
- * list (see that class's javadoc for why an unexcluded Spring AI
- * autoconfiguration crashes this platform's BYOK boot), so per this build's
- * own guidance this hand-rolls the Converse call directly against the AWS
- * SDK instead of guessing at a starter dependency coordinate.
+ * Minimal, hand-rolled {@link ChatModel} over AWS Bedrock's Converse API (via {@code
+ * software.amazon.awssdk:bedrockruntime}'s {@link BedrockRuntimeClient#converse} / {@link
+ * BedrockRuntimeAsyncClient#converseStream}), NOT a Spring AI Bedrock starter - this platform's
+ * Spring AI BOM pin (1.1.7, see {@code core/pom.xml}) was not confidently verified to resolve a
+ * {@code spring-ai-starter-model-bedrock-*} artifact with a known-correct autoconfiguration class
+ * name to add to {@code CoreApplication}'s exclude list (see that class's javadoc for why an
+ * unexcluded Spring AI autoconfiguration crashes this platform's BYOK boot), so per this build's
+ * own guidance this hand-rolls the Converse call directly against the AWS SDK instead of guessing
+ * at a starter dependency coordinate.
  *
  * <p><b>Honestly scoped - what this does and does NOT cover:</b>
+ *
  * <ul>
- *   <li>Covers: single- and multi-turn text chat (system + user + assistant
- *   history), {@code maxTokens}/{@code temperature}/{@code topP} inference
- *   config, SigV4 auth via the credential's own access key/secret/region,
- *   token usage (Bedrock's {@link TokenUsage} mapped into {@link
- *   DefaultUsage} on the {@link ChatResponseMetadata}, so {@code
- *   LlmMetricsAdvisor}'s cost tracking sees real numbers), and streaming.
- *   <li>Streaming ({@link #stream}): when an async client is supplied, a real
- *   {@code ConverseStream} - one {@link ChatResponse} per text delta, then a
- *   final empty-text chunk carrying the usage and finish reason (the advisor
- *   reads usage off the LAST chunk). Without an async client it degrades to
- *   one {@link #call} emitted as a single chunk on {@code boundedElastic} -
- *   correct output, no incremental tokens. This override matters: {@link
- *   ChatModel}'s inherited default throws {@code
- *   UnsupportedOperationException}, and the FAST reasoning depth (every
- *   agent's default) always streams.
- *   <li>Does NOT cover: tool/function calling (Bedrock's {@code toolConfig}
- *   is not wired - a {@code TOOL} message in the prompt history is skipped
- *   rather than sent, and tool definitions on the prompt's options are
- *   ignored; both are logged at WARN once per call so it isn't silent), and
- *   image/document content blocks (only {@link ContentBlock#fromText}).
+ *   <li>Covers: single- and multi-turn text chat (system + user + assistant history), {@code
+ *       maxTokens}/{@code temperature}/{@code topP} inference config, SigV4 auth via the
+ *       credential's own access key/secret/region, token usage (Bedrock's {@link TokenUsage} mapped
+ *       into {@link DefaultUsage} on the {@link ChatResponseMetadata}, so {@code
+ *       LlmMetricsAdvisor}'s cost tracking sees real numbers), and streaming.
+ *   <li>Streaming ({@link #stream}): when an async client is supplied, a real {@code
+ *       ConverseStream} - one {@link ChatResponse} per text delta, then a final empty-text chunk
+ *       carrying the usage and finish reason (the advisor reads usage off the LAST chunk). Without
+ *       an async client it degrades to one {@link #call} emitted as a single chunk on {@code
+ *       boundedElastic} - correct output, no incremental tokens. This override matters: {@link
+ *       ChatModel}'s inherited default throws {@code UnsupportedOperationException}, and the FAST
+ *       reasoning depth (every agent's default) always streams.
+ *   <li>Does NOT cover: tool/function calling (Bedrock's {@code toolConfig} is not wired - a {@code
+ *       TOOL} message in the prompt history is skipped rather than sent, and tool definitions on
+ *       the prompt's options are ignored; both are logged at WARN once per call so it isn't
+ *       silent), and image/document content blocks (only {@link ContentBlock#fromText}).
  * </ul>
  */
 public class AwsBedrockChatModel implements ChatModel {
@@ -85,14 +79,22 @@ public class AwsBedrockChatModel implements ChatModel {
     private final double topP;
 
     /** Sync-only: {@link #stream} degrades to a single blocking {@link #call} chunk. */
-    public AwsBedrockChatModel(BedrockRuntimeClient client, String modelId, int maxTokens, double temperature, double topP) {
+    public AwsBedrockChatModel(
+            BedrockRuntimeClient client,
+            String modelId,
+            int maxTokens,
+            double temperature,
+            double topP) {
         this(client, null, modelId, maxTokens, temperature, topP);
     }
 
     public AwsBedrockChatModel(
-        BedrockRuntimeClient client, BedrockRuntimeAsyncClient asyncClient,
-        String modelId, int maxTokens, double temperature, double topP
-    ) {
+            BedrockRuntimeClient client,
+            BedrockRuntimeAsyncClient asyncClient,
+            String modelId,
+            int maxTokens,
+            double temperature,
+            double topP) {
         this.client = client;
         this.asyncClient = asyncClient;
         this.modelId = modelId;
@@ -101,8 +103,13 @@ public class AwsBedrockChatModel implements ChatModel {
         this.topP = topP;
     }
 
-    /** Converse-shaped pieces of a Spring AI prompt, shared by {@link #call} and {@link #stream}. */
-    private record ConverseInput(List<Message> messages, List<SystemContentBlock> system, InferenceConfiguration inference) {}
+    /**
+     * Converse-shaped pieces of a Spring AI prompt, shared by {@link #call} and {@link #stream}.
+     */
+    private record ConverseInput(
+            List<Message> messages,
+            List<SystemContentBlock> system,
+            InferenceConfiguration inference) {}
 
     private ConverseInput toConverseInput(Prompt prompt) {
         List<Message> messages = new ArrayList<>();
@@ -125,33 +132,37 @@ public class AwsBedrockChatModel implements ChatModel {
             }
             switch (message.getMessageType()) {
                 case SYSTEM -> systemBlocks.add(SystemContentBlock.fromText(text));
-                case USER -> messages.add(Message.builder()
-                    .role(ConversationRole.USER)
-                    .content(ContentBlock.fromText(text))
-                    .build());
-                case ASSISTANT -> messages.add(Message.builder()
-                    .role(ConversationRole.ASSISTANT)
-                    .content(ContentBlock.fromText(text))
-                    .build());
-                default -> { }
+                case USER ->
+                        messages.add(
+                                Message.builder()
+                                        .role(ConversationRole.USER)
+                                        .content(ContentBlock.fromText(text))
+                                        .build());
+                case ASSISTANT ->
+                        messages.add(
+                                Message.builder()
+                                        .role(ConversationRole.ASSISTANT)
+                                        .content(ContentBlock.fromText(text))
+                                        .build());
+                default -> {}
             }
         }
 
         warnIfToolsIgnored(prompt, skippedToolMessages);
 
-        InferenceConfiguration inference = InferenceConfiguration.builder()
-            .maxTokens(maxTokens)
-            .temperature((float) temperature)
-            .topP((float) topP)
-            .build();
+        InferenceConfiguration inference =
+                InferenceConfiguration.builder()
+                        .maxTokens(maxTokens)
+                        .temperature((float) temperature)
+                        .topP((float) topP)
+                        .build();
         return new ConverseInput(messages, systemBlocks, inference);
     }
 
     /**
-     * One WARN per call when the caller asked for tools this model cannot
-     * honour - the turn still runs as plain text chat (the previous, silent
-     * behaviour), but an operator can now see why a Bedrock agent never
-     * calls its tools.
+     * One WARN per call when the caller asked for tools this model cannot honour - the turn still
+     * runs as plain text chat (the previous, silent behaviour), but an operator can now see why a
+     * Bedrock agent never calls its tools.
      */
     private void warnIfToolsIgnored(Prompt prompt, int skippedToolMessages) {
         int toolDefinitions = 0;
@@ -159,13 +170,14 @@ public class AwsBedrockChatModel implements ChatModel {
             if (toolOptions.getToolCallbacks() != null) {
                 toolDefinitions += toolOptions.getToolCallbacks().size();
             }
-            if (toolOptions.getToolNames() != null) {
-                toolDefinitions += toolOptions.getToolNames().size();
-            }
         }
         if (toolDefinitions > 0 || skippedToolMessages > 0) {
-            log.warn("AWS Bedrock model {} does not support tool calling here: ignoring {} tool definition(s) "
-                + "and skipping {} TOOL message(s); the turn runs as plain text chat", modelId, toolDefinitions, skippedToolMessages);
+            log.warn(
+                    "AWS Bedrock model {} does not support tool calling here: ignoring {} tool definition(s) "
+                            + "and skipping {} TOOL message(s); the turn runs as plain text chat",
+                    modelId,
+                    toolDefinitions,
+                    skippedToolMessages);
         }
     }
 
@@ -173,10 +185,11 @@ public class AwsBedrockChatModel implements ChatModel {
     public ChatResponse call(Prompt prompt) {
         ConverseInput input = toConverseInput(prompt);
 
-        ConverseRequest.Builder requestBuilder = ConverseRequest.builder()
-            .modelId(modelId)
-            .messages(input.messages())
-            .inferenceConfig(input.inference());
+        ConverseRequest.Builder requestBuilder =
+                ConverseRequest.builder()
+                        .modelId(modelId)
+                        .messages(input.messages())
+                        .inferenceConfig(input.inference());
         if (!input.system().isEmpty()) {
             requestBuilder.system(input.system());
         }
@@ -190,14 +203,17 @@ public class AwsBedrockChatModel implements ChatModel {
         // own exceptions get (see that translator's class javadoc).
         ConverseResponse response = client.converse(requestBuilder.build());
 
-        String text = (response.output() != null && response.output().message() != null)
-            ? response.output().message().content().stream()
-                .map(ContentBlock::text)
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining())
-            : "";
+        String text =
+                (response.output() != null && response.output().message() != null)
+                        ? response.output().message().content().stream()
+                                .map(ContentBlock::text)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.joining())
+                        : "";
 
-        Generation generation = new Generation(new AssistantMessage(text), finishMetadata(response.stopReasonAsString()));
+        Generation generation =
+                new Generation(
+                        new AssistantMessage(text), finishMetadata(response.stopReasonAsString()));
         return new ChatResponse(List.of(generation), responseMetadata(response.usage()));
     }
 
@@ -205,64 +221,110 @@ public class AwsBedrockChatModel implements ChatModel {
     public Flux<ChatResponse> stream(Prompt prompt) {
         if (asyncClient == null) {
             // Degraded path - see class javadoc. call() blocks, hence boundedElastic.
-            return Flux.defer(() -> Flux.just(call(prompt))).subscribeOn(TenantAwareSchedulers.boundedElastic());
+            return Flux.defer(() -> Flux.just(call(prompt)))
+                    .subscribeOn(TenantAwareSchedulers.boundedElastic());
         }
-        return Flux.defer(() -> {
-            ConverseInput input = toConverseInput(prompt);
-            ConverseStreamRequest.Builder requestBuilder = ConverseStreamRequest.builder()
-                .modelId(modelId)
-                .messages(input.messages())
-                .inferenceConfig(input.inference());
-            if (!input.system().isEmpty()) {
-                requestBuilder.system(input.system());
-            }
-            ConverseStreamRequest request = requestBuilder.build();
-
-            return Flux.<ChatResponse>create(sink -> {
-                AtomicReference<TokenUsage> usage = new AtomicReference<>();
-                AtomicReference<String> stopReason = new AtomicReference<>();
-
-                ConverseStreamResponseHandler handler = ConverseStreamResponseHandler.builder()
-                    .subscriber(ConverseStreamResponseHandler.Visitor.builder()
-                        .onContentBlockDelta(event -> {
-                            String delta = event.delta() == null ? null : event.delta().text();
-                            if (delta != null && !delta.isEmpty()) {
-                                sink.next(new ChatResponse(
-                                    List.of(new Generation(new AssistantMessage(delta))),
-                                    ChatResponseMetadata.builder().model(modelId).build()));
-                            }
-                        })
-                        .onMessageStop(event -> stopReason.set(event.stopReasonAsString()))
-                        .onMetadata(event -> usage.set(event.usage()))
-                        .build())
-                    .onComplete(() -> {
-                        // Final chunk: empty text, carries usage + finish reason.
-                        // LlmMetricsAdvisor reads usage off the last chunk seen.
-                        sink.next(new ChatResponse(
-                            List.of(new Generation(new AssistantMessage(""), finishMetadata(stopReason.get()))),
-                            responseMetadata(usage.get())));
-                        sink.complete();
-                    })
-                    .build();
-
-                // Errors are taken from the returned future only (the handler's
-                // onError is left at its no-op default) so a failure is signalled
-                // exactly once; unwrapped so ProviderErrorTranslator sees the
-                // BedrockRuntimeException itself, same as the sync path.
-                CompletableFuture<Void> future = asyncClient.converseStream(request, handler);
-                future.whenComplete((ignored, error) -> {
-                    if (error != null) {
-                        sink.error(unwrap(error));
+        return Flux.defer(
+                () -> {
+                    ConverseInput input = toConverseInput(prompt);
+                    ConverseStreamRequest.Builder requestBuilder =
+                            ConverseStreamRequest.builder()
+                                    .modelId(modelId)
+                                    .messages(input.messages())
+                                    .inferenceConfig(input.inference());
+                    if (!input.system().isEmpty()) {
+                        requestBuilder.system(input.system());
                     }
+                    ConverseStreamRequest request = requestBuilder.build();
+
+                    return Flux.<ChatResponse>create(
+                            sink -> {
+                                AtomicReference<TokenUsage> usage = new AtomicReference<>();
+                                AtomicReference<String> stopReason = new AtomicReference<>();
+
+                                ConverseStreamResponseHandler handler =
+                                        ConverseStreamResponseHandler.builder()
+                                                .subscriber(
+                                                        ConverseStreamResponseHandler.Visitor
+                                                                .builder()
+                                                                .onContentBlockDelta(
+                                                                        event -> {
+                                                                            String delta =
+                                                                                    event.delta()
+                                                                                                    == null
+                                                                                            ? null
+                                                                                            : event.delta()
+                                                                                                    .text();
+                                                                            if (delta != null
+                                                                                    && !delta
+                                                                                            .isEmpty()) {
+                                                                                sink.next(
+                                                                                        new ChatResponse(
+                                                                                                List
+                                                                                                        .of(
+                                                                                                                new Generation(
+                                                                                                                        new AssistantMessage(
+                                                                                                                                delta))),
+                                                                                                ChatResponseMetadata
+                                                                                                        .builder()
+                                                                                                        .model(
+                                                                                                                modelId)
+                                                                                                        .build()));
+                                                                            }
+                                                                        })
+                                                                .onMessageStop(
+                                                                        event ->
+                                                                                stopReason.set(
+                                                                                        event
+                                                                                                .stopReasonAsString()))
+                                                                .onMetadata(
+                                                                        event ->
+                                                                                usage.set(
+                                                                                        event
+                                                                                                .usage()))
+                                                                .build())
+                                                .onComplete(
+                                                        () -> {
+                                                            // Final chunk: empty text, carries
+                                                            // usage + finish reason.
+                                                            // LlmMetricsAdvisor reads usage off the
+                                                            // last chunk seen.
+                                                            sink.next(
+                                                                    new ChatResponse(
+                                                                            List.of(
+                                                                                    new Generation(
+                                                                                            new AssistantMessage(
+                                                                                                    ""),
+                                                                                            finishMetadata(
+                                                                                                    stopReason
+                                                                                                            .get()))),
+                                                                            responseMetadata(
+                                                                                    usage.get())));
+                                                            sink.complete();
+                                                        })
+                                                .build();
+
+                                // Errors are taken from the returned future only (the handler's
+                                // onError is left at its no-op default) so a failure is signalled
+                                // exactly once; unwrapped so ProviderErrorTranslator sees the
+                                // BedrockRuntimeException itself, same as the sync path.
+                                CompletableFuture<Void> future =
+                                        asyncClient.converseStream(request, handler);
+                                future.whenComplete(
+                                        (ignored, error) -> {
+                                            if (error != null) {
+                                                sink.error(unwrap(error));
+                                            }
+                                        });
+                                sink.onCancel(() -> future.cancel(true));
+                            });
                 });
-                sink.onCancel(() -> future.cancel(true));
-            });
-        });
     }
 
     private static Throwable unwrap(Throwable error) {
         Throwable current = error;
-        while ((current instanceof CompletionException || current instanceof ExecutionException) && current.getCause() != null) {
+        while ((current instanceof CompletionException || current instanceof ExecutionException)
+                && current.getCause() != null) {
             current = current.getCause();
         }
         return current;
@@ -270,14 +332,16 @@ public class AwsBedrockChatModel implements ChatModel {
 
     private static ChatGenerationMetadata finishMetadata(String stopReason) {
         return stopReason == null
-            ? ChatGenerationMetadata.NULL
-            : ChatGenerationMetadata.builder().finishReason(stopReason).build();
+                ? ChatGenerationMetadata.NULL
+                : ChatGenerationMetadata.builder().finishReason(stopReason).build();
     }
 
     private ChatResponseMetadata responseMetadata(TokenUsage usage) {
         ChatResponseMetadata.Builder builder = ChatResponseMetadata.builder().model(modelId);
         if (usage != null) {
-            builder.usage(new DefaultUsage(usage.inputTokens(), usage.outputTokens(), usage.totalTokens()));
+            builder.usage(
+                    new DefaultUsage(
+                            usage.inputTokens(), usage.outputTokens(), usage.totalTokens()));
         }
         return builder.build();
     }

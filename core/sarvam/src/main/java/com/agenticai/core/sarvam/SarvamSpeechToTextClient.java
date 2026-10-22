@@ -2,7 +2,6 @@ package com.agenticai.core.sarvam;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -12,6 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /speech-to-text} (multipart file upload). Two models: {@code saarika:v2.5}
@@ -106,9 +106,9 @@ public class SarvamSpeechToTextClient {
                             .body(JsonNode.class);
             success = true;
             return new TranscriptionResult(
-                    response.path("transcript").asText(null),
-                    response.path("language_code").asText(null),
-                    response.path("request_id").asText(null));
+                    response.path("transcript").asString(null),
+                    response.path("language_code").asString(null),
+                    response.path("request_id").asString(null));
         } catch (RestClientResponseException e) {
             errorMessage = SarvamTranslateClient.describeError(e);
             throw new SarvamApiException(

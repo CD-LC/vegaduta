@@ -268,7 +268,13 @@ class AgentToolGovernanceTest {
                 "crm",
                 java.util.List.of(
                         new io.modelcontextprotocol.spec.McpSchema.Tool(
-                                "update_record", null, "a tool", null, null, readOnly, null)));
+                                "update_record",
+                                null,
+                                "a tool",
+                                java.util.Map.of("type", "object"),
+                                null,
+                                readOnly,
+                                null)));
         ToolClassificationRegistry real =
                 new ToolClassificationRegistry(
                         mock(
@@ -301,12 +307,16 @@ class AgentToolGovernanceTest {
     void unclassifiedToolsRequireApprovalWhenConfiguredFailClosed() {
         when(registry.resolve(TOOL)).thenReturn(unclassified());
 
-        ToolDispatchGate.Verdict verdict = governanceWithUnclassified("require-approval").decide(registry, TOOL);
+        ToolDispatchGate.Verdict verdict =
+                governanceWithUnclassified("require-approval").decide(registry, TOOL);
 
         assertEquals(ToolDispatchGate.Outcome.REQUIRE_APPROVAL, verdict.outcome());
         assertEquals(
                 1.0,
-                meters.counter(AgentToolGovernance.REFUSED_METRIC, "reason", "UNCLASSIFIED_APPROVAL")
+                meters.counter(
+                                AgentToolGovernance.REFUSED_METRIC,
+                                "reason",
+                                "UNCLASSIFIED_APPROVAL")
                         .count());
     }
 
@@ -314,7 +324,8 @@ class AgentToolGovernanceTest {
     void unclassifiedToolsAreDeniedWhenConfiguredDeny() {
         when(registry.resolve(TOOL)).thenReturn(unclassified());
 
-        ToolDispatchGate.Verdict verdict = governanceWithUnclassified("deny").decide(registry, TOOL);
+        ToolDispatchGate.Verdict verdict =
+                governanceWithUnclassified("deny").decide(registry, TOOL);
 
         assertEquals(ToolDispatchGate.Outcome.DENY, verdict.outcome());
         assertTrue(verdict.reason().contains("no safety classification"), verdict.reason());

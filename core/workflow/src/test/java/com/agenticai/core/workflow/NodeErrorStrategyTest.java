@@ -10,8 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,15 +18,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
-/** Pure-logic coverage of {@link NodeErrorStrategy}: parsing, the irreversible guard, backoff and attempt counting. */
+/**
+ * Pure-logic coverage of {@link NodeErrorStrategy}: parsing, the irreversible guard, backoff and
+ * attempt counting.
+ */
 class NodeErrorStrategyTest {
 
     private static WorkflowNodeDto node(String type, Map<String, Object> config) {
-        return new WorkflowNodeDto("n1", type, Map.of(), Map.of("config", config, "label", "Node 1"));
+        return new WorkflowNodeDto(
+                "n1", type, Map.of(), Map.of("config", config, "label", "Node 1"));
     }
 
-    private static Map<String, Object> retry(Object maxAttempts, Object backoffMs, String backoff, String retryOn) {
+    private static Map<String, Object> retry(
+            Object maxAttempts, Object backoffMs, String backoff, String retryOn) {
         Map<String, Object> r = new HashMap<>();
         if (maxAttempts != null) {
             r.put("maxAttempts", maxAttempts);
@@ -52,33 +56,40 @@ class NodeErrorStrategyTest {
         return p.retry();
     }
 
-    // ---- parsing ----------------------------------------------------------------------------------------------
+    // ---- parsing
+    // ----------------------------------------------------------------------------------------------
 
     @Test
     void nothingConfiguredOrExplicitFailIsNoPolicyAtAll() {
         assertNull(NodeErrorStrategy.parse(node("agent", Map.of())));
         assertNull(NodeErrorStrategy.parse(node("agent", Map.of("onError", "fail"))));
-        assertNull(NodeErrorStrategy.parse(node("agent", Map.of("onError", "garbage"))), "unknown values degrade to fail");
+        assertNull(
+                NodeErrorStrategy.parse(node("agent", Map.of("onError", "garbage"))),
+                "unknown values degrade to fail");
         assertNull(NodeErrorStrategy.parse(node("agent", Map.of("retry", "not-a-map"))));
     }
 
     @Test
     void onErrorValuesParseCaseInsensitively() {
-        assertEquals(NodeErrorStrategy.OnError.CONTINUE,
-            NodeErrorStrategy.parse(node("agent", Map.of("onError", " Continue "))).onError());
-        assertEquals(NodeErrorStrategy.OnError.BRANCH,
-            NodeErrorStrategy.parse(node("agent", Map.of("onError", "BRANCH"))).onError());
+        assertEquals(
+                NodeErrorStrategy.OnError.CONTINUE,
+                NodeErrorStrategy.parse(node("agent", Map.of("onError", " Continue "))).onError());
+        assertEquals(
+                NodeErrorStrategy.OnError.BRANCH,
+                NodeErrorStrategy.parse(node("agent", Map.of("onError", "BRANCH"))).onError());
     }
 
     @Test
     void retryConfigIsClampedAndDefaulted() {
-        NodeErrorStrategy.Retry r = retryOf("agent", Map.of("retry", retry(99, 999_999, "exponential", "transient")));
+        NodeErrorStrategy.Retry r =
+                retryOf("agent", Map.of("retry", retry(99, 999_999, "exponential", "transient")));
         assertEquals(5, r.maxAttempts(), "maxAttempts is capped at 5");
         assertEquals(60_000L, r.backoffMs(), "backoffMs is capped at 60s");
         assertTrue(r.exponential());
         assertTrue(r.transientOnly());
 
-        NodeErrorStrategy.Retry defaults = retryOf("agent", Map.of("retry", new HashMap<String, Object>()));
+        NodeErrorStrategy.Retry defaults =
+                retryOf("agent", Map.of("retry", new HashMap<String, Object>()));
         assertEquals(3, defaults.maxAttempts());
         assertEquals(1_000L, defaults.backoffMs());
         assertFalse(defaults.exponential());
@@ -88,16 +99,26 @@ class NodeErrorStrategyTest {
         assertEquals(1, low.maxAttempts(), "never fewer than one attempt");
         assertEquals(0L, low.backoffMs());
 
-        NodeErrorStrategy.Retry stringy = retryOf("agent", Map.of("retry", retry("4", "250", null, null)));
+        NodeErrorStrategy.Retry stringy =
+                retryOf("agent", Map.of("retry", retry("4", "250", null, null)));
         assertEquals(4, stringy.maxAttempts());
         assertEquals(250L, stringy.backoffMs());
     }
 
-    // ---- irreversible-node guard ---------------------------------------------------------------------------------
+    // ---- irreversible-node guard
+    // ---------------------------------------------------------------------------------
 
     @Test
     void irreversibleNodeTypesAreNeverRetriedWithoutTheExplicitOptIn() {
-        for (String type : List.of("bulk_email", "tool", "device_control", "crm_lead", "media", "output", "workflow")) {
+        for (String type :
+                List.of(
+                        "bulk_email",
+                        "tool",
+                        "device_control",
+                        "crm_lead",
+                        "media",
+                        "output",
+                        "workflow")) {
             NodeErrorStrategy.Retry r = retryOf(type, Map.of("retry", retry(4, 0, null, null)));
             assertEquals(1, r.maxAttempts(), type + " must be limited to a single attempt");
             assertEquals(4, r.requestedAttempts());
@@ -121,15 +142,24 @@ class NodeErrorStrategyTest {
 
     @Test
     void httpIsIrreversibleExceptForReadMethods() {
-        assertFalse(NodeErrorStrategy.isIrreversible(node("http", Map.of())), "default method is GET");
+        assertFalse(
+                NodeErrorStrategy.isIrreversible(node("http", Map.of())), "default method is GET");
         assertFalse(NodeErrorStrategy.isIrreversible(node("http", Map.of("method", "get"))));
         assertFalse(NodeErrorStrategy.isIrreversible(node("http", Map.of("method", "HEAD"))));
         assertTrue(NodeErrorStrategy.isIrreversible(node("http", Map.of("method", "POST"))));
         assertTrue(NodeErrorStrategy.isIrreversible(node("http", Map.of("method", "delete"))));
-        assertTrue(NodeErrorStrategy.isIrreversible(node("http", Map.of("method", "{{input.m}}"))), "unknown = unsafe");
+        assertTrue(
+                NodeErrorStrategy.isIrreversible(node("http", Map.of("method", "{{input.m}}"))),
+                "unknown = unsafe");
 
-        assertEquals(1, retryOf("http", Map.of("method", "POST", "retry", retry(3, 0, null, null))).maxAttempts());
-        assertEquals(3, retryOf("http", Map.of("method", "GET", "retry", retry(3, 0, null, null))).maxAttempts());
+        assertEquals(
+                1,
+                retryOf("http", Map.of("method", "POST", "retry", retry(3, 0, null, null)))
+                        .maxAttempts());
+        assertEquals(
+                3,
+                retryOf("http", Map.of("method", "GET", "retry", retry(3, 0, null, null)))
+                        .maxAttempts());
     }
 
     @Test
@@ -139,28 +169,34 @@ class NodeErrorStrategyTest {
         }
     }
 
-    // ---- backoff -----------------------------------------------------------------------------------------------
+    // ---- backoff
+    // -----------------------------------------------------------------------------------------------
 
     @Test
     void fixedBackoffIsConstantAndExponentialDoublesUpToTheCap() {
-        NodeErrorStrategy.Retry fixed = retryOf("agent", Map.of("retry", retry(5, 700, "fixed", null)));
+        NodeErrorStrategy.Retry fixed =
+                retryOf("agent", Map.of("retry", retry(5, 700, "fixed", null)));
         assertEquals(700, NodeErrorStrategy.delayMillis(fixed, 1));
         assertEquals(700, NodeErrorStrategy.delayMillis(fixed, 4));
 
-        NodeErrorStrategy.Retry exp = retryOf("agent", Map.of("retry", retry(5, 1000, "exponential", null)));
+        NodeErrorStrategy.Retry exp =
+                retryOf("agent", Map.of("retry", retry(5, 1000, "exponential", null)));
         assertEquals(1_000, NodeErrorStrategy.delayMillis(exp, 1));
         assertEquals(2_000, NodeErrorStrategy.delayMillis(exp, 2));
         assertEquals(4_000, NodeErrorStrategy.delayMillis(exp, 3));
         assertEquals(8_000, NodeErrorStrategy.delayMillis(exp, 4));
-        assertEquals(60_000, NodeErrorStrategy.delayMillis(exp, 30), "capped, and no shift overflow");
+        assertEquals(
+                60_000, NodeErrorStrategy.delayMillis(exp, 30), "capped, and no shift overflow");
     }
 
-    // ---- which failures retry ----------------------------------------------------------------------------------
+    // ---- which failures retry
+    // ----------------------------------------------------------------------------------
 
     @Test
     void quotaRejectionsAreNeverRetried() {
         NodeErrorStrategy.Retry all = retryOf("agent", Map.of("retry", retry(3, 0, null, "all")));
-        assertFalse(NodeErrorStrategy.shouldRetry(all, new TenantLimitExceededException("over quota")));
+        assertFalse(
+                NodeErrorStrategy.shouldRetry(all, new TenantLimitExceededException("over quota")));
         assertTrue(NodeErrorStrategy.shouldRetry(all, new RuntimeException("anything")));
     }
 
@@ -169,45 +205,75 @@ class NodeErrorStrategyTest {
         assertTrue(NodeErrorStrategy.isTransient(new RuntimeException("Read timed out")));
         assertTrue(NodeErrorStrategy.isTransient(new RuntimeException("HTTP 503 from provider")));
         assertTrue(NodeErrorStrategy.isTransient(new RuntimeException("429 Too Many Requests")));
-        assertTrue(NodeErrorStrategy.isTransient(new RuntimeException("wrapper", new IOException("connection reset"))));
+        assertTrue(
+                NodeErrorStrategy.isTransient(
+                        new RuntimeException("wrapper", new IOException("connection reset"))));
         assertTrue(NodeErrorStrategy.isTransient(new java.util.concurrent.TimeoutException("x")));
-        assertTrue(NodeErrorStrategy.isTransient(new IllegalStateException("The model is overloaded")));
+        assertTrue(
+                NodeErrorStrategy.isTransient(
+                        new IllegalStateException("The model is overloaded")));
 
-        assertFalse(NodeErrorStrategy.isTransient(new IllegalArgumentException("agentId is not a UUID")));
-        assertFalse(NodeErrorStrategy.isTransient(new RuntimeException("Agent 5030 not found")), "5030 is not 503");
+        assertFalse(
+                NodeErrorStrategy.isTransient(
+                        new IllegalArgumentException("agentId is not a UUID")));
+        assertFalse(
+                NodeErrorStrategy.isTransient(new RuntimeException("Agent 5030 not found")),
+                "5030 is not 503");
         assertFalse(NodeErrorStrategy.isTransient(new RuntimeException("bad configuration")));
     }
 
     @Test
     void transientOnlySkipsDeterministicFailures() {
-        NodeErrorStrategy.Retry onlyTransient = retryOf("agent", Map.of("retry", retry(3, 0, null, "transient")));
-        assertFalse(NodeErrorStrategy.shouldRetry(onlyTransient, new RuntimeException("bad configuration")));
-        assertTrue(NodeErrorStrategy.shouldRetry(onlyTransient, new RuntimeException("upstream timeout")));
+        NodeErrorStrategy.Retry onlyTransient =
+                retryOf("agent", Map.of("retry", retry(3, 0, null, "transient")));
+        assertFalse(
+                NodeErrorStrategy.shouldRetry(
+                        onlyTransient, new RuntimeException("bad configuration")));
+        assertTrue(
+                NodeErrorStrategy.shouldRetry(
+                        onlyTransient, new RuntimeException("upstream timeout")));
     }
 
-    // ---- attempt counting ---------------------------------------------------------------------------------------
+    // ---- attempt counting
+    // ---------------------------------------------------------------------------------------
 
-    private static <T> T run(NodeErrorStrategy.Retry retry, AtomicInteger calls, List<NodeErrorStrategy.Attempt> failed,
-        List<Long> slept, java.util.function.Supplier<T> body) {
-        return NodeErrorStrategy.runWithRetry(retry, () -> {
-            calls.incrementAndGet();
-            return body.get();
-        }, slept::add, Instant::now, failed);
+    private static <T> T run(
+            NodeErrorStrategy.Retry retry,
+            AtomicInteger calls,
+            List<NodeErrorStrategy.Attempt> failed,
+            List<Long> slept,
+            java.util.function.Supplier<T> body) {
+        return NodeErrorStrategy.runWithRetry(
+                retry,
+                () -> {
+                    calls.incrementAndGet();
+                    return body.get();
+                },
+                slept::add,
+                Instant::now,
+                failed);
     }
 
     @Test
     void succeedsOnTheThirdAttemptAfterTwoTracedFailures() {
-        NodeErrorStrategy.Retry retry = retryOf("agent", Map.of("retry", retry(3, 200, "exponential", null)));
+        NodeErrorStrategy.Retry retry =
+                retryOf("agent", Map.of("retry", retry(3, 200, "exponential", null)));
         AtomicInteger calls = new AtomicInteger();
         List<NodeErrorStrategy.Attempt> failed = new ArrayList<>();
         List<Long> slept = new ArrayList<>();
 
-        String result = run(retry, calls, failed, slept, () -> {
-            if (calls.get() < 3) {
-                throw new RuntimeException("flaky " + calls.get());
-            }
-            return "done";
-        });
+        String result =
+                run(
+                        retry,
+                        calls,
+                        failed,
+                        slept,
+                        () -> {
+                            if (calls.get() < 3) {
+                                throw new RuntimeException("flaky " + calls.get());
+                            }
+                            return "done";
+                        });
 
         assertEquals("done", result);
         assertEquals(3, calls.get());
@@ -224,24 +290,44 @@ class NodeErrorStrategyTest {
         AtomicInteger calls = new AtomicInteger();
         List<NodeErrorStrategy.Attempt> failed = new ArrayList<>();
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () ->
-            run(retry, calls, failed, new ArrayList<>(), () -> {
-                throw new RuntimeException("always " + calls.get());
-            }));
+        RuntimeException thrown =
+                assertThrows(
+                        RuntimeException.class,
+                        () ->
+                                run(
+                                        retry,
+                                        calls,
+                                        failed,
+                                        new ArrayList<>(),
+                                        () -> {
+                                            throw new RuntimeException("always " + calls.get());
+                                        }));
 
         assertEquals("always 4", thrown.getMessage());
         assertEquals(4, calls.get());
-        assertEquals(3, failed.size(), "the final failure is rethrown, not recorded as a retried attempt");
+        assertEquals(
+                3,
+                failed.size(),
+                "the final failure is rethrown, not recorded as a retried attempt");
     }
 
     @Test
     void anIrreversibleNodeRunsExactlyOnceEvenWhenThreeAttemptsWereRequested() {
-        NodeErrorStrategy.Retry retry = retryOf("bulk_email", Map.of("retry", retry(3, 0, null, null)));
+        NodeErrorStrategy.Retry retry =
+                retryOf("bulk_email", Map.of("retry", retry(3, 0, null, null)));
         AtomicInteger calls = new AtomicInteger();
 
-        assertThrows(RuntimeException.class, () -> run(retry, calls, new ArrayList<>(), new ArrayList<>(), () -> {
-            throw new RuntimeException("smtp down");
-        }));
+        assertThrows(
+                RuntimeException.class,
+                () ->
+                        run(
+                                retry,
+                                calls,
+                                new ArrayList<>(),
+                                new ArrayList<>(),
+                                () -> {
+                                    throw new RuntimeException("smtp down");
+                                }));
 
         assertEquals(1, calls.get(), "a duplicated send is worse than a failure");
     }
@@ -254,21 +340,38 @@ class NodeErrorStrategyTest {
         NodeErrorStrategy.Retry retry = retryOf("bulk_email", config);
         AtomicInteger calls = new AtomicInteger();
 
-        assertThrows(RuntimeException.class, () -> run(retry, calls, new ArrayList<>(), new ArrayList<>(), () -> {
-            throw new RuntimeException("smtp down");
-        }));
+        assertThrows(
+                RuntimeException.class,
+                () ->
+                        run(
+                                retry,
+                                calls,
+                                new ArrayList<>(),
+                                new ArrayList<>(),
+                                () -> {
+                                    throw new RuntimeException("smtp down");
+                                }));
 
         assertEquals(3, calls.get());
     }
 
     @Test
     void transientOnlyStopsImmediatelyOnADeterministicFailure() {
-        NodeErrorStrategy.Retry retry = retryOf("agent", Map.of("retry", retry(5, 0, null, "transient")));
+        NodeErrorStrategy.Retry retry =
+                retryOf("agent", Map.of("retry", retry(5, 0, null, "transient")));
         AtomicInteger calls = new AtomicInteger();
 
-        assertThrows(RuntimeException.class, () -> run(retry, calls, new ArrayList<>(), new ArrayList<>(), () -> {
-            throw new IllegalArgumentException("agentId is invalid");
-        }));
+        assertThrows(
+                RuntimeException.class,
+                () ->
+                        run(
+                                retry,
+                                calls,
+                                new ArrayList<>(),
+                                new ArrayList<>(),
+                                () -> {
+                                    throw new IllegalArgumentException("agentId is invalid");
+                                }));
 
         assertEquals(1, calls.get());
     }
@@ -278,25 +381,42 @@ class NodeErrorStrategyTest {
         NodeErrorStrategy.Retry retry = retryOf("agent", Map.of("retry", retry(5, 0, null, "all")));
         AtomicInteger calls = new AtomicInteger();
 
-        assertThrows(TenantLimitExceededException.class, () -> run(retry, calls, new ArrayList<>(), new ArrayList<>(), () -> {
-            throw new TenantLimitExceededException("over quota");
-        }));
+        assertThrows(
+                TenantLimitExceededException.class,
+                () ->
+                        run(
+                                retry,
+                                calls,
+                                new ArrayList<>(),
+                                new ArrayList<>(),
+                                () -> {
+                                    throw new TenantLimitExceededException("over quota");
+                                }));
 
         assertEquals(1, calls.get());
     }
 
     @Test
     void anInterruptedBackoffStopsRetryingAndKeepsTheInterruptFlag() {
-        NodeErrorStrategy.Retry retry = retryOf("agent", Map.of("retry", retry(5, 500, null, null)));
+        NodeErrorStrategy.Retry retry =
+                retryOf("agent", Map.of("retry", retry(5, 500, null, null)));
         AtomicInteger calls = new AtomicInteger();
 
         try {
-            assertThrows(RuntimeException.class, () -> NodeErrorStrategy.runWithRetry(retry, () -> {
-                calls.incrementAndGet();
-                throw new RuntimeException("x");
-            }, millis -> {
-                throw new InterruptedException("stop");
-            }, Instant::now, new ArrayList<>()));
+            assertThrows(
+                    RuntimeException.class,
+                    () ->
+                            NodeErrorStrategy.runWithRetry(
+                                    retry,
+                                    () -> {
+                                        calls.incrementAndGet();
+                                        throw new RuntimeException("x");
+                                    },
+                                    millis -> {
+                                        throw new InterruptedException("stop");
+                                    },
+                                    Instant::now,
+                                    new ArrayList<>()));
             assertEquals(1, calls.get());
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
@@ -304,21 +424,29 @@ class NodeErrorStrategyTest {
         }
     }
 
-    // ---- trace entries & continue output ------------------------------------------------------------------------
+    // ---- trace entries & continue output
+    // ------------------------------------------------------------------------
 
     @Test
     void everyRetriedAttemptBecomesAnErrorTraceEntry() {
-        NodeErrorStrategy.Retry retry = retryOf("agent", Map.of("retry", retry(3, 100, null, null)));
+        NodeErrorStrategy.Retry retry =
+                retryOf("agent", Map.of("retry", retry(3, 100, null, null)));
         AtomicInteger calls = new AtomicInteger();
         List<NodeErrorStrategy.Attempt> failed = new ArrayList<>();
-        run(retry, calls, failed, new ArrayList<>(), () -> {
-            if (calls.get() < 3) {
-                throw new RuntimeException("boom");
-            }
-            return "ok";
-        });
+        run(
+                retry,
+                calls,
+                failed,
+                new ArrayList<>(),
+                () -> {
+                    if (calls.get() < 3) {
+                        throw new RuntimeException("boom");
+                    }
+                    return "ok";
+                });
 
-        List<NodeTraceEntry> entries = NodeErrorStrategy.attemptEntries(node("agent", Map.of()), failed, retry, false);
+        List<NodeTraceEntry> entries =
+                NodeErrorStrategy.attemptEntries(node("agent", Map.of()), failed, retry, false);
 
         assertEquals(2, entries.size());
         assertEquals("ERROR", entries.get(0).status());
@@ -341,14 +469,23 @@ class NodeErrorStrategyTest {
 
     @Test
     void continueOutputIsTheErrorAndNodeIdObject() throws Exception {
-        String json = NodeErrorStrategy.continueOutput(new ObjectMapper(), node("agent", Map.of()), "it broke");
-        JsonNode parsed = new ObjectMapper().readTree(json);
-        assertEquals("it broke", parsed.get("error").asText());
-        assertEquals("n1", parsed.get("nodeId").asText());
+        String json =
+                NodeErrorStrategy.continueOutput(
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        node("agent", Map.of()),
+                        "it broke");
+        JsonNode parsed = com.agenticai.core.json.JsonMappers.plain().readTree(json);
+        assertEquals("it broke", parsed.get("error").asString());
+        assertEquals("n1", parsed.get("nodeId").asString());
         assertEquals(2, parsed.size());
 
-        JsonNode blank = new ObjectMapper().readTree(
-            NodeErrorStrategy.continueOutput(new ObjectMapper(), node("agent", Map.of()), " "));
-        assertEquals("Node failed.", blank.get("error").asText());
+        JsonNode blank =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(
+                                NodeErrorStrategy.continueOutput(
+                                        com.agenticai.core.json.JsonMappers.plain(),
+                                        node("agent", Map.of()),
+                                        " "));
+        assertEquals("Node failed.", blank.get("error").asString());
     }
 }

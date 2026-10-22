@@ -17,7 +17,6 @@ import com.agenticai.core.chat.gateway.GovernanceDegradationSignal;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.telegram.TelegramCredentialService;
 import com.agenticai.core.omnichannel.telegram.TelegramTenantBotToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -62,7 +61,7 @@ class TelegramOutputServiceTest {
                 new TelegramOutputService(
                         "platform-token",
                         List.of(new TelegramTenantBotToken(credentialService)),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         guard,
                         httpClient);
     }

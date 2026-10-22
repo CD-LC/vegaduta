@@ -29,12 +29,6 @@ import com.agenticai.core.workflow.portability.PortabilityDtos.PlaceholderView;
 import com.agenticai.core.workflow.portability.PortabilityDtos.PreviewResponse;
 import com.agenticai.core.workflow.portability.PortabilityDtos.UseView;
 import com.agenticai.core.workflow.portability.PortabilityDtos.WorkflowView;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +50,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Workflow portability: export a saved workflow as the VegaDuta workflow DSL (JSON), and import a
@@ -179,7 +179,8 @@ public class WorkflowPortabilityService {
         TenantLimits limits = tenantLimits == null ? null : tenantLimits.getIfAvailable();
         if (tenantId != null && limits != null && !limits.workflowExportAllowed(tenantId)) {
             throw new TenantLimitExceededException(
-                    "Your plan does not include workflow export - upgrade your plan to export workflows.");
+                    "Your plan does not include workflow export - upgrade your plan to export"
+                            + " workflows.");
         }
         WorkflowDefinition definition = workflowService.requireViewerAccess(workflowId);
         WorkflowDslExporter.Settings settings =
@@ -301,7 +302,7 @@ public class WorkflowPortabilityService {
         JsonNode envelope;
         try {
             envelope = envelopeMapper.readTree(body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // Not echoing the parser message: it can quote a fragment of the payload.
             throw new IllegalArgumentException(
                     "The request body is not valid JSON, or is nested more than "
@@ -312,13 +313,13 @@ public class WorkflowPortabilityService {
             throw new IllegalArgumentException("The request body must be a JSON object.");
         }
         JsonNode sourceNode = envelope.get("source");
-        if (sourceNode != null && !sourceNode.isNull() && !sourceNode.isTextual()) {
+        if (sourceNode != null && !sourceNode.isNull() && !sourceNode.isString()) {
             throw new IllegalArgumentException("\"source\" must be a string.");
         }
         String requestedSource =
-                sourceNode == null || sourceNode.isNull() || sourceNode.asText().isBlank()
+                sourceNode == null || sourceNode.isNull() || sourceNode.asString().isBlank()
                         ? PortabilityFormat.AUTO
-                        : sourceNode.asText();
+                        : sourceNode.asString();
 
         PortabilityDocumentParser.Parsed parsed =
                 parser.parse(payloadText(envelope.get("payload")));
@@ -360,8 +361,8 @@ public class WorkflowPortabilityService {
             throw new IllegalArgumentException("\"payload\" is required.");
         }
         String text;
-        if (payload.isTextual()) {
-            text = payload.asText();
+        if (payload.isString()) {
+            text = payload.asString();
         } else if (payload.isObject() || payload.isArray()) {
             text = payload.toString();
         } else {
@@ -380,14 +381,16 @@ public class WorkflowPortabilityService {
             return detected.orElseThrow(
                     () ->
                             new IllegalArgumentException(
-                                    "Couldn't tell which format this file is. Choose a source: vegaduta, n8n or dify."));
+                                    "Couldn't tell which format this file is. Choose a source:"
+                                            + " vegaduta, n8n or dify."));
         }
         PortabilityFormat chosen =
                 PortabilityFormat.parse(requested)
                         .orElseThrow(
                                 () ->
                                         new IllegalArgumentException(
-                                                "Unknown source. Use one of: vegaduta, n8n, dify, auto."));
+                                                "Unknown source. Use one of: vegaduta, n8n, dify,"
+                                                        + " auto."));
         if (detected.isPresent() && detected.get() != chosen) {
             throw new IllegalArgumentException(
                     "The file looks like a "
@@ -438,7 +441,7 @@ public class WorkflowPortabilityService {
         if (node.size() > MAX_MAPPINGS) {
             throw new IllegalArgumentException("Too many mappings (limit " + MAX_MAPPINGS + ").");
         }
-        Iterator<Map.Entry<String, JsonNode>> it = node.fields();
+        Iterator<Map.Entry<String, JsonNode>> it = node.properties().iterator();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> entry = it.next();
             String key = entry.getKey();
@@ -549,8 +552,8 @@ public class WorkflowPortabilityService {
                             "Choose a " + kindName(kind) + " for '" + label + "'",
                             "The "
                                     + kindName(kind)
-                                    + " this step used lives in another workspace or platform and cannot "
-                                    + "be carried over, so the field was left empty.",
+                                    + " this step used lives in another workspace or platform and"
+                                    + " cannot be carried over, so the field was left empty.",
                             "Pick one on the node (placeholder " + entry.key() + ").");
                 }
             } else if (PlaceholderRegistry.DESTINATION.equals(kind)
@@ -562,9 +565,10 @@ public class WorkflowPortabilityService {
             } else if (entry.key().startsWith("CREDENTIAL_")) {
                 wf.report.needsManual(
                         "Credential marker " + entry.key(),
-                        "A credential-looking value was replaced by this marker; it is never kept in a file.",
-                        "Replace the marker with a {{secret.NAME}} vault reference (or the real value in the node, "
-                                + "if you accept that) before activating.");
+                        "A credential-looking value was replaced by this marker; it is never kept"
+                                + " in a file.",
+                        "Replace the marker with a {{secret.NAME}} vault reference (or the real"
+                                + " value in the node, if you accept that) before activating.");
             } else if (PlaceholderRegistry.SECRET.equals(kind) && hasNodeUse(entry)) {
                 wf.report.needsManual(
                         "Vault secret '" + label + "'",
@@ -608,7 +612,8 @@ public class WorkflowPortabilityService {
                 wf.report.needsManual(
                         "Expression in node '" + AgentImportText.inline(node.label(), 80) + "'",
                         String.join(" ", problems.subList(0, Math.min(3, problems.size()))),
-                        "Open the node and rewrite the expression in VegaDuta's expression language.");
+                        "Open the node and rewrite the expression in VegaDuta's expression"
+                                + " language.");
             }
         }
     }
@@ -694,7 +699,8 @@ public class WorkflowPortabilityService {
                     "Workflow import validation could not complete: {}",
                     e.getClass().getSimpleName());
             issues.add(
-                    "Validation could not be completed just now; validate the draft from the canvas.");
+                    "Validation could not be completed just now; validate the draft from the"
+                            + " canvas.");
         }
         return issues;
     }
@@ -727,7 +733,8 @@ public class WorkflowPortabilityService {
                     workflowId,
                     e.getClass().getSimpleName());
             p.wf.report.warn(
-                    "The execution limits in the file could not be applied; the workflow keeps the defaults.");
+                    "The execution limits in the file could not be applied; the workflow keeps the"
+                            + " defaults.");
         }
     }
 
@@ -798,7 +805,7 @@ public class WorkflowPortabilityService {
 
     private ResponseStatusException tooLarge() {
         return new ResponseStatusException(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 "The file is larger than the import limit of " + maxPayloadBytes + " bytes.");
     }
 

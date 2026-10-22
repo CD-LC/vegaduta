@@ -3,10 +3,6 @@ package com.agenticai.core.apidocs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +16,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Provider side of the consumer-driven contracts (ADR-0025): every interaction in {@code
@@ -99,21 +98,21 @@ class ConsumerContractVerificationTest {
                 JsonNode doc;
                 try {
                     doc = ApiContractRepoSupport.MAPPER.readTree(file.toFile());
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     result.failures.add(where + ": not valid JSON (" + e.getMessage() + ")");
                     continue;
                 }
-                if (!consumer.equals(doc.path("consumer").asText())) {
+                if (!consumer.equals(doc.path("consumer").asString())) {
                     result.failures.add(
                             where + ": \"consumer\" must be \"" + consumer + "\" (the directory)");
                 }
-                if (!"core".equals(doc.path("provider").asText())) {
+                if (!"core".equals(doc.path("provider").asString())) {
                     result.failures.add(where + ": \"provider\" must be \"core\"");
                 }
                 for (JsonNode it : doc.path("interactions")) {
                     result.interactions++;
                     result.perConsumer.merge(consumer, 1, Integer::sum);
-                    String id = it.path("id").asText("");
+                    String id = it.path("id").asString("");
                     if (id.isBlank()) {
                         result.failures.add(where + ": an interaction has no id");
                     } else if (!ids.add(id)) {
@@ -134,8 +133,8 @@ class ConsumerContractVerificationTest {
             String id,
             JsonNode it,
             Result result) {
-        String method = it.path("method").asText("").toUpperCase(Locale.ROOT);
-        String path = it.path("path").asText("");
+        String method = it.path("method").asString("").toUpperCase(Locale.ROOT);
+        String path = it.path("path").asString("");
         String label = where + " [" + id + "] " + method + " " + path;
         if (!VERBS.contains(method) || !path.startsWith("/")) {
             result.failures.add(label + ": needs an HTTP method and a path starting with /");
@@ -153,7 +152,7 @@ class ConsumerContractVerificationTest {
             result.failures.add(label + ": no such operation in the provider's OpenAPI document");
             return;
         }
-        String status = it.path("status").asText("");
+        String status = it.path("status").asString("");
         JsonNode response = op.path("responses").path(status);
         if (status.isEmpty() || response.isMissingNode()) {
             result.failures.add(label + ": status " + status + " is not declared by the provider");
@@ -179,7 +178,7 @@ class ConsumerContractVerificationTest {
             String side,
             Result result) {
         for (JsonNode f : required) {
-            String field = f.asText();
+            String field = f.asString();
             if (body == null) {
                 result.failures.add(
                         label + ": " + side + " field " + field + " but no " + side + " body");
@@ -200,7 +199,7 @@ class ConsumerContractVerificationTest {
     /** Normalised template ({@code {anything}} to {@code {}}) to the document's path keys. */
     static Map<String, List<String>> indexPaths(JsonNode spec) {
         Map<String, List<String>> index = new HashMap<>();
-        for (Iterator<String> it = spec.path("paths").fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = spec.path("paths").propertyNames().iterator(); it.hasNext(); ) {
             String p = it.next();
             index.computeIfAbsent(normalize(p), k -> new ArrayList<>()).add(p);
         }

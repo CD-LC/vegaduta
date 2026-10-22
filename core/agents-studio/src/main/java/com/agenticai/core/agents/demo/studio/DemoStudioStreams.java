@@ -4,8 +4,6 @@ import com.agenticai.core.agents.demo.studio.DemoStudioController.RunView;
 import com.agenticai.core.agents.demo.studio.DemoStudioService.StudioException;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.tenancy.demo.DemoSession;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The wire half of {@link DemoStudioController}'s streams: turns mission chunks and workflow run
@@ -160,7 +160,7 @@ final class DemoStudioStreams {
         Object trace;
         try {
             trace = objectMapper.readValue(r.getTraceJson(), Object.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             trace = List.of();
         }
         return new RunView(
@@ -176,7 +176,7 @@ final class DemoStudioStreams {
     String json(Map<String, ?> event) {
         try {
             return objectMapper.writeValueAsString(event);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{\"type\":\"error\",\"message\":\"unserialisable event\"}";
         }
     }

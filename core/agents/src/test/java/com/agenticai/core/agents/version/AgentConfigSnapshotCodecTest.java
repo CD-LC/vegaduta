@@ -16,28 +16,26 @@ import com.agenticai.core.providers.modality.TtsModelProvider;
 import com.agenticai.core.providers.modality.VideoModelProvider;
 import com.agenticai.core.providers.modality.VoiceModelProvider;
 import com.agenticai.core.security.ExperienceMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Covers {@link AgentConfigSnapshotCodec} - the class that decides what an
- * agent's configuration IS, and therefore the one place a bug in this feature
- * would be invisible until someone actually tried to roll back.
+ * Covers {@link AgentConfigSnapshotCodec} - the class that decides what an agent's configuration
+ * IS, and therefore the one place a bug in this feature would be invisible until someone actually
+ * tried to roll back.
  *
- * <p>Plain JUnit 5 with real objects and a real {@link ObjectMapper}: no Spring
- * context, no database, no mocks. Every collaborator here is a POJO, and the
- * behaviour under test is entirely about field-by-field fidelity - the exact
- * thing a mock would hide.
+ * <p>Plain JUnit 5 with real objects and a real {@link ObjectMapper}: no Spring context, no
+ * database, no mocks. Every collaborator here is a POJO, and the behaviour under test is entirely
+ * about field-by-field fidelity - the exact thing a mock would hide.
  *
- * <p>The load-bearing test is {@link #captureThenApplyRoundTripsEveryRestorableField}:
- * it sets every restorable field to a NON-DEFAULT value on one agent, round-trips
- * through JSON, and asserts the values landed on a second agent that started from
- * different defaults. A field forgotten in {@code capture} or in {@code apply}
- * fails it, which is the regression guard for the "Agent grew a 42nd field and
- * nobody told the codec" case that this whole item exists to prevent.
+ * <p>The load-bearing test is {@link #captureThenApplyRoundTripsEveryRestorableField}: it sets
+ * every restorable field to a NON-DEFAULT value on one agent, round-trips through JSON, and asserts
+ * the values landed on a second agent that started from different defaults. A field forgotten in
+ * {@code capture} or in {@code apply} fails it, which is the regression guard for the "Agent grew a
+ * 42nd field and nobody told the codec" case that this whole item exists to prevent.
  */
 class AgentConfigSnapshotCodecTest {
 
@@ -45,24 +43,24 @@ class AgentConfigSnapshotCodecTest {
 
     @BeforeEach
     void setUp() {
-        codec = new AgentConfigSnapshotCodec(new ObjectMapper());
+        codec = new AgentConfigSnapshotCodec(com.agenticai.core.json.JsonMappers.plain());
     }
 
     /** An agent with every restorable field deliberately away from its default. */
     private Agent fullyConfiguredSource() {
-        Agent agent = new Agent(
-            "Source agent",
-            "You are a source.",
-            ProviderName.ANTHROPIC,
-            "claude-opus-4-8",
-            4096,
-            0.31,
-            0.77,
-            true,
-            ExperienceMode.ADVANCED,
-            ReasoningDepth.RIGOROUS,
-            TuningMode.SIMPLE
-        );
+        Agent agent =
+                new Agent(
+                        "Source agent",
+                        "You are a source.",
+                        ProviderName.ANTHROPIC,
+                        "claude-opus-4-8",
+                        4096,
+                        0.31,
+                        0.77,
+                        true,
+                        ExperienceMode.ADVANCED,
+                        ReasoningDepth.RIGOROUS,
+                        TuningMode.SIMPLE);
         agent.setFallbackProvider(ProviderName.OPENAI, "gpt-4o");
         agent.setAutonomyTier(AgentAutonomyTier.SUPERVISED);
         agent.setEdgeRoutingPolicy(EdgeRoutingPolicy.EDGE_FIRST);
@@ -91,18 +89,17 @@ class AgentConfigSnapshotCodecTest {
     /** A different agent, at defaults, to restore ONTO - so an unwritten field is visible. */
     private Agent bareTarget() {
         return new Agent(
-            "Target agent",
-            "You are a target.",
-            ProviderName.GROK,
-            "grok-4.5",
-            256,
-            0.9,
-            1.0,
-            false,
-            ExperienceMode.SIMPLE,
-            ReasoningDepth.FAST,
-            TuningMode.MANUAL
-        );
+                "Target agent",
+                "You are a target.",
+                ProviderName.GROK,
+                "grok-4.5",
+                256,
+                0.9,
+                1.0,
+                false,
+                ExperienceMode.SIMPLE,
+                ReasoningDepth.FAST,
+                TuningMode.MANUAL);
     }
 
     @Test
@@ -133,7 +130,9 @@ class AgentConfigSnapshotCodecTest {
         assertEquals(source.isKnowledgeWriteEnabled(), target.isKnowledgeWriteEnabled());
         assertEquals(source.isShareMemoryWithTenant(), target.isShareMemoryWithTenant());
         assertEquals(source.isResponseCachingEnabled(), target.isResponseCachingEnabled());
-        assertEquals(source.isSemanticResponseCachingEnabled(), target.isSemanticResponseCachingEnabled());
+        assertEquals(
+                source.isSemanticResponseCachingEnabled(),
+                target.isSemanticResponseCachingEnabled());
         assertEquals(source.isCostRoutingEnabled(), target.isCostRoutingEnabled());
         assertEquals(source.getEconomyProviderName(), target.getEconomyProviderName());
         assertEquals(source.getEconomyModel(), target.getEconomyModel());
@@ -147,12 +146,13 @@ class AgentConfigSnapshotCodecTest {
         assertEquals(source.getTtsModel(), target.getTtsModel());
         assertEquals(source.getResultSchemaJson(), target.getResultSchemaJson());
         assertEquals(source.getAllowedToolNames(), target.getAllowedToolNames());
-        assertEquals(source.getAllowedKnowledgeCollectionIds(), target.getAllowedKnowledgeCollectionIds());
+        assertEquals(
+                source.getAllowedKnowledgeCollectionIds(),
+                target.getAllowedKnowledgeCollectionIds());
         assertEquals(source.getAllowedCodeIntelRepoIds(), target.getAllowedCodeIntelRepoIds());
         assertEquals(
-            source.getAllowedKnowledgeWriteCollectionIds(),
-            target.getAllowedKnowledgeWriteCollectionIds()
-        );
+                source.getAllowedKnowledgeWriteCollectionIds(),
+                target.getAllowedKnowledgeWriteCollectionIds());
         assertEquals(source.getCollaboratorAgentIds(), target.getCollaboratorAgentIds());
         assertEquals(source.getEnabledGuardrails(), target.getEnabledGuardrails());
 
@@ -237,23 +237,60 @@ class AgentConfigSnapshotCodecTest {
         // must NOT be read as "the tenant had an empty set" - for four of the six
         // collections empty means unrestricted and for two it means deny-all, so
         // guessing is wrong in both directions. Leave the live value, say so.
-        AgentConfigSnapshot sparse = new AgentConfigSnapshot(
-            AgentConfigSnapshot.CURRENT_FORMAT_VERSION,
-            "Old snapshot", "prompt", ProviderName.ANTHROPIC, "claude-opus-4-8",
-            1024, 0.5, 1.0,
-            null, null,
-            AgentAutonomyTier.SEMI_AUTONOMOUS, TuningMode.MANUAL, ReasoningDepth.FAST, null, null,
-            true, false, false, false, false, false, false, false, false,
-            false, null, null, null,
-            null, null, null, null, null, null, null, null,
-            null,
-            // Every collection absent - the shape of a pre-versioning document.
-            null, null, null, null, null, null,
-            // xaiServerToolsEnabled absent too - same "predates the field" shape.
-            null,
-            // sampling group absent too.
-            null, null, null, null, null
-        );
+        AgentConfigSnapshot sparse =
+                new AgentConfigSnapshot(
+                        AgentConfigSnapshot.CURRENT_FORMAT_VERSION,
+                        "Old snapshot",
+                        "prompt",
+                        ProviderName.ANTHROPIC,
+                        "claude-opus-4-8",
+                        1024,
+                        0.5,
+                        1.0,
+                        null,
+                        null,
+                        AgentAutonomyTier.SEMI_AUTONOMOUS,
+                        TuningMode.MANUAL,
+                        ReasoningDepth.FAST,
+                        null,
+                        null,
+                        true,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        // Every collection absent - the shape of a pre-versioning document.
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        // xaiServerToolsEnabled absent too - same "predates the field" shape.
+                        null,
+                        // sampling group absent too.
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         Agent target = bareTarget();
         target.setAllowedToolNames(Set.of("keep-me"));
@@ -284,7 +321,7 @@ class AgentConfigSnapshotCodecTest {
         assertFalse(target.isBiometricConsentEnabled());
 
         AgentConfigSnapshotCodec.RestoreOutcome outcome =
-            codec.apply(codec.fromJson(codec.toJson(codec.capture(source))), target);
+                codec.apply(codec.fromJson(codec.toJson(codec.capture(source))), target);
 
         assertFalse(target.isBiometricConsentEnabled());
         assertTrue(outcome.skippedFields().contains("biometricConsentEnabled"));
@@ -302,7 +339,7 @@ class AgentConfigSnapshotCodecTest {
         target.setBiometricConsentEnabled(true);
 
         AgentConfigSnapshotCodec.RestoreOutcome outcome =
-            codec.apply(codec.fromJson(codec.toJson(codec.capture(source))), target);
+                codec.apply(codec.fromJson(codec.toJson(codec.capture(source))), target);
 
         assertFalse(target.isBiometricConsentEnabled());
         assertFalse(outcome.skippedFields().contains("biometricConsentEnabled"));
@@ -360,8 +397,9 @@ class AgentConfigSnapshotCodecTest {
         // Forward compatibility during a rolling deploy: a newer node writes a
         // document with a field this build has never heard of, and an older node
         // must still be able to read and restore it rather than 500.
-        String forwardCompatible = "{\"formatVersion\":1,\"name\":\"x\",\"systemPrompt\":\"p\","
-            + "\"providerName\":\"ANTHROPIC\",\"model\":\"m\",\"somethingFromTheFuture\":true}";
+        String forwardCompatible =
+                "{\"formatVersion\":1,\"name\":\"x\",\"systemPrompt\":\"p\","
+                        + "\"providerName\":\"ANTHROPIC\",\"model\":\"m\",\"somethingFromTheFuture\":true}";
 
         AgentConfigSnapshot decoded = codec.fromJson(forwardCompatible);
 

@@ -1,16 +1,16 @@
 package com.agenticai.core.chat.structured;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A small, forgiving JSON Schema check for the prompt-and-validate fallback ({@code
  * OllamaStructuredFallbackChatModel}): is a model's reply the shape the caller's schema describes?
- * Supports {@code type} (one name or a list), {@code enum}, {@code const}, {@code required},
- * {@code properties}, {@code items}, {@code anyOf}/{@code oneOf}/{@code allOf} and {@code
+ * Supports {@code type} (one name or a list), {@code enum}, {@code const}, {@code required}, {@code
+ * properties}, {@code items}, {@code anyOf}/{@code oneOf}/{@code allOf} and {@code
  * additionalProperties: false}. Anything else (formats, patterns, numeric bounds, remote or local
  * {@code $ref}) is ignored, so a schema feature this does not know can only make the check more
  * lenient, never reject a reply the real schema would accept.
@@ -34,8 +34,12 @@ public final class JsonSchemaCheck {
         return out;
     }
 
-    private static void check(JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
-        if (out.size() >= MAX_PROBLEMS || depth > MAX_DEPTH || schema == null || !schema.isObject()) {
+    private static void check(
+            JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
+        if (out.size() >= MAX_PROBLEMS
+                || depth > MAX_DEPTH
+                || schema == null
+                || !schema.isObject()) {
             return;
         }
         if (schema.has("anyOf") || schema.has("oneOf")) {
@@ -65,7 +69,9 @@ public final class JsonSchemaCheck {
             out.add(path + " must be " + describe(schema.get("type")) + " but is " + kind(value));
             return;
         }
-        if (schema.has("enum") && schema.get("enum").isArray() && !contains(schema.get("enum"), value)) {
+        if (schema.has("enum")
+                && schema.get("enum").isArray()
+                && !contains(schema.get("enum"), value)) {
             out.add(path + " must be one of " + schema.get("enum"));
             return;
         }
@@ -82,27 +88,33 @@ public final class JsonSchemaCheck {
         }
     }
 
-    private static void checkObject(JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
+    private static void checkObject(
+            JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
         JsonNode required = schema.get("required");
         if (required != null && required.isArray()) {
             for (JsonNode name : required) {
-                if (!value.has(name.asText())) {
-                    out.add(path + "." + name.asText() + " is required");
+                if (!value.has(name.asString())) {
+                    out.add(path + "." + name.asString() + " is required");
                 }
             }
         }
         JsonNode properties = schema.get("properties");
         if (properties != null && properties.isObject()) {
-            Iterator<Map.Entry<String, JsonNode>> fields = properties.fields();
+            Iterator<Map.Entry<String, JsonNode>> fields = properties.properties().iterator();
             while (fields.hasNext() && out.size() < MAX_PROBLEMS) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 if (value.has(field.getKey())) {
-                    check(field.getValue(), value.get(field.getKey()), path + "." + field.getKey(), out, depth + 1);
+                    check(
+                            field.getValue(),
+                            value.get(field.getKey()),
+                            path + "." + field.getKey(),
+                            out,
+                            depth + 1);
                 }
             }
             JsonNode additional = schema.get("additionalProperties");
             if (additional != null && additional.isBoolean() && !additional.asBoolean()) {
-                Iterator<String> names = value.fieldNames();
+                Iterator<String> names = value.propertyNames().iterator();
                 while (names.hasNext()) {
                     String name = names.next();
                     if (!properties.has(name) && out.size() < MAX_PROBLEMS) {
@@ -125,13 +137,16 @@ public final class JsonSchemaCheck {
             }
             return false;
         }
-        return switch (type.asText()) {
+        return switch (type.asString()) {
             case "object" -> value.isObject();
             case "array" -> value.isArray();
-            case "string" -> value.isTextual();
+            case "string" -> value.isString();
             case "boolean" -> value.isBoolean();
             case "null" -> value.isNull();
-            case "integer" -> value.isIntegralNumber() || (value.isNumber() && value.asDouble() == Math.rint(value.asDouble()));
+            case "integer" ->
+                    value.isIntegralNumber()
+                            || (value.isNumber()
+                                    && value.asDouble() == Math.rint(value.asDouble()));
             case "number" -> value.isNumber();
             default -> true;
         };
@@ -147,7 +162,7 @@ public final class JsonSchemaCheck {
     }
 
     private static String describe(JsonNode type) {
-        return type.isArray() ? "one of " + type : type.asText();
+        return type.isArray() ? "one of " + type : type.asString();
     }
 
     private static String kind(JsonNode value) {
@@ -157,7 +172,7 @@ public final class JsonSchemaCheck {
         if (value.isArray()) {
             return "an array";
         }
-        if (value.isTextual()) {
+        if (value.isString()) {
             return "a string";
         }
         if (value.isBoolean()) {

@@ -4,7 +4,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pulls WhatsApp messages from the operator's whatsapp-qr bridge. Linked-device WhatsApp has no
@@ -53,8 +53,10 @@ public class WhatsAppQrReceiveService {
     private static final long MAX_BACKOFF_SECONDS = 60;
     private static final long MIN_POLL_INTERVAL_MS = 1_000;
     private static final int PROBLEM_AFTER_FAILURES = 3;
+
     /** After the first few failures a steady one-WARN-per-minute loop is noise; log every Nth. */
     private static final int QUIET_LOG_EVERY = 30;
+
     static final String NOT_CONFIGURED =
             "WhatsApp bridge not configured: set APP_WHATSAPPQR_BRIDGE_URL and"
                     + " APP_WHATSAPPQR_BRIDGE_SECRET, then restart core";
@@ -120,8 +122,11 @@ public class WhatsAppQrReceiveService {
                     Receiver receiver = new Receiver(sessionKey, tenantSchema);
                     receiver.thread =
                             TenantAwareExecutors.startVirtualThread(
-                                    "whatsapp-qr-receive-" + sessionKey.substring(0, 8), receiver::run);
-                    log.info("WhatsApp QR receiving started for session {}", sessionKey.substring(0, 8));
+                                    "whatsapp-qr-receive-" + sessionKey.substring(0, 8),
+                                    receiver::run);
+                    log.info(
+                            "WhatsApp QR receiving started for session {}",
+                            sessionKey.substring(0, 8));
                     return receiver;
                 });
     }
@@ -150,6 +155,7 @@ public class WhatsAppQrReceiveService {
         private final String tenantSchema;
         private final AtomicBoolean stopped = new AtomicBoolean();
         private volatile Thread thread;
+
         /** Consecutive failures; a poll that answered resets it. */
         private int failures;
 
@@ -173,10 +179,15 @@ public class WhatsAppQrReceiveService {
         void run() {
             while (!stopped.get()) {
                 TenantContext.set(
-                        TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + sessionKey.substring(0, 8), Set.of()));
+                        TenantContext.of(
+                                tenantSchema,
+                                REQUESTED_BY_PREFIX + sessionKey.substring(0, 8),
+                                Set.of()));
                 try {
                     if (!connectionAlive()) {
-                        log.info("WhatsApp QR receiving stopped for session {}: connection is gone", sessionKey.substring(0, 8));
+                        log.info(
+                                "WhatsApp QR receiving stopped for session {}: connection is gone",
+                                sessionKey.substring(0, 8));
                         receivers.remove(sessionKey, this);
                         problems.remove(sessionKey);
                         return;
@@ -229,7 +240,9 @@ public class WhatsAppQrReceiveService {
             }
         }
 
-        /** The row must still exist and not be DISCONNECTED - the session's tenant-side identity. */
+        /**
+         * The row must still exist and not be DISCONNECTED - the session's tenant-side identity.
+         */
         private boolean connectionAlive() {
             Optional<WhatsAppQrConnection> row = connectionRepository.findBySessionKey(sessionKey);
             return row.isPresent() && row.get().getStatus() != WhatsAppQrStatus.DISCONNECTED;
@@ -260,15 +273,18 @@ public class WhatsAppQrReceiveService {
             return result;
         }
 
-        /** Bridge status -&gt; row transitions. @return true when the loop must end (logged out). */
+        /**
+         * Bridge status -&gt; row transitions. @return true when the loop must end (logged out).
+         */
         private boolean applyStatus(JsonNode result) {
             if (result == null) {
                 return false;
             }
-            String status = result.path("status").asText("");
+            String status = result.path("status").asString("");
             switch (status) {
-                case "CONNECTED" -> service.markConnected(
-                        sessionKey, result.path("phoneNumber").asText(null));
+                case "CONNECTED" ->
+                        service.markConnected(
+                                sessionKey, result.path("phoneNumber").asString(null));
                 case "LOGGED_OUT" -> {
                     service.markLoggedOut(sessionKey);
                     stopReceiving(sessionKey);
@@ -298,7 +314,9 @@ public class WhatsAppQrReceiveService {
                 sleep(SHED_BACKOFF_MS);
             }
             if (!stopped.get()) {
-                log.warn("Dropped a WhatsApp QR message for session {}: the inbound executor stayed full", sessionKey.substring(0, 8));
+                log.warn(
+                        "Dropped a WhatsApp QR message for session {}: the inbound executor stayed full",
+                        sessionKey.substring(0, 8));
             }
         }
 

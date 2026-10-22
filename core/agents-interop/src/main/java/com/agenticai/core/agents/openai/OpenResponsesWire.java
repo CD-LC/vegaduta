@@ -1,38 +1,43 @@
 package com.agenticai.core.agents.openai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Builds the Open Responses / OpenAI Responses JSON: the {@code response} object and the
- * streaming events. Pure (no Spring, no I/O) so the shapes are unit-testable against recorded
- * fixtures. One instance per response: it owns the event {@code sequence_number} counter.
+ * Builds the Open Responses / OpenAI Responses JSON: the {@code response} object and the streaming
+ * events. Pure (no Spring, no I/O) so the shapes are unit-testable against recorded fixtures. One
+ * instance per response: it owns the event {@code sequence_number} counter.
  *
  * <p>Shapes follow the OpenAI Responses API reference (the Open Responses spec derives from it):
  * https://platform.openai.com/docs/api-reference/responses/object and
  * https://platform.openai.com/docs/api-reference/responses-streaming, cross-checked against the
- * openai-python SDK models (https://github.com/openai/openai-python/tree/main/src/openai/types/responses)
- * and https://www.openresponses.org/specification. Every {@code response.*} event carries
- * {@code type} and a {@code sequence_number} that starts at 0 and increases by one; each is sent as
- * {@code event: <type>} + {@code data: <json>}, and the stream ends with {@code data: [DONE]}.
+ * openai-python SDK models
+ * (https://github.com/openai/openai-python/tree/main/src/openai/types/responses) and
+ * https://www.openresponses.org/specification. Every {@code response.*} event carries {@code type}
+ * and a {@code sequence_number} that starts at 0 and increases by one; each is sent as {@code
+ * event: <type>} + {@code data: <json>}, and the stream ends with {@code data: [DONE]}.
  *
  * <p>Event order for one text message: {@code response.created}, {@code response.in_progress},
- * {@code response.output_item.added}, {@code response.content_part.added}, N x
- * {@code response.output_text.delta}, {@code response.output_text.done},
- * {@code response.content_part.done}, {@code response.output_item.done}, {@code response.completed}.
- * A failure after the stream opened is {@code error} then {@code response.failed}.
+ * {@code response.output_item.added}, {@code response.content_part.added}, N x {@code
+ * response.output_text.delta}, {@code response.output_text.done}, {@code
+ * response.content_part.done}, {@code response.output_item.done}, {@code response.completed}. A
+ * failure after the stream opened is {@code error} then {@code response.failed}.
  */
 final class OpenResponsesWire {
 
     /** What a response echoes about its request and identity. */
     record Meta(
-        String responseId, String itemId, long createdAt, String model, String instructions, JsonNode metadata
-    ) {}
+            String responseId,
+            String itemId,
+            long createdAt,
+            String model,
+            String instructions,
+            JsonNode metadata) {}
 
     private final ObjectMapper mapper;
     private final Meta meta;
@@ -46,13 +51,17 @@ final class OpenResponsesWire {
     // ------------------------------------------------------------ response object
 
     /**
-     * The {@code response} object. {@code text == null} means no output item yet ({@code output: []}).
-     * {@code temperature}/{@code max_output_tokens} are reported as null because the agent owns its
-     * sampling and the request values are not applied.
+     * The {@code response} object. {@code text == null} means no output item yet ({@code output:
+     * []}). {@code temperature}/{@code max_output_tokens} are reported as null because the agent
+     * owns its sampling and the request values are not applied.
      */
     ObjectNode response(
-        String status, String text, Long inputTokens, Long outputTokens, Long completedAt, OpenAiCompatErrors.Info error
-    ) {
+            String status,
+            String text,
+            Long inputTokens,
+            Long outputTokens,
+            Long completedAt,
+            OpenAiCompatErrors.Info error) {
         ObjectNode r = mapper.createObjectNode();
         r.put("id", meta.responseId());
         r.put("object", "response");
@@ -144,36 +153,52 @@ final class OpenResponsesWire {
      */
     Flux<ServerSentEvent<String>> events(Flux<String> tokens, long inputTokens) {
         StringBuilder text = new StringBuilder();
-        Flux<ServerSentEvent<String>> body = Flux.concat(
-            Flux.defer(() -> Flux.just(
-                frame(created()),
-                frame(inProgress()),
-                frame(outputItemAdded()),
-                frame(contentPartAdded()))),
-            tokens
-                .filter(t -> t != null && !t.isEmpty())
-                .doOnNext(text::append)
-                .map(t -> frame(textDelta(t))),
-            Flux.defer(() -> {
-                String full = text.toString();
-                return Flux.just(
-                    frame(textDone(full)),
-                    frame(contentPartDone(full)),
-                    frame(outputItemDone(full)),
-                    frame(completed(full, inputTokens, OpenAiCompatCalls.estimateTokens(full.length()),
-                        System.currentTimeMillis() / 1000L)));
-            })
-        ).onErrorResume(e -> {
-            // Headers are already committed by the time a mid-stream failure lands, so it rides
-            // in-band: an `error` event, then `response.failed` (never the raw exception text).
-            OpenAiCompatErrors.Info info = OpenAiCompatErrors.classify(e);
-            return Flux.just(frame(errorEvent(info)), frame(failed(info)));
-        });
+        Flux<ServerSentEvent<String>> body =
+                Flux.concat(
+                                Flux.defer(
+                                        () ->
+                                                Flux.just(
+                                                        frame(created()),
+                                                        frame(inProgress()),
+                                                        frame(outputItemAdded()),
+                                                        frame(contentPartAdded()))),
+                                tokens.filter(t -> t != null && !t.isEmpty())
+                                        .doOnNext(text::append)
+                                        .map(t -> frame(textDelta(t))),
+                                Flux.defer(
+                                        () -> {
+                                            String full = text.toString();
+                                            return Flux.just(
+                                                    frame(textDone(full)),
+                                                    frame(contentPartDone(full)),
+                                                    frame(outputItemDone(full)),
+                                                    frame(
+                                                            completed(
+                                                                    full,
+                                                                    inputTokens,
+                                                                    OpenAiCompatCalls
+                                                                            .estimateTokens(
+                                                                                    full.length()),
+                                                                    System.currentTimeMillis()
+                                                                            / 1000L)));
+                                        }))
+                        .onErrorResume(
+                                e -> {
+                                    // Headers are already committed by the time a mid-stream
+                                    // failure lands, so it rides
+                                    // in-band: an `error` event, then `response.failed` (never the
+                                    // raw exception text).
+                                    OpenAiCompatErrors.Info info = OpenAiCompatErrors.classify(e);
+                                    return Flux.just(frame(errorEvent(info)), frame(failed(info)));
+                                });
         return body.concatWith(Flux.just(ServerSentEvent.<String>builder().data("[DONE]").build()));
     }
 
     private ServerSentEvent<String> frame(ObjectNode event) {
-        return ServerSentEvent.<String>builder().event(event.get("type").asText()).data(event.toString()).build();
+        return ServerSentEvent.<String>builder()
+                .event(event.get("type").asString())
+                .data(event.toString())
+                .build();
     }
 
     private ObjectNode event(String type) {
@@ -249,7 +274,9 @@ final class OpenResponsesWire {
 
     ObjectNode completed(String text, long inputTokens, long outputTokens, long completedAt) {
         ObjectNode e = event("response.completed");
-        e.set("response", response("completed", text, inputTokens, outputTokens, completedAt, null));
+        e.set(
+                "response",
+                response("completed", text, inputTokens, outputTokens, completedAt, null));
         return e;
     }
 

@@ -6,15 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
- * Every data-node operation, including the edge cases (empty lists, nulls, mixed types, ties, hostile regexes).
- * This class covers paths, Set and Filter (with regex safety); Sort / Aggregate / Limit / Dedupe are in
- * {@link WorkflowDataOpsReshapeTest}, Switch / Merge and the number helpers in {@link WorkflowDataOpsRoutingTest}.
+ * Every data-node operation, including the edge cases (empty lists, nulls, mixed types, ties,
+ * hostile regexes). This class covers paths, Set and Filter (with regex safety); Sort / Aggregate /
+ * Limit / Dedupe are in {@link WorkflowDataOpsReshapeTest}, Switch / Merge and the number helpers
+ * in {@link WorkflowDataOpsRoutingTest}.
  */
 class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
@@ -47,66 +48,104 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
     @Test
     void setAutoTypingOnlyChangesUnambiguousLiterals() {
-        Outcome o = ops.set(m("assignments", List.of(
-            assign("n", "42", "auto"),
-            assign("b", "true", null),
-            assign("zip", "01234", null),
-            assign("o", "{\"k\":1}", null),
-            assign("nul", "null", null),
-            assign("s", "hello", null),
-            assign("f", "2.50", null))), "{}");
-        assertJson("{\"n\":42,\"b\":true,\"zip\":\"01234\",\"o\":{\"k\":1},\"nul\":null,\"s\":\"hello\",\"f\":2.5}", o.output());
+        Outcome o =
+                ops.set(
+                        m(
+                                "assignments",
+                                List.of(
+                                        assign("n", "42", "auto"),
+                                        assign("b", "true", null),
+                                        assign("zip", "01234", null),
+                                        assign("o", "{\"k\":1}", null),
+                                        assign("nul", "null", null),
+                                        assign("s", "hello", null),
+                                        assign("f", "2.50", null))),
+                        "{}");
+        assertJson(
+                "{\"n\":42,\"b\":true,\"zip\":\"01234\",\"o\":{\"k\":1},\"nul\":null,\"s\":\"hello\",\"f\":2.5}",
+                o.output());
     }
 
     @Test
     void setAutoKeepsIdentifierLikeNumbersAsText() {
-        Outcome o = ops.set(m("assignments", List.of(
-            assign("code", "1e3", null),
-            assign("card", "1234567890123456", null),
-            assign("phone", "9876543210", null))), "{}");
-        assertJson("{\"code\":\"1e3\",\"card\":\"1234567890123456\",\"phone\":9876543210}", o.output());
+        Outcome o =
+                ops.set(
+                        m(
+                                "assignments",
+                                List.of(
+                                        assign("code", "1e3", null),
+                                        assign("card", "1234567890123456", null),
+                                        assign("phone", "9876543210", null))),
+                        "{}");
+        assertJson(
+                "{\"code\":\"1e3\",\"card\":\"1234567890123456\",\"phone\":9876543210}",
+                o.output());
         Outcome forced = ops.set(m("assignments", List.of(assign("code", "1e3", "number"))), "{}");
         assertJson("{\"code\":1000}", forced.output());
     }
 
     @Test
     void setExplicitTypesAndTypeErrors() {
-        Outcome o = ops.set(m("assignments", List.of(
-            assign("num", "3.50", "number"),
-            assign("str", "42", "string"),
-            assign("flag", "FALSE", "boolean"),
-            assign("arr", "[1,2]", "json"),
-            assign("nothing", "ignored", "null"),
-            assign("blankNum", "", "number"))), "{}");
-        assertJson("{\"num\":3.5,\"str\":\"42\",\"flag\":false,\"arr\":[1,2],\"nothing\":null,\"blankNum\":null}", o.output());
+        Outcome o =
+                ops.set(
+                        m(
+                                "assignments",
+                                List.of(
+                                        assign("num", "3.50", "number"),
+                                        assign("str", "42", "string"),
+                                        assign("flag", "FALSE", "boolean"),
+                                        assign("arr", "[1,2]", "json"),
+                                        assign("nothing", "ignored", "null"),
+                                        assign("blankNum", "", "number"))),
+                        "{}");
+        assertJson(
+                "{\"num\":3.5,\"str\":\"42\",\"flag\":false,\"arr\":[1,2],\"nothing\":null,\"blankNum\":null}",
+                o.output());
 
-        assertThrows(IllegalArgumentException.class,
-            () -> ops.set(m("assignments", List.of(assign("x", "abc", "number"))), "{}"));
-        assertThrows(IllegalArgumentException.class,
-            () -> ops.set(m("assignments", List.of(assign("x", "maybe", "boolean"))), "{}"));
-        assertThrows(IllegalArgumentException.class,
-            () -> ops.set(m("assignments", List.of(assign("x", "{oops", "json"))), "{}"));
-        assertThrows(IllegalArgumentException.class,
-            () -> ops.set(m("assignments", List.of(assign("x", "1", "weird"))), "{}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ops.set(m("assignments", List.of(assign("x", "abc", "number"))), "{}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ops.set(m("assignments", List.of(assign("x", "maybe", "boolean"))), "{}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ops.set(m("assignments", List.of(assign("x", "{oops", "json"))), "{}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ops.set(m("assignments", List.of(assign("x", "1", "weird"))), "{}"));
     }
 
     @Test
     void setHonoursRealJsonTypesFromApiAuthoredConfig() {
-        Outcome o = ops.set(m("assignments", List.of(
-            assign("n", 7, null), assign("b", Boolean.TRUE, null), assign("asText", 7, "string"),
-            assign("o", Map.of("k", "v"), null))), "{}");
+        Outcome o =
+                ops.set(
+                        m(
+                                "assignments",
+                                List.of(
+                                        assign("n", 7, null),
+                                        assign("b", Boolean.TRUE, null),
+                                        assign("asText", 7, "string"),
+                                        assign("o", Map.of("k", "v"), null))),
+                        "{}");
         assertJson("{\"n\":7,\"b\":true,\"asText\":\"7\",\"o\":{\"k\":\"v\"}}", o.output());
     }
 
     @Test
     void setKeepOnlySetDropsEverythingElse() {
-        Outcome o = ops.set(m("assignments", List.of(assign("c", "v", null)), "keepOnlySet", true), "{\"a\":1,\"b\":2}");
+        Outcome o =
+                ops.set(
+                        m("assignments", List.of(assign("c", "v", null)), "keepOnlySet", true),
+                        "{\"a\":1,\"b\":2}");
         assertJson("{\"c\":\"v\"}", o.output());
     }
 
     @Test
     void setUpdatesEveryObjectOfAnArrayAndLeavesScalarsAlone() {
-        Outcome o = ops.set(m("assignments", List.of(assign("flag", "y", null))), "[{\"a\":1},{\"a\":2},5]");
+        Outcome o =
+                ops.set(
+                        m("assignments", List.of(assign("flag", "y", null))),
+                        "[{\"a\":1},{\"a\":2},5]");
         assertJson("[{\"a\":1,\"flag\":\"y\"},{\"a\":2,\"flag\":\"y\"},5]", o.output());
         assertTrue(o.log().stream().anyMatch(l -> l.contains("non-object")));
     }
@@ -126,7 +165,10 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
     @Test
     void setDoesNotMutateTheInputTreeAcrossArrayElements() {
-        Outcome o = ops.set(m("assignments", List.of(assign("a.b", "1", null))), "[{\"a\":{\"z\":0}},{}]");
+        Outcome o =
+                ops.set(
+                        m("assignments", List.of(assign("a.b", "1", null))),
+                        "[{\"a\":{\"z\":0}},{}]");
         assertJson("[{\"a\":{\"z\":0,\"b\":1}},{\"a\":{\"b\":1}}]", o.output());
     }
 
@@ -151,7 +193,10 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
     @Test
     void filterEqualityDoesNotConflateLeadingZeroIds() {
-        Outcome o = ops.filter(m("conditions", List.of(cond("zip", "eq", "1234"))), "[{\"zip\":\"01234\"},{\"zip\":\"1234\"}]");
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond("zip", "eq", "1234"))),
+                        "[{\"zip\":\"01234\"},{\"zip\":\"1234\"}]");
         assertEquals(List.of("1234"), col(o.output(), "zip"));
     }
 
@@ -185,17 +230,26 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
     @Test
     void filterAndOrCombinators() {
-        Outcome or = ops.filter(m("combinator", "or",
-            "conditions", List.of(cond("n", "eq", "a"), cond("p", "gt", "10"))), F);
+        Outcome or =
+                ops.filter(
+                        m(
+                                "combinator",
+                                "or",
+                                "conditions",
+                                List.of(cond("n", "eq", "a"), cond("p", "gt", "10"))),
+                        F);
         assertEquals(List.of("a", "b", "A"), col(or.output(), "n"));
-        Outcome and = ops.filter(m("conditions", List.of(cond("p", "gt", "1"), cond("n", "eq", "b"))), F);
+        Outcome and =
+                ops.filter(m("conditions", List.of(cond("p", "gt", "1"), cond("n", "eq", "b"))), F);
         assertEquals(List.of("b"), col(and.output(), "n"));
     }
 
     @Test
     void filterContainsLooksInsideArrays() {
-        Outcome o = ops.filter(m("conditions", List.of(cond("tags", "contains", "vip"))),
-            "[{\"id\":1,\"tags\":[\"new\",\"vip\"]},{\"id\":2,\"tags\":[\"new\"]},{\"id\":3}]");
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond("tags", "contains", "vip"))),
+                        "[{\"id\":1,\"tags\":[\"new\",\"vip\"]},{\"id\":2,\"tags\":[\"new\"]},{\"id\":3}]");
         assertEquals(List.of("1"), col(o.output(), "id"));
     }
 
@@ -214,11 +268,15 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
     @Test
     void filterWithItemsFieldReplacesOnlyThatField() {
-        Outcome o = ops.filter(m("itemsField", "rows", "conditions", List.of(cond("v", "gt", "1"))),
-            "{\"rows\":[{\"v\":1},{\"v\":2}],\"meta\":\"m\"}");
+        Outcome o =
+                ops.filter(
+                        m("itemsField", "rows", "conditions", List.of(cond("v", "gt", "1"))),
+                        "{\"rows\":[{\"v\":1},{\"v\":2}],\"meta\":\"m\"}");
         assertJson("{\"rows\":[{\"v\":2}],\"meta\":\"m\"}", o.output());
-        Outcome nested = ops.filter(m("itemsField", "data.rows", "conditions", List.of(cond("v", "gt", "1"))),
-            "{\"data\":{\"rows\":[{\"v\":1},{\"v\":2}],\"k\":1}}");
+        Outcome nested =
+                ops.filter(
+                        m("itemsField", "data.rows", "conditions", List.of(cond("v", "gt", "1"))),
+                        "{\"data\":{\"rows\":[{\"v\":1},{\"v\":2}],\"k\":1}}");
         assertJson("{\"data\":{\"rows\":[{\"v\":2}],\"k\":1}}", nested.output());
     }
 
@@ -230,11 +288,38 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
 
     @Test
     void filterRejectsNonArraysAndUnknownOperators() {
-        assertThrows(IllegalArgumentException.class, () -> ops.filter(m("conditions", List.of(cond("a", "eq", "1"))), "{\"a\":1}"));
-        assertThrows(IllegalArgumentException.class, () -> ops.filter(m("conditions", List.of(cond("a", "eq", "1"))), "not json"));
-        assertThrows(IllegalArgumentException.class, () -> ops.filter(m("itemsField", "rows", "conditions", List.of(cond("a", "eq", "1"))), "[1]"));
-        assertThrows(IllegalArgumentException.class, () -> ops.filter(m("itemsField", "rows", "conditions", List.of(cond("a", "eq", "1"))), "{\"rows\":5}"));
-        assertThrows(IllegalArgumentException.class, () -> ops.filter(m("conditions", List.of(cond("a", "wobbles", "1"))), "[{\"a\":1}]"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ops.filter(m("conditions", List.of(cond("a", "eq", "1"))), "{\"a\":1}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ops.filter(m("conditions", List.of(cond("a", "eq", "1"))), "not json"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        ops.filter(
+                                m(
+                                        "itemsField",
+                                        "rows",
+                                        "conditions",
+                                        List.of(cond("a", "eq", "1"))),
+                                "[1]"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        ops.filter(
+                                m(
+                                        "itemsField",
+                                        "rows",
+                                        "conditions",
+                                        List.of(cond("a", "eq", "1"))),
+                                "{\"rows\":5}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        ops.filter(
+                                m("conditions", List.of(cond("a", "wobbles", "1"))),
+                                "[{\"a\":1}]"));
     }
 
     @Test
@@ -248,23 +333,37 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
     @Test
     void regexPatternLongerThanTheCapIsRejected() {
         String pattern = "a".repeat(WorkflowDataOps.MAX_REGEX_PATTERN_CHARS + 1);
-        assertThrows(IllegalArgumentException.class,
-            () -> ops.filter(m("conditions", List.of(cond("a", "regex", pattern))), "[{\"a\":\"a\"}]"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        ops.filter(
+                                m("conditions", List.of(cond("a", "regex", pattern))),
+                                "[{\"a\":\"a\"}]"));
         // exactly at the cap is fine
         String atCap = "a".repeat(WorkflowDataOps.MAX_REGEX_PATTERN_CHARS);
-        assertJson("[]", ops.filter(m("conditions", List.of(cond("a", "regex", atCap))), "[{\"a\":\"a\"}]").output());
+        assertJson(
+                "[]",
+                ops.filter(m("conditions", List.of(cond("a", "regex", atCap))), "[{\"a\":\"a\"}]")
+                        .output());
     }
 
     @Test
     void invalidRegexIsAnIllegalArgument() {
-        assertThrows(IllegalArgumentException.class,
-            () -> ops.filter(m("conditions", List.of(cond("a", "regex", "(unclosed"))), "[{\"a\":\"a\"}]"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        ops.filter(
+                                m("conditions", List.of(cond("a", "regex", "(unclosed"))),
+                                "[{\"a\":\"a\"}]"));
     }
 
     @Test
     void regexInputLongerThanTheCapIsNotMatchedAndSaysSo() {
         String huge = "a".repeat(WorkflowDataOps.MAX_REGEX_INPUT_CHARS + 1);
-        Outcome o = ops.filter(m("conditions", List.of(cond("v", "regex", "a"))), "[{\"v\":\"" + huge + "\"},{\"v\":\"a\"}]");
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond("v", "regex", "a"))),
+                        "[{\"v\":\"" + huge + "\"},{\"v\":\"a\"}]");
         assertEquals(1, j(o.output()).size());
         assertTrue(o.log().stream().anyMatch(l -> l.contains("longer than")), o.log().toString());
     }
@@ -273,7 +372,10 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
     void catastrophicBacktrackingIsBoundedInTime() {
         String evil = "a".repeat(40) + "b";
         long start = System.nanoTime();
-        Outcome o = ops.filter(m("conditions", List.of(cond("v", "regex", "(a+)+$"))), "[{\"v\":\"" + evil + "\"}]");
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond("v", "regex", "(a+)+$"))),
+                        "[{\"v\":\"" + evil + "\"}]");
         long elapsedMs = (System.nanoTime() - start) / 1_000_000L;
         assertJson("[]", o.output());
         assertTrue(elapsedMs < 5_000, "regex ran for " + elapsedMs + " ms");
@@ -282,21 +384,29 @@ class WorkflowDataOpsTest extends WorkflowDataOpsTestBase {
     @Test
     void deeplyRecursiveRegexOnALongValueNeverEscapesAsAnError() {
         String longValue = "a".repeat(WorkflowDataOps.MAX_REGEX_INPUT_CHARS);
-        // Whether the JVM stack holds 10k levels of (a|b)* or not, the node must finish cleanly (match or no match).
-        Outcome o = ops.filter(m("conditions", List.of(cond("v", "regex", "^(a|b)*$"))), "[{\"v\":\"" + longValue + "\"}]");
+        // Whether the JVM stack holds 10k levels of (a|b)* or not, the node must finish cleanly
+        // (match or no match).
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond("v", "regex", "^(a|b)*$"))),
+                        "[{\"v\":\"" + longValue + "\"}]");
         assertTrue(j(o.output()).isArray(), o.output());
     }
 
     @Test
     void theDeadlineCharSequenceInterruptsALongRead() {
-        DataFilterOps.DeadlineCharSequence seq = new DataFilterOps.DeadlineCharSequence("x".repeat(2000), System.nanoTime() - 1);
-        assertThrows(DataFilterOps.RegexTimeout.class, () -> {
-            for (int i = 0; i < 1000; i++) {
-                seq.charAt(i);
-            }
-        });
+        DataFilterOps.DeadlineCharSequence seq =
+                new DataFilterOps.DeadlineCharSequence("x".repeat(2000), System.nanoTime() - 1);
+        assertThrows(
+                DataFilterOps.RegexTimeout.class,
+                () -> {
+                    for (int i = 0; i < 1000; i++) {
+                        seq.charAt(i);
+                    }
+                });
         // a generous deadline never trips
-        DataFilterOps.DeadlineCharSequence ok = new DataFilterOps.DeadlineCharSequence("abc", System.nanoTime() + 60_000_000_000L);
+        DataFilterOps.DeadlineCharSequence ok =
+                new DataFilterOps.DeadlineCharSequence("abc", System.nanoTime() + 60_000_000_000L);
         assertEquals('b', ok.charAt(1));
         assertEquals("abc", ok.toString());
         assertEquals(3, ok.length());

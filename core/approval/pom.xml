@@ -60,7 +60,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
     <!-- #640: ApprovalController reads Authentication.getAuthorities() to
          enforce an Approval node's "adminOnly" config server-side (not just
@@ -88,7 +88,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-test-classic</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

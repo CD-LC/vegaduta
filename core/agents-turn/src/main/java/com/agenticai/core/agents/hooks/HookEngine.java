@@ -3,7 +3,6 @@ package com.agenticai.core.agents.hooks;
 import com.agenticai.core.agents.tools.AgentStepEventRedactor;
 import com.agenticai.core.guardrails.ToolDispatchGate;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -13,6 +12,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Evaluates hooks at each point. Holds no per-run state of its own (that lives in the {@link

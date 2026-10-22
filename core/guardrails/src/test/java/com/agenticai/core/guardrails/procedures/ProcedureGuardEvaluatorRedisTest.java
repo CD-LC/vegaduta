@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,8 +23,9 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * REQUIRE_TOOL_BEFORE across two "replicas" ({@code app.guardrails.procedures.session-calls-store=redis}): two
- * evaluators sharing one in-memory fake of the Redis set commands they use. Not run against a real Redis.
+ * REQUIRE_TOOL_BEFORE across two "replicas" ({@code
+ * app.guardrails.procedures.session-calls-store=redis}): two evaluators sharing one in-memory fake
+ * of the Redis set commands they use. Not run against a real Redis.
  */
 class ProcedureGuardEvaluatorRedisTest {
 
@@ -43,33 +43,57 @@ class ProcedureGuardEvaluatorRedisTest {
     @BeforeEach
     void twoReplicasOneRedis() {
         ProcedureService service = mock(ProcedureService.class);
-        ProcedureRule rule = new ProcedureRule(UUID.randomUUID(), 1, "Verify identity before refunds",
-            ProcedureGuardKind.REQUIRE_TOOL_BEFORE, "process_refund", "{\"prior\":\"verify_identity\"}");
-        when(service.activeRulesForAgent(AGENT)).thenReturn(List.of(
-            new ProcedureService.ResolvedProcedure(new Procedure("t1", "refunds", "d", "u"), List.of(rule))));
+        ProcedureRule rule =
+                new ProcedureRule(
+                        UUID.randomUUID(),
+                        1,
+                        "Verify identity before refunds",
+                        ProcedureGuardKind.REQUIRE_TOOL_BEFORE,
+                        "process_refund",
+                        "{\"prior\":\"verify_identity\"}");
+        when(service.activeRulesForAgent(AGENT))
+                .thenReturn(
+                        List.of(
+                                new ProcedureService.ResolvedProcedure(
+                                        new Procedure("t1", "refunds", "d", "u"), List.of(rule))));
 
-        SetOperations<String, String> fakeSet = (SetOperations<String, String>) Proxy.newProxyInstance(
-            getClass().getClassLoader(), new Class<?>[] {SetOperations.class}, (proxy, method, args) -> {
-                switch (method.getName()) {
-                    case "add" -> {
-                        Object[] values = (Object[]) args[1];
-                        redisSets.computeIfAbsent((String) args[0], k -> new HashSet<>())
-                            .addAll(Arrays.stream(values).map(String::valueOf).toList());
-                        return (long) values.length;
-                    }
-                    case "isMember" -> {
-                        return redisSets.getOrDefault((String) args[0], Set.of()).contains(String.valueOf(args[1]));
-                    }
-                    default -> throw new UnsupportedOperationException(method.getName());
-                }
-            });
+        SetOperations<String, String> fakeSet =
+                (SetOperations<String, String>)
+                        Proxy.newProxyInstance(
+                                getClass().getClassLoader(),
+                                new Class<?>[] {SetOperations.class},
+                                (proxy, method, args) -> {
+                                    switch (method.getName()) {
+                                        case "add" -> {
+                                            Object[] values = (Object[]) args[1];
+                                            redisSets
+                                                    .computeIfAbsent(
+                                                            (String) args[0], k -> new HashSet<>())
+                                                    .addAll(
+                                                            Arrays.stream(values)
+                                                                    .map(String::valueOf)
+                                                                    .toList());
+                                            return (long) values.length;
+                                        }
+                                        case "isMember" -> {
+                                            return redisSets
+                                                    .getOrDefault((String) args[0], Set.of())
+                                                    .contains(String.valueOf(args[1]));
+                                        }
+                                        default ->
+                                                throw new UnsupportedOperationException(
+                                                        method.getName());
+                                    }
+                                });
         redis = mock(StringRedisTemplate.class);
         when(redis.opsForSet()).thenReturn(fakeSet);
 
         sharedA = new ProcedureSessionCallsRedis(redis);
         sharedB = new ProcedureSessionCallsRedis(redis);
-        replicaA = new ProcedureGuardEvaluator(service, new ObjectMapper());
-        replicaB = new ProcedureGuardEvaluator(service, new ObjectMapper());
+        replicaA =
+                new ProcedureGuardEvaluator(service, com.agenticai.core.json.JsonMappers.plain());
+        replicaB =
+                new ProcedureGuardEvaluator(service, com.agenticai.core.json.JsonMappers.plain());
         replicaA.useSharedCalls(sharedA);
         replicaB.useSharedCalls(sharedB);
     }
@@ -82,12 +106,14 @@ class ProcedureGuardEvaluatorRedisTest {
 
     @Test
     void aPrerequisiteThatRanOnAnotherReplicaSatisfiesTheRule() throws Exception {
-        assertThat(replicaB.check(AGENT, SESSION, "process_refund").outcome()).isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
+        assertThat(replicaB.check(AGENT, SESSION, "process_refund").outcome())
+                .isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
 
         replicaA.recordCall(SESSION, "verify_identity");
         sharedA.awaitQueuedWrites();
 
-        assertThat(replicaB.check(AGENT, SESSION, "process_refund").outcome()).isEqualTo(ProcedureGuardEvaluator.Outcome.ALLOW);
+        assertThat(replicaB.check(AGENT, SESSION, "process_refund").outcome())
+                .isEqualTo(ProcedureGuardEvaluator.Outcome.ALLOW);
     }
 
     @Test
@@ -96,7 +122,7 @@ class ProcedureGuardEvaluatorRedisTest {
         sharedA.awaitQueuedWrites();
 
         assertThat(replicaB.check(AGENT, "other-session", "process_refund").outcome())
-            .isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
+                .isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
     }
 
     @Test
@@ -105,7 +131,8 @@ class ProcedureGuardEvaluatorRedisTest {
         sharedA.awaitQueuedWrites();
         when(redis.opsForSet()).thenThrow(new IllegalStateException("redis down"));
 
-        assertThat(replicaB.check(AGENT, SESSION, "process_refund").outcome()).isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
+        assertThat(replicaB.check(AGENT, SESSION, "process_refund").outcome())
+                .isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
     }
 
     @SuppressWarnings("unchecked")
@@ -113,14 +140,19 @@ class ProcedureGuardEvaluatorRedisTest {
     void aHangingRedisIsBoundedAndKeepsTodaysFailClosedAnswer() {
         CountDownLatch neverReleased = new CountDownLatch(1);
         SetOperations<String, String> hanging = mock(SetOperations.class);
-        when(hanging.isMember(anyString(), any())).thenAnswer(call -> {
-            neverReleased.await(); // black-holed connection: the real Lettuce call would wait 60 s
-            return true;
-        });
+        when(hanging.isMember(anyString(), any()))
+                .thenAnswer(
+                        call -> {
+                            neverReleased
+                                    .await(); // black-holed connection: the real Lettuce call would
+                            // wait 60 s
+                            return true;
+                        });
         when(redis.opsForSet()).thenReturn(hanging);
 
         long started = System.nanoTime();
-        ProcedureGuardEvaluator.Outcome outcome = replicaB.check(AGENT, SESSION, "process_refund").outcome();
+        ProcedureGuardEvaluator.Outcome outcome =
+                replicaB.check(AGENT, SESSION, "process_refund").outcome();
         long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
 
         assertThat(outcome).isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
@@ -130,14 +162,26 @@ class ProcedureGuardEvaluatorRedisTest {
     @Test
     void withoutRedisTheEvaluatorBehavesAsBefore() {
         ProcedureService service = mock(ProcedureService.class);
-        ProcedureRule rule = new ProcedureRule(UUID.randomUUID(), 1, "Verify identity before refunds",
-            ProcedureGuardKind.REQUIRE_TOOL_BEFORE, "process_refund", "{\"prior\":\"verify_identity\"}");
-        when(service.activeRulesForAgent(AGENT)).thenReturn(List.of(
-            new ProcedureService.ResolvedProcedure(new Procedure("t1", "refunds", "d", "u"), List.of(rule))));
-        ProcedureGuardEvaluator plain = new ProcedureGuardEvaluator(service, new ObjectMapper());
+        ProcedureRule rule =
+                new ProcedureRule(
+                        UUID.randomUUID(),
+                        1,
+                        "Verify identity before refunds",
+                        ProcedureGuardKind.REQUIRE_TOOL_BEFORE,
+                        "process_refund",
+                        "{\"prior\":\"verify_identity\"}");
+        when(service.activeRulesForAgent(AGENT))
+                .thenReturn(
+                        List.of(
+                                new ProcedureService.ResolvedProcedure(
+                                        new Procedure("t1", "refunds", "d", "u"), List.of(rule))));
+        ProcedureGuardEvaluator plain =
+                new ProcedureGuardEvaluator(service, com.agenticai.core.json.JsonMappers.plain());
 
-        assertThat(plain.check(AGENT, SESSION, "process_refund").outcome()).isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
+        assertThat(plain.check(AGENT, SESSION, "process_refund").outcome())
+                .isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);
         plain.recordCall(SESSION, "verify_identity");
-        assertThat(plain.check(AGENT, SESSION, "process_refund").outcome()).isEqualTo(ProcedureGuardEvaluator.Outcome.ALLOW);
+        assertThat(plain.check(AGENT, SESSION, "process_refund").outcome())
+                .isEqualTo(ProcedureGuardEvaluator.Outcome.ALLOW);
     }
 }

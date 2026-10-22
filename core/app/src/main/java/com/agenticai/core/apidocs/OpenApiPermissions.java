@@ -37,8 +37,13 @@ import org.springframework.util.AntPathMatcher;
 final class OpenApiPermissions {
 
     static final String RESOURCE = "/security/authorization-rule-snapshot.txt";
+
+    /**
+     * {@code PathPattern [GET /api/x/**]} (Spring Security 7's rendering; the method is optional).
+     */
     private static final Pattern RULE =
-            Pattern.compile("^Deferred \\[Mvc \\[pattern='([^']*)'(?:, ([A-Z]+))?].*] => ([Y-]+)$");
+            Pattern.compile("^PathPattern \\[(?:([A-Z]+) )?([^\\]]*)] => ([Y-]+)$");
+
     private static final AntPathMatcher MATCHER = new AntPathMatcher();
     private static final String MEMBER = "member";
     private static final String COMBINED = "AGENTS+WORKFLOWS_ADMIN";
@@ -59,7 +64,8 @@ final class OpenApiPermissions {
             if (in == null) {
                 return new OpenApiPermissions(List.of(), List.of());
             }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             return parse(reader.lines().toList());
         } catch (IOException e) {
             return new OpenApiPermissions(List.of(), List.of());
@@ -76,7 +82,7 @@ final class OpenApiPermissions {
             }
             Matcher m = RULE.matcher(line.strip());
             if (m.matches()) {
-                rules.add(new Rule(m.group(2), m.group(1), m.group(3)));
+                rules.add(new Rule(m.group(1), m.group(2), m.group(3)));
             }
         }
         return new OpenApiPermissions(principals, rules);
@@ -86,7 +92,9 @@ final class OpenApiPermissions {
         return rules.isEmpty();
     }
 
-    /** The first rule matching the operation, or null (the chain's anyRequest().authenticated()). */
+    /**
+     * The first rule matching the operation, or null (the chain's anyRequest().authenticated()).
+     */
     Rule ruleFor(String httpMethod, String path) {
         for (Rule r : rules) {
             if (r.method() != null && !r.method().equalsIgnoreCase(httpMethod)) {
@@ -131,14 +139,19 @@ final class OpenApiPermissions {
             out.put("x-permissions", Map.of("allOf", all));
             note = "Requires both PERM_MANAGE_AGENTS and PERM_MANAGE_WORKFLOWS_ADMIN";
         } else if (!roles.isEmpty()) {
-            note = "Restricted to " + String.join(" or ", roles.stream().map(String::valueOf).toList());
+            note =
+                    "Restricted to "
+                            + String.join(" or ", roles.stream().map(String::valueOf).toList());
         } else {
             return out;
         }
         if (!roles.isEmpty()) {
             out.put("x-roles", roles);
             if (out.containsKey("x-permissions")) {
-                note += " (or the " + String.join(" or ", roles.stream().map(String::valueOf).toList()) + " role)";
+                note +=
+                        " (or the "
+                                + String.join(" or ", roles.stream().map(String::valueOf).toList())
+                                + " role)";
             }
         }
         out.put("note", note + ".");

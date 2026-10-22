@@ -1,6 +1,5 @@
 package com.agenticai.core.workflow.portability;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +9,7 @@ import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * VegaDuta workflow DSL, version 1 - the documented, versioned JSON file a workflow is exported to
@@ -71,7 +71,7 @@ public final class WorkflowDslV1 {
             sb.append("null");
         } else if (node.isObject()) {
             List<String> names = new ArrayList<>();
-            Iterator<String> it = node.fieldNames();
+            Iterator<String> it = node.propertyNames().iterator();
             while (it.hasNext()) {
                 names.add(it.next());
             }
@@ -86,7 +86,7 @@ public final class WorkflowDslV1 {
                     sb.append(',');
                 }
                 first = false;
-                sb.append(com.fasterxml.jackson.databind.node.TextNode.valueOf(name).toString())
+                sb.append(tools.jackson.databind.node.StringNode.valueOf(name).toString())
                         .append(':');
                 canonical(node.get(name), sb, false);
             }

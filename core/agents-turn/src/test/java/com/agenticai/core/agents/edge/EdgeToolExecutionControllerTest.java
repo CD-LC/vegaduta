@@ -16,49 +16,39 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolExecuteRequest;
 import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolExecuteResponse;
-import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolListResponse;
-import com.agenticai.core.agents.memory.AgentMemoryService;
-import com.agenticai.core.agents.tools.AgentToolPort;
-import com.agenticai.core.devices.DeviceAuthResolver;
 import com.agenticai.core.devices.DeviceException;
-import com.agenticai.core.devices.MobileDevice;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
- * The edge propose/execute tool bridge (including device-token support and the
- * full-tool-parity change - see {@link EdgeToolExecutionController}'s class
- * javadoc), and the D-9 follow-up bug fix (listTools' resolution path capped - see that method's
- * javadoc). {@code GET /api/edge/tools} and {@code POST /api/edge/tools/execute}'s authorization
- * layers and result contract. Plain unit tests calling the controller method directly (the module's
- * established convention); the decorator stack itself (guardrails/logging) is {@code
- * AgentToolProvider}'s own tested concern - here the resolved callback is faked, and what's under
- * test is that the controller (a) executes ANY tool {@code resolveToolCandidatesFor} resolves and
- * lists the same tools {@code resolveToolsFor}'s relevance-selected/capped set resolves, subject
- * ONLY to the agent's own allow-list (the old media-generation/MCP whitelist is gone - full parity
- * with hosted), with consumer-safe 4xx messages for what IS still refused, (b) executes through the
- * resolved callback under an {@code "edge:"}-prefixed session id (the tool_call_log origin marker),
- * (c) lets the tenancy/sharing 404s ({@code AgentNotFoundException}/{@code
- * ResourceAccessDeniedException}) propagate to {@code GlobalExceptionHandler} untouched, and (d)
- * accepts EITHER a Keycloak JWT (unchanged) or a valid {@code X-Device-Token} as the authenticating
- * credential, rejecting a request that presents neither (or an invalid device token) before either
- * agent lookup runs.
+ * The edge propose/execute tool bridge (including device-token support and the full-tool-parity
+ * change - see {@link EdgeToolExecutionController}'s class javadoc), and the D-9 follow-up bug fix
+ * (listTools' resolution path capped - see that method's javadoc). {@code GET /api/edge/tools} and
+ * {@code POST /api/edge/tools/execute}'s authorization layers and result contract. Plain unit tests
+ * calling the controller method directly (the module's established convention); the decorator stack
+ * itself (guardrails/logging) is {@code AgentToolProvider}'s own tested concern - here the resolved
+ * callback is faked, and what's under test is that the controller (a) executes ANY tool {@code
+ * resolveToolCandidatesFor} resolves and lists the same tools {@code resolveToolsFor}'s
+ * relevance-selected/capped set resolves, subject ONLY to the agent's own allow-list (the old
+ * media-generation/MCP whitelist is gone - full parity with hosted), with consumer-safe 4xx
+ * messages for what IS still refused, (b) executes through the resolved callback under an {@code
+ * "edge:"}-prefixed session id (the tool_call_log origin marker), (c) lets the tenancy/sharing 404s
+ * ({@code AgentNotFoundException}/{@code ResourceAccessDeniedException}) propagate to {@code
+ * GlobalExceptionHandler} untouched, and (d) accepts EITHER a Keycloak JWT (unchanged) or a valid
+ * {@code X-Device-Token} as the authenticating credential, rejecting a request that presents
+ * neither (or an invalid device token) before either agent lookup runs.
  */
 class EdgeToolExecutionControllerTest extends EdgeToolExecutionControllerTestBase {
 
@@ -303,7 +293,6 @@ class EdgeToolExecutionControllerTest extends EdgeToolExecutionControllerTestBas
         assertFalse(body.error().contains("10.0.0.7"));
     }
 
-
     @Test
     void blankArgumentsDefaultToEmptyObject() {
         ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
@@ -366,7 +355,6 @@ class EdgeToolExecutionControllerTest extends EdgeToolExecutionControllerTestBas
         assertEquals("device:" + deviceId, subjectKey.getValue());
     }
 
-
     @Test
     void deviceTokenCallerStillGoesThroughTheSameAllowListLayer() {
         // The device-token path is not a shortcut around layer 3 (the agent's
@@ -401,7 +389,6 @@ class EdgeToolExecutionControllerTest extends EdgeToolExecutionControllerTestBas
         verify(agentService, never()).requireAccess(any(), any());
         verify(agentToolProvider, never()).resolveToolCandidatesFor(any(), any(), any());
     }
-
 
     @Test
     void anonymousAuthenticationTokenIsNotTreatedAsAKeycloakSession() {

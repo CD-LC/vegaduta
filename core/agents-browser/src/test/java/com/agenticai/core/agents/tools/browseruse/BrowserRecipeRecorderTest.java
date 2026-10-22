@@ -5,11 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.agents.tools.browseruse.BrowserRecipeRecorder.JournalCall;
 import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.RecipeStep;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Recipe extraction from a fake tool-call journal: what is kept, what becomes a placeholder, and -
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 class BrowserRecipeRecorderTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static JournalCall nav(String url, String finalUrl) {
         return new JournalCall(

@@ -29,13 +29,13 @@ import com.agenticai.core.workflow.output.PdfOutputRenderer;
 import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The four AI node types through {@link WorkflowNodeExecutor#executeNode}: dispatch, expression
@@ -43,7 +43,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class WorkflowNodeExecutorAiNodesTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @SuppressWarnings("unchecked")
     private static WorkflowNodeExecutor newExecutor() {
@@ -175,7 +175,7 @@ class WorkflowNodeExecutorAiNodesTest {
                                 node("parameter_extractor", config),
                                 "I live in Pune",
                                 "system:test");
-        assertEquals("Pune", MAPPER.readTree(result.output()).get("city").asText());
+        assertEquals("Pune", MAPPER.readTree(result.output()).get("city").asString());
     }
 
     @Test

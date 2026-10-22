@@ -45,7 +45,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -92,7 +91,8 @@ class ResearchRunServiceTest {
         credentials = mock(PlatformToolCredentialService.class);
         credentialProvider = mock(ObjectProvider.class);
         when(credentialProvider.getIfAvailable()).thenReturn(credentials);
-        when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH)).thenReturn(Optional.of("k"));
+        when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
+                .thenReturn(Optional.of("k"));
         providerResolver = mock(ProviderCredentialResolver.class);
         providerResolverProvider = mock(ObjectProvider.class);
         when(providerResolverProvider.getIfAvailable()).thenReturn(providerResolver);
@@ -110,8 +110,15 @@ class ResearchRunServiceTest {
 
     private ResearchRunService service(boolean runsEnabled, boolean deepEnabled) {
         return new ResearchRunService(
-            ResearchRunUsageServiceTest.properties(runsEnabled, deepEnabled, 5), usage, agentService,
-            agentRepository, capabilityStates, jobService, credentialProvider, providerResolverProvider, tenantLimits);
+                ResearchRunUsageServiceTest.properties(runsEnabled, deepEnabled, 5),
+                usage,
+                agentService,
+                agentRepository,
+                capabilityStates,
+                jobService,
+                credentialProvider,
+                providerResolverProvider,
+                tenantLimits);
     }
 
     private static ResearchRunStartRequest question(String q) {
@@ -125,16 +132,33 @@ class ResearchRunServiceTest {
         when(agent.getName()).thenReturn(name);
         when(agent.getCreatedAt()).thenReturn(createdAt);
         if (marked) {
-            when(capabilityStates.findById(new AgentCapabilityStateId(id, DeepResearchCapability.CAPABILITY_KEY)))
-                .thenReturn(Optional.of(new AgentCapabilityState(id, DeepResearchCapability.CAPABILITY_KEY, true)));
+            when(capabilityStates.findById(
+                            new AgentCapabilityStateId(id, DeepResearchCapability.CAPABILITY_KEY)))
+                    .thenReturn(
+                            Optional.of(
+                                    new AgentCapabilityState(
+                                            id, DeepResearchCapability.CAPABILITY_KEY, true)));
         }
         return agent;
     }
 
     private static AgentJobResponse queuedJob(UUID agentId) {
-        AgentJob job = AgentJob.queued(UUID.randomUUID(), TENANT, agentId, "goal", ALICE, ALICE,
-            Set.of("ROLE_user"), AgentJobOrigin.API, null, 600, 1, 15, ResearchRunPlan.RESULT_SCHEMA);
-        return AgentJobResponse.from(job, new ObjectMapper());
+        AgentJob job =
+                AgentJob.queued(
+                        UUID.randomUUID(),
+                        TENANT,
+                        agentId,
+                        "goal",
+                        ALICE,
+                        ALICE,
+                        Set.of("ROLE_user"),
+                        AgentJobOrigin.API,
+                        null,
+                        600,
+                        1,
+                        15,
+                        ResearchRunPlan.RESULT_SCHEMA);
+        return AgentJobResponse.from(job, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static int statusOf(ResponseStatusException e) {
@@ -163,7 +187,8 @@ class ResearchRunServiceTest {
         assertEquals(0, on.limits().runBudgetUsd().compareTo(new java.math.BigDecimal("2.0")));
         assertEquals(Integer.valueOf(4), on.remainingToday());
 
-        when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH)).thenReturn(Optional.empty());
+        when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
+                .thenReturn(Optional.empty());
         assertFalse(service(true, true).status().searchConfigured());
     }
 
@@ -171,23 +196,36 @@ class ResearchRunServiceTest {
     void everyRunEndpointIs404WhileTheRunsFlagIsOff() {
         ResearchRunService off = service(false, true);
         UUID jobId = UUID.randomUUID();
-        assertEquals(404, statusOf(assertThrows(ResponseStatusException.class, () -> off.start(question("q")))));
-        assertEquals(404, statusOf(assertThrows(ResponseStatusException.class, () -> off.list(50, 0))));
-        assertEquals(404, statusOf(assertThrows(ResponseStatusException.class, () -> off.get(jobId))));
-        assertEquals(404, statusOf(assertThrows(ResponseStatusException.class, () -> off.cancel(jobId))));
+        assertEquals(
+                404,
+                statusOf(
+                        assertThrows(
+                                ResponseStatusException.class, () -> off.start(question("q")))));
+        assertEquals(
+                404, statusOf(assertThrows(ResponseStatusException.class, () -> off.list(50, 0))));
+        assertEquals(
+                404, statusOf(assertThrows(ResponseStatusException.class, () -> off.get(jobId))));
+        assertEquals(
+                404,
+                statusOf(assertThrows(ResponseStatusException.class, () -> off.cancel(jobId))));
         verifyNoInteractions(jobService, agentService, usage);
     }
 
     @Test
     void startIs503WithARelayableMessageWhenDeepResearchIsOffOrTheSearchKeyIsMissing() {
-        ResponseStatusException deepOff = assertThrows(ResponseStatusException.class,
-            () -> service(true, false).start(question("q")));
+        ResponseStatusException deepOff =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service(true, false).start(question("q")));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), statusOf(deepOff));
         assertEquals(ResearchRunService.MSG_DEEP_OFF, deepOff.getReason());
 
-        when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH)).thenReturn(Optional.empty());
-        ResponseStatusException noKey = assertThrows(ResponseStatusException.class,
-            () -> service(true, true).start(question("q")));
+        when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
+                .thenReturn(Optional.empty());
+        ResponseStatusException noKey =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service(true, true).start(question("q")));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), statusOf(noKey));
         assertEquals(ResearchRunService.MSG_NO_SEARCH_KEY, noKey.getReason());
         verifyNoInteractions(jobService, agentService, usage);
@@ -195,9 +233,13 @@ class ResearchRunServiceTest {
 
     @Test
     void anInvalidRequestIsA400BeforeAnythingIsCreatedOrCounted() {
-        assertThrows(IllegalArgumentException.class, () -> service(true, true).start(question("  ")));
-        assertThrows(IllegalArgumentException.class,
-            () -> service(true, true).start(new ResearchRunStartRequest("q", "huge", null, null)));
+        assertThrows(
+                IllegalArgumentException.class, () -> service(true, true).start(question("  ")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service(true, true)
+                                .start(new ResearchRunStartRequest("q", "huge", null, null)));
         verifyNoInteractions(jobService, agentService, usage);
     }
 
@@ -212,18 +254,26 @@ class ResearchRunServiceTest {
         AgentJobResponse queued = queuedJob(agentId);
         when(jobService.submit(eq(agentId), any(), eq(true))).thenReturn(queued);
 
-        AgentJobResponse result = service(true, true).start(
-            new ResearchRunStartRequest("Compare A and B", "comparison", List.of("https://a.example"), null));
+        AgentJobResponse result =
+                service(true, true)
+                        .start(
+                                new ResearchRunStartRequest(
+                                        "Compare A and B",
+                                        "comparison",
+                                        List.of("https://a.example"),
+                                        null));
         assertSame(queued, result);
 
-        ArgumentCaptor<AgentCreateRequest> create = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> create =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService).create(create.capture());
         assertEquals("Deep Research", create.getValue().name());
         assertEquals(ResearchRunPlan.SYSTEM_PROMPT, create.getValue().systemPrompt());
         assertEquals(ProviderName.PLATFORM_HOSTED, create.getValue().providerName());
         assertEquals(ExperienceMode.ADVANCED, create.getValue().experienceMode());
         assertEquals(Boolean.FALSE, create.getValue().knowledgeBaseEnabled());
-        // The whole report plus every source travels in one JSON answer: the default 4096 would truncate it.
+        // The whole report plus every source travels in one JSON answer: the default 4096 would
+        // truncate it.
         assertEquals(Integer.valueOf(8192), create.getValue().maxTokens());
 
         // Allow-list first, capability marker last, and only then the cap and the job.
@@ -231,7 +281,8 @@ class ResearchRunServiceTest {
         order.verify(agentService).setAllowedToolNames(agentId, ResearchRunPlan.AGENT_TOOLS);
         order.verify(agentService).setCapabilityEnabled(agentId, "deep-research", true);
         order.verify(usage).reserve(TENANT, ALICE);
-        ArgumentCaptor<AgentJobStartRequest> job = ArgumentCaptor.forClass(AgentJobStartRequest.class);
+        ArgumentCaptor<AgentJobStartRequest> job =
+                ArgumentCaptor.forClass(AgentJobStartRequest.class);
         order.verify(jobService).submit(eq(agentId), job.capture(), eq(true));
         assertTrue(job.getValue().goal().contains("Compare A and B"));
         assertTrue(job.getValue().goal().startsWith(ResearchRunPlan.GOAL_PREFIX));
@@ -247,12 +298,24 @@ class ResearchRunServiceTest {
     void aSecondRunReusesTheExistingAgentAndPicksTheOldestWhenThereAreTwo() {
         UUID older = UUID.randomUUID();
         UUID newer = UUID.randomUUID();
-        Agent unrelated = researchAgent(UUID.randomUUID(), "Support bot", true, Instant.parse("2026-01-01T00:00:00Z"));
-        Agent sameNameNoMarker = researchAgent(UUID.randomUUID(), "Deep Research", false, Instant.parse("2026-01-02T00:00:00Z"));
-        Agent newerAgent = researchAgent(newer, "Deep Research", true, Instant.parse("2026-03-01T00:00:00Z"));
-        Agent olderAgent = researchAgent(older, "Deep Research", true, Instant.parse("2026-02-01T00:00:00Z"));
+        Agent unrelated =
+                researchAgent(
+                        UUID.randomUUID(),
+                        "Support bot",
+                        true,
+                        Instant.parse("2026-01-01T00:00:00Z"));
+        Agent sameNameNoMarker =
+                researchAgent(
+                        UUID.randomUUID(),
+                        "Deep Research",
+                        false,
+                        Instant.parse("2026-01-02T00:00:00Z"));
+        Agent newerAgent =
+                researchAgent(newer, "Deep Research", true, Instant.parse("2026-03-01T00:00:00Z"));
+        Agent olderAgent =
+                researchAgent(older, "Deep Research", true, Instant.parse("2026-02-01T00:00:00Z"));
         when(agentRepository.findByCreatedBy(ALICE))
-            .thenReturn(List.of(unrelated, sameNameNoMarker, newerAgent, olderAgent));
+                .thenReturn(List.of(unrelated, sameNameNoMarker, newerAgent, olderAgent));
         when(jobService.submit(eq(older), any(), eq(true))).thenReturn(queuedJob(older));
 
         service(true, true).start(question("q"));
@@ -267,7 +330,8 @@ class ResearchRunServiceTest {
     void paidTenantUsesItsOwnActiveProviderAndFallsBackToTheHostedPool() {
         when(tenantLimits.plan(TENANT)).thenReturn(TenantPlan.PREMIUM);
         when(providerResolver.resolveAnyActiveKey())
-            .thenReturn(new ProviderCredentialResolver.ActiveProvider(ProviderName.OPENAI, "sk"));
+                .thenReturn(
+                        new ProviderCredentialResolver.ActiveProvider(ProviderName.OPENAI, "sk"));
         AgentResponse created = mock(AgentResponse.class);
         UUID agentId = UUID.randomUUID();
         when(created.id()).thenReturn(agentId);
@@ -275,10 +339,12 @@ class ResearchRunServiceTest {
         when(jobService.submit(eq(agentId), any(), eq(true))).thenReturn(queuedJob(agentId));
 
         service(true, true).start(question("q"));
-        when(providerResolver.resolveAnyActiveKey()).thenThrow(new IllegalStateException("no active provider"));
+        when(providerResolver.resolveAnyActiveKey())
+                .thenThrow(new IllegalStateException("no active provider"));
         service(true, true).start(question("q"));
 
-        ArgumentCaptor<AgentCreateRequest> create = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> create =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService, times(2)).create(create.capture());
         assertEquals(ProviderName.OPENAI, create.getAllValues().get(0).providerName());
         assertEquals(ProviderName.PLATFORM_HOSTED, create.getAllValues().get(1).providerName());
@@ -289,13 +355,18 @@ class ResearchRunServiceTest {
     @Test
     void dailyCap429StopsTheRunBeforeAnyJobIsSubmitted() {
         UUID agentId = UUID.randomUUID();
-        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito misuse.
+        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito
+        // misuse.
         Agent mine = researchAgent(agentId, "Deep Research", true, Instant.now());
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(mine));
-        doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "cap")).when(usage).reserve(TENANT, ALICE);
+        doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "cap"))
+                .when(usage)
+                .reserve(TENANT, ALICE);
 
-        ResponseStatusException refused = assertThrows(ResponseStatusException.class,
-            () -> service(true, true).start(question("q")));
+        ResponseStatusException refused =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service(true, true).start(question("q")));
         assertEquals(429, statusOf(refused));
         verify(jobService, never()).submit(any(), any());
         verify(usage, never()).release(anyString(), anyString());
@@ -304,10 +375,12 @@ class ResearchRunServiceTest {
     @Test
     void aFailedSubmissionGivesTheDailySlotBack() {
         UUID agentId = UUID.randomUUID();
-        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito misuse.
+        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito
+        // misuse.
         Agent mine = researchAgent(agentId, "Deep Research", true, Instant.now());
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(mine));
-        when(jobService.submit(eq(agentId), any(), eq(true))).thenThrow(new IllegalStateException("db down"));
+        when(jobService.submit(eq(agentId), any(), eq(true)))
+                .thenThrow(new IllegalStateException("db down"));
 
         assertThrows(IllegalStateException.class, () -> service(true, true).start(question("q")));
         verify(usage).reserve(TENANT, ALICE);
@@ -316,8 +389,10 @@ class ResearchRunServiceTest {
 
     @Test
     void agentCeilingSurfacesAsThePlanLimitAndCountsNothing() {
-        when(agentService.create(any())).thenThrow(new TenantLimitExceededException("This plan allows up to 3 agents"));
-        assertThrows(TenantLimitExceededException.class, () -> service(true, true).start(question("q")));
+        when(agentService.create(any()))
+                .thenThrow(new TenantLimitExceededException("This plan allows up to 3 agents"));
+        assertThrows(
+                TenantLimitExceededException.class, () -> service(true, true).start(question("q")));
         verifyNoInteractions(usage, jobService);
     }
 
@@ -326,15 +401,19 @@ class ResearchRunServiceTest {
         when(tenantLimits.maxAgents(TENANT)).thenReturn(Optional.of(5));
         when(agentRepository.count()).thenReturn(5L);
 
-        TenantLimitExceededException free = assertThrows(TenantLimitExceededException.class,
-            () -> service(true, true).start(question("q")));
+        TenantLimitExceededException free =
+                assertThrows(
+                        TenantLimitExceededException.class,
+                        () -> service(true, true).start(question("q")));
         assertTrue(free.getMessage().contains("Research needs one agent slot"));
         assertTrue(free.getMessage().endsWith(ResearchRunService.MSG_SLOT_FREE_PLAN));
         assertFalse(free.getMessage().contains("delete"));
 
         when(tenantLimits.plan(TENANT)).thenReturn(TenantPlan.PREMIUM);
-        TenantLimitExceededException paid = assertThrows(TenantLimitExceededException.class,
-            () -> service(true, true).start(question("q")));
+        TenantLimitExceededException paid =
+                assertThrows(
+                        TenantLimitExceededException.class,
+                        () -> service(true, true).start(question("q")));
         assertTrue(paid.getMessage().endsWith(ResearchRunService.MSG_SLOT_PAID_PLAN));
 
         verify(agentService, never()).create(any());
@@ -362,9 +441,10 @@ class ResearchRunServiceTest {
         when(created.id()).thenReturn(agentId);
         when(agentService.create(any())).thenReturn(created);
         when(agentService.setCapabilityEnabled(agentId, "deep-research", true))
-            .thenThrow(new IllegalArgumentException("Unknown capability"));
+                .thenThrow(new IllegalArgumentException("Unknown capability"));
 
-        assertThrows(IllegalArgumentException.class, () -> service(true, true).start(question("q")));
+        assertThrows(
+                IllegalArgumentException.class, () -> service(true, true).start(question("q")));
         verify(agentService, never()).delete(any());
         verifyNoInteractions(usage, jobService);
     }
@@ -372,10 +452,17 @@ class ResearchRunServiceTest {
     @Test
     void theNextRunAdoptsAHalfBuiltAgentInsteadOfCreatingAnother() {
         UUID halfBuilt = UUID.randomUUID();
-        Agent unfinished = researchAgent(halfBuilt, "Deep Research", false, Instant.parse("2026-02-01T00:00:00Z"));
+        Agent unfinished =
+                researchAgent(
+                        halfBuilt, "Deep Research", false, Instant.parse("2026-02-01T00:00:00Z"));
         when(unfinished.getSystemPrompt()).thenReturn(ResearchRunPlan.SYSTEM_PROMPT);
         // Same name, the user's own prompt: theirs, never taken over.
-        Agent usersOwn = researchAgent(UUID.randomUUID(), "Deep Research", false, Instant.parse("2026-01-01T00:00:00Z"));
+        Agent usersOwn =
+                researchAgent(
+                        UUID.randomUUID(),
+                        "Deep Research",
+                        false,
+                        Instant.parse("2026-01-01T00:00:00Z"));
         when(usersOwn.getSystemPrompt()).thenReturn("You are my reading-list helper.");
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(usersOwn, unfinished));
         when(jobService.submit(eq(halfBuilt), any(), eq(true))).thenReturn(queuedJob(halfBuilt));
@@ -394,14 +481,30 @@ class ResearchRunServiceTest {
         UUID jobId = UUID.randomUUID();
         for (String subject : new String[] {null, "", "  "}) {
             TenantContext.set(TenantContext.of(TENANT, subject, Set.of()));
-            assertEquals(401, statusOf(assertThrows(ResponseStatusException.class,
-                () -> service(true, true).start(question("q")))));
-            assertEquals(401, statusOf(assertThrows(ResponseStatusException.class,
-                () -> service(true, true).list(50, 0))));
-            assertEquals(401, statusOf(assertThrows(ResponseStatusException.class,
-                () -> service(true, true).get(jobId))));
-            assertEquals(401, statusOf(assertThrows(ResponseStatusException.class,
-                () -> service(true, true).cancel(jobId))));
+            assertEquals(
+                    401,
+                    statusOf(
+                            assertThrows(
+                                    ResponseStatusException.class,
+                                    () -> service(true, true).start(question("q")))));
+            assertEquals(
+                    401,
+                    statusOf(
+                            assertThrows(
+                                    ResponseStatusException.class,
+                                    () -> service(true, true).list(50, 0))));
+            assertEquals(
+                    401,
+                    statusOf(
+                            assertThrows(
+                                    ResponseStatusException.class,
+                                    () -> service(true, true).get(jobId))));
+            assertEquals(
+                    401,
+                    statusOf(
+                            assertThrows(
+                                    ResponseStatusException.class,
+                                    () -> service(true, true).cancel(jobId))));
         }
         verifyNoInteractions(jobService, agentService, usage);
         verify(agentRepository, never()).findByCreatedBy(any());
@@ -415,28 +518,34 @@ class ResearchRunServiceTest {
         verify(jobService, never()).listForAgentsWithGoalPrefix(any(), any(), anyInt(), anyInt());
 
         UUID agentId = UUID.randomUUID();
-        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito misuse.
+        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito
+        // misuse.
         Agent mine = researchAgent(agentId, "Deep Research", true, Instant.now());
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(mine));
         when(jobService.listForAgentsWithGoalPrefix(any(), any(), anyInt(), anyInt()))
-            .thenReturn(new AgentJobService.SummarySlice(List.of(), true));
+                .thenReturn(new AgentJobService.SummarySlice(List.of(), true));
         AgentJobService.SummarySlice page = service(true, true).listPage(20, 40);
         assertTrue(page.hasMore());
-        verify(jobService).listForAgentsWithGoalPrefix(List.of(agentId), ResearchRunPlan.GOAL_PREFIX, 20, 40);
+        verify(jobService)
+                .listForAgentsWithGoalPrefix(List.of(agentId), ResearchRunPlan.GOAL_PREFIX, 20, 40);
     }
 
     @Test
     void historySpansAllOfTheCallersResearchAgentsOldestFirst() {
         UUID older = UUID.randomUUID();
         UUID newer = UUID.randomUUID();
-        Agent newerAgent = researchAgent(newer, "Deep Research", true, Instant.parse("2026-03-01T00:00:00Z"));
-        Agent olderAgent = researchAgent(older, "Deep Research", true, Instant.parse("2026-02-01T00:00:00Z"));
+        Agent newerAgent =
+                researchAgent(newer, "Deep Research", true, Instant.parse("2026-03-01T00:00:00Z"));
+        Agent olderAgent =
+                researchAgent(older, "Deep Research", true, Instant.parse("2026-02-01T00:00:00Z"));
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(newerAgent, olderAgent));
         when(jobService.listForAgentsWithGoalPrefix(any(), any(), anyInt(), anyInt()))
-            .thenReturn(new AgentJobService.SummarySlice(List.of(), false));
+                .thenReturn(new AgentJobService.SummarySlice(List.of(), false));
 
         service(true, true).list(50, 0);
-        verify(jobService).listForAgentsWithGoalPrefix(List.of(older, newer), ResearchRunPlan.GOAL_PREFIX, 50, 0);
+        verify(jobService)
+                .listForAgentsWithGoalPrefix(
+                        List.of(older, newer), ResearchRunPlan.GOAL_PREFIX, 50, 0);
     }
 
     @Test
@@ -444,8 +553,10 @@ class ResearchRunServiceTest {
         UUID older = UUID.randomUUID();
         UUID newer = UUID.randomUUID();
         UUID jobId = UUID.randomUUID();
-        Agent newerAgent = researchAgent(newer, "Deep Research", true, Instant.parse("2026-03-01T00:00:00Z"));
-        Agent olderAgent = researchAgent(older, "Deep Research", true, Instant.parse("2026-02-01T00:00:00Z"));
+        Agent newerAgent =
+                researchAgent(newer, "Deep Research", true, Instant.parse("2026-03-01T00:00:00Z"));
+        Agent olderAgent =
+                researchAgent(older, "Deep Research", true, Instant.parse("2026-02-01T00:00:00Z"));
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(newerAgent, olderAgent));
         when(jobService.get(older, jobId)).thenThrow(new AgentJobNotFoundException(jobId));
         AgentJobResponse onNewer = queuedJob(newer);
@@ -461,22 +572,49 @@ class ResearchRunServiceTest {
         Agent mine = researchAgent(agentId, "Deep Research", true, Instant.now());
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(mine));
         AgentJobResponse base = queuedJob(agentId);
-        com.fasterxml.jackson.databind.JsonNode result = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
-            "{\"title\":\"t\",\"reportMarkdown\":\"r\",\"sources\":["
-                + "{\"id\":\"S1\",\"url\":\"https://ok.example/a\"},"
-                + "{\"id\":\"S2\",\"url\":\"javascript:alert(1)\"}]}");
-        AgentJobResponse withResult = new AgentJobResponse(base.id(), base.agentId(), base.goal(), base.status(),
-            base.terminal(), base.origin(), base.originRef(), base.sessionId(), base.requestedBy(),
-            base.progressNote(), base.progressUpdatedAt(), base.resultText(), result, base.schemaAttempts(),
-            base.costUsd(), base.errorCode(), base.errorMessage(), base.timeoutSeconds(), base.deadlineAt(),
-            base.turnsUsed(), base.maxTurns(), base.cancelRequested(), base.createdAt(), base.startedAt(),
-            base.finishedAt(), base.scheduleId(), base.scheduleOccurrenceAt(), base.parkedAt(),
-            base.approvalDeadlineAt(), base.parkCount());
+        tools.jackson.databind.JsonNode result =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(
+                                "{\"title\":\"t\",\"reportMarkdown\":\"r\",\"sources\":["
+                                        + "{\"id\":\"S1\",\"url\":\"https://ok.example/a\"},"
+                                        + "{\"id\":\"S2\",\"url\":\"javascript:alert(1)\"}]}");
+        AgentJobResponse withResult =
+                new AgentJobResponse(
+                        base.id(),
+                        base.agentId(),
+                        base.goal(),
+                        base.status(),
+                        base.terminal(),
+                        base.origin(),
+                        base.originRef(),
+                        base.sessionId(),
+                        base.requestedBy(),
+                        base.progressNote(),
+                        base.progressUpdatedAt(),
+                        base.resultText(),
+                        result,
+                        base.schemaAttempts(),
+                        base.costUsd(),
+                        base.errorCode(),
+                        base.errorMessage(),
+                        base.timeoutSeconds(),
+                        base.deadlineAt(),
+                        base.turnsUsed(),
+                        base.maxTurns(),
+                        base.cancelRequested(),
+                        base.createdAt(),
+                        base.startedAt(),
+                        base.finishedAt(),
+                        base.scheduleId(),
+                        base.scheduleOccurrenceAt(),
+                        base.parkedAt(),
+                        base.approvalDeadlineAt(),
+                        base.parkCount());
         when(jobService.get(agentId, jobId)).thenReturn(withResult);
 
         AgentJobResponse out = service(true, true).get(jobId);
         assertEquals(1, out.resultJson().get("sources").size());
-        assertEquals("S1", out.resultJson().get("sources").get(0).get("id").asText());
+        assertEquals("S1", out.resultJson().get("sources").get(0).get("id").asString());
     }
 
     @Test
@@ -488,7 +626,8 @@ class ResearchRunServiceTest {
         verifyNoInteractions(jobService);
 
         UUID agentId = UUID.randomUUID();
-        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito misuse.
+        // Built first: stubbing a mock inside another stubbing's thenReturn(...) is a Mockito
+        // misuse.
         Agent mine = researchAgent(agentId, "Deep Research", true, Instant.now());
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(mine));
         service(true, true).get(jobId);
@@ -502,9 +641,18 @@ class ResearchRunServiceTest {
     @Test
     void withoutATenantContextNothingRuns() {
         TenantContext.clear();
-        assertEquals(401, statusOf(assertThrows(ResponseStatusException.class, () -> service(true, true).status())));
-        assertEquals(401, statusOf(assertThrows(ResponseStatusException.class,
-            () -> service(true, true).start(question("q")))));
+        assertEquals(
+                401,
+                statusOf(
+                        assertThrows(
+                                ResponseStatusException.class,
+                                () -> service(true, true).status())));
+        assertEquals(
+                401,
+                statusOf(
+                        assertThrows(
+                                ResponseStatusException.class,
+                                () -> service(true, true).start(question("q")))));
         verifyNoInteractions(jobService, agentService);
     }
 
@@ -525,8 +673,8 @@ class ResearchRunServiceTest {
 
         UUID jobId = UUID.randomUUID();
         when(runs.listPage(10, 20)).thenReturn(new AgentJobService.SummarySlice(List.of(), true));
-        ResponseEntity<java.util.List<com.agenticai.core.agents.job.dto.AgentJobSummaryResponse>> page =
-            controller.list(10, 20);
+        ResponseEntity<java.util.List<com.agenticai.core.agents.job.dto.AgentJobSummaryResponse>>
+                page = controller.list(10, 20);
         assertEquals("true", page.getHeaders().getFirst("X-Has-More"));
         assertEquals(List.of(), page.getBody());
         controller.status();

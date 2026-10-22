@@ -2,7 +2,6 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
 import com.agenticai.core.security.logging.LogSafe;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -16,6 +15,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
+import tools.jackson.core.JacksonException;
 
 /**
  * Per-turn side channel that carries an agent's TOOL activity (a step trace) alongside - never
@@ -669,7 +669,7 @@ public final class AgentStepEventEmitter {
         String json;
         try {
             json = AgentStepEventPayloads.toJson(event);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.debug(
                     "Dropping a step event for tool {} - could not serialize it",
                     LogSafe.clean(event.get("tool")),

@@ -27,8 +27,6 @@ import com.agenticai.core.sdlc.dto.RunCodeResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
@@ -37,13 +35,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * D1: the per-tenant daily meter for platform-paid run_code, and how the tool callback applies it.
  */
 class PlatformSandboxRunQuotaTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String INPUT = "{\"code\":\"print(1)\",\"language\":\"python\"}";
     private static final E2bAccess PLATFORM =
             new E2bAccess("platform-key", "platform-tpl", E2bAccess.Source.PLATFORM);
@@ -168,7 +168,7 @@ class PlatformSandboxRunQuotaTest {
         E2bRunCodeToolCallback callback = callback(quota(1, 1));
 
         JsonNode first = MAPPER.readTree(callback.call(INPUT));
-        assertEquals("hi", first.path("stdout").asText());
+        assertEquals("hi", first.path("stdout").asString());
         ArgumentCaptor<RunCodeRequest> request = ArgumentCaptor.forClass(RunCodeRequest.class);
         ArgumentCaptor<E2bAccess> access = ArgumentCaptor.forClass(E2bAccess.class);
         verify(sandbox).runCode(access.capture(), request.capture());
@@ -176,7 +176,7 @@ class PlatformSandboxRunQuotaTest {
         assertEquals(Integer.valueOf(30), request.getValue().timeoutSeconds());
 
         JsonNode second = MAPPER.readTree(callback.call(INPUT));
-        assertTrue(second.path("error").asText().contains("Daily analysis limit reached"));
+        assertTrue(second.path("error").asString().contains("Daily analysis limit reached"));
         assertFalse(second.has("stdout"));
         verify(sandbox, times(1)).runCode(any(E2bAccess.class), any(RunCodeRequest.class));
         // The tenant-key-only entry point is never used once a resolver is wired.
@@ -192,8 +192,8 @@ class PlatformSandboxRunQuotaTest {
         PlatformSandboxRunQuota quota = quota(0, 0);
         E2bRunCodeToolCallback callback = callback(quota);
 
-        assertEquals("hi", MAPPER.readTree(callback.call(INPUT)).path("stdout").asText());
-        assertEquals("hi", MAPPER.readTree(callback.call(INPUT)).path("stdout").asText());
+        assertEquals("hi", MAPPER.readTree(callback.call(INPUT)).path("stdout").asString());
+        assertEquals("hi", MAPPER.readTree(callback.call(INPUT)).path("stdout").asString());
         ArgumentCaptor<RunCodeRequest> request = ArgumentCaptor.forClass(RunCodeRequest.class);
         verify(sandbox, times(2)).runCode(any(E2bAccess.class), request.capture());
         assertNull(request.getValue().timeoutSeconds());
@@ -215,7 +215,7 @@ class PlatformSandboxRunQuotaTest {
 
         // No sandbox was ever created: the run is given back.
         JsonNode out = MAPPER.readTree(callback(quota).call(INPUT));
-        assertTrue(out.path("error").asText().contains("E2B unreachable"));
+        assertTrue(out.path("error").asString().contains("E2B unreachable"));
         assertEquals(0, quota.usedToday());
 
         // The sandbox existed and the runner failed (user code can force this): stays counted.
@@ -226,7 +226,7 @@ class PlatformSandboxRunQuotaTest {
         assertTrue(
                 MAPPER.readTree(callback(quota).call(INPUT))
                         .path("error")
-                        .asText()
+                        .asString()
                         .contains("Daily analysis limit reached"));
     }
 
@@ -283,7 +283,7 @@ class PlatformSandboxRunQuotaTest {
         when(resolver.resolveForCodeExecution()).thenReturn(PLATFORM);
         as("t1");
         JsonNode refused = MAPPER.readTree(callback(null).call(INPUT));
-        assertTrue(refused.path("error").asText().contains("not available yet"));
+        assertTrue(refused.path("error").asString().contains("not available yet"));
 
         when(resolver.resolveForCodeExecution()).thenThrow(new E2bNotConfiguredException());
         JsonNode notConfigured = MAPPER.readTree(callback(quota(1, 1)).call(INPUT));

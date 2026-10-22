@@ -8,12 +8,12 @@ import static org.mockito.Mockito.never;
 
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /** Parameter extractor of {@link WorkflowAiNodeHandler}, with a scripted fake model. */
 class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
@@ -41,13 +41,13 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                 "Asha wants to pay 1,200.50 urgently");
         assertEquals("OK", r.status());
         JsonNode out = json(r.output());
-        assertEquals("Asha", out.get("name").asText());
+        assertEquals("Asha", out.get("name").asString());
         assertEquals(1200.5, out.get("amount").asDouble(), 1e-9);
         assertTrue(out.get("amount").isNumber());
         assertTrue(out.get("urgent").asBoolean());
         assertTrue(out.get("phone").isNull());
         assertEquals(1, out.get("_missing").size());
-        assertEquals("phone", out.get("_missing").get(0).asText());
+        assertEquals("phone", out.get("_missing").get(0).asString());
         assertEquals(1, model.requests.size(), "no repair is needed when the reply is valid");
         assertTrue(model.requests.get(0).system().contains("NEVER guess"));
         assertTrue(model.requests.get(0).user().contains("amount (number, required)"));
@@ -77,9 +77,9 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                 .output());
         assertEquals(7, out.get("qty").asInt());
         assertTrue(out.get("qty").isIntegralNumber());
-        assertEquals("Green", out.get("color").asText());
+        assertEquals("Green", out.get("color").asString());
         assertEquals(3, out.get("tags").size());
-        assertEquals("b", out.get("tags").get(1).asText());
+        assertEquals("b", out.get("tags").get(1).asString());
         assertEquals(0.25, out.get("ratio").asDouble(), 1e-9);
         assertEquals(0, out.get("_missing").size());
     }
@@ -116,8 +116,8 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                 .output());
         assertEquals(2, stubborn.requests.size(), "exactly one repair retry");
         assertTrue(bad.get("amount").isNull());
-        assertEquals("amount", bad.get("_invalid").get(0).asText());
-        assertEquals("amount", bad.get("_missing").get(0).asText());
+        assertEquals("amount", bad.get("_invalid").get(0).asString());
+        assertEquals("amount", bad.get("_missing").get(0).asString());
     }
 
     @Test
@@ -133,7 +133,7 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                 .executeParameterExtractor(
                                         node("parameter_extractor", config), "in Pune")
                                 .output());
-        assertEquals("Pune", ok.get("city").asText());
+        assertEquals("Pune", ok.get("city").asString());
 
         FakeModel never = new FakeModel().reply("no").reply("still no");
         JsonNode bad =
@@ -143,8 +143,8 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                         node("parameter_extractor", config), "in Pune")
                                 .output());
         assertTrue(bad.get("city").isNull());
-        assertEquals("unusable_model_reply", bad.get("_error").asText());
-        assertEquals("city", bad.get("_missing").get(0).asText());
+        assertEquals("unusable_model_reply", bad.get("_error").asString());
+        assertEquals("city", bad.get("_missing").get(0).asString());
     }
 
     @Test
@@ -162,7 +162,7 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                         node("parameter_extractor", config), "in Pune")
                                 .output());
         assertEquals(1, down.requests.size());
-        assertEquals("model_call_failed", out.get("_error").asText());
+        assertEquals("model_call_failed", out.get("_error").asString());
 
         FakeModel quota = new FakeModel().fail(new TenantLimitExceededException("quota"));
         assertThrows(
@@ -219,8 +219,8 @@ class WorkflowAiNodeExtractorTest extends WorkflowAiNodeHandlerTestBase {
                                         node("parameter_extractor", config), "  ")
                                 .output());
         assertTrue(model.requests.isEmpty());
-        assertEquals("empty_input", out.get("_error").asText());
-        assertEquals("city", out.get("_missing").get(0).asText());
+        assertEquals("empty_input", out.get("_error").asString());
+        assertEquals("city", out.get("_missing").get(0).asString());
     }
 
     @Test

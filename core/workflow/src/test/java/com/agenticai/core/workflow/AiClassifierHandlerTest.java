@@ -6,17 +6,20 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
-/** {@link AiClassifierHandler} used directly (the facade path is covered by WorkflowAiNodeHandlerTest). */
+/**
+ * {@link AiClassifierHandler} used directly (the facade path is covered by
+ * WorkflowAiNodeHandlerTest).
+ */
 class AiClassifierHandlerTest {
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     @SuppressWarnings("unchecked")
     private static AiClassifierHandler handler(WorkflowAiModel model, boolean enabled) {
@@ -27,9 +30,11 @@ class AiClassifierHandlerTest {
 
     private static WorkflowNodeDto node() {
         Map<String, Object> config = new HashMap<>();
-        config.put("classes", List.of(
-            Map.of("handle", "billing", "label", "Billing", "description", "money"),
-            Map.of("handle", "other", "label", "Other", "description", "rest")));
+        config.put(
+                "classes",
+                List.of(
+                        Map.of("handle", "billing", "label", "Billing", "description", "money"),
+                        Map.of("handle", "other", "label", "Other", "description", "rest")));
         config.put("defaultClass", "other");
         return new WorkflowNodeDto("n1", "question_classifier", Map.of(), Map.of("config", config));
     }
@@ -37,10 +42,14 @@ class AiClassifierHandlerTest {
     @Test
     void routesToTheClassTheModelChose() {
         List<WorkflowAiModel.Request> seen = new ArrayList<>();
-        NodeExecutionResult r = handler(req -> {
-            seen.add(req);
-            return "{\"class\":\"billing\",\"confidence\":0.9}";
-        }, true).execute(node(), "I was charged twice");
+        NodeExecutionResult r =
+                handler(
+                                req -> {
+                                    seen.add(req);
+                                    return "{\"class\":\"billing\",\"confidence\":0.9}";
+                                },
+                                true)
+                        .execute(node(), "I was charged twice");
         assertEquals("billing", r.branch());
         assertEquals("I was charged twice", r.output());
         assertEquals(AiClassifierHandler_CLASSIFIER_SYSTEM(), seen.get(0).system());
@@ -50,15 +59,29 @@ class AiClassifierHandlerTest {
 
     @Test
     void fallsBackToDefaultOnProviderFailureOnBadReplyAndWhenDisabled() {
-        assertEquals("other", handler(req -> { throw new IllegalStateException("x"); }, true).execute(node(), "t").branch());
+        assertEquals(
+                "other",
+                handler(
+                                req -> {
+                                    throw new IllegalStateException("x");
+                                },
+                                true)
+                        .execute(node(), "t")
+                        .branch());
         assertEquals("other", handler(req -> "no json", true).execute(node(), "t").branch());
-        assertEquals("other", handler(req -> "{\"class\":\"billing\"}", false).execute(node(), "t").branch());
+        assertEquals(
+                "other",
+                handler(req -> "{\"class\":\"billing\"}", false).execute(node(), "t").branch());
         assertEquals("other", handler(null, true).execute(node(), "t").branch());
     }
 
     @Test
     void lowConfidenceFallsBack() {
-        assertEquals("other", handler(req -> "{\"class\":\"billing\",\"confidence\":0.1}", true).execute(node(), "t").branch());
+        assertEquals(
+                "other",
+                handler(req -> "{\"class\":\"billing\",\"confidence\":0.1}", true)
+                        .execute(node(), "t")
+                        .branch());
     }
 
     private static String AiClassifierHandler_CLASSIFIER_SYSTEM() {

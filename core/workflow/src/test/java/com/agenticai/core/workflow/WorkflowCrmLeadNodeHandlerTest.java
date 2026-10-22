@@ -14,7 +14,6 @@ import com.agenticai.core.omnichannel.crm.LeadService;
 import com.agenticai.core.omnichannel.crm.LeadStage;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,11 +34,14 @@ class WorkflowCrmLeadNodeHandlerTest {
         service = mock(LeadService.class);
         ObjectProvider<LeadService> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(service);
-        handler = new WorkflowCrmLeadNodeHandler(provider, new ObjectMapper());
+        handler =
+                new WorkflowCrmLeadNodeHandler(
+                        provider, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static WorkflowNodeDto node(Map<String, Object> config) {
-        return new WorkflowNodeDto("n1", "crm_lead", null, Map.of("label", "CRM", "config", config));
+        return new WorkflowNodeDto(
+                "n1", "crm_lead", null, Map.of("label", "CRM", "config", config));
     }
 
     private static Lead lead(String email, LeadStage stage) {
@@ -52,10 +54,23 @@ class WorkflowCrmLeadNodeHandlerTest {
     @Test
     void upsertRendersTemplatesFromJsonInput() {
         when(service.upsert(any())).thenReturn(lead("ann@x.com", LeadStage.NEW));
-        NodeExecutionResult r = handler.execute(
-            node(Map.of("action", "upsert", "email", "{{email}}", "name", "{{name}}", "source", "workflow", "stage", "contacted")),
-            "{\"email\":\"ann@x.com\",\"name\":\"Ann\"}");
-        ArgumentCaptor<LeadService.LeadInput> in = ArgumentCaptor.forClass(LeadService.LeadInput.class);
+        NodeExecutionResult r =
+                handler.execute(
+                        node(
+                                Map.of(
+                                        "action",
+                                        "upsert",
+                                        "email",
+                                        "{{email}}",
+                                        "name",
+                                        "{{name}}",
+                                        "source",
+                                        "workflow",
+                                        "stage",
+                                        "contacted")),
+                        "{\"email\":\"ann@x.com\",\"name\":\"Ann\"}");
+        ArgumentCaptor<LeadService.LeadInput> in =
+                ArgumentCaptor.forClass(LeadService.LeadInput.class);
         verify(service).upsert(in.capture());
         assertEquals("ann@x.com", in.getValue().email());
         assertEquals("Ann", in.getValue().name());
@@ -69,8 +84,10 @@ class WorkflowCrmLeadNodeHandlerTest {
         Lead l = lead("ann@x.com", LeadStage.NEW);
         when(service.findByEmail("ann@x.com")).thenReturn(Optional.of(l));
         when(service.changeStage(l.getId(), LeadStage.QUALIFIED, null)).thenReturn(l);
-        NodeExecutionResult r = handler.execute(
-            node(Map.of("action", "stage", "email", "{{input}}", "stage", "QUALIFIED")), "ann@x.com");
+        NodeExecutionResult r =
+                handler.execute(
+                        node(Map.of("action", "stage", "email", "{{input}}", "stage", "QUALIFIED")),
+                        "ann@x.com");
         assertEquals("OK", r.status());
         verify(service).changeStage(l.getId(), LeadStage.QUALIFIED, null);
     }
@@ -78,8 +95,10 @@ class WorkflowCrmLeadNodeHandlerTest {
     @Test
     void stageActionWithUnknownLeadIsSkippedNotFailed() {
         when(service.findByEmail("nobody@x.com")).thenReturn(Optional.empty());
-        NodeExecutionResult r = handler.execute(
-            node(Map.of("action", "stage", "email", "nobody@x.com", "stage", "WON")), "in");
+        NodeExecutionResult r =
+                handler.execute(
+                        node(Map.of("action", "stage", "email", "nobody@x.com", "stage", "WON")),
+                        "in");
         assertEquals("SKIPPED", r.status());
         assertEquals("in", r.output());
         verify(service, never()).changeStage(any(), any(), any());
@@ -91,13 +110,20 @@ class WorkflowCrmLeadNodeHandlerTest {
         when(service.findByEmail("ann@x.com")).thenReturn(Optional.of(l));
         when(service.get(l.getId())).thenReturn(l);
         handler.execute(node(Map.of("action", "activity", "email", "ann@x.com")), "called back");
-        verify(service).addActivity(any(), org.mockito.ArgumentMatchers.eq(LeadActivityType.NOTE),
-            org.mockito.ArgumentMatchers.eq("called back"), any());
+        verify(service)
+                .addActivity(
+                        any(),
+                        org.mockito.ArgumentMatchers.eq(LeadActivityType.NOTE),
+                        org.mockito.ArgumentMatchers.eq("called back"),
+                        any());
     }
 
     @Test
     void invalidStageIsSkippedWithMessage() {
-        NodeExecutionResult r = handler.execute(node(Map.of("action", "upsert", "email", "a@x.com", "stage", "bogus")), "in");
+        NodeExecutionResult r =
+                handler.execute(
+                        node(Map.of("action", "upsert", "email", "a@x.com", "stage", "bogus")),
+                        "in");
         assertEquals("SKIPPED", r.status());
         assertTrue(r.summary().contains("failed"));
     }
@@ -106,7 +132,9 @@ class WorkflowCrmLeadNodeHandlerTest {
     void unavailableServicePassesInputThrough() {
         @SuppressWarnings("unchecked")
         ObjectProvider<LeadService> none = mock(ObjectProvider.class);
-        NodeExecutionResult r = new WorkflowCrmLeadNodeHandler(none, new ObjectMapper()).execute(node(Map.of()), "x");
+        NodeExecutionResult r =
+                new WorkflowCrmLeadNodeHandler(none, com.agenticai.core.json.JsonMappers.plain())
+                        .execute(node(Map.of()), "x");
         assertEquals("SKIPPED", r.status());
         assertEquals("x", r.output());
     }

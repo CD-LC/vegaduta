@@ -7,7 +7,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Eval credibility + reproducibility surface (V375), kept apart from {@link EvalDatasetController}
@@ -106,8 +106,7 @@ public class EvalCredibilityController {
         if (saved.getGraderSpec() != null) {
             try {
                 echoed =
-                        new com.fasterxml.jackson.databind.ObjectMapper()
-                                .readTree(saved.getGraderSpec());
+                        com.agenticai.core.json.JsonMappers.plain().readTree(saved.getGraderSpec());
             } catch (Exception ignored) {
                 echoed = null;
             }

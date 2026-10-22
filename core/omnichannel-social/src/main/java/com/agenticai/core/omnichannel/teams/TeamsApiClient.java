@@ -5,8 +5,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -19,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for the two HTTP surfaces a Bot Framework bot needs - the same
@@ -175,9 +175,9 @@ public class TeamsApiClient {
             } catch (Exception e) {
                 node = objectMapper.nullNode();
             }
-            String accessToken = node.path("access_token").asText(null);
+            String accessToken = node.path("access_token").asString(null);
             if (response.statusCode() != 200 || accessToken == null) {
-                String detail = node.path("error_description").asText(response.body());
+                String detail = node.path("error_description").asString(response.body());
                 throw new ChannelConfigurationException(
                         "teams",
                         "Microsoft Entra rejected these bot credentials ("

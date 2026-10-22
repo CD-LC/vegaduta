@@ -7,8 +7,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,36 +26,35 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Canvas comments (phase 4). Threads anchor to a node ({@code nodeId}) or a
- * canvas point ({@code x}/{@code y}); replies are one level deep (a reply to
- * a reply joins the root's thread).
+ * Canvas comments (phase 4). Threads anchor to a node ({@code nodeId}) or a canvas point ({@code
+ * x}/{@code y}); replies are one level deep (a reply to a reply joins the root's thread).
  *
- * <p><b>Who may do what.</b> {@link com.agenticai.core.sharing.PermissionLevel}
- * ranks RUNNER &lt; VIEWER &lt; EDITOR, and RUNNER cannot see the graph at all,
- * so "RUNNER or above" collapses to VIEWER: anyone who can see the canvas can
- * read AND write comments - reviewers are exactly the people who view but do
- * not edit. Only the author edits or deletes a comment; the thread's author or
- * any EDITOR resolves / reopens it.
+ * <p><b>Who may do what.</b> {@link com.agenticai.core.sharing.PermissionLevel} ranks RUNNER &lt;
+ * VIEWER &lt; EDITOR, and RUNNER cannot see the graph at all, so "RUNNER or above" collapses to
+ * VIEWER: anyone who can see the canvas can read AND write comments - reviewers are exactly the
+ * people who view but do not edit. Only the author edits or deletes a comment; the thread's author
+ * or any EDITOR resolves / reopens it.
  *
- * <p><b>Orphans.</b> A thread whose node is no longer in the saved graph is
- * returned with {@code orphaned: true} - never deleted.
+ * <p><b>Orphans.</b> A thread whose node is no longer in the saved graph is returned with {@code
+ * orphaned: true} - never deleted.
  *
- * <p><b>Deletes</b> are hard unless the comment has live replies, in which
- * case it is blanked ({@code deleted: true}, body null) so the thread stays
- * readable.
+ * <p><b>Deletes</b> are hard unless the comment has live replies, in which case it is blanked
+ * ({@code deleted: true}, body null) so the thread stays readable.
  *
- * <p>Deliberately NOT {@code @Transactional}: {@code context()} probes EDITOR
- * access by catching the access exception, which inside a surrounding
- * transaction could mark it rollback-only. Every write here is a single-row
- * repository call (resolve touches the root only), so nothing needs atomicity.
+ * <p>Deliberately NOT {@code @Transactional}: {@code context()} probes EDITOR access by catching
+ * the access exception, which inside a surrounding transaction could mark it rollback-only. Every
+ * write here is a single-row repository call (resolve touches the root only), so nothing needs
+ * atomicity.
  *
- * <p><b>Mentions</b> are user subject ids. Each newly mentioned user (not the
- * author) gets a WORKFLOW notification in their bell linking to
- * {@code /workflows/{workflowId}?comment={commentId}}. Display names: the
- * tenant schema has no user directory, so a mention resolves to the name that
- * user last commented under here, else null (the client shows the id).
+ * <p><b>Mentions</b> are user subject ids. Each newly mentioned user (not the author) gets a
+ * WORKFLOW notification in their bell linking to {@code
+ * /workflows/{workflowId}?comment={commentId}}. Display names: the tenant schema has no user
+ * directory, so a mention resolves to the name that user last commented under here, else null (the
+ * client shows the id).
  */
 @Service
 public class WorkflowCommentService {
@@ -73,40 +70,51 @@ public class WorkflowCommentService {
     private final ObjectMapper objectMapper;
 
     public WorkflowCommentService(
-        WorkflowCommentRepository repository, WorkflowService workflowService,
-        ObjectProvider<NotificationService> notifications, ObjectMapper objectMapper
-    ) {
+            WorkflowCommentRepository repository,
+            WorkflowService workflowService,
+            ObjectProvider<NotificationService> notifications,
+            ObjectMapper objectMapper) {
         this.repository = repository;
         this.workflowService = workflowService;
         this.notifications = notifications;
         this.objectMapper = objectMapper;
     }
 
-    public record Person(String id, String displayName) {
-    }
+    public record Person(String id, String displayName) {}
 
-    public record Anchor(Double x, Double y) {
-    }
+    public record Anchor(Double x, Double y) {}
 
     public record CommentView(
-        UUID id, UUID parentId, String nodeId, Anchor anchor, String body, List<Person> mentions, Person author,
-        boolean resolved, String resolvedBy, Instant resolvedAt, boolean deleted, boolean orphaned,
-        boolean canEdit, boolean canResolve, Instant createdAt, Instant updatedAt, List<CommentView> replies
-    ) {
-    }
+            UUID id,
+            UUID parentId,
+            String nodeId,
+            Anchor anchor,
+            String body,
+            List<Person> mentions,
+            Person author,
+            boolean resolved,
+            String resolvedBy,
+            Instant resolvedAt,
+            boolean deleted,
+            boolean orphaned,
+            boolean canEdit,
+            boolean canResolve,
+            Instant createdAt,
+            Instant updatedAt,
+            List<CommentView> replies) {}
 
-    public record CreateRequest(String body, String nodeId, Double x, Double y, UUID parentId, List<String> mentions) {
-    }
+    public record CreateRequest(
+            String body, String nodeId, Double x, Double y, UUID parentId, List<String> mentions) {}
 
-    public record UpdateRequest(String body, List<String> mentions, Boolean resolved) {
-    }
+    public record UpdateRequest(String body, List<String> mentions, Boolean resolved) {}
 
     // ------------------------------------------------------------------
 
     public List<CommentView> list(UUID workflowId) {
         WorkflowDefinition definition = workflowService.requireViewerAccess(workflowId);
         Context ctx = context(workflowId);
-        List<WorkflowComment> all = repository.findByWorkflowIdOrderByCreatedAtAsc(definition.getId());
+        List<WorkflowComment> all =
+                repository.findByWorkflowIdOrderByCreatedAtAsc(definition.getId());
         Map<UUID, List<WorkflowComment>> replies = new LinkedHashMap<>();
         List<WorkflowComment> roots = new ArrayList<>();
         for (WorkflowComment c : all) {
@@ -142,22 +150,39 @@ public class WorkflowCommentService {
             WorkflowComment parent = load(workflowId, request.parentId());
             parentId = parent.getParentId() != null ? parent.getParentId() : parent.getId();
         } else {
-            nodeId = request.nodeId() == null || request.nodeId().isBlank() ? null : request.nodeId().strip();
+            nodeId =
+                    request.nodeId() == null || request.nodeId().isBlank()
+                            ? null
+                            : request.nodeId().strip();
             if (nodeId != null && nodeId.length() > 128) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "nodeId is too long.");
             }
             if (nodeId == null) {
-                if (request.x() == null || request.y() == null || !Double.isFinite(request.x()) || !Double.isFinite(request.y())) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "A new comment needs a nodeId or both x and y.");
+                if (request.x() == null
+                        || request.y() == null
+                        || !Double.isFinite(request.x())
+                        || !Double.isFinite(request.y())) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "A new comment needs a nodeId or both x and y.");
                 }
                 x = request.x();
                 y = request.y();
             }
         }
 
-        WorkflowComment saved = repository.save(new WorkflowComment(
-            workflowId, parentId, nodeId, x, y, body, writeMentions(mentions), ctx.userId, currentDisplayName()));
+        WorkflowComment saved =
+                repository.save(
+                        new WorkflowComment(
+                                workflowId,
+                                parentId,
+                                nodeId,
+                                x,
+                                y,
+                                body,
+                                writeMentions(mentions),
+                                ctx.userId,
+                                currentDisplayName()));
         notifyMentions(workflowId, saved, mentions, Set.of());
         WorkflowComment root = parentId == null ? saved : load(workflowId, parentId);
         return view(saved, root, ctx, new HashMap<>(), List.of());
@@ -175,25 +200,32 @@ public class WorkflowCommentService {
         }
         if (request.body() != null || request.mentions() != null) {
             if (!ctx.userId.equals(comment.getAuthorId())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can edit a comment.");
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Only the author can edit a comment.");
             }
             List<String> before = readMentions(comment.getMentions());
-            List<String> mentions = request.mentions() == null ? before : cleanMentions(request.mentions());
+            List<String> mentions =
+                    request.mentions() == null ? before : cleanMentions(request.mentions());
             String body = request.body() == null ? comment.getBody() : requireBody(request.body());
             comment.edit(body, writeMentions(mentions));
             notifyMentions(workflowId, comment, mentions, new HashSet<>(before));
         }
         if (request.resolved() != null) {
-            WorkflowComment root = comment.getParentId() == null ? comment : load(workflowId, comment.getParentId());
+            WorkflowComment root =
+                    comment.getParentId() == null
+                            ? comment
+                            : load(workflowId, comment.getParentId());
             if (!canResolve(root, ctx)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Only the thread's author or an editor can resolve it.");
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "Only the thread's author or an editor can resolve it.");
             }
             root.setResolved(request.resolved(), ctx.userId);
             repository.save(root);
         }
         repository.save(comment);
-        WorkflowComment root = comment.getParentId() == null ? comment : load(workflowId, comment.getParentId());
+        WorkflowComment root =
+                comment.getParentId() == null ? comment : load(workflowId, comment.getParentId());
         return view(comment, root, ctx, new HashMap<>(), List.of());
     }
 
@@ -202,9 +234,11 @@ public class WorkflowCommentService {
         Context ctx = context(workflowId);
         WorkflowComment comment = load(workflowId, commentId);
         if (!ctx.userId.equals(comment.getAuthorId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can delete a comment.");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Only the author can delete a comment.");
         }
-        if (comment.getParentId() == null && repository.existsByParentIdAndDeletedAtIsNull(comment.getId())) {
+        if (comment.getParentId() == null
+                && repository.existsByParentIdAndDeletedAtIsNull(comment.getId())) {
             comment.markDeleted();
             repository.save(comment);
         } else {
@@ -215,8 +249,7 @@ public class WorkflowCommentService {
     // ------------------------------------------------------------------
 
     /** Per-request facts: who is calling, can they edit the workflow, which nodes exist. */
-    private record Context(String userId, boolean editor, Set<String> nodeIds) {
-    }
+    private record Context(String userId, boolean editor, Set<String> nodeIds) {}
 
     private Context context(UUID workflowId) {
         String userId = TenantContext.current().map(TenantContext::getSubject).orElse(null);
@@ -236,7 +269,10 @@ public class WorkflowCommentService {
                 nodeIds.add(node.id());
             }
         } catch (RuntimeException e) {
-            log.debug("Could not read graph of workflow {} for orphan detection: {}", workflowId, e.getMessage());
+            log.debug(
+                    "Could not read graph of workflow {} for orphan detection: {}",
+                    workflowId,
+                    e.getMessage());
         }
         return new Context(userId, editor, nodeIds);
     }
@@ -246,35 +282,65 @@ public class WorkflowCommentService {
     }
 
     private WorkflowComment load(UUID workflowId, UUID commentId) {
-        return repository.findByIdAndWorkflowId(commentId, workflowId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found."));
+        return repository
+                .findByIdAndWorkflowId(commentId, workflowId)
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND, "Comment not found."));
     }
 
     private CommentView view(
-        WorkflowComment c, WorkflowComment root, Context ctx, Map<String, String> names, List<CommentView> replies
-    ) {
+            WorkflowComment c,
+            WorkflowComment root,
+            Context ctx,
+            Map<String, String> names,
+            List<CommentView> replies) {
         boolean deleted = c.getDeletedAt() != null;
-        boolean orphaned = root.getNodeId() != null && !ctx.nodeIds().isEmpty() && !ctx.nodeIds().contains(root.getNodeId());
+        boolean orphaned =
+                root.getNodeId() != null
+                        && !ctx.nodeIds().isEmpty()
+                        && !ctx.nodeIds().contains(root.getNodeId());
         List<Person> mentioned = new ArrayList<>();
         for (String id : readMentions(c.getMentions())) {
             mentioned.add(new Person(id, nameOf(id, names)));
         }
         Anchor anchor = c.getAnchorX() == null ? null : new Anchor(c.getAnchorX(), c.getAnchorY());
         return new CommentView(
-            c.getId(), c.getParentId(), c.getParentId() == null ? c.getNodeId() : root.getNodeId(), anchor,
-            c.getBody(), mentioned, new Person(c.getAuthorId(), c.getAuthorName()),
-            root.isResolved(), root.getResolvedBy(), root.getResolvedAt(), deleted, orphaned,
-            !deleted && ctx.userId().equals(c.getAuthorId()), canResolve(root, ctx),
-            c.getCreatedAt(), c.getUpdatedAt(), replies);
+                c.getId(),
+                c.getParentId(),
+                c.getParentId() == null ? c.getNodeId() : root.getNodeId(),
+                anchor,
+                c.getBody(),
+                mentioned,
+                new Person(c.getAuthorId(), c.getAuthorName()),
+                root.isResolved(),
+                root.getResolvedBy(),
+                root.getResolvedAt(),
+                deleted,
+                orphaned,
+                !deleted && ctx.userId().equals(c.getAuthorId()),
+                canResolve(root, ctx),
+                c.getCreatedAt(),
+                c.getUpdatedAt(),
+                replies);
     }
 
     private String nameOf(String userId, Map<String, String> cache) {
-        return cache.computeIfAbsent(userId, id -> repository
-            .findFirstByAuthorIdAndAuthorNameIsNotNullOrderByCreatedAtDesc(id)
-            .map(WorkflowComment::getAuthorName).orElse(null));
+        return cache.computeIfAbsent(
+                userId,
+                id ->
+                        repository
+                                .findFirstByAuthorIdAndAuthorNameIsNotNullOrderByCreatedAtDesc(id)
+                                .map(WorkflowComment::getAuthorName)
+                                .orElse(null));
     }
 
-    private void notifyMentions(UUID workflowId, WorkflowComment comment, List<String> mentions, Set<String> alreadyNotified) {
+    private void notifyMentions(
+            UUID workflowId,
+            WorkflowComment comment,
+            List<String> mentions,
+            Set<String> alreadyNotified) {
         NotificationService service = notifications.getIfAvailable();
         if (service == null) {
             return;
@@ -289,12 +355,20 @@ public class WorkflowCommentService {
                 continue;
             }
             try {
-                service.create(userId, NotificationCategory.WORKFLOW, who + " mentioned you on a workflow",
-                    preview, NotificationSeverity.INFO,
-                    "/workflows/" + workflowId + "?comment=" + comment.getId(), null);
+                service.create(
+                        userId,
+                        NotificationCategory.WORKFLOW,
+                        who + " mentioned you on a workflow",
+                        preview,
+                        NotificationSeverity.INFO,
+                        "/workflows/" + workflowId + "?comment=" + comment.getId(),
+                        null);
             } catch (RuntimeException e) {
                 // Best-effort, same posture as every other notification call site.
-                log.warn("Failed to notify {} of a workflow comment mention: {}", userId, e.getMessage());
+                log.warn(
+                        "Failed to notify {} of a workflow comment mention: {}",
+                        userId,
+                        e.getMessage());
             }
         }
     }
@@ -305,8 +379,9 @@ public class WorkflowCommentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A comment can't be empty.");
         }
         if (b.length() > MAX_BODY_CHARS) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "A comment can be at most " + MAX_BODY_CHARS + " characters.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A comment can be at most " + MAX_BODY_CHARS + " characters.");
         }
         return b;
     }
@@ -322,7 +397,8 @@ public class WorkflowCommentService {
             }
         }
         if (out.size() > MAX_MENTIONS) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At most " + MAX_MENTIONS + " mentions per comment.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "At most " + MAX_MENTIONS + " mentions per comment.");
         }
         return new ArrayList<>(out);
     }
@@ -343,13 +419,16 @@ public class WorkflowCommentService {
             return List.of();
         }
         try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() { });
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
         } catch (Exception e) {
             return List.of();
         }
     }
 
-    /** The caller's display name from their token (name, then preferred_username, then email), or null. */
+    /**
+     * The caller's display name from their token (name, then preferred_username, then email), or
+     * null.
+     */
     static String currentDisplayName() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {

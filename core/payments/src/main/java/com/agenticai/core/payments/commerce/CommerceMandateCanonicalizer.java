@@ -3,9 +3,6 @@ package com.agenticai.core.payments.commerce;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,6 +11,9 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Canonical JSON for {@link CommerceMandate} signatures - the same contract as {@code

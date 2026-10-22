@@ -1,22 +1,25 @@
 package com.agenticai.core.agents.importer;
 
 import com.agenticai.core.agents.importer.AgentImportDtos.ConversionReport;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-/** Test helper: loads the realistic export fixtures under {@code src/test/resources/agent-import}. */
+/**
+ * Test helper: loads the realistic export fixtures under {@code src/test/resources/agent-import}.
+ */
 final class AgentImportFixtures {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
-    private AgentImportFixtures() {
-    }
+    private AgentImportFixtures() {}
 
     static String text(String name) {
-        try (InputStream in = AgentImportFixtures.class.getResourceAsStream("/agent-import/" + name)) {
+        try (InputStream in =
+                AgentImportFixtures.class.getResourceAsStream("/agent-import/" + name)) {
             if (in == null) {
                 throw new IllegalStateException("missing fixture " + name);
             }
@@ -33,12 +36,15 @@ final class AgentImportFixtures {
     static JsonNode parse(String json) {
         try {
             return MAPPER.readTree(json);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    /** The whole report flattened to one lowercase string, for "this text must not appear anywhere" checks. */
+    /**
+     * The whole report flattened to one lowercase string, for "this text must not appear anywhere"
+     * checks.
+     */
     static String flat(ConversionReport report) {
         return report.toString().toLowerCase();
     }

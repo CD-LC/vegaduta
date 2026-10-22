@@ -4,8 +4,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -25,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * What is deployed: {@code GET /api/platform/version}.
@@ -197,7 +198,7 @@ public class PlatformVersionService {
         }
         try {
             return JSON.readTree(body);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }
@@ -208,8 +209,8 @@ public class PlatformVersionService {
         }
         for (String name : names) {
             JsonNode v = body.get(name);
-            if (v != null && v.isValueNode() && !v.asText().isBlank()) {
-                String s = v.asText();
+            if (v != null && v.isValueNode() && !v.asString().isBlank()) {
+                String s = v.asString();
                 return s.length() > 100 ? s.substring(0, 100) : s;
             }
         }

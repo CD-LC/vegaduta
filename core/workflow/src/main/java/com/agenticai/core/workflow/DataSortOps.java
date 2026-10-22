@@ -10,9 +10,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.bool;
 import static com.agenticai.core.workflow.WorkflowDataOps.mapList;
 import static com.agenticai.core.workflow.WorkflowDataOps.str;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,15 +17,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
- * The {@code sort} data operation. {@code sortKeys: [{field, direction: asc|desc, type: auto|string|number|date}]}
- * (or the single-key shorthand {@code field} + {@code direction}), {@code caseSensitive}, {@code itemsField}.
- * Stable; missing / null values sort last in both directions. {@code auto} picks number, then date, then text by
- * looking at every value of the key once (so the comparator is a consistent total order even on mixed data).
+ * The {@code sort} data operation. {@code sortKeys: [{field, direction: asc|desc, type:
+ * auto|string|number|date}]} (or the single-key shorthand {@code field} + {@code direction}),
+ * {@code caseSensitive}, {@code itemsField}. Stable; missing / null values sort last in both
+ * directions. {@code auto} picks number, then date, then text by looking at every value of the key
+ * once (so the comparator is a consistent total order even on mixed data).
  *
- * <p>Strategy: each key column is sorted by a {@link SortType}, which knows how to derive a comparable key from a
- * JSON value and how to compare two keys. Extracted from {@link WorkflowDataOps}.
+ * <p>Strategy: each key column is sorted by a {@link SortType}, which knows how to derive a
+ * comparable key from a JSON value and how to compare two keys. Extracted from {@link
+ * WorkflowDataOps}.
  */
 final class DataSortOps {
 
@@ -51,7 +53,7 @@ final class DataSortOps {
                 if (v.isNumber()) {
                     return v.asLong();
                 }
-                return v.isTextual() ? parseDate(v.asText()) : null;
+                return v.isString() ? parseDate(v.asString()) : null;
             }
 
             @Override
@@ -67,7 +69,9 @@ final class DataSortOps {
 
             @Override
             int compare(Object a, Object b, boolean caseSensitive) {
-                return caseSensitive ? ((String) a).compareTo((String) b) : ((String) a).compareToIgnoreCase((String) b);
+                return caseSensitive
+                        ? ((String) a).compareTo((String) b)
+                        : ((String) a).compareToIgnoreCase((String) b);
             }
         };
 
@@ -81,7 +85,9 @@ final class DataSortOps {
             return id;
         }
 
-        /** The comparable key of a present value (null when it cannot be keyed, which sorts last). */
+        /**
+         * The comparable key of a present value (null when it cannot be keyed, which sorts last).
+         */
         abstract Object key(JsonNode v);
 
         abstract int compare(Object a, Object b, boolean caseSensitive);
@@ -110,7 +116,7 @@ final class DataSortOps {
                 if (canonicalNumber(v) == null) {
                     allNumbers = false;
                 }
-                if (!v.isTextual() || parseDate(v.asText()) == null) {
+                if (!v.isString() || parseDate(v.asString()) == null) {
                     allDates = false;
                 }
             }
@@ -124,12 +130,14 @@ final class DataSortOps {
         }
     }
 
-    private DataSortOps() {
-    }
+    private DataSortOps() {}
 
-    static WorkflowDataOps.Outcome sort(ObjectMapper mapper, Map<String, Object> config, WorkflowDataOps.Items items) {
+    static WorkflowDataOps.Outcome sort(
+            ObjectMapper mapper, Map<String, Object> config, WorkflowDataOps.Items items) {
         List<Map<String, Object>> specs = mapList(config.get("sortKeys"));
-        if (specs.isEmpty() && str(config.get("field")) != null && !str(config.get("field")).isBlank()) {
+        if (specs.isEmpty()
+                && str(config.get("field")) != null
+                && !str(config.get("field")).isBlank()) {
             Map<String, Object> single = new LinkedHashMap<>();
             single.put("field", config.get("field"));
             single.put("direction", config.get("direction"));
@@ -142,8 +150,10 @@ final class DataSortOps {
         List<String> log = new ArrayList<>();
         if (specs.isEmpty()) {
             log.add("No sort key configured - order unchanged.");
-            return WorkflowDataOps.Outcome.ok(WorkflowDataOps.withItems(items, items.array()).toString(),
-                "Sort: no key set, " + list.size() + " item(s) left in order.", log);
+            return WorkflowDataOps.Outcome.ok(
+                    WorkflowDataOps.withItems(items, items.array()).toString(),
+                    "Sort: no key set, " + list.size() + " item(s) left in order.",
+                    log);
         }
 
         int n = list.size();
@@ -151,7 +161,12 @@ final class DataSortOps {
         for (Map<String, Object> spec : specs) {
             String field = str(spec.get("field"));
             String requested = str(spec.get("type"));
-            boolean desc = "desc".equalsIgnoreCase(str(spec.get("direction")) == null ? "" : str(spec.get("direction")).strip());
+            boolean desc =
+                    "desc"
+                            .equalsIgnoreCase(
+                                    str(spec.get("direction")) == null
+                                            ? ""
+                                            : str(spec.get("direction")).strip());
             List<JsonNode> raw = new ArrayList<>(n);
             for (JsonNode item : list) {
                 raw.add(get(item, field == null ? "" : field));
@@ -162,28 +177,36 @@ final class DataSortOps {
                 keys[i] = isAbsent(raw.get(i)) ? null : type.key(raw.get(i));
             }
             columns.add(new Column(desc, type, keys));
-            log.add("Sorted by " + (field == null || field.isBlank() ? "(item)" : field) + " " + (desc ? "descending" : "ascending")
-                + " as " + type.id() + ".");
+            log.add(
+                    "Sorted by "
+                            + (field == null || field.isBlank() ? "(item)" : field)
+                            + " "
+                            + (desc ? "descending" : "ascending")
+                            + " as "
+                            + type.id()
+                            + ".");
         }
         List<Integer> order = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             order.add(i);
         }
-        Comparator<Integer> cmp = (a, b) -> {
-            for (Column c : columns) {
-                int r = c.compare(a, b, caseSensitive);
-                if (r != 0) {
-                    return r;
-                }
-            }
-            return 0;
-        };
+        Comparator<Integer> cmp =
+                (a, b) -> {
+                    for (Column c : columns) {
+                        int r = c.compare(a, b, caseSensitive);
+                        if (r != 0) {
+                            return r;
+                        }
+                    }
+                    return 0;
+                };
         order.sort(cmp); // List.sort is a stable merge sort: ties keep their input order
         ArrayNode out = mapper.createArrayNode();
         for (int idx : order) {
             out.add(list.get(idx));
         }
-        return WorkflowDataOps.Outcome.ok(WorkflowDataOps.withItems(items, out).toString(), "Sorted " + n + " item(s).", log);
+        return WorkflowDataOps.Outcome.ok(
+                WorkflowDataOps.withItems(items, out).toString(), "Sorted " + n + " item(s).", log);
     }
 
     private static final class Column {

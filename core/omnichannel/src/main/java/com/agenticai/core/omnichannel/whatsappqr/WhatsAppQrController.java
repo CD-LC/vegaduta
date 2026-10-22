@@ -8,7 +8,6 @@ import com.agenticai.core.omnichannel.session.ChannelSessionService;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.SetDefaultAgentRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
@@ -22,13 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The console's WhatsApp QR card: start/restart pairing (returns the current QR payload for the
  * scan), read live status while waiting, unlink, send, and the channel's default agent.
  *
- * <p>Unlike every sibling channel there is no credential form: linking IS the pairing scan, and
- * the only durable identity is the bridge session key - never shown here. The QR payload in the
+ * <p>Unlike every sibling channel there is no credential form: linking IS the pairing scan, and the
+ * only durable identity is the bridge session key - never shown here. The QR payload in the
  * response completes a device link as this tenant's number, so it is returned only on this
  * authenticated, admin-gated surface and only while pairing is open.
  */
@@ -51,7 +51,10 @@ public class WhatsAppQrController {
         this.channelSessionService = channelSessionService;
     }
 
-    /** Start or restart pairing. "Link a different number" is the same call - it replaces the session. */
+    /**
+     * Start or restart pairing. "Link a different number" is the same call - it replaces the
+     * session.
+     */
     @PostMapping("/session")
     public WhatsAppQrStatusResponse connect() {
         return service.connect();

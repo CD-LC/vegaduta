@@ -10,8 +10,6 @@ import com.agenticai.core.tables.DataTableNodeOps;
 import com.agenticai.core.tables.DataTableService;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,28 +17,31 @@ import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * "Data Table" node ({@code data_table}) - read or write the tenant's Data Tables (see {@link DataTableService})
- * so a workflow can keep state between runs without an external database.
+ * "Data Table" node ({@code data_table}) - read or write the tenant's Data Tables (see {@link
+ * DataTableService}) so a workflow can keep state between runs without an external database.
  *
  * <p>Config: {@code table} (name or id, required), {@code operation} = {@code get_rows} (default) |
- * {@code insert_row} | {@code update_rows} | {@code upsert_row} | {@code delete_rows} | {@code count};
- * {@code filter} = list of {@code {column, op, value}} (all must hold; values may be expressions);
- * {@code valuesJson} = JSON object of column to value for insert/update/upsert (insert and upsert fall back to the
- * upstream output when it is a JSON object); {@code keyColumn} for upsert; {@code sortColumn} /
- * {@code sortDirection} / {@code limit} (default 100, max 1000) for get_rows; {@code confirmAll} to let
- * update_rows / delete_rows run with an empty filter (without it that is refused - the guard against wiping a
- * table with a mis-wired expression).
+ * {@code insert_row} | {@code update_rows} | {@code upsert_row} | {@code delete_rows} | {@code
+ * count}; {@code filter} = list of {@code {column, op, value}} (all must hold; values may be
+ * expressions); {@code valuesJson} = JSON object of column to value for insert/update/upsert
+ * (insert and upsert fall back to the upstream output when it is a JSON object); {@code keyColumn}
+ * for upsert; {@code sortColumn} / {@code sortDirection} / {@code limit} (default 100, max 1000)
+ * for get_rows; {@code confirmAll} to let update_rows / delete_rows run with an empty filter
+ * (without it that is refused - the guard against wiping a table with a mis-wired expression).
  *
- * <p>Output is JSON: get_rows {@code {"rows":[{"_id":..,"col":..}],"count":n,"total":N}}, insert_row
- * {@code {"inserted":1,"row":{..}}}, update_rows {@code {"updated":n}}, upsert_row
- * {@code {"created":b,"affected":n,"row":{..}}}, delete_rows {@code {"deleted":n}}, count {@code {"count":n}}.
+ * <p>Output is JSON: get_rows {@code {"rows":[{"_id":..,"col":..}],"count":n,"total":N}},
+ * insert_row {@code {"inserted":1,"row":{..}}}, update_rows {@code {"updated":n}}, upsert_row
+ * {@code {"created":b,"affected":n,"row":{..}}}, delete_rows {@code {"deleted":n}}, count {@code
+ * {"count":n}}.
  *
- * <p>Failure contract: with the feature off (or the service absent) the node is SKIPPED and the input passes
- * through, like every optional node; a bad configuration or a refused operation (unknown table or column, value
- * that does not fit its column type, cap hit, delete guard) FAILS the node with the reason, because downstream
- * steps usually rely on the data having been written.
+ * <p>Failure contract: with the feature off (or the service absent) the node is SKIPPED and the
+ * input passes through, like every optional node; a bad configuration or a refused operation
+ * (unknown table or column, value that does not fit its column type, cap hit, delete guard) FAILS
+ * the node with the reason, because downstream steps usually rely on the data having been written.
  */
 @Component
 class WorkflowDataTableNodeHandler {
@@ -51,26 +52,37 @@ class WorkflowDataTableNodeHandler {
     private final ObjectProvider<DataTableService> service;
     private final ObjectMapper objectMapper;
 
-    WorkflowDataTableNodeHandler(ObjectProvider<DataTableService> service, ObjectMapper objectMapper) {
+    WorkflowDataTableNodeHandler(
+            ObjectProvider<DataTableService> service, ObjectMapper objectMapper) {
         this.service = service;
         this.objectMapper = objectMapper;
     }
 
-    /** {@link WorkflowNodeExecutor} has already resolved the node's expression fields before calling this. */
+    /**
+     * {@link WorkflowNodeExecutor} has already resolved the node's expression fields before calling
+     * this.
+     */
     NodeExecutionResult executeResolved(WorkflowNodeDto node, String input) {
         DataTableService tables = service.getIfAvailable();
         if (tables == null || !tables.isEnabled()) {
-            return NodeExecutionResult.skipped(input, "Data tables are not enabled in this deployment - input passed through unchanged.");
+            return NodeExecutionResult.skipped(
+                    input,
+                    "Data tables are not enabled in this deployment - input passed through unchanged.");
         }
         Map<String, Object> config = node.config();
         String table = str(config, "table");
         if (table == null) {
-            throw new IllegalArgumentException("Data table node '" + node.label() + "' has no table configured.");
+            throw new IllegalArgumentException(
+                    "Data table node '" + node.label() + "' has no table configured.");
         }
         String op = DataTableNodeOps.normalize(config.get("operation"));
         if (!DataTableNodeOps.isKnown(op)) {
-            throw new IllegalArgumentException("Data table node '" + node.label() + "': unknown operation '" + op
-                + "' - use get_rows, insert_row, update_rows, upsert_row, delete_rows or count.");
+            throw new IllegalArgumentException(
+                    "Data table node '"
+                            + node.label()
+                            + "': unknown operation '"
+                            + op
+                            + "' - use get_rows, insert_row, update_rows, upsert_row, delete_rows or count.");
         }
         try {
             return switch (op) {
@@ -84,16 +96,25 @@ class WorkflowDataTableNodeHandler {
         } catch (ResponseStatusException e) {
             throw new IllegalArgumentException("Data table " + op + " failed: " + e.getReason(), e);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Data table " + op + " failed: " + e.getMessage(), e);
+            throw new IllegalArgumentException(
+                    "Data table " + op + " failed: " + e.getMessage(), e);
         }
     }
 
     // ------------------------------------------------------------------
 
-    private NodeExecutionResult getRows(DataTableService tables, String table, Map<String, Object> config) {
+    private NodeExecutionResult getRows(
+            DataTableService tables, String table, Map<String, Object> config) {
         int limit = clampLimit(str(config, "limit"));
-        RowPage page = tables.queryRows(table, new RowQuery(
-            filter(config), DataTableFilter.sortOf(str(config, "sortColumn"), str(config, "sortDirection")), limit, 0));
+        RowPage page =
+                tables.queryRows(
+                        table,
+                        new RowQuery(
+                                filter(config),
+                                DataTableFilter.sortOf(
+                                        str(config, "sortColumn"), str(config, "sortDirection")),
+                                limit,
+                                0));
         List<Map<String, Object>> rows = new ArrayList<>();
         for (RowView r : page.items()) {
             rows.add(flatten(r));
@@ -102,10 +123,14 @@ class WorkflowDataTableNodeHandler {
         out.put("rows", rows);
         out.put("count", rows.size());
         out.put("total", page.total());
-        return NodeExecutionResult.ok(json(out), "Read " + rows.size() + " of " + page.total() + " row(s) from '" + table + "'.", null);
+        return NodeExecutionResult.ok(
+                json(out),
+                "Read " + rows.size() + " of " + page.total() + " row(s) from '" + table + "'.",
+                null);
     }
 
-    private NodeExecutionResult insertRow(DataTableService tables, String table, Map<String, Object> config, String input) {
+    private NodeExecutionResult insertRow(
+            DataTableService tables, String table, Map<String, Object> config, String input) {
         Map<String, Object> values = values(config, input, true);
         RowView row = tables.insertRow(table, values);
         Map<String, Object> out = new LinkedHashMap<>();
@@ -114,13 +139,18 @@ class WorkflowDataTableNodeHandler {
         return NodeExecutionResult.ok(json(out), "Inserted 1 row into '" + table + "'.", null);
     }
 
-    private NodeExecutionResult updateRows(DataTableService tables, String table, Map<String, Object> config) {
+    private NodeExecutionResult updateRows(
+            DataTableService tables, String table, Map<String, Object> config) {
         Map<String, Object> values = values(config, null, false);
         int updated = tables.updateRows(table, filter(config), values, bool(config, "confirmAll"));
-        return NodeExecutionResult.ok(json(Map.of("updated", updated)), "Updated " + updated + " row(s) in '" + table + "'.", null);
+        return NodeExecutionResult.ok(
+                json(Map.of("updated", updated)),
+                "Updated " + updated + " row(s) in '" + table + "'.",
+                null);
     }
 
-    private NodeExecutionResult upsertRow(DataTableService tables, String table, Map<String, Object> config, String input) {
+    private NodeExecutionResult upsertRow(
+            DataTableService tables, String table, Map<String, Object> config, String input) {
         String key = str(config, "keyColumn");
         if (key == null) {
             throw new IllegalArgumentException("upsert_row needs a keyColumn.");
@@ -131,25 +161,38 @@ class WorkflowDataTableNodeHandler {
         out.put("created", r.created());
         out.put("affected", r.affected());
         out.put("row", r.row() == null ? null : flatten(r.row()));
-        return NodeExecutionResult.ok(json(out),
-            (r.created() ? "Inserted a new row into '" : "Updated " + r.affected() + " existing row(s) in '") + table + "'.", null);
+        return NodeExecutionResult.ok(
+                json(out),
+                (r.created()
+                                ? "Inserted a new row into '"
+                                : "Updated " + r.affected() + " existing row(s) in '")
+                        + table
+                        + "'.",
+                null);
     }
 
-    private NodeExecutionResult deleteRows(DataTableService tables, String table, Map<String, Object> config) {
+    private NodeExecutionResult deleteRows(
+            DataTableService tables, String table, Map<String, Object> config) {
         int deleted = tables.deleteRows(table, filter(config), bool(config, "confirmAll"));
-        return NodeExecutionResult.ok(json(Map.of("deleted", deleted)), "Deleted " + deleted + " row(s) from '" + table + "'.", null);
+        return NodeExecutionResult.ok(
+                json(Map.of("deleted", deleted)),
+                "Deleted " + deleted + " row(s) from '" + table + "'.",
+                null);
     }
 
-    private NodeExecutionResult count(DataTableService tables, String table, Map<String, Object> config) {
+    private NodeExecutionResult count(
+            DataTableService tables, String table, Map<String, Object> config) {
         long n = tables.count(table, filter(config));
-        return NodeExecutionResult.ok(json(Map.of("count", n)), "Counted " + n + " row(s) in '" + table + "'.", null);
+        return NodeExecutionResult.ok(
+                json(Map.of("count", n)), "Counted " + n + " row(s) in '" + table + "'.", null);
     }
 
     // ------------------------------------------------------------------
 
     /**
-     * The condition list. A half-filled row from the canvas form (no column yet) is dropped rather than failing
-     * the run; {@code filter} may also be a JSON string or an object of column/value pairs.
+     * The condition list. A half-filled row from the canvas form (no column yet) is dropped rather
+     * than failing the run; {@code filter} may also be a JSON string or an object of column/value
+     * pairs.
      */
     private List<Condition> filter(Map<String, Object> config) {
         Object raw = config.get("filter");
@@ -169,9 +212,13 @@ class WorkflowDataTableNodeHandler {
         return DataTableFilter.parse(raw);
     }
 
-    /** {@code valuesJson} (text or an already-parsed object); optionally falling back to the upstream JSON object. */
+    /**
+     * {@code valuesJson} (text or an already-parsed object); optionally falling back to the
+     * upstream JSON object.
+     */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> values(Map<String, Object> config, String input, boolean fallbackToInput) {
+    private Map<String, Object> values(
+            Map<String, Object> config, String input, boolean fallbackToInput) {
         Object raw = config.get("valuesJson");
         if (raw == null) {
             raw = config.get("values");
@@ -185,7 +232,8 @@ class WorkflowDataTableNodeHandler {
             if (parsed instanceof Map<?, ?> m) {
                 return (Map<String, Object>) m;
             }
-            throw new IllegalArgumentException("'valuesJson' must be a JSON object of column names to values.");
+            throw new IllegalArgumentException(
+                    "'valuesJson' must be a JSON object of column names to values.");
         }
         if (fallbackToInput && input != null && input.trim().startsWith("{")) {
             Object parsed = parse(input.trim());
@@ -193,14 +241,15 @@ class WorkflowDataTableNodeHandler {
                 return (Map<String, Object>) m;
             }
         }
-        throw new IllegalArgumentException("This operation needs 'valuesJson' - a JSON object of column names to values"
-            + (fallbackToInput ? " (or a JSON object as the step's input)." : "."));
+        throw new IllegalArgumentException(
+                "This operation needs 'valuesJson' - a JSON object of column names to values"
+                        + (fallbackToInput ? " (or a JSON object as the step's input)." : "."));
     }
 
     private Object parse(String text) {
         try {
             return objectMapper.readValue(text, Object.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("'valuesJson' is not valid JSON.");
         }
     }
@@ -208,7 +257,7 @@ class WorkflowDataTableNodeHandler {
     private String json(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{}";
         }
     }
@@ -235,7 +284,9 @@ class WorkflowDataTableNodeHandler {
 
     private static boolean bool(Map<String, Object> c, String key) {
         Object v = c.get(key);
-        return v instanceof Boolean b ? b : v != null && "true".equalsIgnoreCase(v.toString().trim());
+        return v instanceof Boolean b
+                ? b
+                : v != null && "true".equalsIgnoreCase(v.toString().trim());
     }
 
     private static String str(Map<String, Object> c, String key) {

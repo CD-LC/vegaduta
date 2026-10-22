@@ -2,24 +2,23 @@ package com.agenticai.core.mcp;
 
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.json.JsonMappers;
-import com.agenticai.core.secrets.SecretReferenceResolver;
-import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.secrets.SecretReferenceResolver;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The stored-config codec behind {@link McpRegistryService}: encrypts a registration's env map,
  * merges a partial credential edit onto the stored one, decrypts it again (flagging an unreadable
- * blob instead of failing), expands {@code {{secret.NAME}}} vault references, and reads/writes
- * the JSON columns. Created and owned by {@link McpRegistryService}; not a bean.
+ * blob instead of failing), expands {@code {{secret.NAME}}} vault references, and reads/writes the
+ * JSON columns. Created and owned by {@link McpRegistryService}; not a bean.
  */
 final class McpRegistrationEnv {
 
@@ -69,8 +68,7 @@ final class McpRegistrationEnv {
         }
         if (wasUpdate && !incoming.isEmpty()) {
             Map<String, String> merged =
-                    new java.util.LinkedHashMap<>(
-                            decryptDetailed(entity.getEncryptedEnv()).env());
+                    new java.util.LinkedHashMap<>(decryptDetailed(entity.getEncryptedEnv()).env());
             merged.putAll(incoming);
             return encrypt(merged);
         }
@@ -162,7 +160,7 @@ final class McpRegistrationEnv {
     static String writeJson(Object value) {
         try {
             return MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize MCP server config", e);
         }
     }
@@ -171,7 +169,7 @@ final class McpRegistrationEnv {
     static String toJsonOrEmpty(List<String> args) {
         try {
             return MAPPER.writeValueAsString(args == null ? List.of() : args);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Could not serialize suggested-fix args, storing empty list", e);
             return "[]";
         }

@@ -8,8 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -24,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The paid-spend caps: atomic search reservation (no check-then-act overshoot), the in-process
@@ -32,7 +32,7 @@ import org.springframework.data.redis.core.ValueOperations;
  */
 class SearchSpendCapsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @SuppressWarnings("unchecked")
     private static ObjectProvider<StringRedisTemplate> noRedis() {
@@ -146,7 +146,8 @@ class SearchSpendCapsTest {
                 0, allowance.remaining("t1", "alice"), "charged up front for exactly what ran");
 
         JsonNode second = MAPPER.readTree(tool.call(call));
-        assertTrue(second.get("error").asText().contains("allowance for this account is used up"));
+        assertTrue(
+                second.get("error").asString().contains("allowance for this account is used up"));
         assertEquals(3, searches.get(), "a refused call runs no searches");
     }
 

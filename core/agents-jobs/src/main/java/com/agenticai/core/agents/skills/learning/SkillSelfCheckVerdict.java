@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.skills.learning;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Locale;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The outcome of replaying a drafted skill against the turn it came from, and the parser for the
@@ -38,17 +38,21 @@ public record SkillSelfCheckVerdict(Verdict verdict, String reason) {
         } catch (Exception e) {
             return Optional.empty();
         }
-        if (!node.isObject() || !node.path("verdict").isTextual()) {
+        if (!node.isObject() || !node.path("verdict").isString()) {
             return Optional.empty();
         }
         Verdict v;
         try {
-            v = Verdict.valueOf(node.path("verdict").asText().trim().toUpperCase(Locale.ROOT));
+            v = Verdict.valueOf(node.path("verdict").asString().trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
         String reason =
-                node.path("reason").asText("").replaceAll("[<>]", "").replaceAll("\\s+", " ").strip();
+                node.path("reason")
+                        .asString("")
+                        .replaceAll("[<>]", "")
+                        .replaceAll("\\s+", " ")
+                        .strip();
         if (reason.length() > MAX_REASON) {
             reason = reason.substring(0, MAX_REASON).stripTrailing();
         }

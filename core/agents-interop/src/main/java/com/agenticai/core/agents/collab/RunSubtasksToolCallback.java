@@ -6,7 +6,6 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.DelegateOptions;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Ad hoc parallel sub-tasks: the calling agent writes a self-contained brief per piece of work and
@@ -30,8 +30,8 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  *
  * <p><b>Isolation:</b> every worker runs {@code AgentChatService#delegateCall} - a throwaway
  * session {@code delegated:subtasks:<runId>:<i>}, no history, no memory, the depth-1 cap (a
- * delegated turn never resolves delegation tools, so a worker cannot fan out again), and the
- * worker tool set below. Workers see only their brief plus a short directive.
+ * delegated turn never resolves delegation tools, so a worker cannot fan out again), and the worker
+ * tool set below. Workers see only their brief plus a short directive.
  *
  * <p><b>Worker tools:</b> the agent's normal tools minus {@link #workerMayUse the excluded set}:
  * every delegation tool, {@code schedule_task}, {@code request_human}, {@code coding_task} and the
@@ -106,7 +106,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
                 BRANCH_TIMEOUT_SECONDS);
     }
 
-    /** Test seam: the per-worker limit is a constructor value so a timeout can be exercised fast. */
+    /**
+     * Test seam: the per-worker limit is a constructor value so a timeout can be exercised fast.
+     */
     RunSubtasksToolCallback(
             AgentChatService agentChatService,
             UUID agentId,
@@ -231,7 +233,8 @@ public class RunSubtasksToolCallback implements ToolCallback {
         // shutdownNow() in the finally, not close(): close() would block on a worker that ignores
         // interrupts past the timeout (same lifecycle as DelegateToTeamToolCallback).
         @SuppressWarnings("java:S2095")
-        ExecutorService pool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("run-subtasks-tool-callback-");
+        ExecutorService pool =
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("run-subtasks-tool-callback-");
         try {
             List<Future<Map<String, Object>>> futures = new ArrayList<>();
             for (int i = 0; i < runnable.size(); i++) {
@@ -301,7 +304,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
 
     private static String label(int index, Map<String, Object> task) {
         String role = roleOf(task);
-        return role == null ? "subtask-" + (index + 1) : "subtask-" + (index + 1) + " (" + role + ")";
+        return role == null
+                ? "subtask-" + (index + 1)
+                : "subtask-" + (index + 1) + " (" + role + ")";
     }
 
     /** The result entry every outcome starts from: 1-based task number and the role, if given. */
@@ -336,7 +341,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
             String step =
                     stepJournal == null
                             ? null
-                            : "subtasks:" + DelegateToTeamToolCallback.branchHash("subtask:" + (role == null ? "" : role), brief, null);
+                            : "subtasks:"
+                                    + DelegateToTeamToolCallback.branchHash(
+                                            "subtask:" + (role == null ? "" : role), brief, null);
             if (step != null) {
                 var done = stepJournal.findCompletedResult(journalRunId, step);
                 if (done.isPresent()) {
@@ -349,7 +356,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
                 stepJournal.begin(journalRunId, step, StepJournal.KIND_SWARM);
             }
             String directive =
-                    role == null ? WORKER_DIRECTIVE : WORKER_DIRECTIVE + " Your role: " + role + ".";
+                    role == null
+                            ? WORKER_DIRECTIVE
+                            : WORKER_DIRECTIVE + " Your role: " + role + ".";
             String answer =
                     agentChatService.delegateCall(
                             agentId,
@@ -374,7 +383,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
         } catch (Exception e) {
             log.warn("run_subtasks worker {} (agent {}) failed", index, agentId, e);
             out.put("status", "error");
-            out.put("error", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
+            out.put(
+                    "error",
+                    e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
             out.put("ms", System.currentTimeMillis() - started);
             return out;
         } finally {

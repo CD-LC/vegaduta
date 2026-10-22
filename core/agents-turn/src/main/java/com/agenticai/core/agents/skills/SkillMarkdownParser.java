@@ -178,7 +178,11 @@ public final class SkillMarkdownParser {
         String text = value.toString().replaceAll("\\s+", " ").strip();
         if (text.length() > max) {
             throw new SkillValidationException(
-                    "SKILL.md \"" + key + "\" is too long - the maximum is " + max + " characters.");
+                    "SKILL.md \""
+                            + key
+                            + "\" is too long - the maximum is "
+                            + max
+                            + " characters.");
         }
         if (XML_TAG.matcher(text).find()) {
             throw new SkillValidationException(
@@ -189,7 +193,8 @@ public final class SkillMarkdownParser {
 
     private static Map<String, String> metadataOf(Object value) {
         if (!(value instanceof Map<?, ?> entries)) {
-            throw new SkillValidationException("SKILL.md \"metadata\" must be a map of text values.");
+            throw new SkillValidationException(
+                    "SKILL.md \"metadata\" must be a map of text values.");
         }
         if (entries.size() > MAX_METADATA_ENTRIES) {
             throw new SkillValidationException(
@@ -211,14 +216,16 @@ public final class SkillMarkdownParser {
         return out;
     }
 
-    /** Extras as the JSON text stored in {@code skill.frontmatter_extra}; null when there are none. */
+    /**
+     * Extras as the JSON text stored in {@code skill.frontmatter_extra}; null when there are none.
+     */
     public static String extrasToJson(Map<String, Object> extras) {
         if (extras == null || extras.isEmpty()) {
             return null;
         }
         try {
             return com.agenticai.core.json.JsonMappers.plain().writeValueAsString(extras);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new SkillValidationException("The skill's optional metadata could not be saved.");
         }
     }
@@ -232,9 +239,9 @@ public final class SkillMarkdownParser {
             return com.agenticai.core.json.JsonMappers.plain()
                     .readValue(
                             json,
-                            new com.fasterxml.jackson.core.type.TypeReference<
+                            new tools.jackson.core.type.TypeReference<
                                     LinkedHashMap<String, Object>>() {});
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             return Map.of();
         }
     }

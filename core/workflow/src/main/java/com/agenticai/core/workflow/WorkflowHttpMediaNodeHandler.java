@@ -15,8 +15,6 @@ import com.agenticai.core.knowledge.dto.SidecarTtsResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +22,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "HTTP Request" and "Media" node execution, extracted out of {@link WorkflowNodeExecutor}
@@ -435,7 +435,7 @@ class WorkflowHttpMediaNodeHandler {
                             + " needs a JSON request body");
         }
         try {
-            com.fasterxml.jackson.databind.JsonNode parsed = objectMapper.readTree(input);
+            tools.jackson.databind.JsonNode parsed = objectMapper.readTree(input);
             if (!parsed.isObject()) {
                 throw new IllegalArgumentException(
                         "the Media node's input must be a JSON object for /"
@@ -445,8 +445,8 @@ class WorkflowHttpMediaNodeHandler {
                                 + " - check what the upstream node emits");
             }
             return objectMapper.convertValue(
-                    parsed, new com.fasterxml.jackson.core.type.TypeReference<>() {});
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                    parsed, new tools.jackson.core.type.TypeReference<>() {});
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalArgumentException(
                     "the Media node's input is not valid JSON, so it cannot be a /"
                             + operation
@@ -461,14 +461,14 @@ class WorkflowHttpMediaNodeHandler {
             return null;
         }
         try {
-            com.fasterxml.jackson.databind.JsonNode parsed = objectMapper.readTree(input);
+            tools.jackson.databind.JsonNode parsed = objectMapper.readTree(input);
             for (String key : new String[] {"job_id", "jobId"}) {
-                com.fasterxml.jackson.databind.JsonNode value = parsed.get(key);
-                if (value != null && value.isTextual() && !value.asText().isBlank()) {
-                    return value.asText();
+                tools.jackson.databind.JsonNode value = parsed.get(key);
+                if (value != null && value.isString() && !value.asString().isBlank()) {
+                    return value.asString();
                 }
             }
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             return null;
         }
         return null;
@@ -536,12 +536,12 @@ class WorkflowHttpMediaNodeHandler {
                 JsonNode bodyJson = result.bodyAsJson(objectMapper);
                 return bodyJson == null ? result.body() : objectMapper.writeValueAsString(bodyJson);
             }
-            com.fasterxml.jackson.databind.node.ObjectNode out = objectMapper.createObjectNode();
+            tools.jackson.databind.node.ObjectNode out = objectMapper.createObjectNode();
             try {
                 JsonNode root =
                         objectMapper.readTree(input == null || input.isBlank() ? "{}" : input);
                 if (root.isObject()) {
-                    out = ((com.fasterxml.jackson.databind.node.ObjectNode) root).deepCopy();
+                    out = ((tools.jackson.databind.node.ObjectNode) root).deepCopy();
                 } else if (input != null && !input.isBlank()) {
                     out.put("input", input);
                 }
@@ -552,7 +552,7 @@ class WorkflowHttpMediaNodeHandler {
             }
             out.set(saveAs.strip(), result.toJson(objectMapper));
             return objectMapper.writeValueAsString(out);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             return result.body();
         }
     }

@@ -2,10 +2,6 @@ package com.agenticai.core.agents.tools.openapi;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,18 +18,21 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Request assembly, header checks, the cancel-on-close response wrapper and the small encode /
- * parse / redact helpers behind {@link OpenApiToolExecutor}. Stateless and static; split out of
- * the executor only to keep each file reviewable - the security rules are unchanged and still
+ * parse / redact helpers behind {@link OpenApiToolExecutor}. Stateless and static; split out of the
+ * executor only to keep each file reviewable - the security rules are unchanged and still
  * documented on the executor.
  */
 final class OpenApiHttpSupport {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
-    static final String USER_AGENT =
-            "VegaDuta-Agent/1.0 (+https://github.com/CD-LC/vegaduta)";
+    static final String USER_AGENT = "VegaDuta-Agent/1.0 (+https://github.com/CD-LC/vegaduta)";
     static final String REDACTED = "[redacted]";
 
     /**
@@ -162,7 +161,7 @@ final class OpenApiHttpSupport {
         try {
             JsonNode node = MAPPER.readTree(toolInputJson);
             return node != null && node.isObject() ? (ObjectNode) node : MAPPER.createObjectNode();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new OpenApiToolException(
                     "The tool input is not valid JSON: " + e.getOriginalMessage());
         }
@@ -208,7 +207,7 @@ final class OpenApiHttpSupport {
         if (value == null || value.isNull()) {
             return "";
         }
-        return value.isValueNode() ? value.asText() : value.toString();
+        return value.isValueNode() ? value.asString() : value.toString();
     }
 
     static JsonNode tryParseJson(String text, String contentType, boolean truncated) {
@@ -225,7 +224,7 @@ final class OpenApiHttpSupport {
         }
         try {
             return MAPPER.readTree(trimmed);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }
@@ -288,5 +287,6 @@ final class OpenApiHttpSupport {
             return null;
         }
     }
+
     private OpenApiHttpSupport() {}
 }

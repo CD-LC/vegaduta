@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.agents.core.AgentController;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Golden test for {@link AgUiEventMapper}: a synthetic chat stream - tokens plus {@code
@@ -34,7 +34,7 @@ import reactor.core.publisher.Flux;
 class AgUiEventMapperTest {
 
     private static final String MARKER = AgentStepEventEmitter.STEP_EVENT_MARKER;
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
     private static final UUID AGENT_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
 
     private AgUiEventMapper mapper;
@@ -371,18 +371,18 @@ class AgUiEventMapperTest {
 
         assertFalse(json.contains("\n"));
         JsonNode node = JSON.readTree(json);
-        assertEquals("TEXT_MESSAGE_CONTENT", node.get("type").asText());
-        assertEquals("m1", node.get("messageId").asText());
-        assertEquals("hi", node.get("delta").asText());
+        assertEquals("TEXT_MESSAGE_CONTENT", node.get("type").asString());
+        assertEquals("m1", node.get("messageId").asString());
+        assertEquals("hi", node.get("delta").asString());
         assertEquals(5L, node.get("timestamp").asLong());
         assertNull(node.get("toolCallId"));
         assertNull(node.get("threadId"));
         assertEquals(4, node.size(), json);
 
         JsonNode start = JSON.readTree(AgUiEvent.toolCallStart("t1", "search", "m1", 5L).toJson());
-        assertEquals("t1", start.get("toolCallId").asText());
-        assertEquals("search", start.get("toolCallName").asText());
-        assertEquals("m1", start.get("parentMessageId").asText());
+        assertEquals("t1", start.get("toolCallId").asString());
+        assertEquals("search", start.get("toolCallName").asString());
+        assertEquals("m1", start.get("parentMessageId").asString());
     }
 
     @Test

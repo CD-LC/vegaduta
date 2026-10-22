@@ -8,38 +8,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.genai.types.GenerateContentResponseUsageMetadata;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.google.genai.metadata.GoogleGenAiUsage;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
- * Locks in the two properties {@link CacheTokenAccounting} exists to
- * guarantee, both of which are easy to break by "simplifying" it later:
+ * Locks in the two properties {@link CacheTokenAccounting} exists to guarantee, both of which are
+ * easy to break by "simplifying" it later:
  *
  * <ol>
- *   <li><b>Absent is never zero.</b> A provider that reports no cache
- *       dimension must produce {@code null}, not {@code 0}, because a
- *       measured total cache miss (a real, expensive regression) is also
- *       zero and the two must stay distinguishable. This is what stops the
- *       Micrometer layer from publishing a permanent fake-zero series for
- *       every provider that has no prompt cache.</li>
- *   <li><b>The inclusive/exclusive split is respected per provider.</b>
- *       Anthropic's {@code inputTokens} EXCLUDES cached reads while OpenAI's
- *       and Gemini's {@code promptTokens} INCLUDES them. Getting that
- *       backwards either double-counts a tenant's input tokens or reports a
- *       cache hit ratio computed against the wrong denominator - and in the
- *       cost path it would double-BILL them, which is why {@code
- *       billableCache*Tokens()} is asserted separately from the raw
- *       counts.</li>
+ *   <li><b>Absent is never zero.</b> A provider that reports no cache dimension must produce {@code
+ *       null}, not {@code 0}, because a measured total cache miss (a real, expensive regression) is
+ *       also zero and the two must stay distinguishable. This is what stops the Micrometer layer
+ *       from publishing a permanent fake-zero series for every provider that has no prompt cache.
+ *   <li><b>The inclusive/exclusive split is respected per provider.</b> Anthropic's {@code
+ *       inputTokens} EXCLUDES cached reads while OpenAI's and Gemini's {@code promptTokens}
+ *       INCLUDES them. Getting that backwards either double-counts a tenant's input tokens or
+ *       reports a cache hit ratio computed against the wrong denominator - and in the cost path it
+ *       would double-BILL them, which is why {@code billableCache*Tokens()} is asserted separately
+ *       from the raw counts.
  * </ol>
  *
- * <p>Every provider usage shape here is constructed from the real Spring AI
- * 1.1.7 / Google GenAI SDK types on the compile classpath (not a hand-rolled
- * stub), so a future dependency bump that reshapes one of them breaks this
- * test rather than silently making the accounting wrong at runtime - which is
- * the only failure mode of this class that would otherwise be invisible.
+ * <p>Every provider usage shape here is constructed from the real Spring AI 2.0.1 / vendor SDK /
+ * Google GenAI SDK types on the compile classpath (not a hand-rolled stub), so a future dependency
+ * bump that reshapes one of them breaks this test rather than silently making the accounting wrong
+ * at runtime - which is the only failure mode of this class that would otherwise be invisible.
  */
 class CacheTokenAccountingTest {
 
@@ -57,18 +50,23 @@ class CacheTokenAccountingTest {
         CacheTokenAccounting accounting = CacheTokenAccounting.from(usage);
 
         assertTrue(accounting.isPresent());
-        assertFalse(accounting.cacheReadsIncludedInPromptTokens(),
-            "Anthropic reports cache buckets alongside input_tokens, not inside it");
+        assertFalse(
+                accounting.cacheReadsIncludedInPromptTokens(),
+                "Anthropic reports cache buckets alongside input_tokens, not inside it");
         assertEquals(1800L, accounting.cacheReadInputTokens());
         assertEquals(0L, accounting.cacheWriteInputTokens());
-        assertEquals(200L, accounting.uncachedInputTokens(), "promptTokens IS the uncached bucket here - no subtraction");
+        assertEquals(
+                200L,
+                accounting.uncachedInputTokens(),
+                "promptTokens IS the uncached bucket here - no subtraction");
         assertEquals(2000L, accounting.totalInputTokens());
         assertEquals(0.9d, accounting.hitRatio(), 1e-9);
     }
 
     @Test
     void anthropicCacheBucketsStayBillableAsTheirOwnCostLineItems() {
-        CacheTokenAccounting accounting = CacheTokenAccounting.from(anthropicUsage(200, 120, 4096, 1800));
+        CacheTokenAccounting accounting =
+                CacheTokenAccounting.from(anthropicUsage(200, 120, 4096, 1800));
 
         // These two are what LlmMetricsAdvisor hands to
         // LlmPricingCatalog.estimateCostUsd's 5-arg overload, which prices
@@ -85,7 +83,8 @@ class CacheTokenAccountingTest {
         // full price for input it used to read from cache. The provider says
         // so - cache_read_input_tokens: 0 - and that MUST survive as a real
         // 0.0 hit ratio rather than collapsing to "unknown".
-        CacheTokenAccounting accounting = CacheTokenAccounting.from(anthropicUsage(2000, 120, 0, 0));
+        CacheTokenAccounting accounting =
+                CacheTokenAccounting.from(anthropicUsage(2000, 120, 0, 0));
 
         assertTrue(accounting.isPresent(), "an explicit zero from the provider is a measurement");
         assertEquals(0L, accounting.cacheReadInputTokens());
@@ -98,7 +97,8 @@ class CacheTokenAccountingTest {
         // omits both fields, so nothing was measured. Reporting 0.0 here
         // would be indistinguishable from the measured-miss case above and
         // would make the fleet hit ratio quietly wrong.
-        CacheTokenAccounting accounting = CacheTokenAccounting.from(anthropicUsage(2000, 120, null, null));
+        CacheTokenAccounting accounting =
+                CacheTokenAccounting.from(anthropicUsage(2000, 120, null, null));
 
         assertSame(CacheTokenAccounting.ABSENT, accounting);
         assertFalse(accounting.isPresent());
@@ -110,13 +110,19 @@ class CacheTokenAccountingTest {
     void anthropicReportingOnlyAWriteStillCountsAsMeasured() {
         // First call against a cold prefix: everything was written, nothing
         // read. Anthropic can report cache_creation with cache_read absent.
-        CacheTokenAccounting accounting = CacheTokenAccounting.from(anthropicUsage(150, 90, 4096, null));
+        CacheTokenAccounting accounting =
+                CacheTokenAccounting.from(anthropicUsage(150, 90, 4096, null));
 
         assertTrue(accounting.isPresent());
         assertEquals(4096L, accounting.cacheWriteInputTokens());
         assertNull(accounting.cacheReadInputTokens());
-        assertNull(accounting.hitRatio(), "no read count reported means the ratio is unknown, not zero");
-        assertEquals(4246L, accounting.totalInputTokens(), "an absent read bucket contributes nothing to the total");
+        assertNull(
+                accounting.hitRatio(),
+                "no read count reported means the ratio is unknown, not zero");
+        assertEquals(
+                4246L,
+                accounting.totalInputTokens(),
+                "an absent read bucket contributes nothing to the total");
     }
 
     // ------------------------------------------------------------------
@@ -135,8 +141,10 @@ class CacheTokenAccountingTest {
         assertTrue(accounting.cacheReadsIncludedInPromptTokens());
         assertEquals(1024L, accounting.cacheReadInputTokens());
         assertEquals(976L, accounting.uncachedInputTokens());
-        assertEquals(2000L, accounting.totalInputTokens(),
-            "for an inclusive provider the accounted total must equal promptTokens, not exceed it");
+        assertEquals(
+                2000L,
+                accounting.totalInputTokens(),
+                "for an inclusive provider the accounted total must equal promptTokens, not exceed it");
         assertEquals(1024d / 2000d, accounting.hitRatio(), 1e-9);
     }
 
@@ -144,8 +152,9 @@ class CacheTokenAccountingTest {
     void openAiReportsNoCacheWriteCountSoTheWriteBucketStaysAbsent() {
         CacheTokenAccounting accounting = CacheTokenAccounting.from(openAiUsage(2000, 120, 1024));
 
-        assertNull(accounting.cacheWriteInputTokens(),
-            "OpenAI's caching is automatic and it reports no write count - absent, not a zero write");
+        assertNull(
+                accounting.cacheWriteInputTokens(),
+                "OpenAI's caching is automatic and it reports no write count - absent, not a zero write");
     }
 
     @Test
@@ -167,7 +176,7 @@ class CacheTokenAccountingTest {
         // Non-caching OpenAI-compatible endpoints (OpenRouter, Grok via
         // OpenAiApi - see this module's pom.xml comment) routinely omit the
         // details object entirely.
-        Usage usage = new DefaultUsage(2000, 120, 2120, new OpenAiApi.Usage(120, 2000, 2120));
+        Usage usage = SdkUsageFixtures.openAi(2000, 120, null);
 
         assertSame(CacheTokenAccounting.ABSENT, CacheTokenAccounting.from(usage));
     }
@@ -192,12 +201,14 @@ class CacheTokenAccountingTest {
         // GoogleGenAiUsage extends DefaultUsage rather than hanging a native
         // record off getNativeUsage(), so this branch has to match on the
         // Usage type - the reason CacheTokenAccounting.from checks it first.
-        GoogleGenAiUsage usage = GoogleGenAiUsage.from(GenerateContentResponseUsageMetadata.builder()
-            .promptTokenCount(5000)
-            .candidatesTokenCount(200)
-            .totalTokenCount(5200)
-            .cachedContentTokenCount(4000)
-            .build());
+        GoogleGenAiUsage usage =
+                GoogleGenAiUsage.from(
+                        GenerateContentResponseUsageMetadata.builder()
+                                .promptTokenCount(5000)
+                                .candidatesTokenCount(200)
+                                .totalTokenCount(5200)
+                                .cachedContentTokenCount(4000)
+                                .build());
 
         CacheTokenAccounting accounting = CacheTokenAccounting.from(usage);
 
@@ -205,19 +216,24 @@ class CacheTokenAccountingTest {
         assertTrue(accounting.cacheReadsIncludedInPromptTokens());
         assertEquals(4000L, accounting.cacheReadInputTokens());
         assertEquals(1000L, accounting.uncachedInputTokens());
-        assertNull(accounting.cacheWriteInputTokens(),
-            "creating a Gemini cache object is its own API call (GoogleGenAiCacheManager), not a field on a response");
+        assertNull(
+                accounting.cacheWriteInputTokens(),
+                "creating a Gemini cache object is its own API call (GoogleGenAiCacheManager), not a field on a response");
         assertEquals(0.8d, accounting.hitRatio(), 1e-9);
-        assertNull(accounting.billableCacheReadTokens(), "inclusive provider - already inside promptTokens");
+        assertNull(
+                accounting.billableCacheReadTokens(),
+                "inclusive provider - already inside promptTokens");
     }
 
     @Test
     void googleGenAiWithoutCachedContentIsAbsent() {
-        GoogleGenAiUsage usage = GoogleGenAiUsage.from(GenerateContentResponseUsageMetadata.builder()
-            .promptTokenCount(5000)
-            .candidatesTokenCount(200)
-            .totalTokenCount(5200)
-            .build());
+        GoogleGenAiUsage usage =
+                GoogleGenAiUsage.from(
+                        GenerateContentResponseUsageMetadata.builder()
+                                .promptTokenCount(5000)
+                                .candidatesTokenCount(200)
+                                .totalTokenCount(5200)
+                                .build());
 
         assertSame(CacheTokenAccounting.ABSENT, CacheTokenAccounting.from(usage));
     }
@@ -233,7 +249,9 @@ class CacheTokenAccountingTest {
         // DefaultUsage built WITHOUT a native usage object, so the cache
         // split genuinely is not recoverable on those turns. Absent is the
         // honest answer - see CacheTokenAccounting's javadoc.
-        assertSame(CacheTokenAccounting.ABSENT, CacheTokenAccounting.from(new DefaultUsage(2000, 120, 2120)));
+        assertSame(
+                CacheTokenAccounting.ABSENT,
+                CacheTokenAccounting.from(new DefaultUsage(2000, 120, 2120)));
     }
 
     @Test
@@ -246,30 +264,31 @@ class CacheTokenAccountingTest {
         CacheTokenAccounting accounting = CacheTokenAccounting.from(anthropicUsage(0, 0, 0, 0));
 
         assertTrue(accounting.isPresent(), "the provider did report the dimensions");
-        assertNull(accounting.hitRatio(), "0/0 is undefined, and must not be reported as a 0% hit rate");
+        assertNull(
+                accounting.hitRatio(),
+                "0/0 is undefined, and must not be reported as a 0% hit rate");
     }
 
     // ------------------------------------------------------------------
     // Fixtures - real provider types, deliberately not stubs
     // ------------------------------------------------------------------
 
-    /** {@code AnthropicApi.Usage} component order is (inputTokens, outputTokens, cacheCreation, cacheRead). */
+    /**
+     * Exactly what Spring AI 2's AnthropicChatModel#getDefaultUsage builds: promptTokens =
+     * inputTokens alone.
+     */
     private static Usage anthropicUsage(
-        Integer inputTokens, Integer outputTokens, Integer cacheCreationInputTokens, Integer cacheReadInputTokens
-    ) {
-        AnthropicApi.Usage nativeUsage =
-            new AnthropicApi.Usage(inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens);
-        // Exactly what AnthropicChatModel#getDefaultUsage builds: promptTokens
-        // from inputTokens alone, with the native record preserved.
-        return new DefaultUsage(inputTokens, outputTokens,
-            inputTokens == null || outputTokens == null ? null : inputTokens + outputTokens, nativeUsage);
+            Integer inputTokens,
+            Integer outputTokens,
+            Integer cacheCreationInputTokens,
+            Integer cacheReadInputTokens) {
+        return SdkUsageFixtures.anthropic(
+                inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens);
     }
 
-    /** {@code OpenAiApi.Usage} component order is (completionTokens, promptTokens, totalTokens, promptDetails, completionDetails). */
-    private static Usage openAiUsage(Integer promptTokens, Integer completionTokens, Integer cachedTokens) {
-        OpenAiApi.Usage nativeUsage = new OpenAiApi.Usage(
-            completionTokens, promptTokens, promptTokens + completionTokens,
-            new OpenAiApi.Usage.PromptTokensDetails(null, cachedTokens), null);
-        return new DefaultUsage(promptTokens, completionTokens, promptTokens + completionTokens, nativeUsage);
+    /** Exactly what Spring AI 2's OpenAiChatModel#getDefaultUsage builds. */
+    private static Usage openAiUsage(
+            Integer promptTokens, Integer completionTokens, Integer cachedTokens) {
+        return SdkUsageFixtures.openAi(promptTokens, completionTokens, cachedTokens);
     }
 }

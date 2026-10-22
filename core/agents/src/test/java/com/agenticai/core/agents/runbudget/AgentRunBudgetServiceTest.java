@@ -29,8 +29,14 @@ class AgentRunBudgetServiceTest {
 
     // $1 / $5 per M tokens, 10_000 avg tokens/branch => $0.018 per branch (see RunBudgetTest).
     private AgentRunBudgetService service(String globalCap, boolean overrideEnabled) {
-        return new AgentRunBudgetService(agentService, new BigDecimal(globalCap), BigDecimal.ONE,
-            new BigDecimal("5"), 10_000, overrideEnabled, new BigDecimal("10"));
+        return new AgentRunBudgetService(
+                agentService,
+                new BigDecimal(globalCap),
+                BigDecimal.ONE,
+                new BigDecimal("5"),
+                10_000,
+                overrideEnabled,
+                new BigDecimal("10"));
     }
 
     private void agentWithCap(String cap) {
@@ -40,7 +46,10 @@ class AgentRunBudgetServiceTest {
     }
 
     private static void assertNum(String expected, BigDecimal actual) {
-        assertEquals(0, new BigDecimal(expected).compareTo(actual), "expected " + expected + " but was " + actual);
+        assertEquals(
+                0,
+                new BigDecimal(expected).compareTo(actual),
+                "expected " + expected + " but was " + actual);
     }
 
     @Test
@@ -80,7 +89,7 @@ class AgentRunBudgetServiceTest {
     @Test
     void getIsDeniedWhenTheCallerCannotViewTheAgent() {
         when(agentService.requireAccess(agentId, PermissionLevel.VIEWER))
-            .thenThrow(new ResourceAccessDeniedException());
+                .thenThrow(new ResourceAccessDeniedException());
 
         assertThrows(ResourceAccessDeniedException.class, () -> service("2.0", true).get(agentId));
     }
@@ -105,16 +114,19 @@ class AgentRunBudgetServiceTest {
 
     @Test
     void updateAboveThePlatformCapIsRejectedBeforeAnythingIsSaved() {
-        assertThrows(IllegalArgumentException.class,
-            () -> service("2.0", true).update(agentId, new BigDecimal("2.5")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service("2.0", true).update(agentId, new BigDecimal("2.5")));
         verify(agentService, never()).setRunBudgetUsd(any(), any());
     }
 
     @Test
     void updateIsAConflictWhenTheOverrideIsSwitchedOff() {
         agentWithCap(null);
-        ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> service("2.0", false).update(agentId, new BigDecimal("1")));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service("2.0", false).update(agentId, new BigDecimal("1")));
 
         assertEquals(HttpStatus.CONFLICT, e.getStatusCode());
         verify(agentService, never()).setRunBudgetUsd(any(), any());
@@ -123,11 +135,12 @@ class AgentRunBudgetServiceTest {
     @Test
     void updateChecksAccessBeforeValidationSoAnUnseenAgentIsNeverA400() {
         when(agentService.requireAccess(agentId, PermissionLevel.VIEWER))
-            .thenThrow(new ResourceAccessDeniedException());
+                .thenThrow(new ResourceAccessDeniedException());
 
         // 2.5 is above the platform cap: without the access check first this would be a 400.
-        assertThrows(ResourceAccessDeniedException.class,
-            () -> service("2.0", true).update(agentId, new BigDecimal("2.5")));
+        assertThrows(
+                ResourceAccessDeniedException.class,
+                () -> service("2.0", true).update(agentId, new BigDecimal("2.5")));
         verify(agentService, never()).setRunBudgetUsd(any(), any());
     }
 
@@ -135,7 +148,7 @@ class AgentRunBudgetServiceTest {
     void controllerDelegatesAndClearsOnlyOnAnExplicitNull() throws Exception {
         AgentRunBudgetService svc = mock(AgentRunBudgetService.class);
         AgentRunBudgetController controller = new AgentRunBudgetController(svc);
-        com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
+        tools.jackson.databind.ObjectMapper json = com.agenticai.core.json.JsonMappers.plain();
 
         controller.get(agentId);
         controller.update(agentId, json.readTree("{\"runBudgetUsd\": 1.5}"));
@@ -150,19 +163,30 @@ class AgentRunBudgetServiceTest {
     void controllerRejectsAMissingOrMisspelledFieldInsteadOfClearing() throws Exception {
         AgentRunBudgetService svc = mock(AgentRunBudgetService.class);
         AgentRunBudgetController controller = new AgentRunBudgetController(svc);
-        com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
+        tools.jackson.databind.ObjectMapper json = com.agenticai.core.json.JsonMappers.plain();
 
         assertThrows(IllegalArgumentException.class, () -> controller.update(agentId, null));
-        assertThrows(IllegalArgumentException.class, () -> controller.update(agentId, json.readTree("{}")));
-        assertThrows(IllegalArgumentException.class,
-            () -> controller.update(agentId, json.readTree("{\"run_budget_usd\": 1}")));
-        assertThrows(IllegalArgumentException.class,
-            () -> controller.update(agentId, json.readTree("{\"runBudgetUsd\": true}")));
-        assertThrows(IllegalArgumentException.class,
-            () -> controller.update(agentId, json.readTree("{\"runBudgetUsd\": \"abc\"}")));
-        assertThrows(IllegalArgumentException.class, () -> controller.update(agentId, json.readTree("[1]")));
-        assertEquals(0, new BigDecimal("0.25").compareTo(
-            AgentRunBudgetController.parseRunBudgetUsd(json.readTree("{\"runBudgetUsd\": \"0.25\"}"))));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.update(agentId, json.readTree("{}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.update(agentId, json.readTree("{\"run_budget_usd\": 1}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.update(agentId, json.readTree("{\"runBudgetUsd\": true}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.update(agentId, json.readTree("{\"runBudgetUsd\": \"abc\"}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.update(agentId, json.readTree("[1]")));
+        assertEquals(
+                0,
+                new BigDecimal("0.25")
+                        .compareTo(
+                                AgentRunBudgetController.parseRunBudgetUsd(
+                                        json.readTree("{\"runBudgetUsd\": \"0.25\"}"))));
         verify(svc, never()).update(any(), any());
     }
 }

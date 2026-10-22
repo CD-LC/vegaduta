@@ -15,7 +15,6 @@ import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.ParamSpec;
 import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.RecipeStep;
 import com.agenticai.core.secrets.SecretVaultService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code run_browser_recipe} end to end over a real {@link BrowserRecipeService} (mock repository)
@@ -37,7 +37,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class RunBrowserRecipeToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final UUID AGENT = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
     private static final String PASSWORD = "S3cretPw!";
 

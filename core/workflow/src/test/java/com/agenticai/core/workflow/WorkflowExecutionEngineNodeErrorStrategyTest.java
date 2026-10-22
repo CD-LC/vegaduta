@@ -13,9 +13,6 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +22,15 @@ import java.util.function.IntFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * End-to-end through {@link WorkflowExecutionEngine}'s traversal (executor mocked, so node ORDER, INPUTS and attempt
- * COUNTS are what is pinned): the per-node error strategy's {@code continue} / {@code branch} routing, retry with
- * a per-attempt trace, the irreversible-node guard, and - the property everything else relies on - that with the
- * flag off the very same config is ignored and the run fails exactly as it always did.
+ * End-to-end through {@link WorkflowExecutionEngine}'s traversal (executor mocked, so node ORDER,
+ * INPUTS and attempt COUNTS are what is pinned): the per-node error strategy's {@code continue} /
+ * {@code branch} routing, retry with a per-attempt trace, the irreversible-node guard, and - the
+ * property everything else relies on - that with the flag off the very same config is ignored and
+ * the run fails exactly as it always did.
  */
 class WorkflowExecutionEngineNodeErrorStrategyTest {
 
@@ -38,38 +38,63 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
     private final Map<String, AtomicInteger> calls = new HashMap<>();
     private final Map<String, String> inputs = new HashMap<>();
     private final Map<String, IntFunction<RuntimeException>> failures = new HashMap<>();
-    private final Map<String, WorkflowNodeExecutor.NodeExecutionResult> fixedResults = new HashMap<>();
+    private final Map<String, WorkflowNodeExecutor.NodeExecutionResult> fixedResults =
+            new HashMap<>();
 
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.withJavaTime();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
         WorkflowNodeExecutor nodeExecutor = mock(WorkflowNodeExecutor.class);
-        engine = new WorkflowExecutionEngine(
-            mock(WorkflowRunRepository.class), mock(OrchestratorService.class), nodeExecutor,
-            mock(WorkflowEventPublisher.class), mapper(), mock(PlatformIssueService.class),
-            mock(ObjectProvider.class), mock(ObjectProvider.class),
-            mock(WorkflowRunCancellationService.class), mock(WorkflowRunPauseService.class),
-            null, null,
-            new com.agenticai.core.security.concurrent.ContextPropagatingExecutor("test-branch-", 16));
-        when(nodeExecutor.executeNode(anyString(), anyString(), anyString(), any(WorkflowNodeDto.class),
-            any(), any(), any(), any())).thenAnswer(invocation -> {
-                WorkflowNodeDto node = invocation.getArgument(3);
-                String input = invocation.getArgument(4);
-                int attempt = calls.computeIfAbsent(node.id(), k -> new AtomicInteger()).incrementAndGet();
-                inputs.put(node.id(), input);
-                IntFunction<RuntimeException> failure = failures.get(node.id());
-                RuntimeException toThrow = failure == null ? null : failure.apply(attempt);
-                if (toThrow != null) {
-                    throw toThrow;
-                }
-                WorkflowNodeExecutor.NodeExecutionResult fixed = fixedResults.get(node.id());
-                return fixed != null ? fixed
-                    : WorkflowNodeExecutor.NodeExecutionResult.ok("out-" + node.id(), "ran " + node.id(), null);
-            });
+        engine =
+                new WorkflowExecutionEngine(
+                        mock(WorkflowRunRepository.class),
+                        mock(OrchestratorService.class),
+                        nodeExecutor,
+                        mock(WorkflowEventPublisher.class),
+                        mapper(),
+                        mock(PlatformIssueService.class),
+                        mock(ObjectProvider.class),
+                        mock(ObjectProvider.class),
+                        mock(WorkflowRunCancellationService.class),
+                        mock(WorkflowRunPauseService.class),
+                        null,
+                        null,
+                        new com.agenticai.core.security.concurrent.ContextPropagatingExecutor(
+                                "test-branch-", 16));
+        when(nodeExecutor.executeNode(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(WorkflowNodeDto.class),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
+                .thenAnswer(
+                        invocation -> {
+                            WorkflowNodeDto node = invocation.getArgument(3);
+                            String input = invocation.getArgument(4);
+                            int attempt =
+                                    calls.computeIfAbsent(node.id(), k -> new AtomicInteger())
+                                            .incrementAndGet();
+                            inputs.put(node.id(), input);
+                            IntFunction<RuntimeException> failure = failures.get(node.id());
+                            RuntimeException toThrow =
+                                    failure == null ? null : failure.apply(attempt);
+                            if (toThrow != null) {
+                                throw toThrow;
+                            }
+                            WorkflowNodeExecutor.NodeExecutionResult fixed =
+                                    fixedResults.get(node.id());
+                            return fixed != null
+                                    ? fixed
+                                    : WorkflowNodeExecutor.NodeExecutionResult.ok(
+                                            "out-" + node.id(), "ran " + node.id(), null);
+                        });
     }
 
     private static WorkflowNodeDto node(String id, String type, Map<String, Object> config) {
@@ -101,8 +126,12 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
     }
 
     private static WorkflowDefinition definitionWithId() throws ReflectiveOperationException {
-        WorkflowDefinition definition = new WorkflowDefinition(
-            "Test Workflow", "desc", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.ACTIVE);
+        WorkflowDefinition definition =
+                new WorkflowDefinition(
+                        "Test Workflow",
+                        "desc",
+                        "{\"nodes\":[],\"edges\":[]}",
+                        WorkflowStatus.ACTIVE);
         java.lang.reflect.Field idField = WorkflowDefinition.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(definition, UUID.randomUUID());
@@ -120,18 +149,25 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
 
     private static WorkflowGraphDto chain(WorkflowNodeDto middle) {
         return new WorkflowGraphDto(
-            List.of(node("t", "trigger", Map.of()), middle, node("b", "agent", cfg())),
-            List.of(edge("e1", "t", middle.id(), null), edge("e2", middle.id(), "b", null)));
+                List.of(node("t", "trigger", Map.of()), middle, node("b", "agent", cfg())),
+                List.of(edge("e1", "t", middle.id(), null), edge("e2", middle.id(), "b", null)));
     }
 
-    // ---- flag off: byte-identical ------------------------------------------------------------------------------
+    // ---- flag off: byte-identical
+    // ------------------------------------------------------------------------------
 
     @Test
     void flagOffIgnoresOnErrorAndRetryAndTheRunFailsAsItAlwaysDid() throws Exception {
         engine.setNodeErrorStrategyEnabled(false);
         failures.put("a", attempt -> new RuntimeException("boom"));
 
-        WorkflowRun result = run(chain(node("a", "agent", cfg("onError", "continue", "retry", retryBlock(5, null)))));
+        WorkflowRun result =
+                run(
+                        chain(
+                                node(
+                                        "a",
+                                        "agent",
+                                        cfg("onError", "continue", "retry", retryBlock(5, null)))));
 
         assertEquals(WorkflowRunStatus.FAILED, result.getStatus());
         assertEquals(1, callsOf("a"), "the retry block must be ignored");
@@ -144,10 +180,17 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
     void flagOffStillRoutesAnExistingErrorEdgeExactlyAsBefore() throws Exception {
         engine.setNodeErrorStrategyEnabled(false);
         failures.put("a", attempt -> new RuntimeException("boom"));
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(node("t", "trigger", Map.of()), node("a", "agent", cfg()), node("ok", "agent", cfg()),
-                node("err", "agent", cfg())),
-            List.of(edge("e1", "t", "a", null), edge("e2", "a", "ok", null), edge("e3", "a", "err", "error")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                node("t", "trigger", Map.of()),
+                                node("a", "agent", cfg()),
+                                node("ok", "agent", cfg()),
+                                node("err", "agent", cfg())),
+                        List.of(
+                                edge("e1", "t", "a", null),
+                                edge("e2", "a", "ok", null),
+                                edge("e3", "a", "err", "error")));
 
         WorkflowRun result = run(graph);
 
@@ -167,7 +210,8 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         assertEquals("out-a", inputs.get("b"));
     }
 
-    // ---- onError: continue -------------------------------------------------------------------------------------
+    // ---- onError: continue
+    // -------------------------------------------------------------------------------------
 
     @Test
     void continuePassesAnErrorObjectDownstreamAndMarksTheStep() throws Exception {
@@ -178,8 +222,8 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
 
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
         JsonNode downstream = mapper().readTree(inputs.get("b"));
-        assertEquals("boom", downstream.get("error").asText());
-        assertEquals("a", downstream.get("nodeId").asText());
+        assertEquals("boom", downstream.get("error").asString());
+        assertEquals("a", downstream.get("nodeId").asString());
         assertTrue(result.getTraceJson().contains("\"status\":\"ERROR\""), result.getTraceJson());
         assertTrue(result.getTraceJson().contains("onError=continue"), result.getTraceJson());
     }
@@ -187,32 +231,45 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
     @Test
     void continueDoesNotSwallowAPlanOrQuotaDenial() throws Exception {
         engine.setNodeErrorStrategyEnabled(true);
-        failures.put("a", attempt -> new com.agenticai.core.security.TenantLimitExceededException("plan limit reached"));
+        failures.put(
+                "a",
+                attempt ->
+                        new com.agenticai.core.security.TenantLimitExceededException(
+                                "plan limit reached"));
 
         WorkflowRun result = run(chain(node("a", "agent", cfg("onError", "continue"))));
 
         assertEquals(WorkflowRunStatus.FAILED, result.getStatus());
-        assertEquals(0, callsOf("b"), "a quota denial must stop the run, not flow downstream as an error object");
+        assertEquals(
+                0,
+                callsOf("b"),
+                "a quota denial must stop the run, not flow downstream as an error object");
     }
 
     @Test
     void continueAlsoCoversANodeThatReportsFailureInsteadOfThrowing() throws Exception {
         engine.setNodeErrorStrategyEnabled(true);
-        fixedResults.put("a", WorkflowNodeExecutor.NodeExecutionResult.halted(WorkflowRunStatus.FAILED, "node said no"));
+        fixedResults.put(
+                "a",
+                WorkflowNodeExecutor.NodeExecutionResult.halted(
+                        WorkflowRunStatus.FAILED, "node said no"));
 
         WorkflowRun result = run(chain(node("a", "agent", cfg("onError", "continue"))));
 
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
-        assertEquals("node said no", mapper().readTree(inputs.get("b")).get("error").asText());
+        assertEquals("node said no", mapper().readTree(inputs.get("b")).get("error").asString());
     }
 
     @Test
     void continueOnTheLastNodeEndsTheRunCompleted() throws Exception {
         engine.setNodeErrorStrategyEnabled(true);
         failures.put("a", attempt -> new RuntimeException("boom"));
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(node("t", "trigger", Map.of()), node("a", "agent", cfg("onError", "continue"))),
-            List.of(edge("e1", "t", "a", null)));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                node("t", "trigger", Map.of()),
+                                node("a", "agent", cfg("onError", "continue"))),
+                        List.of(edge("e1", "t", "a", null)));
 
         assertEquals(WorkflowRunStatus.COMPLETED, run(graph).getStatus());
     }
@@ -221,10 +278,17 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
     void continueNeverRoutesDownTheErrorEdge() throws Exception {
         engine.setNodeErrorStrategyEnabled(true);
         failures.put("a", attempt -> new RuntimeException("boom"));
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(node("t", "trigger", Map.of()), node("a", "agent", cfg("onError", "continue")),
-                node("ok", "agent", cfg()), node("err", "agent", cfg())),
-            List.of(edge("e1", "t", "a", null), edge("e2", "a", "err", "error"), edge("e3", "a", "ok", null)));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                node("t", "trigger", Map.of()),
+                                node("a", "agent", cfg("onError", "continue")),
+                                node("ok", "agent", cfg()),
+                                node("err", "agent", cfg())),
+                        List.of(
+                                edge("e1", "t", "a", null),
+                                edge("e2", "a", "err", "error"),
+                                edge("e3", "a", "ok", null)));
 
         run(graph);
 
@@ -232,23 +296,31 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         assertEquals(0, callsOf("err"));
     }
 
-    // ---- onError: branch ---------------------------------------------------------------------------------------
+    // ---- onError: branch
+    // ---------------------------------------------------------------------------------------
 
     @Test
     void branchRoutesToTheErrorEdgeWhenOneIsWired() throws Exception {
         engine.setNodeErrorStrategyEnabled(true);
         failures.put("a", attempt -> new RuntimeException("boom"));
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(node("t", "trigger", Map.of()), node("a", "agent", cfg("onError", "branch")),
-                node("ok", "agent", cfg()), node("err", "agent", cfg())),
-            List.of(edge("e1", "t", "a", null), edge("e2", "a", "ok", null), edge("e3", "a", "err", "error")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                node("t", "trigger", Map.of()),
+                                node("a", "agent", cfg("onError", "branch")),
+                                node("ok", "agent", cfg()),
+                                node("err", "agent", cfg())),
+                        List.of(
+                                edge("e1", "t", "a", null),
+                                edge("e2", "a", "ok", null),
+                                edge("e3", "a", "err", "error")));
 
         WorkflowRun result = run(graph);
 
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
         assertEquals(1, callsOf("err"));
         assertEquals(0, callsOf("ok"));
-        assertEquals("a", mapper().readTree(inputs.get("err")).get("failedNodeId").asText());
+        assertEquals("a", mapper().readTree(inputs.get("err")).get("failedNodeId").asString());
     }
 
     @Test
@@ -262,7 +334,8 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         assertEquals(0, callsOf("b"));
     }
 
-    // ---- retry -------------------------------------------------------------------------------------------------
+    // ---- retry
+    // -------------------------------------------------------------------------------------------------
 
     @Test
     void retryRerunsUntilSuccessAndTracesEveryFailedAttempt() throws Exception {
@@ -276,7 +349,9 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         String trace = result.getTraceJson();
         assertTrue(trace.contains("(attempt 1/3)"), trace);
         assertTrue(trace.contains("(attempt 2/3)"), trace);
-        assertFalse(trace.contains("(attempt 3/3)"), "the successful attempt is the node's normal OK entry");
+        assertFalse(
+                trace.contains("(attempt 3/3)"),
+                "the successful attempt is the node's normal OK entry");
         assertTrue(trace.contains("Attempt 1/3 failed: flaky 1"), trace);
     }
 
@@ -297,7 +372,13 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         engine.setNodeErrorStrategyEnabled(true);
         failures.put("a", attempt -> new RuntimeException("always"));
 
-        WorkflowRun result = run(chain(node("a", "agent", cfg("retry", retryBlock(2, null), "onError", "continue"))));
+        WorkflowRun result =
+                run(
+                        chain(
+                                node(
+                                        "a",
+                                        "agent",
+                                        cfg("retry", retryBlock(2, null), "onError", "continue"))));
 
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
         assertEquals(2, callsOf("a"));

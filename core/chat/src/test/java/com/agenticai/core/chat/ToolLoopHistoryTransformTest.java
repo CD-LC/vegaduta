@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,26 +22,36 @@ import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * The per-run {@link ToolLoopHistoryTransform} hook of {@link ArgumentSanitizingToolCallingManager}: applied
- * after a tool round when the request's tool context carries one, invisible otherwise.
+ * The per-run {@link ToolLoopHistoryTransform} hook of {@link
+ * ArgumentSanitizingToolCallingManager}: applied after a tool round when the request's tool context
+ * carries one, invisible otherwise.
  */
 class ToolLoopHistoryTransformTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     private static List<Message> roundHistory() {
         List<Message> history = new ArrayList<>();
         history.add(new SystemMessage("system"));
         history.add(new UserMessage("go"));
-        history.add(AssistantMessage.builder()
-            .content("")
-            .toolCalls(List.of(new AssistantMessage.ToolCall("call-1", "function", "search", "{}")))
-            .build());
-        history.add(ToolResponseMessage.builder()
-            .responses(List.of(new ToolResponseMessage.ToolResponse("call-1", "search", "{\"result\":\"big\"}")))
-            .build());
+        history.add(
+                AssistantMessage.builder()
+                        .content("")
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall(
+                                                "call-1", "function", "search", "{}")))
+                        .build());
+        history.add(
+                ToolResponseMessage.builder()
+                        .responses(
+                                List.of(
+                                        new ToolResponseMessage.ToolResponse(
+                                                "call-1", "search", "{\"result\":\"big\"}")))
+                        .build());
         return history;
     }
 
@@ -58,25 +67,36 @@ class ToolLoopHistoryTransformTest {
     }
 
     private static ChatResponse response() {
-        AssistantMessage message = AssistantMessage.builder()
-            .content("")
-            .toolCalls(List.of(new AssistantMessage.ToolCall("call-1", "function", "search", "{}")))
-            .build();
+        AssistantMessage message =
+                AssistantMessage.builder()
+                        .content("")
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall(
+                                                "call-1", "function", "search", "{}")))
+                        .build();
         return new ChatResponse(List.of(new Generation(message)));
     }
 
-    private ArgumentSanitizingToolCallingManager managerReturning(List<Message> history, boolean returnDirect) {
-        ToolCallingManager delegate = new ToolCallingManager() {
-            @Override
-            public List<ToolDefinition> resolveToolDefinitions(ToolCallingChatOptions chatOptions) {
-                return List.of();
-            }
+    private ArgumentSanitizingToolCallingManager managerReturning(
+            List<Message> history, boolean returnDirect) {
+        ToolCallingManager delegate =
+                new ToolCallingManager() {
+                    @Override
+                    public List<ToolDefinition> resolveToolDefinitions(
+                            ToolCallingChatOptions chatOptions) {
+                        return List.of();
+                    }
 
-            @Override
-            public ToolExecutionResult executeToolCalls(Prompt prompt, ChatResponse chatResponse) {
-                return ToolExecutionResult.builder().conversationHistory(history).returnDirect(returnDirect).build();
-            }
-        };
+                    @Override
+                    public ToolExecutionResult executeToolCalls(
+                            Prompt prompt, ChatResponse chatResponse) {
+                        return ToolExecutionResult.builder()
+                                .conversationHistory(history)
+                                .returnDirect(returnDirect)
+                                .build();
+                    }
+                };
         return new ArgumentSanitizingToolCallingManager(delegate, objectMapper);
     }
 
@@ -84,14 +104,18 @@ class ToolLoopHistoryTransformTest {
     void theRunsTransformIsAppliedToTheHistoryAfterAToolRound() {
         AtomicReference<String> seenModel = new AtomicReference<>();
         List<Message> replacement = List.of(new UserMessage("replaced"));
-        ToolLoopHistoryTransform transform = (history, modelId) -> {
-            seenModel.set(modelId);
-            assertEquals(4, history.size());
-            return replacement;
-        };
-        Prompt prompt = promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, transform), "some-model");
+        ToolLoopHistoryTransform transform =
+                (history, modelId) -> {
+                    seenModel.set(modelId);
+                    assertEquals(4, history.size());
+                    return replacement;
+                };
+        Prompt prompt =
+                promptWith(
+                        Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, transform), "some-model");
 
-        ToolExecutionResult result = managerReturning(roundHistory(), false).executeToolCalls(prompt, response());
+        ToolExecutionResult result =
+                managerReturning(roundHistory(), false).executeToolCalls(prompt, response());
 
         assertEquals(replacement, result.conversationHistory());
         assertEquals("some-model", seenModel.get());
@@ -101,20 +125,25 @@ class ToolLoopHistoryTransformTest {
     void withoutTheKeyTheHistoryIsExactlyWhatTheDelegateProduced() {
         List<Message> history = roundHistory();
 
-        ToolExecutionResult result = managerReturning(history, false).executeToolCalls(promptWith(null, null), response());
+        ToolExecutionResult result =
+                managerReturning(history, false)
+                        .executeToolCalls(promptWith(null, null), response());
 
         assertEquals(history, result.conversationHistory());
     }
 
     @Test
     void aTransformThatThrowsNeverCostsTheTurn() {
-        ToolLoopHistoryTransform failing = (history, modelId) -> {
-            throw new IllegalStateException("boom");
-        };
+        ToolLoopHistoryTransform failing =
+                (history, modelId) -> {
+                    throw new IllegalStateException("boom");
+                };
         List<Message> history = roundHistory();
-        Prompt prompt = promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, failing), null);
+        Prompt prompt =
+                promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, failing), null);
 
-        ToolExecutionResult result = managerReturning(history, false).executeToolCalls(prompt, response());
+        ToolExecutionResult result =
+                managerReturning(history, false).executeToolCalls(prompt, response());
 
         assertEquals(history, result.conversationHistory());
     }
@@ -123,9 +152,11 @@ class ToolLoopHistoryTransformTest {
     void aTransformThatReturnsNullFallsBackToTheUntouchedHistory() {
         ToolLoopHistoryTransform nothing = (history, modelId) -> null;
         List<Message> history = roundHistory();
-        Prompt prompt = promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, nothing), null);
+        Prompt prompt =
+                promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, nothing), null);
 
-        ToolExecutionResult result = managerReturning(history, false).executeToolCalls(prompt, response());
+        ToolExecutionResult result =
+                managerReturning(history, false).executeToolCalls(prompt, response());
 
         assertEquals(history, result.conversationHistory());
     }
@@ -133,11 +164,13 @@ class ToolLoopHistoryTransformTest {
     @Test
     void aReturnDirectRoundDoesNotRunTheTransform() {
         AtomicReference<Object> called = new AtomicReference<>();
-        ToolLoopHistoryTransform transform = (history, modelId) -> {
-            called.set("called");
-            return history;
-        };
-        Prompt prompt = promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, transform), null);
+        ToolLoopHistoryTransform transform =
+                (history, modelId) -> {
+                    called.set("called");
+                    return history;
+                };
+        Prompt prompt =
+                promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, transform), null);
 
         managerReturning(roundHistory(), true).executeToolCalls(prompt, response());
 
@@ -147,9 +180,12 @@ class ToolLoopHistoryTransformTest {
     @Test
     void aNonTransformValueUnderTheKeyIsIgnored() {
         List<Message> history = roundHistory();
-        Prompt prompt = promptWith(Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, "not a transform"), null);
+        Prompt prompt =
+                promptWith(
+                        Map.of(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY, "not a transform"), null);
 
-        ToolExecutionResult result = managerReturning(history, false).executeToolCalls(prompt, response());
+        ToolExecutionResult result =
+                managerReturning(history, false).executeToolCalls(prompt, response());
 
         assertEquals(history, result.conversationHistory());
         assertTrue(result.conversationHistory().get(3) instanceof ToolResponseMessage);

@@ -36,10 +36,11 @@ public final class McpToolPin {
 
         public String aggregateHash() {
             MessageDigest md = sha256();
-            toolHashes.forEach((name, hash) -> {
-                update(md, name);
-                update(md, hash);
-            });
+            toolHashes.forEach(
+                    (name, hash) -> {
+                        update(md, name);
+                        update(md, hash);
+                    });
             return HexFormat.of().formatHex(md.digest());
         }
 
@@ -52,7 +53,11 @@ public final class McpToolPin {
                     sb.append(',');
                 }
                 first = false;
-                sb.append('"').append(escape(e.getKey())).append("\":\"").append(e.getValue()).append('"');
+                sb.append('"')
+                        .append(escape(e.getKey()))
+                        .append("\":\"")
+                        .append(e.getValue())
+                        .append('"');
             }
             return sb.append('}').toString();
         }
@@ -63,10 +68,10 @@ public final class McpToolPin {
                 return new Manifest(out);
             }
             try {
-                com.fasterxml.jackson.databind.JsonNode node =
+                tools.jackson.databind.JsonNode node =
                         com.agenticai.core.json.JsonMappers.plain().readTree(json);
-                node.fields().forEachRemaining(e -> out.put(e.getKey(), e.getValue().asText()));
-            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                node.properties().forEach(e -> out.put(e.getKey(), e.getValue().asString()));
+            } catch (tools.jackson.core.JacksonException e) {
                 // A corrupt stored manifest only loses the "which tool" detail; the aggregate hash
                 // comparison still decides changed/unchanged.
                 return new Manifest(new TreeMap<>());

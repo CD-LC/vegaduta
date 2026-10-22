@@ -195,18 +195,17 @@ class SearchAndCallToolTest {
 
     @Test
     void theToolDefinitionsAreValidJsonSchemaWithTheDocumentedFields() throws Exception {
-        com.fasterxml.jackson.databind.ObjectMapper mapper =
-                new com.fasterxml.jackson.databind.ObjectMapper();
-        com.fasterxml.jackson.databind.JsonNode searchSchema =
+        tools.jackson.databind.ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
+        tools.jackson.databind.JsonNode searchSchema =
                 mapper.readTree(search.getToolDefinition().inputSchema());
-        com.fasterxml.jackson.databind.JsonNode callSchema =
+        tools.jackson.databind.JsonNode callSchema =
                 mapper.readTree(callTool.getToolDefinition().inputSchema());
 
         assertEquals("search_tools", search.getToolDefinition().name());
         assertEquals("call_tool", callTool.getToolDefinition().name());
         assertTrue(searchSchema.path("properties").has("query"));
         assertTrue(searchSchema.path("properties").has("limit"));
-        assertEquals("query", searchSchema.path("required").get(0).asText());
+        assertEquals("query", searchSchema.path("required").get(0).asString());
         assertTrue(callSchema.path("properties").has("name"));
         assertTrue(callSchema.path("properties").has("argsJson"));
     }
@@ -391,7 +390,8 @@ class SearchAndCallToolTest {
         search.call("{\"query\":\"send email\"}");
 
         callTool.call(
-                "{\"name\":\"google_gmail\",\"argsJson\":\"{\\\"to\\\":\\\"a@b.com\\\"} trailing garbage\"}");
+                "{\"name\":\"google_gmail\",\"argsJson\":\"{\\\"to\\\":\\\"a@b.com\\\"} trailing"
+                        + " garbage\"}");
 
         assertEquals(List.of("{\"to\":\"a@b.com\"}"), gmail.inputs);
     }

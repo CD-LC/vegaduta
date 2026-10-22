@@ -10,19 +10,17 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.common.plugins.PluginCatalogController.PluginCatalog;
 import com.agenticai.core.common.plugins.PluginCatalogController.PluginEntry;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 /**
- * IDE-plugin plan B3 - the public plugin catalog at {@code GET /api/plugins/catalog}:
- * seeded in-code default when the {@code plugins.catalog} platform setting is unset,
- * admin-stored JSON winning when present, and corrupt stored JSON falling back to the
- * default rather than 500ing. Plain unit tests calling the controller method directly,
- * no MockMvc/web layer - mirrors {@code EdgeAgentsConfigControllerTest}, the pattern
- * this controller copies.
+ * IDE-plugin plan B3 - the public plugin catalog at {@code GET /api/plugins/catalog}: seeded
+ * in-code default when the {@code plugins.catalog} platform setting is unset, admin-stored JSON
+ * winning when present, and corrupt stored JSON falling back to the default rather than 500ing.
+ * Plain unit tests calling the controller method directly, no MockMvc/web layer - mirrors {@code
+ * EdgeAgentsConfigControllerTest}, the pattern this controller copies.
  */
 class PluginCatalogControllerTest {
 
@@ -32,7 +30,10 @@ class PluginCatalogControllerTest {
     @BeforeEach
     void setUp() {
         settings = mock(PlatformSettingsService.class);
-        controller = new PluginCatalogController(new PluginCatalogService(settings, new ObjectMapper()));
+        controller =
+                new PluginCatalogController(
+                        new PluginCatalogService(
+                                settings, com.agenticai.core.json.JsonMappers.plain()));
     }
 
     @Test
@@ -46,16 +47,18 @@ class PluginCatalogControllerTest {
         assertEquals("1", catalog.version()); // version is a STRING on the wire
         assertEquals(3, catalog.plugins().size());
         assertEquals(
-            List.of("vscode", "jetbrains", "chrome"),
-            catalog.plugins().stream().map(PluginEntry::id).toList()
-        );
+                List.of("vscode", "jetbrains", "chrome"),
+                catalog.plugins().stream().map(PluginEntry::id).toList());
         for (PluginEntry entry : catalog.plugins()) {
             // Honest "nothing published yet" state: no artifact, no version, no
             // fabricated store link - clients must render these as coming-soon.
-            assertNull(entry.artifact(), entry.id() + " must ship with no artifact until first upload");
+            assertNull(
+                    entry.artifact(),
+                    entry.id() + " must ship with no artifact until first upload");
             assertNull(entry.latestVersion(), entry.id());
             assertNull(entry.releasedAt(), entry.id());
-            assertNull(entry.externalStoreUrl(), entry.id() + " must not fabricate a store listing");
+            assertNull(
+                    entry.externalStoreUrl(), entry.id() + " must not fabricate a store listing");
             assertNotNull(entry.displayName(), entry.id());
             assertNotNull(entry.description(), entry.id());
         }
@@ -77,7 +80,9 @@ class PluginCatalogControllerTest {
 
     @Test
     void adminStoredCatalogSettingOverridesDefault() {
-        when(settings.getString(PluginCatalogController.CATALOG_KEY, null)).thenReturn("""
+        when(settings.getString(PluginCatalogController.CATALOG_KEY, null))
+                .thenReturn(
+                        """
             {
               "version": "4",
               "plugins": [
@@ -116,7 +121,7 @@ class PluginCatalogControllerTest {
     @Test
     void corruptStoredCatalogFallsBackToDefaultInsteadOfFailing() {
         when(settings.getString(PluginCatalogController.CATALOG_KEY, null))
-            .thenReturn("{ this is not valid json");
+                .thenReturn("{ this is not valid json");
 
         PluginCatalog catalog = controller.getCatalog().getBody();
 

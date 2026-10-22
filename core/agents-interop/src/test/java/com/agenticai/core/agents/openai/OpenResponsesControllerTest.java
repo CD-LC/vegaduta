@@ -18,9 +18,6 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +43,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Drives {@link OpenResponsesController} with a recorded OpenAI-SDK-style Responses request ({@code
@@ -58,7 +58,7 @@ class OpenResponsesControllerTest {
 
     private static final UUID AGENT_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private AgentService agentService;
     private AgentChatService chatService;
     private OpenResponsesController controller;
@@ -153,16 +153,16 @@ class OpenResponsesControllerTest {
     private void normalizeInPlace(JsonNode node) {
         if (node.isObject()) {
             ObjectNode obj = (ObjectNode) node;
-            Iterator<Map.Entry<String, JsonNode>> it = obj.fields();
+            Iterator<Map.Entry<String, JsonNode>> it = obj.properties().iterator();
             List<String> names = new ArrayList<>();
             while (it.hasNext()) {
                 names.add(it.next().getKey());
             }
             for (String name : names) {
                 JsonNode v = obj.get(name);
-                if ("id".equals(name) && v.isTextual() && v.asText().startsWith("resp_")) {
+                if ("id".equals(name) && v.isString() && v.asString().startsWith("resp_")) {
                     obj.put(name, "RESP");
-                } else if ("id".equals(name) && v.isTextual() && v.asText().startsWith("msg_")) {
+                } else if ("id".equals(name) && v.isString() && v.asString().startsWith("msg_")) {
                     obj.put(name, "MSG");
                 } else if ("item_id".equals(name)) {
                     obj.put(name, "MSG");
@@ -199,8 +199,8 @@ class OpenResponsesControllerTest {
 
         assertEquals(200, res.getStatusCode().value());
         JsonNode body = mapper.readTree((String) res.getBody());
-        assertTrue(body.get("id").asText().startsWith("resp_"));
-        assertTrue(body.get("output").get(0).get("id").asText().startsWith("msg_"));
+        assertTrue(body.get("id").asString().startsWith("resp_"));
+        assertTrue(body.get("output").get(0).get("id").asString().startsWith("msg_"));
         assertTrue(body.get("created_at").asLong() > 0);
         assertEquals(normalize(resource("expected-response.json")), normalize(body));
     }
@@ -272,9 +272,10 @@ class OpenResponsesControllerTest {
                         .andReturn();
         assertEquals(200, result.getResponse().getStatus());
         JsonNode json = mapper.readTree(result.getResponse().getContentAsString());
-        assertEquals("response", json.get("object").asText());
+        assertEquals("response", json.get("object").asString());
         assertEquals(
-                "12 (4 x 3)", json.get("output").get(0).get("content").get(0).get("text").asText());
+                "12 (4 x 3)",
+                json.get("output").get(0).get("content").get(0).get("text").asString());
     }
 
     // ---- streaming ----
@@ -305,7 +306,7 @@ class OpenResponsesControllerTest {
             assertEquals(
                     normalize(mapper.readTree(recorded.get(i))), normalize(actual), "event #" + i);
             // the SSE event name is the payload type, and sequence_number counts 0,1,2,...
-            assertEquals(actual.get("type").asText(), frames.get(i).event());
+            assertEquals(actual.get("type").asString(), frames.get(i).event());
             assertEquals(i, actual.get("sequence_number").asInt());
         }
     }
@@ -362,7 +363,7 @@ class OpenResponsesControllerTest {
                         .get("content")
                         .get(0)
                         .get("text")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -391,11 +392,11 @@ class OpenResponsesControllerTest {
         assertEquals("[DONE]", frames.get(frames.size() - 1).data());
         JsonNode failed = mapper.readTree(frames.get(frames.size() - 2).data());
         JsonNode error = mapper.readTree(frames.get(frames.size() - 3).data());
-        assertEquals("response.failed", failed.get("type").asText());
-        assertEquals("failed", failed.get("response").get("status").asText());
-        assertEquals("server_error", failed.get("response").get("error").get("code").asText());
-        assertEquals("error", error.get("type").asText());
-        assertEquals("server_error", error.get("code").asText());
+        assertEquals("response.failed", failed.get("type").asString());
+        assertEquals("failed", failed.get("response").get("status").asString());
+        assertEquals("server_error", failed.get("response").get("error").get("code").asString());
+        assertEquals("error", error.get("type").asString());
+        assertEquals("server_error", error.get("code").asString());
         assertEquals(
                 failed.get("sequence_number").asInt() - 1, error.get("sequence_number").asInt());
         for (ServerSentEvent<String> f : frames) {
@@ -410,7 +411,7 @@ class OpenResponsesControllerTest {
         List<ServerSentEvent<String>> frames =
                 events(controller.respond(request(true), null, principal));
         JsonNode done = mapper.readTree(frames.get(frames.size() - 2).data());
-        assertEquals("response.completed", done.get("type").asText());
+        assertEquals("response.completed", done.get("type").asString());
         assertEquals(
                 "",
                 done.get("response")
@@ -419,7 +420,7 @@ class OpenResponsesControllerTest {
                         .get("content")
                         .get(0)
                         .get("text")
-                        .asText());
+                        .asString());
     }
 
     // ---- errors: same envelope, same gates as chat completions ----
@@ -461,7 +462,7 @@ class OpenResponsesControllerTest {
                 mapper.readTree(result.getResponse().getContentAsString())
                         .get("error")
                         .get("code")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -595,9 +596,9 @@ class OpenResponsesControllerTest {
                         .andReturn();
         assertEquals(400, result.getResponse().getStatus());
         JsonNode err = mapper.readTree(result.getResponse().getContentAsString()).get("error");
-        assertEquals("unsupported_parameter", err.get("code").asText());
-        assertEquals("invalid_request_error", err.get("type").asText());
-        assertTrue(err.get("message").asText().contains("previous_response_id"));
+        assertEquals("unsupported_parameter", err.get("code").asString());
+        assertEquals("invalid_request_error", err.get("type").asString());
+        assertTrue(err.get("message").asString().contains("previous_response_id"));
         org.mockito.Mockito.verifyNoInteractions(chatService);
     }
 
@@ -616,7 +617,7 @@ class OpenResponsesControllerTest {
                 mapper.readTree(result.getResponse().getContentAsString())
                         .get("error")
                         .get("code")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -643,8 +644,8 @@ class OpenResponsesControllerTest {
                         .andReturn();
         assertEquals(404, result.getResponse().getStatus());
         JsonNode err = mapper.readTree(result.getResponse().getContentAsString()).get("error");
-        assertEquals("response_not_found", err.get("code").asText());
-        assertEquals("invalid_request_error", err.get("type").asText());
+        assertEquals("response_not_found", err.get("code").asString());
+        assertEquals("invalid_request_error", err.get("type").asString());
     }
 
     @Test

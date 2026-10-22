@@ -16,10 +16,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.str;
 import com.agenticai.core.workflow.WorkflowDataOps.Condition;
 import com.agenticai.core.workflow.WorkflowDataOps.Items;
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,12 +24,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * The {@code filter} and {@code switch} data operations and the condition language they share
- * ({@code field operator value}). Every operator is a {@link Operator} strategy (name aliases -> predicate), so
- * adding one is one enum constant. Regex safety (pattern/input caps, per-match deadline, shared budget) lives in
- * {@link ConditionEvaluator}. Extracted from {@link WorkflowDataOps}.
+ * ({@code field operator value}). Every operator is a {@link Operator} strategy (name aliases ->
+ * predicate), so adding one is one enum constant. Regex safety (pattern/input caps, per-match
+ * deadline, shared budget) lives in {@link ConditionEvaluator}. Extracted from {@link
+ * WorkflowDataOps}.
  */
 final class DataFilterOps {
 
@@ -82,12 +83,20 @@ final class DataFilterOps {
             return test.apply(ev, v, rhs);
         }
 
-        /** Canonical operator for a spelling (symbols, case and "_ - space" insensitive), or null when unknown. */
+        /**
+         * Canonical operator for a spelling (symbols, case and "_ - space" insensitive), or null
+         * when unknown.
+         */
         static Operator parse(String raw) {
             if (raw == null) {
                 return null;
             }
-            String s = raw.strip().toLowerCase(Locale.ROOT).replace("_", "").replace("-", "").replace(" ", "");
+            String s =
+                    raw.strip()
+                            .toLowerCase(Locale.ROOT)
+                            .replace("_", "")
+                            .replace("-", "")
+                            .replace(" ", "");
             for (Operator op : values()) {
                 if (op.id.toLowerCase(Locale.ROOT).equals(s) || op.aliases.contains(s)) {
                     return op;
@@ -97,20 +106,27 @@ final class DataFilterOps {
         }
     }
 
-    private DataFilterOps() {
-    }
+    private DataFilterOps() {}
 
-    /** Canonical operator name, or null when unknown. Accepts the symbols and a few common spellings. */
+    /**
+     * Canonical operator name, or null when unknown. Accepts the symbols and a few common
+     * spellings.
+     */
     static String normalizeOperator(String raw) {
         Operator op = Operator.parse(raw);
         return op == null ? null : op.id();
     }
 
-    /** {@code conditions: [{field, operator, value}]}, {@code combinator: and|or}, {@code ignoreCase}, {@code itemsField}. */
-    static Outcome filter(ObjectMapper mapper, Map<String, Object> config, Supplier<Items> itemsSource) {
+    /**
+     * {@code conditions: [{field, operator, value}]}, {@code combinator: and|or}, {@code
+     * ignoreCase}, {@code itemsField}.
+     */
+    static Outcome filter(
+            ObjectMapper mapper, Map<String, Object> config, Supplier<Items> itemsSource) {
         List<Condition> conditions = conditions(config.get("conditions"));
         boolean any = isOr(config.get("combinator"));
-        ConditionEvaluator evaluator = new ConditionEvaluator(bool(config.get("ignoreCase"), false));
+        ConditionEvaluator evaluator =
+                new ConditionEvaluator(bool(config.get("ignoreCase"), false));
         Items items = itemsSource.get();
         List<String> log = new ArrayList<>();
         ArrayNode kept = mapper.createArrayNode();
@@ -126,24 +142,28 @@ final class DataFilterOps {
         }
         evaluator.addWarnings(log);
         int total = items.array().size();
-        return Outcome.ok(WorkflowDataOps.withItems(items, kept).toString(),
-            "Filter kept " + kept.size() + " of " + total + " item(s).", log);
+        return Outcome.ok(
+                WorkflowDataOps.withItems(items, kept).toString(),
+                "Filter kept " + kept.size() + " of " + total + " item(s).",
+                log);
     }
 
     /**
-     * {@code cases: [{name, combinator: and|or, conditions: [{field, operator, value}]}]}, {@code ignoreCase}. The
-     * FIRST case whose conditions hold wins and its {@code name} becomes the node's {@code branch} - the very
-     * mechanism {@code condition} (true/false) and {@code supervisor} (route handle) use, resolved by
-     * {@link WorkflowGraphSupport#nextNodeId} against each outgoing edge's {@code sourceHandle}. No match routes to
-     * {@value #SWITCH_DEFAULT_HANDLE}. The input passes through unchanged. The condition fields are read from the
-     * input as one item (a JSON object; a blank field tests the whole input text).
+     * {@code cases: [{name, combinator: and|or, conditions: [{field, operator, value}]}]}, {@code
+     * ignoreCase}. The FIRST case whose conditions hold wins and its {@code name} becomes the
+     * node's {@code branch} - the very mechanism {@code condition} (true/false) and {@code
+     * supervisor} (route handle) use, resolved by {@link WorkflowGraphSupport#nextNodeId} against
+     * each outgoing edge's {@code sourceHandle}. No match routes to {@value
+     * #SWITCH_DEFAULT_HANDLE}. The input passes through unchanged. The condition fields are read
+     * from the input as one item (a JSON object; a blank field tests the whole input text).
      */
     static Outcome switchRoute(ObjectMapper mapper, Map<String, Object> config, String input) {
         List<Map<String, Object>> cases = mapList(config.get("cases"));
-        ConditionEvaluator evaluator = new ConditionEvaluator(bool(config.get("ignoreCase"), false));
+        ConditionEvaluator evaluator =
+                new ConditionEvaluator(bool(config.get("ignoreCase"), false));
         JsonNode item = DataValues.parse(mapper, input);
         if (item == null) {
-            item = TextNode.valueOf(input == null ? "" : input);
+            item = StringNode.valueOf(input == null ? "" : input);
         }
         List<String> log = new ArrayList<>();
         for (Map<String, Object> c : cases) {
@@ -155,13 +175,17 @@ final class DataFilterOps {
             if (evaluator.matches(item, conditions, isOr(c.get("combinator")))) {
                 evaluator.addWarnings(log);
                 log.add("Matched case '" + name.strip() + "'.");
-                return Outcome.routed(input, "Switch routed to '" + name.strip() + "'.", name.strip(), log);
+                return Outcome.routed(
+                        input, "Switch routed to '" + name.strip() + "'.", name.strip(), log);
             }
         }
         evaluator.addWarnings(log);
         log.add("No case matched.");
-        return Outcome.routed(input, "Switch defaulted to '" + SWITCH_DEFAULT_HANDLE + "' (no case matched).",
-            SWITCH_DEFAULT_HANDLE, log);
+        return Outcome.routed(
+                input,
+                "Switch defaulted to '" + SWITCH_DEFAULT_HANDLE + "' (no case matched).",
+                SWITCH_DEFAULT_HANDLE,
+                log);
     }
 
     static List<Condition> conditions(Object raw) {
@@ -170,8 +194,11 @@ final class DataFilterOps {
             String field = str(m.get("field"));
             String op = str(m.get("operator"));
             Object value = m.get("value");
-            out.add(new Condition(field == null ? "" : field.strip(), op == null || op.isBlank() ? "eq" : op,
-                value == null ? "" : value.toString()));
+            out.add(
+                    new Condition(
+                            field == null ? "" : field.strip(),
+                            op == null || op.isBlank() ? "eq" : op,
+                            value == null ? "" : value.toString()));
         }
         return out;
     }
@@ -180,7 +207,10 @@ final class DataFilterOps {
         return combinator != null && combinator.toString().strip().equalsIgnoreCase("or");
     }
 
-    /** Evaluates conditions against one item. One instance per node execution (it carries the regex budget). */
+    /**
+     * Evaluates conditions against one item. One instance per node execution (it carries the regex
+     * budget).
+     */
     static final class ConditionEvaluator {
         private final boolean ignoreCase;
         private final long totalDeadline;
@@ -194,7 +224,10 @@ final class DataFilterOps {
             this.totalDeadline = System.nanoTime() + REGEX_TOTAL_BUDGET_NANOS;
         }
 
-        /** AND (any=false) / OR (any=true) over {@code conditions}; the caller handles an empty list. */
+        /**
+         * AND (any=false) / OR (any=true) over {@code conditions}; the caller handles an empty
+         * list.
+         */
         boolean matches(JsonNode item, List<Condition> conditions, boolean any) {
             for (Condition c : conditions) {
                 boolean r = test(item, c);
@@ -213,11 +246,17 @@ final class DataFilterOps {
                 log.add(regexTimeouts + " regex match(es) timed out and were treated as no match.");
             }
             if (regexTooDeep > 0) {
-                log.add(regexTooDeep + " regex match(es) were too deep for the input and were treated as no match.");
+                log.add(
+                        regexTooDeep
+                                + " regex match(es) were too deep for the input and were treated as"
+                                + " no match.");
             }
             if (regexSkippedLong > 0) {
-                log.add(regexSkippedLong + " value(s) longer than " + MAX_REGEX_INPUT_CHARS
-                    + " characters were not regex-tested (treated as no match).");
+                log.add(
+                        regexSkippedLong
+                                + " value(s) longer than "
+                                + MAX_REGEX_INPUT_CHARS
+                                + " characters were not regex-tested (treated as no match).");
             }
         }
 
@@ -265,7 +304,10 @@ final class DataFilterOps {
             return ignoreCase ? t.equalsIgnoreCase(rhs) : t.equals(rhs);
         }
 
-        /** Ordering of the item value against the config value; null when the item has no value to order. */
+        /**
+         * Ordering of the item value against the config value; null when the item has no value to
+         * order.
+         */
         private Integer order(JsonNode v, String rhs) {
             if (isAbsent(v)) {
                 return null;
@@ -275,7 +317,7 @@ final class DataFilterOps {
             if (a != null && b != null) {
                 return a.compareTo(b);
             }
-            Long da = v.isTextual() ? parseDate(v.asText()) : null;
+            Long da = v.isString() ? parseDate(v.asString()) : null;
             Long db = parseDate(rhs);
             if (da != null && db != null) {
                 return Long.compare(da, db);
@@ -286,7 +328,8 @@ final class DataFilterOps {
 
         private boolean regex(JsonNode v, String pattern) {
             if (pattern.length() > MAX_REGEX_PATTERN_CHARS) {
-                throw new IllegalArgumentException("Regex pattern is longer than " + MAX_REGEX_PATTERN_CHARS + " characters.");
+                throw new IllegalArgumentException(
+                        "Regex pattern is longer than " + MAX_REGEX_PATTERN_CHARS + " characters.");
             }
             String haystack = text(v);
             if (haystack.length() > MAX_REGEX_INPUT_CHARS) {
@@ -295,12 +338,17 @@ final class DataFilterOps {
             }
             Pattern p = patterns.get(pattern);
             if (p == null) {
-                p = Pattern.compile(pattern, ignoreCase ? Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE : 0);
+                p =
+                        Pattern.compile(
+                                pattern,
+                                ignoreCase ? Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE : 0);
                 patterns.put(pattern, p);
             }
             long now = System.nanoTime();
             if (now - totalDeadline > 0) {
-                throw new IllegalStateException("Regex evaluation budget exceeded - simplify the pattern or reduce the input.");
+                throw new IllegalStateException(
+                        "Regex evaluation budget exceeded - simplify the pattern or reduce the"
+                                + " input.");
             }
             long deadline = Math.min(now + REGEX_MATCH_BUDGET_NANOS, totalDeadline);
             try {
@@ -308,12 +356,16 @@ final class DataFilterOps {
             } catch (RegexTimeout e) {
                 regexTimeouts++;
                 if (regexTimeouts >= MAX_REGEX_TIMEOUTS) {
-                    throw new IllegalStateException("Regex '" + abbreviate(pattern, 40)
-                        + "' timed out repeatedly (catastrophic backtracking?) - simplify the pattern.");
+                    throw new IllegalStateException(
+                            "Regex '"
+                                    + abbreviate(pattern, 40)
+                                    + "' timed out repeatedly (catastrophic backtracking?) -"
+                                    + " simplify the pattern.");
                 }
                 return false;
             } catch (StackOverflowError e) {
-                // java.util.regex recurses per character for constructs like (a|b)*; a long value can blow the stack.
+                // java.util.regex recurses per character for constructs like (a|b)*; a long value
+                // can blow the stack.
                 // An Error would kill the run thread, so treat it as a non-match and say so.
                 regexTooDeep++;
                 return false;
@@ -321,7 +373,10 @@ final class DataFilterOps {
         }
     }
 
-    /** Thrown from {@link DeadlineCharSequence#charAt} when the per-match budget is spent. No stack trace: it is control flow. */
+    /**
+     * Thrown from {@link DeadlineCharSequence#charAt} when the per-match budget is spent. No stack
+     * trace: it is control flow.
+     */
     static final class RegexTimeout extends RuntimeException {
         private static final long serialVersionUID = 1L;
 

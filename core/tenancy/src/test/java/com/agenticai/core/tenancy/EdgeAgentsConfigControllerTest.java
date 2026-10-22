@@ -14,7 +14,6 @@ import com.agenticai.core.tenancy.EdgeAgentPolicyLookup.EdgeAgentPolicyView;
 import com.agenticai.core.tenancy.EdgeAgentsConfigController.EdgeConfigResponse;
 import com.agenticai.core.tenancy.EdgeAgentsConfigController.EdgeModelEntry;
 import com.agenticai.core.tenancy.EdgeAgentsConfigController.EdgeModelManifest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,20 +22,21 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.ResponseEntity;
 
 /**
- * The versioned on-device model
- * manifest at {@code GET /api/edge/manifest}: seeded in-code default when the
- * {@code edge.model-manifest} platform setting is unset, admin-stored JSON
- * winning when present, and corrupt stored JSON falling back to the default
- * rather than 500ing. Plain unit tests calling the controller method directly,
- * no MockMvc/web layer - the established convention in this module's tests
- * (see {@code TenantSettingsControllerTest}'s header note).
+ * The versioned on-device model manifest at {@code GET /api/edge/manifest}: seeded in-code default
+ * when the {@code edge.model-manifest} platform setting is unset, admin-stored JSON winning when
+ * present, and corrupt stored JSON falling back to the default rather than 500ing. Plain unit tests
+ * calling the controller method directly, no MockMvc/web layer - the established convention in this
+ * module's tests (see {@code TenantSettingsControllerTest}'s header note).
  */
 class EdgeAgentsConfigControllerTest {
 
     private PlatformSettingsService settings;
     private EdgeAgentPolicyLookup policyLookup;
+
     @SuppressWarnings("unchecked")
-    private final ObjectProvider<EdgeAgentPolicyLookup> policyLookupProvider = mock(ObjectProvider.class);
+    private final ObjectProvider<EdgeAgentPolicyLookup> policyLookupProvider =
+            mock(ObjectProvider.class);
+
     private EdgeAgentsConfigController controller;
 
     @BeforeEach
@@ -44,7 +44,11 @@ class EdgeAgentsConfigControllerTest {
         settings = mock(PlatformSettingsService.class);
         policyLookup = mock(EdgeAgentPolicyLookup.class);
         when(policyLookupProvider.getIfAvailable()).thenReturn(policyLookup);
-        controller = new EdgeAgentsConfigController(settings, new ObjectMapper(), policyLookupProvider);
+        controller =
+                new EdgeAgentsConfigController(
+                        settings,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        policyLookupProvider);
     }
 
     @Test
@@ -104,9 +108,11 @@ class EdgeAgentsConfigControllerTest {
         assertEquals("rife-video-interpolation", rife.id());
         assertEquals(2, rife.tier());
         assertEquals("video-interpolation", rife.kind());
-        assertEquals("https://huggingface.co/FuryTMP/RIFE_fp32/resolve/main/RIFE_fp32.onnx", rife.url());
+        assertEquals(
+                "https://huggingface.co/FuryTMP/RIFE_fp32/resolve/main/RIFE_fp32.onnx", rife.url());
         assertEquals(21_604_631L, rife.sizeBytes());
-        assertEquals("6a31074c0f588648982b5e828aee6c27e005015a712a46ea63da48c65fa9a26b", rife.sha256());
+        assertEquals(
+                "6a31074c0f588648982b5e828aee6c27e005015a712a46ea63da48c65fa9a26b", rife.sha256());
 
         EdgeModelEntry film = manifest.models().get(5);
         assertEquals("film-video-interpolation", film.id());
@@ -152,13 +158,14 @@ class EdgeAgentsConfigControllerTest {
         // Guards the exact JSON the client's ManifestModel type
         // (web/app/lib/edge/capabilities.ts) parses: version as a string,
         // tier as a number, and the capital-GB minDeviceMemoryGB field name.
-        com.fasterxml.jackson.databind.JsonNode json =
-            new ObjectMapper().valueToTree(EdgeAgentsConfigController.DEFAULT_MANIFEST);
+        tools.jackson.databind.JsonNode json =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .valueToTree(EdgeAgentsConfigController.DEFAULT_MANIFEST);
 
-        assertTrue(json.get("version").isTextual());
-        assertEquals("1", json.get("version").asText());
+        assertTrue(json.get("version").isString());
+        assertEquals("1", json.get("version").asString());
 
-        com.fasterxml.jackson.databind.JsonNode llama = json.get("models").get(1);
+        tools.jackson.databind.JsonNode llama = json.get("models").get(1);
         assertTrue(llama.get("tier").isInt());
         assertEquals(1, llama.get("tier").asInt());
         assertTrue(llama.has("minDeviceMemoryGB"));
@@ -166,7 +173,7 @@ class EdgeAgentsConfigControllerTest {
         assertTrue(llama.get("url").isNull());
         assertTrue(llama.get("sha256").isNull());
         assertTrue(llama.get("requiresWebGpu").asBoolean());
-        assertEquals("llm", llama.get("kind").asText());
+        assertEquals("llm", llama.get("kind").asString());
         // D-9: contextWindowSize is a NUMBER on the wire (client
         // coerceContextWindowSize parses it), null on non-tier-1 rows.
         assertTrue(llama.get("contextWindowSize").isInt());
@@ -176,7 +183,9 @@ class EdgeAgentsConfigControllerTest {
 
     @Test
     void adminStoredManifestSettingOverridesDefault() {
-        when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null)).thenReturn("""
+        when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null))
+                .thenReturn(
+                        """
             {
               "version": "7",
               "models": [
@@ -224,13 +233,19 @@ class EdgeAgentsConfigControllerTest {
             // ever held) was promoted into DEFAULT_MANIFEST on 2026-08-07,
             // so every remaining registry row is back to tier-1 WebLLM.
             assertEquals(1, candidate.tier(), candidate.id() + " should be tier 1");
-            assertTrue(candidate.requiresWebGpu(), candidate.id() + " (tier 1) should require WebGPU");
-            assertNull(candidate.url(), candidate.id() + " (tier 1) should resolve by id against the MLC CDN, not a stored url");
-            assertTrue(candidate.sizeBytes() > 0, candidate.id() + " should have a real, non-zero size");
             assertTrue(
-                !defaultIds.contains(candidate.id()),
-                candidate.id() + " is already in DEFAULT_MANIFEST - registry candidates must be new"
-            );
+                    candidate.requiresWebGpu(), candidate.id() + " (tier 1) should require WebGPU");
+            assertNull(
+                    candidate.url(),
+                    candidate.id()
+                            + " (tier 1) should resolve by id against the MLC CDN, not a stored url");
+            assertTrue(
+                    candidate.sizeBytes() > 0,
+                    candidate.id() + " should have a real, non-zero size");
+            assertTrue(
+                    !defaultIds.contains(candidate.id()),
+                    candidate.id()
+                            + " is already in DEFAULT_MANIFEST - registry candidates must be new");
         }
     }
 
@@ -252,7 +267,9 @@ class EdgeAgentsConfigControllerTest {
             assertNull(entry.url());
             assertTrue(entry.sizeBytes() > 0);
         }
-        assertEquals(java.util.Set.of("edge-stt-whisper", "edge-tts-kokoro", "edge-vision-smolvlm"), ids);
+        assertEquals(
+                java.util.Set.of("edge-stt-whisper", "edge-tts-kokoro", "edge-vision-smolvlm"),
+                ids);
         assertEquals(java.util.Set.of("stt", "tts", "vision"), kinds);
         // Always present regardless of whether an admin override exists - these
         // are never part of the toggleable manifest.
@@ -262,7 +279,7 @@ class EdgeAgentsConfigControllerTest {
     @Test
     void corruptStoredManifestFallsBackToDefaultInsteadOfFailing() {
         when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null))
-            .thenReturn("{ this is not valid json");
+                .thenReturn("{ this is not valid json");
 
         EdgeModelManifest manifest = controller.getManifest().getBody();
 
@@ -279,14 +296,14 @@ class EdgeAgentsConfigControllerTest {
         // Same values as tier1.ts's BUILTIN_FALLBACK_MANIFEST (1B-2B => fast,
         // 3B+ => capable); non-tier-1-LLM rows stay untagged (null).
         var models = EdgeAgentsConfigController.DEFAULT_MANIFEST.models();
-        assertNull(models.get(0).speedTier());                 // chrome-builtin (tier 0)
-        assertEquals("capable", models.get(1).speedTier());    // Llama 3B
-        assertEquals("fast", models.get(2).speedTier());       // Qwen 1.5B
-        assertEquals("fast", models.get(3).speedTier());       // Llama 1B
-        assertNull(models.get(4).speedTier());                 // RIFE (video)
-        assertNull(models.get(5).speedTier());                 // FILM (video)
-        assertEquals("capable", models.get(6).speedTier());    // Phi 3.5 mini (3.8B)
-        assertEquals("fast", models.get(7).speedTier());       // Gemma 2 2B
+        assertNull(models.get(0).speedTier()); // chrome-builtin (tier 0)
+        assertEquals("capable", models.get(1).speedTier()); // Llama 3B
+        assertEquals("fast", models.get(2).speedTier()); // Qwen 1.5B
+        assertEquals("fast", models.get(3).speedTier()); // Llama 1B
+        assertNull(models.get(4).speedTier()); // RIFE (video)
+        assertNull(models.get(5).speedTier()); // FILM (video)
+        assertEquals("capable", models.get(6).speedTier()); // Phi 3.5 mini (3.8B)
+        assertEquals("fast", models.get(7).speedTier()); // Gemma 2 2B
 
         // Every tier-1 LLM row in DEFAULT_MANIFEST and the registry catalog
         // carries a tag — an untagged tier-1 row would silently re-enable
@@ -299,9 +316,8 @@ class EdgeAgentsConfigControllerTest {
         for (EdgeModelEntry entry : EdgeAgentsConfigController.REGISTRY_CATALOG) {
             assertNotNull(entry.speedTier(), entry.id() + " (registry) must carry a speedTier");
             assertTrue(
-                "fast".equals(entry.speedTier()) || "capable".equals(entry.speedTier()),
-                entry.id() + " speedTier must be canonical"
-            );
+                    "fast".equals(entry.speedTier()) || "capable".equals(entry.speedTier()),
+                    entry.id() + " speedTier must be canonical");
         }
     }
 
@@ -322,12 +338,15 @@ class EdgeAgentsConfigControllerTest {
         assertNull(models.get(5).contextWindowSize()); // FILM (video)
         for (EdgeModelEntry entry : models) {
             if (entry.tier() == 1) {
-                assertEquals(Integer.valueOf(4096), entry.contextWindowSize(),
-                    entry.id() + " (tier 1) must carry the installed record's window");
+                assertEquals(
+                        Integer.valueOf(4096),
+                        entry.contextWindowSize(),
+                        entry.id() + " (tier 1) must carry the installed record's window");
             }
         }
         for (EdgeModelEntry entry : EdgeAgentsConfigController.REGISTRY_CATALOG) {
-            Integer expected = "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC".equals(entry.id()) ? 2048 : 4096;
+            Integer expected =
+                    "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC".equals(entry.id()) ? 2048 : 4096;
             assertEquals(expected, entry.contextWindowSize(), entry.id());
         }
         for (EdgeModelEntry entry : EdgeAgentsConfigController.FIXED_UTILITIES) {
@@ -340,7 +359,9 @@ class EdgeAgentsConfigControllerTest {
         // Positive passes through (the admin raise the client honors); 0 /
         // negative / absent (a pre-D-9 stored override) -> null, never
         // guessed — mirrors the client's coerceContextWindowSize.
-        when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null)).thenReturn("""
+        when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null))
+                .thenReturn(
+                        """
             {
               "version": "10",
               "models": [
@@ -373,7 +394,9 @@ class EdgeAgentsConfigControllerTest {
         // "FAST " (casing/whitespace drift) -> "fast"; "turbo" (unknown) ->
         // null; absent field (pre-Wave-2 stored override) -> null. Never
         // guessed, never a 500 — mirrors the client's coerceSpeedTier.
-        when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null)).thenReturn("""
+        when(settings.getString(EdgeAgentsConfigController.MANIFEST_KEY, null))
+                .thenReturn(
+                        """
             {
               "version": "9",
               "models": [
@@ -412,8 +435,11 @@ class EdgeAgentsConfigControllerTest {
 
         assertTrue(response.enabled());
         assertNull(response.agent());
-        verify(policyLookup, never()).lookup(org.mockito.ArgumentMatchers.any(),
-            org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(policyLookup, never())
+                .lookup(
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any());
     }
 
     @Test

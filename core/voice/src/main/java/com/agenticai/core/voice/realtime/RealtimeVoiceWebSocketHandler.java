@@ -5,9 +5,6 @@ import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -21,35 +18,37 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Bridges a browser's voice socket to a native speech-to-speech provider
- * session ({@link GeminiLiveRealtimeProvider} / {@link
- * OpenAiRealtimeProvider}). Registered at {@code /webhook/voice/realtime} -
- * under {@code /webhook/**} for the same reason the Twilio relay is: the
- * browser {@code WebSocket} API cannot set an Authorization header, so the
- * handshake can't carry the Keycloak JWT. Authentication is the {@link
- * RealtimeVoiceTicketService} ticket in the first text frame instead, minted
- * by the authenticated {@link RealtimeVoiceSessionController}.
+ * Bridges a browser's voice socket to a native speech-to-speech provider session ({@link
+ * GeminiLiveRealtimeProvider} / {@link OpenAiRealtimeProvider}). Registered at {@code
+ * /webhook/voice/realtime} - under {@code /webhook/**} for the same reason the Twilio relay is: the
+ * browser {@code WebSocket} API cannot set an Authorization header, so the handshake can't carry
+ * the Keycloak JWT. Authentication is the {@link RealtimeVoiceTicketService} ticket in the first
+ * text frame instead, minted by the authenticated {@link RealtimeVoiceSessionController}.
  *
  * <p><b>Downstream protocol (client &rarr; relay):</b>
+ *
  * <ul>
- *   <li>first text frame: {@code {"type":"setup","ticket":"..."}} - the
- *       socket is closed if the ticket is missing, forged, or expired
- *   <li>binary frames: signed 16-bit LE PCM at the provider's input rate
- *       (16 kHz Gemini, 24 kHz OpenAI - the client learns both rates from
- *       the session-create response)
+ *   <li>first text frame: {@code {"type":"setup","ticket":"..."}} - the socket is closed if the
+ *       ticket is missing, forged, or expired
+ *   <li>binary frames: signed 16-bit LE PCM at the provider's input rate (16 kHz Gemini, 24 kHz
+ *       OpenAI - the client learns both rates from the session-create response)
  *   <li>text {@code {"type":"interrupt"}}: barge-in (provider-side cancel)
  * </ul>
  *
- * <p><b>Upstream events (relay &rarr; client):</b> binary frames carrying
- * agent audio, and text frames {@code {"type":"transcript","role":"caller|
- * agent","text":...}}, {@code {"type":"interrupted"}}, {@code
- * {"type":"ready","model":...}}, {@code {"type":"error","message":...}}.
+ * <p><b>Upstream events (relay &rarr; client):</b> binary frames carrying agent audio, and text
+ * frames {@code {"type":"transcript","role":"caller| agent","text":...}}, {@code
+ * {"type":"interrupted"}}, {@code {"type":"ready","model":...}}, {@code
+ * {"type":"error","message":...}}.
  *
- * <p>Downstream sends go through {@link ConcurrentWebSocketSessionDecorator}
- * because provider events arrive on the upstream client's delivery thread
- * while the container owns the downstream session thread.
+ * <p>Downstream sends go through {@link ConcurrentWebSocketSessionDecorator} because provider
+ * events arrive on the upstream client's delivery thread while the container owns the downstream
+ * session thread.
  */
 public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
 
@@ -66,11 +65,10 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
     private final List<RealtimeVoiceProvider> providers;
 
     public RealtimeVoiceWebSocketHandler(
-        RealtimeVoiceTicketService ticketService,
-        ProviderCredentialResolver credentialResolver,
-        AgentRepository agentRepository,
-        List<RealtimeVoiceProvider> providers
-    ) {
+            RealtimeVoiceTicketService ticketService,
+            ProviderCredentialResolver credentialResolver,
+            AgentRepository agentRepository,
+            List<RealtimeVoiceProvider> providers) {
         this.ticketService = ticketService;
         this.credentialResolver = credentialResolver;
         this.agentRepository = agentRepository;
@@ -79,8 +77,10 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        session.getAttributes().put(ATTR_SAFE_SESSION,
-            new ConcurrentWebSocketSessionDecorator(session, 10_000, 512 * 1024));
+        session.getAttributes()
+                .put(
+                        ATTR_SAFE_SESSION,
+                        new ConcurrentWebSocketSessionDecorator(session, 10_000, 512 * 1024));
     }
 
     @Override
@@ -88,15 +88,16 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
         JsonNode node;
         try {
             node = MAPPER.readTree(message.getPayload());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("Malformed realtime-voice frame on {}: {}", session.getId(), e.getMessage());
             return;
         }
-        String type = node.path("type").asText("");
+        String type = node.path("type").asString("");
         if ("setup".equals(type)) {
             handleSetup(session, node);
         } else if ("interrupt".equals(type)) {
-            RealtimeVoiceSession upstream = (RealtimeVoiceSession) session.getAttributes().get(ATTR_UPSTREAM);
+            RealtimeVoiceSession upstream =
+                    (RealtimeVoiceSession) session.getAttributes().get(ATTR_UPSTREAM);
             if (upstream != null) {
                 upstream.interrupt();
             }
@@ -108,32 +109,45 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
             return;
         }
         Optional<RealtimeVoiceTicketService.Admission> admission =
-            ticketService.verifyAndConsume(node.path("ticket").asText(""));
+                ticketService.verifyAndConsume(node.path("ticket").asString(""));
         if (admission.isEmpty()) {
-            log.warn("Rejected realtime voice setup on {} - missing/forged/expired/already-used ticket", session.getId());
+            log.warn(
+                    "Rejected realtime voice setup on {} - missing/forged/expired/already-used ticket",
+                    session.getId());
             closeQuietly(session, CloseStatus.POLICY_VIOLATION);
             return;
         }
         RealtimeVoiceTicketService.Admission adm = admission.get();
 
-        TenantContext.set(TenantContext.of(adm.tenantSchema(), "system:voice-realtime:" + adm.subject(), Set.of()));
+        TenantContext.set(
+                TenantContext.of(
+                        adm.tenantSchema(), "system:voice-realtime:" + adm.subject(), Set.of()));
         try {
             Agent agent = agentRepository.findById(adm.agentId()).orElse(null);
             if (agent == null) {
-                log.warn("Realtime voice setup: agent {} not found in schema {}", adm.agentId(), adm.tenantSchema());
+                log.warn(
+                        "Realtime voice setup: agent {} not found in schema {}",
+                        adm.agentId(),
+                        adm.tenantSchema());
                 closeQuietly(session, CloseStatus.POLICY_VIOLATION);
                 return;
             }
-            String apiKey = credentialResolver.resolveActiveKey(
-                RealtimeVoiceSessionController.providerNameFor(adm.provider()));
-            RealtimeVoiceProvider provider = providers.stream()
-                .filter(p -> p.getProvider() == adm.provider())
-                .findFirst()
-                .orElseThrow(() -> new RealtimeVoiceException("No provider bean for " + adm.provider()));
+            String apiKey =
+                    credentialResolver.resolveActiveKey(
+                            RealtimeVoiceSessionController.providerNameFor(adm.provider()));
+            RealtimeVoiceProvider provider =
+                    providers.stream()
+                            .filter(p -> p.getProvider() == adm.provider())
+                            .findFirst()
+                            .orElseThrow(
+                                    () ->
+                                            new RealtimeVoiceException(
+                                                    "No provider bean for " + adm.provider()));
 
-            RealtimeVoiceSession upstream = provider.open(
-                new RealtimeSessionConfig(apiKey, null, agent.getSystemPrompt(), null),
-                new RelayListener(session));
+            RealtimeVoiceSession upstream =
+                    provider.open(
+                            new RealtimeSessionConfig(apiKey, null, agent.getSystemPrompt(), null),
+                            new RelayListener(session));
             session.getAttributes().put(ATTR_UPSTREAM, upstream);
             session.getAttributes().put(ATTR_SETUP_DONE, Boolean.TRUE);
             sendJson(session, "ready", Map.of("provider", adm.provider().name()));
@@ -148,7 +162,8 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        RealtimeVoiceSession upstream = (RealtimeVoiceSession) session.getAttributes().get(ATTR_UPSTREAM);
+        RealtimeVoiceSession upstream =
+                (RealtimeVoiceSession) session.getAttributes().get(ATTR_UPSTREAM);
         if (upstream == null) {
             return; // audio before setup - drop, don't punish the socket
         }
@@ -159,7 +174,8 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        RealtimeVoiceSession upstream = (RealtimeVoiceSession) session.getAttributes().remove(ATTR_UPSTREAM);
+        RealtimeVoiceSession upstream =
+                (RealtimeVoiceSession) session.getAttributes().remove(ATTR_UPSTREAM);
         if (upstream != null) {
             upstream.close();
         }
@@ -230,7 +246,10 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
 
         @Override
         public void onError(String message) {
-            sendJson(session, "error", Map.of("message", message == null ? "provider error" : message));
+            sendJson(
+                    session,
+                    "error",
+                    Map.of("message", message == null ? "provider error" : message));
         }
 
         @Override

@@ -24,9 +24,9 @@ import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
 import com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequestService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Builds a {@link WorkflowNodeExecutor} from the flat collaborator list the tests have always used.
@@ -129,7 +129,10 @@ final class NodeExecutorTestFactory {
         NodeOutputMapper outputMapper = new NodeOutputMapper(objectMapper);
         EconomyModelCaller economy =
                 new EconomyModelCaller(
-                        freeTierChatClientService, llmGatewayService, credentialResolver, tenantLimits);
+                        freeTierChatClientService,
+                        llmGatewayService,
+                        credentialResolver,
+                        tenantLimits);
         StructuredAgentRunner structured =
                 new StructuredAgentRunner(
                         agentChatService, subagentRunRepository, configResolver, outputMapper);

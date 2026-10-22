@@ -4,8 +4,6 @@ import com.agenticai.core.agents.context.ToolResultRestoreIds;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code restore_tool_result}: hands back the stored output of an earlier tool call of THIS run
@@ -83,7 +83,7 @@ public class RestoreToolResultToolCallback implements ToolCallback {
         try {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            stepId = args.path("stepId").asText("").trim();
+            stepId = args.path("stepId").asString("").trim();
         } catch (Exception e) {
             return "Could not restore: the tool input was not valid JSON. Call restore_tool_result with "
                     + "{\"stepId\": \"<value from the cleared result>\"}.";

@@ -453,7 +453,7 @@ CAPABILITIES = [
     # --------------------------------------------------- OpenTelemetry ----
     {
         "standard": "OpenTelemetry",
-        "capability": "OTLP/HTTP trace export (Micrometer `Observation` -> OTel bridge -> `management.otlp.tracing.endpoint`, Langfuse or any collector)",
+        "capability": "OTLP/HTTP trace export (Micrometer `Observation` -> OTel bridge -> `management.opentelemetry.tracing.export.otlp.endpoint`, Langfuse or any collector)",
         "claimed": "implemented",
         "checks": [
             (f"{APPCONFIG}/application.yml",

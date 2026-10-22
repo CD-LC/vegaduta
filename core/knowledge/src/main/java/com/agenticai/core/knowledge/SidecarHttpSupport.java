@@ -1,8 +1,6 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.ConnectException;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -10,11 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Shared HTTP plumbing for the sidecar client family: the single connect-refused retry and the error
- * message builders. Extracted unchanged from {@link SidecarClient}; the logger keeps that class's
- * name so existing log filters still match.
+ * Shared HTTP plumbing for the sidecar client family: the single connect-refused retry and the
+ * error message builders. Extracted unchanged from {@link SidecarClient}; the logger keeps that
+ * class's name so existing log filters still match.
  */
 final class SidecarHttpSupport {
 
@@ -73,8 +73,8 @@ final class SidecarHttpSupport {
         try {
             JsonNode node = MAPPER.readTree(body);
             JsonNode detail = node.get("detail");
-            if (detail != null && detail.isTextual()) {
-                return detail.asText();
+            if (detail != null && detail.isString()) {
+                return detail.asString();
             }
         } catch (Exception ignored) {
             // Not JSON, or no "detail" field - fall through to the raw body below.

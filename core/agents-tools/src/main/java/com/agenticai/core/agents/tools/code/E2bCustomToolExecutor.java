@@ -5,14 +5,14 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.sdlc.SdlcSandboxService;
 import com.agenticai.core.sdlc.dto.RunCodeRequest;
 import com.agenticai.core.sdlc.dto.RunCodeResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * L6 first slice: runs a Python {@link CustomCodeTool} inside the tenant's own E2B sandbox

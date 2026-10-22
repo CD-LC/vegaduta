@@ -1,19 +1,18 @@
 package com.agenticai.core.codeintel;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * {@code code_callees} - what a given symbol itself calls, from the
- * deterministic AST-derived code graph (the reverse of {@code code_callers}).
- * Read-only. Use to understand a function's own dependencies before changing
- * or removing it.
+ * {@code code_callees} - what a given symbol itself calls, from the deterministic AST-derived code
+ * graph (the reverse of {@code code_callers}). Read-only. Use to understand a function's own
+ * dependencies before changing or removing it.
  */
 public class CodeCalleesToolCallback implements ToolCallback {
 
@@ -27,7 +26,10 @@ public class CodeCalleesToolCallback implements ToolCallback {
         this(client, Set.of());
     }
 
-    /** EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s constructor javadoc for why. */
+    /**
+     * EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s
+     * constructor javadoc for why.
+     */
     public CodeCalleesToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
         this.allowedRepoIds = allowedRepoIds == null ? Set.of() : allowedRepoIds;
@@ -36,13 +38,14 @@ public class CodeCalleesToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("code_callees")
-            .description(
-                "Lists everything a given function/method/symbol itself calls, from the deterministic "
-                    + "code graph (not a guess) - the reverse of code_callers. Use to understand what a "
-                    + "symbol depends on before changing or removing it. Requires the repo_id the symbol "
-                    + "lives in.")
-            .inputSchema("""
+                .name("code_callees")
+                .description(
+                        "Lists everything a given function/method/symbol itself calls, from the deterministic "
+                                + "code graph (not a guess) - the reverse of code_callers. Use to understand what a "
+                                + "symbol depends on before changing or removing it. Requires the repo_id the symbol "
+                                + "lives in.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -58,7 +61,7 @@ public class CodeCalleesToolCallback implements ToolCallback {
                     "required": ["symbol", "repo_id"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -80,7 +83,9 @@ public class CodeCalleesToolCallback implements ToolCallback {
             return client.callees(repoId.toString(), symbol.toString());
         } catch (Exception e) {
             log.warn("code_callees tool call failed", e);
-            return "{\"error\": \"code_callees failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"code_callees failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 }

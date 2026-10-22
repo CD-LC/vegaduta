@@ -1,5 +1,9 @@
 package com.agenticai.core.brief;
 
+import static com.agenticai.core.brief.PlannerText.orElse;
+import static com.agenticai.core.brief.PlannerText.strings;
+import static com.agenticai.core.brief.PlannerText.text;
+
 import com.agenticai.core.brief.model.Brief;
 import com.agenticai.core.brief.model.Brief.AgentSpec;
 import com.agenticai.core.brief.model.Brief.ChannelSpec;
@@ -13,7 +17,6 @@ import com.agenticai.core.brief.model.Brief.SecretSpec;
 import com.agenticai.core.brief.model.Brief.ToolSpec;
 import com.agenticai.core.brief.model.Brief.WorkflowSpec;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -23,26 +26,29 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.agenticai.core.brief.PlannerText.orElse;
-import static com.agenticai.core.brief.PlannerText.strings;
-import static com.agenticai.core.brief.PlannerText.text;
+import tools.jackson.databind.JsonNode;
 
 /**
- * The planner's closing steps, run once the agents and workflows exist: trust tagging (what cannot be undone),
- * the eval set with rehearsal personas, and the per-item narrative. Split out of {@link BriefPlannerService};
- * every model answer is checked against the refs and node paths the plan really has.
+ * The planner's closing steps, run once the agents and workflows exist: trust tagging (what cannot
+ * be undone), the eval set with rehearsal personas, and the per-item narrative. Split out of {@link
+ * BriefPlannerService}; every model answer is checked against the refs and node paths the plan
+ * really has.
  */
 final class PlannerReview {
 
     private static final Logger log = LoggerFactory.getLogger(PlannerReview.class);
 
-    /** Documented design default for {@code evalSet.gate.minScore}; the trust engine arms the gate from it. */
+    /**
+     * Documented design default for {@code evalSet.gate.minScore}; the trust engine arms the gate
+     * from it.
+     */
     static final double DEFAULT_GATE_MIN_SCORE = 0.7;
+
     private static final int MAX_EVAL_CASES = 12;
     private static final int MAX_PERSONAS = 3;
     private static final Set<String> HTTP_READ_METHODS = Set.of("GET", "HEAD", "OPTIONS");
-    private static final Set<String> IRREVERSIBLE_OUTPUT_CHANNELS = Set.of("email", "telegram", "whatsapp");
+    private static final Set<String> IRREVERSIBLE_OUTPUT_CHANNELS =
+            Set.of("email", "telegram", "whatsapp");
 
     private final PlannerLlm llm;
 
@@ -56,7 +62,8 @@ final class PlannerReview {
         StringBuilder nodes = new StringBuilder();
         for (WorkflowSpec w : workflows) {
             for (WorkflowNodeDto n : w.graph().nodes()) {
-                if (n.id() == null || !BriefRefs.NODE_PATH.matcher(w.ref() + "." + n.id()).matches()) {
+                if (n.id() == null
+                        || !BriefRefs.NODE_PATH.matcher(w.ref() + "." + n.id()).matches()) {
                     continue;
                 }
                 String path = w.ref() + "." + n.id();
@@ -64,7 +71,11 @@ final class PlannerReview {
                 if (isIrreversibleByRule(n)) {
                     irreversible.add(path);
                 }
-                nodes.append(path).append(" | type=").append(n.type()).append(" | ").append(n.label());
+                nodes.append(path)
+                        .append(" | type=")
+                        .append(n.type())
+                        .append(" | ")
+                        .append(n.label());
                 Object method = n.config().get("method");
                 Object channel = n.config().get("channel");
                 if (method != null) {
@@ -78,7 +89,10 @@ final class PlannerReview {
         }
         List<String> humanMustDecide = new ArrayList<>();
         if (!real.isEmpty()) {
-            JsonNode tagged = llm.callJson("trust", """
+            JsonNode tagged =
+                    llm.callJson(
+                            "trust",
+                            """
                 You tag workflow nodes by how bad a mistake would be. Output ONE JSON object (no markdown fences):
                 {"irreversible": ["node path", ...], "humanMustDecide": ["node path", ...]}.
                 "irreversible": nodes whose action cannot be undone - sends money, deletes data, sends messages to
@@ -86,12 +100,14 @@ final class PlannerReview {
                 should still decide even when the solution is fully trusted (money, legal, safety, irreversible
                 deletion). Use ONLY paths from the list, copied exactly. Reading, searching, summarising and
                 drafting are reversible.
-                """, "Goal: " + prompt + "\nNodes:\n" + nodes);
+                """,
+                            "Goal: " + prompt + "\nNodes:\n" + nodes);
             for (String p : strings(tagged.path("irreversible"))) {
                 if (real.contains(p)) {
                     irreversible.add(p);
                 } else {
-                    warnings.add("Ignored an irreversible tag for '" + p + "': no such workflow node.");
+                    warnings.add(
+                            "Ignored an irreversible tag for '" + p + "': no such workflow node.");
                 }
             }
             for (String p : strings(tagged.path("humanMustDecide"))) {
@@ -104,18 +120,24 @@ final class PlannerReview {
         return new Brief.Trust("UNDER_WATCH", new ArrayList<>(irreversible), humanMustDecide);
     }
 
-    /** Deterministic floor under the model's tagging: side effects that are unambiguous from the node config alone. */
+    /**
+     * Deterministic floor under the model's tagging: side effects that are unambiguous from the
+     * node config alone.
+     */
     static boolean isIrreversibleByRule(WorkflowNodeDto node) {
         String type = node.type() == null ? "" : node.type().toLowerCase(Locale.ROOT);
         Map<String, Object> cfg = node.config();
         switch (type) {
             case "http" -> {
                 Object method = cfg.get("method");
-                return method != null && !HTTP_READ_METHODS.contains(method.toString().toUpperCase(Locale.ROOT));
+                return method != null
+                        && !HTTP_READ_METHODS.contains(method.toString().toUpperCase(Locale.ROOT));
             }
             case "output" -> {
                 Object channel = cfg.get("channel");
-                return channel != null && IRREVERSIBLE_OUTPUT_CHANNELS.contains(channel.toString().toLowerCase(Locale.ROOT));
+                return channel != null
+                        && IRREVERSIBLE_OUTPUT_CHANNELS.contains(
+                                channel.toString().toLowerCase(Locale.ROOT));
             }
             case "device_control" -> {
                 return true;
@@ -128,16 +150,27 @@ final class PlannerReview {
 
     // ================================================================== eval + personas
 
-    record EvalAndPersonas(Brief.EvalSet evalSet, Brief.Rehearsal rehearsal) {
-    }
+    record EvalAndPersonas(Brief.EvalSet evalSet, Brief.Rehearsal rehearsal) {}
 
     EvalAndPersonas evalOf(
-        String prompt, String locale, List<AgentSpec> agents, List<WorkflowSpec> workflows, List<String> warnings
-    ) {
+            String prompt,
+            String locale,
+            List<AgentSpec> agents,
+            List<WorkflowSpec> workflows,
+            List<String> warnings) {
         StringBuilder summary = new StringBuilder();
-        agents.forEach(a -> summary.append("- agent ").append(a.name()).append(": ").append(orElse(a.description(), "")).append('\n'));
+        agents.forEach(
+                a ->
+                        summary.append("- agent ")
+                                .append(a.name())
+                                .append(": ")
+                                .append(orElse(a.description(), ""))
+                                .append('\n'));
         workflows.forEach(w -> summary.append("- workflow ").append(w.name()).append('\n'));
-        JsonNode out = llm.callJson("evalSet", """
+        JsonNode out =
+                llm.callJson(
+                        "evalSet",
+                        """
             You write the test set for a solution on an AI-agent platform. Output ONE JSON object (no markdown
             fences):
             {"cases": [{"input": "what a real user would send", "expected": "what a good answer contains (optional)",
@@ -145,8 +178,10 @@ final class PlannerReview {
              "personas": [{"name": "", "traits": ["", ""], "opening": "the first message this person sends"}]}
             Write 6 to 12 cases covering typical requests, edge cases, missing information, and at least two that
             try to make the agent do something it should refuse. Write 2 to 3 personas of realistic, different
-            users (one difficult). Write all text in the language with ISO code\s""" + locale + ".",
-            "Goal: " + prompt + "\nThe solution:\n" + summary);
+            users (one difficult). Write all text in the language with ISO code\s"""
+                                + locale
+                                + ".",
+                        "Goal: " + prompt + "\nThe solution:\n" + summary);
         List<EvalCase> cases = new ArrayList<>();
         for (JsonNode c : out.path("cases")) {
             String input = text(c, "input");
@@ -156,14 +191,22 @@ final class PlannerReview {
             }
         }
         if (cases.size() < 4) {
-            throw new BriefValidationException("evalSet", "The planner wrote only " + cases.size() + " usable test cases (at least 4 are needed).");
+            throw new BriefValidationException(
+                    "evalSet",
+                    "The planner wrote only "
+                            + cases.size()
+                            + " usable test cases (at least 4 are needed).");
         }
         if (cases.size() < 6) {
-            warnings.add("Only " + cases.size() + " test cases were written; add a few more for a steadier quality gate.");
+            warnings.add(
+                    "Only "
+                            + cases.size()
+                            + " test cases were written; add a few more for a steadier quality gate.");
         }
         List<Persona> personas = personasOf(out.path("personas"));
         if (personas.isEmpty()) {
-            // The shared evalSet call sometimes returns cases but no personas; one focused retry before the floor.
+            // The shared evalSet call sometimes returns cases but no personas; one focused retry
+            // before the floor.
             JsonNode retry = personasOnly(prompt, locale, summary);
             if (retry != null) {
                 personas = personasOf(retry.path("personas"));
@@ -173,11 +216,15 @@ final class PlannerReview {
             warnings.add("No rehearsal personas were written - the generic pair is used instead.");
             personas = new ArrayList<>(Brief.Rehearsal.fallbackPersonas());
         }
-        Brief.EvalSet evalSet = new Brief.EvalSet(agents.get(0).ref(), cases, new Brief.Gate(DEFAULT_GATE_MIN_SCORE));
+        Brief.EvalSet evalSet =
+                new Brief.EvalSet(
+                        agents.get(0).ref(), cases, new Brief.Gate(DEFAULT_GATE_MIN_SCORE));
         return new EvalAndPersonas(evalSet, new Brief.Rehearsal(personas));
     }
 
-    /** Parses the personas array of one model reply; entries with no name or no traits are dropped. */
+    /**
+     * Parses the personas array of one model reply; entries with no name or no traits are dropped.
+     */
     private List<Persona> personasOf(JsonNode array) {
         List<Persona> personas = new ArrayList<>();
         for (JsonNode p : array) {
@@ -190,18 +237,26 @@ final class PlannerReview {
         return personas;
     }
 
-    /** One personas-only call, used when the evalSet reply carried none; an unparseable reply just yields null. */
+    /**
+     * One personas-only call, used when the evalSet reply carried none; an unparseable reply just
+     * yields null.
+     */
     private JsonNode personasOnly(String prompt, String locale, StringBuilder summary) {
         try {
-            return llm.callJson("personas", """
+            return llm.callJson(
+                    "personas",
+                    """
                 You write rehearsal personas for a solution on an AI-agent platform. Output ONE JSON object (no
                 markdown fences):
                 {"personas": [{"name": "", "traits": ["", ""], "opening": "the first message this person sends"}]}
                 Write 2 to 3 personas of realistic, different users of this solution (one difficult). Write all
-                text in the language with ISO code\s""" + locale + ".",
-                "Goal: " + prompt + "\nThe solution:\n" + summary);
+                text in the language with ISO code\s"""
+                            + locale
+                            + ".",
+                    "Goal: " + prompt + "\nThe solution:\n" + summary);
         } catch (BriefValidationException e) {
-            log.warn("Brief planner: personas retry was unusable, falling back to the generic pair");
+            log.warn(
+                    "Brief planner: personas retry was unusable, falling back to the generic pair");
             return null;
         }
     }
@@ -209,19 +264,44 @@ final class PlannerReview {
     // ================================================================== narrative
 
     Brief.Narrative narrativeOf(
-        String prompt, String locale, List<AgentSpec> agents, List<WorkflowSpec> workflows, List<ToolSpec> tools,
-        List<McpServerSpec> mcp, List<KnowledgeSpec> knowledge, List<SecretSpec> secrets,
-        List<ProcedureSpec> procedures, List<ChannelSpec> channels, Brief.Trust trust
-    ) {
+            String prompt,
+            String locale,
+            List<AgentSpec> agents,
+            List<WorkflowSpec> workflows,
+            List<ToolSpec> tools,
+            List<McpServerSpec> mcp,
+            List<KnowledgeSpec> knowledge,
+            List<SecretSpec> secrets,
+            List<ProcedureSpec> procedures,
+            List<ChannelSpec> channels,
+            Brief.Trust trust) {
         Map<String, String> items = new LinkedHashMap<>();
-        agents.forEach(a -> items.put(a.ref(), "agent \"" + a.name() + "\" - " + orElse(a.description(), "")));
-        workflows.forEach(w -> items.put(w.ref(), "workflow \"" + w.name() + "\" with " + w.graph().nodes().size() + " nodes"));
-        tools.forEach(t -> items.put(t.ref(), "tool \"" + orElse(t.name(), t.ref()) + "\" (" + t.kind() + ")"));
-        mcp.forEach(m -> items.put(m.ref(), "MCP server \"" + orElse(m.name(), m.registryId()) + "\""));
+        agents.forEach(
+                a ->
+                        items.put(
+                                a.ref(),
+                                "agent \"" + a.name() + "\" - " + orElse(a.description(), "")));
+        workflows.forEach(
+                w ->
+                        items.put(
+                                w.ref(),
+                                "workflow \""
+                                        + w.name()
+                                        + "\" with "
+                                        + w.graph().nodes().size()
+                                        + " nodes"));
+        tools.forEach(
+                t ->
+                        items.put(
+                                t.ref(),
+                                "tool \"" + orElse(t.name(), t.ref()) + "\" (" + t.kind() + ")"));
+        mcp.forEach(
+                m -> items.put(m.ref(), "MCP server \"" + orElse(m.name(), m.registryId()) + "\""));
         knowledge.forEach(k -> items.put(k.ref(), "knowledge collection \"" + k.name() + "\""));
         secrets.forEach(s -> items.put(s.ref(), "secret " + s.name() + " (" + s.why() + ")"));
         procedures.forEach(p -> items.put(p.ref(), "procedure \"" + p.name() + "\""));
-        channels.forEach(c -> items.put(c.ref(), "channel " + c.kind() + " bound to " + c.bindTo()));
+        channels.forEach(
+                c -> items.put(c.ref(), "channel " + c.kind() + " bound to " + c.bindTo()));
         Map<String, String> nodeLabels = new LinkedHashMap<>();
         for (WorkflowSpec w : workflows) {
             for (WorkflowNodeDto n : w.graph().nodes()) {
@@ -244,16 +324,22 @@ final class PlannerReview {
             narrative = new Brief.Narrative(narrative.whyAgentic(), merged);
             missing.removeAll(merged.keySet());
             if (!missing.isEmpty()) {
-                throw new BriefValidationException("narrative", "The planner did not explain: " + String.join(", ", missing) + ".");
+                throw new BriefValidationException(
+                        "narrative",
+                        "The planner did not explain: " + String.join(", ", missing) + ".");
             }
         }
         return narrative;
     }
 
-    private Brief.Narrative requestNarrative(String prompt, String locale, Map<String, String> items, Set<String> keys) {
+    private Brief.Narrative requestNarrative(
+            String prompt, String locale, Map<String, String> items, Set<String> keys) {
         StringBuilder list = new StringBuilder();
         items.forEach((k, v) -> list.append(k).append(": ").append(v).append('\n'));
-        JsonNode out = llm.callJson("narrative", """
+        JsonNode out =
+                llm.callJson(
+                        "narrative",
+                        """
             You explain a solution to the person who asked for it. Output ONE JSON object (no markdown fences):
             {"whyAgentic": "2 or 3 sentences: why this needs agents rather than a form or a script",
              "perNode": {"<key>": {"why": "why this exists", "tune": "what to change here if results are wrong,
@@ -261,8 +347,10 @@ final class PlannerReview {
              tokens field, the tool allow-list, the Knowledge toggle, the node on the Canvas, the Secrets page,
              the MCP connect dialog)", "proof": "how the user will know it worked"}}}
             Include EXACTLY one perNode entry for every key in the list, keys copied exactly. Plain language, no
-            jargon, no prices. Write everything in the language with ISO code\s""" + locale + ".",
-            "Goal: " + prompt + "\nKeys to explain:\n" + list);
+            jargon, no prices. Write everything in the language with ISO code\s"""
+                                + locale
+                                + ".",
+                        "Goal: " + prompt + "\nKeys to explain:\n" + list);
         Map<String, NodeNarrative> perNode = new LinkedHashMap<>();
         JsonNode per = out.path("perNode");
         for (String key : keys) {

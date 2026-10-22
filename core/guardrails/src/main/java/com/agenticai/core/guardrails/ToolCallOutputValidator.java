@@ -1,7 +1,7 @@
 package com.agenticai.core.guardrails;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * 2026 Reliability Gap Analysis (task #815), Gap 1 - "no deterministic,
@@ -34,25 +34,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public final class ToolCallOutputValidator {
 
     /**
-     * Matches {@code PatternBasedGuardrailService.MAX_TOOL_OUTPUT_CHARS} -
-     * same ceiling, different response (see class javadoc).
+     * Matches {@code PatternBasedGuardrailService.MAX_TOOL_OUTPUT_CHARS} - same ceiling, different
+     * response (see class javadoc).
      */
     static final int MAX_OUTPUT_CHARS = 20_000;
 
     /**
-     * Prefix {@link com.agenticai.core.guardrails.GuardedToolCallback} puts
-     * on the synthetic error message it returns to the model on a failed
-     * validation, so {@code LoggingToolCallback} can detect the failure
-     * (to flag {@code ToolCallLog.validationFailed}) and strip the marker
-     * before it's persisted/re-shown - the model and any human reading the
-     * log should see a clean sentence, never this internal tag.
+     * Prefix {@link com.agenticai.core.guardrails.GuardedToolCallback} puts on the synthetic error
+     * message it returns to the model on a failed validation, so {@code LoggingToolCallback} can
+     * detect the failure (to flag {@code ToolCallLog.validationFailed}) and strip the marker before
+     * it's persisted/re-shown - the model and any human reading the log should see a clean
+     * sentence, never this internal tag.
      */
     public static final String VALIDATION_FAILURE_PREFIX = "[TOOL_OUTPUT_VALIDATION_FAILED] ";
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private ToolCallOutputValidator() {
-    }
+    private ToolCallOutputValidator() {}
 
     public static ValidationResult validate(String toolName, String rawOutput) {
         if (rawOutput == null) {
@@ -60,8 +58,11 @@ public final class ToolCallOutputValidator {
         }
         if (rawOutput.length() > MAX_OUTPUT_CHARS) {
             return ValidationResult.invalid(
-                "output was " + rawOutput.length() + " characters, over the " + MAX_OUTPUT_CHARS + "-character limit"
-            );
+                    "output was "
+                            + rawOutput.length()
+                            + " characters, over the "
+                            + MAX_OUTPUT_CHARS
+                            + "-character limit");
         }
         String trimmed = rawOutput.trim();
         boolean looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
@@ -70,9 +71,12 @@ public final class ToolCallOutputValidator {
                 MAPPER.readTree(trimmed);
             } catch (Exception e) {
                 return ValidationResult.invalid(
-                    "output looked like JSON (started with '" + trimmed.charAt(0) + "') but failed to parse - "
-                        + "the tool ('" + toolName + "') likely returned a truncated or malformed response"
-                );
+                        "output looked like JSON (started with '"
+                                + trimmed.charAt(0)
+                                + "') but failed to parse - "
+                                + "the tool ('"
+                                + toolName
+                                + "') likely returned a truncated or malformed response");
             }
         }
         return ValidationResult.ok();

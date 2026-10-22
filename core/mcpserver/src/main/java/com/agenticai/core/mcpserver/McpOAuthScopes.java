@@ -1,9 +1,9 @@
 package com.agenticai.core.mcpserver;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Scope vocabulary of the OAuth 2.1 option of the {@code /mcp} server, and the mapping from a
@@ -24,16 +24,28 @@ final class McpOAuthScopes {
     static final String WORKFLOWS_CALL = "mcp:workflows:call";
     static final String KNOWLEDGE_SEARCH = "mcp:knowledge:search";
     static final String TASKS = "mcp:tasks";
-    /** Fallback for a tool this table does not know; not advertised, so a stock token never has it. */
+
+    /**
+     * Fallback for a tool this table does not know; not advertised, so a stock token never has it.
+     */
     static final String TOOLS_CALL = "mcp:tools:call";
 
     /** What {@code scopes_supported} advertises: every concrete scope, never a pattern. */
-    static final List<String> SUPPORTED = List.of(
-        AGENTS_READ, AGENTS_CALL, WORKFLOWS_READ, WORKFLOWS_CALL, KNOWLEDGE_SEARCH, TASKS);
+    static final List<String> SUPPORTED =
+            List.of(
+                    AGENTS_READ,
+                    AGENTS_CALL,
+                    WORKFLOWS_READ,
+                    WORKFLOWS_CALL,
+                    KNOWLEDGE_SEARCH,
+                    TASKS);
 
     private McpOAuthScopes() {}
 
-    /** Scopes required by a JSON-RPC body (single message or batch). Empty set = valid token suffices. */
+    /**
+     * Scopes required by a JSON-RPC body (single message or batch). Empty set = valid token
+     * suffices.
+     */
     static Set<String> requiredFor(JsonNode body) {
         Set<String> required = new LinkedHashSet<>();
         if (body == null) {
@@ -43,8 +55,8 @@ final class McpOAuthScopes {
             body.forEach(m -> required.addAll(requiredFor(m)));
             return required;
         }
-        if (body.isObject() && "tools/call".equals(body.path("method").asText())) {
-            required.add(scopeForTool(body.path("params").path("name").asText("")));
+        if (body.isObject() && "tools/call".equals(body.path("method").asString())) {
+            required.add(scopeForTool(body.path("params").path("name").asString("")));
         }
         return required;
     }

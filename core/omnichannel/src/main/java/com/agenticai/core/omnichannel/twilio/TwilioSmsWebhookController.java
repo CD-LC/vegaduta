@@ -25,7 +25,6 @@ import com.agenticai.core.security.concurrent.ContextPropagatingExecutor;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Inbound SMS. Originally (#422) only a workflow <i>trigger</i>: a message to the tenant's Twilio
@@ -146,7 +146,7 @@ public class TwilioSmsWebhookController {
                                 () -> {
                                     log.warn(
                                             "No tenant link found for Twilio AccountSid ***{}"
-                                                + " (inbound SMS) - falling back to the {} schema.",
+                                                    + " (inbound SMS) - falling back to the {} schema.",
                                             lastFour(accountSid),
                                             TenantSchemaResolver.DEFAULT_SCHEMA);
                                     return TenantSchemaResolver.DEFAULT_SCHEMA;

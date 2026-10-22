@@ -12,7 +12,6 @@ import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,11 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tools.jackson.databind.ObjectMapper;
 
 /** The connect/status/disconnect lifecycle over the row, the link and the bridge. */
 class WhatsAppQrServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SCHEMA = "tenant_test";
 
     private WhatsAppQrConnectionRepository repository;
@@ -99,7 +99,10 @@ class WhatsAppQrServiceTest {
         verify(repository).save(row.capture());
         assertThat(row.getValue().getStatus()).isEqualTo(WhatsAppQrStatus.PAIRING);
         verify(resolution)
-                .link(eq(ExternalAccountProvider.WHATSAPP_QR), eq(row.getValue().getSessionKey()), eq(SCHEMA));
+                .link(
+                        eq(ExternalAccountProvider.WHATSAPP_QR),
+                        eq(row.getValue().getSessionKey()),
+                        eq(SCHEMA));
         // The receiver starts only after the row is committed, so its own thread can read it.
         verify(receive, org.mockito.Mockito.never()).ensureReceiving(any(), any());
         commit();

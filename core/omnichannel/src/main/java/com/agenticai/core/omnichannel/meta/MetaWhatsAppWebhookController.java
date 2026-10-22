@@ -23,8 +23,6 @@ import com.agenticai.core.omnichannel.whatsappvoice.WhatsAppVoiceNoteService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -41,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Inbound WhatsApp via direct Meta Cloud API - the Meta-native counterpart to {@code
@@ -206,7 +206,8 @@ public class MetaWhatsAppWebhookController {
         for (JsonNode entry : root.path("entry")) {
             for (JsonNode change : entry.path("changes")) {
                 JsonNode value = change.path("value");
-                String phoneNumberId = value.path("metadata").path("phone_number_id").asText(null);
+                String phoneNumberId =
+                        value.path("metadata").path("phone_number_id").asString(null);
                 if (phoneNumberId == null) {
                     continue;
                 }
@@ -249,7 +250,9 @@ public class MetaWhatsAppWebhookController {
 
         TenantContext.set(
                 TenantContext.of(
-                        tenantSchema.get(), MetaWhatsAppReplyFlow.REQUESTED_BY_PREFIX + phoneNumberId, Set.of()));
+                        tenantSchema.get(),
+                        MetaWhatsAppReplyFlow.REQUESTED_BY_PREFIX + phoneNumberId,
+                        Set.of()));
         try {
             // resolveActive() throws MetaWhatsAppNotConfiguredException (mapped
             // to 400, caught below) if this tenant's credential was somehow
@@ -272,17 +275,18 @@ public class MetaWhatsAppWebhookController {
                 WhatsAppVoiceNoteService voice = voiceNotes;
                 if (voice != null
                         && voice.isEnabled()
-                        && "audio".equals(message.path("type").asText())) {
+                        && "audio".equals(message.path("type").asString())) {
                     if (!handleVoiceNote(voice, message, credential)) {
-                        dedupService.release(ChannelType.WHATSAPP, message.path("id").asText(null));
+                        dedupService.release(
+                                ChannelType.WHATSAPP, message.path("id").asString(null));
                         rejected = true;
                     }
                     continue;
                 }
-                if (!"text".equals(message.path("type").asText())) {
+                if (!"text".equals(message.path("type").asString())) {
                     log.info(
                             "Skipping non-text Meta WhatsApp message type '{}'",
-                            message.path("type").asText());
+                            message.path("type").asString());
                     continue;
                 }
                 // Master-Roadmap-2026.md item #1, gap (b)#3 - the same fix
@@ -297,13 +301,13 @@ public class MetaWhatsAppWebhookController {
                 // Meta batches: a retried batch skips exactly the messages
                 // already claimed on the first delivery. The 200 for the
                 // whole payload still goes out either way (see #inbound).
-                String messageId = message.path("id").asText(null);
+                String messageId = message.path("id").asString(null);
                 if (!dedupService.tryClaim(ChannelType.WHATSAPP, messageId)) {
                     log.info("Ignoring duplicate Meta WhatsApp message id {}", messageId);
                     continue;
                 }
-                String from = message.path("from").asText("");
-                String body = message.path("text").path("body").asText("");
+                String from = message.path("from").asString("");
+                String body = message.path("text").path("body").asString("");
                 if (!handleTextMessage(from, body)) {
                     dedupService.release(ChannelType.WHATSAPP, messageId);
                     rejected = true;
@@ -368,12 +372,12 @@ public class MetaWhatsAppWebhookController {
             JsonNode message,
             MetaWhatsAppCredentialService.DecryptedCredential credential) {
         // Same dedup claim a text message gets, after signature validation and before any work.
-        String messageId = message.path("id").asText(null);
+        String messageId = message.path("id").asString(null);
         if (!dedupService.tryClaim(ChannelType.WHATSAPP, messageId)) {
             log.info("Ignoring duplicate Meta WhatsApp message id {}", messageId);
             return true;
         }
-        String from = message.path("from").asText("");
+        String from = message.path("from").asString("");
         // Admission BEFORE any side effect (session create, transcription); see
         // InboundChannelExecutor.
         // The permit is the worker's slot: it is held through transcription and the inline chat

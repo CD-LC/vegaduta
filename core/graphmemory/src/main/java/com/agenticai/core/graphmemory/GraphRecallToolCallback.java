@@ -1,7 +1,6 @@
 package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -9,16 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Exposes {@link GraphMemoryService#recallRelated}
- * as a native Spring AI tool, the same "plain in-process ToolCallback wrapped by
- * AgentToolProvider" pattern {@code RememberFactToolCallback} established. Deliberately a
- * separate, explicitly-callable tool rather than folded into {@code AgentChatService}'s automatic
- * recall block: multi-hop graph traversal only pays off when the model has a specific named
- * entity in mind ("is Priya's manager available?"), unlike vector recall's blanket
- * "recall anything relevant to this whole message" - the model deciding to look up a specific
- * name is a better trigger than always running a traversal against every message.
+ * Exposes {@link GraphMemoryService#recallRelated} as a native Spring AI tool, the same "plain
+ * in-process ToolCallback wrapped by AgentToolProvider" pattern {@code RememberFactToolCallback}
+ * established. Deliberately a separate, explicitly-callable tool rather than folded into {@code
+ * AgentChatService}'s automatic recall block: multi-hop graph traversal only pays off when the
+ * model has a specific named entity in mind ("is Priya's manager available?"), unlike vector
+ * recall's blanket "recall anything relevant to this whole message" - the model deciding to look up
+ * a specific name is a better trigger than always running a traversal against every message.
  */
 public class GraphRecallToolCallback implements ToolCallback {
 
@@ -29,7 +28,8 @@ public class GraphRecallToolCallback implements ToolCallback {
     private final UUID agentId;
     private final String subjectKey;
 
-    public GraphRecallToolCallback(GraphMemoryService graphMemoryService, UUID agentId, String subjectKey) {
+    public GraphRecallToolCallback(
+            GraphMemoryService graphMemoryService, UUID agentId, String subjectKey) {
         this.graphMemoryService = graphMemoryService;
         this.agentId = agentId;
         this.subjectKey = subjectKey;
@@ -38,15 +38,15 @@ public class GraphRecallToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("recall_related_facts")
-            .description(
-                "Looks up facts CONNECTED to a named entity (a person, place, company, or thing) from what "
-                    + "you've remembered about this user - not just facts similar in wording, but facts "
-                    + "relationally linked (e.g. asking about \"Priya\" can surface \"Priya's manager is Raj\" "
-                    + "even if the current message never mentions Raj). Use this when the user asks about a "
-                    + "specific named thing and a simple keyword match might miss an indirect connection."
-            )
-            .inputSchema("""
+                .name("recall_related_facts")
+                .description(
+                        "Looks up facts CONNECTED to a named entity (a person, place, company, or thing) from what "
+                                + "you've remembered about this user - not just facts similar in wording, but facts "
+                                + "relationally linked (e.g. asking about \"Priya\" can surface \"Priya's manager is Raj\" "
+                                + "even if the current message never mentions Raj). Use this when the user asks about a "
+                                + "specific named thing and a simple keyword match might miss an indirect connection.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -58,7 +58,7 @@ public class GraphRecallToolCallback implements ToolCallback {
                     "required": ["entity"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -70,7 +70,9 @@ public class GraphRecallToolCallback implements ToolCallback {
             if (entityValue == null || entityValue.toString().isBlank()) {
                 return "{\"error\": \"entity is required\"}";
             }
-            List<GraphFact> facts = graphMemoryService.recallRelated(agentId, subjectKey, entityValue.toString(), 2);
+            List<GraphFact> facts =
+                    graphMemoryService.recallRelated(
+                            agentId, subjectKey, entityValue.toString(), 2);
             if (facts.isEmpty()) {
                 return "{\"facts\": [], \"note\": \"No connected facts found for this entity.\"}";
             }

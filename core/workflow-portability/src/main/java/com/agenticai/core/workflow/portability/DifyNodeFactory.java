@@ -7,11 +7,11 @@ import com.agenticai.core.workflow.portability.DifyImportModel.Ctx;
 import com.agenticai.core.workflow.portability.DifyImportModel.Exit;
 import com.agenticai.core.workflow.portability.DifyImportModel.Level;
 import com.agenticai.core.workflow.portability.DifyImportModel.Mapped;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Builds the mapped node shapes every Dify node mapper ends with: a single node, or an inert

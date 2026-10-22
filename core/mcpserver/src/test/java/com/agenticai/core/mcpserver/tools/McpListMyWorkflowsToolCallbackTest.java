@@ -12,8 +12,6 @@ import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,17 +19,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * Workflow-side mirror of {@code McpListAgentsToolCallbackTest} - same
- * leak-prevention stakes (the listing must be the grant's exposed set,
- * nothing more), plus the status field: a caller deciding whether to
- * trigger a workflow needs to see DRAFT vs ACTIVE, since triggering a
- * draft is a legitimate-but-surprising thing to let an external key do.
+ * Workflow-side mirror of {@code McpListAgentsToolCallbackTest} - same leak-prevention stakes (the
+ * listing must be the grant's exposed set, nothing more), plus the status field: a caller deciding
+ * whether to trigger a workflow needs to see DRAFT vs ACTIVE, since triggering a draft is a
+ * legitimate-but-surprising thing to let an external key do.
  */
 class McpListMyWorkflowsToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private WorkflowService workflowService;
     private McpListMyWorkflowsToolCallback callback;
@@ -57,14 +56,15 @@ class McpListMyWorkflowsToolCallbackTest {
     void listsExactlyTheGrantsExposedWorkflowsWithIdNameAndStatus() throws Exception {
         UUID workflowId = UUID.randomUUID();
         McpCallerContextTestAccess.set(UUID.randomUUID(), Set.of(), Set.of(workflowId), Set.of());
-        when(workflowService.get(workflowId)).thenReturn(workflowNamed(workflowId, "Invoice Chaser", WorkflowStatus.ACTIVE));
+        when(workflowService.get(workflowId))
+                .thenReturn(workflowNamed(workflowId, "Invoice Chaser", WorkflowStatus.ACTIVE));
 
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
         assertEquals(1, result.size());
-        assertEquals(workflowId.toString(), result.get(0).get("id").asText());
-        assertEquals("Invoice Chaser", result.get(0).get("name").asText());
-        assertEquals("ACTIVE", result.get(0).get("status").asText());
+        assertEquals(workflowId.toString(), result.get(0).get("id").asString());
+        assertEquals("Invoice Chaser", result.get(0).get("name").asString());
+        assertEquals("ACTIVE", result.get(0).get("status").asString());
         // id/name/status only - the graph JSON (which can embed prompts,
         // webhook URLs, connector details) stays inside the platform.
         assertEquals(3, result.get(0).size());
@@ -92,14 +92,16 @@ class McpListMyWorkflowsToolCallbackTest {
     void aDeletedWorkflowIsOmittedWhileTheRestOfTheListingSurvives() throws Exception {
         UUID liveId = UUID.randomUUID();
         UUID deletedId = UUID.randomUUID();
-        McpCallerContextTestAccess.set(UUID.randomUUID(), Set.of(), new HashSet<>(Set.of(liveId, deletedId)), Set.of());
-        when(workflowService.get(liveId)).thenReturn(workflowNamed(liveId, "Still Here", WorkflowStatus.DRAFT));
+        McpCallerContextTestAccess.set(
+                UUID.randomUUID(), Set.of(), new HashSet<>(Set.of(liveId, deletedId)), Set.of());
+        when(workflowService.get(liveId))
+                .thenReturn(workflowNamed(liveId, "Still Here", WorkflowStatus.DRAFT));
         when(workflowService.get(deletedId)).thenThrow(new RuntimeException("workflow not found"));
 
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
         assertEquals(1, result.size());
-        assertEquals("Still Here", result.get(0).get("name").asText());
-        assertEquals("DRAFT", result.get(0).get("status").asText());
+        assertEquals("Still Here", result.get(0).get("name").asString());
+        assertEquals("DRAFT", result.get(0).get("status").asString());
     }
 }

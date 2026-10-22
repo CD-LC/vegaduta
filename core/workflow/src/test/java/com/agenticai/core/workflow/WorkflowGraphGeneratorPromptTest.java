@@ -6,12 +6,19 @@ import com.agenticai.core.workflow.expression.BuiltIn;
 import com.agenticai.core.workflow.expression.BuiltIns;
 import org.junit.jupiter.api.Test;
 
-/** The generator prompt must teach the expression language without dropping the legacy templating. */
+/**
+ * The generator prompt must teach the expression language without dropping the legacy templating.
+ */
 class WorkflowGraphGeneratorPromptTest {
 
-    private static final String PROMPT = WorkflowGeneratorPrompts.buildSystemPrompt("- id=\"a1\" name=\"Agent\"\n", true);
-    private static final String PROMPT_OFF = WorkflowGeneratorPrompts.buildSystemPrompt("- id=\"a1\" name=\"Agent\"\n", false);
-    /** Same text with runs of whitespace collapsed, so assertions ignore the prompt's line wrapping. */
+    private static final String PROMPT =
+            WorkflowGeneratorPrompts.buildSystemPrompt("- id=\"a1\" name=\"Agent\"\n", true);
+    private static final String PROMPT_OFF =
+            WorkflowGeneratorPrompts.buildSystemPrompt("- id=\"a1\" name=\"Agent\"\n", false);
+
+    /**
+     * Same text with runs of whitespace collapsed, so assertions ignore the prompt's line wrapping.
+     */
     private static final String FLAT = PROMPT.replaceAll("\\s+", " ");
 
     private static void has(String haystack, String needle) {
@@ -52,7 +59,14 @@ class WorkflowGraphGeneratorPromptTest {
     @Test
     void flagOffPromptTeachesNoExpressionSyntaxButKeepsLegacyTemplating() {
         String flat = PROMPT_OFF.replaceAll("\\s+", " ");
-        for (String forbidden : new String[] {"$node[", "$json.path", "$trigger", "\"mode\": \"expression\"", "Built-in functions"}) {
+        for (String forbidden :
+                new String[] {
+                    "$node[",
+                    "$json.path",
+                    "$trigger",
+                    "\"mode\": \"expression\"",
+                    "Built-in functions"
+                }) {
             assertTrue(!flat.contains(forbidden), "flag-off prompt must not mention: " + forbidden);
         }
         has(flat, "\"{{input}}\" is this node's raw input");
@@ -64,15 +78,23 @@ class WorkflowGraphGeneratorPromptTest {
     void serviceOnlyTeachesExpressionsWhenResolverIsWiredAndEnabled() throws Exception {
         var m = WorkflowGraphGeneratorService.class.getDeclaredMethod("expressionsWired");
         m.setAccessible(true);
-        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var objectMapper = com.agenticai.core.json.JsonMappers.plain();
         var unsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         unsafe.setAccessible(true);
         var u = (sun.misc.Unsafe) unsafe.get(null);
-        var svc = (WorkflowGraphGeneratorService) u.allocateInstance(WorkflowGraphGeneratorService.class);
+        var svc =
+                (WorkflowGraphGeneratorService)
+                        u.allocateInstance(WorkflowGraphGeneratorService.class);
         assertTrue(!(boolean) m.invoke(svc), "no resolver wired -> legacy prompt");
         svc.setExpressions(WorkflowExpressionResolver.standalone(objectMapper));
         assertTrue((boolean) m.invoke(svc), "enabled resolver wired -> expression prompt");
-        svc.setExpressions(new WorkflowExpressionResolver((RunDataStore) null, (WorkflowRunRepository) null, objectMapper, false, false));
+        svc.setExpressions(
+                new WorkflowExpressionResolver(
+                        (RunDataStore) null,
+                        (WorkflowRunRepository) null,
+                        objectMapper,
+                        false,
+                        false));
         assertTrue(!(boolean) m.invoke(svc), "kill switch off -> legacy prompt");
     }
 
@@ -92,7 +114,9 @@ class WorkflowGraphGeneratorPromptTest {
     @Test
     void perItemDestinationIsOnlyTaughtWhenExpressionsAreOn() {
         has(FLAT, "\"whatsappTo\": \"{{ $json.phone }}\"");
-        assertTrue(!PROMPT_OFF.contains("$json.phone"), "destination fields have no legacy templating");
+        assertTrue(
+                !PROMPT_OFF.contains("$json.phone"),
+                "destination fields have no legacy templating");
     }
 
     @Test
@@ -110,12 +134,15 @@ class WorkflowGraphGeneratorPromptTest {
             has(flat, "\"knowledgeNeeded\"");
         }
         // The Brief planner's reference-mode prompt is built without this addendum.
-        assertTrue(!PROMPT.contains("SCHEDULE:"), "base prompt must stay free of the direct-generation addendum");
+        assertTrue(
+                !PROMPT.contains("SCHEDULE:"),
+                "base prompt must stay free of the direct-generation addendum");
     }
 
     @Test
     void editSuffixHandsOverTheCurrentGraphAsAChangeRequest() {
-        String suffix = WorkflowGeneratorSupport.editSuffix("{\"nodes\":[{\"id\":\"n1\"}],\"edges\":[]}");
+        String suffix =
+                WorkflowGeneratorSupport.editSuffix("{\"nodes\":[{\"id\":\"n1\"}],\"edges\":[]}");
         has(suffix, "CHANGE REQUEST");
         has(suffix, "keep every node and edge the request does not concern exactly as it is");
         has(suffix, "return the COMPLETE updated graph");

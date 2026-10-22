@@ -1,7 +1,6 @@
 package com.agenticai.core.google.agenttools;
 
 import com.agenticai.core.google.GoogleSheetsClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link GoogleSheetsClient} as a native tool - see {@code GoogleDriveToolCallback}'s
@@ -85,23 +85,32 @@ public class GoogleSheetsToolCallback implements ToolCallback {
                         yield "{\"error\": \"rows is required for action=append_rows\"}";
                     }
                     if (rows.size() > MAX_APPEND_ROWS) {
-                        yield errorJson("append_rows takes at most " + MAX_APPEND_ROWS + " rows per call");
+                        yield errorJson(
+                                "append_rows takes at most " + MAX_APPEND_ROWS + " rows per call");
                     }
                     yield MAPPER.writeValueAsString(client.appendRows(spreadsheetId, range, rows));
                 }
-                default -> "{\"error\": \"Unknown action - use read_range, write_range or append_rows\"}";
+                default ->
+                        "{\"error\": \"Unknown action - use read_range, write_range or append_rows\"}";
             };
         } catch (Exception e) {
-            // Class only: a Sheets error body can quote the cell values sent, which may be customer text.
+            // Class only: a Sheets error body can quote the cell values sent, which may be customer
+            // text.
             log.warn("google_sheets tool call failed: {}", e.getClass().getSimpleName());
             return errorJson("Google Sheets call failed: " + e.getMessage());
         }
     }
 
-    /** One call appends a bounded batch; a bulk import belongs in a workflow, not a single tool call. */
+    /**
+     * One call appends a bounded batch; a bulk import belongs in a workflow, not a single tool
+     * call.
+     */
     static final int MAX_APPEND_ROWS = 200;
 
-    /** {@code rows} as row-major strings ({@code null} cells become ""), or null when it is not a list. */
+    /**
+     * {@code rows} as row-major strings ({@code null} cells become ""), or null when it is not a
+     * list.
+     */
     private static List<List<String>> rowsOf(Object rowsRaw) {
         if (!(rowsRaw instanceof List<?> rawRows)) {
             return null;

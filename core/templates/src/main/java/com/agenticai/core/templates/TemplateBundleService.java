@@ -11,14 +11,14 @@ import com.agenticai.core.templates.dto.AgentBundle;
 import com.agenticai.core.templates.dto.AgentBundlePreview;
 import com.agenticai.core.templates.dto.TemplateImportResponse;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Export an agent as a shareable file and import one. A bundle is untrusted input from another
@@ -67,7 +67,8 @@ public class TemplateBundleService {
     /** The caller's own agent as a bundle (same allow-list snapshot a template uses). */
     @Transactional(readOnly = true)
     public AgentBundle export(UUID agentId) {
-        // VIEWER access / same-tenant existence, else 404 (the same check a template snapshot uses).
+        // VIEWER access / same-tenant existence, else 404 (the same check a template snapshot
+        // uses).
         Agent agent = templates.loadOwnedAgentEntity(agentId);
         try {
             JsonNode design = objectMapper.readTree(snapshotService.snapshotAgent(agent));
@@ -112,14 +113,19 @@ public class TemplateBundleService {
                         + prepared.preview().autonomyTier()
                         + (prepared.preview().adjustments().isEmpty()
                                 ? ""
-                                : "; adjusted: " + String.join("; ", prepared.preview().adjustments())));
+                                : "; adjusted: "
+                                        + String.join("; ", prepared.preview().adjustments())));
         return new TemplateImportResponse(TemplateKind.AGENT, newId);
     }
 
     private Prepared prepare(AgentBundle bundle) {
         if (!FORMAT.equals(bundle.format())) {
             throw new IllegalArgumentException(
-                    "Unsupported bundle format '" + bundle.format() + "'; this server reads " + FORMAT + ".");
+                    "Unsupported bundle format '"
+                            + bundle.format()
+                            + "'; this server reads "
+                            + FORMAT
+                            + ".");
         }
         if (!bundle.agent().isObject()) {
             throw new IllegalArgumentException("'agent' must be a JSON object.");
@@ -134,15 +140,17 @@ public class TemplateBundleService {
         // Never carry another tenant's knowledge-base ids.
         if (agent.hasNonNull("allowedKnowledgeCollectionIds")
                 && !agent.get("allowedKnowledgeCollectionIds").isEmpty()) {
-            adjustments.add("knowledge-base restrictions dropped (they point at the author's data)");
+            adjustments.add(
+                    "knowledge-base restrictions dropped (they point at the author's data)");
         }
         agent.putArray("allowedKnowledgeCollectionIds");
-        String tier = agent.path("autonomyTier").asText("");
+        String tier = agent.path("autonomyTier").asString("");
         if (tier.isBlank()) {
             tier = AgentAutonomyTier.SUPERVISED.name();
             agent.put("autonomyTier", tier);
         } else if (AgentAutonomyTier.FULLY_AUTONOMOUS.name().equals(tier)) {
-            adjustments.add("FULLY_AUTONOMOUS lowered to SUPERVISED: a shared file cannot grant full autonomy");
+            adjustments.add(
+                    "FULLY_AUTONOMOUS lowered to SUPERVISED: a shared file cannot grant full autonomy");
             tier = AgentAutonomyTier.SUPERVISED.name();
             agent.put("autonomyTier", tier);
         }
@@ -151,14 +159,17 @@ public class TemplateBundleService {
         try {
             snapshot = snapshotService.readAgentSnapshot(configJson);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("The agent design is not valid: " + e.getMessage(), e);
+            throw new IllegalArgumentException(
+                    "The agent design is not valid: " + e.getMessage(), e);
         }
         if (snapshot.systemPrompt() == null || snapshot.systemPrompt().isBlank()) {
             throw new IllegalArgumentException("The agent has no system prompt.");
         }
-        List<String> tools = snapshot.allowedToolNames() == null ? List.of() : snapshot.allowedToolNames();
+        List<String> tools =
+                snapshot.allowedToolNames() == null ? List.of() : snapshot.allowedToolNames();
         if (tools.size() > MAX_TOOLS) {
-            throw new IllegalArgumentException("The agent lists more than " + MAX_TOOLS + " tools.");
+            throw new IllegalArgumentException(
+                    "The agent lists more than " + MAX_TOOLS + " tools.");
         }
         if (tools.isEmpty()) {
             adjustments.add("no tool list: the agent can use every tool your workspace allows");
@@ -173,7 +184,8 @@ public class TemplateBundleService {
                         agent);
         return new Prepared(
                 configJson,
-                new AgentBundlePreview(bundle.title(), tools, tier, List.copyOf(adjustments), readiness));
+                new AgentBundlePreview(
+                        bundle.title(), tools, tier, List.copyOf(adjustments), readiness));
     }
 
     private record Prepared(String configJson, AgentBundlePreview preview) {}

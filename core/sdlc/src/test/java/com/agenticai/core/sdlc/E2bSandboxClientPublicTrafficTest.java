@@ -9,8 +9,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -19,6 +17,8 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Sandboxes are created with {@code network.allowPublicTraffic=false} and the {@code
@@ -29,7 +29,7 @@ class E2bSandboxClientPublicTrafficTest {
 
     private static final String CREATE_URL = "https://api.e2b.app/sandboxes";
     private static final String KILL_URL = "https://api.e2b.app/sandboxes/sb1";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static E2bSandboxClient client(MockRestServiceServer[] serverOut, Boolean restrict) {
         RestClient.Builder builder = RestClient.builder();
@@ -41,7 +41,8 @@ class E2bSandboxClientPublicTrafficTest {
     }
 
     private static RequestMatcher jsonBody(Consumer<JsonNode> check) {
-        return request -> check.accept(MAPPER.readTree(((MockClientHttpRequest) request).getBodyAsString()));
+        return request ->
+                check.accept(MAPPER.readTree(((MockClientHttpRequest) request).getBodyAsString()));
     }
 
     @Test
@@ -54,10 +55,16 @@ class E2bSandboxClientPublicTrafficTest {
                 .andExpect(
                         jsonBody(
                                 body -> {
-                                    assertThat(body.path("templateID").asText()).isEqualTo("tpl");
-                                    assertThat(body.path("network").path("allowPublicTraffic").isBoolean())
+                                    assertThat(body.path("templateID").asString()).isEqualTo("tpl");
+                                    assertThat(
+                                                    body.path("network")
+                                                            .path("allowPublicTraffic")
+                                                            .isBoolean())
                                             .isTrue();
-                                    assertThat(body.path("network").path("allowPublicTraffic").asBoolean())
+                                    assertThat(
+                                                    body.path("network")
+                                                            .path("allowPublicTraffic")
+                                                            .asBoolean())
                                             .isFalse();
                                 }))
                 .andRespond(
@@ -108,7 +115,10 @@ class E2bSandboxClientPublicTrafficTest {
                                 "{\"sandboxID\":\"sb1\",\"templateID\":\"tpl\",\"envdVersion\":\"1\","
                                         + "\"trafficAccessToken\":null}",
                                 MediaType.APPLICATION_JSON));
-        server[0].expect(requestTo(KILL_URL)).andExpect(method(HttpMethod.DELETE)).andRespond(withServerError());
+        server[0]
+                .expect(requestTo(KILL_URL))
+                .andExpect(method(HttpMethod.DELETE))
+                .andRespond(withServerError());
 
         assertThatThrownBy(() -> client.createSandbox("key", "tpl", 60, null, null))
                 .isInstanceOf(E2bApiException.class)

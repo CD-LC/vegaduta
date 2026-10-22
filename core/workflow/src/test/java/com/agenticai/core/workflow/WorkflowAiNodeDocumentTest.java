@@ -17,13 +17,13 @@ import com.agenticai.core.agents.tools.web.HttpRequestSpec;
 import com.agenticai.core.knowledge.SidecarClient;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /** Variable aggregator and document extractor of {@link WorkflowAiNodeHandler}. */
 class WorkflowAiNodeDocumentTest extends WorkflowAiNodeHandlerTestBase {
@@ -145,8 +145,8 @@ class WorkflowAiNodeDocumentTest extends WorkflowAiNodeHandlerTestBase {
                                 .executeDocumentExtractor(
                                         node("document_extractor", config), "# Title\nbody")
                                 .output());
-        assertEquals("md", out.get("format").asText());
-        assertEquals("text", out.get("source").asText());
+        assertEquals("md", out.get("format").asString());
+        assertEquals("text", out.get("source").asString());
         assertFalse(out.get("truncated").asBoolean());
         assertTrue(out.get("pages").isNull());
     }
@@ -172,10 +172,10 @@ class WorkflowAiNodeDocumentTest extends WorkflowAiNodeHandlerTestBase {
                         .executeDocumentExtractor(node("document_extractor", config), "ignored");
         assertEquals("OK", r.status(), r.summary());
         JsonNode out = json(r.output());
-        assertEquals("page text from the sidecar", out.get("text").asText());
+        assertEquals("page text from the sidecar", out.get("text").asString());
         assertEquals(5, out.get("pages").asInt());
         assertTrue(out.get("truncated").asBoolean());
-        assertEquals("pdf", out.get("format").asText());
+        assertEquals("pdf", out.get("format").asString());
         org.mockito.ArgumentCaptor<byte[]> sent = org.mockito.ArgumentCaptor.forClass(byte[].class);
         verify(sidecar).extractText(anyString(), sent.capture());
         assertEquals(

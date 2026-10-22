@@ -3,9 +3,6 @@ package com.agenticai.core.billing.gateway;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +20,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@link PaymentGatewayClient} backed by PhonePe's Payment Gateway + UPI Autopay (subscription
@@ -283,9 +283,9 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
                 throw new PaymentGatewayException(
                         "PhonePe subscription setup returned an empty response", null);
             }
-            String subscriptionId = response.path("subscriptionId").asText(merchantOrderId);
-            String redirectUrl = response.path("redirectUrl").asText(null);
-            String state = response.path("state").asText("PENDING");
+            String subscriptionId = response.path("subscriptionId").asString(merchantOrderId);
+            String redirectUrl = response.path("redirectUrl").asString(null);
+            String state = response.path("state").asString("PENDING");
             return new GatewaySubscription(subscriptionId, redirectUrl, state);
         } catch (RestClientException e) {
             throw new PaymentGatewayException(
@@ -345,10 +345,10 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
             log.error("Could not parse PhonePe webhook body - dropping the event as UNKNOWN", e);
             return new BillingEvent(BillingEventType.UNKNOWN, null, "", gatewayName());
         }
-        String rawEventName = json.path("event").asText("");
-        String subscriptionOrOrderId = json.path("payload").path("orderId").asText(null);
+        String rawEventName = json.path("event").asString("");
+        String subscriptionOrOrderId = json.path("payload").path("orderId").asString(null);
         if (subscriptionOrOrderId == null) {
-            subscriptionOrOrderId = json.path("payload").path("subscriptionId").asText(null);
+            subscriptionOrOrderId = json.path("payload").path("subscriptionId").asString(null);
         }
         return new BillingEvent(
                 mapEventType(rawEventName), subscriptionOrOrderId, rawEventName, gatewayName());
@@ -398,7 +398,7 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
                 throw new PaymentGatewayException(
                         "PhonePe OAuth token response was missing access_token", null);
             }
-            String accessToken = response.path("access_token").asText();
+            String accessToken = response.path("access_token").asString();
             long expiresAtEpochSeconds = response.path("expires_at").asLong(now.getEpochSecond());
             // Refresh a little early (60s margin) rather than risk a request starting just before
             // expiry and finishing just after it.

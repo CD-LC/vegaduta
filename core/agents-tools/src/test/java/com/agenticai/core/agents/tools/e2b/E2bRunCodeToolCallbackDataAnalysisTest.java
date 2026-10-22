@@ -16,16 +16,16 @@ import com.agenticai.core.sdlc.dto.RunCodeRequest;
 import com.agenticai.core.sdlc.dto.RunCodeResponse;
 import com.agenticai.core.sdlc.dto.SandboxArtifact;
 import com.agenticai.core.storage.FileStorageService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class E2bRunCodeToolCallbackDataAnalysisTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String INPUT = "{\"code\":\"print(1)\",\"language\":\"python\"}";
 
     private final UUID agent = UUID.randomUUID();
@@ -67,12 +67,12 @@ class E2bRunCodeToolCallbackDataAnalysisTest {
         assertEquals(1, req.getValue().files().size());
         assertEquals("sales.csv", req.getValue().files().get(0).name());
 
-        assertEquals("sales.csv", out.path("mountedFiles").get(0).asText());
+        assertEquals("sales.csv", out.path("mountedFiles").get(0).asString());
         JsonNode files = out.path("files");
         assertEquals(2, files.size(), "the .exe is not allow-listed and must be dropped");
-        assertEquals("chart.png", files.get(0).path("filename").asText());
-        assertTrue(files.get(0).path("url").asText().startsWith(SandboxArtifacts.URL_PREFIX));
-        assertTrue(out.path("instructions").asText().contains("url"));
+        assertEquals("chart.png", files.get(0).path("filename").asString());
+        assertTrue(files.get(0).path("url").asString().startsWith(SandboxArtifacts.URL_PREFIX));
+        assertTrue(out.path("instructions").asString().contains("url"));
         // bytes + name sidecar per stored artifact
         verify(storage, org.mockito.Mockito.times(4)).put(any(), any(), any());
         verify(storage).put(any(), eq(new byte[] {1, 2, 3}), eq("image/png"));
@@ -83,7 +83,7 @@ class E2bRunCodeToolCallbackDataAnalysisTest {
         when(sandbox.runCode(any())).thenReturn(new RunCodeResponse("hi", "", 0, false, "sbx"));
         E2bRunCodeToolCallback callback = new E2bRunCodeToolCallback(sandbox);
         JsonNode out = MAPPER.readTree(callback.call(INPUT));
-        assertEquals("hi", out.path("stdout").asText());
+        assertEquals("hi", out.path("stdout").asString());
         assertFalse(out.has("files"));
         assertFalse(out.has("mountedFiles"));
         assertFalse(callback.getToolDefinition().description().contains("DATA ANALYSIS"));

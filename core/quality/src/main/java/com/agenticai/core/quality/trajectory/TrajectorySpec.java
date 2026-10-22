@@ -1,11 +1,6 @@
 package com.agenticai.core.quality.trajectory;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,12 +10,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
- * A dataset case's expected trajectory plus how to score it - stored as the case's {@code grader_spec} JSON
- * (the existing nullable TEXT column, V375) with {@code "type":"trajectory"}, so NO new column and no
- * migration. A case therefore carries either a response grader (regex / exact / json_schema) OR a trajectory
- * spec; {@code EvalDatasetService#setCaseGrader} routes between them.
+ * A dataset case's expected trajectory plus how to score it - stored as the case's {@code
+ * grader_spec} JSON (the existing nullable TEXT column, V375) with {@code "type":"trajectory"}, so
+ * NO new column and no migration. A case therefore carries either a response grader (regex / exact
+ * / json_schema) OR a trajectory spec; {@code EvalDatasetService#setCaseGrader} routes between
+ * them.
  *
  * <pre>
  * {"type":"trajectory",
@@ -31,13 +32,17 @@ import java.util.regex.Pattern;
  *  "steps":[ {"tool":"search_knowledge_base","args":{"query":{"regex":"refund"}}}, {"tool":"send_email"} ]}
  * </pre>
  *
- * Unknown keys are rejected at write time (a typo must not silently weaken a spec). {@code steps} may be empty:
- * "the agent should call no tools" (use mode {@code exact}, or {@code maxExtraCalls: 0}).
+ * Unknown keys are rejected at write time (a typo must not silently weaken a spec). {@code steps}
+ * may be empty: "the agent should call no tools" (use mode {@code exact}, or {@code maxExtraCalls:
+ * 0}).
  */
 public final class TrajectorySpec {
 
     public enum Mode {
-        EXACT, IN_ORDER, ANY_ORDER, F1;
+        EXACT,
+        IN_ORDER,
+        ANY_ORDER,
+        F1;
 
         public String wire() {
             return name().toLowerCase(Locale.ROOT);
@@ -47,7 +52,8 @@ public final class TrajectorySpec {
             try {
                 return valueOf(text.trim().toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("'mode' must be one of exact, in_order, any_order, f1.");
+                throw new IllegalArgumentException(
+                        "'mode' must be one of exact, in_order, any_order, f1.");
             }
         }
     }
@@ -58,10 +64,12 @@ public final class TrajectorySpec {
     public static final int MAX_DOCUMENT_CHARS = 16_384;
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
-    private static final Set<String> KEYS = Set.of("type", "mode", "minScore", "maxExtraCalls", "minEfficiency", "steps");
+    private static final Set<String> KEYS =
+            Set.of("type", "mode", "minScore", "maxExtraCalls", "minEfficiency", "steps");
     private static final Set<String> STEP_KEYS = Set.of("tool", "args");
     private static final Pattern TOOL_NAME = Pattern.compile("[A-Za-z0-9_.:-]{1,128}");
-    private static final Pattern ARG_PATH = Pattern.compile("[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+){0,7}");
+    private static final Pattern ARG_PATH =
+            Pattern.compile("[A-Za-z0-9_$-]+(\\.[A-Za-z0-9_$-]+){0,7}");
 
     private final Mode mode;
     private final double minScore;
@@ -69,7 +77,12 @@ public final class TrajectorySpec {
     private final Double minEfficiency;
     private final List<ExpectedStep> steps;
 
-    private TrajectorySpec(Mode mode, double minScore, Integer maxExtraCalls, Double minEfficiency, List<ExpectedStep> steps) {
+    private TrajectorySpec(
+            Mode mode,
+            double minScore,
+            Integer maxExtraCalls,
+            Double minEfficiency,
+            List<ExpectedStep> steps) {
         this.mode = mode;
         this.minScore = minScore;
         this.maxExtraCalls = maxExtraCalls;
@@ -104,48 +117,57 @@ public final class TrajectorySpec {
     // ------------------------------------------------------------------
 
     /**
-     * Cheap routing test: is this stored {@code grader_spec} a trajectory spec? False for anything that is not
-     * a JSON object with {@code "type":"trajectory"} (including text that does not parse - the code-grader
-     * path owns reporting that).
+     * Cheap routing test: is this stored {@code grader_spec} a trajectory spec? False for anything
+     * that is not a JSON object with {@code "type":"trajectory"} (including text that does not
+     * parse - the code-grader path owns reporting that).
      */
     public static boolean isTrajectory(String specJson) {
-        if (specJson == null || specJson.isBlank() || !specJson.toLowerCase(Locale.ROOT).contains(TYPE)) {
+        if (specJson == null
+                || specJson.isBlank()
+                || !specJson.toLowerCase(Locale.ROOT).contains(TYPE)) {
             return false;
         }
         try {
             JsonNode node = MAPPER.readTree(specJson);
-            return node != null && node.isObject() && node.path("type").isTextual()
-                && TYPE.equalsIgnoreCase(node.path("type").asText().trim());
-        } catch (JsonProcessingException e) {
+            return node != null
+                    && node.isObject()
+                    && node.path("type").isString()
+                    && TYPE.equalsIgnoreCase(node.path("type").asString().trim());
+        } catch (JacksonException e) {
             return false;
         }
     }
 
     /**
-     * Write-time gate used by {@code EvalDatasetService#setCaseGrader}: with the feature off a trajectory spec
-     * is rejected with exactly the message today's code-grader parser gives for an unknown type, so flag-off
-     * behaviour is unchanged; with it on the spec is fully validated.
+     * Write-time gate used by {@code EvalDatasetService#setCaseGrader}: with the feature off a
+     * trajectory spec is rejected with exactly the message today's code-grader parser gives for an
+     * unknown type, so flag-off behaviour is unchanged; with it on the spec is fully validated.
      *
      * @throws IllegalArgumentException when disabled or invalid
      */
     public static void validateForWrite(String specJson, boolean featureEnabled) {
         if (!featureEnabled) {
-            throw new IllegalArgumentException("Unknown grader type '" + TYPE + "' - use regex, exact or json_schema.");
+            throw new IllegalArgumentException(
+                    "Unknown grader type '" + TYPE + "' - use regex, exact or json_schema.");
         }
         parse(specJson);
     }
 
-    /** @throws IllegalArgumentException with a precise message when the document is not a valid trajectory spec */
+    /**
+     * @throws IllegalArgumentException with a precise message when the document is not a valid
+     *     trajectory spec
+     */
     public static TrajectorySpec parse(String specJson) {
         if (specJson == null || specJson.isBlank()) {
             throw new IllegalArgumentException("Trajectory spec is empty.");
         }
         if (specJson.length() > MAX_DOCUMENT_CHARS) {
-            throw new IllegalArgumentException("The trajectory spec is limited to " + MAX_DOCUMENT_CHARS + " characters.");
+            throw new IllegalArgumentException(
+                    "The trajectory spec is limited to " + MAX_DOCUMENT_CHARS + " characters.");
         }
         try {
             return parse(MAPPER.readTree(specJson));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Trajectory spec is not valid JSON.");
         }
     }
@@ -155,22 +177,26 @@ public final class TrajectorySpec {
         if (spec == null || !spec.isObject()) {
             throw new IllegalArgumentException("Trajectory spec must be a JSON object.");
         }
-        for (Iterator<String> it = spec.fieldNames(); it.hasNext();) {
+        for (Iterator<String> it = spec.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!KEYS.contains(key)) {
-                throw new IllegalArgumentException("Unknown trajectory key '" + clip(key) + "'. Allowed: "
-                    + String.join(", ", new java.util.TreeSet<>(KEYS)) + ".");
+                throw new IllegalArgumentException(
+                        "Unknown trajectory key '"
+                                + clip(key)
+                                + "'. Allowed: "
+                                + String.join(", ", new java.util.TreeSet<>(KEYS))
+                                + ".");
             }
         }
-        if (!spec.has("type") || !TYPE.equalsIgnoreCase(spec.path("type").asText("").trim())) {
+        if (!spec.has("type") || !TYPE.equalsIgnoreCase(spec.path("type").asString("").trim())) {
             throw new IllegalArgumentException("Trajectory spec needs \"type\":\"" + TYPE + "\".");
         }
         Mode mode = Mode.IN_ORDER;
         if (spec.has("mode")) {
-            if (!spec.get("mode").isTextual()) {
+            if (!spec.get("mode").isString()) {
                 throw new IllegalArgumentException("'mode' must be text.");
             }
-            mode = Mode.parse(spec.get("mode").asText());
+            mode = Mode.parse(spec.get("mode").asString());
         }
         double minScore = 1.0;
         if (spec.has("minScore")) {
@@ -179,8 +205,12 @@ public final class TrajectorySpec {
         Integer maxExtra = null;
         if (spec.has("maxExtraCalls")) {
             JsonNode v = spec.get("maxExtraCalls");
-            if (!v.isIntegralNumber() || !v.canConvertToInt() || v.asInt() < 0 || v.asInt() > 1000) {
-                throw new IllegalArgumentException("'maxExtraCalls' must be a whole number from 0 to 1000.");
+            if (!v.isIntegralNumber()
+                    || !v.canConvertToInt()
+                    || v.asInt() < 0
+                    || v.asInt() > 1000) {
+                throw new IllegalArgumentException(
+                        "'maxExtraCalls' must be a whole number from 0 to 1000.");
             }
             maxExtra = v.asInt();
         }
@@ -190,10 +220,12 @@ public final class TrajectorySpec {
         }
         JsonNode stepsNode = spec.get("steps");
         if (stepsNode == null || !stepsNode.isArray()) {
-            throw new IllegalArgumentException("Trajectory spec needs a 'steps' array (it may be empty).");
+            throw new IllegalArgumentException(
+                    "Trajectory spec needs a 'steps' array (it may be empty).");
         }
         if (stepsNode.size() > MAX_STEPS) {
-            throw new IllegalArgumentException("A trajectory can list at most " + MAX_STEPS + " steps.");
+            throw new IllegalArgumentException(
+                    "A trajectory can list at most " + MAX_STEPS + " steps.");
         }
         List<ExpectedStep> steps = new ArrayList<>();
         int index = 0;
@@ -208,31 +240,41 @@ public final class TrajectorySpec {
         if (!s.isObject()) {
             throw new IllegalArgumentException(where + "must be a JSON object.");
         }
-        for (Iterator<String> it = s.fieldNames(); it.hasNext();) {
+        for (Iterator<String> it = s.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!STEP_KEYS.contains(key)) {
-                throw new IllegalArgumentException(where + "unknown key '" + clip(key) + "'. Allowed: tool, args.");
+                throw new IllegalArgumentException(
+                        where + "unknown key '" + clip(key) + "'. Allowed: tool, args.");
             }
         }
         JsonNode tool = s.get("tool");
-        if (tool == null || !tool.isTextual() || !TOOL_NAME.matcher(tool.asText().trim()).matches()) {
-            throw new IllegalArgumentException(where + "'tool' must be an exact tool name (letters, digits, _ - . :).");
+        if (tool == null
+                || !tool.isString()
+                || !TOOL_NAME.matcher(tool.asString().trim()).matches()) {
+            throw new IllegalArgumentException(
+                    where + "'tool' must be an exact tool name (letters, digits, _ - . :).");
         }
         Map<String, ArgMatcher> matchers = new LinkedHashMap<>();
         Map<String, JsonNode> raw = new LinkedHashMap<>();
         JsonNode args = s.get("args");
         if (args != null && !args.isNull()) {
             if (!args.isObject()) {
-                throw new IllegalArgumentException(where + "'args' must be an object of argument matchers.");
+                throw new IllegalArgumentException(
+                        where + "'args' must be an object of argument matchers.");
             }
             if (args.size() > MAX_ARGS_PER_STEP) {
-                throw new IllegalArgumentException(where + "at most " + MAX_ARGS_PER_STEP + " argument matchers per step.");
+                throw new IllegalArgumentException(
+                        where + "at most " + MAX_ARGS_PER_STEP + " argument matchers per step.");
             }
-            for (Iterator<Map.Entry<String, JsonNode>> it = args.fields(); it.hasNext();) {
+            for (Iterator<Map.Entry<String, JsonNode>> it = args.properties().iterator();
+                    it.hasNext(); ) {
                 Map.Entry<String, JsonNode> e = it.next();
                 if (!ARG_PATH.matcher(e.getKey()).matches()) {
-                    throw new IllegalArgumentException(where + "argument path '" + clip(e.getKey())
-                        + "' must be field names joined by dots, e.g. opts.limit.");
+                    throw new IllegalArgumentException(
+                            where
+                                    + "argument path '"
+                                    + clip(e.getKey())
+                                    + "' must be field names joined by dots, e.g. opts.limit.");
                 }
                 try {
                     matchers.put(e.getKey(), ArgMatcher.parse(e.getKey(), e.getValue()));
@@ -242,7 +284,7 @@ public final class TrajectorySpec {
                 raw.put(e.getKey(), e.getValue());
             }
         }
-        return new ExpectedStep(tool.asText().trim(), matchers, raw);
+        return new ExpectedStep(tool.asString().trim(), matchers, raw);
     }
 
     private static double unitInterval(JsonNode v, String key) {

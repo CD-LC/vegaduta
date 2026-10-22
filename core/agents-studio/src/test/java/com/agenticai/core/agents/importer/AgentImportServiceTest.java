@@ -28,8 +28,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 class AgentImportServiceTest {
 
@@ -71,14 +71,17 @@ class AgentImportServiceTest {
     }
 
     private static ProviderModelResponse model(String id) {
-        return new ProviderModelResponse(id, id, 128_000, false, false, false, null, null, false, "SEED");
+        return new ProviderModelResponse(
+                id, id, 128_000, false, false, false, null, null, false, "SEED");
     }
 
-    // ---- preview ---------------------------------------------------------------------------------------
+    // ---- preview
+    // ---------------------------------------------------------------------------------------
 
     @Test
     void previewTouchesNothingAndShapesTheContractExactly() {
-        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o")).thenReturn(Optional.of(model("gpt-4o")));
+        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o"))
+                .thenReturn(Optional.of(model("gpt-4o")));
 
         PreviewResponse res = service.preview(envelope("auto", json("openai-assistant.json")));
 
@@ -86,7 +89,8 @@ class AgentImportServiceTest {
         assertThat(res.source()).isEqualTo("auto");
         assertThat(res.detectedSource()).isEqualTo("openai-assistant");
         assertThat(res.agent().name()).isEqualTo("Math Tutor");
-        assertThat(res.agent().description()).isEqualTo("Personal math tutor that writes and runs code.");
+        assertThat(res.agent().description())
+                .isEqualTo("Personal math tutor that writes and runs code.");
         assertThat(res.agent().instructions()).startsWith("You are a personal math tutor.");
         assertThat(res.agent().modelProvider()).isEqualTo("OPENAI");
         assertThat(res.agent().model()).isEqualTo("gpt-4o");
@@ -101,7 +105,8 @@ class AgentImportServiceTest {
     void previewLeavesTheModelBlankWhenTheCatalogDoesNotOfferIt() {
         when(catalog.findModel(eq(ProviderName.OPENAI), any())).thenReturn(Optional.empty());
 
-        PreviewResponse res = service.preview(envelope("openai-assistant", json("openai-assistant.json")));
+        PreviewResponse res =
+                service.preview(envelope("openai-assistant", json("openai-assistant.json")));
 
         assertThat(res.agent().modelProvider()).isEqualTo("OPENAI");
         assertThat(res.agent().model()).isEmpty();
@@ -115,15 +120,17 @@ class AgentImportServiceTest {
         PreviewResponse res = service.preview(envelope("auto", json("openai-assistant.json")));
 
         assertThat(res.agent().model()).isEmpty();
-        assertThat(res.report().warnings()).anyMatch(w -> w.contains("catalog could not be checked"));
+        assertThat(res.report().warnings())
+                .anyMatch(w -> w.contains("catalog could not be checked"));
     }
 
     @Test
     void unknownProviderFallsBackToNoProviderRatherThanAGuess() {
         // a Flowise chat model type the importer does not know
-        String flow = "{\"nodes\":[{\"id\":\"m\",\"data\":{\"id\":\"m\",\"name\":\"chatWeirdLLM\",\"label\":\"Weird\",\"category\":\"Chat Models\","
-            + "\"inputs\":{\"modelName\":\"weird-1\"}}},{\"id\":\"a\",\"data\":{\"id\":\"a\",\"name\":\"toolAgent\",\"category\":\"Agents\","
-            + "\"inputs\":{\"systemMessage\":\"hi\",\"model\":\"{{m.data.instance}}\"}}}],\"edges\":[]}";
+        String flow =
+                "{\"nodes\":[{\"id\":\"m\",\"data\":{\"id\":\"m\",\"name\":\"chatWeirdLLM\",\"label\":\"Weird\",\"category\":\"Chat Models\","
+                        + "\"inputs\":{\"modelName\":\"weird-1\"}}},{\"id\":\"a\",\"data\":{\"id\":\"a\",\"name\":\"toolAgent\",\"category\":\"Agents\","
+                        + "\"inputs\":{\"systemMessage\":\"hi\",\"model\":\"{{m.data.instance}}\"}}}],\"edges\":[]}";
 
         PreviewResponse res = service.preview(envelope("flowise", parseNode(flow)));
 
@@ -159,11 +166,13 @@ class AgentImportServiceTest {
         assertThat(res.agent().name()).isEqualTo("Triage agent");
     }
 
-    // ---- import ----------------------------------------------------------------------------------------
+    // ---- import
+    // ----------------------------------------------------------------------------------------
 
     @Test
     void importCreatesADraftThroughTheNormalCreatePath() {
-        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o")).thenReturn(Optional.of(model("gpt-4o")));
+        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o"))
+                .thenReturn(Optional.of(model("gpt-4o")));
         UUID id = UUID.randomUUID();
         AgentResponse created = mock(AgentResponse.class);
         when(created.id()).thenReturn(id);
@@ -171,7 +180,8 @@ class AgentImportServiceTest {
 
         ImportResponse res = service.importAgent(envelope("auto", json("openai-assistant.json")));
 
-        ArgumentCaptor<AgentCreateRequest> captor = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> captor =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService).create(captor.capture());
         AgentCreateRequest sent = captor.getValue();
         assertThat(sent.name()).isEqualTo("Math Tutor");
@@ -198,12 +208,18 @@ class AgentImportServiceTest {
 
         ImportResponse res = service.importAgent(envelope("auto", json("openai-assistant.json")));
 
-        ArgumentCaptor<AgentCreateRequest> captor = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> captor =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService).create(captor.capture());
         assertThat(captor.getValue().experienceMode()).isEqualTo(ExperienceMode.ADVANCED);
-        verify(agentService).setAllowedToolNames(id, Set.of("search_knowledge_base", "list_knowledge_collections"));
-        assertThat(res.report().converted()).anyMatch(c -> c.detail().contains("private agent")
-            && c.detail().contains("limited to knowledge-base"));
+        verify(agentService)
+                .setAllowedToolNames(
+                        id, Set.of("search_knowledge_base", "list_knowledge_collections"));
+        assertThat(res.report().converted())
+                .anyMatch(
+                        c ->
+                                c.detail().contains("private agent")
+                                        && c.detail().contains("limited to knowledge-base"));
     }
 
     @Test
@@ -212,13 +228,15 @@ class AgentImportServiceTest {
         AgentResponse created = mock(AgentResponse.class);
         when(created.id()).thenReturn(id);
         when(agentService.create(any(AgentCreateRequest.class))).thenReturn(created);
-        when(agentService.setAllowedToolNames(any(), any())).thenThrow(new IllegalStateException("boom"));
+        when(agentService.setAllowedToolNames(any(), any()))
+                .thenThrow(new IllegalStateException("boom"));
 
         ImportResponse res = service.importAgent(envelope("auto", json("openai-assistant.json")));
 
         assertThat(res.agentId()).isEqualTo(id);
         assertThat(res.report().warnings()).anyMatch(w -> w.contains("could not be restricted"));
-        assertThat(res.report().converted()).anyMatch(c -> c.detail().contains("could not be narrowed"));
+        assertThat(res.report().converted())
+                .anyMatch(c -> c.detail().contains("could not be narrowed"));
     }
 
     @Test
@@ -244,7 +262,8 @@ class AgentImportServiceTest {
 
         service.importAgent(envelope("auto", json("openai-assistant.json")));
 
-        ArgumentCaptor<AgentCreateRequest> captor = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> captor =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService).create(captor.capture());
         assertThat(captor.getValue().providerName()).isEqualTo(ProviderName.PLATFORM_HOSTED);
         assertThat(captor.getValue().model()).isNull();
@@ -255,7 +274,8 @@ class AgentImportServiceTest {
         TenantContext.set(TenantContext.of("t2", "bob", Set.of()));
         when(tenantLimits.plan("t2")).thenReturn(TenantPlan.PREMIUM);
         when(tenantLimits.usesPlatformPool("t2")).thenReturn(false);
-        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o")).thenReturn(Optional.of(model("gpt-4o")));
+        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o"))
+                .thenReturn(Optional.of(model("gpt-4o")));
 
         PreviewResponse res = service.preview(envelope("auto", json("openai-assistant.json")));
 
@@ -268,7 +288,8 @@ class AgentImportServiceTest {
         TenantContext.set(TenantContext.of("t3", "cy", Set.of()));
         when(tenantLimits.plan("t3")).thenReturn(TenantPlan.PREMIUM);
         when(tenantLimits.usesPlatformPool("t3")).thenReturn(true);
-        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o")).thenReturn(Optional.of(model("gpt-4o")));
+        when(catalog.findModel(ProviderName.OPENAI, "gpt-4o"))
+                .thenReturn(Optional.of(model("gpt-4o")));
 
         PreviewResponse res = service.preview(envelope("auto", json("openai-assistant.json")));
 
@@ -277,14 +298,16 @@ class AgentImportServiceTest {
 
     @Test
     void readBoundedStopsAtTheCapWith413() throws Exception {
-        AgentImportService small = new AgentImportService(agentService, catalog, tenantLimits, true, 1024L);
+        AgentImportService small =
+                new AgentImportService(agentService, catalog, tenantLimits, true, 1024L);
         byte[] ok = new byte[1024 + AgentImportService.ENVELOPE_SLACK_BYTES];
         byte[] tooBig = new byte[ok.length + 1];
 
         assertThat(small.readBounded(new ByteArrayInputStream(ok))).hasSize(ok.length);
         assertThatThrownBy(() -> small.readBounded(new ByteArrayInputStream(tooBig)))
-            .isInstanceOfSatisfying(ResponseStatusException.class,
-                e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+                .isInstanceOfSatisfying(
+                        ResponseStatusException.class,
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
     }
 
     @Test
@@ -298,9 +321,13 @@ class AgentImportServiceTest {
 
         service.importAgent(env.toString());
 
-        ArgumentCaptor<AgentCreateRequest> captor = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> captor =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService).create(captor.capture());
-        assertThat(captor.getValue().name()).doesNotContain("<").doesNotContain(">").contains("Renamed");
+        assertThat(captor.getValue().name())
+                .doesNotContain("<")
+                .doesNotContain(">")
+                .contains("Renamed");
     }
 
     @Test
@@ -312,57 +339,72 @@ class AgentImportServiceTest {
 
         service.importAgent(envelope("flowise", parseNode("{\"nodes\":[],\"edges\":[]}")));
 
-        ArgumentCaptor<AgentCreateRequest> captor = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        ArgumentCaptor<AgentCreateRequest> captor =
+                ArgumentCaptor.forClass(AgentCreateRequest.class);
         verify(agentService).create(captor.capture());
         assertThat(captor.getValue().providerName()).isEqualTo(ProviderName.PLATFORM_HOSTED);
         assertThat(captor.getValue().model()).isNull();
-        assertThat(captor.getValue().systemPrompt()).isEqualTo(AgentImportFinalizer.PLACEHOLDER_INSTRUCTIONS);
+        assertThat(captor.getValue().systemPrompt())
+                .isEqualTo(AgentImportFinalizer.PLACEHOLDER_INSTRUCTIONS);
     }
 
     @Test
     void planLimitFromTheNormalCreatePathPropagatesUnchanged() {
-        when(agentService.create(any(AgentCreateRequest.class))).thenThrow(new TenantLimitExceededException("agent cap reached"));
+        when(agentService.create(any(AgentCreateRequest.class)))
+                .thenThrow(new TenantLimitExceededException("agent cap reached"));
 
-        assertThatThrownBy(() -> service.importAgent(envelope("auto", json("openai-assistant.json"))))
-            .isInstanceOf(TenantLimitExceededException.class);
+        assertThatThrownBy(
+                        () -> service.importAgent(envelope("auto", json("openai-assistant.json"))))
+                .isInstanceOf(TenantLimitExceededException.class);
     }
 
-    // ---- flag, limits, hostile input ---------------------------------------------------------------------
+    // ---- flag, limits, hostile input
+    // ---------------------------------------------------------------------
 
     @Test
     void disabledAnswers404ForBothRoutesAndDoesNothing() {
-        AgentImportService off = new AgentImportService(agentService, catalog, tenantLimits, false, 1_048_576L);
+        AgentImportService off =
+                new AgentImportService(agentService, catalog, tenantLimits, false, 1_048_576L);
         String body = envelope("auto", json("openai-assistant.json"));
 
-        for (Runnable call : new Runnable[] {() -> off.preview(body), () -> off.importAgent(body)}) {
+        for (Runnable call :
+                new Runnable[] {() -> off.preview(body), () -> off.importAgent(body)}) {
             assertThatThrownBy(call::run)
-                .isInstanceOfSatisfying(ResponseStatusException.class,
-                    e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+                    .isInstanceOfSatisfying(
+                            ResponseStatusException.class,
+                            e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
         }
         verifyNoInteractions(agentService, catalog);
     }
 
     @Test
     void oversizedBodyIs413BeforeParsing() {
-        AgentImportService small = new AgentImportService(agentService, catalog, tenantLimits, true, 1024L);
-        String body = "{\"source\":\"auto\",\"payload\":{\"instructions\":\"" + "x".repeat(20_000) + "\"}}";
+        AgentImportService small =
+                new AgentImportService(agentService, catalog, tenantLimits, true, 1024L);
+        String body =
+                "{\"source\":\"auto\",\"payload\":{\"instructions\":\""
+                        + "x".repeat(20_000)
+                        + "\"}}";
 
         assertThatThrownBy(() -> small.preview(body))
-            .isInstanceOfSatisfying(ResponseStatusException.class,
-                e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+                .isInstanceOfSatisfying(
+                        ResponseStatusException.class,
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
         verifyNoInteractions(agentService);
     }
 
     @Test
     void oversizedStringPayloadIs413() {
-        AgentImportService small = new AgentImportService(agentService, catalog, tenantLimits, true, 1024L);
+        AgentImportService small =
+                new AgentImportService(agentService, catalog, tenantLimits, true, 1024L);
         ObjectNode env = MAPPER.createObjectNode();
         env.put("source", "auto");
         env.put("payload", "y".repeat(5_000)); // within the envelope slack, over the payload cap
 
         assertThatThrownBy(() -> small.preview(env.toString()))
-            .isInstanceOfSatisfying(ResponseStatusException.class,
-                e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+                .isInstanceOfSatisfying(
+                        ResponseStatusException.class,
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
     }
 
     @Test
@@ -379,20 +421,32 @@ class AgentImportServiceTest {
         sb.append("}");
 
         assertThatThrownBy(() -> service.preview(sb.toString()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("nested too deeply")
-            .satisfies(e -> assertThat(e.getMessage()).doesNotContain("SECRET_MARKER"));
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("nested too deeply")
+                .satisfies(e -> assertThat(e.getMessage()).doesNotContain("SECRET_MARKER"));
     }
 
     @Test
     void malformedAndWronglyShapedRequestsAre400() {
-        for (String body : new String[] {
-            null, "", "   ", "not json", "[]", "\"x\"", "{}", "{\"payload\":null}", "{\"payload\":5}", "{\"payload\":[1]}",
-            "{\"source\":7,\"payload\":{}}", "{\"source\":\"auto\",\"payload\":{}}", "{\"source\":\"nope\",\"payload\":{\"instructions\":\"x\"}}"
-        }) {
+        for (String body :
+                new String[] {
+                    null,
+                    "",
+                    "   ",
+                    "not json",
+                    "[]",
+                    "\"x\"",
+                    "{}",
+                    "{\"payload\":null}",
+                    "{\"payload\":5}",
+                    "{\"payload\":[1]}",
+                    "{\"source\":7,\"payload\":{}}",
+                    "{\"source\":\"auto\",\"payload\":{}}",
+                    "{\"source\":\"nope\",\"payload\":{\"instructions\":\"x\"}}"
+                }) {
             assertThatThrownBy(() -> service.preview(body))
-                .as("body=%s", body)
-                .isInstanceOf(IllegalArgumentException.class);
+                    .as("body=%s", body)
+                    .isInstanceOf(IllegalArgumentException.class);
         }
         verifyNoInteractions(agentService);
     }
@@ -401,22 +455,30 @@ class AgentImportServiceTest {
     void sourceCodePastedAsTextGetsAnExplanationNotAGuess() {
         ObjectNode env = MAPPER.createObjectNode();
         env.put("source", "openai-agents");
-        env.put("payload", "import { Agent } from '@openai/agents';\nconst a = new Agent({ name: 'x', instructions: 'y' });");
+        env.put(
+                "payload",
+                "import { Agent } from '@openai/agents';\nconst a = new Agent({ name: 'x', instructions: 'y' });");
 
         assertThatThrownBy(() -> service.preview(env.toString()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("not JSON")
-            .hasMessageContaining("code");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("not JSON")
+                .hasMessageContaining("code");
     }
 
     @Test
     void aFlowiseExportSentAsAnOpenAiSourceIsRefusedNotMisconverted() {
-        assertThatThrownBy(() -> service.preview(envelope("openai-assistant", json("flowise-tool-agent.json"))))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("flowise");
-        assertThatThrownBy(() -> service.preview(envelope("flowise", json("openai-assistant.json"))))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("openai-assistant");
+        assertThatThrownBy(
+                        () ->
+                                service.preview(
+                                        envelope(
+                                                "openai-assistant",
+                                                json("flowise-tool-agent.json"))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("flowise");
+        assertThatThrownBy(
+                        () -> service.preview(envelope("flowise", json("openai-assistant.json"))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("openai-assistant");
     }
 
     private static JsonNode parseNode(String json) {
