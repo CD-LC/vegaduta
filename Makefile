@@ -103,6 +103,7 @@ test-sdk-clients: ## SDK REST clients + python-agent, incl. consumer contracts (
 	node --test sdk/test/*.test.mjs
 	cd sdk/python && $(PYTHON) -m unittest discover -s tests
 	cd sdk/python-agent && PYTHONPATH=. $(PYTHON) -m pytest tests/ -q
+	$(PYTHON) -m unittest discover -s contracts/consumers/tools -p 'test_*.py'
 
 .PHONY: lint
 lint: ## ESLint + tsc for the console, ruff for Python, shellcheck

@@ -15,8 +15,9 @@ The consumer side checks that every interaction exists in docs/api/openapi.json 
 declared, and that the client never calls anything that is not an interaction. Whether core really
 answers with those fields is the provider verifier's job (core/app).
 
-``validate`` is a deliberately small JSON Schema subset (type, enum, required, properties,
-additionalProperties: false, minimum, format uuid/date-time) - enough for contracts/outbound.
+``validate`` is a deliberately small JSON Schema subset (type, enum, const, pattern, required, properties,
+additionalProperties: false, minimum, format uuid/date-time, allOf and a relative-file ``$ref``) - enough
+for contracts/outbound and contracts/inbound.
 """
 
 from __future__ import annotations
@@ -280,9 +281,25 @@ def _format_ok(fmt: str, value: str) -> bool:
     return True
 
 
-def validate(schema: dict[str, Any], value: Any, where: str = "$") -> list[str]:
-    """Errors of ``value`` against a JSON Schema subset (empty when valid)."""
+def validate(
+    schema: dict[str, Any], value: Any, where: str = "$", *, base_dir: Path | None = None
+) -> list[str]:
+    """Errors of ``value`` against a JSON Schema subset (empty when valid).
+
+    ``base_dir`` is where a relative-file ``$ref`` (``./_envelope.schema.json``) is read from; without it a
+    ``$ref`` is an error rather than silently passing."""
     errs: list[str] = []
+    if "$ref" in schema:
+        if base_dir is None or not str(schema["$ref"]).startswith("./"):
+            return [f"{where}: cannot resolve $ref {schema['$ref']!r}"]
+        target = json.loads((base_dir / schema["$ref"]).read_text(encoding="utf-8"))
+        errs.extend(validate(target, value, where, base_dir=(base_dir / schema["$ref"]).parent))
+    for part in schema.get("allOf", []):
+        errs.extend(validate(part, value, where, base_dir=base_dir))
+    if "const" in schema and value != schema["const"]:
+        errs.append(f"{where}: {value!r} is not {schema['const']!r}")
+    if isinstance(value, str) and "pattern" in schema and not re.search(schema["pattern"], value):
+        errs.append(f"{where}: {value!r} does not match {schema['pattern']}")
     types = schema.get("type")
     if types is not None:
         allowed = types if isinstance(types, list) else [types]
@@ -299,7 +316,7 @@ def validate(schema: dict[str, Any], value: Any, where: str = "$") -> list[str]:
         errs.extend(f"{where}: missing required {k}" for k in schema.get("required", []) if k not in value)
         for k, v in value.items():
             if k in props:
-                errs.extend(validate(props[k], v, f"{where}.{k}"))
+                errs.extend(validate(props[k], v, f"{where}.{k}", base_dir=base_dir))
             elif schema.get("additionalProperties") is False:
                 errs.append(f"{where}: unexpected property {k}")
     return errs
