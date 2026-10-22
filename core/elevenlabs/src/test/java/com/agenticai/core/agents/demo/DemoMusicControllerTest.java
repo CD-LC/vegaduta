@@ -18,9 +18,9 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.demo.DemoMusicController.DemoMusicRequest;
 import com.agenticai.core.agents.demo.DemoMusicController.DemoMusicResponse;
+import com.agenticai.core.agentspi.MusicComposer;
 import com.agenticai.core.elevenlabs.ElevenLabsApiException;
 import com.agenticai.core.elevenlabs.ElevenLabsClient;
-import com.agenticai.core.agentspi.MusicComposer;
 import com.agenticai.core.elevenlabs.agenttools.ElevenLabsMusicComposer;
 import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
@@ -124,8 +124,7 @@ class DemoMusicControllerTest {
     }
 
     private DemoMusicController controllerWithoutAComposer() {
-        return new DemoMusicController(
-                sessions, music, limiter, providerOf(), credentials, costs);
+        return new DemoMusicController(sessions, music, limiter, providerOf(), credentials, costs);
     }
 
     private ResponseEntity<DemoMusicResponse> post(String prompt) {

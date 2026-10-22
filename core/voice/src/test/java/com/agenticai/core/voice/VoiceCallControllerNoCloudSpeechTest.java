@@ -16,8 +16,8 @@ import org.springframework.mock.web.MockMultipartFile;
 /**
  * The voice turn on an install without cloud speech (edition feature {@code CLOUD_SPEECH} off, the
  * personal default): Spring injects an EMPTY {@code List<CallSpeechSynthesizer>} and no {@code
- * CallSpeechTranscriber}, because neither the Sarvam nor the ElevenLabs adapter is a bean. The
- * turn must still answer, on the sidecar's Whisper, as text only.
+ * CallSpeechTranscriber}, because neither the Sarvam nor the ElevenLabs adapter is a bean. The turn
+ * must still answer, on the sidecar's Whisper, as text only.
  */
 @DisplayName("Voice Call Controller - no cloud speech vendors registered")
 class VoiceCallControllerNoCloudSpeechTest extends VoiceCallControllerTestBase {

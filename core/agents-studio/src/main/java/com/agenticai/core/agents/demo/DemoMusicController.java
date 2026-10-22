@@ -61,11 +61,11 @@ import org.springframework.web.bind.annotation.RestController;
  * ~$1.50/day. The response names the model and says it was the low-cost pick, so the page can tell
  * the visitor so honestly.
  *
- * <p><b>No composer.</b> The only {@link MusicComposer} is the ElevenLabs one, which a lean (personal)
- * install does not register (edition feature {@code CLOUD_SPEECH}). It is therefore injected lazily:
- * with none present the controller still exists and answers exactly like a missing platform key
- * (HTTP 200, {@code simulated: true}, "paused"), and {@code /music/status} says {@code enabled:
- * false}.
+ * <p><b>No composer.</b> The only {@link MusicComposer} is the ElevenLabs one, which a lean
+ * (personal) install does not register (edition feature {@code CLOUD_SPEECH}). It is therefore
+ * injected lazily: with none present the controller still exists and answers exactly like a missing
+ * platform key (HTTP 200, {@code simulated: true}, "paused"), and {@code /music/status} says {@code
+ * enabled: false}.
  */
 @RestController
 @RequestMapping("/api/demo")
