@@ -1,5 +1,7 @@
 package com.agenticai.core.imagegen;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
  * operation-status endpoint and not racing two finalize/download passes for
  * the same completed video.
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @Component
 public class VideoGenerationJobRunner {
 

@@ -3,6 +3,8 @@ package com.agenticai.core.imagegen.demo;
 import com.agenticai.core.imagegen.ImageGenApiException;
 import com.agenticai.core.imagegen.VertexVeoVideoGenerationClient;
 import com.agenticai.core.imagegen.VideoGenerationClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.demo.DemoGeneratedVideo;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionRateLimiter;
@@ -48,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  * reasonable trade against building a whole second async surface for a
  * deliberately tiny feature.
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @RestController
 @RequestMapping("/api/demo")
 public class DemoVideoController {

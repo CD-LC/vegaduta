@@ -4,6 +4,8 @@ import com.agenticai.core.agents.share.AgentShare;
 import com.agenticai.core.agents.share.AgentShareService;
 import com.agenticai.core.agents.share.ShareVisitorSessions;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.voice.dto.VoiceTokenRequest;
 import com.agenticai.core.voice.dto.VoiceTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,6 +55,7 @@ import org.springframework.web.multipart.MultipartFile;
  * the client IP any more. The worker only ever echoes it back verbatim, and {@code
  * AgentShareController#chatStream} honours it only because this server signed it.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @RestController
 @RequestMapping("/api/share/agents/{shareId}/voice")
 public class AgentShareVoiceController {

@@ -2,6 +2,8 @@ package com.agenticai.core.voice;
 
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.voice.dto.VoiceCallRecordingResponse;
 import java.security.Principal;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  * GlobalExceptionHandler}'s catch-all would turn a thrown {@code ResponseStatusException} into an
  * opaque 500.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @RestController
 @RequestMapping("/api/voice/agents/{agentId}/calls/{roomName}/recording")
 public class VoiceCallRecordingController {

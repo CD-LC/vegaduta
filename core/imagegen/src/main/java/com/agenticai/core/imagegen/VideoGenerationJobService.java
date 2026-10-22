@@ -1,5 +1,7 @@
 package com.agenticai.core.imagegen;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.OffsetLimitRequest;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderName;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
  * before the enqueue spends anything; the free tier's video story is the
  * client-side on-device ladder).
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @Service
 public class VideoGenerationJobService {
 
