@@ -152,6 +152,7 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	python3 scripts/ci/conformance-report.py --check
 	bash tests/install/vegaduta-install.test.sh
 	bash scripts/ci/docs-link-check.sh
+	bash scripts/ci/channel-docs-check.sh
 	bash scripts/ci/internal-reference-lint.sh
 	bash scripts/ci/no-telemetry-check.sh
 	bash scripts/ci/test-internal-reference-lint.sh

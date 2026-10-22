@@ -305,7 +305,8 @@ export const EMAIL_IMAP_GUIDE = {
   steps: [
     "Use the IMAP host/port your mail provider publishes (Gmail: imap.gmail.com, port 993; Outlook: outlook.office365.com, port 993).",
     "If 2-factor authentication is on (recommended), generate an app-specific password rather than using your normal login password.",
-    "This mailbox is checked every 5 minutes for unread mail; replies go out through the platform's own outbound relay, not this mailbox's SMTP.",
+    "Use a mailbox that only the agent reads: it is checked every 5 minutes for unread mail, and every unread message is marked read after one attempt, even if the agent failed to answer it (it is not retried). Replies go out through the platform's own outbound relay, not this mailbox's SMTP.",
+    "A mail server on a private network (a LAN server, a local bridge) must be listed by the operator in app.security.outbound.allowed-private-hosts.",
   ],
   href: "https://support.google.com/mail/answer/7126229",
   hrefLabel: "Gmail IMAP settings",
