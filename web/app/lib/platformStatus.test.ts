@@ -1,10 +1,11 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import en from "../../messages/en.json";
 import {
   DISMISS_KEY_PREFIX,
   announcementActive,
+  editionMismatch,
   dismissKey,
   getPlatformStatusState,
   hashMessage,
@@ -59,6 +60,75 @@ describe("normalizePublicStatus", () => {
     expect(normalizePublicStatus({ maintenance: { enabled: "yes" } })?.maintenance.enabled).toBe(false);
     expect(normalizePublicStatus(null)).toBeNull();
     expect(normalizePublicStatus("x")).toBeNull();
+  });
+});
+
+const EDITION_BODY = {
+  tier: "lite",
+  billingEnabled: true,
+  authMode: "keycloak",
+  features: { "billing-payments": true, "social-channels": true, bogus: "yes" },
+};
+
+describe("edition in the public status", () => {
+  it("parses the edition block tolerantly", () => {
+    const s = normalizePublicStatus({ edition: EDITION_BODY });
+    expect(s?.edition).toEqual({
+      tier: "lite",
+      billingEnabled: true,
+      authMode: "keycloak",
+      features: { "billing-payments": true, "social-channels": true },
+    });
+  });
+
+  it("is null from a core without the contract or with an unusable tier", () => {
+    expect(normalizePublicStatus({})?.edition).toBeNull();
+    expect(normalizePublicStatus({ edition: { tier: "enterprise" } })?.edition).toBeNull();
+    expect(normalizePublicStatus({ edition: "personal" })?.edition).toBeNull();
+  });
+
+  it("reports a mismatch only when both sides know their edition and they differ", () => {
+    const server = normalizePublicStatus({ edition: EDITION_BODY });
+    expect(editionMismatch(server, "personal")).toEqual({ seed: "personal", server: "lite" });
+    expect(editionMismatch(server, "lite")).toBeNull();
+    expect(editionMismatch(server, null)).toBeNull(); // an undeclared build has nothing to contradict
+    expect(editionMismatch(normalizePublicStatus({}), "personal")).toBeNull(); // an older core
+    expect(editionMismatch(null, "personal")).toBeNull();
+  });
+
+  it("warns once and shows the banner on a mismatch, without touching the rest of the status", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      await refreshPlatformStatus(fakeFetch({ maintenance: { enabled: false }, edition: EDITION_BODY }), { force: true });
+      const a = getPlatformStatusState().status?.announcement;
+      expect(a?.level).toBe("warning");
+      expect(a?.message).toContain("personal");
+      expect(a?.message).toContain("lite");
+      expect(announcementActive(a)).toBe(true);
+      expect(getPlatformStatusState().status?.maintenance.enabled).toBe(false);
+      await refreshPlatformStatus(fakeFetch({ edition: EDITION_BODY }), { force: true });
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("keeps an announcement core sent, and stays silent when the editions agree", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      await refreshPlatformStatus(fakeFetch({ announcement: ANN, edition: EDITION_BODY }), { force: true });
+      expect(getPlatformStatusState().status?.announcement?.message).toBe(ANN.message);
+      resetPlatformStatusForTests();
+      await refreshPlatformStatus(fakeFetch({ edition: { ...EDITION_BODY, tier: "personal" } }), { force: true });
+      expect(getPlatformStatusState().status?.announcement).toBeNull();
+      expect(warn).toHaveBeenCalledTimes(1); // the first, mismatching poll only
+    } finally {
+      warn.mockRestore();
+      vi.unstubAllEnvs();
+    }
   });
 });
 
