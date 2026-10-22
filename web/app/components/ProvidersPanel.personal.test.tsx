@@ -3,7 +3,8 @@
 // 404). lite, full and an undeclared build keep all of it (see ProvidersPanel.elevenlabs.test.tsx).
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { refreshPlatformStatus, resetPlatformStatusForTests } from "../lib/platformStatus";
 
 vi.mock("../lib/i18n", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
@@ -56,6 +57,26 @@ describe("ProvidersPanel - cloud speech by edition", () => {
     expect(speechCalls.getSarvamCredential).not.toHaveBeenCalled();
     expect(speechCalls.getElevenLabsCredential).not.toHaveBeenCalled();
     expect(speechCalls.listElevenLabsVoices).not.toHaveBeenCalled();
+  });
+
+  it("offers both cards on a personal install once core reports cloud-speech on (the escape hatch)", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    const reported = (async () => ({
+      ok: true,
+      json: async () => ({ edition: { tier: "personal", billingEnabled: false, authMode: "local", features: { "cloud-speech": true } } }),
+    })) as unknown as typeof fetch;
+    try {
+      render(<ProvidersPanel providers={[]} onChanged={() => {}} />);
+      expect(await screen.findByText("anthropicLabel")).toBeInTheDocument();
+      expect(screen.queryByText("sarvamLabel")).toBeNull();
+      await act(async () => {
+        await refreshPlatformStatus(reported, { force: true });
+      });
+      expect(await screen.findByText("sarvamLabel")).toBeInTheDocument();
+      expect(screen.getByText("elevenLabsLabel")).toBeInTheDocument();
+    } finally {
+      resetPlatformStatusForTests();
+    }
   });
 
   it.each(["lite", "full"])("keeps both cards and reads their credentials on the %s edition", async (tier) => {

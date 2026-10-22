@@ -3,9 +3,12 @@
 // reject its Promise.allSettled entry and show the "some files could not be loaded" banner for nothing.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { refreshPlatformStatus, resetPlatformStatusForTests } from "../lib/platformStatus";
 
-vi.mock("../lib/i18n", () => ({ useTranslations: () => (key: string) => key }));
+// One stable translator, like the real hook: a fresh function per render would change refreshArtifacts' deps each time.
+const translate = (key: string) => key;
+vi.mock("../lib/i18n", () => ({ useTranslations: () => translate }));
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock("../components/AppShell", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: () => {} }));
@@ -47,6 +50,26 @@ describe("FilesPage - generated audio listings", () => {
     expect(calls.listSarvamAudio).not.toHaveBeenCalled();
     expect(screen.queryByText("artifactsPartialTitle")).toBeNull();
     expect(screen.queryByText("artifactsFailedTitle")).toBeNull();
+  });
+
+  it("lists both on a personal install once core reports cloud-speech on (the escape hatch)", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    const reported = (async () => ({
+      ok: true,
+      json: async () => ({ edition: { tier: "personal", billingEnabled: false, authMode: "local", features: { "cloud-speech": true } } }),
+    })) as unknown as typeof fetch;
+    try {
+      render(<FilesPage />);
+      await waitFor(() => expect(calls.listVideoGenerationJobs).toHaveBeenCalled());
+      expect(calls.listElevenLabsAudio).not.toHaveBeenCalled();
+      await act(async () => {
+        await refreshPlatformStatus(reported, { force: true });
+      });
+      await waitFor(() => expect(calls.listElevenLabsAudio).toHaveBeenCalled());
+      expect(calls.listSarvamAudio).toHaveBeenCalled();
+    } finally {
+      resetPlatformStatusForTests();
+    }
   });
 
   it.each(["lite", "full"])("still lists both on the %s edition (and a rejected one is the partial banner)", async (tier) => {
