@@ -34,7 +34,7 @@ livekit-plugins-silero==1.6.8
 # /transcribe call, llm_core_bridge.py's core /api/agents/{id}/chat SSE
 # call). Already a transitive dependency of livekit-agents itself; pinned
 # directly here since both of this package's own modules import it by name.
-aiohttp==3.14.3
+aiohttp==3.14.4
 
 # Perception ("sight") mode frame handling - see perception.py. numpy backs
 # the scene-change gate (mean-abs-diff on a 64x36 grayscale thumbnail per
@@ -47,4 +47,4 @@ aiohttp==3.14.3
 # (this image's base) but NOT pip-installed/runtime-verified in this pass -
 # see the header comment's re-verify note.
 numpy==2.3.5
-pillow==12.3.0
+pillow==13.0.0

@@ -75,4 +75,17 @@ RUN apt-get update     && apt-get install -y --no-install-recommends         bui
 #     superuser-only. The $libdir/plugins/age.so symlink created above is what
 #     makes that work (Postgres lets non-superusers load only from plugins/).
 
+# CloudNativePG base only (the official postgres image has no Python): its
+# barman-cloud stack is pip-installed and ships a certifi that can lag a published
+# fix (2026.10.18 carries GHSA-6q48-6c7w-9gw2, fixed in 2026.10.19), which the
+# release image scan gates on. Upgrade it in place, hash-pinned like the service
+# locks. Drop this step once the upstream image ships 2026.10.19 or newer.
+# hadolint ignore=DL3013
+RUN if command -v pip3 >/dev/null 2>&1; then \
+      printf 'certifi==2026.10.19 --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b\n' > /tmp/certifi.txt \
+      && pip3 install --no-cache-dir --break-system-packages --no-deps --require-hashes -r /tmp/certifi.txt \
+      && rm -f /tmp/certifi.txt \
+      && python3 -c 'import certifi; v = certifi.__version__; assert v >= "2026.10.19", v'; \
+    fi
+
 USER ${FINAL_USER}
