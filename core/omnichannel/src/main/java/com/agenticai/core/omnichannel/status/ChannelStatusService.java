@@ -61,20 +61,20 @@ public class ChannelStatusService {
     public ChannelStatusResponse status() {
         List<ChannelStatusEntry> channels = new ArrayList<>();
         channels.add(whatsappEntry());
-        channels.add(connectionEntry("whatsappqr", "WhatsApp QR", ChannelType.WHATSAPP_QR));
-        channels.add(connectionEntry("telegram", "Telegram", ChannelType.TELEGRAM));
-        channels.add(connectionEntry("instagram", "Instagram DM", ChannelType.INSTAGRAM));
-        channels.add(connectionEntry("messenger", "Messenger", ChannelType.MESSENGER));
-        channels.add(connectionEntry("slack", "Slack", ChannelType.SLACK));
-        channels.add(connectionEntry("discord", "Discord", ChannelType.DISCORD));
-        channels.add(connectionEntry("x", "X - DMs", ChannelType.X));
-        channels.add(connectionEntry("teams", "Microsoft Teams", ChannelType.TEAMS));
-        channels.add(connectionEntry("email", "Email - IMAP", ChannelType.EMAIL));
-        channels.add(connectionEntry("voice", "Voice", ChannelType.VOICE));
-        channels.add(connectionEntry("sms", "SMS", ChannelType.SMS));
-        channels.add(connectionEntry("signal", "Signal", ChannelType.SIGNAL));
-        channels.add(connectionEntry("matrix", "Matrix", ChannelType.MATRIX));
-        channels.add(connectionEntry("imessage", "iMessage", ChannelType.IMESSAGE));
+        addConnectionEntry(channels, "whatsappqr", "WhatsApp QR", ChannelType.WHATSAPP_QR);
+        addConnectionEntry(channels, "telegram", "Telegram", ChannelType.TELEGRAM);
+        addConnectionEntry(channels, "instagram", "Instagram DM", ChannelType.INSTAGRAM);
+        addConnectionEntry(channels, "messenger", "Messenger", ChannelType.MESSENGER);
+        addConnectionEntry(channels, "slack", "Slack", ChannelType.SLACK);
+        addConnectionEntry(channels, "discord", "Discord", ChannelType.DISCORD);
+        addConnectionEntry(channels, "x", "X - DMs", ChannelType.X);
+        addConnectionEntry(channels, "teams", "Microsoft Teams", ChannelType.TEAMS);
+        addConnectionEntry(channels, "email", "Email - IMAP", ChannelType.EMAIL);
+        addConnectionEntry(channels, "voice", "Voice", ChannelType.VOICE);
+        addConnectionEntry(channels, "sms", "SMS", ChannelType.SMS);
+        addConnectionEntry(channels, "signal", "Signal", ChannelType.SIGNAL);
+        addConnectionEntry(channels, "matrix", "Matrix", ChannelType.MATRIX);
+        addConnectionEntry(channels, "imessage", "iMessage", ChannelType.IMESSAGE);
         channels.add(mobileSdkEntry());
 
         long liveCount = channels.stream().filter(c -> "CONNECTED".equals(c.state())).count();
@@ -109,13 +109,17 @@ public class ChannelStatusService {
 
     // Every other channel reports through its own ChannelConnection
     // (ADR-0011 rule a), which applies the same ACTIVE-only #597 rule. A
-    // channel with no connection bean shows as not connected.
-    private ChannelStatusEntry connectionEntry(String key, String label, ChannelType type) {
-        ChannelConnection.Summary summary =
-                connections.containsKey(key)
-                        ? connections.get(key).summary()
-                        : ChannelConnection.Summary.notConnected("+ connect");
-        return channelEntry(key, label, summary.state(), summary.detail(), type);
+    // channel with no connection bean is not part of this deployment (a lean
+    // personal install registers no Slack, Discord, Teams or X beans), so it
+    // gets no tile at all rather than a "+ connect" button that cannot work.
+    private void addConnectionEntry(
+            List<ChannelStatusEntry> channels, String key, String label, ChannelType type) {
+        ChannelConnection connection = connections.get(key);
+        if (connection == null) {
+            return;
+        }
+        ChannelConnection.Summary summary = connection.summary();
+        channels.add(channelEntry(key, label, summary.state(), summary.detail(), type));
     }
 
     private ChannelStatusEntry mobileSdkEntry() {
