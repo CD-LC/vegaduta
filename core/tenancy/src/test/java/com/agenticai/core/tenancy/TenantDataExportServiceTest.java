@@ -17,8 +17,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,6 +31,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Zero test coverage existed for {@link TenantDataExportService} before this - the class behind
@@ -124,7 +124,7 @@ class TenantDataExportServiceTest {
                         dataSource,
                         fileStorageService,
                         auditLogService,
-                        new ObjectMapper());
+                        com.agenticai.core.json.JsonMappers.plain());
 
         TenantContext.set(TenantContext.of(SCHEMA_NAME, "user-123", Set.of("tenant-admin")));
     }
@@ -244,11 +244,12 @@ class TenantDataExportServiceTest {
 
         TenantDataExportService.ExportResult result = service.exportCurrentTenantData();
 
-        JsonNode tables = new ObjectMapper().readTree(result.bytes()).path("tables");
+        JsonNode tables =
+                com.agenticai.core.json.JsonMappers.plain().readTree(result.bytes()).path("tables");
         assertTrue(tables.path("agent").isArray());
         assertEquals(0, tables.path("agent").size());
         // The export carried on past the failure and kept real data.
-        assertEquals("row-1", tables.path("prompt_version").get(0).path("id").asText());
+        assertEquals("row-1", tables.path("prompt_version").get(0).path("id").asString());
         assertEquals("tenant-data-export-" + SCHEMA_NAME + ".json", result.filename());
     }
 

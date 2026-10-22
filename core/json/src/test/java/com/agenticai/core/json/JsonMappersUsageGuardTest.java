@@ -44,7 +44,10 @@ class JsonMappersUsageGuardTest {
                                     || line.startsWith("/*")) {
                                 continue;
                             }
-                            if (line.contains("new ObjectMapper(")) {
+                            if (line.contains("new ObjectMapper(")
+                                    && !line.contains(
+                                            "Jackson 2:")) { // Jackson 2 wire codecs for Spring AI
+                                // 1.x are annotated
                                 offenders.add(core.relativize(file) + ":" + (i + 1));
                             }
                         }

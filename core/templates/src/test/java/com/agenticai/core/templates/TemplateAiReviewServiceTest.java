@@ -8,17 +8,17 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.assist.AssistService;
 import com.agenticai.core.templates.dto.TemplateAiReview;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The AI reviewer's trust boundary: it can add findings, never approve, escalate or invent rules.
  */
 class TemplateAiReviewServiceTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final AssistService assist = mock(AssistService.class);
     private final TemplateAiReviewService service = new TemplateAiReviewService(assist, mapper);
 

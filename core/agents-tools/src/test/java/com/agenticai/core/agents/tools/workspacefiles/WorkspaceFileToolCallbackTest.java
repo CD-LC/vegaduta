@@ -3,12 +3,12 @@ package com.agenticai.core.agents.tools.workspacefiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import tools.jackson.databind.JsonNode;
 
 class WorkspaceFileToolCallbackTest {
 
@@ -38,7 +38,7 @@ class WorkspaceFileToolCallbackTest {
                         "{\"path\":\"demo/src/App.java\",\"content\":\"class App {}\\n\"}");
         assertThat(w.path("created").asBoolean()).isTrue();
         JsonNode r = call(WorkspaceFileToolCallback.Kind.READ, "{\"path\":\"demo/src/App.java\"}");
-        assertThat(r.path("content").asText()).startsWith("1\tclass App {}");
+        assertThat(r.path("content").asString()).startsWith("1\tclass App {}");
     }
 
     @Test
@@ -63,14 +63,14 @@ class WorkspaceFileToolCallbackTest {
                                         WorkspaceFileToolCallback.Kind.EDIT,
                                         "{\"path\":\"demo/README.md\",\"old_text\":\"line\",\"new_text\":\"x\"}")
                                 .path("error")
-                                .asText())
+                                .asString())
                 .contains("more than once");
         assertThat(
                         call(
                                         WorkspaceFileToolCallback.Kind.EDIT,
                                         "{\"path\":\"demo/README.md\",\"old_text\":\"missing\",\"new_text\":\"x\"}")
                                 .path("error")
-                                .asText())
+                                .asString())
                 .contains("not found");
         call(
                 WorkspaceFileToolCallback.Kind.EDIT,
@@ -120,7 +120,7 @@ class WorkspaceFileToolCallbackTest {
                 call(
                         WorkspaceFileToolCallback.Kind.READ,
                         "{\"path\":\"demo/long.txt\",\"offset\":2,\"limit\":2}");
-        assertThat(r.path("content").asText()).isEqualTo("2\tb\n3\tc\n");
+        assertThat(r.path("content").asString()).isEqualTo("2\tb\n3\tc\n");
     }
 
     @Test
@@ -139,14 +139,14 @@ class WorkspaceFileToolCallbackTest {
                 .doesNotContain("blob.bin");
         JsonNode byLine = call(WorkspaceFileToolCallback.Kind.SEARCH, "{\"query\":\"TOTAL eur\"}");
         assertThat(byLine.path("matches").get(0).path("line").asInt()).isEqualTo(1);
-        assertThat(byLine.path("matches").get(0).path("text").asText())
+        assertThat(byLine.path("matches").get(0).path("text").asString())
                 .isEqualTo("Total due: 420 EUR");
         assertThat(
                         call(
                                         WorkspaceFileToolCallback.Kind.SEARCH,
                                         "{\"query\":\"nonexistentword\"}")
                                 .path("note")
-                                .asText())
+                                .asString())
                 .contains("No file name");
         assertThat(
                         call(

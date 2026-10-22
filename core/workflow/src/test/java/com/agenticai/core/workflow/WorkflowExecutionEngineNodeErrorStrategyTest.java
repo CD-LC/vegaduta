@@ -13,9 +13,6 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +22,8 @@ import java.util.function.IntFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * End-to-end through {@link WorkflowExecutionEngine}'s traversal (executor mocked, so node ORDER,
@@ -43,7 +42,7 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
             new HashMap<>();
 
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.withJavaTime();
     }
 
     @BeforeEach
@@ -223,8 +222,8 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
 
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
         JsonNode downstream = mapper().readTree(inputs.get("b"));
-        assertEquals("boom", downstream.get("error").asText());
-        assertEquals("a", downstream.get("nodeId").asText());
+        assertEquals("boom", downstream.get("error").asString());
+        assertEquals("a", downstream.get("nodeId").asString());
         assertTrue(result.getTraceJson().contains("\"status\":\"ERROR\""), result.getTraceJson());
         assertTrue(result.getTraceJson().contains("onError=continue"), result.getTraceJson());
     }
@@ -258,7 +257,7 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         WorkflowRun result = run(chain(node("a", "agent", cfg("onError", "continue"))));
 
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
-        assertEquals("node said no", mapper().readTree(inputs.get("b")).get("error").asText());
+        assertEquals("node said no", mapper().readTree(inputs.get("b")).get("error").asString());
     }
 
     @Test
@@ -321,7 +320,7 @@ class WorkflowExecutionEngineNodeErrorStrategyTest {
         assertEquals(WorkflowRunStatus.COMPLETED, result.getStatus());
         assertEquals(1, callsOf("err"));
         assertEquals(0, callsOf("ok"));
-        assertEquals("a", mapper().readTree(inputs.get("err")).get("failedNodeId").asText());
+        assertEquals("a", mapper().readTree(inputs.get("err")).get("failedNodeId").asString());
     }
 
     @Test

@@ -16,8 +16,6 @@ import com.agenticai.core.google.GoogleCalendarClient;
 import com.agenticai.core.google.GoogleCalendarClient.BusyTime;
 import com.agenticai.core.google.GoogleCalendarClient.Interval;
 import com.agenticai.core.google.GoogleSheetsClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,6 +23,8 @@ import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The booking tools (free slots, move, cancel) and Sheets append, at the tool boundary: argument
@@ -32,7 +32,7 @@ import org.mockito.ArgumentCaptor;
  */
 class GoogleBookingToolsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final Clock NOW =
             Clock.fixed(Instant.parse("2026-10-14T00:00:00Z"), ZoneOffset.UTC);
 
@@ -63,11 +63,12 @@ class GoogleBookingToolsTest {
         // window.
         assertEquals(Instant.parse("2026-10-14T00:00:00Z"), from.getValue());
         assertEquals(Instant.parse("2026-10-17T00:00:00Z"), to.getValue());
-        assertEquals("Asia/Kolkata", out.path("time_zone").asText());
+        assertEquals("Asia/Kolkata", out.path("time_zone").asString());
         // Busy 09:00-11:00 IST: the first free hour is 11:00, then 12:00.
         assertEquals(2, out.path("slots").size(), out.toString());
-        assertEquals("2026-10-15T11:00:00+05:30", out.path("slots").get(0).path("start").asText());
-        assertEquals("2026-10-15T13:00:00+05:30", out.path("slots").get(1).path("end").asText());
+        assertEquals(
+                "2026-10-15T11:00:00+05:30", out.path("slots").get(0).path("start").asString());
+        assertEquals("2026-10-15T13:00:00+05:30", out.path("slots").get(1).path("end").asString());
     }
 
     @Test
@@ -80,7 +81,7 @@ class GoogleBookingToolsTest {
                         new GoogleCalendarFreeSlotsToolCallback(calendar, NOW)
                                 .call("{\"from\":\"2026-10-15\",\"to\":\"2026-10-16\"}"));
 
-        assertTrue(out.path("error").asText().contains("narrow the window"), out.toString());
+        assertTrue(out.path("error").asString().contains("narrow the window"), out.toString());
     }
 
     @Test
@@ -115,7 +116,7 @@ class GoogleBookingToolsTest {
                                 move.call(
                                         "{\"event_id\":\"e1\",\"start\":\"2026-10-15T10:00:00+05:30\",\"end\":\"2026-10-15T11:00:00+05:30\"}"))
                         .path("error")
-                        .asText()
+                        .asString()
                         .contains("notify_attendees"));
         assertTrue(
                 MAPPER.readTree(
@@ -123,7 +124,7 @@ class GoogleBookingToolsTest {
                                         "{\"event_id\":\"e1\",\"start\":\"2026-10-15T11:00:00+05:30\",\"end\":\"2026-10-15T10:00:00+05:30\","
                                                 + "\"notify_attendees\":true}"))
                         .path("error")
-                        .asText()
+                        .asString()
                         .contains("after start"));
         verify(calendar, never()).moveEvent(anyString(), anyString(), anyString(), anyBoolean());
 
@@ -137,7 +138,7 @@ class GoogleBookingToolsTest {
                         move.call(
                                 "{\"event_id\":\"e1\",\"start\":\"2026-10-15T10:00:00+05:30\",\"end\":\"2026-10-15T11:00:00+05:30\","
                                         + "\"notify_attendees\":true}"));
-        assertEquals("moved", out.path("status").asText());
+        assertEquals("moved", out.path("status").asString());
         assertTrue(out.path("attendees_notified").asBoolean());
     }
 
@@ -150,7 +151,7 @@ class GoogleBookingToolsTest {
                         GoogleCalendarChangeEventToolCallback.cancel(calendar)
                                 .call("{\"event_id\":\"e1\",\"notify_attendees\":false}"));
 
-        assertEquals("cancelled", out.path("status").asText());
+        assertEquals("cancelled", out.path("status").asString());
         assertEquals(false, out.path("attendees_notified").asBoolean());
         verify(calendar).cancelEvent("e1", false);
     }
@@ -188,7 +189,7 @@ class GoogleBookingToolsTest {
                 MAPPER.readTree(
                         tool.call(
                                 "{\"action\":\"append_rows\",\"spreadsheet_id\":\"s1\",\"range\":\"Leads\",\"rows\":[[\"Asha\",null]]}"));
-        assertEquals("Leads!A2:B2", out.path("updatedRange").asText());
+        assertEquals("Leads!A2:B2", out.path("updatedRange").asString());
 
         StringBuilder many = new StringBuilder("[");
         for (int i = 0; i <= GoogleSheetsToolCallback.MAX_APPEND_ROWS; i++) {
@@ -200,7 +201,7 @@ class GoogleBookingToolsTest {
                                 "{\"action\":\"append_rows\",\"spreadsheet_id\":\"s1\",\"range\":\"Leads\",\"rows\":"
                                         + many
                                         + "]}"));
-        assertTrue(tooMany.path("error").asText().contains("at most"), tooMany.toString());
+        assertTrue(tooMany.path("error").asString().contains("at most"), tooMany.toString());
     }
 
     @Test

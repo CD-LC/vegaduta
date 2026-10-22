@@ -6,20 +6,20 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link AiClassifierHandler} used directly (the facade path is covered by
  * WorkflowAiNodeHandlerTest).
  */
 class AiClassifierHandlerTest {
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     @SuppressWarnings("unchecked")
     private static AiClassifierHandler handler(WorkflowAiModel model, boolean enabled) {

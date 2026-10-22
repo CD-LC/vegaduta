@@ -7,8 +7,6 @@ import com.agenticai.core.agents.tools.web.HttpRequestExecutor;
 import com.agenticai.core.knowledge.SidecarClient;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -16,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture of the {@link WorkflowAiNodeHandler} tests: a scripted fake model and node/config
@@ -23,7 +23,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 abstract class WorkflowAiNodeHandlerTestBase {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     /**
      * Pops scripted replies (a String, or a RuntimeException to throw) in order and records every

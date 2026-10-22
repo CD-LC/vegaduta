@@ -28,7 +28,6 @@ import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +90,7 @@ class AgentToolCallApprovalExecutorTest {
                         notificationProvider,
                         sessionMemoryProvider,
                         agentJobLookupProvider,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         eventPublisher);
     }
 

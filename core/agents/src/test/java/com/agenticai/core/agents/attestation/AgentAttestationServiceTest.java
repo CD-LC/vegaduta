@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.agents.a2a.A2aCardSigningService;
 import com.agenticai.core.agents.a2a.A2aProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.Signature;
 import java.time.Clock;
@@ -19,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * KYA attestation JWTs: the compact-JWS wire shape, signature validity against the deployment's own
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.ObjectProvider;
 class AgentAttestationServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-09-24T10:00:00Z");
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private A2aCardSigningService signer;
     private AgentAttestationService service;

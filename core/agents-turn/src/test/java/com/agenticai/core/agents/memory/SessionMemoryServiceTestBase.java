@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link SessionMemoryService} tests: manual {@link StringRedisTemplate}
@@ -42,7 +42,7 @@ abstract class SessionMemoryServiceTestBase {
     // Same ObjectMapper shape the service gets from Spring (jsr310 present on
     // the Boot classpath) - ChatTurn carries an Instant, so the plain
     // new ObjectMapper() would fail to serialize it.
-    final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.withJavaTime();
 
     StringRedisTemplate redisTemplate;
     ListOperations<String, String> listOps;

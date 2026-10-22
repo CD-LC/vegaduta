@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -30,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Golden-small check of {@link OpenApiSpecGenerator} against tiny fixture controllers: header, tags
@@ -39,7 +39,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  */
 class OpenApiFixtureSpecTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     // ================================================================== golden-small fixture
 
@@ -130,7 +130,7 @@ class OpenApiFixtureSpecTest {
     private static JsonNode schemaEndingWith(JsonNode doc, String suffix) {
         JsonNode schemas = doc.path("components").path("schemas");
         List<String> hits = new ArrayList<>();
-        for (Iterator<String> it = schemas.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = schemas.propertyNames().iterator(); it.hasNext(); ) {
             String name = it.next();
             if (name.endsWith(suffix)) {
                 hits.add(name);
@@ -141,32 +141,32 @@ class OpenApiFixtureSpecTest {
     }
 
     private static String refName(JsonNode node) {
-        String ref = node.path("$ref").asText();
+        String ref = node.path("$ref").asString();
         return ref.substring(ref.lastIndexOf('/') + 1);
     }
 
     private static List<String> fieldNames(JsonNode node) {
         List<String> out = new ArrayList<>();
-        node.fieldNames().forEachRemaining(out::add);
+        node.propertyNames().forEach(out::add);
         return out;
     }
 
     private static List<String> tagNames(JsonNode doc) {
         List<String> out = new ArrayList<>();
-        doc.path("tags").forEach(t -> out.add(t.path("name").asText()));
+        doc.path("tags").forEach(t -> out.add(t.path("name").asString()));
         return out;
     }
 
     private static List<String> texts(JsonNode array) {
         List<String> out = new ArrayList<>();
-        array.forEach(n -> out.add(n.asText()));
+        array.forEach(n -> out.add(n.asString()));
         return out;
     }
 
     @Test
     void fixtureHeaderTagsAndPaths() throws IOException {
         JsonNode doc = fixtureDoc();
-        assertThat(doc.path("openapi").asText()).isEqualTo("3.1.0");
+        assertThat(doc.path("openapi").asString()).isEqualTo("3.1.0");
         assertThat(tagNames(doc)).containsExactly("Fixture", "PublicFixture");
         assertThat(fieldNames(doc.path("paths")))
                 .containsExactly(
@@ -183,7 +183,7 @@ class OpenApiFixtureSpecTest {
     void fixtureCreateOperation() throws IOException {
         JsonNode doc = fixtureDoc();
         JsonNode op = doc.path("paths").path("/api/fixture").path("post");
-        assertThat(op.path("operationId").asText()).isEqualTo("FixtureController_create");
+        assertThat(op.path("operationId").asString()).isEqualTo("FixtureController_create");
         assertThat(texts(op.path("tags"))).containsExactly("Fixture");
         assertThat(op.path("requestBody").path("required").asBoolean()).isTrue();
         JsonNode bodySchema =
@@ -208,16 +208,16 @@ class OpenApiFixtureSpecTest {
         JsonNode op = fixtureDoc().path("paths").path("/api/fixture/{id}").path("get");
         JsonNode params = op.path("parameters");
         assertThat(params.size()).isEqualTo(3);
-        assertThat(params.get(0).path("name").asText()).isEqualTo("id");
-        assertThat(params.get(0).path("in").asText()).isEqualTo("path");
+        assertThat(params.get(0).path("name").asString()).isEqualTo("id");
+        assertThat(params.get(0).path("in").asString()).isEqualTo("path");
         assertThat(params.get(0).path("required").asBoolean()).isTrue();
-        assertThat(params.get(0).path("schema").path("format").asText()).isEqualTo("uuid");
-        assertThat(params.get(1).path("name").asText()).isEqualTo("limit");
-        assertThat(params.get(1).path("in").asText()).isEqualTo("query");
+        assertThat(params.get(0).path("schema").path("format").asString()).isEqualTo("uuid");
+        assertThat(params.get(1).path("name").asString()).isEqualTo("limit");
+        assertThat(params.get(1).path("in").asString()).isEqualTo("query");
         assertThat(params.get(1).path("required").asBoolean()).isFalse();
-        assertThat(params.get(1).path("schema").path("type").asText()).isEqualTo("integer");
-        assertThat(params.get(2).path("name").asText()).isEqualTo("X-Trace");
-        assertThat(params.get(2).path("in").asText()).isEqualTo("header");
+        assertThat(params.get(1).path("schema").path("type").asString()).isEqualTo("integer");
+        assertThat(params.get(2).path("name").asString()).isEqualTo("X-Trace");
+        assertThat(params.get(2).path("in").asString()).isEqualTo("header");
         assertThat(params.get(2).path("required").asBoolean()).isTrue();
         assertThat(fieldNames(op.path("responses")))
                 .containsExactly("200", "400", "401", "403", "404", "500");
@@ -236,14 +236,14 @@ class OpenApiFixtureSpecTest {
         assertThat(delete.path("responses").path("204").has("content")).isFalse();
 
         JsonNode odd = doc.path("paths").path("/api/fixture/odd/{rest}").path("get");
-        assertThat(odd.path("parameters").get(0).path("name").asText()).isEqualTo("rest");
+        assertThat(odd.path("parameters").get(0).path("name").asString()).isEqualTo("rest");
         JsonNode oddSchema =
                 odd.path("responses")
                         .path("200")
                         .path("content")
                         .path("application/json")
                         .path("schema");
-        assertThat(oddSchema.path("type").asText()).isEqualTo("object");
+        assertThat(oddSchema.path("type").asString()).isEqualTo("object");
         assertThat(oddSchema.path("additionalProperties").asBoolean()).isTrue();
     }
 
@@ -254,7 +254,7 @@ class OpenApiFixtureSpecTest {
         assertThat(op.path("security").size()).isZero();
         assertThat(op.path("responses").has("401")).isFalse();
         assertThat(op.path("responses").has("403")).isFalse();
-        assertThat(op.path("description").asText()).contains("Public route");
+        assertThat(op.path("description").asString()).contains("Public route");
     }
 
     @Test
@@ -265,12 +265,14 @@ class OpenApiFixtureSpecTest {
         assertThat(fieldNames(widget.path("properties")))
                 .containsExactly("id", "name", "count", "tags", "kind", "parent");
         assertThat(texts(widget.path("required"))).containsExactly("name", "count");
-        assertThat(widget.path("properties").path("id").path("format").asText()).isEqualTo("uuid");
+        assertThat(widget.path("properties").path("id").path("format").asString())
+                .isEqualTo("uuid");
         assertThat(widget.path("properties").path("name").path("minLength").asInt()).isEqualTo(1);
         assertThat(widget.path("properties").path("name").path("maxLength").asInt()).isEqualTo(40);
         assertThat(widget.path("properties").path("count").path("default").asInt()).isZero();
-        assertThat(widget.path("properties").path("tags").path("type").asText()).isEqualTo("array");
-        assertThat(widget.path("properties").path("tags").path("items").path("type").asText())
+        assertThat(widget.path("properties").path("tags").path("type").asString())
+                .isEqualTo("array");
+        assertThat(widget.path("properties").path("tags").path("items").path("type").asString())
                 .isEqualTo("string");
 
         String kindName = refName(widget.path("properties").path("kind"));

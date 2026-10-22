@@ -2,16 +2,16 @@ package com.agenticai.core.workflow;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Characterisation of {@link DataAggregateOps}: every reduction, grouping and the error contract.
  */
 class DataAggregateOpsTest {
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     private static Map<String, Object> m(Object... kv) {
         Map<String, Object> out = new LinkedHashMap<>();
@@ -54,13 +54,15 @@ class DataAggregateOpsTest {
         assertEquals(1.75, r.get("avg_v").asDouble());
         assertEquals(
                 "2.5",
-                r.get("min_v").asText().isEmpty()
+                r.get("min_v").asString().isEmpty()
                         ? ""
-                        : r.get("min_v").asText().equals("1") ? "2.5" : r.get("min_v").asText());
-        assertEquals("z", r.get("max_s").asText());
-        assertEquals("x", r.get("first_s").asText());
-        assertEquals("z", r.get("last_s").asText());
-        assertEquals("x|y|z", r.get("concat_s").asText());
+                        : r.get("min_v").asString().equals("1")
+                                ? "2.5"
+                                : r.get("min_v").asString());
+        assertEquals("z", r.get("max_s").asString());
+        assertEquals("x", r.get("first_s").asString());
+        assertEquals("z", r.get("last_s").asString());
+        assertEquals("x|y|z", r.get("concat_s").asString());
         assertEquals(M.readTree("[\"a\",\"b\",\"a\",\"a\"]"), r.get("gs"));
     }
 

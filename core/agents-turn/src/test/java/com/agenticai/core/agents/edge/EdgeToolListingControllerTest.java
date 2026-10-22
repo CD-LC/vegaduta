@@ -1,45 +1,28 @@
 package com.agenticai.core.agents.edge;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.core.AgentNotFoundException;
-import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolExecuteRequest;
-import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolExecuteResponse;
 import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolListResponse;
-import com.agenticai.core.agents.memory.AgentMemoryService;
-import com.agenticai.core.agents.tools.AgentToolPort;
-import com.agenticai.core.devices.DeviceAuthResolver;
 import com.agenticai.core.devices.DeviceException;
-import com.agenticai.core.devices.MobileDevice;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * {@code GET /api/edge/tools} (the discovery half of {@link EdgeToolExecutionController}): the
@@ -80,7 +63,7 @@ class EdgeToolListingControllerTest extends EdgeToolExecutionControllerTestBase 
         assertEquals("test tool search_knowledge_base", first.description());
         // inputSchema is a real JSON object on the wire, never a double-encoded string.
         assertTrue(first.inputSchema().isObject());
-        assertEquals("object", first.inputSchema().get("type").asText());
+        assertEquals("object", first.inputSchema().get("type").asString());
         assertEquals(
                 List.of("search_knowledge_base", "remember_fact", "google_gmail", "run_code"),
                 response.tools().stream()
@@ -185,6 +168,7 @@ class EdgeToolListingControllerTest extends EdgeToolExecutionControllerTestBase 
                 ResourceAccessDeniedException.class,
                 () -> controller.listTools(privateAgentId, null, PRINCIPAL));
     }
+
     @Test
     void validDeviceTokenCanListTools() {
         UUID deviceId = UUID.randomUUID();
@@ -207,6 +191,7 @@ class EdgeToolListingControllerTest extends EdgeToolExecutionControllerTestBase 
                         eq(AGENT_ID), any(), subjectKey.capture(), eq(null), eq(null), eq(null));
         assertEquals("device:" + deviceId, subjectKey.getValue());
     }
+
     @Test
     void missingCredentialOfEitherKindIsUnauthorizedForListTools() {
         ResponseEntity<EdgeToolListResponse> response = controller.listTools(AGENT_ID, null, null);
@@ -216,6 +201,7 @@ class EdgeToolListingControllerTest extends EdgeToolExecutionControllerTestBase 
         verify(agentToolProvider, never())
                 .resolveToolsFor(any(), any(), any(), any(), any(), any());
     }
+
     @Test
     void invalidDeviceTokenPropagatesDeviceExceptionForListTools() {
         when(deviceAuthResolver.run(eq("bad-token"), any()))

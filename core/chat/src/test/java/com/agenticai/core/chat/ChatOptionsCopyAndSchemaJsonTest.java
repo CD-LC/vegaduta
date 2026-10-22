@@ -6,15 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.genai.types.Schema;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
-import org.springframework.ai.model.ModelOptionsUtils;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import tools.jackson.core.JacksonException;
 
 class ChatOptionsCopyAndSchemaJsonTest {
 
@@ -39,9 +38,9 @@ class ChatOptionsCopyAndSchemaJsonTest {
     @Test
     void mutatingTheCopyDoesNotTouchTheOriginal() {
         OpenAiChatOptions openAi = OpenAiChatOptions.builder().model("gpt-4o").build();
-        OpenAiChatOptions copy = ChatOptionsCopy.of(openAi);
-        copy.setModel("other");
+        OpenAiChatOptions changed = openAi.mutate().model("other").build();
         assertEquals("gpt-4o", openAi.getModel());
+        assertEquals("other", changed.getModel());
     }
 
     @Test
@@ -54,24 +53,25 @@ class ChatOptionsCopyAndSchemaJsonTest {
     }
 
     @Test
-    void schemaJsonWritesLikeSpringAisOwnMapper() throws JsonProcessingException {
+    void schemaJsonWritesLikeSpringAisOwnMapper() throws Exception {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("b", 1);
         map.put("a", java.util.List.of("x"));
         assertEquals(
-                ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(map), SchemaJson.write(map));
+                org.springframework.ai.util.JacksonUtils.getDefaultJsonMapper()
+                        .writeValueAsString(map),
+                SchemaJson.write(map));
     }
 
     @Test
-    void schemaJsonReadsAValidGeminiSchemaAndRejectsAnInvalidOne() throws JsonProcessingException {
+    void schemaJsonReadsAValidGeminiSchemaAndRejectsAnInvalidOne() throws JacksonException {
         Schema ok =
                 SchemaJson.read(
                         "{\"type\":\"OBJECT\",\"properties\":{\"a\":{\"type\":\"STRING\"}}}",
                         Schema.class);
         assertEquals(1, ok.properties().orElseThrow().size());
         assertThrows(
-                JsonProcessingException.class,
-                () -> SchemaJson.read("{\"properties\":5}", Schema.class));
+                JacksonException.class, () -> SchemaJson.read("{\"properties\":5}", Schema.class));
         assertNull(SchemaJson.read("null", Schema.class));
     }
 }

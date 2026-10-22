@@ -3,9 +3,6 @@ package com.agenticai.core.chat.structured;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +11,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 // S2187: every test lives in a @Nested class below; Sonar only descends into @Nested
 // when junit-jupiter-api is on its analysis classpath.
 @SuppressWarnings("java:S2187")
 class StructuredOutputTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     record Verdict(String category, int score, List<String> tags) {}
 
@@ -282,17 +282,12 @@ class StructuredOutputTest {
                                             mapper, "{\"score\":\"high\"}", Verdict.class))
                     .isInstanceOf(StructuredOutputException.class)
                     .hasMessageContaining("does not match the expected Verdict shape")
-                    .hasCauseInstanceOf(com.fasterxml.jackson.core.JsonProcessingException.class);
+                    .hasCauseInstanceOf(tools.jackson.core.JacksonException.class);
         }
 
         @Test
         void usesTheCallersMapperConfiguration() {
-            ObjectMapper lenient =
-                    new ObjectMapper()
-                            .configure(
-                                    com.fasterxml.jackson.databind.DeserializationFeature
-                                            .FAIL_ON_UNKNOWN_PROPERTIES,
-                                    false);
+            ObjectMapper lenient = com.agenticai.core.json.JsonMappers.lenient();
             Verdict v =
                     StructuredOutput.parse(
                             lenient, "{\"category\":\"ok\",\"extra\":1}", Verdict.class);

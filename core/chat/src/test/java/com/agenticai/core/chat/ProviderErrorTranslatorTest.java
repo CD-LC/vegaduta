@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link ProviderErrorTranslator} is the seam that decides what a tenant actually sees when an LLM
@@ -26,7 +26,7 @@ class ProviderErrorTranslatorTest {
     // (budget gate, cache, spend metering) is covered by
     // ErrorExplanationServiceTest plus the dedicated tests at the bottom here.
     private final ProviderErrorTranslator translator =
-            new ProviderErrorTranslator(new ObjectMapper(), null);
+            new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), null);
 
     // --- WebClientResponseException branch (OpenRouter/Grok - #678) --------
 
@@ -234,7 +234,7 @@ class ProviderErrorTranslatorTest {
                         java.util.Optional.of(
                                 "The provider connection dropped mid-request. Please try again."));
         ProviderErrorTranslator aiTranslator =
-                new ProviderErrorTranslator(new ObjectMapper(), explainer);
+                new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), explainer);
 
         UpstreamProviderException result =
                 aiTranslator.translate(new RuntimeException("connection reset by peer"));
@@ -257,13 +257,13 @@ class ProviderErrorTranslatorTest {
                                 org.mockito.Mockito.anyInt(), org.mockito.Mockito.anyString()))
                 .thenReturn(java.util.Optional.empty());
         ProviderErrorTranslator aiTranslator =
-                new ProviderErrorTranslator(new ObjectMapper(), explainer);
+                new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), explainer);
 
         UpstreamProviderException result =
                 aiTranslator.translate(new RuntimeException("connection reset by peer"));
 
         assertEquals(
-                new ProviderErrorTranslator(new ObjectMapper(), null)
+                new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), null)
                         .translate(new RuntimeException("connection reset by peer"))
                         .getConsumerMessage(),
                 result.getConsumerMessage());
@@ -276,7 +276,7 @@ class ProviderErrorTranslatorTest {
         // body) must not spend Smart AI budget.
         ErrorExplanationService explainer = org.mockito.Mockito.mock(ErrorExplanationService.class);
         ProviderErrorTranslator aiTranslator =
-                new ProviderErrorTranslator(new ObjectMapper(), explainer);
+                new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), explainer);
 
         aiTranslator.translate(
                 WebClientResponseException.create(
@@ -300,7 +300,7 @@ class ProviderErrorTranslatorTest {
                                 org.mockito.Mockito.anyInt(), org.mockito.Mockito.anyString()))
                 .thenThrow(new IllegalStateException("boom"));
         ProviderErrorTranslator aiTranslator =
-                new ProviderErrorTranslator(new ObjectMapper(), explainer);
+                new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), explainer);
 
         UpstreamProviderException result =
                 aiTranslator.translate(new RuntimeException("connection reset by peer"));
@@ -409,7 +409,8 @@ class ProviderErrorTranslatorTest {
                                 catalogModel("gpt-4o-mini"), catalogModel("gpt-4o"),
                                 catalogModel("gpt-4.1"), catalogModel("o4-mini")));
         ProviderErrorTranslator enriching =
-                new ProviderErrorTranslator(new ObjectMapper(), null, catalog);
+                new ProviderErrorTranslator(
+                        com.agenticai.core.json.JsonMappers.plain(), null, catalog);
 
         UpstreamProviderException result =
                 enriching.translate(
@@ -437,7 +438,8 @@ class ProviderErrorTranslatorTest {
         org.mockito.Mockito.when(catalog.replacementForRetiredModel("gemini-2.0-flash-lite"))
                 .thenReturn(java.util.Optional.of("gemini-2.5-flash-lite"));
         ProviderErrorTranslator enriching =
-                new ProviderErrorTranslator(new ObjectMapper(), null, catalog);
+                new ProviderErrorTranslator(
+                        com.agenticai.core.json.JsonMappers.plain(), null, catalog);
 
         UpstreamProviderException result =
                 enriching.translate(
@@ -464,7 +466,8 @@ class ProviderErrorTranslatorTest {
                                 org.mockito.Mockito.eq("gpt-4o")))
                 .thenReturn(java.util.Optional.of(catalogModel("gpt-4o")));
         ProviderErrorTranslator enriching =
-                new ProviderErrorTranslator(new ObjectMapper(), null, catalog);
+                new ProviderErrorTranslator(
+                        com.agenticai.core.json.JsonMappers.plain(), null, catalog);
 
         UpstreamProviderException result =
                 enriching.translate(
@@ -486,7 +489,8 @@ class ProviderErrorTranslatorTest {
                                 org.mockito.Mockito.any(), org.mockito.Mockito.anyString()))
                 .thenThrow(new IllegalStateException("catalog database down"));
         ProviderErrorTranslator enriching =
-                new ProviderErrorTranslator(new ObjectMapper(), null, catalog);
+                new ProviderErrorTranslator(
+                        com.agenticai.core.json.JsonMappers.plain(), null, catalog);
 
         UpstreamProviderException result =
                 enriching.translate(

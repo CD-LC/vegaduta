@@ -23,8 +23,6 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,11 +32,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Routing of one sync batch: policy, rooms, pairing, threads, encryption notice, invites. */
 class MatrixEventServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BOT = "@bot:hs";
     private static final String ROOM = "!room:hs";
 
@@ -182,8 +182,8 @@ class MatrixEventServiceTest {
 
         assertThat(ok).isTrue();
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("to").asText()).isEqualTo(ROOM);
-        assertThat(payload.path("body").asText()).isEqualTo("pong");
+        assertThat(payload.path("to").asString()).isEqualTo(ROOM);
+        assertThat(payload.path("body").asString()).isEqualTo("pong");
         // A direct chat needs no quote.
         assertThat(payload.path("replyToEventId").isNull()).isTrue();
         assertThat(server.requestsTo("PUT", "/_matrix/client/v3/rooms/!room:hs/typing/"))
@@ -207,7 +207,7 @@ class MatrixEventServiceTest {
                 true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("body").asText()).contains("ABC123").contains("approve");
+        assertThat(payload.path("body").asString()).contains("ABC123").contains("approve");
         verify(sessions).markPairingNoticeSent(session.getId());
         verify(agent, never()).chat(any(), any());
     }
@@ -276,7 +276,7 @@ class MatrixEventServiceTest {
                 true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("replyToEventId").asText()).isEqualTo("$g2");
+        assertThat(payload.path("replyToEventId").asString()).isEqualTo("$g2");
         assertThat(payload.path("threadRootEventId").isNull()).isTrue();
     }
 
@@ -293,8 +293,8 @@ class MatrixEventServiceTest {
                 true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("threadRootEventId").asText()).isEqualTo("$root");
-        assertThat(payload.path("replyToEventId").asText()).isEqualTo("$t1");
+        assertThat(payload.path("threadRootEventId").asString()).isEqualTo("$root");
+        assertThat(payload.path("replyToEventId").asString()).isEqualTo("$t1");
     }
 
     @Test
@@ -327,7 +327,7 @@ class MatrixEventServiceTest {
         service.process(defaults(), batch(encrypted, encrypted2), true);
 
         JsonNode payload = lastGatePayload();
-        assertThat(payload.path("body").asText())
+        assertThat(payload.path("body").asString())
                 .contains("end-to-end encrypted")
                 .contains("not support");
         verify(sessions, never()).resolveOrCreate(any(), anyString(), anyString());

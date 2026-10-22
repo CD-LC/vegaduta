@@ -14,9 +14,6 @@ import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Characterisation of the engine-level containers (loop, parallel, fan_out, sub_flow) and the
@@ -34,7 +33,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class WorkflowExecutionEngineContainersTest {
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
     private final List<String> inputsSeen =
             java.util.Collections.synchronizedList(new ArrayList<>());
     private WorkflowNodeExecutor nodeExecutor;

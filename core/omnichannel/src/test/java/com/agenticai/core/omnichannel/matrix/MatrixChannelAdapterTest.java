@@ -13,16 +13,16 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class MatrixChannelAdapterTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private FakeHomeserver server;
     private MatrixCredentialService credentials;
@@ -75,8 +75,8 @@ class MatrixChannelAdapterTest {
         FakeHomeserver.Request sent = server.requests.get(0);
         assertThat(sent.rawPath()).endsWith("/send/m.room.message/vd-" + id);
         JsonNode body = MAPPER.readTree(sent.body());
-        assertThat(body.path("body").asText()).isEqualTo("hello");
-        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asText())
+        assertThat(body.path("body").asString()).isEqualTo("hello");
+        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asString())
                 .isEqualTo("$q");
         verify(logger).recordSent(eq(ChannelType.MATRIX), eq("!r:hs"), eq("hello"), any());
     }

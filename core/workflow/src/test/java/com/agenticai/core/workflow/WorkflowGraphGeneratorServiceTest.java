@@ -36,7 +36,6 @@ import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.guidance.WorkflowSendApprovalGuard;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -130,7 +129,7 @@ class WorkflowGraphGeneratorServiceTest {
                 mock(ProviderModelCatalogService.class),
                 agents,
                 orchestrator,
-                new ObjectMapper(),
+                com.agenticai.core.json.JsonMappers.plain(),
                 limits,
                 freeTier,
                 consistencyChecker,

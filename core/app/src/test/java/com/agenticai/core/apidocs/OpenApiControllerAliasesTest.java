@@ -2,13 +2,12 @@ package com.agenticai.core.apidocs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A controller split for size must keep its published tag and operationIds, because the SDKs group
@@ -39,7 +38,7 @@ class OpenApiControllerAliasesTest {
     @Test
     void splitWorkflowOperationsKeepTheirPublishedIdsAndTag() throws IOException {
         JsonNode paths =
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(new OpenApiSpecGenerator("9.9.9").generateJson())
                         .path("paths");
         String run = "/api/workflows/{workflowId}/runs/{runId}";
@@ -55,7 +54,7 @@ class OpenApiControllerAliasesTest {
     private static void assertOperation(JsonNode paths, String path, String verb, String id) {
         JsonNode op = paths.path(path).path(verb);
         assertThat(op.isMissingNode()).as(verb + " " + path).isFalse();
-        assertThat(op.path("operationId").asText()).as(verb + " " + path).isEqualTo(id);
-        assertThat(op.path("tags").get(0).asText()).as(verb + " " + path).isEqualTo("Workflow");
+        assertThat(op.path("operationId").asString()).as(verb + " " + path).isEqualTo(id);
+        assertThat(op.path("tags").get(0).asString()).as(verb + " " + path).isEqualTo("Workflow");
     }
 }

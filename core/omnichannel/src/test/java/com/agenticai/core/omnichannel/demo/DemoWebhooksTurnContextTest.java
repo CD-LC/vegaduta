@@ -21,7 +21,6 @@ import com.agenticai.core.tenancy.demo.DemoChannelType;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import com.agenticai.core.tenancy.demo.DemoWhatsAppPhoneGuard;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
@@ -31,6 +30,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * ADR-0022 stage 4: the demo Telegram and WhatsApp bots run the agent turn inside {@code
@@ -45,7 +45,7 @@ class DemoWebhooksTurnContextTest {
 
     private static final String FROM = "919812345678";
     private static final String CHAT_ID = "4242";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final TenantContext demoTenant =
             TenantContext.of("demo_sandbox", "demo:session", Set.of());

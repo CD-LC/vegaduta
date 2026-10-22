@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.mcp.McpDynamicConnector;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Routed MCP tool calls (app.mcp.registry-route-tool-calls): off by default, owner-executed, never
@@ -94,7 +94,10 @@ class RedisMcpOwnershipGateToolCallTest {
                         any());
         assertEquals(
                 "mcp__s__ping",
-                new ObjectMapper().readTree(payload.getValue()).get("tool").asText());
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(payload.getValue())
+                        .get("tool")
+                        .asString());
     }
 
     @Test
@@ -169,7 +172,7 @@ class RedisMcpOwnershipGateToolCallTest {
 
     @Test
     void commandJsonRoundTripsAndOldPayloadlessEntriesStillParse() throws Exception {
-        ObjectMapper m = new ObjectMapper();
+        ObjectMapper m = com.agenticai.core.json.JsonMappers.plain();
         McpCommand c = new McpCommand(McpCommand.Op.CALL, "t", reg, "rk", "{\"tool\":\"x\"}");
         assertEquals(c, m.readValue(m.writeValueAsString(c), McpCommand.class));
         String legacy =

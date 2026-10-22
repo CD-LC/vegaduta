@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class ApiGuideToolCallbackTest {
 
@@ -32,27 +32,27 @@ class ApiGuideToolCallbackTest {
     @Test
     void searchRanksByPathAndSummary() throws Exception {
         JsonNode r = call("{\"action\":\"search\",\"query\":\"list agents\"}");
-        assertEquals("/api/agents", r.at("/results/0/path").asText());
-        assertEquals("GET", r.at("/results/0/method").asText());
+        assertEquals("/api/agents", r.at("/results/0/path").asString());
+        assertEquals("GET", r.at("/results/0/method").asString());
     }
 
     @Test
     void searchCanFilterByMethod() throws Exception {
         JsonNode r = call("{\"action\":\"search\",\"query\":\"agents\",\"method\":\"POST\"}");
         assertEquals(1, r.path("results").size());
-        assertEquals("POST", r.at("/results/0/method").asText());
+        assertEquals("POST", r.at("/results/0/method").asString());
     }
 
     @Test
     void describeResolvesSchemasAndOffersTheLiveBlock() throws Exception {
         JsonNode r = call("{\"action\":\"describe\",\"method\":\"POST\",\"path\":\"/api/agents\"}");
-        assertEquals("string", r.at("/body/schema/properties/name/type").asText());
-        assertEquals("name", r.at("/body/schema/required/0").asText());
-        assertTrue(r.path("showItLive").asText().contains("\"type\":\"apiCall\""));
+        assertEquals("string", r.at("/body/schema/properties/name/type").asString());
+        assertEquals("name", r.at("/body/schema/required/0").asString());
+        assertTrue(r.path("showItLive").asString().contains("\"type\":\"apiCall\""));
         JsonNode get =
                 call("{\"action\":\"describe\",\"method\":\"GET\",\"path\":\"/api/agents\"}");
-        assertEquals("array", get.at("/response/type").asText());
-        assertEquals("page", get.at("/parameters/0/name").asText());
+        assertEquals("array", get.at("/response/type").asString());
+        assertEquals("page", get.at("/parameters/0/name").asString());
     }
 
     @Test

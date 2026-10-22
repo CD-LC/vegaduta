@@ -30,7 +30,6 @@ import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.AppUser;
 import com.agenticai.core.tenancy.AppUserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
@@ -90,7 +89,7 @@ class QuickTaskServiceTurnContextTest {
                         mock(HumanApprovalGateService.class),
                         mock(ToolCallLogService.class),
                         mock(QuickTaskRunService.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(AuditLogService.class),
                         mock(ChannelTextSends.class));
     }

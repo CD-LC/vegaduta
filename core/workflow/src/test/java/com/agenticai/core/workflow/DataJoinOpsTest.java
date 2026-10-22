@@ -2,17 +2,17 @@ package com.agenticai.core.workflow;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Characterisation of {@link DataJoinOps}: append / join (left, inner, outer) / first_non_empty and
  * minInputs.
  */
 class DataJoinOpsTest {
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     private static Map<String, Object> m(Object... kv) {
         Map<String, Object> out = new LinkedHashMap<>();
@@ -80,7 +80,7 @@ class DataJoinOpsTest {
                                 List.of(LEFT, RIGHT)),
                         "");
         assertEquals(3, outer.size());
-        assertEquals("q", outer.get(2).get("b").asText());
+        assertEquals("q", outer.get(2).get("b").asString());
     }
 
     @Test

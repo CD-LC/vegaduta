@@ -3,17 +3,17 @@ package com.agenticai.core.mcpserver.expose;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class McpWorkflowInputSchemaTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static JsonNode parse(String json) throws Exception {
         return MAPPER.readTree(json);
@@ -45,7 +45,7 @@ class McpWorkflowInputSchemaTest {
                     McpWorkflowInputSchema.openSchemaJson()
                 }) {
             JsonNode schema = parse(json);
-            assertEquals("object", schema.get("type").asText());
+            assertEquals("object", schema.get("type").asString());
             assertTrue(schema.get("additionalProperties").asBoolean());
             assertTrue(schema.get("properties").has("input"));
         }
@@ -65,10 +65,10 @@ class McpWorkflowInputSchemaTest {
                                                 m("type", "number")),
                                 "required", list("customer")));
         JsonNode schema = parse(McpWorkflowInputSchema.fromTriggerConfig(config));
-        assertEquals("object", schema.get("type").asText());
-        assertEquals("string", schema.get("properties").get("customer").get("type").asText());
-        assertEquals("number", schema.get("properties").get("amount").get("type").asText());
-        assertEquals("customer", schema.get("required").get(0).asText());
+        assertEquals("object", schema.get("type").asString());
+        assertEquals("string", schema.get("properties").get("customer").get("type").asString());
+        assertEquals("number", schema.get("properties").get("amount").get("type").asString());
+        assertEquals("customer", schema.get("required").get(0).asString());
     }
 
     @Test
@@ -92,12 +92,12 @@ class McpWorkflowInputSchemaTest {
         JsonNode schema = parse(McpWorkflowInputSchema.fromTriggerConfig(config));
         JsonNode properties = schema.get("properties");
         assertEquals(3, properties.size());
-        assertEquals("string", properties.get("email").get("type").asText());
-        assertEquals("Customer email", properties.get("email").get("description").asText());
-        assertEquals("number", properties.get("count").get("type").asText());
-        assertEquals("boolean", properties.get("flag").get("type").asText());
+        assertEquals("string", properties.get("email").get("type").asString());
+        assertEquals("Customer email", properties.get("email").get("description").asString());
+        assertEquals("number", properties.get("count").get("type").asString());
+        assertEquals("boolean", properties.get("flag").get("type").asString());
         assertEquals(1, schema.get("required").size());
-        assertEquals("email", schema.get("required").get(0).asText());
+        assertEquals("email", schema.get("required").get(0).asString());
     }
 
     @Test

@@ -10,8 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pure-logic coverage of {@link NodeErrorStrategy}: parsing, the irreversible guard, backoff and
@@ -472,17 +471,21 @@ class NodeErrorStrategyTest {
     void continueOutputIsTheErrorAndNodeIdObject() throws Exception {
         String json =
                 NodeErrorStrategy.continueOutput(
-                        new ObjectMapper(), node("agent", Map.of()), "it broke");
-        JsonNode parsed = new ObjectMapper().readTree(json);
-        assertEquals("it broke", parsed.get("error").asText());
-        assertEquals("n1", parsed.get("nodeId").asText());
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        node("agent", Map.of()),
+                        "it broke");
+        JsonNode parsed = com.agenticai.core.json.JsonMappers.plain().readTree(json);
+        assertEquals("it broke", parsed.get("error").asString());
+        assertEquals("n1", parsed.get("nodeId").asString());
         assertEquals(2, parsed.size());
 
         JsonNode blank =
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(
                                 NodeErrorStrategy.continueOutput(
-                                        new ObjectMapper(), node("agent", Map.of()), " "));
-        assertEquals("Node failed.", blank.get("error").asText());
+                                        com.agenticai.core.json.JsonMappers.plain(),
+                                        node("agent", Map.of()),
+                                        " "));
+        assertEquals("Node failed.", blank.get("error").asString());
     }
 }

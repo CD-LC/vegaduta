@@ -28,8 +28,6 @@ import com.agenticai.core.workflow.dto.WorkflowExpressionApi.UpstreamSchemaRespo
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.expression.BuiltIns;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +38,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Evaluate / lint / upstream-schema / function registry behaviour and the exact JSON of their DTOs.
@@ -661,7 +661,7 @@ class WorkflowExpressionServiceTest {
 
     private static TreeSet<String> keys(JsonNode n) {
         TreeSet<String> names = new TreeSet<>();
-        n.fieldNames().forEachRemaining(names::add);
+        n.propertyNames().forEach(names::add);
         return names;
     }
 
@@ -721,7 +721,7 @@ class WorkflowExpressionServiceTest {
                 new TreeSet<>(
                         Set.of("nodeId", "field", "severity", "code", "message", "start", "end")),
                 keys(d));
-        assertEquals("error", d.get("severity").asText());
+        assertEquals("error", d.get("severity").asString());
         LintRequest parsed =
                 mapper.readValue(
                         "{\"items\":[{\"nodeId\":\"a\",\"field\":\"url\",\"template\":\"t\"}]}",
@@ -741,7 +741,7 @@ class WorkflowExpressionServiceTest {
         assertEquals(new TreeSet<>(Set.of("path", "type", "sample")), keys(path));
         JsonNode container =
                 node.get("paths").get(0); // "items" is an array: sample is present and null
-        assertEquals("items", container.get("path").asText());
+        assertEquals("items", container.get("path").asString());
         assertTrue(container.has("sample") && container.get("sample").isNull());
     }
 

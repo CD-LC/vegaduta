@@ -23,8 +23,6 @@ import com.agenticai.core.workflow.dto.WorkflowRunRequest;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
 import com.agenticai.core.workflow.guidance.WorkflowInsightsService;
 import com.agenticai.core.workflow.guidance.WorkflowLintService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The run endpoint's optional {@code mode}, and the thin pin / expression controllers. This
@@ -140,7 +140,7 @@ class WorkflowRunModeControllerTest {
         run.setRunMode(RunMode.DRAFT);
         JsonNode json =
                 mapper.readTree(mapper.writeValueAsString(WorkflowRunResponse.from(run, mapper)));
-        assertEquals("draft", json.get("mode").asText());
+        assertEquals("draft", json.get("mode").asString());
         assertEquals(0, json.get("pinnedNodeCount").asInt());
         for (String existing :
                 List.of(

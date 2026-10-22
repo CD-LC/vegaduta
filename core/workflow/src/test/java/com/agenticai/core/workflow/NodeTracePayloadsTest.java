@@ -6,12 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class NodeTracePayloadsTest {
 
@@ -180,7 +179,7 @@ class NodeTracePayloadsTest {
 
     @Test
     void preExistingTraceJsonStillDeserializes() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         String legacy =
                 "[{\"nodeId\":\"n1\",\"nodeType\":\"code\",\"label\":\"T\",\"status\":\"OK\","
                         + "\"summary\":\"s\",\"startedAt\":\"2026-09-01T00:00:00Z\",\"completedAt\":\"2026-09-01T00:00:02Z\","
@@ -199,7 +198,7 @@ class NodeTracePayloadsTest {
 
     @Test
     void newFieldsRoundTripUnderTheirWireNames() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         NodeTraceEntry e =
                 NodeTracePayloads.attach(entry(), "in", "out", 100, 0)
                         .withUsage(120L, 30L, new BigDecimal("0.0042"));

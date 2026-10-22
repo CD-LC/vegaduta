@@ -9,12 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class RunBudgetTest {
 
@@ -74,7 +73,7 @@ class RunBudgetTest {
                         budget("0"));
 
         JsonNode root =
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(
                                 team.call(
                                         "{\"tasks\":["
@@ -83,8 +82,8 @@ class RunBudgetTest {
 
         assertFalse(root.has("costEstimate"));
         assertFalse(root.has("stopReason"));
-        assertEquals("ok", root.get("results").get(0).get("status").asText());
-        assertEquals("ok", root.get("results").get(1).get("status").asText());
+        assertEquals("ok", root.get("results").get(0).get("status").asString());
+        assertEquals("ok", root.get("results").get(1).get("status").asString());
     }
 
     @Test
@@ -110,16 +109,16 @@ class RunBudgetTest {
                         budget("0.02"));
 
         JsonNode root =
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(
                                 team.call(
                                         "{\"tasks\":["
                                                 + "{\"agent\":\"researcher\",\"question\":\"q1\"},"
                                                 + "{\"agent\":\"writer\",\"question\":\"q2\"}]}"));
 
-        assertTrue(root.get("costEstimate").asText().contains("estimated cost"));
-        assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asText());
-        assertEquals("ok", root.get("results").get(0).get("status").asText());
-        assertEquals("skipped", root.get("results").get(1).get("status").asText());
+        assertTrue(root.get("costEstimate").asString().contains("estimated cost"));
+        assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asString());
+        assertEquals("ok", root.get("results").get(0).get("status").asString());
+        assertEquals("skipped", root.get("results").get(1).get("status").asString());
     }
 }

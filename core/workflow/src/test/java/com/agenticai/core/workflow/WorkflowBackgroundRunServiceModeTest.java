@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -55,7 +54,7 @@ class WorkflowBackgroundRunServiceModeTest {
                         workflowService,
                         engine,
                         mock(WorkflowRunRepository.class),
-                        new ObjectMapper());
+                        com.agenticai.core.json.JsonMappers.plain());
     }
 
     /**

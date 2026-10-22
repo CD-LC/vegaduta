@@ -26,7 +26,6 @@ import com.agenticai.core.workflow.WorkflowValidationException;
 import com.agenticai.core.workflow.dto.RefGraphResponse;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +33,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The LLM, the graph generator and the registry are mocked; the assertions are on what ends up in
@@ -46,7 +46,7 @@ class BriefPlannerServiceTest {
             mock(WorkflowGraphGeneratorService.class);
     private final OfficialMcpRegistryClient registry = mock(OfficialMcpRegistryClient.class);
     private final BriefValidator validator = mock(BriefValidator.class);
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private BriefPlannerService planner;
 
     /**

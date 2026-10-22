@@ -16,7 +16,6 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.demo.studio.DemoStudioService.StudioException;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +68,7 @@ class DemoStudioIsolationAndEntryPointsTest {
                         runner,
                         workflows,
                         runs,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(DemoStudioDocumentService.class),
                         mock(DemoStudioConnectorService.class),
                         fairUse,

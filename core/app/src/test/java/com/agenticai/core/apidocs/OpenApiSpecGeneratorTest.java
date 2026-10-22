@@ -2,8 +2,6 @@ package com.agenticai.core.apidocs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,6 +18,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests for the reflection-based OpenAPI generator: structural checks over the REAL controller set
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
  */
 class OpenApiSpecGeneratorTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final Pattern BRACES = Pattern.compile("\\{([^/{}]+)}");
     private static final List<String> VERBS =
             List.of("get", "put", "post", "delete", "patch", "options", "head", "trace");
@@ -53,9 +53,9 @@ class OpenApiSpecGeneratorTest {
     @Test
     void fullSpecIsValidJsonWithExpectedHeader() throws IOException {
         JsonNode doc = full();
-        assertThat(doc.path("openapi").asText()).startsWith("3.1");
-        assertThat(doc.path("info").path("title").asText()).isNotBlank();
-        assertThat(doc.path("info").path("version").asText()).isEqualTo("9.9.9");
+        assertThat(doc.path("openapi").asString()).startsWith("3.1");
+        assertThat(doc.path("info").path("title").asString()).isNotBlank();
+        assertThat(doc.path("info").path("version").asString()).isEqualTo("9.9.9");
         assertThat(doc.path("info").path("x-skipped").isArray()).isTrue();
         assertThat(doc.path("components").path("schemas").has("Error")).isTrue();
         assertThat(doc.path("components").path("securitySchemes").has(OpenApiSecurity.BEARER))
@@ -77,7 +77,7 @@ class OpenApiSpecGeneratorTest {
                     continue;
                 }
                 operations++;
-                String id = item.path(verb).path("operationId").asText();
+                String id = item.path(verb).path("operationId").asString();
                 assertThat(id).isNotBlank();
                 if (!ids.add(id)) {
                     duplicates.add(id);
@@ -99,8 +99,8 @@ class OpenApiSpecGeneratorTest {
     private static void collectUnresolvedRefs(JsonNode root, JsonNode node, List<String> out) {
         if (node.isObject()) {
             JsonNode ref = node.get("$ref");
-            if (ref != null && ref.isTextual()) {
-                String r = ref.asText();
+            if (ref != null && ref.isString()) {
+                String r = ref.asString();
                 String prefix = "#/components/";
                 boolean ok = false;
                 if (r.startsWith(prefix)) {
@@ -115,7 +115,7 @@ class OpenApiSpecGeneratorTest {
                     out.add(r);
                 }
             }
-            for (Iterator<JsonNode> it = node.elements(); it.hasNext(); ) {
+            for (Iterator<JsonNode> it = node.values().iterator(); it.hasNext(); ) {
                 collectUnresolvedRefs(root, it.next(), out);
             }
         } else if (node.isArray()) {
@@ -153,8 +153,8 @@ class OpenApiSpecGeneratorTest {
                 }
                 Set<String> declared = new TreeSet<>();
                 for (JsonNode p : op.path("parameters")) {
-                    if ("path".equals(p.path("in").asText())) {
-                        declared.add(p.path("name").asText());
+                    if ("path".equals(p.path("in").asString())) {
+                        declared.add(p.path("name").asString());
                     }
                 }
                 if (!declared.equals(template)) {
@@ -215,7 +215,7 @@ class OpenApiSpecGeneratorTest {
                 missing.add(key);
                 continue;
             }
-            assertThat(op.path("description").asText())
+            assertThat(op.path("description").asString())
                     .as("description of %s", key)
                     .startsWith(OpenApiDescriptions.describe(verb, path));
         }
@@ -240,7 +240,7 @@ class OpenApiSpecGeneratorTest {
                         "post " + base + "/messages/{messageId}/regenerate")) {
             String verb = route.substring(0, route.indexOf(' '));
             String path = route.substring(route.indexOf(' ') + 1);
-            String description = paths.path(path).path(verb).path("description").asText();
+            String description = paths.path(path).path(verb).path("description").asString();
             assertThat(description)
                     .as("%s", route)
                     .contains("only by the caller who started the session")
@@ -258,7 +258,7 @@ class OpenApiSpecGeneratorTest {
                 paths.path(base + "/messages/{messageId}/edit")
                         .path("post")
                         .path("description")
-                        .asText();
+                        .asString();
         assertThat(edit).contains("Server-Sent Events");
         assertThat(edit.indexOf("APP_CHAT_BRANCHING_ENABLED"))
                 .isLessThan(edit.indexOf("Server-Sent Events"));

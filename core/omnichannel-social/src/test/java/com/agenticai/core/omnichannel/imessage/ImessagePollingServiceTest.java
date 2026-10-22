@@ -8,10 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
 
 class ImessagePollingServiceTest {
 
@@ -47,7 +47,7 @@ class ImessagePollingServiceTest {
             ArgumentCaptor<JsonNode> handled = ArgumentCaptor.forClass(JsonNode.class);
             verify(updates, org.mockito.Mockito.times(2)).acceptVerified(handled.capture());
             assertThat(handled.getAllValues())
-                    .extracting(n -> n.path("guid").asText())
+                    .extracting(n -> n.path("guid").asString())
                     .containsExactly("a", "b");
             verify(credentials).savePollCursor(3000L);
         }

@@ -6,14 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link GoogleGmailClient} request-mapping and error-translation tests on the injected stub
@@ -32,7 +32,7 @@ class GoogleGmailClientTest {
     private GoogleOAuthService oauthService;
     private GoogleGmailClient client;
     private HttpStubs.RecordingHttpClient http;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     @BeforeEach
     void setUp() {
@@ -59,7 +59,7 @@ class GoogleGmailClientTest {
         assertEquals("application/json", request.headers().firstValue("Content-Type").orElse(null));
 
         JsonNode body = objectMapper.readTree(HttpStubs.bodyOf(request));
-        String raw = body.path("raw").asText();
+        String raw = body.path("raw").asString();
         // Must decode with the URL decoder - if the client ever regressed to
         // standard base64, '+'/'/' chars would make this decode blow up.
         String rfc2822 = new String(Base64.getUrlDecoder().decode(raw), StandardCharsets.UTF_8);

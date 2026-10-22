@@ -14,21 +14,14 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.model.tool.DefaultToolExecutionEligibilityPredicate;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.model.tool.ToolExecutionResult;
-import org.springframework.ai.support.UsageCalculator;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * P0 characterisation fixture (ADR-0012): a {@link ChatModel} that replays a fixed script and, like
- * every provider {@code ChatModel} in Spring AI 1.1.x (OpenAiChatModel, AnthropicChatModel, ...),
- * runs the tool-calling loop INTERNALLY: when a scripted step carries tool calls and internal
- * execution is enabled it hands them to the {@link ToolCallingManager} and calls itself again with
- * the extended conversation.
+ * every provider {@code ChatModel} in Spring AI 2 (the tool loop lives in the advisor, not the
+ * model).
  *
  * <p>It also reproduces the one metering-relevant detail of those models: across loop iterations
  * the usage is accumulated with {@code UsageCalculator.getCumulativeUsage(current,
@@ -37,11 +30,10 @@ import reactor.core.scheduler.Schedulers;
  * cumulative sum, and provider-specific cache counters (Anthropic cache read/write) survive only on
  * a turn that made a single model call.
  *
- * <p><b>P3 touch point.</b> In Spring AI 2 the loop moves out of the model into the ChatClient's
- * {@code ToolCallingAdvisor}, and the model just returns the tool calls. This class is then the
- * only thing to adapt: drop the internal loop and the cumulative-usage step (the advisor
- * accumulates), keep the script format. The tests use only the {@code text}/{@code toolCalls} step
- * builders and {@link ToolLoopHarness}, so they do not change.
+ * <p><b>P3 (done).</b> In Spring AI 2 the loop moved out of the model into the ChatClient's {@code
+ * ToolCallingAdvisor}: this model now just returns one scripted response per call (tool calls
+ * included) with that call's OWN usage, like the real OpenAI/Anthropic models; the advisor executes
+ * the tools and accumulates usage. The script format and the step builders are unchanged.
  */
 public final class ScriptedChatModel implements ChatModel {
 
@@ -76,8 +68,6 @@ public final class ScriptedChatModel implements ChatModel {
     private final ToolCallingManager toolCallingManager;
     private final AtomicInteger modelCalls = new AtomicInteger();
     private final List<Prompt> prompts = new CopyOnWriteArrayList<>();
-    private final DefaultToolExecutionEligibilityPredicate eligibility =
-            new DefaultToolExecutionEligibilityPredicate();
 
     public ScriptedChatModel(List<Step> script, ToolCallingManager toolCallingManager) {
         this.script = List.copyOf(script);
@@ -94,8 +84,16 @@ public final class ScriptedChatModel implements ChatModel {
         return List.copyOf(prompts);
     }
 
+    /**
+     * The manager the ChatClient's ToolCallingAdvisor must be seated with (Spring AI 2: the model
+     * no longer runs tools).
+     */
+    public ToolCallingManager toolCallingManager() {
+        return toolCallingManager;
+    }
+
     @Override
-    public ChatOptions getDefaultOptions() {
+    public ChatOptions getOptions() {
         return ToolCallingChatOptions.builder().build();
     }
 
@@ -103,88 +101,29 @@ public final class ScriptedChatModel implements ChatModel {
 
     @Override
     public ChatResponse call(Prompt prompt) {
-        return internalCall(prompt, null);
-    }
-
-    private ChatResponse internalCall(Prompt prompt, ChatResponse previous) {
         Step step = nextStep(prompt);
-        Usage cumulative = UsageCalculator.getCumulativeUsage(step.usage(), previous);
-        ChatResponse response = response(step, step.text(), cumulative, true);
-        if (eligibility.test(prompt.getOptions(), response)) {
-            ToolExecutionResult result = toolCallingManager.executeToolCalls(prompt, response);
-            if (result.returnDirect()) {
-                return ChatResponse.builder()
-                        .from(response)
-                        .generations(ToolExecutionResult.buildGenerations(result))
-                        .build();
-            }
-            return internalCall(
-                    new Prompt(result.conversationHistory(), prompt.getOptions()), response);
-        }
-        return response;
+        // One provider call = its own usage. Summing across the loop is the ToolCallingAdvisor's
+        // job.
+        return response(step, step.text(), step.usage(), true);
     }
 
     // ------------------------------------------------------------- stream
 
     @Override
     public Flux<ChatResponse> stream(Prompt prompt) {
-        return Flux.defer(() -> internalStream(prompt, null));
-    }
-
-    private Flux<ChatResponse> internalStream(Prompt prompt, ChatResponse previous) {
-        // Lazy, like a real provider request: the "HTTP call" only happens on subscription, so a
-        // cancelled subscription never reaches the next model call.
-        return Flux.create(
-                sink -> {
-                    if (sink.isCancelled()) {
-                        return;
+        // Lazy, like a real provider request: the "HTTP call" only happens on subscription.
+        return Flux.defer(
+                () -> {
+                    Step step = nextStep(prompt);
+                    List<Flux<ChatResponse>> parts = new ArrayList<>();
+                    for (String chunk : step.textChunks()) {
+                        // Provider streams carry usage only on the last chunk; earlier chunks
+                        // report none.
+                        parts.add(Flux.just(response(step, chunk, new EmptyUsage(), false)));
                     }
-                    Disposable running =
-                            Flux.defer(() -> streamStep(prompt, previous))
-                                    .subscribe(sink::next, sink::error, sink::complete);
-                    sink.onDispose(running);
+                    parts.add(Flux.just(response(step, "", step.usage(), true)));
+                    return Flux.concat(parts);
                 });
-    }
-
-    private Flux<ChatResponse> streamStep(Prompt prompt, ChatResponse previous) {
-        Step step = nextStep(prompt);
-        List<Flux<ChatResponse>> parts = new ArrayList<>();
-        for (String chunk : step.textChunks()) {
-            // Provider streams carry usage only on the last chunk; earlier chunks report none.
-            parts.add(Flux.just(response(step, chunk, new EmptyUsage(), false)));
-        }
-        Usage cumulative = UsageCalculator.getCumulativeUsage(step.usage(), previous);
-        ChatResponse last = response(step, "", cumulative, true);
-        if (eligibility.test(prompt.getOptions(), last)) {
-            ChatResponse toolCallResponse = response(step, step.text(), cumulative, true);
-            // The tool-call chunk itself is not emitted downstream; tools run off the event loop.
-            parts.add(
-                    Flux.defer(
-                                    () -> {
-                                        ToolExecutionResult result =
-                                                toolCallingManager.executeToolCalls(
-                                                        prompt, toolCallResponse);
-                                        if (result.returnDirect()) {
-                                            return Flux.just(
-                                                    ChatResponse.builder()
-                                                            .from(last)
-                                                            .generations(
-                                                                    ToolExecutionResult
-                                                                            .buildGenerations(
-                                                                                    result))
-                                                            .build());
-                                        }
-                                        return internalStream(
-                                                new Prompt(
-                                                        result.conversationHistory(),
-                                                        prompt.getOptions()),
-                                                toolCallResponse);
-                                    })
-                            .subscribeOn(Schedulers.boundedElastic()));
-        } else {
-            parts.add(Flux.just(last));
-        }
-        return Flux.concat(parts);
     }
 
     // ------------------------------------------------------------ helpers

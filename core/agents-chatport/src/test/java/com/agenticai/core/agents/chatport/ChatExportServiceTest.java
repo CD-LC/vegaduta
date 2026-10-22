@@ -25,8 +25,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,6 +39,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
 
 @SuppressWarnings("unchecked")
 class ChatExportServiceTest {
@@ -189,16 +188,16 @@ class ChatExportServiceTest {
         ExportFile f = svc.exportSession(agentId, "s1", "json");
 
         assertEquals("application/json", f.contentType());
-        JsonNode root = new ObjectMapper().readTree(f.bytes());
-        assertEquals("vegaduta.chat-export", root.get("schema").asText());
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(f.bytes());
+        assertEquals("vegaduta.chat-export", root.get("schema").asString());
         assertEquals(1, root.get("version").asInt());
         JsonNode c = root.get("conversations").get(0);
-        assertEquals("s1", c.get("id").asText());
-        assertEquals("vegaduta", c.get("source").asText());
-        assertEquals("Helper Bot", c.get("agent").asText());
+        assertEquals("s1", c.get("id").asString());
+        assertEquals("vegaduta", c.get("source").asString());
+        assertEquals("Helper Bot", c.get("agent").asString());
         assertEquals(3, c.get("messages").size());
-        assertEquals("report.pdf", c.get("messages").get(0).get("attachments").get(0).asText());
-        assertEquals("Summarise this", c.get("messages").get(0).get("content").asText());
+        assertEquals("report.pdf", c.get("messages").get(0).get("attachments").get(0).asString());
+        assertEquals("Summarise this", c.get("messages").get(0).get("content").asString());
     }
 
     @Test
@@ -348,10 +347,10 @@ class ChatExportServiceTest {
 
         ExportFile f = svc.exportAllImported("alice", "json");
 
-        JsonNode root = new ObjectMapper().readTree(f.bytes());
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(f.bytes());
         assertEquals(2, root.get("conversations").size());
-        assertEquals("One", root.get("conversations").get(0).get("title").asText());
-        assertEquals("Two", root.get("conversations").get(1).get("title").asText());
+        assertEquals("One", root.get("conversations").get(0).get("title").asString());
+        assertEquals("Two", root.get("conversations").get(1).get("title").asString());
         assertEquals(0, root.get("conversations").get(0).get("notes").size());
         assertTrue(f.filename().startsWith("vegaduta-imported-chats-"));
     }
@@ -371,9 +370,9 @@ class ChatExportServiceTest {
 
         ExportFile f = svc.exportAllImported("alice", "json");
 
-        JsonNode root = new ObjectMapper().readTree(f.bytes());
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(f.bytes());
         assertEquals(1, root.get("conversations").size());
-        String note = root.get("conversations").get(0).get("notes").get(0).asText();
+        String note = root.get("conversations").get(0).get("notes").get(0).asString();
         assertTrue(note.contains("stopped after 1 of 3"), note);
     }
 
@@ -383,9 +382,11 @@ class ChatExportServiceTest {
         when(repository.findFullByOwnerSubjectOrderByImportedAtDesc(
                         eq("alice"), any(Pageable.class)))
                 .thenReturn(List.of());
-        JsonNode root = new ObjectMapper().readTree(svc.exportAllImported("alice", "json").bytes());
+        JsonNode root =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(svc.exportAllImported("alice", "json").bytes());
         assertEquals(0, root.get("conversations").size());
-        assertEquals("vegaduta.chat-export", root.get("schema").asText());
+        assertEquals("vegaduta.chat-export", root.get("schema").asString());
     }
 
     @Test

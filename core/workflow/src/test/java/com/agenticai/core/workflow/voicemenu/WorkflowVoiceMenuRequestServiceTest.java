@@ -21,7 +21,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.WorkflowStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.List;
@@ -61,7 +60,7 @@ class WorkflowVoiceMenuRequestServiceTest {
                         runRepository,
                         definitionRepository,
                         engineProvider,
-                        new ObjectMapper().findAndRegisterModules());
+                        com.agenticai.core.json.JsonMappers.withJavaTime());
 
         when(requestRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
@@ -273,7 +272,8 @@ class WorkflowVoiceMenuRequestServiceTest {
 
     private String writeTrace(NodeTraceEntry entry) {
         try {
-            return new ObjectMapper().findAndRegisterModules().writeValueAsString(List.of(entry));
+            return com.agenticai.core.json.JsonMappers.withJavaTime()
+                    .writeValueAsString(List.of(entry));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

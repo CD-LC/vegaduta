@@ -16,8 +16,7 @@ import com.agenticai.core.agents.lab.AgentLabDtos.LabCellResult;
 import com.agenticai.core.agents.lab.AgentLabDtos.LabRunDocument;
 import com.agenticai.core.agents.lab.AgentLabDtos.LabRunResponse;
 import com.agenticai.core.agents.lab.AgentLabDtos.LabSimilarity;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.json.JsonMappers;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +30,8 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link RedisAgentLabRunStore} against a mocked template: keys, TTLs and the stored JSON. The Lua
@@ -43,7 +44,7 @@ class AgentLabRunStoreTest {
     @SuppressWarnings("unchecked")
     private final ValueOperations<String, String> values = mock(ValueOperations.class);
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = JsonMappers.plain();
     private RedisAgentLabRunStore store;
 
     @BeforeEach
@@ -365,7 +366,7 @@ class AgentLabRunStoreTest {
 
     private static List<String> names(JsonNode node) {
         List<String> names = new ArrayList<>();
-        for (Iterator<String> it = node.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = node.propertyNames().iterator(); it.hasNext(); ) {
             names.add(it.next());
         }
         return names;

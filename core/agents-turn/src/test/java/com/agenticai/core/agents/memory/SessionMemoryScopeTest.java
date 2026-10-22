@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import com.agenticai.core.tenancy.demo.DemoTranscriptEmailService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +75,7 @@ class SessionMemoryScopeTest {
         memory =
                 new SessionMemoryService(
                         redis,
-                        new ObjectMapper().findAndRegisterModules(),
+                        com.agenticai.core.json.JsonMappers.withJavaTime(),
                         settings,
                         noSummariser,
                         24,

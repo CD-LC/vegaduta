@@ -9,12 +9,12 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.dto.CompGrantResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * DAST-2026-07-27 D4 - regression coverage for the auth-before-body-parsing ordering fix. Before
@@ -40,7 +40,7 @@ class CompGrantControllerTest {
     @BeforeEach
     void setUp() {
         compGrantService = mock(CompGrantService.class);
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         controller =
                 new CompGrantController(compGrantService, VALID_TOKEN, objectMapper, validator);
@@ -148,7 +148,7 @@ class CompGrantControllerTest {
                 new CompGrantController(
                         compGrantService,
                         "",
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         Validation.buildDefaultValidatorFactory().getValidator());
 
         assertThrows(

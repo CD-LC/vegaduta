@@ -1,7 +1,5 @@
 package com.agenticai.core.graphmemory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,6 +17,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.ai.chat.client.ChatClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * <b>LongMemEval-lite (own fixtures)</b> - a deterministic retrieval/QA evaluation of the graph
@@ -46,7 +46,7 @@ final class MemoryEval {
 
     static final String FIXTURE_NAME = "LongMemEval-lite (own fixtures)";
     static final UUID AGENT = UUID.fromString("00000000-0000-0000-0000-00000000e7a1");
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final int ANSWER_TOP_K = 10;
     private static final List<Integer> RECALL_KS = List.of(3, 5);
 
@@ -168,7 +168,7 @@ final class MemoryEval {
             }
             JsonNode root = MAPPER.readTree(in);
             Set<String> multi = new LinkedHashSet<>();
-            root.get("multi").forEach(n -> multi.add(n.asText()));
+            root.get("multi").forEach(n -> multi.add(n.asString()));
             List<EvalCase> cases = new ArrayList<>();
             for (JsonNode c : root.get("cases")) {
                 List<Session> sessions = new ArrayList<>();
@@ -179,13 +179,13 @@ final class MemoryEval {
                                     t ->
                                             facts.add(
                                                     new GraphTriple(
-                                                            t.get(0).asText(),
-                                                            t.get(1).asText(),
-                                                            t.get(2).asText())));
+                                                            t.get(0).asString(),
+                                                            t.get(1).asString(),
+                                                            t.get(2).asString())));
                     sessions.add(
                             new Session(
-                                    s.get("id").asText(),
-                                    LocalDate.parse(s.get("t").asText())
+                                    s.get("id").asString(),
+                                    LocalDate.parse(s.get("t").asString())
                                             .atStartOfDay()
                                             .toInstant(ZoneOffset.UTC)
                                             .toEpochMilli(),
@@ -198,23 +198,23 @@ final class MemoryEval {
                 List<String> gold = q.has("gold") ? strings(q.get("gold")) : expected;
                 cases.add(
                         new EvalCase(
-                                c.get("id").asText(),
-                                c.get("cat").asText(),
+                                c.get("id").asString(),
+                                c.get("cat").asString(),
                                 sessions,
                                 new Question(
-                                        q.get("text").asText(),
-                                        q.get("ent").asText(),
-                                        q.get("rel").asText(),
-                                        q.path("kind").asText("lookup"),
-                                        "in".equals(q.path("dir").asText("out")),
+                                        q.get("text").asString(),
+                                        q.get("ent").asString(),
+                                        q.get("rel").asString(),
+                                        q.path("kind").asString("lookup"),
+                                        "in".equals(q.path("dir").asString("out")),
                                         q.path("hops").asInt(1),
-                                        q.has("asof") ? q.get("asof").asText() : null,
+                                        q.has("asof") ? q.get("asof").asString() : null,
                                         expected,
                                         gold,
                                         strings(q.path("stale")),
                                         q.path("abstain").asBoolean(false))));
             }
-            return new Fixture(root.get("name").asText(), multi, cases);
+            return new Fixture(root.get("name").asString(), multi, cases);
         } catch (java.io.IOException ex) {
             throw new IllegalStateException(ex);
         }
@@ -222,7 +222,7 @@ final class MemoryEval {
 
     private static List<String> strings(JsonNode array) {
         List<String> out = new ArrayList<>();
-        array.forEach(n -> out.add(n.asText()));
+        array.forEach(n -> out.add(n.asString()));
         return out;
     }
 

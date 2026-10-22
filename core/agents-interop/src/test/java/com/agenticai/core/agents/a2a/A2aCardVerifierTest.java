@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Round-trip coverage for {@link A2aCardVerifier}: a card signed by {@link A2aCardSigningService}
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
  */
 class A2aCardVerifierTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String CARD_URL =
             "https://publisher.example.com/.well-known/agent-card.json";
     private static final String JWKS_URL = "https://publisher.example.com/.well-known/jwks.json";

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantLimits;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,9 @@ class TenantAiModelPreferenceServiceTest {
     void setUp() {
         repository = mock(TenantRepository.class);
         limits = mock(TenantLimits.class);
-        service = new TenantAiModelPreferenceService(repository, new ObjectMapper(), limits);
+        service =
+                new TenantAiModelPreferenceService(
+                        repository, com.agenticai.core.json.JsonMappers.plain(), limits);
     }
 
     @Test

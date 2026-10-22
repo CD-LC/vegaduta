@@ -5,21 +5,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The client against a fake signal-cli: REST calls, the receive websocket, and the outbound policy.
  */
 class SignalApiClientTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String NUMBER = "+4915112345678";
 
     private FakeSignalCli cli;
@@ -61,7 +61,7 @@ class SignalApiClientTest {
         JsonNode batch = client.receive(connection(null), 1);
 
         assertThat(batch).hasSize(1);
-        assertThat(batch.get(0).path("envelope").path("dataMessage").path("message").asText())
+        assertThat(batch.get(0).path("envelope").path("dataMessage").path("message").asString())
                 .isEqualTo("hi");
         String line = cli.requestLines.get(cli.requestLines.size() - 1);
         assertThat(line)
@@ -85,12 +85,12 @@ class SignalApiClientTest {
                 List.of());
 
         JsonNode first = MAPPER.readTree(cli.sentBodies.get(0));
-        assertThat(first.path("message").asText()).isEqualTo("hello");
-        assertThat(first.path("number").asText()).isEqualTo(NUMBER);
-        assertThat(first.path("recipients").get(0).asText()).isEqualTo("+4917600000001");
+        assertThat(first.path("message").asString()).isEqualTo("hello");
+        assertThat(first.path("number").asString()).isEqualTo(NUMBER);
+        assertThat(first.path("recipients").get(0).asString()).isEqualTo("+4917600000001");
         assertThat(first.has("base64_attachments")).isFalse();
         JsonNode second = MAPPER.readTree(cli.sentBodies.get(1));
-        assertThat(second.path("recipients").get(0).asText()).startsWith("group.");
+        assertThat(second.path("recipients").get(0).asString()).startsWith("group.");
     }
 
     @Test
@@ -104,7 +104,7 @@ class SignalApiClientTest {
                 List.of(new SignalApiClient.Attachment(bytes, "image/png", "cat;evil,name.png")));
 
         String uri =
-                MAPPER.readTree(cli.sentBodies.get(0)).path("base64_attachments").get(0).asText();
+                MAPPER.readTree(cli.sentBodies.get(0)).path("base64_attachments").get(0).asString();
         assertThat(uri).startsWith("data:image/png;filename=cat_evil_name.png;base64,");
         assertThat(Base64.getDecoder().decode(uri.substring(uri.indexOf("base64,") + 7)))
                 .isEqualTo(bytes);
@@ -226,7 +226,7 @@ class SignalApiClientTest {
                     "{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\"one\"}}}");
             JsonNode frame = stream.poll(Duration.ofSeconds(5));
             assertThat(frame).isNotNull();
-            assertThat(frame.path("envelope").path("dataMessage").path("message").asText())
+            assertThat(frame.path("envelope").path("dataMessage").path("message").asString())
                     .isEqualTo("one");
 
             // A large frame crosses the JDK's fragmentation boundary.
@@ -236,7 +236,7 @@ class SignalApiClientTest {
                             + big
                             + "\"}}}");
             JsonNode large = stream.poll(Duration.ofSeconds(5));
-            assertThat(large.path("envelope").path("dataMessage").path("message").asText())
+            assertThat(large.path("envelope").path("dataMessage").path("message").asString())
                     .hasSize(100_000);
 
             cli.dropConnections();

@@ -12,17 +12,17 @@ import com.agenticai.core.agents.modality.ModelModalities;
 import com.agenticai.core.agents.tools.e2b.SandboxDataAvailability;
 import com.agenticai.core.agents.tools.e2b.SandboxFileRegistry;
 import com.agenticai.core.sdlc.E2bCredentialService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * D5: the agent response says WHY file analysis is unavailable - only when the platform flag is on.
  */
 class AgentModalitiesViewTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @SuppressWarnings("unchecked")
     private static SandboxFileRegistry registry(boolean flagOn, boolean tenantReady) {
@@ -75,7 +75,8 @@ class AgentModalitiesViewTest {
                 AgentModalitiesView.of(
                         ModelModalities.NONE, state.available(), state.unavailableReason());
         JsonNode json = MAPPER.readTree(MAPPER.writeValueAsString(view));
-        assertEquals(state.unavailableReason(), json.path("sandboxDataUnavailableReason").asText());
+        assertEquals(
+                state.unavailableReason(), json.path("sandboxDataUnavailableReason").asString());
         assertFalse(json.path("sandboxData").asBoolean());
     }
 

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.providers.ToolRouterMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Through the real {@link ArgumentSanitizingToolCallingManager}, against a scripted provider model,
@@ -40,7 +40,7 @@ import reactor.core.publisher.Flux;
  */
 class ConstrainedToolRouterChatModelTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private final ToolCallingManager manager =
             new ArgumentSanitizingToolCallingManager(

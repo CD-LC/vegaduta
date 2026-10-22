@@ -3,8 +3,8 @@ package com.agenticai.core.omnichannel.imessage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class ImessageEventParserTest {
 

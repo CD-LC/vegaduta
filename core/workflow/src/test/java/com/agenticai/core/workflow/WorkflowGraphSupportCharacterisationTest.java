@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,8 @@ import org.junit.jupiter.api.Test;
  */
 class WorkflowGraphSupportCharacterisationTest {
 
-    private final WorkflowGraphSupport support = new WorkflowGraphSupport(new ObjectMapper());
+    private final WorkflowGraphSupport support =
+            new WorkflowGraphSupport(com.agenticai.core.json.JsonMappers.plain());
 
     private static WorkflowNodeDto node(Map<String, Object> config) {
         return new WorkflowNodeDto("n", "loop", Map.of(), Map.of("config", config, "label", "L"));

@@ -1,8 +1,5 @@
 package com.agenticai.core.golden;
 
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 import org.opentest4j.AssertionFailedError;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Golden-file support for the P0 characterisation suites (ADR-0012).
@@ -46,8 +47,8 @@ public final class GoldenJson {
         DefaultPrettyPrinter printer =
                 new DefaultPrettyPrinter().withObjectIndenter(indenter).withArrayIndenter(indenter);
         try {
-            return mapper.writer(printer).writeValueAsString(value) + "\n";
-        } catch (IOException e) {
+            return mapper.writer().with(printer).writeValueAsString(value) + "\n";
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "could not serialise golden value " + value.getClass(), e);
         }
@@ -102,12 +103,12 @@ public final class GoldenJson {
         assertMatches(name, mapper, sortKeys(mapper, mapper.valueToTree(value)));
     }
 
-    private static com.fasterxml.jackson.databind.JsonNode sortKeys(
-            ObjectMapper mapper, com.fasterxml.jackson.databind.JsonNode node) {
+    private static tools.jackson.databind.JsonNode sortKeys(
+            ObjectMapper mapper, tools.jackson.databind.JsonNode node) {
         if (node.isObject()) {
-            com.fasterxml.jackson.databind.node.ObjectNode sorted = mapper.createObjectNode();
+            tools.jackson.databind.node.ObjectNode sorted = mapper.createObjectNode();
             List<String> names = new ArrayList<>();
-            node.fieldNames().forEachRemaining(names::add);
+            node.propertyNames().iterator().forEachRemaining(names::add);
             java.util.Collections.sort(names);
             for (String key : names) {
                 sorted.set(key, sortKeys(mapper, node.get(key)));
@@ -115,7 +116,7 @@ public final class GoldenJson {
             return sorted;
         }
         if (node.isArray()) {
-            com.fasterxml.jackson.databind.node.ArrayNode array = mapper.createArrayNode();
+            tools.jackson.databind.node.ArrayNode array = mapper.createArrayNode();
             node.forEach(child -> array.add(sortKeys(mapper, child)));
             return array;
         }

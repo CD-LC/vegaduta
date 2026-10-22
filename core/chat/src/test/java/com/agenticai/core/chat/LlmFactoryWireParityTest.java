@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,12 +12,8 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.AzureOpenAiCredential;
 import com.agenticai.core.providers.OllamaCredential;
 import com.agenticai.core.providers.PlatformHostedLlmProvider;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,15 +26,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.mock.http.client.MockClientHttpResponse;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wire-level characterisation of every LLM chat-client factory (ADR-0012 P1b). Each factory is
@@ -70,9 +61,10 @@ class LlmFactoryWireParityTest {
                     "anthropic-version",
                     "Content-Type");
 
-    private final List<String> captured = new ArrayList<>();
-    private final Map<String, String> snapshot = new LinkedHashMap<>();
     private String reply = OPENAI_REPLY;
+    private final CannedLlmTransport transport = new CannedLlmTransport(() -> reply);
+    private final Map<String, String> snapshot = new LinkedHashMap<>();
+    private final List<String> captured = new ArrayList<>();
 
     private final ResilientToolCallingManagerFactory tools =
             new ResilientToolCallingManagerFactory(JsonMappers.plain());
@@ -81,57 +73,36 @@ class LlmFactoryWireParityTest {
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private final LlmPricingCatalog pricing = mock(LlmPricingCatalog.class);
 
-    @SuppressWarnings("unchecked")
+    // Spring AI 2 sits on the vendor SDKs (OkHttp): the canned transport is the terminal
+    // interceptor the
+    // factories get from LlmHttpClientFactory#transport, so the request each factory emits (URL,
+    // auth headers,
+    // JSON body) is captured exactly as it would have gone out on the wire.
     private LlmHttpClientFactory http() {
         LlmHttpClientFactory http = mock(LlmHttpClientFactory.class);
-        when(http.restClientBuilder()).thenAnswer(i -> restBuilder());
-        when(http.guardedRestClientBuilder()).thenAnswer(i -> restBuilder());
-        when(http.webClientBuilder()).thenAnswer(i -> WebClient.builder());
-        when(http.guardedWebClientBuilder()).thenAnswer(i -> WebClient.builder());
+        when(http.transport(anyBoolean())).thenReturn(transport);
         when(http.readTimeout()).thenReturn(Duration.ofSeconds(30));
         return http;
     }
 
-    private RestClient.Builder restBuilder() {
-        ClientHttpRequestFactory factory =
-                (uri, method) ->
-                        new MockClientHttpRequest(method, uri) {
-                            @Override
-                            protected ClientHttpResponse executeInternal() {
-                                capture(this);
-                                MockClientHttpResponse response =
-                                        new MockClientHttpResponse(
-                                                reply.getBytes(StandardCharsets.UTF_8),
-                                                HttpStatus.OK);
-                                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                                return response;
-                            }
-                        };
-        return RestClient.builder().requestFactory(factory);
-    }
-
-    private void capture(MockClientHttpRequest request) {
+    private void capture(CannedLlmTransport.Captured request) {
         StringBuilder sb = new StringBuilder();
-        sb.append(request.getMethod()).append(' ').append(request.getURI()).append('\n');
-        HttpHeaders headers = request.getHeaders();
+        sb.append(request.method()).append(' ').append(request.url()).append('\n');
         for (String name : HEADERS) {
-            if (headers.containsKey(name)) {
+            List<String> values = request.headers().values(name);
+            if (!values.isEmpty()) {
                 sb.append("  ")
                         .append(name)
                         .append(": ")
-                        .append(String.join(",", headers.get(name)))
+                        .append(String.join(",", values))
                         .append('\n');
             }
         }
         try {
-            JsonNode body = JSON.readTree(request.getBodyAsString());
+            JsonNode body = JSON.readTree(request.body());
             Object tree = JSON.treeToValue(body, Object.class);
-            sb.append("  body: ")
-                    .append(
-                            SORTED.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
-                                    .writeValueAsString(tree))
-                    .append('\n');
-        } catch (IOException e) {
+            sb.append("  body: ").append(SORTED.writeValueAsString(tree)).append('\n');
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
         captured.add(sb.toString());
@@ -160,7 +131,9 @@ class LlmFactoryWireParityTest {
 
     private void run(String label, ChatClient client) {
         captured.clear();
+        transport.captured().clear();
         client.prompt().user("hi").call().content();
+        transport.captured().forEach(this::capture);
         StringBuilder sb = new StringBuilder("### " + label + "\n");
         captured.forEach(sb::append);
         snapshot.put(label, sb.toString());

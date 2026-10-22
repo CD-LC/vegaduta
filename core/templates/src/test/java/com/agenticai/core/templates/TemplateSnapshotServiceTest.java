@@ -10,12 +10,12 @@ import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * THE acceptance test for this module's single most important correctness property: the {@code
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  */
 class TemplateSnapshotServiceTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final TemplateSnapshotService service = new TemplateSnapshotService(mapper);
 
     // Sentinel secrets/identity/tenant values that MUST NEVER appear in a snapshot.
@@ -83,10 +83,10 @@ class TemplateSnapshotServiceTest {
         assertThat(config.get("allowedKnowledgeCollectionIds")).isEmpty();
 
         // The design content the user deliberately authored IS carried through.
-        assertThat(config.get("systemPrompt").asText())
+        assertThat(config.get("systemPrompt").asString())
                 .isEqualTo("You are a helpful returns assistant.");
-        assertThat(config.get("model").asText()).isEqualTo("claude-sonnet-4-5");
-        assertThat(config.get("providerName").asText()).isEqualTo("ANTHROPIC");
+        assertThat(config.get("model").asString()).isEqualTo("claude-sonnet-4-5");
+        assertThat(config.get("providerName").asString()).isEqualTo("ANTHROPIC");
         // An unconfigured optional design field is present-but-null (Jackson emits the
         // record component), never omitted and never defaulted to something misleading.
         assertThat(config.hasNonNull("economyModel")).isFalse();
@@ -133,7 +133,7 @@ class TemplateSnapshotServiceTest {
         JsonNode config = parse(configJson);
         assertThat(fieldNames(config)).containsExactlyInAnyOrder("name", "description", "graph");
         // The design graph itself is preserved intact.
-        assertThat(config.get("graph").get("nodes").get(0).get("id").asText()).isEqualTo("n1");
+        assertThat(config.get("graph").get("nodes").get(0).get("id").asString()).isEqualTo("n1");
     }
 
     // ------------------------------------------------------------------
@@ -174,7 +174,7 @@ class TemplateSnapshotServiceTest {
 
     private static List<String> fieldNames(JsonNode node) {
         List<String> names = new java.util.ArrayList<>();
-        node.fieldNames().forEachRemaining(names::add);
+        node.propertyNames().iterator().forEachRemaining(names::add);
         return names;
     }
 

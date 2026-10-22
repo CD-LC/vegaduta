@@ -15,14 +15,14 @@ import com.agenticai.core.agents.tools.classification.ToolClassification;
 import com.agenticai.core.agents.tools.classification.ToolSensitivity;
 import com.agenticai.core.agents.tools.classification.ToolTrustTier;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code browser_request_user}: offered only with takeover on, parks the agent, reports status
@@ -30,7 +30,7 @@ import org.springframework.ai.tool.ToolCallback;
  */
 class BrowserTakeoverToolTest {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     @AfterEach
     void clear() {
@@ -51,7 +51,7 @@ class BrowserTakeoverToolTest {
     void theToolDefinitionIsAValidShortSchema() throws Exception {
         BrowserRequestUserToolCallback tool = tool(new Rig(BrowserTakeoverFixtures.on()));
         assertThat(tool.getToolDefinition().name()).isEqualTo("browser_request_user");
-        assertThat(JSON.readTree(tool.getToolDefinition().inputSchema()).path("type").asText())
+        assertThat(JSON.readTree(tool.getToolDefinition().inputSchema()).path("type").asString())
                 .isEqualTo("object");
         assertThat(tool.getToolDefinition().description().length()).isLessThan(700);
     }
@@ -63,22 +63,24 @@ class BrowserTakeoverToolTest {
         TenantContext.set(TenantContext.of(TENANT, USER, Set.of()));
 
         JsonNode parked = call(tool, "{\"reason\":\"Solve the captcha\",\"kind\":\"captcha\"}");
-        assertThat(parked.path("state").asText()).isEqualTo("PAUSED_FOR_USER");
-        assertThat(parked.path("message").asText()).contains("Do NOT call any other browser tool");
-        assertThat(call(tool, "{\"action\":\"status\"}").path("state").asText())
+        assertThat(parked.path("state").asString()).isEqualTo("PAUSED_FOR_USER");
+        assertThat(parked.path("message").asString())
+                .contains("Do NOT call any other browser tool");
+        assertThat(call(tool, "{\"action\":\"status\"}").path("state").asString())
                 .isEqualTo("PAUSED_FOR_USER");
 
         UUID id =
                 UUID.fromString(rig.service.status(TENANT, USER, AGENT, CHAT_SESSION).takeoverId());
         rig.service.begin(TENANT, USER, id);
-        assertThat(call(tool, "{\"action\":\"status\"}").path("state").asText())
+        assertThat(call(tool, "{\"action\":\"status\"}").path("state").asString())
                 .isEqualTo("USER_CONTROL");
         rig.service.handBack(TENANT, USER, id);
 
         JsonNode done = call(tool, "{\"action\":\"status\"}");
-        assertThat(done.path("state").asText()).isEqualTo("AGENT_CONTROL");
-        assertThat(done.path("message").asText()).contains("The user finished the requested step");
-        assertThat(call(tool, "{\"action\":\"status\"}").path("message").asText())
+        assertThat(done.path("state").asString()).isEqualTo("AGENT_CONTROL");
+        assertThat(done.path("message").asString())
+                .contains("The user finished the requested step");
+        assertThat(call(tool, "{\"action\":\"status\"}").path("message").asString())
                 .doesNotContain("The user finished");
     }
 
@@ -86,12 +88,12 @@ class BrowserTakeoverToolTest {
     void badArgumentsAndMissingContextComeBackAsErrorsNotExceptions() throws Exception {
         Rig rig = new Rig(BrowserTakeoverFixtures.on());
         BrowserRequestUserToolCallback tool = tool(rig);
-        assertThat(call(tool, "{\"reason\":\"x\"}").path("error").asText())
+        assertThat(call(tool, "{\"reason\":\"x\"}").path("error").asString())
                 .as("no tenant context")
                 .contains("tenant");
         TenantContext.set(TenantContext.of(TENANT, USER, Set.of()));
-        assertThat(call(tool, "{}").path("error").asText()).contains("reason");
-        assertThat(call(tool, "{\"action\":\"teleport\"}").path("error").asText())
+        assertThat(call(tool, "{}").path("error").asString()).contains("reason");
+        assertThat(call(tool, "{\"action\":\"teleport\"}").path("error").asString())
                 .contains("action");
         assertThat(rig.service.controlFor(rig.key).state())
                 .isEqualTo(BrowserTakeoverState.AGENT_CONTROL);
@@ -107,7 +109,7 @@ class BrowserTakeoverToolTest {
                         AGENT,
                         "a-chat-with-no-browser");
         TenantContext.set(TenantContext.of(TENANT, USER, Set.of()));
-        assertThat(call(tool, "{\"reason\":\"x\"}").path("error").asText())
+        assertThat(call(tool, "{\"reason\":\"x\"}").path("error").asString())
                 .contains("browser_navigate");
     }
 

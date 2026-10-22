@@ -47,7 +47,6 @@ import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.FeatureFlagService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -113,10 +112,12 @@ class AgentChatServiceByokFallbackGatingTest {
                 mock(AgentService.class),
                 credentialResolver,
                 llmGatewayService,
-                mock(SessionMemoryService.class),
-                // REAL translator (no explainer/catalog): the gate's classification
+                mock(
+                        SessionMemoryService
+                                .class), // REAL translator (no explainer/catalog): the gate's
+                // classification
                 // of raw exceptions is part of what this suite pins.
-                new ProviderErrorTranslator(new ObjectMapper(), null),
+                new ProviderErrorTranslator(com.agenticai.core.json.JsonMappers.plain(), null),
                 mock(AgentToolPort.class),
                 providerOf(mock(AgentMemoryService.class)),
                 providerOf((TenantMemoryService) null),
@@ -144,13 +145,15 @@ class AgentChatServiceByokFallbackGatingTest {
                 mock(ResourceAccessService.class),
                 mock(VisionUsageService.class),
                 mock(VisionSessionService.class),
-                providerOf((com.agenticai.core.providers.PlatformHostedLlmProviderService) null),
-                // Load-test seam - unstubbed mock is false for every tenantId,
+                providerOf(
+                        (com.agenticai.core.providers.PlatformHostedLlmProviderService)
+                                null), // Load-test seam - unstubbed mock is false for every
+                // tenantId,
                 // matching this suite's existing (non-load-test) assumptions.
                 mock(LoadTestTenantAllowlist.class),
                 mock(ChatTurnCancelService.class),
-                java.time.Duration.ofSeconds(90),
-                // Buffered-depth total-turn ceiling and SSE keepalive interval
+                java.time.Duration.ofSeconds(
+                        90), // Buffered-depth total-turn ceiling and SSE keepalive interval
                 // (2026-09-17). Neither fires in this suite - every turn here resolves
                 // in milliseconds - so both are just non-null values the constructor needs.
                 java.time.Duration.ofSeconds(240),

@@ -24,7 +24,6 @@ import com.agenticai.core.agents.job.AgentJobRepository;
 import com.agenticai.core.agents.job.AgentJobService;
 import com.agenticai.core.agents.job.dto.AgentJobStartRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.Optional;
@@ -73,7 +72,7 @@ class AgentJobResultSchemaResolutionTest {
                         mock(AgentJobExecutor.class),
                         new AgentJobProperties(),
                         new SimpleMeterRegistry(),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         15);
 
         TenantContext.set(

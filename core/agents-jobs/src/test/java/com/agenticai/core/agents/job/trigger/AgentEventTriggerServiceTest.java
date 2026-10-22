@@ -15,7 +15,6 @@ import com.agenticai.core.agents.job.trigger.dto.AgentEventTriggerRequest;
 import com.agenticai.core.agents.job.trigger.dto.AgentEventTriggerResponse;
 import com.agenticai.core.eventbus.WorkflowEventTypes;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +61,7 @@ class AgentEventTriggerServiceTest {
                         repository,
                         mock(AgentService.class),
                         properties,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         new AgentEventTriggerPresenceCache(),
                         tenantLimits);
         when(repository.save(any(AgentEventTrigger.class))).thenAnswer(i -> i.getArgument(0));
@@ -87,8 +86,9 @@ class AgentEventTriggerServiceTest {
     void anEventTypeThePlatformDoesNotPublishIsRejectedWithTheValidSet() {
         assertThatThrownBy(() -> upsert("customer.churned", null, "React."))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("customer.churned")
-                // Event names are not invented here; the nine real ones have to be in
+                .hasMessageContaining(
+                        "customer.churned") // Event names are not invented here; the nine real ones
+                // have to be in
                 // the message because they are not guessable.
                 .hasMessageContaining(WHATSAPP)
                 .hasMessageContaining(WorkflowEventTypes.DOCUMENT_GENERATION_COMPLETED);
@@ -295,7 +295,10 @@ class AgentEventTriggerServiceTest {
         // Only reachable by hand-editing a row past requireUsable. A filter that
         // cannot be evaluated must not degrade into "match everything" - that
         // would turn a narrow subscription into a firehose.
-        assertThatThrownBy(() -> AgentEventTriggerFilter.parse("{oops", new ObjectMapper()))
+        assertThatThrownBy(
+                        () ->
+                                AgentEventTriggerFilter.parse(
+                                        "{oops", com.agenticai.core.json.JsonMappers.plain()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

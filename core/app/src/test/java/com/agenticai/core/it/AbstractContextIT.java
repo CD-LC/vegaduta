@@ -28,7 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
             "app.storage.type=local",
             "app.storage.local.path=${java.io.tmpdir}/vegaduta-it-storage",
             "management.tracing.sampling.probability=0.0",
-            "management.otlp.tracing.export.enabled=false",
+            "management.tracing.export.otlp.enabled=false",
             "management.endpoint.health.show-details=always"
         })
 public abstract class AbstractContextIT {

@@ -18,8 +18,6 @@ import com.agenticai.core.knowledge.ocr.OcrProviderConfigService;
 import com.agenticai.core.knowledge.rag.KnowledgeRagSettingsService;
 import com.agenticai.core.knowledge.rag.ParentChildChunker;
 import com.agenticai.core.knowledge.rag.ParentChunkStore;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,11 +26,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Ingestion with parent-child on (collection opted in) and the unchanged flat path otherwise. */
 class KnowledgeIngestionParentChildTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String TEXT =
             "# Refunds\nRefunds are issued within 14 days. Contact support first.\n\n"
                     + "# Shipping\nShipping takes 5 days. Express takes 2 days.\n\nTracking numbers are emailed.";
@@ -152,9 +152,10 @@ class KnowledgeIngestionParentChildTest {
             for (ParentChildChunker.Child child : expected.get(p).children()) {
                 Object[] row = insertedChunks.get(childNumber++);
                 JsonNode metadata = MAPPER.readTree((String) row[row.length - 1]);
-                assertEquals("text", metadata.get("source_type").asText());
+                assertEquals("text", metadata.get("source_type").asString());
                 assertEquals(
-                        rows.getValue().get(p).id().toString(), metadata.get("parent_id").asText());
+                        rows.getValue().get(p).id().toString(),
+                        metadata.get("parent_id").asString());
                 assertEquals(child.startInParent(), metadata.get("child_start").asInt());
                 assertEquals(child.endInParent(), metadata.get("child_end").asInt());
                 String content = (String) row[4]; // sql, id, source, chunk_index, content, ...

@@ -6,13 +6,11 @@ import static org.mockito.Mockito.mock;
 
 import com.agenticai.core.audit.PlatformIssueService;
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +18,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The real legacy {@link WorkflowExecutionEngine} + real {@link WorkflowNodeExecutor} + real
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class WorkflowExecutionEngineExpressionDataTest {
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper mapper = JsonMappers.withJavaTime();
     private final List<WorkflowRunNodeOutput> saved = new ArrayList<>();
     private WorkflowExecutionEngine engine;
     private WorkflowDefinition definition;

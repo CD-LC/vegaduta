@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.mcp.oauth.McpOAuthConnectionStore.McpOAuthConnection;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -19,6 +18,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class McpOAuthServiceTest {
 
@@ -78,7 +78,7 @@ class McpOAuthServiceTest {
     }
 
     private McpOAuthService newService(boolean enabled) {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
         return new McpOAuthService(
                 new McpOAuthDiscovery(http, om),
                 new McpOAuthClient(http, om),

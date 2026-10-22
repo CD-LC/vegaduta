@@ -8,12 +8,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.collab.RunBudget;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
 
 class RunBudgetToolCallbackTest {
 
@@ -41,9 +40,9 @@ class RunBudgetToolCallbackTest {
         assertEquals("answer", cb.call("{}")); // $0.036 spent, now over
         String stopped = cb.call("{}");
 
-        JsonNode root = new ObjectMapper().readTree(stopped);
-        assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asText());
-        assertTrue(root.get("error").asText().contains("Run budget reached"));
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(stopped);
+        assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asString());
+        assertTrue(root.get("error").asString().contains("Run budget reached"));
         verify(raw, org.mockito.Mockito.times(2)).call("{}");
     }
 
@@ -58,8 +57,10 @@ class RunBudgetToolCallbackTest {
     void stopJsonIsAlwaysValidJson() throws Exception {
         RunBudget b = budget("0.001");
         b.record("x".repeat(4000), "y".repeat(4000));
-        JsonNode root = new ObjectMapper().readTree(RunBudgetToolCallback.stopJson(b));
-        assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asText());
+        JsonNode root =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(RunBudgetToolCallback.stopJson(b));
+        assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asString());
     }
 
     @Test

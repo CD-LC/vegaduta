@@ -17,10 +17,10 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link CommunityTemplateService} test classes: mocks, a REAL {@link
@@ -37,7 +37,7 @@ abstract class CommunityTemplateServiceTestBase {
     final AgentService agentService = mock(AgentService.class);
     final AgentRepository agentRepository = mock(AgentRepository.class);
     final WorkflowService workflowService = mock(WorkflowService.class);
-    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     final TemplateSnapshotService snapshotService = new TemplateSnapshotService(mapper);
     // A Mockito mock's void assertWithinDailyCap is a no-op - the daily import
     // cap never trips in these tests, which exercise the lifecycle, not the limiter.

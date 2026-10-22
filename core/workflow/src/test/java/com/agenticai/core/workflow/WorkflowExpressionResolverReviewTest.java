@@ -10,11 +10,11 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.workflow.WorkflowExpressionResolver.NodeEvalInfo;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Resolver behaviour pinned by the review of the expression feature: {{input}} in the agent and CRM
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  */
 class WorkflowExpressionResolverReviewTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String RUN = UUID.randomUUID().toString();
     private static final NodeEvalInfo INFO =
             new NodeEvalInfo(UUID.randomUUID().toString(), "wf", RUN, "ann");
@@ -136,14 +136,14 @@ class WorkflowExpressionResolverReviewTest {
                 argsJson("{\"qty\":\"{{ $json.n }}\",\"label\":\"n={{ $json.n }}\"}", "{\"n\":5}");
         assertTrue(args.get("qty").isNumber(), args.toString());
         assertEquals(5, args.get("qty").asInt());
-        assertEquals("n=5", args.get("label").asText());
+        assertEquals("n=5", args.get("label").asString());
     }
 
     @Test
     void aSubstitutedValueWithQuotesAndNewlinesCannotBreakTheJsonArgs() throws Exception {
         JsonNode args =
                 argsJson("{\"m\":\"{{ $json.s }}\"}", "{\"s\":\"he said \\\"hi\\\"\\nbye\"}");
-        assertEquals("he said \"hi\"\nbye", args.get("m").asText());
+        assertEquals("he said \"hi\"\nbye", args.get("m").asString());
     }
 
     // ---- CRM fields blank a key the input does not carry

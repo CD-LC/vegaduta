@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.approval.dto.ApprovalDecisionRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -71,7 +70,7 @@ class ApprovalControllerTest {
                         gateService,
                         requestRepository,
                         policyService,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         List.of(workflowRule));
     }
 

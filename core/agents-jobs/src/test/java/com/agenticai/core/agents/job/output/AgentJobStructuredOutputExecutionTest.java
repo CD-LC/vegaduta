@@ -21,13 +21,13 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The acceptance criterion PR-6 shipped violating: <b>a job with a schema returns valid parsed JSON
@@ -41,7 +41,7 @@ import reactor.core.publisher.Flux;
  */
 class AgentJobStructuredOutputExecutionTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @AfterEach
     void tearDown() {
@@ -67,7 +67,7 @@ class AgentJobStructuredOutputExecutionTest {
         // Parsed, not merely non-null: "surface the parsed object on the job
         // result" is the half of the criterion a raw string would silently fail.
         JsonNode parsed = MAPPER.readTree(job.getResultJson());
-        assertEquals("three tickets, all billing", parsed.path("summary").asText());
+        assertEquals("three tickets, all billing", parsed.path("summary").asString());
         assertEquals(3, parsed.path("count").asInt());
     }
 

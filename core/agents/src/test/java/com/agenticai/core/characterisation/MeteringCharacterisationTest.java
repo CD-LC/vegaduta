@@ -25,7 +25,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
@@ -342,15 +341,24 @@ class MeteringCharacterisationTest {
 
     /**
      * Anthropic-shaped usage: promptTokens is the uncached input only, the cache counters live in
-     * the native payload. P3 touch point: {@code AnthropicApi.Usage} moves package in Spring AI 2
-     * (the official anthropic-java SDK), so this helper is the only line to adapt.
+     * the native SDK payload AND (Spring AI 2) on the Usage interface itself.
      */
     private static Usage anthropicUsage(int input, int output, int cacheWrite, int cacheRead) {
+        com.anthropic.models.messages.Usage nativeUsage =
+                com.anthropic.models.messages.Usage.builder()
+                        .cacheCreation(java.util.Optional.empty())
+                        .cacheCreationInputTokens(java.util.Optional.of((long) cacheWrite))
+                        .cacheReadInputTokens(java.util.Optional.of((long) cacheRead))
+                        .inferenceGeo(java.util.Optional.empty())
+                        .inputTokens((long) input)
+                        .outputTokens((long) output)
+                        .outputTokensDetails(java.util.Optional.empty())
+                        .serverToolUse(java.util.Optional.empty())
+                        .serviceTier(java.util.Optional.empty())
+                        .build();
+        // Exactly what Spring AI 2's AnthropicChatModel#getDefaultUsage builds.
         return new DefaultUsage(
-                input,
-                output,
-                input + output,
-                new AnthropicApi.Usage(input, output, cacheWrite, cacheRead));
+                input, output, input + output, nativeUsage, (long) cacheRead, (long) cacheWrite);
     }
 
     @Test
@@ -371,14 +379,20 @@ class MeteringCharacterisationTest {
     }
 
     /**
-     * P3-DECISION: today a tool turn loses the provider-native usage (UsageCalculator builds a
-     * plain DefaultUsage), so cache counters are ABSENT - null on the row and no cache meter series
-     * at all - while prompt/completion stay cumulative. If Spring AI 2 accumulates native usage,
-     * cacheRead becomes non-null here; that is an improvement, but the cost estimate then changes,
-     * so decide.
+     * P3-DECISION (intended improvement, ADR-0012 P3): on Spring AI 1.1 a tool turn lost the
+     * provider-native usage (UsageCalculator built a plain DefaultUsage), so the cache counters
+     * were ABSENT (null, no meter series) while prompt/completion stayed cumulative. Spring AI 2
+     * carries the cache read/write counts on the Usage interface and sums them across the tool
+     * loop, and LlmMetricsAdvisor now hands CacheTokenAccounting the provider (the
+     * exclusive/inclusive billing convention can no longer be read off a native object that the
+     * summed usage does not have). So the row now records the SUM of the per-iteration counters:
+     * write 100+0, read 0+400, with the uncached prompt tokens still 300+50 (Anthropic prompt
+     * tokens exclude the cache buckets). Every other assertion is unchanged; single-call turns
+     * behave exactly as before.
      */
     @Test
-    void toolTurnDropsAnthropicCacheCountersButKeepsCumulativeTokens() throws Exception {
+    void toolTurnSumsAnthropicCacheCountersAcrossIterationsAndKeepsCumulativeTokens()
+            throws Exception {
         ScriptedChatModel model =
                 model(
                         toolCalls(anthropicUsage(300, 10, 100, 0), call("c1", "lookup", "{}")),
@@ -391,11 +405,15 @@ class MeteringCharacterisationTest {
         assertThat(rows).hasSize(1);
         assertThat(logged.get(0).prompt()).isEqualTo(350);
         assertThat(logged.get(0).completion()).isEqualTo(40);
-        assertThat(logged.get(0).cacheCreation()).as("absent, not zero").isNull();
-        assertThat(logged.get(0).cacheRead()).as("absent, not zero").isNull();
+        assertThat(logged.get(0).cacheCreation())
+                .as("100 written in iteration 1, 0 in iteration 2")
+                .isEqualTo(100);
+        assertThat(logged.get(0).cacheRead())
+                .as("0 read in iteration 1, 400 in iteration 2")
+                .isEqualTo(400);
         assertThat(meters.find("llm.cache.accounted.calls").counters())
-                .as("no series for unmeasured cache")
-                .isEmpty();
+                .as("the tool turn is now a measured call")
+                .isNotEmpty();
     }
 
     // -------------------------------------------------------- cancellation

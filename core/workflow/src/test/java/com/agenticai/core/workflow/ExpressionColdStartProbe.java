@@ -1,12 +1,13 @@
 package com.agenticai.core.workflow;
 
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.expression.BasicEvalContext;
 import com.agenticai.core.workflow.expression.ExpressionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Main class for {@link ExpressionColdStartTest}, run in a fresh JVM so nothing is pre-loaded by
@@ -20,7 +21,7 @@ public final class ExpressionColdStartProbe {
 
     public static void main(String[] args) {
         var classes = ManagementFactory.getClassLoadingMXBean();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMappers.plain();
         long c0 = classes.getTotalLoadedClassCount();
         WorkflowExpressionResolver resolver =
                 new WorkflowExpressionResolver(

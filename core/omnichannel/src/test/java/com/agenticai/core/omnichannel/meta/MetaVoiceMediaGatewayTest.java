@@ -12,7 +12,6 @@ import com.agenticai.core.omnichannel.whatsappvoice.TestAudio;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceMediaGateway;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteException;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteOutcome;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Real Meta is not reachable from here, so this pins the request SHAPES and every guard against a
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
  */
 class MetaVoiceMediaGatewayTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String TOKEN = "tok-123";
 
     private HttpServer server;

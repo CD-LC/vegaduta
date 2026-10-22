@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -17,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link WorkflowTraversalRules} runs inside the Temporal workflow class, so it must be
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  */
 class WorkflowTraversalRulesTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static WorkflowNodeDto node(Map<String, Object> config) {
         return new WorkflowNodeDto("n", "loop", Map.of(), Map.of("config", config, "label", "L"));

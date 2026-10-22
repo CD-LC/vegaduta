@@ -12,8 +12,6 @@ import com.agenticai.core.rl.domain.TurnFeedback;
 import com.agenticai.core.rl.repo.EpisodeRepository;
 import com.agenticai.core.rl.repo.TrajectoryStepRepository;
 import com.agenticai.core.rl.repo.TurnFeedbackRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Verifies the NDJSON trace export: every line parses standalone, an episode line inlines its steps
@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TrajectoryExportServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @Mock private EpisodeRepository episodeRepository;
     @Mock private TrajectoryStepRepository stepRepository;
@@ -126,17 +126,18 @@ class TrajectoryExportServiceTest {
 
         assertThat(parsed).hasSize(1);
         JsonNode row = parsed.get(0);
-        assertThat(row.get("type").asText()).isEqualTo("episode");
-        assertThat(row.get("schema").asText()).isEqualTo(TrajectoryExportService.TRAJECTORY_SCHEMA);
-        assertThat(row.get("sessionId").asText()).isEqualTo("s1");
+        assertThat(row.get("type").asString()).isEqualTo("episode");
+        assertThat(row.get("schema").asString())
+                .isEqualTo(TrajectoryExportService.TRAJECTORY_SCHEMA);
+        assertThat(row.get("sessionId").asString()).isEqualTo("s1");
         assertThat(row.get("reward").asDouble()).isEqualTo(0.9);
         // JSON columns embedded parsed, not double-encoded.
         assertThat(row.get("context").get("k").asInt()).isEqualTo(1);
         assertThat(row.get("rewardBreakdown").get("HUMAN").asDouble()).isEqualTo(0.9);
         assertThat(row.get("steps")).hasSize(3);
-        assertThat(row.get("steps").get(1).get("toolName").asText()).isEqualTo("search");
+        assertThat(row.get("steps").get(1).get("toolName").asString()).isEqualTo("search");
         assertThat(row.get("steps").get(1).get("tokens").asLong()).isEqualTo(12L);
-        assertThat(row.get("steps").get(2).get("content").asText()).isEqualTo("the answer");
+        assertThat(row.get("steps").get(2).get("content").asString()).isEqualTo("the answer");
     }
 
     @Test
@@ -151,7 +152,7 @@ class TrajectoryExportServiceTest {
         List<JsonNode> parsed = lines(service.trajectoriesJsonl(agentId, 1));
 
         assertThat(parsed).hasSize(1);
-        assertThat(parsed.get(0).get("sessionId").asText()).isEqualTo("s1");
+        assertThat(parsed.get(0).get("sessionId").asString()).isEqualTo("s1");
     }
 
     @Test
@@ -222,13 +223,13 @@ class TrajectoryExportServiceTest {
 
         assertThat(parsed).hasSize(2);
         JsonNode dpo = parsed.get(0);
-        assertThat(dpo.get("type").asText()).isEqualTo("dpo");
-        assertThat(dpo.get("prompt").asText()).isEqualTo("p-t1");
-        assertThat(dpo.get("chosen").asText()).isEqualTo("corrected");
-        assertThat(dpo.get("rejected").asText()).isEqualTo("a-t1");
+        assertThat(dpo.get("type").asString()).isEqualTo("dpo");
+        assertThat(dpo.get("prompt").asString()).isEqualTo("p-t1");
+        assertThat(dpo.get("chosen").asString()).isEqualTo("corrected");
+        assertThat(dpo.get("rejected").asString()).isEqualTo("a-t1");
         JsonNode kto = parsed.get(1);
-        assertThat(kto.get("type").asText()).isEqualTo("kto");
+        assertThat(kto.get("type").asString()).isEqualTo("kto");
         assertThat(kto.get("label").asBoolean()).isTrue();
-        assertThat(kto.get("signal").asText()).isEqualTo("THUMBS_UP");
+        assertThat(kto.get("signal").asString()).isEqualTo("THUMBS_UP");
     }
 }

@@ -30,7 +30,6 @@ import com.agenticai.core.tutor.dto.TutorDtos.QuizAnswerResult;
 import com.agenticai.core.tutor.dto.TutorDtos.QuizInput;
 import com.agenticai.core.tutor.dto.TutorDtos.QuizQuestionView;
 import com.agenticai.core.tutor.dto.TutorDtos.ReviewAnswerResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -253,8 +252,7 @@ class StudyPlanServiceTest {
             assertNull(q.selectedIndex());
         }
         String json =
-                new ObjectMapper()
-                        .findAndRegisterModules()
+                com.agenticai.core.json.JsonMappers.withJavaTime()
                         .writeValueAsString(service.get("alice", plan.id()));
         assertFalse(json.contains("correctIndex"), json);
         assertFalse(json.contains("Because of"), json);

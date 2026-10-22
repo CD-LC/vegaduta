@@ -3,7 +3,6 @@ package com.agenticai.core.apidocs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.audit.AuditOutcome;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,6 +15,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pins core's {@link AuditOutcome} to the audit vocabulary of the two Agent SDKs and to the
@@ -58,7 +58,7 @@ class AuditOutcomeAlignmentTest {
         schema.path("properties")
                 .path("outcome")
                 .path("enum")
-                .forEach(n -> published.add(n.asText()));
+                .forEach(n -> published.add(n.asString()));
         assertThat(published).isEqualTo(core());
     }
 

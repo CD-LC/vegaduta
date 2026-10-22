@@ -6,11 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.execution.ToolExecutionException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * What a failed tool call hands back to the model: never a credential, never an unbounded stack of
@@ -57,7 +56,7 @@ class RedactingToolExecutionExceptionProcessorTest {
                 processor.process(
                         new ToolExecutionException(DEFINITION, new RuntimeException(huge)));
 
-        JsonNode node = new ObjectMapper().readTree(result);
+        JsonNode node = com.agenticai.core.json.JsonMappers.plain().readTree(result);
         assertTrue(node.isObject());
         assertTrue(
                 result.length() < 1_000,

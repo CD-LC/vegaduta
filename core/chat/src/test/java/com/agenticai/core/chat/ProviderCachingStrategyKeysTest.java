@@ -62,11 +62,12 @@ class ProviderCachingStrategyKeysTest {
         OpenAIProviderCachingStrategy strategy = new OpenAIProviderCachingStrategy(true);
         OpenAiChatOptions options = OpenAiChatOptions.builder().model("gpt-4.1").build();
 
-        strategy.applyToRequestOptions(options, "sk-test", "sys");
+        // Spring AI 2 options are immutable: the keyed options come back as a new instance.
+        OpenAiChatOptions keyed = strategy.applyToRequestOptions(options, "sk-test", "sys");
 
         assertEquals(
                 OpenAIProviderCachingStrategy.promptCacheKeyFor("sk-test", "sys"),
-                options.getPromptCacheKey());
+                keyed.getPromptCacheKey());
     }
 
     @Test

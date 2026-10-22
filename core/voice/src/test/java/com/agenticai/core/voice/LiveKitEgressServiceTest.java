@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.storage.StorageProperties;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,6 +12,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Verifies {@link LiveKitEgressService} builds the request LiveKit's Egress (Twirp) API actually
@@ -92,18 +92,18 @@ class LiveKitEgressServiceTest {
         assertThat(lastPath.get()).isEqualTo("/twirp/livekit.Egress/StartRoomCompositeEgress");
         assertThat(lastAuthHeader.get()).startsWith("Bearer ");
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         JsonNode body = mapper.readTree(lastBody.get());
-        assertThat(body.get("room_name").asText()).isEqualTo("voice-room-1");
+        assertThat(body.get("room_name").asString()).isEqualTo("voice-room-1");
         assertThat(body.get("audio_only").asBoolean()).isTrue();
         JsonNode fileOutput = body.get("file_outputs").get(0);
-        assertThat(fileOutput.get("file_type").asText()).isEqualTo("OGG");
-        assertThat(fileOutput.get("filepath").asText()).isEqualTo(result.objectKey());
+        assertThat(fileOutput.get("file_type").asString()).isEqualTo("OGG");
+        assertThat(fileOutput.get("filepath").asString()).isEqualTo(result.objectKey());
         JsonNode s3 = fileOutput.get("s3");
-        assertThat(s3.get("access_key").asText()).isEqualTo("minioadmin");
-        assertThat(s3.get("secret").asText()).isEqualTo("minioadmin");
-        assertThat(s3.get("bucket").asText()).isEqualTo("agentic-ai");
-        assertThat(s3.get("endpoint").asText()).isEqualTo("http://minio:9000");
+        assertThat(s3.get("access_key").asString()).isEqualTo("minioadmin");
+        assertThat(s3.get("secret").asString()).isEqualTo("minioadmin");
+        assertThat(s3.get("bucket").asString()).isEqualTo("agentic-ai");
+        assertThat(s3.get("endpoint").asString()).isEqualTo("http://minio:9000");
         assertThat(s3.get("force_path_style").asBoolean()).isTrue();
 
         // The Authorization bearer token itself must carry the roomRecord
@@ -145,9 +145,9 @@ class LiveKitEgressServiceTest {
         service.stopRecording("EG_abc123");
 
         assertThat(lastPath.get()).isEqualTo("/twirp/livekit.Egress/StopEgress");
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         JsonNode body = mapper.readTree(lastBody.get());
-        assertThat(body.get("egress_id").asText()).isEqualTo("EG_abc123");
+        assertThat(body.get("egress_id").asString()).isEqualTo("EG_abc123");
     }
 
     @Test

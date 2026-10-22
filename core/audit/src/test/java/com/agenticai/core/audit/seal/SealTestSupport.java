@@ -1,6 +1,5 @@
 package com.agenticai.core.audit.seal;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Test fixtures: an Ed25519 signer, deterministic rows and a seal builder independent of
@@ -22,7 +22,7 @@ import java.util.UUID;
 final class SealTestSupport {
 
     static final long BASE_MICROS = 1_700_000_000_000_000L;
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     private SealTestSupport() {}
 

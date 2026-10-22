@@ -31,7 +31,7 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.ai.retry.TransientAiException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -87,8 +87,8 @@ class LlmModelSupportTest {
         assertThrows(
                 TransientAiException.class,
                 () ->
-                        retry.execute(
-                                ctx -> {
+                        retry.invoke(
+                                () -> {
                                     calls.incrementAndGet();
                                     throw new TransientAiException("500 - boom");
                                 }));
@@ -104,8 +104,8 @@ class LlmModelSupportTest {
         assertThrows(
                 NonTransientAiException.class,
                 () ->
-                        retry.execute(
-                                ctx -> {
+                        retry.invoke(
+                                () -> {
                                     calls.incrementAndGet();
                                     throw new NonTransientAiException("400 - bad request");
                                 }));
@@ -114,14 +114,14 @@ class LlmModelSupportTest {
 
     @Test
     void degenerateBackoffSettingsDoNotBreakContextStartup() {
-        // RetryTemplateBuilder asserts max > initial; a max <= initial config must not fail boot.
+        // the retry policy needs max > initial; a max <= initial config must not fail boot.
         RetryTemplate retry = LlmModelSupport.boundedRetryTemplate(0, Duration.ZERO, Duration.ZERO);
         AtomicInteger calls = new AtomicInteger();
         assertThrows(
                 TransientAiException.class,
                 () ->
-                        retry.execute(
-                                ctx -> {
+                        retry.invoke(
+                                () -> {
                                     calls.incrementAndGet();
                                     throw new TransientAiException("500");
                                 }));
@@ -320,10 +320,10 @@ class LlmModelSupportTest {
                         com.agenticai.core.chat.structured.StructuredSchemaSpec.options(
                                 "n", "{\"type\":\"object\"}"));
         assertEquals(
-                org.springframework.ai.openai.api.ResponseFormat.Type.JSON_SCHEMA,
+                org.springframework.ai.openai.OpenAiChatModel.ResponseFormat.Type.JSON_SCHEMA,
                 out.getResponseFormat().getType());
         // A bare {"type":"object"} is an open object: valid as json_schema, never as strict.
-        assertFalse(Boolean.TRUE.equals(out.getResponseFormat().getJsonSchema().getStrict()));
+        assertFalse(Boolean.TRUE.equals(out.getResponseFormat().getStrict()));
     }
 
     @Test

@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.json.JsonNodes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Backward-compatibility gate (spec 3.1). {@link #oldRender} is a verbatim copy of the
@@ -19,7 +21,7 @@ import org.junit.jupiter.api.Test;
  */
 class LegacyTemplateCompatTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonMappers.plain();
     private final ExpressionEngine engine = new ExpressionEngine();
 
     // ---- reference copy of the OLD algorithm (do not "fix" this)
@@ -30,13 +32,13 @@ class LegacyTemplateCompatTest {
         try {
             JsonNode root = MAPPER.readTree(input == null || input.isBlank() ? "{}" : input);
             if (root.isObject()) {
-                root.fields()
+                JsonNodes.fields(root)
                         .forEachRemaining(
                                 e ->
                                         values.put(
                                                 e.getKey(),
-                                                e.getValue().isTextual()
-                                                        ? e.getValue().asText()
+                                                e.getValue().isString()
+                                                        ? e.getValue().asString()
                                                         : e.getValue().toString()));
             }
         } catch (Exception ignored) {

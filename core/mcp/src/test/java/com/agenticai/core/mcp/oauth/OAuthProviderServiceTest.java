@@ -14,7 +14,6 @@ import com.agenticai.core.mcp.oauth.OAuthProviderClient.RevokeOutcome;
 import com.agenticai.core.mcp.oauth.OAuthProviderTestSupport.MutableClock;
 import com.agenticai.core.mcp.oauth.OAuthProviderTestSupport.ScriptedHttp;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -70,7 +69,7 @@ class OAuthProviderServiceTest {
     private OAuthProviderService newService(Map<String, String> props) {
         return new OAuthProviderService(
                 OAuthProviderTestSupport.registry(props),
-                new OAuthProviderClient(http, new ObjectMapper()),
+                new OAuthProviderClient(http, com.agenticai.core.json.JsonMappers.plain()),
                 store,
                 encryption,
                 600,
@@ -612,7 +611,7 @@ class OAuthProviderServiceTest {
                 new OAuthProviderService(
                         OAuthProviderTestSupport.registry(
                                 OAuthProviderTestSupport.props("google-sheets", "github")),
-                        new OAuthProviderClient(http, new ObjectMapper()),
+                        new OAuthProviderClient(http, com.agenticai.core.json.JsonMappers.plain()),
                         store,
                         OAuthProviderTestSupport.encryption((byte) 9),
                         600,
@@ -641,7 +640,7 @@ class OAuthProviderServiceTest {
         OAuthProviderService wrongKey =
                 new OAuthProviderService(
                         OAuthProviderTestSupport.registry(OAuthProviderTestSupport.props("github")),
-                        new OAuthProviderClient(http, new ObjectMapper()),
+                        new OAuthProviderClient(http, com.agenticai.core.json.JsonMappers.plain()),
                         store,
                         OAuthProviderTestSupport.encryption((byte) 9),
                         600,

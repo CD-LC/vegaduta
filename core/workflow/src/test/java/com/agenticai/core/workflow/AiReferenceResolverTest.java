@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import com.agenticai.core.workflow.WorkflowDocumentText.DocumentExtractionException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -18,7 +17,10 @@ class AiReferenceResolverTest {
     @SuppressWarnings("unchecked")
     private static AiReferenceResolver resolver() {
         return new AiReferenceResolver(
-                mock(ObjectProvider.class), mock(ObjectProvider.class), new ObjectMapper(), 1024);
+                mock(ObjectProvider.class),
+                mock(ObjectProvider.class),
+                com.agenticai.core.json.JsonMappers.plain(),
+                1024);
     }
 
     @Test

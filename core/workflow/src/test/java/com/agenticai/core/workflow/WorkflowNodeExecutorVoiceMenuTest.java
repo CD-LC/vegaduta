@@ -29,7 +29,6 @@ import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
 import com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequest;
 import com.agenticai.core.workflow.voicemenu.WorkflowVoiceMenuRequestService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -74,7 +73,7 @@ class WorkflowNodeExecutorVoiceMenuTest {
                 mock(ToolCallLogRepository.class),
                 mock(DeviceCommandService.class),
                 mock(AgentToolProvider.class),
-                new ObjectMapper(),
+                com.agenticai.core.json.JsonMappers.plain(),
                 mock(ObjectProvider.class),
                 mock(LlmResponseCacheService.class),
                 mock(QueryComplexityClassifier.class),
@@ -141,7 +140,7 @@ class WorkflowNodeExecutorVoiceMenuTest {
         WorkflowNodeExecutor executor = newExecutor(mock(WorkflowVoiceMenuRequestService.class));
         WorkflowNodeDto node = menuNode(Map.of("prompt", "Press 1 for sales, 2 for support"));
         String resumeInput =
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .writeValueAsString(
                                 Map.of(
                                         "digits",

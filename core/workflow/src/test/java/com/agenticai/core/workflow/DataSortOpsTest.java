@@ -2,13 +2,13 @@ package com.agenticai.core.workflow;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /** Characterisation of {@link DataSortOps}: key typing, stability, missing-last, multi-key. */
 class DataSortOpsTest {
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     private static Map<String, Object> m(Object... kv) {
         Map<String, Object> out = new LinkedHashMap<>();

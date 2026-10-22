@@ -17,8 +17,6 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Set;
@@ -35,6 +33,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Every {@code /api/tenant/roi/**} endpoint against a real Postgres with two tenant schemas, A and
@@ -192,7 +192,7 @@ class RoiApiIT extends AbstractContextIT {
         as(B);
         mvc.perform(get("/api/tenant/roi/prices"))
                 .andExpect(jsonPath("$.prices.length()").value(0));
-        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asText()))
+        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asString()))
                 .andExpect(status().isNotFound());
 
         as(A);
@@ -202,7 +202,7 @@ class RoiApiIT extends AbstractContextIT {
                                 .content(
                                         "{\"providerName\":\"ANTHROPIC\",\"modelPrefix\":\"claude\",\"inputPerMillion\":-1}"))
                 .andExpect(status().isBadRequest());
-        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asText()))
+        mvc.perform(delete("/api/tenant/roi/prices/" + created.get("id").asString()))
                 .andExpect(status().isNoContent());
         mvc.perform(get("/api/tenant/roi/prices"))
                 .andExpect(jsonPath("$.prices.length()").value(1));
@@ -230,12 +230,12 @@ class RoiApiIT extends AbstractContextIT {
         assertThat(report.at("/total/pricedCalls").asInt()).isEqualTo(1);
         assertThat(report.at("/total/unpricedCalls").asInt()).isEqualTo(1);
         assertThat(report.at("/total/costComplete").asBoolean()).isFalse();
-        assertThat(report.at("/rows/0/label").asText()).isEqualTo("Support bot");
-        assertThat(report.get("costBasis").asText()).contains("estimated");
+        assertThat(report.at("/rows/0/label").asString()).isEqualTo("Support bot");
+        assertThat(report.get("costBasis").asString()).contains("estimated");
 
         JsonNode prices = json(mvc.perform(get("/api/tenant/roi/prices")));
-        assertThat(prices.at("/unpricedModels/0/model").asText()).isEqualTo("gpt-unlisted");
-        assertThat(prices.at("/unpricedModels/0/reason").asText()).isEqualTo("NO_PRICE");
+        assertThat(prices.at("/unpricedModels/0/model").asString()).isEqualTo("gpt-unlisted");
+        assertThat(prices.at("/unpricedModels/0/reason").asString()).isEqualTo("NO_PRICE");
 
         for (String dim : new String[] {"workflow", "channel", "owner", "day"}) {
             mvc.perform(get("/api/tenant/roi/costs?groupBy=" + dim)).andExpect(status().isOk());
@@ -296,7 +296,7 @@ class RoiApiIT extends AbstractContextIT {
                 json(mvc.perform(get("/api/tenant/roi/agents")).andExpect(status().isOk()));
         assertThat(empty.at("/agents/0/handoverRate").isNull()).isTrue();
         assertThat(empty.at("/agents/0/estimatedCostPerResolvedUsd").isNull()).isTrue();
-        assertThat(empty.at("/agents/0/roiNote").asText()).isEqualTo("NO_ASSUMPTIONS");
+        assertThat(empty.at("/agents/0/roiNote").asString()).isEqualTo("NO_ASSUMPTIONS");
 
         mvc.perform(
                         post("/api/tenant/roi/prices")

@@ -14,7 +14,6 @@ import com.agenticai.core.tenancy.EdgeAgentPolicyLookup.EdgeAgentPolicyView;
 import com.agenticai.core.tenancy.EdgeAgentsConfigController.EdgeConfigResponse;
 import com.agenticai.core.tenancy.EdgeAgentsConfigController.EdgeModelEntry;
 import com.agenticai.core.tenancy.EdgeAgentsConfigController.EdgeModelManifest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +45,10 @@ class EdgeAgentsConfigControllerTest {
         policyLookup = mock(EdgeAgentPolicyLookup.class);
         when(policyLookupProvider.getIfAvailable()).thenReturn(policyLookup);
         controller =
-                new EdgeAgentsConfigController(settings, new ObjectMapper(), policyLookupProvider);
+                new EdgeAgentsConfigController(
+                        settings,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        policyLookupProvider);
     }
 
     @Test
@@ -156,13 +158,14 @@ class EdgeAgentsConfigControllerTest {
         // Guards the exact JSON the client's ManifestModel type
         // (web/app/lib/edge/capabilities.ts) parses: version as a string,
         // tier as a number, and the capital-GB minDeviceMemoryGB field name.
-        com.fasterxml.jackson.databind.JsonNode json =
-                new ObjectMapper().valueToTree(EdgeAgentsConfigController.DEFAULT_MANIFEST);
+        tools.jackson.databind.JsonNode json =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .valueToTree(EdgeAgentsConfigController.DEFAULT_MANIFEST);
 
-        assertTrue(json.get("version").isTextual());
-        assertEquals("1", json.get("version").asText());
+        assertTrue(json.get("version").isString());
+        assertEquals("1", json.get("version").asString());
 
-        com.fasterxml.jackson.databind.JsonNode llama = json.get("models").get(1);
+        tools.jackson.databind.JsonNode llama = json.get("models").get(1);
         assertTrue(llama.get("tier").isInt());
         assertEquals(1, llama.get("tier").asInt());
         assertTrue(llama.has("minDeviceMemoryGB"));
@@ -170,7 +173,7 @@ class EdgeAgentsConfigControllerTest {
         assertTrue(llama.get("url").isNull());
         assertTrue(llama.get("sha256").isNull());
         assertTrue(llama.get("requiresWebGpu").asBoolean());
-        assertEquals("llm", llama.get("kind").asText());
+        assertEquals("llm", llama.get("kind").asString());
         // D-9: contextWindowSize is a NUMBER on the wire (client
         // coerceContextWindowSize parses it), null on non-tier-1 rows.
         assertTrue(llama.get("contextWindowSize").isInt());

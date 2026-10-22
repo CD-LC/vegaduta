@@ -15,8 +15,6 @@ import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowStatus;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +23,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The catalog is the "no cross-tenant / no cross-grant listing" gate: a tool is visible only when
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
  */
 class McpExposedToolCatalogTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private McpToolExposureService exposureService;
     private AgentService agentService;
@@ -181,7 +181,7 @@ class McpExposedToolCatalogTest {
         McpExposedTool tool = catalog.forCaller(caller(Set.of(agentA), Set.of())).get(0);
         JsonNode schema = MAPPER.readTree(tool.inputSchemaJson());
 
-        assertEquals("message", schema.get("required").get(0).asText());
+        assertEquals("message", schema.get("required").get(0).asString());
         assertEquals(1, schema.get("required").size());
         assertTrue(schema.get("properties").has("conversationId"));
         // The model-facing description names the agent but never carries its prompt or config.
@@ -214,8 +214,8 @@ class McpExposedToolCatalogTest {
                         .orElseThrow();
         JsonNode schema = MAPPER.readTree(tool.inputSchemaJson());
 
-        assertEquals("string", schema.get("properties").get("customer").get("type").asText());
-        assertEquals("customer", schema.get("required").get(0).asText());
+        assertEquals("string", schema.get("properties").get("customer").get("type").asString());
+        assertEquals("customer", schema.get("required").get(0).asString());
     }
 
     @Test

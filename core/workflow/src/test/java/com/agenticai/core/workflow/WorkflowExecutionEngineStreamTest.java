@@ -16,8 +16,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.stream.NodeStreamContext;
 import com.agenticai.core.workflow.stream.WorkflowRunStreamHub;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /** Phase 3: the engine's run-level and node-level events on the live stream. */
 class WorkflowExecutionEngineStreamTest {
@@ -40,7 +39,7 @@ class WorkflowExecutionEngineStreamTest {
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         hub =
                 new WorkflowRunStreamHub(mapper) {
                     @Override

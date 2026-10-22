@@ -2,8 +2,6 @@ package com.agenticai.core.conformance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,6 +13,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Conformance by construction (ADR-0019): every list-returning GET operation in the committed
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  */
 class ListPagingConformanceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final Set<String> PAGING = Set.of("limit", "offset", "page", "size", "cursor");
     private static final String ALLOWLIST = "/conformance/list-paging-allowlist.txt";
 
@@ -93,8 +93,8 @@ class ListPagingConformanceTest {
 
     private static boolean hasPaging(JsonNode op) {
         for (JsonNode param : op.path("parameters")) {
-            if ("query".equals(param.path("in").asText())
-                    && PAGING.contains(param.path("name").asText())) {
+            if ("query".equals(param.path("in").asString())
+                    && PAGING.contains(param.path("name").asString())) {
                 return true;
             }
         }
@@ -118,10 +118,10 @@ class ListPagingConformanceTest {
 
     private static boolean isArray(JsonNode schema, JsonNode schemas) {
         for (int hops = 0; hops < 5; hops++) {
-            if ("array".equals(schema.path("type").asText())) {
+            if ("array".equals(schema.path("type").asString())) {
                 return true;
             }
-            String ref = schema.path("$ref").asText("");
+            String ref = schema.path("$ref").asString("");
             if (!ref.startsWith("#/components/schemas/")) {
                 return false;
             }

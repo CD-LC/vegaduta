@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,8 +90,10 @@ class ProcedureGuardEvaluatorRedisTest {
 
         sharedA = new ProcedureSessionCallsRedis(redis);
         sharedB = new ProcedureSessionCallsRedis(redis);
-        replicaA = new ProcedureGuardEvaluator(service, new ObjectMapper());
-        replicaB = new ProcedureGuardEvaluator(service, new ObjectMapper());
+        replicaA =
+                new ProcedureGuardEvaluator(service, com.agenticai.core.json.JsonMappers.plain());
+        replicaB =
+                new ProcedureGuardEvaluator(service, com.agenticai.core.json.JsonMappers.plain());
         replicaA.useSharedCalls(sharedA);
         replicaB.useSharedCalls(sharedB);
     }
@@ -174,7 +175,8 @@ class ProcedureGuardEvaluatorRedisTest {
                         List.of(
                                 new ProcedureService.ResolvedProcedure(
                                         new Procedure("t1", "refunds", "d", "u"), List.of(rule))));
-        ProcedureGuardEvaluator plain = new ProcedureGuardEvaluator(service, new ObjectMapper());
+        ProcedureGuardEvaluator plain =
+                new ProcedureGuardEvaluator(service, com.agenticai.core.json.JsonMappers.plain());
 
         assertThat(plain.check(AGENT, SESSION, "process_refund").outcome())
                 .isEqualTo(ProcedureGuardEvaluator.Outcome.DENY);

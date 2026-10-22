@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.agenticai.core.templates.dto.TemplateReadinessReport;
 import com.agenticai.core.templates.dto.TemplateReadinessReport.Issue;
 import com.agenticai.core.templates.dto.TemplateRequirement;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Rule-engine tests: the LifePilot regression, the published example, requirement derivation,
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
  */
 class TemplateReadinessServiceTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final TemplateReadinessService service = new TemplateReadinessService();
 
     private static final String BOILERPLATE =

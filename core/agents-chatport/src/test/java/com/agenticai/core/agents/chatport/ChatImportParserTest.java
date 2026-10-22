@@ -421,15 +421,9 @@ class ChatImportParserTest {
 
     @Test
     void timestampsOutsideAnyPlausibleRangeAreDropped() {
-        assertNull(
-                ChatImportParser.epochSeconds(
-                        new com.fasterxml.jackson.databind.node.DoubleNode(-5)));
-        assertNull(
-                ChatImportParser.epochSeconds(
-                        new com.fasterxml.jackson.databind.node.DoubleNode(9e15)));
-        assertNull(
-                ChatImportParser.epochSeconds(
-                        new com.fasterxml.jackson.databind.node.TextNode("12")));
+        assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.DoubleNode(-5)));
+        assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.DoubleNode(9e15)));
+        assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.TextNode("12")));
         assertNull(ChatImportParser.parseIso("yesterday"));
         assertEquals(
                 Instant.parse("2024-03-01T10:00:00Z"),

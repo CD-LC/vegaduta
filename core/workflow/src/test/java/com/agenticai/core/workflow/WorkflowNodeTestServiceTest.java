@@ -20,7 +20,6 @@ import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeTestRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +49,10 @@ class WorkflowNodeTestServiceTest {
         when(workflowService.requireAccess(WF, PermissionLevel.RUNNER)).thenReturn(definition);
         service =
                 new WorkflowNodeTestService(
-                        workflowService, executor, usageResolver, new ObjectMapper());
+                        workflowService,
+                        executor,
+                        usageResolver,
+                        com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static WorkflowNodeDto node(String id, String type, Map<String, Object> config) {

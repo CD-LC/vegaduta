@@ -4,7 +4,6 @@ import com.agenticai.core.chat.DefaultAgentAdvisor;
 import com.agenticai.core.chat.LlmModelSupport;
 import com.agenticai.core.chat.ResilientToolCallingManagerFactory;
 import com.agenticai.core.chat.ToolResultClearing;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.observation.ObservationRegistry;
 import java.time.Duration;
 import org.springframework.ai.chat.client.ChatClient;
@@ -30,11 +29,13 @@ public final class ToolLoopHarness {
     /** The production tool-calling manager (argument sanitising, redaction, round caps). */
     public static ToolCallingManager resilientManager(int maxRounds, int maxUnknownCalls) {
         return new ResilientToolCallingManagerFactory(
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         null,
                         null,
                         maxRounds,
                         maxUnknownCalls,
+                        -1,
+                        -1,
                         true,
                         ToolResultClearing.DEFAULT_THRESHOLD_CHARS,
                         ToolResultClearing.DEFAULT_KEEP_LAST)
@@ -42,7 +43,8 @@ public final class ToolLoopHarness {
     }
 
     public static ToolCallingManager resilientManager() {
-        return new ResilientToolCallingManagerFactory(new ObjectMapper()).create();
+        return new ResilientToolCallingManagerFactory(com.agenticai.core.json.JsonMappers.plain())
+                .create();
     }
 
     public static LlmModelSupport modelSupport() {
@@ -67,7 +69,9 @@ public final class ToolLoopHarness {
      */
     public static ChatClient client(ScriptedChatModel model, Advisor... advisors) {
         LlmModelSupport support = modelSupport();
-        return support.chatClientBuilder(model).defaultAdvisors(support.advisors(advisors)).build();
+        return support.chatClientBuilder(model, model.toolCallingManager())
+                .defaultAdvisors(support.advisors(advisors))
+                .build();
     }
 
     /** A prompt/completion usage with the total derived, no native (provider) payload. */

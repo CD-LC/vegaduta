@@ -33,7 +33,6 @@ import com.agenticai.core.workflow.output.PdfOutputRenderer;
 import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The pin hook in {@link WorkflowNodeExecutor#executeNode}: a pinned node is replaced by its pin
@@ -66,7 +66,7 @@ class WorkflowNodeExecutorPinTest {
         pinStore = spy(new WorkflowPinStore(repo));
         orchestrator = mock(OrchestratorService.class);
         recorded = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         RunDataStore runData = new RunDataStore(PinTestSupport.runOutputRepository(recorded));
         WorkflowExpressionResolver resolver =
                 new WorkflowExpressionResolver(

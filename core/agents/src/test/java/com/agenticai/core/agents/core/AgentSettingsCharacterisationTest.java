@@ -78,8 +78,7 @@ class AgentSettingsCharacterisationTest {
                         resourceAccess,
                         schema,
                         snapshots,
-                        new AgentConfigSnapshotCodec(
-                                new com.fasterxml.jackson.databind.ObjectMapper()),
+                        new AgentConfigSnapshotCodec(new tools.jackson.databind.ObjectMapper()),
                         new AgentCapabilityRegistry(List.of()),
                         "claude-sonnet-5",
                         1024,

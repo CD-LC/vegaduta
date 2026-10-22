@@ -26,8 +26,6 @@ import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.portability.PortabilityDtos.ImportResponse;
 import com.agenticai.core.workflow.portability.PortabilityDtos.PlaceholderView;
 import com.agenticai.core.workflow.portability.PortabilityDtos.PreviewResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +36,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The service end to end for every format, with the collaborators mocked: the flag, the size cap,
@@ -46,7 +46,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 class WorkflowPortabilityServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private WorkflowService workflowService;
     private OrchestratorService orchestratorService;
@@ -418,7 +418,7 @@ class WorkflowPortabilityServiceTest {
         assertThat(file.json()).isEqualTo(again.json());
         assertThat(file.json()).doesNotContain(agentId).doesNotContain("abcdefghijklmnop123456");
         JsonNode doc = MAPPER.readTree(file.json().getBytes(StandardCharsets.UTF_8));
-        assertThat(doc.get("format").asText()).isEqualTo("vegaduta.workflow");
+        assertThat(doc.get("format").asString()).isEqualTo("vegaduta.workflow");
         assertThat(doc.get("placeholders").findValuesAsText("key")).contains("agent_1");
         assertThat(doc.has("exportedAt")).isFalse();
     }

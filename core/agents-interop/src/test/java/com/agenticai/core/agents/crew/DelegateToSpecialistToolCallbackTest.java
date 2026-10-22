@@ -10,11 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Thin-adapter contract for {@link DelegateToSpecialistToolCallback}, mirroring {@code
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  */
 class DelegateToSpecialistToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final AgentChatService chatService = mock(AgentChatService.class);
     private final UUID rootAgentId = UUID.randomUUID();
@@ -58,8 +58,8 @@ class DelegateToSpecialistToolCallbackTest {
                                 "{\"capability\":\"billing\",\"subTask\":\"refund question\",\"contextSummary\":\"prior context\"}");
 
         JsonNode root = MAPPER.readTree(out);
-        assertEquals("billing", root.get("capability").asText());
-        assertEquals("Refund approved.", root.get("answer").asText());
+        assertEquals("billing", root.get("capability").asString());
+        assertEquals("Refund approved.", root.get("answer").asString());
         verify(chatService)
                 .delegateToSpecialist(chain, "billing", "refund question", "prior context");
     }

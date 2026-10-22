@@ -13,8 +13,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.mcpserver.McpCallerContext;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The JSON-RPC hook that serves the per-caller dynamic tools. The properties that matter: with
@@ -34,7 +34,7 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  */
 class McpExposureRpcHandlerTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private McpExposedToolCatalog catalog;
     private McpExposedToolInvoker invoker;
@@ -100,14 +100,14 @@ class McpExposureRpcHandlerTest {
                         send(
                                 "{\"jsonrpc\":\"2.0\",\"id\":\"req-7\",\"method\":\"tools/list\",\"params\":{}}"));
 
-        assertEquals("2.0", response.get("jsonrpc").asText());
-        assertEquals("req-7", response.get("id").asText());
+        assertEquals("2.0", response.get("jsonrpc").asString());
+        assertEquals("req-7", response.get("id").asString());
         JsonNode tools = response.get("result").get("tools");
         assertEquals(2, tools.size());
-        assertEquals("call_agent", tools.get(0).get("name").asText());
-        assertEquals("agent_helper", tools.get(1).get("name").asText());
-        assertEquals("Helper tool", tools.get(1).get("description").asText());
-        assertEquals("object", tools.get(1).get("inputSchema").get("type").asText());
+        assertEquals("call_agent", tools.get(0).get("name").asString());
+        assertEquals("agent_helper", tools.get(1).get("name").asString());
+        assertEquals("Helper tool", tools.get(1).get("description").asString());
+        assertEquals("object", tools.get(1).get("inputSchema").get("type").asString());
     }
 
     @Test
@@ -122,7 +122,7 @@ class McpExposureRpcHandlerTest {
                         .get("result")
                         .get("tools");
 
-        assertEquals("object", tools.get(1).get("inputSchema").get("type").asText());
+        assertEquals("object", tools.get(1).get("inputSchema").get("type").asString());
     }
 
     @Test
@@ -150,9 +150,9 @@ class McpExposureRpcHandlerTest {
         assertEquals(5, response.get("id").asInt());
         JsonNode result = response.get("result");
         assertFalse(result.get("isError").asBoolean());
-        assertEquals("text", result.get("content").get(0).get("type").asText());
-        assertEquals("the reply", result.get("content").get(0).get("text").asText());
-        assertEquals("meta line", result.get("content").get(1).get("text").asText());
+        assertEquals("text", result.get("content").get(0).get("type").asString());
+        assertEquals("the reply", result.get("content").get(0).get("text").asString());
+        assertEquals("meta line", result.get("content").get(1).get("text").asString());
     }
 
     @Test
@@ -169,7 +169,7 @@ class McpExposureRpcHandlerTest {
         assertFalse(response.has("error"));
         assertTrue(response.get("result").get("isError").asBoolean());
         assertEquals(
-                "budget gone", response.get("result").get("content").get(0).get("text").asText());
+                "budget gone", response.get("result").get("content").get(0).get("text").asString());
     }
 
     @Test
@@ -182,7 +182,7 @@ class McpExposureRpcHandlerTest {
                                 "{\"jsonrpc\":\"2.0\",\"id\":8,\"method\":\"tools/call\",\"params\":{\"name\":\"agent_someone_elses\",\"arguments\":{\"message\":\"hi\"}}}"));
 
         assertEquals(-32602, response.get("error").get("code").asInt());
-        assertEquals("Unknown tool", response.get("error").get("message").asText());
+        assertEquals("Unknown tool", response.get("error").get("message").asString());
         verify(invoker).recordDenied(caller, "agent_someone_elses");
         verify(invoker, never()).invoke(any(), any(), any());
     }

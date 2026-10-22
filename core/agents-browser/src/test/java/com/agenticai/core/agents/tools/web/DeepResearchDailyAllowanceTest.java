@@ -10,8 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The per-caller daily search allowance, and its enforcement inside the deep_research tool call -
@@ -29,7 +29,7 @@ import org.springframework.data.redis.core.ValueOperations;
  */
 class DeepResearchDailyAllowanceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String KEY = DeepResearchDailyAllowance.KEY_PREFIX + "t1:alice";
 
     private StringRedisTemplate redis;
@@ -157,7 +157,7 @@ class DeepResearchDailyAllowanceTest {
                         service(searches), new DeepResearchSession(12, 12), allowance);
 
         JsonNode out = MAPPER.readTree(tool.call(COMPARISON_CALL));
-        assertTrue(out.get("error").asText().contains("allowance for this account is used up"));
+        assertTrue(out.get("error").asString().contains("allowance for this account is used up"));
         assertEquals(0, searches.get());
         assertTrue(allowance.charged.isEmpty());
     }

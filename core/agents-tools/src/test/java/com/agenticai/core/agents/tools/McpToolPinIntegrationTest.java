@@ -25,8 +25,6 @@ import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.modelcontextprotocol.client.McpClient;
@@ -48,6 +46,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Integration test for tool-definition pinning: a REAL MCP client talks over Streamable HTTP to a
@@ -58,7 +58,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class McpToolPinIntegrationTest {
 
     private static final String TENANT = "tenant_a";
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final AtomicReference<String> toolsJson = new AtomicReference<>();
     private HttpServer server;
     private McpSyncClient client;
@@ -83,7 +83,7 @@ class McpToolPinIntegrationTest {
                         }
                         JsonNode request =
                                 mapper.readTree(exchange.getRequestBody().readAllBytes());
-                        String method = request.path("method").asText();
+                        String method = request.path("method").asString();
                         String result =
                                 switch (method) {
                                     case "initialize" ->

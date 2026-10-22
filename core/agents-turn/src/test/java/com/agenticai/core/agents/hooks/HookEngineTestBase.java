@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.audit.AuditLogService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link HookEngine} tests: a fake webhook transport, a fake clock and an
@@ -25,7 +25,7 @@ import org.springframework.beans.factory.ObjectProvider;
 abstract class HookEngineTestBase {
 
     static final UUID AGENT = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     static final String ALLOW = "{\"decision\":\"allow\"}";
 
     final AuditLogService audit = mock(AuditLogService.class);

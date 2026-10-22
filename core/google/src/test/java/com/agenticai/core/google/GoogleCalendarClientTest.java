@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpRequest;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link GoogleCalendarClient} request-mapping and error-translation tests on the injected stub
@@ -31,7 +31,7 @@ class GoogleCalendarClientTest {
 
     private GoogleCalendarClient client;
     private HttpStubs.RecordingHttpClient http;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     @BeforeEach
     void setUp() {
@@ -61,10 +61,10 @@ class GoogleCalendarClientTest {
         assertEquals("POST", request.method());
         assertEquals("Bearer " + TOKEN, request.headers().firstValue("Authorization").orElse(null));
         JsonNode body = objectMapper.readTree(HttpStubs.bodyOf(request));
-        assertEquals("Sync", body.path("summary").asText());
-        assertEquals("2026-08-10T15:00:00+05:30", body.path("start").path("dateTime").asText());
-        assertEquals("2026-08-10T15:30:00+05:30", body.path("end").path("dateTime").asText());
-        assertEquals("a@example.com", body.path("attendees").get(0).path("email").asText());
+        assertEquals("Sync", body.path("summary").asString());
+        assertEquals("2026-08-10T15:00:00+05:30", body.path("start").path("dateTime").asString());
+        assertEquals("2026-08-10T15:30:00+05:30", body.path("end").path("dateTime").asString());
+        assertEquals("a@example.com", body.path("attendees").get(0).path("email").asString());
         assertEquals(2, body.path("attendees").size());
 
         // The returned event blends Google's response (id, htmlLink) with the
@@ -222,7 +222,7 @@ class GoogleCalendarClientTest {
         JsonNode body = objectMapper.readTree(HttpStubs.bodyOf(request));
         assertEquals(
                 2, body.size(), "PATCH must carry only start and end, keeping every other field");
-        assertEquals("2026-10-15T15:00:00+05:30", body.path("start").path("dateTime").asText());
+        assertEquals("2026-10-15T15:00:00+05:30", body.path("start").path("dateTime").asString());
         assertEquals("Consultation", moved.summary());
     }
 

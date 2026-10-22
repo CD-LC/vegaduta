@@ -11,8 +11,6 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.UUID;
@@ -20,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link OpenAiCompatController} tests. Split from the former
@@ -29,7 +29,7 @@ abstract class OpenAiCompatControllerTestSupport {
 
     static final UUID AGENT_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
 
-    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     AgentService agentService;
 
@@ -66,7 +66,7 @@ abstract class OpenAiCompatControllerTestSupport {
     OpenAiChatRequest fixture(boolean stream) throws Exception {
         try (InputStream in = getClass().getResourceAsStream("/openai-compat/sdk-request.json")) {
             JsonNode node = mapper.readTree(in);
-            ((com.fasterxml.jackson.databind.node.ObjectNode) node).put("stream", stream);
+            ((tools.jackson.databind.node.ObjectNode) node).put("stream", stream);
             return mapper.treeToValue(node, OpenAiChatRequest.class);
         }
     }
@@ -100,7 +100,7 @@ abstract class OpenAiCompatControllerTestSupport {
     String body(boolean stream) throws Exception {
         try (InputStream in = getClass().getResourceAsStream("/openai-compat/sdk-request.json")) {
             JsonNode node = mapper.readTree(in);
-            ((com.fasterxml.jackson.databind.node.ObjectNode) node).put("stream", stream);
+            ((tools.jackson.databind.node.ObjectNode) node).put("stream", stream);
             return node.toString();
         }
     }

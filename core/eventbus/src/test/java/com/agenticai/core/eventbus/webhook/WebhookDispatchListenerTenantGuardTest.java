@@ -16,8 +16,6 @@ import ch.qos.logback.core.read.ListAppender;
 import com.agenticai.core.eventbus.WorkflowEvent;
 import com.agenticai.core.eventbus.WorkflowEventSignal;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,9 +38,7 @@ class WebhookDispatchListenerTenantGuardTest {
     private final WebhookDeliveryRepository deliveries = mock(WebhookDeliveryRepository.class);
     private final WebhookDispatchListener listener =
             new WebhookDispatchListener(
-                    subscriptions,
-                    deliveries,
-                    new ObjectMapper().registerModule(new JavaTimeModule()));
+                    subscriptions, deliveries, com.agenticai.core.json.JsonMappers.withJavaTime());
     private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
     private final Logger logger = (Logger) LoggerFactory.getLogger(WebhookDispatchListener.class);
 

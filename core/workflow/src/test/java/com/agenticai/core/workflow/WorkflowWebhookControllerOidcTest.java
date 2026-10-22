@@ -14,7 +14,6 @@ import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,7 +57,7 @@ class WorkflowWebhookControllerOidcTest {
                         definitionRepositoryWithActiveWorkflow(),
                         mock(WorkflowTriggerNodeService.class),
                         workflowService,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         jwtDecoderProvider,
                         mock(InboundMessageDedupService.class));
 

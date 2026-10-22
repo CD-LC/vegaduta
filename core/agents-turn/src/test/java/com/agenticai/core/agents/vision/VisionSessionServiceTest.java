@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.approval.ApprovalPolicyService;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link VisionSessionService#start}'s governance branches in their checked order (503 flag / 403
@@ -53,7 +53,7 @@ class VisionSessionServiceTest {
         redisTemplate = mock(StringRedisTemplate.class);
         valueOperations = mock(ValueOperations.class);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        objectMapper = new ObjectMapper();
+        objectMapper = com.agenticai.core.json.JsonMappers.plain();
         properties = new VisionProperties();
         usageService = mock(VisionUsageService.class);
         tenantLimits = mock(TenantLimits.class);

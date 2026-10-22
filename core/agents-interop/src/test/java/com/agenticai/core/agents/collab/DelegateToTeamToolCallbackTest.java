@@ -11,13 +11,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Parallel fan-out semantics for {@link DelegateToTeamToolCallback}: every branch runs {@code
@@ -26,7 +26,7 @@ import org.mockito.ArgumentCaptor;
  */
 class DelegateToTeamToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final AgentChatService chatService = mock(AgentChatService.class);
     private final UUID aId = UUID.randomUUID();
@@ -57,7 +57,7 @@ class DelegateToTeamToolCallbackTest {
         JsonNode results = root.get("results");
         assertEquals(2, results.size());
         for (JsonNode r : results) {
-            assertEquals("ok", r.get("status").asText());
+            assertEquals("ok", r.get("status").asString());
         }
     }
 
@@ -101,11 +101,11 @@ class DelegateToTeamToolCallbackTest {
         boolean sawError = false;
         boolean sawOk = false;
         for (JsonNode r : results) {
-            if ("error".equals(r.get("status").asText())) {
+            if ("error".equals(r.get("status").asString())) {
                 sawError = true;
-                assertEquals("nobody", r.get("agent").asText());
+                assertEquals("nobody", r.get("agent").asString());
             }
-            if ("ok".equals(r.get("status").asText())) {
+            if ("ok".equals(r.get("status").asString())) {
                 sawOk = true;
             }
         }
@@ -130,8 +130,8 @@ class DelegateToTeamToolCallbackTest {
         long skipped = 0;
         long ok = 0;
         for (JsonNode r : results) {
-            if ("skipped".equals(r.get("status").asText())) skipped++;
-            if ("ok".equals(r.get("status").asText())) ok++;
+            if ("skipped".equals(r.get("status").asString())) skipped++;
+            if ("ok".equals(r.get("status").asString())) ok++;
         }
         assertEquals(8, ok);
         assertEquals(2, skipped);
@@ -153,9 +153,9 @@ class DelegateToTeamToolCallbackTest {
         assertEquals(2, results.size());
         boolean sawError = false;
         for (JsonNode r : results) {
-            if ("error".equals(r.get("status").asText())) {
+            if ("error".equals(r.get("status").asString())) {
                 sawError = true;
-                assertTrue(r.get("error").asText().contains("provider down"));
+                assertTrue(r.get("error").asString().contains("provider down"));
             }
         }
         assertTrue(sawError);

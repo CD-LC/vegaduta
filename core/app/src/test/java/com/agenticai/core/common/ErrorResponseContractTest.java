@@ -22,8 +22,6 @@ import com.agenticai.core.chat.gateway.LlmGatewayLimitExceededException;
 import com.agenticai.core.security.RequestCorrelationFilter;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.WorkflowValidationException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -43,6 +41,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wire contract of every error body the ordered @RestControllerAdvice chain (see
@@ -114,7 +114,7 @@ class ErrorResponseContractTest {
         }
     }
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     private MockMvc mvc(boolean problemDetails) {
         ErrorResponseFactory errors =
@@ -145,7 +145,7 @@ class ErrorResponseContractTest {
 
     private static List<String> keys(JsonNode n) {
         List<String> out = new ArrayList<>();
-        n.fieldNames().forEachRemaining(out::add);
+        n.propertyNames().iterator().forEachRemaining(out::add);
         return out;
     }
 

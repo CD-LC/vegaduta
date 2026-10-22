@@ -16,11 +16,11 @@ import com.agenticai.core.providers.modality.TtsModelProvider;
 import com.agenticai.core.providers.modality.VideoModelProvider;
 import com.agenticai.core.providers.modality.VoiceModelProvider;
 import com.agenticai.core.security.ExperienceMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Covers {@link AgentConfigSnapshotCodec} - the class that decides what an agent's configuration
@@ -43,7 +43,7 @@ class AgentConfigSnapshotCodecTest {
 
     @BeforeEach
     void setUp() {
-        codec = new AgentConfigSnapshotCodec(new ObjectMapper());
+        codec = new AgentConfigSnapshotCodec(com.agenticai.core.json.JsonMappers.plain());
     }
 
     /** An agent with every restorable field deliberately away from its default. */

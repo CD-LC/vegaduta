@@ -9,16 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.job.AgentJobProperties;
 import com.agenticai.core.agents.job.output.JobResultSchemaValidator;
 import com.agenticai.core.agents.research.dto.ResearchRunStartRequest;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Request validation, goal assembly and the fixed result schema - all pure. */
 class ResearchRunPlanTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static ResearchRunStartRequest request(
             String question, String depth, List<String> seeds, String language) {

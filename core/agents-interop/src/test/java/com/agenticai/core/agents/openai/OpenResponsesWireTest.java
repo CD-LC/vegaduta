@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.agents.budget.PerUserBudgetExhaustedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,6 +13,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Field contract of the Responses wire format. The required-field lists come from the openai-python
@@ -39,7 +39,7 @@ class OpenResponsesWireTest {
                     "usage",
                     "metadata");
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     private OpenResponsesWire wire(String instructions, JsonNode metadata) {
         return new OpenResponsesWire(
@@ -73,18 +73,18 @@ class OpenResponsesWireTest {
                 wire("be brief", mapper.createObjectNode().put("k", "v"))
                         .response("completed", "hello", 7L, 2L, 1700000005L, null);
         assertHasAll(r, RESPONSE_REQUIRED);
-        assertEquals("response", r.get("object").asText());
-        assertEquals("completed", r.get("status").asText());
+        assertEquals("response", r.get("object").asString());
+        assertEquals("completed", r.get("status").asString());
         assertTrue(r.get("error").isNull());
-        assertEquals("be brief", r.get("instructions").asText());
-        assertEquals("v", r.get("metadata").get("k").asText());
+        assertEquals("be brief", r.get("instructions").asString());
+        assertEquals("v", r.get("metadata").get("k").asString());
         JsonNode item = r.get("output").get(0);
         assertHasAll(item, List.of("id", "type", "status", "role", "content"));
-        assertEquals("message", item.get("type").asText());
-        assertEquals("assistant", item.get("role").asText());
+        assertEquals("message", item.get("type").asString());
+        assertEquals("assistant", item.get("role").asString());
         JsonNode part = item.get("content").get(0);
         assertHasAll(part, List.of("type", "text", "annotations"));
-        assertEquals("output_text", part.get("type").asText());
+        assertEquals("output_text", part.get("type").asString());
         assertEquals(0, part.get("annotations").size());
         JsonNode usage = r.get("usage");
         assertHasAll(
@@ -119,7 +119,7 @@ class OpenResponsesWireTest {
     @Test
     void streamingEventsFollowTheDocumentedOrderWithMonotonicSequenceNumbers() throws Exception {
         List<JsonNode> events = run(wire(null, null), Flux.just("a", "", "bc", "d"));
-        List<String> types = events.stream().map(e -> e.get("type").asText()).toList();
+        List<String> types = events.stream().map(e -> e.get("type").asString()).toList();
         assertEquals(
                 List.of(
                         "response.created",
@@ -143,27 +143,27 @@ class OpenResponsesWireTest {
     void streamingEventPayloadsCarryTheirRequiredFields() throws Exception {
         List<JsonNode> e = run(wire(null, null), Flux.just("Hi"));
         assertHasAll(e.get(0).get("response"), RESPONSE_REQUIRED);
-        assertEquals("in_progress", e.get(0).get("response").get("status").asText());
+        assertEquals("in_progress", e.get(0).get("response").get("status").asString());
         assertHasAll(e.get(2), List.of("output_index", "item"));
-        assertEquals("in_progress", e.get(2).get("item").get("status").asText());
+        assertEquals("in_progress", e.get(2).get("item").get("status").asString());
         assertEquals(0, e.get(2).get("item").get("content").size());
         assertHasAll(e.get(3), List.of("item_id", "output_index", "content_index", "part"));
-        assertEquals("", e.get(3).get("part").get("text").asText());
+        assertEquals("", e.get(3).get("part").get("text").asString());
         JsonNode delta = e.get(4);
         assertHasAll(
                 delta, List.of("item_id", "output_index", "content_index", "delta", "logprobs"));
-        assertEquals("Hi", delta.get("delta").asText());
-        assertEquals("msg_1", delta.get("item_id").asText());
+        assertEquals("Hi", delta.get("delta").asString());
+        assertEquals("msg_1", delta.get("item_id").asString());
         assertHasAll(
                 e.get(5), List.of("item_id", "output_index", "content_index", "text", "logprobs"));
-        assertEquals("Hi", e.get(5).get("text").asText());
+        assertEquals("Hi", e.get(5).get("text").asString());
         assertHasAll(e.get(6), List.of("item_id", "output_index", "content_index", "part"));
-        assertEquals("Hi", e.get(6).get("part").get("text").asText());
-        assertEquals("completed", e.get(7).get("item").get("status").asText());
+        assertEquals("Hi", e.get(6).get("part").get("text").asString());
+        assertEquals("completed", e.get(7).get("item").get("status").asString());
         JsonNode completed = e.get(8).get("response");
-        assertEquals("completed", completed.get("status").asText());
+        assertEquals("completed", completed.get("status").asString());
         assertEquals(
-                "Hi", completed.get("output").get(0).get("content").get(0).get("text").asText());
+                "Hi", completed.get("output").get(0).get("content").get(0).get("text").asString());
         assertEquals(10, completed.get("usage").get("input_tokens").asInt());
         assertEquals(1, completed.get("usage").get("output_tokens").asInt());
         assertTrue(completed.get("completed_at").asLong() > 0);
@@ -177,7 +177,7 @@ class OpenResponsesWireTest {
                         .collectList()
                         .block(Duration.ofSeconds(5));
         for (ServerSentEvent<String> f : frames.subList(0, frames.size() - 1)) {
-            assertEquals(mapper.readTree(f.data()).get("type").asText(), f.event());
+            assertEquals(mapper.readTree(f.data()).get("type").asString(), f.event());
         }
         assertNull(frames.get(frames.size() - 1).event());
     }
@@ -197,17 +197,18 @@ class OpenResponsesWireTest {
                                         60L)));
         List<JsonNode> e = run(wire(null, null), tokens);
         int n = e.size();
-        assertEquals("error", e.get(n - 2).get("type").asText());
-        assertEquals("insufficient_quota", e.get(n - 2).get("code").asText());
+        assertEquals("error", e.get(n - 2).get("type").asString());
+        assertEquals("insufficient_quota", e.get(n - 2).get("code").asString());
         assertTrue(e.get(n - 2).has("message"));
         assertTrue(e.get(n - 2).get("param").isNull());
         JsonNode failed = e.get(n - 1);
-        assertEquals("response.failed", failed.get("type").asText());
-        assertEquals("failed", failed.get("response").get("status").asText());
+        assertEquals("response.failed", failed.get("type").asString());
+        assertEquals("failed", failed.get("response").get("status").asString());
         assertEquals(
-                "insufficient_quota", failed.get("response").get("error").get("code").asText());
+                "insufficient_quota", failed.get("response").get("error").get("code").asString());
         assertEquals(0, failed.get("response").get("output").size());
-        assertFalse(e.stream().anyMatch(x -> "response.completed".equals(x.get("type").asText())));
+        assertFalse(
+                e.stream().anyMatch(x -> "response.completed".equals(x.get("type").asString())));
         for (int i = 0; i < n; i++) {
             assertEquals(i, e.get(i).get("sequence_number").asInt());
         }
@@ -218,7 +219,7 @@ class OpenResponsesWireTest {
         List<JsonNode> e =
                 run(wire(null, null), Flux.error(new IllegalStateException("secret internals")));
         JsonNode failed = e.get(e.size() - 1);
-        assertEquals("server_error", failed.get("response").get("error").get("code").asText());
+        assertEquals("server_error", failed.get("response").get("error").get("code").asString());
         assertFalse(failed.toString().contains("secret"));
     }
 }

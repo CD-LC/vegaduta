@@ -13,12 +13,12 @@ import com.agenticai.core.agents.budget.PerUserBudgetExhaustedException;
 import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 /** {@link OpenAiCompatController}: vmcp_ grant-key callers. */
 class OpenAiCompatControllerGrantKeyTest extends OpenAiCompatControllerTestSupport {
@@ -111,7 +111,7 @@ class OpenAiCompatControllerGrantKeyTest extends OpenAiCompatControllerTestSuppo
                 mapper.readTree(
                         grantController(java.util.Set.of(AGENT_ID, other)).models().getBody());
         assertEquals(1, body.get("data").size());
-        assertEquals(AGENT_ID.toString(), body.get("data").get(0).get("id").asText());
+        assertEquals(AGENT_ID.toString(), body.get("data").get(0).get("id").asString());
         org.mockito.Mockito.verify(agentService, org.mockito.Mockito.never()).listAll();
     }
 

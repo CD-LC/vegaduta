@@ -83,7 +83,7 @@ class AgentServiceCreateHardeningTest {
                 mock(ResourceAccessService.class),
                 mock(AgentSchemaService.class),
                 AgentVersionSnapshotService.disabled(),
-                new AgentConfigSnapshotCodec(new com.fasterxml.jackson.databind.ObjectMapper()),
+                new AgentConfigSnapshotCodec(com.agenticai.core.json.JsonMappers.plain()),
                 new AgentCapabilityRegistry(List.of()),
                 "claude-sonnet-5",
                 1024,

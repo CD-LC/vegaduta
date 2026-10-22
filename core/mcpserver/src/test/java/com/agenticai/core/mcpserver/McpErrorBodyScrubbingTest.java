@@ -7,8 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpError;
 import jakarta.servlet.FilterChain;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * B11: the MCP transport answers e.g. a missing Mcp-Session-Id with a 400 whose body is a
@@ -29,7 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 class McpErrorBodyScrubbingTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private McpApiKeyAuthFilter filter;
     private MockHttpServletRequest request;
@@ -88,9 +88,9 @@ class McpErrorBodyScrubbingTest {
         assertFalse(body.contains("java."), body);
         assertFalse(body.contains("lineNumber"), body);
         JsonNode json = MAPPER.readTree(body);
-        assertEquals("2.0", json.path("jsonrpc").asText());
+        assertEquals("2.0", json.path("jsonrpc").asString());
         assertEquals(-32600, json.path("error").path("code").asInt());
-        assertEquals("Session ID missing", json.path("error").path("message").asText());
+        assertEquals("Session ID missing", json.path("error").path("message").asString());
         assertEquals(response.getContentAsByteArray().length, response.getContentLength());
     }
 

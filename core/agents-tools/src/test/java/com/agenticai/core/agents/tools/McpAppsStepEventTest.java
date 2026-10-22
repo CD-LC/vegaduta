@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.agents.tools.mcpapps.McpAppsConfig;
 import com.agenticai.core.agents.tools.mcpapps.McpAppsService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Flag-off is a no-op and flag-on adds one additive key to the tool_result step event, nothing
@@ -26,7 +26,7 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  */
 class McpAppsStepEventTest {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
     private static final String MARKER = AgentStepEventEmitter.STEP_EVENT_MARKER;
 
     private static ToolCallback tool(String name, String reply) {
@@ -63,7 +63,7 @@ class McpAppsStepEventTest {
 
         assertEquals(strip(legacy), strip(withNull));
         JsonNode result = JSON.readTree(withNull.get(1).substring(MARKER.length()));
-        assertEquals("tool_result", result.get("type").asText());
+        assertEquals("tool_result", result.get("type").asString());
         assertFalse(result.has("app"));
     }
 
@@ -101,8 +101,8 @@ class McpAppsStepEventTest {
         String raw = chunks.get(1);
         assertTrue(raw.indexOf('\n') < 0);
         JsonNode result = JSON.readTree(raw.substring(MARKER.length()));
-        assertEquals("abc", result.get("app").get("appId").asText());
-        assertEquals("tool_result", result.get("type").asText());
+        assertEquals("abc", result.get("app").get("appId").asString());
+        assertEquals("tool_result", result.get("type").asString());
         assertNotNull(result.get("preview"));
     }
 
@@ -170,7 +170,8 @@ class McpAppsStepEventTest {
         String wire =
                 "{\"name\":\"forecast\",\"description\":\"d\",\"inputSchema\":{\"type\":\"object\"},"
                         + "\"_meta\":{\"ui\":{\"resourceUri\":\"ui://weather/forecast\",\"csp\":{\"connectDomains\":[\"https://api.x.example\"]}}}}";
-        McpSchema.Tool t = new ObjectMapper().readValue(wire, McpSchema.Tool.class);
+        McpSchema.Tool t =
+                com.agenticai.core.json.JsonMappers.plain().readValue(wire, McpSchema.Tool.class);
         var decl =
                 com.agenticai.core.agents.tools.mcpapps.McpAppUiMeta.declarationOf(t.meta())
                         .orElseThrow();

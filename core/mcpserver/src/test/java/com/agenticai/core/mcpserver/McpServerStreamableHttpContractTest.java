@@ -9,15 +9,13 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -30,6 +28,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * P0 characterisation (ADR-0012, section 6 P0.5): the inbound MCP server contract that external
@@ -68,10 +68,10 @@ class McpServerStreamableHttpContractTest {
     @EnableWebMvc
     @ImportAutoConfiguration({
         JacksonAutoConfiguration.class,
-        org.springframework.ai.mcp.server.common.autoconfigure
-                .McpServerObjectMapperAutoConfiguration.class,
+        org.springframework.ai.mcp.server.common.autoconfigure.McpServerJsonMapperAutoConfiguration
+                .class,
         org.springframework.ai.mcp.server.common.autoconfigure.McpServerAutoConfiguration.class,
-        org.springframework.ai.mcp.server.autoconfigure
+        org.springframework.ai.mcp.server.webmvc.autoconfigure
                 .McpServerStreamableHttpWebMvcAutoConfiguration.class
     })
     @Import(McpServerToolConfig.class)
@@ -195,16 +195,16 @@ class McpServerStreamableHttpContractTest {
         JsonNode response = initialize();
 
         assertThat(initializeStatus).isEqualTo(200);
-        assertThat(response.path("jsonrpc").asText()).isEqualTo("2.0");
+        assertThat(response.path("jsonrpc").asString()).isEqualTo("2.0");
         assertThat(response.path("id").asInt()).isEqualTo(1);
         JsonNode result = response.path("result");
-        assertThat(result.path("serverInfo").path("name").asText())
+        assertThat(result.path("serverInfo").path("name").asString())
                 .isEqualTo("vegaduta-mcp-server");
-        assertThat(result.path("serverInfo").path("version").asText()).isEqualTo("1.0.0");
+        assertThat(result.path("serverInfo").path("version").asString()).isEqualTo("1.0.0");
         assertThat(result.path("capabilities").has("tools"))
                 .as("tools capability advertised")
                 .isTrue();
-        assertThat(result.path("protocolVersion").asText()).isNotBlank();
+        assertThat(result.path("protocolVersion").asString()).isNotBlank();
     }
 
     @Test
@@ -218,12 +218,13 @@ class McpServerStreamableHttpContractTest {
 
         JsonNode tools = response.path("result").path("tools");
         List<String> names = new ArrayList<>();
-        tools.forEach(t -> names.add(t.path("name").asText()));
+        tools.forEach(t -> names.add(t.path("name").asString()));
         assertThat(names).containsExactlyInAnyOrderElementsOf(CURATED_TOOLS);
         tools.forEach(
                 tool -> {
-                    assertThat(tool.path("description").asText()).isNotBlank();
-                    assertThat(tool.path("inputSchema").path("type").asText()).isEqualTo("object");
+                    assertThat(tool.path("description").asString()).isNotBlank();
+                    assertThat(tool.path("inputSchema").path("type").asString())
+                            .isEqualTo("object");
                 });
         // The knowledge tool is registered only when a KnowledgeSearchService bean exists; none
         // here.
@@ -246,10 +247,10 @@ class McpServerStreamableHttpContractTest {
         assertThat(result.path("isError").asBoolean(false)).isFalse();
         JsonNode content = result.path("content");
         assertThat(content.isArray()).isTrue();
-        assertThat(content.get(0).path("type").asText()).isEqualTo("text");
+        assertThat(content.get(0).path("type").asString()).isEqualTo("text");
         // With no caller context and no granted agents the curated tool answers an empty JSON
         // array.
-        assertThat(mapper.readTree(content.get(0).path("text").asText()).isArray()).isTrue();
+        assertThat(mapper.readTree(content.get(0).path("text").asString()).isArray()).isTrue();
     }
 
     @Test

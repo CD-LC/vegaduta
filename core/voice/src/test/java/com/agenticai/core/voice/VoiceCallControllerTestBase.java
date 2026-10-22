@@ -29,7 +29,6 @@ import com.agenticai.core.speech.call.CallSpeechSynthesizer;
 import com.agenticai.core.voice.dto.VoiceTurnAudioChunkEvent;
 import com.agenticai.core.voice.dto.VoiceTurnResponse;
 import com.agenticai.core.voice.dto.VoiceTurnTranscriptEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +41,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.mock.web.MockMultipartFile;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture for the {@link VoiceCallController} test classes: the vendor mocks, a controller
@@ -52,7 +52,7 @@ import reactor.core.publisher.Flux;
  */
 abstract class VoiceCallControllerTestBase {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @Mock AgentService agentService;
 

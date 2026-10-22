@@ -9,8 +9,6 @@ import com.agenticai.core.security.SecurityConfig;
 import com.agenticai.core.security.localauth.LocalAuthSecurityConfig;
 import com.agenticai.core.security.localauth.LocalJwtService;
 import com.agenticai.core.security.localauth.LocalJwtService.AccessTokenRequest;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -31,6 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code /api/auth/local/unlock} through the REAL filter chains: statuses, the {@code {error,
@@ -44,12 +44,12 @@ class LocalUnlockHttpTest {
     private static final String PIN = "482916";
     private static final String ORIGIN = "https://console.example.test";
     private static final String RP_ID = "console.example.test";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
     private static final String U = "/api/auth/local/unlock";
 
     record Resp(int status, JsonNode body, MockHttpServletResponse raw) {
         String text(String field) {
-            return body.path(field).asText();
+            return body.path(field).asString();
         }
     }
 
@@ -251,7 +251,7 @@ class LocalUnlockHttpTest {
         assertThat(enrolled.text("deviceSecret")).hasSize(43);
 
         Resp methods = send(get(U + "/methods"), token, null);
-        assertThat(methods.body().get("devices").get(0).get("label").asText())
+        assertThat(methods.body().get("devices").get(0).get("label").asString())
                 .isEqualTo("Kitchen laptop");
         assertThat(methods.body().toString()).doesNotContain(enrolled.text("deviceSecret"));
 
@@ -268,7 +268,7 @@ class LocalUnlockHttpTest {
                                 Map.of("pin", PIN, "deviceSecret", enrolled.text("deviceSecret"))));
         assertThat(login.status()).isEqualTo(200);
         assertThat(login.text("tokenType")).isEqualTo("Bearer");
-        assertThat(login.body().get("user").get("email").asText()).isEqualTo(EMAIL);
+        assertThat(login.body().get("user").get("email").asString()).isEqualTo(EMAIL);
         assertThat(
                         ctx.getBean(LocalJwtService.class)
                                 .decoder()
@@ -338,7 +338,7 @@ class LocalUnlockHttpTest {
         Resp made = postJson(U + "/recovery-codes", bearer(), null);
         assertThat(made.status()).isEqualTo(200);
         assertThat(made.body().get("codes")).hasSize(8);
-        String code = made.body().get("codes").get(0).asText();
+        String code = made.body().get("codes").get(0).asString();
         assertThat(code).matches("[A-HJ-NP-Z2-9]{4}(-[A-HJ-NP-Z2-9]{4}){3}");
         assertThat(
                         send(get(U + "/methods"), bearer(), null)
@@ -497,11 +497,11 @@ class LocalUnlockHttpTest {
         for (Resp r : List.of(forwarded, direct)) {
             assertThat(r.status()).isEqualTo(200);
             assertThat(r.text("challengeId")).matches("[0-9a-f]{32}");
-            assertThat(r.body().get("publicKey").get("rpId").asText()).isEqualTo(RP_ID);
-            assertThat(r.body().get("publicKey").get("userVerification").asText())
+            assertThat(r.body().get("publicKey").get("rpId").asString()).isEqualTo(RP_ID);
+            assertThat(r.body().get("publicKey").get("userVerification").asString())
                     .isEqualTo("required");
             assertThat(r.body().get("publicKey").get("allowCredentials")).isEmpty();
-            assertThat(r.body().get("publicKey").get("challenge").asText()).hasSize(43);
+            assertThat(r.body().get("publicKey").get("challenge").asString()).hasSize(43);
         }
     }
 
@@ -558,15 +558,15 @@ class LocalUnlockHttpTest {
                         "X-Vegaduta-Origin",
                         ORIGIN);
         assertThat(ok.status()).isEqualTo(200);
-        assertThat(ok.body().get("publicKey").get("rp").get("id").asText()).isEqualTo(RP_ID);
+        assertThat(ok.body().get("publicKey").get("rp").get("id").asString()).isEqualTo(RP_ID);
         assertThat(
                         ok.body()
                                 .get("publicKey")
                                 .get("authenticatorSelection")
                                 .get("residentKey")
-                                .asText())
+                                .asString())
                 .isEqualTo("required");
-        assertThat(ok.body().get("publicKey").get("attestation").asText()).isEqualTo("none");
+        assertThat(ok.body().get("publicKey").get("attestation").asString()).isEqualTo("none");
     }
 
     @Test
@@ -580,7 +580,7 @@ class LocalUnlockHttpTest {
                         ORIGIN);
 
         assertThat(r.status()).isEqualTo(200);
-        assertThat(r.body().get("publicKey").get("user").get("name").asText()).isEqualTo(EMAIL);
+        assertThat(r.body().get("publicKey").get("user").get("name").asString()).isEqualTo(EMAIL);
         assertThat(r.body().get("publicKey").get("excludeCredentials")).isEmpty();
         assertThat(
                         postJson(
@@ -596,7 +596,7 @@ class LocalUnlockHttpTest {
 
     private String registrationJson(SoftAuthenticator key, Resp options, String origin) {
         return key.registration(
-                options.body().get("publicKey").get("challenge").asText(),
+                options.body().get("publicKey").get("challenge").asString(),
                 origin,
                 RP_ID,
                 SoftAuthenticator.UP | SoftAuthenticator.UV | SoftAuthenticator.AT);
@@ -621,7 +621,7 @@ class LocalUnlockHttpTest {
                                 "label",
                                 "MacBook"));
         assertThat(registered.status()).isEqualTo(200);
-        assertThat(registered.body().get("passkey").get("label").asText()).isEqualTo("MacBook");
+        assertThat(registered.body().get("passkey").get("label").asString()).isEqualTo("MacBook");
         assertThat(registered.body().get("passkey").get("backedUp").asBoolean()).isFalse();
         assertThat(registered.body().has("session"))
                 .as("a signed-in person already has a session")
@@ -632,7 +632,7 @@ class LocalUnlockHttpTest {
                 postJson(U + "/passkey/login-options", null, null, "X-Vegaduta-Origin", ORIGIN);
         String assertion =
                 key.assertion(
-                        loginOptions.body().get("publicKey").get("challenge").asText(),
+                        loginOptions.body().get("publicKey").get("challenge").asString(),
                         ORIGIN,
                         RP_ID,
                         SoftAuthenticator.UP | SoftAuthenticator.UV,
@@ -710,11 +710,11 @@ class LocalUnlockHttpTest {
                                 setup));
 
         assertThat(done.status()).isEqualTo(200);
-        assertThat(done.body().get("session").get("accessToken").asText()).isNotBlank();
-        assertThat(done.body().get("session").get("user").get("email").asText())
+        assertThat(done.body().get("session").get("accessToken").asString()).isNotBlank();
+        assertThat(done.body().get("session").get("user").get("email").asString())
                 .isEqualTo("first@example.test");
         assertThat(done.body().get("recoveryCodes")).hasSize(8);
-        assertThat(done.body().get("passkey").get("id").asText()).isNotBlank();
+        assertThat(done.body().get("passkey").get("id").asString()).isNotBlank();
         assertRefusal(
                 postJson(
                         U + "/passkey/register-options",
@@ -739,8 +739,8 @@ class LocalUnlockHttpTest {
                         Map.of("token", setup, "pin", "739105", "label", "Study"));
 
         assertThat(done.status()).isEqualTo(200);
-        assertThat(done.body().get("session").get("accessToken").asText()).isNotBlank();
-        assertThat(done.body().get("session").get("refreshToken").asText())
+        assertThat(done.body().get("session").get("accessToken").asString()).isNotBlank();
+        assertThat(done.body().get("session").get("refreshToken").asString())
                 .startsWith(LocalTokens.REFRESH_PREFIX);
         assertThat(done.text("deviceId")).isNotBlank();
         assertThat(done.text("deviceSecret")).hasSize(43);
@@ -748,7 +748,7 @@ class LocalUnlockHttpTest {
         assertThat(
                         send(
                                         get("/api/probe/any"),
-                                        done.body().get("session").get("accessToken").asText(),
+                                        done.body().get("session").get("accessToken").asString(),
                                         null)
                                 .status())
                 .isEqualTo(200);

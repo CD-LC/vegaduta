@@ -22,8 +22,6 @@ import com.agenticai.core.agents.memory.QueryEmbedding;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +29,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("unchecked")
 class ChatMemoryRecallBlocksTest {
@@ -101,7 +101,7 @@ class ChatMemoryRecallBlocksTest {
         emitter.complete();
         List<String> chunks = emitter.asFlux().collectList().block();
         List<JsonNode> events = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         for (String chunk : chunks) {
             assertTrue(chunk.startsWith(AgentStepEventEmitter.STEP_EVENT_MARKER));
             assertFalse(chunk.contains("\n"));
@@ -142,17 +142,17 @@ class ChatMemoryRecallBlocksTest {
         assertFalse(emitter.hasEmitted());
         List<JsonNode> events = drain(emitter);
         assertEquals(2, events.size());
-        assertEquals("run_started", events.get(0).get("type").asText());
+        assertEquals("run_started", events.get(0).get("type").asString());
         JsonNode memory = events.get(1);
-        assertEquals("memory", memory.get("type").asText());
+        assertEquals("memory", memory.get("type").asString());
         assertEquals(2, memory.get("blocks").asInt());
-        assertEquals("persona", memory.get("blockLabels").get(0).asText());
-        assertEquals("project:acme", memory.get("blockLabels").get(1).asText());
+        assertEquals("persona", memory.get("blockLabels").get(0).asString());
+        assertEquals("project:acme", memory.get("blockLabels").get(1).asString());
         assertEquals(1, memory.get("privateFacts").asInt());
         assertEquals(1, memory.get("sharedFacts").asInt());
         assertEquals(2, memory.get("factIds").size());
-        assertEquals(mine.id().toString(), memory.get("factIds").get(0).asText());
-        assertEquals(shared.id().toString(), memory.get("factIds").get(1).asText());
+        assertEquals(mine.id().toString(), memory.get("factIds").get(0).asString());
+        assertEquals(shared.id().toString(), memory.get("factIds").get(1).asString());
         assertFalse(memory.toString().contains("likes tea"));
         assertFalse(memory.toString().contains("works at Acme"));
         assertFalse(memory.toString().contains("BLOCKS"));
@@ -182,7 +182,7 @@ class ChatMemoryRecallBlocksTest {
         assertNull(recall.recallMemoryFactsBlock(agentId, "alice", "hi", emitter));
         List<JsonNode> events = drain(emitter);
         assertEquals(1, events.size());
-        assertEquals("run_started", events.get(0).get("type").asText());
+        assertEquals("run_started", events.get(0).get("type").asString());
     }
 
     @Test

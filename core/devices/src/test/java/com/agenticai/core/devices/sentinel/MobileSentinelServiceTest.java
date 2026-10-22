@@ -20,8 +20,6 @@ import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
@@ -39,10 +37,12 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class MobileSentinelServiceTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final List<MobileSentinelEvent> store = new ArrayList<>();
     private MobileSentinelPolicy policyRow;
 

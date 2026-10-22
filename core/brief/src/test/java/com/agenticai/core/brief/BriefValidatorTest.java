@@ -17,7 +17,6 @@ import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.workflow.OrchestratorService;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runs the REAL {@link OrchestratorService} (only its collaborators are mocked) so the
@@ -49,7 +49,10 @@ class BriefValidatorTest {
                 .requireExists(any(UUID.class));
         OrchestratorService orchestrator =
                 new OrchestratorService(
-                        agentService, null, new ObjectMapper(), mock(ObjectProvider.class));
+                        agentService,
+                        null,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        mock(ObjectProvider.class));
         when(tenantLimits.maxAgents("t1")).thenReturn(Optional.empty());
         when(tenantLimits.maxWorkflows("t1")).thenReturn(Optional.empty());
         validator =
@@ -58,7 +61,7 @@ class BriefValidatorTest {
                         tenantLimits,
                         agentService,
                         workflowService,
-                        new ObjectMapper());
+                        com.agenticai.core.json.JsonMappers.plain());
         TenantContext.set(
                 TenantContext.of(
                         "t1", "user-1", Set.of("PERM_MANAGE_AGENTS", "PERM_MANAGE_INTEGRATIONS")));
@@ -245,7 +248,7 @@ class BriefValidatorTest {
 
     @Test
     void briefSurvivesAJsonRoundTripAndIgnoresUnknownProperties() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         Brief original = BriefFixtures.valid().build();
         String json = mapper.writeValueAsString(original);
         assertThat(mapper.readValue(json, Brief.class)).isEqualTo(original);

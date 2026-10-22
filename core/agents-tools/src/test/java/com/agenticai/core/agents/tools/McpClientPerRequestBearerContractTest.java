@@ -14,8 +14,6 @@ import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.modelcontextprotocol.client.McpClient;
@@ -36,6 +34,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * P0 characterisation (ADR-0012, section 6 P0.5, client side): the {@code McpRemoteHeaders}
@@ -52,7 +52,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class McpClientPerRequestBearerContractTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final List<String> authorizationPerRequest = new CopyOnWriteArrayList<>();
     private final List<String> methodPerRequest = new CopyOnWriteArrayList<>();
     private HttpServer server;
@@ -73,7 +73,7 @@ class McpClientPerRequestBearerContractTest {
                         }
                         JsonNode request =
                                 mapper.readTree(exchange.getRequestBody().readAllBytes());
-                        String method = request.path("method").asText();
+                        String method = request.path("method").asString();
                         authorizationPerRequest.add(
                                 exchange.getRequestHeaders().getFirst("Authorization"));
                         methodPerRequest.add(method);

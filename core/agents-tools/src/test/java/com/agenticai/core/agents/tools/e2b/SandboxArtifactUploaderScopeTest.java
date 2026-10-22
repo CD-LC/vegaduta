@@ -14,8 +14,6 @@ import com.agenticai.core.sdlc.dto.RunCodeResponse;
 import com.agenticai.core.sdlc.dto.SandboxArtifact;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Set;
@@ -24,10 +22,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class SandboxArtifactUploaderScopeTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final FileStorageService storage = mock(FileStorageService.class);
     private final AgentService agents = mock(AgentService.class);
@@ -116,7 +116,7 @@ class SandboxArtifactUploaderScopeTest {
         JsonNode out =
                 MAPPER.readTree(callback.call("{\"code\":\"print(1)\",\"language\":\"python\"}"));
 
-        assertTrue(out.path("warnings").get(0).asText().contains("huge.csv"));
+        assertTrue(out.path("warnings").get(0).asString().contains("huge.csv"));
         ArgumentCaptor<byte[]> meta = ArgumentCaptor.forClass(byte[].class);
         verify(storage)
                 .put(
@@ -126,13 +126,13 @@ class SandboxArtifactUploaderScopeTest {
                                                 out.path("files")
                                                         .get(0)
                                                         .path("url")
-                                                        .asText()
+                                                        .asString()
                                                         .substring(
                                                                 SandboxArtifacts.URL_PREFIX
                                                                         .length())))),
                         meta.capture(),
                         eq("application/json"));
-        assertEquals("alice", MAPPER.readTree(meta.getValue()).path("userId").asText());
+        assertEquals("alice", MAPPER.readTree(meta.getValue()).path("userId").asString());
 
         JsonNode second =
                 MAPPER.readTree(callback.call("{\"code\":\"print(1)\",\"language\":\"python\"}"));

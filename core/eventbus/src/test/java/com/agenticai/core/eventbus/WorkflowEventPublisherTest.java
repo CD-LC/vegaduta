@@ -12,14 +12,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link WorkflowEventPublisher} is, per its own javadoc, "the single entry point any part of this
@@ -38,7 +37,7 @@ class WorkflowEventPublisherTest {
     @BeforeEach
     void setUp() {
         outboxRepository = mock(WorkflowEventOutboxRepository.class);
-        objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        objectMapper = com.agenticai.core.json.JsonMappers.plain();
     }
 
     @AfterEach
@@ -99,9 +98,8 @@ class WorkflowEventPublisherTest {
         // reach the agent even if event publishing itself is broken."
         ObjectMapper brokenMapper = mock(ObjectMapper.class);
         try {
-            when(brokenMapper.writeValueAsString(any()))
-                    .thenThrow(new JsonProcessingException("boom") {});
-        } catch (JsonProcessingException impossible) {
+            when(brokenMapper.writeValueAsString(any())).thenThrow(new JacksonException("boom") {});
+        } catch (JacksonException impossible) {
             throw new AssertionError(impossible);
         }
         WorkflowEventPublisher publisher =

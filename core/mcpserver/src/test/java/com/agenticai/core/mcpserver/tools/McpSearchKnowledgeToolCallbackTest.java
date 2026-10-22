@@ -17,14 +17,14 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.knowledge.KnowledgeSearchService;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code search_knowledge}'s one load-bearing subtlety is the INVERTED empty-set convention (its
@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  */
 class McpSearchKnowledgeToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private KnowledgeSearchService knowledgeSearchService;
     private AuditLogService auditLogService;
@@ -86,7 +86,7 @@ class McpSearchKnowledgeToolCallbackTest {
 
         JsonNode result = call("{\"query\": \"quarterly report\"}");
 
-        assertTrue(result.get("error").asText().contains("tenant admin"));
+        assertTrue(result.get("error").asString().contains("tenant admin"));
         verify(knowledgeSearchService, never()).search(anyString(), anyInt(), anySet());
         // A deny-by-default rejection is itself compliance-relevant, same posture as the
         // other MCP tool callbacks' rejection branches.
@@ -167,7 +167,7 @@ class McpSearchKnowledgeToolCallbackTest {
 
         JsonNode result = call("{\"query\": \"q\"}");
 
-        assertTrue(result.get("error").asText().contains("Knowledge search failed"));
+        assertTrue(result.get("error").asString().contains("Knowledge search failed"));
         verify(auditLogService)
                 .record(
                         eq("mcp-external:" + grantId),

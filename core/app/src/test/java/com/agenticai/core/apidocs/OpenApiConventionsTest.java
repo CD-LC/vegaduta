@@ -3,14 +3,14 @@ package com.agenticai.core.apidocs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.common.security.PublicEndpointRateLimitFilter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The cross-cutting API conventions the generated document must state over the REAL controller set:
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  */
 class OpenApiConventionsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static JsonNode doc;
 
     private static synchronized JsonNode doc() throws IOException {
@@ -38,7 +38,7 @@ class OpenApiConventionsTest {
     private static List<String> schemes(JsonNode op) {
         List<String> out = new ArrayList<>();
         for (JsonNode alt : op.path("security")) {
-            alt.fieldNames().forEachRemaining(out::add);
+            alt.propertyNames().forEach(out::add);
         }
         return out;
     }
@@ -55,7 +55,7 @@ class OpenApiConventionsTest {
         JsonNode notFound = doc().path("components").path("responses").path("NotFound");
         assertThat(notFound.path("content").has("application/problem+json")).isTrue();
         assertThat(notFound.path("content").has("application/json")).isTrue();
-        assertThat(notFound.path("headers").path("X-Request-Id").path("$ref").asText())
+        assertThat(notFound.path("headers").path("X-Request-Id").path("$ref").asString())
                 .isEqualTo("#/components/headers/X-Request-Id");
     }
 
@@ -73,7 +73,7 @@ class OpenApiConventionsTest {
                                 .path("responses")
                                 .path("429")
                                 .path("$ref")
-                                .asText())
+                                .asString())
                 .isEqualTo("#/components/responses/TooManyRequests");
         assertThat(op("/api/agents", "get").path("responses").has("429")).isFalse();
         assertThat(
@@ -104,7 +104,7 @@ class OpenApiConventionsTest {
     @Test
     void pagedListEndpointsDocumentPagingHeaders() throws IOException {
         JsonNode headers = op("/api/agents", "get").path("responses").path("200").path("headers");
-        assertThat(headers.path("X-Total-Count").path("$ref").asText())
+        assertThat(headers.path("X-Total-Count").path("$ref").asString())
                 .isEqualTo("#/components/headers/X-Total-Count");
         assertThat(headers.has("X-Has-More")).isTrue();
         assertThat(
@@ -125,10 +125,10 @@ class OpenApiConventionsTest {
                                 .path("application/json")
                                 .path("schema")
                                 .path("$ref")
-                                .asText())
+                                .asString())
                 .endsWith("/WorkflowEvent");
         List<String> headers = new ArrayList<>();
-        post.path("parameters").forEach(p -> headers.add(p.path("name").asText()));
+        post.path("parameters").forEach(p -> headers.add(p.path("name").asString()));
         assertThat(headers)
                 .contains("X-VegaDuta-Signature", "X-VegaDuta-Delivery", "X-VegaDuta-Event");
     }
@@ -136,10 +136,10 @@ class OpenApiConventionsTest {
     @Test
     void permissionsComeFromTheSecurityRuleSnapshot() throws IOException {
         JsonNode audit = op("/api/audit-log", "get");
-        assertThat(audit.path("x-permissions").path("anyOf").get(0).asText())
+        assertThat(audit.path("x-permissions").path("anyOf").get(0).asString())
                 .isEqualTo("PERM_VIEW_AUDIT_LOG");
-        assertThat(audit.path("x-roles").get(0).asText()).isEqualTo("tenant-admin");
-        assertThat(audit.path("description").asText()).contains("Requires PERM_VIEW_AUDIT_LOG");
+        assertThat(audit.path("x-roles").get(0).asString()).isEqualTo("tenant-admin");
+        assertThat(audit.path("description").asString()).contains("Requires PERM_VIEW_AUDIT_LOG");
         assertThat(op("/api/agents", "get").has("x-permissions")).isFalse();
     }
 

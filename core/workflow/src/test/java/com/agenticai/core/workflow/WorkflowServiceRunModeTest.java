@@ -24,7 +24,6 @@ import com.agenticai.core.workflow.dto.WorkflowRunResponse;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
 import com.agenticai.core.workflow.version.WorkflowVersion;
 import com.agenticai.core.workflow.version.WorkflowVersionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,7 +73,7 @@ class WorkflowServiceRunModeTest {
                         mock(WorkflowRunRepository.class),
                         mock(OrchestratorService.class),
                         engine,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(TenantResolutionService.class),
                         mock(TenantSchemaResolver.class),
                         mock(TenantLimits.class),

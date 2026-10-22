@@ -7,8 +7,6 @@ import static org.mockito.Mockito.mock;
 
 import com.agenticai.core.agents.turn.VerifierEscalationRouter.Reason;
 import com.agenticai.core.agents.turn.VerifierEscalationRouter.Signals;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +15,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
+import tools.jackson.databind.JsonNode;
 
 class VerifierEscalationRouterTest {
 
@@ -260,7 +259,8 @@ class VerifierEscalationRouterTest {
         Assumptions.assumeTrue(
                 fixture != null,
                 "eval fixture golden-dataset.json not found above " + Path.of("").toAbsolutePath());
-        JsonNode cases = new ObjectMapper().readTree(Files.readString(fixture));
+        JsonNode cases =
+                com.agenticai.core.json.JsonMappers.plain().readTree(Files.readString(fixture));
         assertTrue(cases.size() > 10);
 
         SimpleMeterRegistry reg = new SimpleMeterRegistry();
@@ -270,7 +270,7 @@ class VerifierEscalationRouterTest {
         int kept = 0;
         int i = 0;
         for (JsonNode c : cases) {
-            String category = c.path("category").asText("");
+            String category = c.path("category").asString("");
             // Scripted cheap-model behaviour: reasoning-heavy categories hedge, every 7th case
             // returns nothing, everything else answers confidently.
             String answer;
@@ -289,7 +289,7 @@ class VerifierEscalationRouterTest {
                 expectedEscalations++;
             }
             Optional<Reason> reason = r.shouldEscalate(r.inspect(answer, null, 0));
-            assertEquals(unsafe, reason.isPresent(), "case " + c.path("id").asText());
+            assertEquals(unsafe, reason.isPresent(), "case " + c.path("id").asString());
             r.recordDecision(UUID.randomUUID(), reason, answer.length());
             if (reason.isPresent()) {
                 escalations++;

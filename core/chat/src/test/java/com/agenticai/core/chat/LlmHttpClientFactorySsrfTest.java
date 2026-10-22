@@ -2,9 +2,6 @@ package com.agenticai.core.chat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.net.SsrfGuard;
 import com.sun.net.httpserver.HttpServer;
@@ -15,12 +12,14 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
-import org.springframework.web.client.RestClient;
 
 /**
  * SEC-023 at USE time: the BYOK Ollama / Azure OpenAI chat path checks the tenant base URL and
@@ -69,20 +68,9 @@ class LlmHttpClientFactorySsrfTest {
     }
 
     private static LlmHttpClientFactory factory(SsrfGuard guard) {
-        @SuppressWarnings("unchecked")
-        ObjectProvider<ClientHttpRequestFactorySettings> settings = mock(ObjectProvider.class);
-        when(settings.getIfAvailable(any()))
-                .thenReturn(ClientHttpRequestFactorySettings.defaults());
         LlmHttpClientFactory f =
                 new LlmHttpClientFactory(
-                        RestClient.builder(),
-                        settings,
-                        Duration.ofSeconds(2),
-                        Duration.ofSeconds(5),
-                        false,
-                        Duration.ZERO,
-                        20,
-                        40);
+                        Duration.ofSeconds(2), Duration.ofSeconds(5), false, Duration.ZERO, 20, 40);
         f.setSsrfGuard(guard);
         return f;
     }
@@ -118,36 +106,38 @@ class LlmHttpClientFactorySsrfTest {
     }
 
     @Test
-    void operatorAllowListedSelfHostedOllamaStillWorks() {
+    void operatorAllowListedSelfHostedOllamaStillWorks() throws Exception {
         LlmHttpClientFactory f =
                 factory(guard(Map.of("ollama", "127.0.0.1"), Set.of("ollama:" + port)));
         f.requireAllowedTenantBaseUrl("http://ollama:" + port);
-        String body =
-                f.guardedRestClientBuilder()
-                        .build()
-                        .get()
-                        .uri("http://ollama:" + port + "/ok")
-                        .retrieve()
-                        .body(String.class);
-        assertThat(body).isEqualTo("{}");
+        try (Response response =
+                f.guardedClient()
+                        .newCall(new Request.Builder().url("http://ollama:" + port + "/ok").build())
+                        .execute()) {
+            assertThat(response.body().string()).isEqualTo("{}");
+        }
     }
 
     @Test
     void guardedClientIsPinnedEvenIfTheUseTimeCheckWereSkipped() {
         LlmHttpClientFactory f =
                 factory(guard(Map.of("rebound.example.com", "127.0.0.1"), Set.of()));
-        RestClient client = f.guardedRestClientBuilder().build();
+        OkHttpClient client = f.guardedClient();
         assertThatThrownBy(
                         () ->
-                                client.get()
-                                        .uri("http://rebound.example.com:" + port + "/ok")
-                                        .retrieve()
-                                        .body(String.class))
-                .hasRootCauseInstanceOf(SsrfGuard.BlockedAddressException.class);
+                                client.newCall(
+                                                new Request.Builder()
+                                                        .url(
+                                                                "http://rebound.example.com:"
+                                                                        + port
+                                                                        + "/ok")
+                                                        .build())
+                                        .execute())
+                .isInstanceOf(SsrfGuard.BlockedAddressException.class);
     }
 
     @Test
-    void guardedClientDoesNotFollowRedirectsIntoTheNetwork() {
+    void guardedClientDoesNotFollowRedirectsIntoTheNetwork() throws Exception {
         LlmHttpClientFactory f =
                 factory(
                         guard(
@@ -157,15 +147,22 @@ class LlmHttpClientFactorySsrfTest {
                                         "internal.example.net",
                                         "127.0.0.1"),
                                 Set.of("ollama.example.com", "internal.example.net")));
-        RestClient client = f.guardedRestClientBuilder().build();
+        OkHttpClient client = f.guardedClient();
         // Both hosts are reachable for this test; only the redirect policy stops the hop.
-        var response =
-                client.post()
-                        .uri("http://ollama.example.com:" + port + "/v1/chat/completions")
-                        .body("{}")
-                        .retrieve()
-                        .toBodilessEntity();
-        assertThat(response.getStatusCode().value()).isEqualTo(307);
+        try (Response response =
+                client.newCall(
+                                new Request.Builder()
+                                        .url(
+                                                "http://ollama.example.com:"
+                                                        + port
+                                                        + "/v1/chat/completions")
+                                        .post(
+                                                RequestBody.create(
+                                                        "{}", MediaType.get("application/json")))
+                                        .build())
+                        .execute()) {
+            assertThat(response.code()).isEqualTo(307);
+        }
         assertThat(secretHits.get()).isZero();
     }
 }

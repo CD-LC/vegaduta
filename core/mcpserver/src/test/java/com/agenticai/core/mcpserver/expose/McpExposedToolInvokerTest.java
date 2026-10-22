@@ -35,8 +35,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -49,6 +47,8 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Pins what an external MCP caller can and cannot make a dynamic tool do: authorization is
@@ -58,7 +58,7 @@ import reactor.core.publisher.Flux;
  */
 class McpExposedToolInvokerTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private AgentChatService agentChatService;
     private WorkflowService workflowService;
@@ -551,10 +551,10 @@ class McpExposedToolInvokerTest {
 
         assertFalse(result.error());
         JsonNode body = MAPPER.readTree(result.texts().get(0));
-        assertEquals("COMPLETED", body.get("status").asText());
-        assertEquals(runId.toString(), body.get("run_id").asText());
-        assertEquals("\"the answer\"", body.get("output").asText());
-        assertEquals("0.0100", body.get("approx_cost_usd").asText());
+        assertEquals("COMPLETED", body.get("status").asString());
+        assertEquals(runId.toString(), body.get("run_id").asString());
+        assertEquals("\"the answer\"", body.get("output").asString());
+        assertEquals("0.0100", body.get("approx_cost_usd").asString());
         verify(auditLogService)
                 .record(
                         eq("mcp-external:" + grantId),
@@ -576,9 +576,9 @@ class McpExposedToolInvokerTest {
 
         assertFalse(result.error());
         JsonNode body = MAPPER.readTree(result.texts().get(0));
-        assertEquals("RUNNING", body.get("status").asText());
-        assertEquals(runId.toString(), body.get("run_id").asText());
-        assertTrue(body.get("hint").asText().contains("get_run"));
+        assertEquals("RUNNING", body.get("status").asString());
+        assertEquals(runId.toString(), body.get("run_id").asString());
+        assertTrue(body.get("hint").asString().contains("get_run"));
         verify(workflowService, never()).getRun(any(), any());
     }
 
@@ -643,8 +643,8 @@ class McpExposedToolInvokerTest {
 
         assertTrue(result.error());
         JsonNode body = MAPPER.readTree(result.texts().get(0));
-        assertEquals("FAILED", body.get("status").asText());
-        assertEquals("node exploded", body.get("error_message").asText());
+        assertEquals("FAILED", body.get("status").asString());
+        assertEquals("node exploded", body.get("error_message").asString());
     }
 
     @Test
@@ -684,7 +684,7 @@ class McpExposedToolInvokerTest {
                 invoker.invoke(caller, getRunTool, args("{\"run_id\":\"" + runId + "\"}"));
 
         assertFalse(result.error());
-        assertEquals("COMPLETED", MAPPER.readTree(result.texts().get(0)).get("status").asText());
+        assertEquals("COMPLETED", MAPPER.readTree(result.texts().get(0)).get("status").asString());
         verify(workflowService, never()).getRun(eq(foreignWorkflow), any());
     }
 

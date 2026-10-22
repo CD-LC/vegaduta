@@ -29,8 +29,6 @@ import com.agenticai.core.agents.tools.coding.CodingTaskToolCallbackFactory;
 import com.agenticai.core.guardrails.ToolDispatchGate;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
@@ -44,6 +42,8 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The agent-facing side of coding tasks: how the tool is classified and gated (human confirmation
@@ -52,7 +52,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 class CodingTaskToolTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private final UUID agentId = UUID.randomUUID();
     private final CodingTaskService service = mock(CodingTaskService.class);
 
@@ -261,7 +261,7 @@ class CodingTaskToolTest {
         assertThat(tool.getToolDefinition().name()).isEqualTo("coding_task");
         JsonNode schema = MAPPER.readTree(tool.getToolDefinition().inputSchema());
         List<String> props = new java.util.ArrayList<>();
-        schema.get("properties").fieldNames().forEachRemaining(props::add);
+        schema.get("properties").propertyNames().forEach(props::add);
         assertThat(props).containsExactlyInAnyOrder("instruction", "repoUrl", "testCommand");
         assertThat(tool.getToolDefinition().description().toLowerCase()).contains("cannot approve");
         for (String forbidden :
@@ -292,12 +292,12 @@ class CodingTaskToolTest {
                         .call(
                                 "{\"instruction\":\"Add validation\",\"repoUrl\":\"https://github.com/acme/widgets\",\"testCommand\":\"mvn -q test\"}");
         JsonNode json = MAPPER.readTree(out);
-        assertThat(json.get("status").asText()).isEqualTo("AWAITING_APPROVAL");
+        assertThat(json.get("status").asString()).isEqualTo("AWAITING_APPROVAL");
         assertThat(json.get("approvalRequired").asBoolean()).isTrue();
-        assertThat(json.get("diff").asText()).contains("+y");
+        assertThat(json.get("diff").asString()).contains("+y");
         assertThat(json.get("testFilesTouched").asBoolean()).isTrue();
         assertThat(json.get("testRuns")).hasSize(2);
-        assertThat(json.get("note").asText()).contains("cannot approve");
+        assertThat(json.get("note").asString()).contains("cannot approve");
 
         org.mockito.ArgumentCaptor<CodingTaskService.StartInput> input =
                 org.mockito.ArgumentCaptor.forClass(CodingTaskService.StartInput.class);
@@ -324,9 +324,9 @@ class CodingTaskToolTest {
                         new CodingTaskToolCallback(service, agentId)
                                 .call(
                                         "{\"instruction\":\"x\",\"repoUrl\":\"https://github.com/a/b\",\"testCommand\":\"npm test\"}"));
-        assertThat(json.get("status").asText()).isEqualTo("RUNNING");
+        assertThat(json.get("status").asString()).isEqualTo("RUNNING");
         assertThat(json.has("diff")).isFalse();
-        assertThat(json.get("note").asText()).contains("Still running");
+        assertThat(json.get("note").asString()).contains("Still running");
     }
 
     @Test

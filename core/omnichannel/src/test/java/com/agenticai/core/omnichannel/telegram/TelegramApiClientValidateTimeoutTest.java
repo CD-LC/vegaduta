@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
@@ -49,7 +48,7 @@ class TelegramApiClientValidateTimeoutTest {
     private TelegramApiClient client() {
         TelegramApiClient c =
                 new TelegramApiClient(
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         "http://127.0.0.1:" + server.getAddress().getPort() + "/bot",
                         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build());
         c.validateTimeout = Duration.ofMillis(300);

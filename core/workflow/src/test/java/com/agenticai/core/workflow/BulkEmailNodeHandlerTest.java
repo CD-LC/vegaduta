@@ -28,8 +28,6 @@ import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.output.BulkEmailSender;
 import com.agenticai.core.workflow.output.WorkflowOutputDedupGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +38,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class BulkEmailNodeHandlerTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private BulkEmailSender sender;
     private EmailMessageRepository messages;
     private EmailSuppressionRepository suppressions;
@@ -119,9 +119,9 @@ class BulkEmailNodeHandlerTest {
         assertEquals(3, out.get("skipped").asInt());
         assertEquals(0, out.get("failed").asInt());
         assertEquals(5, out.get("rows").size());
-        assertEquals("suppressed", out.get("rows").get(1).get("reason").asText());
-        assertEquals("invalid address", out.get("rows").get(2).get("reason").asText());
-        assertEquals("duplicate in list", out.get("rows").get(3).get("reason").asText());
+        assertEquals("suppressed", out.get("rows").get(1).get("reason").asString());
+        assertEquals("invalid address", out.get("rows").get(2).get("reason").asString());
+        assertEquals("duplicate in list", out.get("rows").get(3).get("reason").asString());
 
         ArgumentCaptor<String> subject = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> body = ArgumentCaptor.forClass(String.class);
@@ -172,7 +172,7 @@ class BulkEmailNodeHandlerTest {
         assertEquals(2, out.get("sent").asInt());
         assertEquals(1, out.get("deferred").asInt());
         assertEquals(List.of(60_000L), sleeps);
-        assertEquals("deferred", out.get("rows").get(2).get("status").asText());
+        assertEquals("deferred", out.get("rows").get(2).get("status").asString());
         // A deferred recipient must not keep its dedup claim, or a follow-up run could never send
         // it.
         verify(dedup).release(anyString());
@@ -223,7 +223,7 @@ class BulkEmailNodeHandlerTest {
                         "{}");
         JsonNode out = json(result);
         assertEquals(1, out.get("sent").asInt());
-        assertEquals("already replied", out.get("rows").get(0).get("reason").asText());
+        assertEquals("already replied", out.get("rows").get(0).get("reason").asString());
         verify(sender, never())
                 .send(eq("a@x.test"), anyString(), anyString(), anyBoolean(), any(), any());
     }
@@ -261,7 +261,7 @@ class BulkEmailNodeHandlerTest {
         assertEquals("OK", result.status());
         assertEquals(1, out.get("sent").asInt());
         assertEquals(1, out.get("failed").asInt());
-        assertEquals("550 rejected", out.get("rows").get(0).get("error").asText());
+        assertEquals("550 rejected", out.get("rows").get(0).get("error").asString());
         verify(dedup).release(anyString());
         ArgumentCaptor<EmailMessage> saved = ArgumentCaptor.forClass(EmailMessage.class);
         verify(messages, org.mockito.Mockito.times(2)).save(saved.capture());
@@ -295,7 +295,7 @@ class BulkEmailNodeHandlerTest {
         assertEquals("OK", result.status());
         assertEquals(2, out.get("sent").asInt());
         assertEquals(1, out.get("failed").asInt());
-        assertTrue(out.get("rows").get(1).get("error").asText().contains("template error"));
+        assertTrue(out.get("rows").get(1).get("error").asString().contains("template error"));
         verify(dedup).release(anyString()); // b's claim is given back, so a retry can still reach b
         verify(sender, never())
                 .send(eq("b@x.test"), anyString(), anyString(), anyBoolean(), any(), any());

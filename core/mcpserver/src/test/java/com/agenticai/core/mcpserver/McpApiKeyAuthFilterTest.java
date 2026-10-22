@@ -173,7 +173,7 @@ class McpApiKeyAuthFilterTest {
         assertEquals("application/json", response.getContentType());
         // The hand-built body must stay parseable JSON - a quote slipping
         // through the replace() would corrupt every client's error handling.
-        new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.getContentAsString());
+        new tools.jackson.databind.ObjectMapper().readTree(response.getContentAsString());
     }
 
     // ---- happy path ---------------------------------------------------------

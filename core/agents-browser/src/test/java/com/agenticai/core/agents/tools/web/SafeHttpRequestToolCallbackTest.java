@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.agents.tools.web.HttpRequestExecutorSafeModeTestSupport.RecordingExecutor;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The model-facing surface of the safe-mode tools: schemas, names, argument handling and the
@@ -25,7 +25,7 @@ class SafeHttpRequestToolCallbackTest {
 
     private static final String HOST = "203.0.113.10";
     private static final String SECRET = "sk_live_9f8e7d6c5b4a3210";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static HttpRequestPolicy base(List<String> agentHosts) {
         return new HttpRequestPolicy(
@@ -65,8 +65,8 @@ class SafeHttpRequestToolCallbackTest {
 
         JsonNode readSchema = MAPPER.readTree(readDef.inputSchema());
         JsonNode writeSchema = MAPPER.readTree(writeDef.inputSchema());
-        assertEquals("url", readSchema.get("required").get(0).asText());
-        assertEquals("url", writeSchema.get("required").get(0).asText());
+        assertEquals("url", readSchema.get("required").get(0).asString());
+        assertEquals("url", writeSchema.get("required").get(0).asString());
 
         JsonNode readProps = readSchema.get("properties");
         JsonNode writeProps = writeSchema.get("properties");

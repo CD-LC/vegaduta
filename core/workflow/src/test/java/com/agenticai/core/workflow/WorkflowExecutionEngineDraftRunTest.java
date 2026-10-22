@@ -11,20 +11,20 @@ import static org.mockito.Mockito.verify;
 
 import com.agenticai.core.audit.PlatformIssueService;
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The real {@link WorkflowExecutionEngine} driving the real {@link WorkflowNodeExecutor} over pins:
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class WorkflowExecutionEngineDraftRunTest {
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper mapper = JsonMappers.withJavaTime();
     private WorkflowPinStore pinStore;
     private WorkflowExecutionEngine engine;
     private WorkflowDefinition definition;

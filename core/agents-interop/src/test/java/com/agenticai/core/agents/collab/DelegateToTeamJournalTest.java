@@ -13,12 +13,12 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * L1: durable delegate_parallel branches - a COMPLETED branch is replayed from the journal, not
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  */
 class DelegateToTeamJournalTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String JOB_SESSION = "job:" + UUID.randomUUID();
 
     private final AgentChatService chat = mock(AgentChatService.class);
@@ -68,9 +68,9 @@ class DelegateToTeamJournalTest {
                                         + "{\"agent\":\"writer\",\"question\":\"draft it\"}]}");
 
         JsonNode results = MAPPER.readTree(out).get("results");
-        assertEquals("cached A", results.get(0).get("answer").asText());
+        assertEquals("cached A", results.get(0).get("answer").asString());
         assertTrue(results.get(0).get("resumedFromJournal").asBoolean());
-        assertEquals("fresh B", results.get(1).get("answer").asText());
+        assertEquals("fresh B", results.get(1).get("answer").asString());
         verify(chat, never()).delegateCall(eq(aId), any(), any(), any());
         verify(chat, times(1)).delegateCall(eq(bId), any(), any(), any());
         // The re-run branch is journaled as completed for the next resume.

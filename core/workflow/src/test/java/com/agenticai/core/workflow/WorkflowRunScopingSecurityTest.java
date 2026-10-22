@@ -16,7 +16,6 @@ import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,7 +71,7 @@ class WorkflowRunScopingSecurityTest {
                         runRepository,
                         mock(OrchestratorService.class),
                         mock(WorkflowExecutionEngine.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(TenantResolutionService.class),
                         mock(TenantSchemaResolver.class),
                         mock(TenantLimits.class),

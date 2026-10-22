@@ -3,8 +3,6 @@ package com.agenticai.core.chat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -31,6 +29,8 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link AnthropicStructuredToolChatModel}: stub-level routing (forced / pass-through / unwrap) and
@@ -39,7 +39,7 @@ import reactor.core.publisher.Flux;
  */
 class AnthropicStructuredToolChatModelTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SCHEMA =
             "{\"type\":\"object\",\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
     private static final JsonNode INPUT_SCHEMA = StructuredOutput.anthropicToolInputSchema(SCHEMA);
@@ -124,7 +124,7 @@ class AnthropicStructuredToolChatModelTest {
                 .isEqualTo("verdict");
         assertThat(sent.getInternalToolExecutionEnabled()).isFalse();
         assertThat(sent.getToolCallbacks()).hasSize(1);
-        assertThat(MAPPER.readTree(out.getResult().getOutput().getText()).get("verdict").asText())
+        assertThat(MAPPER.readTree(out.getResult().getOutput().getText()).get("verdict").asString())
                 .isEqualTo("pass");
         assertThat(stub.calls.get()).isEqualTo(1);
     }
@@ -267,15 +267,15 @@ class AnthropicStructuredToolChatModelTest {
 
         String content = client(model).prompt().user("judge it").call().content();
 
-        assertThat(MAPPER.readTree(content).get("verdict").asText()).isEqualTo("pass");
+        assertThat(MAPPER.readTree(content).get("verdict").asString()).isEqualTo("pass");
         assertThat(requests)
                 .hasSize(1); // the pseudo tool was never "executed" and no follow-up turn happened
         JsonNode sent = MAPPER.readTree(requests.get(0));
-        assertThat(sent.get("tool_choice").get("type").asText()).isEqualTo("tool");
-        assertThat(sent.get("tool_choice").get("name").asText()).isEqualTo("verdict");
+        assertThat(sent.get("tool_choice").get("type").asString()).isEqualTo("tool");
+        assertThat(sent.get("tool_choice").get("name").asString()).isEqualTo("verdict");
         assertThat(sent.get("tools")).hasSize(1);
-        assertThat(sent.get("tools").get(0).get("name").asText()).isEqualTo("verdict");
-        assertThat(sent.get("tools").get(0).get("input_schema").get("type").asText())
+        assertThat(sent.get("tools").get(0).get("name").asString()).isEqualTo("verdict");
+        assertThat(sent.get("tools").get(0).get("input_schema").get("type").asString())
                 .isEqualTo("object");
         assertThat(sent.get("tools").get(0).get("input_schema").get("properties").has("verdict"))
                 .isTrue();
@@ -291,7 +291,7 @@ class AnthropicStructuredToolChatModelTest {
 
         String content = client(model).prompt().user("judge it").call().content();
 
-        assertThat(MAPPER.readTree(content).get("verdict").asText()).isEqualTo("fail");
+        assertThat(MAPPER.readTree(content).get("verdict").asString()).isEqualTo("fail");
         assertThat(requests).hasSize(1);
     }
 
@@ -310,7 +310,7 @@ class AnthropicStructuredToolChatModelTest {
         client(model).prompt().user("judge it").call().content();
 
         JsonNode sent = MAPPER.readTree(requests.get(0));
-        assertThat(sent.get("thinking").get("type").asText()).isEqualTo("enabled");
+        assertThat(sent.get("thinking").get("type").asString()).isEqualTo("enabled");
         assertThat(sent.has("tool_choice")).isFalse();
         assertThat(sent.has("tools")).isFalse();
     }
@@ -332,6 +332,6 @@ class AnthropicStructuredToolChatModelTest {
         JsonNode sent = MAPPER.readTree(requests.get(0));
         assertThat(sent.has("tool_choice")).isFalse();
         assertThat(sent.get("tools")).hasSize(1);
-        assertThat(sent.get("tools").get(0).get("name").asText()).isEqualTo("real_tool");
+        assertThat(sent.get("tools").get(0).get("name").asString()).isEqualTo("real_tool");
     }
 }

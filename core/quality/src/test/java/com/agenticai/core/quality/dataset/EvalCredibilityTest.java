@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.quality.grader.CodeGrader;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /** V375: agent-config snapshot, grader-aware dataset hash, run bundle, research seed. */
 class EvalCredibilityTest {
@@ -165,16 +165,17 @@ class EvalCredibilityTest {
         Set<String> ids = new HashSet<>();
         for (JsonNode task : tasks) {
             assertTrue(
-                    ids.add(task.path("id").asText()), "duplicate id " + task.path("id").asText());
-            assertTrue(task.path("question").asText().length() > 20);
-            String answer = task.path("answer").asText();
+                    ids.add(task.path("id").asString()),
+                    "duplicate id " + task.path("id").asString());
+            assertTrue(task.path("question").asString().length() > 20);
+            String answer = task.path("answer").asString();
             CodeGrader grader = CodeGrader.parse(task.path("grader").toString()); // parses cleanly
             assertTrue(
                     grader.grade(answer).passed(),
-                    "reference answer must satisfy its own grader: " + task.path("id").asText());
+                    "reference answer must satisfy its own grader: " + task.path("id").asString());
             assertTrue(
                     !grader.grade("I could not find an answer.").passed(),
-                    "grader must not pass a non-answer: " + task.path("id").asText());
+                    "grader must not pass a non-answer: " + task.path("id").asString());
         }
     }
 }

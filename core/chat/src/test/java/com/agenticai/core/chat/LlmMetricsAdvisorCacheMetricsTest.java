@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
@@ -31,7 +30,6 @@ import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
  * Covers the cached-vs-uncached token accounting {@link LlmMetricsAdvisor} emits, kept in its own
@@ -358,24 +356,11 @@ class LlmMetricsAdvisorCacheMetricsTest {
             int outputTokens,
             Integer cacheCreationInputTokens,
             Integer cacheReadInputTokens) {
-        return new DefaultUsage(
-                inputTokens,
-                outputTokens,
-                inputTokens + outputTokens,
-                new AnthropicApi.Usage(
-                        inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens));
+        return SdkUsageFixtures.anthropic(
+                inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens);
     }
 
     private static Usage openAiUsage(int promptTokens, int completionTokens, Integer cachedTokens) {
-        return new DefaultUsage(
-                promptTokens,
-                completionTokens,
-                promptTokens + completionTokens,
-                new OpenAiApi.Usage(
-                        completionTokens,
-                        promptTokens,
-                        promptTokens + completionTokens,
-                        new OpenAiApi.Usage.PromptTokensDetails(null, cachedTokens),
-                        null));
+        return SdkUsageFixtures.openAi(promptTokens, completionTokens, cachedTokens);
     }
 }

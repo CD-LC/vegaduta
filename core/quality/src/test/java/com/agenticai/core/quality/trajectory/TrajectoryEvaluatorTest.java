@@ -5,15 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class TrajectoryEvaluatorTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final double EPS = 1e-9;
 
     /**
@@ -414,6 +414,6 @@ class TrajectoryEvaluatorTest {
         assertTrue(r.summary().contains("1 extra call"), r.summary());
         assertTrue(r.summary().endsWith("- failed"), r.summary());
         JsonNode asJson = MAPPER.valueToTree(m);
-        assertEquals("a", asJson.get("expected").get(0).get("tool").asText());
+        assertEquals("a", asJson.get("expected").get(0).get("tool").asString());
     }
 }

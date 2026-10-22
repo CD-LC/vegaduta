@@ -3,7 +3,6 @@ package com.agenticai.core.it;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.tenancy.RedisTenantDataPurgeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +39,8 @@ class RedisTenantDataPurgeIT {
         factory.afterPropertiesSet();
         redis = new StringRedisTemplate(factory);
         redis.afterPropertiesSet();
-        service = new RedisTenantDataPurgeService(redis, new ObjectMapper());
+        service =
+                new RedisTenantDataPurgeService(redis, com.agenticai.core.json.JsonMappers.plain());
     }
 
     @AfterAll

@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.imagegen.ImageGenNotConfiguredException;
 import com.agenticai.core.imagegen.ImageGenerationOrchestratorService;
 import com.agenticai.core.imagegen.agenttools.OrchestratorImageGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.agenticai.core.json.JsonMappers;
 import java.util.Base64;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class AppBuilderImageControllerTest {
 
     private AppBuilderImageController controller(String token) {
         return new AppBuilderImageController(
-                new OrchestratorImageGenerator(orchestrator), token, new ObjectMapper());
+                new OrchestratorImageGenerator(orchestrator), token, JsonMappers.plain());
     }
 
     @Test
