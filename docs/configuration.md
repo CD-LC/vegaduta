@@ -1108,7 +1108,9 @@ conditions as the terminal (enabled, one-person install) when the workspace fold
 personal profile raises `max-timeout-seconds` to `1800`.
 
 Compose (`--profile workspace`): `VEGADUTA_PROJECTS_DIR` (default `~/VegaDuta-Projects`), `WORKSPACE_RUNNER_SECRET`,
-`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS` (`1800`), `WORKSPACE_RUNNER_MEM_LIMIT` (`3g`).
+`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS` (`1800`), `WORKSPACE_RUNNER_MEM_LIMIT` (`3g`),
+`WORKSPACE_RUNNER_PIDS_LIMIT` (`2048`: the most processes and threads the container may have at once, so a runaway command is stopped by the
+container and not by the host; a Maven, Gradle or Next.js build peaks below 200; raise it only for a very large parallel build).
 
 Network from the terminal follows the sandbox's per-server list: add `local-shell` (or `*`) to
 `app.mcp.stdio.sandbox-network-allow`.
