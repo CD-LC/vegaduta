@@ -112,8 +112,11 @@ public class DependencyHealthService {
             @Value("${app.platform.reliability.cache-ttl-seconds:30}") long cacheTtlSeconds,
             @Value("${app.platform.reliability.probe-timeout-ms:2000}") long probeTimeoutMs,
             @Value("${app.keycloak.jwk-set-uri:}") String jwkSetUri,
-            // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED / UNKNOWN), not as an outage.
-            @Value("#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}") String sidecarBaseUrl,
+            // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED /
+            // UNKNOWN), not as an outage.
+            @Value(
+                            "#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}")
+                    String sidecarBaseUrl,
             @Value("${app.workflow-events.enabled:false}") boolean workflowEventsEnabled,
             @Value("${spring.kafka.bootstrap-servers:}") String kafkaBootstrap,
             @Value("${app.meta.webhook-verify-token:}") String metaWebhookToken,
@@ -131,7 +134,8 @@ public class DependencyHealthService {
         this.enabled = enabled;
         this.cacheTtlSeconds = Math.max(0, cacheTtlSeconds);
         this.clock = Clock.systemUTC();
-        this.executor = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("dependency-health-service-");
+        this.executor =
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("dependency-health-service-");
         // Floor of 200 ms so a mis-set 0 cannot turn every probe into an instant "no answer".
         Duration probeTimeout = Duration.ofMillis(Math.max(200L, probeTimeoutMs));
         ProbeRunner runner = new ProbeRunner(executor, probeTimeout, clock);
@@ -206,7 +210,9 @@ public class DependencyHealthService {
                                 new Spec(
                                         "temporal",
                                         "workflow",
-                                        () -> probes.checkTemporal(temporalProfile, temporalTarget)),
+                                        () ->
+                                                probes.checkTemporal(
+                                                        temporalProfile, temporalTarget)),
                                 new Spec(
                                         "code-intel",
                                         "ai",
@@ -447,12 +453,12 @@ public class DependencyHealthService {
     private static List<String> notes() {
         return List.of(
                 "Each dependency is probed in parallel with a hard timeout and the result is cached"
-                    + " for a short time on this replica, so reloading the page does not re-probe"
-                    + " more often than that.",
+                        + " for a short time on this replica, so reloading the page does not re-probe"
+                        + " more often than that.",
                 "Hosted-LLM pool rows are checked for reachability only (an unauthenticated request"
-                    + " to the provider's base URL; any HTTP answer below 500 counts as reachable)."
-                    + " No credential is sent and no completion is requested, so a revoked key, an"
-                    + " exhausted quota or a failing model is not detected here.",
+                        + " to the provider's base URL; any HTTP answer below 500 counts as reachable)."
+                        + " No credential is sent and no completion is requested, so a revoked key, an"
+                        + " exhausted quota or a failing model is not detected here.",
                 "E2B, Brave and Meta rows show that a credential is present; they are never"
                         + " called.",
                 "Sidecar is checked through its liveness endpoint only; the embedding model itself"
@@ -464,10 +470,9 @@ public class DependencyHealthService {
                 "Temporal is checked with a TCP connect to its frontend address, and only when the"
                         + " temporal profile is active.",
                 "Code-intel, Langfuse, academy and app-builder are checked through their"
-                    + " unauthenticated health endpoints; object storage through MinIO's liveness"
-                    + " endpoint (credentials are not exercised).",
+                        + " unauthenticated health endpoints; object storage through MinIO's liveness"
+                        + " endpoint (credentials are not exercised).",
                 "UNKNOWN means not configured in this deployment (or not checkable), not a"
                         + " failure.");
     }
-
 }

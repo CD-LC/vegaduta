@@ -104,12 +104,11 @@ public class TenantDataUsageService {
     private boolean tracingEnabled = true;
 
     public TenantDataUsageService(
-        TenantRepository tenantRepository,
-        Optional<TenantDataErasureService> tenantDataErasureService,
-        LlmCallLogService llmCallLogService,
-        WorkflowEventOutboxRepository outboxRepository,
-        DataSource dataSource
-    ) {
+            TenantRepository tenantRepository,
+            Optional<TenantDataErasureService> tenantDataErasureService,
+            LlmCallLogService llmCallLogService,
+            WorkflowEventOutboxRepository outboxRepository,
+            DataSource dataSource) {
         this.tenantRepository = tenantRepository;
         this.tenantDataErasureService = tenantDataErasureService;
         this.llmCallLogService = llmCallLogService;
@@ -119,7 +118,8 @@ public class TenantDataUsageService {
 
     public TenantDataUsageResponse currentTenantUsage() {
         Tenant tenant = requireCurrentTenant();
-        List<SystemUsage> systems = new java.util.ArrayList<>(List.of(postgres(tenant), minio(), redis()));
+        List<SystemUsage> systems =
+                new java.util.ArrayList<>(List.of(postgres(tenant), minio(), redis()));
         if (tracingEnabled) {
             systems.add(langfuse());
         }
@@ -150,17 +150,17 @@ public class TenantDataUsageService {
     private SystemUsage postgres(Tenant tenant) {
         Integer tableCount = safe(() -> postgresTableCount(tenant.getSchemaName()));
         return new SystemUsage(
-            "postgres",
-            "Database",
-            "PostgreSQL",
-            "Primary storage",
-            "Every agent, workflow, conversation, and audit record you create is stored here.",
-            "Your workspace's data lives in its own dedicated Postgres schema ('" + tenant.getSchemaName()
-                + "'), separate from every other tenant's schema - no query this platform runs for another "
-                + "tenant can read or write your tables.",
-            tableCount == null ? null : new LiveStat("Tables in your workspace", tableCount),
-            "active"
-        );
+                "postgres",
+                "Database",
+                "PostgreSQL",
+                "Primary storage",
+                "Every agent, workflow, conversation, and audit record you create is stored here.",
+                "Your workspace's data lives in its own dedicated Postgres schema ('"
+                        + tenant.getSchemaName()
+                        + "'), separate from every other tenant's schema - no query this platform runs for another "
+                        + "tenant can read or write your tables.",
+                tableCount == null ? null : new LiveStat("Tables in your workspace", tableCount),
+                "active");
     }
 
     /**
@@ -191,22 +191,24 @@ public class TenantDataUsageService {
     }
 
     private SystemUsage minio() {
-        Long objectCount = tenantDataErasureService
-            .map(service -> safe(service::countObjectStorageItemsForCurrentTenant))
-            .orElse(null);
+        Long objectCount =
+                tenantDataErasureService
+                        .map(service -> safe(service::countObjectStorageItemsForCurrentTenant))
+                        .orElse(null);
         return new SystemUsage(
-            "minio",
-            "Object storage",
-            "local".equalsIgnoreCase(storageType) ? "Local disk" : "MinIO (S3-compatible)",
-            "File storage",
-            "Documents you upload to your knowledge base, generated images, avatars, and generated "
-                + "audio clips are stored here as objects.",
-            "Every object your workspace creates is written under its own 'tenant/<your-id>/...' key "
-                + "prefix, and a request to read, check, or delete an object is refused outright if the "
-                + "key belongs to a different tenant.",
-            objectCount == null ? null : new LiveStat("Files stored for your workspace", objectCount),
-            "active"
-        );
+                "minio",
+                "Object storage",
+                "local".equalsIgnoreCase(storageType) ? "Local disk" : "MinIO (S3-compatible)",
+                "File storage",
+                "Documents you upload to your knowledge base, generated images, avatars, and generated "
+                        + "audio clips are stored here as objects.",
+                "Every object your workspace creates is written under its own 'tenant/<your-id>/...' key "
+                        + "prefix, and a request to read, check, or delete an object is refused outright if the "
+                        + "key belongs to a different tenant.",
+                objectCount == null
+                        ? null
+                        : new LiveStat("Files stored for your workspace", objectCount),
+                "active");
     }
 
     /**
@@ -221,19 +223,18 @@ public class TenantDataUsageService {
      */
     private SystemUsage redis() {
         return new SystemUsage(
-            "redis",
-            "Cache & rate limiter",
-            "Redis",
-            "Caching and rate limiting",
-            "Session state and short-lived counters - like how many LLM calls your workspace has made "
-                + "in the current minute - are cached here rather than hitting the database on every "
-                + "request.",
-            "Every rate-limit counter is keyed to your tenant specifically ('agentic:llm-gateway-rate:"
-                + "<your-tenant-id>') - your usage is never combined with or throttled by another "
-                + "tenant's traffic.",
-            null,
-            "active"
-        );
+                "redis",
+                "Cache & rate limiter",
+                "Redis",
+                "Caching and rate limiting",
+                "Session state and short-lived counters - like how many LLM calls your workspace has made "
+                        + "in the current minute - are cached here rather than hitting the database on every "
+                        + "request.",
+                "Every rate-limit counter is keyed to your tenant specifically ('agentic:llm-gateway-rate:"
+                        + "<your-tenant-id>') - your usage is never combined with or throttled by another "
+                        + "tenant's traffic.",
+                null,
+                "active");
     }
 
     /**
@@ -252,19 +253,18 @@ public class TenantDataUsageService {
     private SystemUsage langfuse() {
         Long calls24h = safe(() -> llmCallLogService.dashboardMetrics().callsLast24h());
         return new SystemUsage(
-            "langfuse",
-            "AI call tracing",
-            "Langfuse",
-            "AI call observability",
-            "Every call your agents make to an LLM is traced here for latency, cost, and quality "
-                + "monitoring.",
-            "Every trace is tagged with your tenant id (the 'vegaduta.tenant.id' attribute, set on every "
-                + "LLM call), so traces are filterable to your workspace specifically inside Langfuse. "
-                + "A pseudonymous user identifier (never an email) separates one person's traces from "
-                + "another's; operators can have it sent as a salted hash instead.",
-            calls24h == null ? null : new LiveStat("AI calls (last 24h)", calls24h),
-            "active"
-        );
+                "langfuse",
+                "AI call tracing",
+                "Langfuse",
+                "AI call observability",
+                "Every call your agents make to an LLM is traced here for latency, cost, and quality "
+                        + "monitoring.",
+                "Every trace is tagged with your tenant id (the 'vegaduta.tenant.id' attribute, set on every "
+                        + "LLM call), so traces are filterable to your workspace specifically inside Langfuse. "
+                        + "A pseudonymous user identifier (never an email) separates one person's traces from "
+                        + "another's; operators can have it sent as a salted hash instead.",
+                calls24h == null ? null : new LiveStat("AI calls (last 24h)", calls24h),
+                "active");
     }
 
     /**
@@ -278,21 +278,23 @@ public class TenantDataUsageService {
      * new query.
      */
     private SystemUsage kafka() {
-        Long pending = safe(() ->
-            outboxRepository.countByPublishedAtIsNullAndRetryCountLessThan(WorkflowEventOutboxRelay.MAX_RETRIES));
+        Long pending =
+                safe(
+                        () ->
+                                outboxRepository.countByPublishedAtIsNullAndRetryCountLessThan(
+                                        WorkflowEventOutboxRelay.MAX_RETRIES));
         return new SystemUsage(
-            "kafka",
-            "Event queue",
-            "Kafka / Redpanda",
-            "Workflow event queue",
-            "Workflow step events (a run starting, a step finishing, a run completing) pass through "
-                + "here on their way to being logged and, where configured, delivered to external "
-                + "subscribers.",
-            "Pending events live in your own workspace's 'workflow_event_outbox' table, in your own "
-                + "Postgres schema - not a shared queue table other tenants' events pass through.",
-            pending == null ? null : new LiveStat("Pending workflow events", pending),
-            "active"
-        );
+                "kafka",
+                "Event queue",
+                "Kafka / Redpanda",
+                "Workflow event queue",
+                "Workflow step events (a run starting, a step finishing, a run completing) pass through "
+                        + "here on their way to being logged and, where configured, delivered to external "
+                        + "subscribers.",
+                "Pending events live in your own workspace's 'workflow_event_outbox' table, in your own "
+                        + "Postgres schema - not a shared queue table other tenants' events pass through.",
+                pending == null ? null : new LiveStat("Pending workflow events", pending),
+                "active");
     }
 
     /**
@@ -313,20 +315,19 @@ public class TenantDataUsageService {
     private SystemUsage temporal() {
         boolean engaged = "temporal".equalsIgnoreCase(executionEngineMode);
         return new SystemUsage(
-            "temporal",
-            "Durable workflow engine",
-            "Temporal",
-            "Durable workflow execution",
-            "Workflow runs currently execute directly within our application, with automatic retries "
-                + "on failure. Temporal, a durable workflow engine that would let a run survive a server "
-                + "crash mid-execution and resume exactly where it left off, is built into the platform "
-                + "but is not yet the default execution path.",
-            "Not applicable today - no workflow run engine yet writes or reads Temporal-managed state "
-                + "for your workspace, so there is nothing there to isolate. This will be documented here "
-                + "the moment that changes.",
-            null,
-            engaged ? "active" : "available_not_engaged"
-        );
+                "temporal",
+                "Durable workflow engine",
+                "Temporal",
+                "Durable workflow execution",
+                "Workflow runs currently execute directly within our application, with automatic retries "
+                        + "on failure. Temporal, a durable workflow engine that would let a run survive a server "
+                        + "crash mid-execution and resume exactly where it left off, is built into the platform "
+                        + "but is not yet the default execution path.",
+                "Not applicable today - no workflow run engine yet writes or reads Temporal-managed state "
+                        + "for your workspace, so there is nothing there to isolate. This will be documented here "
+                        + "the moment that changes.",
+                null,
+                engaged ? "active" : "available_not_engaged");
     }
 
     /**
@@ -340,38 +341,48 @@ public class TenantDataUsageService {
      */
     private SystemUsage keycloak() {
         return new SystemUsage(
-            "keycloak",
-            "Identity & authentication",
-            "Keycloak",
-            "Identity provider",
-            "Sign-in, session tokens, and user accounts for your workspace are managed here.",
-            "Every authenticated request's token must carry your tenant's id as a claim - a request "
-                + "with no usable tenant claim is rejected before it reaches any of your data.",
-            null,
-            "active"
-        );
+                "keycloak",
+                "Identity & authentication",
+                "Keycloak",
+                "Identity provider",
+                "Sign-in, session tokens, and user accounts for your workspace are managed here.",
+                "Every authenticated request's token must carry your tenant's id as a claim - a request "
+                        + "with no usable tenant claim is rejected before it reaches any of your data.",
+                null,
+                "active");
     }
 
     private Integer postgresTableCount(String schemaName) {
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ?";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, schemaName);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt(1) : null;
             }
         } catch (SQLException e) {
-            log.warn("Could not count tables in schema '{}' for /api/tenant/data-usage - {}", schemaName, e.getMessage());
+            log.warn(
+                    "Could not count tables in schema '{}' for /api/tenant/data-usage - {}",
+                    schemaName,
+                    e.getMessage());
             return null;
         }
     }
 
     private Tenant requireCurrentTenant() {
-        String schemaName = TenantContext.current().map(TenantContext::getTenantId)
-            .orElseThrow(() -> new IllegalStateException(
-                "No TenantContext for an authenticated /api/tenant/data-usage request - SecurityConfig should have blocked this"));
-        return tenantRepository.findBySchemaName(schemaName)
-            .orElseThrow(() -> new IllegalStateException("No Tenant row for schema '" + schemaName + "'"));
+        String schemaName =
+                TenantContext.current()
+                        .map(TenantContext::getTenantId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "No TenantContext for an authenticated /api/tenant/data-usage request - SecurityConfig should have blocked this"));
+        return tenantRepository
+                .findBySchemaName(schemaName)
+                .orElseThrow(
+                        () ->
+                                new IllegalStateException(
+                                        "No Tenant row for schema '" + schemaName + "'"));
     }
 
     /** Same "one bad reading never blanks the whole response" posture as {@code SystemStatusController#safe}. */
@@ -379,7 +390,9 @@ public class TenantDataUsageService {
         try {
             return read.get();
         } catch (Exception e) {
-            log.warn("A /api/tenant/data-usage live-stat read failed - degrading that field to null", e);
+            log.warn(
+                    "A /api/tenant/data-usage live-stat read failed - degrading that field to null",
+                    e);
             return null;
         }
     }
