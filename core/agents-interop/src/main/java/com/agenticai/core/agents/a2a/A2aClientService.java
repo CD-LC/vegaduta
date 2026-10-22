@@ -2,6 +2,8 @@ package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
@@ -68,6 +70,7 @@ import org.springframework.stereotype.Service;
  * {@code BuiltInToolClassifications}). DNS rebinding between check and connect
  * is the same accepted limitation as {@code fetch_web_page}.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aClientService implements A2aRemoteAgentToolSource {
 

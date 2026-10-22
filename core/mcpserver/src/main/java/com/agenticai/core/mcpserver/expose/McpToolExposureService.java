@@ -4,6 +4,8 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.workflow.WorkflowService;
 import java.util.HashSet;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>The tool name is allocated once (see {@link McpToolSlugs}) and kept when the switch is turned
  * off and on again, so external clients keep working across a temporary disable.
  */
+@ConditionalOnEditionFeature(EditionFeature.MCP_SERVER_EXPOSURE)
 @Service
 public class McpToolExposureService {
 
