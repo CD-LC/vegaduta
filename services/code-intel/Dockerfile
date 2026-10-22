@@ -11,7 +11,9 @@ WORKDIR /srv/code-intel
 # services/lock-requirements.sh), so a rebuild can neither drift to other
 # versions nor accept a substituted artifact.
 COPY requirements.lock .
-RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+# --no-deps: the lock is the complete tree, and overrides.txt pins pillow past fastembed's
+# declared range, which pip's resolver would otherwise refuse.
+RUN pip install --no-cache-dir --require-hashes --no-deps -r requirements.lock
 
 COPY codebase_rag ./codebase_rag
 COPY app ./app
