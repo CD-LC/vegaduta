@@ -81,7 +81,15 @@ describe("OSS landing wiring", () => {
   it("lists every surface from the single status source, including mobile", () => {
     render(<OssLanding />);
     const text = document.getElementById("surfaces")?.textContent ?? "";
-    for (const name of ["VS Code", "JetBrains IDEs", "Chrome", "Android app", "Wear OS watch", "iPhone app", "MCP server"]) {
+    for (const name of [
+      "VS Code",
+      "JetBrains IDEs",
+      "Chrome",
+      "Android app",
+      "Wear OS watch",
+      "iPhone app",
+      "MCP server",
+    ]) {
       expect(text).toContain(name);
     }
     expect(text).toContain("In development");

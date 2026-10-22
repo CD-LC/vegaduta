@@ -3,7 +3,25 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, Brain, Globe, FileUp, Hammer, Loader2, Monitor, MessageSquarePlus, PanelLeft, PanelRight, Sparkles, SlidersHorizontal, Workflow, Zap, Volume2, VolumeX, Square } from "lucide-react";
+import {
+  AlertTriangle,
+  Brain,
+  Globe,
+  FileUp,
+  Hammer,
+  Loader2,
+  Monitor,
+  MessageSquarePlus,
+  PanelLeft,
+  PanelRight,
+  Sparkles,
+  SlidersHorizontal,
+  Workflow,
+  Zap,
+  Volume2,
+  VolumeX,
+  Square,
+} from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import { errorMessage } from "../../lib/errors";
 import { cn } from "../../lib/utils";
@@ -66,7 +84,8 @@ import ComposerModeBar from "./ComposerModeBar";
 import { parseComposerMode, type ComposerMode } from "./assistantTypes";
 
 /** A header toggle that is switched on: solid brand fill and a glow ring, so on and off are never confused. */
-const TOGGLE_ON = "bg-primary text-primary-foreground ring-4 ring-primary/30 hover:bg-primary/90 hover:text-primary-foreground";
+const TOGGLE_ON =
+  "bg-primary text-primary-foreground ring-4 ring-primary/30 hover:bg-primary/90 hover:text-primary-foreground";
 
 /**
  * The /assistant screen: threads on the left (local index), the transcript and the box in the centre,
@@ -282,9 +301,22 @@ export default function AssistantPane() {
             : phase === "stopped"
               ? t("taskWasStopped")
               : full.errorMessage || t("taskFailedPlain");
-        turn.appendTurns({ id: nextTurnId("a"), role: "assistant", content: text, at: Date.now(), note, failed: phase === "failed" });
+        turn.appendTurns({
+          id: nextTurnId("a"),
+          role: "assistant",
+          content: text,
+          at: Date.now(),
+          note,
+          failed: phase === "failed",
+        });
       } catch (err) {
-        turn.appendTurns({ id: nextTurnId("a"), role: "assistant", content: errorMessage(err), at: Date.now(), failed: true });
+        turn.appendTurns({
+          id: nextTurnId("a"),
+          role: "assistant",
+          content: errorMessage(err),
+          at: Date.now(),
+          failed: true,
+        });
       }
     },
     [turn, t]
@@ -346,12 +378,38 @@ export default function AssistantPane() {
   }, []);
 
   const paletteItems: PaletteItem[] = [
-    { id: "new", group: t("paletteGroupActions"), label: t("paletteNewThread"), icon: <MessageSquarePlus size={14} />, run: newThread },
-    { id: "mode-chat", group: t("paletteGroupActions"), label: t("statusMode_chat"), icon: <Sparkles size={14} />, run: () => setMode("chat") },
+    {
+      id: "new",
+      group: t("paletteGroupActions"),
+      label: t("paletteNewThread"),
+      icon: <MessageSquarePlus size={14} />,
+      run: newThread,
+    },
+    {
+      id: "mode-chat",
+      group: t("paletteGroupActions"),
+      label: t("statusMode_chat"),
+      icon: <Sparkles size={14} />,
+      run: () => setMode("chat"),
+    },
     ...(caps.jobs
-      ? [{ id: "mode-bg", group: t("paletteGroupActions"), label: t("statusMode_background"), icon: <Workflow size={14} />, run: () => setMode("background") }]
+      ? [
+          {
+            id: "mode-bg",
+            group: t("paletteGroupActions"),
+            label: t("statusMode_background"),
+            icon: <Workflow size={14} />,
+            run: () => setMode("background"),
+          },
+        ]
       : []),
-    { id: "mode-task", group: t("paletteGroupActions"), label: t("statusMode_task"), icon: <Zap size={14} />, run: () => setMode("task") },
+    {
+      id: "mode-task",
+      group: t("paletteGroupActions"),
+      label: t("statusMode_task"),
+      icon: <Zap size={14} />,
+      run: () => setMode("task"),
+    },
     {
       id: "tune",
       group: t("paletteGroupBuild"),
@@ -360,8 +418,22 @@ export default function AssistantPane() {
       icon: <SlidersHorizontal size={14} />,
       run: () => router.push(active ? `/agents?agent=${encodeURIComponent(active.id)}` : "/agents"),
     },
-    { id: "workflow", group: t("paletteGroupBuild"), label: t("journey_workflow_title"), hint: t("paletteOpens"), icon: <Workflow size={14} />, run: () => router.push("/workflows") },
-    { id: "app", group: t("paletteGroupBuild"), label: t("journey_app_title"), hint: t("paletteOpens"), icon: <Hammer size={14} />, run: () => router.push("/build") },
+    {
+      id: "workflow",
+      group: t("paletteGroupBuild"),
+      label: t("journey_workflow_title"),
+      hint: t("paletteOpens"),
+      icon: <Workflow size={14} />,
+      run: () => router.push("/workflows"),
+    },
+    {
+      id: "app",
+      group: t("paletteGroupBuild"),
+      label: t("journey_app_title"),
+      hint: t("paletteOpens"),
+      icon: <Hammer size={14} />,
+      run: () => router.push("/build"),
+    },
     ...(["tune", "workflow", "app"] as const).map((j) => ({
       id: `ask-${j}`,
       group: t("paletteGroupAsk"),
@@ -375,7 +447,8 @@ export default function AssistantPane() {
   // narrow screens keep them as overlays the same button opens.
   const toggleRail = (side: "left" | "right") => {
     const wide = window.matchMedia(side === "left" ? "(min-width: 1024px)" : "(min-width: 1280px)").matches;
-    if (wide) setPrefs(side === "left" ? { leftCollapsed: !prefs.leftCollapsed } : { rightCollapsed: !prefs.rightCollapsed });
+    if (wide)
+      setPrefs(side === "left" ? { leftCollapsed: !prefs.leftCollapsed } : { rightCollapsed: !prefs.rightCollapsed });
     else if (side === "left") setLeftOpen((o) => !o);
     else setRightOpen((o) => !o);
   };
@@ -450,7 +523,10 @@ export default function AssistantPane() {
           />
           <h2 className="truncate text-sm font-semibold text-foreground">{active?.name ?? t("title")}</h2>
           {active && !active.isAssistant && (
-            <span className="truncate rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground" data-testid="talking-to">
+            <span
+              className="truncate rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
+              data-testid="talking-to"
+            >
               {t("answeringAgent", { name: active.name })}
             </span>
           )}
@@ -478,7 +554,15 @@ export default function AssistantPane() {
             {prefs.speakReplies ? <Volume2 size={16} aria-hidden="true" /> : <VolumeX size={16} aria-hidden="true" />}
           </Button>
           {speaking && (
-            <Button type="button" size="sm" variant="destructive" onClick={() => stopSpeaking()} aria-label={t("stopSpeakingNow")} title={t("stopSpeakingNow")} data-testid="stop-speaking">
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              onClick={() => stopSpeaking()}
+              aria-label={t("stopSpeakingNow")}
+              title={t("stopSpeakingNow")}
+              data-testid="stop-speaking"
+            >
               <Square size={12} aria-hidden="true" />
               <span className="hidden sm:inline">{t("stopSpeakingNow")}</span>
             </Button>
@@ -496,16 +580,35 @@ export default function AssistantPane() {
             <Brain size={16} aria-hidden="true" />
           </Button>
           {livePreviews.previews.length > 0 && (
-            <Button type="button" size="sm" variant={previewVisible ? "secondary" : "outline"} onClick={() => setPreviewOpen((o) => !o)} aria-label={t("previewTitle")} title={t("previewTitle")} data-testid="preview-toggle">
+            <Button
+              type="button"
+              size="sm"
+              variant={previewVisible ? "secondary" : "outline"}
+              onClick={() => setPreviewOpen((o) => !o)}
+              aria-label={t("previewTitle")}
+              title={t("previewTitle")}
+              data-testid="preview-toggle"
+            >
               <Monitor size={14} aria-hidden="true" />
               <span className="hidden sm:inline">{t("previewTitle")}</span>
             </Button>
           )}
           {browserReady && (
-            <Button type="button" size="sm" variant={browserVisible ? "secondary" : "outline"} onClick={() => setBrowserOpen((o) => !o)} aria-pressed={browserVisible} aria-label={tb("toggle")} title={tb("toggle")} data-testid="browser-toggle">
+            <Button
+              type="button"
+              size="sm"
+              variant={browserVisible ? "secondary" : "outline"}
+              onClick={() => setBrowserOpen((o) => !o)}
+              aria-pressed={browserVisible}
+              aria-label={tb("toggle")}
+              title={tb("toggle")}
+              data-testid="browser-toggle"
+            >
               <Globe size={14} aria-hidden="true" />
               <span className="hidden sm:inline">{tb("toggle")}</span>
-              {browser.pending && !browserVisible && <span className="size-2 rounded-full bg-amber-500" role="status" aria-label={tb("needsYou")} />}
+              {browser.pending && !browserVisible && (
+                <span className="size-2 rounded-full bg-amber-500" role="status" aria-label={tb("needsYou")} />
+              )}
             </Button>
           )}
           {active && <ChatExportMenu agentId={active.id} sessionId={turn.sessionId} />}
@@ -570,7 +673,12 @@ export default function AssistantPane() {
           sending={turn.sending}
           agentId={active?.id ?? null}
           agentName={active?.name ?? t("title")}
-          task={{ onConfirm: (id) => void quick.confirm(id), onCancel: quick.cancel, onChannel: quick.setChannel, onSavePhone: quick.savePhone }}
+          task={{
+            onConfirm: (id) => void quick.confirm(id),
+            onCancel: quick.cancel,
+            onChannel: quick.setChannel,
+            onSavePhone: quick.savePhone,
+          }}
           sessionId={turn.sessionId}
           canBackground={caps.jobs && ready}
           restoredNote={restoredNote}
@@ -663,7 +771,9 @@ export default function AssistantPane() {
       )}
 
       {paletteOpen && <AssistantPalette items={paletteItems} onClose={() => setPaletteOpen(false)} />}
-      {cameraOpen && <CameraCapture onCapture={(file) => void files.pick([file])} onClose={() => setCameraOpen(false)} />}
+      {cameraOpen && (
+        <CameraCapture onCapture={(file) => void files.pick([file])} onClose={() => setCameraOpen(false)} />
+      )}
       {callOpen && agent && (
         <CallOverlay
           agent={agent}
@@ -676,7 +786,11 @@ export default function AssistantPane() {
       )}
 
       {previewVisible && (
-        <PreviewPane previews={livePreviews.previews} onStop={(port) => void livePreviews.stop(port)} onClose={() => setPreviewOpen(false)} />
+        <PreviewPane
+          previews={livePreviews.previews}
+          onStop={(port) => void livePreviews.stop(port)}
+          onClose={() => setPreviewOpen(false)}
+        />
       )}
 
       {browserVisible && (
@@ -700,7 +814,13 @@ export default function AssistantPane() {
               : "hidden xl:static xl:flex xl:flex-col"
         )}
       >
-        <WorkRail counts={counts} onStopJob={(job) => void stopJob(job)} onShowJob={(job) => void showJobResult(job)} stoppingId={stoppingId} learned={learned} />
+        <WorkRail
+          counts={counts}
+          onStopJob={(job) => void stopJob(job)}
+          onShowJob={(job) => void showJobResult(job)}
+          stoppingId={stoppingId}
+          learned={learned}
+        />
       </aside>
     </div>
   );
