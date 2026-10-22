@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantDataErasureService;
 import com.agenticai.core.tenancy.TenantNotFoundByIdException;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Service;
  * DemoSandboxDataPurger} removes its {@code demo_session}-keyed control-plane rows and media
  * objects.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 @Profile("security")
 public class DemoSandboxReclaimService {

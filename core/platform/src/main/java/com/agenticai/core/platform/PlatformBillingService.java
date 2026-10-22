@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Service;
  *   <li>Demo ({@code /try}) sandbox tenants are excluded, same as the roster.
  * </ul>
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 @Profile("security")
 public class PlatformBillingService {

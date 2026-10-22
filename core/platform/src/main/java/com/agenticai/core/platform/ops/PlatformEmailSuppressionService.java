@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.ops;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import java.sql.Connection;
@@ -35,6 +37,7 @@ import org.springframework.web.server.ResponseStatusException;
  * when {@code tenantId} is given, and is audited in each affected tenant.
  * Schema names come only from {@code control_plane.tenant} rows and are quoted.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformEmailSuppressionService {
 

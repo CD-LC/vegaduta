@@ -2,6 +2,8 @@ package com.agenticai.core.platform.reliability;
 
 import com.agenticai.core.platform.reliability.ReliabilityApi.DependenciesResponse;
 import com.agenticai.core.platform.reliability.ReliabilityApi.SloResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * decided in the services ({@link IllegalArgumentException} answers 400, a
  * disabled feature 404). Same profile gate as the other platform controllers.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @Profile("security")
 public class ReliabilityHealthController {

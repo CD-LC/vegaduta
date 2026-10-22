@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.ops;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import com.agenticai.core.tenancy.TenantSchemaGuard;
@@ -46,6 +48,7 @@ import org.springframework.stereotype.Service;
  * <p>Schema names come only from {@code control_plane.tenant} rows, never from
  * the request, and are quoted as identifiers. Result cached 30 s per replica.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformMigrationService {
 

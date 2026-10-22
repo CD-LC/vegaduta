@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.moderation;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * their digits and a leading {@code +} for the same reason - the same number
  * written three ways is one block.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class ModerationBlocklistService {
 

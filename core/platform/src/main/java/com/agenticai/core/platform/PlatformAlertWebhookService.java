@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.platform.PlatformAlertWebhookEvent.AlertStatus;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
@@ -30,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  * delivery's {@code alerts} array is recorded independently (a `for` grouping
  * routinely bundles several alerts into one HTTP POST).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformAlertWebhookService {
 

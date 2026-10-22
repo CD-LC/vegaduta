@@ -11,6 +11,8 @@ import com.agenticai.core.platform.northstar.NorthStarDtos.NorthStarResponse;
 import com.agenticai.core.platform.northstar.NorthStarDtos.PassK;
 import com.agenticai.core.platform.northstar.NorthStarDtos.WeekPoint;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import java.time.Clock;
@@ -57,6 +59,7 @@ import org.springframework.web.server.ResponseStatusException;
  * entry, TTL {@code app.platform.north-star.cache-ttl-seconds}); calls are
  * serialised, so a stampede of dashboard loads runs the sweep once.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class NorthStarService {
 

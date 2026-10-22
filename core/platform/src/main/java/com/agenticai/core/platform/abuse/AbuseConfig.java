@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.abuse;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  * interactive use) so the detector does not false-positive legitimate power
  * users. They are the same numbers seeded by V120.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class AbuseConfig {
 

@@ -5,6 +5,8 @@ import com.agenticai.core.platform.ops.PlatformMigrationService.MigrationsRespon
 import com.agenticai.core.platform.ops.PlatformVersionService.VersionsResponse;
 import com.agenticai.core.platform.ops.ScheduledJobRegistryService.JobView;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * migration status. Role-gated by the blanket {@code /api/platform/** ->
  * ROLE_platform-admin} rule.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform")
 public class PlatformOpsController {

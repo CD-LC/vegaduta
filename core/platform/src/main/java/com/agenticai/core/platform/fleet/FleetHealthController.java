@@ -2,6 +2,8 @@ package com.agenticai.core.platform.fleet;
 
 import com.agenticai.core.platform.fleet.FleetHealthService.FleetHealthResponse;
 import com.agenticai.core.platform.fleet.FleetHealthService.FleetSlo;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * existing per-tenant emergency-stop/resume buttons ({@code POST
  * /api/platform/tenants/{tenantId}/emergency-stop|resume}).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/fleet")
 @Profile("security")

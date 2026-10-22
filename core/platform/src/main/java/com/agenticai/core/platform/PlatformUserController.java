@@ -9,6 +9,8 @@ import com.agenticai.core.admin.permission.UserPermissionService;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.AppUserRepository;
 import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.tenancy.Tenant;
@@ -67,6 +69,7 @@ import org.springframework.web.bind.annotation.RestController;
  * and restores the caller's context afterwards. The audit row lands in the target tenant's own
  * audit log with the platform operator as the actor, so the tenant can see who touched their user.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/users")
 @Profile("security")
