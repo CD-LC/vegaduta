@@ -32,6 +32,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { Textarea } from "../ui/textarea";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * Create / edit form for a scheduled task. The schedule is a friendly picker (daily, weekdays, weekly, monthly, or
@@ -450,13 +451,15 @@ export default function ScheduledTaskForm({
             className="flex flex-wrap items-center gap-3 rounded-md border border-[color-mix(in_srgb,var(--upgrade)_32%,transparent)] bg-[color-mix(in_srgb,var(--upgrade)_12%,transparent)] px-3 py-2 text-sm text-foreground"
           >
             <span className="min-w-0 flex-1">{planLimit}</span>
-            <Link
-              href="/admin/billing"
-              className="inline-flex shrink-0 items-center gap-1 font-semibold text-[var(--upgrade)] hover:underline"
-            >
-              <Sparkles size={12} aria-hidden="true" />
-              {t("upgradeLink")}
-            </Link>
+            {!isPersonalEdition() && (
+              <Link
+                href="/admin/billing"
+                className="inline-flex shrink-0 items-center gap-1 font-semibold text-[var(--upgrade)] hover:underline"
+              >
+                <Sparkles size={12} aria-hidden="true" />
+                {t("upgradeLink")}
+              </Link>
+            )}
           </div>
         )}
 
