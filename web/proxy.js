@@ -105,7 +105,11 @@ export function isKnownPublicHost(host) {
   if (!host) return false;
   if (APEX_TO_APP_HOST[host] || Object.values(APEX_TO_APP_HOST).includes(host)) return true;
   const env = nodeProcess.env;
-  return [env.PLATFORM_ADMIN_HOST, hostnameOf(env.NEXT_PUBLIC_APP_URL || ""), hostnameOf(env.NEXT_PUBLIC_SITE_URL || "")]
+  return [
+    env.PLATFORM_ADMIN_HOST,
+    hostnameOf(env.NEXT_PUBLIC_APP_URL || ""),
+    hostnameOf(env.NEXT_PUBLIC_SITE_URL || ""),
+  ]
     .map((h) => (h || "").toLowerCase())
     .includes(host);
 }
@@ -169,9 +173,7 @@ function logAiVisibility(request) {
 // /api/client-log stays deliberately unauthenticated (see that route's own
 // comment), which is why the matcher exclusion of /api/* below is fine.
 export function isPlatformAdminPrivilegedApiPath(pathname) {
-  return (
-    pathname === "/platform-admin/api/academy" || pathname.startsWith("/platform-admin/api/academy/")
-  );
+  return pathname === "/platform-admin/api/academy" || pathname.startsWith("/platform-admin/api/academy/");
 }
 
 export async function proxy(request) {
