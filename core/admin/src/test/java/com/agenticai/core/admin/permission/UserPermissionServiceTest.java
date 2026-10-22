@@ -178,15 +178,42 @@ class UserPermissionServiceTest {
         // KeycloakAdminClient and have no grant rows at all. First request
         // persists marker + full bundle so grants-bind-admins doesn't lock
         // them out on deploy.
-        when(repository.findByTenantIdAndKeycloakUserId(TENANT_ID, USER_ID)).thenReturn(List.of());
+        List<UserPermissionGrant> stored = new java.util.ArrayList<>();
+        stored.add(grant("SEED_MARKER"));
+        DefaultPermissionBundles.unionForRoles(Set.of("tenant-admin")).forEach(p -> stored.add(grant(p)));
+        // No rows on the first read; the seed rows are visible once inserted.
+        when(repository.findByTenantIdAndKeycloakUserId(TENANT_ID, USER_ID))
+            .thenReturn(List.of(), stored);
+        when(repository.insertIfAbsent(any(), eq(TENANT_ID), eq(USER_ID), anyString(), eq(USER_ID), any()))
+            .thenReturn(1);
 
         Set<String> result =
             service.getOrSeedEffectivePermissions(TENANT_ID, USER_ID, Set.of("tenant-admin"), USER_ID);
 
         org.junit.jupiter.api.Assertions.assertEquals(
             TenantAssignablePermissions.ASSIGNABLE, result);
-        verify(repository).save(org.mockito.ArgumentMatchers.argThat(
-            g -> "SEED_MARKER".equals(g.getPermission())));
+        verify(repository).insertIfAbsent(any(), eq(TENANT_ID), eq(USER_ID), eq("SEED_MARKER"), eq(USER_ID), any());
+        // A JPA save() defers the insert to commit, where a concurrent first request's unique
+        // violation escapes the catch: the seed must use the idempotent insert only.
+        verify(repository, never()).save(any());
+        verify(repository, never()).saveAll(any());
+    }
+
+    @Test
+    void getOrSeedEffectiveLosingTheFirstRequestRaceReturnsTheWinnersRowsWithoutFailing() {
+        // Another request seeded the same user between our read and our inserts: every insert is a
+        // no-op (0 rows), and the answer is whatever is now stored.
+        List<UserPermissionGrant> winners =
+            List.of(grant("SEED_MARKER"), grant("MANAGE_BILLING"), grant("MANAGE_USERS"));
+        when(repository.findByTenantIdAndKeycloakUserId(TENANT_ID, USER_ID))
+            .thenReturn(List.of(), winners);
+        when(repository.insertIfAbsent(any(), any(), any(), any(), any(), any())).thenReturn(0);
+
+        Set<String> result =
+            service.getOrSeedEffectivePermissions(TENANT_ID, USER_ID, Set.of("tenant-admin"), USER_ID);
+
+        org.junit.jupiter.api.Assertions.assertEquals(Set.of("MANAGE_BILLING", "MANAGE_USERS"), result);
+        verify(repository, never()).save(any());
     }
 
     @Test
