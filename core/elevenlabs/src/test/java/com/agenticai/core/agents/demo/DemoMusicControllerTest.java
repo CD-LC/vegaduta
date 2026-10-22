@@ -20,6 +20,7 @@ import com.agenticai.core.agents.demo.DemoMusicController.DemoMusicRequest;
 import com.agenticai.core.agents.demo.DemoMusicController.DemoMusicResponse;
 import com.agenticai.core.elevenlabs.ElevenLabsApiException;
 import com.agenticai.core.elevenlabs.ElevenLabsClient;
+import com.agenticai.core.agentspi.MusicComposer;
 import com.agenticai.core.elevenlabs.agenttools.ElevenLabsMusicComposer;
 import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
@@ -39,6 +40,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -70,7 +73,7 @@ class DemoMusicControllerTest {
                         sessions,
                         music,
                         limiter,
-                        new ElevenLabsMusicComposer(client),
+                        providerOf(new ElevenLabsMusicComposer(client)),
                         credentials,
                         costs);
         Instant now = Instant.now();
@@ -109,6 +112,20 @@ class DemoMusicControllerTest {
                                         "music_v1",
                                         new BigDecimal("0.075"),
                                         1)));
+    }
+
+    /** A real {@link ObjectProvider}: the composer is optional, exactly as in a lean install. */
+    private static ObjectProvider<MusicComposer> providerOf(MusicComposer... composers) {
+        StaticListableBeanFactory beans = new StaticListableBeanFactory();
+        for (int i = 0; i < composers.length; i++) {
+            beans.addBean("composer" + i, composers[i]);
+        }
+        return beans.getBeanProvider(MusicComposer.class);
+    }
+
+    private DemoMusicController controllerWithoutAComposer() {
+        return new DemoMusicController(
+                sessions, music, limiter, providerOf(), credentials, costs);
     }
 
     private ResponseEntity<DemoMusicResponse> post(String prompt) {
@@ -263,5 +280,30 @@ class DemoMusicControllerTest {
         when(music.find(any())).thenReturn(Optional.empty());
 
         assertEquals(HttpStatus.NOT_FOUND, controller.serve(UUID.randomUUID()).getStatusCode());
+    }
+
+    @Test
+    void withNoMusicComposerRegisteredGenerateIsASoftPausedSampleAndSpendsNothing() {
+        // CLOUD_SPEECH off (personal install): ElevenLabsMusicComposer is not a bean.
+        DemoMusicController lean = controllerWithoutAComposer();
+
+        ResponseEntity<DemoMusicResponse> response =
+                lean.generate("token", new DemoMusicRequest("jazz"), servletRequest);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().simulated());
+        assertNull(response.getBody().musicUrl());
+        assertTrue(response.getBody().message().contains("paused"));
+        verify(limiter, never()).tryAcquireMusic(anyString());
+        verify(music, never()).recordAttempt(any());
+        verifyNoInteractions(client);
+    }
+
+    @Test
+    void withNoMusicComposerRegisteredStatusSaysNotEnabled() {
+        DemoMusicController lean = controllerWithoutAComposer();
+
+        assertFalse(lean.status("token").enabled());
+        assertEquals(15, lean.status("token").clipSeconds());
     }
 }

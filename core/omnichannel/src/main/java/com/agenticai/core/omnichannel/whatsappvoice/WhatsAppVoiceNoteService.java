@@ -117,7 +117,7 @@ public class WhatsAppVoiceNoteService {
             @Value("${app.omnichannel.whatsapp.voice-notes.tts-speaker:}") String ttsSpeaker,
             @Value("${app.omnichannel.whatsapp.voice-notes.tts-codec:mp3}") String ttsCodec,
             VoiceMediaGateway media,
-            VoiceSpeechGateway speech,
+            ObjectProvider<VoiceSpeechGateway> speech,
             ObjectProvider<MeterRegistry> meterRegistry) {
         this(
                 new WhatsAppVoiceNoteSettings(
@@ -138,9 +138,60 @@ public class WhatsAppVoiceNoteService {
                         ttsSpeaker,
                         ttsCodec),
                 media,
-                speech,
+                speech.getIfAvailable(NoSpeechGateway::new),
                 new VoiceNoteMetrics(meterRegistry.getIfAvailable()),
                 Clock.systemUTC());
+    }
+
+    /**
+     * Stands in when no {@link VoiceSpeechGateway} bean exists: the only implementation is the
+     * Sarvam one, which a lean (personal) install does not register (edition feature {@code
+     * CLOUD_SPEECH}). The service then still starts and answers every voice note as "not
+     * available", exactly as for a tenant with no speech credential.
+     */
+    private static final class NoSpeechGateway implements VoiceSpeechGateway {
+
+        private static VoiceSpeechException unavailable() {
+            return new VoiceSpeechException(
+                    VoiceSpeechException.Failure.NOT_CONFIGURED,
+                    "no speech provider is installed");
+        }
+
+        @Override
+        public boolean isConfigured() {
+            return false;
+        }
+
+        @Override
+        public long speechToTextCallsSince(Instant since) {
+            return 0;
+        }
+
+        @Override
+        public Transcript transcribe(byte[] audio, String filename, String model, String mode) {
+            throw unavailable();
+        }
+
+        @Override
+        public byte[] synthesize(
+                String text, String languageCode, String model, String speaker, String codec) {
+            throw unavailable();
+        }
+
+        @Override
+        public String normalizeLanguage(String languageCode) {
+            return null;
+        }
+
+        @Override
+        public String languageDisplayName(String languageCode) {
+            return null;
+        }
+
+        @Override
+        public Optional<String> ttsLanguageFor(String detectedLanguageCode) {
+            return Optional.empty();
+        }
     }
 
     /** Test seam: hand-built, injectable clock and metrics. */
