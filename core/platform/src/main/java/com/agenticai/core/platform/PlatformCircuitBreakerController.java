@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,6 +49,7 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>The caller is tenant-less; this class touches only Redis, never JPA, so no
  * tenant binding is needed. Tenant and tool are just parts of the Redis key.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/rate-control/circuit-breakers")
 @Profile("security")

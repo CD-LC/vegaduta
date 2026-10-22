@@ -9,6 +9,8 @@ import com.agenticai.core.guardrails.moderation.ModerationReviewAlreadyDecidedEx
 import com.agenticai.core.guardrails.moderation.ModerationReviewItem;
 import com.agenticai.core.guardrails.moderation.ModerationReviewNotFoundException;
 import com.agenticai.core.guardrails.moderation.ModerationReviewStatus;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -68,6 +70,7 @@ import org.springframework.web.bind.annotation.RestController;
  * restricted evidence trail. Shipping detection without those is not a partial
  * feature; it is a compliance hazard. See {@link ModerationPolicyPack#CSAM}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/moderation")
 public class ModerationController {

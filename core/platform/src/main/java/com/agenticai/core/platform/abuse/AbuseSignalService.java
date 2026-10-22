@@ -11,6 +11,8 @@ import com.agenticai.core.chat.LlmCallLogRepository;
 import com.agenticai.core.audit.AuditLogRepository;
 import com.agenticai.core.platform.PlatformTenantNotFoundException;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantEmergencyControlService;
@@ -56,6 +58,7 @@ import org.springframework.stereotype.Service;
  * Geo-velocity has no data source today - it degrades to {@code unavailable}
  * unless a {@link GeoVelocityProvider} bean is wired.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class AbuseSignalService {
 

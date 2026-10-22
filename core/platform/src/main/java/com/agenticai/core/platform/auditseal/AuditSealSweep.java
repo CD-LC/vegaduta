@@ -2,6 +2,8 @@ package com.agenticai.core.platform.auditseal;
 
 import com.agenticai.core.audit.seal.AuditSeal;
 import com.agenticai.core.audit.seal.AuditSealService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.time.Clock;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Component;
  * tick, so one tenant cannot monopolise the sweep. Without a signing key nothing is sealed (an unsigned seal
  * proves little) and a single WARN says so.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class AuditSealSweep {
 

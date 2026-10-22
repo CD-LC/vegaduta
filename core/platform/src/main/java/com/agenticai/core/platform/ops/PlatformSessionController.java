@@ -4,6 +4,8 @@ import com.agenticai.core.admin.AdminUserNotFoundException;
 import com.agenticai.core.admin.identity.IdentityUserAdminPort;
 import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.springframework.web.server.ResponseStatusException;
  * actions are written to the target tenant's audit log via
  * {@link PlatformTenantAuditor}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform")
 @Profile("security")

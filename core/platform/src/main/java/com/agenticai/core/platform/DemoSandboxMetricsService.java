@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -46,6 +48,7 @@ import org.springframework.stereotype.Service;
  * which would silently follow the database session's time zone and quietly
  * change what "today" means between environments.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class DemoSandboxMetricsService {
 

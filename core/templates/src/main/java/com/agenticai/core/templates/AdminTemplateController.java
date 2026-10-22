@@ -1,5 +1,7 @@
 package com.agenticai.core.templates;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.ResponseEntity;
 import com.agenticai.core.tenancy.ListPaging;
@@ -27,6 +29,7 @@ import java.util.UUID;
  * else). A tenant admin - who holds every tenant permission including {@code PERM_MANAGE_TEMPLATES}
  * - must never approve, verify, or list other tenants' submissions.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @PreAuthorize("hasAuthority('ROLE_platform-admin')")
 @RequestMapping("/api/admin/templates")

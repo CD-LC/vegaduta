@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PreDestroy;
@@ -70,6 +72,7 @@ import org.springframework.stereotype.Component;
  * buffers are independent, which is safe because the Redis counters are
  * additive. See docs/plans/CORE-LANDING-EVENT-BATCHING.md.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 @ConditionalOnProperty(name = "app.landing-events.batch-enabled", havingValue = "true")
 public class LandingEventBuffer {

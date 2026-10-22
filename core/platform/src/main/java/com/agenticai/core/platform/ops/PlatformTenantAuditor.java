@@ -3,6 +3,8 @@ package com.agenticai.core.platform.ops;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
  * fallback record when the tenant write fails (a failed audit write must not
  * turn an already-applied action into an error the operator would retry).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class PlatformTenantAuditor {
 

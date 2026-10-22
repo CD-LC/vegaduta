@@ -10,6 +10,7 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,9 +42,14 @@ import org.springframework.web.bind.annotation.RestController;
  * password is ever set here; the user activates via Keycloak's own required-actions email, so a
  * SCIM token holder can add/disable users but can't mint credentials.
  */
+// Off under app.identity.provider=local (a personal install): there the SCIM bearer tokens that gate this
+// permitAll surface cannot be minted (TenantSsoController is Keycloak-only), so the endpoints would be a
+// public, token-guarded door with no IdP behind it. Every other provider value, and the property unset,
+// keeps it, exactly as before: Auth0 still supplies IdentityUserAdminPort for it (see TenantSsoController).
 @RestController
 @RequestMapping("/scim/v2")
 @Profile("security")
+@ConditionalOnExpression("!'local'.equals('${app.identity.provider:keycloak}')")
 public class ScimProvisioningController {
 
     private static final String SCIM_CONTENT_TYPE = "application/scim+json";

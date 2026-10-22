@@ -5,6 +5,8 @@ import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.platform.PlatformTenantNotFoundException;
 import com.agenticai.core.platform.ops.PlatformTenantAuditor;
 import com.agenticai.core.security.ImpersonationGrantResolver;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.AllowUnlockedSchedule;
 import com.agenticai.core.tenancy.AppUser;
 import com.agenticai.core.tenancy.AppUserRepository;
@@ -71,6 +73,7 @@ import org.springframework.web.server.ResponseStatusException;
  * <p><b>Request counting</b> is in memory and flushed every ~30 s in one batch
  * (and on shutdown) - never a DB write per request.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 @Profile("security")
 public class ImpersonationService implements ImpersonationGrantResolver {

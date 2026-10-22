@@ -4,6 +4,8 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.platform.reliability.SloMath.InstanceWindow;
 import com.agenticai.core.platform.reliability.SloSample.Hist;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -63,6 +65,7 @@ import org.springframework.stereotype.Component;
  * applies. It runs on its own daemon thread, so it also works in deployables
  * without {@code @EnableScheduling}. Failures are logged once and never propagate.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class SloSampler {
 

@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.abuse;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
  * Being an ordinary bean, it coexists with any opt-in sinks - {@code
  * AbuseSignalService} fans out to the whole {@code List<AbuseAlertSink>}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class NoOpAbuseAlertSink implements AbuseAlertSink {
 
