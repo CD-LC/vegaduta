@@ -5,6 +5,7 @@ import { X as CloseIcon } from "lucide-react";
 import ShareWorkflowPanel from "./ShareWorkflowPanel";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import McpExposureField from "../McpExposureField";
+import { isPersonalEdition } from "../../lib/edition";
 
 export default function WorkflowShareModal({
   setShowShareModal,
@@ -46,9 +47,11 @@ export default function WorkflowShareModal({
               </button>
             </div>
             <ShareWorkflowPanel workflowId={workflow.id} workflowName={workflow.name} />
-            <div className="px-5 pb-5">
-              <McpExposureField kind="workflows" resourceId={workflow.id} />
-            </div>
+            {!isPersonalEdition() && (
+              <div className="px-5 pb-5">
+                <McpExposureField kind="workflows" resourceId={workflow.id} />
+              </div>
+            )}
           </div>
         </div>
       )}

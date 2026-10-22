@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { UserRound, LibraryBig } from "lucide-react";
 import LibraryChrome from "../../components/library/LibraryChrome";
 import MySubmissions from "../../components/templates/MySubmissions";
+import { isPersonalDenied, isPersonalEdition } from "../../lib/edition";
 
 // "My submissions" - the authed corner of the /templates section. It lives
 // under the public /templates prefix (so the gallery is crawlable), which
@@ -15,6 +17,8 @@ export default async function MyTemplatesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // Not served on a personal install (the proxy answers 404 first; this is the same answer if it is bypassed).
+  if (isPersonalEdition() && isPersonalDenied("/templates/mine")) notFound();
   const sp = await searchParams;
   const autoOpen = sp.new === "1" || "share" in sp;
 

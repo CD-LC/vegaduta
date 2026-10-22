@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Fingerprint, Home, LayoutTemplate, LogIn, Puzzle
 import { auth } from "../../lib/auth";
 import { Button } from "../ui/button";
 import { isBillingEnabled } from "../../lib/billing-flag";
+import { isPersonalDenied, isPersonalEdition } from "../../lib/edition";
 
 // Standalone dark chrome for the PUBLIC template pages (/templates and
 // /templates/[id]) - and, since 2026-08-09, the /plugins marketplace page,
@@ -28,6 +29,9 @@ import { isBillingEnabled } from "../../lib/billing-flag";
 // Icon audit (2026-09-24): every nav control carries a lucide glyph that
 // matches its destination, using the same vocabulary as the console rail
 // (Puzzle = plugins, LayoutTemplate = templates) so the two chromes agree.
+/** True for a page the proxy answers 404 on a personal install (lib/edition.ts EDITION_ROUTES), so no link should lead to it. */
+const notServed = (path: string): boolean => isPersonalEdition() && isPersonalDenied(path);
+
 export default function TemplatesPublicChrome({
   children,
   footer,
@@ -74,18 +78,24 @@ export default function TemplatesPublicChrome({
               <Puzzle className="size-4" aria-hidden="true" /> Plugins
             </Link>
           </Button>
-          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            <Link href="/directory">
-              <Fingerprint className="size-4" aria-hidden="true" /> Directory
-            </Link>
-          </Button>
+          {/* /directory, /templates/mine and /signup are not served on a personal install (the proxy 404s
+              them; lib/edition.ts EDITION_ROUTES), so the chrome does not link to them. */}
+          {!notServed("/directory") && (
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Link href="/directory">
+                <Fingerprint className="size-4" aria-hidden="true" /> Directory
+              </Link>
+            </Button>
+          )}
           {authed ? (
             <>
-              <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <Link href="/templates/mine">
-                  <LayoutTemplate className="size-4" aria-hidden="true" /> My templates
-                </Link>
-              </Button>
+              {!notServed("/templates/mine") && (
+                <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/templates/mine">
+                    <LayoutTemplate className="size-4" aria-hidden="true" /> My templates
+                  </Link>
+                </Button>
+              )}
               <Button asChild variant="outline" size="sm">
                 <Link href="/">
                   <ArrowLeft className="size-4" aria-hidden="true" /> Back to console
@@ -105,16 +115,22 @@ export default function TemplatesPublicChrome({
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-foreground"
-                onClick={() => auth.login({ redirectUri: `${window.location.origin}/templates/mine` })}
+                onClick={() =>
+                  auth.login({
+                    redirectUri: `${window.location.origin}${notServed("/templates/mine") ? "/templates" : "/templates/mine"}`,
+                  })
+                }
                 data-testid="login-landing-button"
               >
                 <LogIn className="size-4" aria-hidden="true" /> Sign in
               </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/signup">
-                  Start free <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              </Button>
+              {!notServed("/signup") && (
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/signup">
+                    Start free <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+              )}
             </>
           )}
         </div>

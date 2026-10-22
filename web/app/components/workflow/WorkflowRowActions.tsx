@@ -5,6 +5,7 @@ import { useTranslations } from "../../lib/i18n";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ShareAsTemplateButton from "../templates/ShareAsTemplateButton";
+import { isPersonalEdition } from "../../lib/edition";
 import WorkflowExportButton from "../WorkflowExportButton";
 
 /**
@@ -107,14 +108,16 @@ export default function WorkflowRowActions({
         </TooltipTrigger>
         <TooltipContent>{copied ? "Link copied" : "Copy link"}</TooltipContent>
       </Tooltip>
-      <ShareAsTemplateButton
-        sourceId={wf.id}
-        sourceName={wf.name}
-        sourceKind="WORKFLOW"
-        variant="ghost"
-        size="icon"
-        className="size-8"
-      />
+      {!isPersonalEdition() && (
+        <ShareAsTemplateButton
+          sourceId={wf.id}
+          sourceName={wf.name}
+          sourceKind="WORKFLOW"
+          variant="ghost"
+          size="icon"
+          className="size-8"
+        />
+      )}
       {portable && <WorkflowExportButton workflowId={wf.id} workflowName={wf.name} />}
       {/* On FREE the Button renders its own upgrade tooltip
           (upgradeLocked), so only the unlocked button gets
