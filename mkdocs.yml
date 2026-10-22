@@ -164,6 +164,7 @@ nav:
       - AI for everyone (gap analysis, 2026-10-14): architecture/AI-FOR-EVERYONE-2026-10-14.md
       - Out of the box, personal install (gap analysis, 2026-10-19): architecture/OUT-OF-THE-BOX-PERSONAL-2026-10-19.md
       - Personal install audit (2026-10-19): architecture/PERSONAL-INSTALL-AUDIT-2026-10-19.md
+      - A lighter, faster personal install (plan, 2026-10-22): architecture/PERSONAL-LIGHTER-INSTALL-PLAN-2026-10-22.md
       - Technical audit (2026-10-19): architecture/TECHNICAL-AUDIT-2026-10-19.md
       - Archive (historical notes): architecture/archive/README.md
       - Decisions:
