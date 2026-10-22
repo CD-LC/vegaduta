@@ -23,13 +23,17 @@ class AttachmentDispositionTest {
         assertFalse(header.contains("=?"), header);
     }
 
-    /** What the previous code sent - kept as a guard so nobody "simplifies" back to it. */
+    /**
+     * Spring 6 sent an RFC 2047 encoded word in {@code filename=} for this call, which is the bug above.
+     * Spring 7 (Boot 4) writes a plain quoted name plus {@code filename*=}, the same shape as this class, so the
+     * framework no longer has the defect. The assertion keeps the guard: the encoded word must not come back.
+     */
     @Test
-    void springsCharsetBuilderIsTheEncodedWordFormThisClassReplaces() {
+    void springsCharsetBuilderNoLongerEmitsTheEncodedWordThisClassReplaced() {
         String spring = ContentDisposition.attachment()
             .filename("e2e-workflow.vegaduta-workflow.json", StandardCharsets.UTF_8).build().toString();
 
-        assertEquals(true, spring.contains("=?UTF-8?Q?"), spring);
+        assertFalse(spring.contains("=?UTF-8?Q?"), spring);
     }
 
     @Test

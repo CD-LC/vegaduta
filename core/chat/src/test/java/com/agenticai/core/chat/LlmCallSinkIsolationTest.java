@@ -83,8 +83,10 @@ class LlmCallSinkIsolationTest {
 
         @Override
         public void onCall(LlmCallObservation observation) {
-            seen.add(observation);
+            // Record the tenant BEFORE publishing the observation: the test thread polls `seen`
+            // and reads `tenant` as soon as it is non-empty.
             tenant.set(TenantContext.current().map(TenantContext::getTenantId).orElse(null));
+            seen.add(observation);
         }
     }
 

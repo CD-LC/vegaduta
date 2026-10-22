@@ -268,7 +268,13 @@ class AgentToolGovernanceTest {
                 "crm",
                 java.util.List.of(
                         new io.modelcontextprotocol.spec.McpSchema.Tool(
-                                "update_record", null, "a tool", null, null, readOnly, null)));
+                                "update_record",
+                                null,
+                                "a tool",
+                                java.util.Map.of("type", "object"),
+                                null,
+                                readOnly,
+                                null)));
         ToolClassificationRegistry real =
                 new ToolClassificationRegistry(
                         mock(
