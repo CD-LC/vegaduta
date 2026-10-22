@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.agents.tools.messaging.A2aDeliveryPort;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Service;
 
 /**
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
  * A2aClientService#send}, so the operator allow-list, SSRF guard and signed-card verification apply
  * to scheduled-task delivery exactly as they do to the {@code a2a_call_agent} tool.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aDeliveryPortImpl implements A2aDeliveryPort {
 

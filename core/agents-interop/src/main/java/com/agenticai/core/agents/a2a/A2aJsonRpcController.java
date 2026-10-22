@@ -2,6 +2,8 @@ package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,6 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Every failure - including a body that isn't JSON - is an HTTP 200 with a
  * JSON-RPC {@code error} member, per the binding; see {@link A2aError}.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @RestController
 @ConditionalOnProperty(prefix = "app.a2a", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class A2aJsonRpcController {
