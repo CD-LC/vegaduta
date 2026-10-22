@@ -122,24 +122,30 @@ def _audit_dir(settings: Settings) -> str:
 def _record_fallback(settings: Settings, project_id: str, reason: str) -> None:
     log.warning(
         "ingress: Caddy admin API unavailable, falling back to raw "
-        "host:port preview URL for project_id=%s (%s)", project_id, reason)
+        "host:port preview URL for project_id=%s (%s)",
+        project_id,
+        reason,
+    )
     try:
-        audit.record(_audit_dir(settings), {
-            "kind": "preview_ingress_fallback",
-            "project_id": project_id,
-            "reason": reason,
-        })
+        audit.record(
+            _audit_dir(settings),
+            {
+                "kind": "preview_ingress_fallback",
+                "project_id": project_id,
+                "reason": reason,
+            },
+        )
     except OSError:
         # Never let audit-logging itself break the fallback path.
         log.exception("ingress: failed to write fallback audit event")
 
 
-def _admin_request(settings: Settings, method: str, path: str,
-                    json_body: dict | None = None) -> httpx.Response:
+def _admin_request(
+    settings: Settings, method: str, path: str, json_body: dict | None = None
+) -> httpx.Response:
     url = settings.caddy_admin_url.rstrip("/") + path
     try:
-        resp = httpx.request(method, url, json=json_body,
-                              timeout=_ADMIN_TIMEOUT_SECONDS)
+        resp = httpx.request(method, url, json=json_body, timeout=_ADMIN_TIMEOUT_SECONDS)
     except httpx.TimeoutException as e:
         raise CaddyAdminError(f"Caddy admin API timed out: {method} {path}") from e
     except httpx.TransportError as e:
@@ -154,8 +160,7 @@ def _find_server_name(settings: Settings) -> str:
     or no matching server is found."""
     resp = _admin_request(settings, "GET", "/config/apps/http/servers")
     if resp.status_code != 200:
-        raise CaddyAdminError(
-            f"unexpected status reading servers: {resp.status_code}")
+        raise CaddyAdminError(f"unexpected status reading servers: {resp.status_code}")
     try:
         servers = resp.json() or {}
     except ValueError as e:
@@ -164,12 +169,10 @@ def _find_server_name(settings: Settings) -> str:
     for name, server in servers.items():
         if _LISTEN_ADDR in (server.get("listen") or []):
             return name
-    raise CaddyAdminError(
-        f"no Caddy server found listening on {_LISTEN_ADDR}")
+    raise CaddyAdminError(f"no Caddy server found listening on {_LISTEN_ADDR}")
 
 
-def _path_route(project_id: str, upstream_host: str, upstream_port: int,
-                route_id: str) -> dict:
+def _path_route(project_id: str, upstream_host: str, upstream_port: int, route_id: str) -> dict:
     prefix = f"/preview/{project_id}"
     return {
         "@id": route_id,
@@ -179,15 +182,15 @@ def _path_route(project_id: str, upstream_host: str, upstream_port: int,
             {
                 "handler": "reverse_proxy",
                 "upstreams": [{"dial": f"{upstream_host}:{upstream_port}"}],
-                "headers": {"request": {"set": {
-                    "X-Forwarded-Proto": ["https"]}}},
+                "headers": {"request": {"set": {"X-Forwarded-Proto": ["https"]}}},
             },
         ],
     }
 
 
-def _subdomain_route(project_id: str, upstream_host: str, upstream_port: int,
-                     route_id: str, preview_domain: str) -> dict:
+def _subdomain_route(
+    project_id: str, upstream_host: str, upstream_port: int, route_id: str, preview_domain: str
+) -> dict:
     host = f"{project_id}.{preview_domain}"
     return {
         "@id": route_id,
@@ -196,8 +199,7 @@ def _subdomain_route(project_id: str, upstream_host: str, upstream_port: int,
             {
                 "handler": "reverse_proxy",
                 "upstreams": [{"dial": f"{upstream_host}:{upstream_port}"}],
-                "headers": {"request": {"set": {
-                    "X-Forwarded-Proto": ["https"]}}},
+                "headers": {"request": {"set": {"X-Forwarded-Proto": ["https"]}}},
             },
         ],
     }
@@ -217,36 +219,37 @@ def _upsert_route(settings: Settings, route_id: str, route: dict) -> None:
     if patch_resp.status_code != 404:
         raise CaddyAdminError(
             f"unexpected status updating route {route_id}: "
-            f"{patch_resp.status_code} {patch_resp.text[:300]}")
+            f"{patch_resp.status_code} {patch_resp.text[:300]}"
+        )
 
     # Not registered yet — insert at the front of the live server's routes.
     server_name = _find_server_name(settings)
     insert_resp = _admin_request(
-        settings, "PUT",
-        f"/config/apps/http/servers/{server_name}/routes/0", route)
+        settings, "PUT", f"/config/apps/http/servers/{server_name}/routes/0", route
+    )
     if insert_resp.status_code not in (200, 201):
         raise CaddyAdminError(
             f"unexpected status inserting route {route_id}: "
-            f"{insert_resp.status_code} {insert_resp.text[:300]}")
+            f"{insert_resp.status_code} {insert_resp.text[:300]}"
+        )
 
 
-def register_preview_route(project_id: str, upstream_host: str,
-                           upstream_port: int,
-                           settings: Settings = SETTINGS) -> str:
+def register_preview_route(
+    project_id: str, upstream_host: str, upstream_port: int, settings: Settings = SETTINGS
+) -> str:
     route_id = _route_id(project_id)
     mode = settings.ingress_mode
 
     try:
         if mode == "subdomain":
             route = _subdomain_route(
-                project_id, upstream_host, upstream_port, route_id,
-                settings.preview_domain)
+                project_id, upstream_host, upstream_port, route_id, settings.preview_domain
+            )
             _upsert_route(settings, route_id, route)
             return f"https://{project_id}.{settings.preview_domain}"
 
         # default / "path"
-        route = _path_route(
-            project_id, upstream_host, upstream_port, route_id)
+        route = _path_route(project_id, upstream_host, upstream_port, route_id)
         _upsert_route(settings, route_id, route)
         base = settings.preview_path_base_url.rstrip("/")
         return f"{base}/preview/{project_id}/"
@@ -255,15 +258,14 @@ def register_preview_route(project_id: str, upstream_host: str,
         return f"http://{upstream_host}:{upstream_port}"
 
 
-def deregister_preview_route(project_id: str,
-                             settings: Settings = SETTINGS) -> None:
+def deregister_preview_route(project_id: str, settings: Settings = SETTINGS) -> None:
     route_id = _route_id(project_id)
     try:
         resp = _admin_request(settings, "DELETE", f"/id/{route_id}")
         if resp.status_code not in (200, 204, 404):
             raise CaddyAdminError(
-                f"unexpected status deleting route {route_id}: "
-                f"{resp.status_code} {resp.text[:300]}")
+                f"unexpected status deleting route {route_id}: {resp.status_code} {resp.text[:300]}"
+            )
     except CaddyAdminError as e:
         # No downstream URL to fall back to here (the caller already has
         # nothing to do with a return value) — just make sure the stale

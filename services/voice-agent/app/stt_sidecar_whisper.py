@@ -19,6 +19,7 @@ calls `_recognize_impl` below) exactly once per utterance. That VAD-driven
 utterance boundary - not a manual button release - is the actual latency win
 over today's push-to-talk `VoiceCallController#turn`.
 """
+
 from __future__ import annotations
 
 import base64
@@ -63,9 +64,7 @@ class SidecarWhisperSTT(stt.STT):
         http_session: aiohttp.ClientSession | None = None,
         room: rtc.Room | None = None,
     ) -> None:
-        super().__init__(
-            capabilities=stt.STTCapabilities(streaming=False, interim_results=False)
-        )
+        super().__init__(capabilities=stt.STTCapabilities(streaming=False, interim_results=False))
         self._base_url = (base_url or config.SIDECAR_BASE_URL).rstrip("/")
         self._session = http_session
         self._owns_session = http_session is None
@@ -140,9 +139,7 @@ class SidecarWhisperSTT(stt.STT):
                 url,
                 json=payload,
                 headers=(
-                    {"X-Internal-Token": _SIDECAR_SHARED_SECRET}
-                    if _SIDECAR_SHARED_SECRET
-                    else None
+                    {"X-Internal-Token": _SIDECAR_SHARED_SECRET} if _SIDECAR_SHARED_SECRET else None
                 ),
                 timeout=aiohttp.ClientTimeout(total=effective_timeout, sock_connect=10),
             ) as resp:

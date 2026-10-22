@@ -38,6 +38,7 @@ drift apart. If narration ever does arrive with markdown in it, the fix
 is to expose that class over HTTP from core, which its own comment in
 voice-agent/app/tts_sarvam.py already names as the correct follow-up.
 """
+
 from __future__ import annotations
 
 import base64
