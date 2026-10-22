@@ -708,7 +708,7 @@ scripts/vegaduta personal --browser        # PowerShell: .\scripts\vegaduta.ps1 
 scripts/vegaduta personal --no-browser     # turn it off again (the choice is remembered)
 ```
 
-This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.49.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
+This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.63.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
 
 To let the agent sign in to a site, name it in `deploy/compose/.env`: `BROWSER_ALLOWED_DOMAINS=github.com,*.github.com`.
 
