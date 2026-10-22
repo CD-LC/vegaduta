@@ -2,10 +2,13 @@ package com.agenticai.core.omnichannel.slack;
 
 import com.agenticai.core.omnichannel.status.ChannelConnection;
 import com.agenticai.core.omnichannel.status.ChannelNotConnectedException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /** Slack's connection state for the Channels screen: the workspace name. */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class SlackChannelConnection implements ChannelConnection {
 
     private final SlackCredentialService credentialService;

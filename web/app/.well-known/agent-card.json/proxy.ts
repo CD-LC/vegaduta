@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isPersonalEdition } from "../../lib/edition";
 import { publicApiBase } from "../../lib/env";
 
 // A2A discovery (2026-09-09). Peers resolve an Agent Card at the PUBLIC
@@ -39,6 +40,12 @@ export const AGENT_CARD_CACHE_CONTROL = "public, max-age=300";
 const UPSTREAM_TIMEOUT_MS = 5000;
 
 export async function fetchAgentCard(): Promise<Response> {
+  // A personal install has no peers to advertise to: core does not run the A2A directory there, and the
+  // proxy already answers 404 for these paths. This is the same answer from the route itself, for a
+  // request that reaches it without passing the proxy. No upstream call is made.
+  if (isPersonalEdition()) {
+    return new NextResponse(null, { status: 404, headers: { "Cache-Control": "no-store" } });
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {

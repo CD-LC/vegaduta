@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.teams;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Component;
  * point it at their own server.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsServiceUrlPolicy {
 
     /**

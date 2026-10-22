@@ -5,6 +5,7 @@ import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.AppUser;
 import com.agenticai.core.tenancy.AppUserRepository;
@@ -144,7 +145,7 @@ public class AccountSelfDeletionService {
             deleteAppUserRow(userId);
             aiContentReportRepository.anonymiseReporter(userId);
             keycloakAdminClient.deleteUser(userId);
-            log.warn("Account self-deletion: tenant-less user {} deleted", userId);
+            log.warn("Account self-deletion: tenant-less user {} deleted", LogSafe.clean(userId));
             return new Result(true, false);
         }
 
@@ -160,8 +161,8 @@ public class AccountSelfDeletionService {
             log.warn(
                     "Account self-deletion: sole member {} of tenant '{}' deleted with the whole"
                             + " workspace",
-                    userId,
-                    tenantId);
+                    LogSafe.clean(userId),
+                    LogSafe.clean(tenantId));
             return new Result(true, true);
         }
 
@@ -233,12 +234,14 @@ public class AccountSelfDeletionService {
             // that no longer exists.
             log.error(
                     "Account self-deletion: audit write failed for user {} in tenant '{}'",
-                    userId,
-                    tenantId,
-                    auditFailure);
+                    LogSafe.clean(userId),
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(auditFailure));
         }
         log.warn(
-                "Account self-deletion: user {} removed from shared tenant '{}'", userId, tenantId);
+                "Account self-deletion: user {} removed from shared tenant '{}'",
+                LogSafe.clean(userId),
+                LogSafe.clean(tenantId));
     }
 
     /**
@@ -264,7 +267,7 @@ public class AccountSelfDeletionService {
                 log.warn(
                         "Account self-deletion: could not delete avatar object for user {} -"
                                 + " continuing",
-                        userId,
+                        LogSafe.clean(userId),
                         e);
             }
         }
@@ -279,9 +282,9 @@ public class AccountSelfDeletionService {
             // Keycloak user of the tenant, so this 404s.
             log.info(
                     "Account self-deletion: explicit Keycloak delete for {} after tenant erasure"
-                        + " did not succeed ({}) - expected when the erasure already removed it",
-                    userId,
-                    alreadyGoneOrFailed.getMessage());
+                            + " did not succeed ({}) - expected when the erasure already removed it",
+                    LogSafe.clean(userId),
+                    LogSafe.clean(alreadyGoneOrFailed.getMessage()));
         }
     }
 }

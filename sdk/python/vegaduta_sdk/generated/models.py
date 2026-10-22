@@ -3613,6 +3613,13 @@ class EdgeTurnTelemetryController_EdgeTurnReportRequest(TypedDict, total=False):
     latencyMs: int
 
 
+class EditionInfo(TypedDict, total=False):
+    tier: str
+    billingEnabled: bool
+    authMode: str
+    features: Dict[str, bool]
+
+
 class ElevenLabsCredentialActivationRequest(TypedDict):
     apiKey: str
 
@@ -7566,6 +7573,7 @@ class PublicStatusController_PublicStatusResponse(TypedDict, total=False):
     components: List[PublicStatusController_Component]
     maintenance: PlatformBroadcastService_PublicMaintenance
     announcement: PlatformBroadcastService_PublicAnnouncement
+    edition: EditionInfo
 
 
 class QualityController_QualityConfigResponse(TypedDict, total=False):

@@ -1,6 +1,9 @@
 package com.agenticai.core.voice;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.storage.StorageProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +65,7 @@ import org.springframework.util.StringUtils;
  * client for the API LiveKit documents; it has not been exercised against a live LiveKit+Egress
  * deployment in this pass.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Component
 public class LiveKitEgressService {
 
@@ -168,7 +172,7 @@ public class LiveKitEgressService {
         String egressId = callEgress("StartRoomCompositeEgress", body);
         log.info(
                 "Started LiveKit RoomCompositeEgress room={} egressId={} objectKey={}",
-                roomName,
+                LogSafe.clean(roomName),
                 egressId,
                 objectKey);
         return new EgressStartResult(egressId, objectKey);
@@ -186,8 +190,8 @@ public class LiveKitEgressService {
                 || !"static".equalsIgnoreCase(properties.getCredentials())) {
             throw new LiveKitEgressException(
                     "Call recording needs app.storage.type=s3 with app.storage.credentials=static"
-                        + " (LiveKit Egress uploads with an S3 access key and secret it is given)."
-                        + " It is not supported with type="
+                            + " (LiveKit Egress uploads with an S3 access key and secret it is given)."
+                            + " It is not supported with type="
                             + properties.getType()
                             + ", credentials="
                             + properties.getCredentials()
