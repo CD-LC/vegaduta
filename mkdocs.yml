@@ -229,6 +229,7 @@ nav:
       - Repository setup: maintainers/repo-setup.md
       - Branch protection: maintainers/branch-protection.md
       - Releasing: maintainers/releasing.md
+      - Dependabot pull requests: maintainers/dependabot-prs.md
       - Agent coordination: maintainers/agent-coordination.md
       - Releasing the Java Agent SDK: maintainers/releasing-sdk.md
       - Publishing these docs: maintainers/docs-site.md
