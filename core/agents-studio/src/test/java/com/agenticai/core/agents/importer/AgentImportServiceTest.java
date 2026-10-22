@@ -307,7 +307,7 @@ class AgentImportServiceTest {
         assertThatThrownBy(() -> small.readBounded(new ByteArrayInputStream(tooBig)))
                 .isInstanceOfSatisfying(
                         ResponseStatusException.class,
-                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
     }
 
     @Test
@@ -389,7 +389,7 @@ class AgentImportServiceTest {
         assertThatThrownBy(() -> small.preview(body))
                 .isInstanceOfSatisfying(
                         ResponseStatusException.class,
-                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
         verifyNoInteractions(agentService);
     }
 
@@ -404,7 +404,7 @@ class AgentImportServiceTest {
         assertThatThrownBy(() -> small.preview(env.toString()))
                 .isInstanceOfSatisfying(
                         ResponseStatusException.class,
-                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE));
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONTENT_TOO_LARGE));
     }
 
     @Test

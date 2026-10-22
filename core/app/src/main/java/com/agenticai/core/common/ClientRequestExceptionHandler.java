@@ -280,7 +280,7 @@ public class ClientRequestExceptionHandler {
     @ExceptionHandler(AttachmentPayloadTooLargeException.class)
     public ResponseEntity<Map<String, Object>> handleAttachmentPayloadTooLarge(
             AttachmentPayloadTooLargeException e) {
-        return errorResponse(e, HttpStatus.PAYLOAD_TOO_LARGE, e.getMessage());
+        return errorResponse(e, HttpStatus.CONTENT_TOO_LARGE, e.getMessage());
     }
 
     @ExceptionHandler(AttachmentModalityNotSupportedException.class)

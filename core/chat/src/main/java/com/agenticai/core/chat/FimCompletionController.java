@@ -82,7 +82,7 @@ public class FimCompletionController {
         }
         if (contextChars > MAX_CONTEXT_CHARS) {
             throw new ResponseStatusException(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 "prefix + suffix must be at most " + MAX_CONTEXT_CHARS + " characters"
             );
         }

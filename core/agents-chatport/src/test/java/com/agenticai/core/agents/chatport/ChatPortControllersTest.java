@@ -88,7 +88,7 @@ class ChatPortControllersTest {
         when(importService.maxBytes()).thenReturn(10L);
         assertEquals(HttpStatus.BAD_REQUEST,
             assertThrows(ResponseStatusException.class, () -> controller.previewUpload(upload(""), alice)).getStatusCode());
-        assertEquals(HttpStatus.PAYLOAD_TOO_LARGE,
+        assertEquals(HttpStatus.CONTENT_TOO_LARGE,
             assertThrows(ResponseStatusException.class, () -> controller.previewUpload(upload("[0123456789012345]"), alice)).getStatusCode());
     }
 

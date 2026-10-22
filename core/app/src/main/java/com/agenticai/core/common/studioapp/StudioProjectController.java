@@ -84,7 +84,7 @@ public class StudioProjectController {
             case "project_not_found", "bad_id" -> HttpStatus.NOT_FOUND;
             case "no_subject" -> HttpStatus.UNAUTHORIZED;
             case "forbidden" -> HttpStatus.FORBIDDEN;
-            case "version_too_large", "payload_too_large", "settings_too_large" -> HttpStatus.PAYLOAD_TOO_LARGE;
+            case "version_too_large", "payload_too_large", "settings_too_large" -> HttpStatus.CONTENT_TOO_LARGE;
             default -> HttpStatus.UNPROCESSABLE_ENTITY;
         };
         return ResponseEntity.status(status).body(Map.of("error", e.getMessage()));

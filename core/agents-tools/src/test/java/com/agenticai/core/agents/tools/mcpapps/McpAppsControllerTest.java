@@ -221,7 +221,7 @@ class McpAppsControllerTest {
                         .refused(new McpAppsException(McpAppsException.Code.RATE_LIMITED, "x"))
                         .getStatusCode());
         assertEquals(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 controller
                         .refused(new McpAppsException(McpAppsException.Code.TOO_LARGE, "x"))
                         .getStatusCode());

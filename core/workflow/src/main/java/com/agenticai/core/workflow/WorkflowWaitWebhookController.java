@@ -75,7 +75,7 @@ public class WorkflowWaitWebhookController {
                     .body(Map.of("error", "rate_limited"));
         }
         if (body != null && !body.isEmpty() && serializedLength(body) > maxBodyChars) {
-            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+            return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE)
                     .body(Map.of("error", "payload_too_large"));
         }
         WorkflowWaitResumeTokens.Claims c = claims.get();

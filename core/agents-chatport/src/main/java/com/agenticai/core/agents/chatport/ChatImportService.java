@@ -393,7 +393,7 @@ public class ChatImportService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a conversations file first.");
         }
         if (data.length > maxBytes) {
-            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,
+            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE,
                 "That file is larger than " + (maxBytes / (1024 * 1024)) + " MB. Upload just conversations.json from the export.");
         }
     }

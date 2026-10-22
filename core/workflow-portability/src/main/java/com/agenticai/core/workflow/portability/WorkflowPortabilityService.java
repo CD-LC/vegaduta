@@ -808,7 +808,7 @@ public class WorkflowPortabilityService {
 
     private ResponseStatusException tooLarge() {
         return new ResponseStatusException(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 "The file is larger than the import limit of " + maxPayloadBytes + " bytes.");
     }
 

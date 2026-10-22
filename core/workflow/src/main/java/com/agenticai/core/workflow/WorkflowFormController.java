@@ -59,7 +59,7 @@ public class WorkflowFormController {
             }
             case INVALID -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("ok", false, "errors", result.errors()));
             case RATE_LIMITED -> ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", "rate_limited"));
-            case TOO_LARGE -> ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(Map.of("error", "payload_too_large"));
+            case TOO_LARGE -> ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(Map.of("error", "payload_too_large"));
             case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "not_found"));
         };
     }
