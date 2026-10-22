@@ -18,7 +18,7 @@
          (core, core-jobs, core-worker) brings spring-boot-starter-actuator at runtime. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-actuator</artifactId>
+      <artifactId>spring-boot-health</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
