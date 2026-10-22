@@ -1,5 +1,7 @@
 package com.agenticai.core.mcpserver.expose;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * admin can prepare, but nothing is advertised until the flag is on. {@code mcpPath} is the path of
  * the MCP endpoint on the API host.
  */
+@ConditionalOnEditionFeature(EditionFeature.MCP_SERVER_EXPOSURE)
 @RestController
 @RequestMapping("/api/mcpserver/exposure")
 public class McpToolExposureController {

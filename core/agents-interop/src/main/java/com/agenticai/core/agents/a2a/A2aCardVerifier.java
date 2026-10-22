@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -62,6 +64,7 @@ import org.springframework.util.StringUtils;
  * loopback dev path therefore only works when the operator lists the host in
  * {@code app.security.outbound.allowed-private-hosts}.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aCardVerifier {
 

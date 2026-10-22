@@ -3,6 +3,8 @@ package com.agenticai.core.agents.a2a;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,6 +103,7 @@ import org.springframework.stereotype.Component;
  * way that does not confirm the task exists: a mismatch is an empty
  * {@link Optional}, indistinguishable from "never existed".
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Component
 public class A2aTaskStore {
 

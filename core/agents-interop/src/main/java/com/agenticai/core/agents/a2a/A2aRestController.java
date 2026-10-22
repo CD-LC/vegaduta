@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.agents.core.AgentNotFoundException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Business logic is shared with {@link A2aJsonRpcController}: same RUNNER check, same task
  * service, same SSE frame order.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @RestController
 @ConditionalOnProperty(
         prefix = "app.a2a",

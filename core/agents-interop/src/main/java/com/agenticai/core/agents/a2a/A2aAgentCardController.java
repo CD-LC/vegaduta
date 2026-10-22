@@ -2,6 +2,8 @@ package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.PermissionLevel;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Gated on {@code app.a2a.enabled} (default on): off, none of these routes
  * exist and the well-known probes 404 - see {@link A2aProperties#isEnabled()}.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @RestController
 @ConditionalOnProperty(prefix = "app.a2a", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class A2aAgentCardController {
