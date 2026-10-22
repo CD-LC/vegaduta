@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   billingOffRedirect,
   filterBillingItems,
@@ -13,6 +13,7 @@ import {
 // Billing switch (lib/billing-flag.ts): OFF unless NEXT_PUBLIC_BILLING_ENABLED
 // is exactly "1", read at runtime (window.__ENV > build-time value).
 afterEach(() => {
+  vi.unstubAllEnvs();
   delete window.__ENV;
   delete process.env.NEXT_PUBLIC_BILLING_ENABLED;
 });
@@ -38,6 +39,35 @@ describe("isBillingEnabled", () => {
     window.__ENV = { NEXT_PUBLIC_BILLING_ENABLED: "1" };
     delete process.env.NEXT_PUBLIC_BILLING_ENABLED;
     expect(isBillingEnabled()).toBe(true);
+  });
+});
+
+describe("a personal install has no billing whatever NEXT_PUBLIC_BILLING_ENABLED says", () => {
+  it("is OFF for personal even with the variable set to 1, and drops every plans/billing row and link", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    vi.stubEnv("NEXT_PUBLIC_BILLING_ENABLED", "1");
+    expect(isBillingEnabled()).toBe(false);
+    expect(filterBillingItems([{ href: "/features" }, { href: "/admin/billing" }, { href: "/usage" }])).toEqual([
+      { href: "/usage" },
+    ]);
+    expect(showUpgradeLink("/admin/billing")).toBe(false);
+    expect(llmSpendHref()).toBe("/usage#llm-usage");
+  });
+
+  it("is also OFF for personal by local auth alone", () => {
+    vi.stubEnv("NEXT_PUBLIC_AUTH_MODE", "local");
+    vi.stubEnv("NEXT_PUBLIC_BILLING_ENABLED", "1");
+    expect(isBillingEnabled()).toBe(false);
+  });
+
+  it("still follows the variable on lite, full and an undeclared install", () => {
+    for (const e of ["lite", "full", ""]) {
+      vi.stubEnv("NEXT_PUBLIC_EDITION", e);
+      vi.stubEnv("NEXT_PUBLIC_BILLING_ENABLED", "1");
+      expect(isBillingEnabled(), e).toBe(true);
+      vi.stubEnv("NEXT_PUBLIC_BILLING_ENABLED", "");
+      expect(isBillingEnabled(), e).toBe(false);
+    }
   });
 });
 

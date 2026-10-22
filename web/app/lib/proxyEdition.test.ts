@@ -125,6 +125,15 @@ describe("proxy() on a personal install", () => {
     expect(features.headers.get("location")).toBe(`${ORIGIN}/`);
   });
 
+  it("redirects the billing family even when NEXT_PUBLIC_BILLING_ENABLED=1 is set by mistake", async () => {
+    process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
+    for (const [path, to] of [["/billing", "/"], ["/pricing", "/"], ["/features", "/"], ["/admin/billing", "/usage"]]) {
+      const res = await get(path);
+      expect(res.status, path).toBe(307);
+      expect(res.headers.get("location"), path).toBe(`${ORIGIN}${to}`);
+    }
+  });
+
   it("is 404 for /try and /signup in the classic site mode too", async () => {
     process.env.NEXT_PUBLIC_SITE_MODE = "classic";
     expect((await get("/try")).status).toBe(404);
