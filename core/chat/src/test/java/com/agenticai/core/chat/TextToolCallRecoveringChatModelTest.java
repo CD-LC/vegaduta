@@ -501,7 +501,7 @@ class TextToolCallRecoveringChatModelTest {
         }
 
         @Override
-        public ChatOptions getDefaultOptions() {
+        public ChatOptions getOptions() {
             return ToolCallingChatOptions.builder().build();
         }
 

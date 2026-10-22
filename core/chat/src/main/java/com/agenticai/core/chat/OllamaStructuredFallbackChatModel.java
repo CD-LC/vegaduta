@@ -114,8 +114,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     }
 
     @Override
-    public ChatOptions getDefaultOptions() {
-        return delegate.getDefaultOptions();
+    public ChatOptions getOptions() {
+        return delegate.getOptions();
     }
 
     private static boolean asksForSchema(OpenAiChatOptions options) {

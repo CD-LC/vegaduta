@@ -418,7 +418,7 @@ class ConstrainedToolRouterChatModelTest {
         }
 
         @Override
-        public ChatOptions getDefaultOptions() {
+        public ChatOptions getOptions() {
             return OpenAiChatOptions.builder().build();
         }
     }
