@@ -414,10 +414,9 @@ public class A2aTaskStore {
         if (!Objects.equals(task.tenantId(), tenantId)
                 || !Objects.equals(task.subject(), subject)) {
             log.warn(
-                    "A2A task {} requested by a non-owner (tenant {}, subject {}) - answering not-found",
+                    "A2A task {} requested by a non-owner (same tenant: {}) - answering not-found",
                     LogSafe.clean(taskId),
-                    LogSafe.clean(tenantId),
-                    subject);
+                    Objects.equals(task.tenantId(), tenantId));
             return Optional.empty();
         }
         if (redis != null) {
@@ -441,10 +440,9 @@ public class A2aTaskStore {
             if (!Objects.equals(stored.tenantId(), tenantId)
                     || !Objects.equals(stored.subject(), subject)) {
                 log.warn(
-                        "A2A task {} requested by a non-owner (tenant {}, subject {}) - answering not-found",
+                        "A2A task {} requested by a non-owner (same tenant: {}) - answering not-found",
                         LogSafe.clean(taskId),
-                        LogSafe.clean(tenantId),
-                        subject);
+                        Objects.equals(stored.tenantId(), tenantId));
                 return Optional.empty();
             }
             stored = reconcileStored(key, stored);
