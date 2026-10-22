@@ -14,8 +14,7 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import java.util.Set;
-import java.util.UUID;
+
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -26,13 +25,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * The pilot baseline and report endpoints against a real Postgres with two tenant schemas. Covers a
@@ -50,7 +53,7 @@ class PilotReportApiIT extends AbstractContextIT {
     @Autowired private TenantMigrationService migrations;
     @Autowired private JdbcTemplate jdbc;
     @Autowired private RoiController controller;
-    @Autowired private ObjectMapper mapper;
+    @Autowired private JsonMapper mapper;
 
     private MockMvc mvc;
     private UUID agentA;
@@ -91,7 +94,7 @@ class PilotReportApiIT extends AbstractContextIT {
                 MockMvcBuilders.standaloneSetup(controller)
                         .setMessageConverters(
                                 new ByteArrayHttpMessageConverter(),
-                                new MappingJackson2HttpMessageConverter(mapper))
+                                new JacksonJsonHttpMessageConverter(mapper))
                         .build();
     }
 
@@ -108,8 +111,9 @@ class PilotReportApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens, temperature,"
-                        + " knowledge_base_enabled, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,now(),now())",
+                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens,"
+                        + " temperature, knowledge_base_enabled, created_at, updated_at) VALUES"
+                        + " (?,?,?,?,?,?,?,?,now(),now())",
                 id,
                 name,
                 "p",
@@ -125,8 +129,9 @@ class PilotReportApiIT extends AbstractContextIT {
     }
 
     private static final String BASELINE =
-            "{\"jobType\":\"APPOINTMENT_REMINDERS\",\"baselinePeriod\":\"Aug 2026\",\"monthlyVolume\":300,"
-                    + "\"avgHandlingMinutes\":4.5,\"missedRate\":0.22,\"avgValuePerConversion\":1200,\"valueCurrency\":\"inr\"}";
+            "{\"jobType\":\"APPOINTMENT_REMINDERS\",\"baselinePeriod\":\"Aug"
+                + " 2026\",\"monthlyVolume\":300,"
+                + "\"avgHandlingMinutes\":4.5,\"missedRate\":0.22,\"avgValuePerConversion\":1200,\"valueCurrency\":\"inr\"}";
 
     @Test
     void zeroVolumeAgentGetsAReportWithNoRatesAndNoZeros() throws Exception {
@@ -167,8 +172,9 @@ class PilotReportApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + A
-                        + ".llm_call_log (id, agent_id, session_id, provider_name, model, prompt_tokens,"
-                        + " completion_tokens, total_tokens, success, latency_ms, started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
+                        + ".llm_call_log (id, agent_id, session_id, provider_name, model,"
+                        + " prompt_tokens, completion_tokens, total_tokens, success, latency_ms,"
+                        + " started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
                 UUID.randomUUID(),
                 agentA,
                 "s1",
@@ -182,8 +188,9 @@ class PilotReportApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + A
-                        + ".llm_call_log (id, agent_id, session_id, provider_name, model, prompt_tokens,"
-                        + " completion_tokens, total_tokens, success, latency_ms, started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
+                        + ".llm_call_log (id, agent_id, session_id, provider_name, model,"
+                        + " prompt_tokens, completion_tokens, total_tokens, success, latency_ms,"
+                        + " started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
                 UUID.randomUUID(),
                 agentA,
                 "s2",

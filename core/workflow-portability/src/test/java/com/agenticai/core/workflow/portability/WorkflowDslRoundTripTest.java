@@ -5,13 +5,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.agents.importer.AgentImportDtos.ConversionReport;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * The VegaDuta workflow DSL v1: what an export contains and leaves out, that it is deterministic,
@@ -30,31 +33,31 @@ class WorkflowDslRoundTripTest {
     /** JSON with single quotes standing in for double quotes, so the fixture stays readable. */
     private static String graphJson() {
         return """
-            {'nodes': [
-              {'id': 't1', 'type': 'trigger', 'position': {'x': 0, 'y': 0},
-               'data': {'label': 'Start', 'config': {'channel': 'WEBHOOK'}}},
-              {'id': 'a1', 'type': 'agent', 'position': {'x': 200, 'y': 0},
-               'data': {'label': 'Researcher', 'config': {'agentId': '%s'}}},
-              {'id': 'k1', 'type': 'knowledge', 'position': {'x': 200, 'y': 120},
-               'data': {'label': 'Docs', 'config': {'collectionId': '%s', 'topK': 5}}},
-              {'id': 'h1', 'type': 'http', 'position': {'x': 400, 'y': 0},
-               'data': {'label': 'Call API', 'config': {'method': 'POST',
-                 'url': 'https://api.example.com/v1/orders?api_key=%s',
-                 'headers': [{'name': 'Authorization', 'value': 'Bearer %s'},
-                             {'name': 'X-Org', 'value': '{{secret.ORG_KEY}}'}],
-                 'bodyType': 'json', 'body': 'hello'}}},
-              {'id': 'o1', 'type': 'output', 'position': {'x': 600, 'y': 0},
-               'data': {'label': 'Mail it', 'config': {'channel': 'email', 'emailTo': 'boss@example.com'}}},
-              {'id': 's1', 'type': 'sub_flow', 'position': {'x': 600, 'y': 120},
-               'data': {'label': 'Each', 'config': {'body': {'nodes': [
-                 {'id': 'b1', 'type': 'agent', 'position': {'x': 0, 'y': 0},
-                  'data': {'label': 'Inner', 'config': {'agentId': '%s'}}}], 'edges': []}}}}
-            ], 'edges': [
-              {'id': 'e1', 'source': 't1', 'target': 'a1'},
-              {'id': 'e2', 'source': 'a1', 'target': 'h1'},
-              {'id': 'e3', 'source': 'h1', 'target': 'o1', 'sourceHandle': null}
-            ]}
-            """
+{'nodes': [
+  {'id': 't1', 'type': 'trigger', 'position': {'x': 0, 'y': 0},
+   'data': {'label': 'Start', 'config': {'channel': 'WEBHOOK'}}},
+  {'id': 'a1', 'type': 'agent', 'position': {'x': 200, 'y': 0},
+   'data': {'label': 'Researcher', 'config': {'agentId': '%s'}}},
+  {'id': 'k1', 'type': 'knowledge', 'position': {'x': 200, 'y': 120},
+   'data': {'label': 'Docs', 'config': {'collectionId': '%s', 'topK': 5}}},
+  {'id': 'h1', 'type': 'http', 'position': {'x': 400, 'y': 0},
+   'data': {'label': 'Call API', 'config': {'method': 'POST',
+     'url': 'https://api.example.com/v1/orders?api_key=%s',
+     'headers': [{'name': 'Authorization', 'value': 'Bearer %s'},
+                 {'name': 'X-Org', 'value': '{{secret.ORG_KEY}}'}],
+     'bodyType': 'json', 'body': 'hello'}}},
+  {'id': 'o1', 'type': 'output', 'position': {'x': 600, 'y': 0},
+   'data': {'label': 'Mail it', 'config': {'channel': 'email', 'emailTo': 'boss@example.com'}}},
+  {'id': 's1', 'type': 'sub_flow', 'position': {'x': 600, 'y': 120},
+   'data': {'label': 'Each', 'config': {'body': {'nodes': [
+     {'id': 'b1', 'type': 'agent', 'position': {'x': 0, 'y': 0},
+      'data': {'label': 'Inner', 'config': {'agentId': '%s'}}}], 'edges': []}}}}
+], 'edges': [
+  {'id': 'e1', 'source': 't1', 'target': 'a1'},
+  {'id': 'e2', 'source': 'a1', 'target': 'h1'},
+  {'id': 'e3', 'source': 'h1', 'target': 'o1', 'sourceHandle': null}
+]}
+"""
                 .formatted(AGENT_ID, KB_ID, API_KEY, BEARER, AGENT_ID)
                 .replace('\'', '"');
     }
@@ -119,13 +122,13 @@ class WorkflowDslRoundTripTest {
                 .isEqualTo("@placeholder:agent_1");
 
         JsonNode placeholders = doc.get("placeholders");
-        List<String> keys = placeholders.findValuesAsText("key");
+        List<String> keys = placeholders.findValuesAsString("key");
         assertThat(keys).contains("agent_1", "kb_1", "destination_1", "secret:ORG_KEY");
         assertThat(keys).anyMatch(k -> k.startsWith("CREDENTIAL_"));
         for (JsonNode placeholder : placeholders) {
             if ("agent_1".equals(placeholder.get("key").asString())) {
                 assertThat(placeholder.get("kind").asString()).isEqualTo("agent");
-                assertThat(placeholder.get("usedBy").findValuesAsText("nodeId"))
+                assertThat(placeholder.get("usedBy").findValuesAsString("nodeId"))
                         .contains("a1", "b1");
             }
         }

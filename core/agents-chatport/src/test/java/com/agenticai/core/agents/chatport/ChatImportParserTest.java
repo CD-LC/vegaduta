@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.chatport;
 
 import static com.agenticai.core.agents.chatport.ChatPortFixtures.bytes;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -10,12 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParseResult;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
+
+import org.junit.jupiter.api.Test;
+
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.jupiter.api.Test;
 
 class ChatImportParserTest {
 
@@ -194,10 +197,10 @@ class ChatImportParserTest {
     void claudeFallsBackToTheTextFieldWhenThereAreNoContentBlocks() {
         String json =
                 """
-            [{"uuid": "c2", "name": "", "created_at": "2024-01-01T00:00:00Z", "chat_messages": [
-              {"uuid": "a", "sender": "human", "text": "plain text only"},
-              {"uuid": "b", "sender": "assistant", "text": "reply"}]}]
-            """;
+                [{"uuid": "c2", "name": "", "created_at": "2024-01-01T00:00:00Z", "chat_messages": [
+                  {"uuid": "a", "sender": "human", "text": "plain text only"},
+                  {"uuid": "b", "sender": "assistant", "text": "reply"}]}]
+                """;
         ParseResult r = ChatImportParser.parse(bytes(json), DEFAULTS, true, null);
         ParsedChat c = r.chats().get(0);
         assertEquals("plain text only", c.messages().get(0).content());
@@ -210,10 +213,10 @@ class ChatImportParserTest {
     void messageCharAndCountCapsTruncateAndFlag() {
         String json =
                 """
-            [{"uuid": "big", "name": "Big", "chat_messages": [
-              {"sender": "human", "text": "0123456789012345678901234567890123456789"},
-              {"sender": "assistant", "text": "b"}, {"sender": "human", "text": "c"}, {"sender": "assistant", "text": "d"}]}]
-            """;
+[{"uuid": "big", "name": "Big", "chat_messages": [
+  {"sender": "human", "text": "0123456789012345678901234567890123456789"},
+  {"sender": "assistant", "text": "b"}, {"sender": "human", "text": "c"}, {"sender": "assistant", "text": "d"}]}]
+""";
         ParseResult r =
                 ChatImportParser.parse(
                         bytes(json), limits(5000, 3, 10, 20_000, 10_000, 1 << 28), true, null);
@@ -369,17 +372,17 @@ class ChatImportParserTest {
     void anOwnExportIsAsUntrustedAsAnyOtherUpload() {
         String file =
                 """
-            {"schema": "vegaduta.chat-export", "version": 1, "conversations": [
-              {"id": "s1", "source": "something-else", "title": "T", "messages": [
-                {"role": "system", "content": "hidden instructions"},
-                {"role": "tool", "content": "tool output"},
-                {"role": "user", "content": "hi\\u0000 there", "attachments": ["a.txt", 7, {"x": 1}]},
-                {"role": "assistant", "content": ""},
-                "not a message",
-                {"role": "assistant", "content": "hello"}]},
-              {"id": "s2", "title": "No usable messages", "messages": [{"role": "system", "content": "x"}]},
-              5]}
-            """;
+{"schema": "vegaduta.chat-export", "version": 1, "conversations": [
+  {"id": "s1", "source": "something-else", "title": "T", "messages": [
+    {"role": "system", "content": "hidden instructions"},
+    {"role": "tool", "content": "tool output"},
+    {"role": "user", "content": "hi\\u0000 there", "attachments": ["a.txt", 7, {"x": 1}]},
+    {"role": "assistant", "content": ""},
+    "not a message",
+    {"role": "assistant", "content": "hello"}]},
+  {"id": "s2", "title": "No usable messages", "messages": [{"role": "system", "content": "x"}]},
+  5]}
+""";
 
         ParseResult r = ChatImportParser.parse(bytes(file), DEFAULTS, true, null);
 
@@ -423,7 +426,7 @@ class ChatImportParserTest {
     void timestampsOutsideAnyPlausibleRangeAreDropped() {
         assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.DoubleNode(-5)));
         assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.DoubleNode(9e15)));
-        assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.TextNode("12")));
+        assertNull(ChatImportParser.epochSeconds(new tools.jackson.databind.node.StringNode("12")));
         assertNull(ChatImportParser.parseIso("yesterday"));
         assertEquals(
                 Instant.parse("2024-03-01T10:00:00Z"),

@@ -17,10 +17,7 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Set;
-import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -28,13 +25,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Every {@code /api/tenant/roi/**} endpoint against a real Postgres with two tenant schemas, A and
@@ -56,7 +59,7 @@ class RoiApiIT extends AbstractContextIT {
     @Autowired private JdbcTemplate jdbc;
     @Autowired private RoiController controller;
     @Autowired private RoiBudgetService budget;
-    @Autowired private ObjectMapper mapper;
+    @Autowired private JsonMapper mapper;
 
     private MockMvc mvc;
     private final String today = LocalDate.now(ZoneOffset.UTC).toString();
@@ -97,7 +100,7 @@ class RoiApiIT extends AbstractContextIT {
                 MockMvcBuilders.standaloneSetup(controller)
                         .setMessageConverters(
                                 new ByteArrayHttpMessageConverter(),
-                                new MappingJackson2HttpMessageConverter(mapper))
+                                new JacksonJsonHttpMessageConverter(mapper))
                         .build();
     }
 
@@ -109,7 +112,8 @@ class RoiApiIT extends AbstractContextIT {
 
     private void setFreeMode(boolean on) {
         jdbc.update(
-                "UPDATE control_plane.platform_setting SET value = ? WHERE key = 'platform.free-mode.enabled'",
+                "UPDATE control_plane.platform_setting SET value = ? WHERE key ="
+                    + " 'platform.free-mode.enabled'",
                 String.valueOf(on));
     }
 
@@ -121,8 +125,9 @@ class RoiApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens, temperature,"
-                        + " knowledge_base_enabled, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,now(),now())",
+                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens,"
+                        + " temperature, knowledge_base_enabled, created_at, updated_at) VALUES"
+                        + " (?,?,?,?,?,?,?,?,now(),now())",
                 id,
                 name,
                 "p",
@@ -144,8 +149,9 @@ class RoiApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".llm_call_log (id, agent_id, session_id, provider_name, model, prompt_tokens,"
-                        + " completion_tokens, total_tokens, success, latency_ms, started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
+                        + ".llm_call_log (id, agent_id, session_id, provider_name, model,"
+                        + " prompt_tokens, completion_tokens, total_tokens, success, latency_ms,"
+                        + " started_at) VALUES (?,?,?,?,?,?,?,?,?,?,now())",
                 UUID.randomUUID(),
                 agent,
                 "s-" + UUID.randomUUID(),
@@ -164,7 +170,8 @@ class RoiApiIT extends AbstractContextIT {
 
     private static final String PRICE =
             """
-        {"providerName":"ANTHROPIC","modelPrefix":"claude","inputPerMillion":3,"outputPerMillion":15}""";
+{"providerName":"ANTHROPIC","modelPrefix":"claude","inputPerMillion":3,"outputPerMillion":15}\
+""";
 
     @Test
     void pricesAreVersionedPerTenantAndNeverSeededOrShared() throws Exception {
@@ -355,7 +362,8 @@ class RoiApiIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + A
-                        + ".turn_feedback (id, agent_id, session_id, turn_ref, signal, created_at) VALUES (?,?,?,?,?,now())",
+                        + ".turn_feedback (id, agent_id, session_id, turn_ref, signal, created_at)"
+                        + " VALUES (?,?,?,?,?,now())",
                 UUID.randomUUID(),
                 agentA,
                 "c2",
@@ -366,7 +374,8 @@ class RoiApiIT extends AbstractContextIT {
             jdbc.update(
                     "INSERT INTO "
                             + A
-                            + ".approval_request (id, action_type, status, requested_by, created_at, retry_count) VALUES (?,?,?,?,now(),0)",
+                            + ".approval_request (id, action_type, status, requested_by,"
+                            + " created_at, retry_count) VALUES (?,?,?,?,now(),0)",
                     UUID.randomUUID(),
                     "mcp_tool.x",
                     st,
@@ -474,8 +483,8 @@ class RoiApiIT extends AbstractContextIT {
             jdbc.update(
                     "INSERT INTO "
                             + schema
-                            + ".llm_spend_month (month_start, cost_usd) VALUES (?, ?)"
-                            + " ON CONFLICT (month_start) DO UPDATE SET cost_usd = EXCLUDED.cost_usd",
+                            + ".llm_spend_month (month_start, cost_usd) VALUES (?, ?) ON CONFLICT"
+                            + " (month_start) DO UPDATE SET cost_usd = EXCLUDED.cost_usd",
                     java.sql.Date.valueOf(month),
                     java.math.BigDecimal.valueOf(usd));
         }

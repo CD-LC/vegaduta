@@ -10,14 +10,19 @@ import com.agenticai.core.agents.importer.AgentImportDtos.ConversionReport;
 import com.agenticai.core.agents.importer.AgentImportDtos.ImportResponse;
 import com.agenticai.core.agents.importer.AgentImportDtos.ImportedAgentView;
 import com.agenticai.core.agents.importer.AgentImportDtos.PreviewResponse;
-import java.util.List;
-import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-/** The import routes are a thin shell: bounded raw body in, 200 for preview, 201 for the created agent. */
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * The import routes are a thin shell: bounded raw body in, 200 for preview, 201 for the created
+ * agent.
+ */
 class AgentImportControllerTest {
 
     private final AgentImportService service = mock(AgentImportService.class);
@@ -29,8 +34,13 @@ class AgentImportControllerTest {
 
     @Test
     void previewPassesTheRawBodyThrough() throws Exception {
-        PreviewResponse preview = new PreviewResponse("auto", "flowise",
-            new ImportedAgentView("n", "", "i", "", "", null, null, List.of(), List.of()), emptyReport());
+        PreviewResponse preview =
+                new PreviewResponse(
+                        "auto",
+                        "flowise",
+                        new ImportedAgentView(
+                                "n", "", "i", "", "", null, null, List.of(), List.of()),
+                        emptyReport());
         when(service.readBounded(any())).thenReturn("{\"x\":1}");
         when(service.preview("{\"x\":1}")).thenReturn(preview);
 
@@ -53,19 +63,41 @@ class AgentImportControllerTest {
 
     @Test
     void responseDtosSerialiseWithTheDocumentedFieldNames() throws Exception {
-        PreviewResponse preview = new PreviewResponse("auto", "openai-assistant",
-            new ImportedAgentView("n", "d", "i", "OPENAI", "gpt-4o", 0.5, null, List.of("e2b-code-execution"), List.of("run_code")),
-            emptyReport());
+        PreviewResponse preview =
+                new PreviewResponse(
+                        "auto",
+                        "openai-assistant",
+                        new ImportedAgentView(
+                                "n",
+                                "d",
+                                "i",
+                                "OPENAI",
+                                "gpt-4o",
+                                0.5,
+                                null,
+                                List.of("e2b-code-execution"),
+                                List.of("run_code")),
+                        emptyReport());
 
-        var json = AgentImportFixtures.MAPPER.readTree(AgentImportFixtures.MAPPER.writeValueAsString(preview));
+        var json =
+                AgentImportFixtures.MAPPER.readTree(
+                        AgentImportFixtures.MAPPER.writeValueAsString(preview));
 
-        assertThat(json.fieldNames()).toIterable()
-            .containsExactlyInAnyOrder("source", "detectedSource", "agent", "report");
-        assertThat(json.get("agent").fieldNames()).toIterable().containsExactlyInAnyOrder(
-            "name", "description", "instructions", "modelProvider", "model", "temperature", "topP",
-            "suggestedCapabilities", "suggestedTools");
+        assertThat(json.propertyNames())
+                .containsExactlyInAnyOrder("source", "detectedSource", "agent", "report");
+        assertThat(json.get("agent").propertyNames())
+                .containsExactlyInAnyOrder(
+                        "name",
+                        "description",
+                        "instructions",
+                        "modelProvider",
+                        "model",
+                        "temperature",
+                        "topP",
+                        "suggestedCapabilities",
+                        "suggestedTools");
         assertThat(json.get("agent").get("topP").isNull()).isTrue();
-        assertThat(json.get("report").fieldNames()).toIterable()
-            .containsExactlyInAnyOrder("converted", "needsManual", "unsupported", "warnings");
+        assertThat(json.get("report").propertyNames())
+                .containsExactlyInAnyOrder("converted", "needsManual", "unsupported", "warnings");
     }
 }

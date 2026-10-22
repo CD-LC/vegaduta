@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.expression.BuiltIn;
 import com.agenticai.core.workflow.expression.BuiltIns;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -78,7 +79,7 @@ class WorkflowGraphGeneratorPromptTest {
     void serviceOnlyTeachesExpressionsWhenResolverIsWiredAndEnabled() throws Exception {
         var m = WorkflowGraphGeneratorService.class.getDeclaredMethod("expressionsWired");
         m.setAccessible(true);
-        var objectMapper = new tools.jackson.databind.ObjectMapper();
+        var objectMapper = com.agenticai.core.json.JsonMappers.plain();
         var unsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         unsafe.setAccessible(true);
         var u = (sun.misc.Unsafe) unsafe.get(null);

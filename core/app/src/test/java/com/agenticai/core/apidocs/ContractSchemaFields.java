@@ -1,5 +1,7 @@
 package com.agenticai.core.apidocs;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Resolves the JSONPath-ish field names of a consumer contract ({@code $.a.b}, {@code
@@ -179,7 +180,7 @@ final class ContractSchemaFields {
         }
         JsonNode json = content.path("application/json");
         if (json.isMissingNode()) {
-            Iterator<Map.Entry<String, JsonNode>> it = content.fields();
+            Iterator<Map.Entry<String, JsonNode>> it = content.properties().iterator();
             json = it.next().getValue();
         }
         JsonNode schema = json.path("schema");

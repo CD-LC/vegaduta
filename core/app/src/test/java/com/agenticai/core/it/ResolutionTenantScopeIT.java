@@ -16,11 +16,7 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Set;
-import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -28,11 +24,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import tools.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.json.JsonMapper;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * The resolution meter's tenant-table reads and writes against a real Postgres with two tenant
@@ -54,7 +57,7 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
     @Autowired private ResolutionController controller;
     @Autowired private ResolutionEventRepository repository;
     @Autowired private ChannelSessionResolutionSweep sweep;
-    @Autowired private ObjectMapper mapper;
+    @Autowired private JsonMapper mapper;
 
     private MockMvc mvc;
     private UUID agentA;
@@ -90,7 +93,7 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
                 MockMvcBuilders.standaloneSetup(controller)
                         .setMessageConverters(
                                 new ByteArrayHttpMessageConverter(),
-                                new MappingJackson2HttpMessageConverter(mapper))
+                                new JacksonJsonHttpMessageConverter(mapper))
                         .build();
     }
 
@@ -108,8 +111,9 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens, temperature,"
-                        + " knowledge_base_enabled, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,now(),now())",
+                        + ".agent (id, name, system_prompt, provider_name, model, max_tokens,"
+                        + " temperature, knowledge_base_enabled, created_at, updated_at) VALUES"
+                        + " (?,?,?,?,?,?,?,?,now(),now())",
                 id,
                 "Support bot",
                 "p",
@@ -124,8 +128,9 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".resolution_event (id, conversation_key, agent_id, channel, outcome, evidence,"
-                        + " confidence, billable, resolved_at, dedupe_key) VALUES (?,?,?,?,?,?,?,?,now(),?)",
+                        + ".resolution_event (id, conversation_key, agent_id, channel, outcome,"
+                        + " evidence, confidence, billable, resolved_at, dedupe_key) VALUES"
+                        + " (?,?,?,?,?,?,?,?,now(),?)",
                 UUID.randomUUID(),
                 "conv-" + dedupeKey,
                 agentA,
@@ -249,9 +254,9 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
         jdbc.update(
                 "INSERT INTO "
                         + schema
-                        + ".channel_session (id, channel, external_id, session_id, agent_id, created_at,"
-                        + " last_message_at, paired, pairing_notice_sent, ai_disclosure_sent)"
-                        + " VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        + ".channel_session (id, channel, external_id, session_id, agent_id,"
+                        + " created_at, last_message_at, paired, pairing_notice_sent,"
+                        + " ai_disclosure_sent) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 UUID.randomUUID(),
                 "WHATSAPP",
                 "ext-" + schema,

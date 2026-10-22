@@ -26,18 +26,21 @@ import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.portability.PortabilityDtos.ImportResponse;
 import com.agenticai.core.workflow.portability.PortabilityDtos.PlaceholderView;
 import com.agenticai.core.workflow.portability.PortabilityDtos.PreviewResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * The service end to end for every format, with the collaborators mocked: the flag, the size cap,
@@ -65,27 +68,27 @@ class WorkflowPortabilityServiceTest {
 
     private static String n8nFile() {
         return """
-            {'name': 'Hook to agent', 'nodes': [
-              {'parameters': {'path': 'in'}, 'name': 'Webhook', 'type': 'n8n-nodes-base.webhook', 'position': [0, 0]},
-              {'parameters': {'text': 'hi'}, 'name': 'AI Agent', 'type': '@n8n/n8n-nodes-langchain.agent',
-               'position': [200, 0], 'credentials': {'openAiApi': {'id': '5', 'name': 'My OpenAI'}}}],
-             'connections': {'Webhook': {'main': [[{'node': 'AI Agent', 'type': 'main', 'index': 0}]]}}}
-            """
+{'name': 'Hook to agent', 'nodes': [
+  {'parameters': {'path': 'in'}, 'name': 'Webhook', 'type': 'n8n-nodes-base.webhook', 'position': [0, 0]},
+  {'parameters': {'text': 'hi'}, 'name': 'AI Agent', 'type': '@n8n/n8n-nodes-langchain.agent',
+   'position': [200, 0], 'credentials': {'openAiApi': {'id': '5', 'name': 'My OpenAI'}}}],
+ 'connections': {'Webhook': {'main': [[{'node': 'AI Agent', 'type': 'main', 'index': 0}]]}}}
+"""
                 .replace('\'', '"');
     }
 
     private static String difyFile() {
         return """
-            app: {mode: workflow, name: Tiny}
-            kind: app
-            workflow:
-              graph:
-                edges:
-                - {id: a, source: s, target: e, sourceHandle: source}
-                nodes:
-                - {id: s, data: {type: start, title: Start}}
-                - {id: e, data: {type: end, title: End, outputs: []}}
-            """;
+        app: {mode: workflow, name: Tiny}
+        kind: app
+        workflow:
+          graph:
+            edges:
+            - {id: a, source: s, target: e, sourceHandle: source}
+            nodes:
+            - {id: s, data: {type: start, title: Start}}
+            - {id: e, data: {type: end, title: End, outputs: []}}
+        """;
     }
 
     private static String envelope(String source, String payload) throws Exception {
@@ -167,8 +170,10 @@ class WorkflowPortabilityServiceTest {
                 "kind: app\napp: {mode: workflow}\na: &a "
                         + lol
                         + "\n"
-                        + "b: &b [*a,*a,*a,*a,*a,*a,*a,*a,*a]\nc: &c [*b,*b,*b,*b,*b,*b,*b,*b,*b]\n"
-                        + "d: &d [*c,*c,*c,*c,*c,*c,*c,*c,*c]\ne: &e [*d,*d,*d,*d,*d,*d,*d,*d,*d]\n";
+                        + "b: &b [*a,*a,*a,*a,*a,*a,*a,*a,*a]\n"
+                        + "c: &c [*b,*b,*b,*b,*b,*b,*b,*b,*b]\n"
+                        + "d: &d [*c,*c,*c,*c,*c,*c,*c,*c,*c]\n"
+                        + "e: &e [*d,*d,*d,*d,*d,*d,*d,*d,*d]\n";
         assertThatThrownBy(() -> service.preview(envelope("auto", bomb)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("anchors");
@@ -419,7 +424,7 @@ class WorkflowPortabilityServiceTest {
         assertThat(file.json()).doesNotContain(agentId).doesNotContain("abcdefghijklmnop123456");
         JsonNode doc = MAPPER.readTree(file.json().getBytes(StandardCharsets.UTF_8));
         assertThat(doc.get("format").asString()).isEqualTo("vegaduta.workflow");
-        assertThat(doc.get("placeholders").findValuesAsText("key")).contains("agent_1");
+        assertThat(doc.get("placeholders").findValuesAsString("key")).contains("agent_1");
         assertThat(doc.has("exportedAt")).isFalse();
     }
 

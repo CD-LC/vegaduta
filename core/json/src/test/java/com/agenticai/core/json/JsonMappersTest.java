@@ -117,4 +117,38 @@ class JsonMappersTest {
         // Jackson 3 has java.time built in, so plain() can write it too (Jackson 2 could not).
         assertEquals("1767323045.000000000", JsonMappers.plain().writeValueAsString(t));
     }
+
+    @Test
+    void isoDatesWritesInstantsAsIsoStringsAndKeepsTheOtherJackson2Defaults() throws JacksonException {
+        Instant t = Instant.parse("2026-01-02T03:04:05Z");
+        assertEquals("\"2026-01-02T03:04:05Z\"", JsonMappers.isoDates().writeValueAsString(t));
+        assertThrows(
+                UnrecognizedPropertyException.class,
+                () -> JsonMappers.isoDates().readValue("{\"x\":1,\"extra\":2}", Point.class));
+    }
+
+    @Test
+    void isoDatesLenientAlsoIgnoresUnknownFields() throws JacksonException {
+        Instant t = Instant.parse("2026-01-02T03:04:05Z");
+        assertEquals(
+                "\"2026-01-02T03:04:05Z\"", JsonMappers.isoDatesLenient().writeValueAsString(t));
+        assertEquals(
+                new Point(1, null),
+                JsonMappers.isoDatesLenient().readValue("{\"x\":1,\"extra\":2}", Point.class));
+    }
+
+    @Test
+    void strictReaderRejectsDuplicateKeysAndTrailingTokens() {
+        assertThrows(
+                JacksonException.class, () -> JsonMappers.strictReader().readTree("{\"a\":1,\"a\":2}"));
+        assertThrows(JacksonException.class, () -> JsonMappers.strictReader().readTree("{} {}"));
+        // the plain mapper keeps the Jackson 2 behaviour: last duplicate wins, trailing ignored
+        assertEquals("{\"a\":2}", JsonMappers.plain().readTree("{\"a\":1,\"a\":2}").toString());
+    }
+
+    @Test
+    void indentedWritesPrettyPrintedJson() throws JacksonException {
+        String out = JsonMappers.indented().writeValueAsString(Map.of("a", 1));
+        assertTrue(out.contains("\n"), out);
+    }
 }

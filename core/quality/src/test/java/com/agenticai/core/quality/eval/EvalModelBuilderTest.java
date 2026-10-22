@@ -24,8 +24,8 @@ class EvalModelBuilderTest {
                         "k",
                         "llama3",
                         1024,
-                        EvalLlmHttp.ofSeconds(10),
-                        EvalLlmHttp.ofMinutes(10));
+                        java.time.Duration.ofSeconds(10),
+                        java.time.Duration.ofMinutes(10));
         OpenAiChatOptions options = model.getOptions();
         assertEquals("llama3", options.getModel());
         assertEquals(1024, options.getMaxTokens());
@@ -46,8 +46,8 @@ class EvalModelBuilderTest {
                         "k",
                         "claude-sonnet-5",
                         1024,
-                        EvalLlmHttp.ofSeconds(10),
-                        EvalLlmHttp.ofMinutes(10));
+                        java.time.Duration.ofSeconds(10),
+                        java.time.Duration.ofMinutes(10));
         AnthropicChatOptions options = (AnthropicChatOptions) model.getOptions();
         assertEquals("claude-sonnet-5", options.getModel());
         assertEquals(1024, options.getMaxTokens());

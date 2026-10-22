@@ -2,6 +2,7 @@ package com.agenticai.core.omnichannel.matrix;
 
 import com.agenticai.core.security.net.SsrfGuard;
 import com.sun.net.httpserver.HttpServer;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +113,7 @@ final class FakeHomeserver implements AutoCloseable {
 
     MatrixApiClient client() {
         SsrfGuard guard = guard();
-        return new MatrixApiClient(new tools.jackson.databind.ObjectMapper(), () -> guard);
+        return new MatrixApiClient(com.agenticai.core.json.JsonMappers.plain(), () -> guard);
     }
 
     MatrixApiClient.Endpoint endpoint(String token) {

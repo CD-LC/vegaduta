@@ -2,6 +2,12 @@ package com.agenticai.core.apidocs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,10 +22,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests for the reflection-based OpenAPI generator: structural checks over the REAL controller set
@@ -69,7 +71,8 @@ class OpenApiSpecGeneratorTest {
         int operations = 0;
         Set<String> ids = new HashSet<>();
         List<String> duplicates = new ArrayList<>();
-        for (Iterator<Map.Entry<String, JsonNode>> paths = doc.path("paths").fields();
+        for (Iterator<Map.Entry<String, JsonNode>> paths =
+                        doc.path("paths").properties().iterator();
                 paths.hasNext(); ) {
             JsonNode item = paths.next().getValue();
             for (String verb : VERBS) {
@@ -129,7 +132,8 @@ class OpenApiSpecGeneratorTest {
     void pathsHaveBalancedBracesAndDeclareEveryPathVariable() throws IOException {
         JsonNode doc = full();
         List<String> problems = new ArrayList<>();
-        for (Iterator<Map.Entry<String, JsonNode>> paths = doc.path("paths").fields();
+        for (Iterator<Map.Entry<String, JsonNode>> paths =
+                        doc.path("paths").properties().iterator();
                 paths.hasNext(); ) {
             Map.Entry<String, JsonNode> entry = paths.next();
             String path = entry.getKey();

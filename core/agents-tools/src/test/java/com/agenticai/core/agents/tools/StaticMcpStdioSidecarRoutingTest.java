@@ -3,10 +3,7 @@ package com.agenticai.core.agents.tools;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.modelcontextprotocol.client.transport.ServerParameters;
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.ai.mcp.client.common.autoconfigure.NamedClientMcpTransport;
@@ -14,6 +11,11 @@ import org.springframework.ai.mcp.client.common.autoconfigure.StdioTransportAuto
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.core.ResolvableType;
+
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Routing decision for the static (application-mcp.yml) STDIO built-ins: relayed through
@@ -135,7 +137,7 @@ class StaticMcpStdioSidecarRoutingTest {
 
     private static Map<String, String> readJsonMap(String json) {
         try {
-            return new tools.jackson.databind.ObjectMapper()
+            return com.agenticai.core.json.JsonMappers.plain()
                     .readValue(
                             json,
                             new tools.jackson.core.type.TypeReference<Map<String, String>>() {});

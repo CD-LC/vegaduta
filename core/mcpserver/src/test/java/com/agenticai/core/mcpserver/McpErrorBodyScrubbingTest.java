@@ -7,20 +7,26 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
+
 import io.modelcontextprotocol.spec.McpError;
+import io.modelcontextprotocol.spec.McpSchema.JSONRPCResponse.JSONRPCError;
+
 import jakarta.servlet.FilterChain;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * B11: the MCP transport answers e.g. a missing Mcp-Session-Id with a 400 whose body is a
@@ -68,7 +74,9 @@ class McpErrorBodyScrubbingTest {
             ((jakarta.servlet.http.HttpServletResponse) res).setStatus(400);
             res.setContentType("application/json");
             res.getOutputStream()
-                    .write(MAPPER.writeValueAsBytes(new McpError("Session ID missing")));
+                    .write(
+                            MAPPER.writeValueAsBytes(
+                                    new McpError(new JSONRPCError(-32600, "Session ID missing"))));
         };
     }
 
@@ -76,7 +84,10 @@ class McpErrorBodyScrubbingTest {
     void aSerializedExceptionBodyIsReplacedByAPlainJsonRpcError() throws Exception {
         // sanity: the transport's body really does carry the trace this fix exists to remove
         assertTrue(
-                new String(MAPPER.writeValueAsBytes(new McpError("x")), StandardCharsets.UTF_8)
+                new String(
+                                MAPPER.writeValueAsBytes(
+                                        new McpError(new JSONRPCError(-32600, "x"))),
+                                StandardCharsets.UTF_8)
                         .contains("stackTrace"));
 
         filter.doFilter(request, response, transportAnswering400WithSerializedException());
