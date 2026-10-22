@@ -74,10 +74,10 @@ test-core: ## mvn verify (context tests need Postgres with pgvector+AGE on DB_HO
 
 .PHONY: spring-wiring
 spring-wiring: ## Startup-only Spring wiring checks without a context: constructor choice, duplicate bean/entity names (part of test-core too)
-	cd core && $(MVN) -B -ntp -pl app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest='InjectableConstructorTest,UniqueBeanNamesTest' test
+	cd core && $(MVN) -B -ntp -pl app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest='InjectableConstructorTest,UniqueBeanNamesTest,ShapeInjectionPointsTest' test
 
 .PHONY: boot-check
-boot-check: ## Boot the real core jar against throwaway pgvector+AGE Postgres and Redis (about 3 min; needs Docker and JAVA_HOME on a JDK 21+)
+boot-check: ## Boot the real core jars (api, migrate-only, jobs, worker) against throwaway pgvector+AGE Postgres and Redis (about 6 min; needs Docker and JAVA_HOME on a JDK 21+)
 	bash scripts/ci/boot-check.sh
 
 .PHONY: test-web
