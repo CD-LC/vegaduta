@@ -2,6 +2,8 @@ package com.agenticai.core.payments.agenttools;
 
 import com.agenticai.core.agentspi.MandatePaymentToolSource;
 import com.agenticai.core.payments.PaymentToolService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
  * payments service offer nothing.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentMandateToolSource implements MandatePaymentToolSource {
 
     private final ObjectProvider<PaymentToolService> paymentToolService;
