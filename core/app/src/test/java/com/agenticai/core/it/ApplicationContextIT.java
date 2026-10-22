@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,6 +39,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Tag("integration")
 @Testcontainers(disabledWithoutDocker = true)
+// Boot 4 no longer registers a TestRestTemplate bean on its own; this opts the test in.
+@AutoConfigureTestRestTemplate
 class ApplicationContextIT extends AbstractContextIT {
 
     @Autowired private TestRestTemplate http;

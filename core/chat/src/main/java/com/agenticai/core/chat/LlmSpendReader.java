@@ -1,15 +1,8 @@
 package com.agenticai.core.chat;
 
 import io.micrometer.core.instrument.MeterRegistry;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import org.hibernate.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,6 +12,11 @@ import java.sql.Savepoint;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.stereotype.Component;
 
 /**
  * Read side of the BYOK spend counter ({@code llm_spend_month}, V481), isolated from the caller's
@@ -83,13 +81,29 @@ public class LlmSpendReader {
         void bind(PreparedStatement ps) throws SQLException;
     }
 
+    /**
+     * The read's outcome, carried out of Hibernate's work callback: a value, or the SQLException
+     * the statement failed with.
+     */
+    private record Outcome(BigDecimal value, SQLException failure) {}
+
     private BigDecimal read(String sql, Binder binder) {
-        return entityManager
-                .unwrap(Session.class)
-                .doReturningWork(connection -> readWithSavepoint(connection, sql, binder));
+        // The SQLException must not escape the work callback: on Hibernate 7 an exception leaving
+        // doReturningWork is converted by the session, which marks the shared transaction
+        // rollback-only, so the commit threw UnexpectedRollbackException even though the savepoint
+        // rollback had left the transaction usable. The failure is rethrown here, outside
+        // Hibernate.
+        Outcome outcome =
+                entityManager
+                        .unwrap(Session.class)
+                        .doReturningWork(connection -> readWithSavepoint(connection, sql, binder));
+        if (outcome.failure() != null) {
+            throw new UncategorizedSQLException("llm spend read", sql, outcome.failure());
+        }
+        return outcome.value();
     }
 
-    private BigDecimal readWithSavepoint(Connection connection, String sql, Binder binder)
+    private Outcome readWithSavepoint(Connection connection, String sql, Binder binder)
             throws SQLException {
         Savepoint savepoint = connection.setSavepoint();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -101,10 +115,10 @@ public class LlmSpendReader {
                 }
             }
             connection.releaseSavepoint(savepoint);
-            return value;
+            return new Outcome(value, null);
         } catch (SQLException e) {
             connection.rollback(savepoint);
-            throw e;
+            return new Outcome(null, e);
         }
     }
 
