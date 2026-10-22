@@ -1,9 +1,14 @@
 package com.agenticai.core.billing.gateway;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.annotation.JsonAlias;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -13,11 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The gateway-NEUTRAL checkout API: one-off orders, server-side payment verification and the list
@@ -36,8 +36,8 @@ import java.util.Set;
  * GatewayCapability#UPI_COLLECT}/{@link GatewayCapability#UPI_QR}.
  */
 @RestController
-@ConditionalOnBillingEdition
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentCheckoutController {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentCheckoutController.class);
@@ -147,7 +147,7 @@ public class PaymentCheckoutController {
             log.warn(
                     "Top-up order creation failed on gateway {} for tenant {}",
                     client.gatewayName(),
-                    tenantId,
+                    LogSafe.clean(tenantId),
                     e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
