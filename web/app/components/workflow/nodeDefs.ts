@@ -2,6 +2,7 @@
 // Types live in nodeConfigTypes.ts and the palette catalog in
 // nodeDefCatalog.ts; this module re-exports both and keeps the lookups and
 // small per-type helpers.
+import { channelOffered } from "../../lib/edition";
 import { NODE_DEFS } from "./nodeDefCatalog";
 import type { VoiceMenuBranch, WorkflowGraphEdge, WorkflowGraphNode, WorkflowNodeDef } from "./nodeConfigTypes";
 
@@ -180,3 +181,12 @@ export const TRIGGER_CHANNEL_LABELS: Record<string, string> = {
   X: "X",
   EMAIL: "Email",
 };
+
+/**
+ * False for a trigger channel (WEBHOOK, WHATSAPP, SLACK, ...) whose adapter this install does not run, so the
+ * trigger picker should not offer it. The label table above stays complete: a saved graph that already holds a
+ * Slack trigger still renders its badge.
+ */
+export function triggerChannelOffered(channel: string): boolean {
+  return channelOffered(channel.toLowerCase());
+}
