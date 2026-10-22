@@ -65,7 +65,10 @@ final class LlmCallObserver {
                             span,
                             streamCancelled);
         } catch (RuntimeException e) {
-            log.warn("LLM call observation could not be built for model {} - {}", model, e.toString());
+            log.warn(
+                    "LLM call observation could not be built for model {} - {}",
+                    model,
+                    e.toString());
             return;
         }
         for (LlmCallSink sink : sinks) {
@@ -119,7 +122,7 @@ final class LlmCallObserver {
             // Prompt-cache counts are NOT folded into promptTokens for Anthropic; OpenAI and Google
             // GenAI report them INCLUSIVE of promptTokens - the per-provider difference
             // CacheTokenAccounting normalizes.
-            cacheAccounting = CacheTokenAccounting.from(usage);
+            cacheAccounting = CacheTokenAccounting.from(usage, providerName);
         }
         // Gemini thinking tokens sit OUTSIDE completionTokens and bill at the output rate; OpenAI's
         // are already inside it (see ReasoningTokenAccounting).
