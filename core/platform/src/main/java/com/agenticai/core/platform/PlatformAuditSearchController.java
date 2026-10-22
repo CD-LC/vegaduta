@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * found here. The response reports the scan bounds - see
  * {@link PlatformAuditSearchService}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/audit")
 @Profile("security")

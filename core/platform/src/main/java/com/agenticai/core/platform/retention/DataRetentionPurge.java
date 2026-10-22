@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.retention;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.sql.Timestamp;
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Component;
  * batch, which is acceptable for a 6-hourly bounded job; an index migration on these hot insert tables was
  * judged riskier (Flyway cannot CREATE INDEX CONCURRENTLY inside its transaction).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class DataRetentionPurge {
 

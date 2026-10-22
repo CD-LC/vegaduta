@@ -2,6 +2,8 @@ package com.agenticai.core.platform.abuse;
 
 import com.agenticai.core.platform.PlatformListPaging;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * (keys seeded by migration V120), so this controller exposes thresholds
  * read-only via {@link #config()} rather than duplicating a write path.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/abuse-monitor")
 @Profile("security")

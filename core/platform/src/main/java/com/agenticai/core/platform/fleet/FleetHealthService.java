@@ -1,6 +1,8 @@
 package com.agenticai.core.platform.fleet;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import jakarta.persistence.EntityManager;
@@ -48,6 +50,7 @@ import org.springframework.stereotype.Service;
  * and the console acts through the existing {@code
  * /api/platform/tenants/{id}/emergency-stop|resume} endpoints.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class FleetHealthService {
 

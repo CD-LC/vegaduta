@@ -10,6 +10,8 @@ import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceListResponse;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceMetricsResponse;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceModelMetric;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceRow;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,6 +55,7 @@ import org.springframework.stereotype.Service;
  * a level exist only on observations, so list rows carry {@code null} for
  * them (never 0); the detail view sums/derives them from the observations.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformTraceService {
 

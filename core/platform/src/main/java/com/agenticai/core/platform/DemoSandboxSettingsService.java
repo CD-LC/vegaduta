@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Service;
  * three keys are deliberately different from the seeded values - so the
  * operator can always see both numbers.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class DemoSandboxSettingsService {
 

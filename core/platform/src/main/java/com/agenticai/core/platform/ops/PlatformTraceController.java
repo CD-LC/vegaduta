@@ -3,6 +3,8 @@ package com.agenticai.core.platform.ops;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceDetailResponse;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceListResponse;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceMetricsResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * rule {@code /api/platform/** -> ROLE_platform-admin}. Langfuse being absent
  * or down answers 200 with {@code available=false} and a {@code reason}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/traces")
 public class PlatformTraceController {

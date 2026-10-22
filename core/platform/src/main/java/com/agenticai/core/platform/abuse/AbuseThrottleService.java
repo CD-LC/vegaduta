@@ -3,6 +3,8 @@ package com.agenticai.core.platform.abuse;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.resilience.RateLimitedLog;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Service;
  * traceable and, crucially, reversible on the record: {@link #clear} is the
  * explicit un-throttle an admin endpoint calls, and expiry is the automatic one.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class AbuseThrottleService {
 

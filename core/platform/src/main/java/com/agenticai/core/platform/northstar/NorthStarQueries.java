@@ -4,6 +4,8 @@ import com.agenticai.core.platform.northstar.NorthStarAggregator.FirstRun;
 import com.agenticai.core.platform.northstar.NorthStarAggregator.PassKRow;
 import com.agenticai.core.platform.northstar.NorthStarAggregator.RunBucket;
 import com.agenticai.core.platform.northstar.NorthStarAggregator.RunKind;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Component;
  * repeats, scores_json with the {@code REPEATS} dimension written by
  * EvalRunService) and {@code control_plane.app_user} (created_at).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class NorthStarQueries {
 

@@ -5,6 +5,8 @@ import com.agenticai.core.guardrails.moderation.ModerationReviewNotFoundExceptio
 import com.agenticai.core.guardrails.moderation.ModerationReviewService;
 import com.agenticai.core.guardrails.moderation.ModerationReviewStatus;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
@@ -44,6 +46,7 @@ import org.springframework.stereotype.Service;
  * whose {@code enqueue} had no caller - a table that was unreachable-by-
  * construction and therefore always empty. V216 dropped it.)
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformModerationQueueService {
 

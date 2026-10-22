@@ -3,6 +3,8 @@ package com.agenticai.core.platform.impersonation;
 import com.agenticai.core.platform.TenantDeletionController;
 import com.agenticai.core.platform.impersonation.ImpersonationService.SessionPage;
 import com.agenticai.core.platform.impersonation.ImpersonationService.StartedSession;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * ({@link TenantDeletionController#authenticateMasterKey}). Ending one does not
  * (ending only ever reduces access). See {@link ImpersonationService}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/impersonation")
 @Profile("security")

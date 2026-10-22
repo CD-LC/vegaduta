@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.ops;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
 import java.lang.reflect.Method;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Component;
  * same string Spring's {@code ScheduledMethodRunnable#toString()} produces, which
  * is how {@link ScheduledJobRegistryService} joins runs to registered tasks.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class ScheduledJobRunTracker implements ObservationHandler<ScheduledTaskObservationContext> {
 

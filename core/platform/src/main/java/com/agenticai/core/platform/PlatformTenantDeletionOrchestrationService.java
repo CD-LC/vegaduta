@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.codeintel.CodeIntelClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.TenantDataErasureService;
 import com.agenticai.core.tenancy.TenantErasureResult;
 import java.util.Optional;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
  * and {@code core/codeintel} without a cycle ({@code core/codeintel} is a leaf-ish module that does
  * not depend back on {@code core/platform}).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformTenantDeletionOrchestrationService {
 
