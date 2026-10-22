@@ -6,7 +6,7 @@
 # https://github.com/livekit/agents releases before bumping; this SDK's
 # public API (AgentServer/rtc_session vs. the older WorkerOptions/cli.run_app
 # shape both this file and main.py rely on) has moved fast across 1.x.
-livekit-agents==1.6.8
+livekit-agents==1.8.8
 
 # Held at 2.x: livekit-agents 1.6.8 declares only `openai>=2` but its
 # inference/llm.py does `import httpx` and passes httpx objects to openai,
@@ -21,20 +21,20 @@ openai==2.54.0
 # first... Sarvam otherwise"). Only the TTS leg is used from this package;
 # its `stt` submodule (ElevenLabs also offers STT) is NOT used here - STT is
 # sidecar Whisper (app/stt_sidecar_whisper.py), per the build brief.
-livekit-plugins-elevenlabs==1.6.8
+livekit-plugins-elevenlabs==1.8.8
 
 # Silero VAD - turn detection (utterance start/end), ships its own ONNX
 # model file inside the wheel (see silero/resources/silero_vad.onnx) so,
 # unlike sidecar's sentence-transformers model, there is nothing to
 # download or cache at runtime/build time - no HF_HOME-style baking needed
 # in the Dockerfile for this dependency.
-livekit-plugins-silero==1.6.8
+livekit-plugins-silero==1.8.8
 
 # HTTP client for both custom plugins (stt_sidecar_whisper.py's sidecar
 # /transcribe call, llm_core_bridge.py's core /api/agents/{id}/chat SSE
 # call). Already a transitive dependency of livekit-agents itself; pinned
 # directly here since both of this package's own modules import it by name.
-aiohttp==3.14.3
+aiohttp==3.14.5
 
 # Perception ("sight") mode frame handling - see perception.py. numpy backs
 # the scene-change gate (mean-abs-diff on a 64x36 grayscale thumbnail per
@@ -46,5 +46,5 @@ aiohttp==3.14.3
 # imports it by name. Both pins verified present on PyPI for python:3.12
 # (this image's base) but NOT pip-installed/runtime-verified in this pass -
 # see the header comment's re-verify note.
-numpy==2.3.5
+numpy==2.5.4
 pillow==13.0.0
