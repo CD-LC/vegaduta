@@ -189,7 +189,9 @@ abstract class VoiceCallControllerTestBase {
         return newController(sidecar, tts, Optional.of(roomRegistry));
     }
 
-    /** As above, with the room registry optional: absent on an edition that drops call recording. */
+    /**
+     * As above, with the room registry optional: absent on an edition that drops call recording.
+     */
     VoiceCallController newController(
             Optional<SidecarClient> sidecar,
             ElevenLabsClient tts,

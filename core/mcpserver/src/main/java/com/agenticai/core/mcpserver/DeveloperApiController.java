@@ -373,8 +373,8 @@ public class DeveloperApiController {
                         () ->
                                 new IllegalStateException(
                                         "Developer API endpoint invoked with no McpCallerContext"
-                                            + " set - McpApiKeyAuthFilter should have rejected this"
-                                            + " request already."));
+                                                + " set - McpApiKeyAuthFilter should have rejected this"
+                                                + " request already."));
     }
 
     /**

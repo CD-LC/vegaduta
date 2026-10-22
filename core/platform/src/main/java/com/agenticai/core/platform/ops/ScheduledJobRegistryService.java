@@ -39,28 +39,25 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Registry of every {@code @Scheduled} method registered on THIS replica, read
- * from Spring's own {@link ScheduledTaskHolder}s (the scheduled-annotation post
- * processor, including core's {@code RoleFilteringScheduledAnnotationBeanPostProcessor}:
- * a job another deployment shape owns is simply not registered here, so it is not
- * listed), joined with {@link ScheduledJobRunTracker}'s last-run bookkeeping.
+ * Registry of every {@code @Scheduled} method registered on THIS replica, read from Spring's own
+ * {@link ScheduledTaskHolder}s (the scheduled-annotation post processor, including core's {@code
+ * RoleFilteringScheduledAnnotationBeanPostProcessor}: a job another deployment shape owns is simply
+ * not registered here, so it is not listed), joined with {@link ScheduledJobRunTracker}'s last-run
+ * bookkeeping.
  *
- * <p><b>Per replica, in memory.</b> Last-run fields describe runs on the replica
- * that answered the request, since its boot. With several replicas the console can
- * show a job as never run while another replica ran it. When the tracker has no
- * record yet (observations not wired), Spring's own
+ * <p><b>Per replica, in memory.</b> Last-run fields describe runs on the replica that answered the
+ * request, since its boot. With several replicas the console can show a job as never run while
+ * another replica ran it. When the tracker has no record yet (observations not wired), Spring's own
  * {@link Task#getLastExecutionOutcome()} supplies start time and status.
  *
- * <p><b>Run now</b> ({@link #runNow}) is allowed only for the jobs in
- * {@code app.platform.jobs.run-now-allowlist} ({@code FQCN#method} entries). The
- * default list holds only jobs verified idempotent AND guarded by
- * {@code PgAdvisoryJobLock}, so a manual run can neither double-apply nor race
- * the scheduled run on another replica: the LLM usage rollup (idempotent upsert
- * of yesterday), demo-session expiry (stamp-guarded), stale pending-upgrade
- * cleanup (clears stale state) and the model-catalog refresh (replace-not-merge
- * per provider). The run invokes Spring's own scheduled runnable, so it goes
- * through the bean proxy ({@code @Transactional} applies) and is tracked like a
- * scheduled run.
+ * <p><b>Run now</b> ({@link #runNow}) is allowed only for the jobs in {@code
+ * app.platform.jobs.run-now-allowlist} ({@code FQCN#method} entries). The default list holds only
+ * jobs verified idempotent AND guarded by {@code PgAdvisoryJobLock}, so a manual run can neither
+ * double-apply nor race the scheduled run on another replica: the LLM usage rollup (idempotent
+ * upsert of yesterday), demo-session expiry (stamp-guarded), stale pending-upgrade cleanup (clears
+ * stale state) and the model-catalog refresh (replace-not-merge per provider). The run invokes
+ * Spring's own scheduled runnable, so it goes through the bean proxy ({@code @Transactional}
+ * applies) and is tracked like a scheduled run.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
@@ -69,20 +66,26 @@ public class ScheduledJobRegistryService {
     private static final Logger log = LoggerFactory.getLogger(ScheduledJobRegistryService.class);
 
     static final String DEFAULT_ALLOWLIST =
-        "com.agenticai.core.platform.LlmUsageRollupScheduler#rollupYesterday,"
-            + "com.agenticai.core.tenancy.demo.DemoSessionExpiryJob#tick,"
-            + "com.agenticai.core.tenancy.StalePendingUpgradeCleanup#clearStalePendingUpgrades,"
-            + "com.agenticai.core.providers.ProviderModelCatalogService#scheduledRefresh";
+            "com.agenticai.core.platform.LlmUsageRollupScheduler#rollupYesterday,"
+                    + "com.agenticai.core.tenancy.demo.DemoSessionExpiryJob#tick,"
+                    + "com.agenticai.core.tenancy.StalePendingUpgradeCleanup#clearStalePendingUpgrades,"
+                    + "com.agenticai.core.providers.ProviderModelCatalogService#scheduledRefresh";
 
     /** {@code GET /api/platform/jobs} row. {@code id} is the stable {@code beanName#method}. */
-    public record JobView(String id, String bean, String method, String schedule, Instant lastStartedAt,
-                          Instant lastFinishedAt, String lastStatus, String lastError, Long lastDurationMs,
-                          boolean runNowAllowed) {
-    }
+    public record JobView(
+            String id,
+            String bean,
+            String method,
+            String schedule,
+            Instant lastStartedAt,
+            Instant lastFinishedAt,
+            String lastStatus,
+            String lastError,
+            Long lastDurationMs,
+            boolean runNowAllowed) {}
 
     /** One registered task, resolved. */
-    record Entry(String id, String bean, String className, String method, ScheduledTask task) {
-    }
+    record Entry(String id, String bean, String className, String method, ScheduledTask task) {}
 
     private final ObjectProvider<ScheduledTaskHolder> holders;
     private final Function<String, String> beanNameResolver;
@@ -93,17 +96,26 @@ public class ScheduledJobRegistryService {
 
     @Autowired
     public ScheduledJobRegistryService(
-        ObjectProvider<ScheduledTaskHolder> holders,
-        ListableBeanFactory beanFactory,
-        ScheduledJobRunTracker tracker,
-        @Value("${app.platform.jobs.run-now-allowlist:" + DEFAULT_ALLOWLIST + "}") String allowlist
-    ) {
-        this(holders, className -> resolveBeanName(beanFactory, className), tracker, allowlist,
-            TenantAwareExecutors.newVirtualThreadPerTaskExecutor("scheduled-job-registry-service-"));
+            ObjectProvider<ScheduledTaskHolder> holders,
+            ListableBeanFactory beanFactory,
+            ScheduledJobRunTracker tracker,
+            @Value("${app.platform.jobs.run-now-allowlist:" + DEFAULT_ALLOWLIST + "}")
+                    String allowlist) {
+        this(
+                holders,
+                className -> resolveBeanName(beanFactory, className),
+                tracker,
+                allowlist,
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                        "scheduled-job-registry-service-"));
     }
 
-    ScheduledJobRegistryService(ObjectProvider<ScheduledTaskHolder> holders, Function<String, String> beanNameResolver,
-                                ScheduledJobRunTracker tracker, String allowlist, ExecutorService executor) {
+    ScheduledJobRegistryService(
+            ObjectProvider<ScheduledTaskHolder> holders,
+            Function<String, String> beanNameResolver,
+            ScheduledJobRunTracker tracker,
+            String allowlist,
+            ExecutorService executor) {
         this.holders = holders;
         this.beanNameResolver = beanNameResolver;
         this.tracker = tracker;
@@ -122,31 +134,51 @@ public class ScheduledJobRegistryService {
     /**
      * Starts the job asynchronously.
      *
-     * @throws ResponseStatusException 404 unknown id, 403 not on the run-now allowlist,
-     *     409 already running on this replica
+     * @throws ResponseStatusException 404 unknown id, 403 not on the run-now allowlist, 409 already
+     *     running on this replica
      */
     public void runNow(String id, String actor) {
-        Entry entry = entries().stream().filter(e -> e.id().equals(id)).findFirst()
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No scheduled job with id '" + id + "' is registered on this replica."));
+        Entry entry =
+                entries().stream()
+                        .filter(e -> e.id().equals(id))
+                        .findFirst()
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "No scheduled job with id '"
+                                                        + id
+                                                        + "' is registered on this replica."));
         if (!allowlist.contains(entry.className() + "#" + entry.method())) {
-            log.info("platform-ops-audit actor={} action=platform.job.run_now outcome=DENIED job={}", actor, id);
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "Run-now is not allowed for this job (only idempotent, advisory-locked jobs are allowlisted).");
+            log.info(
+                    "platform-ops-audit actor={} action=platform.job.run_now outcome=DENIED job={}",
+                    actor,
+                    id);
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Run-now is not allowed for this job (only idempotent, advisory-locked jobs are allowlisted).");
         }
         RunState state = tracker.get(trackerKey(entry));
         if (state != null && "RUNNING".equals(state.lastStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "This job is already running on this replica.");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "This job is already running on this replica.");
         }
-        log.info("platform-ops-audit actor={} action=platform.job.run_now outcome=STARTED job={}", actor, id);
+        log.info(
+                "platform-ops-audit actor={} action=platform.job.run_now outcome=STARTED job={}",
+                actor,
+                id);
         Runnable runnable = entry.task().getTask().getRunnable();
-        executor.submit(() -> {
-            try {
-                runnable.run();
-            } catch (RuntimeException | Error e) {
-                log.warn("Manual run of scheduled job {} failed: {}", id, ScheduledJobRunTracker.describe(e));
-            }
-        });
+        executor.submit(
+                () -> {
+                    try {
+                        runnable.run();
+                    } catch (RuntimeException | Error e) {
+                        log.warn(
+                                "Manual run of scheduled job {} failed: {}",
+                                id,
+                                ScheduledJobRunTracker.describe(e));
+                    }
+                });
     }
 
     // ---------------------------------------------------------------- internals
@@ -160,7 +192,8 @@ public class ScheduledJobRegistryService {
             String ref = String.valueOf(task.getTask().getRunnable());
             int dot = ref.lastIndexOf('.');
             if (dot <= 0 || dot == ref.length() - 1) {
-                continue; // not a @Scheduled method runnable (programmatic task) - nothing stable to show
+                continue; // not a @Scheduled method runnable (programmatic task) - nothing stable
+                // to show
             }
             String className = stripProxySuffix(ref.substring(0, dot));
             String method = ref.substring(dot + 1);
@@ -204,8 +237,17 @@ public class ScheduledJobRegistryService {
                 started = status == null ? null : outcome.executionTime();
             }
         }
-        return new JobView(e.id(), e.bean(), e.method(), describeSchedule(e.task().getTask()), started, finished,
-            status, error, duration, allowlist.contains(e.className() + "#" + e.method()));
+        return new JobView(
+                e.id(),
+                e.bean(),
+                e.method(),
+                describeSchedule(e.task().getTask()),
+                started,
+                finished,
+                status,
+                error,
+                duration,
+                allowlist.contains(e.className() + "#" + e.method()));
     }
 
     private static String trackerKey(Entry e) {
@@ -228,7 +270,9 @@ public class ScheduledJobRegistryService {
 
     static String resolveBeanName(ListableBeanFactory beanFactory, String className) {
         try {
-            Class<?> type = ClassUtils.forName(className, ScheduledJobRegistryService.class.getClassLoader());
+            Class<?> type =
+                    ClassUtils.forName(
+                            className, ScheduledJobRegistryService.class.getClassLoader());
             String[] names = beanFactory.getBeanNamesForType(type, true, false);
             return names.length == 0 ? null : names[0];
         } catch (ClassNotFoundException | LinkageError e) {
@@ -254,7 +298,10 @@ public class ScheduledJobRegistryService {
         return Set.copyOf(out);
     }
 
-    /** Human-readable schedule: {@code cron 0 20 0 * * *}, {@code fixedRate 5m}, {@code fixedDelay 30s}, {@code once}. */
+    /**
+     * Human-readable schedule: {@code cron 0 20 0 * * *}, {@code fixedRate 5m}, {@code fixedDelay
+     * 30s}, {@code once}.
+     */
     static String describeSchedule(Task task) {
         if (task instanceof CronTask cron) {
             return "cron " + cron.getExpression();

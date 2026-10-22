@@ -22,25 +22,22 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Session revocation for the platform console. Gated by the blanket
- * {@code /api/platform/** -> ROLE_platform-admin} rule.
+ * Session revocation for the platform console. Gated by the blanket {@code /api/platform/** ->
+ * ROLE_platform-admin} rule.
  *
  * <ul>
- *   <li>{@code POST /api/platform/users/{keycloakUserId}/logout} -> {@code {ok:true}}.
- *       The id is the Keycloak user id (the {@code id} of a
- *       {@code GET /api/platform/users} row). Platform operators are refused
- *       with 403 (they are managed in the Keycloak console), which also covers
- *       an operator logging themself out.</li>
- *   <li>{@code POST /api/platform/tenants/{tenantId}/logout-all} ->
- *       {@code {usersLoggedOut}}. {@code tenantId} is the tenant UUID (roster
- *       link) or its schema name. Platform operators who happen to carry the
- *       tenant's {@code tenant_id} attribute are skipped, as is the caller.</li>
+ *   <li>{@code POST /api/platform/users/{keycloakUserId}/logout} -> {@code {ok:true}}. The id is
+ *       the Keycloak user id (the {@code id} of a {@code GET /api/platform/users} row). Platform
+ *       operators are refused with 403 (they are managed in the Keycloak console), which also
+ *       covers an operator logging themself out.
+ *   <li>{@code POST /api/platform/tenants/{tenantId}/logout-all} -> {@code {usersLoggedOut}}.
+ *       {@code tenantId} is the tenant UUID (roster link) or its schema name. Platform operators
+ *       who happen to carry the tenant's {@code tenant_id} attribute are skipped, as is the caller.
  * </ul>
  *
- * <p>Keycloak's logout revokes every SSO session and refresh token at once;
- * already-issued access tokens stay valid until they expire (minutes). Both
- * actions are written to the target tenant's audit log via
- * {@link PlatformTenantAuditor}.
+ * <p>Keycloak's logout revokes every SSO session and refresh token at once; already-issued access
+ * tokens stay valid until they expire (minutes). Both actions are written to the target tenant's
+ * audit log via {@link PlatformTenantAuditor}.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
@@ -55,8 +52,10 @@ public class PlatformSessionController {
     private final TenantRepository tenantRepository;
     private final PlatformTenantAuditor auditor;
 
-    public PlatformSessionController(IdentityUserAdminPort keycloak, TenantRepository tenantRepository,
-                                     PlatformTenantAuditor auditor) {
+    public PlatformSessionController(
+            IdentityUserAdminPort keycloak,
+            TenantRepository tenantRepository,
+            PlatformTenantAuditor auditor) {
         this.keycloak = keycloak;
         this.tenantRepository = tenantRepository;
         this.auditor = auditor;
@@ -71,13 +70,19 @@ public class PlatformSessionController {
             throw new AdminUserNotFoundException(keycloakUserId);
         }
         if (keycloakUserId.equals(actor())
-            || keycloak.getUserRealmRoleNames(keycloakUserId).contains(PLATFORM_ADMIN_ROLE)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "Platform operators' sessions are managed in the Keycloak admin console, not through this API.");
+                || keycloak.getUserRealmRoleNames(keycloakUserId).contains(PLATFORM_ADMIN_ROLE)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Platform operators' sessions are managed in the Keycloak admin console, not through this API.");
         }
         keycloak.logoutUser(keycloakUserId);
-        auditor.record(tenantOf(target), actor(), "platform.user.logout", "keycloak_user", keycloakUserId,
-            "Revoked all sessions of user " + target.username());
+        auditor.record(
+                tenantOf(target),
+                actor(),
+                "platform.user.logout",
+                "keycloak_user",
+                keycloakUserId,
+                "Revoked all sessions of user " + target.username());
         return Map.of("ok", true);
     }
 
@@ -99,25 +104,49 @@ public class PlatformSessionController {
                 loggedOut++;
             } catch (RuntimeException e) {
                 failed++;
-                log.warn("logout-all: could not log out user {} of tenant {} ({})", user.id(), schema,
-                    e.getClass().getSimpleName());
+                log.warn(
+                        "logout-all: could not log out user {} of tenant {} ({})",
+                        user.id(),
+                        schema,
+                        e.getClass().getSimpleName());
             }
         }
-        auditor.record(schema, self, "platform.tenant.logout_all", "tenant", schema,
-            "Revoked all sessions of " + loggedOut + " user(s)" + (failed > 0 ? "; " + failed + " failed" : ""));
+        auditor.record(
+                schema,
+                self,
+                "platform.tenant.logout_all",
+                "tenant",
+                schema,
+                "Revoked all sessions of "
+                        + loggedOut
+                        + " user(s)"
+                        + (failed > 0 ? "; " + failed + " failed" : ""));
         return Map.of("usersLoggedOut", loggedOut);
     }
 
-    /** UUID -> that tenant's schema; otherwise must be an existing tenant's schema name. 404 when neither. */
+    /**
+     * UUID -> that tenant's schema; otherwise must be an existing tenant's schema name. 404 when
+     * neither.
+     */
     private String resolveSchema(String tenantId) {
         String value = tenantId == null ? "" : tenantId.trim();
         try {
             UUID id = UUID.fromString(value);
-            return tenantRepository.findById(id).map(Tenant::getSchemaName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown tenant."));
+            return tenantRepository
+                    .findById(id)
+                    .map(Tenant::getSchemaName)
+                    .orElseThrow(
+                            () ->
+                                    new ResponseStatusException(
+                                            HttpStatus.NOT_FOUND, "Unknown tenant."));
         } catch (IllegalArgumentException notAUuid) {
-            return tenantRepository.findBySchemaName(value).map(Tenant::getSchemaName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown tenant."));
+            return tenantRepository
+                    .findBySchemaName(value)
+                    .map(Tenant::getSchemaName)
+                    .orElseThrow(
+                            () ->
+                                    new ResponseStatusException(
+                                            HttpStatus.NOT_FOUND, "Unknown tenant."));
         }
     }
 
@@ -130,6 +159,8 @@ public class PlatformSessionController {
             return null;
         }
         List<String> values = u.attributes().getOrDefault("tenant_id", List.of());
-        return values.isEmpty() || values.get(0) == null || values.get(0).isBlank() ? null : values.get(0);
+        return values.isEmpty() || values.get(0) == null || values.get(0).isBlank()
+                ? null
+                : values.get(0);
     }
 }

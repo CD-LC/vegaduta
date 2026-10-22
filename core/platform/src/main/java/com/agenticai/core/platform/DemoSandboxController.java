@@ -11,20 +11,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Platform-admin controls and analytics for the anonymous "try it without
- * registering" demo sandbox - {@code /api/platform/demo-settings} and
- * {@code /api/platform/demo-metrics}.
+ * Platform-admin controls and analytics for the anonymous "try it without registering" demo sandbox
+ * - {@code /api/platform/demo-settings} and {@code /api/platform/demo-metrics}.
  *
  * <p>Gated by the same {@code SecurityConfig} {@code
- * .requestMatchers("/api/platform/**").hasAuthority("ROLE_platform-admin")}
- * wildcard every other controller under this prefix inherits (see {@code
- * PlatformController}'s javadoc for that posture) - no separate authorization
- * check in this class.
+ * .requestMatchers("/api/platform/**").hasAuthority("ROLE_platform-admin")} wildcard every other
+ * controller under this prefix inherits (see {@code PlatformController}'s javadoc for that posture)
+ * - no separate authorization check in this class.
  *
- * <p>Its own small controller rather than more methods on {@code
- * PlatformController}, for the reason {@link NewsletterController} states: that
- * class is long-lived and under concurrent edit, and a self-contained feature
- * with its own services gains nothing from living in it.
+ * <p>Its own small controller rather than more methods on {@code PlatformController}, for the
+ * reason {@link NewsletterController} states: that class is long-lived and under concurrent edit,
+ * and a self-contained feature with its own services gains nothing from living in it.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
@@ -35,9 +32,7 @@ public class DemoSandboxController {
     private final DemoSandboxMetricsService metricsService;
 
     public DemoSandboxController(
-        DemoSandboxSettingsService settingsService,
-        DemoSandboxMetricsService metricsService
-    ) {
+            DemoSandboxSettingsService settingsService, DemoSandboxMetricsService metricsService) {
         this.settingsService = settingsService;
         this.metricsService = metricsService;
     }
@@ -49,9 +44,8 @@ public class DemoSandboxController {
     }
 
     /**
-     * Partial update; validated. Returns the full re-read state so the console
-     * renders what the platform actually stored rather than what it hoped it
-     * had sent.
+     * Partial update; validated. Returns the full re-read state so the console renders what the
+     * platform actually stored rather than what it hoped it had sent.
      */
     @PutMapping("/demo-settings")
     public DemoSettingsResponse updateDemoSettings(@RequestBody DemoSettingsUpdateRequest request) {
@@ -60,21 +54,19 @@ public class DemoSandboxController {
     }
 
     /**
-     * The demo funnel - created / live / converted / conversion rate, plus a
-     * daily series and the recent-sandbox operator table.
+     * The demo funnel - created / live / converted / conversion rate, plus a daily series and the
+     * recent-sandbox operator table.
      *
-     * @param days length of the daily series. Clamped rather than rejected: a
-     *     silly {@code ?days=100000} from a hand-edited URL should give the
-     *     operator a chart, not a 400 - there is no correctness risk in a
-     *     read-only window, unlike the settings above where clamping would
-     *     silently store something the operator didn't ask for.
+     * @param days length of the daily series. Clamped rather than rejected: a silly {@code
+     *     ?days=100000} from a hand-edited URL should give the operator a chart, not a 400 - there
+     *     is no correctness risk in a read-only window, unlike the settings above where clamping
+     *     would silently store something the operator didn't ask for.
      * @param limit rows in the recent table, clamped the same way.
      */
     @GetMapping("/demo-metrics")
     public DemoMetricsResponse getDemoMetrics(
-        @RequestParam(name = "days", defaultValue = "30") int days,
-        @RequestParam(name = "limit", defaultValue = "20") int limit
-    ) {
+            @RequestParam(name = "days", defaultValue = "30") int days,
+            @RequestParam(name = "limit", defaultValue = "20") int limit) {
         return metricsService.metrics(clamp(days, 1, 90), clamp(limit, 1, 200));
     }
 

@@ -65,9 +65,9 @@ import reactor.core.publisher.Flux;
  *       LiveKitTokenService#issueToken(String, String, String, String)}) so the {@code voice-agent}
  *       worker (LiveKit Agents, Python - {@code deploy/docker-compose.yml}'s {@code voice-agent}
  *       service, a DIFFERENT session's scope, not this module's) can call back into {@link
- *       com.agenticai.core.agents.core.AgentController#chat} as this same user once it joins the room.
- *       That worker is assumed to register for LiveKit's AUTOMATIC dispatch (no explicit {@code
- *       agent_name}) so it joins every room this endpoint creates with no explicit
+ *       com.agenticai.core.agents.core.AgentController#chat} as this same user once it joins the
+ *       room. That worker is assumed to register for LiveKit's AUTOMATIC dispatch (no explicit
+ *       {@code agent_name}) so it joins every room this endpoint creates with no explicit
  *       AgentDispatchService call needed here - see the {@code voice-agent} compose service's
  *       comment and {@code docs/AGENT-COORDINATION-2026-07-18.md} for the cross-scope flag on that
  *       assumption.
@@ -112,7 +112,8 @@ public class VoiceCallController {
     private final VoiceTurnSpeech turnSpeech;
     private final VoiceTurnStream turnStream;
     private final VoiceTurnTranscriber voiceTurnTranscriber;
-    // Absent on an edition without realtime/recording voice (personal); then nothing can record a room.
+    // Absent on an edition without realtime/recording voice (personal); then nothing can record a
+    // room.
     private final Optional<VoiceCallRoomRegistry> roomRegistry;
 
     // Sarvam TTS quota gate (2026-08-08 audit fix #2): the Sarvam tier checks
@@ -218,7 +219,8 @@ public class VoiceCallController {
             String ttsVoice = request.ttsVoice().trim();
             // Opaque provider-side id (an ElevenLabs voice_id, a Sarvam
             // speaker name) - capped so a junk field can't bloat the JWT.
-            metadata.put("ttsVoice", ttsVoice.length() > 120 ? ttsVoice.substring(0, 120) : ttsVoice);
+            metadata.put(
+                    "ttsVoice", ttsVoice.length() > 120 ? ttsVoice.substring(0, 120) : ttsVoice);
             if (StringUtils.hasText(request.ttsVoiceProvider())) {
                 metadata.put("ttsVoiceProvider", request.ttsVoiceProvider().trim());
             }

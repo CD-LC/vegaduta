@@ -25,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
  * the whole feature is behind {@code app.mcp-server.expose-agents.enabled} (default off). Flipping
  * the switch therefore grants nothing by itself.
  *
- * <p>Who may flip it: anyone with EDITOR access to the resource, checked through the same
- * {@code core/sharing} funnels the console's own settings endpoints use ({@code
+ * <p>Who may flip it: anyone with EDITOR access to the resource, checked through the same {@code
+ * core/sharing} funnels the console's own settings endpoints use ({@code
  * AgentService#requireAccess}, {@code WorkflowService#requireEditorAccess}); a caller who cannot
  * even see the resource gets the usual 404. Reading the state needs VIEWER access.
  *
@@ -39,9 +39,10 @@ public class McpToolExposureService {
 
     private static final Logger log = LoggerFactory.getLogger(McpToolExposureService.class);
 
-    /** Current state of one resource; {@code toolName} is null until the resource was first exposed. */
-    public record State(boolean exposed, String toolName) {
-    }
+    /**
+     * Current state of one resource; {@code toolName} is null until the resource was first exposed.
+     */
+    public record State(boolean exposed, String toolName) {}
 
     private final McpToolExposureRepository repository;
     private final AgentService agentService;
@@ -49,11 +50,10 @@ public class McpToolExposureService {
     private final AuditLogService auditLogService;
 
     public McpToolExposureService(
-        McpToolExposureRepository repository,
-        AgentService agentService,
-        WorkflowService workflowService,
-        AuditLogService auditLogService
-    ) {
+            McpToolExposureRepository repository,
+            AgentService agentService,
+            WorkflowService workflowService,
+            AuditLogService auditLogService) {
         this.repository = repository;
         this.agentService = agentService;
         this.workflowService = workflowService;
@@ -63,9 +63,10 @@ public class McpToolExposureService {
     @Transactional(readOnly = true)
     public State get(McpExposureKind kind, UUID resourceId) {
         requireAccess(kind, resourceId, PermissionLevel.VIEWER);
-        return repository.findByKindAndResourceId(kind, resourceId)
-            .map(row -> new State(row.isExposed(), row.getToolName()))
-            .orElse(new State(false, null));
+        return repository
+                .findByKindAndResourceId(kind, resourceId)
+                .map(row -> new State(row.isExposed(), row.getToolName()))
+                .orElse(new State(false, null));
     }
 
     @Transactional
@@ -89,25 +90,35 @@ public class McpToolExposureService {
                 taken.add(other.getToolName());
             }
             String toolName = McpToolSlugs.allocate(kind, resourceName, resourceId, taken);
-            row = repository.save(new McpToolExposure(kind, resourceId, toolName, true, currentActor()));
+            row =
+                    repository.save(
+                            new McpToolExposure(kind, resourceId, toolName, true, currentActor()));
         }
         recordAudit(kind, resourceId, row.getToolName(), exposed);
         return new State(row.isExposed(), row.getToolName());
     }
 
-    /** Every enabled exposure row of the current tenant (the caller's own grant filter is applied by {@link McpExposedToolCatalog}). */
+    /**
+     * Every enabled exposure row of the current tenant (the caller's own grant filter is applied by
+     * {@link McpExposedToolCatalog}).
+     */
     @Transactional(readOnly = true)
     public List<McpToolExposure> listExposed() {
         return repository.findByExposedTrue();
     }
 
-    /** Returns the resource's display name once the access check passed (404 via ResourceAccessDeniedException otherwise). */
+    /**
+     * Returns the resource's display name once the access check passed (404 via
+     * ResourceAccessDeniedException otherwise).
+     */
     private String requireAccess(McpExposureKind kind, UUID resourceId, PermissionLevel level) {
         return switch (kind) {
             case AGENT -> agentService.requireAccess(resourceId, level).getName();
-            case WORKFLOW -> (level == PermissionLevel.EDITOR
-                ? workflowService.requireEditorAccess(resourceId)
-                : workflowService.requireViewerAccess(resourceId)).getName();
+            case WORKFLOW ->
+                    (level == PermissionLevel.EDITOR
+                                    ? workflowService.requireEditorAccess(resourceId)
+                                    : workflowService.requireViewerAccess(resourceId))
+                            .getName();
         };
     }
 
@@ -115,14 +126,30 @@ public class McpToolExposureService {
         return TenantContext.current().map(TenantContext::getSubject).orElse(null);
     }
 
-    private void recordAudit(McpExposureKind kind, UUID resourceId, String toolName, boolean exposed) {
+    private void recordAudit(
+            McpExposureKind kind, UUID resourceId, String toolName, boolean exposed) {
         try {
-            auditLogService.record(currentActor(), exposed ? "mcpserver.exposure.enabled" : "mcpserver.exposure.disabled",
-                kind == McpExposureKind.AGENT ? "Agent" : "Workflow", resourceId.toString(), AuditOutcome.SUCCESS,
-                "[channel=mcp] " + (exposed ? "Exposed" : "Stopped exposing") + " " + kind.name().toLowerCase()
-                    + " " + resourceId + " as MCP tool '" + toolName + "'.");
+            auditLogService.record(
+                    currentActor(),
+                    exposed ? "mcpserver.exposure.enabled" : "mcpserver.exposure.disabled",
+                    kind == McpExposureKind.AGENT ? "Agent" : "Workflow",
+                    resourceId.toString(),
+                    AuditOutcome.SUCCESS,
+                    "[channel=mcp] "
+                            + (exposed ? "Exposed" : "Stopped exposing")
+                            + " "
+                            + kind.name().toLowerCase()
+                            + " "
+                            + resourceId
+                            + " as MCP tool '"
+                            + toolName
+                            + "'.");
         } catch (RuntimeException auditFailure) {
-            log.warn("Failed to record audit log entry for MCP exposure change on {} {}", kind, resourceId, auditFailure);
+            log.warn(
+                    "Failed to record audit log entry for MCP exposure change on {} {}",
+                    kind,
+                    resourceId,
+                    auditFailure);
         }
     }
 }

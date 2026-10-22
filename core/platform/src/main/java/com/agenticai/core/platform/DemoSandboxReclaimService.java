@@ -115,11 +115,11 @@ public class DemoSandboxReclaimService {
         List<ReclaimableSandbox> rows =
                 jdbc.query(
                         "SELECT t.id, t.name, t.schema_name, t.status, t.created_at, s.last_at FROM"
-                            + " control_plane.tenant t LEFT JOIN (SELECT tenant_id,"
-                            + " MAX(last_activity_at) AS last_at FROM control_plane.demo_session"
-                            + " GROUP BY tenant_id) s ON s.tenant_id = t.id WHERE t.is_demo AND"
-                            + " t.status <> 'ERASED' AND t.schema_name <> ? ORDER BY t.created_at"
-                            + " LIMIT "
+                                + " control_plane.tenant t LEFT JOIN (SELECT tenant_id,"
+                                + " MAX(last_activity_at) AS last_at FROM control_plane.demo_session"
+                                + " GROUP BY tenant_id) s ON s.tenant_id = t.id WHERE t.is_demo AND"
+                                + " t.status <> 'ERASED' AND t.schema_name <> ? ORDER BY t.created_at"
+                                + " LIMIT "
                                 + MAX_LISTED,
                         (rs, i) ->
                                 new ReclaimableSandbox(

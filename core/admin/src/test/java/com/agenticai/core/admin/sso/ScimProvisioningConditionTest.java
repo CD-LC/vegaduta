@@ -12,10 +12,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * {@code /scim/v2/**} is {@code permitAll}; the only thing behind it is a {@code vdscim_*} bearer token that
- * {@code TenantSsoController} (Keycloak-only) mints. On a personal edition ({@code app.edition.tier=personal})
- * no token can exist, so the controller must not be registered at all and {@code /scim/v2/**} answers 404.
- * Lite, full and an unset edition keep the controller exactly as before, whatever the identity provider is.
+ * {@code /scim/v2/**} is {@code permitAll}; the only thing behind it is a {@code vdscim_*} bearer
+ * token that {@code TenantSsoController} (Keycloak-only) mints. On a personal edition ({@code
+ * app.edition.tier=personal}) no token can exist, so the controller must not be registered at all
+ * and {@code /scim/v2/**} answers 404. Lite, full and an unset edition keep the controller exactly
+ * as before, whatever the identity provider is.
  */
 class ScimProvisioningConditionTest {
 
@@ -54,10 +55,13 @@ class ScimProvisioningConditionTest {
     void presentOnLiteAndFullWhateverTheIdentityProvider() {
         for (String tier : new String[] {"lite", "full"}) {
             for (String provider : new String[] {"local", "keycloak", "auth0", ""}) {
-                runner().withPropertyValues("app.edition.tier=" + tier, "app.identity.provider=" + provider)
-                        .run(ctx -> assertThat(ctx)
-                                .as("tier=%s provider=%s", tier, provider)
-                                .hasSingleBean(ScimProvisioningController.class));
+                runner().withPropertyValues(
+                                "app.edition.tier=" + tier, "app.identity.provider=" + provider)
+                        .run(
+                                ctx ->
+                                        assertThat(ctx)
+                                                .as("tier=%s provider=%s", tier, provider)
+                                                .hasSingleBean(ScimProvisioningController.class));
             }
         }
     }
@@ -72,7 +76,8 @@ class ScimProvisioningConditionTest {
     @Test
     void anExplicitFeatureOverrideCanSwitchItBackOnForPersonal() {
         runner().withPropertyValues(
-                        "app.edition.tier=personal", "app.edition.features.operator-console.enabled=true")
+                        "app.edition.tier=personal",
+                        "app.edition.features.operator-console.enabled=true")
                 .run(ctx -> assertThat(ctx).hasSingleBean(ScimProvisioningController.class));
     }
 

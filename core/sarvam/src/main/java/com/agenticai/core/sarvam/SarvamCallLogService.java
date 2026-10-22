@@ -10,17 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Persists one {@link SarvamCallLog} row per real call made by any of
- * Stage 3's five capability clients. Called directly by those clients
- * (not via an advisor chain the way {@code LlmMetricsAdvisor} wraps chat
- * calls - these clients are plain injectable services, not {@code
- * ChatClient}s, so there's no advisor seam to hook into; each client calls
- * {@link #record} itself in a {@code finally} block around its HTTP call).
+ * Persists one {@link SarvamCallLog} row per real call made by any of Stage 3's five capability
+ * clients. Called directly by those clients (not via an advisor chain the way {@code
+ * LlmMetricsAdvisor} wraps chat calls - these clients are plain injectable services, not {@code
+ * ChatClient}s, so there's no advisor seam to hook into; each client calls {@link #record} itself
+ * in a {@code finally} block around its HTTP call).
  *
- * <p>A logging failure here must never break the real translate/transcribe/
- * synthesize call that triggered it - same "a missing metric never breaks
- * the real feature" rule {@link SarvamCallLog}'s chat-log counterpart,
- * {@code LlmCallLogService#record}, already follows.
+ * <p>A logging failure here must never break the real translate/transcribe/ synthesize call that
+ * triggered it - same "a missing metric never breaks the real feature" rule {@link SarvamCallLog}'s
+ * chat-log counterpart, {@code LlmCallLogService#record}, already follows.
  */
 @Service
 @ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
@@ -36,17 +34,21 @@ public class SarvamCallLogService {
 
     @Transactional
     public void record(
-        SarvamCallCapability capability,
-        String model,
-        boolean success,
-        String errorMessage,
-        long latencyMs,
-        Instant startedAt
-    ) {
+            SarvamCallCapability capability,
+            String model,
+            boolean success,
+            String errorMessage,
+            long latencyMs,
+            Instant startedAt) {
         try {
-            repository.save(new SarvamCallLog(capability, model, success, errorMessage, latencyMs, startedAt));
+            repository.save(
+                    new SarvamCallLog(
+                            capability, model, success, errorMessage, latencyMs, startedAt));
         } catch (Exception e) {
-            log.warn("Failed to persist SarvamCallLog for capability {} (call itself already completed) - {}", capability, e.getMessage());
+            log.warn(
+                    "Failed to persist SarvamCallLog for capability {} (call itself already completed) - {}",
+                    capability,
+                    e.getMessage());
         }
     }
 

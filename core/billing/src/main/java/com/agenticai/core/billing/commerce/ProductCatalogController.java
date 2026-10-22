@@ -27,12 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Tenant member surface for the product catalog ({@code
- * /api/tenant/commerce/products}) - the rows the public feed ({@link
- * ProductFeedController}) publishes when {@code published} is set. Falls
- * through to {@code SecurityConfig}'s {@code anyRequest().authenticated()};
- * tenant scoping comes exclusively from {@link TenantContext}, never a
- * request field - same posture as {@code CheckoutSessionController}.
+ * Tenant member surface for the product catalog ({@code /api/tenant/commerce/products}) - the rows
+ * the public feed ({@link ProductFeedController}) publishes when {@code published} is set. Falls
+ * through to {@code SecurityConfig}'s {@code anyRequest().authenticated()}; tenant scoping comes
+ * exclusively from {@link TenantContext}, never a request field - same posture as {@code
+ * CheckoutSessionController}.
  */
 @RestController
 @Profile("security")
@@ -40,47 +39,67 @@ import org.springframework.web.server.ResponseStatusException;
 @ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class ProductCatalogController {
 
-    /** Wire shape - paise plus a display-only major amount, same convention as CheckoutSessionResponse. */
+    /**
+     * Wire shape - paise plus a display-only major amount, same convention as
+     * CheckoutSessionResponse.
+     */
     public record ProductResponse(
-        UUID id,
-        String sku,
-        String name,
-        String description,
-        String category,
-        long pricePaise,
-        BigDecimal price,
-        String currency,
-        String availability,
-        String imageUrl,
-        String productUrl,
-        boolean published,
-        Instant createdAt,
-        Instant updatedAt
-    ) {
+            UUID id,
+            String sku,
+            String name,
+            String description,
+            String category,
+            long pricePaise,
+            BigDecimal price,
+            String currency,
+            String availability,
+            String imageUrl,
+            String productUrl,
+            boolean published,
+            Instant createdAt,
+            Instant updatedAt) {
         static ProductResponse from(CommerceProduct p) {
             return new ProductResponse(
-                p.id(), p.sku(), p.name(), p.description(), p.category(), p.pricePaise(), p.priceMajor(),
-                p.currency(), p.availability().wireValue(), p.imageUrl(), p.productUrl(), p.published(),
-                p.createdAt(), p.updatedAt()
-            );
+                    p.id(),
+                    p.sku(),
+                    p.name(),
+                    p.description(),
+                    p.category(),
+                    p.pricePaise(),
+                    p.priceMajor(),
+                    p.currency(),
+                    p.availability().wireValue(),
+                    p.imageUrl(),
+                    p.productUrl(),
+                    p.published(),
+                    p.createdAt(),
+                    p.updatedAt());
         }
     }
 
     public record ProductRequest(
-        @Size(max = 128) String sku,
-        @NotBlank @Size(max = 200) String name,
-        @Size(max = 4000) String description,
-        @Size(max = 64) String category,
-        @Min(0) long pricePaise,
-        @Size(max = 3) String currency,
-        ProductAvailability availability,
-        @Size(max = 1024) String imageUrl,
-        @Size(max = 1024) String productUrl,
-        boolean published
-    ) {
+            @Size(max = 128) String sku,
+            @NotBlank @Size(max = 200) String name,
+            @Size(max = 4000) String description,
+            @Size(max = 64) String category,
+            @Min(0) long pricePaise,
+            @Size(max = 3) String currency,
+            ProductAvailability availability,
+            @Size(max = 1024) String imageUrl,
+            @Size(max = 1024) String productUrl,
+            boolean published) {
         ProductUpsert toUpsert() {
             return new ProductUpsert(
-                sku, name, description, category, pricePaise, currency, availability, imageUrl, productUrl, published);
+                    sku,
+                    name,
+                    description,
+                    category,
+                    pricePaise,
+                    currency,
+                    availability,
+                    imageUrl,
+                    productUrl,
+                    published);
         }
     }
 
@@ -96,28 +115,40 @@ public class ProductCatalogController {
     }
 
     @PutMapping("/{id}")
-    public ProductResponse update(@PathVariable UUID id, @Valid @RequestBody ProductRequest request) {
+    public ProductResponse update(
+            @PathVariable UUID id, @Valid @RequestBody ProductRequest request) {
         return service.update(currentTenantId(), id, request.toUpsert())
-            .map(ProductResponse::from)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product for this tenant"));
+                .map(ProductResponse::from)
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND, "No such product for this tenant"));
     }
 
     @DeleteMapping("/{id}")
     public org.springframework.http.ResponseEntity<Void> delete(@PathVariable UUID id) {
         if (!service.delete(currentTenantId(), id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product for this tenant");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "No such product for this tenant");
         }
         return org.springframework.http.ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public List<ProductResponse> list(@RequestParam(name = "limit", defaultValue = "200") int limit) {
-        return service.listForTenant(currentTenantId(), limit).stream().map(ProductResponse::from).toList();
+    public List<ProductResponse> list(
+            @RequestParam(name = "limit", defaultValue = "200") int limit) {
+        return service.listForTenant(currentTenantId(), limit).stream()
+                .map(ProductResponse::from)
+                .toList();
     }
 
     private static String currentTenantId() {
-        return TenantContext.current().map(TenantContext::getTenantId)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED, "No tenant context - authentication required"));
+        return TenantContext.current()
+                .map(TenantContext::getTenantId)
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.UNAUTHORIZED,
+                                        "No tenant context - authentication required"));
     }
 }

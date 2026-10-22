@@ -5,17 +5,6 @@ import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,6 +14,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 /**
  * Platform-admin "Newsletter / news broadcast" feature - a super-admin writes a subject + HTML body
@@ -62,10 +60,10 @@ public class NewsletterService {
 
     private static final String RECIPIENTS_SQL =
             "SELECT t.id AS tenant_id, t.name AS tenant_name, t.news_opt_in AS news_opt_in,"
-                + " au.email AS admin_email FROM control_plane.tenant t LEFT JOIN LATERAL (  "
-                + " SELECT email FROM control_plane.app_user   WHERE tenant_id = t.id AND role ="
-                + " 'TENANT_ADMIN'   ORDER BY created_at ASC LIMIT 1 ) au ON true WHERE t.status ="
-                + " 'ACTIVE' ORDER BY t.name";
+                    + " au.email AS admin_email FROM control_plane.tenant t LEFT JOIN LATERAL (  "
+                    + " SELECT email FROM control_plane.app_user   WHERE tenant_id = t.id AND role ="
+                    + " 'TENANT_ADMIN'   ORDER BY created_at ASC LIMIT 1 ) au ON true WHERE t.status ="
+                    + " 'ACTIVE' ORDER BY t.name";
 
     private static final String INSERT_CAMPAIGN_SQL =
             "INSERT INTO control_plane.newsletter_campaign (id, subject, sent_count, created_at,"

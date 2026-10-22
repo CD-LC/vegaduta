@@ -18,10 +18,10 @@ import org.springframework.core.env.StandardEnvironment;
 
 /**
  * The agent-to-agent server, client and directory are one edition feature ({@link
- * EditionFeature#A2A_DIRECTORY}): on the personal tier none of their beans exists and the context still
- * starts; on every other tier, and whenever no edition property is set, all of them are registered as
- * before. Registration only evaluates the conditions, so no bean is instantiated and no database or Redis
- * is needed.
+ * EditionFeature#A2A_DIRECTORY}): on the personal tier none of their beans exists and the context
+ * still starts; on every other tier, and whenever no edition property is set, all of them are
+ * registered as before. Registration only evaluates the conditions, so no bean is instantiated and
+ * no database or Redis is needed.
  */
 class A2aEditionGateTest {
 
@@ -57,7 +57,8 @@ class A2aEditionGateTest {
                             c ->
                                     Arrays.stream(ctx.getBeanDefinitionNames())
                                             .map(ctx::getBeanDefinition)
-                                            .anyMatch(d -> c.getName().equals(d.getBeanClassName())))
+                                            .anyMatch(
+                                                    d -> c.getName().equals(d.getBeanClassName())))
                     .count();
         }
     }
@@ -65,9 +66,12 @@ class A2aEditionGateTest {
     @Test
     void everyA2aBeanCarriesTheDirectoryFeatureGate() {
         for (Class<?> bean : A2A_BEANS) {
-            ConditionalOnEditionFeature gate = bean.getAnnotation(ConditionalOnEditionFeature.class);
+            ConditionalOnEditionFeature gate =
+                    bean.getAnnotation(ConditionalOnEditionFeature.class);
             assertThat(gate).as(bean.getSimpleName()).isNotNull();
-            assertThat(gate.value()).as(bean.getSimpleName()).isEqualTo(EditionFeature.A2A_DIRECTORY);
+            assertThat(gate.value())
+                    .as(bean.getSimpleName())
+                    .isEqualTo(EditionFeature.A2A_DIRECTORY);
         }
     }
 
@@ -106,7 +110,9 @@ class A2aEditionGateTest {
                         context -> {
                             assertThat(context).hasNotFailed();
                             for (Class<?> bean : A2A_BEANS) {
-                                assertThat(context.getBeanNamesForType(bean)).as(bean.getSimpleName()).isEmpty();
+                                assertThat(context.getBeanNamesForType(bean))
+                                        .as(bean.getSimpleName())
+                                        .isEmpty();
                             }
                         });
     }

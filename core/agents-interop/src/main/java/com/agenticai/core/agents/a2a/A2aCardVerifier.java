@@ -3,13 +3,13 @@ package com.agenticai.core.agents.a2a;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.math.BigInteger;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -33,36 +33,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * The inbound half of signed Agent Cards - what the cross-tenant marketplace
- * consumes. {@link A2aCardSigningService} signs OUR cards; this verifies
- * THEIRS: fetch a card from a remote deployment, resolve the publisher's JWKS
- * (the card's {@code jwks_uri} if advertised, else
- * {@code {origin}/.well-known/jwks.json} - the path this platform itself
- * serves), match the signature's {@code kid}, and re-verify the detached JWS.
+ * The inbound half of signed Agent Cards - what the cross-tenant marketplace consumes. {@link
+ * A2aCardSigningService} signs OUR cards; this verifies THEIRS: fetch a card from a remote
+ * deployment, resolve the publisher's JWKS (the card's {@code jwks_uri} if advertised, else {@code
+ * {origin}/.well-known/jwks.json} - the path this platform itself serves), match the signature's
+ * {@code kid}, and re-verify the detached JWS.
  *
- * <p><b>Trust boundary.</b> Verification proves the card was signed by whoever
- * holds the key the SAME ORIGIN's JWKS publishes - that is origin-bound proof
- * of integrity, not independent attestation (a malicious origin can sign its
- * own lies). A marketplace layer that wants more must pin trusted kids per
- * publisher on top of this. Documented rather than hidden: {@link
- * VerificationResult#verified()} true means "signed and unmodified, by a key
- * this origin claims", full stop.
+ * <p><b>Trust boundary.</b> Verification proves the card was signed by whoever holds the key the
+ * SAME ORIGIN's JWKS publishes - that is origin-bound proof of integrity, not independent
+ * attestation (a malicious origin can sign its own lies). A marketplace layer that wants more must
+ * pin trusted kids per publisher on top of this. Documented rather than hidden: {@link
+ * VerificationResult#verified()} true means "signed and unmodified, by a key this origin claims",
+ * full stop.
  *
- * <p><b>URL policy.</b> HTTPS required for remote cards; plain HTTP is
- * accepted only for loopback (dev/self-test). The URL is operator-supplied
- * config, not model/tool input - same posture as {@code
- * HttpWebTaskBackend}'s provider URL. Timeouts are short (10s) because card
- * verification is a synchronous part of a marketplace listing check.
+ * <p><b>URL policy.</b> HTTPS required for remote cards; plain HTTP is accepted only for loopback
+ * (dev/self-test). The URL is operator-supplied config, not model/tool input - same posture as
+ * {@code HttpWebTaskBackend}'s provider URL. Timeouts are short (10s) because card verification is
+ * a synchronous part of a marketplace listing check.
  *
- * <p><b>SSRF (security review SEC-048).</b> The production fetcher is built
- * on {@code SafeHttpClients}: every URL (card and JWKS) is validated by the
- * shared {@link SsrfGuard}, the socket goes only to an address validated in
- * the same DNS lookup, no proxy is used and redirects are NOT followed (a 3xx
- * is a fetch failure). The card's {@code jwks_uri} is attacker-chosen content,
- * so it must be same-origin with the card URL or an https URL that passes
- * the guard's host rules; the fetcher then applies the full guard to it. The
- * loopback dev path therefore only works when the operator lists the host in
- * {@code app.security.outbound.allowed-private-hosts}.
+ * <p><b>SSRF (security review SEC-048).</b> The production fetcher is built on {@code
+ * SafeHttpClients}: every URL (card and JWKS) is validated by the shared {@link SsrfGuard}, the
+ * socket goes only to an address validated in the same DNS lookup, no proxy is used and redirects
+ * are NOT followed (a 3xx is a fetch failure). The card's {@code jwks_uri} is attacker-chosen
+ * content, so it must be same-origin with the card URL or an https URL that passes the guard's host
+ * rules; the fetcher then applies the full guard to it. The loopback dev path therefore only works
+ * when the operator lists the host in {@code app.security.outbound.allowed-private-hosts}.
  */
 @ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
@@ -73,10 +68,9 @@ public class A2aCardVerifier {
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
 
     /**
-     * {@code verified} = at least one signature entry verified against a JWKS
-     * key; {@code kid} = the key that verified (null when none did);
-     * {@code detail} = human-readable failure/skip reason for logs and admin
-     * surfaces - never an exception message blob.
+     * {@code verified} = at least one signature entry verified against a JWKS key; {@code kid} =
+     * the key that verified (null when none did); {@code detail} = human-readable failure/skip
+     * reason for logs and admin surfaces - never an exception message blob.
      */
     public record VerificationResult(boolean verified, String kid, String detail) {}
 
@@ -110,8 +104,8 @@ public class A2aCardVerifier {
     }
 
     /**
-     * SEC-048: the production fetcher. Guard-validated, address-pinned,
-     * proxy-free, redirects off, body capped. Package-private for tests.
+     * SEC-048: the production fetcher. Guard-validated, address-pinned, proxy-free, redirects off,
+     * body capped. Package-private for tests.
      */
     static Fetcher guardedFetcher(SsrfGuard guard) {
         CloseableHttpClient http = SafeHttpClients.create(guard, TIMEOUT, TIMEOUT, false);
@@ -128,7 +122,10 @@ public class A2aCardVerifier {
             try {
                 int status = response.getCode();
                 if (status >= 300) {
-                    throw new IOException("HTTP " + status + (status < 400 ? " (redirects are not followed)" : ""));
+                    throw new IOException(
+                            "HTTP "
+                                    + status
+                                    + (status < 400 ? " (redirects are not followed)" : ""));
                 }
                 HttpEntity entity = response.getEntity();
                 if (entity == null) {
@@ -151,9 +148,9 @@ public class A2aCardVerifier {
     private static final int MAX_BODY_BYTES = 1024 * 1024;
 
     /**
-     * SEC-048: a card-supplied {@code jwks_uri} must be same-origin with the
-     * card, or an https URL that passes the guard's (DNS-free) host rules.
-     * The fetcher then runs the full, resolving guard on it. Null = allowed.
+     * SEC-048: a card-supplied {@code jwks_uri} must be same-origin with the card, or an https URL
+     * that passes the guard's (DNS-free) host rules. The fetcher then runs the full, resolving
+     * guard on it. Null = allowed.
      */
     String jwksUriRefusal(URI cardUri, String jwksUrl) {
         URI jwks;
@@ -177,9 +174,8 @@ public class A2aCardVerifier {
     }
 
     /**
-     * Verifies a remote card end-to-end. Never throws - every failure (fetch,
-     * parse, missing JWKS, bad signature) returns {@code verified=false} with a
-     * {@code detail} an operator can act on.
+     * Verifies a remote card end-to-end. Never throws - every failure (fetch, parse, missing JWKS,
+     * bad signature) returns {@code verified=false} with a {@code detail} an operator can act on.
      */
     @SuppressWarnings("unchecked")
     public VerificationResult verifyRemote(String cardUrl) {
@@ -190,27 +186,31 @@ public class A2aCardVerifier {
             return new VerificationResult(false, null, "card URL is not parseable");
         }
         String scheme = uri.getScheme();
-        boolean loopback = uri.getHost() != null
-            && (uri.getHost().equals("localhost") || uri.getHost().equals("127.0.0.1") || uri.getHost().equals("::1"));
+        boolean loopback =
+                uri.getHost() != null
+                        && (uri.getHost().equals("localhost")
+                                || uri.getHost().equals("127.0.0.1")
+                                || uri.getHost().equals("::1"));
         if (!"https".equalsIgnoreCase(scheme) && !("http".equalsIgnoreCase(scheme) && loopback)) {
-            return new VerificationResult(false, null, "card URL must be https (http allowed only for loopback)");
+            return new VerificationResult(
+                    false, null, "card URL must be https (http allowed only for loopback)");
         }
 
         Map<String, Object> card;
         try {
             card = MAPPER.readValue(fetcher.get(cardUrl), Map.class);
         } catch (Exception e) {
-            return new VerificationResult(false, null, "could not fetch/parse card: " + e.getMessage());
+            return new VerificationResult(
+                    false, null, "could not fetch/parse card: " + e.getMessage());
         }
         return verifyCard(card, uri, fetcher);
     }
 
     /**
-     * Verifies an ALREADY-FETCHED card (the outbound A2A client fetches the card
-     * itself through its SSRF guard, then must verify exactly the bytes it will
-     * act on - re-fetching would open a swap window). {@code jwksFetcher}
-     * retrieves the JWKS, which may live at a card-advertised {@code jwks_uri}
-     * the caller must therefore be able to police.
+     * Verifies an ALREADY-FETCHED card (the outbound A2A client fetches the card itself through its
+     * SSRF guard, then must verify exactly the bytes it will act on - re-fetching would open a swap
+     * window). {@code jwksFetcher} retrieves the JWKS, which may live at a card-advertised {@code
+     * jwks_uri} the caller must therefore be able to police.
      */
     @SuppressWarnings("unchecked")
     VerificationResult verifyCard(Map<String, Object> card, URI uri, Fetcher jwksFetcher) {
@@ -245,7 +245,8 @@ public class A2aCardVerifier {
         try {
             jwks = MAPPER.readValue(jwksFetcher.get(jwksUrl), Map.class);
         } catch (Exception e) {
-            return new VerificationResult(false, kid, "could not fetch/parse JWKS at " + jwksUrl + ": " + e.getMessage());
+            return new VerificationResult(
+                    false, kid, "could not fetch/parse JWKS at " + jwksUrl + ": " + e.getMessage());
         }
         Object keys = jwks.get("keys");
         if (!(keys instanceof List<?> keyList)) {
@@ -258,14 +259,16 @@ public class A2aCardVerifier {
             if (kid != null && !kid.equals(jwk.get("kid"))) {
                 continue;
             }
-            if (!"OKP".equals(jwk.get("kty")) || !"Ed25519".equals(jwk.get("crv"))
-                || !(jwk.get("x") instanceof String x)) {
+            if (!"OKP".equals(jwk.get("kty"))
+                    || !"Ed25519".equals(jwk.get("crv"))
+                    || !(jwk.get("x") instanceof String x)) {
                 continue;
             }
             try {
                 PublicKey publicKey = okpToPublicKey(x);
                 if (signingService.verify(card, publicKey)) {
-                    return new VerificationResult(true, (String) jwk.get("kid"), "verified against " + jwksUrl);
+                    return new VerificationResult(
+                            true, (String) jwk.get("kid"), "verified against " + jwksUrl);
                 }
             } catch (GeneralSecurityException e) {
                 log.debug("Skipping malformed Ed25519 JWK (kid={})", jwk.get("kid"), e);
@@ -289,7 +292,10 @@ public class A2aCardVerifier {
         for (int i = 0; i < 32; i++) {
             reversed[i] = x[31 - i];
         }
-        return KeyFactory.getInstance("Ed25519").generatePublic(
-            new EdECPublicKeySpec(NamedParameterSpec.ED25519, new EdECPoint(xOdd, new BigInteger(1, reversed))));
+        return KeyFactory.getInstance("Ed25519")
+                .generatePublic(
+                        new EdECPublicKeySpec(
+                                NamedParameterSpec.ED25519,
+                                new EdECPoint(xOdd, new BigInteger(1, reversed))));
     }
 }

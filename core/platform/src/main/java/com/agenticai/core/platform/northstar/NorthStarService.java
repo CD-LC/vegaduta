@@ -35,29 +35,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Credible, measurable "number one" metrics for the platform owner: weekly
- * active users who completed an agent run, run volume and success rate, how
- * much work happens without a human present, time to a first successful run,
- * channel-delivered runs and eval reliability (pass^k). Aggregates only - see
- * {@link NorthStarAggregator} for the 5-user suppression rule.
+ * Credible, measurable "number one" metrics for the platform owner: weekly active users who
+ * completed an agent run, run volume and success rate, how much work happens without a human
+ * present, time to a first successful run, channel-delivered runs and eval reliability (pass^k).
+ * Aggregates only - see {@link NorthStarAggregator} for the 5-user suppression rule.
  *
- * <p><b>What counts as a run.</b> Only runs recorded against a user identity
- * in a durable table: terminal {@code agent_job} rows and terminal {@code
- * quick_task_run} rows. Interactive chat turns are NOT counted - no table
- * records which user sent a chat turn ({@code llm_call_log} has an agent and a
- * session but no user) - and the response says so in {@code notes} rather than
- * estimating them.
+ * <p><b>What counts as a run.</b> Only runs recorded against a user identity in a durable table:
+ * terminal {@code agent_job} rows and terminal {@code quick_task_run} rows. Interactive chat turns
+ * are NOT counted - no table records which user sent a chat turn ({@code llm_call_log} has an agent
+ * and a session but no user) - and the response says so in {@code notes} rather than estimating
+ * them.
  *
- * <p><b>How it reads.</b> Same discipline as {@code FleetHealthService}: walk
- * every ACTIVE non-demo tenant, bind that tenant's schema, run a few bounded
- * grouped queries (each with a JDBC timeout), and merge. A query that fails in
- * one tenant (timeout, missing table, error) is counted per source and
- * reported in {@code notes}; it never turns into a silent zero and never
- * aborts the sweep. A total time budget stops the sweep early and says so.
+ * <p><b>How it reads.</b> Same discipline as {@code FleetHealthService}: walk every ACTIVE non-demo
+ * tenant, bind that tenant's schema, run a few bounded grouped queries (each with a JDBC timeout),
+ * and merge. A query that fails in one tenant (timeout, missing table, error) is counted per source
+ * and reported in {@code notes}; it never turns into a silent zero and never aborts the sweep. A
+ * total time budget stops the sweep early and says so.
  *
- * <p><b>Cost control.</b> The finished response is cached in memory (a single
- * entry, TTL {@code app.platform.north-star.cache-ttl-seconds}); calls are
- * serialised, so a stampede of dashboard loads runs the sweep once.
+ * <p><b>Cost control.</b> The finished response is cached in memory (a single entry, TTL {@code
+ * app.platform.north-star.cache-ttl-seconds}); calls are serialised, so a stampede of dashboard
+ * loads runs the sweep once.
  */
 @ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
@@ -94,8 +91,7 @@ public class NorthStarService {
         }
     }
 
-    private record CacheEntry(int weeks, Instant computedAt, NorthStarResponse response) {
-    }
+    private record CacheEntry(int weeks, Instant computedAt, NorthStarResponse response) {}
 
     private final TenantRepository tenantRepository;
     private final NorthStarQueries queries;
@@ -103,18 +99,19 @@ public class NorthStarService {
     private final long cacheTtlSeconds;
     private final long totalBudgetSeconds;
 
-    /** Package-private and non-final so tests can pin time; production uses the system UTC clock. */
+    /**
+     * Package-private and non-final so tests can pin time; production uses the system UTC clock.
+     */
     Clock clock = Clock.systemUTC();
 
     private CacheEntry cache;
 
     public NorthStarService(
-        TenantRepository tenantRepository,
-        NorthStarQueries queries,
-        @Value("${app.platform.north-star.enabled:true}") boolean enabled,
-        @Value("${app.platform.north-star.cache-ttl-seconds:3600}") long cacheTtlSeconds,
-        @Value("${app.platform.north-star.total-budget-seconds:90}") long totalBudgetSeconds
-    ) {
+            TenantRepository tenantRepository,
+            NorthStarQueries queries,
+            @Value("${app.platform.north-star.enabled:true}") boolean enabled,
+            @Value("${app.platform.north-star.cache-ttl-seconds:3600}") long cacheTtlSeconds,
+            @Value("${app.platform.north-star.total-budget-seconds:90}") long totalBudgetSeconds) {
         this.tenantRepository = tenantRepository;
         this.queries = queries;
         this.enabled = enabled;
@@ -123,20 +120,23 @@ public class NorthStarService {
     }
 
     /**
-     * The north-star metrics for the trailing {@code weeks} ISO weeks (UTC,
-     * including the current partial week). Serves the cached entry when it is
-     * younger than the TTL and was computed for the same {@code weeks}.
+     * The north-star metrics for the trailing {@code weeks} ISO weeks (UTC, including the current
+     * partial week). Serves the cached entry when it is younger than the TTL and was computed for
+     * the same {@code weeks}.
      */
     public synchronized NorthStarResponse northStar(int weeks) {
         if (!enabled) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "North-star metrics are disabled.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "North-star metrics are disabled.");
         }
         if (weeks < MIN_WEEKS || weeks > MAX_WEEKS) {
             throw new IllegalArgumentException("weeks must be " + MIN_WEEKS + ".." + MAX_WEEKS);
         }
         Instant now = clock.instant();
-        if (cache != null && cache.weeks() == weeks && cacheTtlSeconds > 0
-            && now.isBefore(cache.computedAt().plusSeconds(cacheTtlSeconds))) {
+        if (cache != null
+                && cache.weeks() == weeks
+                && cacheTtlSeconds > 0
+                && now.isBefore(cache.computedAt().plusSeconds(cacheTtlSeconds))) {
             return cache.response();
         }
         NorthStarResponse fresh = compute(weeks, now);
@@ -150,7 +150,8 @@ public class NorthStarService {
         final List<RunBucket> runs = new ArrayList<>();
         final List<FirstRun> firstRuns = new ArrayList<>();
         final List<PassKRow> passK = new ArrayList<>();
-        final EnumMap<Source, int[]> failures = new EnumMap<>(Source.class); // [missing, timeout, error]
+        final EnumMap<Source, int[]> failures =
+                new EnumMap<>(Source.class); // [missing, timeout, error]
 
         void fail(Source source, NorthStarSqlFailure kind) {
             int[] f = failures.computeIfAbsent(source, k -> new int[3]);
@@ -184,47 +185,83 @@ public class NorthStarService {
         try {
             signups = queries.signupsByWeek(since);
         } catch (RuntimeException e) {
-            log.warn("North-star: signup counts unavailable ({})", NorthStarSqlFailure.classify(e), e);
+            log.warn(
+                    "North-star: signup counts unavailable ({})",
+                    NorthStarSqlFailure.classify(e),
+                    e);
         }
 
         List<WeekPoint> weekPoints = NorthStarAggregator.weekly(data.runs, weekStarts, currentWeek);
         List<ChannelPoint> channels = NorthStarAggregator.channels(data.runs, weekStarts);
-        List<CohortPoint> cohorts = NorthStarAggregator.cohorts(data.firstRuns, signups, weekStarts);
+        List<CohortPoint> cohorts =
+                NorthStarAggregator.cohorts(data.firstRuns, signups, weekStarts);
         Double median = NorthStarAggregator.overallMedianMinutes(data.firstRuns, weekStarts);
         PassK passK = NorthStarAggregator.passK(data.passK);
         List<LanguagePoint> languages = List.of();
 
         List<SourceHealth> health = new ArrayList<>();
-        data.failures.forEach((source, f) -> health.add(new SourceHealth(source, f[0], f[1], f[2])));
+        data.failures.forEach(
+                (source, f) -> health.add(new SourceHealth(source, f[0], f[1], f[2])));
 
-        List<String> notes = buildNotes(
-            health, all.size(), scanned, skipped, capped,
-            NorthStarAggregator.countSuppressed(weekPoints, cohorts, channels, passK),
-            median, data.firstRuns.isEmpty(), passK, signups != null);
+        List<String> notes =
+                buildNotes(
+                        health,
+                        all.size(),
+                        scanned,
+                        skipped,
+                        capped,
+                        NorthStarAggregator.countSuppressed(weekPoints, cohorts, channels, passK),
+                        median,
+                        data.firstRuns.isEmpty(),
+                        passK,
+                        signups != null);
 
-        return new NorthStarResponse(now, weekPoints, median, cohorts, languages, channels, passK,
-            new Coverage(all.size(), scanned, skipped, capped || skipped > 0), notes);
+        return new NorthStarResponse(
+                now,
+                weekPoints,
+                median,
+                cohorts,
+                languages,
+                channels,
+                passK,
+                new Coverage(all.size(), scanned, skipped, capped || skipped > 0),
+                notes);
     }
 
     private void scanTenant(Tenant tenant, Instant since, Collected data) {
         String schema = tenant.getSchemaName();
-        asTenant(schema, () -> {
-            data.runs.addAll(guard(Source.JOBS, data, schema, () -> queries.jobRuns(schema, since)));
-            data.runs.addAll(guard(Source.QUICK_TASKS, data, schema, () -> queries.quickTaskRuns(schema, since)));
-            data.firstRuns.addAll(guard(Source.FIRST_RUNS, data, schema,
-                () -> queries.firstRuns(schema, tenant.getId(), since)));
-            data.passK.addAll(guard(Source.PASS_K, data, schema, () -> queries.passK(schema, since)));
-            return null;
-        });
+        asTenant(
+                schema,
+                () -> {
+                    data.runs.addAll(
+                            guard(Source.JOBS, data, schema, () -> queries.jobRuns(schema, since)));
+                    data.runs.addAll(
+                            guard(
+                                    Source.QUICK_TASKS,
+                                    data,
+                                    schema,
+                                    () -> queries.quickTaskRuns(schema, since)));
+                    data.firstRuns.addAll(
+                            guard(
+                                    Source.FIRST_RUNS,
+                                    data,
+                                    schema,
+                                    () -> queries.firstRuns(schema, tenant.getId(), since)));
+                    data.passK.addAll(
+                            guard(Source.PASS_K, data, schema, () -> queries.passK(schema, since)));
+                    return null;
+                });
     }
 
-    private <T> List<T> guard(Source source, Collected data, String schema, Supplier<List<T>> query) {
+    private <T> List<T> guard(
+            Source source, Collected data, String schema, Supplier<List<T>> query) {
         try {
             return query.get();
         } catch (RuntimeException e) {
             NorthStarSqlFailure kind = NorthStarSqlFailure.classify(e);
             data.fail(source, kind);
-            log.warn("North-star: {} unreadable in schema '{}' ({})", source.table, schema, kind, e);
+            log.warn(
+                    "North-star: {} unreadable in schema '{}' ({})", source.table, schema, kind, e);
             return List.of();
         }
     }
@@ -247,35 +284,52 @@ public class NorthStarService {
     // ------------------------------------------------------------------- notes
 
     /**
-     * Every honest caveat the numbers carry, as plain sentences. "unavailable"
-     * means the metric could not be computed at all; "partially unavailable"
-     * means it was computed over the tenants that could be read.
+     * Every honest caveat the numbers carry, as plain sentences. "unavailable" means the metric
+     * could not be computed at all; "partially unavailable" means it was computed over the tenants
+     * that could be read.
      */
     static List<String> buildNotes(
-        List<SourceHealth> health, int tenantsTotal, int scanned, int skipped, boolean capped,
-        int suppressedCells, Double medianMinutes, boolean noFirstRuns, PassK passK, boolean signupsAvailable
-    ) {
+            List<SourceHealth> health,
+            int tenantsTotal,
+            int scanned,
+            int skipped,
+            boolean capped,
+            int suppressedCells,
+            Double medianMinutes,
+            boolean noFirstRuns,
+            PassK passK,
+            boolean signupsAvailable) {
         List<String> notes = new ArrayList<>();
 
-        notes.add("Metric 'interactive chat turns' unavailable because chat turns are not recorded against a user "
-            + "identity in any durable table (llm_call_log keeps the agent and session but no user), so runs and "
-            + "weekly active users count agent jobs and Quick Task runs only.");
-        notes.add("Metric 'conversations by language' unavailable because no language or locale is recorded on "
-            + "conversations, runs or channel sessions.");
-        notes.add("Weekly active users count only user-initiated runs (API-submitted agent jobs and Quick Tasks). "
-            + "Scheduled and event-triggered runs fire without a person present, so they are counted as runs but "
-            + "never as active users.");
-        notes.add("Run success rate = succeeded / (succeeded + failed). Cancelled, queued, running and "
-            + "awaiting-approval runs are excluded from both sides.");
-        notes.add("Time to first run is measured from the user's account creation (control_plane.app_user.created_at) "
-            + "to the start of their first successful user-initiated run, for users who signed up inside the window. "
-            + "Users who never ran an agent are not in the median; the cohort table shows activated vs signed up.");
+        notes.add(
+                "Metric 'interactive chat turns' unavailable because chat turns are not recorded against a user "
+                        + "identity in any durable table (llm_call_log keeps the agent and session but no user), so runs and "
+                        + "weekly active users count agent jobs and Quick Task runs only.");
+        notes.add(
+                "Metric 'conversations by language' unavailable because no language or locale is recorded on "
+                        + "conversations, runs or channel sessions.");
+        notes.add(
+                "Weekly active users count only user-initiated runs (API-submitted agent jobs and Quick Tasks). "
+                        + "Scheduled and event-triggered runs fire without a person present, so they are counted as runs but "
+                        + "never as active users.");
+        notes.add(
+                "Run success rate = succeeded / (succeeded + failed). Cancelled, queued, running and "
+                        + "awaiting-approval runs are excluded from both sides.");
+        notes.add(
+                "Time to first run is measured from the user's account creation (control_plane.app_user.created_at) "
+                        + "to the start of their first successful user-initiated run, for users who signed up inside the window. "
+                        + "Users who never ran an agent are not in the median; the cohort table shows activated vs signed up.");
 
         if (skipped > 0 || capped) {
-            notes.add("Partial sweep: " + scanned + " of " + tenantsTotal + " active tenants were scanned"
-                + (capped ? " (tenant cap " + MAX_TENANTS + ")" : "")
-                + (skipped > 0 && !capped ? " before the time budget ran out" : "")
-                + "; every figure covers only those tenants.");
+            notes.add(
+                    "Partial sweep: "
+                            + scanned
+                            + " of "
+                            + tenantsTotal
+                            + " active tenants were scanned"
+                            + (capped ? " (tenant cap " + MAX_TENANTS + ")" : "")
+                            + (skipped > 0 && !capped ? " before the time budget ran out" : "")
+                            + "; every figure covers only those tenants.");
         }
 
         for (SourceHealth h : health) {
@@ -293,33 +347,53 @@ public class NorthStarService {
                 why.append(why.length() > 0 ? ", " : "").append(h.errored()).append(" errored");
             }
             boolean everyone = scanned > 0 && h.total() >= scanned;
-            notes.add("Metric '" + h.source().metrics + "' " + (everyone ? "unavailable" : "partially unavailable")
-                + " because " + h.source().table + " could not be read for " + h.total() + " of " + scanned
-                + " scanned tenants (" + why + ")"
-                + (everyone ? "." : "; figures cover the remaining tenants."));
+            notes.add(
+                    "Metric '"
+                            + h.source().metrics
+                            + "' "
+                            + (everyone ? "unavailable" : "partially unavailable")
+                            + " because "
+                            + h.source().table
+                            + " could not be read for "
+                            + h.total()
+                            + " of "
+                            + scanned
+                            + " scanned tenants ("
+                            + why
+                            + ")"
+                            + (everyone ? "." : "; figures cover the remaining tenants."));
         }
 
         if (!signupsAvailable) {
-            notes.add("Signup counts unavailable because control_plane.app_user could not be read; cohort "
-                + "'signups' cells are omitted.");
+            notes.add(
+                    "Signup counts unavailable because control_plane.app_user could not be read; cohort "
+                            + "'signups' cells are omitted.");
         }
         if (medianMinutes == null) {
-            notes.add(noFirstRuns
-                ? "Metric 'time to first run' unavailable because no user who signed up inside the window has a "
-                    + "successful run yet."
-                : "Metric 'time to first run' withheld because fewer than " + NorthStarAggregator.MIN_CONTRIBUTORS
-                    + " users in the window have a successful first run.");
+            notes.add(
+                    noFirstRuns
+                            ? "Metric 'time to first run' unavailable because no user who signed up inside the window has a "
+                                    + "successful run yet."
+                            : "Metric 'time to first run' withheld because fewer than "
+                                    + NorthStarAggregator.MIN_CONTRIBUTORS
+                                    + " users in the window have a successful first run.");
         }
         if (passK == null) {
-            notes.add("Metric 'pass^k' unavailable because no successful eval run in the window replayed its cases "
-                + "more than once (pass^k needs repeats >= 2).");
+            notes.add(
+                    "Metric 'pass^k' unavailable because no successful eval run in the window replayed its cases "
+                            + "more than once (pass^k needs repeats >= 2).");
         } else if (passK.average() == null) {
-            notes.add("Metric 'pass^k' withheld because fewer than " + NorthStarAggregator.MIN_CONTRIBUTORS
-                + " users contributed repeated eval runs.");
+            notes.add(
+                    "Metric 'pass^k' withheld because fewer than "
+                            + NorthStarAggregator.MIN_CONTRIBUTORS
+                            + " users contributed repeated eval runs.");
         }
         if (suppressedCells > 0) {
-            notes.add(suppressedCells + " cell(s) suppressed because fewer than " + NorthStarAggregator.MIN_CONTRIBUTORS
-                + " users contributed. A suppressed cell is hidden, not zero.");
+            notes.add(
+                    suppressedCells
+                            + " cell(s) suppressed because fewer than "
+                            + NorthStarAggregator.MIN_CONTRIBUTORS
+                            + " users contributed. A suppressed cell is hidden, not zero.");
         }
         return notes;
     }

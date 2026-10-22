@@ -109,8 +109,9 @@ public class PlatformUserController {
      *     links with) or its schema name (what Keycloak's {@code tenant_id} attribute holds); an
      *     unknown UUID matches no one
      * @param q optional case-insensitive substring over username, email and name
-     * @param offset rows to skip (default 0); with {@code limit} this pages the matches. The response
-     *     also carries {@code X-Total-Count} (same as the body {@code total}) and {@code X-Has-More}
+     * @param offset rows to skip (default 0); with {@code limit} this pages the matches. The
+     *     response also carries {@code X-Total-Count} (same as the body {@code total}) and {@code
+     *     X-Has-More}
      * @param limit page size, default 100, max 500 (the Keycloak client fetches the whole realm and
      *     filters in memory - see its own javadoc - so this bounds the response, not the upstream
      *     cost)

@@ -91,7 +91,8 @@ public class X402SellerService {
             @org.springframework.beans.factory.annotation.Value(
                             "${app.x402.facilitator-timeout-ms:10000}")
                     int facilitatorTimeoutMs) {
-        // The payments module (the BILLING_PAYMENTS edition feature) may be absent: x402 then refuses
+        // The payments module (the BILLING_PAYMENTS edition feature) may be absent: x402 then
+        // refuses
         // settlement with a "payments disabled" answer instead of blocking startup.
         this(
                 offerRepository,

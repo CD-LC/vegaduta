@@ -54,9 +54,9 @@ import org.springframework.web.client.RestClient;
  * ({@code app.web.allowed-origins}).
  *
  * <p><b>Edition (lean-edition contract).</b> The response also carries {@code
- * edition:{tier,billingEnabled,authMode,features}} ({@link EditionInfo}) so the web console can check that
- * the edition it was built for matches the core it talks to. Fixed for the life of the process, so it adds
- * nothing to the 15 s cache cost, and it names no secret, version or tenant.
+ * edition:{tier,billingEnabled,authMode,features}} ({@link EditionInfo}) so the web console can
+ * check that the edition it was built for matches the core it talks to. Fixed for the life of the
+ * process, so it adds nothing to the 15 s cache cost, and it names no secret, version or tenant.
  *
  * <p>Not profile-gated, same as {@link SystemStatusController}: with the {@code security} profile
  * off, the main chain's {@code anyRequest().authenticated()} doesn't exist anyway and the permitAll
@@ -96,8 +96,11 @@ public class PublicStatusController {
             HealthContributorRegistry healthContributorRegistry,
             @Value("${app.workflow-events.enabled:false}") boolean workflowEventsEnabled,
             ObjectProvider<KafkaAdmin> kafkaAdmin,
-            // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED / UNKNOWN), not as an outage.
-            @Value("#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}") String sidecarBaseUrl,
+            // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED /
+            // UNKNOWN), not as an outage.
+            @Value(
+                            "#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}")
+                    String sidecarBaseUrl,
             ObjectProvider<PlatformBroadcastService> broadcast,
             EditionInfo edition) {
         this.broadcast = broadcast;
