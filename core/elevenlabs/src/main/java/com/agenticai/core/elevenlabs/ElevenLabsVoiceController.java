@@ -1,6 +1,8 @@
 package com.agenticai.core.elevenlabs;
 
 import com.agenticai.core.elevenlabs.dto.ElevenLabsVoiceResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
  * in, bytes out) already established in {@code core/agents}.
  */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 @RequestMapping("/api/elevenlabs/voices")
 public class ElevenLabsVoiceController {
 

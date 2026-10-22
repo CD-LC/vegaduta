@@ -1,25 +1,28 @@
 package com.agenticai.core.elevenlabs;
 
 import com.agenticai.core.elevenlabs.dto.GeneratedMusicResponse;
-import org.springframework.web.bind.annotation.RequestParam;
-import com.agenticai.core.tenancy.ListPaging;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.http.AttachmentDisposition;
 import com.agenticai.core.storage.FileStorageException;
 import com.agenticai.core.storage.FileStorageService;
+import com.agenticai.core.tenancy.ListPaging;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
-import com.agenticai.core.security.http.AttachmentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Serves {@code generate_music} tracks - authenticated and tenant-schema scoped, same shape as {@link ElevenLabsGeneratedAudioController}. */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 @RequestMapping("/api/musicgen/tracks")
 public class GeneratedMusicController {
 

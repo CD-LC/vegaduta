@@ -1,7 +1,9 @@
 package com.agenticai.core.sarvam;
 
-import com.agenticai.core.tenancy.OffsetLimitRequest;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.FileStorageService;
+import com.agenticai.core.tenancy.OffsetLimitRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * object key, instead of base64-encoding into Postgres - see migration V65.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamGeneratedAudioService {
 
     private static final String WAV_CONTENT_TYPE = "audio/wav";

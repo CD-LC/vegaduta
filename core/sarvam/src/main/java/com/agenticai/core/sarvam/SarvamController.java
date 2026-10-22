@@ -2,6 +2,8 @@ package com.agenticai.core.sarvam;
 
 import com.agenticai.core.sarvam.dto.SarvamCredentialActivationRequest;
 import com.agenticai.core.sarvam.dto.SarvamCredentialResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Same three-endpoint shape {@code TwilioCredentialController} uses - activate/current/deactivate, nothing more in Stage 1. */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 @RequestMapping("/api/sarvam/credential")
 public class SarvamController {
 

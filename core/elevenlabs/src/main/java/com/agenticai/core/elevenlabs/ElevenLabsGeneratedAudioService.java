@@ -1,7 +1,9 @@
 package com.agenticai.core.elevenlabs;
 
-import com.agenticai.core.tenancy.OffsetLimitRequest;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.FileStorageService;
+import com.agenticai.core.tenancy.OffsetLimitRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Stores/retrieves {@link ElevenLabsGeneratedAudio} rows via {@link FileStorageService} - mirrors {@code SarvamGeneratedAudioService}/{@code GeneratedImageService} exactly. */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsGeneratedAudioService {
 
     private static final String MP3_CONTENT_TYPE = "audio/mpeg";
