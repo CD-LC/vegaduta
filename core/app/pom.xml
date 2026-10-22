@@ -275,7 +275,7 @@
          above, and for every ChatClient call via Spring AI's own built-in
          ChatClient/ChatModel observation support once this bridge is on the
          classpath) to produce real OpenTelemetry spans; opentelemetry-
-         exporter-otlp ships them to management.otlp.tracing.endpoint (see
+         exporter-otlp ships them to management.opentelemetry.tracing.export.otlp.endpoint (see
          application.yml) via OTLP/HTTP - Langfuse's native ingestion
          protocol as of v3.22+ (POST .../api/public/otel/v1/traces), so no
          Langfuse-specific SDK or custom span code is needed here at all. -->

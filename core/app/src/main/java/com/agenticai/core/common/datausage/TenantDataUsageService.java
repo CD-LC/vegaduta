@@ -100,7 +100,7 @@ public class TenantDataUsageService {
     @Value("${app.storage.type:s3}")
     private String storageType = "s3";
 
-    @Value("${management.tracing.enabled:true}")
+    @Value("${management.tracing.export.enabled:true}")
     private boolean tracingEnabled = true;
 
     public TenantDataUsageService(

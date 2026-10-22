@@ -9,7 +9,7 @@ import java.util.Locale;
  */
 public final class LangfuseEndpoints {
 
-    /** Langfuse's documented native OTLP ingestion path - see application.yml's management.otlp.tracing.endpoint. */
+    /** Langfuse's documented native OTLP ingestion path - see application.yml's management.opentelemetry.tracing.export.otlp.endpoint. */
     static final String OTLP_TRACES_SUFFIX = "/api/public/otel/v1/traces";
 
     private LangfuseEndpoints() {}

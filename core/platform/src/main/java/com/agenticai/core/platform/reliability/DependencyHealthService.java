@@ -128,7 +128,8 @@ public class DependencyHealthService {
             @Value("${code-intel.base-url:}") String codeIntelBaseUrl,
             @Value("${app.storage.endpoint:}") String storageEndpoint,
             @Value("${app.langfuse.base-url:}") String langfuseBaseUrl,
-            @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+            @Value("${management.opentelemetry.tracing.export.otlp.endpoint:}")
+                    String otlpTracesEndpoint,
             @Value("${app.platform.ops.academy-base-url:}") String academyBaseUrl,
             @Value("${app.platform.ops.app-builder-base-url:}") String appBuilderBaseUrl) {
         this.enabled = enabled;
