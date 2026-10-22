@@ -68,6 +68,7 @@ value at runtime. For the `=== "1"` flags, pass `0` to switch one off.
 | `NEXT_PUBLIC_APP_BUILDER_URL` | App Builder origin (optional) | empty, which hides /build |
 | `NEXT_PUBLIC_EDGE_AGENTS` | `1` turns on the on-device agents UI | off |
 | `NEXT_PUBLIC_EDGE_MODEL_MANIFEST_URL` | fallback edge model manifest | empty |
+| `NEXT_PUBLIC_EDITION` | `personal` / `lite` / `full`: the edition core runs as (`app.edition.tier`). Decides which pages the console hides and 404s on a personal install (`lib/edition.ts`, one `EDITION_ROUTES` table). Compose derives it and core's `APP_EDITION_TIER` from the single `VEGADUTA_EDITION`. Unset falls back to `NEXT_PUBLIC_AUTH_MODE=local` = personal, then `NEXT_PUBLIC_DEPLOY_ENV=lite\|full`; a console that is told nothing hides nothing. The console compares it with `edition.tier` from `/api/public/status` and warns on a mismatch | derived (see left) |
 | `NEXT_PUBLIC_DEPLOY_ENV` | topbar environment pill (`production` / `staging`) | none |
 | `NEXT_PUBLIC_FREE_MODE` | `1` hides pricing | off |
 | `NEXT_PUBLIC_BILLING_ENABLED` | `1` shows plans/prices/upgrade/billing UI; off redirects `/billing`, `/features`, `/admin/billing` (`lib/billing-flag.ts`) | off |
