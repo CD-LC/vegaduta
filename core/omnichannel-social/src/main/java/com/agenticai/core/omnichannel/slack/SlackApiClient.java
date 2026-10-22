@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.slack;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
  * MetaGraphApiClient} does.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class SlackApiClient {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(10);

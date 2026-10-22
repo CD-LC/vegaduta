@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.x;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
  * DiscordApiClient}/{@code MetaGraphApiClient} (unlike Slack's always-200 body).
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class XApiClient {
 
     private static final String API_BASE = "https://api.x.com/2";
