@@ -3,12 +3,10 @@ package com.agenticai.core.agents.a2a;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
+import com.agenticai.core.security.net.SsrfGuard;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +31,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The OUTBOUND half of A2A: lets an agent call an EXTERNAL A2A agent as a tool ({@code
