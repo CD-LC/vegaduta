@@ -227,7 +227,7 @@
          21+ - local builds whose JAVA_HOME still points at a 17 JDK need it
          repointed at 21+ (a 21+ JDK is already installed). -->
     <java.version>21</java.version>
-    <spring-ai.version>1.1.8</spring-ai.version>
+    <spring-ai.version>2.0.1</spring-ai.version>
     <!-- Dependency upgrades for the release image scan (grype, fail on
          critical). Boot's managed tomcat/netty trail the fixed versions the
          scan requires; override the BOM properties rather than bumping the
