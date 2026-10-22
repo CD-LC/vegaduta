@@ -1,9 +1,11 @@
 package com.agenticai.core.common.privacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import com.agenticai.core.common.privacy.ConsentText.Intent;
 import com.agenticai.core.common.privacy.ConsentText.Keywords;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -88,5 +90,28 @@ class ConsentTextTest {
     void hashChangesWhenTheNoticeChanges() {
         assertThat(ConsentText.sha256("a")).hasSize(64).isNotEqualTo(ConsentText.sha256("b"));
         assertThat(ConsentText.sha256("a")).isEqualTo(ConsentText.sha256("a"));
+    }
+
+    @Test
+    void aVeryLongRunOfPunctuationIsHandledInBoundedTime() {
+        // Inbound channel text is unbounded: the trailing-punctuation pattern was quadratic on
+        // this.
+        String hostile = "a" + "!".repeat(50_000) + "x";
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> ConsentText.normalize(hostile));
+        assertTimeoutPreemptively(
+                Duration.ofSeconds(2), () -> ConsentText.parse(hostile, Keywords.DEFAULTS));
+        assertThat(intent(hostile)).isEqualTo(Intent.OTHER);
+    }
+
+    @Test
+    void aLongMessageIsNeverReadAsConsentByCuttingItShort() {
+        // "yes", then padding, then more text: truncating to the cap would leave a bare "yes".
+        String padded =
+                "yes"
+                        + " ".repeat(ConsentText.MAX_NORMALIZED_CHARS + 10)
+                        + "but only if you delete everything.";
+        assertThat(intent(padded)).isEqualTo(Intent.OTHER);
+        assertThat(intent("yes" + " ".repeat(2_000)))
+                .isEqualTo(Intent.ACCEPT); // trailing blanks are trimmed first
     }
 }

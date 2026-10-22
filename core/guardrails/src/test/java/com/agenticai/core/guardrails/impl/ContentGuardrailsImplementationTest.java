@@ -1,9 +1,11 @@
 package com.agenticai.core.guardrails.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import com.agenticai.core.guardrails.ContentGuardrailResult;
 import com.agenticai.core.guardrails.ContentGuardrailType;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -220,5 +222,18 @@ class ContentGuardrailsImplementationTest {
         } catch (IllegalArgumentException ex) {
             assertThat(ex.getMessage()).contains("Unknown guardrail type");
         }
+    }
+
+    @Test
+    @DisplayName("PII: a long run of email characters with no @ is scanned in bounded time")
+    void piiEmailScanIsLinearOnLongInput() {
+        for (String unit : new String[] {"b.", "b-", "a%"}) {
+            String hostile = unit.repeat(25_000);
+            ContentGuardrailResult result =
+                    assertTimeoutPreemptively(
+                            Duration.ofSeconds(2), () -> piiGuardrail.evaluate(hostile));
+            assertThat(result.isPassed()).isTrue();
+        }
+        assertThat(piiGuardrail.evaluate("write to jane.doe@example.com").isPassed()).isFalse();
     }
 }

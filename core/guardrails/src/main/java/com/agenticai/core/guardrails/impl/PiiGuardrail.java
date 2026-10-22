@@ -29,7 +29,7 @@ public class PiiGuardrail implements ContentGuardrail {
 
     // Email pattern (simplified - not RFC-complete but good enough for filtering)
     private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+            Pattern.compile("\\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
 
     // Phone numbers.
     //
@@ -86,7 +86,8 @@ public class PiiGuardrail implements ContentGuardrail {
         if (EMAIL_PATTERN.matcher(content).find()) {
             return ContentGuardrailResult.fail(
                     ContentGuardrailType.PII,
-                    "Response contains email addresses. Please remove personally identifiable information.",
+                    "Response contains email addresses. Please remove personally identifiable"
+                            + " information.",
                     80);
         }
 
@@ -94,7 +95,8 @@ public class PiiGuardrail implements ContentGuardrail {
         if (PHONE_PATTERN.matcher(content).find()) {
             return ContentGuardrailResult.fail(
                     ContentGuardrailType.PII,
-                    "Response contains phone numbers. Please remove personally identifiable information.",
+                    "Response contains phone numbers. Please remove personally identifiable"
+                            + " information.",
                     85);
         }
 

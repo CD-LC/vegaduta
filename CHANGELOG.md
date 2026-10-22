@@ -26,6 +26,11 @@ Release notes on GitHub are generated from the section for each version.
 
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
 
+### Security
+
+- **Pathological text can no longer tie up a request thread in a regular expression** (CodeQL `java/redos` and `java/polynomial-redos`). The consent keyword reader (`ConsentText.normalize`, fed by inbound channel text) took about 8 s on 50,000 characters of punctuation; it now reads at most 512 characters and treats anything longer as "not a keyword" (never as consent). The pasted GitHub skill-folder link (`SkillRegistryClient`) was matched with a nested optional-slash group that backtracks exponentially (22 s at 50,000 characters); it is now a linear pattern and links over 400 characters are refused before matching. The email patterns in `PiiGuardrail`, `LlmGatewayPiiRedactor` and `PolicyPackPatternMatcher` (13-19 s at 50,000 characters) now cap the part before `@` at 64 characters (the RFC 5321 limit), and the PEM private-key pattern in the step-event redactor no longer scans to the end of the text once per `BEGIN` line.
+- **`WorkspaceFiles.saveUpload` checks the file name itself.** It relied on the controller to strip directories; it now refuses a name containing `/`, `\` or NUL, or equal to `.` or `..`, so no caller can write outside the chosen folder.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added

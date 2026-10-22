@@ -103,9 +103,11 @@ public final class AgentStepEventRedactor {
                     "passphrase");
 
     /**
-     * Copied verbatim from {@code PatternBasedGuardrailService#REDACTION_PATTERNS} - see this
-     * class's javadoc for why it is a copy and not an import. If that list gains a pattern, this
-     * one should too.
+     * Copied from {@code PatternBasedGuardrailService#REDACTION_PATTERNS} - see this class's
+     * javadoc for why it is a copy and not an import. If that list gains a pattern, this one should
+     * too. One deliberate difference: a PEM body may not contain another BEGIN line, so a text with
+     * many BEGIN lines and no END is scanned once rather than once per line (this input is not
+     * length-capped here, the guardrail's is).
      */
     private static final List<Pattern> SECRET_VALUE_PATTERNS =
             List.of(
@@ -115,7 +117,8 @@ public final class AgentStepEventRedactor {
                     Pattern.compile("xox[baprs]-[A-Za-z0-9-]{10,}"),
                     Pattern.compile("sk-[A-Za-z0-9]{20,}"),
                     Pattern.compile(
-                            "-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----"),
+                            "-----BEGIN [A-Z ]*PRIVATE KEY-----(?:(?!-----BEGIN"
+                                    + " )[\\s\\S])*?-----END [A-Z ]*PRIVATE KEY-----"),
                     Pattern.compile(
                             "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"));
 

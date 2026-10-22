@@ -37,7 +37,7 @@ final class LlmGatewayPiiRedactor {
     // Same shape as PiiGuardrail.EMAIL_PATTERN (core/guardrails) - kept
     // independent per this class's javadoc.
     private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
+            Pattern.compile("\\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
 
     // Same shape as PiiGuardrail.PHONE_PATTERN - NANP + India 5-5 grouping.
     private static final Pattern PHONE_PATTERN =
