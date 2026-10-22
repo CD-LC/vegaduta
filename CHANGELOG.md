@@ -13,15 +13,12 @@ Release notes on GitHub are generated from the section for each version.
 - **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.
 - **`ApprovalNotificationBlockedException` is a `GovernanceException` again.** It extended `RuntimeException`, so `catch (GovernanceException)` - the documented one-stop handler - missed it.
 - **REST clients: streams, retries and errors are publish-grade.** The Python client's 60 s request timeout also applied to SSE reads, so a stream idle for a minute died; `stream()` now bounds connect+headers only (`http.client`, blocking reads). Both clients retry idempotent GET/HEAD on 429/5xx/network failures honouring `Retry-After`, re-resolve a callable token once on 401, wrap transport failures in a `NetworkError`, expose `code`, `headers` and `retry_after`/`retryAfterMs` on `ApiError`, and send an SDK `User-Agent`. The TypeScript client gains `timeoutMs` (client and per-call), `maxRetries` and `userAgent` options.
+- **The core image is about 340 MB smaller.** The application jar was copied as root and then rewritten by a recursive `chown`, so it was stored in two layers. It is now copied with its owner set.
 - **SDK metadata is publish-ready.** `vegaduta-agent` uses PEP 639 license metadata and carries `LICENSE`, coverage and mypy config and the missing `Security`/`OS Independent`/`Typed` classifiers; `vegaduta-sdk` (Python) gains full PyPI metadata; `vegaduta-sdk` (TypeScript) gains `exports`, `repository`/`bugs`/`keywords`, a `prepack` typecheck+build, a pinned `typescript` devDependency and a package `README.md`.
 
 ### Added
 
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
-
-### Changed
-
-- **The core image is about 340 MB smaller.** The application jar was copied as root and then rewritten by a recursive `chown`, so it was stored in two layers. It is now copied with its owner set.
 
 ## [0.1.9] - 2026-10-21
 
