@@ -10,7 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Security
 
-- **The web console image no longer ships known High vulnerabilities with fixes available.** `next` 16.3.6 -> 16.3.8 (GHSA-cjq9-62q9-8jv4, SSRF in the image optimiser, already limited to the hosts in `images.remotePatterns`) and `sharp` 0.35.4 -> 0.35.5 (GHSA-wq5f-xc86-pv6w). The runtime stage also deletes the node base image's npm, corepack and yarn, which the console never runs and whose bundled brace-expansion, ip-address, picomatch, pacote and sigstore carried 10 more High advisories; grype `--only-fixed` now reports nothing for the image. `scripts/ci/web-image-deps.sh` keeps both fixes from regressing.
+- **The web console image no longer ships known High vulnerabilities with fixes available.** `next` 16.3.6 -> 16.4.2 (GHSA-cjq9-62q9-8jv4, SSRF in the image optimiser, already limited to the hosts in `images.remotePatterns`; and, published 2026-10-22, the Critical GHSA-2464-fhr4-w9xw and GHSA-673q-mjm6-r5xr (unauthenticated remote code execution) and the High GHSA-p3m5-59mp-jv5r, all fixed in 16.4.1) and `sharp` 0.35.4 -> 0.35.5 (GHSA-wq5f-xc86-pv6w). The runtime stage also deletes the node base image's npm, corepack and yarn, which the console never runs and whose bundled brace-expansion, ip-address, picomatch, pacote and sigstore carried 10 more High advisories; grype `--only-fixed` now reports nothing for the image. `scripts/ci/web-image-deps.sh` keeps both fixes from regressing.
 
 ### Changed
 

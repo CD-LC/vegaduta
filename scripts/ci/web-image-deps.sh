@@ -1,7 +1,9 @@
 #!/bin/sh
 # Guards for the web (console) image's dependency CVE fixes:
-#   1. web/package-lock.json resolves next >= 16.3.8 (GHSA-cjq9-62q9-8jv4, SSRF in the image
-#      optimiser) and sharp >= 0.35.5 (GHSA-wq5f-xc86-pv6w). The floors only ever go up.
+#   1. web/package-lock.json resolves next >= 16.4.1 (GHSA-cjq9-62q9-8jv4, SSRF in the image
+#      optimiser; GHSA-2464-fhr4-w9xw and GHSA-673q-mjm6-r5xr, unauthenticated RCE in the image
+#      optimiser with SVG and in `use cache`; GHSA-p3m5-59mp-jv5r, Server Actions DoS)
+#      and sharp >= 0.35.5 (GHSA-wq5f-xc86-pv6w). The floors only ever go up.
 #   2. web/Dockerfile's runtime stage removes the node base image's npm/corepack/yarn: the app
 #      only runs `node`, and their bundled dependencies carry High advisories (brace-expansion,
 #      ip-address, picomatch, pacote, sigstore) that no base-image bump has fixed.
@@ -27,7 +29,7 @@ at_least() {
   fi
 }
 
-at_least next 16.3.8
+at_least next 16.4.1
 at_least sharp 0.35.5
 
 # The runtime stage is everything after the last FROM, with line continuations joined.
