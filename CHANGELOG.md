@@ -8,6 +8,13 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **The voice-agent image ships aiohttp 3.14.5 and the sidecar image pypdf 6.21.2.** aiohttp 3.14.3 had eight open advisories (three High; fixed in 3.14.4) and pypdf 6.19.0 five (fixed through 6.21.1). Both `requirements.lock` files were regenerated with `services/lock-requirements.sh`; only those two packages moved.
+- **Core generates and reads DOCX/XLSX/PPTX with Apache POI 5.5.1 (was 5.3.0).** 5.4.0 fixed the advisories listed for `poi-ooxml` (CVE-2025-31672 among them). The version is one property, `poi.version` in `core/pom.xml`, for `core/documentgen` and `core/omnichannel`; the `commons-io` pin rose from 2.17.0 to 2.21.0 because POI calls into it. `PoiVersionAndRoundTripTest` guards the floor and writes then reads back an XLSX and a DOCX.
+- **App Builder starters scaffold patched build tools.** `node-react` and `capacitor-app` use `vite` ^7.3.7 (was ^5.4.0) and `astro-site` uses `astro` ~7.3.8 (was ^4.16.0, one Critical advisory and seventeen more). Astro stays on 7.3 because 7.4.2 and later need Node 22.23.4, newer than the workspace runner's; each starter was built with `npm install && npm run build` on Node 22.23.3. The React 19, Capacitor 8 and TypeScript 7 majors in Dependabot pull request #43 are not part of this.
+- **The console's lockfile takes the fixed vitest, vite, js-yaml, browserslist, brace-expansion, source-map-js and baseline-browser-mapping releases** (vitest 4.1.12, vite 7.3.7, js-yaml 4.3.2, browserslist 4.29.4, brace-expansion 1.1.21, source-map-js 1.2.2, baseline-browser-mapping 2.11.30). Everything except the last two is a dev dependency; `package.json` changes only the two vitest ranges, and `next` and `sharp` are left to the pull request that patches them.
+
 ### Changed
 
 - **Platform trace filters are validated.** `GET /api/platform/traces` now answers 400 when `userId` or `name` contains a character outside letters, digits and `. _ : -` (plus `@ +` for `userId` and a space for `name`) or is longer than 128 characters; before, the value was URL-encoded and forwarded to Langfuse unchanged. Ordinary user ids, e-mail addresses and trace names such as `agent.turn` are unaffected.
