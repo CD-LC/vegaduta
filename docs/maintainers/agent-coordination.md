@@ -95,6 +95,11 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-22 08:06, docs agent (local Devin session): pushed `docs/rest-sdk-release-workflow`
+  (adds `rest-sdk-release.yml` to the workflow table and refreshes the PyPI/npm state rows; docs
+  only, no code). Also on the repo: created the `pypi`, `pypi-rest-sdk` and `npm` environments,
+  set `SDK_PUBLISH_PYPI=true` (arms the PyPI jobs of both `pypi-release.yml` and
+  `rest-sdk-release.yml`; `SDK_PUBLISH_NPM` left unset until the npm name and `NPM_TOKEN` exist).
 - 2026-10-21 15:05, release agent: the v0.1.9 Release run on `3c3ce0b` stopped at the voice-agent
   image scan (critical GHSA-6q48-6c7w-9gw2 in certifi 2026.7.22, published after 0.1.8); nothing was
   published (no draft, floating tags unmoved). Merged #26 and #16, bumped certifi in five service
