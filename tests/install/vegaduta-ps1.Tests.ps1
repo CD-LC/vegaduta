@@ -457,6 +457,30 @@ Describe 'personal -DryRun' {
   }
 }
 
+Describe 'personal: the closing lines of a real (not dry) start' {
+  # The model line (or the hint to add a provider key) and the web-search line are two independent
+  # statements, as in scripts/vegaduta: the "Add an LLM provider key" hint belongs to "no local model" only.
+  # A search `if` inserted between the local-model `if` and its `else` attached the hint to the search
+  # switch: printed with a local model and search off, missing with no local model and search on.
+  It 'local AI <ai>, web search <search>: <what>' -ForEach @(
+    @{ ai = 'on';  search = 'on';  flags = @('-Search');            model = $true;  web = $true;  hint = $false; what = 'model and search lines, no hint' }
+    @{ ai = 'on';  search = 'off'; flags = @('-NoSearch');          model = $true;  web = $false; hint = $false; what = 'model line only, no hint' }
+    @{ ai = 'off'; search = 'on';  flags = @('-Cloud', '-Search');  model = $false; web = $true;  hint = $true;  what = 'search line and the hint' }
+    @{ ai = 'off'; search = 'off'; flags = @('-Cloud', '-NoSearch'); model = $false; web = $false; hint = $true;  what = 'the hint only' }
+  ) {
+    $sb = New-Sandbox
+    $r = Invoke-Launcher $sb (@('personal') + $flags) @{ HOST_RAM_GB = '32' }
+    $r.ExitCode | Should -Be 0 -Because $r.Text
+    $r.Text | Should -Match 'VegaDuta \(personal\) is up' -Because $r.Text
+    $hasModel = $r.Text -match '(?m)^\s+Local model\s'
+    $hasWeb = $r.Text -match '(?m)^\s+Web search\s+on'
+    $hasHint = $r.Text -match 'Add an LLM provider key in the console'
+    $hasModel | Should -Be $model -Because $r.Text
+    $hasWeb | Should -Be $web -Because $r.Text
+    $hasHint | Should -Be $hint -Because $r.Text
+  }
+}
+
 Describe 'upgrade' {
   # install-ps1-upgrade-no-tree-03: `upgrade -Version X` only re-pinned the images.
   It 'does not re-pin or restart anything when the release of the target cannot be downloaded' {
