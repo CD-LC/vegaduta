@@ -1,5 +1,7 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ElevenLabsSpeakToolCallback}.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsVoiceService {
 
     private final ElevenLabsVoiceRepository repository;

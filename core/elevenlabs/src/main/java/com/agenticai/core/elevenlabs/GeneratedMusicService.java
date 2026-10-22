@@ -1,5 +1,7 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.FileStorageService;
 import java.time.Instant;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Stores/retrieves {@link GeneratedMusic} rows via {@link FileStorageService} - mirrors {@link ElevenLabsGeneratedAudioService}. */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class GeneratedMusicService {
 
     private static final String MP3_CONTENT_TYPE = "audio/mpeg";

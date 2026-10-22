@@ -6,6 +6,8 @@ import com.agenticai.core.elevenlabs.ElevenLabsClient;
 import com.agenticai.core.elevenlabs.ElevenLabsGeneratedAudioService;
 import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  * #resolve()} call rather than cached.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class PlatformElevenLabsSpeakCapabilityProvider implements SpeakCapabilityProvider {
 
     private final ObjectProvider<PlatformToolCredentialService> credentialService;

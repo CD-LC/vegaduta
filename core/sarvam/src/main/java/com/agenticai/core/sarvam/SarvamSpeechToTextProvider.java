@@ -5,6 +5,8 @@ import com.agenticai.core.providers.modality.SpeechToTextProvider;
 import com.agenticai.core.providers.modality.SpeechToTextProviderException;
 import com.agenticai.core.providers.modality.SpeechToTextTranscriptionException;
 import com.agenticai.core.providers.modality.VoiceModelProvider;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ import org.springframework.util.StringUtils;
  * </ul>
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamSpeechToTextProvider implements SpeechToTextProvider {
 
     private static final Logger log = LoggerFactory.getLogger(SarvamSpeechToTextProvider.class);

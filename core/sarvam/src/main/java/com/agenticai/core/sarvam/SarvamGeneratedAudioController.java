@@ -1,21 +1,23 @@
 package com.agenticai.core.sarvam;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.sarvam.dto.SarvamGeneratedAudioResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.http.AttachmentDisposition;
 import com.agenticai.core.storage.FileStorageService;
+import com.agenticai.core.tenancy.ListPaging;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
-import com.agenticai.core.security.http.AttachmentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  * base64 decode path - see {@link SarvamGeneratedAudio}'s javadoc.
  */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 @RequestMapping("/api/sarvam/audio")
 public class SarvamGeneratedAudioController {
 

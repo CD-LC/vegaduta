@@ -5,6 +5,8 @@ import com.agenticai.core.providers.modality.TextToSpeechProvider;
 import com.agenticai.core.providers.modality.TextToSpeechProviderException;
 import com.agenticai.core.providers.modality.TextToSpeechSynthesisException;
 import com.agenticai.core.providers.modality.TtsModelProvider;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ import org.springframework.util.StringUtils;
  * selecting this provider is rejected by {@code TextToSpeechProviderValidator}.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsTextToSpeechProvider implements TextToSpeechProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ElevenLabsTextToSpeechProvider.class);

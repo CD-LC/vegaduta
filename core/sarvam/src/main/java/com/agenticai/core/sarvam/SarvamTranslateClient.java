@@ -1,5 +1,7 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -34,6 +36,7 @@ import org.springframework.web.client.RestClientResponseException;
  * placement note already called out).
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamTranslateClient {
 
     private static final String URL = "https://api.sarvam.ai/translate";
