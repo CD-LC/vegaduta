@@ -408,11 +408,16 @@ else
     *'"status":"UP"'*) : ;;
     *) fail "readiness is 200 but not UP: ${READY_BODY:0:300}" ;;
   esac
-  case "$READY_BODY" in
-    *'"tenantMigration":{"status":"UP"'*) log "readiness: 200 UP, tenantMigration UP" ;;
-    *'"tenantMigration"'*) fail "tenantMigration is present but not UP: ${READY_BODY:0:300}" ;;
-    *) fail "tenantMigration is missing from the readiness group: ${READY_BODY:0:300}" ;;
-  esac
+  # Key order is not part of the contract: Jackson 3 writes the actuator's properties alphabetically, so
+  # "details" can come before "status".
+  if printf '%s' "$READY_BODY" | grep -Eq '"tenantMigration":\{("details":\{[^}]*\},)?"status":"UP"|"tenantMigration":\{"status":"UP"'; then
+    log "readiness: 200 UP, tenantMigration UP"
+  else
+    case "$READY_BODY" in
+      *'"tenantMigration"'*) fail "tenantMigration is present but not UP: ${READY_BODY:0:300}" ;;
+      *) fail "tenantMigration is missing from the readiness group: ${READY_BODY:0:300}" ;;
+    esac
+  fi
 fi
 
 for route in $ROUTES; do
