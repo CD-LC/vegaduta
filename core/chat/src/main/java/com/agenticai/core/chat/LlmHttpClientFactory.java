@@ -1,5 +1,6 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
@@ -15,6 +16,10 @@ import okhttp3.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.HttpClientSettings;
+import org.springframework.boot.http.client.HttpRedirects;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -27,10 +32,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The one place outbound HTTP timeouts, pooling and SSRF pinning are configured for the LLM
@@ -170,18 +172,8 @@ public class LlmHttpClientFactory {
      * own pool.
      */
     private static ExecutorService newDispatcherExecutor() {
-        AtomicInteger n = new AtomicInteger();
-        return new ThreadPoolExecutor(
-                0,
-                Integer.MAX_VALUE,
-                60,
-                TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                r -> {
-                    Thread t = new Thread(r, "llm-http-dispatcher-" + n.getAndIncrement());
-                    t.setDaemon(true);
-                    return t;
-                });
+        return TenantAwareExecutors.newCachedThreadPool(
+                TenantAwareExecutors.numberedThreadFactory("llm-http-dispatcher-", true));
     }
 
     /** Releases the pools and dispatcher threads on context shutdown. */
@@ -218,8 +210,16 @@ public class LlmHttpClientFactory {
      * #transport(boolean)}.
      */
     public RestClient.Builder restClientBuilder() {
-        HttpClient jdk = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
-        return restClientOver(jdk);
+        // Spring Boot's request-factory builder (JDK HttpClient underneath) instead of a hand-built
+        // client; redirects stay off, as with a bare JDK client.
+        ClientHttpRequestFactory factory =
+                ClientHttpRequestFactoryBuilder.jdk()
+                        .build(
+                                HttpClientSettings.defaults()
+                                        .withConnectTimeout(connectTimeout)
+                                        .withReadTimeout(readTimeout)
+                                        .withRedirects(HttpRedirects.DONT_FOLLOW));
+        return RestClient.builder().requestFactory(factory);
     }
 
     /**
