@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/button";
 import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge";
 import { StatusDot } from "../../components/ui/status-dot";
+import { channelOffered } from "../../lib/edition";
 import { cn } from "../../lib/utils";
 import { inboxApi, type ConversationSummary, type HandoffTranscriptMessage } from "./inboxApi";
 import { ChannelBadge, authorLabel, dotStatus, stateLabel } from "./inboxFormat";
@@ -67,7 +68,7 @@ export function InboxThread({
         <Badge variant="outline" className="text-xs">
           {stateLabel(selected)}
         </Badge>
-        {selected.channel === "SLACK" && (
+        {selected.channel === "SLACK" && channelOffered("slack") && (
           // Slack sessions are keyed by CHANNEL id, not by person
           // (SlackWebhookController's documented design) - a takeover
           // holds the whole channel/DM, worth saying out loud.
