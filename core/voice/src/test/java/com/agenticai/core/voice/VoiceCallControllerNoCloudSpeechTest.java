@@ -30,7 +30,7 @@ class VoiceCallControllerNoCloudSpeechTest extends VoiceCallControllerTestBase {
                 sidecar,
                 List.of(),
                 Optional.empty(),
-                roomRegistry,
+                Optional.of(roomRegistry),
                 providerFactory);
     }
 
