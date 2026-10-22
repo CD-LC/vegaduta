@@ -3,7 +3,12 @@ package com.agenticai.core.chat.structured;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sun.net.httpserver.HttpServer;
-
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,17 +17,9 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * OpenAI strict function calling: schema eligibility, body rewriting, and the blocking + streaming
@@ -34,8 +31,8 @@ class ToolStrictModeTest {
 
     static final String STRICT_PARAMS =
             "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
-                + "\"properties\":{\"city\":{\"type\":\"string\"},\"days\":{\"type\":\"integer\"}},"
-                + "\"required\":[\"city\",\"days\"],\"additionalProperties\":false}";
+                    + "\"properties\":{\"city\":{\"type\":\"string\"},\"days\":{\"type\":\"integer\"}},"
+                    + "\"required\":[\"city\",\"days\"],\"additionalProperties\":false}";
     static final String OPEN_PARAMS =
             "{\"type\":\"object\",\"properties\":{\"q\":{\"type\":\"string\"}},\"required\":[\"q\"]}";
 
@@ -68,7 +65,7 @@ class ToolStrictModeTest {
                         ToolStrictMode.eligible(
                                 json(
                                         "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}},"
-                                            + "\"required\":[\"a\"],\"additionalProperties\":false}")))
+                                                + "\"required\":[\"a\"],\"additionalProperties\":false}")))
                 .isFalse(); // b optional
         assertThat(ToolStrictMode.eligible(json("{\"type\":\"object\",\"properties\":{}}")))
                 .isFalse(); // open no-arg
@@ -92,13 +89,13 @@ class ToolStrictModeTest {
                         ToolStrictMode.eligible(
                                 json(
                                         "{\"type\":\"object\",\"properties\":{\"o\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
-                                            + "\"required\":[\"x\"]}},\"required\":[\"o\"],\"additionalProperties\":false}")))
+                                                + "\"required\":[\"x\"]}},\"required\":[\"o\"],\"additionalProperties\":false}")))
                 .isFalse();
         assertThat(
                         ToolStrictMode.eligible(
                                 json(
                                         "{\"type\":\"object\",\"properties\":{\"o\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
-                                            + "\"required\":[\"x\"],\"additionalProperties\":false}},\"required\":[\"o\"],\"additionalProperties\":false}")))
+                                                + "\"required\":[\"x\"],\"additionalProperties\":false}},\"required\":[\"o\"],\"additionalProperties\":false}")))
                 .isTrue();
     }
 
@@ -126,7 +123,7 @@ class ToolStrictModeTest {
                         ToolStrictMode.eligible(
                                 json(
                                         "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"],"
-                                            + "\"additionalProperties\":false,\"patternProperties\":{}}")))
+                                                + "\"additionalProperties\":false,\"patternProperties\":{}}")))
                 .isFalse();
     }
 
@@ -134,7 +131,7 @@ class ToolStrictModeTest {
     void aPropertyNamedLikeAKeywordIsJustAName() {
         String s =
                 "{\"type\":\"object\",\"properties\":{\"default\":{\"type\":\"string\"},\"format\":{\"type\":\"string\"}},"
-                    + "\"required\":[\"default\",\"format\"],\"additionalProperties\":false}";
+                        + "\"required\":[\"default\",\"format\"],\"additionalProperties\":false}";
         assertThat(ToolStrictMode.eligible(json(s))).isTrue();
     }
 

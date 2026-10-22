@@ -12,14 +12,11 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.LocalOpenAiCredential;
 import com.agenticai.core.providers.ProviderName;
-
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
-
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
-
-import java.time.Duration;
 
 /**
  * {@link LocalOpenAiAgentChatClientFactory} driven end to end against a canned transport, as {@link
@@ -31,8 +28,8 @@ class LocalOpenAiAgentChatClientFactoryTest {
 
     private static final String REPLY =
             "{\"id\":\"c1\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,"
-                + "\"message\":{\"role\":\"assistant\",\"content\":\"ok\"},\"finish_reason\":\"stop\"}],"
-                + "\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}";
+                    + "\"message\":{\"role\":\"assistant\",\"content\":\"ok\"},\"finish_reason\":\"stop\"}],"
+                    + "\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}";
 
     /** The terminal interceptor the SDK model gets from LlmHttpClientFactory#transport. */
     private final CannedLlmTransport transport = new CannedLlmTransport(() -> REPLY);

@@ -2,10 +2,6 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
 import java.net.InetAddress;
 import java.net.URI;
 import java.util.Iterator;
@@ -14,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Baseline security check on LLM-constructed MCP tool-call ARGUMENT VALUES, applied by {@link
@@ -241,7 +239,7 @@ final class McpToolArgumentGuard {
         if (ipv4 != null && isBlockedIpv4(ipv4)) {
             return Optional.of(
                     "is a URL pointing at a private, loopback, link-local, or cloud-metadata IP"
-                        + " address ("
+                            + " address ("
                             + bareHost
                             + ")");
         }

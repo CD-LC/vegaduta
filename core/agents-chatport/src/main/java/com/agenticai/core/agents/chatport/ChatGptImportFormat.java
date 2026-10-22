@@ -12,9 +12,6 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.SOURCE_CHATGPT
 
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-
-import tools.jackson.databind.JsonNode;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * ChatGPT's {@code conversations.json}: {@code {title, create_time, update_time, mapping{id ->
@@ -81,7 +79,7 @@ final class ChatGptImportFormat implements ChatImportFormat {
         if (cyclic) {
             c.warn(
                     "A conversation had a cyclic message tree; only the part that could be followed"
-                        + " was imported.");
+                            + " was imported.");
         }
         Collections.reverse(path);
 

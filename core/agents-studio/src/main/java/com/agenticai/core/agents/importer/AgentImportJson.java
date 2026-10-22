@@ -1,12 +1,11 @@
 package com.agenticai.core.agents.importer;
 
-import tools.jackson.databind.JsonNode;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Type-tolerant accessors over untrusted JSON. A wrong type or a missing field yields null / empty
@@ -22,8 +21,8 @@ public final class AgentImportJson {
     private static final Pattern SECRET_KEY =
             Pattern.compile(
                     "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_"
-                        + " ]?token|access[-_ ]?token|refresh[-_ ]?token|private[-_"
-                        + " ]?key|session[-_ ]?token|^token$|^key$)");
+                            + " ]?token|access[-_ ]?token|refresh[-_ ]?token|private[-_"
+                            + " ]?key|session[-_ ]?token|^token$|^key$)");
 
     /** Upper bound on nodes visited when scanning for credential fields. */
     private static final int SCAN_NODE_CAP = 200_000;

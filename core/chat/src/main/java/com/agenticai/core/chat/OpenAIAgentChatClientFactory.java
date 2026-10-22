@@ -1,9 +1,7 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ProviderName;
-
 import io.micrometer.core.instrument.MeterRegistry;
-
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;

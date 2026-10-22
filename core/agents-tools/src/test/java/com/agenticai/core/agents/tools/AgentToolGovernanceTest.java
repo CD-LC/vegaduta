@@ -307,12 +307,16 @@ class AgentToolGovernanceTest {
     void unclassifiedToolsRequireApprovalWhenConfiguredFailClosed() {
         when(registry.resolve(TOOL)).thenReturn(unclassified());
 
-        ToolDispatchGate.Verdict verdict = governanceWithUnclassified("require-approval").decide(registry, TOOL);
+        ToolDispatchGate.Verdict verdict =
+                governanceWithUnclassified("require-approval").decide(registry, TOOL);
 
         assertEquals(ToolDispatchGate.Outcome.REQUIRE_APPROVAL, verdict.outcome());
         assertEquals(
                 1.0,
-                meters.counter(AgentToolGovernance.REFUSED_METRIC, "reason", "UNCLASSIFIED_APPROVAL")
+                meters.counter(
+                                AgentToolGovernance.REFUSED_METRIC,
+                                "reason",
+                                "UNCLASSIFIED_APPROVAL")
                         .count());
     }
 
@@ -320,7 +324,8 @@ class AgentToolGovernanceTest {
     void unclassifiedToolsAreDeniedWhenConfiguredDeny() {
         when(registry.resolve(TOOL)).thenReturn(unclassified());
 
-        ToolDispatchGate.Verdict verdict = governanceWithUnclassified("deny").decide(registry, TOOL);
+        ToolDispatchGate.Verdict verdict =
+                governanceWithUnclassified("deny").decide(registry, TOOL);
 
         assertEquals(ToolDispatchGate.Outcome.DENY, verdict.outcome());
         assertTrue(verdict.reason().contains("no safety classification"), verdict.reason());

@@ -4,7 +4,10 @@ import com.agenticai.core.chat.CallerRunsToolLoop;
 import com.agenticai.core.json.JsonMappers;
 import com.anthropic.models.messages.ToolChoice;
 import com.anthropic.models.messages.ToolChoiceTool;
-
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
@@ -15,18 +18,12 @@ import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * The one place "ask a model for JSON, get JSON back" is implemented. Before this class existed, a
@@ -210,7 +207,7 @@ public final class StructuredOutput {
                                                 (raw == null || raw.isBlank()
                                                                 ? "The reply was empty"
                                                                 : "The reply did not contain valid"
-                                                                      + " JSON")
+                                                                        + " JSON")
                                                         + " - expected a JSON document for "
                                                         + typeName
                                                         + ".",
@@ -280,8 +277,8 @@ public final class StructuredOutput {
                         .append(error.getMessage())
                         .append(
                                 "\n"
-                                    + "Reply again with ONLY the corrected JSON - no markdown code"
-                                    + " fences, no commentary.");
+                                        + "Reply again with ONLY the corrected JSON - no markdown code"
+                                        + " fences, no commentary.");
         if (formatInstructions != null && !formatInstructions.isBlank()) {
             sb.append("\n\n").append(formatInstructions);
         }

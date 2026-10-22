@@ -15,14 +15,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.mapList;
 import static com.agenticai.core.workflow.WorkflowDataOps.str;
 import static com.agenticai.core.workflow.WorkflowDataOps.stringList;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.LongNode;
-import tools.jackson.databind.node.NullNode;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.databind.node.StringNode;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -31,6 +23,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.LongNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * The {@code aggregate} data operation. {@code aggregations: [{operation, field, as, separator}]},

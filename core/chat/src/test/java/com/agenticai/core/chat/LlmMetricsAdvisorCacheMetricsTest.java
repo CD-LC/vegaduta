@@ -13,11 +13,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.providers.ProviderName;
-
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.search.MeterNotFoundException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.chat.client.ChatClientRequest;
@@ -30,9 +30,6 @@ import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Covers the cached-vs-uncached token accounting {@link LlmMetricsAdvisor} emits, kept in its own
@@ -234,11 +231,11 @@ class LlmMetricsAdvisorCacheMetricsTest {
                 400.0,
                 counterTotal("llm.input.tokens.uncached"),
                 "prompt_tokens already contains the cached ones, so the uncached bucket is the"
-                    + " remainder");
+                        + " remainder");
         assertNull(
                 counterTotal("llm.input.tokens.cache.write"),
                 "OpenAI reports no cache-write count - the series must not exist rather than read"
-                    + " zero");
+                        + " zero");
     }
 
     @Test

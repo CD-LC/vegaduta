@@ -14,7 +14,7 @@ record ForcedStructuredTool(String name, String inputSchema) implements ToolCall
                 .name(name)
                 .description(
                         "Return the final structured result. Call this tool exactly once with the"
-                            + " complete answer.")
+                                + " complete answer.")
                 .inputSchema(inputSchema)
                 .build();
     }

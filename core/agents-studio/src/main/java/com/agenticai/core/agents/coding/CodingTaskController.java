@@ -28,11 +28,11 @@ import org.springframework.web.server.ResponseStatusException;
  * it at the human gate, cancel, roll back.
  *
  * <p>Thin on purpose: access (RUNNER on the agent), the plan gate, validation, the flag and every
- * status code are decided in {@link CodingTaskService}, which throws only types
- * {@code GlobalExceptionHandler} already maps. No {@code SecurityConfig} entry: the path falls
- * through to {@code anyRequest().authenticated()}, like the Agent Lab and scheduled-task routes.
- * With {@code app.coding-harness.enabled=false} (the default) everything but {@code /capabilities}
- * answers 404 - including the upload, which is refused before a byte of it is read.
+ * status code are decided in {@link CodingTaskService}, which throws only types {@code
+ * GlobalExceptionHandler} already maps. No {@code SecurityConfig} entry: the path falls through to
+ * {@code anyRequest().authenticated()}, like the Agent Lab and scheduled-task routes. With {@code
+ * app.coding-harness.enabled=false} (the default) everything but {@code /capabilities} answers 404
+ * - including the upload, which is refused before a byte of it is read.
  */
 @RestController
 @RequestMapping("/api/coding-tasks")
@@ -52,22 +52,22 @@ public class CodingTaskController {
     }
 
     /**
-     * Starts a task. 202: it is queued, the body is its first poll result. Multipart because the source
-     * may be an uploaded archive; exactly one of {@code repoUrl} / {@code archive} must be given.
+     * Starts a task. 202: it is queued, the body is its first poll result. Multipart because the
+     * source may be an uploaded archive; exactly one of {@code repoUrl} / {@code archive} must be
+     * given.
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TaskView> start(
-        @RequestParam("agentId") String agentId,
-        @RequestParam("instruction") String instruction,
-        @RequestParam("testCommand") String testCommand,
-        @RequestParam(value = "repoUrl", required = false) String repoUrl,
-        @RequestParam(value = "archive", required = false) MultipartFile archive,
-        @RequestParam(value = "maxSteps", required = false) Integer maxSteps,
-        @RequestParam(value = "maxWallSeconds", required = false) Integer maxWallSeconds,
-        @RequestParam(value = "maxTokens", required = false) Integer maxTokens,
-        @RequestParam(value = "maxFixIterations", required = false) Integer maxFixIterations,
-        Principal principal
-    ) {
+            @RequestParam("agentId") String agentId,
+            @RequestParam("instruction") String instruction,
+            @RequestParam("testCommand") String testCommand,
+            @RequestParam(value = "repoUrl", required = false) String repoUrl,
+            @RequestParam(value = "archive", required = false) MultipartFile archive,
+            @RequestParam(value = "maxSteps", required = false) Integer maxSteps,
+            @RequestParam(value = "maxWallSeconds", required = false) Integer maxWallSeconds,
+            @RequestParam(value = "maxTokens", required = false) Integer maxTokens,
+            @RequestParam(value = "maxFixIterations", required = false) Integer maxFixIterations,
+            Principal principal) {
         service.requireEnabled();
         UUID agent;
         try {
@@ -78,8 +78,11 @@ public class CodingTaskController {
         byte[] bytes = null;
         if (archive != null && !archive.isEmpty()) {
             if (archive.getSize() > settings.maxArchiveBytes()) {
-                throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE,
-                    "The archive is larger than the " + (settings.maxArchiveBytes() >> 20) + " MB limit.");
+                throw new ResponseStatusException(
+                        HttpStatus.CONTENT_TOO_LARGE,
+                        "The archive is larger than the "
+                                + (settings.maxArchiveBytes() >> 20)
+                                + " MB limit.");
             }
             try {
                 bytes = archive.getBytes();
@@ -87,30 +90,43 @@ public class CodingTaskController {
                 throw new IllegalArgumentException("The archive could not be read.");
             }
         }
-        TaskView view = service.start(new StartInput(
-            agent, instruction, testCommand, repoUrl, bytes, maxSteps, maxWallSeconds, maxTokens, maxFixIterations),
-            subjectOf(principal));
+        TaskView view =
+                service.start(
+                        new StartInput(
+                                agent,
+                                instruction,
+                                testCommand,
+                                repoUrl,
+                                bytes,
+                                maxSteps,
+                                maxWallSeconds,
+                                maxTokens,
+                                maxFixIterations),
+                        subjectOf(principal));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(view);
     }
 
     /**
      * {@code limit} 1..100 (default 20 = the newest 20, as before), {@code offset} skips the newest
-     * tasks. {@code X-Total-Count} is the size of the user's recent list (the index keeps the newest 200).
+     * tasks. {@code X-Total-Count} is the size of the user's recent list (the index keeps the
+     * newest 200).
      */
     @GetMapping
     public ResponseEntity<List<TaskView>> list(
-        @RequestParam(value = "limit", required = false) Integer limit,
-        @RequestParam(value = "offset", required = false) Long offset,
-        Principal principal
-    ) {
-        int size = limit == null ? CodingTaskListing.DEFAULT_LIMIT : Math.min(Math.max(limit, 1), CodingTaskListing.MAX_LIMIT);
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Long offset,
+            Principal principal) {
+        int size =
+                limit == null
+                        ? CodingTaskListing.DEFAULT_LIMIT
+                        : Math.min(Math.max(limit, 1), CodingTaskListing.MAX_LIMIT);
         int skip = (int) Math.min(offset == null ? 0 : Math.max(offset, 0), 1_000_000L);
         CodingTaskListing.Page page = service.list(subjectOf(principal), skip, size);
         long seen = (long) skip + page.tasks().size();
         return ResponseEntity.ok()
-            .header("X-Total-Count", String.valueOf(Math.max(page.total(), seen)))
-            .header("X-Has-More", String.valueOf(page.total() > skip + size))
-            .body(page.tasks());
+                .header("X-Total-Count", String.valueOf(Math.max(page.total(), seen)))
+                .header("X-Has-More", String.valueOf(page.total() > skip + size))
+                .body(page.tasks());
     }
 
     @GetMapping("/{taskId}")
@@ -123,9 +139,12 @@ public class CodingTaskController {
         return service.diff(taskId, subjectOf(principal));
     }
 
-    /** The decision is bound to the diff the user saw: {@code diffHash} must match. 409 otherwise. */
+    /**
+     * The decision is bound to the diff the user saw: {@code diffHash} must match. 409 otherwise.
+     */
     @PostMapping("/{taskId}/approve")
-    public TaskView approve(@PathVariable String taskId, @RequestBody ApproveRequest body, Principal principal) {
+    public TaskView approve(
+            @PathVariable String taskId, @RequestBody ApproveRequest body, Principal principal) {
         return service.approve(taskId, subjectOf(principal), body == null ? null : body.diffHash());
     }
 

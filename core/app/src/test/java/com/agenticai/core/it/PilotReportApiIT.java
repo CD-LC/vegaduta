@@ -14,7 +14,8 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-
+import java.util.Set;
+import java.util.UUID;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -30,12 +31,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * The pilot baseline and report endpoints against a real Postgres with two tenant schemas. Covers a
@@ -130,8 +127,8 @@ class PilotReportApiIT extends AbstractContextIT {
 
     private static final String BASELINE =
             "{\"jobType\":\"APPOINTMENT_REMINDERS\",\"baselinePeriod\":\"Aug"
-                + " 2026\",\"monthlyVolume\":300,"
-                + "\"avgHandlingMinutes\":4.5,\"missedRate\":0.22,\"avgValuePerConversion\":1200,\"valueCurrency\":\"inr\"}";
+                    + " 2026\",\"monthlyVolume\":300,"
+                    + "\"avgHandlingMinutes\":4.5,\"missedRate\":0.22,\"avgValuePerConversion\":1200,\"valueCurrency\":\"inr\"}";
 
     @Test
     void zeroVolumeAgentGetsAReportWithNoRatesAndNoZeros() throws Exception {

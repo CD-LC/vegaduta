@@ -2,23 +2,7 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ProviderName;
 import com.google.genai.Client;
-
 import io.micrometer.observation.ObservationRegistry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
-import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.retry.RetryTemplate;
-import org.springframework.stereotype.Component;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +18,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.retry.RetryTemplate;
+import org.springframework.stereotype.Component;
 
 /**
  * The cross-cutting model-construction policy every chat-client factory in this package shares, so
@@ -197,7 +194,7 @@ public class LlmModelSupport implements DisposableBean {
         if (thinkingOn) {
             log.info(
                     "Anthropic forced-tool structured output skipped: extended thinking is on for"
-                        + " model {}",
+                            + " model {}",
                     model);
             return chatModel;
         }
@@ -220,7 +217,7 @@ public class LlmModelSupport implements DisposableBean {
         if (schema == null) {
             log.info(
                     "Anthropic forced-tool structured output skipped: schema '{}' is not"
-                        + " representable as a tool input schema; using prompt-and-validate",
+                            + " representable as a tool input schema; using prompt-and-validate",
                     spec.name());
             return chatModel;
         }

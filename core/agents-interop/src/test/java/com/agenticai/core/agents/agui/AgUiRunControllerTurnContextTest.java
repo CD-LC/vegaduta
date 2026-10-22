@@ -13,18 +13,14 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.security.TenantContext;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
-import reactor.core.publisher.Flux;
-
-import tools.jackson.databind.node.StringNode;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import reactor.core.publisher.Flux;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * ADR-0022 stage 4 at the AG-UI entry: {@code POST /api/agents/{agentId}/agui/run} builds the turn

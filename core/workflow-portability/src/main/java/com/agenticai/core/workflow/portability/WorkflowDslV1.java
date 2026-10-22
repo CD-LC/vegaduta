@@ -1,7 +1,5 @@
 package com.agenticai.core.workflow.portability;
 
-import tools.jackson.databind.JsonNode;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +9,7 @@ import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * VegaDuta workflow DSL, version 1 - the documented, versioned JSON file a workflow is exported to

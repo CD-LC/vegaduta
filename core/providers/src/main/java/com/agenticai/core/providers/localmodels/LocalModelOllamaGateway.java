@@ -3,23 +3,7 @@ package com.agenticai.core.providers.localmodels;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-
 import jakarta.annotation.PreDestroy;
-
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,6 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The only door from the local-models API to Ollama: {@code GET /api/tags} (what is installed),
@@ -234,10 +230,10 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         if (loaded.isPresent() && loaded.get() < wantedContext) {
             log.warn(
                     "Local model '{}' is loaded with a {}-token context but core sends prompts for"
-                        + " {} (app.llm.ollama.num-ctx). This Ollama runner ignores the per-request"
-                        + " num_ctx, so long agent prompts are truncated. Set"
-                        + " OLLAMA_CONTEXT_LENGTH={} in the Ollama server's environment and restart"
-                        + " it.",
+                            + " {} (app.llm.ollama.num-ctx). This Ollama runner ignores the per-request"
+                            + " num_ctx, so long agent prompts are truncated. Set"
+                            + " OLLAMA_CONTEXT_LENGTH={} in the Ollama server's environment and restart"
+                            + " it.",
                     tag,
                     loaded.get(),
                     wantedContext,
@@ -400,8 +396,8 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                 refusalLogged = true;
                 log.warn(
                         "The Ollama URL {} is refused by the SSRF guard ({}). List the host in"
-                            + " app.security.outbound.allowed-private-hosts to use a local model"
-                            + " server.",
+                                + " app.security.outbound.allowed-private-hosts to use a local model"
+                                + " server.",
                         baseUrl,
                         e.getMessage());
             }

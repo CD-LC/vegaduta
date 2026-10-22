@@ -8,9 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.providers.ToolRouterMode;
-
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -29,14 +30,8 @@ import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
 import reactor.core.publisher.Flux;
-
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Through the real {@link ArgumentSanitizingToolCallingManager}, against a scripted provider model,
@@ -165,8 +160,8 @@ class ConstrainedToolRouterChatModelTest {
                         List.of(
                                 reply(
                                         "```json\n"
-                                            + "{\"name\":\"generate_document\",\"arguments\":{\"type\":\"PDF\",\"filename\":\"r.pdf\"}}\n"
-                                            + "```"),
+                                                + "{\"name\":\"generate_document\",\"arguments\":{\"type\":\"PDF\",\"filename\":\"r.pdf\"}}\n"
+                                                + "```"),
                                 reply("Plain prose, no JSON.")));
 
         ChatResponse out = router(provider, ToolRouterMode.FORMAT, 6).call(prompt(tool));
@@ -432,7 +427,7 @@ class ConstrainedToolRouterChatModelTest {
                         .description("Generate a document.")
                         .inputSchema(
                                 "{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\"},"
-                                    + "\"filename\":{\"type\":\"string\"}},\"required\":[\"type\",\"filename\"]}")
+                                        + "\"filename\":{\"type\":\"string\"}},\"required\":[\"type\",\"filename\"]}")
                         .build();
 
         @Override

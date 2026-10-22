@@ -1,21 +1,12 @@
 package com.agenticai.core.quality.eval;
 
 import com.agenticai.core.json.JsonMappers;
-
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.ai.chat.client.ChatClient;
-
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -24,6 +15,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.ai.chat.client.ChatClient;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Master Roadmap 2026 item #15 (CI golden-dataset eval suite, sec B/C) - entry point. Run via
@@ -193,9 +189,9 @@ public final class EvalRunner {
                     || System.getenv("EVAL_BASE_URL").isBlank()) {
                 System.out.println(
                         "[eval] SKIPPED - EVAL_BACKEND=openai but EVAL_BASE_URL is not set. This is"
-                            + " not a failure: point it at an OpenAI-compatible endpoint (e.g."
-                            + " http://localhost:11434 for Ollama) to run the self-hosted/on-device"
-                            + " eval path.");
+                                + " not a failure: point it at an OpenAI-compatible endpoint (e.g."
+                                + " http://localhost:11434 for Ollama) to run the self-hosted/on-device"
+                                + " eval path.");
                 System.exit(0);
                 return;
             }
@@ -205,9 +201,9 @@ public final class EvalRunner {
             if (apiKey == null || apiKey.isBlank()) {
                 System.out.println(
                         "[eval] SKIPPED - ANTHROPIC_API_KEY is not set. This is not a failure: the"
-                            + " eval suite needs a real, billed LLM key to run (see"
-                            + " core/quality/eval-harness.md). Configure the ANTHROPIC_API_KEY"
-                            + " secret to actually exercise the golden dataset.");
+                                + " eval suite needs a real, billed LLM key to run (see"
+                                + " core/quality/eval-harness.md). Configure the ANTHROPIC_API_KEY"
+                                + " secret to actually exercise the golden dataset.");
                 System.exit(0);
                 return;
             }
@@ -276,7 +272,7 @@ public final class EvalRunner {
         Tracer tracer = openTelemetry.getTracer("com.agenticai.core.quality.eval.EvalRunner");
         log.info(
                 "[eval] starting run {} ({} case(s), model={}, token-regression threshold={}%,"
-                    + " langfuseRun={})",
+                        + " langfuseRun={})",
                 evalRunId,
                 cases.size(),
                 model,
@@ -298,7 +294,7 @@ public final class EvalRunner {
         if (repeats > 1) {
             log.info(
                     "[eval] repeats={} - every case runs {}x ({} billed model calls per case), gate"
-                        + " = strict majority per case, min mean pass^k={}",
+                            + " = strict majority per case, min mean pass^k={}",
                     repeats,
                     repeats,
                     repeats * 2,
@@ -358,7 +354,7 @@ public final class EvalRunner {
             System.out.printf(
                     java.util.Locale.ROOT,
                     "[eval] per-case latency: p50=%dms max=%dms (generation+judge, backend=%s,"
-                        + " model=%s)%n",
+                            + " model=%s)%n",
                     p50,
                     max,
                     backend,
@@ -525,7 +521,7 @@ public final class EvalRunner {
         for (String unmatched : requestedIds) {
             log.warn(
                     "[eval] {}={} named case id '{}' which does not exist in golden-dataset.json -"
-                        + " ignoring",
+                            + " ignoring",
                     CASE_IDS_ENV_VAR,
                     rawCsv,
                     unmatched);

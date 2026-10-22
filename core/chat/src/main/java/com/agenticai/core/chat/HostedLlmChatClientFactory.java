@@ -8,9 +8,9 @@ import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.genai.Client;
 import com.google.genai.types.HttpOptions;
-
 import io.micrometer.core.instrument.MeterRegistry;
-
+import java.util.Locale;
+import java.util.Map;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
@@ -19,9 +19,6 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Builds a {@link ChatClient} from a {@link PlatformHostedLlmProvider} row - the FREE-tier

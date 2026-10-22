@@ -12,12 +12,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.RedisConnectionFailureException;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * {@link SessionMemoryService}: summarisation when turns leave the replay window, rewind, and the

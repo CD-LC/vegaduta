@@ -3,20 +3,17 @@ package com.agenticai.core.agents.tools.localshell;
 import com.agenticai.core.agents.tools.stdiosandbox.StdioSandboxException;
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.json.JsonMappers;
-
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Optional;
 
 /**
  * The Assistant's terminal, as two tools over one sandboxed runner:
@@ -80,23 +77,23 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
         String description =
                 readOnly
                         ? "Runs a read-only inspection command without asking: ls, cat, head, tail,"
-                              + " wc, grep, find, sort, cut, diff, jq, git status/log/diff/show,"
-                              + " date, uname, df, du, ps, which, and pipes between them. No"
-                              + " redirects, no $( ) or backticks, no ; && or &. Anything else is"
-                              + " refused: use local_shell for that. "
+                                + " wc, grep, find, sort, cut, diff, jq, git status/log/diff/show,"
+                                + " date, uname, df, du, ps, which, and pipes between them. No"
+                                + " redirects, no $( ) or backticks, no ; && or &. Anything else is"
+                                + " refused: use local_shell for that. "
                                 + where
                         : "Runs any shell command (build, script, file processing, anything) and"
-                              + " returns its output. "
+                                + " returns its output. "
                                 + (approvalRequired
                                         ? "EVERY call is shown to the user for approval before it"
-                                              + " runs, so say in plain words what the command does"
-                                              + " first, and prefer local_shell_read for looking"
-                                              + " around. "
+                                                + " runs, so say in plain words what the command does"
+                                                + " first, and prefer local_shell_read for looking"
+                                                + " around. "
                                         : "On this install the calls run without waiting for"
-                                              + " approval (the owner trusted the sandboxed"
-                                              + " terminal), so still say in plain words what the"
-                                              + " command does first, and prefer local_shell_read"
-                                              + " for looking around. ")
+                                                + " approval (the owner trusted the sandboxed"
+                                                + " terminal), so still say in plain words what the"
+                                                + " command does first, and prefer local_shell_read"
+                                                + " for looking around. ")
                                 + where;
         return ToolDefinition.builder()
                 .name(readOnly ? READ_NAME : RUN_NAME)
@@ -170,13 +167,13 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
                     bg.put(
                             "note",
                             "The server keeps running. Tell the person it is in the Preview pane"
-                                + " (top right of the Assistant).");
+                                    + " (top right of the Assistant).");
                 } else {
                     bg.put("exit_code", server.exitCode() == null ? -1 : server.exitCode());
                     bg.put(
                             "note",
                             "The server stopped on its own; read the output, fix it and start it"
-                                + " again.");
+                                    + " again.");
                 }
                 return MAPPER.writeValueAsString(bg);
             }

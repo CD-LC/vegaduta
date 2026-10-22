@@ -1,14 +1,12 @@
 package com.agenticai.core.tenancy;
 
 import com.agenticai.core.json.JsonMappers;
-
+import java.util.Map;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.type.format.FormatMapper;
 import org.hibernate.type.format.jackson.Jackson3JsonFormatMapper;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * Pins Hibernate 7's {@code @JdbcTypeCode(SqlTypes.JSON)} mapper to a Jackson 3 mapper built from

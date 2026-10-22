@@ -22,18 +22,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockHttpServletResponse;
-
-import reactor.core.publisher.Flux;
-
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.time.Duration;
@@ -41,6 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletResponse;
+import reactor.core.publisher.Flux;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The JSON-RPC binding end to end against a mocked {@link AgentChatService}: method-name aliasing
@@ -259,8 +255,8 @@ class A2aJsonRpcControllerTest {
         replyWith(Flux.just("ok"));
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"contextId\":\"conv-42\",\"parts\":[{\"text\":\"again\"}]},"
-                    + "\"configuration\":{\"historyLength\":1},\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"contextId\":\"conv-42\",\"parts\":[{\"text\":\"again\"}]},"
+                        + "\"configuration\":{\"historyLength\":1},\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
 
@@ -382,8 +378,8 @@ class A2aJsonRpcControllerTest {
     void filePartsAreContentTypeNotSupported() {
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"parts\":[{\"kind\":\"file\",\"file\":{\"uri\":\"https://x/y.pdf\"}}]},"
-                    + "\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"parts\":[{\"kind\":\"file\",\"file\":{\"uri\":\"https://x/y.pdf\"}}]},"
+                        + "\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
         assertError(rpc(null, "1.0", body), A2aError.CONTENT_TYPE_NOT_SUPPORTED);
@@ -435,8 +431,8 @@ class A2aJsonRpcControllerTest {
     void multiTurnTaskContinuationIsRejectedWithGuidance() {
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"taskId\":\"t-1\",\"parts\":[{\"text\":\"more\"}]},"
-                    + "\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"taskId\":\"t-1\",\"parts\":[{\"text\":\"more\"}]},"
+                        + "\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
         JsonNode envelope = rpc(null, "1.0", body);

@@ -119,7 +119,8 @@ class JsonMappersTest {
     }
 
     @Test
-    void isoDatesWritesInstantsAsIsoStringsAndKeepsTheOtherJackson2Defaults() throws JacksonException {
+    void isoDatesWritesInstantsAsIsoStringsAndKeepsTheOtherJackson2Defaults()
+            throws JacksonException {
         Instant t = Instant.parse("2026-01-02T03:04:05Z");
         assertEquals("\"2026-01-02T03:04:05Z\"", JsonMappers.isoDates().writeValueAsString(t));
         assertThrows(
@@ -140,7 +141,8 @@ class JsonMappersTest {
     @Test
     void strictReaderRejectsDuplicateKeysAndTrailingTokens() {
         assertThrows(
-                JacksonException.class, () -> JsonMappers.strictReader().readTree("{\"a\":1,\"a\":2}"));
+                JacksonException.class,
+                () -> JsonMappers.strictReader().readTree("{\"a\":1,\"a\":2}"));
         assertThrows(JacksonException.class, () -> JsonMappers.strictReader().readTree("{} {}"));
         // the plain mapper keeps the Jackson 2 behaviour: last duplicate wins, trailing ignored
         assertEquals("{\"a\":2}", JsonMappers.plain().readTree("{\"a\":1,\"a\":2}").toString());

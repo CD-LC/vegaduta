@@ -2,19 +2,16 @@ package com.agenticai.core.agents.tools.apiguide;
 
 import com.agenticai.core.agentspi.ApiSpecProvider;
 import com.agenticai.core.json.JsonMappers;
-
+import java.io.IOException;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
-
-import java.io.IOException;
-import java.util.Optional;
 
 /**
  * {@code vegaduta_api_guide}: the Assistant's way into the platform's REST contract. Read-only - it
@@ -44,14 +41,14 @@ public class ApiGuideToolCallback implements ToolCallback {
                 .name(NAME)
                 .description(
                         "Looks up this VegaDuta install's REST API in its real OpenAPI spec. Use it"
-                            + " whenever the user asks how to do something with the API, which"
-                            + " endpoint to call, or wants data the API can return. action=search"
-                            + " finds endpoints by words; action=describe returns the parameters,"
-                            + " request body and response of one endpoint and a ready json_ui"
-                            + " apiCall block that shows the live result to the user (GET runs by"
-                            + " itself, POST/PUT/PATCH/DELETE wait for the user to press Send)."
-                            + " Prefer showing the live result over describing it. The full spec is"
-                            + " at /api/openapi.json.")
+                                + " whenever the user asks how to do something with the API, which"
+                                + " endpoint to call, or wants data the API can return. action=search"
+                                + " finds endpoints by words; action=describe returns the parameters,"
+                                + " request body and response of one endpoint and a ready json_ui"
+                                + " apiCall block that shows the live result to the user (GET runs by"
+                                + " itself, POST/PUT/PATCH/DELETE wait for the user to press Send)."
+                                + " Prefer showing the live result over describing it. The full spec is"
+                                + " at /api/openapi.json.")
                 .inputSchema(
                         """
 {

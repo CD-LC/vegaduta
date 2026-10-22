@@ -9,7 +9,10 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.security.TenantLimitExceededException;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -26,15 +29,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 /**
  * One model turn for a CLIENT-SIDE tool-calling agent, served from the platform's hosted LLM pool:
@@ -123,9 +120,9 @@ public class AgentTurnService {
         if (this.entitlements == null) {
             log.error(
                     "No FimCompletionEntitlements bean is registered - POST"
-                        + " /api/completions/agent-turn will refuse every request until one"
-                        + " appears; it spends platform-paid hosted inference and must not run"
-                        + " unmetered.");
+                            + " /api/completions/agent-turn will refuse every request until one"
+                            + " appears; it spends platform-paid hosted inference and must not run"
+                            + " unmetered.");
         }
     }
 
@@ -162,7 +159,7 @@ public class AgentTurnService {
         if (adapter == null) {
             throw new EntitlementsUnavailableException(
                     "Hosted agent turns are unavailable: no entitlements adapter is registered, and"
-                        + " this endpoint must not serve platform-paid inference unmetered.");
+                            + " this endpoint must not serve platform-paid inference unmetered.");
         }
         int maxTokens = clampMaxTokens(request.maxTokens());
         double temperature =
@@ -178,7 +175,7 @@ public class AgentTurnService {
             lease.abandon();
             throw new BusyException(
                     "The hosted agent is handling its maximum number of turns - retry in a"
-                        + " moment.");
+                            + " moment.");
         }
         try {
             return runChain(request, maxTokens, temperature, lease);

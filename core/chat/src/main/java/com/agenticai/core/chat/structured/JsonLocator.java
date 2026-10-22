@@ -1,11 +1,10 @@
 package com.agenticai.core.chat.structured;
 
+import java.util.Arrays;
+import java.util.Optional;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Finds the JSON in a model reply for {@link StructuredOutput}: the fence-stripped reply when it is

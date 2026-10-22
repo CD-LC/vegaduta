@@ -9,11 +9,6 @@ import com.agenticai.core.workflow.portability.DifyImportModel.Ctx;
 import com.agenticai.core.workflow.portability.DifyImportModel.Exit;
 import com.agenticai.core.workflow.portability.DifyImportModel.Level;
 import com.agenticai.core.workflow.portability.DifyImportModel.Mapped;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +17,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Best-effort import of a Dify app DSL ({@code kind: app}, {@code workflow.graph.nodes/edges}, as
@@ -210,7 +208,7 @@ public final class DifyImportMapper {
             wf.report.unsupported(
                     "Conversation variables (" + conversation.size() + ")",
                     "Chatflow conversation memory has no equivalent here; references to it are left"
-                        + " as written.");
+                            + " as written.");
         }
         return wf;
     }
@@ -234,7 +232,7 @@ public final class DifyImportMapper {
                 wf.report.needsManual(
                         "Secret variable '" + AgentImportText.inline(name, 60) + "'",
                         "Dify secret values are never exported and never imported; only the name is"
-                            + " kept.",
+                                + " kept.",
                         "Create a vault secret with this name; HTTP nodes refer to it as {{secret."
                                 + name
                                 + "}}.");
@@ -242,7 +240,7 @@ public final class DifyImportMapper {
                 wf.report.unsupported(
                         "Environment variable '" + AgentImportText.inline(name, 60) + "'",
                         "Plain environment variables have no equivalent store here; references to"
-                            + " it become {{ $vars."
+                                + " it become {{ $vars."
                                 + name
                                 + " }} and need a value.");
             }
@@ -294,7 +292,7 @@ public final class DifyImportMapper {
                                         + ")",
                                 String.join(" ", m.notes),
                                 "Open the node on the canvas and check it before activating the"
-                                    + " workflow.");
+                                        + " workflow.");
                     }
                     default -> {
                         wf.fidelity.placeholders++;
@@ -571,7 +569,7 @@ public final class DifyImportMapper {
         }
         c.lose(
                 "The search query is this node's input, not the Dify query variable; reranking and"
-                    + " score thresholds were not carried over.");
+                        + " score thresholds were not carried over.");
         return factory.single(c, "knowledge", c.node.title(), config, Level.APPROXIMATE);
     }
 
@@ -608,8 +606,8 @@ public final class DifyImportMapper {
         }
         c.lose(
                 "JavaScript is never executed on this platform. The original source is kept in the"
-                    + " node's importedSource field and the node passes its input through unchanged"
-                    + " until you replace it with a Transform, Agent or Tool step.");
+                        + " node's importedSource field and the node passes its input through unchanged"
+                        + " until you replace it with a Transform, Agent or Tool step.");
         return factory.single(
                 c, "code", "[Needs review] " + c.node.title(), config, Level.APPROXIMATE);
     }
@@ -689,8 +687,8 @@ public final class DifyImportMapper {
         }
         c.lose(
                 "The Sub-Flow repeats the body once per item of the input field named by"
-                    + " itemsField; check that field, the parallel/error settings (not carried) and"
-                    + " how the body's result is collected.");
+                        + " itemsField; check that field, the parallel/error settings (not carried) and"
+                        + " how the body's result is collected.");
         return factory.single(c, "sub_flow", c.node.title(), config, Level.APPROXIMATE);
     }
 }

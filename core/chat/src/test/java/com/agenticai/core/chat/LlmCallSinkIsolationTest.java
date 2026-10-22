@@ -132,10 +132,27 @@ class LlmCallSinkIsolationTest {
         org.mockito.Mockito.doThrow(new IllegalStateException("db down"))
                 .when(logService)
                 .record(
-                        any(), any(), any(), any(), any(), any(), any(),
-                        org.mockito.ArgumentMatchers.anyBoolean(), any(), any(), any(), any(),
-                        org.mockito.ArgumentMatchers.anyLong(), any(), any(), any(), any(), any(),
-                        any(), any(), any());
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        org.mockito.ArgumentMatchers.anyBoolean(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        org.mockito.ArgumentMatchers.anyLong(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any());
         ChatClientResponse expected = chunk();
         when(callChain.nextCall(any())).thenReturn(expected);
 
@@ -144,7 +161,9 @@ class LlmCallSinkIsolationTest {
         assertSame(expected, actual);
         assertEquals(1.0, registry.get("llm.calls").counter().count());
         assertEquals(
-                0, registry.find("llm.call.errors").meters().size(), "a sink failure is not a call error");
+                0,
+                registry.find("llm.call.errors").meters().size(),
+                "a sink failure is not a call error");
     }
 
     @Test

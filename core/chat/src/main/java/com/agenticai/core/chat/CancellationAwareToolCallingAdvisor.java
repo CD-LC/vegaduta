@@ -1,5 +1,7 @@
 package com.agenticai.core.chat;
 
+import java.util.List;
+import java.util.concurrent.CancellationException;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
@@ -8,11 +10,7 @@ import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.model.tool.ToolExecutionEligibilityChecker;
 import org.springframework.ai.model.tool.ToolExecutionResult;
-
 import reactor.core.publisher.Flux;
-
-import java.util.List;
-import java.util.concurrent.CancellationException;
 
 /**
  * {@link ToolCallingAdvisor} that stops a streamed tool loop whose subscriber has gone away

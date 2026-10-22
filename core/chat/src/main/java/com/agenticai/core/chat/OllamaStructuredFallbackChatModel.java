@@ -4,7 +4,11 @@ import com.agenticai.core.chat.structured.JsonSchemaCheck;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.chat.structured.StructuredOutputException;
 import com.agenticai.core.json.JsonMappers;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -19,17 +23,9 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-
 import reactor.core.publisher.Flux;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Keeps a structured-output request alive on an Ollama model whose server refuses {@code
@@ -100,7 +96,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
                 FORMAT_REFUSED.add(model);
                 log.warn(
                         "Ollama refused the reply schema for model '{}'; structured replies use"
-                            + " prompt-based JSON with validation until core restarts. Message: {}",
+                                + " prompt-based JSON with validation until core restarts. Message: {}",
                         model,
                         e.getMessage());
             }
@@ -174,8 +170,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
 
     private String schemaInstruction() {
         return "Reply with ONLY one JSON value that is valid for the JSON Schema below. No markdown"
-                   + " code fences, no commentary before or after.\n"
-                   + "JSON Schema: "
+                + " code fences, no commentary before or after.\n"
+                + "JSON Schema: "
                 + schemaText;
     }
 

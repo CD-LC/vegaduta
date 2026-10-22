@@ -2,20 +2,17 @@ package com.agenticai.core.mcpserver.expose;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.McpCallerContext;
-
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * JSON-RPC level hook that lets ONE authenticated caller see - and call - its own exposed agents /

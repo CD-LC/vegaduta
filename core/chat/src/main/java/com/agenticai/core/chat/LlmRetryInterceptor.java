@@ -1,12 +1,10 @@
 package com.agenticai.core.chat;
 
+import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * Applies the platform's bounded {@link LlmRetry} policy around the terminal transport interceptor

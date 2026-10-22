@@ -4,7 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import com.zaxxer.hikari.HikariDataSource;
-
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,15 +20,6 @@ import org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.sql.DataSource;
 
 /**
  * Runs with Spring Boot's {@code DataSourceAutoConfiguration} loaded, as in core, so Boot's own
@@ -324,8 +321,8 @@ class DbAuthConfigurationTest {
                         "app.datasource.auth=aws-iam",
                         "app.datasource.aws.region=eu-west-1",
                         "spring.datasource.url="
-                            + "jdbc:postgresql://mydb.abc123.eu-west-1.rds.amazonaws.com:5432/app"
-                            + "?sslmode=require",
+                                + "jdbc:postgresql://mydb.abc123.eu-west-1.rds.amazonaws.com:5432/app"
+                                + "?sslmode=require",
                         "spring.datasource.hikari.minimum-idle=0",
                         "spring.datasource.hikari.maximum-pool-size=3")
                 .run(
@@ -343,7 +340,7 @@ class DbAuthConfigurationTest {
                                             o ->
                                                     o.contains(
                                                                     "|agentic|mydb.abc123.eu-west-1"
-                                                                        + ".rds.amazonaws.com:5432/?")
+                                                                            + ".rds.amazonaws.com:5432/?")
                                                             && o.contains("Action=connect")
                                                             && o.contains("X-Amz-Signature="));
                             // One cached token inside its refresh window, handed to every new

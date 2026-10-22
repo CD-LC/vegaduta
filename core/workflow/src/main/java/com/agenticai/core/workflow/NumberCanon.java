@@ -1,10 +1,5 @@
 package com.agenticai.core.workflow;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.DoubleNode;
-import tools.jackson.databind.node.LongNode;
-import tools.jackson.databind.node.StringNode;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,6 +8,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.DoubleNode;
+import tools.jackson.databind.node.LongNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Number and date canonicalisation shared by every data operation: canonical (strict) versus

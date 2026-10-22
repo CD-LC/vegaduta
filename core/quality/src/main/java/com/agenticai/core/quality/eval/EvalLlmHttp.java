@@ -1,10 +1,9 @@
 package com.agenticai.core.quality.eval;
 
+import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.convert.DurationStyle;
-
-import java.time.Duration;
 
 /**
  * The {@link EvalRunner}'s LLM HTTP transport: blocking and streaming client builders bounded by

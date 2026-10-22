@@ -201,7 +201,8 @@ public class ClientRequestExceptionHandler {
     }
 
     // core/omnichannel - the per-sender / per-channel turn cap every inbound channel shares
-    // (InboundRateLimiter, raised from ChannelSessionService#resolveOrCreate). 429 with Retry-After;
+    // (InboundRateLimiter, raised from ChannelSessionService#resolveOrCreate). 429 with
+    // Retry-After;
     // the message is the constant friendly text, never the limit or the count.
     @ExceptionHandler(InboundRateLimitedException.class)
     public ResponseEntity<Map<String, Object>> handleInboundRateLimited(
