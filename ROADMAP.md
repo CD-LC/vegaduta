@@ -16,7 +16,7 @@ Anything here can be picked up by a contributor: comment on the linked issue
 | Consoles read browser URLs at runtime, so one published image works on any domain | done (`web/docs/RUNTIME-CONFIG.md`, ADR-0007 revised) |
 | Faster core start-up: migrations in a one-shot job instead of the API boot, JVM AOT/CDS cache | in progress (Helm migrate Job and `APP_TENANCY_MIGRATE_ONLY` shipped; AOT/CDS pending) |
 | Slim ML sidecar image without PyTorch for document extraction | planned |
-| Upgrade the Spring stack (Spring Boot 4, Spring AI 2) | planned |
+| Upgrade the Spring stack (Spring Boot 4, Spring AI 2) | in progress (done on a branch, draft PR #99: compiled, tested and booted; not soaked, not merged) |
 
 The chat path stays in one process; see
 [docs/architecture/overview.md](docs/architecture/overview.md) for why splitting

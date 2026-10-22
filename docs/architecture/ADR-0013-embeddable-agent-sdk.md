@@ -265,7 +265,7 @@ in AGENTS.md still holds. `sdk/java/` gets its own tag prefix (`sdk-v0.1.0`) and
 
 ### 7.3 Spring AI version for the adapter
 
-The platform is on Spring AI 1.1.8 / Boot 3.5.16 (both OSS-EOL; ADR-0012 P2/P3 not started).
+`main` is on Spring AI 1.1.8 / Boot 3.5.16 (both OSS-EOL). ADR-0012 P2/P3 are done on a branch (draft PR #99: compiled, tested and booted, not soaked, not merged).
 Publishing an adapter against 1.1.x would ship a dead line to new users. **Decision:** the
 published `vegaduta-agent-spring-ai` targets **Spring AI 2.0.x / Boot 4.x** from the first
 release. Until ADR-0012 P3 lands, `core/` dogfoods `api`, `core`, `mcp`, `skills` and `jdbc`
