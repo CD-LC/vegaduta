@@ -1,11 +1,9 @@
 package com.agenticai.core.omnichannel.x;
 
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for the two X API v2 endpoints {@code XDmPollingJob}/{@code
