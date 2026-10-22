@@ -336,7 +336,10 @@ function route(request, csp) {
   // ("/hi/billing") go to the console instead of rendering. 307, not 308:
   // an operator can switch billing on later without browsers having cached
   // a permanent redirect. Billing ON = this block is skipped entirely.
-  if (!isBillingEnabled()) {
+  // A personal install has no billing whatever NEXT_PUBLIC_BILLING_ENABLED says; the runtime edition is
+  // read from the real process env (isPersonalEditionAtRuntime) so a runtime-only
+  // NEXT_PUBLIC_EDITION=personal is seen here too.
+  if (!isBillingEnabled() || isPersonalEditionAtRuntime()) {
     const billingPath = splitLocalePrefix(request.nextUrl.pathname).pathname;
     if (isBillingRoute(billingPath)) {
       const target = request.nextUrl.clone();
