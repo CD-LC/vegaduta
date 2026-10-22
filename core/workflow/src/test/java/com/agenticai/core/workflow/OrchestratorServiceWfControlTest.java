@@ -10,7 +10,6 @@ import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ class OrchestratorServiceWfControlTest {
                 new OrchestratorService(
                         mock(AgentService.class),
                         mock(HumanApprovalGateService.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(ObjectProvider.class));
     }
 

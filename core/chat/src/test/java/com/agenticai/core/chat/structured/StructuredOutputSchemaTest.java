@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 
 class StructuredOutputSchemaTest {
 
@@ -24,8 +24,10 @@ class StructuredOutputSchemaTest {
         assertThat(out).isNotSameAs(original);
         assertThat(original.getResponseFormat()).isNull();
         assertThat(out.getResponseFormat().getType()).isEqualTo(ResponseFormat.Type.JSON_SCHEMA);
-        assertThat(out.getResponseFormat().getJsonSchema().getName()).isEqualTo("my_verdict_");
-        assertThat(out.getResponseFormat().getJsonSchema().getStrict()).isTrue();
+        // Spring AI 2's ResponseFormat carries the schema string only; the SDK model names it
+        // itself.
+        assertThat(out.getResponseFormat().getJsonSchema()).isEqualTo(STRICT_SCHEMA);
+        assertThat(out.getResponseFormat().getStrict()).isTrue();
     }
 
     @Test
@@ -37,7 +39,7 @@ class StructuredOutputSchemaTest {
                         LOOSE_SCHEMA,
                         true);
         assertThat(out.getResponseFormat().getType()).isEqualTo(ResponseFormat.Type.JSON_SCHEMA);
-        assertThat(out.getResponseFormat().getJsonSchema().getStrict()).isFalse();
+        assertThat(out.getResponseFormat().getStrict()).isFalse();
     }
 
     @Test
@@ -159,7 +161,7 @@ class StructuredOutputSchemaTest {
         OpenAiChatOptions out =
                 StructuredOutput.withJsonSchema(
                         OpenAiChatOptions.builder().model("gpt-4o").build(), "x", schema, true);
-        assertThat(out.getResponseFormat().getJsonSchema().getStrict()).isTrue();
+        assertThat(out.getResponseFormat().getStrict()).isTrue();
         GoogleGenAiChatOptions g =
                 StructuredOutput.withJsonSchema(
                         GoogleGenAiChatOptions.builder().model("gemini-2.5-flash").build(),

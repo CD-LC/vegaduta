@@ -6,8 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.chat.structured.StructuredSchemaSpec;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.observation.ObservationRegistry;
 import java.io.IOException;
@@ -33,6 +31,8 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The wave-E flags on {@link LlmModelSupport}: every one is the identity when off, and shapes the
@@ -40,7 +40,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 class LlmModelSupportStructuredFlagsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SCHEMA =
             "{\"type\":\"object\",\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
 
@@ -278,9 +278,9 @@ class LlmModelSupportStructuredFlagsTest {
             assertThat(tools).hasSize(2);
             JsonNode closed = tools.get(0).get("function");
             JsonNode open = tools.get(1).get("function");
-            assertThat(closed.get("name").asText()).isEqualTo("closed");
+            assertThat(closed.get("name").asString()).isEqualTo("closed");
             assertThat(closed.get("strict").asBoolean()).isTrue();
-            assertThat(open.get("name").asText()).isEqualTo("open");
+            assertThat(open.get("name").asString()).isEqualTo("open");
             assertThat(open.has("strict")).isFalse();
         }
     }

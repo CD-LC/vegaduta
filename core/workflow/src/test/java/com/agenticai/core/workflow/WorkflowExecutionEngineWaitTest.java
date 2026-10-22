@@ -16,8 +16,6 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -28,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The Wait node inside {@link WorkflowExecutionEngine}'s traversal: it parks the run durably
@@ -44,7 +43,7 @@ class WorkflowExecutionEngineWaitTest {
     private final List<String> executed = new java.util.ArrayList<>();
 
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.withJavaTime();
     }
 
     @BeforeEach

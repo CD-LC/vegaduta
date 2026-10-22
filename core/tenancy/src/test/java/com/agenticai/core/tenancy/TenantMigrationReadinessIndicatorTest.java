@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.health.contributor.Status;
 
 /** The readiness gate's three answers: still migrating, migrated, budget elapsed. */
 class TenantMigrationReadinessIndicatorTest {

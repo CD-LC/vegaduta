@@ -3,12 +3,12 @@ package com.agenticai.core.workflow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class WorkflowApprovalFormValuesTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     @Test
     void approverAnswersAreAppendedToTheResumedNodeInput() throws Exception {

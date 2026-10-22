@@ -10,8 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.context.ContextCompactionEngine.Params;
 import com.agenticai.core.agents.context.ContextCompactionEngine.Result;
 import com.agenticai.core.agents.context.ContextCompactionEngine.Summarizer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +23,8 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The engine over real Spring AI messages: clearing with restorable placeholders, compaction
@@ -37,7 +37,7 @@ import org.springframework.ai.chat.messages.UserMessage;
  */
 class ContextCompactionEngineTest {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
     private final ContextCompactionEngine engine = new ContextCompactionEngine();
 
     /**
@@ -140,14 +140,14 @@ class ContextCompactionEngineTest {
 
         JsonNode node = JSON.readTree(placeholder);
         assertTrue(node.path("context_cleared").asBoolean());
-        assertEquals("search", node.path("tool").asText());
+        assertEquals("search", node.path("tool").asString());
         assertEquals(
-                ToolResultRestoreIds.digest("{\"q\":\"topic 1\"}"), node.path("args").asText());
-        assertEquals("ok", node.path("status").asText());
+                ToolResultRestoreIds.digest("{\"q\":\"topic 1\"}"), node.path("args").asString());
+        assertEquals("ok", node.path("status").asString());
         assertEquals(8_000, node.path("chars").asInt());
         String stepId = ToolResultRestoreIds.stepId("search", "{\"q\":\"topic 1\"}");
-        assertTrue(node.path("restore").asText().contains("restore_tool_result"));
-        assertTrue(node.path("restore").asText().contains(stepId));
+        assertTrue(node.path("restore").asString().contains("restore_tool_result"));
+        assertTrue(node.path("restore").asString().contains(stepId));
     }
 
     @Test
@@ -157,7 +157,7 @@ class ContextCompactionEngineTest {
         String placeholder =
                 data(engine.apply(toolRun(5), 0, noRestore, failing()).messages().get(3));
 
-        String restore = JSON.readTree(placeholder).path("restore").asText();
+        String restore = JSON.readTree(placeholder).path("restore").asString();
         assertFalse(restore.contains("restore_tool_result"));
         assertTrue(restore.contains("run the tool again"));
     }
@@ -169,7 +169,7 @@ class ContextCompactionEngineTest {
 
         String placeholder = data(engine.apply(messages, 0, PARAMS, failing()).messages().get(3));
 
-        assertEquals("error", JSON.readTree(placeholder).path("status").asText());
+        assertEquals("error", JSON.readTree(placeholder).path("status").asString());
     }
 
     @Test
@@ -559,11 +559,11 @@ class ContextCompactionEngineTest {
             JsonNode node = JSON.readTree(data(out.get(1 + 2 * round)));
             assertEquals(
                     ToolResultRestoreIds.digest("{\"q\":\"topic " + round + "\"}"),
-                    node.path("args").asText(),
+                    node.path("args").asString(),
                     "round " + round + " must keep its own arguments, not the last call's");
             assertTrue(
                     node.path("restore")
-                            .asText()
+                            .asString()
                             .contains(
                                     ToolResultRestoreIds.stepId(
                                             "search", "{\"q\":\"topic " + round + "\"}")),
@@ -605,10 +605,10 @@ class ContextCompactionEngineTest {
 
         assertEquals(
                 ToolResultRestoreIds.digest("{\"q\":\"first\"}"),
-                JSON.readTree(first.getResponses().get(0).responseData()).path("args").asText());
+                JSON.readTree(first.getResponses().get(0).responseData()).path("args").asString());
         assertEquals(
                 ToolResultRestoreIds.digest("{\"q\":\"second\"}"),
-                JSON.readTree(first.getResponses().get(1).responseData()).path("args").asText());
+                JSON.readTree(first.getResponses().get(1).responseData()).path("args").asString());
     }
 
     // ------------------------------------------------------------- hostile markers

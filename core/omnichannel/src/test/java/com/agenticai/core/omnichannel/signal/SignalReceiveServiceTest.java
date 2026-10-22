@@ -13,8 +13,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -24,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The receiver against a fake signal-cli: long polling, the json-rpc websocket, tenant scoping and
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class SignalReceiveServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String NUMBER = "+4915112345678";
     private static final String ONE =
             "{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"timestamp\":1,\"dataMessage\":{\"timestamp\":1,\"message\":\"one\"}}}";
@@ -117,7 +117,7 @@ class SignalReceiveServiceTest {
                                 .path("envelope")
                                 .path("dataMessage")
                                 .path("message")
-                                .asText())
+                                .asString())
                 .isEqualTo("one");
         assertThat(
                         messages.getAllValues()
@@ -125,7 +125,7 @@ class SignalReceiveServiceTest {
                                 .path("envelope")
                                 .path("dataMessage")
                                 .path("message")
-                                .asText())
+                                .asString())
                 .isEqualTo("two");
         assertThat(tenantsSeen).containsOnly("tenant_abc");
         assertThat(service.problem(NUMBER)).isNull();

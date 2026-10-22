@@ -3,19 +3,21 @@ package com.agenticai.core.json;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class JsonNodesTest {
 
     @SuppressWarnings("deprecation")
     private static List<String> viaFields(JsonNode node) {
         List<String> out = new ArrayList<>();
-        node.fields().forEachRemaining(e -> out.add(e.getKey() + "=" + e.getValue()));
+        node.properties()
+                .iterator()
+                .forEachRemaining(e -> out.add(e.getKey() + "=" + e.getValue()));
         return out;
     }
 

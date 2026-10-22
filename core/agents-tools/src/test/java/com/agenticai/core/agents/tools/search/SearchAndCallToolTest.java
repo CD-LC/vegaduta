@@ -195,18 +195,17 @@ class SearchAndCallToolTest {
 
     @Test
     void theToolDefinitionsAreValidJsonSchemaWithTheDocumentedFields() throws Exception {
-        com.fasterxml.jackson.databind.ObjectMapper mapper =
-                new com.fasterxml.jackson.databind.ObjectMapper();
-        com.fasterxml.jackson.databind.JsonNode searchSchema =
+        tools.jackson.databind.ObjectMapper mapper = new tools.jackson.databind.ObjectMapper();
+        tools.jackson.databind.JsonNode searchSchema =
                 mapper.readTree(search.getToolDefinition().inputSchema());
-        com.fasterxml.jackson.databind.JsonNode callSchema =
+        tools.jackson.databind.JsonNode callSchema =
                 mapper.readTree(callTool.getToolDefinition().inputSchema());
 
         assertEquals("search_tools", search.getToolDefinition().name());
         assertEquals("call_tool", callTool.getToolDefinition().name());
         assertTrue(searchSchema.path("properties").has("query"));
         assertTrue(searchSchema.path("properties").has("limit"));
-        assertEquals("query", searchSchema.path("required").get(0).asText());
+        assertEquals("query", searchSchema.path("required").get(0).asString());
         assertTrue(callSchema.path("properties").has("name"));
         assertTrue(callSchema.path("properties").has("argsJson"));
     }

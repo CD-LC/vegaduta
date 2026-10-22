@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.mcp.oauth.McpOAuthDiscovery.AuthServerMetadata;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -26,7 +25,8 @@ class McpOAuthClientTest {
                     List.of("none", "client_secret_basic"));
 
     private final FakeMcpOAuthHttp http = new FakeMcpOAuthHttp();
-    private final McpOAuthClient client = new McpOAuthClient(http, new ObjectMapper());
+    private final McpOAuthClient client =
+            new McpOAuthClient(http, com.agenticai.core.json.JsonMappers.plain());
 
     @Test
     void pkceChallengeIsS256OfVerifier() {

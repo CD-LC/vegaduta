@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.quality.dataset.AgentTurnReplayer.ReplayedToolCall;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -77,7 +76,7 @@ class TrajectoryCaseGraderTest {
     void theDimensionIsDetectedInAStoredScoresDocument() throws Exception {
         TrajectoryCaseGrader.Graded g = TrajectoryCaseGrader.grade(SPEC, List.of(call("a")));
         String scores =
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .writeValueAsString(
                                 Map.of(
                                         "ACCURACY",

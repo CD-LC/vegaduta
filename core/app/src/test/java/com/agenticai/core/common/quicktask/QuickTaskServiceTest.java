@@ -25,7 +25,6 @@ import com.agenticai.core.omnichannel.outbound.ChannelTextSends;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.tenancy.AppUserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
@@ -77,7 +76,7 @@ class QuickTaskServiceTest {
                         mock(HumanApprovalGateService.class),
                         mock(ToolCallLogService.class),
                         mock(QuickTaskRunService.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(AuditLogService.class),
                         mock(ChannelTextSends.class));
 
@@ -117,7 +116,7 @@ class QuickTaskServiceTest {
                         mock(HumanApprovalGateService.class),
                         mock(ToolCallLogService.class),
                         mock(QuickTaskRunService.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(AuditLogService.class),
                         mock(ChannelTextSends.class));
         AgentResponse primary = agentResponse("Primary", "You are the primary agent.");

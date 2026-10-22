@@ -10,12 +10,12 @@ import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.chat.UpstreamProviderException;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
 
 /** {@link OpenAiCompatController}: responses against the recorded OpenAI wire shapes. */
 class OpenAiCompatControllerWireShapesTest extends OpenAiCompatControllerTestSupport {
@@ -33,12 +33,13 @@ class OpenAiCompatControllerWireShapesTest extends OpenAiCompatControllerTestSup
         JsonNode shape = shapes.get(shapeName);
         for (JsonNode required : shape.get("required")) {
             assertTrue(
-                    actual.has(required.asText()),
-                    shapeName + " missing required '" + required.asText() + "': " + actual);
+                    actual.has(required.asString()),
+                    shapeName + " missing required '" + required.asString() + "': " + actual);
         }
         java.util.Set<String> allowed = new java.util.HashSet<>();
-        shape.get("allowed").forEach(n -> allowed.add(n.asText()));
-        actual.fieldNames()
+        shape.get("allowed").forEach(n -> allowed.add(n.asString()));
+        actual.propertyNames()
+                .iterator()
                 .forEachRemaining(
                         f ->
                                 assertTrue(
@@ -53,7 +54,7 @@ class OpenAiCompatControllerWireShapesTest extends OpenAiCompatControllerTestSup
         try (InputStream in =
                 getClass().getResourceAsStream("/openai-compat/openai-python-request.json")) {
             JsonNode node = mapper.readTree(in);
-            ((com.fasterxml.jackson.databind.node.ObjectNode) node).put("stream", stream);
+            ((tools.jackson.databind.node.ObjectNode) node).put("stream", stream);
             return mapper.treeToValue(node, OpenAiChatRequest.class);
         }
     }
@@ -152,7 +153,7 @@ class OpenAiCompatControllerWireShapesTest extends OpenAiCompatControllerTestSup
                         .toList();
         for (JsonNode c : chunks) {
             assertShape(shapes, "chat.completion.chunk", c);
-            assertEquals("chat.completion.chunk", c.get("object").asText());
+            assertEquals("chat.completion.chunk", c.get("object").asString());
             if (c.get("choices").size() > 0) {
                 assertShape(shapes, "chat.completion.chunk.choice", c.get("choices").get(0));
                 assertShape(
@@ -167,7 +168,7 @@ class OpenAiCompatControllerWireShapesTest extends OpenAiCompatControllerTestSup
         assertEquals(0, usageChunk.get("choices").size());
         assertShape(shapes, "usage", usageChunk.get("usage"));
         // every chunk shares one id (SDKs accumulate by it)
-        assertEquals(1, chunks.stream().map(c -> c.get("id").asText()).distinct().count());
+        assertEquals(1, chunks.stream().map(c -> c.get("id").asString()).distinct().count());
     }
 
     @Test

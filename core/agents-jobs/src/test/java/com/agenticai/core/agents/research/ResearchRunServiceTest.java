@@ -45,7 +45,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -159,7 +158,7 @@ class ResearchRunServiceTest {
                         1,
                         15,
                         ResearchRunPlan.RESULT_SCHEMA);
-        return AgentJobResponse.from(job, new ObjectMapper());
+        return AgentJobResponse.from(job, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static int statusOf(ResponseStatusException e) {
@@ -573,8 +572,8 @@ class ResearchRunServiceTest {
         Agent mine = researchAgent(agentId, "Deep Research", true, Instant.now());
         when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(mine));
         AgentJobResponse base = queuedJob(agentId);
-        com.fasterxml.jackson.databind.JsonNode result =
-                new com.fasterxml.jackson.databind.ObjectMapper()
+        tools.jackson.databind.JsonNode result =
+                new tools.jackson.databind.ObjectMapper()
                         .readTree(
                                 "{\"title\":\"t\",\"reportMarkdown\":\"r\",\"sources\":["
                                         + "{\"id\":\"S1\",\"url\":\"https://ok.example/a\"},"
@@ -615,7 +614,7 @@ class ResearchRunServiceTest {
 
         AgentJobResponse out = service(true, true).get(jobId);
         assertEquals(1, out.resultJson().get("sources").size());
-        assertEquals("S1", out.resultJson().get("sources").get(0).get("id").asText());
+        assertEquals("S1", out.resultJson().get("sources").get(0).get("id").asString());
     }
 
     @Test

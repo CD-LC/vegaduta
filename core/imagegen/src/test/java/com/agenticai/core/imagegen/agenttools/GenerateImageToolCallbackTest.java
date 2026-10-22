@@ -11,11 +11,11 @@ import com.agenticai.core.imagegen.GeneratedImageService;
 import com.agenticai.core.imagegen.ImageGenNotConfiguredException;
 import com.agenticai.core.imagegen.ImageGenerationOrchestratorService;
 import com.agenticai.core.imagegen.ImageGenerationQuotaExceededException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The image-generation half of the 2026-07-29 "asking for an image returns a raw sentinel string"
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
  */
 class GenerateImageToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final ImageGenerationOrchestratorService orchestrator =
             mock(ImageGenerationOrchestratorService.class);
@@ -97,12 +97,12 @@ class GenerateImageToolCallbackTest {
 
         JsonNode result = parse(callback.call("{\"prompt\": \"a brick kiln at sunrise\"}"));
 
-        assertEquals("/api/imagegen/images/" + id, result.path("imageUrl").asText());
-        assertEquals("gpt-image-1", result.path("model").asText());
+        assertEquals("/api/imagegen/images/" + id, result.path("imageUrl").asString());
+        assertEquals("gpt-image-1", result.path("model").asString());
     }
 
     private static String errorOf(String toolResult) {
-        return parse(toolResult).path("error").asText();
+        return parse(toolResult).path("error").asString();
     }
 
     private static JsonNode parse(String toolResult) {

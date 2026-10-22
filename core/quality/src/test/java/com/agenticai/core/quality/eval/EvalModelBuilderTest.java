@@ -24,14 +24,19 @@ class EvalModelBuilderTest {
                         "k",
                         "llama3",
                         1024,
-                        EvalLlmHttp.llmRestClientBuilder(),
-                        EvalLlmHttp.llmWebClientBuilder());
-        OpenAiChatOptions options = (OpenAiChatOptions) model.getDefaultOptions();
+                        EvalLlmHttp.ofSeconds(10),
+                        EvalLlmHttp.ofMinutes(10));
+        OpenAiChatOptions options = model.getOptions();
         assertEquals("llama3", options.getModel());
         assertEquals(1024, options.getMaxTokens());
         assertNull(options.getTemperature());
         assertNull(options.getTopP());
-        assertNotEquals(Boolean.TRUE, options.getStreamUsage());
+        assertEquals("http://localhost:11434/v1", options.getBaseUrl());
+        assertNotEquals(
+                Boolean.TRUE,
+                options.getStreamOptions() != null
+                        ? options.getStreamOptions().includeUsage()
+                        : null);
     }
 
     @Test
@@ -41,9 +46,9 @@ class EvalModelBuilderTest {
                         "k",
                         "claude-sonnet-5",
                         1024,
-                        EvalLlmHttp.llmRestClientBuilder(),
-                        EvalLlmHttp.llmWebClientBuilder());
-        AnthropicChatOptions options = (AnthropicChatOptions) model.getDefaultOptions();
+                        EvalLlmHttp.ofSeconds(10),
+                        EvalLlmHttp.ofMinutes(10));
+        AnthropicChatOptions options = (AnthropicChatOptions) model.getOptions();
         assertEquals("claude-sonnet-5", options.getModel());
         assertEquals(1024, options.getMaxTokens());
         assertNull(options.getTemperature());

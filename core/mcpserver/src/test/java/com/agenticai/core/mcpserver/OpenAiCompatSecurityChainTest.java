@@ -25,8 +25,6 @@ import com.agenticai.core.security.AccessDeniedEventListener;
 import com.agenticai.core.security.SecurityConfig;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
 import java.math.BigDecimal;
 import java.util.List;
@@ -58,6 +56,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The real {@code SecurityConfig.filterChain} (all three chains), the real {@link
@@ -73,7 +73,7 @@ class OpenAiCompatSecurityChainTest {
     private static final UUID AGENT_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
     private static final String KEY = "vmcp_raw";
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final McpServerAccessGrantService grantService =
             mock(McpServerAccessGrantService.class);
     private final McpServerRateLimiter rateLimiter = mock(McpServerRateLimiter.class);
@@ -248,7 +248,7 @@ class OpenAiCompatSecurityChainTest {
                         .get(0)
                         .get("message")
                         .get("content")
-                        .asText());
+                        .asString());
         verify(chatService)
                 .chat(
                         any(TurnContext.class),
@@ -276,7 +276,7 @@ class OpenAiCompatSecurityChainTest {
                 mvc(true).perform(post(KEY, body(AGENT_ID.toString(), false))).andReturn();
 
         assertEquals(404, result.getResponse().getStatus());
-        assertEquals("model_not_found", error(result).get("code").asText());
+        assertEquals("model_not_found", error(result).get("code").asString());
         verifyNoInteractions(chatService);
     }
 
@@ -321,7 +321,7 @@ class OpenAiCompatSecurityChainTest {
                 mvc(true).perform(post(KEY, body(AGENT_ID.toString(), false))).andReturn();
 
         assertEquals(429, result.getResponse().getStatus());
-        assertEquals("insufficient_quota", error(result).get("code").asText());
+        assertEquals("insufficient_quota", error(result).get("code").asString());
         assertEquals("3600", result.getResponse().getHeader("Retry-After"));
         // The budget was charged against the grant's own subject, not a shared one.
         verify(chatService)
@@ -350,7 +350,7 @@ class OpenAiCompatSecurityChainTest {
                 mvc(true).perform(post("vmcp_nope", body(AGENT_ID.toString(), false))).andReturn();
 
         assertEquals(401, result.getResponse().getStatus());
-        assertEquals("invalid_api_key", error(result).get("code").asText());
+        assertEquals("invalid_api_key", error(result).get("code").asString());
         verifyNoInteractions(chatService);
     }
 
@@ -360,7 +360,7 @@ class OpenAiCompatSecurityChainTest {
                 mvc(true).perform(post(null, body(AGENT_ID.toString(), false))).andReturn();
 
         assertEquals(401, result.getResponse().getStatus());
-        assertEquals("invalid_api_key", error(result).get("code").asText());
+        assertEquals("invalid_api_key", error(result).get("code").asString());
         assertTrue(
                 error(result).has("message")
                         && error(result).has("type")

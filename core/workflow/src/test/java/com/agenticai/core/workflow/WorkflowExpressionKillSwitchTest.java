@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.WorkflowExpressionResolver.NodeEvalInfo;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code app.workflow.expressions.enabled=false} must put every field back on the algorithm it used
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  */
 class WorkflowExpressionKillSwitchTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final NodeEvalInfo INFO = new NodeEvalInfo("wf", "wf", null, "ann");
     private static final String INPUT = "{\"a\":1,\"email\":\"e@x.test\"}";
 

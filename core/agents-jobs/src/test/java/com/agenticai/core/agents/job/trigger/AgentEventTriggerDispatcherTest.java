@@ -21,7 +21,6 @@ import com.agenticai.core.eventbus.WorkflowEventSignal;
 import com.agenticai.core.eventbus.WorkflowEventTypes;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
@@ -73,7 +72,7 @@ class AgentEventTriggerDispatcherTest {
                         new AgentEventTriggerFiring(
                                 repository, fireRepository, launcher, properties),
                         properties,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         meterRegistry,
                         mock(NotificationService.class),
                         new AgentEventTriggerPresenceCache());

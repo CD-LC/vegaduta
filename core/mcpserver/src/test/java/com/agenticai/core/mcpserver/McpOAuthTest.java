@@ -372,11 +372,9 @@ class McpOAuthTest {
                 response,
                 (a, b) -> {});
         assertThat(response.getStatus()).isEqualTo(200);
-        var doc =
-                new com.fasterxml.jackson.databind.ObjectMapper()
-                        .readTree(response.getContentAsString());
-        assertThat(doc.path("resource").asText()).isEqualTo(RESOURCE);
-        assertThat(doc.path("authorization_servers").get(0).asText()).isEqualTo(ISSUER);
+        var doc = new tools.jackson.databind.ObjectMapper().readTree(response.getContentAsString());
+        assertThat(doc.path("resource").asString()).isEqualTo(RESOURCE);
+        assertThat(doc.path("authorization_servers").get(0).asString()).isEqualTo(ISSUER);
         assertThat(doc.path("scopes_supported").toString())
                 .doesNotContain("*")
                 .contains("mcp:agents:call");

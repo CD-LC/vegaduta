@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.crypto.EnvelopeEncryptionService;
 import com.agenticai.core.crypto.WrappedDataKey;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
@@ -20,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runs the real REST client against an in-process fake of the Cloud KMS encrypt/decrypt endpoints.
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 class GcpCloudKmsKeyManagementProviderTest {
 
     private static final String KEY = "projects/p/locations/europe-west1/keyRings/r/cryptoKeys/k";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     private HttpServer server;
     private String endpoint;
@@ -57,8 +57,8 @@ class GcpCloudKmsKeyManagementProviderTest {
                         JsonNode in = JSON.readTree(ex.getRequestBody());
                         boolean enc = ex.getRequestURI().getPath().endsWith(":encrypt");
                         String field = enc ? "plaintext" : "ciphertext";
-                        aad.add(in.path("additionalAuthenticatedData").asText());
-                        byte[] data = Base64.getDecoder().decode(in.path(field).asText());
+                        aad.add(in.path("additionalAuthenticatedData").asString());
+                        byte[] data = Base64.getDecoder().decode(in.path(field).asString());
                         byte[] out = new byte[data.length];
                         for (int i = 0; i < data.length; i++) {
                             out[i] = (byte) (data[i] ^ 0x33);

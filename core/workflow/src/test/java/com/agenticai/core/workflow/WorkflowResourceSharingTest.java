@@ -23,7 +23,6 @@ import com.agenticai.core.sharing.ResourceType;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Cross-user resource sharing retrofit (Round 2) - end-to-end coverage of {@link
@@ -72,7 +72,7 @@ class WorkflowResourceSharingTest {
         WorkflowRunRepository runRepository = mock(WorkflowRunRepository.class);
         OrchestratorService orchestratorService = mock(OrchestratorService.class);
         WorkflowExecutionEngine executionEngine = mock(WorkflowExecutionEngine.class);
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
         TenantResolutionService tenantResolutionService = mock(TenantResolutionService.class);
         TenantSchemaResolver tenantSchemaResolver = mock(TenantSchemaResolver.class);
         TenantLimits tenantLimits = mock(TenantLimits.class);

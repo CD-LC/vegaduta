@@ -23,8 +23,6 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.guardrails.toolargs.ToolArgPolicyEvaluator;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Optional;
@@ -34,10 +32,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class ToolArgPolicyServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String DOC =
             "{\"policies\":[{\"tool\":\"fetch_web_page\",\"rules\":"
                     + "[{\"path\":\"url\",\"urlHostIn\":[\"Example.com\"]}]}]}";
@@ -116,7 +116,8 @@ class ToolArgPolicyServiceTest {
         PoliciesResponse got = service(true, 30).get(agentId);
 
         assertTrue(got.enabled());
-        assertEquals("fetch_web_page", got.policies().get("policies").get(0).get("tool").asText());
+        assertEquals(
+                "fetch_web_page", got.policies().get("policies").get(0).get("tool").asString());
         assertEquals("alice", got.updatedBy());
         assertNotNull(got.updatedAt());
         assertEquals(50, got.limits().maxPolicies());
@@ -155,7 +156,7 @@ class ToolArgPolicyServiceTest {
                         .get(0)
                         .get("urlHostIn")
                         .get(0)
-                        .asText());
+                        .asString());
     }
 
     @Test

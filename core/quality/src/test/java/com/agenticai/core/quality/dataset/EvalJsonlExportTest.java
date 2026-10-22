@@ -2,11 +2,11 @@ package com.agenticai.core.quality.dataset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Verifies the NDJSON renderings: every line parses standalone, the header carries run/dataset
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
  */
 class EvalJsonlExportTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final UUID agentId = UUID.randomUUID();
     private final UUID datasetId = UUID.randomUUID();
@@ -66,19 +66,19 @@ class EvalJsonlExportTest {
         assertThat(parsed).hasSize(3);
 
         JsonNode head = parsed.get(0);
-        assertThat(head.get("type").asText()).isEqualTo("run");
-        assertThat(head.get("schema").asText()).isEqualTo(EvalJsonlExport.RUN_SCHEMA);
-        assertThat(head.get("runId").asText()).isEqualTo(runId.toString());
+        assertThat(head.get("type").asString()).isEqualTo("run");
+        assertThat(head.get("schema").asString()).isEqualTo(EvalJsonlExport.RUN_SCHEMA);
+        assertThat(head.get("runId").asString()).isEqualTo(runId.toString());
         assertThat(head.get("passThreshold").asDouble()).isEqualTo(0.7);
 
         JsonNode c0 = parsed.get(1);
-        assertThat(c0.get("type").asText()).isEqualTo("case");
-        assertThat(c0.get("input").asText()).isEqualTo("question 0");
-        assertThat(c0.get("response").asText()).isEqualTo("answer 0");
+        assertThat(c0.get("type").asString()).isEqualTo("case");
+        assertThat(c0.get("input").asString()).isEqualTo("question 0");
+        assertThat(c0.get("response").asString()).isEqualTo("answer 0");
         assertThat(c0.get("passed").asBoolean()).isTrue();
         // JSON columns embedded parsed, not stringified.
         assertThat(c0.get("expectedTools").isArray()).isTrue();
-        assertThat(c0.get("expectedTools").get(0).asText()).isEqualTo("search");
+        assertThat(c0.get("expectedTools").get(0).asString()).isEqualTo("search");
         assertThat(c0.get("toolCalls").isArray()).isTrue();
         assertThat(c0.get("scores").get("ACCURACY").get("score").asDouble()).isEqualTo(0.9);
     }
@@ -104,11 +104,11 @@ class EvalJsonlExportTest {
                 lines(EvalJsonlExport.run(dataset(), run, List.of(errored, corrupt)));
 
         assertThat(parsed).hasSize(3);
-        assertThat(parsed.get(1).get("status").asText()).isEqualTo("ERROR");
-        assertThat(parsed.get(1).get("errorMessage").asText()).isEqualTo("replay blew up");
+        assertThat(parsed.get(1).get("status").asString()).isEqualTo("ERROR");
+        assertThat(parsed.get(1).get("errorMessage").asString()).isEqualTo("replay blew up");
         // Unparseable JSON columns are preserved verbatim under a *Raw key.
-        assertThat(parsed.get(2).get("toolCallsRaw").asText()).isEqualTo("not-json");
-        assertThat(parsed.get(2).get("scoresRaw").asText()).isEqualTo("also-not-json");
+        assertThat(parsed.get(2).get("toolCallsRaw").asString()).isEqualTo("not-json");
+        assertThat(parsed.get(2).get("scoresRaw").asString()).isEqualTo("also-not-json");
         assertThat(parsed.get(2).has("toolCalls")).isFalse();
     }
 
@@ -123,14 +123,14 @@ class EvalJsonlExportTest {
 
         assertThat(parsed).hasSize(3);
         JsonNode head = parsed.get(0);
-        assertThat(head.get("type").asText()).isEqualTo("dataset");
-        assertThat(head.get("schema").asText()).isEqualTo(EvalJsonlExport.DATASET_SCHEMA);
-        assertThat(head.get("name").asText()).isEqualTo("Support golden set");
+        assertThat(head.get("type").asString()).isEqualTo("dataset");
+        assertThat(head.get("schema").asString()).isEqualTo(EvalJsonlExport.DATASET_SCHEMA);
+        assertThat(head.get("name").asString()).isEqualTo("Support golden set");
         assertThat(head.get("caseCount").asInt()).isEqualTo(2);
 
-        assertThat(parsed.get(1).get("input").asText()).isEqualTo("q1");
-        assertThat(parsed.get(1).get("grader").get("type").asText()).isEqualTo("exact");
+        assertThat(parsed.get(1).get("input").asString()).isEqualTo("q1");
+        assertThat(parsed.get(1).get("grader").get("type").asString()).isEqualTo("exact");
         assertThat(parsed.get(2).has("grader")).isFalse();
-        assertThat(parsed.get(2).get("expectedTools").get(0).asText()).isEqualTo("t");
+        assertThat(parsed.get(2).get("expectedTools").get(0).asString()).isEqualTo("t");
     }
 }

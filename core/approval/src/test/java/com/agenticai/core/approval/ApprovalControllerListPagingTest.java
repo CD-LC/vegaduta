@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ class ApprovalControllerListPagingTest {
                         mock(HumanApprovalGateService.class),
                         repo,
                         mock(ApprovalPolicyService.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         List.of());
     }
 

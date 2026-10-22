@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +108,7 @@ public final class InMemorySessionMemory {
         service =
                 new SessionMemoryService(
                         redis,
-                        new ObjectMapper().findAndRegisterModules(),
+                        com.agenticai.core.json.JsonMappers.withJavaTime(),
                         settings,
                         noSummariser,
                         24,

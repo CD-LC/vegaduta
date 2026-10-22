@@ -12,7 +12,6 @@ import com.agenticai.core.brief.model.Brief;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -24,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wires the real {@link BriefApplyService}, {@link TrustLadderService}, {@link BriefVersionService}
@@ -35,7 +35,7 @@ class EnvoyKit {
 
     static final Instant NOW = Instant.parse("2026-09-26T12:00:00Z");
 
-    final ObjectMapper mapper = new ObjectMapper();
+    final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     final FakeEnvoyPorts ports = new FakeEnvoyPorts();
     final InMemoryLedger ledger = new InMemoryLedger();
     final Map<UUID, BriefEntity> briefs = new ConcurrentHashMap<>();

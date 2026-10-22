@@ -4,14 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class TextToolCallParserTest {
 
@@ -25,7 +25,7 @@ class TextToolCallParserTest {
             "{\"name\": \"generate_document\", \"parameters\": {\"f\": \"mandi_prices_weather_report\", "
                     + "\"path\": \"templates/report.md\", \"skill\": \"mandi-prices-weather-report\"}}";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     @Test
     void theIncidentReplyParsesAsOneCallToGenerateDocument() throws Exception {
@@ -38,8 +38,8 @@ class TextToolCallParserTest {
         assertEquals("function", call.type());
         assertFalse(call.id().isBlank());
         JsonNode args = objectMapper.readTree(call.arguments());
-        assertEquals("templates/report.md", args.get("path").asText());
-        assertEquals("mandi-prices-weather-report", args.get("skill").asText());
+        assertEquals("templates/report.md", args.get("path").asString());
+        assertEquals("mandi-prices-weather-report", args.get("skill").asString());
     }
 
     @ParameterizedTest
@@ -70,7 +70,7 @@ class TextToolCallParserTest {
 
         assertEquals(1, calls.size(), reply);
         assertEquals("search_docs", calls.get(0).name());
-        assertEquals("x", objectMapper.readTree(calls.get(0).arguments()).get("q").asText());
+        assertEquals("x", objectMapper.readTree(calls.get(0).arguments()).get("q").asString());
     }
 
     @Test
@@ -198,8 +198,8 @@ class TextToolCallParserTest {
 
         assertEquals(1, calls.size());
         JsonNode args = objectMapper.readTree(calls.get(0).arguments());
-        assertEquals("app/src/Main.java", args.get("path").asText());
-        assertEquals("package a;\n\npublic class Main {\n}", args.get("content").asText());
+        assertEquals("app/src/Main.java", args.get("path").asString());
+        assertEquals("package a;\n\npublic class Main {\n}", args.get("content").asString());
     }
 
     @Test

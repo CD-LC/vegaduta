@@ -2,8 +2,6 @@ package com.agenticai.core.chat.structured;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,8 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.ai.tool.function.FunctionToolCallback;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Anthropic forced-tool structured output and Ollama {@code format}: option shaping, schema gating,
@@ -23,7 +23,7 @@ import org.springframework.ai.tool.function.FunctionToolCallback;
  */
 class StructuredOutputToolForcingTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SCHEMA =
             "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
                     + "\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
@@ -79,7 +79,7 @@ class StructuredOutputToolForcingTest {
         JsonNode out = schema();
         assertThat(out).isNotNull();
         assertThat(out.has("$schema")).isFalse();
-        assertThat(out.get("type").asText()).isEqualTo("object");
+        assertThat(out.get("type").asString()).isEqualTo("object");
         assertThat(out.get("properties").has("verdict")).isTrue();
     }
 
@@ -276,7 +276,7 @@ class StructuredOutputToolForcingTest {
 
         assertThat(out.getResults()).hasSize(1);
         String reply = out.getResult().getOutput().getText();
-        assertThat(MAPPER.readTree(reply).get("verdict").asText()).isEqualTo("ok");
+        assertThat(MAPPER.readTree(reply).get("verdict").asString()).isEqualTo("ok");
         assertThat(out.getResult().getOutput().hasToolCalls()).isFalse();
         assertThat(out.getResult().getMetadata().getFinishReason()).isEqualTo("end_turn");
     }

@@ -14,7 +14,6 @@ import com.agenticai.core.agents.demo.studio.DemoStudioWorkflowRunner.Definition
 import com.agenticai.core.agents.demo.studio.DemoStudioWorkflowRunner.Step;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The studio's sequential runner: shape validation, template rendering, and the three flow-control
@@ -66,7 +66,11 @@ class DemoStudioWorkflowRunnerTest {
         moderation = mock(DemoStudioModerationService.class);
         runner =
                 new DemoStudioWorkflowRunner(
-                        studio, sessions, runs, new ObjectMapper(), moderation);
+                        studio,
+                        sessions,
+                        runs,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        moderation);
     }
 
     private Step trigger() {
@@ -88,14 +92,14 @@ class DemoStudioWorkflowRunnerTest {
 
     private List<Map<String, Object>> collect(DemoStudioWorkflow wf, String input)
             throws Exception {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
         return runner.run(session, wf, input)
                 .map(
                         line -> {
                             try {
                                 return om.readValue(
                                         line,
-                                        new com.fasterxml.jackson.core.type.TypeReference<
+                                        new tools.jackson.core.type.TypeReference<
                                                 Map<String, Object>>() {});
                             } catch (Exception e) {
                                 throw new RuntimeException(e);

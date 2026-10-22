@@ -13,8 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +20,13 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Goal verifier for delegate_parallel, driven by a fake model call (no real ChatClient). */
 class SwarmVerifierTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String TASKS =
             "{\"tasks\":["
                     + "{\"agent\":\"researcher\",\"question\":\"find facts\"},"
@@ -83,7 +83,7 @@ class SwarmVerifierTest {
         JsonNode root = MAPPER.readTree(team(verifier(1, PASS_JSON), null).call(TASKS));
 
         JsonNode ver = root.get("verification");
-        assertEquals("PASS", ver.get("verdict").asText());
+        assertEquals("PASS", ver.get("verdict").asString());
         assertEquals(0, ver.get("repairRounds").asInt());
         assertEquals(0.9, ver.get("confidence").asDouble(), 1e-9);
         assertEquals(1, users.size());
@@ -106,7 +106,7 @@ class SwarmVerifierTest {
         JsonNode root =
                 MAPPER.readTree(team(verifier(1, PARTIAL_JSON, PASS_JSON), null).call(TASKS));
 
-        assertEquals("PASS", root.get("verification").get("verdict").asText());
+        assertEquals("PASS", root.get("verification").get("verdict").asString());
         assertEquals(1, root.get("verification").get("repairRounds").asInt());
         assertEquals(2, users.size());
         verify(chat, times(1)).delegateCall(eq(aId), any(), any(), any());
@@ -115,8 +115,8 @@ class SwarmVerifierTest {
         assertTrue(ctx.getAllValues().get(1).contains("need the draft text"));
         boolean repairedPresent = false;
         for (JsonNode r : root.get("results")) {
-            if ("writer".equals(r.get("agent").asText())) {
-                assertEquals("repaired answer B", r.get("answer").asText());
+            if ("writer".equals(r.get("agent").asString())) {
+                assertEquals("repaired answer B", r.get("answer").asString());
                 repairedPresent = true;
             }
         }
@@ -132,7 +132,7 @@ class SwarmVerifierTest {
 
         JsonNode root = MAPPER.readTree(team(verifier(1, fail), null).call(TASKS));
 
-        assertEquals("FAIL", root.get("verification").get("verdict").asText());
+        assertEquals("FAIL", root.get("verification").get("verdict").asString());
         assertEquals(1, root.get("verification").get("repairRounds").asInt());
         assertEquals(2, users.size()); // verify, one repair, verify once more - then stop
         verify(chat, times(2)).delegateCall(eq(bId), any(), any(), any());
@@ -144,7 +144,7 @@ class SwarmVerifierTest {
 
         JsonNode root = MAPPER.readTree(team(verifier(0, PARTIAL_JSON), null).call(TASKS));
 
-        assertEquals("PARTIAL", root.get("verification").get("verdict").asText());
+        assertEquals("PARTIAL", root.get("verification").get("verdict").asString());
         assertEquals(0, root.get("verification").get("repairRounds").asInt());
         assertEquals(1, users.size());
         verify(chat, times(2)).delegateCall(any(), any(), any(), any());
@@ -157,9 +157,9 @@ class SwarmVerifierTest {
         for (String bad :
                 new String[] {"not json at all", "{\"verdict\":\"MAYBE\"}", "{\"verdict\": ", ""}) {
             JsonNode root = MAPPER.readTree(team(verifier(1, bad), null).call(TASKS));
-            assertEquals("UNVERIFIED", root.get("verification").get("verdict").asText(), bad);
+            assertEquals("UNVERIFIED", root.get("verification").get("verdict").asString(), bad);
             assertEquals(2, root.get("results").size());
-            assertEquals("ok", root.get("results").get(0).get("status").asText());
+            assertEquals("ok", root.get("results").get(0).get("status").asString());
         }
     }
 
@@ -176,7 +176,7 @@ class SwarmVerifierTest {
 
         JsonNode root = MAPPER.readTree(team(boom, null).call(TASKS));
 
-        assertEquals("UNVERIFIED", root.get("verification").get("verdict").asText());
+        assertEquals("UNVERIFIED", root.get("verification").get("verdict").asString());
         assertEquals(2, root.get("results").size());
     }
 
@@ -281,7 +281,7 @@ class SwarmVerifierTest {
         JsonNode root = MAPPER.readTree(team(hung, null).call(TASKS));
         long seconds = (System.nanoTime() - t0) / 1_000_000_000L;
 
-        assertEquals("UNVERIFIED", root.get("verification").get("verdict").asText());
+        assertEquals("UNVERIFIED", root.get("verification").get("verdict").asString());
         assertEquals(2, root.get("results").size());
         assertTrue(seconds < 20, "tool result must not wait on a stalled verifier");
     }
@@ -298,7 +298,7 @@ class SwarmVerifierTest {
         assertEquals(0, root.get("verification").get("repairRounds").asInt());
         assertEquals(1, users.size()); // no repair round, no second verification
         verify(chat, times(1)).delegateCall(any(), any(), any(), any());
-        assertEquals("error", root.get("results").get(1).get("status").asText());
+        assertEquals("error", root.get("results").get(1).get("status").asString());
     }
 
     @Test
@@ -369,11 +369,11 @@ class SwarmVerifierTest {
 
     /** Drops the per-run random id and timings so two runs can be compared structurally. */
     private static String normalise(String json) throws Exception {
-        com.fasterxml.jackson.databind.node.ObjectNode root =
-                (com.fasterxml.jackson.databind.node.ObjectNode) MAPPER.readTree(json);
+        tools.jackson.databind.node.ObjectNode root =
+                (tools.jackson.databind.node.ObjectNode) MAPPER.readTree(json);
         root.remove("runId");
         for (JsonNode r : root.get("results")) {
-            ((com.fasterxml.jackson.databind.node.ObjectNode) r).remove("ms");
+            ((tools.jackson.databind.node.ObjectNode) r).remove("ms");
         }
         return MAPPER.writeValueAsString(root);
     }

@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.common.plugins.PluginCatalogController.PluginCatalog;
 import com.agenticai.core.common.plugins.PluginCatalogController.PluginEntry;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,9 @@ class PluginCatalogControllerTest {
     void setUp() {
         settings = mock(PlatformSettingsService.class);
         controller =
-                new PluginCatalogController(new PluginCatalogService(settings, new ObjectMapper()));
+                new PluginCatalogController(
+                        new PluginCatalogService(
+                                settings, com.agenticai.core.json.JsonMappers.plain()));
     }
 
     @Test

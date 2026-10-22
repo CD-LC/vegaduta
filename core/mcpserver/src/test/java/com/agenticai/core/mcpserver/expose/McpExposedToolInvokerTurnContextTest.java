@@ -19,7 +19,6 @@ import com.agenticai.core.mcpserver.McpServerRateLimiter;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowBackgroundRunService;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -87,7 +86,8 @@ class McpExposedToolInvokerTurnContextTest {
         invoker.invoke(
                 caller,
                 agentTool,
-                new ObjectMapper().readTree("{\"message\":\"ping\",\"conversationId\":\"c1\"}"));
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree("{\"message\":\"ping\",\"conversationId\":\"c1\"}"));
 
         ArgumentCaptor<TurnContext> context = ArgumentCaptor.forClass(TurnContext.class);
         ArgumentCaptor<ChatTurnRequest> request = ArgumentCaptor.forClass(ChatTurnRequest.class);

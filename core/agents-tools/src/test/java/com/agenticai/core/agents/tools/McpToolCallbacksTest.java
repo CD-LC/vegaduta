@@ -19,6 +19,11 @@ class McpToolCallbacksTest {
     @Test
     void discoversEveryToolWithItsOwnUnprefixedName() {
         McpSyncClient client = StaticMcpExposurePolicyTest.client("docs");
+        // Spring AI 2 asserts the client identity when it builds a callback; a real McpSyncClient
+        // always has both.
+        when(client.getClientCapabilities())
+                .thenReturn(McpSchema.ClientCapabilities.builder().build());
+        when(client.getClientInfo()).thenReturn(new McpSchema.Implementation("test", "1"));
         McpSchema.JsonSchema schema =
                 new McpSchema.JsonSchema("object", Map.of(), List.of(), null, null, null);
         when(client.listTools())

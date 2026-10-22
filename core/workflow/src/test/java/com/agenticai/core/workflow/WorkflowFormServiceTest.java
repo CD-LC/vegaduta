@@ -24,8 +24,6 @@ import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +32,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The public form's resolution, validation, honeypot, rate limits and run start. The token is the
@@ -87,7 +86,7 @@ class WorkflowFormServiceTest {
                 workflowService,
                 triggerPort,
                 rateLimiter,
-                new ObjectMapper(),
+                com.agenticai.core.json.JsonMappers.plain(),
                 enabled,
                 30,
                 8,
@@ -254,8 +253,8 @@ class WorkflowFormServiceTest {
                         eq(NODE_ID),
                         input.capture(),
                         startsWith("workflow-form:"));
-        JsonNode sent = new ObjectMapper().readTree(input.getValue());
-        assertEquals("Asha", sent.get("name").asText());
+        JsonNode sent = com.agenticai.core.json.JsonMappers.plain().readTree(input.getValue());
+        assertEquals("Asha", sent.get("name").asString());
         assertTrue(sent.get("agree").asBoolean());
         assertEquals(2, sent.size(), "only schema fields reach the workflow");
         assertNoTenantLeak();

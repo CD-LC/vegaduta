@@ -13,7 +13,6 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
@@ -39,6 +38,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * P0 characterisation (ADR-0012, section 6 P0.2): the JSONB paths against a real Postgres.
@@ -59,7 +59,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class JsonbRoundTripIT extends AbstractContextIT {
 
     private static final String SCHEMA = "tenant_it_jsonb";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     @Autowired private TenantRepository tenantRepository;
     @Autowired private TenantMigrationService tenantMigrationService;

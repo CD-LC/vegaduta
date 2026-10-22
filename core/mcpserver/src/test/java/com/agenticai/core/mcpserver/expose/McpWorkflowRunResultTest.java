@@ -8,17 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class McpWorkflowRunResultTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static NodeTraceEntry step(String label, String output, String cost) {
         NodeTraceEntry entry =
@@ -85,10 +85,10 @@ class McpWorkflowRunResultTest {
         String json = McpWorkflowRunResult.toJson(run, 1000, null);
         JsonNode body = MAPPER.readTree(json);
 
-        assertEquals("COMPLETED", body.get("status").asText());
-        assertEquals("\"final\"", body.get("output").asText());
+        assertEquals("COMPLETED", body.get("status").asString());
+        assertEquals("\"final\"", body.get("output").asString());
         assertEquals(2, body.get("steps").size());
-        assertEquals("first", body.get("steps").get(0).get("node").asText());
+        assertEquals("first", body.get("steps").get(0).get("node").asString());
         assertFalse(body.has("hint"));
         assertFalse(json.contains("secret"), "node inputs must not be returned to an MCP caller");
     }
@@ -100,9 +100,9 @@ class McpWorkflowRunResultTest {
 
         JsonNode body = MAPPER.readTree(McpWorkflowRunResult.toJson(run, 100, "poll me"));
 
-        assertTrue(body.get("output").asText().endsWith("[truncated]"));
-        assertTrue(body.get("output").asText().length() < 130);
-        assertEquals("poll me", body.get("hint").asText());
+        assertTrue(body.get("output").asString().endsWith("[truncated]"));
+        assertTrue(body.get("output").asString().length() < 130);
+        assertEquals("poll me", body.get("hint").asString());
     }
 
     @Test
@@ -112,7 +112,7 @@ class McpWorkflowRunResultTest {
                         McpWorkflowRunResult.toJson(
                                 run(WorkflowRunStatus.RUNNING, List.of()), 100, null));
 
-        assertEquals("RUNNING", body.get("status").asText());
+        assertEquals("RUNNING", body.get("status").asString());
         assertFalse(body.has("output"));
         assertFalse(body.has("steps"));
     }

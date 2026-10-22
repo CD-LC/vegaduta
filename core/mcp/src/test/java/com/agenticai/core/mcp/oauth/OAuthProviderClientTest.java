@@ -10,7 +10,6 @@ import com.agenticai.core.mcp.oauth.OAuthProviderClient.RevokeOutcome;
 import com.agenticai.core.mcp.oauth.OAuthProviderClient.TokenResult;
 import com.agenticai.core.mcp.oauth.OAuthProviderRegistry.Provider;
 import com.agenticai.core.mcp.oauth.OAuthProviderTestSupport.ScriptedHttp;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +28,7 @@ class OAuthProviderClientTest {
     @BeforeEach
     void setUp() {
         http = new ScriptedHttp();
-        client = new OAuthProviderClient(http, new ObjectMapper());
+        client = new OAuthProviderClient(http, com.agenticai.core.json.JsonMappers.plain());
         registry =
                 OAuthProviderTestSupport.registry(
                         OAuthProviderTestSupport.props(

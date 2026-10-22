@@ -14,11 +14,11 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.workflow.WorkflowExpressionResolver.NodeEvalInfo;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.expression.NodeOutput;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Resolver behaviour that the review round 2 found unpinned: vault refs in data, legacy literals,
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  */
 class WorkflowExpressionResolverTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String RUN = UUID.randomUUID().toString();
     private static final NodeEvalInfo INFO =
             new NodeEvalInfo(UUID.randomUUID().toString(), "wf", RUN, "ann");

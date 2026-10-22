@@ -24,7 +24,6 @@ import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.Optional;
@@ -256,7 +255,7 @@ class AgentJobCancellationTest {
                             executor,
                             AgentJobTestSupport.properties(),
                             new SimpleMeterRegistry(),
-                            new ObjectMapper(),
+                            com.agenticai.core.json.JsonMappers.plain(),
                             15);
         }
     }

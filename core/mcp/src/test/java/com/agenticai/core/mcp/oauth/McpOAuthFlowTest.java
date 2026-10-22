@@ -17,7 +17,6 @@ import com.agenticai.core.mcp.McpRemoteUrlGuard;
 import com.agenticai.core.mcp.oauth.McpOAuthConnectionStore.McpOAuthConnection;
 import com.agenticai.core.mcp.oauth.OAuthProviderTestSupport.MutableClock;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The generic remote-MCP OAuth flow end to end against {@link FakeAuthorizationServer}, which
@@ -73,7 +73,7 @@ class McpOAuthFlowTest {
     }
 
     private McpOAuthService newService(boolean enabled, McpOAuthClientMetadata cimd) {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
         return new McpOAuthService(
                 new McpOAuthDiscovery(as, om),
                 new McpOAuthClient(as, om),
@@ -193,8 +193,10 @@ class McpOAuthFlowTest {
                 };
         McpOAuthService s =
                 new McpOAuthService(
-                        new McpOAuthDiscovery(unreachable, new ObjectMapper()),
-                        new McpOAuthClient(unreachable, new ObjectMapper()),
+                        new McpOAuthDiscovery(
+                                unreachable, com.agenticai.core.json.JsonMappers.plain()),
+                        new McpOAuthClient(
+                                unreachable, com.agenticai.core.json.JsonMappers.plain()),
                         store,
                         encryption,
                         true,
@@ -208,7 +210,9 @@ class McpOAuthFlowTest {
     void cimdIsUsedAsTheClientIdWhenTheServerSupportsItAndNoRegistrationHappens() {
         service = newService(true, activeCimd());
         as.cimdSupported = true;
-        as.cimdDocuments.put(CIMD_URL, new ObjectMapper().valueToTree(activeCimd().document()));
+        as.cimdDocuments.put(
+                CIMD_URL,
+                com.agenticai.core.json.JsonMappers.plain().valueToTree(activeCimd().document()));
 
         McpOAuthService.AuthorizationStart start = service.beginAuthorization(MCP, null);
         assertEquals("cimd", start.clientMode());
@@ -798,7 +802,7 @@ class McpOAuthFlowTest {
         assertThrows(McpOAuthException.class, () -> off.status(MCP));
         assertThrows(McpOAuthException.class, () -> off.completeAuthorization("c", "s", null));
         // on, but the callback is not a public https URL (localhost) -> not usable
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
         McpOAuthService local =
                 new McpOAuthService(
                         new McpOAuthDiscovery(as, om),

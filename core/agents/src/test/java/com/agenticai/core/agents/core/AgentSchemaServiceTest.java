@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class AgentSchemaServiceTest {
 
@@ -21,7 +21,7 @@ class AgentSchemaServiceTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new ObjectMapper();
+        mapper = com.agenticai.core.json.JsonMappers.plain();
         service = new AgentSchemaService(mapper);
     }
 
@@ -48,7 +48,7 @@ class AgentSchemaServiceTest {
         Agent agent = agentWith(false, Set.of(), Set.of());
         JsonNode schema = mapper.readTree(service.generateInputSchema(agent));
 
-        assertEquals("object", schema.get("type").asText());
+        assertEquals("object", schema.get("type").asString());
         assertFalse(schema.get("additionalProperties").asBoolean());
         assertTrue(schema.get("properties").has("query"));
         assertTrue(schema.get("properties").has("context_data"));
@@ -56,7 +56,7 @@ class AgentSchemaServiceTest {
 
         boolean queryRequired = false;
         for (JsonNode required : schema.get("required")) {
-            if ("query".equals(required.asText())) {
+            if ("query".equals(required.asString())) {
                 queryRequired = true;
             }
         }

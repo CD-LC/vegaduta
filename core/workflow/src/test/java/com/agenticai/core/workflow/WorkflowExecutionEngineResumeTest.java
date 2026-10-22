@@ -13,8 +13,6 @@ import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +21,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link WorkflowExecutionEngine#resume}'s core contract (F-05 approval-node resume): re-entry
@@ -43,7 +42,7 @@ class WorkflowExecutionEngineResumeTest {
 
     /** Same JavaTimeModule necessity as {@code WorkflowExecutionEngineFailProofTest#mapper}. */
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.plain();
     }
 
     @BeforeEach

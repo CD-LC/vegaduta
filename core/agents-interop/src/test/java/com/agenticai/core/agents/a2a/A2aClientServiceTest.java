@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.tools.classification.BuiltInToolClassifications;
 import com.agenticai.core.agents.tools.classification.ToolClassification;
 import com.agenticai.core.agents.tools.classification.ToolTrustTier;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -30,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Outbound A2A client against a REAL loopback fake A2A server (JDK HttpServer): signed card + JWKS
@@ -39,7 +39,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
  */
 class A2aClientServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private HttpServer server;
     private int port;
@@ -593,12 +593,12 @@ class A2aClientServiceTest {
 
     private void rpc(HttpExchange ex) throws IOException {
         JsonNode req = MAPPER.readTree(ex.getRequestBody().readAllBytes());
-        String method = req.path("method").asText();
+        String method = req.path("method").asString();
         methods.add(method);
         boolean v1 = protocolVersion.startsWith("1.");
         Map<String, Object> env = new LinkedHashMap<>();
         env.put("jsonrpc", "2.0");
-        env.put("id", req.path("id").asText());
+        env.put("id", req.path("id").asString());
         if (method.equals("message/send") || method.equals("SendMessage")) {
             JsonNode cfg = req.path("params").path("configuration");
             lastBlocking = cfg.path("blocking").asBoolean(true);
@@ -634,7 +634,7 @@ class A2aClientServiceTest {
                                 .path("parts")
                                 .path(0)
                                 .path("text")
-                                .asText();
+                                .asString();
                 if (inlineMessage) {
                     Map<String, Object> m = new LinkedHashMap<>();
                     m.put("kind", "message");

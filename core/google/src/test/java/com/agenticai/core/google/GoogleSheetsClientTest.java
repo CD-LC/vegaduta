@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpRequest;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link GoogleSheetsClient} request-mapping and error-translation tests on the injected stub
@@ -26,7 +26,7 @@ class GoogleSheetsClientTest {
 
     private GoogleSheetsClient client;
     private HttpStubs.RecordingHttpClient http;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     @BeforeEach
     void setUp() {
@@ -76,9 +76,9 @@ class GoogleSheetsClientTest {
         assertEquals("PUT", request.method());
         assertEquals("application/json", request.headers().firstValue("Content-Type").orElse(null));
         JsonNode body = objectMapper.readTree(HttpStubs.bodyOf(request));
-        assertEquals("Sheet1!A1", body.path("range").asText());
-        assertEquals("a", body.path("values").get(0).get(0).asText());
-        assertEquals("d", body.path("values").get(1).get(1).asText());
+        assertEquals("Sheet1!A1", body.path("range").asString());
+        assertEquals("a", body.path("values").get(0).get(0).asString());
+        assertEquals("d", body.path("values").get(1).get(1).asString());
     }
 
     @Test
@@ -131,7 +131,7 @@ class GoogleSheetsClientTest {
                         + "?valueInputOption=RAW&insertDataOption=INSERT_ROWS",
                 request.uri().toString());
         JsonNode body = objectMapper.readTree(HttpStubs.bodyOf(request));
-        assertEquals("=IMPORTXML(\"x\",\"y\")", body.path("values").get(0).get(2).asText());
+        assertEquals("=IMPORTXML(\"x\",\"y\")", body.path("values").get(0).get(2).asString());
         assertEquals(new GoogleSheetsClient.AppendResult("Leads!A12:C12", 1), result);
     }
 

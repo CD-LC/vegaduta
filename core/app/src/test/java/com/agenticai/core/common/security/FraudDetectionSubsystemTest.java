@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.InetAddress;
 import java.util.Set;
 import java.util.UUID;
@@ -18,6 +17,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * JAVA-005: the fraud subsystem is OFF unless {@code app.fraud-detection.enabled=true}; when on, it
@@ -84,7 +84,8 @@ class FraudDetectionSubsystemTest {
         AbuseDetectionService service = mock(AbuseDetectionService.class);
         when(service.analyzeRequest(any(), any())).thenReturn(FraudDecision.BLOCK);
         FraudDetectionInterceptor interceptor =
-                new FraudDetectionInterceptor(service, new ObjectMapper(), true);
+                new FraudDetectionInterceptor(
+                        service, com.agenticai.core.json.JsonMappers.plain(), true);
         UUID tenant = UUID.randomUUID();
         TenantContext.set(
                 TenantContext.of(tenant.toString(), UUID.randomUUID().toString(), Set.of()));
@@ -100,8 +101,8 @@ class FraudDetectionSubsystemTest {
     void interceptorSkipsTenantlessRequestsWithoutCallingTheService() throws Exception {
         AbuseDetectionService service = mock(AbuseDetectionService.class);
         FraudDetectionInterceptor interceptor =
-                new FraudDetectionInterceptor(service, new ObjectMapper(), true);
-
+                new FraudDetectionInterceptor(
+                        service, com.agenticai.core.json.JsonMappers.plain(), true);
         assertThat(
                         interceptor.preHandle(
                                 new MockHttpServletRequest("POST", "/api/agents"),

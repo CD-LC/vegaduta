@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Covers {@link DiscordApiClient#sendMediaMessage} - the multipart/form-data {@code POST
@@ -33,7 +33,7 @@ import org.springframework.web.client.RestClient;
  */
 class DiscordApiClientMediaUploadTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BOT_TOKEN = "dummy-bot-token";
     private static final String CHANNEL_ID = "c123";
 

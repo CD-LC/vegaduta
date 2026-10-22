@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -56,8 +55,8 @@ class AnthropicThinkingChatModelTest {
         }
 
         @Override
-        public ChatOptions getDefaultOptions() {
-            return defaults != null ? defaults : ChatModel.super.getDefaultOptions();
+        public ChatOptions getOptions() {
+            return defaults != null ? defaults : ChatModel.super.getOptions();
         }
 
         @Override
@@ -139,7 +138,14 @@ class AnthropicThinkingChatModelTest {
         Prompt withTools =
                 new Prompt(
                         List.of(new UserMessage("hi")),
-                        ToolCallingChatOptions.builder().toolNames("web_search").build());
+                        ToolCallingChatOptions.builder()
+                                .toolCallbacks(
+                                        FunctionToolCallback.<String, String>builder(
+                                                        "web_search", in -> in)
+                                                .description("search")
+                                                .inputType(String.class)
+                                                .build())
+                                .build());
         assertThat(AnthropicThinkingChatModel.hasTools(withTools)).isTrue();
         assertThat(model.call(withTools)).isSameAs(toolTurn);
         assertThat(model.stream(withTools).blockFirst()).isSameAs(toolTurn);
@@ -180,7 +186,7 @@ class AnthropicThinkingChatModelTest {
         return AnthropicChatOptions.builder()
                 .model("m")
                 .maxTokens(20000)
-                .thinking(AnthropicApi.ThinkingType.ENABLED, 1024)
+                .thinkingEnabled(1024)
                 .build();
     }
 
@@ -239,20 +245,20 @@ class AnthropicThinkingChatModelTest {
                 new AnthropicThinkingChatModel(
                         new Stub(new ChatResponse(List.of(text("a"))), thinkingDefaults()),
                         new Stub(new ChatResponse(List.of(text("b"))), plainDefaults()));
-        assertThat(((AnthropicChatOptions) wrapper.getDefaultOptions()).getThinking()).isNull();
+        assertThat(((AnthropicChatOptions) wrapper.getOptions()).getThinking()).isNull();
     }
 
     /**
-     * Pins the real 1.1.7 metadata keys: THINKING/THINKING_DELTA use "signature", redacted uses
-     * "data".
+     * Pins the real SDK-model (Spring AI 2.0.1) metadata keys: THINKING/THINKING_DELTA use
+     * "signature", redacted uses "data".
      */
     @Test
     void streamingThinkingChunkWithEmptySignatureIsStillStripped() {
         var props = new java.util.HashMap<String, Object>();
         props.put(
                 "signature",
-                ""); // 1.1.7 always puts the key even for a thinking_delta chunk (value may be
-        // empty)
+                ""); // the SDK model always puts the key even for a thinking_delta chunk (value may
+        // be empty)
         Generation delta =
                 new Generation(
                         AssistantMessage.builder()

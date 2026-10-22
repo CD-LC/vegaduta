@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpRequest;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link GoogleDriveClient} request-mapping and error-translation tests on the injected stub
@@ -27,7 +27,7 @@ class GoogleDriveClientTest {
 
     private GoogleDriveClient client;
     private HttpStubs.RecordingHttpClient http;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     @BeforeEach
     void setUp() {
@@ -57,7 +57,7 @@ class GoogleDriveClientTest {
         assertEquals("POST", create.method());
         assertEquals("Bearer " + TOKEN, create.headers().firstValue("Authorization").orElse(null));
         JsonNode metadata = objectMapper.readTree(HttpStubs.bodyOf(create));
-        assertEquals("notes.txt", metadata.path("name").asText());
+        assertEquals("notes.txt", metadata.path("name").asString());
         assertTrue(
                 metadata.path("parents").isMissingNode(),
                 "no folderId means no parents field at all");
@@ -87,7 +87,7 @@ class GoogleDriveClientTest {
         client.createTextFile("report.txt", "content", "folder-9");
 
         JsonNode metadata = objectMapper.readTree(HttpStubs.bodyOf(http.requests.get(0)));
-        assertEquals("folder-9", metadata.path("parents").get(0).asText());
+        assertEquals("folder-9", metadata.path("parents").get(0).asString());
     }
 
     @Test

@@ -2,8 +2,6 @@ package com.agenticai.core.startup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +15,7 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.metrics.StartupStep;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Cold-start lane: start-up profiling is OFF by default (zero behaviour change), and when ON it
@@ -158,15 +157,15 @@ class StartupProfilingTest {
     void jsonDumpIsValidJsonInTheActuatorStartupShapeAndEscapesTags() throws Exception {
         String json = StartupProfilingReporter.toJson(recordedStartup().getBufferedTimeline());
 
-        JsonNode root = new ObjectMapper().readTree(json);
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(json);
         JsonNode events = root.path("timeline").path("events");
         assertThat(events.isArray()).isTrue();
         assertThat(events).hasSize(2);
         JsonNode first = events.get(0);
-        assertThat(first.path("startupStep").path("name").asText())
+        assertThat(first.path("startupStep").path("name").asString())
                 .isEqualTo("spring.beans.instantiate");
-        assertThat(first.path("duration").asText()).startsWith("PT");
-        assertThat(first.path("startupStep").path("tags").get(0).path("value").asText())
+        assertThat(first.path("duration").asString()).startsWith("PT");
+        assertThat(first.path("startupStep").path("tags").get(0).path("value").asString())
                 .isEqualTo("quote\"and\nnewline");
         assertThat(first.path("startupStep").has("parentId")).isTrue();
     }
@@ -204,7 +203,9 @@ class StartupProfilingTest {
         new StartupProfilingReporter().onApplicationEvent(readyEvent(context));
 
         assertThat(dump).exists();
-        JsonNode root = new ObjectMapper().readTree(Files.readString(dump, StandardCharsets.UTF_8));
+        JsonNode root =
+                com.agenticai.core.json.JsonMappers.plain()
+                        .readTree(Files.readString(dump, StandardCharsets.UTF_8));
         assertThat(root.path("timeline").path("events")).hasSize(1);
     }
 }

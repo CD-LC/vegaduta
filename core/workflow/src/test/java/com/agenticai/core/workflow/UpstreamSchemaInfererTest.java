@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.dto.WorkflowExpressionApi.SchemaPath;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,7 +14,8 @@ import org.junit.jupiter.api.Test;
 /** Path and type inference for the data picker, and the caps the API contract promises. */
 class UpstreamSchemaInfererTest {
 
-    private final UpstreamSchemaInferer inferer = new UpstreamSchemaInferer(new ObjectMapper());
+    private final UpstreamSchemaInferer inferer =
+            new UpstreamSchemaInferer(com.agenticai.core.json.JsonMappers.plain());
 
     private static Map<String, SchemaPath> byPath(List<SchemaPath> paths) {
         return paths.stream()

@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.openai.OpenAiCompatCallerScope;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link McpApiKeyAuthFilter} in OpenAI-compat mode (registered for {@code /v1/*} by {@link
@@ -32,7 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 class OpenAiCompatKeyAuthTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private McpServerAccessGrantService grantService;
     private McpServerRateLimiter rateLimiter;
     private McpApiKeyAuthFilter filter;
@@ -95,8 +95,8 @@ class OpenAiCompatKeyAuthTest {
                 });
         assertEquals(401, response.getStatus());
         JsonNode err = mapper.readTree(response.getContentAsString()).get("error");
-        assertEquals("invalid_api_key", err.get("code").asText());
-        assertEquals("invalid_request_error", err.get("type").asText());
+        assertEquals("invalid_api_key", err.get("code").asString());
+        assertEquals("invalid_request_error", err.get("type").asString());
         assertTrue(err.has("param") && err.has("message"));
     }
 
@@ -118,7 +118,7 @@ class OpenAiCompatKeyAuthTest {
         assertNotNull(response.getHeader("Retry-After"));
         assertEquals(
                 "rate_limit_exceeded",
-                mapper.readTree(response.getContentAsString()).get("error").get("code").asText());
+                mapper.readTree(response.getContentAsString()).get("error").get("code").asString());
         assertTrue(TenantContext.current().isEmpty());
     }
 

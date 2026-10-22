@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The callback against a stubbed desktop-agent: schema honesty, body forwarding, agent errors
@@ -105,14 +105,14 @@ class DesktopToolCallbackTest {
         reply = "{\"error\":\"no UI element labelled \\\"Save\\\"\"}";
         replyStatus = 404;
         JsonNode r = result(tool(DesktopToolCallback.Action.PRESS, false), "{\"label\":\"Save\"}");
-        assertTrue(r.path("error").asText().contains("Save"), r.toString());
+        assertTrue(r.path("error").asString().contains("Save"), r.toString());
     }
 
     @Test
     void unreachableAgentExplainsHowToStartIt() throws Exception {
         stop();
         JsonNode r = result(tool(DesktopToolCallback.Action.CLICK, false), "{\"x\":1,\"y\":2}");
-        assertTrue(r.path("error").asText().contains("desktop-agent"), r.toString());
+        assertTrue(r.path("error").asString().contains("desktop-agent"), r.toString());
     }
 
     @Test

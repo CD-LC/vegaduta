@@ -21,8 +21,6 @@ import com.agenticai.core.tables.DataTableFilter.Op;
 import com.agenticai.core.tables.DataTableService;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,10 +32,12 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class WorkflowDataTableNodeHandlerTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private DataTableService service;
     private WorkflowDataTableNodeHandler handler;
@@ -158,8 +158,8 @@ class WorkflowDataTableNodeHandlerTest {
         JsonNode out = json(r);
         assertThat(out.get("count").asInt()).isEqualTo(1);
         assertThat(out.get("total").asInt()).isEqualTo(40);
-        assertThat(out.get("rows").get(0).get("_id").asText()).isEqualTo(id.toString());
-        assertThat(out.get("rows").get(0).get("email").asText()).isEqualTo("a@b.co");
+        assertThat(out.get("rows").get(0).get("_id").asString()).isEqualTo(id.toString());
+        assertThat(out.get("rows").get(0).get("email").asString()).isEqualTo("a@b.co");
         assertThat(r.summary()).contains("1 of 40");
     }
 
@@ -231,7 +231,7 @@ class WorkflowDataTableNodeHandlerTest {
                 .containsEntry("qty", "3");
         assertThat(values.getAllValues().get(1)).containsEntry("email", "from-input");
         assertThat(json(explicit).get("inserted").asInt()).isEqualTo(1);
-        assertThat(json(explicit).get("row").get("_id").asText()).isEqualTo(id.toString());
+        assertThat(json(explicit).get("row").get("_id").asString()).isEqualTo(id.toString());
     }
 
     @Test

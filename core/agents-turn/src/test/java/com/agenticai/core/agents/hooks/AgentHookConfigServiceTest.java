@@ -23,8 +23,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +35,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class AgentHookConfigServiceTest {
 
     private static final UUID AGENT = UUID.fromString("55555555-5555-5555-5555-555555555555");
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BLOCK_HOOK =
             "{\"hooks\":[{\"id\":\"no-delete\",\"point\":\"BEFORE_TOOL\",\"match\":{\"tool\":\"delete_*\"},\"action\":\"block\"}]}";
 

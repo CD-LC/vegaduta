@@ -5,92 +5,56 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 /**
- * Each factory must be byte-behaviour-identical to the inline construction it replaced (ADR-0012
- * P1b). Parity is asserted by comparing the full effective configuration (every feature flag,
- * registered modules, default inclusion) with a mapper built the old way, plus behavioural round
+ * The factories carry the Jackson 2 wire defaults into Jackson 3 (ADR-0012 P2): parity is asserted
+ * on the observable behaviour (features that differ between the majors), plus behavioural round
  * trips.
  */
 class JsonMappersTest {
 
-    /** Everything observable about a mapper's configuration. */
-    private static Map<String, Object> describe(ObjectMapper m) {
-        Map<String, Object> d = new TreeMap<>();
-        for (DeserializationFeature f : DeserializationFeature.values()) {
-            d.put("D." + f, m.isEnabled(f));
-        }
-        for (SerializationFeature f : SerializationFeature.values()) {
-            d.put("S." + f, m.isEnabled(f));
-        }
-        for (MapperFeature f : MapperFeature.values()) {
-            d.put("M." + f, m.isEnabled(f));
-        }
-        d.put("modules", m.getRegisteredModuleIds().toString());
-        d.put("inclusion", m.getSerializationConfig().getDefaultPropertyInclusion().toString());
-        return d;
-    }
-
-    private static void assertSameConfig(ObjectMapper expected, ObjectMapper actual) {
-        assertEquals(describe(expected), describe(actual));
-    }
-
     @Test
-    void plainEqualsNewObjectMapper() {
-        assertSameConfig(new ObjectMapper(), JsonMappers.plain());
+    void jackson2DefaultsHold() {
+        for (ObjectMapper m :
+                new ObjectMapper[] {
+                    JsonMappers.plain(),
+                    JsonMappers.withJavaTime(),
+                    JsonMappers.lenient(),
+                    JsonMappers.nonNull(),
+                    JsonMappers.sortedMapKeys(),
+                    JsonMappers.strictTrailingTokens()
+                }) {
+            assertTrue(
+                    m.isEnabled(
+                            tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS),
+                    "dates as timestamps");
+            assertTrue(
+                    !m.isEnabled(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY),
+                    "declaration order");
+        }
+        assertTrue(!JsonMappers.plain().isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS));
         assertTrue(
-                JsonMappers.plain().getRegisteredModuleIds().isEmpty(),
-                "plain() registers no modules");
-    }
-
-    @Test
-    void withJavaTimeEqualsRegisterModule() {
-        assertSameConfig(
-                new ObjectMapper().registerModule(new JavaTimeModule()),
-                JsonMappers.withJavaTime());
-    }
-
-    @Test
-    void lenientEqualsConfigureFailOnUnknownFalse() {
-        assertSameConfig(
-                new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false),
-                JsonMappers.lenient());
-    }
-
-    @Test
-    void nonNullEqualsSetDefaultPropertyInclusion() {
-        assertSameConfig(
-                new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL),
-                JsonMappers.nonNull());
-    }
-
-    @Test
-    void sortedMapKeysEqualsEnableOrderMapEntries() {
-        assertSameConfig(
-                new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS),
-                JsonMappers.sortedMapKeys());
-    }
-
-    @Test
-    void strictTrailingTokensEqualsEnableFailOnTrailingTokens() {
-        assertSameConfig(
-                new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS),
-                JsonMappers.strictTrailingTokens());
+                JsonMappers.plain().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        assertTrue(
+                !JsonMappers.lenient()
+                        .isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        assertTrue(
+                JsonMappers.strictTrailingTokens()
+                        .isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS));
+        assertTrue(
+                JsonMappers.sortedMapKeys()
+                        .isEnabled(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS));
     }
 
     @Test
@@ -102,7 +66,7 @@ class JsonMappersTest {
     record Point(int x, String label) {}
 
     @Test
-    void plainRoundTripsRecordsAndTrees() throws JsonProcessingException {
+    void plainRoundTripsRecordsAndTrees() throws JacksonException {
         ObjectMapper m = JsonMappers.plain();
         String json = m.writeValueAsString(new Point(3, "a"));
         assertEquals("{\"x\":3,\"label\":\"a\"}", json);
@@ -115,14 +79,14 @@ class JsonMappersTest {
     }
 
     @Test
-    void lenientIgnoresUnknownProperties() throws JsonProcessingException {
+    void lenientIgnoresUnknownProperties() throws JacksonException {
         assertEquals(
                 new Point(1, null),
                 JsonMappers.lenient().readValue("{\"x\":1,\"zzz\":2}", Point.class));
     }
 
     @Test
-    void nonNullOmitsNullProperties() throws JsonProcessingException {
+    void nonNullOmitsNullProperties() throws JacksonException {
         assertEquals("{\"x\":1}", JsonMappers.nonNull().writeValueAsString(new Point(1, null)));
         assertEquals(
                 "{\"x\":1,\"label\":null}",
@@ -130,7 +94,7 @@ class JsonMappersTest {
     }
 
     @Test
-    void sortedMapKeysOrdersMapEntries() throws JsonProcessingException {
+    void sortedMapKeysOrdersMapEntries() throws JacksonException {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("b", 1);
         map.put("a", 2);
@@ -139,19 +103,18 @@ class JsonMappersTest {
     }
 
     @Test
-    void strictTrailingTokensRejectsTrailingContent() throws JsonProcessingException {
+    void strictTrailingTokensRejectsTrailingContent() throws JacksonException {
         assertThrows(
-                JsonProcessingException.class,
-                () -> JsonMappers.strictTrailingTokens().readTree("{} {}"));
+                JacksonException.class, () -> JsonMappers.strictTrailingTokens().readTree("{} {}"));
         assertEquals("{}", JsonMappers.plain().readTree("{} {}").toString());
     }
 
     @Test
-    void withJavaTimeWritesInstantsAndPlainCannot() throws JsonProcessingException {
+    void withJavaTimeWritesInstantsAndPlainCannot() throws JacksonException {
         Instant t = Instant.parse("2026-01-02T03:04:05Z");
         // With the module and default WRITE_DATES_AS_TIMESTAMPS: numeric seconds.nanos.
         assertEquals("1767323045.000000000", JsonMappers.withJavaTime().writeValueAsString(t));
-        assertThrows(
-                JsonProcessingException.class, () -> JsonMappers.plain().writeValueAsString(t));
+        // Jackson 3 has java.time built in, so plain() can write it too (Jackson 2 could not).
+        assertEquals("1767323045.000000000", JsonMappers.plain().writeValueAsString(t));
     }
 }

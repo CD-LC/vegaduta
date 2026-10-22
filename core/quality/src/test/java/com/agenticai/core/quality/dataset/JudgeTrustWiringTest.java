@@ -21,8 +21,6 @@ import com.agenticai.core.quality.dataset.dto.EvalDatasetDtos.RunResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +28,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wave E wiring: the calibration-set run dispatch on {@code EvalCredibilityController}, and the
@@ -151,7 +151,7 @@ class JudgeTrustWiringTest {
 
     @Test
     void theInlineResponseJsonIsUnchangedByTheNewOptionalFields() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
         JsonNode inline = mapper.valueToTree(new CalibrationResponse("J", "A", null, null, "m"));
         assertFalse(inline.has("calibrationSetId"));
         assertFalse(inline.has("resultId"));
@@ -165,7 +165,7 @@ class JudgeTrustWiringTest {
                                         SET,
                                         UUID.randomUUID(),
                                         java.time.Instant.parse("2026-10-05T00:00:00Z")));
-        assertEquals(SET.toString(), stored.get("calibrationSetId").asText());
+        assertEquals(SET.toString(), stored.get("calibrationSetId").asString());
         assertTrue(stored.has("resultId"));
         assertTrue(stored.has("recordedAt"));
     }
@@ -197,7 +197,7 @@ class JudgeTrustWiringTest {
 
         assertNull(withService.judgeCalibration());
         assertNull(withoutService.judgeCalibration());
-        JsonNode json = new ObjectMapper().findAndRegisterModules().valueToTree(withService);
+        JsonNode json = com.agenticai.core.json.JsonMappers.withJavaTime().valueToTree(withService);
         assertFalse(
                 json.has("judgeCalibration"),
                 "absent, not null, so the flag-off JSON is unchanged");
@@ -220,8 +220,8 @@ class JudgeTrustWiringTest {
 
         assertEquals("UNCALIBRATED", r.judgeCalibration().status());
         assertNull(r.judgeCalibration().kappa());
-        JsonNode json = new ObjectMapper().findAndRegisterModules().valueToTree(r);
-        assertEquals("UNCALIBRATED", json.get("judgeCalibration").get("status").asText());
+        JsonNode json = com.agenticai.core.json.JsonMappers.withJavaTime().valueToTree(r);
+        assertEquals("UNCALIBRATED", json.get("judgeCalibration").get("status").asString());
     }
 
     @Test

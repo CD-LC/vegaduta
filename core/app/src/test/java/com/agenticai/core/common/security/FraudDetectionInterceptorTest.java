@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -53,7 +52,8 @@ class FraudDetectionInterceptorTest {
     }
 
     private FraudDetectionInterceptor interceptor(boolean enforce) {
-        return new FraudDetectionInterceptor(abuse, new ObjectMapper(), enforce);
+        return new FraudDetectionInterceptor(
+                abuse, com.agenticai.core.json.JsonMappers.plain(), enforce);
     }
 
     @Test

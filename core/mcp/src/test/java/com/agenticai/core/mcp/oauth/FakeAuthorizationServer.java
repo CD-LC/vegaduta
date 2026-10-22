@@ -1,8 +1,6 @@
 package com.agenticai.core.mcp.oauth;
 
 import com.agenticai.core.mcp.McpRemoteUrlGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A stateful, in-process MCP server + authorization server behind the {@link McpOAuthHttp} seam.
@@ -56,7 +56,7 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
     final Map<String, JsonNode> cimdDocuments = new HashMap<>();
 
     // --- state
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
     private final McpRemoteUrlGuard guard = new McpRemoteUrlGuard();
     private final Map<String, Client> clients = new HashMap<>();
     private final Map<String, Code> codes = new HashMap<>();
@@ -99,10 +99,10 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
             // CIMD: the AS fetches the client's metadata document and trusts its redirect_uris.
             JsonNode doc = cimdDocuments.get(clientId);
             require(
-                    clientId.equals(doc.path("client_id").asText()),
+                    clientId.equals(doc.path("client_id").asString()),
                     "document client_id equals its URL");
             Set<String> uris = new HashSet<>();
-            doc.path("redirect_uris").forEach(n -> uris.add(n.asText()));
+            doc.path("redirect_uris").forEach(n -> uris.add(n.asString()));
             client = new Client(clientId, null, uris);
         }
         require(client != null, "known client " + clientId);
@@ -228,7 +228,7 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
             String id = "dcr-client-" + registrations;
             String secret = "dcr-secret-" + registrations;
             Set<String> uris = new HashSet<>();
-            req.path("redirect_uris").forEach(n -> uris.add(n.asText()));
+            req.path("redirect_uris").forEach(n -> uris.add(n.asString()));
             clients.put(id, new Client(id, secret, uris));
             return json(
                     201,

@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.agenticai.core.security.SecurityConfig;
 import com.agenticai.core.security.localauth.LocalAuthSecurityConfig;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
 import java.nio.file.Path;
 import java.util.Map;
@@ -28,6 +26,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Local mode end to end through the REAL filter chains (no mocks of security): sign in over HTTP,
@@ -38,7 +38,7 @@ class LocalAuthHttpTest {
 
     private static final String EMAIL = "owner@example.test";
     private static final String PASSWORD = "correct horse battery staple";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     @EnableWebMvc
     @Configuration(proxyBeanMethods = false)
@@ -243,7 +243,7 @@ class LocalAuthHttpTest {
         MvcResult r = mvc.perform(get("/api/auth/local/config")).andReturn();
 
         assertThat(r.getResponse().getStatus()).isEqualTo(200);
-        assertThat(JSON.readTree(r.getResponse().getContentAsString()).get("mode").asText())
+        assertThat(JSON.readTree(r.getResponse().getContentAsString()).get("mode").asString())
                 .isEqualTo("local");
         assertThat(r.getResponse().getHeader("Cache-Control")).contains("no-store");
     }
@@ -251,9 +251,9 @@ class LocalAuthHttpTest {
     @Test
     void loginIssuesATokenThatOpensTheRestOfTheApi() throws Exception {
         JsonNode session = login(PASSWORD, 200);
-        String token = session.get("accessToken").asText();
+        String token = session.get("accessToken").asString();
 
-        assertThat(session.get("tokenType").asText()).isEqualTo("Bearer");
+        assertThat(session.get("tokenType").asString()).isEqualTo("Bearer");
         assertThat(session.get("user").get("roles").toString()).contains("tenant-admin");
         assertThat(mvc.perform(get("/api/probe/any")).andReturn().getResponse().getStatus())
                 .as("no token")
@@ -305,7 +305,7 @@ class LocalAuthHttpTest {
                                                                 PASSWORD))))
                         .andReturn();
         String token =
-                JSON.readTree(r.getResponse().getContentAsString()).get("accessToken").asText();
+                JSON.readTree(r.getResponse().getContentAsString()).get("accessToken").asString();
 
         assertThat(
                         mvc.perform(
@@ -321,13 +321,13 @@ class LocalAuthHttpTest {
     void aWrongPasswordIsA401WithAStableCodeAndNoToken() throws Exception {
         JsonNode body = login("definitely not the password", 401);
 
-        assertThat(body.get("error").asText()).isEqualTo("invalid_credentials");
+        assertThat(body.get("error").asString()).isEqualTo("invalid_credentials");
         assertThat(body.has("accessToken")).isFalse();
     }
 
     @Test
     void aTamperedOrForeignBearerIsRefusedOnTheMainChain() throws Exception {
-        String token = login(PASSWORD, 200).get("accessToken").asText();
+        String token = login(PASSWORD, 200).get("accessToken").asString();
         String[] p = token.split("\\.");
         String tampered = p[0] + "." + p[1] + "x." + p[2];
 
@@ -353,7 +353,7 @@ class LocalAuthHttpTest {
 
     @Test
     void refreshRotatesAndLogoutEndsTheSession() throws Exception {
-        String refresh = login(PASSWORD, 200).get("refreshToken").asText();
+        String refresh = login(PASSWORD, 200).get("refreshToken").asString();
 
         MvcResult rotated =
                 mvc.perform(
@@ -367,7 +367,7 @@ class LocalAuthHttpTest {
         String next =
                 JSON.readTree(rotated.getResponse().getContentAsString())
                         .get("refreshToken")
-                        .asText();
+                        .asString();
         assertThat(next).isNotEqualTo(refresh);
 
         assertThat(
@@ -396,7 +396,7 @@ class LocalAuthHttpTest {
 
     @Test
     void changePasswordNeedsAValidBearerButLoginIgnoresAStaleOne() throws Exception {
-        String token = login(PASSWORD, 200).get("accessToken").asText();
+        String token = login(PASSWORD, 200).get("accessToken").asString();
         String body =
                 JSON.writeValueAsString(
                         Map.of(
@@ -457,7 +457,7 @@ class LocalAuthHttpTest {
         String body =
                 JSON.writeValueAsString(
                         Map.of("orgName", "Intruder", "adminEmail", "x@example.test"));
-        String token = login(PASSWORD, 200).get("accessToken").asText();
+        String token = login(PASSWORD, 200).get("accessToken").asString();
 
         assertThat(
                         mvc.perform(

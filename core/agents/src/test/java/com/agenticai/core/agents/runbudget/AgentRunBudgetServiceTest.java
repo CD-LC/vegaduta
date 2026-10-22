@@ -148,8 +148,7 @@ class AgentRunBudgetServiceTest {
     void controllerDelegatesAndClearsOnlyOnAnExplicitNull() throws Exception {
         AgentRunBudgetService svc = mock(AgentRunBudgetService.class);
         AgentRunBudgetController controller = new AgentRunBudgetController(svc);
-        com.fasterxml.jackson.databind.ObjectMapper json =
-                new com.fasterxml.jackson.databind.ObjectMapper();
+        tools.jackson.databind.ObjectMapper json = com.agenticai.core.json.JsonMappers.plain();
 
         controller.get(agentId);
         controller.update(agentId, json.readTree("{\"runBudgetUsd\": 1.5}"));
@@ -164,8 +163,7 @@ class AgentRunBudgetServiceTest {
     void controllerRejectsAMissingOrMisspelledFieldInsteadOfClearing() throws Exception {
         AgentRunBudgetService svc = mock(AgentRunBudgetService.class);
         AgentRunBudgetController controller = new AgentRunBudgetController(svc);
-        com.fasterxml.jackson.databind.ObjectMapper json =
-                new com.fasterxml.jackson.databind.ObjectMapper();
+        tools.jackson.databind.ObjectMapper json = com.agenticai.core.json.JsonMappers.plain();
 
         assertThrows(IllegalArgumentException.class, () -> controller.update(agentId, null));
         assertThrows(

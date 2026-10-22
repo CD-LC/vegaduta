@@ -8,11 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.chatport.ChatExportRenderer.Conversation;
 import com.agenticai.core.agents.chatport.ChatExportRenderer.Format;
 import com.agenticai.core.agents.chatport.ChatExportRenderer.Message;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class ChatExportRendererTest {
 
@@ -77,21 +76,21 @@ class ChatExportRendererTest {
     @Test
     void jsonIsVersionedAndCarriesEveryField() throws Exception {
         String json = ChatExportRenderer.render(Format.JSON, List.of(sample()), EXPORTED);
-        JsonNode root = new ObjectMapper().readTree(json);
+        JsonNode root = com.agenticai.core.json.JsonMappers.plain().readTree(json);
 
-        assertEquals("vegaduta.chat-export", root.get("schema").asText());
+        assertEquals("vegaduta.chat-export", root.get("schema").asString());
         assertEquals(1, root.get("version").asInt());
-        assertEquals("2026-10-04T08:00:00Z", root.get("exportedAt").asText());
+        assertEquals("2026-10-04T08:00:00Z", root.get("exportedAt").asString());
         JsonNode c = root.get("conversations").get(0);
-        assertEquals("conv-1", c.get("id").asText());
-        assertEquals("chatgpt", c.get("source").asText());
-        assertEquals("Trip planning", c.get("title").asText());
-        assertEquals("2023-11-14T22:13:20Z", c.get("createdAt").asText());
-        assertEquals("Older turns may be missing.", c.get("notes").get(0).asText());
+        assertEquals("conv-1", c.get("id").asString());
+        assertEquals("chatgpt", c.get("source").asString());
+        assertEquals("Trip planning", c.get("title").asString());
+        assertEquals("2023-11-14T22:13:20Z", c.get("createdAt").asString());
+        assertEquals("Older turns may be missing.", c.get("notes").get(0).asString());
         JsonNode m0 = c.get("messages").get(0);
-        assertEquals("user", m0.get("role").asText());
-        assertEquals("Plan a trip to Kyoto.", m0.get("content").asText());
-        assertEquals("notes.pdf", m0.get("attachments").get(1).asText());
+        assertEquals("user", m0.get("role").asString());
+        assertEquals("Plan a trip to Kyoto.", m0.get("content").asString());
+        assertEquals("notes.pdf", m0.get("attachments").get(1).asString());
         assertEquals(2, c.get("messages").size());
         assertTrue(c.get("messages").get(1).get("attachments").isEmpty());
     }

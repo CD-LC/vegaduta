@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -71,7 +70,7 @@ class DemoTranscriptEmailServiceTest {
                         settings,
                         redisProvider,
                         mailProvider,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         "no-reply@example.com",
                         "https://app.example",
                         2);

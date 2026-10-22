@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ class GoogleOAuthClientTest {
 
     @BeforeEach
     void setUp() {
-        client = new GoogleOAuthClient(new ObjectMapper());
+        client = new GoogleOAuthClient(com.agenticai.core.json.JsonMappers.plain());
         http = HttpStubs.install(client);
     }
 

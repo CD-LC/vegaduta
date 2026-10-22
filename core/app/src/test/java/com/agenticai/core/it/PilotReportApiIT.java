@@ -14,8 +14,6 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.pdfbox.Loader;
@@ -33,6 +31,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The pilot baseline and report endpoints against a real Postgres with two tenant schemas. Covers a
@@ -204,7 +204,7 @@ class PilotReportApiIT extends AbstractContextIT {
                                                         + "/pilot-report?format=json"))
                                 .andExpect(status().isOk()));
         assertThat(r.get("baseline").get("monthlyVolume").isNull()).isTrue();
-        assertThat(r.get("baseline").get("source").asText()).isEqualTo("tenant-entered");
+        assertThat(r.get("baseline").get("source").asString()).isEqualTo("tenant-entered");
         assertThat(r.get("costComplete").asBoolean())
                 .isFalse(); // no llm_price row: unpriced, not guessed
         assertThat(
@@ -213,15 +213,15 @@ class PilotReportApiIT extends AbstractContextIT {
                 .isTrue();
         assertThat(r.get("medianResponseSeconds").decimalValue()).isEqualByComparingTo("3.00");
         assertThat(r.get("responseSamples").asInt()).isEqualTo(2);
-        assertThat(r.get("roiNote").asText()).isEqualTo("NO_ASSUMPTIONS");
+        assertThat(r.get("roiNote").asString()).isEqualTo("NO_ASSUMPTIONS");
         assertThat(r.get("modelCalls").asInt()).isEqualTo(2);
         StringBuilder labels = new StringBuilder();
         r.get("assumptions")
                 .forEach(
                         a ->
-                                labels.append(a.get("label").asText())
+                                labels.append(a.get("label").asString())
                                         .append('|')
-                                        .append(a.get("value").asText())
+                                        .append(a.get("value").asString())
                                         .append(';'));
         assertThat(labels)
                 .as("an unpriced model is listed as missing, not silently dropped")
@@ -283,7 +283,7 @@ class PilotReportApiIT extends AbstractContextIT {
                                 .andExpect(status().isOk()));
         assertThat(r.get("baseline").get("monthlyVolume").asInt()).isEqualTo(300);
         StringBuilder labels = new StringBuilder();
-        r.get("assumptions").forEach(a -> labels.append(a.get("label").asText()).append('|'));
+        r.get("assumptions").forEach(a -> labels.append(a.get("label").asString()).append('|'));
         assertThat(labels)
                 .contains("Baseline monthly volume")
                 .contains("Baseline missed rate")
@@ -328,7 +328,7 @@ class PilotReportApiIT extends AbstractContextIT {
                                                         + agentB
                                                         + "/pilot-report?format=json"))
                                 .andExpect(status().isOk()));
-        assertThat(rb.get("agentName").asText()).isEqualTo("B bot");
+        assertThat(rb.get("agentName").asString()).isEqualTo("B bot");
         assertThat(rb.get("baseline").get("monthlyVolume").isNull()).isTrue();
         // and A's baseline is intact
         as(A);

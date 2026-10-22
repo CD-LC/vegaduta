@@ -22,7 +22,6 @@ import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 class ImessageUpdateServiceTest {
 

@@ -20,8 +20,6 @@ import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Lifecycle of the task-style tools over the REAL {@link A2aTaskService} and {@link A2aTaskStore}
@@ -40,7 +40,7 @@ import reactor.core.publisher.Flux;
  */
 class McpAgentTaskToolCallbacksTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private AgentChatService chat;
     private A2aTaskService service;
@@ -115,16 +115,16 @@ class McpAgentTaskToolCallbacksTest {
                                                 && r.attachmentMimeType() == null)))
                 .thenReturn(Flux.just("Hel", "lo"));
         JsonNode started = startTask();
-        String taskId = started.get("task_id").asText();
+        String taskId = started.get("task_id").asString();
         assertTrue(
                 Set.of("submitted", "working", "completed")
-                        .contains(started.get("state").asText()));
-        assertTrue(started.get("session_id").asText().startsWith("mcp-" + grantId));
+                        .contains(started.get("state").asString()));
+        assertTrue(started.get("session_id").asString().startsWith("mcp-" + grantId));
 
         awaitTerminal(taskId);
         JsonNode done = json(get, "{\"task_id\":\"" + taskId + "\"}");
-        assertEquals("completed", done.get("state").asText());
-        assertEquals("Hello", done.get("reply").asText());
+        assertEquals("completed", done.get("state").asString());
+        assertEquals("Hello", done.get("reply").asString());
         assertFalse(done.has("error"));
     }
 
@@ -138,10 +138,10 @@ class McpAgentTaskToolCallbacksTest {
                                                 && r.subjectKey() != null
                                                 && r.userMessage() != null)))
                 .thenReturn(Flux.error(new RuntimeException("boom")));
-        String taskId = startTask().get("task_id").asText();
+        String taskId = startTask().get("task_id").asString();
         awaitTerminal(taskId);
         JsonNode failed = json(get, "{\"task_id\":\"" + taskId + "\"}");
-        assertEquals("failed", failed.get("state").asText());
+        assertEquals("failed", failed.get("state").asString());
         assertNotNull(failed.get("error"));
     }
 
@@ -155,12 +155,12 @@ class McpAgentTaskToolCallbacksTest {
                                                 && r.subjectKey() != null
                                                 && r.userMessage() != null)))
                 .thenReturn(Flux.never());
-        String taskId = startTask().get("task_id").asText();
+        String taskId = startTask().get("task_id").asString();
         // Wait until the virtual thread has actually moved it to working.
         long deadline = System.currentTimeMillis() + 5000;
         String state = "";
         while (System.currentTimeMillis() < deadline) {
-            state = json(get, "{\"task_id\":\"" + taskId + "\"}").get("state").asText();
+            state = json(get, "{\"task_id\":\"" + taskId + "\"}").get("state").asString();
             if ("working".equals(state)) {
                 break;
             }
@@ -169,12 +169,11 @@ class McpAgentTaskToolCallbacksTest {
         assertEquals("working", state);
 
         JsonNode canceled = json(cancel, "{\"task_id\":\"" + taskId + "\"}");
-        assertEquals("cancelled", canceled.get("state").asText());
+        assertEquals("cancelled", canceled.get("state").asString());
         assertEquals(
-                "cancelled", json(get, "{\"task_id\":\"" + taskId + "\"}").get("state").asText());
-
+                "cancelled", json(get, "{\"task_id\":\"" + taskId + "\"}").get("state").asString());
         JsonNode again = json(cancel, "{\"task_id\":\"" + taskId + "\"}");
-        assertTrue(again.get("error").asText().contains("cannot be cancelled"));
+        assertTrue(again.get("error").asString().contains("cannot be cancelled"));
     }
 
     @Test
@@ -187,31 +186,32 @@ class McpAgentTaskToolCallbacksTest {
                                                 && r.subjectKey() != null
                                                 && r.userMessage() != null)))
                 .thenReturn(Flux.never());
-        String taskId = startTask().get("task_id").asText();
+        String taskId = startTask().get("task_id").asString();
 
         bind(UUID.randomUUID());
         assertTrue(
                 json(get, "{\"task_id\":\"" + taskId + "\"}")
                         .get("error")
-                        .asText()
+                        .asString()
                         .contains("not found"));
         assertTrue(
                 json(cancel, "{\"task_id\":\"" + taskId + "\"}")
                         .get("error")
-                        .asText()
+                        .asString()
                         .contains("not found"));
     }
 
     @Test
     void unknownTaskIsNotFound() throws Exception {
-        assertTrue(json(get, "{\"task_id\":\"nope\"}").get("error").asText().contains("not found"));
+        assertTrue(
+                json(get, "{\"task_id\":\"nope\"}").get("error").asString().contains("not found"));
     }
 
     @Test
     void agentOutsideExposedSetIsRejectedBeforeAnyTurnStarts() throws Exception {
         JsonNode res =
                 json(start, "{\"agent_id\":\"" + UUID.randomUUID() + "\",\"message\":\"hi\"}");
-        assertTrue(res.get("error").asText().contains("not authorized"));
+        assertTrue(res.get("error").asString().contains("not authorized"));
         verify(chat, never())
                 .chat(
                         any(TurnContext.class),
@@ -252,10 +252,9 @@ class McpAgentTaskToolCallbacksTest {
         assertFalse(first.has("error"));
 
         JsonNode second = startTaskWith(cappedStart);
-        assertTrue(second.get("error").asText().contains("limit 1"), second.toString());
+        assertTrue(second.get("error").asString().contains("limit 1"), second.toString());
 
-        json(cancel, "{\"task_id\":\"" + first.get("task_id").asText() + "\"}");
-
+        json(cancel, "{\"task_id\":\"" + first.get("task_id").asString() + "\"}");
         assertFalse(
                 startTaskWith(cappedStart).has("error"),
                 "the slot is released once the task is terminal");
@@ -314,7 +313,7 @@ class McpAgentTaskToolCallbacksTest {
         assertEquals(
                 McpAgentTaskToolCallbacks.POLL_AFTER_SECONDS,
                 started.get("poll_after_seconds").asInt());
-        String taskId = started.get("task_id").asText();
+        String taskId = started.get("task_id").asString();
 
         JsonNode canceled = json(cancel, "{\"task_id\":\"" + taskId + "\"}");
         assertFalse(canceled.has("poll_after_seconds"));

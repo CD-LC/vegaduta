@@ -135,12 +135,11 @@ class StaticMcpStdioSidecarRoutingTest {
 
     private static Map<String, String> readJsonMap(String json) {
         try {
-            return new com.fasterxml.jackson.databind.ObjectMapper()
+            return new tools.jackson.databind.ObjectMapper()
                     .readValue(
                             json,
-                            new com.fasterxml.jackson.core.type.TypeReference<
-                                    Map<String, String>>() {});
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                            new tools.jackson.core.type.TypeReference<Map<String, String>>() {});
+        } catch (tools.jackson.core.JacksonException e) {
             throw new AssertionError(e);
         }
     }

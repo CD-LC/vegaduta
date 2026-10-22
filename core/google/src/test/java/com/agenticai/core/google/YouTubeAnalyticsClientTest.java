@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,9 @@ class YouTubeAnalyticsClientTest {
     void setUp() {
         GoogleOAuthService oauthService = mock(GoogleOAuthService.class);
         when(oauthService.currentAccessToken()).thenReturn("at-123");
-        client = new YouTubeAnalyticsClient(new ObjectMapper(), oauthService);
+        client =
+                new YouTubeAnalyticsClient(
+                        com.agenticai.core.json.JsonMappers.plain(), oauthService);
         http = HttpStubs.install(client);
     }
 

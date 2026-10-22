@@ -24,7 +24,6 @@ import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +98,9 @@ class WorkflowCommentServiceTest {
         notifications = mock(NotificationService.class);
         ObjectProvider<NotificationService> np = mock(ObjectProvider.class);
         when(np.getIfAvailable()).thenReturn(notifications);
-        service = new WorkflowCommentService(repo, workflows, np, new ObjectMapper());
+        service =
+                new WorkflowCommentService(
+                        repo, workflows, np, com.agenticai.core.json.JsonMappers.plain());
         as("alice");
     }
 

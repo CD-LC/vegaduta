@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The one invariant that matters here: {@link CustomCodeToolCallback#call} must never throw,
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 class CustomCodeToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final CustomCodeToolService service = mock(CustomCodeToolService.class);
 
@@ -32,7 +32,7 @@ class CustomCodeToolCallbackTest {
 
         JsonNode node = MAPPER.readTree(result);
         assertThat(node.hasNonNull("error")).isTrue();
-        assertThat(node.get("error").asText()).contains("sandbox is unavailable");
+        assertThat(node.get("error").asString()).contains("sandbox is unavailable");
     }
 
     @Test
@@ -42,7 +42,7 @@ class CustomCodeToolCallbackTest {
 
         String result = new CustomCodeToolCallback(snapshot(tool()), service).call("{}");
 
-        assertThat(MAPPER.readTree(result).get("error").asText())
+        assertThat(MAPPER.readTree(result).get("error").asString())
                 .contains("TOOL_SANDBOX_ENABLED=true");
     }
 
@@ -57,7 +57,7 @@ class CustomCodeToolCallbackTest {
 
         String result = new CustomCodeToolCallback(snapshot(tool()), service).call("{}");
 
-        assertThat(MAPPER.readTree(result).get("error").asText())
+        assertThat(MAPPER.readTree(result).get("error").asString())
                 .contains("expected \"}\"")
                 .contains("at Foo.bar");
     }

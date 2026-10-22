@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Effort scaling, source dedupe, span passages, the search and fetch ceilings, seed cap, and
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  */
 class DeepResearchServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String PAGE =
             "Intro text here. Solid-state batteries reach 400 Wh/kg in lab cells. Other sentence follows.";
 
@@ -74,8 +74,8 @@ class DeepResearchServiceTest {
         JsonNode passage = json.get("sources").get(0).get("passages").get(0);
         int start = passage.get("startChar").asInt();
         int end = passage.get("endChar").asInt();
-        assertEquals(PAGE.substring(start, end), passage.get("quote").asText());
-        assertTrue(passage.get("quote").asText().contains("400 Wh/kg"));
+        assertEquals(PAGE.substring(start, end), passage.get("quote").asString());
+        assertTrue(passage.get("quote").asString().contains("400 Wh/kg"));
     }
 
     @Test
@@ -263,7 +263,7 @@ class DeepResearchServiceTest {
         JsonNode json = MAPPER.readTree(MAPPER.writeValueAsString(out));
         long seedSources = 0;
         for (JsonNode src : json.get("sources")) {
-            if (src.get("url").asText().startsWith("https://s.example/")) {
+            if (src.get("url").asString().startsWith("https://s.example/")) {
                 seedSources++;
             }
         }
@@ -303,10 +303,10 @@ class DeepResearchServiceTest {
         assertEquals(1, json.get("verified").asInt());
         assertEquals(2, json.get("failed").asInt());
         assertTrue(json.get("results").get(0).get("verified").asBoolean());
-        assertEquals("SUPPORTED", json.get("results").get(0).get("verdict").asText());
+        assertEquals("SUPPORTED", json.get("results").get(0).get("verdict").asString());
         assertFalse(json.get("results").get(1).get("verified").asBoolean());
-        assertEquals("QUOTE_NOT_FOUND", json.get("results").get(1).get("verdict").asText());
-        assertEquals("UNKNOWN_SOURCE", json.get("results").get(2).get("verdict").asText());
+        assertEquals("QUOTE_NOT_FOUND", json.get("results").get(1).get("verdict").asString());
+        assertEquals("UNKNOWN_SOURCE", json.get("results").get(2).get("verdict").asString());
     }
 
     private static String verdictOf(DeepResearchSession session, String quote, String claim)
@@ -320,7 +320,7 @@ class DeepResearchServiceTest {
                                         + ",\"claim\":"
                                         + MAPPER.writeValueAsString(claim)
                                         + "}]}");
-        return MAPPER.readTree(out).get("results").get(0).get("verdict").asText();
+        return MAPPER.readTree(out).get("results").get(0).get("verdict").asString();
     }
 
     @Test
@@ -379,7 +379,7 @@ class DeepResearchServiceTest {
         assertTrue(
                 MAPPER.readTree(out)
                         .get("error")
-                        .asText()
+                        .asString()
                         .contains("no deep_research results exist in this turn"));
     }
 

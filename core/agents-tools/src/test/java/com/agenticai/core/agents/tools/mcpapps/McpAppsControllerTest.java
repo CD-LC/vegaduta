@@ -18,7 +18,6 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.McpSyncClient;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * An app's tools/call must reach a tool ONLY through AgentToolProvider's guarded resolution (the
@@ -44,7 +44,7 @@ class McpAppsControllerTest {
     private static final UUID REG = UUID.randomUUID();
     private static final UUID OTHER = UUID.randomUUID();
     private static final UUID AGENT = UUID.randomUUID();
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     private McpSyncClient rawClient;
     private AgentService agentService;

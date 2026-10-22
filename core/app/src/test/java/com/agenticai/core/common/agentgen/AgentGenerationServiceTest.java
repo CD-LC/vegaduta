@@ -19,7 +19,6 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +46,7 @@ class AgentGenerationServiceTest {
                     channelSessionService,
                     credentialResolver,
                     tenantLimits,
-                    new ObjectMapper());
+                    com.agenticai.core.json.JsonMappers.plain());
 
     private UUID stubAgent() {
         UUID id = UUID.randomUUID();

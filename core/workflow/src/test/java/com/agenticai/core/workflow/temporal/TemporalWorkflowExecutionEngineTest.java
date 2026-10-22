@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.workflow.OrchestratorService;
 import com.agenticai.core.workflow.RunMode;
 import com.agenticai.core.workflow.WorkflowDefinition;
@@ -17,7 +18,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.version.WorkflowVersion;
 import com.agenticai.core.workflow.version.WorkflowVersionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.testing.TestWorkflowEnvironment;
 import io.temporal.worker.Worker;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ class TemporalWorkflowExecutionEngineTest {
         WorkflowVersion snapshot = mock(WorkflowVersion.class);
         when(snapshot.getVersionNumber()).thenReturn(3);
         when(snapshot.getGraphJson())
-                .thenReturn(new ObjectMapper().writeValueAsString(graphWith("snapshot-trigger")));
+                .thenReturn(JsonMappers.plain().writeValueAsString(graphWith("snapshot-trigger")));
         when(versions.resolveRunVersion(WF)).thenReturn(Optional.of(snapshot));
         when(versions.currentVersionNumber(WF)).thenReturn(7);
         ObjectProvider<WorkflowVersionService> provider = mock(ObjectProvider.class);

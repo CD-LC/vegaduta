@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +26,7 @@ import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The single-round-trip append (mocked Redis): one script call and nothing else on the happy path,
@@ -42,7 +42,7 @@ class SessionMemoryAppendRoundTripTest {
     private static final String MARKER = "agentic:session-folded:" + SID;
     private static final String OWNER = "agentic:session-owner:" + SID;
 
-    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
     private StringRedisTemplate redis;
     private ListOperations<String, String> listOps;
     private ValueOperations<String, String> valueOps;

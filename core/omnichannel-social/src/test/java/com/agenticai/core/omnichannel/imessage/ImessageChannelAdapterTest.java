@@ -13,8 +13,8 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The outbound path end to end against a fake BlueBubbles server: approval payload in, REST call
@@ -55,8 +55,8 @@ class ImessageChannelAdapterTest {
                                                     "iMessage;-;+15550100100", "hello back"))));
 
             JsonNode body = JsonMappers.plain().readTree(bb.requests.get(0).bodyText());
-            assertThat(body.path("chatGuid").asText()).isEqualTo("iMessage;-;+15550100100");
-            assertThat(body.path("message").asText()).isEqualTo("hello back");
+            assertThat(body.path("chatGuid").asString()).isEqualTo("iMessage;-;+15550100100");
+            assertThat(body.path("message").asString()).isEqualTo("hello back");
             verify(logger)
                     .recordSent(
                             ChannelType.IMESSAGE,

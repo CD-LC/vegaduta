@@ -32,11 +32,11 @@ import com.agenticai.core.omnichannel.twilio.TwilioWhatsAppChannelAdapter;
 import com.agenticai.core.omnichannel.twilio.TwilioWhatsAppTextSend;
 import com.agenticai.core.omnichannel.x.XChannelAdapter;
 import com.agenticai.core.omnichannel.x.XTextSend;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Agent sends reach the approval gate with each channel's own action type, SendPayload JSON and

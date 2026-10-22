@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * In-memory stand-ins for the pin and run-data repositories, plus the mapper the app serves JSON
@@ -29,7 +28,11 @@ final class PinTestSupport {
      * serialise with.
      */
     static ObjectMapper appMapper() {
-        return Jackson2ObjectMapperBuilder.json().build();
+        return tools.jackson.databind.json.JsonMapper.builder()
+                .configureForJackson2()
+                .disable(tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     /** A {@link WorkflowNodePinRepository} that really stores, counts, sums and deletes. */

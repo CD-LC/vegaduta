@@ -16,7 +16,6 @@ import com.agenticai.core.workflow.WorkflowIntelligenceSettings;
 import com.agenticai.core.workflow.WorkflowNodeExecutor;
 import com.agenticai.core.workflow.WorkflowRunRepository;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.testing.TestActivityEnvironment;
 import java.time.Duration;
@@ -62,7 +61,7 @@ class WorkflowNodeActivitiesImplTest {
                         executor,
                         mock(WorkflowRunRepository.class),
                         mock(WorkflowEventPublisher.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         executorService);
         // @Value is not applied outside Spring; 0 would make the heartbeat loop spin.
         ReflectionTestUtils.setField(impl, "heartbeatIntervalSeconds", 5L);

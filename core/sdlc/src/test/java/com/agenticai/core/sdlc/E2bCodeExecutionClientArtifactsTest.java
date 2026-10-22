@@ -5,14 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.sdlc.dto.SandboxArtifact;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class E2bCodeExecutionClientArtifactsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER =
+            tools.jackson.databind.json.JsonMapper.builder().build();
 
     @Test
     void decodesWellFormedArtifactsAndSkipsBrokenOnes() throws Exception {

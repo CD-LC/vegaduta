@@ -12,11 +12,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.elevenlabs.ElevenLabsApiException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Mirrors {@code GenerateImageToolCallbackTest}: the tool result is always JSON a model can relay,
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  */
 class GenerateMusicToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final MusicGenerationService service = mock(MusicGenerationService.class);
     private final GenerateMusicToolCallback callback = new GenerateMusicToolCallback(service);
@@ -34,7 +34,7 @@ class GenerateMusicToolCallbackTest {
         assertEquals("generate_music", callback.getToolDefinition().name());
         JsonNode schema = MAPPER.readTree(callback.getToolDefinition().inputSchema());
         assertEquals(1, schema.path("required").size());
-        assertEquals("prompt", schema.path("required").get(0).asText());
+        assertEquals("prompt", schema.path("required").get(0).asString());
     }
 
     @Test
@@ -48,9 +48,9 @@ class GenerateMusicToolCallbackTest {
                         callback.call(
                                 "{\"prompt\":\"  lofi beat for a bakery \",\"durationSeconds\":12,\"instrumental\":true}"));
 
-        assertEquals("success", result.path("status").asText());
-        assertEquals("/api/musicgen/tracks/" + id, result.path("audioUrl").asText());
-        assertEquals("music_v2_5", result.path("model").asText());
+        assertEquals("success", result.path("status").asString());
+        assertEquals("/api/musicgen/tracks/" + id, result.path("audioUrl").asString());
+        assertEquals("music_v2_5", result.path("model").asString());
         assertEquals(12, result.path("durationSeconds").asInt());
     }
 
@@ -112,6 +112,6 @@ class GenerateMusicToolCallbackTest {
     }
 
     private static String errorOf(String json) throws Exception {
-        return MAPPER.readTree(json).path("error").asText();
+        return MAPPER.readTree(json).path("error").asString();
     }
 }

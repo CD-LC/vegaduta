@@ -32,8 +32,6 @@ import com.agenticai.core.workflow.output.PdfOutputRenderer;
 import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Fail-proof hardening pass on {@link WorkflowExecutionEngine}: before this, (1) a node that threw
@@ -63,14 +62,15 @@ class WorkflowExecutionEngineFailProofTest {
 
     /**
      * In the real app this is a Spring-managed bean with JavaTimeModule auto-registered by Spring
-     * Boot's Jackson autoconfiguration - a plain {@code new ObjectMapper()} here cannot serialize
-     * {@code NodeTraceEntry}'s {@code Instant} fields, and {@link
-     * WorkflowExecutionEngine#writeTrace} silently swallows that failure and returns {@code "[]"}
-     * (a deliberate best-effort posture for the real caller, but one that would otherwise make this
-     * test's assertions observe an always-empty trace regardless of what actually happened).
+     * Boot's Jackson autoconfiguration - a plain {@code
+     * com.agenticai.core.json.JsonMappers.plain()} here cannot serialize {@code NodeTraceEntry}'s
+     * {@code Instant} fields, and {@link WorkflowExecutionEngine#writeTrace} silently swallows that
+     * failure and returns {@code "[]"} (a deliberate best-effort posture for the real caller, but
+     * one that would otherwise make this test's assertions observe an always-empty trace regardless
+     * of what actually happened).
      */
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.plain();
     }
 
     @BeforeEach

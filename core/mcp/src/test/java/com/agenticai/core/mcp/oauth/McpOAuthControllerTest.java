@@ -21,7 +21,6 @@ import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.mcp.McpRemoteUrlGuard;
 import com.agenticai.core.mcp.oauth.OAuthProviderTestSupport.MutableClock;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -34,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * REST face of the generic flow, through real Spring MVC request mapping (standalone MockMvc):
@@ -83,7 +83,7 @@ class McpOAuthControllerTest {
     }
 
     private McpOAuthService service(boolean enabled, McpOAuthClientMetadata cimd) {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = com.agenticai.core.json.JsonMappers.plain();
         return new McpOAuthService(
                 new McpOAuthDiscovery(as, om),
                 new McpOAuthClient(as, om),

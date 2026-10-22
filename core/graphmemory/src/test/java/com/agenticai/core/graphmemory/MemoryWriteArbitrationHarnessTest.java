@@ -7,10 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,6 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.chat.client.ChatClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Deterministic harness for {@link MemoryWriteArbitrationService}: a fake LLM (scripted from the
@@ -36,7 +36,7 @@ import org.springframework.ai.chat.client.ChatClient;
  */
 class MemoryWriteArbitrationHarnessTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final UUID AGENT = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final String SUBJECT_KEY = "user-1";
 
@@ -47,7 +47,7 @@ class MemoryWriteArbitrationHarnessTest {
                 .map(
                         c ->
                                 DynamicTest.dynamicTest(
-                                        c.get("cat").asText() + ": " + c.get("n").asText(),
+                                        c.get("cat").asString() + ": " + c.get("n").asString(),
                                         () -> runCase(c)));
     }
 
@@ -58,8 +58,8 @@ class MemoryWriteArbitrationHarnessTest {
         Set<String> categories = new LinkedHashSet<>();
         Set<String> names = new LinkedHashSet<>();
         for (JsonNode c : cases) {
-            categories.add(c.get("cat").asText());
-            assertThat(names.add(c.get("n").asText()))
+            categories.add(c.get("cat").asString());
+            assertThat(names.add(c.get("n").asString()))
                     .as("unique case name " + c.get("n"))
                     .isTrue();
         }
@@ -297,7 +297,7 @@ class MemoryWriteArbitrationHarnessTest {
             expected.add(key(t));
         }
         assertThat(store.triples())
-                .as(c.get("n").asText())
+                .as(c.get("n").asString())
                 .containsExactlyInAnyOrderElementsOf(expected);
     }
 
@@ -306,7 +306,7 @@ class MemoryWriteArbitrationHarnessTest {
      */
     private String responseFor(JsonNode c, List<GraphTriple> candidates) {
         if (c.has("raw")) {
-            return c.get("raw").asText();
+            return c.get("raw").asString();
         }
         if (!c.has("v")) {
             return null;
@@ -318,7 +318,7 @@ class MemoryWriteArbitrationHarnessTest {
             node.put("subject", t.subject());
             node.put("relation", t.relation());
             node.put("object", t.object());
-            node.put("decision", c.get("v").get(i).asText());
+            node.put("decision", c.get("v").get(i).asString());
         }
         if (c.has("truncateTo")) {
             while (array.size() > c.get("truncateTo").asInt()) {
@@ -356,7 +356,7 @@ class MemoryWriteArbitrationHarnessTest {
     private static List<GraphTriple> triples(JsonNode array) {
         List<GraphTriple> out = new ArrayList<>();
         for (JsonNode t : array) {
-            out.add(new GraphTriple(t.get(0).asText(), t.get(1).asText(), t.get(2).asText()));
+            out.add(new GraphTriple(t.get(0).asString(), t.get(1).asString(), t.get(2).asString()));
         }
         return out;
     }

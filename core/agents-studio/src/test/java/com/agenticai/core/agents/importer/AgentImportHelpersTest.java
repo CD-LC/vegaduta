@@ -96,17 +96,16 @@ class AgentImportHelpersTest {
         for (int i = 0; i < 5000; i++) {
             sb.append("}");
         }
-        com.fasterxml.jackson.databind.ObjectMapper deep =
-                new com.fasterxml.jackson.databind.ObjectMapper();
+        tools.jackson.databind.ObjectMapper deep = new tools.jackson.databind.ObjectMapper();
         deep.getFactory()
                 .setStreamReadConstraints(
-                        com.fasterxml.jackson.core.StreamReadConstraints.builder()
+                        tools.jackson.core.StreamReadConstraints.builder()
                                 .maxNestingDepth(10_000)
                                 .build());
         try {
             assertThat(AgentImportJson.countCredentialFields(deep.readTree(sb.toString())))
                     .isZero();
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException(e);
         }
     }

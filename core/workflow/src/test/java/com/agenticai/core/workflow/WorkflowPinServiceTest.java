@@ -24,8 +24,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.dto.WorkflowPinRequest;
 import com.agenticai.core.workflow.dto.WorkflowPinResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +34,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Who may list, write and read pins (RUNNER lists without data, EDITOR does everything), the
@@ -301,15 +301,15 @@ class WorkflowPinServiceTest {
                                 "configHash",
                                 "data")),
                 fieldNames(full));
-        assertEquals("n1", full.get("nodeId").asText());
-        assertEquals("test", full.get("source").asText());
-        assertEquals("run-1", full.get("sourceRunId").asText());
-        assertEquals("ann", full.get("pinnedBy").asText());
+        assertEquals("n1", full.get("nodeId").asString());
+        assertEquals("test", full.get("source").asString());
+        assertEquals("run-1", full.get("sourceRunId").asString());
+        assertEquals("ann", full.get("pinnedBy").asString());
         assertTrue(
-                full.get("pinnedAt").isTextual(), "pinnedAt is an ISO string, not an epoch number");
-        assertTrue(java.time.Instant.parse(full.get("pinnedAt").asText()) != null);
+                full.get("pinnedAt").isString(), "pinnedAt is an ISO string, not an epoch number");
+        assertTrue(java.time.Instant.parse(full.get("pinnedAt").asString()) != null);
         assertEquals(7, full.get("sizeChars").asInt());
-        assertEquals("{\"a\":1}", full.get("data").asText());
+        assertEquals("{\"a\":1}", full.get("data").asString());
 
         asRunner();
         JsonNode hidden = mapper.readTree(mapper.writeValueAsString(service.list(WF).get(0)));
@@ -333,7 +333,7 @@ class WorkflowPinServiceTest {
 
     static TreeSet<String> fieldNames(JsonNode node) {
         TreeSet<String> names = new TreeSet<>();
-        node.fieldNames().forEachRemaining(names::add);
+        node.propertyNames().forEach(names::add);
         return names;
     }
 }

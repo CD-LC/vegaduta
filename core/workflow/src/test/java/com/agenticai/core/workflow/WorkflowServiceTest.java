@@ -24,7 +24,6 @@ import com.agenticai.core.workflow.dto.WorkflowResponse;
 import com.agenticai.core.workflow.dto.WorkflowTriggerChannelResponse;
 import com.agenticai.core.workflow.dto.WorkflowWebhookResponse;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link WorkflowService} had zero test coverage before this - including its {@code
@@ -67,7 +67,7 @@ class WorkflowServiceTest {
         WorkflowRunRepository runRepository = mock(WorkflowRunRepository.class);
         OrchestratorService orchestratorService = mock(OrchestratorService.class);
         WorkflowExecutionEngine executionEngine = mock(WorkflowExecutionEngine.class);
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
         tenantResolutionService = mock(TenantResolutionService.class);
         tenantSchemaResolver = mock(TenantSchemaResolver.class);
         tenantLimits = mock(TenantLimits.class);

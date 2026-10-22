@@ -20,7 +20,6 @@ import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -81,7 +80,7 @@ class WorkflowRunControlTest {
                         runRepository,
                         mock(OrchestratorService.class),
                         executionEngine,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(TenantResolutionService.class),
                         mock(TenantSchemaResolver.class),
                         mock(TenantLimits.class),
@@ -98,7 +97,10 @@ class WorkflowRunControlTest {
         // getRunEntity/readGraph calls exercise the real (mocked-repo) path.
         backgroundRunService =
                 new WorkflowBackgroundRunService(
-                        service, executionEngine, runRepository, new ObjectMapper());
+                        service,
+                        executionEngine,
+                        runRepository,
+                        com.agenticai.core.json.JsonMappers.plain());
     }
 
     private WorkflowRun run(WorkflowRunStatus status) {

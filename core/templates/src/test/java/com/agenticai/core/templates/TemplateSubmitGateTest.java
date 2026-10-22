@@ -15,13 +15,12 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.templates.dto.TemplateAiReview;
 import com.agenticai.core.templates.dto.TemplateReadinessReport.Issue;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The submit gate end to end with the REAL rule engine: blockers stop it, the AI layer runs only
@@ -31,7 +30,7 @@ class TemplateSubmitGateTest {
 
     private final CommunityTemplateRepository repository = mock(CommunityTemplateRepository.class);
     private final TemplateAiReviewService ai = mock(TemplateAiReviewService.class);
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
     private final TemplateSnapshotService snapshot = new TemplateSnapshotService(mapper);
     private final CommunityTemplateService service =
             new CommunityTemplateService(

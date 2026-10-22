@@ -7,14 +7,14 @@ import com.agenticai.core.agents.tools.classification.BuiltInToolClassifications
 import com.agenticai.core.agents.tools.classification.ToolClassification;
 import com.agenticai.core.agents.tools.classification.ToolSensitivity;
 import com.agenticai.core.agents.tools.classification.ToolTrustTier;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The eight v2 tool callbacks: unique names, valid input schemas, no-tenant-context failing as a
@@ -23,7 +23,7 @@ import org.springframework.ai.tool.ToolCallback;
  */
 class BrowserV2ToolDefinitionsTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static List<ToolCallback> allV2Tools() {
         BrowserUseSessionManager manager = mock(BrowserUseSessionManager.class);
@@ -71,13 +71,13 @@ class BrowserV2ToolDefinitionsTest {
         for (ToolCallback tool : allV2Tools()) {
             String name = tool.getToolDefinition().name();
             JsonNode schema = MAPPER.readTree(tool.getToolDefinition().inputSchema());
-            assertThat(schema.path("type").asText()).as(name).isEqualTo("object");
+            assertThat(schema.path("type").asString()).as(name).isEqualTo("object");
             assertThat(schema.has("properties")).as(name).isTrue();
             // tool schemas are token-budgeted (conventions #9): keep each description to a few
             // sentences
             assertThat(tool.getToolDefinition().description().length()).as(name).isLessThan(480);
             for (JsonNode required : schema.path("required")) {
-                assertThat(schema.path("properties").has(required.asText()))
+                assertThat(schema.path("properties").has(required.asString()))
                         .as(name + " required " + required)
                         .isTrue();
             }
@@ -108,7 +108,7 @@ class BrowserV2ToolDefinitionsTest {
                     tool.call(
                             "{\"index\": 1, \"text\": \"x\", \"label\": \"y\", \"value\": \"v\"}");
             JsonNode json = MAPPER.readTree(result);
-            assertThat(json.path("error").asText())
+            assertThat(json.path("error").asString())
                     .as(tool.getToolDefinition().name())
                     .contains("tenant");
         }

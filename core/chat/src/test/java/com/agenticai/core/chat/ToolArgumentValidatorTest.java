@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class ToolArgumentValidatorTest {
 
@@ -26,7 +26,7 @@ class ToolArgumentValidatorTest {
         }
         """;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
 
     @Test
     void theIncidentArgumentsAreRejectedWithBothMissingPropertiesAndTheStrayKeys() {
@@ -119,13 +119,13 @@ class ToolArgumentValidatorTest {
                         "generate_document", result, GENERATE_DOCUMENT_SCHEMA, objectMapper);
 
         JsonNode json = objectMapper.readTree(feedback);
-        assertEquals("invalid_arguments", json.get("error").asText());
-        assertEquals("generate_document", json.get("tool").asText());
+        assertEquals("invalid_arguments", json.get("error").asString());
+        assertEquals("generate_document", json.get("tool").asString());
         assertEquals(2, json.get("problems").size());
-        assertEquals("f", json.get("unknown_keys").get(0).asText());
-        assertTrue(json.get("hint").asText().contains("NOT executed"));
-        assertTrue(json.get("hint").asText().contains("f"));
-        assertTrue(json.get("schema").asText().contains("\"required\""));
+        assertEquals("f", json.get("unknown_keys").get(0).asString());
+        assertTrue(json.get("hint").asString().contains("NOT executed"));
+        assertTrue(json.get("hint").asString().contains("f"));
+        assertTrue(json.get("schema").asString().contains("\"required\""));
     }
 
     @Test
@@ -142,8 +142,8 @@ class ToolArgumentValidatorTest {
                         ToolArgumentValidator.feedback("t", result, huge, objectMapper));
 
         assertTrue(
-                json.get("schema").asText().length()
+                json.get("schema").asString().length()
                         <= ToolArgumentValidator.MAX_SCHEMA_ECHO_CHARS + 3);
-        assertTrue(json.get("schema").asText().endsWith("..."));
+        assertTrue(json.get("schema").asString().endsWith("..."));
     }
 }

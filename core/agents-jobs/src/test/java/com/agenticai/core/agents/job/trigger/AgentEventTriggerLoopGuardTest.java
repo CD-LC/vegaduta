@@ -20,7 +20,6 @@ import com.agenticai.core.eventbus.WorkflowEvent;
 import com.agenticai.core.eventbus.WorkflowEventSignal;
 import com.agenticai.core.eventbus.WorkflowEventTypes;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Duration;
@@ -142,7 +141,7 @@ class AgentEventTriggerLoopGuardTest {
                         new AgentEventTriggerFiring(
                                 repository, fireRepository, launcher, properties),
                         properties,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         meterRegistry,
                         notificationService,
                         new AgentEventTriggerPresenceCache());

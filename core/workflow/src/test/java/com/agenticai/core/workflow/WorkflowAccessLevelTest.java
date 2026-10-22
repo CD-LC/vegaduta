@@ -19,7 +19,6 @@ import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.agenticai.core.workflow.dto.WorkflowResponse;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
 import com.agenticai.core.workflow.version.WorkflowVersionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ class WorkflowAccessLevelTest {
                         mock(WorkflowRunRepository.class),
                         mock(OrchestratorService.class),
                         mock(WorkflowExecutionEngine.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(TenantResolutionService.class),
                         mock(TenantSchemaResolver.class),
                         mock(TenantLimits.class),
@@ -102,9 +101,13 @@ class WorkflowAccessLevelTest {
     @Test
     void responseCarriesTheLevelAndInternalCallersDefaultToEditor() {
         WorkflowResponse viaService =
-                WorkflowResponse.from(definition, new ObjectMapper(), true, "RUNNER");
+                WorkflowResponse.from(
+                        definition, com.agenticai.core.json.JsonMappers.plain(), true, "RUNNER");
         assertEquals("RUNNER", viaService.accessLevel());
-        assertEquals("EDITOR", WorkflowResponse.from(definition, new ObjectMapper()).accessLevel());
+        assertEquals(
+                "EDITOR",
+                WorkflowResponse.from(definition, com.agenticai.core.json.JsonMappers.plain())
+                        .accessLevel());
     }
 
     @Test

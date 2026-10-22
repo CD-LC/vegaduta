@@ -13,7 +13,6 @@ import com.agenticai.core.agents.budget.PerUserBudgetExhaustedException;
 import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -26,6 +25,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 /** {@link OpenAiCompatController}: chat completions, streaming, models, rate limit. */
 class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTestSupport {
@@ -66,7 +66,7 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
                         .get(0)
                         .get("delta")
                         .get("role")
-                        .asText());
+                        .asString());
         assertEquals(
                 "12",
                 mapper.readTree(frames.get(1))
@@ -74,7 +74,7 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
                         .get(0)
                         .get("delta")
                         .get("content")
-                        .asText());
+                        .asString());
         assertEquals("[DONE]", frames.get(frames.size() - 1));
     }
 
@@ -93,9 +93,9 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
 
         assertEquals(200, result.getResponse().getStatus());
         JsonNode json = mapper.readTree(result.getResponse().getContentAsString());
-        assertEquals("chat.completion", json.get("object").asText());
+        assertEquals("chat.completion", json.get("object").asString());
         assertEquals(
-                "12 (4 x 3)", json.get("choices").get(0).get("message").get("content").asText());
+                "12 (4 x 3)", json.get("choices").get(0).get("message").get("content").asString());
     }
 
     @Test
@@ -105,15 +105,15 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
 
         assertEquals(200, res.getStatusCode().value());
         JsonNode body = mapper.readTree((String) res.getBody());
-        assertTrue(body.get("id").asText().startsWith("chatcmpl-"));
-        assertEquals("chat.completion", body.get("object").asText());
-        assertEquals(AGENT_ID.toString(), body.get("model").asText());
+        assertTrue(body.get("id").asString().startsWith("chatcmpl-"));
+        assertEquals("chat.completion", body.get("object").asString());
+        assertEquals(AGENT_ID.toString(), body.get("model").asString());
         assertTrue(body.get("created").asLong() > 0);
         JsonNode choice = body.get("choices").get(0);
         assertEquals(0, choice.get("index").asInt());
-        assertEquals("assistant", choice.get("message").get("role").asText());
-        assertEquals("12 (4 x 3)", choice.get("message").get("content").asText());
-        assertEquals("stop", choice.get("finish_reason").asText());
+        assertEquals("assistant", choice.get("message").get("role").asString());
+        assertEquals("12 (4 x 3)", choice.get("message").get("content").asString());
+        assertEquals("stop", choice.get("finish_reason").asString());
         JsonNode usage = body.get("usage");
         assertTrue(usage.get("prompt_tokens").asLong() > 0);
         assertEquals(
@@ -192,8 +192,8 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
 
         assertEquals("[DONE]", frames.get(frames.size() - 1));
         JsonNode first = mapper.readTree(frames.get(0));
-        assertEquals("chat.completion.chunk", first.get("object").asText());
-        assertEquals("assistant", first.get("choices").get(0).get("delta").get("role").asText());
+        assertEquals("chat.completion.chunk", first.get("object").asString());
+        assertEquals("assistant", first.get("choices").get(0).get("delta").get("role").asString());
         assertEquals(
                 "Hel",
                 mapper.readTree(frames.get(1))
@@ -201,7 +201,7 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
                         .get(0)
                         .get("delta")
                         .get("content")
-                        .asText());
+                        .asString());
         assertEquals(
                 "lo",
                 mapper.readTree(frames.get(2))
@@ -209,9 +209,9 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
                         .get(0)
                         .get("delta")
                         .get("content")
-                        .asText());
+                        .asString());
         JsonNode finish = mapper.readTree(frames.get(3));
-        assertEquals("stop", finish.get("choices").get(0).get("finish_reason").asText());
+        assertEquals("stop", finish.get("choices").get(0).get("finish_reason").asString());
         // stream_options.include_usage=true in the fixture -> trailing usage chunk with empty
         // choices
         JsonNode usageChunk = mapper.readTree(frames.get(4));
@@ -253,7 +253,7 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
                         .block(Duration.ofSeconds(5));
         assertEquals("[DONE]", frames.get(frames.size() - 1));
         JsonNode err = mapper.readTree(frames.get(frames.size() - 2));
-        assertEquals("server_error", err.get("error").get("type").asText());
+        assertEquals("server_error", err.get("error").get("type").asString());
         assertFalse(frames.get(frames.size() - 2).contains("boom"));
     }
 
@@ -301,12 +301,12 @@ class OpenAiCompatControllerChatCompletionsTest extends OpenAiCompatControllerTe
         when(agentService.listAll()).thenReturn(List.of(r));
 
         JsonNode body = mapper.readTree(controller.models().getBody());
-        assertEquals("list", body.get("object").asText());
+        assertEquals("list", body.get("object").asString());
         JsonNode m = body.get("data").get(0);
-        assertEquals(AGENT_ID.toString(), m.get("id").asText());
-        assertEquals("model", m.get("object").asText());
+        assertEquals(AGENT_ID.toString(), m.get("id").asString());
+        assertEquals("model", m.get("object").asString());
         assertEquals(1700000000L, m.get("created").asLong());
-        assertEquals("Research Helper", m.get("name").asText());
+        assertEquals("Research Helper", m.get("name").asString());
     }
 
     @Test

@@ -15,7 +15,6 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,7 +58,7 @@ class WorkflowWebhookControllerFormGuardTest {
                         definitionRepository,
                         triggerNodes,
                         workflowService,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         jwt,
                         dedup);
 
@@ -87,7 +86,7 @@ class WorkflowWebhookControllerFormGuardTest {
 
     private static byte[] json(Object value) {
         try {
-            return new ObjectMapper().writeValueAsBytes(value);
+            return com.agenticai.core.json.JsonMappers.plain().writeValueAsBytes(value);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

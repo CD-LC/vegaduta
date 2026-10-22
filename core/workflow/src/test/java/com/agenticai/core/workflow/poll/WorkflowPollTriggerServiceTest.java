@@ -17,7 +17,6 @@ import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowValidationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +66,7 @@ class WorkflowPollTriggerServiceTest {
                         fetcher,
                         new WorkflowPollProperties(),
                         encryptionService,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         provider,
                         guard);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));

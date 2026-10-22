@@ -74,7 +74,7 @@ import org.springframework.test.context.TestPropertySource;
             "app.storage.type=local",
             "app.storage.local.path=${java.io.tmpdir}/vegaduta-smoke-storage",
             "management.tracing.sampling.probability=0.0",
-            "management.otlp.tracing.export.enabled=false",
+            "management.tracing.export.otlp.enabled=false",
             // TEST-ONLY throwaway AES key, committed to the repo so `mvn clean install`
             // boots the context with no manual env export. Because it lives in git
             // history forever, it is PERMANENTLY BURNED as a real key: it must NEVER

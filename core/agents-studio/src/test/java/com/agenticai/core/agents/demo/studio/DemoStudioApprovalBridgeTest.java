@@ -13,8 +13,6 @@ import com.agenticai.core.agents.demo.studio.DemoStudioWorkflowRunner.Definition
 import com.agenticai.core.agents.demo.studio.DemoStudioWorkflowRunner.Step;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code app.demo.studio.approval-store=redis}: a studio run parked on an approval step in replica
@@ -108,13 +108,25 @@ class DemoStudioApprovalBridgeTest {
 
         replicaA =
                 new DemoStudioWorkflowRunner(
-                        studio, sessions, runs, new ObjectMapper(), moderation);
+                        studio,
+                        sessions,
+                        runs,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        moderation);
         replicaB =
                 new DemoStudioWorkflowRunner(
-                        studio, sessions, runs, new ObjectMapper(), moderation);
+                        studio,
+                        sessions,
+                        runs,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        moderation);
         replicaWithoutBridge =
                 new DemoStudioWorkflowRunner(
-                        studio, sessions, runs, new ObjectMapper(), moderation);
+                        studio,
+                        sessions,
+                        runs,
+                        com.agenticai.core.json.JsonMappers.plain(),
+                        moderation);
         replicaA.useApprovalBridge(new DemoStudioApprovalBridge(redis));
         replicaB.useApprovalBridge(new DemoStudioApprovalBridge(redis));
     }
@@ -142,7 +154,7 @@ class DemoStudioApprovalBridgeTest {
                         "wf",
                         replicaA.serialize(approvalWorkflow()),
                         java.time.Instant.now());
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         return CompletableFuture.supplyAsync(
                 () ->
                         replicaA.run(session, workflow, "topic")

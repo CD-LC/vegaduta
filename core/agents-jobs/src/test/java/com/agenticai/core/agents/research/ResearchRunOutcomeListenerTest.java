@@ -11,7 +11,6 @@ import com.agenticai.core.agents.capability.AgentCapabilityStateRepository;
 import com.agenticai.core.agents.job.AgentJob;
 import com.agenticai.core.agents.job.AgentJobOrigin;
 import com.agenticai.core.agents.job.AgentJobStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +30,9 @@ class ResearchRunOutcomeListenerTest {
         AgentCapabilityState enabled = mock(AgentCapabilityState.class);
         when(enabled.isEnabled()).thenReturn(true);
         when(states.findById(any())).thenReturn(Optional.of(enabled));
-        listener = new ResearchRunOutcomeListener(states, usage, new ObjectMapper());
+        listener =
+                new ResearchRunOutcomeListener(
+                        states, usage, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static AgentJob job(AgentJobStatus status, String resultJson) {

@@ -16,7 +16,6 @@ import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.job.dto.AgentJobStartRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Duration;
 import java.util.Optional;
@@ -151,7 +150,7 @@ class AgentJobCrossPodSignalTest {
                         mockExecutor,
                         properties,
                         new SimpleMeterRegistry(),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         15);
         TenantContext.set(TenantContext.of(TENANT, "alice@example.com", Set.of("ROLE_user")));
 
@@ -183,7 +182,7 @@ class AgentJobCrossPodSignalTest {
                         mockExecutor,
                         properties,
                         new SimpleMeterRegistry(),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         15);
         TenantContext.set(TenantContext.of(TENANT, "alice@example.com", Set.of("ROLE_user")));
 

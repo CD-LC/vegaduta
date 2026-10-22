@@ -2,14 +2,14 @@ package com.agenticai.core.workflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** The portability redactor's second pass: URL userinfo, and export-only header / query names. */
 class WorkflowPortabilityRedactorTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static JsonNode json(String singleQuoted) throws Exception {
         return MAPPER.readTree(singleQuoted.replace('\'', '"'));
@@ -21,13 +21,13 @@ class WorkflowPortabilityRedactorTest {
         for (boolean export : new boolean[] {false, true}) {
             WorkflowPortabilityRedactor.Result r =
                     WorkflowPortabilityRedactor.redact(MAPPER, in, "n1_", export);
-            String url = r.json().get("url").asText();
+            String url = r.json().get("url").asString();
             assertThat(url).doesNotContain("hunter2pass").doesNotContain("admin:");
             assertThat(url).startsWith("https://[[CREDENTIAL_n1_1]]@db.example.com/v1");
             assertThat(r.count()).isEqualTo(1);
         }
         // The input tree is never mutated.
-        assertThat(in.get("url").asText()).contains("hunter2pass");
+        assertThat(in.get("url").asString()).contains("hunter2pass");
     }
 
     @Test
@@ -35,7 +35,7 @@ class WorkflowPortabilityRedactorTest {
         JsonNode in = json("{'url': 'https://{{secret.USER}}:{{secret.PASS}}@db.example.com/'}");
         WorkflowPortabilityRedactor.Result r =
                 WorkflowPortabilityRedactor.redact(MAPPER, in, "", true);
-        assertThat(r.json().get("url").asText())
+        assertThat(r.json().get("url").asString())
                 .isEqualTo("https://{{secret.USER}}:{{secret.PASS}}@db.example.com/");
         assertThat(r.count()).isZero();
     }

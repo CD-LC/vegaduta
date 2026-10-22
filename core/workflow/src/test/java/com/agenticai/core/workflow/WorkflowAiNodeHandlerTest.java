@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.chat.gateway.LlmGatewayLimitExceededException;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Question classifier of {@link WorkflowAiNodeHandler}, with a scripted fake model. The parameter
@@ -193,9 +193,9 @@ class WorkflowAiNodeHandlerTest extends WorkflowAiNodeHandlerTestBase {
                 handler(model).executeQuestionClassifier(node("question_classifier", config), "x");
         assertEquals("a", r.branch());
         JsonNode out = json(r.output());
-        assertEquals("a", out.get("class").asText());
+        assertEquals("a", out.get("class").asString());
         assertTrue(out.get("fallback").asBoolean());
-        assertEquals("x", out.get("text").asText());
+        assertEquals("x", out.get("text").asString());
     }
 
     @Test

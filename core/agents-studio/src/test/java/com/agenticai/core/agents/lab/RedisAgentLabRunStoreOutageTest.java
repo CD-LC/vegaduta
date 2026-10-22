@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ class RedisAgentLabRunStoreOutageTest {
         when(ops.get(anyString())).thenThrow(down);
         when(ops.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenThrow(down);
         when(redis.hasKey(anyString())).thenThrow(down);
-        store = new RedisAgentLabRunStore(redis, new ObjectMapper());
+        store = new RedisAgentLabRunStore(redis, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static void assertServiceUnavailable(Throwable e) {

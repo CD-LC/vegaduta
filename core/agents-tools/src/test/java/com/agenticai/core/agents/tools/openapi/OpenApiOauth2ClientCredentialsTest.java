@@ -5,9 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The OAuth2 client-credentials wire format. The HTTP leg is deliberately not exercised - {@code
@@ -56,12 +55,12 @@ class OpenApiOauth2ClientCredentialsTest {
         OpenApiToolExecutor.TokenRequestBody body =
                 OpenApiToolExecutor.buildTokenRequestBody(oauth2Source("JSON", "sc"), "s3cr&t");
         assertEquals("application/json", body.contentType());
-        JsonNode parsed = new ObjectMapper().readTree(body.body());
-        assertEquals("client_credentials", parsed.get("grant_type").asText());
-        assertEquals("client-123", parsed.get("client_id").asText());
+        JsonNode parsed = com.agenticai.core.json.JsonMappers.plain().readTree(body.body());
+        assertEquals("client_credentials", parsed.get("grant_type").asString());
+        assertEquals("client-123", parsed.get("client_id").asString());
         // JSON transport - the secret is NOT url-encoded.
-        assertEquals("s3cr&t", parsed.get("client_secret").asText());
-        assertEquals("sc", parsed.get("scope").asText());
+        assertEquals("s3cr&t", parsed.get("client_secret").asString());
+        assertEquals("sc", parsed.get("scope").asString());
     }
 
     @Test

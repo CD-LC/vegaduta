@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ class ResilientToolCallingManagerFactoryTest {
     private static final String KNOWN_TOOL = "remember_fact";
 
     private final ResilientToolCallingManagerFactory factory =
-            new ResilientToolCallingManagerFactory(new ObjectMapper());
+            new ResilientToolCallingManagerFactory(com.agenticai.core.json.JsonMappers.plain());
 
     @Test
     void theManagerHandedToEveryFactoryIsTheSanitizingWrapper() {

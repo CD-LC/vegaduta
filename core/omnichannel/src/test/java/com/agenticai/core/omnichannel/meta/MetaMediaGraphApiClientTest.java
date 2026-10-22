@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -20,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * No live Meta credentials exist to test the media-upload/send calls against (real Graph API
@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
  */
 class MetaMediaGraphApiClientTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private HttpServer server;
     private final List<byte[]> capturedBodies = new ArrayList<>();
@@ -145,12 +145,12 @@ class MetaMediaGraphApiClientTest {
         assertEquals("/v21.0/PHONE123/messages", capturedPaths.get(1));
         assertEquals("application/json", capturedContentTypes.get(1));
         JsonNode payload = MAPPER.readTree(capturedBodies.get(1));
-        assertEquals("whatsapp", payload.path("messaging_product").asText());
+        assertEquals("whatsapp", payload.path("messaging_product").asString());
         // Meta wants digits only - "+1 555 123 4567" strips down to a bare number.
-        assertEquals("15551234567", payload.path("to").asText());
-        assertEquals("image", payload.path("type").asText());
-        assertEquals("MEDIA123", payload.path("image").path("id").asText());
-        assertEquals("a caption", payload.path("image").path("caption").asText());
+        assertEquals("15551234567", payload.path("to").asString());
+        assertEquals("image", payload.path("type").asString());
+        assertEquals("MEDIA123", payload.path("image").path("id").asString());
+        assertEquals("a caption", payload.path("image").path("caption").asString());
 
         assertTrue(
                 result.contains("wamid.ABC"),
@@ -191,7 +191,7 @@ class MetaMediaGraphApiClientTest {
                 "should be dropped, not sent");
 
         JsonNode payload = MAPPER.readTree(capturedBodies.get(0));
-        assertEquals("audio", payload.path("type").asText());
+        assertEquals("audio", payload.path("type").asString());
         assertFalse(
                 payload.path("audio").has("caption"),
                 "audio media object must not carry a caption field: " + payload);
@@ -273,8 +273,8 @@ class MetaMediaGraphApiClientTest {
 
         assertEquals("application/json", capturedContentTypes.get(1));
         JsonNode followUp = MAPPER.readTree(capturedBodies.get(1));
-        assertEquals("look at this", followUp.path("message").path("text").asText());
-        assertEquals("psid-1", followUp.path("recipient").path("id").asText());
+        assertEquals("look at this", followUp.path("message").path("text").asString());
+        assertEquals("psid-1", followUp.path("recipient").path("id").asString());
 
         assertTrue(result.contains("image"), result);
     }

@@ -3,8 +3,6 @@ package com.agenticai.core.quality.eval;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,6 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Drives {@link LangfuseEvalClient} against a JDK-built-in {@link HttpServer} on an ephemeral
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
  */
 class LangfuseEvalClientTest {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
     private static final String AUTH = "Basic cGs6c2s=";
 
     /** One captured request: method, path, Authorization header, parsed JSON body. */
@@ -179,21 +179,22 @@ class LangfuseEvalClientTest {
         assertThat(dataset.method()).isEqualTo("POST");
         assertThat(dataset.path()).isEqualTo("/api/public/v2/datasets");
         assertThat(dataset.authorization()).isEqualTo(AUTH);
-        assertThat(dataset.body().get("name").asText()).isEqualTo("vegaduta-golden");
+        assertThat(dataset.body().get("name").asString()).isEqualTo("vegaduta-golden");
 
         Captured item = captured.get(1);
         assertThat(item.path()).isEqualTo("/api/public/dataset-items");
         assertThat(item.authorization()).isEqualTo(AUTH);
-        assertThat(item.body().get("datasetName").asText()).isEqualTo("vegaduta-golden");
+        assertThat(item.body().get("datasetName").asString()).isEqualTo("vegaduta-golden");
         // id == case id is what makes a re-run an upsert, not a duplicate.
-        assertThat(item.body().get("id").asText()).isEqualTo("c1");
-        assertThat(item.body().get("input").get("systemPrompt").asText()).isEqualTo("sys c1");
-        assertThat(item.body().get("input").get("userMessage").asText()).isEqualTo("user c1");
-        assertThat(item.body().get("expectedOutput").get("rubric").asText()).isEqualTo("rubric c1");
-        assertThat(item.body().get("metadata").get("persona").asText()).isEqualTo("tutor");
-        assertThat(item.body().get("metadata").get("category").asText()).isEqualTo("grounding");
+        assertThat(item.body().get("id").asString()).isEqualTo("c1");
+        assertThat(item.body().get("input").get("systemPrompt").asString()).isEqualTo("sys c1");
+        assertThat(item.body().get("input").get("userMessage").asString()).isEqualTo("user c1");
+        assertThat(item.body().get("expectedOutput").get("rubric").asString())
+                .isEqualTo("rubric c1");
+        assertThat(item.body().get("metadata").get("persona").asString()).isEqualTo("tutor");
+        assertThat(item.body().get("metadata").get("category").asString()).isEqualTo("grounding");
 
-        assertThat(captured.get(2).body().get("id").asText()).isEqualTo("c2");
+        assertThat(captured.get(2).body().get("id").asString()).isEqualTo("c2");
     }
 
     // ------------------------------------------------------------------
@@ -214,45 +215,45 @@ class LangfuseEvalClientTest {
         assertThat(captured).hasSize(6);
         Captured runItem = captured.get(0);
         assertThat(runItem.path()).isEqualTo("/api/public/dataset-run-items");
-        assertThat(runItem.body().get("runName").asText()).isEqualTo("run-1");
-        assertThat(runItem.body().get("datasetItemId").asText()).isEqualTo("c1");
-        assertThat(runItem.body().get("traceId").asText())
+        assertThat(runItem.body().get("runName").asString()).isEqualTo("run-1");
+        assertThat(runItem.body().get("datasetItemId").asString()).isEqualTo("c1");
+        assertThat(runItem.body().get("traceId").asString())
                 .isEqualTo("0af7651916cd43dd8448eb211c80319c");
-        assertThat(runItem.body().get("metadata").get("gitSha").asText()).isEqualTo("abc1234");
+        assertThat(runItem.body().get("metadata").get("gitSha").asString()).isEqualTo("abc1234");
 
         Captured rubric = captured.get(1);
         assertThat(rubric.path()).isEqualTo("/api/public/scores");
-        assertThat(rubric.body().get("id").asText()).isEqualTo("run-1:c1:rubric_pass");
-        assertThat(rubric.body().get("traceId").asText())
+        assertThat(rubric.body().get("id").asString()).isEqualTo("run-1:c1:rubric_pass");
+        assertThat(rubric.body().get("traceId").asString())
                 .isEqualTo("0af7651916cd43dd8448eb211c80319c");
-        assertThat(rubric.body().get("name").asText()).isEqualTo("rubric_pass");
-        assertThat(rubric.body().get("dataType").asText()).isEqualTo("BOOLEAN");
+        assertThat(rubric.body().get("name").asString()).isEqualTo("rubric_pass");
+        assertThat(rubric.body().get("dataType").asString()).isEqualTo("BOOLEAN");
         assertThat(rubric.body().get("value").asInt()).isZero();
-        assertThat(rubric.body().get("comment").asText()).isEqualTo("missed the total");
+        assertThat(rubric.body().get("comment").asString()).isEqualTo("missed the total");
 
         // The three-way outcome, posted alongside rubric_pass rather than
         // replacing it - a correct refusal and a correct answer are both
         // rubric_pass=1, and this is what tells them apart in a run
         // comparison. See EvalOutcome.
         Captured outcome = captured.get(2);
-        assertThat(outcome.body().get("id").asText()).isEqualTo("run-1:c1:outcome");
-        assertThat(outcome.body().get("name").asText()).isEqualTo("outcome");
-        assertThat(outcome.body().get("dataType").asText()).isEqualTo("CATEGORICAL");
-        assertThat(outcome.body().get("value").asText()).isEqualTo("INCORRECT");
-        assertThat(outcome.body().get("comment").asText()).isEqualTo("missed the total");
+        assertThat(outcome.body().get("id").asString()).isEqualTo("run-1:c1:outcome");
+        assertThat(outcome.body().get("name").asString()).isEqualTo("outcome");
+        assertThat(outcome.body().get("dataType").asString()).isEqualTo("CATEGORICAL");
+        assertThat(outcome.body().get("value").asString()).isEqualTo("INCORRECT");
+        assertThat(outcome.body().get("comment").asString()).isEqualTo("missed the total");
 
         Captured score = captured.get(3);
-        assertThat(score.body().get("name").asText()).isEqualTo("confidence_targeted_score");
-        assertThat(score.body().get("dataType").asText()).isEqualTo("NUMERIC");
+        assertThat(score.body().get("name").asString()).isEqualTo("confidence_targeted_score");
+        assertThat(score.body().get("dataType").asString()).isEqualTo("NUMERIC");
         assertThat(score.body().get("value").asDouble()).isEqualTo(-1.0);
 
         Captured tokens = captured.get(4);
-        assertThat(tokens.body().get("name").asText()).isEqualTo("total_tokens");
-        assertThat(tokens.body().get("dataType").asText()).isEqualTo("NUMERIC");
+        assertThat(tokens.body().get("name").asString()).isEqualTo("total_tokens");
+        assertThat(tokens.body().get("dataType").asString()).isEqualTo("NUMERIC");
         assertThat(tokens.body().get("value").asInt()).isEqualTo(321);
 
         Captured budget = captured.get(5);
-        assertThat(budget.body().get("name").asText()).isEqualTo("token_budget_ok");
+        assertThat(budget.body().get("name").asString()).isEqualTo("token_budget_ok");
         assertThat(budget.body().get("value").asInt()).isEqualTo(1);
         assertThat(budget.body().has("comment")).isFalse();
     }
@@ -278,9 +279,9 @@ class LangfuseEvalClientTest {
 
         client().recordCaseResult(result);
 
-        assertThat(captured.get(1).body().get("name").asText()).isEqualTo("rubric_pass");
+        assertThat(captured.get(1).body().get("name").asString()).isEqualTo("rubric_pass");
         assertThat(captured.get(1).body().get("value").asInt()).isEqualTo(1);
-        assertThat(captured.get(2).body().get("value").asText())
+        assertThat(captured.get(2).body().get("value").asString())
                 .isEqualTo("ABSTAINED_OR_ESCALATED");
         assertThat(captured.get(3).body().get("value").asDouble()).isEqualTo(1.0);
     }
@@ -297,7 +298,7 @@ class LangfuseEvalClientTest {
         assertThat(captured.get(1).body().get("value").asInt()).isEqualTo(1);
         Captured budget = captured.get(5);
         assertThat(budget.body().get("value").asInt()).isZero();
-        assertThat(budget.body().get("comment").asText())
+        assertThat(budget.body().get("comment").asString())
                 .isEqualTo("token usage 500 exceeds baseline 300");
     }
 
@@ -315,10 +316,10 @@ class LangfuseEvalClientTest {
 
         assertThat(captured).hasSize(4);
         assertThat(captured.get(0).path()).isEqualTo("/api/public/dataset-run-items");
-        assertThat(captured.get(1).body().get("name").asText()).isEqualTo("rubric_pass");
-        assertThat(captured.get(1).body().get("comment").asText()).isEqualTo("judge exploded");
-        assertThat(captured.get(2).body().get("value").asText()).isEqualTo("INCORRECT");
-        assertThat(captured.get(3).body().get("name").asText())
+        assertThat(captured.get(1).body().get("name").asString()).isEqualTo("rubric_pass");
+        assertThat(captured.get(1).body().get("comment").asString()).isEqualTo("judge exploded");
+        assertThat(captured.get(2).body().get("value").asString()).isEqualTo("INCORRECT");
+        assertThat(captured.get(3).body().get("name").asString())
                 .isEqualTo("confidence_targeted_score");
     }
 

@@ -6,20 +6,20 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link AiExtractorHandler} used directly: repair retry, error codes, missing/invalid bookkeeping.
  */
 class AiExtractorHandlerTest {
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     @SuppressWarnings("unchecked")
     private static AiExtractorHandler handler(WorkflowAiModel model, boolean enabled) {
@@ -126,7 +126,7 @@ class AiExtractorHandlerTest {
                                         .execute(node(), "text")
                                         .output())
                         .get("_error")
-                        .asText());
+                        .asString());
         assertEquals(
                 "model_call_failed",
                 M.readTree(
@@ -138,7 +138,7 @@ class AiExtractorHandlerTest {
                                         .execute(node(), "text")
                                         .output())
                         .get("_error")
-                        .asText());
+                        .asString());
         assertEquals(
                 "empty_input",
                 M.readTree(
@@ -146,7 +146,7 @@ class AiExtractorHandlerTest {
                                         .execute(node(), "  ")
                                         .output())
                         .get("_error")
-                        .asText());
+                        .asString());
     }
 
     @Test

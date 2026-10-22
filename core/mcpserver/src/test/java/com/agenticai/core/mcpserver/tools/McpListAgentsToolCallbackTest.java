@@ -14,8 +14,6 @@ import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +21,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code list_my_agents} is the external caller's discovery surface for what its key can do - the
@@ -35,7 +35,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 class McpListAgentsToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private AgentService agentService;
     private McpListAgentsToolCallback callback;
@@ -80,8 +80,8 @@ class McpListAgentsToolCallbackTest {
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
         assertEquals(1, result.size());
-        assertEquals(agentId.toString(), result.get(0).get("id").asText());
-        assertEquals("Support Bot", result.get(0).get("name").asText());
+        assertEquals(agentId.toString(), result.get(0).get("id").asString());
+        assertEquals("Support Bot", result.get(0).get("name").asString());
         // Only id + name cross the boundary - never the system prompt,
         // model, or tool config AgentResponse also carries.
         assertEquals(2, result.get(0).size());
@@ -126,6 +126,6 @@ class McpListAgentsToolCallbackTest {
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
         assertEquals(1, result.size());
-        assertEquals("Still Here", result.get(0).get("name").asText());
+        assertEquals("Still Here", result.get(0).get("name").asString());
     }
 }

@@ -18,8 +18,6 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
@@ -30,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link WorkflowRunRecoveryJob} exists because a JVM crash mid-run leaves a {@link WorkflowRun}
@@ -61,7 +60,7 @@ class WorkflowRunRecoveryJobTest {
      * NodeTraceEntry}'s Instants.
      */
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.plain();
     }
 
     @BeforeEach

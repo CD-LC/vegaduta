@@ -3,16 +3,16 @@ package com.agenticai.core.agents.tools.localshell;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.agents.tools.stdiosandbox.StdioSandboxException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class LocalShellToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private static final class FakeRunner implements ShellRunner {
         final List<String> commands = new ArrayList<>();
@@ -61,8 +61,8 @@ class LocalShellToolCallbackTest {
                                 .call("{\"command\":\"echo hi > f && cat f\"}"));
         assertThat(runner.commands).containsExactly("echo hi > f && cat f");
         assertThat(out.path("exit_code").asInt()).isZero();
-        assertThat(out.path("output").asText()).isEqualTo("hello\n");
-        assertThat(out.path("workspace").asText()).isEqualTo("/work");
+        assertThat(out.path("output").asString()).isEqualTo("hello\n");
+        assertThat(out.path("workspace").asString()).isEqualTo("/work");
         assertThat(out.has("error")).isFalse();
     }
 
@@ -74,7 +74,7 @@ class LocalShellToolCallbackTest {
                         new LocalShellToolCallback(runner, true, 60, 300)
                                 .call("{\"command\":\"rm notes.txt\"}"));
         assertThat(runner.commands).isEmpty();
-        assertThat(out.path("error").asText()).contains("local_shell").contains("asked");
+        assertThat(out.path("error").asString()).contains("local_shell").contains("asked");
     }
 
     @Test
@@ -92,7 +92,7 @@ class LocalShellToolCallbackTest {
                     json(
                             new LocalShellToolCallback(runner, readOnly, 60, 300)
                                     .call("{\"command\":\"sudo rm -rf /\"}"));
-            assertThat(out.path("error").asText()).contains("not allowed");
+            assertThat(out.path("error").asString()).contains("not allowed");
         }
         assertThat(runner.commands).isEmpty();
     }
@@ -101,8 +101,8 @@ class LocalShellToolCallbackTest {
     void missingOrBlankCommandIsAnError() throws Exception {
         FakeRunner runner = new FakeRunner();
         var tool = new LocalShellToolCallback(runner, false, 60, 300);
-        assertThat(json(tool.call("{}")).path("error").asText()).contains("required");
-        assertThat(json(tool.call("{\"command\":\"  \"}")).path("error").asText())
+        assertThat(json(tool.call("{}")).path("error").asString()).contains("required");
+        assertThat(json(tool.call("{\"command\":\"  \"}")).path("error").asString())
                 .contains("required");
         assertThat(json(tool.call("not json")).has("error")).isTrue();
     }
@@ -128,7 +128,7 @@ class LocalShellToolCallbackTest {
                         new LocalShellToolCallback(runner, false, 5, 5)
                                 .call("{\"command\":\"sleep 99\"}"));
         assertThat(out.path("timed_out").asBoolean()).isTrue();
-        assertThat(out.path("note").asText()).contains("5 s");
+        assertThat(out.path("note").asString()).contains("5 s");
     }
 
     @Test
@@ -136,10 +136,10 @@ class LocalShellToolCallbackTest {
         FakeRunner runner = new FakeRunner();
         var tool = new LocalShellToolCallback(runner, false, 60, 300);
         runner.failure = new StdioSandboxException("The terminal is off: sandbox unavailable");
-        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asText())
+        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asString())
                 .contains("terminal is off");
         runner.failure = new IllegalStateException("secret internals");
-        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asText())
+        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asString())
                 .doesNotContain("secret internals");
     }
 

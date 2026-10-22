@@ -6,11 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.agenticai.core.agents.importer.AgentImportDtos.ConversionReport;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Golden fixtures for the n8n importer: small realistic exports written for this test (not copied
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  */
 class N8nImportMapperTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String BEARER = "abcdefghijklmnopqrstuvwxyz0123456789";
 
     /** JSON with single quotes standing in for double quotes. */

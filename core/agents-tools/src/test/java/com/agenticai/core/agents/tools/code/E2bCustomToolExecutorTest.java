@@ -15,15 +15,15 @@ import com.agenticai.core.sdlc.SdlcSandboxService;
 import com.agenticai.core.sdlc.dto.RunCodeRequest;
 import com.agenticai.core.sdlc.dto.RunCodeResponse;
 import com.agenticai.core.secrets.SecretRedactor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 class E2bCustomToolExecutorTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String NONCE = "__VEGA_RESULT_abc__";
 
     @SuppressWarnings("unchecked")

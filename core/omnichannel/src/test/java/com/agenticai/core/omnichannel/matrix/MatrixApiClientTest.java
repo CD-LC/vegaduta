@@ -4,19 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** The Matrix client against a fake homeserver: paths, auth, bodies, errors, and the SSRF guard. */
 class MatrixApiClientTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String TOKEN = "syt_super_secret_token";
 
     private FakeHomeserver server;
@@ -57,7 +57,7 @@ class MatrixApiClientTest {
 
         JsonNode response = client.sync(endpoint, "s8", 1234);
 
-        assertThat(response.path("next_batch").asText()).isEqualTo("s9");
+        assertThat(response.path("next_batch").asString()).isEqualTo("s9");
         String query = server.requests.get(0).query();
         assertThat(query).contains("timeout=1234").contains("since=s8").contains("filter=");
         // First sync carries no since token at all.
@@ -79,9 +79,9 @@ class MatrixApiClientTest {
         assertThat(request.rawPath())
                 .isEqualTo("/_matrix/client/v3/rooms/%21room%3Ahs/send/m.room.message/txn-1");
         JsonNode body = MAPPER.readTree(request.body());
-        assertThat(body.path("msgtype").asText()).isEqualTo("m.text");
-        assertThat(body.path("body").asText()).isEqualTo("hello");
-        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asText())
+        assertThat(body.path("msgtype").asString()).isEqualTo("m.text");
+        assertThat(body.path("body").asString()).isEqualTo("hello");
+        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asString())
                 .isEqualTo("$orig");
     }
 
@@ -92,10 +92,10 @@ class MatrixApiClientTest {
         client.sendText(endpoint, "!r:hs", "t", "in thread", "$msg", "$root");
 
         JsonNode relation = MAPPER.readTree(server.requests.get(0).body()).path("m.relates_to");
-        assertThat(relation.path("rel_type").asText()).isEqualTo("m.thread");
-        assertThat(relation.path("event_id").asText()).isEqualTo("$root");
+        assertThat(relation.path("rel_type").asString()).isEqualTo("m.thread");
+        assertThat(relation.path("event_id").asString()).isEqualTo("$root");
         assertThat(relation.path("is_falling_back").asBoolean()).isFalse();
-        assertThat(relation.path("m.in_reply_to").path("event_id").asText()).isEqualTo("$msg");
+        assertThat(relation.path("m.in_reply_to").path("event_id").asString()).isEqualTo("$msg");
     }
 
     @Test
@@ -171,9 +171,9 @@ class MatrixApiClientTest {
         assertThat(upload.body()).containsExactly(1, 2, 3);
         assertThat(upload.headers().get("content-type")).startsWith("image/png");
         JsonNode event = MAPPER.readTree(server.requests.get(1).body());
-        assertThat(event.path("msgtype").asText()).isEqualTo("m.image");
-        assertThat(event.path("url").asText()).isEqualTo("mxc://hs/abc123");
-        assertThat(event.path("body").asText()).isEqualTo("a picture");
+        assertThat(event.path("msgtype").asString()).isEqualTo("m.image");
+        assertThat(event.path("url").asString()).isEqualTo("mxc://hs/abc123");
+        assertThat(event.path("body").asString()).isEqualTo("a picture");
         assertThat(event.path("info").path("size").asInt()).isEqualTo(3);
     }
 

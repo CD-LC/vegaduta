@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.agents.context.ToolResultRestoreIds;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -204,9 +203,9 @@ class RestoreToolResultToolCallbackTest {
         assertEquals("restore_tool_result", tool.getToolDefinition().name());
         assertEquals(
                 "object",
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(tool.getToolDefinition().inputSchema())
                         .path("type")
-                        .asText());
+                        .asString());
     }
 }

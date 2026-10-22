@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.mcp.McpRemoteUrlGuard;
 import com.agenticai.core.mcp.oauth.McpOAuthDiscovery.Discovered;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,8 @@ class McpOAuthDiscoveryTest {
                     + "/register\",\"code_challenge_methods_supported\":[\"S256\"]}";
 
     private final FakeMcpOAuthHttp http = new FakeMcpOAuthHttp();
-    private final McpOAuthDiscovery discovery = new McpOAuthDiscovery(http, new ObjectMapper());
+    private final McpOAuthDiscovery discovery =
+            new McpOAuthDiscovery(http, com.agenticai.core.json.JsonMappers.plain());
 
     @Test
     void discoversViaPathAwareWellKnownWhenNoChallenge() {
@@ -163,7 +163,8 @@ class McpOAuthDiscoveryTest {
                     throw new McpOAuthBlockedException(
                             "MCP OAuth request blocked: private address");
                 };
-        McpOAuthDiscovery d = new McpOAuthDiscovery(blocking, new ObjectMapper());
+        McpOAuthDiscovery d =
+                new McpOAuthDiscovery(blocking, com.agenticai.core.json.JsonMappers.plain());
         assertThrows(McpOAuthBlockedException.class, () -> d.discover(MCP));
     }
 
@@ -187,7 +188,7 @@ class McpOAuthDiscoveryTest {
                 };
         assertEquals(
                 MCP,
-                new McpOAuthDiscovery(flaky, new ObjectMapper())
+                new McpOAuthDiscovery(flaky, com.agenticai.core.json.JsonMappers.plain())
                         .discover(MCP)
                         .resource()
                         .resource());
@@ -209,7 +210,8 @@ class McpOAuthDiscoveryTest {
         assertEquals("files:read files:write", probe.challengeScope());
 
         FakeMcpOAuthHttp open = new FakeMcpOAuthHttp().on("POST", MCP, 200, "{}");
-        McpOAuthDiscovery.Probe noAuth = new McpOAuthDiscovery(open, new ObjectMapper()).probe(MCP);
+        McpOAuthDiscovery.Probe noAuth =
+                new McpOAuthDiscovery(open, com.agenticai.core.json.JsonMappers.plain()).probe(MCP);
         assertEquals(200, noAuth.status());
         assertEquals(false, noAuth.authRequired());
     }
@@ -229,7 +231,7 @@ class McpOAuthDiscoveryTest {
                 new FakeMcpOAuthHttp().on("GET", PRM_PATH, 200, PRM).on("GET", AS_URL, 200, AS);
         assertEquals(
                 List.of("read", "write"),
-                new McpOAuthDiscovery(plain, new ObjectMapper())
+                new McpOAuthDiscovery(plain, com.agenticai.core.json.JsonMappers.plain())
                         .discover(MCP)
                         .resource()
                         .allowedScopes());
@@ -290,7 +292,11 @@ class McpOAuthDiscoveryTest {
         McpOAuthBlockedException e =
                 assertThrows(
                         McpOAuthBlockedException.class,
-                        () -> new McpOAuthDiscovery(vetting, new ObjectMapper()).discover(MCP));
+                        () ->
+                                new McpOAuthDiscovery(
+                                                vetting,
+                                                com.agenticai.core.json.JsonMappers.plain())
+                                        .discover(MCP));
         assertTrue(e.getMessage().contains("token_endpoint"));
     }
 }

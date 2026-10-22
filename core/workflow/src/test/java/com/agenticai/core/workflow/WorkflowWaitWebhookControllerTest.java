@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,7 +41,13 @@ class WorkflowWaitWebhookControllerTest {
 
     private WorkflowWaitWebhookController controller(boolean enabled, int maxBodyChars) {
         return new WorkflowWaitWebhookController(
-                tokens, resumeService, rateLimiter, new ObjectMapper(), enabled, 30, maxBodyChars);
+                tokens,
+                resumeService,
+                rateLimiter,
+                com.agenticai.core.json.JsonMappers.plain(),
+                enabled,
+                30,
+                maxBodyChars);
     }
 
     private String token() {

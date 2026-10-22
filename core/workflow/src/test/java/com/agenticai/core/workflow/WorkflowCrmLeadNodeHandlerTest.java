@@ -14,7 +14,6 @@ import com.agenticai.core.omnichannel.crm.LeadService;
 import com.agenticai.core.omnichannel.crm.LeadStage;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,7 +34,9 @@ class WorkflowCrmLeadNodeHandlerTest {
         service = mock(LeadService.class);
         ObjectProvider<LeadService> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(service);
-        handler = new WorkflowCrmLeadNodeHandler(provider, new ObjectMapper());
+        handler =
+                new WorkflowCrmLeadNodeHandler(
+                        provider, com.agenticai.core.json.JsonMappers.plain());
     }
 
     private static WorkflowNodeDto node(Map<String, Object> config) {
@@ -132,7 +133,7 @@ class WorkflowCrmLeadNodeHandlerTest {
         @SuppressWarnings("unchecked")
         ObjectProvider<LeadService> none = mock(ObjectProvider.class);
         NodeExecutionResult r =
-                new WorkflowCrmLeadNodeHandler(none, new ObjectMapper())
+                new WorkflowCrmLeadNodeHandler(none, com.agenticai.core.json.JsonMappers.plain())
                         .execute(node(Map.of()), "x");
         assertEquals("SKIPPED", r.status());
         assertEquals("x", r.output());

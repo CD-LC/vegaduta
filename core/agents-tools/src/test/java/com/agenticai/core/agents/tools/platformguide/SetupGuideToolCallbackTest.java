@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agentspi.SetupStatusProvider.State;
 import com.agenticai.core.agentspi.SetupStatusProvider.Status;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 class SetupGuideToolCallbackTest {
 
@@ -48,20 +48,20 @@ class SetupGuideToolCallbackTest {
                                                 State.NOT_SET_UP,
                                                 "No MCP server is registered yet."))),
                         "{\"query\":\"I want my agent to read GitHub issues through an MCP server\"}");
-        assertEquals("mcp-servers", r.at("/topics/0/id").asText());
-        assertEquals("/tools", r.at("/topics/0/link").asText());
-        assertEquals("NOT_SET_UP", r.at("/topics/0/status/state").asText());
-        assertEquals("github", r.at("/mcp_servers_that_fit/0/name").asText());
+        assertEquals("mcp-servers", r.at("/topics/0/id").asString());
+        assertEquals("/tools", r.at("/topics/0/link").asString());
+        assertEquals("NOT_SET_UP", r.at("/topics/0/status/state").asString());
+        assertEquals("github", r.at("/mcp_servers_that_fit/0/name").asString());
         // The enabling step is the part people miss: it must be reachable from the first topic.
-        assertEquals("agent-tools", r.at("/topics/0/also_check/0/id").asText());
-        assertTrue(r.path("how_to_answer").asText().contains("send the same request again"));
+        assertEquals("agent-tools", r.at("/topics/0/also_check/0/id").asString());
+        assertTrue(r.path("how_to_answer").asString().contains("send the same request again"));
     }
 
     @Test
     void unknownStatusIsSaidNotInvented() throws Exception {
         JsonNode r = call(tool(Map.of()), "{\"query\":\"connect slack\"}");
-        assertEquals("slack", r.at("/topics/0/id").asText());
-        assertEquals("UNKNOWN", r.at("/topics/0/status/state").asText());
+        assertEquals("slack", r.at("/topics/0/id").asString());
+        assertEquals("UNKNOWN", r.at("/topics/0/status/state").asString());
     }
 
     @Test
@@ -72,19 +72,19 @@ class SetupGuideToolCallbackTest {
                                 tool(Map.of()),
                                 "{\"query\":\"my agent says it has no tool for that, how do I allow tool access\"}")
                         .at("/topics/0/id")
-                        .asText());
+                        .asString());
         assertEquals(
                 "llm-providers",
                 call(
                                 tool(Map.of()),
                                 "{\"query\":\"add my OpenAI api key so agents can use a model\"}")
                         .at("/topics/0/id")
-                        .asText());
+                        .asString());
         assertEquals(
                 "google",
                 call(tool(Map.of()), "{\"query\":\"book a meeting on my calendar\"}")
                         .at("/topics/0/id")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -92,7 +92,7 @@ class SetupGuideToolCallbackTest {
         JsonNode r =
                 call(tool(Map.of()), "{\"action\":\"docs\",\"query\":\"tool pinning enforce\"}");
         assertFalse(r.path("docs").isEmpty());
-        assertTrue(r.at("/docs/0/text").asText().toLowerCase().contains("pin"));
+        assertTrue(r.at("/docs/0/text").asString().toLowerCase().contains("pin"));
     }
 
     @Test

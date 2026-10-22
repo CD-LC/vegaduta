@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.documentgen.model.DocumentContent;
 import com.agenticai.core.documentgen.model.DocumentGenerationRequest;
 import com.agenticai.core.documentgen.model.DocumentType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link JsonDocumentGenerator} has one load-bearing branch: {@link DocumentContent#json()} is
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  */
 class JsonDocumentGeneratorTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
     private final JsonDocumentGenerator generator = new JsonDocumentGenerator(objectMapper);
 
     @Test
@@ -58,9 +58,9 @@ class JsonDocumentGeneratorTest {
 
         JsonNode parsed = parse(generator.generate(request(content)));
 
-        assertEquals("Report", parsed.path("title").asText());
-        assertEquals("H", parsed.at("/sections/0/heading").asText());
-        assertEquals("p1", parsed.at("/sections/0/paragraphs/0").asText());
+        assertEquals("Report", parsed.path("title").asString());
+        assertEquals("H", parsed.at("/sections/0/heading").asString());
+        assertEquals("p1", parsed.at("/sections/0/paragraphs/0").asString());
     }
 
     private DocumentGenerationRequest request(DocumentContent content) {

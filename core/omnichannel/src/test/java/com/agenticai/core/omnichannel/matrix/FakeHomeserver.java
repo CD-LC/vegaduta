@@ -112,7 +112,7 @@ final class FakeHomeserver implements AutoCloseable {
 
     MatrixApiClient client() {
         SsrfGuard guard = guard();
-        return new MatrixApiClient(new com.fasterxml.jackson.databind.ObjectMapper(), () -> guard);
+        return new MatrixApiClient(new tools.jackson.databind.ObjectMapper(), () -> guard);
     }
 
     MatrixApiClient.Endpoint endpoint(String token) {

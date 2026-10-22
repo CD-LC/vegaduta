@@ -2,8 +2,6 @@ package com.agenticai.core.jsonb;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Entity;
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -14,12 +12,13 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.format.FormatMapper;
-import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 import org.hibernate.type.spi.TypeConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * P0 characterisation (ADR-0012, section 6 P0.2, unit level): every entity attribute mapped with
@@ -111,7 +110,8 @@ class JsonbRoundTripTest {
     private static final String NODE_FIELD =
             "com.agenticai.core.common.security.ChallengeNonce#metadata";
 
-    private final FormatMapper hibernateJson = new JacksonJsonFormatMapper();
+    private final FormatMapper hibernateJson =
+            com.agenticai.core.tenancy.HibernateJsonFormatMapperCustomizer.formatMapper();
     private final TypeConfiguration types = new TypeConfiguration();
 
     @SuppressWarnings("unchecked")
@@ -277,10 +277,10 @@ class JsonbRoundTripTest {
     @Test
     void theHibernateDefaultMapperAndAPlainObjectMapperWriteTheSameTextForTypicalDocuments()
             throws Exception {
-        // 179 sites build JSON for these columns with a bare `new ObjectMapper()` (ADR section 10);
-        // the
+        // 179 sites build JSON for these columns with a bare
+        // `com.agenticai.core.json.JsonMappers.plain()` (ADR section 10); the
         // JsonMappers refactor in P1 must not change what they write.
-        ObjectMapper plain = new ObjectMapper();
+        ObjectMapper plain = com.agenticai.core.json.JsonMappers.plain();
         Map<String, Object> doc = new java.util.LinkedHashMap<>();
         doc.put("b", 1);
         doc.put("a", java.util.List.of("x", "y"));

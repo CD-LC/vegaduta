@@ -2,15 +2,15 @@ package com.agenticai.core.omnichannel.whatsappqr;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** JID -> external id mapping, addressability, masking and the bridge event parse. */
 class WhatsAppQrAddressAndEnvelopeTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     @Test
     void externalIdKeepsDigitsForPeopleAndTheLidSuffixForHiddenNumbers() {

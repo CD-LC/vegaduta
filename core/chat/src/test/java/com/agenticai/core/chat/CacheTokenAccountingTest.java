@@ -8,11 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.genai.types.GenerateContentResponseUsageMetadata;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.google.genai.metadata.GoogleGenAiUsage;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
  * Locks in the two properties {@link CacheTokenAccounting} exists to guarantee, both of which are
@@ -31,10 +29,10 @@ import org.springframework.ai.openai.api.OpenAiApi;
  *       from the raw counts.
  * </ol>
  *
- * <p>Every provider usage shape here is constructed from the real Spring AI 1.1.7 / Google GenAI
- * SDK types on the compile classpath (not a hand-rolled stub), so a future dependency bump that
- * reshapes one of them breaks this test rather than silently making the accounting wrong at runtime
- * - which is the only failure mode of this class that would otherwise be invisible.
+ * <p>Every provider usage shape here is constructed from the real Spring AI 2.0.1 / vendor SDK /
+ * Google GenAI SDK types on the compile classpath (not a hand-rolled stub), so a future dependency
+ * bump that reshapes one of them breaks this test rather than silently making the accounting wrong
+ * at runtime - which is the only failure mode of this class that would otherwise be invisible.
  */
 class CacheTokenAccountingTest {
 
@@ -178,7 +176,7 @@ class CacheTokenAccountingTest {
         // Non-caching OpenAI-compatible endpoints (OpenRouter, Grok via
         // OpenAiApi - see this module's pom.xml comment) routinely omit the
         // details object entirely.
-        Usage usage = new DefaultUsage(2000, 120, 2120, new OpenAiApi.Usage(120, 2000, 2120));
+        Usage usage = SdkUsageFixtures.openAi(2000, 120, null);
 
         assertSame(CacheTokenAccounting.ABSENT, CacheTokenAccounting.from(usage));
     }
@@ -276,40 +274,21 @@ class CacheTokenAccountingTest {
     // ------------------------------------------------------------------
 
     /**
-     * {@code AnthropicApi.Usage} component order is (inputTokens, outputTokens, cacheCreation,
-     * cacheRead).
+     * Exactly what Spring AI 2's AnthropicChatModel#getDefaultUsage builds: promptTokens =
+     * inputTokens alone.
      */
     private static Usage anthropicUsage(
             Integer inputTokens,
             Integer outputTokens,
             Integer cacheCreationInputTokens,
             Integer cacheReadInputTokens) {
-        AnthropicApi.Usage nativeUsage =
-                new AnthropicApi.Usage(
-                        inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens);
-        // Exactly what AnthropicChatModel#getDefaultUsage builds: promptTokens
-        // from inputTokens alone, with the native record preserved.
-        return new DefaultUsage(
-                inputTokens,
-                outputTokens,
-                inputTokens == null || outputTokens == null ? null : inputTokens + outputTokens,
-                nativeUsage);
+        return SdkUsageFixtures.anthropic(
+                inputTokens, outputTokens, cacheCreationInputTokens, cacheReadInputTokens);
     }
 
-    /**
-     * {@code OpenAiApi.Usage} component order is (completionTokens, promptTokens, totalTokens,
-     * promptDetails, completionDetails).
-     */
+    /** Exactly what Spring AI 2's OpenAiChatModel#getDefaultUsage builds. */
     private static Usage openAiUsage(
             Integer promptTokens, Integer completionTokens, Integer cachedTokens) {
-        OpenAiApi.Usage nativeUsage =
-                new OpenAiApi.Usage(
-                        completionTokens,
-                        promptTokens,
-                        promptTokens + completionTokens,
-                        new OpenAiApi.Usage.PromptTokensDetails(null, cachedTokens),
-                        null);
-        return new DefaultUsage(
-                promptTokens, completionTokens, promptTokens + completionTokens, nativeUsage);
+        return SdkUsageFixtures.openAi(promptTokens, completionTokens, cachedTokens);
     }
 }

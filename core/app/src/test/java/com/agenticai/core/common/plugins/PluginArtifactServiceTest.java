@@ -18,7 +18,6 @@ import com.agenticai.core.common.plugins.PluginArtifactService.StoredArtifact;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
@@ -53,7 +52,9 @@ class PluginArtifactServiceTest {
         when(settings.getString(PluginCatalogController.CATALOG_KEY, null)).thenReturn(null);
         service =
                 new PluginArtifactService(
-                        storage, new PluginCatalogService(settings, new ObjectMapper()));
+                        storage,
+                        new PluginCatalogService(
+                                settings, com.agenticai.core.json.JsonMappers.plain()));
         TenantContext.clear();
     }
 

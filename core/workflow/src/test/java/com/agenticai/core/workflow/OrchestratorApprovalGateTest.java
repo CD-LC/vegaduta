@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -93,16 +92,16 @@ class OrchestratorApprovalGateTest extends OrchestratorServiceTestBase {
         org.mockito.ArgumentCaptor<String> payloadCaptor =
                 org.mockito.ArgumentCaptor.forClass(String.class);
         verify(approvalGateService).evaluate(any(), any(), payloadCaptor.capture(), any());
-        com.fasterxml.jackson.databind.JsonNode payload =
-                new ObjectMapper().readTree(payloadCaptor.getValue());
+        tools.jackson.databind.JsonNode payload =
+                com.agenticai.core.json.JsonMappers.plain().readTree(payloadCaptor.getValue());
         // Pre-existing top-level keys keep their exact shape (ApprovalController
         // reads adminOnly; the RL feedback hook reads runId).
-        assertEquals("run-1", payload.path("runId").asText());
-        assertEquals("n1", payload.path("nodeId").asText());
+        assertEquals("run-1", payload.path("runId").asString());
+        assertEquals("n1", payload.path("nodeId").asString());
         assertFalse(payload.path("adminOnly").asBoolean());
-        assertEquals("she said \"run\\it\"", payload.path("resume").path("nodeInput").asText());
-        assertEquals("tenant-a", payload.path("resume").path("tenantId").asText());
-        assertEquals("user-sub-1", payload.path("resume").path("subject").asText());
+        assertEquals("she said \"run\\it\"", payload.path("resume").path("nodeInput").asString());
+        assertEquals("tenant-a", payload.path("resume").path("tenantId").asString());
+        assertEquals("user-sub-1", payload.path("resume").path("subject").asString());
     }
 
     @Test
@@ -120,11 +119,11 @@ class OrchestratorApprovalGateTest extends OrchestratorServiceTestBase {
         org.mockito.ArgumentCaptor<String> payloadCaptor =
                 org.mockito.ArgumentCaptor.forClass(String.class);
         verify(approvalGateService).evaluate(any(), any(), payloadCaptor.capture(), any());
-        com.fasterxml.jackson.databind.JsonNode payload =
-                new ObjectMapper().readTree(payloadCaptor.getValue());
+        tools.jackson.databind.JsonNode payload =
+                com.agenticai.core.json.JsonMappers.plain().readTree(payloadCaptor.getValue());
         assertTrue(
                 payload.path("resume").isMissingNode(),
                 "oversized input must omit the resume envelope, got: " + payload.path("resume"));
-        assertEquals("run-1", payload.path("runId").asText());
+        assertEquals("run-1", payload.path("runId").asString());
     }
 }

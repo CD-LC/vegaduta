@@ -14,14 +14,14 @@ import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The data nodes as the rest of the engine sees them: dispatched by the executor (with expression
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 class WorkflowDataNodeTest {
 
-    private static final ObjectMapper M = new ObjectMapper();
+    private static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
 
     // ---- helpers
 

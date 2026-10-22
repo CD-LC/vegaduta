@@ -12,7 +12,6 @@ import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.devices.DeviceAuthResolver;
 import com.agenticai.core.devices.MobileDevice;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.Set;
 import java.util.UUID;
@@ -63,7 +62,7 @@ abstract class EdgeToolExecutionControllerTestBase {
                 new EdgeToolExecutionController(
                         agentService,
                         agentToolProvider,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         deviceAuthResolver,
                         agentMemoryService);
 

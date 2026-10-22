@@ -54,7 +54,7 @@ final class AgentServiceTestFactory {
                 resourceAccessService,
                 agentSchemaService,
                 AgentVersionSnapshotService.disabled(),
-                new AgentConfigSnapshotCodec(new com.fasterxml.jackson.databind.ObjectMapper()),
+                new AgentConfigSnapshotCodec(new tools.jackson.databind.ObjectMapper()),
                 new AgentCapabilityRegistry(List.of()),
                 defaultModel,
                 defaultMaxTokens,

@@ -7,10 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +18,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class WorkflowRunStreamHubTest {
 
     private static final ObjectMapper MAPPER =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            tools.jackson.databind.json.JsonMapper.builder()
+                    .configureForJackson2()
+                    .disable(tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .build();
 
     /** Records what the hub writes instead of needing a servlet response. */
     static final class RecordingEmitter extends SseEmitter {
@@ -118,9 +117,9 @@ class WorkflowRunStreamHubTest {
                 1,
                 sub.named("run.started").size(),
                 "buffered run.started replays to a late subscriber");
-        assertEquals("n1", sub.lastData("node.started").path("nodeId").asText());
+        assertEquals("n1", sub.lastData("node.started").path("nodeId").asString());
         assertEquals(
-                "COMPLETED", sub.lastData("run.finished").path("data").path("status").asText());
+                "COMPLETED", sub.lastData("run.finished").path("data").path("status").asString());
         assertTrue(sub.completed);
     }
 
@@ -136,7 +135,7 @@ class WorkflowRunStreamHubTest {
 
         assertEquals(0, sub.named("run.started").size());
         assertEquals(1, sub.named("node.started").size());
-        assertEquals("b", sub.lastData("node.started").path("nodeId").asText());
+        assertEquals("b", sub.lastData("node.started").path("nodeId").asString());
     }
 
     @Test
@@ -196,7 +195,7 @@ class WorkflowRunStreamHubTest {
                 "AWAITING_APPROVAL",
                 Map.of("status", "AWAITING_APPROVAL", "nodeId", "gate"));
         assertFalse(sub.completed);
-        assertEquals("gate", sub.lastData("run.awaiting").path("data").path("nodeId").asText());
+        assertEquals("gate", sub.lastData("run.awaiting").path("data").path("nodeId").asString());
 
         hub.runStarted(runId, "acme", wf, true);
         assertEquals(1, sub.named("run.resumed").size());

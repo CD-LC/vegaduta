@@ -13,8 +13,6 @@ import com.agenticai.core.providers.PlatformToolKey;
 import com.agenticai.core.providers.capability.ProviderCredentialService;
 import com.agenticai.core.providers.capability.ProviderKeys;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,6 +28,8 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link JevDecisionService} coverage - same MockRestServiceServer harness as the Sarvam client
@@ -39,7 +39,7 @@ import org.springframework.web.client.RestClient;
  */
 class JevDecisionServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private MockRestServiceServer server;
     private PlatformToolCredentialService credentials;
@@ -321,7 +321,7 @@ class JevDecisionServiceTest {
         assertThat(out.get().error()).isNull();
         assertThat(out.get().keySource()).isEqualTo(DecisionModel.KeySource.ENV);
         assertThat(out.get().model()).isEqualTo("jev-1.13.0");
-        assertThat(out.get().answers().path("q").path("choice").asText()).isEqualTo("a");
+        assertThat(out.get().answers().path("q").path("choice").asString()).isEqualTo("a");
         assertThat(out.get().usage().path("input_tokens").asInt()).isEqualTo(120);
     }
 

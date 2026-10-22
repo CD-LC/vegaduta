@@ -12,13 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.agenticai.core.agents.tools.browseruse.BrowserTakeoverFixtures.Rig;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The HTTP surface: 404 everywhere with the flag off, 401 without an identity, owner-only,
@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class BrowserTakeoverControllerTest {
 
     private static final String BASE = "/api/browser/takeover";
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = com.agenticai.core.json.JsonMappers.plain();
 
     @AfterEach
     void clear() {
@@ -121,7 +121,7 @@ class BrowserTakeoverControllerTest {
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        String id = JSON.readTree(statusBody).path("takeover").path("takeoverId").asText();
+        String id = JSON.readTree(statusBody).path("takeover").path("takeoverId").asString();
         assertThat(statusBody).doesNotContain("token=abc").doesNotContain("login");
 
         // a stranger gets 404 on every call about this takeover
@@ -143,7 +143,7 @@ class BrowserTakeoverControllerTest {
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        String token = JSON.readTree(begin).path("token").asText();
+        String token = JSON.readTree(begin).path("token").asString();
         assertThat(token).isNotBlank();
 
         // input needs the token header

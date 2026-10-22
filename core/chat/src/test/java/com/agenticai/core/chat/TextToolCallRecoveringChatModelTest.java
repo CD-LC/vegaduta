@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +29,8 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * End-to-end through the real {@link ResilientToolCallingManagerFactory} manager (argument
@@ -45,7 +45,7 @@ class TextToolCallRecoveringChatModelTest {
     private static final String VALID_REPLY =
             "{\"name\": \"generate_document\", \"parameters\": {\"type\": \"PDF\", \"filename\": \"report.pdf\"}}";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
 
     /**
@@ -123,7 +123,7 @@ class TextToolCallRecoveringChatModelTest {
         assertEquals("Done - report.pdf is ready.", text(out));
         assertEquals(1, tool.calls.get());
         JsonNode args = objectMapper.readTree(tool.lastInput.get());
-        assertEquals("PDF", args.get("type").asText());
+        assertEquals("PDF", args.get("type").asString());
         ToolResponseMessage result = lastToolResponse(provider.prompts.get(1));
         assertEquals("generated:report.pdf", result.getResponses().get(0).responseData());
     }
@@ -539,11 +539,11 @@ class TextToolCallRecoveringChatModelTest {
             calls.incrementAndGet();
             lastInput.set(toolInput);
             try {
-                JsonNode args = new ObjectMapper().readTree(toolInput);
+                JsonNode args = com.agenticai.core.json.JsonMappers.plain().readTree(toolInput);
                 assertNotNull(
                         args.get("filename"),
                         "validation must have let only complete calls through");
-                return "generated:" + args.get("filename").asText();
+                return "generated:" + args.get("filename").asString();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

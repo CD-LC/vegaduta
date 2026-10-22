@@ -2,8 +2,6 @@ package com.agenticai.core.chat.structured;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,6 +17,8 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * OpenAI strict function calling: schema eligibility, body rewriting, and the blocking + streaming
@@ -26,7 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 class ToolStrictModeTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     static final String STRICT_PARAMS =
             "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
@@ -165,9 +165,9 @@ class ToolStrictModeTest {
         assertThat(t0.get("parameters").has("$schema")).isFalse();
         assertThat(t1.has("strict")).isFalse();
         assertThat(t1.get("parameters")).isEqualTo(json(OPEN_PARAMS));
-        assertThat(root.get("model").asText()).isEqualTo("gpt-4o");
+        assertThat(root.get("model").asString()).isEqualTo("gpt-4o");
         assertThat(root.get("temperature").asDouble()).isEqualTo(0.2);
-        assertThat(root.get("messages").get(0).get("content").asText()).isEqualTo("hi");
+        assertThat(root.get("messages").get(0).get("content").asString()).isEqualTo("hi");
     }
 
     @Test

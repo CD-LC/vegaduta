@@ -18,10 +18,10 @@ import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.ai.retry.TransientAiException;
 
 /**
- * {@link LlmRetry} is the seam for the spring-retry to core-retry move; these pin the behaviour the
- * old inline {@code LlmModelSupport} template had: attempt counts, transient-only retry, the
- * per-attempt warning (the "RetryListener metric"), and that the Spring AI adapter is the same
- * policy.
+ * {@link LlmRetry} was the seam for the spring-retry to core-retry move (done in P3); these pin the
+ * behaviour the old inline {@code LlmModelSupport} template had: attempt counts, transient-only
+ * retry, the per-attempt warning (the "RetryListener metric"), and that the Spring AI adapter is
+ * the same policy.
  */
 class LlmRetryTest {
 
@@ -113,8 +113,8 @@ class LlmRetryTest {
                 TransientAiException.class,
                 () ->
                         retry.forSpringAi()
-                                .execute(
-                                        ctx -> {
+                                .invoke(
+                                        () -> {
                                             calls.incrementAndGet();
                                             throw new TransientAiException("500");
                                         }));

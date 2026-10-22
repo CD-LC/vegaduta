@@ -3,19 +3,19 @@ package com.agenticai.core.workflow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared fixture of the {@link WorkflowDataOps} tests: JSON builders and a small filter data set.
  */
 abstract class WorkflowDataOpsTestBase {
 
-    static final ObjectMapper M = new ObjectMapper();
+    static final ObjectMapper M = com.agenticai.core.json.JsonMappers.plain();
     final WorkflowDataOps ops = new WorkflowDataOps(M);
 
     // ---- helpers

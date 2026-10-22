@@ -16,7 +16,6 @@ import com.agenticai.core.agents.job.AgentJobRepository;
 import com.agenticai.core.agents.job.progress.AgentJobProgressService;
 import com.agenticai.core.agents.tools.ToolCallLogRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.Optional;
@@ -25,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Fixtures for the structured-output tests.
@@ -125,7 +125,7 @@ final class StructuredOutputJobFixtures {
 
     /** The real coercer stack - validator, prompt renderer and coercer, all genuine. */
     static StructuredResultCoercer coercer(AgentJobProperties properties) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
         return new StructuredResultCoercer(
                 objectMapper,
                 new JobResultSchemaValidator(objectMapper, properties),

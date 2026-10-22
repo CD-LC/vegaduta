@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.rl.feedback.FeedbackService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,7 +71,7 @@ class HumanApprovalGateServiceTest {
                         executorRegistry,
                         recorder,
                         feedbackService,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         MAX_RETRY_ATTEMPTS,
                         BASE_DELAY_SECONDS,
                         MAX_DELAY_SECONDS);
@@ -535,15 +534,15 @@ class HumanApprovalGateServiceTest {
                         payloadCaptor.capture(),
                         eq("agent:" + agentId + ":session:sess-1"),
                         eq(false));
-        com.fasterxml.jackson.databind.JsonNode payload =
-                new ObjectMapper().readTree(payloadCaptor.getValue());
-        assertEquals("send_message", payload.path("replay").path("toolName").asText());
-        assertEquals(agentId.toString(), payload.path("replay").path("agentId").asText());
-        assertEquals("sess-1", payload.path("replay").path("sessionId").asText());
-        assertEquals("tenant-a", payload.path("replay").path("tenantId").asText());
-        assertEquals("user-sub-1", payload.path("replay").path("subject").asText());
+        tools.jackson.databind.JsonNode payload =
+                com.agenticai.core.json.JsonMappers.plain().readTree(payloadCaptor.getValue());
+        assertEquals("send_message", payload.path("replay").path("toolName").asString());
+        assertEquals(agentId.toString(), payload.path("replay").path("agentId").asString());
+        assertEquals("sess-1", payload.path("replay").path("sessionId").asString());
+        assertEquals("tenant-a", payload.path("replay").path("tenantId").asString());
+        assertEquals("user-sub-1", payload.path("replay").path("subject").asString());
         // Valid-JSON arguments are embedded parsed, not double-encoded.
-        assertEquals("x", payload.path("arguments").path("to").asText());
+        assertEquals("x", payload.path("arguments").path("to").asString());
         verify(executorRegistry, never()).find(any());
     }
 
@@ -570,11 +569,11 @@ class HumanApprovalGateServiceTest {
                         anyString(), anyString(), payloadCaptor.capture(), anyString(), eq(false));
         assertEquals(
                 "abc123",
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(payloadCaptor.getValue())
                         .path("replay")
                         .path("toolDigest")
-                        .asText());
+                        .asString());
     }
 
     @Test
@@ -598,7 +597,7 @@ class HumanApprovalGateServiceTest {
                 .recordNew(
                         anyString(), anyString(), payloadCaptor.capture(), anyString(), eq(false));
         assertTrue(
-                new ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .readTree(payloadCaptor.getValue())
                         .path("replay")
                         .path("toolDigest")
@@ -625,9 +624,9 @@ class HumanApprovalGateServiceTest {
         verify(recorder)
                 .recordNew(
                         anyString(), anyString(), payloadCaptor.capture(), anyString(), eq(false));
-        com.fasterxml.jackson.databind.JsonNode payload =
-                new ObjectMapper().readTree(payloadCaptor.getValue());
-        assertEquals("not json {", payload.path("argumentsRaw").asText());
+        tools.jackson.databind.JsonNode payload =
+                com.agenticai.core.json.JsonMappers.plain().readTree(payloadCaptor.getValue());
+        assertEquals("not json {", payload.path("argumentsRaw").asString());
         assertFalse(payload.has("arguments"));
         // No TenantContext bound in this test - the envelope simply omits
         // tenant/subject rather than failing to record.

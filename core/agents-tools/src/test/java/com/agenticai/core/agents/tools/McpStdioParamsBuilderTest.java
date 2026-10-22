@@ -6,8 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.agenticai.core.mcp.McpServerType;
 import com.agenticai.core.mcp.McpStdioCommandGuard;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -20,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * SEC-030: the in-core relay ({@code node proxy.js}) must never run with the tenant's env as its
@@ -45,7 +44,8 @@ class McpStdioParamsBuilderTest {
     }
 
     private static Map<String, String> json(String value) throws Exception {
-        return new ObjectMapper().readValue(value, new TypeReference<Map<String, String>>() {});
+        return com.agenticai.core.json.JsonMappers.plain()
+                .readValue(value, new TypeReference<Map<String, String>>() {});
     }
 
     @Test

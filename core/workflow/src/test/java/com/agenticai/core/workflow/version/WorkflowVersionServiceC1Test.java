@@ -12,7 +12,6 @@ import com.agenticai.core.agents.version.VersionRollbackException;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -58,7 +57,9 @@ class WorkflowVersionServiceC1Test {
 
     @BeforeEach
     void setUp() {
-        service = new WorkflowVersionService(fakeRepository(), new ObjectMapper());
+        service =
+                new WorkflowVersionService(
+                        fakeRepository(), com.agenticai.core.json.JsonMappers.plain());
         TenantContext.set(TenantContext.of("tenant-1", "user@example.com", Set.of()));
     }
 

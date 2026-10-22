@@ -35,7 +35,6 @@ import com.agenticai.core.workflow.output.PdfOutputRenderer;
 import com.agenticai.core.workflow.output.TeamsOutputService;
 import com.agenticai.core.workflow.output.TelegramOutputService;
 import com.agenticai.core.workflow.output.WhatsAppOutputService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +86,7 @@ class WorkflowNodeExecutorMediaTest {
                 mock(ToolCallLogRepository.class),
                 mock(DeviceCommandService.class),
                 mock(AgentToolProvider.class),
-                new ObjectMapper(),
+                com.agenticai.core.json.JsonMappers.plain(),
                 mock(ObjectProvider.class),
                 mock(LlmResponseCacheService.class),
                 mock(QueryComplexityClassifier.class),

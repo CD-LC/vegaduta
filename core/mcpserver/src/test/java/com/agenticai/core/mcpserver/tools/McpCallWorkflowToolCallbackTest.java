@@ -21,8 +21,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +28,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code call_workflow} is the heaviest thing an external key can trigger - one tool call can fan
@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
  */
 class McpCallWorkflowToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private WorkflowService workflowService;
     private AuditLogService auditLogService;
@@ -99,7 +99,7 @@ class McpCallWorkflowToolCallbackTest {
     @Test
     void malformedWorkflowIdReturnsAGuidingError() throws Exception {
         JsonNode result = call("{\"workflow_id\": \"not-a-uuid\"}");
-        assertTrue(result.get("error").asText().contains("list_my_workflows"));
+        assertTrue(result.get("error").asString().contains("list_my_workflows"));
         verify(workflowService, never()).run(any(), any(), anyString());
     }
 
@@ -111,7 +111,7 @@ class McpCallWorkflowToolCallbackTest {
 
         JsonNode result = call("{\"workflow_id\": \"" + unexposedWorkflowId + "\"}");
 
-        assertTrue(result.get("error").asText().contains("not authorized"));
+        assertTrue(result.get("error").asString().contains("not authorized"));
         verify(workflowService, never()).run(any(), any(), anyString());
         // A rejected over-reach attempt is itself compliance-relevant.
         verify(auditLogService)
@@ -144,12 +144,12 @@ class McpCallWorkflowToolCallbackTest {
         JsonNode result =
                 call("{\"workflow_id\": \"" + exposedWorkflowId + "\", \"input\": \"go\"}");
 
-        assertEquals("COMPLETED", result.get("status").asText());
-        assertEquals(exposedWorkflowId.toString(), result.get("workflow_id").asText());
+        assertEquals("COMPLETED", result.get("status").asString());
+        assertEquals(exposedWorkflowId.toString(), result.get("workflow_id").asString());
         assertNull(result.get("error_message"), "a clean run must not carry an error_message key");
         // The trace uses the human-readable label when present - what an
         // external caller actually reads to understand what their run did.
-        assertEquals("Draft email", result.get("trace").get(0).get("node").asText());
+        assertEquals("Draft email", result.get("trace").get(0).get("node").asString());
         verify(auditLogService)
                 .record(
                         eq("mcp-external:" + grantId),
@@ -169,7 +169,7 @@ class McpCallWorkflowToolCallbackTest {
 
         JsonNode result = call("{\"workflow_id\": \"" + exposedWorkflowId + "\"}");
 
-        assertEquals("COMPLETED", result.get("status").asText());
+        assertEquals("COMPLETED", result.get("status").asString());
         verify(workflowService).run(eq(exposedWorkflowId), eq(""), eq("mcp-external:" + grantId));
     }
 
@@ -181,7 +181,7 @@ class McpCallWorkflowToolCallbackTest {
         JsonNode result =
                 call("{\"workflow_id\": \"" + exposedWorkflowId + "\", \"input\": \"go\"}");
 
-        assertEquals("AWAITING_APPROVAL", result.get("status").asText());
+        assertEquals("AWAITING_APPROVAL", result.get("status").asString());
         assertNull(
                 result.get("error"),
                 "a suspended run is a legitimate terminal state for this call");
@@ -195,8 +195,8 @@ class McpCallWorkflowToolCallbackTest {
         JsonNode result =
                 call("{\"workflow_id\": \"" + exposedWorkflowId + "\", \"input\": \"go\"}");
 
-        assertEquals("FAILED", result.get("status").asText());
-        assertEquals("node n2 timed out", result.get("error_message").asText());
+        assertEquals("FAILED", result.get("status").asString());
+        assertEquals("node n2 timed out", result.get("error_message").asString());
     }
 
     @Test
@@ -207,7 +207,7 @@ class McpCallWorkflowToolCallbackTest {
         JsonNode result =
                 call("{\"workflow_id\": \"" + exposedWorkflowId + "\", \"input\": \"go\"}");
 
-        assertTrue(result.get("error").asText().contains("Workflow call failed"));
+        assertTrue(result.get("error").asString().contains("Workflow call failed"));
         verify(auditLogService)
                 .record(
                         eq("mcp-external:" + grantId),
@@ -230,6 +230,6 @@ class McpCallWorkflowToolCallbackTest {
         JsonNode result =
                 call("{\"workflow_id\": \"" + exposedWorkflowId + "\", \"input\": \"go\"}");
 
-        assertEquals("COMPLETED", result.get("status").asText());
+        assertEquals("COMPLETED", result.get("status").asString());
     }
 }

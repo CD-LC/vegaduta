@@ -18,9 +18,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -33,15 +30,17 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.ObjectMapper;
 
 class WorkflowInsightsServiceTest {
 
     private static final UUID WF = UUID.randomUUID();
     private static final Instant NOW = Instant.parse("2026-09-29T12:00:00Z");
     private static final ObjectMapper MAPPER =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            tools.jackson.databind.json.JsonMapper.builder()
+                    .configureForJackson2()
+                    .disable(tools.jackson.databind.cfg.DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .build();
 
     private WorkflowRunRepository runs;
     private EvalRunRepository evals;

@@ -13,14 +13,14 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.DelegateOptions;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link RunSubtasksToolCallback}: every brief runs as a delegated turn of the same agent, in
@@ -29,7 +29,7 @@ import org.mockito.ArgumentCaptor;
  */
 class RunSubtasksToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final AgentChatService chatService = mock(AgentChatService.class);
     private final UUID agentId = UUID.randomUUID();
@@ -59,9 +59,9 @@ class RunSubtasksToolCallbackTest {
         assertNotNull(root.get("runId"));
         JsonNode results = root.get("results");
         assertEquals(2, results.size());
-        assertEquals("ok", results.get(0).get("status").asText());
-        assertEquals("researcher", results.get(0).get("role").asText());
-        assertEquals("done", results.get(0).get("answer").asText());
+        assertEquals("ok", results.get(0).get("status").asString());
+        assertEquals("researcher", results.get(0).get("role").asString());
+        assertEquals("done", results.get(0).get("answer").asString());
         assertFalse(results.get(1).has("role"));
 
         ArgumentCaptor<String> questions = ArgumentCaptor.forClass(String.class);
@@ -89,8 +89,8 @@ class RunSubtasksToolCallbackTest {
 
         JsonNode results = MAPPER.readTree(tool().call(tasks(2))).get("results");
 
-        assertEquals("ok", results.get(0).get("status").asText());
-        assertEquals("ok", results.get(1).get("status").asText());
+        assertEquals("ok", results.get(0).get("status").asString());
+        assertEquals("ok", results.get(1).get("status").asString());
     }
 
     @Test
@@ -131,8 +131,8 @@ class RunSubtasksToolCallbackTest {
         long ok = 0;
         long skipped = 0;
         for (JsonNode r : results) {
-            if ("ok".equals(r.get("status").asText())) ok++;
-            if ("skipped".equals(r.get("status").asText())) skipped++;
+            if ("ok".equals(r.get("status").asString())) ok++;
+            if ("skipped".equals(r.get("status").asString())) skipped++;
         }
         assertEquals(8, ok);
         assertEquals(2, skipped);
@@ -158,9 +158,9 @@ class RunSubtasksToolCallbackTest {
 
         boolean sawTimeout = false;
         for (JsonNode r : results) {
-            if ("timeout".equals(r.get("status").asText())) {
+            if ("timeout".equals(r.get("status").asString())) {
                 sawTimeout = true;
-                assertTrue(r.get("error").asText().contains("1s"));
+                assertTrue(r.get("error").asString().contains("1s"));
             }
         }
         assertTrue(sawTimeout);
@@ -178,12 +178,12 @@ class RunSubtasksToolCallbackTest {
                                 "{\"tasks\":[{\"brief\":\"bad\"},{\"brief\":\"good\"},{\"brief\":\" \"}]}");
 
         JsonNode results = MAPPER.readTree(out).get("results");
-        assertEquals("error", results.get(0).get("status").asText());
-        assertTrue(results.get(0).get("error").asText().contains("provider down"));
-        assertEquals("ok", results.get(1).get("status").asText());
-        assertEquals("error", results.get(2).get("status").asText());
+        assertEquals("error", results.get(0).get("status").asString());
+        assertTrue(results.get(0).get("error").asString().contains("provider down"));
+        assertEquals("ok", results.get(1).get("status").asString());
+        assertEquals("error", results.get(2).get("status").asString());
         assertEquals(
-                RunSubtasksToolCallback.ERR_BRIEF_REQUIRED, results.get(2).get("error").asText());
+                RunSubtasksToolCallback.ERR_BRIEF_REQUIRED, results.get(2).get("error").asString());
     }
 
     @Test
@@ -194,7 +194,7 @@ class RunSubtasksToolCallbackTest {
         JsonNode results = MAPPER.readTree(tool().call(tasks(1))).get("results");
 
         assertTrue(
-                results.get(0).get("answer").asText().length()
+                results.get(0).get("answer").asString().length()
                         <= RunSubtasksToolCallback.MAX_ANSWER_CHARS + 100);
     }
 

@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runs {@link SessionMemoryService#appendTurn} twice against a REAL Redis-protocol server - once
@@ -48,7 +48,7 @@ class SessionAppendScriptRedisTest {
 
     private static LettuceConnectionFactory factory;
     private static CountingTemplate redis;
-    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.withJavaTime();
 
     /**
      * Counts template calls that reach the connection (one script call is one command; this does

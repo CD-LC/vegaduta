@@ -6,18 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.genai.types.GenerateContentResponseUsageMetadata;
+import com.openai.models.completions.CompletionUsage;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.google.genai.metadata.GoogleGenAiUsage;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
- * Per-provider usage shapes for reasoning tokens, built from the real Spring AI 1.1.7 / Google
- * GenAI types (not stubs) so a dependency bump that reshapes one breaks here instead of silently
- * mis-billing.
+ * Per-provider usage shapes for reasoning tokens, built from the real Spring AI 2 SDK usage /
+ * Google GenAI types (not stubs) so a dependency bump that reshapes one breaks here instead of
+ * silently mis-billing.
  */
 class ReasoningTokenAccountingTest {
 
@@ -60,13 +59,16 @@ class ReasoningTokenAccountingTest {
 
     @Test
     void openAiReasoningTokensAreInsideCompletionTokensAndNeverBilledTwice() {
-        OpenAiApi.Usage nativeUsage =
-                new OpenAiApi.Usage(
-                        500,
-                        100,
-                        600,
-                        null,
-                        new OpenAiApi.Usage.CompletionTokenDetails(400, null, null, null));
+        CompletionUsage nativeUsage =
+                CompletionUsage.builder()
+                        .promptTokens(100L)
+                        .completionTokens(500L)
+                        .totalTokens(600L)
+                        .completionTokensDetails(
+                                CompletionUsage.CompletionTokensDetails.builder()
+                                        .reasoningTokens(400L)
+                                        .build())
+                        .build();
         Usage usage = new DefaultUsage(100, 500, 600, nativeUsage);
 
         ReasoningTokenAccounting accounting = ReasoningTokenAccounting.from(usage);
@@ -81,8 +83,22 @@ class ReasoningTokenAccountingTest {
 
     @Test
     void anthropicReportsNoSeparateReasoningBucket() {
-        Usage usage = new DefaultUsage(100, 500, 600, new AnthropicApi.Usage(100, 500, 0, 0));
+        Usage usage = new DefaultUsage(100, 500, 600, anthropicNativeUsage());
         assertEquals(ReasoningTokenAccounting.ABSENT, ReasoningTokenAccounting.from(usage));
+    }
+
+    private static com.anthropic.models.messages.Usage anthropicNativeUsage() {
+        return com.anthropic.models.messages.Usage.builder()
+                .cacheCreation(java.util.Optional.empty())
+                .cacheCreationInputTokens(java.util.Optional.of(0L))
+                .cacheReadInputTokens(java.util.Optional.of(0L))
+                .inferenceGeo(java.util.Optional.empty())
+                .inputTokens(100L)
+                .outputTokens(500L)
+                .outputTokensDetails(java.util.Optional.empty())
+                .serverToolUse(java.util.Optional.empty())
+                .serviceTier(java.util.Optional.empty())
+                .build();
     }
 
     @Test

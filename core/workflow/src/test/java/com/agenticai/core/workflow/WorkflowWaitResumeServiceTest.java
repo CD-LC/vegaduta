@@ -10,9 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -23,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Pageable;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Waking a parked run: due waits resume exactly once through the existing PAUSED re-entry, a run
@@ -39,7 +38,7 @@ class WorkflowWaitResumeServiceTest {
     private WorkflowWaitResumeService service;
 
     private static ObjectMapper mapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return com.agenticai.core.json.JsonMappers.withJavaTime();
     }
 
     @BeforeEach
@@ -293,7 +292,7 @@ class WorkflowWaitResumeServiceTest {
                         input.capture());
         JsonNode envelope = mapper().readTree(input.getValue());
         assertTrue(envelope.get("timedOut").asBoolean());
-        assertEquals("upstream", envelope.get("input").asText());
+        assertEquals("upstream", envelope.get("input").asString());
         verify(backgroundRuns).resumeRun(WORKFLOW_ID, run.getId());
     }
 
@@ -321,7 +320,7 @@ class WorkflowWaitResumeServiceTest {
                         input.capture());
         JsonNode envelope = mapper().readTree(input.getValue());
         assertTrue(envelope.get("resume").get("approved").asBoolean());
-        assertEquals("upstream", envelope.get("input").asText());
+        assertEquals("upstream", envelope.get("input").asString());
         assertTrue(
                 trace.getValue().contains("Resumed by a call to the resume URL."),
                 trace.getValue());

@@ -5,13 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.agents.importer.AgentImportDtos.ConversionReport;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The VegaDuta workflow DSL v1: what an export contains and leaves out, that it is deterministic,
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
  */
 class WorkflowDslRoundTripTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String AGENT_ID = "3f2b8c1e-0a4d-4c55-9a1e-111122223333";
     private static final String KB_ID = "aaaaaaaa-1111-4222-8333-444444444444";
     private static final String API_KEY = "sk_live_ABCDEFGHIJKLMNOPQRSTUV";
@@ -71,15 +71,15 @@ class WorkflowDslRoundTripTest {
     @Test
     void exportHasTheDocumentedShapeAndNoExportTimestamp() {
         ObjectNode doc = export();
-        assertThat(doc.get("format").asText()).isEqualTo("vegaduta.workflow");
+        assertThat(doc.get("format").asString()).isEqualTo("vegaduta.workflow");
         assertThat(doc.get("schemaVersion").asInt()).isEqualTo(1);
-        assertThat(doc.get("name").asText()).isEqualTo("Order flow");
+        assertThat(doc.get("name").asString()).isEqualTo("Order flow");
         assertThat(doc.get("nodes")).hasSize(6);
         assertThat(doc.get("edges")).hasSize(3);
         assertThat(doc.get("config").get("maxStepsPerRun").asInt()).isEqualTo(50);
         assertThat(doc.has("exportedAt")).isFalse();
-        assertThat(doc.get("checksum").asText()).startsWith("sha256:");
-        assertThat(WorkflowDslV1.checksum(doc)).isEqualTo(doc.get("checksum").asText());
+        assertThat(doc.get("checksum").asString()).startsWith("sha256:");
+        assertThat(WorkflowDslV1.checksum(doc)).isEqualTo(doc.get("checksum").asString());
     }
 
     @Test
@@ -107,15 +107,15 @@ class WorkflowDslRoundTripTest {
     void exportReplacesReferencesWithNamedPlaceholdersAndListsThem() {
         ObjectNode doc = export();
         JsonNode nodes = doc.get("nodes");
-        assertThat(nodes.get(1).get("data").get("config").get("agentId").asText())
+        assertThat(nodes.get(1).get("data").get("config").get("agentId").asString())
                 .isEqualTo("@placeholder:agent_1");
-        assertThat(nodes.get(2).get("data").get("config").get("collectionId").asText())
+        assertThat(nodes.get(2).get("data").get("config").get("collectionId").asString())
                 .isEqualTo("@placeholder:kb_1");
-        assertThat(nodes.get(4).get("data").get("config").get("emailTo").asText())
+        assertThat(nodes.get(4).get("data").get("config").get("emailTo").asString())
                 .isEqualTo("@placeholder:destination_1");
         // The same foreign agent used twice (including inside a sub-flow body) is one placeholder.
         JsonNode inner = nodes.get(5).get("data").get("config").get("body").get("nodes").get(0);
-        assertThat(inner.get("data").get("config").get("agentId").asText())
+        assertThat(inner.get("data").get("config").get("agentId").asString())
                 .isEqualTo("@placeholder:agent_1");
 
         JsonNode placeholders = doc.get("placeholders");
@@ -123,8 +123,8 @@ class WorkflowDslRoundTripTest {
         assertThat(keys).contains("agent_1", "kb_1", "destination_1", "secret:ORG_KEY");
         assertThat(keys).anyMatch(k -> k.startsWith("CREDENTIAL_"));
         for (JsonNode placeholder : placeholders) {
-            if ("agent_1".equals(placeholder.get("key").asText())) {
-                assertThat(placeholder.get("kind").asText()).isEqualTo("agent");
+            if ("agent_1".equals(placeholder.get("key").asString())) {
+                assertThat(placeholder.get("kind").asString()).isEqualTo("agent");
                 assertThat(placeholder.get("usedBy").findValuesAsText("nodeId"))
                         .contains("a1", "b1");
             }

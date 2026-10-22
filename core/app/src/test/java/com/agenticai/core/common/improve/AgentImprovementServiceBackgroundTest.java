@@ -20,7 +20,6 @@ import com.agenticai.core.audit.PlatformIssueRepository;
 import com.agenticai.core.guardrails.procedures.ProcedureService;
 import com.agenticai.core.providers.ProviderCoolingDownException;
 import com.agenticai.core.providers.ProviderName;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -62,7 +61,7 @@ class AgentImprovementServiceBackgroundTest {
                         mock(AgentService.class),
                         mock(ProcedureService.class),
                         assist,
-                        new ObjectMapper());
+                        com.agenticai.core.json.JsonMappers.plain());
     }
 
     private PlatformIssue cluster() {

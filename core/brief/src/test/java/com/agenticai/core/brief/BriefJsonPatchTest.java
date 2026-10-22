@@ -3,16 +3,16 @@ package com.agenticai.core.brief;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.brief.model.Brief;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 class BriefJsonPatchTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
 
     private JsonNode tree(String json) throws Exception {
         return mapper.readTree(json);
@@ -31,7 +31,7 @@ class BriefJsonPatchTest {
         List<ObjectNode> ops = BriefJsonPatch.diff(from, to);
 
         assertThat(ops)
-                .extracting(o -> o.get("op").asText() + " " + o.get("path").asText())
+                .extracting(o -> o.get("op").asString() + " " + o.get("path").asString())
                 .containsExactlyInAnyOrder(
                         "replace /title", "remove /gone", "add /nested/y", "add /fresh");
     }
@@ -96,7 +96,7 @@ class BriefJsonPatchTest {
         List<ObjectNode> ops = BriefJsonPatch.diff(from, to);
 
         assertThat(ops)
-                .extracting(o -> o.get("path").asText())
+                .extracting(o -> o.get("path").asString())
                 .containsExactlyInAnyOrder("/title", "/agents/0/systemPrompt");
         assertThat(BriefJsonPatch.apply(from, ops)).isEqualTo(to);
     }

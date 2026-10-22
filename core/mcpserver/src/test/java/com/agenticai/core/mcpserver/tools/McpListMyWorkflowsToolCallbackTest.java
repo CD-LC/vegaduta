@@ -12,8 +12,6 @@ import com.agenticai.core.mcpserver.McpCallerContextTestAccess;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,6 +19,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Workflow-side mirror of {@code McpListAgentsToolCallbackTest} - same leak-prevention stakes (the
@@ -30,7 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 class McpListMyWorkflowsToolCallbackTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private WorkflowService workflowService;
     private McpListMyWorkflowsToolCallback callback;
@@ -62,9 +62,9 @@ class McpListMyWorkflowsToolCallbackTest {
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
         assertEquals(1, result.size());
-        assertEquals(workflowId.toString(), result.get(0).get("id").asText());
-        assertEquals("Invoice Chaser", result.get(0).get("name").asText());
-        assertEquals("ACTIVE", result.get(0).get("status").asText());
+        assertEquals(workflowId.toString(), result.get(0).get("id").asString());
+        assertEquals("Invoice Chaser", result.get(0).get("name").asString());
+        assertEquals("ACTIVE", result.get(0).get("status").asString());
         // id/name/status only - the graph JSON (which can embed prompts,
         // webhook URLs, connector details) stays inside the platform.
         assertEquals(3, result.get(0).size());
@@ -101,7 +101,7 @@ class McpListMyWorkflowsToolCallbackTest {
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
         assertEquals(1, result.size());
-        assertEquals("Still Here", result.get(0).get("name").asText());
-        assertEquals("DRAFT", result.get(0).get("status").asText());
+        assertEquals("Still Here", result.get(0).get("name").asString());
+        assertEquals("DRAFT", result.get(0).get("status").asString());
     }
 }

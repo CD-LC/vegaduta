@@ -14,14 +14,14 @@ import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.templates.dto.AgentBundle;
 import com.agenticai.core.templates.dto.AgentBundlePreview;
 import com.agenticai.core.templates.dto.TemplateImportResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Shareable agent files: a bundle is untrusted, so import lowers autonomy and rejects junk. */
 class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
@@ -148,7 +148,7 @@ class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
         AgentBundle exported = bundles.export(sourceId);
 
         assertThat(exported.format()).isEqualTo(TemplateBundleService.FORMAT);
-        assertThat(exported.agent().path("systemPrompt").asText())
+        assertThat(exported.agent().path("systemPrompt").asString())
                 .isEqualTo("You are a returns assistant.");
         assertThat(exported.agent().path("allowedKnowledgeCollectionIds")).isEmpty();
     }

@@ -3,7 +3,6 @@ package com.agenticai.core.workflow.portability;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,7 @@ class PortabilityDocumentParserTest {
     void takesTheFirstWorkflowOfAnArrayAndCountsTheRest() {
         PortabilityDocumentParser.Parsed parsed =
                 parser.parse("[{\"name\":\"a\"},{\"name\":\"b\"},{\"name\":\"c\"}]");
-        assertThat(parsed.root().get("name").asText()).isEqualTo("a");
+        assertThat(parsed.root().get("name").asString()).isEqualTo("a");
         assertThat(parsed.dropped()).isEqualTo(2);
     }
 
@@ -67,7 +66,9 @@ class PortabilityDocumentParserTest {
 
     @Test
     void detectionRefusesToGuess() {
-        assertThat(PortabilityFormat.detect(new ObjectMapper().createObjectNode()))
+        assertThat(
+                        PortabilityFormat.detect(
+                                com.agenticai.core.json.JsonMappers.plain().createObjectNode()))
                 .isEqualTo(Optional.empty());
         assertThat(PortabilityFormat.parse("N8N")).contains(PortabilityFormat.N8N);
         assertThat(PortabilityFormat.parse("zapier")).isEmpty();
@@ -88,7 +89,10 @@ class PortabilityDocumentParserTest {
         // `kind: app` + `app` is still Dify; the mapper then explains why a chat app has no
         // workflow to import.
         assertThat(PortabilityFormat.detect(chat.root())).contains(PortabilityFormat.DIFY);
-        assertThatThrownBy(() -> DifyImportMapper.map(new ObjectMapper(), chat.root()))
+        assertThatThrownBy(
+                        () ->
+                                DifyImportMapper.map(
+                                        com.agenticai.core.json.JsonMappers.plain(), chat.root()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("chat");
     }

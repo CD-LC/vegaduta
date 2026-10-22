@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
@@ -26,11 +24,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** A bot with no public URL receives messages by long polling, in its own tenant. */
 class TelegramPollingServiceTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private HttpServer server;
     private final List<String> calls = new CopyOnWriteArrayList<>();
@@ -117,7 +117,7 @@ class TelegramPollingServiceTest {
 
         ArgumentCaptor<JsonNode> update = ArgumentCaptor.forClass(JsonNode.class);
         verify(handler, timeout(5000)).acceptVerifiedUpdate(eq("42"), update.capture(), eq("tok"));
-        assertThat(update.getValue().path("message").path("text").asText()).isEqualTo("hi");
+        assertThat(update.getValue().path("message").path("text").asString()).isEqualTo("hi");
         assertThat(tenantSeen.get(5, TimeUnit.SECONDS)).isEqualTo("tenant_abc");
         // A webhook must not be registered while polling, and the next poll acknowledges update 7.
         assertThat(calls).contains("deleteWebhook");

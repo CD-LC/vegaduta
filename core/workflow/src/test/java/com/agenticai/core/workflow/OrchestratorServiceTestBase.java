@@ -10,7 +10,6 @@ import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -44,7 +43,7 @@ abstract class OrchestratorServiceTestBase {
                 new OrchestratorService(
                         agentService,
                         approvalGateService,
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         mock(ObjectProvider.class));
     }
 

@@ -21,7 +21,6 @@ import com.agenticai.core.tenancy.demo.DemoMagicWorkflow;
 import com.agenticai.core.tenancy.demo.DemoMagicWorkflowRepository;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -79,7 +78,7 @@ class DemoMagicServiceTurnContextTest {
                         mock(PlatformSettingsService.class),
                         mock(SafePublicUrlFetcher.class),
                         mock(ObjectProvider.class),
-                        new ObjectMapper(),
+                        com.agenticai.core.json.JsonMappers.plain(),
                         "");
         session = mock(DemoSession.class);
         when(session.getId()).thenReturn(sessionUuid);
