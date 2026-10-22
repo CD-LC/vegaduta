@@ -1,11 +1,28 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
+
 import jakarta.annotation.PreDestroy;
+
+import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Proxy;
+import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -14,15 +31,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import okhttp3.ConnectionPool;
-import okhttp3.Dispatcher;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * The one place outbound HTTP timeouts, pooling and SSRF pinning are configured for the LLM
@@ -201,6 +209,33 @@ public class LlmHttpClientFactory {
 
     private Response execute(OkHttpClient target, Request request) throws IOException {
         return target.newCall(request).execute();
+    }
+
+    /**
+     * A blocking {@link RestClient} builder for the few callers that talk plain JSON to a model
+     * server outside the SDK models (the tool-call capability probe), with the configured connect
+     * and read timeouts. Spring AI 2's models do not use it: they run on {@link
+     * #transport(boolean)}.
+     */
+    public RestClient.Builder restClientBuilder() {
+        HttpClient jdk = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
+        return restClientOver(jdk);
+    }
+
+    /**
+     * {@link #restClientBuilder()} for a TENANT-supplied base URL: the JDK client resolves every
+     * host through {@link SsrfGuard#dnsResolver()} (the socket connects only to validated
+     * addresses) and follows no redirects.
+     */
+    public RestClient.Builder guardedRestClientBuilder() {
+        return restClientOver(
+                GuardedJdkHttpClient.create(ssrfGuard(), connectTimeout, readTimeout, false));
+    }
+
+    private RestClient.Builder restClientOver(HttpClient jdk) {
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(jdk);
+        factory.setReadTimeout(readTimeout);
+        return RestClient.builder().requestFactory(factory);
     }
 
     /**

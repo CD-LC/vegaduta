@@ -7,10 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -28,9 +25,16 @@ import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
+
 import reactor.core.publisher.Flux;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * End-to-end through the real {@link ResilientToolCallingManagerFactory} manager (argument
@@ -40,10 +44,12 @@ import tools.jackson.databind.ObjectMapper;
 class TextToolCallRecoveringChatModelTest {
 
     private static final String INCIDENT_REPLY =
-            "{\"name\": \"generate_document\", \"parameters\": {\"f\": \"mandi_prices_weather_report\", "
-                    + "\"path\": \"templates/report.md\", \"skill\": \"mandi-prices-weather-report\"}}";
+            "{\"name\": \"generate_document\", \"parameters\": {\"f\":"
+                + " \"mandi_prices_weather_report\", \"path\": \"templates/report.md\", \"skill\":"
+                + " \"mandi-prices-weather-report\"}}";
     private static final String VALID_REPLY =
-            "{\"name\": \"generate_document\", \"parameters\": {\"type\": \"PDF\", \"filename\": \"report.pdf\"}}";
+            "{\"name\": \"generate_document\", \"parameters\": {\"type\": \"PDF\", \"filename\":"
+                + " \"report.pdf\"}}";
 
     private final ObjectMapper objectMapper = com.agenticai.core.json.JsonMappers.plain();
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
@@ -211,7 +217,7 @@ class TextToolCallRecoveringChatModelTest {
         ToolCallingChatOptions options =
                 ToolCallingChatOptions.builder()
                         .toolCallbacks(tool)
-                        .internalToolExecutionEnabled(false)
+                        .toolContext(CallerRunsToolLoop.CONTEXT_KEY, true)
                         .build();
 
         List<ChatResponse> out =

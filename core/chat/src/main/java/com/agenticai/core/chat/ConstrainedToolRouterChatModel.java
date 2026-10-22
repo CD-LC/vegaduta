@@ -2,13 +2,9 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ToolRouterMode;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+
 import io.micrometer.core.instrument.MeterRegistry;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -27,12 +23,22 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Makes a small model choose between "call this tool with these arguments" and "answer" through a
@@ -151,8 +157,8 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                 // model its MLX runner serves (qwen3.5:4b). The provider's own loop still works, so
                 // the turn goes through unrouted and this model is not asked again until restart.
                 log.warn(
-                        "{} refused the reply schema ({}); the constrained tool router is off for this"
-                                + " model until core restarts. Message: {}",
+                        "{} refused the reply schema ({}); the constrained tool router is off for"
+                            + " this model until core restarts. Message: {}",
                         modelName,
                         mode,
                         e.getMessage());
@@ -179,7 +185,8 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         }
         if (round >= maxRounds) {
             log.warn(
-                    "Constrained tool router stopped after {} rounds; releasing the reply (last call: {}).",
+                    "Constrained tool router stopped after {} rounds; releasing the reply (last"
+                        + " call: {}).",
                     round,
                     decision.call.name());
             increment("outcome", "limit");
@@ -220,6 +227,19 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
      */
     static boolean isConstraintRefusal(Throwable e) {
         for (Throwable t = e; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            if (t instanceof com.openai.errors.OpenAIServiceException sdk) {
+                // Spring AI 2's OpenAI model runs on the vendor SDK: a non-2xx is one of its typed
+                // exceptions (status + parsed error body), not a Spring web exception.
+                if (sdk.statusCode() < 400 || sdk.statusCode() >= 500) {
+                    return false;
+                }
+                String body =
+                        (sdk.body() + " " + sdk.getMessage()).toLowerCase(java.util.Locale.ROOT);
+                return body.contains("structured output")
+                        || body.contains("response_format")
+                        || body.contains("json_schema")
+                        || body.contains("format");
+            }
             if (t instanceof org.springframework.web.client.RestClientResponseException http) {
                 if (!http.getStatusCode().is4xxClientError()) {
                     return false;
@@ -252,7 +272,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         JsonNode node;
         try {
             node = objectMapper.readTree(text);
-        } catch (java.io.IOException e) {
+        } catch (JacksonException e) {
             return new Decision(null, text.isEmpty() ? null : text);
         }
         if (node == null || !node.isObject()) {
@@ -299,7 +319,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                             objectMapper.readTree(
                                     call.arguments() == null ? "{}" : call.arguments());
                     return new Decision(null, args.path("answer").asString(""));
-                } catch (java.io.IOException e) {
+                } catch (JacksonException e) {
                     return new Decision(null, call.arguments());
                 }
             }
@@ -316,10 +336,11 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
      * schema enforced.
      */
     Prompt formatPrompt(Prompt original, List<ToolCallback> tools) {
-        OpenAiChatOptions options = ((OpenAiChatOptions) original.getOptions()).copy();
-        options.setToolCallbacks(List.of());
-        options.setToolNames(Set.of());
-        options.setInternalToolExecutionEnabled(false);
+        OpenAiChatOptions options =
+                ((OpenAiChatOptions) original.getOptions())
+                        .mutate()
+                        .toolCallbacks(List.<ToolCallback>of())
+                        .build();
         options =
                 com.agenticai.core.chat.structured.StructuredOutput.withOllamaFormat(
                         options, SCHEMA_NAME, routerSchema(tools).toString());
@@ -331,20 +352,22 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
      * run here, not in the provider.
      */
     Prompt requiredPrompt(Prompt original, List<ToolCallback> tools) {
-        OpenAiChatOptions options = ((OpenAiChatOptions) original.getOptions()).copy();
         List<ToolCallback> withAnswer = new ArrayList<>(tools);
         withAnswer.add(new FinalAnswerTool());
-        options.setToolCallbacks(withAnswer);
-        options.setToolNames(Set.of());
-        options.setInternalToolExecutionEnabled(false);
-        options.setToolChoice("required");
+        OpenAiChatOptions options =
+                ((OpenAiChatOptions) original.getOptions())
+                        .mutate()
+                        .toolCallbacks(withAnswer)
+                        .toolChoice("required")
+                        .build();
         List<Message> messages = new ArrayList<>(original.getInstructions());
         messages.add(
                 insertionIndex(messages),
                 new SystemMessage(
                         "Every reply must be a tool call. Call "
                                 + FINAL_ANSWER_TOOL
-                                + " with your reply to the user when no other tool is needed or you have the results you need."));
+                                + " with your reply to the user when no other tool is needed or you"
+                                + " have the results you need."));
         return new Prompt(messages, options);
     }
 
@@ -372,12 +395,14 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
             List<Message> instructions, List<ToolCallback> tools) {
         StringBuilder text =
                 new StringBuilder(
-                        "You can use the tools below. Reply with exactly one JSON object and nothing else: "
-                                + "{\"action\":\"call\",\"tool\":\"<name>\",\"arguments\":{...}} to run a tool "
-                                + "(arguments must follow that tool's parameters), or "
-                                + "{\"action\":\"answer\",\"answer\":\"<your reply to the user>\"} when no tool is needed "
-                                + "or you already have the results you need. Call one tool at a time; the result comes back "
-                                + "as a tool message.\nTools:\n");
+                        "You can use the tools below. Reply with exactly one JSON object and"
+                            + " nothing else:"
+                            + " {\"action\":\"call\",\"tool\":\"<name>\",\"arguments\":{...}} to"
+                            + " run a tool (arguments must follow that tool's parameters), or"
+                            + " {\"action\":\"answer\",\"answer\":\"<your reply to the user>\"}"
+                            + " when no tool is needed or you already have the results you need."
+                            + " Call one tool at a time; the result comes back as a tool message.\n"
+                            + "Tools:\n");
         for (ToolCallback tool : tools) {
             ToolDefinition definition = tool.getToolDefinition();
             text.append("- ")
@@ -412,9 +437,11 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                 ToolDefinition.builder()
                         .name(FINAL_ANSWER_TOOL)
                         .description(
-                                "Send your reply to the user. Call this when no other tool is needed or you have the results you need.")
+                                "Send your reply to the user. Call this when no other tool is"
+                                    + " needed or you have the results you need.")
                         .inputSchema(
-                                "{\"type\":\"object\",\"properties\":{\"answer\":{\"type\":\"string\",\"description\":\"The reply, in full.\"}},\"required\":[\"answer\"]}")
+                                "{\"type\":\"object\",\"properties\":{\"answer\":{\"type\":\"string\",\"description\":\"The"
+                                    + " reply, in full.\"}},\"required\":[\"answer\"]}")
                         .build();
 
         @Override
@@ -460,7 +487,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         if (prompt == null || !(prompt.getOptions() instanceof ToolCallingChatOptions options)) {
             return List.of();
         }
-        if (Boolean.FALSE.equals(options.getInternalToolExecutionEnabled())) {
+        if (CallerRunsToolLoop.isSet(options)) {
             return List.of();
         }
         Map<String, ToolCallback> byName = new LinkedHashMap<>();

@@ -4,12 +4,7 @@ import com.agenticai.core.chat.structured.JsonSchemaCheck;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.chat.structured.StructuredOutputException;
 import com.agenticai.core.json.JsonMappers;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -22,11 +17,19 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
+
 import reactor.core.publisher.Flux;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Keeps a structured-output request alive on an Ollama model whose server refuses {@code
@@ -73,7 +76,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         JsonNode parsed = null;
         try {
             parsed = MAPPER.readTree(jsonSchema);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             // an unusable schema still works as prompt text; it just cannot be checked
         }
         this.schema = parsed != null && parsed.isObject() ? parsed : null;
@@ -96,8 +99,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
                 }
                 FORMAT_REFUSED.add(model);
                 log.warn(
-                        "Ollama refused the reply schema for model '{}'; structured replies use prompt-based JSON"
-                                + " with validation until core restarts. Message: {}",
+                        "Ollama refused the reply schema for model '{}'; structured replies use"
+                            + " prompt-based JSON with validation until core restarts. Message: {}",
                         model,
                         e.getMessage());
             }
@@ -123,8 +126,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     // --- the fallback -------------------------------------------------------------------
 
     private ChatResponse promptBased(Prompt original, OpenAiChatOptions options) {
-        OpenAiChatOptions plain = options.copy();
-        plain.setResponseFormat(null);
+        OpenAiChatOptions plain = options.mutate().responseFormat(null).build();
         List<Message> messages = withSchemaInstruction(original.getInstructions());
         ChatResponse response = delegate.call(new Prompt(messages, plain));
         String text = textOf(response);
@@ -171,8 +173,9 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     }
 
     private String schemaInstruction() {
-        return "Reply with ONLY one JSON value that is valid for the JSON Schema below. No markdown code fences,"
-                + " no commentary before or after.\nJSON Schema: "
+        return "Reply with ONLY one JSON value that is valid for the JSON Schema below. No markdown"
+                   + " code fences, no commentary before or after.\n"
+                   + "JSON Schema: "
                 + schemaText;
     }
 
@@ -188,7 +191,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         try {
             List<String> problems = JsonSchemaCheck.problems(schema, MAPPER.readTree(json.get()));
             return problems.isEmpty() ? null : String.join("; ", problems);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             return "the reply was not valid JSON";
         }
     }

@@ -1,10 +1,11 @@
 package com.agenticai.core.chat.structured;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import tools.jackson.databind.JsonNode;
 
 /**
  * A small, forgiving JSON Schema check for the prompt-and-validate fallback ({@code
@@ -100,7 +101,7 @@ public final class JsonSchemaCheck {
         }
         JsonNode properties = schema.get("properties");
         if (properties != null && properties.isObject()) {
-            Iterator<Map.Entry<String, JsonNode>> fields = properties.fields();
+            Iterator<Map.Entry<String, JsonNode>> fields = properties.properties().iterator();
             while (fields.hasNext() && out.size() < MAX_PROBLEMS) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 if (value.has(field.getKey())) {

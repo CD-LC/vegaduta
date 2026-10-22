@@ -4,20 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.sun.net.httpserver.HttpServer;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -28,9 +20,20 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.tool.function.FunctionToolCallback;
+
 import reactor.core.publisher.Flux;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link AnthropicStructuredToolChatModel}: stub-level routing (forced / pass-through / unwrap) and
@@ -120,9 +123,8 @@ class AnthropicStructuredToolChatModelTest {
         ChatResponse out = model.call(prompt(plainOptions()));
 
         AnthropicChatOptions sent = (AnthropicChatOptions) stub.last.get().getOptions();
-        assertThat(((AnthropicApi.ToolChoiceTool) sent.getToolChoice()).name())
-                .isEqualTo("verdict");
-        assertThat(sent.getInternalToolExecutionEnabled()).isFalse();
+        assertThat(sent.getToolChoice().tool().orElseThrow().name()).isEqualTo("verdict");
+        assertThat(CallerRunsToolLoop.isSet(sent)).isTrue();
         assertThat(sent.getToolCallbacks()).hasSize(1);
         assertThat(MAPPER.readTree(out.getResult().getOutput().getText()).get("verdict").asString())
                 .isEqualTo("pass");
@@ -144,7 +146,7 @@ class AnthropicStructuredToolChatModelTest {
                 AnthropicChatOptions.builder()
                         .model("claude-sonnet-4-5")
                         .maxTokens(4096)
-                        .thinking(AnthropicApi.ThinkingType.ENABLED, 2048)
+                        .thinkingEnabled(2048)
                         .build();
         Stub stub = new Stub(textReply("plain"), thinking);
         Prompt p = prompt(thinking);
@@ -234,24 +236,30 @@ class AnthropicStructuredToolChatModelTest {
 
     private static final String TOOL_USE_REPLY =
             """
-        {"id":"msg_1","type":"message","role":"assistant","model":"claude-sonnet-4-5",
-         "content":[{"type":"text","text":"Calling it now."},
-                    {"type":"tool_use","id":"toolu_1","name":"verdict","input":{"verdict":"pass"}}],
-         "stop_reason":"tool_use","usage":{"input_tokens":5,"output_tokens":7}}""";
+{"id":"msg_1","type":"message","role":"assistant","model":"claude-sonnet-4-5",
+ "content":[{"type":"text","text":"Calling it now."},
+            {"type":"tool_use","id":"toolu_1","name":"verdict","input":{"verdict":"pass"}}],
+ "stop_reason":"tool_use","usage":{"input_tokens":5,"output_tokens":7}}\
+""";
 
     private static final String TEXT_REPLY =
             """
-        {"id":"msg_2","type":"message","role":"assistant","model":"claude-sonnet-4-5",
-         "content":[{"type":"text","text":"{\\"verdict\\":\\"fail\\"}"}],
-         "stop_reason":"end_turn","usage":{"input_tokens":5,"output_tokens":7}}""";
+            {"id":"msg_2","type":"message","role":"assistant","model":"claude-sonnet-4-5",
+             "content":[{"type":"text","text":"{\\"verdict\\":\\"fail\\"}"}],
+             "stop_reason":"end_turn","usage":{"input_tokens":5,"output_tokens":7}}\
+            """;
 
     private AnthropicChatModel realModel(AnthropicChatOptions defaults) {
-        AnthropicApi api =
-                AnthropicApi.builder()
-                        .baseUrl("http://127.0.0.1:" + server.getAddress().getPort())
-                        .apiKey("test-key")
-                        .build();
-        return AnthropicChatModel.builder().anthropicApi(api).defaultOptions(defaults).build();
+        return AnthropicChatModel.builder()
+                .options(
+                        defaults.mutate()
+                                .baseUrl("http://127.0.0.1:" + server.getAddress().getPort())
+                                .apiKey("test-key")
+                                .maxRetries(0)
+                                .build())
+                .toolCallingManager(
+                        org.springframework.ai.model.tool.ToolCallingManager.builder().build())
+                .build();
     }
 
     private ChatClient client(ChatModel model) {
@@ -302,7 +310,7 @@ class AnthropicStructuredToolChatModelTest {
                 AnthropicChatOptions.builder()
                         .model("claude-sonnet-4-5")
                         .maxTokens(4096)
-                        .thinking(AnthropicApi.ThinkingType.ENABLED, 2048)
+                        .thinkingEnabled(2048)
                         .build();
         ChatModel model =
                 new AnthropicStructuredToolChatModel(realModel(thinking), "verdict", INPUT_SCHEMA);

@@ -2,7 +2,23 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ProviderName;
 import com.google.genai.Client;
+
 import io.micrometer.observation.ObservationRegistry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.retry.RetryTemplate;
+import org.springframework.stereotype.Component;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,19 +34,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
-import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.retry.RetryTemplate;
-import org.springframework.stereotype.Component;
 
 /**
  * The cross-cutting model-construction policy every chat-client factory in this package shares, so
@@ -193,7 +196,8 @@ public class LlmModelSupport implements DisposableBean {
         }
         if (thinkingOn) {
             log.info(
-                    "Anthropic forced-tool structured output skipped: extended thinking is on for model {}",
+                    "Anthropic forced-tool structured output skipped: extended thinking is on for"
+                        + " model {}",
                     model);
             return chatModel;
         }
@@ -210,8 +214,8 @@ public class LlmModelSupport implements DisposableBean {
                         spec.jsonSchema());
         if (schema == null) {
             log.info(
-                    "Anthropic forced-tool structured output skipped: schema '{}' is not representable "
-                            + "as a tool input schema; using prompt-and-validate",
+                    "Anthropic forced-tool structured output skipped: schema '{}' is not"
+                        + " representable as a tool input schema; using prompt-and-validate",
                     spec.name());
             return chatModel;
         }
@@ -237,27 +241,15 @@ public class LlmModelSupport implements DisposableBean {
     }
 
     /**
-     * OpenAI strict function calling ({@code app.llm.tools.strict.enabled}): with the flag on,
-     * registers the body rewriter of {@link com.agenticai.core.chat.structured.ToolStrictMode} on
-     * {@code builder}; with it off returns {@code builder} untouched.
+     * OpenAI strict function calling ({@code app.llm.tools.strict.enabled}): with the flag on, adds
+     * the body rewriter of {@link com.agenticai.core.chat.structured.ToolStrictMode} to {@code api}
+     * (it runs on the blocking and the streamed request alike: both go through the SDK's one HTTP
+     * client); with it off returns {@code api} untouched.
      */
-    public org.springframework.web.client.RestClient.Builder withToolStrict(
-            org.springframework.web.client.RestClient.Builder builder) {
+    OpenAiCompatModelBuilder.Api withToolStrict(OpenAiCompatModelBuilder.Api api) {
         return strictTools
-                ? builder.requestInterceptor(
-                        com.agenticai.core.chat.structured.ToolStrictMode.restInterceptor())
-                : builder;
-    }
-
-    /**
-     * Streaming-path twin of {@link
-     * #withToolStrict(org.springframework.web.client.RestClient.Builder)}.
-     */
-    public org.springframework.web.reactive.function.client.WebClient.Builder withToolStrict(
-            org.springframework.web.reactive.function.client.WebClient.Builder builder) {
-        return strictTools
-                ? builder.filter(com.agenticai.core.chat.structured.ToolStrictMode.webFilter())
-                : builder;
+                ? api.bodyTransform(com.agenticai.core.chat.structured.ToolStrictMode::rewrite)
+                : api;
     }
 
     // ------------------------------------------------------------------ retry
@@ -353,6 +345,15 @@ public class LlmModelSupport implements DisposableBean {
     public ChatClient.Builder chatClientBuilder(
             ChatModel chatModel, ToolCallingManager toolCallingManager) {
         return chatClientBuilder(chatModel, toolCallingManager, null);
+    }
+
+    /**
+     * {@link #chatClientBuilder(ChatModel, ToolCallingManager)} for a model that implements no tool
+     * calling of its own ({@link AwsBedrockChatModel}): the advisor is seated with Spring AI's
+     * stock manager, since no factory-built resilient manager applies to that provider.
+     */
+    public ChatClient.Builder chatClientBuilder(ChatModel chatModel) {
+        return chatClientBuilder(chatModel, ToolCallingManager.builder().build(), null);
     }
 
     /**

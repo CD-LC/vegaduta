@@ -1,7 +1,9 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ProviderName;
+
 import io.micrometer.core.instrument.MeterRegistry;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -108,13 +110,10 @@ public class OpenAIAgentChatClientFactory implements AgentChatClientFactory {
             double topP,
             java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        // PORT-TODO(boot4): the REST and WebClient builders used to be wrapped in
-        // modelSupport.withToolStrict (the identity unless app.llm.tools.strict.enabled: OpenAI
-        // strict function calling). Spring AI 2's OpenAI model sits on the SDK, so strict tools
-        // have
-        // to be requested through the options/request body instead; re-seat it in
-        // OpenAiCompatModelBuilder when this compiles.
-        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey);
+        // OpenAI strict function calling (app.llm.tools.strict.enabled) is a request-body rewrite
+        // on the SDK transport; the identity while the flag is off.
+        OpenAiCompatModelBuilder.Api openAiApi =
+                modelSupport.withToolStrict(modelBuilder.api(BASE_URL).apiKey(apiKey));
 
         var optionsBuilder = modelBuilder.options(ProviderName.OPENAI, model);
         // gpt-5*/o-series need max_completion_tokens and reject temperature/top_p.

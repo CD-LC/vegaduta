@@ -2,7 +2,9 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.OllamaCredential;
 import com.agenticai.core.providers.ProviderName;
+
 import io.micrometer.core.instrument.MeterRegistry;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.NoopApiKey;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -140,18 +142,9 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
                         // baseUrl must be just the host (no trailing "/v1"), same reasoning
                         // as every other OpenAI-compatible factory in this package.
                         .api(normalizeBaseUrl(credential.baseUrl()))
-                        // Guarded transports PLUS the reasoning field alias: Ollama sends
-                        // thinking as "reasoning", Spring AI binds "reasoning_content"
-                        // (see OllamaReasoningAlias). Setting both builders explicitly
-                        // keeps the guarded transport and adds the rewrite on top.
-                        .webClientBuilder(
-                                llmHttpClientFactory
-                                        .guardedWebClientBuilder()
-                                        .filter(OllamaReasoningAlias.streamFilter()))
-                        .restClientBuilder(
-                                llmHttpClientFactory
-                                        .guardedRestClientBuilder()
-                                        .requestInterceptor(OllamaReasoningAlias.restInterceptor()))
+                        // Ollama sends thinking as "reasoning"; Spring AI 2's OpenAI model reads
+                        // both "reasoning" and "reasoning_content" natively, so no wire rewrite
+                        // is needed (it was for 1.x, see OllamaReasoningAliasTest).
                         .guarded();
         apiBuilder = hasKey ? apiBuilder.apiKey(credential.apiKey()) : apiBuilder.noApiKey();
 
@@ -177,7 +170,7 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
         if (numBatch > 0) {
             ollamaOptions.put("num_batch", numBatch);
         }
-        options.setExtraBody(java.util.Map.of("options", ollamaOptions));
+        options = options.mutate().extraBody(java.util.Map.of("options", ollamaOptions)).build();
 
         OpenAiChatModel openAiChatModel = modelBuilder.chatModel(openAiApi, options);
         // A model whose Ollama runner refuses the schema (MLX, seen with qwen3.5:4b) falls back to

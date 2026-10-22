@@ -2,20 +2,25 @@ package com.agenticai.core.chat.structured;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.Map;
+import com.agenticai.core.chat.CallerRunsToolLoop;
+import com.anthropic.models.messages.ToolChoice;
+import com.anthropic.models.messages.ToolChoiceTool;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.ai.tool.function.FunctionToolCallback;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Anthropic forced-tool structured output and Ollama {@code format}: option shaping, schema gating,
@@ -26,7 +31,7 @@ class StructuredOutputToolForcingTest {
     private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SCHEMA =
             "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
-                    + "\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
+                + "\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
 
     private static AnthropicChatOptions anthropic(String model) {
         return AnthropicChatOptions.builder().model(model).maxTokens(512).build();
@@ -153,11 +158,12 @@ class StructuredOutputToolForcingTest {
         assertThat(original.getToolChoice()).isNull();
         assertThat(original.getToolCallbacks()).isNullOrEmpty();
 
-        assertThat(out.getToolChoice()).isInstanceOf(AnthropicApi.ToolChoiceTool.class);
-        AnthropicApi.ToolChoiceTool choice = (AnthropicApi.ToolChoiceTool) out.getToolChoice();
-        assertThat(choice.type()).isEqualTo("tool");
+        assertThat(out.getToolChoice().isTool()).isTrue();
+        ToolChoiceTool choice = out.getToolChoice().asTool();
         assertThat(choice.name()).isEqualTo("verdict");
-        assertThat(out.getInternalToolExecutionEnabled()).isFalse();
+        assertThat(choice.disableParallelToolUse()).contains(true);
+        assertThat(CallerRunsToolLoop.isSet(out)).isTrue();
+        assertThat(CallerRunsToolLoop.isSet(original)).isFalse();
         assertThat(out.getThinking()).isNull();
         assertThat(out.getToolCallbacks()).hasSize(1);
         var def = out.getToolCallbacks().get(0).getToolDefinition();
@@ -174,7 +180,7 @@ class StructuredOutputToolForcingTest {
                 AnthropicChatOptions.builder()
                         .model("claude-sonnet-4-5")
                         .maxTokens(4096)
-                        .thinking(AnthropicApi.ThinkingType.ENABLED, 2048)
+                        .thinkingEnabled(2048)
                         .build();
         assertThat(StructuredOutput.withAnthropicForcedTool(thinking, "verdict", schema()))
                 .isSameAs(thinking);
@@ -186,7 +192,7 @@ class StructuredOutputToolForcingTest {
                 AnthropicChatOptions.builder()
                         .model("claude-sonnet-4-5")
                         .maxTokens(512)
-                        .thinking(AnthropicApi.ThinkingType.DISABLED, null)
+                        .thinkingDisabled()
                         .build();
         AnthropicChatOptions out =
                 StructuredOutput.withAnthropicForcedTool(off, "verdict", schema());
@@ -212,17 +218,12 @@ class StructuredOutputToolForcingTest {
         assertThat(StructuredOutput.withAnthropicForcedTool(withTool, "verdict", schema()))
                 .isSameAs(withTool);
 
-        AnthropicChatOptions withNames =
-                AnthropicChatOptions.builder()
-                        .model("claude-sonnet-4-5")
-                        .maxTokens(512)
-                        .toolNames("real")
+        AnthropicChatOptions withChoice =
+                anthropic("claude-sonnet-4-5")
+                        .mutate()
+                        .toolChoice(
+                                ToolChoice.ofTool(ToolChoiceTool.builder().name("other").build()))
                         .build();
-        assertThat(StructuredOutput.withAnthropicForcedTool(withNames, "verdict", schema()))
-                .isSameAs(withNames);
-
-        AnthropicChatOptions withChoice = anthropic("claude-sonnet-4-5");
-        withChoice.setToolChoice(new AnthropicApi.ToolChoiceTool("other"));
         assertThat(StructuredOutput.withAnthropicForcedTool(withChoice, "verdict", schema()))
                 .isSameAs(withChoice);
     }
@@ -320,8 +321,9 @@ class StructuredOutputToolForcingTest {
         assertThat(out).isNotSameAs(original);
         assertThat(original.getResponseFormat()).isNull();
         assertThat(out.getResponseFormat().getType()).isEqualTo(ResponseFormat.Type.JSON_SCHEMA);
-        assertThat(out.getResponseFormat().getJsonSchema().getName()).isEqualTo("my_verdict");
-        assertThat(out.getResponseFormat().getJsonSchema().getStrict()).isFalse();
+        // Spring AI 2 carries the schema as a JSON string; the SDK model supplies the schema name.
+        assertThat(out.getResponseFormat().getJsonSchema()).contains("\"verdict\"");
+        assertThat(out.getResponseFormat().getStrict()).isFalse();
         assertThat(out.getModel()).isEqualTo("llama3.1");
     }
 
