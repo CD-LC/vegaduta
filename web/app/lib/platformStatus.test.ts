@@ -91,9 +91,33 @@ describe("edition in the public status", () => {
     const server = normalizePublicStatus({ edition: EDITION_BODY });
     expect(editionMismatch(server, "personal")).toEqual({ seed: "personal", server: "lite" });
     expect(editionMismatch(server, "lite")).toBeNull();
+    expect(editionMismatch(server, "full")).toBeNull(); // lite and full render the same, so they never warn
     expect(editionMismatch(server, null)).toBeNull(); // an undeclared build has nothing to contradict
     expect(editionMismatch(normalizePublicStatus({}), "personal")).toBeNull(); // an older core
     expect(editionMismatch(null, "personal")).toBeNull();
+  });
+
+  it("compares personal against not-personal only: a lite console on a default (full) core is not a mismatch", () => {
+    const tier = (t: string) => normalizePublicStatus({ edition: { ...EDITION_BODY, tier: t } });
+    expect(editionMismatch(tier("full"), "lite")).toBeNull();
+    expect(editionMismatch(tier("lite"), "full")).toBeNull();
+    expect(editionMismatch(tier("full"), "personal")).toEqual({ seed: "personal", server: "full" });
+    expect(editionMismatch(tier("personal"), "full")).toEqual({ seed: "full", server: "personal" });
+    expect(editionMismatch(tier("personal"), "lite")).toEqual({ seed: "lite", server: "personal" });
+    expect(editionMismatch(tier("personal"), "personal")).toBeNull();
+  });
+
+  it("raises no banner for a lite console in front of a core that reports full", async () => {
+    vi.stubEnv("NEXT_PUBLIC_DEPLOY_ENV", "lite");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      await refreshPlatformStatus(fakeFetch({ edition: { ...EDITION_BODY, tier: "full" } }), { force: true });
+      expect(getPlatformStatusState().status?.announcement).toBeNull();
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      vi.unstubAllEnvs();
+    }
   });
 
   it("warns once and shows the banner on a mismatch, without touching the rest of the status", async () => {
