@@ -27,7 +27,9 @@ vi.mock("../../lib/i18n", () => ({
     return t;
   },
 }));
-vi.mock("../../components/AppShell", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
+vi.mock("../../components/AppShell", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../../components/useRequireScope", () => ({ useRequireScope: () => true }));
 
 import AdminInstructionsPage from "./page";
@@ -35,14 +37,28 @@ import type { PromptDirective } from "../../lib/api/promptDirectives";
 
 const t = en.promptDirectives;
 const plain: PromptDirective = {
-  key: "date", title: "Current date", description: "Tells the model today's date.", securityCritical: false,
-  placeholders: ["{date}"], enabled: true, overridden: false,
-  defaultText: "Today is {date}.", overrideText: null, effectiveText: "Today is {date}.",
+  key: "date",
+  title: "Current date",
+  description: "Tells the model today's date.",
+  securityCritical: false,
+  placeholders: ["{date}"],
+  enabled: true,
+  overridden: false,
+  defaultText: "Today is {date}.",
+  overrideText: null,
+  effectiveText: "Today is {date}.",
 };
 const critical: PromptDirective = {
-  key: "safety", title: "Safety rules", description: "Refuse harmful requests.", securityCritical: true,
-  placeholders: [], enabled: true, overridden: true,
-  defaultText: "Refuse harm.", overrideText: "Refuse harm, politely.", effectiveText: "Refuse harm, politely.",
+  key: "safety",
+  title: "Safety rules",
+  description: "Refuse harmful requests.",
+  securityCritical: true,
+  placeholders: [],
+  enabled: true,
+  overridden: true,
+  defaultText: "Refuse harm.",
+  overrideText: "Refuse harm, politely.",
+  effectiveText: "Refuse harm, politely.",
 };
 const overview = {
   directives: [plain, critical],
@@ -89,9 +105,14 @@ describe("AdminInstructionsPage", () => {
     expect(save.disabled).toBe(true);
     fireEvent.change(screen.getByLabelText(t.customLabel), { target: { value: "Be very brief." } });
     expect(save.disabled).toBe(false);
-    api.getPromptDirectives.mockResolvedValue({ ...overview, customInstructions: { enabled: true, text: "Be very brief." } });
+    api.getPromptDirectives.mockResolvedValue({
+      ...overview,
+      customInstructions: { enabled: true, text: "Be very brief." },
+    });
     fireEvent.click(save);
-    await waitFor(() => expect(api.saveCustomInstructions).toHaveBeenCalledWith({ enabled: true, text: "Be very brief." }));
+    await waitFor(() =>
+      expect(api.saveCustomInstructions).toHaveBeenCalledWith({ enabled: true, text: "Be very brief." })
+    );
     expect(await screen.findByText(t.saved)).toBeTruthy();
   });
 
@@ -100,7 +121,11 @@ describe("AdminInstructionsPage", () => {
     fireEvent.change(card.querySelector("textarea") as HTMLElement, { target: { value: "It is {date}." } });
     fireEvent.click(within(card).getByRole("button", { name: t.save }));
     await waitFor(() =>
-      expect(api.savePromptDirective).toHaveBeenCalledWith("date", { enabled: true, text: "It is {date}.", acknowledgeRisk: false }),
+      expect(api.savePromptDirective).toHaveBeenCalledWith("date", {
+        enabled: true,
+        text: "It is {date}.",
+        acknowledgeRisk: false,
+      })
     );
   });
 
@@ -119,7 +144,11 @@ describe("AdminInstructionsPage", () => {
     expect(save.disabled).toBe(false);
     fireEvent.click(save);
     await waitFor(() =>
-      expect(api.savePromptDirective).toHaveBeenCalledWith("safety", { enabled: true, text: "Refuse nothing.", acknowledgeRisk: true }),
+      expect(api.savePromptDirective).toHaveBeenCalledWith("safety", {
+        enabled: true,
+        text: "Refuse nothing.",
+        acknowledgeRisk: true,
+      })
     );
   });
 
