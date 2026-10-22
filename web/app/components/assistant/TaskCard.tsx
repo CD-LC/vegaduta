@@ -1,10 +1,14 @@
 "use client";
 
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { AlertTriangle, Bot, Check, FileText, Loader2, MessageCircle, MessageSquareText, Phone, Wrench, Zap } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import { cn } from "../../lib/utils";
+import { errorMessage } from "../../lib/errors";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import MediaCard from "../MediaCard";
 import WorkedForBlock from "./WorkedForBlock";
 import type { AssistantTask, AssistantTurn, TaskChannel } from "./assistantTypes";
@@ -20,6 +24,57 @@ export interface TaskCardHandlers {
   onConfirm: (cardId: string) => void;
   onCancel: (cardId: string) => void;
   onChannel: (cardId: string, channel: TaskChannel) => void;
+  /** Save the person's delivery number (PUT /api/account/phone); rejects with the reason if it fails. */
+  onSavePhone: (phone: string) => Promise<void>;
+}
+
+/** The "add your number" prompt on a card that cannot deliver by WhatsApp / SMS / call yet. */
+function PhonePrompt({ onSave, disabled }: { onSave: (phone: string) => Promise<void>; disabled: boolean }) {
+  const t = useTranslations("assistant");
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave(draft.trim());
+    } catch (err) {
+      setError(errorMessage(err, t("taskPhoneSaveFailed")));
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-1.5">
+      <p className="text-xs text-muted-foreground">{t("taskNeedsPhone")}</p>
+      <Label htmlFor="task-card-phone" className="sr-only">
+        {t("taskPhoneLabel")}
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          id="task-card-phone"
+          type="tel"
+          autoComplete="tel"
+          className="h-8 flex-1 text-xs"
+          placeholder={t("taskPhonePlaceholder")}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          required
+        />
+        <Button type="submit" size="sm" disabled={disabled || saving || !draft.trim()}>
+          {t("taskAddPhone")}
+        </Button>
+      </div>
+      {error && (
+        <p className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </form>
+  );
 }
 
 /**
@@ -99,14 +154,7 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
               );
             })}
           </div>
-          {task.needsPhone && (
-            <p className="text-xs text-muted-foreground">
-              {t("taskNeedsPhone")}{" "}
-              <Link href="/account" className="underline underline-offset-2">
-                {t("taskAddPhone")}
-              </Link>
-            </p>
-          )}
+          {task.needsPhone && <PhonePrompt onSave={handlers.onSavePhone} disabled={busy} />}
           {task.preview?.thirdPartyNumber && <p className="text-xs text-muted-foreground">{t("taskThirdParty", { number: task.preview.thirdPartyNumber })}</p>}
           <div className="flex items-center gap-2">
             <Button type="button" size="sm" onClick={() => handlers.onConfirm(turn.id)} disabled={busy} data-testid="task-confirm">

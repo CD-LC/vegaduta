@@ -570,7 +570,7 @@ export default function AssistantPane() {
           sending={turn.sending}
           agentId={active?.id ?? null}
           agentName={active?.name ?? t("title")}
-          task={{ onConfirm: (id) => void quick.confirm(id), onCancel: quick.cancel, onChannel: quick.setChannel }}
+          task={{ onConfirm: (id) => void quick.confirm(id), onCancel: quick.cancel, onChannel: quick.setChannel, onSavePhone: quick.savePhone }}
           sessionId={turn.sessionId}
           canBackground={caps.jobs && ready}
           restoredNote={restoredNote}
