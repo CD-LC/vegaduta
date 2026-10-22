@@ -3,6 +3,7 @@ package com.agenticai.core.workflow.share;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.voice.VoiceCallController;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
@@ -129,7 +130,7 @@ public class WorkflowShareVoiceController {
             } catch (VoiceCallController.VoiceTurnAudioEmptyException e) {
                 log.info(
                         "Workflow share voice turn for share {} produced no usable speech: {}",
-                        shareId,
+                        LogSafe.clean(shareId),
                         e.getMessage());
                 return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                         .body(Map.of("error", "empty_audio"));
@@ -161,7 +162,7 @@ public class WorkflowShareVoiceController {
                             resultText,
                             runResponse.status().name()));
         } catch (RuntimeException e) {
-            log.warn("Workflow share voice turn failed for share {}", shareId, e);
+            log.warn("Workflow share voice turn failed for share {}", LogSafe.clean(shareId), e);
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("error", "upstream_failed"));
         } finally {

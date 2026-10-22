@@ -3,6 +3,7 @@ package com.agenticai.core.voice;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.storage.StorageProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -171,7 +172,7 @@ public class LiveKitEgressService {
         String egressId = callEgress("StartRoomCompositeEgress", body);
         log.info(
                 "Started LiveKit RoomCompositeEgress room={} egressId={} objectKey={}",
-                roomName,
+                LogSafe.clean(roomName),
                 egressId,
                 objectKey);
         return new EgressStartResult(egressId, objectKey);

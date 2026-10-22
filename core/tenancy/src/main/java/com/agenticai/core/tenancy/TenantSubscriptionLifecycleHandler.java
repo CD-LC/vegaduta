@@ -8,6 +8,7 @@ import com.agenticai.core.billing.invoice.InvoiceService;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Instant;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -89,7 +90,7 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
             log.debug(
                     "{} lifecycle event '{}' carried no subscription id - nothing to apply",
                     gatewayLabel(event),
-                    event.rawEventName());
+                    LogSafe.clean(event.rawEventName()));
             return;
         }
 
@@ -106,8 +107,8 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                 log.debug(
                         "{} webhook '{}' for subscription '{}' - no pending upgrade or live subscription tracked for it, ignoring",
                         gatewayLabel(event),
-                        event.rawEventName(),
-                        subscriptionId);
+                        LogSafe.clean(event.rawEventName()),
+                        LogSafe.clean(subscriptionId));
             }
             return;
         }
@@ -121,7 +122,7 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                         "Tenant '{}' upgrade confirmed via {} '{}'",
                         tenant.getName(),
                         gatewayLabel(event),
-                        event.rawEventName());
+                        LogSafe.clean(event.rawEventName()));
                 recordInvoiceForCapturedPayment(tenant, event);
             }
             case SUBSCRIPTION_CANCELLED, SUBSCRIPTION_HALTED, SUBSCRIPTION_COMPLETED -> {
@@ -131,19 +132,19 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                         "Tenant '{}' pending upgrade cleared via {} '{}' - plan unchanged",
                         tenant.getName(),
                         gatewayLabel(event),
-                        event.rawEventName());
+                        LogSafe.clean(event.rawEventName()));
             }
             case SUBSCRIPTION_AUTHENTICATED ->
                     log.info(
                             "Tenant '{}' {} subscription '{}' authenticated - awaiting first charge before upgrade is confirmed",
                             tenant.getName(),
                             gatewayLabel(event),
-                            subscriptionId);
+                            LogSafe.clean(subscriptionId));
             default ->
                     log.debug(
                             "{} webhook '{}' for tenant '{}' pending upgrade - no action needed for this event type",
                             gatewayLabel(event),
-                            event.rawEventName(),
+                            LogSafe.clean(event.rawEventName()),
                             tenant.getName());
         }
     }
@@ -161,9 +162,9 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
             log.debug(
                     "{} webhook '{}' for FREE tenant '{}' subscription '{}' - trial-subscription lifecycle, deliberately untouched",
                     gatewayLabel(event),
-                    event.rawEventName(),
+                    LogSafe.clean(event.rawEventName()),
                     tenant.getName(),
-                    event.gatewaySubscriptionId());
+                    LogSafe.clean(event.gatewaySubscriptionId()));
             return;
         }
         switch (event.type()) {
@@ -173,7 +174,7 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                 log.warn(
                         "Tenant '{}' paid subscription '{}' HALTED via {} (payment retries exhausted) - marked past-due, plan {} kept during grace",
                         tenant.getName(),
-                        event.gatewaySubscriptionId(),
+                        LogSafe.clean(event.gatewaySubscriptionId()),
                         gatewayLabel(event),
                         tenant.getPlan());
             }
@@ -184,9 +185,9 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                 log.info(
                         "Tenant '{}' paid subscription '{}' ended via {} '{}' - downgraded {} -> FREE",
                         tenant.getName(),
-                        event.gatewaySubscriptionId(),
+                        LogSafe.clean(event.gatewaySubscriptionId()),
                         gatewayLabel(event),
-                        event.rawEventName(),
+                        LogSafe.clean(event.rawEventName()),
                         previousPlan);
             }
             case SUBSCRIPTION_ACTIVATED, SUBSCRIPTION_CHARGED, SUBSCRIPTION_RESUMED -> {
@@ -196,16 +197,16 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                     log.info(
                             "Tenant '{}' paid subscription '{}' recovered via {} '{}' - past-due cleared",
                             tenant.getName(),
-                            event.gatewaySubscriptionId(),
+                            LogSafe.clean(event.gatewaySubscriptionId()),
                             gatewayLabel(event),
-                            event.rawEventName());
+                            LogSafe.clean(event.rawEventName()));
                 } else {
                     log.debug(
                             "Tenant '{}' live subscription '{}' {} event '{}' - healthy, no state change",
                             tenant.getName(),
-                            event.gatewaySubscriptionId(),
+                            LogSafe.clean(event.gatewaySubscriptionId()),
                             gatewayLabel(event),
-                            event.rawEventName());
+                            LogSafe.clean(event.rawEventName()));
                 }
                 recordInvoiceForCapturedPayment(tenant, event);
             }
@@ -213,7 +214,7 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                     log.debug(
                             "{} webhook '{}' for tenant '{}' live subscription - no action needed for this event type",
                             gatewayLabel(event),
-                            event.rawEventName(),
+                            LogSafe.clean(event.rawEventName()),
                             tenant.getName());
         }
     }
@@ -244,18 +245,18 @@ public class TenantSubscriptionLifecycleHandler implements RoutedBillingEventHan
                     "Invoice {} recorded for tenant '{}' payment '{}' ({} {} minor units) via {} '{}'",
                     invoice.invoiceNumber(),
                     tenant.getName(),
-                    event.capturedPayment().paymentId(),
-                    event.capturedPayment().currency(),
+                    LogSafe.clean(event.capturedPayment().paymentId()),
+                    LogSafe.clean(event.capturedPayment().currency()),
                     event.capturedPayment().amountMinor(),
                     gatewayLabel(event),
-                    event.rawEventName());
+                    LogSafe.clean(event.rawEventName()));
         } catch (Exception e) {
             log.error(
                     "Invoice generation failed for tenant '{}' on '{}' (subscription '{}') - plan state already applied; "
                             + "issue the invoice via a gateway webhook redelivery or reconcile manually",
                     tenant.getName(),
-                    event.rawEventName(),
-                    event.gatewaySubscriptionId(),
+                    LogSafe.clean(event.rawEventName()),
+                    LogSafe.clean(event.gatewaySubscriptionId()),
                     e);
         }
     }

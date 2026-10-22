@@ -8,6 +8,7 @@ import com.agenticai.core.providers.modality.SpeechToTextProviderFactory;
 import com.agenticai.core.providers.modality.TtsModelProvider;
 import com.agenticai.core.providers.modality.VoiceModelProvider;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.speech.SpeechStreamNormalizer;
 import com.agenticai.core.speech.SpeechTextNormalizer;
 import com.agenticai.core.speech.call.CallSpeechQuotaExceededException;
@@ -236,7 +237,7 @@ public class VoiceCallController {
                 "Issued LiveKit token for agent {} room {} identity {}",
                 agentId,
                 roomName,
-                identity);
+                LogSafe.clean(identity));
         return new VoiceTokenResponse(token, tokenService.getUrl(), roomName, identity);
     }
 

@@ -5,6 +5,7 @@ import com.agenticai.core.billing.gateway.BillingEventType;
 import com.agenticai.core.billing.gateway.RoutedBillingEventHandler;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
@@ -75,8 +76,8 @@ public class MandateUpiPaymentHandler implements RoutedBillingEventHandler {
                                 "Mandate payment transaction {} (schema {}) captured via {} (reference {})",
                                 txn.getId(),
                                 schema,
-                                event.rawEventName(),
-                                referenceId);
+                                LogSafe.clean(event.rawEventName()),
+                                LogSafe.clean(referenceId));
                     }
                 });
     }

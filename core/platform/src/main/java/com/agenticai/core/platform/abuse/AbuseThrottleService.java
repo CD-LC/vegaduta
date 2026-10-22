@@ -5,6 +5,7 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -129,7 +130,7 @@ public class AbuseThrottleService {
                 AuditOutcome.SUCCESS,
                 removed == null ? "Cleared throttle (was not throttled)" : "Cleared throttle",
                 actor);
-        log.info("Cleared throttle for principal {}", key);
+        log.info("Cleared throttle for principal {}", LogSafe.clean(key));
     }
 
     /**
@@ -271,7 +272,11 @@ public class AbuseThrottleService {
         } catch (RuntimeException e) {
             // Auditing must never break the safeguard itself (same posture as
             // PlatformIssueService's callers).
-            log.warn("Failed to audit {} for {} (swallowed): {}", action, key, e.toString());
+            log.warn(
+                    "Failed to audit {} for {} (swallowed): {}",
+                    action,
+                    LogSafe.clean(key),
+                    e.toString());
         }
     }
 

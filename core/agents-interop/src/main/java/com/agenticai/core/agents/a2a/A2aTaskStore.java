@@ -5,6 +5,7 @@ import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -414,8 +415,8 @@ public class A2aTaskStore {
                 || !Objects.equals(task.subject(), subject)) {
             log.warn(
                     "A2A task {} requested by a non-owner (tenant {}, subject {}) - answering not-found",
-                    taskId,
-                    tenantId,
+                    LogSafe.clean(taskId),
+                    LogSafe.clean(tenantId),
                     subject);
             return Optional.empty();
         }
@@ -441,8 +442,8 @@ public class A2aTaskStore {
                     || !Objects.equals(stored.subject(), subject)) {
                 log.warn(
                         "A2A task {} requested by a non-owner (tenant {}, subject {}) - answering not-found",
-                        taskId,
-                        tenantId,
+                        LogSafe.clean(taskId),
+                        LogSafe.clean(tenantId),
                         subject);
                 return Optional.empty();
             }

@@ -3,6 +3,7 @@ package com.agenticai.core.billing.gateway;
 import com.agenticai.core.billing.email.BillingEmailService;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
         } catch (EmptyResultDataAccessException e) {
             log.warn(
                     "No tenant found for gateway subscription ID '{}' - webhook may be replayed",
-                    gatewaySubscriptionId);
+                    LogSafe.clean(gatewaySubscriptionId));
             return;
         } catch (Exception e) {
             // Split out from the no-row case above: connection refused, pool exhaustion or
@@ -69,7 +70,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
             log.error(
                     "Tenant lookup failed for gateway subscription ID '{}' - subscription.charged dropped, "
                             + "the tenant stays un-activated until the gateway retries",
-                    gatewaySubscriptionId,
+                    LogSafe.clean(gatewaySubscriptionId),
                     e);
             return;
         }
@@ -90,12 +91,12 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
                 log.info(
                         "Tenant {} subscription '{}' transitioned to ACTIVE",
                         tenantId,
-                        gatewaySubscriptionId);
+                        LogSafe.clean(gatewaySubscriptionId));
             } else {
                 log.info(
                         "Tenant {} subscription '{}' already ACTIVE (charged event is idempotent)",
                         tenantId,
-                        gatewaySubscriptionId);
+                        LogSafe.clean(gatewaySubscriptionId));
             }
 
             tenantName =
@@ -119,7 +120,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
             log.error(
                     "Failed to send receipt email for tenant {} (subscription '{}')",
                     tenantId,
-                    gatewaySubscriptionId,
+                    LogSafe.clean(gatewaySubscriptionId),
                     e);
             // Don't fail the handler — subscription is already marked ACTIVE
         }

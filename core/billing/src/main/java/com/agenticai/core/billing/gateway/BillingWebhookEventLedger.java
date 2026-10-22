@@ -2,6 +2,7 @@ package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -95,10 +96,10 @@ public class BillingWebhookEventLedger {
             if (inserted == 0) {
                 log.info(
                         "Billing webhook duplicate: gateway={} consumer={} event={} type={} - skipping reprocessing",
-                        gateway,
+                        LogSafe.clean(gateway),
                         consumer,
-                        eventKey,
-                        eventType);
+                        LogSafe.clean(eventKey),
+                        LogSafe.clean(eventType));
                 return Claim.DUPLICATE;
             }
             return Claim.NEW;
@@ -108,9 +109,9 @@ public class BillingWebhookEventLedger {
             // entirely is the worse failure.
             log.error(
                     "Webhook event ledger claim failed for gateway={} consumer={} event={} - processing without dedupe",
-                    gateway,
+                    LogSafe.clean(gateway),
                     consumer,
-                    eventKey,
+                    LogSafe.clean(eventKey),
                     e);
             return Claim.NEW;
         }
@@ -148,7 +149,7 @@ public class BillingWebhookEventLedger {
             log.warn(
                     "Webhook event ledger status update failed ({} -> {}) - ledger row left as-is",
                     status,
-                    gateway,
+                    LogSafe.clean(gateway),
                     e);
         }
     }
@@ -171,7 +172,7 @@ public class BillingWebhookEventLedger {
         } catch (DataAccessException e) {
             log.warn(
                     "Webhook event ledger release failed for gateway={} consumer={} - later redeliveries will dedupe",
-                    gateway,
+                    LogSafe.clean(gateway),
                     consumer,
                     e);
         }

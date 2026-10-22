@@ -2,6 +2,7 @@ package com.agenticai.core.billing.invoice;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
@@ -200,7 +201,7 @@ public class InvoiceService {
             // The winner's row IS this payment's invoice - return it.
             log.info(
                     "Invoice insert for payment '{}' lost an idempotency race - returning the existing invoice",
-                    gatewayPaymentId);
+                    LogSafe.clean(gatewayPaymentId));
             return invoiceRepository
                     .findByGatewayPaymentId(gatewayPaymentId)
                     .orElseThrow(() -> raced);
@@ -211,7 +212,7 @@ public class InvoiceService {
                 tenantId,
                 plan,
                 period,
-                currency,
+                LogSafe.clean(currency),
                 amountMinor);
         return invoice;
     }

@@ -5,6 +5,7 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -41,7 +42,7 @@ public class PlatformTenantAuditor {
             String detail) {
         log.info(
                 "platform-ops-audit actor={} action={} targetType={} target={} tenant={} detail={}",
-                actor,
+                LogSafe.clean(actor),
                 action,
                 targetType,
                 targetId,
@@ -66,7 +67,7 @@ public class PlatformTenantAuditor {
             log.error(
                     "Could not write tenant audit row for {} on {} (tenant {})",
                     action,
-                    targetId,
+                    LogSafe.clean(targetId),
                     tenantSchema,
                     e);
         }

@@ -5,6 +5,7 @@ import com.agenticai.core.billing.commerce.CheckoutSessionService;
 import com.agenticai.core.billing.commerce.PaidPaymentLookup;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -72,7 +73,7 @@ public class UpiPaymentConfirmedHandler implements BillingEventHandler {
                     "UPI_PAYMENT_CONFIRMED type={} rawEvent={} - payment confirmed but the webhook "
                             + "carried no payment_link/qr_code id, so it is not attributable to anything",
                     event.type(),
-                    event.rawEventName());
+                    LogSafe.clean(event.rawEventName()));
             return;
         }
 
@@ -90,8 +91,8 @@ public class UpiPaymentConfirmedHandler implements BillingEventHandler {
                             "UPI_PAYMENT_CONFIRMED type={} referenceId={} rawEvent={} - checkout_session {} (tenant {}, "
                                     + "{} paise) marked COMPLETED, paymentId={}",
                             event.type(),
-                            referenceId,
-                            event.rawEventName(),
+                            LogSafe.clean(referenceId),
+                            LogSafe.clean(event.rawEventName()),
                             session.id(),
                             session.tenantId(),
                             session.amountPaise(),
@@ -101,16 +102,16 @@ public class UpiPaymentConfirmedHandler implements BillingEventHandler {
                             "UPI_PAYMENT_CONFIRMED type={} referenceId={} rawEvent={} - checkout_session {} was already "
                                     + "COMPLETED (redelivered webhook, idempotent no-op)",
                             event.type(),
-                            referenceId,
-                            event.rawEventName(),
+                            LogSafe.clean(referenceId),
+                            LogSafe.clean(event.rawEventName()),
                             session.id());
             case AMOUNT_MISMATCH ->
                     log.error(
                             "UPI_PAYMENT_AMOUNT_MISMATCH type={} referenceId={} rawEvent={} - checkout_session {} (tenant {}) "
                                     + "NOT completed: {}. Reconcile against this reference id in the Razorpay dashboard.",
                             event.type(),
-                            referenceId,
-                            event.rawEventName(),
+                            LogSafe.clean(referenceId),
+                            LogSafe.clean(event.rawEventName()),
                             session.id(),
                             session.tenantId(),
                             session.reviewNote());
@@ -122,8 +123,8 @@ public class UpiPaymentConfirmedHandler implements BillingEventHandler {
                                     + "any balance - see this class's javadoc. Reconcile manually against this reference id in "
                                     + "the Razorpay dashboard if a credit is owed.",
                             event.type(),
-                            referenceId,
-                            event.rawEventName());
+                            LogSafe.clean(referenceId),
+                            LogSafe.clean(event.rawEventName()));
         }
     }
 
@@ -139,7 +140,7 @@ public class UpiPaymentConfirmedHandler implements BillingEventHandler {
             // complete even if an implementation forgets that.
             log.warn(
                     "Paid-payment lookup threw for reference id '{}' - completing without a payment id",
-                    referenceId,
+                    LogSafe.clean(referenceId),
                     e);
             return null;
         }

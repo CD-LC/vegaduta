@@ -3,6 +3,7 @@ package com.agenticai.core.platform;
 import com.agenticai.core.platform.PlatformAlertWebhookEvent.AlertStatus;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
@@ -60,7 +61,7 @@ public class PlatformAlertWebhookService {
         if (!(rawAlerts instanceof List<?> alerts)) {
             log.warn(
                     "Alertmanager webhook delivery had no 'alerts' array - ignoring. Payload keys: {}",
-                    payload.keySet());
+                    LogSafe.clean(payload.keySet()));
             return 0;
         }
         int recorded = 0;

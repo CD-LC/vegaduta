@@ -4,6 +4,7 @@ import com.agenticai.core.platform.ops.ScheduledJobRunTracker.RunState;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.beans.Introspector;
 import java.time.Duration;
 import java.time.Instant;
@@ -152,8 +153,8 @@ public class ScheduledJobRegistryService {
         if (!allowlist.contains(entry.className() + "#" + entry.method())) {
             log.info(
                     "platform-ops-audit actor={} action=platform.job.run_now outcome=DENIED job={}",
-                    actor,
-                    id);
+                    LogSafe.clean(actor),
+                    LogSafe.clean(id));
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "Run-now is not allowed for this job (only idempotent, advisory-locked jobs are allowlisted).");
@@ -165,8 +166,8 @@ public class ScheduledJobRegistryService {
         }
         log.info(
                 "platform-ops-audit actor={} action=platform.job.run_now outcome=STARTED job={}",
-                actor,
-                id);
+                LogSafe.clean(actor),
+                LogSafe.clean(id));
         Runnable runnable = entry.task().getTask().getRunnable();
         executor.submit(
                 () -> {
