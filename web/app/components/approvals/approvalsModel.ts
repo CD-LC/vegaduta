@@ -1,4 +1,5 @@
 // Pure helpers for the approvals inbox (formatting + payload parsing). No React, no I/O.
+import { channelOffered } from "../../lib/edition";
 
 export type Translate = (key: string, params?: Record<string, unknown>) => string;
 
@@ -23,7 +24,7 @@ export const STATUS_FILTERS = ["PENDING", "", "APPROVED", "REJECTED", "EXECUTION
 
 // Every value is a real ACTION_TYPE a channel adapter gates through; "channel.*.send" is the documented glob.
 // Non-channel action types (mcp_tool.*, workflow.node.*) are free-typed via allowCustom in the picker.
-export const CHANNEL_ACTION_TYPES = [
+const ALL_CHANNEL_ACTION_TYPES = [
   { value: "channel.*.send", labelKey: "channelWildcardOption" },
   { value: "channel.whatsapp.send", labelKey: "channelWhatsappTwilio" },
   { value: "channel.instagram.send", labelKey: "channelInstagram" },
@@ -32,6 +33,12 @@ export const CHANNEL_ACTION_TYPES = [
   { value: "channel.discord.send", labelKey: "channelDiscord" },
   { value: "channel.x.send", labelKey: "channelX" },
 ];
+
+/** The action types for channels this install runs (no Slack/Discord/X policy rows on a personal install). */
+export const CHANNEL_ACTION_TYPES = ALL_CHANNEL_ACTION_TYPES.filter((a) => {
+  const m = /^channel\.([a-z0-9_-]+)\.send$/.exec(a.value);
+  return m === null || channelOffered(m[1]);
+});
 
 export function relTime(iso: string | null | undefined, t: Translate) {
   if (!iso) return "—";

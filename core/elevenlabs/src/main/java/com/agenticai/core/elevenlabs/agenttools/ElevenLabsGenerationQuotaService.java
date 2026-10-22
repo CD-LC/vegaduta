@@ -5,6 +5,8 @@ import com.agenticai.core.elevenlabs.ElevenLabsGeneratedAudioService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
  * resolveAudioTools} only wires this in on the platform-key fallback.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsGenerationQuotaService {
 
     private final ElevenLabsGeneratedAudioService audioService;

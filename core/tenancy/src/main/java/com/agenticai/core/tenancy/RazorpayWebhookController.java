@@ -1,9 +1,10 @@
 package com.agenticai.core.tenancy;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.billing.gateway.BillingWebhookEventLedger;
 import com.agenticai.core.billing.gateway.PaymentGatewayClient;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
  * normal, expected outcome, not a delivery failure worth a retry storm over.
  */
 @RestController
-@ConditionalOnBillingEdition
 @RequestMapping("/webhook/razorpay")
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class RazorpayWebhookController {
 
     // #825 Multi-gateway follow-up - deliberately the CONCRETE RazorpayGatewayClient type, not the

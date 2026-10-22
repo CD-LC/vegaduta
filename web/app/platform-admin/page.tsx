@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   RefreshCw,
   Boxes,
@@ -32,6 +33,7 @@ import { Card, CardContent } from "./components/ui/card";
 import { demoSandboxSummary, normalizeTenantCounts, type TenantCounts } from "./lib/tenantCounts";
 import { getSpendSummary, type SpendSummary } from "./lib/adminApi/spend";
 import { formatUsdOrUnavailable } from "./lib/platformFormat";
+import { PERSONAL_PLATFORM_ADMIN_HOME, isPersonalEdition } from "../lib/edition";
 
 // A tile value is "loading" until its fetch settles, then either a measured
 // value or "unavailable" - a failed fetch is never shown as 0 / $0.
@@ -123,7 +125,15 @@ const SECTION_CARDS = [
   },
 ];
 
-export default function OverviewPage() {
+// The fleet overview (tenant counts, platform spend, alert queues) is operator tooling; a personal
+// install lands on the LLM pools instead, the one page of this section its owner came for. The redirect
+// is a wrapper so the overview's hooks (and its fetches) never mount on personal.
+export default function OverviewRoute() {
+  if (isPersonalEdition()) redirect(PERSONAL_PLATFORM_ADMIN_HOME);
+  return <OverviewPage />;
+}
+
+function OverviewPage() {
   const [health, setHealth] = useState<any>(null);
   const [healthError, setHealthError] = useState<any>(null);
   const [openAlerts, setOpenAlerts] = useState<TileValue>(LOADING);

@@ -7,6 +7,8 @@ import com.agenticai.core.omnichannel.slack.dto.SlackCredentialResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * from Basic Information.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class SlackCredentialService {
 
     private final SlackCredentialRepository repository;

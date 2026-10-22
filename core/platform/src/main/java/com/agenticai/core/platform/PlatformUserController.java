@@ -9,6 +9,9 @@ import com.agenticai.core.admin.permission.UserPermissionService;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.AppUserRepository;
 import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.tenancy.Tenant;
@@ -67,6 +70,7 @@ import org.springframework.web.bind.annotation.RestController;
  * and restores the caller's context afterwards. The audit row lands in the target tenant's own
  * audit log with the platform operator as the actor, so the tenant can see who touched their user.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/users")
 @Profile("security")
@@ -106,8 +110,9 @@ public class PlatformUserController {
      *     links with) or its schema name (what Keycloak's {@code tenant_id} attribute holds); an
      *     unknown UUID matches no one
      * @param q optional case-insensitive substring over username, email and name
-     * @param offset rows to skip (default 0); with {@code limit} this pages the matches. The response
-     *     also carries {@code X-Total-Count} (same as the body {@code total}) and {@code X-Has-More}
+     * @param offset rows to skip (default 0); with {@code limit} this pages the matches. The
+     *     response also carries {@code X-Total-Count} (same as the body {@code total}) and {@code
+     *     X-Has-More}
      * @param limit page size, default 100, max 500 (the Keycloak client fetches the whole realm and
      *     filters in memory - see its own javadoc - so this bounds the response, not the upstream
      *     cost)
@@ -299,7 +304,7 @@ public class PlatformUserController {
         String tenant = tenantOf(target);
         log.info(
                 "platform-user-audit actor={} action={} target={} tenant={} outcome={} detail={}",
-                actor(),
+                LogSafe.clean(actor()),
                 action,
                 target.id(),
                 tenant,

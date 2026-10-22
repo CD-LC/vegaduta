@@ -1,5 +1,6 @@
 package com.agenticai.core.resilience;
 
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,14 +10,15 @@ import org.slf4j.Logger;
 
 /**
  * "Log this warning at most once per interval per key." For degraded paths that fire on every
- * request while a dependency is down (Redis unreachable, a breaker open): one WARN per minute
- * tells an operator everything the thousandth identical line would, and does not flood the log
- * pipeline during exactly the incident when it is most needed.
+ * request while a dependency is down (Redis unreachable, a breaker open): one WARN per minute tells
+ * an operator everything the thousandth identical line would, and does not flood the log pipeline
+ * during exactly the incident when it is most needed.
  *
  * <p>Thread-safe, allocation-light, bounded to {@value #MAX_KEYS} distinct keys (a full table
  * simply stops logging new keys until entries expire - it never grows without bound). Each emitted
- * line carries how many were suppressed since the previous one. The default time source is monotonic
- * ({@link System#nanoTime()}), so a wall-clock step cannot silence the log or let it flood.
+ * line carries how many were suppressed since the previous one. The default time source is
+ * monotonic ({@link System#nanoTime()}), so a wall-clock step cannot silence the log or let it
+ * flood.
  */
 public final class RateLimitedLog {
 
@@ -37,7 +39,10 @@ public final class RateLimitedLog {
     }
 
     public RateLimitedLog(Logger log, Duration interval) {
-        this(log, interval, () -> java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
+        this(
+                log,
+                interval,
+                () -> java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
     }
 
     public RateLimitedLog(Logger log, Duration interval, LongSupplier nowMillis) {
@@ -48,7 +53,8 @@ public final class RateLimitedLog {
 
     /**
      * Logs {@code message} at WARN if {@code key} has not logged within the interval; otherwise
-     * counts it as suppressed. {@code error} (nullable) is attached only to the line that is emitted.
+     * counts it as suppressed. {@code error} (nullable) is attached only to the line that is
+     * emitted.
      *
      * @return true when a line was written.
      */
@@ -66,10 +72,10 @@ public final class RateLimitedLog {
     }
 
     /**
-     * Drop-in for {@code log.warn(format, args...)} at a degraded-path call site: same SLF4J format,
-     * same trailing-Throwable convention, but at most one line per interval per call site. The
-     * {@code format} string itself is the key, so each call site is limited independently and the
-     * per-tenant / per-run arguments never multiply the keys.
+     * Drop-in for {@code log.warn(format, args...)} at a degraded-path call site: same SLF4J
+     * format, same trailing-Throwable convention, but at most one line per interval per call site.
+     * The {@code format} string itself is the key, so each call site is limited independently and
+     * the per-tenant / per-run arguments never multiply the keys.
      *
      * @return true when a line was written.
      */
@@ -78,11 +84,33 @@ public final class RateLimitedLog {
         if (suppressed < 0) {
             return false;
         }
-        log.warn(suppressed > 0 ? format + " (" + suppressed + " similar event(s) suppressed since the last report)" : format, args);
+        log.warn(
+                suppressed > 0
+                        ? format
+                                + " ("
+                                + suppressed
+                                + " similar event(s) suppressed since the last report)"
+                        : format,
+                sanitize(args));
         return true;
     }
 
-    /** @return the number of events suppressed since the last emitted line when this one may be written, or -1 when it must be suppressed. */
+    /**
+     * Line breaks in an argument must not forge a second log line; a trailing Throwable keeps its
+     * stack trace.
+     */
+    private static Object[] sanitize(Object[] args) {
+        Object[] out = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            out[i] = args[i] instanceof Throwable ? args[i] : LogSafe.clean(args[i]);
+        }
+        return out;
+    }
+
+    /**
+     * @return the number of events suppressed since the last emitted line when this one may be
+     *     written, or -1 when it must be suppressed.
+     */
     private long admit(String key) {
         long now = nowMillis.getAsLong();
         Slot slot = slots.get(key);
@@ -114,13 +142,17 @@ public final class RateLimitedLog {
     }
 
     private void emit(String message, Throwable error, long suppressedBefore) {
-        String text = suppressedBefore > 0
-            ? message + " (" + suppressedBefore + " similar event(s) suppressed since the last report)"
-            : message;
+        String text =
+                suppressedBefore > 0
+                        ? message
+                                + " ("
+                                + suppressedBefore
+                                + " similar event(s) suppressed since the last report)"
+                        : message;
         if (error != null) {
-            log.warn(text, error);
+            log.warn(LogSafe.clean(text), error);
         } else {
-            log.warn(text);
+            log.warn(LogSafe.clean(text));
         }
     }
 }
