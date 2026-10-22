@@ -73,7 +73,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | sarvam | vendor | 46 | agents, agentspi, crypto, providers, security, speech, storage, tenancy | Sarvam AI (LLM, STT/TTS, translate) |
 | sdlc | kernel | 44 | crypto, security, tenancy |  |
 | secrets | kernel | 15 | audit, crypto |  |
-| security | kernel | 88 | json |  |
+| security | kernel | 89 | json |  |
 | sharing | kernel | 13 | admin, audit, security |  |
 | speech | kernel | 11 | (none) |  |
 | storage | kernel | 9 | security |  |
