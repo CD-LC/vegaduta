@@ -3,6 +3,8 @@ package com.agenticai.core.billing.commerce;
 import com.agenticai.core.billing.commerce.CommerceProduct.ProductAvailability;
 import com.agenticai.core.billing.commerce.ProductCatalogService.ProductUpsert;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -35,6 +37,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @Profile("security")
 @RequestMapping("/api/tenant/commerce/products")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class ProductCatalogController {
 
     /** Wire shape - paise plus a display-only major amount, same convention as CheckoutSessionResponse. */

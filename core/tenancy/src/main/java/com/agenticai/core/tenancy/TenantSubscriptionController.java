@@ -1,5 +1,7 @@
 package com.agenticai.core.tenancy;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.dto.TenantSubscriptionStatusResponse;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/tenant/subscription")
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class TenantSubscriptionController {
 
     private final TenantSubscriptionService tenantSubscriptionService;

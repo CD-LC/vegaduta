@@ -1,5 +1,7 @@
 package com.agenticai.core.tenancy;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.dto.TenantUpgradeRequest;
 import com.agenticai.core.tenancy.dto.TenantUpgradeOptionsResponse;
 import com.agenticai.core.tenancy.dto.TenantUpgradeResponse;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/tenant/upgrade")
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class TenantUpgradeController {
 
     private final TenantUpgradeService tenantUpgradeService;

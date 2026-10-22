@@ -3,6 +3,8 @@ package com.agenticai.core.payments;
 import com.agenticai.core.billing.gateway.BillingEvent;
 import com.agenticai.core.billing.gateway.BillingEventType;
 import com.agenticai.core.billing.gateway.RoutedBillingEventHandler;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Component;
  * early once a tenant claims the reference.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class MandateUpiPaymentHandler implements RoutedBillingEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(MandateUpiPaymentHandler.class);

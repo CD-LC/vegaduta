@@ -7,6 +7,8 @@ import com.agenticai.core.payments.commerce.CommerceDtos.EventResponse;
 import com.agenticai.core.payments.commerce.CommerceDtos.MandateResponse;
 import com.agenticai.core.payments.commerce.CommerceDtos.RevokeRequest;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.Valid;
@@ -37,6 +39,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/commerce/mandates")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CommerceMandateController {
 
     private final CommerceMandateService mandateService;

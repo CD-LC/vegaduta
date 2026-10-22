@@ -1,5 +1,7 @@
 package com.agenticai.core.payments;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public interface PaymentTransactionRepository extends JpaRepository<PaymentTransaction, UUID> {
 
     /** Idempotency replay: a repeated tool call resolves to the SAME row. */

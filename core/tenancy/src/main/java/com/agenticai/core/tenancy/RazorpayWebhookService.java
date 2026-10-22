@@ -6,6 +6,8 @@ import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
 import com.agenticai.core.billing.invoice.BillingInvoice;
 import com.agenticai.core.billing.invoice.InvoiceService;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class RazorpayWebhookService {
 
     private static final Logger log = LoggerFactory.getLogger(RazorpayWebhookService.class);

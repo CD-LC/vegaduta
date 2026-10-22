@@ -4,6 +4,8 @@ import com.agenticai.core.billing.gateway.GatewayUpiCollectRequest;
 import com.agenticai.core.billing.gateway.PaymentGatewayClient;
 import com.agenticai.core.billing.gateway.PaymentGatewayException;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -48,6 +50,7 @@ import org.springframework.stereotype.Service;
  * open DB transaction anyway.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CheckoutSessionService {
 
     private static final Logger log = LoggerFactory.getLogger(CheckoutSessionService.class);

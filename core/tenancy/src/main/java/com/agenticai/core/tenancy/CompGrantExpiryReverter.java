@@ -1,6 +1,7 @@
 package com.agenticai.core.tenancy;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * months-long comp grant.
  */
 @Component
-@ConditionalOnBillingEdition
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CompGrantExpiryReverter {
 
     private static final Logger log = LoggerFactory.getLogger(CompGrantExpiryReverter.class);

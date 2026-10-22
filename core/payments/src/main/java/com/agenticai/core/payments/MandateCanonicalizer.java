@@ -1,6 +1,8 @@
 package com.agenticai.core.payments;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Component;
  * the signing story is identical either way.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class MandateCanonicalizer {
 
     public static final String MANDATE_VERSION = "vegaduta-upi-mandate/1";

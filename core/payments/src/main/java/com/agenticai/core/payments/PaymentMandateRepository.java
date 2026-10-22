@@ -1,5 +1,7 @@
 package com.agenticai.core.payments;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public interface PaymentMandateRepository extends JpaRepository<PaymentMandate, UUID> {
 
     /** The mandate a tool call authorizes against - newest ACTIVE wins. */

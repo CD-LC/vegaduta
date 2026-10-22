@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.gateway;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +46,7 @@ import org.springframework.stereotype.Service;
  * and must not drag entity scanning or a module cycle in with it.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class BillingWebhookEventLedger {
 
     private static final Logger log = LoggerFactory.getLogger(BillingWebhookEventLedger.class);

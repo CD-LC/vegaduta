@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.invoice;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
@@ -58,6 +60,7 @@ import org.springframework.stereotype.Service;
  * (see {@code RazorpayGatewayClient#extractCapturedPayment}).
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class InvoiceService {
 
     /** 18% IGST in basis points - the standard rate for SaaS/OIDAR services. */

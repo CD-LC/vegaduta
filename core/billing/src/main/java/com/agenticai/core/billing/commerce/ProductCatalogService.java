@@ -2,6 +2,8 @@ package com.agenticai.core.billing.commerce;
 
 import com.agenticai.core.billing.commerce.CheckoutSessionService.CreatePaymentLinkCommand;
 import com.agenticai.core.billing.commerce.CommerceProduct.ProductAvailability;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Service;
  * </ul>
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class ProductCatalogService {
 
     /** Channel stamped on feed-checkout sessions - how {@link #checkout}'s abuse cap counts them. */
