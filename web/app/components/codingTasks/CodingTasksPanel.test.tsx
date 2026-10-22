@@ -143,6 +143,19 @@ describe("CodingTasksPanel states", () => {
     expect((screen.getByText("newTask").closest("button") as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("offers no upgrade link for a plan gate on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      getCodingTasksConfig.mockResolvedValue(config({ allowed: false, reason: "PLAN" }));
+      listCodingTasks.mockResolvedValue([]);
+      render(<CodingTasksPanel />);
+      expect(await screen.findByTestId("coding-not-allowed")).toBeTruthy();
+      expect(screen.queryByText("upgradeLink")).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("reports readiness once, after the first load", async () => {
     getCodingTasksConfig.mockResolvedValue(config({ enabled: false }));
     const onLoaded = vi.fn();
@@ -303,6 +316,23 @@ describe("CodingTasksPanel create form", () => {
     fireEvent.click(screen.getByText("start"));
     expect(await screen.findByText("problem_testArgs")).toBeTruthy();
     expect(startCodingTask).not.toHaveBeenCalled();
+  });
+
+  it("shows no upgrade link for a plan-gate refusal on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      startCodingTask.mockRejectedValue(Object.assign(new Error("Coding tasks are a paid-plan feature."), { status: 403 }));
+      render(<CodingTasksPanel />);
+      fireEvent.click(await screen.findByText("newTask"));
+      fireEvent.change(await screen.findByLabelText("instructionLabel"), { target: { value: "Do it" } });
+      fireEvent.change(screen.getByLabelText("repoLabel"), { target: { value: "https://example.com/acme/widgets" } });
+      fireEvent.click(screen.getByText("start"));
+      const alert = await screen.findByTestId("coding-task-problem");
+      expect(alert.textContent).toContain("Coding tasks are a paid-plan feature.");
+      expect(alert.textContent).not.toContain("upgradeLink");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("shows the server's sentence for a plan gate", async () => {
