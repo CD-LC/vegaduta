@@ -24,6 +24,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **The v1.0.0 definition of done is written down** (`docs/maintainers/v1.0.0-definition-of-done.md`): what 1.0.0 promises and does not, the stability, deprecation, upgrade and support rules from 1.0.0, the release checklist with the evidence each box needs, the requested lean personal edition and the Spring Boot 4.1 / Spring AI 2.0 candidate (in or out is the project lead's decision), and the measured personal start-up numbers with a proposed target.
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
 
 ## [0.1.9] - 2026-10-21
