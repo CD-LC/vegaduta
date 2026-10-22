@@ -1,0 +1,33 @@
+VegaDūta SDKs
+Copyright 2026 The VegaDūta Authors
+
+The contents of the sdk/ directory - the VegaDūta Agent SDK for Java
+(sdk/java), the VegaDūta Agent SDK for Python (sdk/python-agent) and the
+generated VegaDūta REST API clients (sdk/typescript, sdk/python) - are
+licensed under the Apache License, Version 2.0 (see LICENSE in this
+directory).
+
+The remainder of the repository this directory ships inside is licensed
+under the Business Source License 1.1; see the repository root LICENSE.
+When you consume these SDKs as published artifacts (Maven Central, PyPI,
+npm), only this Apache-2.0 license applies.
+
+==============================================================================
+Third-party software
+==============================================================================
+
+The Java SDK declares, but does not bundle, these dependencies (resolved by
+Maven/Gradle from their upstream sources):
+
+  - JSpecify 1.0.0 (Apache-2.0)                annotations
+  - Google RE2/J 1.8 (Go-style license)        linear-time regex for guardrails
+  - Spring Boot / Spring AI (Apache-2.0)       optional integrations
+  - SLF4J (MIT), Micrometer (Apache-2.0),     optional observability
+    OpenTelemetry (Apache-2.0)
+  - JUnit 5, AssertJ (Apache-2.0)              test scopes
+
+The TypeScript and Python REST clients and the Python agent SDK have no
+runtime third-party dependencies.
+
+"VegaDūta" and the VegaDūta marks are trademarks of the Licensor. They are
+not licensed for use as the name or branding of a fork or a hosted service.

@@ -1,6 +1,6 @@
 # Releasing the Java Agent SDK
 
-The Java Agent SDK (`sdk/java`, group `io.vegaduta`) is released on its own cadence, by
+The Java Agent SDK (`sdk/java`, group `io.github.cd-lc`) is released on its own cadence, by
 `.github/workflows/sdk-release.yml`, for a tag `sdk-vX.Y.Z`. Like the
 repository's other release workflows (`release.yml`, `pypi-release.yml`) it is run by hand
 from the Actions tab: it has no tag-push trigger (see [Releasing](releasing.md)). It does not share a version with the platform (`v*.*.*` tags).
@@ -9,7 +9,7 @@ from the Actions tab: it has no tag-push trigger (see [Releasing](releasing.md))
 
 | Step | Where | Notes |
 |---|---|---|
-| Verify the namespace | Central Portal → Namespaces | `io.vegaduta` needs a DNS TXT record on `vegaduta.io` (or use `io.github.<owner>`, which needs no domain but is unwieldy in a POM). Decide before any coordinates appear in documentation ([ADR-0013](../architecture/ADR-0013-embeddable-agent-sdk.md) §7.1) |
+| Verify the namespace | Central Portal → Namespaces | `io.github.cd-lc` is verified via a throwaway public repo in the `CD-LC` org (the portal hands you the repo name, usually a random key, and checks it exists). `io.vegaduta`/`ai.vegaduta` would need a DNS TXT on a domain we own. Decide before any coordinates appear in documentation ([ADR-0013](../architecture/ADR-0013-embeddable-agent-sdk.md) §7.1) |
 | Create a user token | Central Portal → Account | Becomes `CENTRAL_USERNAME` and `CENTRAL_PASSWORD` |
 | Create a GPG key | `gpg --full-generate-key`, publish the public key to a keyserver | Becomes `SDK_GPG_PRIVATE_KEY` (ASCII-armored) and `SDK_GPG_PASSPHRASE` |
 | Add secrets | Settings → Environments → `maven-central` → secrets | `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `SDK_GPG_PRIVATE_KEY`, `SDK_GPG_PASSPHRASE`. Require a reviewer on the environment |

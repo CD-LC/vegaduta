@@ -26,6 +26,8 @@ export interface CallOptions<Q = QueryParams, H = HeaderParams> {
   query?: Q;
   headers?: H;
   signal?: AbortSignal;
+  /** Overrides the client's `timeoutMs` for this call only. */
+  timeoutMs?: number;
 }
 
 /** A bearer token, or a function returning one (called on every request, so it may refresh). */
@@ -40,18 +42,57 @@ export interface ClientOptions {
   fetch?: typeof fetch;
   /** Headers added to every request. */
   headers?: Record<string, string>;
+  /**
+   * Per-request timeout in milliseconds. `0` (the default) means no client-side
+   * deadline; the caller's `signal` still applies. Does NOT bound SSE streams
+   * (a stream lives as long as the server keeps it - it would be killed mid-answer).
+   */
+  timeoutMs?: number;
+  /**
+   * Retries for idempotent GET/HEAD calls that fail with 429, a 5xx, a `Retry-After`
+   * response or a network error (default 2). Mutating methods are never retried.
+   */
+  maxRetries?: number;
+  /** Extra segment appended to the `User-Agent` product token (your app name). */
+  userAgent?: string;
 }
 
 /** Thrown for every non-2xx response. `body` is the parsed JSON error (see ErrorBody) or the raw text. */
 export class ApiError extends Error {
   readonly status: number;
   readonly body: unknown;
+  /** Machine-readable `ErrorBody.code` when the server sent one. */
+  readonly code?: string;
+  /** Response headers (kept: request ids, rate-limit and `Retry-After` live here). */
+  readonly headers: Headers;
+  /** `Retry-After` in milliseconds when the server asked us to wait. */
+  readonly retryAfterMs?: number;
 
-  constructor(status: number, body: unknown, message?: string) {
+  constructor(status: number, body: unknown, headers?: Headers, message?: string) {
     super(message ?? describeError(status, body));
     this.name = "ApiError";
     this.status = status;
     this.body = body;
+    this.headers = headers ?? new Headers();
+    if (body && typeof body === "object") {
+      const code = (body as Record<string, unknown>).code;
+      if (typeof code === "string" && code) this.code = code;
+    }
+    const retryAfter = this.headers.get("retry-after");
+    if (retryAfter) {
+      const secs = Number(retryAfter);
+      if (Number.isFinite(secs)) this.retryAfterMs = Math.max(0, secs * 1000);
+    }
+  }
+}
+
+/** Thrown when the request could not be made at all (DNS, TLS, refused, aborted deadline). */
+export class NetworkError extends Error {
+  readonly cause?: unknown;
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = "NetworkError";
+    this.cause = cause;
   }
 }
 
@@ -165,6 +206,9 @@ export class HttpClient {
   private readonly token?: TokenSource;
   private readonly fetchImpl: typeof fetch;
   private readonly defaultHeaders: Record<string, string>;
+  private readonly timeoutMs: number;
+  private readonly maxRetries: number;
+  private readonly userAgent: string;
 
   constructor(options: ClientOptions = {}) {
     const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
@@ -177,22 +221,62 @@ export class HttpClient {
     this.token = options.token;
     this.defaultHeaders = options.headers ?? {};
     this.fetchImpl = options.fetch ?? ((input, init) => globalThis.fetch(input, init));
+    this.timeoutMs = options.timeoutMs ?? 0;
+    this.maxRetries = Math.max(0, options.maxRetries ?? 2);
+    this.userAgent = ["vegaduta-sdk-ts", options.userAgent].filter(Boolean).join(" ");
   }
 
   /** Performs a request and returns the parsed body; throws ApiError for non-2xx. */
   async request<T>(args: RequestArgs): Promise<T> {
     const kind = args.response ?? "json";
     const accept = kind === "json" ? "application/json" : "*/*";
-    const res = await this.fetchImpl(this.url(args), await this.init(args, accept));
-    if (!res.ok) throw await toApiError(res);
-    return (await readBody(res, kind)) as T;
+    const retryable = isRetryableMethod(args.method);
+    let refreshed = false;
+    let attempt = 0;
+    for (;;) {
+      try {
+        const res = await this.fetchImpl(this.url(args), await this.init(args, accept));
+        if (!res.ok) {
+          const err = await toApiError(res);
+          if (err.status === 401 && typeof this.token === "function" && !refreshed) {
+            refreshed = true; // re-resolve the token source once and try again
+            continue;
+          }
+          if (retryable && attempt < this.maxRetries && isRetryableStatus(err.status)) {
+            await sleep(err.retryAfterMs ?? backoffMs(attempt++));
+            continue;
+          }
+          throw err;
+        }
+        return (await readBody(res, kind)) as T;
+      } catch (e) {
+        if (e instanceof ApiError) throw e;
+        const net = new NetworkError(describeNetworkError(e), e);
+        if (retryable && attempt < this.maxRetries && !isAbort(e)) {
+          await sleep(backoffMs(attempt++));
+          continue;
+        }
+        throw net;
+      }
+    }
   }
 
   /** Performs a request that answers with Server-Sent Events and yields each event's payload. */
   async *stream(args: RequestArgs): AsyncGenerator<string, void, undefined> {
-    const res = await this.fetchImpl(this.url(args), await this.init(args, "text/event-stream"));
+    // No timeout and no retries: a stream is not idempotent and may legitimately idle.
+    let res: Response;
+    try {
+      res = await this.fetchImpl(this.url(args), await this.init(args, "text/event-stream"));
+      if (res.status === 401 && typeof this.token === "function") {
+        res = await this.fetchImpl(this.url(args), await this.init(args, "text/event-stream"));
+      }
+    } catch (e) {
+      throw new NetworkError(describeNetworkError(e), e);
+    }
     if (!res.ok) throw await toApiError(res);
-    if (!res.body) return;
+    if (!res.body) {
+      throw new ApiError(res.status, "response has no body", res.headers, `HTTP ${res.status}: the server returned an empty SSE stream`);
+    }
     for await (const payload of parseSse(res.body)) {
       if (payload.startsWith(STREAM_ERROR_MARKER)) {
         throw new StreamInterruptedError(payload.slice(STREAM_ERROR_MARKER.length));
@@ -221,6 +305,7 @@ export class HttpClient {
     const token = typeof this.token === "function" ? await this.token() : this.token;
     if (token) headers.set("Authorization", `Bearer ${token}`);
     headers.set("Accept", accept);
+    headers.set("User-Agent", this.userAgent);
     for (const [k, v] of Object.entries((args.headers ?? {}) as Record<string, unknown>)) {
       if (v !== undefined && v !== null) headers.set(k, String(v));
     }
@@ -237,8 +322,45 @@ export class HttpClient {
         body = args.body as BodyInit;
       }
     }
-    return { method: args.method, headers, body, signal: args.signal };
+    const perCall = (args as { timeoutMs?: number }).timeoutMs;
+    const deadline = perCall ?? this.timeoutMs;
+    let signal = args.signal;
+    if (deadline > 0) {
+      const timeout = AbortSignal.timeout(deadline);
+      signal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+    }
+    return { method: args.method, headers, body, signal };
   }
+}
+
+const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
+
+function isRetryableMethod(method: string): boolean {
+  const m = method.toUpperCase();
+  return m === "GET" || m === "HEAD";
+}
+
+function isRetryableStatus(status: number): boolean {
+  return RETRYABLE_STATUS.has(status);
+}
+
+function backoffMs(attempt: number): number {
+  // 250ms, 500ms, 1s, ... capped at 5s, with up to 40% jitter against herding.
+  return Math.min(5000, 250 * 2 ** attempt) * (1 - Math.random() * 0.4);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isAbort(e: unknown): boolean {
+  return e instanceof DOMException && e.name === "AbortError";
+}
+
+function describeNetworkError(e: unknown): string {
+  if (isAbort(e)) return "The request was aborted (caller signal or client timeout).";
+  if (e instanceof Error && e.message) return e.message;
+  return "The request could not be completed.";
 }
 
 async function toApiError(res: Response): Promise<ApiError> {
@@ -251,7 +373,7 @@ async function toApiError(res: Response): Promise<ApiError> {
       body = text;
     }
   }
-  return new ApiError(res.status, body, undefined);
+  return new ApiError(res.status, body, res.headers);
 }
 
 async function readBody(res: Response, kind: "json" | "text" | "blob" | "void"): Promise<unknown> {
@@ -262,5 +384,12 @@ async function readBody(res: Response, kind: "json" | "text" | "blob" | "void"):
   if (kind === "blob") return res.blob();
   const text = await res.text();
   if (kind === "text") return text;
-  return text ? JSON.parse(text) : undefined;
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    // A 2xx we cannot parse is still a failure the caller must see - a bare
+    // SyntaxError would pretend it was a programming bug, not a server answer.
+    throw new ApiError(res.status, text, res.headers, `HTTP ${res.status}: expected JSON, got an unparseable body`);
+  }
 }

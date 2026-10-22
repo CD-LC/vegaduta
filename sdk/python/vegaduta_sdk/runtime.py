@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import os
+import random
+import socket
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -21,17 +25,48 @@ TokenSource = Union[str, Callable[[], str], None]
 
 
 class ApiError(Exception):
-    """Raised for every non-2xx response. ``body`` is the parsed JSON error or the raw text."""
+    """Raised for every non-2xx response.
 
-    def __init__(self, status: int, body: Any, message: Optional[str] = None) -> None:
+    ``body`` is the parsed JSON error (the shared ``ErrorBody`` shape: ``status``, ``error``,
+    optional ``code``) or the raw text. ``headers`` keeps request ids and rate-limit
+    information; ``code`` and ``retry_after`` are lifted out for convenience.
+    """
+
+    def __init__(
+        self,
+        status: int,
+        body: Any,
+        message: Optional[str] = None,
+        headers: Optional[Mapping[str, str]] = None,
+    ) -> None:
         self.status = status
         self.body = body
+        self.headers: Dict[str, str] = dict(headers or {})
+        self.code: Optional[str] = body.get("code") if isinstance(body, dict) else None
+        self.retry_after: Optional[float] = None
+        retry_after = _header_lookup(self.headers, "retry-after")
+        if retry_after:
+            try:
+                self.retry_after = max(0.0, float(retry_after))
+            except ValueError:
+                pass
         self.message = message or _describe_error(status, body)
         super().__init__(f"HTTP {status}: {self.message}")
 
 
+class NetworkError(Exception):
+    """The request could not be made at all (DNS, TLS, refused, timed out, aborted)."""
+
+
 class StreamInterruptedError(Exception):
     """Raised while iterating a stream that the server aborted after it had started."""
+
+
+def _header_lookup(headers: Mapping[str, str], name: str) -> Optional[str]:
+    for key, value in headers.items():
+        if key.lower() == name:
+            return value
+    return None
 
 
 def _describe_error(status: int, body: Any) -> str:
@@ -136,6 +171,8 @@ class HttpClient:
         token: TokenSource = None,
         timeout: float = 60.0,
         headers: Optional[Mapping[str, str]] = None,
+        max_retries: int = 2,
+        user_agent: Optional[str] = None,
     ) -> None:
         resolved = base_url or os.environ.get("VEGADUTA_BASE_URL", "")
         if not resolved:
@@ -147,6 +184,9 @@ class HttpClient:
         self.token = token
         self.timeout = timeout
         self.default_headers: Dict[str, str] = dict(headers or {})
+        # Idempotent GET/HEAD calls retry on 429/5xx/network failures; mutating calls never do.
+        self.max_retries = max(0, max_retries)
+        self.user_agent = " ".join(p for p in ("vegaduta-sdk-py", user_agent) if p)
 
     # -- public ---------------------------------------------------------------------------------
 
@@ -161,15 +201,42 @@ class HttpClient:
         body_type: str = "json",
         content_type: Optional[str] = None,
         response: str = "json",
+        timeout: Optional[float] = None,
     ) -> Any:
-        """Perform a request and return the parsed body; raises ApiError for non-2xx."""
+        """Perform a request and return the parsed body; raises ApiError for non-2xx.
+
+        ``timeout`` overrides the client's per-request deadline for this call only.
+        GET/HEAD retry on 429, 5xx and network failures (honouring ``Retry-After``);
+        a callable ``token`` is re-resolved once on 401.
+        """
+        if timeout is None:
+            timeout = self.timeout
         accept = "application/json" if response == "json" else "*/*"
-        req = self._build(method, path, query, headers, body, body_type, content_type, accept)
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as res:
-                raw = res.read()
-        except urllib.error.HTTPError as err:
-            raise self._error(err) from None
+        retryable = method.upper() in ("GET", "HEAD")
+        refreshed = False
+        attempt = 0
+        while True:
+            req = self._build(method, path, query, headers, body, body_type, content_type, accept)
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as res:
+                    raw = res.read()
+            except urllib.error.HTTPError as err:
+                api_error = self._error(err)
+                if api_error.status == 401 and callable(self.token) and not refreshed:
+                    refreshed = True
+                    continue
+                if retryable and attempt < self.max_retries and api_error.status in _RETRYABLE_STATUS:
+                    time.sleep(api_error.retry_after or _backoff(attempt))
+                    attempt += 1
+                    continue
+                raise api_error from None
+            except (urllib.error.URLError, OSError, socket.timeout, TimeoutError) as err:
+                if retryable and attempt < self.max_retries:
+                    time.sleep(_backoff(attempt))
+                    attempt += 1
+                    continue
+                raise NetworkError(f"request to {self.base_url}{path} failed: {err}") from err
+            break
         if response == "void":
             return None
         if response == "blob":
@@ -177,7 +244,12 @@ class HttpClient:
         text = raw.decode("utf-8") if raw else ""
         if response == "text":
             return text
-        return json.loads(text) if text else None
+        if not text:
+            return None
+        try:
+            return json.loads(text)
+        except ValueError:
+            raise ApiError(0, text, "expected JSON, got an unparseable response body") from None
 
     def stream(
         self,
@@ -193,22 +265,41 @@ class HttpClient:
         """Perform a request that answers with Server-Sent Events; yields each event's payload.
 
         The request is sent when the first item is requested (this is a generator). Closing the
-        generator closes the connection.
+        generator closes the connection. The client ``timeout`` bounds connect + headers only:
+        once the stream opens the socket turns blocking, so a stream that legitimately idles
+        between chunks is never killed by the request deadline. A callable ``token`` is
+        re-resolved once on 401; streams are never retried (they are not idempotent).
         """
-        req = self._build(method, path, query, headers, body, body_type, content_type, "text/event-stream")
+        url, merged, data = self._prepare(method, path, query, headers, body, body_type, content_type)
+        merged["Accept"] = "text/event-stream"
+        parts = urllib.parse.urlsplit(url)
+        target = parts.path + ("?" + parts.query if parts.query else "")
+        conn_cls = http.client.HTTPSConnection if parts.scheme == "https" else http.client.HTTPConnection
+        conn = conn_cls(parts.hostname, parts.port, timeout=self.timeout)
         try:
-            res = urllib.request.urlopen(req, timeout=self.timeout)
-        except urllib.error.HTTPError as err:
-            raise self._error(err) from None
-        try:
-            for payload in iter_sse(res):
+            conn.request(method, target, body=data, headers=merged)
+            res = conn.getresponse()
+            if res.status == 401 and callable(self.token):
+                conn.close()
+                conn = conn_cls(parts.hostname, parts.port, timeout=self.timeout)
+                merged["Authorization"] = f"Bearer {self._resolve_token()}"
+                conn.request(method, target, body=data, headers=merged)
+                res = conn.getresponse()
+            if res.status < 200 or res.status >= 300:
+                raise self._status_error(res)
+            # Stream open: remove the read deadline; the server owns stream lifetime.
+            if conn.sock is not None:
+                conn.sock.settimeout(None)
+            for payload in iter_sse(_iter_response_lines(res)):
                 if payload.startswith(STREAM_ERROR_MARKER):
                     raise StreamInterruptedError(
                         payload[len(STREAM_ERROR_MARKER):] or "The response stream was interrupted. Please try again."
                     )
                 yield payload
+        except (OSError, socket.timeout, TimeoutError, http.client.HTTPException) as err:
+            raise NetworkError(f"stream to {self.base_url}{path} failed: {err}") from err
         finally:
-            res.close()
+            conn.close()
 
     # -- internals ------------------------------------------------------------------------------
 
@@ -226,7 +317,7 @@ class HttpClient:
     def _resolve_token(self) -> Optional[str]:
         return self.token() if callable(self.token) else self.token
 
-    def _build(
+    def _prepare(
         self,
         method: str,
         path: str,
@@ -235,13 +326,12 @@ class HttpClient:
         body: Any,
         body_type: str,
         content_type: Optional[str],
-        accept: str,
-    ) -> urllib.request.Request:
+    ) -> Tuple[str, Dict[str, str], Optional[bytes]]:
         merged: Dict[str, str] = dict(self.default_headers)
         token = self._resolve_token()
         if token:
             merged["Authorization"] = f"Bearer {token}"
-        merged["Accept"] = accept
+        merged["User-Agent"] = self.user_agent
         for key, value in (headers or {}).items():
             if value is not None:
                 merged[key] = str(value)
@@ -256,7 +346,31 @@ class HttpClient:
                 if content_type and "Content-Type" not in merged:
                     merged["Content-Type"] = content_type
                 data = body.encode("utf-8") if isinstance(body, str) else bytes(body)
-        return urllib.request.Request(self._url(path, query), data=data, headers=merged, method=method)
+        return self._url(path, query), merged, data
+
+    def _build(
+        self,
+        method: str,
+        path: str,
+        query: Optional[Mapping[str, Any]],
+        headers: Optional[Mapping[str, Any]],
+        body: Any,
+        body_type: str,
+        content_type: Optional[str],
+        accept: str,
+    ) -> urllib.request.Request:
+        url, merged, data = self._prepare(method, path, query, headers, body, body_type, content_type)
+        merged["Accept"] = accept
+        return urllib.request.Request(url, data=data, headers=merged, method=method)
+
+    @staticmethod
+    def _status_error(res: http.client.HTTPResponse) -> ApiError:
+        """ApiError from a raw http.client response (the SSE path does not use HTTPError)."""
+        try:
+            text = res.read().decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001 - a broken error body must not mask the HTTP status
+            text = ""
+        return _api_error_from(res.status, res.getheaders(), text)
 
     @staticmethod
     def _error(err: urllib.error.HTTPError) -> ApiError:
@@ -264,13 +378,34 @@ class HttpClient:
             text = err.read().decode("utf-8", "replace")
         except Exception:  # noqa: BLE001 - a broken error body must not mask the HTTP status
             text = ""
-        body: Any = text
-        if text:
-            try:
-                body = json.loads(text)
-            except ValueError:
-                body = text
-        return ApiError(err.code, body)
+        return _api_error_from(err.code, err.headers.items(), text)
+
+
+_RETRYABLE_STATUS = {408, 425, 429, 500, 502, 503, 504}
+
+
+def _backoff(attempt: int) -> float:
+    """250ms, 500ms, 1s, ... capped at 5s, with up to 40% jitter against herding."""
+    return min(5.0, 0.25 * 2**attempt) * (1 - random.random() * 0.4)
+
+
+def _api_error_from(status: int, headers: Iterable[Tuple[str, str]], text: str) -> ApiError:
+    body: Any = text
+    if text:
+        try:
+            body = json.loads(text)
+        except ValueError:
+            body = text
+    return ApiError(status, body, headers=dict(headers))
+
+
+def _iter_response_lines(res: http.client.HTTPResponse) -> Iterator[bytes]:
+    """Yield raw byte lines from a chunked http.client response."""
+    while True:
+        line = res.readline()
+        if not line:
+            break
+        yield line
 
 
 def _query_text(value: Any) -> str:

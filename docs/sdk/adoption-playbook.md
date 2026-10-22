@@ -81,7 +81,7 @@ against every real call, but **nothing is blocked and nobody is asked for approv
 
    ```xml
    <dependency>
-     <groupId>io.vegaduta</groupId>
+     <groupId>io.github.cd-lc</groupId>
      <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
      <version>${vegaduta-agent.version}</version>
    </dependency>

@@ -5,7 +5,7 @@ your code is.
 
 | You are writing | Use | Lives in | Status |
 |---|---|---|---|
-| A Java application with its own agents or tools (Spring AI, or any framework) and you want governance: tool risk classification, human approval, budgets, idempotent effects, guardrails, hooks, audit, telemetry | **[Java Agent SDK](java-agent-sdk.md)** (`io.vegaduta:vegaduta-agent-*`) | `sdk/java/` | `0.1.0-SNAPSHOT`; builds and tests green; Maven Central publication pending namespace verification |
+| A Java application with its own agents or tools (Spring AI, or any framework) and you want governance: tool risk classification, human approval, budgets, idempotent effects, guardrails, hooks, audit, telemetry | **[Java Agent SDK](java-agent-sdk.md)** (`io.github.cd-lc:vegaduta-agent-*`) | `sdk/java/` | `0.1.0-SNAPSHOT`; builds and tests green; Maven Central publication pending namespace verification |
 | A Python application with its own agents or tools (LangChain, Pydantic AI, a hand-rolled loop) and you want the same governance layer | **[Python Agent SDK](python-agent-sdk.md)** (`vegaduta-agent`) | `sdk/python-agent/` | `0.1.0`; zero runtime dependencies, stdlib only; PyPI publication pending |
 | A TypeScript or Node program that calls a running VegaDūta platform (create agents, chat, run workflows) | **[TypeScript client](clients.md)** (`vegaduta-sdk`) | `sdk/typescript/` | generated from the OpenAPI document; package name is a placeholder until registered |
 | A Python program that calls a running VegaDūta platform | **[Python client](clients.md)** (`vegaduta_sdk`) | `sdk/python/` | generated from the OpenAPI document; standard library only |

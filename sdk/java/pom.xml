@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.vegaduta</groupId>
+  <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-parent</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -103,37 +103,37 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-jdbc</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-testkit</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-scanner</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-spring-ai</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -194,7 +194,8 @@
 
   <build>
     <!-- Apache-2.0 §4: every distributed jar carries the license and the NOTICE file.
-         They live at the repository root (this reactor only builds from a checkout). -->
+         They live in sdk/ (the Apache-2.0-licensed subtree); the repository root's
+         LICENSE is BSL-1.1 and must NOT ship inside these artifacts. -->
     <resources>
       <!-- Declaring <resources> replaces the default list, so keep src/main/resources
            (JDBC DDL, Spring auto-configuration metadata) alongside the legal files. -->
@@ -202,7 +203,7 @@
         <directory>src/main/resources</directory>
       </resource>
       <resource>
-        <directory>${maven.multiModuleProjectDirectory}/../..</directory>
+        <directory>${maven.multiModuleProjectDirectory}/..</directory>
         <includes>
           <include>LICENSE</include>
           <include>NOTICE</include>

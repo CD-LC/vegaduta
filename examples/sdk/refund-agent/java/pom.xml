@@ -25,7 +25,7 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.vegaduta</groupId>
+        <groupId>io.github.cd-lc</groupId>
         <artifactId>vegaduta-agent-bom</artifactId>
         <version>${vegaduta-agent.version}</version>
         <type>pom</type>
@@ -36,7 +36,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.vegaduta</groupId>
+      <groupId>io.github.cd-lc</groupId>
       <artifactId>vegaduta-agent-core</artifactId>
     </dependency>
     <dependency>
