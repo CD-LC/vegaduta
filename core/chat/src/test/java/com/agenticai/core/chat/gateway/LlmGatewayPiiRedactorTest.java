@@ -128,4 +128,30 @@ class LlmGatewayPiiRedactorTest {
                 LlmGatewayPiiRedactor.redact(
                         "first.last+tag@sub.example.co.in", Set.of(LlmGatewayPiiCategory.EMAIL)));
     }
+
+    @Test
+    void anAddressIsRedactedWholeWhateverTheLengthOfItsLocalPart() {
+        for (int length : new int[] {63, 64, 65, 70, 300, 5_000}) {
+            String text = "mail " + "a".repeat(length) + "@example.com please";
+            String result = LlmGatewayPiiRedactor.redact(text, Set.of(LlmGatewayPiiCategory.EMAIL));
+            assertEquals("mail [REDACTED_EMAIL] please", result, "local part of " + length);
+        }
+    }
+
+    @Test
+    void anAdversarialTextOf50kCharactersIsRedactedQuickly() {
+        for (String hostile :
+                new String[] {
+                    "a".repeat(50_000),
+                    "a@".repeat(25_000),
+                    "a".repeat(63) + "@" + "b.".repeat(25_000),
+                    "a@b." + "c".repeat(50_000) + "_"
+                }) {
+            assertTimeoutPreemptively(
+                    Duration.ofSeconds(2),
+                    () ->
+                            LlmGatewayPiiRedactor.redact(
+                                    hostile, Set.of(LlmGatewayPiiCategory.EMAIL)));
+        }
+    }
 }

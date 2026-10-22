@@ -57,4 +57,16 @@ class PolicyPackPatternMatcherTest {
         assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "x".repeat(40) + "@example.com"))
                 .contains("email");
     }
+
+    @Test
+    void anAddressWithAnOverLongLocalPartIsStillDetected() {
+        for (int length : new int[] {64, 65, 70, 300, 5_000}) {
+            assertThat(
+                            matcher.firstMatch(
+                                    ModerationPolicyPack.PII,
+                                    "mail " + "a".repeat(length) + "@example.com"))
+                    .as("local part of %d characters", length)
+                    .contains("email");
+        }
+    }
 }

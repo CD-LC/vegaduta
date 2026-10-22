@@ -1,5 +1,6 @@
 package com.agenticai.core.chat.gateway;
 
+import com.agenticai.core.security.TextRedaction;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -34,10 +35,8 @@ final class LlmGatewayPiiRedactor {
 
     private LlmGatewayPiiRedactor() {}
 
-    // Same shape as PiiGuardrail.EMAIL_PATTERN (core/guardrails) - kept
-    // independent per this class's javadoc.
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("\\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
+    // E-mail: found by core/security's TextRedaction (linear time, whole local part) - same
+    // shape as PiiGuardrail's e-mail pattern, which core/guardrails keeps independently.
 
     // Same shape as PiiGuardrail.PHONE_PATTERN - NANP + India 5-5 grouping.
     private static final Pattern PHONE_PATTERN =
@@ -84,7 +83,7 @@ final class LlmGatewayPiiRedactor {
         // eaten by a later digit-only pattern matching a numeric fragment
         // inside it (e.g. a domain that happens to contain a phone-shaped run).
         if (categories.contains(LlmGatewayPiiCategory.EMAIL)) {
-            result = EMAIL_PATTERN.matcher(result).replaceAll(EMAIL_PLACEHOLDER);
+            result = TextRedaction.redactEmails(result, EMAIL_PLACEHOLDER);
         }
         if (categories.contains(LlmGatewayPiiCategory.CREDIT_CARD)) {
             result = CREDIT_CARD_PATTERN.matcher(result).replaceAll(CREDIT_CARD_PLACEHOLDER);
