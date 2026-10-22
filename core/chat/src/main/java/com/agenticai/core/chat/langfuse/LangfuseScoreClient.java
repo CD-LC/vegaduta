@@ -33,8 +33,9 @@ import org.springframework.web.client.RestClient;
  * uses (stripping the well-known {@code /api/public/otel/v1/traces} suffix Langfuse's own OTLP
  * ingestion path documents), and reuses the exact same {@code LANGFUSE_OTEL_AUTH_HEADER} pre-built
  * "Basic base64(publicKey: secretKey)" value the OTLP exporter's {@code
- * management.opentelemetry.tracing.export.otlp.headers.Authorization} already sends - Langfuse's public API accepts this identical Basic-Auth
- * pair on every one of its endpoints, so no separate credential wiring is needed.
+ * management.opentelemetry.tracing.export.otlp.headers.Authorization} already sends - Langfuse's
+ * public API accepts this identical Basic-Auth pair on every one of its endpoints, so no separate
+ * credential wiring is needed.
  *
  * <p><b>Trace-id caveat (assumption, not confirmed against a live Langfuse instance - see this
  * build's final report)</b>: this class assumes the 32-lowercase-hex-char OTel trace id captured by

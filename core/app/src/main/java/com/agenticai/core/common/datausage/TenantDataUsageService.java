@@ -24,34 +24,28 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Builds {@code GET /api/tenant/data-usage}'s response - a tenant-admin's own,
- * honest answer to "which of our backend systems touch our data, and how."
- * Same voice as {@code web/app/why-vegaduta/page.tsx}: plain, factual, and
- * comfortable admitting a limitation directly rather than overselling it (see
- * {@link #temporal()} in particular).
+ * Builds {@code GET /api/tenant/data-usage}'s response - a tenant-admin's own, honest answer to
+ * "which of our backend systems touch our data, and how." Same voice as {@code
+ * web/app/why-vegaduta/page.tsx}: plain, factual, and comfortable admitting a limitation directly
+ * rather than overselling it (see {@link #temporal()} in particular).
  *
- * <p><b>Why this lives in {@code core/app}, not {@code core/tenancy}
- * alongside {@link TenantDataErasureService}/{@code TenantDataExportService}.
- * </b> This feature deliberately reuses ALREADY-LIVE facts and counters from
- * several modules ({@code core/tenancy} for the Postgres schema/object-storage
- * facts, {@code core/chat} for the Langfuse/LLM-call-count fact, {@code
- * core/eventbus} for the Kafka outbox fact) rather than re-deriving any of
- * them. {@code core/tenancy} cannot be the home for that: {@code core/eventbus}
- * already depends on {@code core/tenancy} (for {@link TenantContext} et al.),
- * and {@code core/chat}'s own dependency chain (chat -&gt; providers -&gt;
- * sarvam -&gt; tenancy) means {@code core/tenancy} depending on either would
- * be a real Maven module cycle, not a style preference. {@code core/app} is
- * the one module that already depends on all three (and on {@code
- * core/security}/{@code core/workflow} for the remaining facts below) - the
- * exact same reason {@code SystemStatusController} (also a many-module
- * aggregator over live facts) already lives in this module's {@code
- * com.agenticai.core.common} package rather than in any one of the modules it
- * reads from.
+ * <p><b>Why this lives in {@code core/app}, not {@code core/tenancy} alongside {@link
+ * TenantDataErasureService}/{@code TenantDataExportService}. </b> This feature deliberately reuses
+ * ALREADY-LIVE facts and counters from several modules ({@code core/tenancy} for the Postgres
+ * schema/object-storage facts, {@code core/chat} for the Langfuse/LLM-call-count fact, {@code
+ * core/eventbus} for the Kafka outbox fact) rather than re-deriving any of them. {@code
+ * core/tenancy} cannot be the home for that: {@code core/eventbus} already depends on {@code
+ * core/tenancy} (for {@link TenantContext} et al.), and {@code core/chat}'s own dependency chain
+ * (chat -&gt; providers -&gt; sarvam -&gt; tenancy) means {@code core/tenancy} depending on either
+ * would be a real Maven module cycle, not a style preference. {@code core/app} is the one module
+ * that already depends on all three (and on {@code core/security}/{@code core/workflow} for the
+ * remaining facts below) - the exact same reason {@code SystemStatusController} (also a many-module
+ * aggregator over live facts) already lives in this module's {@code com.agenticai.core.common}
+ * package rather than in any one of the modules it reads from.
  *
- * <p>Every {@code liveStat}/fact read is independently wrapped in {@link
- * #safe} - the same "one bad reading never blanks the panel" posture {@code
- * SystemStatusController#safe} already establishes for the adjacent System
- * Status panel - so one system's query failing degrades that one entry to a
+ * <p>Every {@code liveStat}/fact read is independently wrapped in {@link #safe} - the same "one bad
+ * reading never blanks the panel" posture {@code SystemStatusController#safe} already establishes
+ * for the adjacent System Status panel - so one system's query failing degrades that one entry to a
  * {@code null} liveStat, never a 500 for the whole response.
  */
 @Service
@@ -73,22 +67,21 @@ public class TenantDataUsageService {
     private final DataSource dataSource;
 
     /**
-     * Same property/default {@code WorkflowService#executionEngineMode} reads
-     * - deliberately re-read here rather than asking {@code WorkflowService}
-     * for its own field (private, and this only needs the raw configured
-     * value, not any of that service's run-orchestration behavior). Confirmed
-     * by direct audit (2026-07-27) of {@code WorkflowService#resolveExecutionEngine}:
-     * this defaults to, and today in this deployment actually is, {@code
-     * "legacy"} - see {@link #temporal()}.
+     * Same property/default {@code WorkflowService#executionEngineMode} reads - deliberately
+     * re-read here rather than asking {@code WorkflowService} for its own field (private, and this
+     * only needs the raw configured value, not any of that service's run-orchestration behavior).
+     * Confirmed by direct audit (2026-07-27) of {@code WorkflowService#resolveExecutionEngine}:
+     * this defaults to, and today in this deployment actually is, {@code "legacy"} - see {@link
+     * #temporal()}.
      */
     @Value("${app.workflow.execution-engine:legacy}")
     private String executionEngineMode;
 
     /**
      * Which of the listed systems this deployment actually runs. A personal install has no Kafka
-     * (no {@code workflow} profile), no Temporal (no {@code temporal} profile), no Keycloak
-     * ({@code app.identity.provider=local}), no tracing backend and files on local disk; listing
-     * them as "active" told the owner about infrastructure that does not exist. Defaults keep the
+     * (no {@code workflow} profile), no Temporal (no {@code temporal} profile), no Keycloak ({@code
+     * app.identity.provider=local}), no tracing backend and files on local disk; listing them as
+     * "active" told the owner about infrastructure that does not exist. Defaults keep the
      * full-stack answer (and the existing tests) unchanged.
      */
     @Value("${spring.profiles.active:}")
@@ -136,16 +129,14 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Isolation fact source: {@code Tenant#getSchemaName()} (see that field's
-     * own javadoc) - this tenant's rows live in a Postgres schema no other
-     * tenant's queries ever touch, the same schema-per-tenant boundary {@code
-     * TenantDataExportService}/{@code TenantDataErasureService} already build
-     * on. {@code liveStat} counts real tables in exactly that schema via
-     * {@code information_schema.tables}, scoped by a bind parameter (never
-     * string-concatenated - {@code schemaName} here is only used as a query
-     * VALUE, unlike the schema-qualified-identifier SQL {@code
-     * TenantDataExportService}/{@code TenantDataErasureService} build for
-     * their own, different raw-JDBC needs).
+     * Isolation fact source: {@code Tenant#getSchemaName()} (see that field's own javadoc) - this
+     * tenant's rows live in a Postgres schema no other tenant's queries ever touch, the same
+     * schema-per-tenant boundary {@code TenantDataExportService}/{@code TenantDataErasureService}
+     * already build on. {@code liveStat} counts real tables in exactly that schema via {@code
+     * information_schema.tables}, scoped by a bind parameter (never string-concatenated - {@code
+     * schemaName} here is only used as a query VALUE, unlike the schema-qualified-identifier SQL
+     * {@code TenantDataExportService}/{@code TenantDataErasureService} build for their own,
+     * different raw-JDBC needs).
      */
     private SystemUsage postgres(Tenant tenant) {
         Integer tableCount = safe(() -> postgresTableCount(tenant.getSchemaName()));
@@ -164,18 +155,16 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Isolation fact source: {@code S3FileStorageService}'s tenant-key-prefix
-     * convention (infra audit fix, 2026-07-27, {@code core/storage}) -
-     * {@code S3FileStorageService#put} prefixes every new object's physical
-     * key with {@code tenant/<tenantId>/}, and {@code #get}/{@code #exists}/
-     * {@code #delete} refuse a caller-supplied key that already carries a
-     * DIFFERENT tenant's prefix ({@code S3FileStorageService#verifyTenantOwnership}
-     * - the class's own "defense-in-depth ownership check"). {@code liveStat}
-     * reuses {@code TenantDataErasureService#countObjectStorageItemsForCurrentTenant}
-     * - a read-only twin of that service's own erasure object-key enumeration
-     * (same {@code OBJECT_KEY_TABLES} list plus avatars), added alongside this
-     * feature specifically so this count and "how many objects erasure would
-     * delete" are always computed the same way.
+     * Isolation fact source: {@code S3FileStorageService}'s tenant-key-prefix convention (infra
+     * audit fix, 2026-07-27, {@code core/storage}) - {@code S3FileStorageService#put} prefixes
+     * every new object's physical key with {@code tenant/<tenantId>/}, and {@code #get}/{@code
+     * #exists}/ {@code #delete} refuse a caller-supplied key that already carries a DIFFERENT
+     * tenant's prefix ({@code S3FileStorageService#verifyTenantOwnership} - the class's own
+     * "defense-in-depth ownership check"). {@code liveStat} reuses {@code
+     * TenantDataErasureService#countObjectStorageItemsForCurrentTenant} - a read-only twin of that
+     * service's own erasure object-key enumeration (same {@code OBJECT_KEY_TABLES} list plus
+     * avatars), added alongside this feature specifically so this count and "how many objects
+     * erasure would delete" are always computed the same way.
      */
     private boolean hasProfile(String profile) {
         // The default (unset) is the full stack, which runs everything.
@@ -212,14 +201,12 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Isolation fact source: {@code LlmGatewayRateLimiterService}'s Redis key
-     * format - {@code KEY_PREFIX + tenantId}, i.e. {@code
-     * "agentic:llm-gateway-rate:<your-tenant-id>"} (see that class's {@code
-     * KEY_PREFIX} constant and {@code assertWithinRateLimit}). No {@code
-     * liveStat}: a bare current counter value for a one-minute fixed window
-     * isn't a meaningful standalone number to show a tenant-admin (it would
-     * usually just read "0" or "3", changing every minute) - honestly left
-     * {@code null} rather than built for the sake of filling the field.
+     * Isolation fact source: {@code LlmGatewayRateLimiterService}'s Redis key format - {@code
+     * KEY_PREFIX + tenantId}, i.e. {@code "agentic:llm-gateway-rate:<your-tenant-id>"} (see that
+     * class's {@code KEY_PREFIX} constant and {@code assertWithinRateLimit}). No {@code liveStat}:
+     * a bare current counter value for a one-minute fixed window isn't a meaningful standalone
+     * number to show a tenant-admin (it would usually just read "0" or "3", changing every minute)
+     * - honestly left {@code null} rather than built for the sake of filling the field.
      */
     private SystemUsage redis() {
         return new SystemUsage(
@@ -238,17 +225,15 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Isolation fact source: {@code LlmMetricsAdvisor#tagSpanAndExtractIds}
-     * (see {@code core/chat}), which sets the OTel attributes {@code
-     * vegaduta.tenant.id} (always the tenant id) and {@code langfuse.user.id}
-     * (a pseudonymous user id, or a salted hash of it, per {@code
-     * app.observability.langfuse.user-id-mode}) on every real LLM call's
-     * trace before it's exported to Langfuse. {@code liveStat} reuses {@code
-     * LlmCallLogService#dashboardMetrics()}'s already-computed {@code
-     * callsLast24h} (the same durable, tenant-schema-scoped {@code
+     * Isolation fact source: {@code LlmMetricsAdvisor#tagSpanAndExtractIds} (see {@code
+     * core/chat}), which sets the OTel attributes {@code vegaduta.tenant.id} (always the tenant id)
+     * and {@code langfuse.user.id} (a pseudonymous user id, or a salted hash of it, per {@code
+     * app.observability.langfuse.user-id-mode}) on every real LLM call's trace before it's exported
+     * to Langfuse. {@code liveStat} reuses {@code LlmCallLogService#dashboardMetrics()}'s
+     * already-computed {@code callsLast24h} (the same durable, tenant-schema-scoped {@code
      * llm_call_log} table the AXON Dashboard telemetry strip and {@code
-     * SystemStatusController#llmTelemetry} already read from) rather than
-     * writing a new aggregation query.
+     * SystemStatusController#llmTelemetry} already read from) rather than writing a new aggregation
+     * query.
      */
     private SystemUsage langfuse() {
         Long calls24h = safe(() -> llmCallLogService.dashboardMetrics().callsLast24h());
@@ -268,14 +253,12 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Isolation fact source: {@code SystemStatusController#kafkaQueue()}'s
-     * existing javadoc/query - "Live counts from this tenant's own {@code
-     * workflow_event_outbox} table (schema-per-tenant multitenancy routes the
-     * query automatically)." {@code liveStat} reuses the identical repository
-     * method that panel already calls ({@code
-     * WorkflowEventOutboxRepository#countByPublishedAtIsNullAndRetryCountLessThan},
-     * bounded by the same {@code WorkflowEventOutboxRelay#MAX_RETRIES}), not a
-     * new query.
+     * Isolation fact source: {@code SystemStatusController#kafkaQueue()}'s existing javadoc/query -
+     * "Live counts from this tenant's own {@code workflow_event_outbox} table (schema-per-tenant
+     * multitenancy routes the query automatically)." {@code liveStat} reuses the identical
+     * repository method that panel already calls ({@code
+     * WorkflowEventOutboxRepository#countByPublishedAtIsNullAndRetryCountLessThan}, bounded by the
+     * same {@code WorkflowEventOutboxRelay#MAX_RETRIES}), not a new query.
      */
     private SystemUsage kafka() {
         Long pending =
@@ -298,19 +281,16 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Status is deliberately {@code "available_not_engaged"} for exactly one
-     * reason: it's true. Confirmed by direct audit (2026-07-27) of {@code
-     * WorkflowService#resolveExecutionEngine} - {@code
-     * app.workflow.execution-engine} defaults to, and this deployment
-     * currently is configured as, {@code "legacy"}: every workflow run today
-     * executes directly in-process, synchronously, inside the request that
-     * triggered it, with the retry/error handling {@code WorkflowExecutionEngine}
-     * already provides - NOT durable across a server crash mid-run. {@code
-     * TemporalWorkflowExecutionEngine} is fully built and would only engage
-     * if this property were set to {@code "temporal"} AND the "temporal"
-     * Spring profile were active; neither is true right now. This is the one
-     * system in this whole view where honesty means admitting a limitation
-     * rather than describing a capability as live.
+     * Status is deliberately {@code "available_not_engaged"} for exactly one reason: it's true.
+     * Confirmed by direct audit (2026-07-27) of {@code WorkflowService#resolveExecutionEngine} -
+     * {@code app.workflow.execution-engine} defaults to, and this deployment currently is
+     * configured as, {@code "legacy"}: every workflow run today executes directly in-process,
+     * synchronously, inside the request that triggered it, with the retry/error handling {@code
+     * WorkflowExecutionEngine} already provides - NOT durable across a server crash mid-run. {@code
+     * TemporalWorkflowExecutionEngine} is fully built and would only engage if this property were
+     * set to {@code "temporal"} AND the "temporal" Spring profile were active; neither is true
+     * right now. This is the one system in this whole view where honesty means admitting a
+     * limitation rather than describing a capability as live.
      */
     private SystemUsage temporal() {
         boolean engaged = "temporal".equalsIgnoreCase(executionEngineMode);
@@ -331,13 +311,12 @@ public class TenantDataUsageService {
     }
 
     /**
-     * Isolation fact source: {@code TenantContextFilter#doFilterInternal} -
-     * every authenticated request's JWT is read for a {@code tenant_id}
-     * claim, and a request from a non-platform-admin JWT that carries no
-     * usable {@code tenant_id} is rejected outright with a 403 before it ever
-     * reaches a controller (see that filter's {@code tenantMissing} branch).
-     * This is the literal mechanism binding a signed-in user to their
-     * tenant's data scope on every single request, not just at login.
+     * Isolation fact source: {@code TenantContextFilter#doFilterInternal} - every authenticated
+     * request's JWT is read for a {@code tenant_id} claim, and a request from a non-platform-admin
+     * JWT that carries no usable {@code tenant_id} is rejected outright with a 403 before it ever
+     * reaches a controller (see that filter's {@code tenantMissing} branch). This is the literal
+     * mechanism binding a signed-in user to their tenant's data scope on every single request, not
+     * just at login.
      */
     private SystemUsage keycloak() {
         return new SystemUsage(
@@ -385,7 +364,10 @@ public class TenantDataUsageService {
                                         "No Tenant row for schema '" + schemaName + "'"));
     }
 
-    /** Same "one bad reading never blanks the whole response" posture as {@code SystemStatusController#safe}. */
+    /**
+     * Same "one bad reading never blanks the whole response" posture as {@code
+     * SystemStatusController#safe}.
+     */
     private <T> T safe(Supplier<T> read) {
         try {
             return read.get();

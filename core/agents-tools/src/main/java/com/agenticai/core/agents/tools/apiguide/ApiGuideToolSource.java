@@ -2,13 +2,11 @@ package com.agenticai.core.agents.tools.apiguide;
 
 import com.agenticai.core.agentspi.ApiSpecProvider;
 import com.agenticai.core.agentspi.WorkspaceToolSource;
-
+import java.util.List;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Offers {@code vegaduta_api_guide} on every install, next to {@code vegaduta_setup_guide}: the

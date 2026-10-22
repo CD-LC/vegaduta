@@ -2,11 +2,10 @@ package com.agenticai.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.InputStream;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Spring Boot 4's OpenTelemetry starter brings the OTLP metrics registry, which is on by default

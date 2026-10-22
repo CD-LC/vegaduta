@@ -3,7 +3,6 @@ package com.agenticai.core.agents.tools.apiguide;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.agentspi.ApiSpecProvider;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
