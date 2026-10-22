@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Download, Files as FilesIcon, Loader2, Search } from "lucide-react";
 import { api } from "../lib/api";
-import { cloudSpeechOffered } from "../lib/cloudSpeech";
+import { useCloudSpeechOffered } from "../lib/cloudSpeech";
 import { usePagination } from "../lib/usePagination";
 import AppShell from "../components/AppShell";
 import PageHeader from "../components/ax/PageHeader";
@@ -156,13 +156,14 @@ export default function FilesPage() {
       .finally(() => setLoaded(true));
   }, []);
 
+  // Re-reads the listings if core's status later says the hosted speech vendors are on or off.
+  const speech = useCloudSpeechOffered();
   const refreshArtifacts = useCallback(() => {
     setArtifactsLoaded(false);
     setArtifactsFailed(false);
     setArtifactsCapped(false);
     setArtifactPartialFailureCount(0);
     // The unpaged lists (images, speech, video) are flagged when one reaches the cap: it may have been truncated.
-    const speech = cloudSpeechOffered();
     const capSeen = { value: false };
     const noteCap = (list: any[]) => {
       if (list.length >= ARTIFACT_LIST_CAP) capSeen.value = true;
@@ -201,7 +202,7 @@ export default function FilesPage() {
         setArtifactsFailed(true);
       })
       .finally(() => setArtifactsLoaded(true));
-  }, [t]);
+  }, [t, speech]);
 
   useEffect(() => {
     refresh();

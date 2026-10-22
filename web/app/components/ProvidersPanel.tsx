@@ -14,7 +14,7 @@ import { cn } from "../lib/utils";
 import { useProviderCatalogFilter } from "../providers/ProviderCatalogFilter";
 import { ROUTING_MODES, getRoutingMode, type TenantProviderState } from "../lib/edge/routingState";
 import { errorMessage } from "../lib/errors";
-import { cloudSpeechOffered } from "../lib/cloudSpeech";
+import { useCloudSpeechOffered } from "../lib/cloudSpeech";
 import { isPersonalInstall, showPlatformPoolToggle } from "../lib/personalInstall";
 import {
   E2B_SPECIAL_CASED,
@@ -80,7 +80,7 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
   const canManageProviders = hasPermission("MANAGE_INTEGRATIONS");
   // Sarvam and ElevenLabs are core's CLOUD_SPEECH feature: absent on a personal install, where their cards,
   // credential reads and the voice-cloning section would only be 404s.
-  const speech = cloudSpeechOffered();
+  const speech = useCloudSpeechOffered();
   const cards = offeredProviders();
   const implementedCards = offeredImplementedProviders();
   const canManageVoice = hasPermission("MANAGE_CHANNELS"); // ElevenLabs key + voices: server-gated on MANAGE_CHANNELS
