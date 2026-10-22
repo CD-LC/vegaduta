@@ -33,7 +33,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     steps: [
       "Go to console.anthropic.com and sign in (or create an account).",
       "Open Settings → API Keys in the left sidebar.",
-      "Click \"Create Key\", name it (e.g. \"vegaduta\"), and copy it immediately - it's shown only once.",
+      'Click "Create Key", name it (e.g. "vegaduta"), and copy it immediately - it\'s shown only once.',
       "Paste it into the API key field here and click Activate.",
     ],
     href: "https://console.anthropic.com/settings/keys",
@@ -44,7 +44,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     steps: [
       "Go to platform.openai.com and sign in.",
       "Open Settings → API keys.",
-      "Click \"Create new secret key\" and copy it - it's shown only once.",
+      'Click "Create new secret key" and copy it - it\'s shown only once.',
     ],
     href: "https://platform.openai.com/api-keys",
     pricingHref: "https://platform.openai.com/docs/pricing",
@@ -54,19 +54,20 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     steps: [
       "Go to openrouter.ai and sign in (or create an account).",
       "Open Settings → Keys.",
-      "Click \"Create Key\", name it, and copy it - it's shown only once.",
+      'Click "Create Key", name it, and copy it - it\'s shown only once.',
       "Paste it into the API key field here and click Activate.",
     ],
     href: "https://openrouter.ai/settings/keys",
     pricingHref: "https://openrouter.ai/models",
-    startHint: "One key, many labs - the easiest way to try several models (including free ones) without juggling accounts.",
+    startHint:
+      "One key, many labs - the easiest way to try several models (including free ones) without juggling accounts.",
   },
   GROK: {
     title: "Get an xAI (Grok) API key",
     steps: [
       "Go to console.x.ai (xAI's developer console) and sign in.",
       "Open the API Keys section.",
-      "Click \"Create API Key\", name it, and copy it - it's shown only once.",
+      'Click "Create API Key", name it, and copy it - it\'s shown only once.',
     ],
     href: "https://console.x.ai",
     pricingHref: "https://docs.x.ai/docs/models",
@@ -75,7 +76,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     title: "Get a Google Gemini (AI Studio) API key",
     steps: [
       "Go to aistudio.google.com/apikey and sign in with a Google account.",
-      "Click \"Create API key\" (no GCP project or billing setup required to get started).",
+      'Click "Create API key" (no GCP project or billing setup required to get started).',
       "Copy the key and paste it into the API key field here.",
     ],
     href: "https://aistudio.google.com/apikey",
@@ -86,7 +87,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     title: "Get an Azure OpenAI key",
     steps: [
       "In the Azure Portal, open (or create) an Azure OpenAI resource.",
-      "Go to \"Keys and Endpoint\" under Resource Management, and copy KEY 1 (or KEY 2) and the endpoint URL.",
+      'Go to "Keys and Endpoint" under Resource Management, and copy KEY 1 (or KEY 2) and the endpoint URL.',
       "In Azure AI Foundry (or Resource Management → Model deployments), find the deployment name you want to use - this is the name YOU gave the deployment, not the underlying model id.",
       "Leave API version blank to use this platform's default, or set one explicitly if your resource needs a different one.",
     ],
@@ -139,7 +140,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     title: "Get a Mistral AI API key",
     steps: [
       "Go to console.mistral.ai and sign in (or create an account).",
-      "Open API Keys and click \"Create new key\".",
+      'Open API Keys and click "Create new key".',
       "Copy it and paste it into the field below - it's shown only once.",
     ],
     href: "https://console.mistral.ai",
@@ -149,7 +150,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     title: "Get a DeepSeek API key",
     steps: [
       "Go to platform.deepseek.com and sign in (or create an account).",
-      "Open API keys and click \"Create new API key\".",
+      'Open API keys and click "Create new API key".',
       "Copy it and paste it into the field below - it's shown only once.",
     ],
     href: "https://platform.deepseek.com",
@@ -159,7 +160,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     title: "Get a Groq (GroqCloud) API key",
     steps: [
       "Go to console.groq.com and sign in (or create an account).",
-      "Open API Keys and click \"Create API Key\".",
+      'Open API Keys and click "Create API Key".',
       "Copy it and paste it into the field below - it's shown only once. Not the same company as xAI's Grok, despite the similar name.",
     ],
     href: "https://console.groq.com/keys",
@@ -170,7 +171,7 @@ export const LLM_PROVIDER_GUIDES: Record<string, LlmProviderGuide> = {
     title: "Get a Meta Model API key (Muse Spark)",
     steps: [
       "Go to dev.meta.ai and sign in with your Meta account. Sign-up for the Meta Model API is not open in every country yet - a key obtained anywhere works from anywhere.",
-      "Open the API keys tab and click \"Create API key\", name it (e.g. \"vegaduta\"), and copy it - it looks like LLM|<digits>|<chars> and is shown only once.",
+      'Open the API keys tab and click "Create API key", name it (e.g. "vegaduta"), and copy it - it looks like LLM|<digits>|<chars> and is shown only once.',
       "Paste it into the field below and click Activate. This unlocks muse-spark-1.3 (recommended), 1.2 and 1.1; the -contributor variants are cheaper because Meta trains on that traffic, so pick them only knowingly.",
       "No Meta key? Muse Spark is also reachable through the OpenRouter provider as meta/muse-spark-1.3.",
     ],
@@ -202,7 +203,7 @@ export const TWILIO_API_KEY_GUIDE = {
   title: "Get a Twilio API Key (recommended over Auth Token)",
   steps: [
     "In the Twilio Console, go to Account → API keys & tokens.",
-    "Click \"Create API key\", choose Standard, and name it.",
+    'Click "Create API key", choose Standard, and name it.',
     "Copy the API Key SID (starts with SK...) and Secret immediately - the secret is shown only once.",
     "API keys can be scoped and revoked individually, unlike the Auth Token which grants full account access.",
   ],
@@ -258,7 +259,7 @@ export const DISCORD_BOT_GUIDE = {
   title: "Get a Discord Bot Token",
   steps: [
     "Go to discord.com/developers/applications and create a New Application.",
-    "Under Bot, click Add Bot, then turn on the \"Message Content Intent\" (required to read ordinary message text).",
+    'Under Bot, click Add Bot, then turn on the "Message Content Intent" (required to read ordinary message text).',
     "Click Reset Token (or Copy) to get the Bot Token.",
     "Under OAuth2 → URL Generator, select the bot scope plus Send Messages and Read Message History, then open the generated URL to invite the bot to your server.",
   ],
@@ -270,7 +271,7 @@ export const X_APP_GUIDE = {
   title: "Get an X (Twitter) OAuth 2.0 Client ID & Secret",
   steps: [
     "DM access requires at least X's paid Basic API tier - go to developer.x.com and create a Project + App.",
-    "Under User authentication settings, turn on OAuth 2.0, set App type to \"Confidential client\", and request the dm.read, dm.write, tweet.read, users.read, and offline.access scopes.",
+    'Under User authentication settings, turn on OAuth 2.0, set App type to "Confidential client", and request the dm.read, dm.write, tweet.read, users.read, and offline.access scopes.',
     "Add this platform's callback URL as a Callback URI (ask your platform operator for the exact value - it's the same for every tenant).",
     "Copy the OAuth 2.0 Client ID and Client Secret from Keys and tokens.",
   ],
@@ -315,7 +316,7 @@ export const EMAIL_IMAP_GUIDE = {
 export const TEAMS_APP_GUIDE = {
   title: "Register an Azure Bot for Microsoft Teams",
   steps: [
-    "In the Azure portal, create an \"Azure Bot\" resource (or reuse an existing Bot registration).",
+    'In the Azure portal, create an "Azure Bot" resource (or reuse an existing Bot registration).',
     "Under the bot's Configuration, set the Messaging endpoint to this platform's /webhook/teams/<your App ID> URL - inbound DMs never arrive until this is set.",
     "Copy the Microsoft App ID from the same page; create a client secret under Certificates & secrets in the linked Entra app registration.",
     "The Entra tenant ID is optional - leave it blank for the usual multi-tenant bot (the platform defaults to botframework.com).",
@@ -339,7 +340,7 @@ export const KNOWLEDGE_BASE_GUIDE = {
   title: "What goes in a knowledge base?",
   steps: [
     "Upload .md, .pdf, .docx, images, audio, or video files - each gets split into searchable chunks automatically.",
-    "Group related files into a Collection (e.g. \"Product FAQs\", \"Support Policies\") so you can scope which agents can search which collection.",
+    'Group related files into a Collection (e.g. "Product FAQs", "Support Policies") so you can scope which agents can search which collection.',
     "An agent with Knowledge Base access turned on will automatically search relevant collections when answering questions.",
   ],
 };
@@ -351,8 +352,8 @@ export const MCP_CREDENTIAL_GUIDES: Record<string, any> = {
     title: "Get an Atlassian API token",
     steps: [
       "Go to id.atlassian.com/manage-profile/security/api-tokens in your browser.",
-      "Click \"Create API token\" to generate a new token.",
-      "Name it (e.g. \"vegaduta\") and copy the token immediately - it's shown only once.",
+      'Click "Create API token" to generate a new token.',
+      'Name it (e.g. "vegaduta") and copy the token immediately - it\'s shown only once.',
       "Add a credential named Authorization with value: Bearer <your-token>",
       "Verify your Atlassian host URL (e.g., https://yourcompany.atlassian.net) is correct in the server configuration.",
     ],
@@ -371,7 +372,7 @@ export const MCP_CREDENTIAL_GUIDES: Record<string, any> = {
     title: "Get a GitHub Personal Access Token",
     steps: [
       "Go to github.com/settings/tokens in your browser.",
-      "Click \"Generate new token\" (choose \"Fine-grained personal access token\" for more control).",
+      'Click "Generate new token" (choose "Fine-grained personal access token" for more control).',
       "Give it a name, set expiration, select required scopes (repo, gist, workflow, etc.), and click Generate.",
       "Copy the token immediately - it's shown only once.",
       "Add a credential named Authorization with value: Bearer <your-token> (or token <your-token> depending on the MCP server).",
@@ -391,7 +392,7 @@ export const MCP_CREDENTIAL_GUIDES: Record<string, any> = {
     title: "Get a GitLab Personal Access Token",
     steps: [
       "Go to gitlab.com/-/user_settings/personal_access_tokens (or your self-hosted GitLab instance).",
-      "Click \"Add new token\" and name it (e.g. \"vegaduta\").",
+      'Click "Add new token" and name it (e.g. "vegaduta").',
       "Select scopes (api, read_api, write_repository, etc.) and click Create token.",
       "Copy the token immediately - it's shown only once.",
       "Add a credential named Authorization with value: Bearer <your-token>",
@@ -447,7 +448,7 @@ export const MCP_CREDENTIAL_GUIDES: Record<string, any> = {
     title: "Get a Notion Integration Token",
     steps: [
       "Go to notion.so/my-integrations and create a new internal integration.",
-      "Name it (e.g. \"vegaduta\") and copy the Internal Integration Token.",
+      'Name it (e.g. "vegaduta") and copy the Internal Integration Token.',
       "Go to each Notion page/database you want this integration to access, and in Share settings, add your integration.",
       "Add a credential named NOTION_API_KEY with the token value.",
     ],
