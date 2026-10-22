@@ -1,0 +1,192 @@
+name: REST SDK release
+
+# Releases the generated REST clients - sdk/typescript (npm `vegaduta-sdk`) and
+# sdk/python (PyPI `vegaduta-sdk`) - for a tag `restsdk-v1.2.3` (or -rc.1).
+# Run it from the Actions tab with "Use workflow from" set to that TAG; a branch
+# is refused. It is independent of the platform release and of the agent SDKs
+# (sdk-v* and pysdk-v* tags). Both packages share the tag version; their
+# manifests must be bumped together.
+# Procedure and one-time setup: docs/maintainers/releasing-rest-sdks.md.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rest-sdk-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TYPESCRIPT_VERSION: "5.9.3"
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: Require a tag ref
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/restsdk-v*) ;;
+            *) echo "::error::run this workflow on a restsdk-v* tag (Use workflow from: Tags), not $GITHUB_REF"; exit 1 ;;
+          esac
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: "24"
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.13"
+      - name: Tag must equal both manifest versions
+        id: version
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#restsdk-v}"
+          ts_version="$(node -e "console.log(require('./sdk/typescript/package.json').version)")"
+          py_version="$(python3 -c 'import re,sys; print(re.search(r"^version = \"(.+)\"", open("sdk/python/pyproject.toml").read(), re.M).group(1))')"
+          py_dunder="$(python3 -c 'import re,sys; print(re.search(r"__version__ = \"(.+)\"", open("sdk/python/vegaduta_sdk/__init__.py").read()).group(1))')"
+          for v in "$ts_version" "$py_version" "$py_dunder"; do
+            if [ "$v" != "$tag_version" ]; then
+              echo "::error::tag $GITHUB_REF_NAME but manifests say typescript=$ts_version python=$py_version dunder=$py_dunder"; exit 1
+            fi
+          done
+          case "$tag_version" in *-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;; *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;; esac
+          echo "version=$tag_version" >> "$GITHUB_OUTPUT"
+      - name: Generated sources are in sync with the spec
+        run: node sdk/generate.mjs --check
+      - name: Type-check and build the TypeScript package
+        working-directory: sdk/typescript
+        run: |
+          npm ci || npm install --no-audit --no-fund
+          npm run typecheck
+          npm run build
+      - name: Run runtime and contract tests
+        run: |
+          node --test sdk/test/ts-runtime.test.mjs
+          node --test sdk/test/generate.test.mjs
+          node --test sdk/test/consumer-contract.test.mjs
+          python3 -m unittest discover -s sdk/python/tests -v
+
+  build:
+    name: Build distributions
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # Sigstore attestations
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: "24"
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.13"
+      - name: Typecheck, build and pack the TypeScript package
+        working-directory: sdk/typescript
+        run: |
+          npm ci || npm install --no-audit --no-fund
+          npm pack
+          mv vegaduta-sdk-*.tgz ../.. --verbose
+      - name: Build the Python package
+        run: |
+          python3 -m pip install --user build
+          python3 -m build sdk/python --outdir dist
+      - name: Checksums
+        run: |
+          cd dist && sha256sum *.tar.gz *.whl ../vegaduta-sdk-*.tgz > SHA256SUMS 2>/dev/null || \
+          ( sha256sum *.tar.gz *.whl > SHA256SUMS && sha256sum ../vegaduta-sdk-*.tgz >> SHA256SUMS )
+      - name: Attest provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdfc65b84548be8d03c2774f4 # v3.0.0
+        with:
+          subject-path: |
+            dist/
+            vegaduta-sdk-*.tgz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rest-sdk-dists
+          path: |
+            dist/
+            vegaduta-sdk-*.tgz
+          retention-days: 30
+
+  release:
+    name: GitHub release
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: rest-sdk-dists
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ needs.verify.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          args=(--generate-notes --verify-tag)
+          [ "$PRERELEASE" = "true" ] && args+=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" "${args[@]}" dist/* vegaduta-sdk-*.tgz \
+            --notes-start-tag "$GITHUB_REF_NAME" || \
+          gh release upload "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz --clobber
+
+  pypi:
+    name: Publish to PyPI
+    if: vars.SDK_PUBLISH_PYPI == 'true'
+    environment: pypi-rest-sdk
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write # trusted publishing
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: rest-sdk-dists
+          path: dist
+      - name: Publish to PyPI (trusted publishing)
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd790c9bec43f9625a9b9ad1e8 # v1.13.0
+        with:
+          skip-existing: true
+          packages-dir: dist
+
+  npm:
+    name: Publish to npm
+    if: vars.SDK_PUBLISH_NPM == 'true'
+    environment: npm
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write # npm provenance
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - name: Publish to npm (provenance)
+        working-directory: sdk/typescript
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm ci || npm install --no-audit --no-fund
+          npm pkg delete private  # the release workflow owns the publish decision
+          npm publish --provenance --access public --ignore-scripts

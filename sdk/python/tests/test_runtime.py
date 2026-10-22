@@ -85,7 +85,29 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlparse(self.path)
-        if url.path == "/echo":
+        self.server.hits.append(url.path)
+        if url.path == "/flaky":
+            # First hit is a 503 asking politely; the second answers.
+            if self.server.hits.count("/flaky") == 1:
+                self.send_response(503)
+                self.send_header("Retry-After", "0")
+                self.end_headers()
+            else:
+                self._json(200, {"ok": True})
+        elif url.path == "/auth-check":
+            if self.headers.get("Authorization") == "Bearer fresh":
+                self._json(200, {"ok": True})
+            else:
+                self._json(401, {"status": 401, "error": "expired"})
+        elif url.path == "/coded-error":
+            self.send_response(429)
+            self.send_header("Retry-After", "1.5")
+            self.send_header("X-Request-Id", "req-9")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": 429, "error": "slow down", "code": "RATE_LIMITED"}).encode())
+        elif url.path == "/not-json-200":
+            self._send(200, b"<html>oops</html>", "text/html")
+        elif url.path == "/echo":
             self._json(200, {
                 "query": parse_qs(url.query),
                 "auth": self.headers.get("Authorization"),
@@ -117,7 +139,10 @@ class _Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(length) if length else b""
         ctype = self.headers.get("Content-Type", "")
-        if self.path == "/json":
+        self.server.hits.append(urlparse(self.path).path)
+        if self.path == "/flaky":
+            self._send(503)
+        elif self.path == "/json":
             self._json(201, {"received": json.loads(raw.decode("utf-8")), "content_type": ctype})
         elif self.path == "/upload":
             self._json(200, {"content_type": ctype, "has_file": b'filename="a.txt"' in raw})
@@ -131,6 +156,7 @@ class _Handler(BaseHTTPRequestHandler):
 class HttpClientTest(unittest.TestCase):
     def setUp(self):
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+        self.server.hits = []
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
         self.addCleanup(self._stop)
@@ -196,6 +222,46 @@ class HttpClientTest(unittest.TestCase):
         gen = HttpClient(base_url=self.base).stream("GET", "/fail")
         with self.assertRaises(ApiError):
             next(gen)
+
+    def test_get_retries_transient_5xx(self):
+        self.assertEqual(HttpClient(base_url=self.base).request("GET", "/flaky"), {"ok": True})
+        self.assertEqual(self.server.hits.count("/flaky"), 2)
+
+    def test_post_is_never_retried(self):
+        with self.assertRaises(ApiError) as ctx:
+            HttpClient(base_url=self.base).request("POST", "/flaky", body={"a": 1})
+        self.assertEqual(ctx.exception.status, 503)
+        self.assertEqual(self.server.hits.count("/flaky"), 1)
+
+    def test_api_error_carries_headers_code_and_retry_after(self):
+        with self.assertRaises(ApiError) as ctx:
+            HttpClient(base_url=self.base, max_retries=0).request("GET", "/coded-error")
+        err = ctx.exception
+        self.assertEqual(err.status, 429)
+        self.assertEqual(err.code, "RATE_LIMITED")
+        self.assertEqual(err.retry_after, 1.5)
+        self.assertEqual(err.headers.get("x-request-id") or err.headers.get("X-Request-Id"), "req-9")
+
+    def test_unparseable_success_body_raises_api_error(self):
+        with self.assertRaises(ApiError) as ctx:
+            HttpClient(base_url=self.base).request("GET", "/not-json-200")
+        self.assertIn("unparseable", ctx.exception.message)
+
+    def test_network_failure_becomes_network_error(self):
+        # A closed local port refuses the connection; POST is not retried so it surfaces at once.
+        refused = f"http://127.0.0.1:{self.server.server_address[1] + 9}"
+        with self.assertRaises(runtime.NetworkError):
+            HttpClient(base_url=refused).request("POST", "/x", body={})
+
+    def test_callable_token_re_resolves_once_on_401(self):
+        tokens = iter(["stale", "fresh"])
+        calls = []
+        def source():
+            calls.append(1)
+            return next(tokens)
+        client = HttpClient(base_url=self.base, token=source)
+        self.assertEqual(client.request("GET", "/auth-check"), {"ok": True})
+        self.assertEqual(len(calls), 2)
 
 
 if __name__ == "__main__":

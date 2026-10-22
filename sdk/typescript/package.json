@@ -1,20 +1,50 @@
 {
   "name": "vegaduta-sdk",
   "version": "0.1.0",
-  "description": "TypeScript SDK for the VegaDuta REST API (generated from docs/api/openapi.json). Placeholder name until a package scope is chosen.",
+  "description": "TypeScript/JavaScript client for the VegaDūta REST API, generated from the platform's OpenAPI spec with a zero-dependency hand-written runtime (fetch, SSE streams, retries, timeouts).",
   "license": "Apache-2.0",
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
-    "src"
+    "README.md",
+    "LICENSE",
+    "NOTICE"
   ],
   "scripts": {
     "generate": "node ../generate.mjs",
-    "build": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run typecheck && npm run build"
   },
   "engines": {
     "node": ">=18"
+  },
+  "keywords": [
+    "vegaduta",
+    "sdk",
+    "api-client",
+    "rest",
+    "agents",
+    "ai"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CD-LC/vegaduta.git",
+    "directory": "sdk/typescript"
+  },
+  "homepage": "https://vegaduta.ai",
+  "bugs": "https://github.com/CD-LC/vegaduta/issues",
+  "sideEffects": false,
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

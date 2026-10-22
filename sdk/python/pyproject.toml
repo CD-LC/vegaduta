@@ -1,15 +1,39 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "vegaduta-sdk"  # placeholder name until a package name is reserved
 version = "0.1.0"
-description = "Python SDK for the VegaDuta REST API (generated from docs/api/openapi.json)"
+description = "Python client for the VegaDūta REST API, generated from the platform's OpenAPI spec with a zero-dependency standard-library runtime (SSE streams, retries, timeouts)."
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
+authors = [{ name = "VegaDūta contributors" }]
+keywords = ["vegaduta", "sdk", "api-client", "rest", "agents", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
 dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1"]
+
+[project.urls]
+Homepage = "https://vegaduta.ai"
+Repository = "https://github.com/CD-LC/vegaduta/tree/main/sdk/python"
+Issues = "https://github.com/CD-LC/vegaduta/issues"
+Changelog = "https://github.com/CD-LC/vegaduta/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 packages = ["vegaduta_sdk", "vegaduta_sdk.generated"]

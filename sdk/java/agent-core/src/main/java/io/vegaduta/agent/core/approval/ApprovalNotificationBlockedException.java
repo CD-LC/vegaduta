@@ -1,6 +1,7 @@
 package io.vegaduta.agent.core.approval;
 
 import io.vegaduta.agent.api.Experimental;
+import io.vegaduta.agent.api.GovernanceException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
  * unseen. {@code GovernedTool} turns it into a denied result.
  */
 @Experimental
-public final class ApprovalNotificationBlockedException extends RuntimeException {
+public final class ApprovalNotificationBlockedException extends GovernanceException {
 
   private static final long serialVersionUID = 1L;
 

@@ -134,3 +134,110 @@ test("HttpClient has no built-in deployment: baseUrl or VEGADUTA_BASE_URL is req
     else process.env.VEGADUTA_BASE_URL = saved;
   }
 });
+
+test("GET retries a 429 honouring Retry-After, then succeeds", { skip }, async () => {
+  let calls = 0;
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    fetch: async () => {
+      calls += 1;
+      if (calls === 1) {
+        return new Response(JSON.stringify({ status: 429, error: "slow" }), {
+          status: 429,
+          headers: { "retry-after": "0" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    },
+  });
+  assert.deepEqual(await client.request({ method: "GET", path: "/f" }), { ok: true });
+  assert.equal(calls, 2);
+});
+
+test("POST is never retried", { skip }, async () => {
+  let calls = 0;
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    fetch: async () => {
+      calls += 1;
+      return new Response(JSON.stringify({ status: 503, error: "down" }), { status: 503 });
+    },
+  });
+  await assert.rejects(() => client.request({ method: "POST", path: "/x", body: {} }), rt.ApiError);
+  assert.equal(calls, 1);
+});
+
+test("ApiError carries headers, code and retryAfterMs", { skip }, async () => {
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    maxRetries: 0,
+    fetch: async () =>
+      new Response(JSON.stringify({ status: 429, error: "slow", code: "RATE_LIMITED" }), {
+        status: 429,
+        headers: { "retry-after": "1.5", "x-request-id": "req-9" },
+      }),
+  });
+  await assert.rejects(
+    () => client.request({ method: "GET", path: "/x" }),
+    (err) =>
+      err instanceof rt.ApiError &&
+      err.status === 429 &&
+      err.code === "RATE_LIMITED" &&
+      err.retryAfterMs === 1500 &&
+      err.headers.get("x-request-id") === "req-9",
+  );
+});
+
+test("an unparseable 200 raises ApiError, not a raw SyntaxError", { skip }, async () => {
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    fetch: async () => new Response("<html>oops</html>", { status: 200 }),
+  });
+  await assert.rejects(
+    () => client.request({ method: "GET", path: "/x" }),
+    (err) => err instanceof rt.ApiError && err.message.includes("unparseable"),
+  );
+});
+
+test("a failed fetch becomes NetworkError (POST, unretried)", { skip }, async () => {
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    fetch: async () => {
+      throw new TypeError("fetch failed");
+    },
+  });
+  await assert.rejects(
+    () => client.request({ method: "POST", path: "/x", body: {} }),
+    (err) => err instanceof rt.NetworkError && err.cause instanceof TypeError,
+  );
+});
+
+test("a callable token is re-resolved once on 401", { skip }, async () => {
+  const tokens = ["stale", "fresh"];
+  const seen = [];
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    token: () => tokens.shift(),
+    fetch: async (url, init) => {
+      seen.push(init.headers.get("Authorization"));
+      if (seen.length === 1) return new Response(JSON.stringify({ error: "expired" }), { status: 401 });
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    },
+  });
+  assert.deepEqual(await client.request({ method: "GET", path: "/x" }), { ok: true });
+  assert.deepEqual(seen, ["Bearer stale", "Bearer fresh"]);
+});
+
+test("requests carry the SDK User-Agent", { skip }, async () => {
+  let ua = null;
+  const client = new rt.HttpClient({
+    baseUrl: "https://x.test",
+    userAgent: "my-app/9",
+    fetch: async (url, init) => {
+      ua = init.headers.get("User-Agent");
+      return new Response("{}", { status: 200 });
+    },
+  });
+  await client.request({ method: "GET", path: "/x" });
+  assert.equal(ua, "vegaduta-sdk-ts my-app/9");
+});

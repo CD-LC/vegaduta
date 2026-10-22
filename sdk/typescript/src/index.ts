@@ -5,6 +5,7 @@ export {
   ApiError,
   DEFAULT_BASE_URL,
   HttpClient,
+  NetworkError,
   SseDecoder,
   STREAM_ERROR_MARKER,
   StreamInterruptedError,

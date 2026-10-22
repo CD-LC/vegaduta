@@ -194,7 +194,8 @@
 
   <build>
     <!-- Apache-2.0 §4: every distributed jar carries the license and the NOTICE file.
-         They live at the repository root (this reactor only builds from a checkout). -->
+         They live in sdk/ (the Apache-2.0-licensed subtree); the repository root's
+         LICENSE is BSL-1.1 and must NOT ship inside these artifacts. -->
     <resources>
       <!-- Declaring <resources> replaces the default list, so keep src/main/resources
            (JDBC DDL, Spring auto-configuration metadata) alongside the legal files. -->
@@ -202,7 +203,7 @@
         <directory>src/main/resources</directory>
       </resource>
       <resource>
-        <directory>${maven.multiModuleProjectDirectory}/../..</directory>
+        <directory>${maven.multiModuleProjectDirectory}/..</directory>
         <includes>
           <include>LICENSE</include>
           <include>NOTICE</include>
