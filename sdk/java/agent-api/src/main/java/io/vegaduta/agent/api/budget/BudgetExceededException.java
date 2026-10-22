@@ -3,7 +3,7 @@ package io.vegaduta.agent.api.budget;
 import io.vegaduta.agent.api.GovernanceException;
 
 /**
- * Thrown when a charge would take a {@link BudgetTracker} over its cap. Carries the amount
+ * Thrown when a charge would take a {@link BudgetProvider} over its cap. Carries the amount
  * requested, what the budget already holds and the cap, so callers can report or retry with a
  * smaller amount without parsing the message.
  */
