@@ -27,6 +27,12 @@ check "plan uses personal.yml and its build overlay, not lite or full" "$(has "$
 check "state remembers the tier" "$([ "$(state tier)" = personal ] && [ "$(state native_core)" = 0 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 check "secrets were generated, none printed" "$(! has "$out" "$(sed -n 's/^APP_ENCRYPTION_KEY=//p' "$VEGADUTA_ENV_FILE")"; echo $?)"
 
+echo "minimal floor"
+new_home
+out="$("$CLI" personal --minimal --build --cloud --dry-run </dev/null 2>&1)"
+check "--minimal prints its plan instead of exiting in silence" "$(has "$out" 'plan: tier=personal'; echo $?)" "$out"
+check "--minimal leaves out the valkey profile" "$(! has "$out" '--profile valkey'; echo $?)" "$out"
+
 echo "native core"
 new_home
 out="$("$CLI" personal --native-core --build --local-ai=host --local-model qwen3.5:2b --dry-run </dev/null 2>&1)"
