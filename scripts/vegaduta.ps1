@@ -5,7 +5,9 @@
 .DESCRIPTION
   Same commands as scripts/vegaduta (bash):
     .\scripts\vegaduta.ps1 up [-Lite|-Full] [-Profile a,b] [-Build] [-Domain example.com]
-    .\scripts\vegaduta.ps1 personal [-Build]   (one-person laptop mode, no Keycloak; the host-JVM -NativeCore option is bash-only: use WSL2)
+    .\scripts\vegaduta.ps1 personal [-Build] [-Search|-NoSearch] [-Cloud] [-LocalModel TAG] [-DryRun]
+                                              (one-person laptop mode, no Keycloak; the host-JVM -NativeCore option is bash-only: use WSL2;
+                                               -DryRun prints the plan and starts nothing; -Search adds private web search (SearXNG))
     .\scripts\vegaduta.ps1 down [-Volumes]
     .\scripts\vegaduta.ps1 status
     .\scripts\vegaduta.ps1 logs [service] [-NoFollow]
@@ -13,7 +15,8 @@
     .\scripts\vegaduta.ps1 secrets [-Domain example.com]
     .\scripts\vegaduta.ps1 backup [DIR]
     .\scripts\vegaduta.ps1 restore DIR [-Yes]
-    .\scripts\vegaduta.ps1 upgrade [-Version 1.2.3] [-NoBackup]
+    .\scripts\vegaduta.ps1 upgrade [-Version 1.2.3] [-NoBackup]   (downloads and verifies that release's compose files first)
+    .\scripts\vegaduta.ps1 models pull TAG     (download a local model into the install's Ollama; `models list|rm` are bash-only)
     .\scripts\vegaduta.ps1 make-admin you@example.com
     .\scripts\vegaduta.ps1 compose <docker compose args...>
   Works with Windows PowerShell 5.1 and PowerShell 7. Requires Docker Desktop.
@@ -34,7 +37,11 @@ param(
   [string] $Version = '',
   [switch] $NoBackup,
   [switch] $Cloud,
-  [string] $LocalModel = ''
+  [string] $LocalModel = '',
+  [switch] $Search,
+  [switch] $NoSearch,
+  [switch] $DryRun,
+  [switch] $Continued   # internal: `upgrade` re-runs itself with the new release's script after unpacking it
 )
 
 $ErrorActionPreference = 'Stop'
@@ -66,6 +73,43 @@ function Warn($m) { Write-Host "  [warn] $m" -ForegroundColor Yellow; $script:Wa
 function Bad($m)  { Write-Host "  [fail] $m" -ForegroundColor Red; $script:Failures++ }
 function Die($m)  { Write-Host "ERROR: $m" -ForegroundColor Red; exit 1 }
 $script:Warnings = 0; $script:Failures = 0
+
+# Runs a native command with its stderr discarded and returns its stdout lines; the exit code is left in
+# $script:NativeExit (1 when the program cannot be started). Under $ErrorActionPreference = 'Stop', Windows
+# PowerShell 5.1 turns the first line a redirected native command writes to stderr into a terminating
+# NativeCommandError before the caller can look at $LASTEXITCODE (`docker volume inspect` of a volume that
+# does not exist, `docker version` with the daemon down, ...). The preference is relaxed here, and only
+# here: no other function redirects a native command's stderr (tests/install/vegaduta-ps1.Tests.ps1).
+function Invoke-Native([string]$Exe, [string[]]$ArgList = @()) {
+  $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  $script:NativeExit = 1; $out = @()
+  try { $out = @(& $Exe @ArgList 2>$null); if ($null -ne $LASTEXITCODE) { $script:NativeExit = $LASTEXITCODE } else { $script:NativeExit = 0 } }
+  catch { $out = @(); $script:NativeExit = 1 }
+  finally { $ErrorActionPreference = $prev }
+  return $out
+}
+# Memory Docker has (the Docker Desktop / WSL2 VM), in bytes; 0 when Docker does not answer.
+function Get-DockerMemBytes {
+  $l = @(Invoke-Native docker @('info', '--format', '{{.MemTotal}}'))
+  if ($script:NativeExit -eq 0 -and $l.Count -gt 0 -and ("$($l[0])".Trim() -match '^\d+$')) { return [int64]"$($l[0])".Trim() }
+  return [int64]0
+}
+# The computer's own memory in GB (0 when unknown). Core in a container sees only the Docker VM.
+function Get-HostRamGb {
+  try { return [int][math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) } catch { return 0 }
+}
+# What the console's hardware panel is told about the GPU: "nvidia:NAME:GB" with an NVIDIA driver
+# (nvidia-smi), else nothing; the same values as host_accelerator in scripts/vegaduta.
+function Get-HostAccelerator {
+  if (-not (Get-Command nvidia-smi -ErrorAction SilentlyContinue)) { return '' }
+  $l = @(Invoke-Native nvidia-smi @('--query-gpu=name,memory.total', '--format=csv,noheader,nounits'))
+  if ($script:NativeExit -ne 0 -or $l.Count -eq 0) { return '' }
+  $line = "$($l[0])"; $i = $line.LastIndexOf(',')
+  if ($i -lt 1) { return '' }
+  $name = $line.Substring(0, $i).Trim(); $mib = ($line.Substring($i + 1) -replace '[^0-9]', '')
+  if (-not $name -or -not $mib) { return '' }
+  return ('nvidia:{0}:{1}' -f $name, [int][math]::Floor(([int]$mib + 512) / 1024))
+}
 
 # ------------------------------------------------------------ env file I/O
 function Read-EnvLines { if (Test-Path $EnvFile) { return [System.IO.File]::ReadAllLines($EnvFile) } return @() }
@@ -197,17 +241,41 @@ function Save-KeptSecrets {
 # A new .env with newly generated secrets, while Docker still holds the data of an earlier personal
 # install (its folder deleted, or one made before secrets were kept): that database and its encrypted
 # values belong to secrets this install does not have. Leave it untouched and give this install a
-# project of its own (personal.yml reads VEGADUTA_PERSONAL_PROJECT), stopping the old containers.
+# project of its own (personal.yml reads VEGADUTA_PERSONAL_PROJECT). This only chooses the name: it never
+# touches a container, because `secrets` and a dry run reach it, and a run that only prepares files must
+# not stop someone's running stack. The old containers' ports are freed when this install really starts
+# (Stop-OldInstallContainers).
 function Split-FromOldData {
   if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { return }
-  & docker volume inspect vegaduta-personal_postgres-data *> $null
-  if ($LASTEXITCODE -ne 0) { return }
+  [void](Invoke-Native docker @('volume', 'inspect', 'vegaduta-personal_postgres-data'))
+  if ($script:NativeExit -ne 0) { return }
   $n = 2
-  while ($true) { & docker volume inspect "vegaduta-personal-$($n)_postgres-data" *> $null; if ($LASTEXITCODE -ne 0) { break }; $n++ }
+  while ($true) { [void](Invoke-Native docker @('volume', 'inspect', "vegaduta-personal-$($n)_postgres-data")); if ($script:NativeExit -ne 0) { break }; $n++ }
   Set-EnvValue VEGADUTA_PERSONAL_PROJECT "vegaduta-personal-$n" -Force
-  $ids = @(& docker ps -q --filter 'label=com.docker.compose.project=vegaduta-personal' 2>$null)
-  if ($ids.Count -gt 0) { & docker stop @ids *> $null }
   Warn "An earlier VegaDuta install left its data in Docker, made with secrets this install does not have. It is kept untouched; this install starts with its own data (project vegaduta-personal-$n). To delete the old data later: docker volume ls -q --filter name=vegaduta-personal_ (then docker volume rm each)"
+}
+# Called only on a real start. Stops a container of the default `vegaduta-personal` project, and only
+# when it publishes a host port this install needs, so a stack that runs beside it (another project,
+# other ports) is left alone. Does nothing when this install IS that project.
+function Stop-OldInstallContainers {
+  $proj = Get-EnvValue 'VEGADUTA_PERSONAL_PROJECT'
+  if (-not $proj -or $proj -eq 'vegaduta-personal') { return }
+  if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { return }
+  $want = @()
+  foreach ($pk in @(@('WEB_HOST_PORT', 3000), @('CORE_HOST_PORT', 8080))) {
+    $v = Get-EnvValue $pk[0]
+    if ($v -match '^\d+$') { $want += [int]$v } else { $want += $pk[1] }
+  }
+  foreach ($id in @(Invoke-Native docker @('ps', '-q', '--filter', 'label=com.docker.compose.project=vegaduta-personal'))) {
+    if (-not "$id".Trim()) { continue }
+    foreach ($line in @(Invoke-Native docker @('port', "$id".Trim()))) {
+      if ("$line" -match ':(\d+)\s*$' -and ($want -contains [int]$Matches[1])) {
+        [void](Invoke-Native docker @('stop', "$id".Trim()))
+        Say "Stopped a container of the earlier install: it held port $($Matches[1]), which this install needs."
+        break
+      }
+    }
+  }
 }
 function Invoke-Secrets([string]$DomainArg) {
   $created = $false
@@ -257,6 +325,7 @@ function Invoke-Secrets([string]$DomainArg) {
 
 # ---------------------------------------------------------- compose wiring
 $script:Tier = ''; $script:Profiles = New-Object System.Collections.Generic.List[string]; $script:DoBuild = $false
+$script:SearchOn = ''   # web search (SearXNG): '1' on, '0' off, '' not chosen
 
 function Add-Profile([string]$p) { if ($p -and -not $script:Profiles.Contains($p)) { $script:Profiles.Add($p) } }
 function Load-State {
@@ -267,6 +336,7 @@ function Load-State {
       elseif ($l -eq 'build=1') { $script:DoBuild = $true }
       elseif ($l -like 'local_ai=*') { $script:LocalAi = $l.Substring(9) }
       elseif ($l -like 'local_model=*') { $script:LocalModelTag = $l.Substring(12) }
+      elseif ($l -like 'search=*' -and -not $script:SearchOn) { $script:SearchOn = $l.Substring(7) }
     }
   }
   if (-not $script:Tier) { $script:Tier = 'lite' }
@@ -280,7 +350,12 @@ function Read-StateValue([string]$Key) {
 function Save-State {
   $b = if ($script:DoBuild) { '1' } else { '0' }
   $c = if ($script:LocalAi) { '0' } elseif ($script:CloudChoice) { '1' } else { '0' }
-  $txt = "tier=$($script:Tier)`nprofiles=$($script:Profiles -join ' ')`nbuild=$b`nlocal_ai=$($script:LocalAi)`nlocal_model=$($script:LocalModelTag)`ncloud=$c`n"
+  # search=, tools= and browser= are the keys scripts/vegaduta writes, so the Setup app and a bash run on the same
+  # folder (WSL) read the same choices; tools and browser are profiles here, so they are derived from the list.
+  $t = if ($script:Profiles.Contains('tools')) { '1' } else { '0' }
+  $br = if ($script:Profiles.Contains('browser')) { '1' } else { '0' }
+  $sr = if ($script:SearchOn -eq '1') { '1' } else { '0' }
+  $txt = "tier=$($script:Tier)`nprofiles=$($script:Profiles -join ' ')`nbuild=$b`nlocal_ai=$($script:LocalAi)`nlocal_model=$($script:LocalModelTag)`nsearch=$sr`ncloud=$c`ntools=$t`nbrowser=$br`n"
   [System.IO.File]::WriteAllText($StateFile, $txt, (New-Object System.Text.UTF8Encoding($false)))
 }
 # Memory in GB -> the catalog's recommended model (deploy/models/catalog.txt "#ladder|minGB|tag" lines).
@@ -312,7 +387,7 @@ function Test-HostOllama {
 # Installs (per-user, no administrator prompt) and starts Ollama when it is not running, so the
 # model runs natively and can use the GPU; the container stays the fallback. Never fails the run.
 function Install-HostOllama {
-  if ($env:VEGADUTA_ASSUME_NO -eq '1' -or (Test-HostOllama)) { return }
+  if ($env:VEGADUTA_ASSUME_NO -eq '1' -or $DryRun -or (Test-HostOllama)) { return }
   $app = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama app.exe'
   if (-not (Test-Path $app) -and -not (Get-Command ollama -ErrorAction SilentlyContinue)) {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { return }
@@ -350,14 +425,13 @@ function Resolve-LocalModel {
     return
   }
   if ($script:LocalAi) { return }
-  $gb = 0
-  try { $gb = [int][math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) } catch { $gb = 0 }
+  $gb = Get-HostRamGb
   if ($gb -eq 0 -or $gb -ge 8) { Install-HostOllama }
   $hostOllama = Test-HostOllama
   # In the container the model only gets the memory Docker has (a WSL2 VM is often smaller than the computer).
   $modelGb = $gb
   if (-not $hostOllama) {
-    try { $dg = [int][math]::Floor([int64](& docker info --format '{{.MemTotal}}' 2>$null) / 1GB) } catch { $dg = 0 }
+    $dg = [int][math]::Floor((Get-DockerMemBytes) / 1GB)
     if ($dg -gt 0 -and ($modelGb -le 0 -or $dg -lt $modelGb)) { $modelGb = $dg }
   }
   if (-not $script:LocalModelTag) { $script:LocalModelTag = Get-RecommendedModel $modelGb }
@@ -440,7 +514,7 @@ function Get-ComposeArgs {
         $env:APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS = $allow
         # A small Docker VM cannot hold a 32k-token context next to the stack; scale it down with Docker's memory.
         if (-not $env:LOCAL_LLM_NUM_CTX -and -not (Get-EnvValue 'LOCAL_LLM_NUM_CTX')) {
-          try { $dgb = [int][math]::Floor([int64](& docker info --format '{{.MemTotal}}' 2>$null) / 1GB) } catch { $dgb = 0 }
+          $dgb = [int][math]::Floor((Get-DockerMemBytes) / 1GB)
           if ($dgb -gt 0 -and $dgb -lt 6) { $env:LOCAL_LLM_NUM_CTX = '8192' } elseif ($dgb -gt 0 -and $dgb -lt 10) { $env:LOCAL_LLM_NUM_CTX = '16384' }
         }
         # The container's memory cap follows the model (the 8g default cannot hold the larger rows); never lowered.
@@ -462,6 +536,16 @@ function Get-ComposeArgs {
       $env:PUBLIC_AUTH_URL = "https://auth.$d"; $env:PUBLIC_CODE_INTEL_URL = "https://codeintel.$d"
       $env:PUBLIC_BUILDER_URL = "https://builder.$d"; $env:PUBLIC_LIVEKIT_URL = "wss://livekit.$d"
     }
+  }
+  # Free private web search for agents (SearXNG, docs/configuration.md "Web search"): the overlay plus core pointed
+  # at it, as search_args does in scripts/vegaduta. lite.yml and personal.yml leave core on the implicit default
+  # network, which the base overlay would replace, so they also need the .lite companion.
+  if ($script:SearchOn -eq '1') {
+    $a += @('-f', (Join-Path $ComposeDir 'docker-compose.search.yml'))
+    if ($script:Tier -eq 'lite' -or $script:Tier -eq 'personal') { $a += @('-f', (Join-Path $ComposeDir 'docker-compose.search.lite.yml')) }
+    $a += @('--profile', 'search')
+    if (-not $env:WEB_SEARCH_PROVIDER) { $env:WEB_SEARCH_PROVIDER = 'searxng' }
+    if (-not $env:WEB_SEARCH_SEARXNG_BASE_URL) { $env:WEB_SEARCH_SEARXNG_BASE_URL = 'http://searxng:8080' }
   }
   foreach ($p in $script:Profiles) { $a += @('--profile', $p) }
   $env:COMPOSE_PROFILES = ''
@@ -542,24 +626,23 @@ function Test-PortInUse([int]$port) {
 function Test-OwnStackRunning {
   $proj = Get-EnvValue 'VEGADUTA_PERSONAL_PROJECT'
   if (-not $proj) { $proj = $env:COMPOSE_PROJECT_NAME }; if (-not $proj) { $proj = Get-EnvValue 'COMPOSE_PROJECT_NAME' }; if (-not $proj) { $proj = 'vegaduta-personal' }
-  $ids = & docker ps -q --filter "label=com.docker.compose.project=$proj" 2>$null
-  return [bool]$ids
+  $ids = @(Invoke-Native docker @('ps', '-q', '--filter', "label=com.docker.compose.project=$proj"))
+  return (@($ids | Where-Object { "$_".Trim() }).Count -gt 0)
 }
 function Invoke-Doctor {
   $ca = Prepare
   $script:Warnings = 0; $script:Failures = 0
   Say "Checking prerequisites (tier: $($script:Tier); profiles: $($script:Profiles -join ' '))"
   if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { Bad 'docker not found - install Docker Desktop'; return $false }
-  $sv = & docker version --format '{{.Server.Version}}' 2>$null
-  if ($LASTEXITCODE -ne 0) { Bad 'Docker daemon not running - start Docker Desktop'; return $false } else { Ok "Docker daemon reachable ($sv)" }
-  $cv = (& docker compose version --short 2>$null) -replace '^v',''
+  $sv = (Invoke-Native docker @('version', '--format', '{{.Server.Version}}')) -join ''
+  if ($script:NativeExit -ne 0) { Bad 'Docker daemon not running - start Docker Desktop'; return $false } else { Ok "Docker daemon reachable ($sv)" }
+  $cv = ((Invoke-Native docker @('compose', 'version', '--short')) -join '') -replace '^v',''
   if (-not $cv) { Bad 'docker compose v2 not found' }
   elseif ([version]($cv -replace '[^0-9.].*$','') -ge [version]'2.24.0') { Ok "docker compose $cv" }
   else { Bad "docker compose $cv is too old (need >= 2.24.0)" }
   $needGb = if ($script:Tier -eq 'full') { 12 } else { 6 }
   $diskNeed = if ($script:Tier -eq 'full') { 40 } else { 15 }
-  $memB = [int64](& docker info --format '{{.MemTotal}}' 2>$null)
-  $memGb = [math]::Floor($memB / 1GB)
+  $memGb = [math]::Floor((Get-DockerMemBytes) / 1GB)
   if ($memGb -ge $needGb) { Ok "Docker memory $memGb GB (>= $needGb GB for $($script:Tier))" } else { Warn "Docker has $memGb GB RAM; $($script:Tier) wants >= $needGb GB (Docker Desktop > Settings > Resources)" }
   $drive = (Get-Item $RepoRoot).PSDrive
   $freeGb = [math]::Floor($drive.Free / 1GB)
@@ -591,7 +674,7 @@ function Invoke-Doctor {
     if ((Get-EnvValue 'KC_VERIFY_EMAIL') -ne 'true') { Warn 'KC_VERIFY_EMAIL is off: anyone can sign up with an address they do not own (configure KEYCLOAK_SMTP_* and set KC_VERIFY_EMAIL=true)' }
     try { [void][System.Net.Dns]::GetHostAddresses("app.$d"); Ok "DNS app.$d resolves" } catch { Warn "DNS app.$d does not resolve yet" }
   } else { Ok 'Local mode (no BASE_DOMAIN): URLs on localhost' }
-  $running = & docker compose @ca ps -q 2>$null
+  $running = Invoke-Native docker (@('compose') + $ca + @('ps', '-q'))
   if ($running) { Ok 'Stack already running - skipping port checks' }
   else {
     # The ports the stack will actually publish: *_HOST_PORT from .env, else the default.
@@ -638,9 +721,9 @@ function Invoke-PersonalDoctor {
   $script:Warnings = 0; $script:Failures = 0
   Say 'Checking prerequisites (tier: personal)'
   if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { Bad 'docker not found - install Docker Desktop'; return $false }
-  $sv = & docker version --format '{{.Server.Version}}' 2>$null
-  if ($LASTEXITCODE -ne 0) { Bad 'Docker daemon not running - start Docker Desktop'; return $false } else { Ok "Docker daemon reachable ($sv)" }
-  $memGb = [math]::Floor([int64](& docker info --format '{{.MemTotal}}' 2>$null) / 1GB)
+  $sv = (Invoke-Native docker @('version', '--format', '{{.Server.Version}}')) -join ''
+  if ($script:NativeExit -ne 0) { Bad 'Docker daemon not running - start Docker Desktop'; return $false } else { Ok "Docker daemon reachable ($sv)" }
+  $memGb = [math]::Floor((Get-DockerMemBytes) / 1GB)
   if ($memGb -ge 4) { Ok "Docker memory $memGb GB (>= 4 GB)" } else { Warn "Docker has $memGb GB RAM; personal wants >= 4 GB (raise Docker Desktop's memory limit)" }
   foreach ($k in @('POSTGRES_PASSWORD','POSTGRES_APP_PASSWORD','VALKEY_PASSWORD','APP_ENCRYPTION_KEY')) {
     if (-not (Get-EnvValue $k)) { Bad "$k is empty - run .\scripts\vegaduta.ps1 secrets" }
@@ -686,7 +769,7 @@ function Invoke-Backup($ca, [string]$Dir) {
   New-Item -ItemType Directory -Force -Path $Dir | Out-Null
   Say "Backing up to $Dir"
   $dbs = @(@('postgres', 'app-db.dump'))
-  if ($script:Tier -eq 'full' -and (& docker compose @ca ps -q keycloak-db 2>$null)) { $dbs += ,@('keycloak-db', 'keycloak-db.dump') }
+  if ($script:Tier -eq 'full' -and (Invoke-Native docker (@('compose') + $ca + @('ps', '-q', 'keycloak-db')))) { $dbs += ,@('keycloak-db', 'keycloak-db.dump') }
   foreach ($pair in $dbs) {
     $rc = Invoke-Dc $ca @('exec', '-T', $pair[0], 'sh', '-c', 'umask 077; pg_dump -U $POSTGRES_USER -d $POSTGRES_DB -Fc -f /tmp/vegaduta-backup.dump')
     if ($rc -ne 0) { Bad "pg_dump in $($pair[0]) failed"; return '' }
@@ -705,10 +788,92 @@ function Invoke-Backup($ca, [string]$Dir) {
   return $Dir
 }
 
+# ------------------------------------------------------------------ models
+# Downloads a model into the Ollama on this computer through its API (the way `personal` always did).
+# Returns '' when it is there, else why not.
+function Invoke-OllamaPull([string]$Tag) {
+  try {
+    $r = Invoke-RestMethod -Method Post -TimeoutSec 3600 -Uri 'http://127.0.0.1:11434/api/pull' -ContentType 'application/json' -Body (@{ model = $Tag; stream = $false } | ConvertTo-Json)
+    if ($r -and $r.error) { return [string]$r.error }
+    return ''
+  } catch {
+    $why = $_.Exception.Message
+    if ($_.ErrorDetails -and $_.ErrorDetails.Message) { $why = $_.ErrorDetails.Message }
+    return $why
+  }
+}
+# Where `models` pulls: the install's own Ollama container, else the one on this computer (as ollama_mode in
+# scripts/vegaduta); '' when there is none.
+function Get-OllamaMode {
+  $m = Read-StateValue 'local_ai'
+  if ($m -eq 'container' -or $m -eq 'host') { return $m }
+  if (Test-HostOllama) { return 'host' }
+  return ''
+}
+
+# ------------------------------------------------------------------ upgrade
+# Downloads the release's source tarball, checks it against the release's SHA256SUMS (and the Sigstore
+# bundle of SHA256SUMS when cosign is installed) and unpacks it over this install: compose files, realm and
+# scripts of that release. Files the tarball does not hold (.env, state, backups) stay. Throws on any
+# problem and unpacks nothing unless every check passed. Same checks as fetch_release in scripts/vegaduta.
+function Install-Release([string]$Ver) {
+  $repo = if ($env:VEGADUTA_REPO) { $env:VEGADUTA_REPO } else { 'CD-LC/vegaduta' }
+  $base = "https://github.com/$repo/releases/download/v$Ver"; $name = "vegaduta-$Ver.tar.gz"
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('vegaduta-upgrade.' + [guid]::NewGuid().ToString('N'))
+  New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+  $ProgressPreference = 'SilentlyContinue'   # the progress bar makes Windows PowerShell 5.1 download many times slower
+  try {
+    try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch { }
+    Say "Downloading release v$Ver"
+    try { Invoke-WebRequest -UseBasicParsing -Uri "$base/$name" -OutFile (Join-Path $tmp $name) }
+    catch { throw "download failed: $base/$name ($($_.Exception.Message))" }
+    try { Invoke-WebRequest -UseBasicParsing -Uri "$base/SHA256SUMS" -OutFile (Join-Path $tmp 'SHA256SUMS') }
+    catch { throw "download failed: $base/SHA256SUMS (refusing an unverified upgrade)" }
+    if (Get-Command cosign -ErrorAction SilentlyContinue) {
+      $bundle = $null
+      try { Invoke-WebRequest -UseBasicParsing -Uri "$base/SHA256SUMS.sigstore.json" -OutFile (Join-Path $tmp 'SHA256SUMS.sigstore.json'); $bundle = Join-Path $tmp 'SHA256SUMS.sigstore.json' } catch { }
+      if ($bundle) {
+        & cosign verify-blob (Join-Path $tmp 'SHA256SUMS') --bundle $bundle --certificate-identity-regexp ('^https://github\.com/' + [regex]::Escape($repo) + '/\.github/workflows/release\.yml@refs/tags/v') --certificate-oidc-issuer https://token.actions.githubusercontent.com | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "cosign could NOT verify SHA256SUMS of v$Ver - not upgrading" }
+        Ok 'SHA256SUMS signature verified (Sigstore)'
+      } elseif ($env:VEGADUTA_REQUIRE_SIGNATURE -eq '1') { throw "v$Ver has no SHA256SUMS.sigstore.json" }
+      else { Warn "v$Ver publishes no signature bundle; checking SHA-256 only" }
+    } elseif ($env:VEGADUTA_REQUIRE_SIGNATURE -eq '1') { throw 'VEGADUTA_REQUIRE_SIGNATURE=1 but cosign is not installed' }
+    $want = ''
+    foreach ($l in [System.IO.File]::ReadAllLines((Join-Path $tmp 'SHA256SUMS'))) {
+      if ($l -match '^([0-9a-fA-F]{64})\s+\*?(?:\./)?(.+?)\s*$' -and $Matches[2] -eq $name) { $want = $Matches[1].ToLowerInvariant(); break }
+    }
+    if (-not $want) { throw "SHA256SUMS has no entry for $name" }
+    $got = (Get-FileHash -LiteralPath (Join-Path $tmp $name) -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($got -ne $want) { throw "checksum mismatch for $name (expected $want, got $got) - not upgrading" }
+    Ok "SHA-256 of $name verified"
+    # The tar of Windows 10 1803+ (bsdtar). Run from the temp folder with a relative archive name: GNU tar
+    # (Git for Windows may be first on PATH) reads `C:\x.tar` as a file `x.tar` on a host called `C`.
+    $tar = $null
+    if ($env:SystemRoot) { $sys = Join-Path (Join-Path $env:SystemRoot 'System32') 'tar.exe'; if (Test-Path -LiteralPath $sys) { $tar = $sys } }
+    if (-not $tar) { $c = Get-Command tar -ErrorAction SilentlyContinue; if ($c) { $tar = $c.Source } }
+    if (-not $tar) { throw 'tar was not found (Windows 10 version 1803 and later include it)' }
+    Push-Location -LiteralPath $tmp
+    try { & $tar -xzf $name -C $RepoRoot --strip-components=1 | Out-Host; $rc = $LASTEXITCODE } finally { Pop-Location }
+    if ($rc -ne 0) { throw "could not unpack $name (tar exit code $rc)" }
+    Ok "Compose files, realm and scripts updated to v$Ver"
+  } finally { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue }
+}
+
 # ---------------------------------------------------------------- commands
+# A yes/no choice: the environment, else .env, else what the last run remembered (as the bash launcher's
+# VEGADUTA_SEARCH). Returns '1', '0' or ''.
+function Resolve-Toggle([string]$Name, [string]$Remembered) {
+  $v = [Environment]::GetEnvironmentVariable($Name)
+  if (-not $v) { $v = Get-EnvValue $Name }
+  if ($v -match '^(?i:0|off|false|no)$') { return '0' }
+  if ($v -match '^(?i:1|on|true|yes)$') { return '1' }
+  return $Remembered
+}
 function Parse-TierFlags {
   if ($Lite) { $script:Tier = 'lite' }
   if ($Full) { $script:Tier = 'full' }
+  if ($Search) { $script:SearchOn = '1' } elseif ($NoSearch) { $script:SearchOn = '0' }
   foreach ($p in $ProfileNames) { foreach ($q in ($p -split ',')) { Add-Profile $q.Trim() } }
   if ($Build) { $script:DoBuild = $true }
 }
@@ -720,18 +885,38 @@ switch ($Command) {
     foreach ($p in $ProfileNames) { foreach ($q in ($p -split ',')) { Add-Profile $q.Trim() } }
     if ($Build) { $script:DoBuild = $true }
     Invoke-Secrets ''
+    # Web search: -Search / -NoSearch, else VEGADUTA_SEARCH (environment or .env), else what the last run chose.
+    $script:SearchOn = if ($Search) { '1' } elseif ($NoSearch) { '0' } else { Resolve-Toggle 'VEGADUTA_SEARCH' (Read-StateValue 'search') }
     Resolve-Profiles
     Resolve-Version
     Resolve-LocalModel
-    if (-not (Invoke-PersonalDoctor)) { Die 'fix the problems above, then re-run' }
+    # A containerised core measures its own cgroup (the Docker VM), not this computer: tell it what the
+    # computer is. Written to .env too, so a later `compose` call sees the same numbers (as scripts/vegaduta).
+    if (-not $env:HOST_RAM_GB) { $env:HOST_RAM_GB = [string](Get-HostRamGb) }
+    if (-not $env:HOST_ACCELERATOR) { $env:HOST_ACCELERATOR = Get-HostAccelerator }
+    Set-EnvValue HOST_RAM_GB ([string]$env:HOST_RAM_GB) -Force
+    Set-EnvValue HOST_ACCELERATOR ([string]$env:HOST_ACCELERATOR) -Force
     $ca = Get-ComposeArgs
+    if ($DryRun) {
+      # What `personal` would do, without Docker: the choices, the state they leave and the compose command.
+      Save-State
+      $planProfiles = 'none'; if ($script:Profiles.Count -gt 0) { $planProfiles = $script:Profiles -join ' ' }
+      $planAi = 'none'; if ($script:LocalAi) { $planAi = $script:LocalAi }
+      $planModel = 'default'; if ($script:LocalModelTag) { $planModel = $script:LocalModelTag }
+      $planSearch = '0'; if ($script:SearchOn -eq '1') { $planSearch = '1' }
+      Write-Host "plan: tier=personal profiles=$planProfiles local_ai=$planAi local_model=$planModel search=$planSearch"
+      Write-Host ('plan: docker compose ' + ($ca -join ' ') + ' up -d')
+      exit 0
+    }
+    Stop-OldInstallContainers
+    if (-not (Invoke-PersonalDoctor)) { Die 'fix the problems above, then re-run' }
     Save-State
     if ($script:LocalAi -eq 'host' -and $script:LocalModelTag) {
       # The chat model, and the embedding model documents and memory use when no sidecar runs.
       foreach ($m in @($script:LocalModelTag, 'nomic-embed-text')) {
         Say "Downloading model '$m' into Ollama on this machine (once; can take a while)"
-        try { Invoke-RestMethod -Method Post -TimeoutSec 3600 -Uri 'http://127.0.0.1:11434/api/pull' -Body (@{ model = $m; stream = $false } | ConvertTo-Json) | Out-Null }
-        catch { Warn "could not download '$m' into Ollama: $($_.Exception.Message) - run: ollama pull $m" }
+        $why = Invoke-OllamaPull $m
+        if ($why) { Warn "could not download '$m' into Ollama: $why - run: ollama pull $m" }
       }
     }
     # The Ollama container reports healthy only once its model is downloaded (several GB on a first start).
@@ -746,11 +931,12 @@ switch ($Command) {
     Write-Host "  Console  $app"
     # Core keeps the one-time first-run link in first-run-setup.txt until the owner has chosen a password.
     $setup = ''
-    $txt = (& docker compose @ca exec -T core cat /data/storage/.auth/first-run-setup.txt 2>$null) -join "`n"
+    $txt = (Invoke-Native docker (@('compose') + $ca + @('exec', '-T', 'core', 'cat', '/data/storage/.auth/first-run-setup.txt'))) -join "`n"
     $m = [regex]::Matches($txt, 'https?://\S+/login\?setup=[A-Za-z0-9_-]+')
     if ($m.Count -gt 0) { $setup = $m[$m.Count - 1].Value }
     if ($setup) { Write-Host "  First-run setup  $setup" } else { Write-Host '  Open the console and sign in (first-run setup is already done).' }
     if ($script:LocalAi) { Write-Host "  Local model  $($script:LocalModelTag) via $($script:LocalAi) Ollama (free; agents can use it right away)" }
+    if ($script:SearchOn -eq '1') { Write-Host '  Web search   on (a private SearXNG container, no API key). Turn off: .\scripts\vegaduta.ps1 personal -NoSearch' }
     else { Write-Host '  Add an LLM provider key in the console (Settings -> Providers), or run Ollama on this machine.' }
   }
   'up' {
@@ -770,7 +956,7 @@ switch ($Command) {
   }
   { $_ -in 'down','stop' } {
     $ca = Prepare
-    foreach ($p in ($AllProfiles + 'rag')) { $ca += @('--profile', $p) }
+    foreach ($p in ($AllProfiles + 'rag' + 'search')) { $ca += @('--profile', $p) }
     if ($Volumes) {
       if (-not $Yes) {
         $ans = Read-Host "This DELETES all data volumes of this $($script:Tier) install. Type 'delete my data' to continue"
@@ -821,14 +1007,32 @@ switch ($Command) {
     $from = Get-EnvValue 'VEGADUTA_VERSION'
     $target = $Version; if (-not $target) { $target = Get-ShippedVersion }; if (-not $target) { $target = $from }
     if (-not $target) { Die 'upgrade: no target version - pass -Version X.Y.Z' }
+    if ($target -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]*$') { Die "upgrade: '$target' is not a release version (pass -Version X.Y.Z)" }
     $ca = Prepare
     # 1. Backup first; abort when it fails (database migrations are one-way).
     $bdir = ''
-    if (-not $NoBackup) {
-      if (-not (& docker compose @ca ps -q postgres 2>$null)) { Die 'upgrade aborted: postgres is not running, so no backup can be taken. Start the stack or pass -NoBackup.' }
+    if ($Continued) { $bdir = [string]$env:VEGADUTA_UPGRADE_BACKUP }   # re-run after the download: the backup was taken before it
+    elseif (-not $NoBackup) {
+      if (-not (Invoke-Native docker (@('compose') + $ca + @('ps', '-q', 'postgres')))) { Die 'upgrade aborted: postgres is not running, so no backup can be taken. Start the stack or pass -NoBackup.' }
       $bdir = Invoke-Backup $ca ''
       if (-not $bdir) { Die 'upgrade aborted: backup failed (fix it, or re-run with -NoBackup at your own risk)' }
     } else { Warn '-NoBackup: upgrading without a database backup' }
+    # 2. The compose files, realm and scripts of the target release. A folder from a release tarball is
+    # brought to it here; a git checkout switches with `git checkout vX.Y.Z` instead. The new script (which
+    # may differ) then finishes the upgrade in a process of its own.
+    $shipped = Get-ShippedVersion
+    if (-not $Continued -and $target -ne 'local' -and $target -ne $shipped) {
+      if (Test-Path -LiteralPath (Join-Path $RepoRoot '.git')) {
+        if ($shipped) { Warn "git checkout: compose files are from $shipped; run 'git checkout v$target' so files and images match" }
+      } else {
+        try { Install-Release $target } catch { Die "upgrade aborted: $($_.Exception.Message)" }
+        $env:VEGADUTA_UPGRADE_BACKUP = $bdir
+        $ps = (Get-Process -Id $PID).Path
+        $re = @('-NoProfile'); if ($env:OS -eq 'Windows_NT') { $re += @('-ExecutionPolicy', 'Bypass') }
+        & $ps @re -File $PSCommandPath upgrade -Version $target -NoBackup -Continued
+        exit $LASTEXITCODE
+      }
+    }
     $bak = "$EnvFile.bak." + (Get-Date -Format 'yyyyMMddHHmmss')
     Copy-Item $EnvFile $bak; Protect-SecretFile $bak
     Set-EnvValue VEGADUTA_VERSION $target -Force
@@ -847,6 +1051,27 @@ switch ($Command) {
     Say "Upgrade complete ($target). Database migrations ran on core start."
     if ($bdir) { Write-Host "    Pre-upgrade backup: $bdir" }
   }
+  'models' {
+    # Only `pull` exists here (the Setup app runs it for a chosen model); `list` and `rm` are bash-only (WSL2).
+    $sub = if ($Rest.Count -gt 0) { $Rest[0] } else { '' }
+    if ($sub -ne 'pull' -and $sub -ne 'install') { Die "models: unknown subcommand '$sub' (only: pull TAG; list and rm are bash-only, use WSL2)" }
+    $tag = if ($Rest.Count -gt 1) { $Rest[1] } else { '' }
+    if (-not $tag) { Die 'models pull needs a model tag, e.g. qwen3.5:4b' }
+    if ($tag -notmatch '^[A-Za-z0-9][A-Za-z0-9._:/@-]*$') { Die "models pull: '$tag' is not a model tag" }
+    $mode = Get-OllamaMode
+    if (-not $mode) { Die "no local Ollama: start the stack with '.\scripts\vegaduta.ps1 personal' (a container), or install Ollama from https://ollama.com/download" }
+    $catalog = Join-Path $RepoRoot 'deploy\models\catalog.txt'
+    if ((Test-Path $catalog) -and -not (@([System.IO.File]::ReadAllLines($catalog)) | Where-Object { $_.StartsWith("$tag|") })) { Warn "'$tag' is not in the catalog (deploy/models/catalog.txt); pulling it anyway" }
+    Say "Downloading model '$tag' into Ollama ($mode; once, can take a while)"
+    if ($mode -eq 'container') {
+      $ca = Prepare
+      if ((Invoke-Dc $ca @('exec', '-T', 'ollama', 'ollama', 'pull', $tag)) -ne 0) { Die "could not download '$tag' into the Ollama container" }
+    } else {
+      $why = Invoke-OllamaPull $tag
+      if ($why) { Die "could not download '$tag' into Ollama: $why - run: ollama pull $tag" }
+    }
+    Ok "'$tag' is installed. To use it for the free pool: Platform Admin -> LLM providers (base URL as for the existing Ollama row, model '$tag')."
+  }
   'make-admin' {
     if ($Rest.Count -lt 1) { Die 'usage: .\scripts\vegaduta.ps1 make-admin USERNAME_OR_EMAIL' }
     $ca = Prepare
@@ -864,5 +1089,10 @@ $K add-roles -r "$REALM" --uid "$ID" --rolename platform-admin
     if ($LASTEXITCODE -eq 0) { Say "Granted platform-admin to $($Rest[0]) (sign out and back in)." } else { Die "could not grant the role - has '$($Rest[0])' signed up yet?" }
   }
   'compose' { $ca = Prepare; exit (Invoke-Dc $ca $Rest) }
-  default { Get-Help $PSCommandPath -Detailed | Out-Host }
+  'help' { Get-Help $PSCommandPath -Detailed | Out-Host }
+  default {
+    Write-Host "ERROR: unknown command '$Command'" -ForegroundColor Red
+    Get-Help $PSCommandPath -Detailed | Out-Host
+    exit 2
+  }
 }

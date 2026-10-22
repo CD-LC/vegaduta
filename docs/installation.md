@@ -206,7 +206,7 @@ them against `SHA256SUMS` (plus the Sigstore bundle when `cosign` is
 installed). Database migrations are forward-only: to roll back, run
 `upgrade --version <previous> --no-backup` and then `restore` the pre-upgrade
 backup; `upgrade` prints both commands when the new version does not become
-healthy. `.env`, its `.bak.*` copies and backups are always written with mode
+healthy. On Windows, `scripts\vegaduta.ps1 upgrade -Version X.Y.Z` does the same (the tarball is unpacked with the `tar` of Windows 10 1803 or later, and the rest of the upgrade runs with the new release's script); in a git checkout it warns and you `git checkout vX.Y.Z` yourself. `.env`, its `.bak.*` copies and backups are always written with mode
 600 (an explicit owner-only ACL on Windows).
 
 ## Kubernetes (Helm)
