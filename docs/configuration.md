@@ -53,11 +53,17 @@ One image, one reactor, four ways to run it. Build with
 | api | `app` / `CoreApplication` | REST, SSE, WebSocket, MCP server, webhooks; the chat path |
 | jobs | `app-jobs` / `JobsApplication` | scheduled sweeps and pollers; run exactly one |
 | worker | `app-worker` / `WorkerApplication` | Temporal workflow worker |
-| migrate | `app` with `app.tenancy.migrate-only=true` | runs Flyway for the control plane and every tenant schema, then exits |
+| migrate | `app` with `app.tenancy.migrate-only=true` | runs Flyway for the control plane and every tenant schema, then exits; no `@Scheduled` job, Kafka consumer or Temporal worker runs in it |
 
 `app.tenancy.migrate-on-boot` (default `true`) makes the API migrate tenant
 schemas at start-up; set it to `false` when a separate migrate step runs (Helm
 does this). Env names: `APP_TENANCY_MIGRATE_ON_BOOT`, `APP_TENANCY_MIGRATE_ONLY`.
+
+The migrate shape exits 0 when every tenant is current, 1 when a tenant failed (the Job fails
+the release) and 75 when another migrator holds the advisory lock `tenant-schema-migrate-only`
+(a second concurrent Job; the Helm Job ignores the pod and starts a new one, without spending
+`migrate.backoffLimit`). A 75 with no other migrator running is a bug, not a lock: report it.
+Compose has no separate migrate step; core migrates on boot there.
 
 ## Essential vs plug-and-play services
 
