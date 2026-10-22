@@ -15,6 +15,11 @@
 // is personal, NEXT_PUBLIC_DEPLOY_ENV=lite|full names that tier, and anything else is a shared
 // install in which nothing is hidden (core's "absent means every feature on").
 //
+// LOCAL AUTH STAYS PERSONAL. Before this file existed local auth alone made the console personal, so an
+// install that sets NEXT_PUBLIC_AUTH_MODE=local together with NEXT_PUBLIC_EDITION=lite|full keeps meaning
+// personal; an explicit lite|full never un-hides pages on a local-auth console. The explicit value
+// decides only when sign-in is not local (personal itself, or lite/full on Keycloak).
+//
 // Deliberately dependency-free apart from env.ts and authMode.ts (no React, no icons, no i18n), so
 // proxy.js, server components and the keycloak-js-free public pages can all import it.
 import { isLocalAuth } from "./authMode";
@@ -29,13 +34,13 @@ export function parseEdition(raw: string | null | undefined): Edition | null {
 }
 
 /**
- * The tier this build was told it is, or null when nothing says: NEXT_PUBLIC_EDITION first, else the
- * pre-edition derivation (local auth, then NEXT_PUBLIC_DEPLOY_ENV=lite|full).
+ * The tier this build was told it is, or null when nothing says: local auth is always personal (as it
+ * was before NEXT_PUBLIC_EDITION existed), else NEXT_PUBLIC_EDITION, else NEXT_PUBLIC_DEPLOY_ENV=lite|full.
  */
 export function declaredEdition(): Edition | null {
+  if (isLocalAuth()) return "personal";
   const explicit = parseEdition(getPublicEnv("NEXT_PUBLIC_EDITION"));
   if (explicit) return explicit;
-  if (isLocalAuth()) return "personal";
   const deploy = parseEdition(getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV"));
   return deploy === "lite" || deploy === "full" ? deploy : null;
 }

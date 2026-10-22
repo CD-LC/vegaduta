@@ -415,9 +415,9 @@ export default function UsagePage() {
           <SpendCapCard />
 
           {/* Buy more of the per-user budget (BudgetTopUpController); hides itself when top-ups are off.
-              Not mounted at all without billing (a personal install has no payments): the card would
-              otherwise call /api/budget on load only to hide itself. */}
-          {billingOn && !isPersonalEdition() && <BudgetTopUpCard />}
+              Not mounted on a personal install (no payments, so no /api/budget call). Every other edition
+              mounts it as it always did, whatever NEXT_PUBLIC_BILLING_ENABLED says. */}
+          {!isPersonalEdition() && <BudgetTopUpCard />}
 
           {/* Cross-link to the money view (2026-09-24): this page is the
               allowance meter every member can read; the per-provider cost,

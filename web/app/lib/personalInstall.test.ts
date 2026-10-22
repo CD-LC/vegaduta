@@ -141,7 +141,8 @@ describe("hiddenOnPersonalInstall", () => {
 });
 
 describe("edition seed", () => {
-  // NEXT_PUBLIC_EDITION wins over the auth-mode / deploy-env derivation the other cases stub.
+  // NEXT_PUBLIC_EDITION wins over the deploy-env derivation the other cases stub; local auth stays personal
+  // whatever it says (that is what local auth meant before NEXT_PUBLIC_EDITION existed).
   const seeded = (edition: string, auth: boolean) => {
     vi.mocked(isLocalAuth).mockReturnValue(auth);
     vi.mocked(getPublicEnv).mockImplementation((key) => (key === "NEXT_PUBLIC_EDITION" ? edition : undefined));
@@ -156,8 +157,16 @@ describe("edition seed", () => {
     expect(tierCommand("")).toBe("scripts/vegaduta personal");
   });
 
-  it("makes the install lite or full from NEXT_PUBLIC_EDITION, whatever the auth mode says", () => {
+  it("keeps a local-auth install personal even when NEXT_PUBLIC_EDITION says lite or full", () => {
     seeded("lite", true);
+    expect(isPersonalInstall()).toBe(true);
+    seeded("full", true);
+    expect(isPersonalInstall()).toBe(true);
+    expect(tierCommand("")).toBe("scripts/vegaduta personal");
+  });
+
+  it("makes the install lite or full from NEXT_PUBLIC_EDITION when sign-in is not local", () => {
+    seeded("lite", false);
     expect(isPersonalInstall()).toBe(false);
     expect(tierCommand("--browser")).toBe("scripts/vegaduta up --lite --browser");
     expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);

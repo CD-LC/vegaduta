@@ -29,6 +29,7 @@ import { Switch } from "./ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Textarea } from "./ui/textarea";
 import BrandText from "./BrandText";
+import { isPersonalEdition } from "../lib/edition";
 
 const K_CHOICES = [3, 5, 10];
 
@@ -314,9 +315,11 @@ export default function RagQualityPanel({ collectionId }: { collectionId: string
             <AlertTitle>{t("upgradeTitle")}</AlertTitle>
             <AlertDescription>
               {t("upgradeBody")}{" "}
-              <Link href="/admin/billing" className="font-semibold text-[var(--upgrade)] underline-offset-4 hover:underline">
-                {t("upgradeLink")}
-              </Link>
+              {!isPersonalEdition() && (
+                <Link href="/admin/billing" className="font-semibold text-[var(--upgrade)] underline-offset-4 hover:underline">
+                  {t("upgradeLink")}
+                </Link>
+              )}
             </AlertDescription>
           </Alert>
         )}

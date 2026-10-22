@@ -47,7 +47,7 @@ import { cn } from "../../lib/utils";
 import { inboxApi, InboxClientNotWiredError, type ConversationSummary, type ConversationView, type HandoffTranscriptMessage, type InboxStats } from "./inboxApi";
 import { InboxDetailsPane, type AgentOption } from "./InboxDetailsPane";
 import { InboxThread } from "./InboxThread";
-import { CHANNELS, ChannelBadge, VIEW_TABS, dotStatus, relTime, stateLabel } from "./inboxFormat";
+import { ChannelBadge, offeredChannels, VIEW_TABS, dotStatus, relTime, stateLabel } from "./inboxFormat";
 
 const POLL_MS = 15000;
 const DEFAULT_PAGE_SIZE = 25;
@@ -329,7 +329,7 @@ export default function InboxPanel({
                 setChannel(e.target.value);
                 setPage(0);
               }}
-              options={[{ value: "", label: "All channels" }, ...CHANNELS.map((c) => ({ value: c.value, label: c.label }))]}
+              options={[{ value: "", label: "All channels" }, ...offeredChannels().map((c) => ({ value: c.value, label: c.label }))]}
             />
             <Button
               type="button"
