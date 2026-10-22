@@ -148,15 +148,15 @@ export function isPlatformAdminPrivilegedApiPath(pathname) {
 // NOT lib/edition.ts's edition(): that goes through getPublicEnv, and the proxy bundle's `process`
 // shim may hold only build-time values (see the PLATFORM_ADMIN_HOST note in route()), so a runtime-only
 // NEXT_PUBLIC_EDITION=personal would be invisible to it. `node:process` is the live process. Same
-// precedence as declaredEdition(): an explicit NEXT_PUBLIC_EDITION, else local auth means personal, else
+// precedence as declaredEdition(): local auth is personal (an explicit lite|full never overrides it), else an explicit NEXT_PUBLIC_EDITION, else
 // NEXT_PUBLIC_DEPLOY_ENV=lite|full names a shared tier; only when the runtime env says nothing at all
 // does it fall back to declaredEdition() (the build-time baked values). Everything non-personal
 // returns false here, so the 404 block in route() never runs for lite, full or an undeclared install.
 export function isPersonalEditionAtRuntime() {
   const env = nodeProcess.env;
+  if ((env.NEXT_PUBLIC_AUTH_MODE || "").trim().toLowerCase() === "local") return true;
   const explicit = parseEdition(env.NEXT_PUBLIC_EDITION);
   if (explicit) return explicit === "personal";
-  if ((env.NEXT_PUBLIC_AUTH_MODE || "").trim().toLowerCase() === "local") return true;
   const deploy = parseEdition(env.NEXT_PUBLIC_DEPLOY_ENV);
   if (deploy === "lite" || deploy === "full") return false;
   return declaredEdition() === "personal";
