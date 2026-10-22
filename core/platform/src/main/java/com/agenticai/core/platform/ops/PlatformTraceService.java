@@ -10,6 +10,8 @@ import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceListResponse;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceMetricsResponse;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceModelMetric;
 import com.agenticai.core.platform.ops.PlatformTraceDtos.TraceRow;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import java.time.Clock;
@@ -52,6 +54,7 @@ import tools.jackson.databind.JsonNode;
  * observations, so list rows carry {@code null} for them (never 0); the detail view sums/derives
  * them from the observations.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformTraceService {
 
@@ -65,6 +68,12 @@ public class PlatformTraceService {
     static final Duration DEFAULT_METRICS_RANGE = Duration.ofDays(14);
     static final Duration MAX_METRICS_RANGE = Duration.ofDays(92);
     private static final Pattern TRACE_ID = Pattern.compile("^[A-Za-z0-9._:-]{1,128}$");
+
+    /** A user id filter: a UUID, a Keycloak subject or an e-mail address. */
+    static final Pattern USER_ID_FILTER = Pattern.compile("^[A-Za-z0-9._:@+-]{1,128}$");
+
+    /** A trace name filter: dotted or spaced identifiers such as {@code agent.turn}. */
+    static final Pattern NAME_FILTER = Pattern.compile("^[A-Za-z0-9._: -]{1,128}$");
 
     private final LangfuseApiClient langfuse;
     private final ObjectProvider<TenantRepository> tenantRepository;
@@ -106,8 +115,8 @@ public class PlatformTraceService {
         Map<String, String> query = new LinkedHashMap<>();
         query.put("fromTimestamp", fromTs == null ? null : fromTs.toString());
         query.put("toTimestamp", toTs == null ? null : toTs.toString());
-        query.put("userId", blankToNull(userId));
-        query.put("name", blankToNull(name));
+        query.put("userId", filterValue(userId, USER_ID_FILTER, "userId"));
+        query.put("name", filterValue(name, NAME_FILTER, "name"));
         query.put("orderBy", "timestamp.desc");
         query.put("fields", "core,io,metrics");
         try {
@@ -512,6 +521,22 @@ public class PlatformTraceService {
             return b == null ? 0 : 1;
         }
         return b == null ? -1 : a.compareTo(b);
+    }
+
+    /**
+     * A filter that is forwarded to Langfuse as a query value: blank means no filter, anything else
+     * must match {@code allowed} (letters, digits and a few separators, at most 128 characters) or
+     * the request is rejected rather than forwarded.
+     */
+    private static String filterValue(String raw, Pattern allowed, String field) {
+        String value = blankToNull(raw);
+        if (value != null && !allowed.matcher(value).matches()) {
+            throw new IllegalArgumentException(
+                    field
+                            + " may only contain letters, digits and . _ : - (and @ + for userId, space for"
+                            + " name), up to 128 characters.");
+        }
+        return value;
     }
 
     private static String blankToNull(String s) {

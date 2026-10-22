@@ -4,6 +4,8 @@ import com.agenticai.core.agents.a2a.A2aAgentCardService;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.tenancy.ListPaging;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +38,7 @@ import tools.jackson.databind.ObjectMapper;
  *       (signed snapshots, not live tenant data).
  * </ul>
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @RestController
 public class AgentDirectoryController {
 

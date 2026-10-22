@@ -3,6 +3,8 @@ package com.agenticai.core.elevenlabs.agenttools;
 import com.agenticai.core.agentspi.MusicComposer;
 import com.agenticai.core.elevenlabs.ElevenLabsApiException;
 import com.agenticai.core.elevenlabs.ElevenLabsClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
  * upstream status.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsMusicComposer implements MusicComposer {
 
     private final ElevenLabsClient client;

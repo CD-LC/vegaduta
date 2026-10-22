@@ -5,6 +5,10 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.net.SsrfGuard;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +33,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The OUTBOUND half of A2A: lets an agent call an EXTERNAL A2A agent as a tool ({@code
@@ -65,6 +67,7 @@ import tools.jackson.databind.ObjectMapper;
  * {@code UNTRUSTED_EXTERNAL} (see {@code BuiltInToolClassifications}). DNS rebinding between check
  * and connect is the same accepted limitation as {@code fetch_web_page}.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aClientService implements A2aRemoteAgentToolSource {
 

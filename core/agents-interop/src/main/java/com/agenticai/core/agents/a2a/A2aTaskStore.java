@@ -3,6 +3,11 @@ package com.agenticai.core.agents.a2a;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
@@ -29,8 +34,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * TTL-bounded registry of A2A tasks: an in-memory map that is ALWAYS the source of truth for tasks
@@ -95,6 +98,7 @@ import tools.jackson.databind.ObjectMapper;
  * does not confirm the task exists: a mismatch is an empty {@link Optional}, indistinguishable from
  * "never existed".
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Component
 public class A2aTaskStore {
 
@@ -410,10 +414,9 @@ public class A2aTaskStore {
         if (!Objects.equals(task.tenantId(), tenantId)
                 || !Objects.equals(task.subject(), subject)) {
             log.warn(
-                    "A2A task {} requested by a non-owner (tenant {}, subject {}) - answering not-found",
-                    taskId,
-                    tenantId,
-                    subject);
+                    "A2A task {} requested by a non-owner (same tenant: {}) - answering not-found",
+                    LogSafe.clean(taskId),
+                    Objects.equals(task.tenantId(), tenantId));
             return Optional.empty();
         }
         if (redis != null) {
@@ -437,10 +440,9 @@ public class A2aTaskStore {
             if (!Objects.equals(stored.tenantId(), tenantId)
                     || !Objects.equals(stored.subject(), subject)) {
                 log.warn(
-                        "A2A task {} requested by a non-owner (tenant {}, subject {}) - answering not-found",
-                        taskId,
-                        tenantId,
-                        subject);
+                        "A2A task {} requested by a non-owner (same tenant: {}) - answering not-found",
+                        LogSafe.clean(taskId),
+                        Objects.equals(stored.tenantId(), tenantId));
                 return Optional.empty();
             }
             stored = reconcileStored(key, stored);

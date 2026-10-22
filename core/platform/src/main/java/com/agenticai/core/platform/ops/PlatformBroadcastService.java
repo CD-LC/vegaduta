@@ -1,7 +1,10 @@
 package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.PlatformSettingsService;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -15,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Platform-wide maintenance mode and announcement banner, each stored as ONE JSON document in a
@@ -217,9 +218,9 @@ public class PlatformBroadcastService {
         write(MAINTENANCE_KEY, next, actor);
         log.info(
                 "platform-ops-audit actor={} action=platform.maintenance.{} endsAt={}",
-                actor,
-                next.enabled() ? "enable" : "disable",
-                endsAt);
+                LogSafe.clean(actor),
+                LogSafe.clean(next.enabled() ? "enable" : "disable"),
+                LogSafe.clean(endsAt));
         refresh();
         return maintenance();
     }
@@ -247,10 +248,10 @@ public class PlatformBroadcastService {
         write(ANNOUNCEMENT_KEY, next, actor);
         log.info(
                 "platform-ops-audit actor={} action=platform.announcement.{} level={} expiresAt={}",
-                actor,
-                next.enabled() ? "publish" : "withdraw",
-                level,
-                expiresAt);
+                LogSafe.clean(actor),
+                LogSafe.clean(next.enabled() ? "publish" : "withdraw"),
+                LogSafe.clean(level),
+                LogSafe.clean(expiresAt));
         refresh();
         return announcement();
     }

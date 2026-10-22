@@ -17,6 +17,10 @@
 #   - skills learning on (app.skills.learning.enabled)
 #   - learning proposals on (app.learning.proposals.enabled): the assistant proposes, you approve
 #   - billing off (app.edition.billing-enabled): no plans, quotas or gateways
+#   - edition tier `personal` (app.edition.tier): features an operator or a business needs but one person
+#     does not (@ConditionalOnEditionFeature, see EditionFeature) default to OFF; lite/full keep them all.
+#     Each is switchable back with app.edition.features.<name>.enabled (APP_EDITION_FEATURES_<NAME>_ENABLED)
+#     plus a core restart, e.g. APP_EDITION_FEATURES_CLOUD_SPEECH_ENABLED=true for a cloud speech provider.
 #   - tracing off, local file storage, in-process (legacy) workflow engine
 #   - small connection pools
 #   - the mail and telegram settings that normally ship inside the `workflow`
@@ -135,7 +139,14 @@ app:
     # restart. A schema that is behind still gets the full migrate. Set false to checksum-validate on boot.
     migrate-skip-up-to-date: ${TENANCY_MIGRATE_SKIP_UP_TO_DATE:true}
   edition:
+    # personal | lite | full. Absent (any other profile set) means full: every feature on. The compose stack and
+    # the installer derive this and the web build's NEXT_PUBLIC_EDITION from the one VEGADUTA_EDITION variable.
+    tier: ${APP_EDITION_TIER:personal}
     billing-enabled: ${APP_EDITION_BILLING_ENABLED:false}
+  # A2A (agent-to-agent) surfaces and the outbound a2a_call_agent tool: off for one person unless asked for.
+  # (Read as a platform-wide kill switch by the A2A controllers and the replica safety check; default on.)
+  a2a:
+    enabled: ${APP_A2A_ENABLED:false}
   # Documents, agent memory and the per-turn query embedding. `auto` picks a cloud key if one is
   # set, else an Ollama named in the environment (APP_EMBEDDINGS_OLLAMA_BASE_URL, or the local-AI
   # bootstrap one), else - decided per call - the Ollama this install registered in the console's
@@ -196,6 +207,8 @@ app:
   scheduled-tasks:
     enabled: ${SCHEDULED_TASKS_ENABLED:true}
     max-per-tenant: ${SCHEDULED_TASKS_MAX_PER_TENANT:25}
+    # Where a result may be delivered: the shared list minus slack (no Slack channel on this edition) and a2a.
+    delivery-channels: ${SCHEDULED_TASKS_DELIVERY_CHANNELS:in_app,email,whatsapp,whatsapp_qr,telegram,signal,matrix,imessage,voice}
   # ---- runtime shape ----
   storage:
     type: ${APP_STORAGE_TYPE:local}
@@ -213,6 +226,12 @@ app:
       enabled: ${TELEGRAM_POLLING_ENABLED:true}
   mail:
     from: ${WORKFLOW_MAIL_FROM:workflows@agentic-ai.local}
+
+# Resolution metering is a pricing substrate (outcome-based billing); this edition bills nothing, so the hourly
+# sweep that closes conversations into resolution_event rows stays off. The REST surface keeps working.
+resolution:
+  sweep:
+    enabled: ${RESOLUTION_SWEEP_ENABLED:false}
 
 # The "Browse registry" tab fetches the official MCP registry on first use. Warming it during boot is
 # network and CPU work a one-person install does not need before it has opened that tab.

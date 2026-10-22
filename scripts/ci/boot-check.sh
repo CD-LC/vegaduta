@@ -37,6 +37,25 @@
 #     BOOTCHECK_JAVA_OPTS     (env) extra JVM options, e.g. "-Xmx1536m"
 #     BOOTCHECK_PG_IMAGE      (env) Postgres image with pgvector + AGE
 #                             (default vegaduta-postgres:local, built from deploy/postgres)
+#     --profiles LIST         Spring profiles to boot with, comma separated (or env BOOTCHECK_PROFILES;
+#                             default security,knowledge,workflow,graph-memory,mcpserver,mcp,temporal)
+#     --personal              boot the one-person shape instead: profiles
+#                             security,knowledge,graph-memory,personal (what scripts/vegaduta personal
+#                             sets), local auth (no Keycloak dummies), local file storage and auth data under
+#                             the throwaway dir, and the small-heap JVM options deploy/compose/personal.yml
+#                             uses (unless BOOTCHECK_JAVA_OPTS is set). Same checks: readiness UP incl.
+#                             tenantMigration and the anonymous-401 routes. Not a substitute for a real
+#                             personal stack: the database user here is a superuser and Redis is redis:7.
+#     --profile-startup       measurement: app.startup.profiling.enabled=true, timeline dumped to a file in the
+#                             throwaway dir, then scripts/ci/startup-profile.sh prints the phase table (time to
+#                             Started, Flyway, Hibernate bootstrap, bean and repository counts, static
+#                             entity/repository counts of the jar). Adds a little recording overhead.
+#     --conditions            measurement: boot with DEBUG=true so the CONDITIONS EVALUATION REPORT is logged,
+#                             and the table lists which Spring AI MCP-server auto-configurations matched.
+#                             DEBUG logging slows the boot: do not read time-to-Started from this run.
+#     --info-routes "/a /b"   routes to probe once after the checks, printing the HTTP status only (never a
+#                             failure), e.g. "/sse /mcp" to see whether an MCP endpoint answers (curl
+#                             gives up after 3 s, so a 200 SSE stream shows as 200).
 #     --flags KEY=VAL ...     extra env for the app, e.g. a flag-on boot:
 #                               --flags APP_RESEARCH_DEEP_ENABLED=true APP_TUTOR_ENABLED=true
 #                             (takes every following KEY=VAL word up to the next --option)
@@ -57,6 +76,14 @@ ROUTES="${BOOTCHECK_ROUTES:-/api/tutor/status /api/research/status /api/memory/e
 START_TIMEOUT=360
 APP_PORT=18080
 KEEP_LOG_ALWAYS=0
+DEFAULT_PROFILES="security,knowledge,workflow,graph-memory,mcpserver,mcp,temporal"
+PERSONAL_PROFILES="security,knowledge,graph-memory,personal"
+PROFILES="${BOOTCHECK_PROFILES:-$DEFAULT_PROFILES}"
+PROFILES_EXPLICIT=0
+PERSONAL=0
+PROFILE_STARTUP=0
+CONDITIONS=0
+INFO_ROUTES=""
 EXTRA_FLAGS=()
 
 while [ $# -gt 0 ]; do
@@ -67,6 +94,11 @@ while [ $# -gt 0 ]; do
     --timeout) shift; START_TIMEOUT="${1:-360}" ;;
     --port) shift; APP_PORT="${1:-18080}" ;;
     --keep-log) KEEP_LOG_ALWAYS=1 ;;
+    --profiles) shift; PROFILES="${1:-}"; PROFILES_EXPLICIT=1; [ -n "$PROFILES" ] || { echo "boot-check: --profiles needs a value" >&2; exit 2; } ;;
+    --personal) PERSONAL=1 ;;
+    --profile-startup) PROFILE_STARTUP=1 ;;
+    --conditions) CONDITIONS=1 ;;
+    --info-routes) shift; INFO_ROUTES="${1:-}" ;;
     --flags)
       shift
       while [ $# -gt 0 ] && [[ "$1" != --* ]]; do
@@ -84,6 +116,14 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+[ -n "${BOOTCHECK_PROFILES:-}" ] && PROFILES_EXPLICIT=1
+if [ "$PERSONAL" = 1 ] && [ "$PROFILES_EXPLICIT" = 0 ]; then PROFILES="$PERSONAL_PROFILES"; fi
+if [ "$PERSONAL" = 1 ] && [ -z "${BOOTCHECK_JAVA_OPTS:-}" ]; then
+  # The heap and GC flags deploy/compose/personal.yml gives core (JAVA_TOOL_OPTIONS), so the timing is the
+  # small-box one. Keep in sync with that file.
+  BOOTCHECK_JAVA_OPTS="-XX:InitialRAMPercentage=25 -XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 -XX:MaxMetaspaceSize=256m -XX:ReservedCodeCacheSize=128m -Djava.net.preferIPv4Stack=true"
+fi
 
 # ------------------------------------------------------------------ state
 
@@ -308,19 +348,15 @@ log "postgres ready, extensions vector + age created"
 # -------------------------------------------------------------------- boot
 
 APP_ENV=(
-  "SPRING_PROFILES_ACTIVE=security,knowledge,workflow,graph-memory,mcpserver,mcp,temporal"
+  "SPRING_PROFILES_ACTIVE=$PROFILES"
   "SERVER_PORT=$APP_PORT"
   "DB_HOST=127.0.0.1" "DB_PORT=$PG_PORT"
   "POSTGRES_USER=agentic" "POSTGRES_PASSWORD=$PG_PASSWORD" "DB_PASSWORD=$PG_PASSWORD" "POSTGRES_DB=agentic_ai"
   "REDIS_HOST=127.0.0.1" "REDIS_PORT=$REDIS_PORT" "REDIS_PASSWORD=$REDIS_PASSWORD"
   # EncryptionService refuses to boot without a 32-byte key; a fresh random one per run.
   "APP_ENCRYPTION_KEY=$BOOT_ENCRYPTION_KEY"
-  # Dummies for the vars docker-compose marks required, so the context can start.
-  "KEYCLOAK_CLIENT_SECRET=bootcheck-dummy"
-  # No localhost default exists for the token issuer or the public console origin (AGENTS.md rule 4):
-  # with the `security` profile active the app refuses to start without them. The .invalid TLD is
-  # reserved and never resolves; the issuer is only contacted when a token is validated.
-  "KEYCLOAK_ISSUER_URI=https://auth.bootcheck.invalid/realms/agentic-ai"
+  # No localhost default exists for the public console origin (AGENTS.md rule 4): with the `security`
+  # profile active the app refuses to start without it. The .invalid TLD is reserved and never resolves.
   "APP_WEB_PUBLIC_URL=https://app.bootcheck.invalid"
   "STORAGE_ACCESS_KEY=bootcheck-dummy" "STORAGE_SECRET_KEY=bootcheck-dummy-secret"
   "LIVEKIT_API_KEY=bootcheck-dummy" "LIVEKIT_API_SECRET=bootcheck-dummy-secret-0123456789abcdef"
@@ -330,6 +366,33 @@ APP_ENV=(
   "MCP_STDIO_SIDECAR_ENABLED=false"
   "MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always"
 )
+if [ "$PERSONAL" = 1 ]; then
+  # The personal shape has no Keycloak: application-personal.yml supplies a non-resolving issuer URN, so
+  # the Keycloak dummies are deliberately NOT set (setting them would hide a personal-only startup failure).
+  # Everything it writes goes under the throwaway dir, like deploy/compose/personal.yml's /data/storage.
+  APP_ENV+=(
+    "APP_AUTH_LOCAL_DATA_DIR=$TMP_DIR/auth"
+    "APP_STORAGE_TYPE=local" "APP_STORAGE_LOCAL_PATH=$TMP_DIR/storage"
+    "APP_MCP_STDIO_SANDBOX=none"
+  )
+  log "shape: personal (profiles $PROFILES, local auth, local storage, no Keycloak dummies)"
+else
+  # Dummies for the vars docker-compose marks required, so the context can start. The issuer is
+  # only contacted when a token is validated.
+  APP_ENV+=(
+    "KEYCLOAK_CLIENT_SECRET=bootcheck-dummy"
+    "KEYCLOAK_ISSUER_URI=https://auth.bootcheck.invalid/realms/agentic-ai"
+  )
+fi
+STARTUP_DUMP="$TMP_DIR/startup-timeline.json"
+if [ "$PROFILE_STARTUP" = 1 ]; then
+  APP_ENV+=("APP_STARTUP_PROFILING_ENABLED=true" "APP_STARTUP_PROFILING_DUMP_FILE=$STARTUP_DUMP")
+  log "measuring: start-up profiling on (timeline -> $STARTUP_DUMP)"
+fi
+if [ "$CONDITIONS" = 1 ]; then
+  APP_ENV+=("DEBUG=true")
+  log "measuring: DEBUG=true for the conditions report (do not read time-to-Started from this run)"
+fi
 if [ ${#EXTRA_FLAGS[@]} -gt 0 ]; then
   APP_ENV+=("${EXTRA_FLAGS[@]}")
   log "extra flags: ${EXTRA_FLAGS[*]}"
@@ -428,6 +491,28 @@ for route in $ROUTES; do
     fail "route $route answered ${code:-no response} to an anonymous caller (expected 401)"
   fi
 done
+
+# ------------------------------------------------------------- measurements
+
+for route in $INFO_ROUTES; do
+  code="$(curl -s -o /dev/null -m 3 -w '%{http_code}' "$BASE$route" 2>/dev/null || true)"
+  log "info route $route -> ${code:-no response} (probe only, not a check)"
+done
+
+if [ "$PROFILE_STARTUP" = 1 ] || [ "$CONDITIONS" = 1 ]; then
+  if [ "$PROFILE_STARTUP" = 1 ]; then
+    # The timeline is written at ApplicationReadyEvent, which can land a moment after readiness answers.
+    for _ in $(seq 1 15); do
+      [ -s "$STARTUP_DUMP" ] && break
+      sleep 2
+    done
+  fi
+  PROFILE_ARGS=(--log "$APP_LOG" --jar "$JAR")
+  [ -s "$STARTUP_DUMP" ] && PROFILE_ARGS+=(--dump "$STARTUP_DUMP")
+  echo "[boot-check] ===== measurements (profiles: $PROFILES) ====="
+  bash "$SCRIPT_DIR/startup-profile.sh" "${PROFILE_ARGS[@]}" || log "startup-profile.sh could not print its table"
+  echo "[boot-check] ================================================"
+fi
 
 # ------------------------------------------------------------------ result
 

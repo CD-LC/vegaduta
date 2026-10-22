@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+import com.agenticai.core.security.logging.LogSafe;
+import tools.jackson.core.JacksonException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -14,7 +16,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
-import tools.jackson.core.JacksonException;
 
 /**
  * Per-turn side channel that carries an agent's TOOL activity (a step trace) alongside - never
@@ -671,14 +672,16 @@ public final class AgentStepEventEmitter {
         } catch (JacksonException e) {
             log.debug(
                     "Dropping a step event for tool {} - could not serialize it",
-                    event.get("tool"),
+                    LogSafe.clean(event.get("tool")),
                     e);
             return;
         }
         Sinks.EmitResult result = sink.tryEmitNext(STEP_EVENT_MARKER + json);
         if (result.isFailure()) {
             log.debug(
-                    "Dropping a step event for tool {} - sink said {}", event.get("tool"), result);
+                    "Dropping a step event for tool {} - sink said {}",
+                    LogSafe.clean(event.get("tool")),
+                    LogSafe.clean(result));
             return;
         }
         // Set only on a SUCCESSFUL emit: a dropped event never reached the

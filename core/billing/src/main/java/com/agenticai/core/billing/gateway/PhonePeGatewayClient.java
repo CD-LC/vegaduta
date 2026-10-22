@@ -1,6 +1,11 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,9 +23,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@link PaymentGatewayClient} backed by PhonePe's Payment Gateway + UPI Autopay (subscription
@@ -83,6 +85,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PhonePeGatewayClient implements PaymentGatewayClient {
 
     private static final Logger log = LoggerFactory.getLogger(PhonePeGatewayClient.class);

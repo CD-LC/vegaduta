@@ -6,6 +6,9 @@ import com.agenticai.core.agents.job.AgentJobLauncher;
 import com.agenticai.core.agents.job.AgentJobOrigin;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
+import com.agenticai.core.security.logging.LogSafe;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -13,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns an approved {@code agent.proposal} request into a real agent job - the "humans ratify" half
@@ -126,10 +127,10 @@ public class SentinelProposalExecutor implements ApprovalActionExecutor {
         request.recordExecutionResult("Enqueued agent job " + jobId + " as " + runAs);
         log.info(
                 "agent.proposal {} approved by {} -> agent job {} (agent {})",
-                request.getId(),
-                request.getDecidedBy(),
-                jobId,
-                agentId);
+                LogSafe.clean(request.getId()),
+                LogSafe.clean(request.getDecidedBy()),
+                LogSafe.clean(jobId),
+                LogSafe.clean(agentId));
     }
 
     private JsonNode parse(ApprovalRequest request) {

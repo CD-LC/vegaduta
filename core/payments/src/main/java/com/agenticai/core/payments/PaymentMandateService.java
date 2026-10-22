@@ -4,6 +4,10 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -11,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The human-facing lifecycle of {@link PaymentMandate}s: preview (the grant wizard's "review and
@@ -25,6 +27,7 @@ import tools.jackson.databind.ObjectMapper;
  * revoke + re-grant, which is what keeps the signature honest. All mutating paths audit-log.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentMandateService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentMandateService.class);

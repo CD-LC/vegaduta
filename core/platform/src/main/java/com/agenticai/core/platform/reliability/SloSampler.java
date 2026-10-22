@@ -4,6 +4,9 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.platform.reliability.SloMath.InstanceWindow;
 import com.agenticai.core.platform.reliability.SloSample.Hist;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -30,7 +33,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns this replica's in-memory Micrometer counters into a time series the SLO view can window.
@@ -60,6 +62,7 @@ import tools.jackson.databind.ObjectMapper;
  * it also works in deployables without {@code @EnableScheduling}. Failures are logged once and
  * never propagate.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class SloSampler {
 

@@ -3,12 +3,14 @@ package com.agenticai.core.payments;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@link ApprovalActionExecutor} for {@code upi.mandate.execute} - picked up by {@code
@@ -22,6 +24,7 @@ import tools.jackson.databind.ObjectMapper;
  * the pending transaction's CHARGE otherwise holds daily/monthly cap forever.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentMandateApprovalExecutor implements ApprovalActionExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentMandateApprovalExecutor.class);

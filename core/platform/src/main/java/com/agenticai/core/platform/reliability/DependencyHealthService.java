@@ -10,6 +10,8 @@ import com.agenticai.core.providers.PlatformHostedLlmProviderRepository;
 import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.net.http.HttpClient;
 import java.time.Clock;
 import java.time.Duration;
@@ -78,6 +80,7 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>Every probe added for the ops console (2026-10-09) is optional: an unset URL reads UNKNOWN
  * (or, for academy/app-builder, no row) and no new configuration is required.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class DependencyHealthService {
 

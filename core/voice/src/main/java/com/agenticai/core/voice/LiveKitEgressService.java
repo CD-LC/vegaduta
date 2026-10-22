@@ -1,6 +1,9 @@
 package com.agenticai.core.voice;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.storage.StorageProperties;
 import java.io.IOException;
 import java.net.URI;
@@ -63,6 +66,7 @@ import tools.jackson.databind.ObjectMapper;
  * client for the API LiveKit documents; it has not been exercised against a live LiveKit+Egress
  * deployment in this pass.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Component
 public class LiveKitEgressService {
 
@@ -169,7 +173,7 @@ public class LiveKitEgressService {
         String egressId = callEgress("StartRoomCompositeEgress", body);
         log.info(
                 "Started LiveKit RoomCompositeEgress room={} egressId={} objectKey={}",
-                roomName,
+                LogSafe.clean(roomName),
                 egressId,
                 objectKey);
         return new EgressStartResult(egressId, objectKey);
