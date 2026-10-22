@@ -30,7 +30,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { CHANNELS, errText, fmtTime } from "./shared";
+import { offeredChannels, errText, fmtTime } from "./shared";
 
 function ConsentHistory({ records }: { records: ConsentRecordDto[] }) {
   const t = useTranslations("privacySso");
@@ -161,7 +161,7 @@ export default function ContactsTab() {
               id="contact-channel"
               value={channel}
               onValueChange={setChannel}
-              options={CHANNELS.map((c) => ({ value: c, label: c }))}
+              options={offeredChannels().map((c) => ({ value: c, label: c }))}
             />
           </div>
           <div className="grid gap-1.5">
