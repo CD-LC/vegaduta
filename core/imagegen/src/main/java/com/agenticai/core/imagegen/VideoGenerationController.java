@@ -1,5 +1,7 @@
 package com.agenticai.core.imagegen;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.imagegen.dto.VideoGenerationJobResponse;
@@ -72,6 +74,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
  * served as a 206 with {@code Content-Range: .../*} via {@link
  * #parseBoundedRange}, anything else streams as a 200.
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @RestController
 @RequestMapping("/api/videogen")
 public class VideoGenerationController {

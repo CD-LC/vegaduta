@@ -112,7 +112,8 @@ public class VoiceCallController {
     private final VoiceTurnSpeech turnSpeech;
     private final VoiceTurnStream turnStream;
     private final VoiceTurnTranscriber voiceTurnTranscriber;
-    private final VoiceCallRoomRegistry roomRegistry;
+    // Absent on an edition without realtime/recording voice (personal); then nothing can record a room.
+    private final Optional<VoiceCallRoomRegistry> roomRegistry;
 
     // Sarvam TTS quota gate (2026-08-08 audit fix #2): the Sarvam tier checks
     // the shared cross-provider voice budget (speech.call.CallSpeechQuota)
@@ -128,7 +129,7 @@ public class VoiceCallController {
             Optional<SidecarClient> sidecarClient,
             List<CallSpeechSynthesizer> synthesizers,
             Optional<CallSpeechTranscriber> transcriber,
-            VoiceCallRoomRegistry roomRegistry,
+            Optional<VoiceCallRoomRegistry> roomRegistry,
             SpeechToTextProviderFactory providerFactory) {
         this.agentService = agentService;
         this.tokenService = tokenService;
@@ -225,7 +226,7 @@ public class VoiceCallController {
 
         String token = tokenService.issueToken(identity, roomName, subject, metadata);
         // Who this room belongs to, so only they can record it (VoiceCallRecordingController).
-        roomRegistry.register(roomName, tenantId, subject);
+        roomRegistry.ifPresent(registry -> registry.register(roomName, tenantId, subject));
         // Deliberately logs identity/room/agentId only - NEVER callerAccessToken
         // or the minted LiveKit token itself, same convention this codebase
         // already follows for other bearer credentials.

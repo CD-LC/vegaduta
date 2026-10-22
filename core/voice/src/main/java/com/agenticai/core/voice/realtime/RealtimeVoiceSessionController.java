@@ -5,6 +5,8 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.sharing.PermissionLevel;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * this path does not consume {@code VoiceQuotaService}'s minute pool, which
  * exists for the platform-keyed Sarvam/ElevenLabs pipeline.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @RestController
 @RequestMapping("/api/voice/realtime")
 public class RealtimeVoiceSessionController {

@@ -1,5 +1,7 @@
 package com.agenticai.core.imagegen;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.providers.VertexAccessTokenProvider;
@@ -49,6 +51,7 @@ import org.springframework.web.client.RestClientResponseException;
  * guarantee pixel-identical likeness is held for the full clip duration (no
  * current text/image-conditioned video model promises that).
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @Component
 public class VertexVeoVideoGenerationClient implements VideoGenerationClient {
 
