@@ -43,11 +43,11 @@ public class PlatformTenantAuditor {
         log.info(
                 "platform-ops-audit actor={} action={} targetType={} target={} tenant={} detail={}",
                 LogSafe.clean(actor),
-                action,
-                targetType,
-                targetId,
-                tenantSchema,
-                detail);
+                LogSafe.clean(action),
+                LogSafe.clean(targetType),
+                LogSafe.clean(targetId),
+                LogSafe.clean(tenantSchema),
+                LogSafe.clean(detail));
         if (tenantSchema == null || tenantSchema.isBlank()) {
             return;
         }
@@ -66,9 +66,9 @@ public class PlatformTenantAuditor {
         } catch (RuntimeException e) {
             log.error(
                     "Could not write tenant audit row for {} on {} (tenant {})",
-                    action,
+                    LogSafe.clean(action),
                     LogSafe.clean(targetId),
-                    tenantSchema,
+                    LogSafe.clean(tenantSchema),
                     e);
         }
     }
