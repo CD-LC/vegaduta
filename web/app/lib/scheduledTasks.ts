@@ -10,6 +10,8 @@
 // Where the two could disagree - a wall-clock time inside a spring-forward gap - the preview shifts forward to the
 // next real instant, which is what the server's cron library does as well.
 
+import { channelOffered } from "./edition";
+
 export type ScheduleKind = "daily" | "weekdays" | "weekly" | "monthly" | "custom";
 export const SCHEDULE_KINDS: readonly ScheduleKind[] = ["daily", "weekdays", "weekly", "monthly", "custom"];
 
@@ -24,7 +26,7 @@ export type DeliveryChannel =
   | "imessage"
   | "a2a"
   | "voice";
-export const DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
+const ALL_DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
   "in_app",
   "email",
   "whatsapp",
@@ -36,6 +38,13 @@ export const DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
   "a2a",
   "voice",
 ];
+
+/**
+ * The delivery channels the form and the explainer offer: ALL of them minus the ones this install does not run
+ * (Slack on a personal install). The server's /capabilities list narrows this further. {@link normalizeDeliveryTarget}
+ * still understands every channel, so an existing task keeps validating.
+ */
+export const DELIVERY_CHANNELS: readonly DeliveryChannel[] = ALL_DELIVERY_CHANNELS.filter((c) => channelOffered(c));
 
 export const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 export type WeekdayCode = (typeof WEEKDAY_CODES)[number];

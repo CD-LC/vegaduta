@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TRIGGER_CHANNEL_LABELS } from "../../nodeDefs";
+import { TRIGGER_CHANNEL_LABELS, triggerChannelOffered } from "../../nodeDefs";
 import { api, API_BASE } from "../../../../lib/api";
 import Select from "../../../Select";
 import { Button } from "../../../ui/button";
@@ -167,7 +167,9 @@ export function TriggerNodeConfig({
             { value: "DISCORD", label: t("inboundDiscordOption") },
             { value: "X", label: t("inboundXOption") },
             { value: "EMAIL", label: t("inboundEmailOption") },
-          ]}
+            // An unoffered channel (Slack, Discord, X on a personal install) is not selectable, but a node that
+            // already carries one keeps showing it rather than silently displaying another channel.
+          ].filter((o) => triggerChannelOffered(o.value) || o.value === channel)}
         />
         {channel && channel !== "WEBHOOK" && channel !== "CALL" && (
           <p className="ax-wf-empty">
