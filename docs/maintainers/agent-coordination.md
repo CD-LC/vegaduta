@@ -27,6 +27,8 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 |---|---|---|
 | Release / install agent | cloud session, branch `claude/why-the-hell-k4tttl` | installer (`installer/`), launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`), `deploy/compose/` personal and local-AI overlays, `.github/workflows/release.yml`, releases and tags; PR #13 (platform-model warm-up: `core/chat/PlatformPoolWarm*`, `web/app/lib/warmPlatformModel.ts`, `web/app/components/chat/ModelWakingUpNotice.tsx`) |
 | Local-model agent | cloud session, branches `ccr-*`, `feat/chat-threads-list` | local-model performance (`docker-compose.local-ai.yml` keep-alive, Ollama options, `web/app/components/assistant/LocalModelTip.tsx`); chat history kept by default (#15); the Assistant's stored history (branch `feat/chat-threads-list`: `core/agents-turn/.../branching/ChatThreads*`, `ChatBranchFlagGate`, `ChatTranscriptService`, tenant migration V661, `web/app/components/assistant/useAssistantThreads.ts`, `useAssistantTurn.ts`, `web/app/lib/api/assistant.ts`, regenerated OpenAPI/SDK/contract files), through PRs |
+| Reels / marketing agent | cloud session, branch `claude/great-ptolemy-qcq7ve`, continuing on a local machine | `docs/marketing/reels/` (promo reel scripts, recorder, assembler, demo data); touches nothing else |
+| Personal start-up agent | local session on this machine, working tree of branch `claude/great-ptolemy-qcq7ve` (the PR will come from a clean branch off `main`) | personal-tier start time and first-install size: the health checks and JVM flags in `deploy/compose/personal.yml` and `docker-compose.search.yml`, the model-probe step of `scripts/vegaduta`, the `core/Dockerfile` jar layer, and the start-up switches in `core/app-config/.../application-personal.yml`. These overlap the release / install agent's launcher and compose files, so the change goes through a PR the release / install agent reviews before it merges |
 | Production agent | local editor | the production deployment: which release it runs, its configuration and its verification. Does not change application code without a PR |
 
 ## What production must run
@@ -94,6 +96,13 @@ and can serve beside the old one while Container Apps switches traffic.
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
+
+- 2026-10-22 11:52 UTC, personal start-up agent: merged #83 (`personal --minimal` and `--no-valkey` no
+  longer exit in silence) and #86 (plan page for a lighter personal install) after green CI. Open and
+  waiting on CI: #82 (start-up budget), #84 (preparing an install never stops another install), #85
+  (core image stores the jar once). Claimed the files in the row above; the release / install agent's
+  review of #82 and #84 is welcome. Measured on one laptop with Docker Desktop, empty database, local
+  Ollama: published 0.1.9 took 39-64 s from launcher start to a healthy console, the branch 23-28 s.
 
 - 2026-10-21 15:05, release agent: the v0.1.9 Release run on `3c3ce0b` stopped at the voice-agent
   image scan (critical GHSA-6q48-6c7w-9gw2 in certifi 2026.7.22, published after 0.1.8); nothing was
