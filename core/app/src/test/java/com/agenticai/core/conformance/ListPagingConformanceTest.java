@@ -2,6 +2,12 @@ package com.agenticai.core.conformance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,10 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Conformance by construction (ADR-0019): every list-returning GET operation in the committed
@@ -79,7 +81,7 @@ class ListPagingConformanceTest {
         JsonNode doc = MAPPER.readTree(Files.readString(spec, StandardCharsets.UTF_8));
         JsonNode schemas = doc.path("components").path("schemas");
         Set<String> out = new TreeSet<>();
-        Iterator<Map.Entry<String, JsonNode>> paths = doc.path("paths").fields();
+        Iterator<Map.Entry<String, JsonNode>> paths = doc.path("paths").properties().iterator();
         while (paths.hasNext()) {
             Map.Entry<String, JsonNode> p = paths.next();
             JsonNode get = p.getValue().path("get");

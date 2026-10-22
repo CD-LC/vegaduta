@@ -7,16 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * search_tools + call_tool against a hand-built {@link ToolSearchState}: activation, dispatch,
@@ -195,7 +196,7 @@ class SearchAndCallToolTest {
 
     @Test
     void theToolDefinitionsAreValidJsonSchemaWithTheDocumentedFields() throws Exception {
-        tools.jackson.databind.ObjectMapper mapper = new tools.jackson.databind.ObjectMapper();
+        tools.jackson.databind.ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
         tools.jackson.databind.JsonNode searchSchema =
                 mapper.readTree(search.getToolDefinition().inputSchema());
         tools.jackson.databind.JsonNode callSchema =
@@ -390,7 +391,8 @@ class SearchAndCallToolTest {
         search.call("{\"query\":\"send email\"}");
 
         callTool.call(
-                "{\"name\":\"google_gmail\",\"argsJson\":\"{\\\"to\\\":\\\"a@b.com\\\"} trailing garbage\"}");
+                "{\"name\":\"google_gmail\",\"argsJson\":\"{\\\"to\\\":\\\"a@b.com\\\"} trailing"
+                    + " garbage\"}");
 
         assertEquals(List.of("{\"to\":\"a@b.com\"}"), gmail.inputs);
     }

@@ -15,16 +15,18 @@ import com.agenticai.core.mcp.McpConnectionPhase;
 import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.mcp.dto.McpConnectionTestResult;
 import com.agenticai.core.security.TenantContext;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.RedisConnectionFailureException;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.redis.RedisConnectionFailureException;
 
 class RedisMcpOwnershipGateTest {
 
@@ -137,7 +139,7 @@ class RedisMcpOwnershipGateTest {
     void testIsRoutedToTheOwnerAndItsResultReturned() throws Exception {
         when(registry.ownerOf("t1", reg)).thenReturn(Optional.of("peer"));
         String json =
-                new tools.jackson.databind.ObjectMapper()
+                com.agenticai.core.json.JsonMappers.plain()
                         .writeValueAsString(McpConnectionTestResult.success(3));
         when(bus.sendAndAwait(eq("peer"), eq(McpCommand.Op.TEST), eq("t1"), eq(reg), any()))
                 .thenReturn(Optional.of(json));

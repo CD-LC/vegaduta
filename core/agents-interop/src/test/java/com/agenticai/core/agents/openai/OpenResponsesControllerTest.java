@@ -18,17 +18,7 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,10 +32,24 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import reactor.core.publisher.Flux;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Drives {@link OpenResponsesController} with a recorded OpenAI-SDK-style Responses request ({@code
@@ -153,7 +157,7 @@ class OpenResponsesControllerTest {
     private void normalizeInPlace(JsonNode node) {
         if (node.isObject()) {
             ObjectNode obj = (ObjectNode) node;
-            Iterator<Map.Entry<String, JsonNode>> it = obj.fields();
+            Iterator<Map.Entry<String, JsonNode>> it = obj.properties().iterator();
             List<String> names = new ArrayList<>();
             while (it.hasNext()) {
                 names.add(it.next().getKey());

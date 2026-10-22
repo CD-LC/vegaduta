@@ -12,11 +12,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.RedisConnectionFailureException;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * {@link SessionMemoryService}: summarisation when turns leave the replay window, rewind, and the
@@ -153,7 +154,7 @@ class SessionMemoryFoldAndRewindTest extends SessionMemoryServiceTestBase {
         assertTrue(executedScripts().isEmpty());
         verify(listOps).trim(REDIS_KEY, -SessionMemoryService.MAX_STORED_ENTRIES, -1);
         verify(redisTemplate).expire(eq(REDIS_KEY), eq(TTL));
-        verify(valueOps, never()).getAndExpire(anyString(), any());
+        verify(valueOps, never()).getAndExpire(anyString(), any(java.time.Duration.class));
     }
 
     @Test

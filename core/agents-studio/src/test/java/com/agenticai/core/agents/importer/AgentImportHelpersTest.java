@@ -2,9 +2,11 @@ package com.agenticai.core.agents.importer;
 
 import static com.agenticai.core.agents.importer.AgentImportFixtures.json;
 import static com.agenticai.core.agents.importer.AgentImportFixtures.parse;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.providers.ProviderName;
+
 import org.junit.jupiter.api.Test;
 
 class AgentImportHelpersTest {
@@ -96,11 +98,13 @@ class AgentImportHelpersTest {
         for (int i = 0; i < 5000; i++) {
             sb.append("}");
         }
-        tools.jackson.databind.ObjectMapper deep = new tools.jackson.databind.ObjectMapper();
-        deep.getFactory()
-                .setStreamReadConstraints(
-                        tools.jackson.core.StreamReadConstraints.builder()
-                                .maxNestingDepth(10_000)
+        tools.jackson.databind.ObjectMapper deep =
+                com.agenticai.core.json.JsonMappers.withFactory(
+                        tools.jackson.core.json.JsonFactory.builder()
+                                .streamReadConstraints(
+                                        tools.jackson.core.StreamReadConstraints.builder()
+                                                .maxNestingDepth(10_000)
+                                                .build())
                                 .build());
         try {
             assertThat(AgentImportJson.countCredentialFields(deep.readTree(sb.toString())))

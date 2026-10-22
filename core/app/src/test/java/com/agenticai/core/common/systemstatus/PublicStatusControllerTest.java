@@ -13,11 +13,13 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.platform.ops.PlatformBroadcastService;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicAnnouncement;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicMaintenance;
-import java.time.Instant;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import org.springframework.boot.actuate.health.HealthContributorRegistry;
+import org.springframework.boot.health.registry.HealthContributorRegistry;
 import org.springframework.kafka.core.KafkaAdmin;
+
+import java.time.Instant;
 
 class PublicStatusControllerTest {
 
@@ -28,16 +30,22 @@ class PublicStatusControllerTest {
         if (broadcast != null) {
             beans.addBean("broadcast", broadcast);
         }
-        return new PublicStatusController(registry, false, beans.getBeanProvider(KafkaAdmin.class), "",
-            beans.getBeanProvider(PlatformBroadcastService.class));
+        return new PublicStatusController(
+                registry,
+                false,
+                beans.getBeanProvider(KafkaAdmin.class),
+                "",
+                beans.getBeanProvider(PlatformBroadcastService.class));
     }
 
     @Test
     void carriesMaintenanceAndAnnouncementAndKeepsTheOriginalFields() {
         PlatformBroadcastService broadcast = mock(PlatformBroadcastService.class);
         Instant ends = Instant.parse("2026-10-09T12:00:00Z");
-        when(broadcast.publicMaintenance()).thenReturn(new PublicMaintenance(true, "Upgrading", ends));
-        when(broadcast.publicAnnouncement()).thenReturn(new PublicAnnouncement(true, "New", "info", null, null));
+        when(broadcast.publicMaintenance())
+                .thenReturn(new PublicMaintenance(true, "Upgrading", ends));
+        when(broadcast.publicAnnouncement())
+                .thenReturn(new PublicAnnouncement(true, "New", "info", null, null));
 
         PublicStatusController.PublicStatusResponse r = controller(broadcast).get();
 

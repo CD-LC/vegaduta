@@ -3,14 +3,17 @@ package com.agenticai.core.apidocs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.common.security.PublicEndpointRateLimitFilter;
+
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The cross-cutting API conventions the generated document must state over the REAL controller set:
@@ -85,10 +88,11 @@ class OpenApiConventionsTest {
                 .isTrue();
         // Every 429 in the document is a route the filter really throttles, and vice versa.
         int documented = 0;
-        for (Iterator<Map.Entry<String, JsonNode>> paths = doc().path("paths").fields();
+        for (Iterator<Map.Entry<String, JsonNode>> paths =
+                        doc().path("paths").properties().iterator();
                 paths.hasNext(); ) {
             Map.Entry<String, JsonNode> p = paths.next();
-            for (Iterator<Map.Entry<String, JsonNode>> ops = p.getValue().fields();
+            for (Iterator<Map.Entry<String, JsonNode>> ops = p.getValue().properties().iterator();
                     ops.hasNext(); ) {
                 Map.Entry<String, JsonNode> o = ops.next();
                 boolean has429 = o.getValue().path("responses").has("429");

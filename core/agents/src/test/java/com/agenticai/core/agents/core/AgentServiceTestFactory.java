@@ -11,6 +11,7 @@ import com.agenticai.core.providers.modality.VideoProviderValidator;
 import com.agenticai.core.providers.modality.VoiceProviderValidator;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.sharing.ResourceAccessService;
+
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ final class AgentServiceTestFactory {
                 resourceAccessService,
                 agentSchemaService,
                 AgentVersionSnapshotService.disabled(),
-                new AgentConfigSnapshotCodec(new tools.jackson.databind.ObjectMapper()),
+                new AgentConfigSnapshotCodec(com.agenticai.core.json.JsonMappers.plain()),
                 new AgentCapabilityRegistry(List.of()),
                 defaultModel,
                 defaultMaxTokens,

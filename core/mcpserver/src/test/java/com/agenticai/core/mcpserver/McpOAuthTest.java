@@ -13,16 +13,9 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
 import jakarta.servlet.FilterChain;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +25,16 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The OAuth 2.1 option of {@code /mcp}: the authenticator's token checks (signature, issuer,
@@ -372,7 +375,8 @@ class McpOAuthTest {
                 response,
                 (a, b) -> {});
         assertThat(response.getStatus()).isEqualTo(200);
-        var doc = new tools.jackson.databind.ObjectMapper().readTree(response.getContentAsString());
+        var doc =
+                com.agenticai.core.json.JsonMappers.plain().readTree(response.getContentAsString());
         assertThat(doc.path("resource").asString()).isEqualTo(RESOURCE);
         assertThat(doc.path("authorization_servers").get(0).asString()).isEqualTo(ISSUER);
         assertThat(doc.path("scopes_supported").toString())

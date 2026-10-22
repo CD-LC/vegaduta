@@ -27,14 +27,16 @@ import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.sharing.ResourceType;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 /**
  * Characterisation of the per-field configuration setters on {@link AgentService}: for each one the
@@ -78,7 +80,7 @@ class AgentSettingsCharacterisationTest {
                         resourceAccess,
                         schema,
                         snapshots,
-                        new AgentConfigSnapshotCodec(new tools.jackson.databind.ObjectMapper()),
+                        new AgentConfigSnapshotCodec(com.agenticai.core.json.JsonMappers.plain()),
                         new AgentCapabilityRegistry(List.of()),
                         "claude-sonnet-5",
                         1024,

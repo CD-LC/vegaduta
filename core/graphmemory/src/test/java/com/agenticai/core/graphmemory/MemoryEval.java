@@ -1,5 +1,11 @@
 package com.agenticai.core.graphmemory;
 
+import org.springframework.ai.chat.client.ChatClient;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,9 +22,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import org.springframework.ai.chat.client.ChatClient;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * <b>LongMemEval-lite (own fixtures)</b> - a deterministic retrieval/QA evaluation of the graph
@@ -215,7 +218,7 @@ final class MemoryEval {
                                         q.path("abstain").asBoolean(false))));
             }
             return new Fixture(root.get("name").asString(), multi, cases);
-        } catch (java.io.IOException ex) {
+        } catch (java.io.IOException | JacksonException ex) {
             throw new IllegalStateException(ex);
         }
     }
@@ -526,7 +529,8 @@ final class MemoryEval {
         StringBuilder sb = new StringBuilder();
         sb.append(FIXTURE_NAME).append(" - backend: ").append(backend).append("\n");
         sb.append(
-                        "(own fixtures; NOT the public LongMemEval benchmark; gold-extracted facts, extractive answerer,")
+                        "(own fixtures; NOT the public LongMemEval benchmark; gold-extracted facts,"
+                            + " extractive answerer,")
                 .append(" scripted arbitrator - see MemoryEval javadoc)\n");
         for (Map.Entry<Mode, List<CaseResult>> e : all.entrySet()) {
             List<CaseResult> rs = e.getValue();
@@ -572,8 +576,10 @@ final class MemoryEval {
             sb.append(
                     String.format(
                             Locale.ROOT,
-                            "category-averaged accuracy: %.1f%%   update-correctness (knowledge_update): %.1f%%   "
-                                    + "stale-value leak rate (cases with a stale value): %.1f%%   abstention accuracy: %.1f%%   hallucination rate: %.1f%%%n",
+                            "category-averaged accuracy: %.1f%%   update-correctness"
+                                + " (knowledge_update): %.1f%%   stale-value leak rate (cases with"
+                                + " a stale value): %.1f%%   abstention accuracy: %.1f%%  "
+                                + " hallucination rate: %.1f%%%n",
                             macro,
                             accuracy(rs, "knowledge_update") * 100,
                             staleLeakRate(rs) * 100,

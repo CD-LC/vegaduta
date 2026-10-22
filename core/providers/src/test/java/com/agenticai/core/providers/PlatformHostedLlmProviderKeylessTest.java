@@ -17,14 +17,16 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.providers.validation.ProviderValidationException;
 import com.agenticai.core.security.net.SsrfGuard;
-import java.net.InetAddress;
-import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+
+import java.net.InetAddress;
+import java.util.Set;
 
 /** Keyless pool rows (local Ollama and friends): only the explicit entry point allows them. */
 class PlatformHostedLlmProviderKeylessTest {
@@ -70,7 +72,7 @@ class PlatformHostedLlmProviderKeylessTest {
         mockServer
                 .expect(requestTo("https://ollama.example/v1/models"))
                 .andExpect(method(HttpMethod.GET))
-                .andExpect(r -> assertFalse(r.getHeaders().containsKey("Authorization")))
+                .andExpect(r -> assertFalse(r.getHeaders().containsHeader("Authorization")))
                 .andRespond(withSuccess());
 
         service.createAllowingBlankKey(request("  "));
