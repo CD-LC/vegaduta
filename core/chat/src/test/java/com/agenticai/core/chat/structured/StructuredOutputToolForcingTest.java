@@ -67,10 +67,11 @@ class StructuredOutputToolForcingTest {
                 .isFalse();
         assertThat(StructuredOutput.supportsAnthropicToolForcing(anthropic("gpt-4o"))).isFalse();
         assertThat(StructuredOutput.supportsAnthropicToolForcing(null)).isFalse();
+        // Spring AI 2 fills in a default Claude model when none is set, so unset options qualify too.
         assertThat(
                         StructuredOutput.supportsAnthropicToolForcing(
                                 AnthropicChatOptions.builder().build()))
-                .isFalse();
+                .isTrue();
         assertThat(
                         StructuredOutput.supportsAnthropicToolForcing(
                                 OpenAiChatOptions.builder().model("claude-sonnet-4-5").build()))
@@ -198,7 +199,8 @@ class StructuredOutputToolForcingTest {
                 StructuredOutput.withAnthropicForcedTool(off, "verdict", schema());
         assertThat(out).isNotSameAs(off);
         assertThat(out.getToolChoice()).isNotNull();
-        assertThat(out.getThinking()).isNull();
+        // The SDK keeps an explicit "disabled" thinking parameter instead of dropping it.
+        assertThat(out.getThinking().isDisabled()).isTrue();
     }
 
     @Test

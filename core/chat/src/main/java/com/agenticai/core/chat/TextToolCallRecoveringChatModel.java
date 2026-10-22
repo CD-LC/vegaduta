@@ -105,8 +105,8 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
     }
 
     @Override
-    public ChatOptions getDefaultOptions() {
-        return delegate.getDefaultOptions();
+    public ChatOptions getOptions() {
+        return delegate.getOptions();
     }
 
     // --- non-streaming ---------------------------------------------------------

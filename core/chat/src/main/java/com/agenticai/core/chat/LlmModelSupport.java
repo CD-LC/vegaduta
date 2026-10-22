@@ -201,6 +201,11 @@ public class LlmModelSupport implements DisposableBean {
                     model);
             return chatModel;
         }
+        if (model == null || model.isBlank()) {
+            // Spring AI 2 substitutes a default Claude model for a null one, which would make the
+            // probe below pass for a request whose real model is unknown.
+            return chatModel;
+        }
         var probe =
                 org.springframework.ai.anthropic.AnthropicChatOptions.builder()
                         .model(model)

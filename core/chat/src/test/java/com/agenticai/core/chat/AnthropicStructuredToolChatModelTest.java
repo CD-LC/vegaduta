@@ -76,7 +76,7 @@ class AnthropicStructuredToolChatModelTest {
         }
 
         @Override
-        public ChatOptions getDefaultOptions() {
+        public ChatOptions getOptions() {
             return defaults;
         }
     }
