@@ -1,6 +1,6 @@
 name: SDK release
 
-# Releases the Java Agent SDK (sdk/java, Maven group io.vegaduta) for a tag
+# Releases the Java Agent SDK (sdk/java, Maven group io.github.cd-lc) for a tag
 # `sdk-v1.2.3` (or `sdk-v1.2.3-rc.1`). Run it from the Actions tab with "Use
 # workflow from" set to that TAG; a branch is refused. It is independent of the
 # platform release (release.yml works on `v*.*.*` tags only).
@@ -146,14 +146,14 @@ jobs:
           else
             gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
               --title "Java Agent SDK $VERSION" \
-              --notes "Java Agent SDK $VERSION (io.vegaduta:vegaduta-agent-*). Verify the jars with \`sha256sum -c SHA256SUMS\` and \`gh attestation verify <jar> --repo $GITHUB_REPOSITORY\`. Maven Central availability is announced in CHANGELOG.md." \
+              --notes "Java Agent SDK $VERSION (io.github.cd-lc:vegaduta-agent-*). Verify the jars with \`sha256sum -c SHA256SUMS\` and \`gh attestation verify <jar> --repo $GITHUB_REPOSITORY\`. Maven Central availability is announced in CHANGELOG.md." \
               "${flags[@]}"
           fi
 
   central:
     name: Maven Central (Portal)
     needs: [verify, release]
-    # Off until a maintainer has verified the io.vegaduta namespace and added the secrets.
+    # Off until a maintainer has verified the io.github.cd-lc namespace and added the secrets.
     if: vars.SDK_PUBLISH_CENTRAL == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30

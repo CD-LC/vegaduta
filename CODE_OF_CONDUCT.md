@@ -38,7 +38,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement by either of these private channels:
 
-- email **punith.nagaraju1988@gmail.com** <!-- TODO(maintainers): placeholder; replace with the project's conduct address before launch (scripts/dev/set-repo-identity.sh --conduct-email) -->
+- email **contact@cdandlc.com** <!-- TODO(maintainers): placeholder; replace with the project's conduct address before launch (scripts/dev/set-repo-identity.sh --conduct-email) -->
 - a private message to any project lead or maintainer listed in [MAINTAINERS.md](MAINTAINERS.md) (for example through their GitHub profile's contact details)
 
 If a report concerns a maintainer, send it to another maintainer or the project lead; the person concerned is excluded from handling it. All complaints will be reviewed and investigated promptly and fairly.

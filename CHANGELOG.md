@@ -8,6 +8,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.
+- **`ApprovalNotificationBlockedException` is a `GovernanceException` again.** It extended `RuntimeException`, so `catch (GovernanceException)` - the documented one-stop handler - missed it.
+- **REST clients: streams, retries and errors are publish-grade.** The Python client's 60 s request timeout also applied to SSE reads, so a stream idle for a minute died; `stream()` now bounds connect+headers only (`http.client`, blocking reads). Both clients retry idempotent GET/HEAD on 429/5xx/network failures honouring `Retry-After`, re-resolve a callable token once on 401, wrap transport failures in a `NetworkError`, expose `code`, `headers` and `retry_after`/`retryAfterMs` on `ApiError`, and send an SDK `User-Agent`. The TypeScript client gains `timeoutMs` (client and per-call), `maxRetries` and `userAgent` options.
+- **SDK metadata is publish-ready.** `vegaduta-agent` uses PEP 639 license metadata and carries `LICENSE`, coverage and mypy config and the missing `Security`/`OS Independent`/`Typed` classifiers; `vegaduta-sdk` (Python) gains full PyPI metadata; `vegaduta-sdk` (TypeScript) gains `exports`, `repository`/`bugs`/`keywords`, a `prepack` typecheck+build, a pinned `typescript` devDependency and a package `README.md`.
+
+### Added
+
+- **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added
@@ -354,7 +365,7 @@ Release notes on GitHub are generated from the section for each version.
   Not imported on purpose: the D-U-N-S company credential, landing/marketing/legal page changes, production deploy documentation and scripts, the Azure and GCP deploy workflows, the WhatsApp QR and Discord bridge services, two SAP-specific agent templates (OSS ships no SAP connector).
 - **Public-page wiring**: `NEXT_PUBLIC_DOCS_URL` (`WEB_DOCS_URL`) points every "Docs" link at the published site; `NEXT_PUBLIC_COMMERCIAL_URL` (`WEB_COMMERCIAL_URL`) adds a "Hosted version" link to the open-source pages. The OSS landing gains "Use it as a dependency" and "Where it runs" sections (SDKs, plugins, Android app, MCP server, with real statuses); the classic footer links plugins, the Java SDK, the source and the self-host guide; `/llms.txt` has a Developers section.
 - **SDK release workflow** (`.github/workflows/sdk-release.yml`): `sdk-v*` tags build, test, attest SLSA provenance, create a GitHub Release and, once enabled, upload signed artifacts to the Maven Central Portal. Dependabot and the labeler cover `sdk/java`.
-- **VegaDūta Agent SDK** (`sdk/java/`, Maven group `io.vegaduta`, design in
+- **VegaDūta Agent SDK** (`sdk/java/`, Maven group `io.github.cd-lc`, design in
   [ADR-0013](docs/architecture/ADR-0013-embeddable-agent-sdk.md)): an embeddable,
   governance-first library for Java agents. `vegaduta-agent-api` (framework-free
   contracts), `-core` (policy gate, lethal-trifecta detector, approval gate with

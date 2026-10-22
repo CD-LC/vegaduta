@@ -1,0 +1,12 @@
+tier=personal
+profiles=workspace rag
+build=0
+local_ai=host
+local_model=qwen3.5:9b
+search=1
+native_core=0
+cloud=0
+previous_version=
+tools=1
+browser=1
+valkey=1

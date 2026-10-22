@@ -1,7 +1,7 @@
 # VegaDūta Agent SDK: security review pack
 
 What a security reviewer, CISO or auditor needs to assess an application that embeds the Java
-Agent SDK (`sdk/java`, group `io.vegaduta`): the threat model of the governed tool pipeline,
+Agent SDK (`sdk/java`, group `io.github.cd-lc`): the threat model of the governed tool pipeline,
 trust boundaries, data handled, key management, deployment modes, a filled vendor security
 questionnaire, known limitations and a test checklist. The regulatory mapping is in the
 [compliance mapping](compliance-mapping.md); the design record is
