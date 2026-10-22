@@ -16,11 +16,11 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Locks the {@code personal} profile (application-personal.yml): the shared contract property
- * names other areas read, their personal defaults, that each is env-overridable, and that the
- * file stays additive (no localhost in a value, nothing that turns Kafka or Temporal on). Parses
- * the shipped YAML with duplicate keys rejected, as Spring Boot's own loader does, and resolves
- * placeholders through a real {@link StandardEnvironment}.
+ * Locks the {@code personal} profile (application-personal.yml): the shared contract property names
+ * other areas read, their personal defaults, that each is env-overridable, and that the file stays
+ * additive (no localhost in a value, nothing that turns Kafka or Temporal on). Parses the shipped
+ * YAML with duplicate keys rejected, as Spring Boot's own loader does, and resolves placeholders
+ * through a real {@link StandardEnvironment}.
  */
 class PersonalProfileConfigTest {
 
@@ -54,14 +54,20 @@ class PersonalProfileConfigTest {
         assertThat(env.getProperty("app.sidecar.enabled")).isEqualTo("false");
 
         StandardEnvironment rag =
-                environment(Map.of("APP_SIDECAR_ENABLED", "true", "APP_EMBEDDINGS_PROVIDER", "sidecar"));
+                environment(
+                        Map.of(
+                                "APP_SIDECAR_ENABLED",
+                                "true",
+                                "APP_EMBEDDINGS_PROVIDER",
+                                "sidecar"));
         assertThat(rag.getProperty("app.sidecar.enabled")).isEqualTo("true");
         assertThat(rag.getProperty("app.embeddings.provider")).isEqualTo("sidecar");
     }
 
     @Test
     void theInboundRateLimitStartsOnHereAndIsOffEverywhereElse() throws IOException {
-        assertThat(environment(Map.of()).getProperty("app.omnichannel.rate-limit.enabled")).isEqualTo("true");
+        assertThat(environment(Map.of()).getProperty("app.omnichannel.rate-limit.enabled"))
+                .isEqualTo("true");
         assertThat(
                         environment(Map.of("APP_OMNICHANNEL_RATE_LIMIT_ENABLED", "false"))
                                 .getProperty("app.omnichannel.rate-limit.enabled"))
@@ -153,11 +159,16 @@ class PersonalProfileConfigTest {
             }
         }
         // Guard against the loop silently matching no source (e.g. a renamed property source).
-        assertThat(checked).as("properties scanned from application-personal.yml").isGreaterThan(10);
+        assertThat(checked)
+                .as("properties scanned from application-personal.yml")
+                .isGreaterThan(10);
         assertThat(env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                 .startsWith("urn:");
         assertThat(
-                        environment(Map.of("KEYCLOAK_ISSUER_URI", "https://auth.example.org/realms/x"))
+                        environment(
+                                        Map.of(
+                                                "KEYCLOAK_ISSUER_URI",
+                                                "https://auth.example.org/realms/x"))
                                 .getProperty(
                                         "spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                 .isEqualTo("https://auth.example.org/realms/x");
@@ -167,8 +178,7 @@ class PersonalProfileConfigTest {
     void yamlHasNoDuplicateKeys() throws IOException {
         LoaderOptions options = new LoaderOptions();
         options.setAllowDuplicateKeys(false);
-        try (InputStream in =
-                getClass().getResourceAsStream("/application-personal.yml")) {
+        try (InputStream in = getClass().getResourceAsStream("/application-personal.yml")) {
             assertThat(in).isNotNull();
             assertThat(new Yaml(options).<Object>load(in)).isNotNull();
         }
