@@ -13,7 +13,7 @@
 # The trusted Java side, built once at image build time. `vega-api.jar` is what
 # tenant code compiles against; `harness.jar` is the loader that invokes it and
 # is deliberately NOT on the tenant's compile classpath.
-FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS harness
+FROM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS harness
 
 WORKDIR /build
 COPY harness/java ./java
