@@ -2,15 +2,19 @@ package com.agenticai.core.agents.tools.apiguide;
 
 import com.agenticai.core.agentspi.ApiSpecProvider;
 import com.agenticai.core.json.JsonMappers;
-import java.io.IOException;
-import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
+import java.util.Optional;
 
 /**
  * {@code vegaduta_api_guide}: the Assistant's way into the platform's REST contract. Read-only - it
@@ -39,25 +43,28 @@ public class ApiGuideToolCallback implements ToolCallback {
         return ToolDefinition.builder()
                 .name(NAME)
                 .description(
-                        "Looks up this VegaDuta install's REST API in its real OpenAPI spec. Use it whenever the user asks "
-                                + "how to do something with the API, which endpoint to call, or wants data the API can return. "
-                                + "action=search finds endpoints by words; action=describe returns the parameters, request "
-                                + "body and response of one endpoint and a ready json_ui apiCall block that shows the live "
-                                + "result to the user (GET runs by itself, POST/PUT/PATCH/DELETE wait for the user to press "
-                                + "Send). Prefer showing the live result over describing it. The full spec is at /api/openapi.json.")
+                        "Looks up this VegaDuta install's REST API in its real OpenAPI spec. Use it"
+                            + " whenever the user asks how to do something with the API, which"
+                            + " endpoint to call, or wants data the API can return. action=search"
+                            + " finds endpoints by words; action=describe returns the parameters,"
+                            + " request body and response of one endpoint and a ready json_ui"
+                            + " apiCall block that shows the live result to the user (GET runs by"
+                            + " itself, POST/PUT/PATCH/DELETE wait for the user to press Send)."
+                            + " Prefer showing the live result over describing it. The full spec is"
+                            + " at /api/openapi.json.")
                 .inputSchema(
                         """
-                        {
-                            "type": "object",
-                            "properties": {
-                                "action": {"type": "string", "enum": ["search", "describe"], "description": "search (default) or describe"},
-                                "query": {"type": "string", "description": "For search: words about the task, e.g. 'list agents' or 'create knowledge base'"},
-                                "method": {"type": "string", "description": "For describe: GET, POST, PUT, PATCH or DELETE. For search: optional filter"},
-                                "path": {"type": "string", "description": "For describe: the exact path from a search result, e.g. /api/agents/{id}"}
-                            },
-                            "required": ["action"]
-                        }
-                        """)
+{
+    "type": "object",
+    "properties": {
+        "action": {"type": "string", "enum": ["search", "describe"], "description": "search (default) or describe"},
+        "query": {"type": "string", "description": "For search: words about the task, e.g. 'list agents' or 'create knowledge base'"},
+        "method": {"type": "string", "description": "For describe: GET, POST, PUT, PATCH or DELETE. For search: optional filter"},
+        "path": {"type": "string", "description": "For describe: the exact path from a search result, e.g. /api/agents/{id}"}
+    },
+    "required": ["action"]
+}
+""")
                 .build();
     }
 
@@ -79,7 +86,8 @@ public class ApiGuideToolCallback implements ToolCallback {
                                         + method
                                         + " "
                                         + path
-                                        + " in the spec. Use action=search to find the exact path.");
+                                        + " in the spec. Use action=search to find the exact"
+                                        + " path.");
             }
             return MAPPER.writeValueAsString(
                     idx.search(args.path("query").asString(""), args.path("method").asString("")));
@@ -106,7 +114,7 @@ public class ApiGuideToolCallback implements ToolCallback {
     private static String error(String message) {
         try {
             return MAPPER.writeValueAsString(MAPPER.createObjectNode().put("error", message));
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return "{\"error\":\"error\"}";
         }
     }

@@ -1,10 +1,11 @@
 package com.agenticai.core.quality.trajectory;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import tools.jackson.databind.JsonNode;
 
 /**
  * What one expected argument of an expected tool call must look like. Written in a trajectory spec
@@ -148,7 +149,7 @@ final class ArgMatcher {
                 if (absent) {
                     return false;
                 }
-                String text = value.isContainerNode() ? value.toString() : value.asString();
+                String text = value.isContainer() ? value.toString() : value.asString();
                 if (text.length() > MAX_REGEX_INPUT_CHARS) {
                     return false;
                 }

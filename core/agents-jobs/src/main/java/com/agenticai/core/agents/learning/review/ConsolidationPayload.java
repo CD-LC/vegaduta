@@ -1,12 +1,14 @@
 package com.agenticai.core.agents.learning.review;
 
 import com.agenticai.core.json.JsonMappers;
+
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import tools.jackson.databind.JsonNode;
 
 /**
  * What an approved CONSOLIDATION proposal does, stored as the proposal's payload: {@code action}
@@ -91,8 +93,8 @@ public record ConsolidationPayload(
             }
             Map<UUID, String> hashes = new LinkedHashMap<>();
             n.path("hashes")
-                    .fields()
-                    .forEachRemaining(e -> hashes.put(decode(e.getKey()), e.getValue().asString()));
+                    .properties()
+                    .forEach(e -> hashes.put(decode(e.getKey()), e.getValue().asString()));
             return new ConsolidationPayload(
                     action, scope, agentId, keepId, List.copyOf(drops), Map.copyOf(hashes));
         } catch (IllegalArgumentException e) {

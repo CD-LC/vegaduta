@@ -3,18 +3,22 @@ package com.agenticai.core.agents.tools.desktop;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The core side of {@code services/desktop-agent}: one RestClient pinned to the operator-configured
@@ -105,7 +109,7 @@ final class DesktopAgentClient {
     private static JsonNode parse(String json) {
         try {
             return json == null ? null : MAPPER.readTree(json);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

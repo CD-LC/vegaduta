@@ -15,6 +15,14 @@ import static com.agenticai.core.workflow.WorkflowDataOps.mapList;
 import static com.agenticai.core.workflow.WorkflowDataOps.str;
 import static com.agenticai.core.workflow.WorkflowDataOps.stringList;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.LongNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -23,13 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.LongNode;
-import tools.jackson.databind.node.NullNode;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.databind.node.TextNode;
 
 /**
  * The {@code aggregate} data operation. {@code aggregations: [{operation, field, as, separator}]},
@@ -136,7 +137,7 @@ final class DataAggregateOps {
                     sb.append(part);
                     firstPart = false;
                 }
-                return TextNode.valueOf(sb.toString());
+                return StringNode.valueOf(sb.toString());
             }
         },
         COLLECT {
@@ -222,7 +223,8 @@ final class DataAggregateOps {
                     throw new IllegalArgumentException(
                             "Unknown aggregate operation '"
                                     + str(spec.get("operation"))
-                                    + "' (expected count, sum, avg, min, max, first, last, concat or collect).");
+                                    + "' (expected count, sum, avg, min, max, first, last, concat"
+                                    + " or collect).");
                 }
                 String field = str(spec.get("field")) == null ? "" : str(spec.get("field")).strip();
                 String as =

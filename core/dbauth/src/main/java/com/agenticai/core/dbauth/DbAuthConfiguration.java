@@ -1,15 +1,15 @@
 package com.agenticai.core.dbauth;
 
 import com.zaxxer.hikari.HikariDataSource;
+
 import jakarta.annotation.PostConstruct;
-import java.sql.DriverManager;
-import java.time.Clock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -17,6 +17,9 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+
+import java.sql.DriverManager;
+import java.time.Clock;
 
 /**
  * {@code app.datasource.auth}: how core logs in to Postgres.

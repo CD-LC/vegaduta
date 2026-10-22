@@ -70,7 +70,7 @@ public final class McpToolPin {
             try {
                 tools.jackson.databind.JsonNode node =
                         com.agenticai.core.json.JsonMappers.plain().readTree(json);
-                node.fields().forEachRemaining(e -> out.put(e.getKey(), e.getValue().asString()));
+                node.properties().forEach(e -> out.put(e.getKey(), e.getValue().asString()));
             } catch (tools.jackson.core.JacksonException e) {
                 // A corrupt stored manifest only loses the "which tool" detail; the aggregate hash
                 // comparison still decides changed/unchanged.

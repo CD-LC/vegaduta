@@ -1,5 +1,11 @@
 package com.agenticai.core.workflow;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,11 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.databind.node.TextNode;
 
 /**
  * Public bridge from the workflow portability feature ({@code
@@ -242,7 +243,7 @@ public final class WorkflowPortabilityRedactor {
         }
 
         private JsonNode text(String key, String value, boolean nameCheck) {
-            return TextNode.valueOf(redactString(key, value, nameCheck));
+            return StringNode.valueOf(redactString(key, value, nameCheck));
         }
 
         private String redactString(String key, String value, boolean nameCheck) {

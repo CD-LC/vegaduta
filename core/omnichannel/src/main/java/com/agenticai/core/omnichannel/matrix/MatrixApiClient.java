@@ -3,16 +3,7 @@ package com.agenticai.core.omnichannel.matrix;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -23,8 +14,21 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Matrix Client-Server API over the platform's guarded HTTP client. The homeserver is chosen by the
@@ -316,7 +320,7 @@ public class MatrixApiClient {
         String json;
         try {
             json = mapper.writeValueAsString(content);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new MatrixApiException(-1, "M_BAD_JSON", "Could not serialise the Matrix event");
         }
         JsonNode node =
@@ -365,7 +369,7 @@ public class MatrixApiClient {
         try {
             JsonNode node = mapper.readTree(reply.body());
             return node == null ? mapper.createObjectNode() : node;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new MatrixApiException(
                     reply.status(),
                     "M_NOT_JSON",
@@ -393,8 +397,8 @@ public class MatrixApiClient {
                 throw new MatrixApiException(
                         -1,
                         "M_INSECURE_HOMESERVER",
-                        "The homeserver URL must use https (plain http is only allowed for hosts listed in"
-                                + " app.security.outbound.allowed-private-hosts)");
+                        "The homeserver URL must use https (plain http is only allowed for hosts"
+                            + " listed in app.security.outbound.allowed-private-hosts)");
             }
             request = new HttpUriRequestBase(method, target.uri());
         } catch (SsrfBlockedException e) {
@@ -457,7 +461,7 @@ public class MatrixApiClient {
             errcode = node.path("errcode").asString(null);
             error = node.path("error").asString(null);
             retryAfter = node.path("retry_after_ms").asLong(0L);
-        } catch (IOException | RuntimeException ignored) {
+        } catch (RuntimeException ignored) {
             // not JSON: fall back to the status
         }
         String message =

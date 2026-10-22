@@ -1,12 +1,21 @@
 package com.agenticai.core.quality.eval;
 
 import com.agenticai.core.json.JsonMappers;
+
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.ai.chat.client.ChatClient;
+
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -15,11 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.ai.chat.client.ChatClient;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Master Roadmap 2026 item #15 (CI golden-dataset eval suite, sec B/C) - entry point. Run via
@@ -68,7 +72,7 @@ import tools.jackson.databind.ObjectMapper;
  * {@link EvalResult#totalTokens()}, checked against {@link TokenBaseline}, printed in the CI log
  * and - when Langfuse is configured - attached to the case's trace and dataset-run item by {@link
  * LangfuseEvalClient}. What this runner DOES now share with core/chat is the LLM HTTP timeout
- * policy - see {@link EvalLlmHttp#llmRestClientBuilder()}.
+ * policy - see {@link EvalLlmHttp#connectTimeout()}.
  *
  * <p><b>Langfuse experiments (2026-09).</b> When the same {@code LANGFUSE_OTEL_AUTH_HEADER} that
  * turns trace export on is present, every run is ALSO mirrored as a Langfuse dataset run via {@link
@@ -188,9 +192,10 @@ public final class EvalRunner {
             if (System.getenv("EVAL_BASE_URL") == null
                     || System.getenv("EVAL_BASE_URL").isBlank()) {
                 System.out.println(
-                        "[eval] SKIPPED - EVAL_BACKEND=openai but EVAL_BASE_URL is not set. This is "
-                                + "not a failure: point it at an OpenAI-compatible endpoint (e.g. "
-                                + "http://localhost:11434 for Ollama) to run the self-hosted/on-device eval path.");
+                        "[eval] SKIPPED - EVAL_BACKEND=openai but EVAL_BASE_URL is not set. This is"
+                            + " not a failure: point it at an OpenAI-compatible endpoint (e.g."
+                            + " http://localhost:11434 for Ollama) to run the self-hosted/on-device"
+                            + " eval path.");
                 System.exit(0);
                 return;
             }
@@ -199,9 +204,10 @@ public final class EvalRunner {
             apiKey = System.getenv("ANTHROPIC_API_KEY");
             if (apiKey == null || apiKey.isBlank()) {
                 System.out.println(
-                        "[eval] SKIPPED - ANTHROPIC_API_KEY is not set. This is not a failure: the eval "
-                                + "suite needs a real, billed LLM key to run (see core/quality/eval-harness.md). Configure the "
-                                + "ANTHROPIC_API_KEY secret to actually exercise the golden dataset.");
+                        "[eval] SKIPPED - ANTHROPIC_API_KEY is not set. This is not a failure: the"
+                            + " eval suite needs a real, billed LLM key to run (see"
+                            + " core/quality/eval-harness.md). Configure the ANTHROPIC_API_KEY"
+                            + " secret to actually exercise the golden dataset.");
                 System.exit(0);
                 return;
             }
@@ -269,7 +275,8 @@ public final class EvalRunner {
         OpenTelemetrySdk openTelemetry = buildOpenTelemetry();
         Tracer tracer = openTelemetry.getTracer("com.agenticai.core.quality.eval.EvalRunner");
         log.info(
-                "[eval] starting run {} ({} case(s), model={}, token-regression threshold={}%, langfuseRun={})",
+                "[eval] starting run {} ({} case(s), model={}, token-regression threshold={}%,"
+                    + " langfuseRun={})",
                 evalRunId,
                 cases.size(),
                 model,
@@ -290,8 +297,8 @@ public final class EvalRunner {
         List<EvalRepeats.CaseSummary> repeatSummaries = new ArrayList<>();
         if (repeats > 1) {
             log.info(
-                    "[eval] repeats={} - every case runs {}x ({} billed model calls per case), gate = strict "
-                            + "majority per case, min mean pass^k={}",
+                    "[eval] repeats={} - every case runs {}x ({} billed model calls per case), gate"
+                        + " = strict majority per case, min mean pass^k={}",
                     repeats,
                     repeats,
                     repeats * 2,
@@ -350,7 +357,8 @@ public final class EvalRunner {
             long max = sorted.get(sorted.size() - 1);
             System.out.printf(
                     java.util.Locale.ROOT,
-                    "[eval] per-case latency: p50=%dms max=%dms (generation+judge, backend=%s, model=%s)%n",
+                    "[eval] per-case latency: p50=%dms max=%dms (generation+judge, backend=%s,"
+                        + " model=%s)%n",
                     p50,
                     max,
                     backend,
@@ -516,7 +524,8 @@ public final class EvalRunner {
         }
         for (String unmatched : requestedIds) {
             log.warn(
-                    "[eval] {}={} named case id '{}' which does not exist in golden-dataset.json - ignoring",
+                    "[eval] {}={} named case id '{}' which does not exist in golden-dataset.json -"
+                        + " ignoring",
                     CASE_IDS_ENV_VAR,
                     rawCsv,
                     unmatched);
@@ -533,11 +542,8 @@ public final class EvalRunner {
                                     apiKey,
                                     model,
                                     1024,
-                                    EvalLlmHttp.llmRestClientBuilder(
-                                            LLM_CONNECT_TIMEOUT_ENV_VAR,
-                                            DEFAULT_LLM_CONNECT_TIMEOUT),
-                                    EvalLlmHttp.llmWebClientBuilder(
-                                            LLM_READ_TIMEOUT_ENV_VAR, DEFAULT_LLM_READ_TIMEOUT)))
+                                    EvalLlmHttp.connectTimeout(),
+                                    EvalLlmHttp.readTimeout()))
                     .build();
         }
         // No temperature/topP set at all - simplest safe choice for a
@@ -551,8 +557,8 @@ public final class EvalRunner {
                                 apiKey,
                                 model,
                                 1024,
-                                EvalLlmHttp.llmRestClientBuilder(),
-                                EvalLlmHttp.llmWebClientBuilder()))
+                                EvalLlmHttp.connectTimeout(),
+                                EvalLlmHttp.readTimeout()))
                 .build();
     }
 

@@ -1,14 +1,17 @@
 package com.agenticai.core.quality.eval;
 
 import com.agenticai.core.json.JsonMappers;
-import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.InputStream;
 import java.util.Map;
 import java.util.TreeMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Last-known-good token totals per {@link EvalCase#id()}, used by {@code EvalRunner} to flag a
@@ -55,16 +58,18 @@ final class TokenBaseline {
         try (InputStream in = TokenBaseline.class.getResourceAsStream(RESOURCE)) {
             if (in == null) {
                 log.info(
-                        "[eval] no {} on classpath - token-budget check will run with zero baselines",
+                        "[eval] no {} on classpath - token-budget check will run with zero"
+                            + " baselines",
                         RESOURCE);
                 return new TokenBaseline(Map.of());
             }
             Map<String, Integer> loaded =
                     mapper.readValue(in, new TypeReference<TreeMap<String, Integer>>() {});
             return new TokenBaseline(loaded);
-        } catch (IOException e) {
+        } catch (java.io.IOException | JacksonException e) {
             log.warn(
-                    "[eval] could not read {} - token-budget check will run with zero baselines: {}",
+                    "[eval] could not read {} - token-budget check will run with zero baselines:"
+                        + " {}",
                     RESOURCE,
                     e.getMessage());
             return new TokenBaseline(Map.of());

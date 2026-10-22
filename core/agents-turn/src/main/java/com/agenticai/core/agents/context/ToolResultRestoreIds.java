@@ -1,15 +1,16 @@
 package com.agenticai.core.agents.context;
 
 import com.agenticai.core.json.JsonMappers;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
 
 /**
  * The pointer a cleared tool result carries and {@code restore_tool_result} resolves: {@code
@@ -26,8 +27,7 @@ import tools.jackson.databind.SerializationFeature;
  */
 public final class ToolResultRestoreIds {
 
-    private static final ObjectMapper CANONICAL =
-            JsonMappers.plain().configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+    private static final ObjectMapper CANONICAL = JsonMappers.sortedMapKeys();
     private static final int DIGEST_BYTES = 6;
 
     private ToolResultRestoreIds() {}

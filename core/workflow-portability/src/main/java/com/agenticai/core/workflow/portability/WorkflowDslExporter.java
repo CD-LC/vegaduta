@@ -1,15 +1,17 @@
 package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.workflow.WorkflowPortabilityRedactor;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+
 import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Builds the VegaDuta workflow DSL v1 document for one saved workflow. Pure: the caller hands over
@@ -125,11 +127,12 @@ public final class WorkflowDslExporter {
      */
     public static String toJson(ObjectMapper mapper, JsonNode doc) {
         try {
-            DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
             DefaultIndenter indenter = new DefaultIndenter("  ", "\n");
-            printer.indentObjectsWith(indenter);
-            printer.indentArraysWith(indenter);
-            return mapper.writer(printer).writeValueAsString(doc) + "\n";
+            DefaultPrettyPrinter printer =
+                    new DefaultPrettyPrinter()
+                            .withObjectIndenter(indenter)
+                            .withArrayIndenter(indenter);
+            return mapper.writer().with(printer).writeValueAsString(doc) + "\n";
         } catch (Exception e) {
             throw new IllegalStateException("Could not serialise the workflow file.", e);
         }

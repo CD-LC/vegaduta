@@ -5,6 +5,13 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.WhatsAppDeliveryRejectedException;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,10 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The Meta Graph API calls this platform needs for WhatsApp Cloud API sending, plus (as of Embedded
@@ -119,7 +122,7 @@ public class MetaGraphApiClient {
     /** Meta's {@code error.code} from a failed response body, or 0 when absent or unparseable. */
     static int metaErrorCode(String body) {
         try {
-            return new tools.jackson.databind.ObjectMapper()
+            return com.agenticai.core.json.JsonMappers.plain()
                     .readTree(body)
                     .path("error")
                     .path("code")

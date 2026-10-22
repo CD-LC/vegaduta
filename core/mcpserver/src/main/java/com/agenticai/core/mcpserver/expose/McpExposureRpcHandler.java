@@ -2,18 +2,20 @@ package com.agenticai.core.mcpserver.expose;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.McpCallerContext;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * JSON-RPC level hook that lets ONE authenticated caller see - and call - its own exposed agents /
@@ -68,7 +70,7 @@ public class McpExposureRpcHandler {
         JsonNode root;
         try {
             root = MAPPER.readTree(requestBody);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             return Optional.empty();
         }
         if (root == null || !root.isObject()) {
@@ -152,7 +154,7 @@ public class McpExposureRpcHandler {
         JsonNode schema;
         try {
             schema = MAPPER.readTree(inputSchemaJson);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             schema = null;
         }
         if (schema == null || !schema.isObject()) {

@@ -1,15 +1,19 @@
 package com.agenticai.core.agents.tools.workspacefiles;
 
 import com.agenticai.core.json.JsonMappers;
-import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
 
 /**
  * The Assistant's file tools over the person's projects folder ({@link WorkspaceFiles}): list,
@@ -59,61 +63,67 @@ final class WorkspaceFileToolCallback implements ToolCallback {
         return switch (kind) {
             case LIST ->
                     def(
-                            "Lists the files and folders in a workspace folder (dependency and build output folders such as "
-                                    + "node_modules, target and .git are skipped)."
+                            "Lists the files and folders in a workspace folder (dependency and"
+                                + " build output folders such as node_modules, target and .git are"
+                                + " skipped)."
                                     + where,
                             """
-                    {"type":"object","properties":{
-                      "path":{"type":"string","description":"Folder to list; empty for the projects folder itself"},
-                      "recursive":{"type":"boolean","description":"Include sub-folders (up to 6 levels, 500 entries)"}}}
-                    """);
+{"type":"object","properties":{
+  "path":{"type":"string","description":"Folder to list; empty for the projects folder itself"},
+  "recursive":{"type":"boolean","description":"Include sub-folders (up to 6 levels, 500 entries)"}}}
+""");
             case READ ->
                     def(
-                            "Reads a text file from the workspace, with line numbers. Use offset/limit for long files."
+                            "Reads a text file from the workspace, with line numbers. Use"
+                                + " offset/limit for long files."
                                     + where,
                             """
-                    {"type":"object","properties":{
-                      "path":{"type":"string","description":"File to read"},
-                      "offset":{"type":"integer","description":"First line (1-based); default 1"},
-                      "limit":{"type":"integer","description":"Number of lines; default all (output is capped)"}},
-                     "required":["path"]}
-                    """);
+{"type":"object","properties":{
+  "path":{"type":"string","description":"File to read"},
+  "offset":{"type":"integer","description":"First line (1-based); default 1"},
+  "limit":{"type":"integer","description":"Number of lines; default all (output is capped)"}},
+ "required":["path"]}
+""");
             case SEARCH ->
                     def(
-                            "Searches the workspace like a find-in-files: file names that contain the query, then lines of "
-                                    + "text files that contain every word of it (case-insensitive). Use it to find a document "
-                                    + "or a passage the person attached or mentioned, then workspace_read the file. PDFs the "
-                                    + "person attached have their text in a sibling '<name>.pdf.txt' file."
+                            "Searches the workspace like a find-in-files: file names that contain"
+                                + " the query, then lines of text files that contain every word of"
+                                + " it (case-insensitive). Use it to find a document or a passage"
+                                + " the person attached or mentioned, then workspace_read the file."
+                                + " PDFs the person attached have their text in a sibling"
+                                + " '<name>.pdf.txt' file."
                                     + where,
                             """
-                    {"type":"object","properties":{
-                      "query":{"type":"string","description":"Words to look for; every word must appear"},
-                      "path":{"type":"string","description":"Folder to search in; empty for the whole projects folder"}},
-                     "required":["query"]}
-                    """);
+{"type":"object","properties":{
+  "query":{"type":"string","description":"Words to look for; every word must appear"},
+  "path":{"type":"string","description":"Folder to search in; empty for the whole projects folder"}},
+ "required":["query"]}
+""");
             case WRITE ->
                     def(
-                            "Creates or replaces a whole text file in the workspace (missing folders are created). Prefer "
-                                    + "workspace_edit for a small change to an existing file."
+                            "Creates or replaces a whole text file in the workspace (missing"
+                                + " folders are created). Prefer workspace_edit for a small change"
+                                + " to an existing file."
                                     + where,
                             """
-                    {"type":"object","properties":{
-                      "path":{"type":"string","description":"File to write"},
-                      "content":{"type":"string","description":"The complete new content"}},
-                     "required":["path","content"]}
-                    """);
+                            {"type":"object","properties":{
+                              "path":{"type":"string","description":"File to write"},
+                              "content":{"type":"string","description":"The complete new content"}},
+                             "required":["path","content"]}
+                            """);
             case EDIT ->
                     def(
-                            "Replaces one exact snippet in a workspace file. old_text must appear exactly once (include "
-                                    + "enough surrounding lines); read the file first."
+                            "Replaces one exact snippet in a workspace file. old_text must appear"
+                                + " exactly once (include enough surrounding lines); read the file"
+                                + " first."
                                     + where,
                             """
-                    {"type":"object","properties":{
-                      "path":{"type":"string","description":"File to change"},
-                      "old_text":{"type":"string","description":"Exact text to replace (must occur exactly once)"},
-                      "new_text":{"type":"string","description":"Replacement text"}},
-                     "required":["path","old_text","new_text"]}
-                    """);
+{"type":"object","properties":{
+  "path":{"type":"string","description":"File to change"},
+  "old_text":{"type":"string","description":"Exact text to replace (must occur exactly once)"},
+  "new_text":{"type":"string","description":"Replacement text"}},
+ "required":["path","old_text","new_text"]}
+""");
         };
     }
 
@@ -166,7 +176,8 @@ final class WorkspaceFileToolCallback implements ToolCallback {
                     if (hits.isEmpty()) {
                         out.put(
                                 "note",
-                                "No file name or line contains all of those words; try fewer or different words.");
+                                "No file name or line contains all of those words; try fewer or"
+                                    + " different words.");
                     } else if (hits.size() >= WorkspaceFiles.MAX_SEARCH_HITS) {
                         out.put(
                                 "note",
@@ -246,7 +257,7 @@ final class WorkspaceFileToolCallback implements ToolCallback {
     private static String error(String message) {
         try {
             return MAPPER.writeValueAsString(MAPPER.createObjectNode().put("error", message));
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return "{\"error\":\"error\"}";
         }
     }

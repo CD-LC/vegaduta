@@ -1,14 +1,17 @@
 package com.agenticai.core.quality.dataset;
 
 import com.agenticai.core.json.JsonMappers;
-import java.io.IOException;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Creates a dataset from the bundled research-task starter set ({@code
@@ -37,7 +40,7 @@ public class ResearchSeedService {
                 throw new IllegalStateException("Research seed resource missing: " + RESOURCE);
             }
             return MAPPER.readTree(in);
-        } catch (IOException e) {
+        } catch (java.io.IOException | JacksonException e) {
             throw new IllegalStateException(
                     "Could not read " + RESOURCE + ": " + e.getMessage(), e);
         }

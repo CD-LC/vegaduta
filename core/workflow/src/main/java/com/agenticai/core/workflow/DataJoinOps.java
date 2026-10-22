@@ -14,6 +14,14 @@ import static com.agenticai.core.workflow.WorkflowDataOps.intOrNull;
 import static com.agenticai.core.workflow.WorkflowDataOps.str;
 
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,12 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.NullNode;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.databind.node.TextNode;
 
 /**
  * The {@code merge} data operation (append / join / first_non_empty) and its keyed join ({@code
@@ -288,11 +290,11 @@ final class DataJoinOps {
         String t = text.strip();
         if (t.charAt(0) == '{' || t.charAt(0) == '[') {
             JsonNode parsed = DataValues.parse(mapper, t);
-            if (parsed != null && parsed.isContainerNode()) {
+            if (parsed != null && parsed.isContainer()) {
                 return parsed;
             }
         }
-        return TextNode.valueOf(text);
+        return StringNode.valueOf(text);
     }
 
     private static boolean isAbsentInput(JsonNode n) {

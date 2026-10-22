@@ -1,10 +1,13 @@
 package com.agenticai.core.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.json.JsonFactory;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -76,6 +79,36 @@ public final class JsonMappers {
      */
     public static ObjectMapper withFactory(JsonFactory factory) {
         return JsonMapper.builder(factory).configureForJackson2().build();
+    }
+
+    /**
+     * Dates written as ISO-8601 strings instead of numeric timestamps (Jackson 2's {@code
+     * WRITE_DATES_AS_TIMESTAMPS} disabled).
+     */
+    public static ObjectMapper isoDates() {
+        return base().disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
+    }
+
+    /** {@link #isoDates()} that also ignores unknown fields on read. */
+    public static ObjectMapper isoDatesLenient() {
+        return base().disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .build();
+    }
+
+    /** Pretty-printed output ({@code INDENT_OUTPUT}). */
+    public static ObjectMapper indented() {
+        return base().enable(SerializationFeature.INDENT_OUTPUT).build();
+    }
+
+    /**
+     * Strict reader: duplicate object keys and trailing tokens are errors, so two parsers cannot
+     * disagree about what a document means.
+     */
+    public static ObjectMapper strictReader() {
+        return base().enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+                .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                .build();
     }
 
     /** Rejects input with content after the first value. */

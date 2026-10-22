@@ -1,6 +1,15 @@
 package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
@@ -18,11 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Read-only client for Langfuse's public REST API ({@code /api/public/**}), used by the
@@ -170,7 +174,7 @@ public class LangfuseApiClient {
         JsonNode body;
         try {
             body = JSON.readTree(response.body() == null ? "" : response.body());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new LangfuseUnavailableException(
                     "Langfuse answered with something that is not JSON.", response.status());
         }
@@ -190,7 +194,8 @@ public class LangfuseApiClient {
             return "Langfuse rejected the configured API credential (HTTP " + status + ").";
         }
         if (status == 404) {
-            return "Langfuse answered HTTP 404 (not found, or this API is not available on the deployed Langfuse version).";
+            return "Langfuse answered HTTP 404 (not found, or this API is not available on the"
+                       + " deployed Langfuse version).";
         }
         if (status == 429) {
             return "Langfuse is rate limiting this server (HTTP 429); try again shortly.";

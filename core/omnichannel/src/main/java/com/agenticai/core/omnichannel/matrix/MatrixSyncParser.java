@@ -1,11 +1,12 @@
 package com.agenticai.core.omnichannel.matrix;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Turns a {@code /sync} response into the three things the channel acts on: room invites addressed
@@ -41,7 +42,8 @@ final class MatrixSyncParser {
         Map<String, Integer> counts = new HashMap<>();
 
         JsonNode rooms = sync.path("rooms");
-        Iterator<Map.Entry<String, JsonNode>> invited = rooms.path("invite").fields();
+        Iterator<Map.Entry<String, JsonNode>> invited =
+                rooms.path("invite").properties().iterator();
         while (invited.hasNext()) {
             Map.Entry<String, JsonNode> room = invited.next();
             String inviter = inviterOf(room.getValue(), botUserId);
@@ -50,7 +52,7 @@ final class MatrixSyncParser {
             }
         }
 
-        Iterator<Map.Entry<String, JsonNode>> joined = rooms.path("join").fields();
+        Iterator<Map.Entry<String, JsonNode>> joined = rooms.path("join").properties().iterator();
         while (joined.hasNext()) {
             Map.Entry<String, JsonNode> entry = joined.next();
             String roomId = entry.getKey();
