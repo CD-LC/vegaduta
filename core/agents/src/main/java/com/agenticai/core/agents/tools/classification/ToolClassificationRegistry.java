@@ -589,9 +589,9 @@ public class ToolClassificationRegistry {
         } else if (!decision.isClassified()) {
             log.warn(
                     "Tool classification blocked: tool='{}' reason={} source={}",
-                    decision.toolName(),
-                    reason,
-                    source);
+                    LogSafe.clean(decision.toolName()),
+                    LogSafe.clean(reason),
+                    LogSafe.clean(source));
         }
         return decision;
     }
