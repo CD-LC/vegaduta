@@ -68,7 +68,13 @@ const STATUS = {
   enabled: true,
   generationAvailable: true,
   remindersEnabled: false,
-  limits: { maxPlansPerUser: 20, maxLessonsPerPlan: 60, maxTopicChars: 300, reviewSessionCap: 12, generationsPerHour: 10 },
+  limits: {
+    maxPlansPerUser: 20,
+    maxLessonsPerPlan: 60,
+    maxTopicChars: 300,
+    reviewSessionCap: 12,
+    generationsPerHour: 10,
+  },
 };
 
 const SUMMARY = {
@@ -97,7 +103,9 @@ describe("/learn/tutor", () => {
   });
 
   it("shows a plain 'not available' state when the feature is off (404)", async () => {
-    apiMock.getTutorStatus.mockRejectedValue(Object.assign(new Error("No endpoint matches this request."), { status: 404 }));
+    apiMock.getTutorStatus.mockRejectedValue(
+      Object.assign(new Error("No endpoint matches this request."), { status: 404 })
+    );
     render(<TutorPage />);
     expect(await screen.findByText("unavailableTitle")).toBeInTheDocument();
     // The only action must go somewhere that exists: /learn has no index page any more.
@@ -132,8 +140,24 @@ describe("/learn/tutor", () => {
           id: "m1",
           title: "Basics",
           lessons: [
-            { id: "m1-l1", title: "Light", objective: "o", status: "COMPLETED", generated: true, content: null, quiz: null },
-            { id: "m1-l2", title: "Water", objective: "o", status: "NOT_STARTED", generated: false, content: null, quiz: null },
+            {
+              id: "m1-l1",
+              title: "Light",
+              objective: "o",
+              status: "COMPLETED",
+              generated: true,
+              content: null,
+              quiz: null,
+            },
+            {
+              id: "m1-l2",
+              title: "Water",
+              objective: "o",
+              status: "NOT_STARTED",
+              generated: false,
+              content: null,
+              quiz: null,
+            },
           ],
         },
       ],

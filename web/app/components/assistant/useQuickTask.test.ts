@@ -8,7 +8,13 @@ import { useQuickTask } from "./useQuickTask";
 import type { AssistantTurn } from "./assistantTypes";
 
 const card = (id: string, needsPhone: boolean): AssistantTurn =>
-  ({ id, role: "assistant", content: "", at: 0, task: { message: "m", agentId: null, channel: "LOG", status: "confirm", preview: null, needsPhone } }) as AssistantTurn;
+  ({
+    id,
+    role: "assistant",
+    content: "",
+    at: 0,
+    task: { message: "m", agentId: null, channel: "LOG", status: "confirm", preview: null, needsPhone },
+  }) as AssistantTurn;
 
 function setup(initial: AssistantTurn[]) {
   let turns = initial;

@@ -19,7 +19,14 @@ vi.mock("../../lib/api", async () => {
   return {
     api: {
       listBriefs: async () => SAMPLE_ENVOYS,
-      getBrief: async () => ({ id: "sample-1", brief: sampleBrief, readiness: SAMPLE_READINESS, rung: "UNDER_WATCH", status: "APPLIED", bindings: [] as any[] }),
+      getBrief: async () => ({
+        id: "sample-1",
+        brief: sampleBrief,
+        readiness: SAMPLE_READINESS,
+        rung: "UNDER_WATCH",
+        status: "APPLIED",
+        bindings: [] as any[],
+      }),
       planBriefStream: async (_req: unknown, onEvent: (e: any) => void) => {
         onEvent({ type: "thinking", text: "Reading what you wrote" });
         await wait(20);
@@ -119,6 +126,8 @@ describe("NarrativeCard", () => {
   });
   it("links secrets to the deep-link even before apply", () => {
     wrap(<NarrativeCard brief={brief} refKey="s1" onClose={() => {}} />);
-    expect(screen.getByText("Open in editor").closest("a")?.getAttribute("href")).toBe("/secrets?tour=field:secret-add");
+    expect(screen.getByText("Open in editor").closest("a")?.getAttribute("href")).toBe(
+      "/secrets?tour=field:secret-add"
+    );
   });
 });
