@@ -1,6 +1,8 @@
 package com.agenticai.core.voice;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.StorageProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +64,7 @@ import org.springframework.util.StringUtils;
  * client for the API LiveKit documents; it has not been exercised against a live LiveKit+Egress
  * deployment in this pass.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Component
 public class LiveKitEgressService {
 

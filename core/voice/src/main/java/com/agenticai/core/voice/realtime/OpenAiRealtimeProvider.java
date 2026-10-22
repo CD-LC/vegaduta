@@ -1,6 +1,8 @@
 package com.agenticai.core.voice.realtime;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Component;
  * default so the caller never has to send explicit commits; {@link
  * RealtimeVoiceSession#interrupt} maps to {@code response.cancel}.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Component
 public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
 

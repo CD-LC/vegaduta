@@ -1,6 +1,8 @@
 package com.agenticai.core.voice.realtime;
 
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.ticket.SingleUseTicketRegistry;
 import java.time.Clock;
 import java.time.Duration;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
  * authentication tag rather than by a comparison; there is no secret string here to compare in
  * constant time.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Service
 public class RealtimeVoiceTicketService {
 

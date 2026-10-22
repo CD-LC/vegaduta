@@ -1,6 +1,8 @@
 package com.agenticai.core.workflow.share;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.voice.VoiceCallController;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
@@ -66,6 +68,7 @@ import org.springframework.web.multipart.MultipartFile;
  *       (see that method's own javadoc).</li>
  * </ol>
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @RestController
 @RequestMapping("/api/share/workflows")
 public class WorkflowShareVoiceController {
