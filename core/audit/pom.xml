@@ -20,7 +20,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
     <!-- PlatformIssueController#acknowledge reads Authentication.getName() to record who
          acknowledged an issue - same "spring-security-core is the smallest dependency that
@@ -42,7 +42,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-test-classic</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

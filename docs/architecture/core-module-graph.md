@@ -9,7 +9,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 `core/app/src/test/java/com/agenticai/core/archrules/ModuleBoundaryRulesTest.java`.
 
 - Reactor modules: **57**
-- Sibling edges (compile/runtime): **473**
+- Sibling edges (compile/runtime): **474**
 - Kernel -> vendor module edges: **0**
 - Vendor -> vendor module edges: **0**
 
@@ -45,7 +45,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | audit | kernel | 37 | json |  |
 | billing | kernel (hosts vendor code) | 69 | json, security | Razorpay + PhonePe gateways in billing.gateway |
 | brief | kernel | 70 | agents, agents-tools, agents-turn, approval, audit, chat, guardrails, json, knowledge, mcp, omnichannel, providers, quality, secrets, security, tenancy, workflow |  |
-| chat | kernel (hosts vendor code) | 163 | audit, json, providers, security, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
+| chat | kernel (hosts vendor code) | 165 | audit, json, providers, security, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
 | codeintel | kernel | 20 | approval, json, security |  |
 | crypto | kernel | 7 | (none) |  |
 | crypto-kms | kernel | 4 | crypto, json, security |  |
@@ -78,7 +78,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | speech | kernel | 11 | (none) |  |
 | storage | kernel | 9 | security |  |
 | templates | kernel | 44 | agents, agents-turn, audit, security, tenancy, workflow |  |
-| tenancy | kernel | 230 | admin, audit, billing, dbauth, security, storage |  |
+| tenancy | kernel | 231 | admin, audit, billing, dbauth, json, security, storage |  |
 | voice | kernel | 38 | agents, agents-turn, crypto, **elevenlabs** (test), json, providers, **sarvam** (test), security, speech, storage |  |
 | workflow | kernel | 282 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
 | workflow-expression | kernel | 23 | json |  |
@@ -577,6 +577,7 @@ graph LR
   tenancy --> audit
   tenancy --> billing
   tenancy --> dbauth
+  tenancy --> json
   tenancy --> security
   tenancy --> storage
   voice --> agents
