@@ -112,13 +112,17 @@ export function normalizePublicStatus(raw: any): PublicStatus | null {
  * The console's edition seed disagreeing with the tier core reports, or null when they agree, when
  * core did not report one, or when the console was not told its edition at all (an undeclared build
  * renders "every feature on" and has nothing to contradict).
+ *
+ * Only personal versus not-personal is compared. lite and full render identically in the console, and
+ * a lite stack (NEXT_PUBLIC_DEPLOY_ENV=lite) runs a core with no app.edition.tier, which reports "full":
+ * lite against full is therefore never a mismatch.
  */
 export function editionMismatch(
   status: Pick<PublicStatus, "edition"> | null | undefined,
   seed: Edition | null = declaredEdition()
 ): { seed: Edition; server: Edition } | null {
   const server = status?.edition?.tier;
-  if (!server || !seed || server === seed) return null;
+  if (!server || !seed || (server === "personal") === (seed === "personal")) return null;
   return { seed, server };
 }
 

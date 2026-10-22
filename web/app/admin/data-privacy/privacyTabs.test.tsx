@@ -142,6 +142,27 @@ describe("retention tab", () => {
     await screen.findByText(/must be a whole number between 1 and 3650/);
     expect(priv.putRetention).not.toHaveBeenCalled();
   });
+  it("offers Slack, Discord, X and Teams as rule channels, except on a personal install", async () => {
+    priv.listRetention.mockResolvedValue([]);
+    const channelOptions = async () => {
+      render(<RetentionTab />);
+      await screen.findByText("No retention rules");
+      fireEvent.click(screen.getByLabelText("Channel"));
+      const names = screen.getAllByRole("option").map((o) => o.textContent);
+      cleanup();
+      return names;
+    };
+    const shared = await channelOptions();
+    for (const c of ["SLACK", "DISCORD", "X", "TEAMS", "EMAIL"]) expect(shared).toContain(c);
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      const personal = await channelOptions();
+      for (const c of ["SLACK", "DISCORD", "X", "TEAMS"]) expect(personal).not.toContain(c);
+      for (const c of ["WHATSAPP", "TELEGRAM", "EMAIL", "SIGNAL"]) expect(personal).toContain(c);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
   it("shows an error with retry", async () => {
     priv.listRetention.mockRejectedValueOnce(new Error("nope")).mockResolvedValue([]);
     render(<RetentionTab />);

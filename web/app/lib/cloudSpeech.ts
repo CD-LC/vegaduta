@@ -7,16 +7,31 @@
 // lite and full (and an undeclared build) keep everything. The hold-to-talk call overlay is a separate
 // concern and stays on every edition.
 //
-// Rendering is synchronous and edition-based, like the rest of the console (lib/edition.ts). The core
-// escape hatch (app.edition.features.cloud-speech.enabled=true on a personal install) is therefore not seen
-// here; a personal install that opts in keeps the cards hidden until the console reads the reported feature
-// flags too.
+// The first paint never waits on the network, so the seed is the edition (lib/edition.ts). Once core's
+// GET /api/public/status has arrived, its reported `edition.features["cloud-speech"]` wins over the seed:
+// that is how the escape hatch (app.edition.features.cloud-speech.enabled=true on a personal install)
+// reaches the console, and how the console never draws a card for a feature core has off. Components call
+// useCloudSpeechOffered so they re-render when the status arrives; plain functions (providerCatalog) call
+// cloudSpeechOffered, which reads the same store.
 import { isPersonalEdition } from "./edition";
+import { getPlatformStatusState, usePlatformStatus } from "./platformStatus";
 
 /** The provider card keys that exist only because of CLOUD_SPEECH (ProviderName.java: SARVAM, ELEVENLABS). */
 export const CLOUD_SPEECH_PROVIDERS: ReadonlySet<string> = new Set(["SARVAM", "ELEVENLABS"]);
 
-/** True when this install has the hosted speech vendors: every edition except personal. */
+/** The status-reported flag, or null while core has not reported one (an older core, or no fetch yet). */
+function reportedCloudSpeech(edition: { features: Record<string, boolean> } | null | undefined): boolean | null {
+  const v = edition?.features?.["cloud-speech"];
+  return typeof v === "boolean" ? v : null;
+}
+
+/** True when this install has the hosted speech vendors: what core reported, else the edition seed (every edition except personal). */
 export function cloudSpeechOffered(): boolean {
-  return !isPersonalEdition();
+  return reportedCloudSpeech(getPlatformStatusState().status?.edition) ?? !isPersonalEdition();
+}
+
+/** {@link cloudSpeechOffered} for a component: re-renders when the public status arrives or changes. */
+export function useCloudSpeechOffered(): boolean {
+  const { status } = usePlatformStatus();
+  return reportedCloudSpeech(status?.edition) ?? !isPersonalEdition();
 }

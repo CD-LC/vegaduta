@@ -37,6 +37,19 @@ describe("/connect", () => {
     expect(within(screen.getByTestId("connect-google")).getByRole("link").getAttribute("href")).toBe("/admin/integrations");
   });
 
+  it("has no Slack card on a personal install and keeps the rest", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      render(<ConnectPage />);
+      expect(screen.queryByTestId("connect-slack")).toBeNull();
+      for (const id of ["telegram", "whatsapp", "email", "google", "sms", "knowledge"]) {
+        expect(screen.getByTestId(`connect-${id}`)).toBeTruthy();
+      }
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("marks a connected channel and offers Manage instead of Connect", async () => {
     render(<ConnectPage />);
     await waitFor(() => expect(within(screen.getByTestId("connect-telegram")).getByText("Connected")).toBeTruthy());

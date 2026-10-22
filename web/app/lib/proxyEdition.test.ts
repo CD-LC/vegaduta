@@ -125,6 +125,15 @@ describe("proxy() on a personal install", () => {
     expect(features.headers.get("location")).toBe(`${ORIGIN}/`);
   });
 
+  it("redirects the billing family even when NEXT_PUBLIC_BILLING_ENABLED=1 is set by mistake", async () => {
+    process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
+    for (const [path, to] of [["/billing", "/"], ["/pricing", "/"], ["/features", "/"], ["/admin/billing", "/usage"]]) {
+      const res = await get(path);
+      expect(res.status, path).toBe(307);
+      expect(res.headers.get("location"), path).toBe(`${ORIGIN}${to}`);
+    }
+  });
+
   it("is 404 for /try and /signup in the classic site mode too", async () => {
     process.env.NEXT_PUBLIC_SITE_MODE = "classic";
     expect((await get("/try")).status).toBe(404);
@@ -138,9 +147,16 @@ describe("proxy() on a personal install", () => {
     expect((await get("/directory")).status).toBe(404);
   });
 
-  it("lets an explicit shared tier win over local auth", async () => {
+  it("does not let an explicit shared tier override local auth (local auth was always personal)", async () => {
     process.env.NEXT_PUBLIC_EDITION = "lite";
     process.env.NEXT_PUBLIC_AUTH_MODE = "local";
+    expect(isPersonalEditionAtRuntime()).toBe(true);
+    expect((await get("/directory")).status).toBe(404);
+  });
+
+  it("lets an explicit shared tier decide when sign-in is keycloak", async () => {
+    process.env.NEXT_PUBLIC_EDITION = "lite";
+    process.env.NEXT_PUBLIC_AUTH_MODE = "keycloak";
     expect(isPersonalEditionAtRuntime()).toBe(false);
     expect((await get("/directory")).status).not.toBe(404);
   });

@@ -4,6 +4,7 @@
 import { MessageSquare } from "lucide-react";
 import { type StatusDotStatus } from "../../components/ui/status-dot";
 import { CHANNEL_ICON } from "../../components/BrandIcons";
+import { channelOffered } from "../../lib/edition";
 import { type ConversationSummary, type ConversationView, type HandoffChannel, type HandoffTranscriptMessage } from "./inboxApi";
 
 export const CHANNELS: { value: HandoffChannel; label: string }[] = [
@@ -20,6 +21,11 @@ export const CHANNELS: { value: HandoffChannel; label: string }[] = [
   { value: "SMS", label: "SMS" },
   { value: "SIGNAL", label: "Signal" },
 ];
+
+/** CHANNELS minus the ones this edition does not run (Slack, Discord, X and Teams on a personal install). */
+export function offeredChannels(): { value: HandoffChannel; label: string }[] {
+  return CHANNELS.filter((c) => channelOffered(c.value));
+}
 
 export const VIEW_TABS: { value: ConversationView; label: string }[] = [
   { value: "all", label: "All" },

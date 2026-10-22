@@ -113,6 +113,18 @@ describe("DataTablesPanel states", () => {
     expect(listDataTables).not.toHaveBeenCalled();
   });
 
+  it("shows the plan-locked card without an upgrade link on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      getDataTablesConfig.mockResolvedValue(config({ planLocked: true }));
+      render(<DataTablesPanel />);
+      expect(await screen.findByText("planLockedTitle")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "upgrade" })).not.toBeInTheDocument();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("reports a real failure with a retry", async () => {
     getDataTablesConfig.mockRejectedValue(Object.assign(new Error("boom"), { status: 500 }));
 

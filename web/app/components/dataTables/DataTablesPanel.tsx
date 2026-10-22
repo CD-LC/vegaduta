@@ -24,6 +24,7 @@ import { capacity } from "./capacity";
 import PaginationControls from "../PaginationControls";
 import { ListSkeleton } from "../tenantLists/ListStates";
 import { usePagination } from "../../lib/usePagination";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * /data-tables: the list of the workspace's tables on the left, the grid editor of the selected one on the right.
@@ -176,9 +177,11 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
         <AlertTitle>{t("planLockedTitle")}</AlertTitle>
         <AlertDescription>
           <p>{t("planLockedBody")}</p>
-          <Button asChild size="sm" className="mt-2">
-            <Link href="/admin/billing">{t("upgrade")}</Link>
-          </Button>
+          {!isPersonalEdition() && (
+            <Button asChild size="sm" className="mt-2">
+              <Link href="/admin/billing">{t("upgrade")}</Link>
+            </Button>
+          )}
         </AlertDescription>
       </Alert>
     );

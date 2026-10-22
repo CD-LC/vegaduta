@@ -321,6 +321,21 @@ describe("create form", () => {
     expect(screen.getByTestId("scheduled-task-form")).toBeTruthy();
   });
 
+  it("shows the plan-limit refusal without an upgrade link on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      createScheduledTask.mockRejectedValue(Object.assign(new Error("Maximum of 3 scheduled tasks."), { status: 403 }));
+      await openForm();
+      fillBasics();
+      fireEvent.click(screen.getByText("save"));
+      const card = await screen.findByTestId("scheduled-task-plan-limit");
+      expect(card.textContent).toContain("Maximum of 3 scheduled tasks.");
+      expect(screen.queryByText("upgradeLink")).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("does not submit while the name or prompt is missing", async () => {
     await openForm();
 

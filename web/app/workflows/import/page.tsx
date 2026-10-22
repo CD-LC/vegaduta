@@ -41,6 +41,7 @@ import {
   sameMappings,
   unmappedCount,
 } from "./workflowImportHelpers";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * Import workflow - migration funnel. Paste or drop a workflow file (a VegaDuta export, an n8n export or a Dify app
@@ -425,11 +426,13 @@ export default function WorkflowImportPage() {
             <AlertDescription>
               <p className="font-medium">{t("upgradeTitle")}</p>
               <p>{error.message || t("upgradeBody")}</p>
-              <Button asChild size="sm" variant="outline" className="mt-2">
-                <Link href="/admin/billing">
-                  <Sparkles size={14} /> {t("upgradeCta")}
-                </Link>
-              </Button>
+              {!isPersonalEdition() && (
+                <Button asChild size="sm" variant="outline" className="mt-2">
+                  <Link href="/admin/billing">
+                    <Sparkles size={14} /> {t("upgradeCta")}
+                  </Link>
+                </Button>
+              )}
             </AlertDescription>
           </Alert>
         )}
