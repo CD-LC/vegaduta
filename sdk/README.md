@@ -2,7 +2,7 @@
 
 > **Looking for the Agent SDKs** — governance for agents inside your own application,
 > not a client of this API? Those are [`java/`](java/README.md)
-> (`io.vegaduta:vegaduta-agent-*`) and [`python-agent/`](python-agent/README.md)
+> (`io.github.cd-lc:vegaduta-agent-*`) and [`python-agent/`](python-agent/README.md)
 > (`vegaduta-agent`). This page covers the generated REST clients for the platform API.
 
 First-party TypeScript and Python clients for the VegaDuta REST API. Both are generated from

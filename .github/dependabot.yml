@@ -63,7 +63,7 @@ updates:
       prefix: "build(deps)"
     ignore:
       # Tracks the SDK reactor in this repository, not a published release.
-      - dependency-name: "io.vegaduta:*"
+      - dependency-name: "io.github.cd-lc:*"
 
   # Documentation site (mkdocs, docs/requirements.txt)
   - package-ecosystem: pip

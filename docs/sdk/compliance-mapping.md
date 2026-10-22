@@ -1,7 +1,7 @@
 # VegaDūta Agent SDK: compliance mapping
 
 A control-by-control mapping of the mechanisms in the Java Agent SDK (`sdk/java`, group
-`io.vegaduta`) to the frameworks a security review, a model-risk committee or an auditor is
+`io.github.cd-lc`) to the frameworks a security review, a model-risk committee or an auditor is
 likely to ask about. It is written for the team that has been blocked by a CISO or an internal
 audit function and needs to answer "which control covers which obligation, and what evidence
 does it leave behind?". The companion document is the

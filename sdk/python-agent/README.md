@@ -12,7 +12,7 @@ cost attribution and policy replay. Framework-free — works on plain and
 and an OpenTelemetry observer.
 
 This is the Python sibling of the Java Agent SDK (`sdk/java`,
-`io.vegaduta:vegaduta-agent-*`): same contracts, same vocabulary, same audit
+`io.github.cd-lc:vegaduta-agent-*`): same contracts, same vocabulary, same audit
 format. It is a different thing from `sdk/python` (`vegaduta_sdk`), which is
 the generated REST client that *calls* the VegaDūta platform API — this
 library runs *inside your own application*. Apache-2.0. Python 3.10+.

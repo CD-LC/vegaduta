@@ -8,7 +8,7 @@ framework underneath changes.
 
 Lives in `sdk/java/` next to the generated TypeScript and Python REST clients (`sdk/typescript/`,
 `sdk/python/`), which are a different thing: those call the VegaDūta platform API; this library
-runs inside your own application. Apache-2.0. Java 17+. Group `io.vegaduta`. Design record:
+runs inside your own application. Apache-2.0. Java 17+. Group `io.github.cd-lc`. Design record:
 [ADR-0013](../../docs/architecture/ADR-0013-embeddable-agent-sdk.md).
 
 > Status: `0.1.0-SNAPSHOT`, not yet on Maven Central. Build it locally with
@@ -80,7 +80,7 @@ run with. From Java: `new RiskMapScanner(policy).scan(classes).toMarkdown()`.
 
 ```xml
 <dependency>
-  <groupId>io.vegaduta</groupId>
+  <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
   <version>0.1.0-SNAPSHOT</version>
 </dependency>
@@ -421,7 +421,7 @@ mvn -f sdk/java/pom.xml spotless:apply    # google-java-format (needs a JDK 21 j
 mvn -f sdk/java/pom.xml -Prelease deploy  # sign and upload to the Central Portal (maintainers)
 ```
 
-Release prerequisites: a verified `io.vegaduta` namespace on the Central Portal, a GPG key,
+Release prerequisites: a verified `io.github.cd-lc` namespace on the Central Portal, a GPG key,
 `CENTRAL_USERNAME` / `CENTRAL_PASSWORD` user token, a tag `sdk-v<version>`, and
 `japicmp.skip=false` with the previous release as baseline.
 

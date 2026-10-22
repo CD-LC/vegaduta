@@ -32,7 +32,7 @@ OWASP's agentic risk list and the EU AI Act. VegaDūta already has most of that 
 sit **on top of** Spring AI (first) and LangChain4j (second), the way Embabel sits on Spring AI,
 but for governance rather than planning.
 
-Working name in this document: **VegaDūta Agent SDK**, Maven group `io.vegaduta`
+Working name in this document: **VegaDūta Agent SDK**, Maven group `io.github.cd-lc`
 (section 7.1 explains why the group is a phase-0 decision).
 
 ---
@@ -168,7 +168,7 @@ Three facts drive the design in section 5:
 
 ## 6. Decision: the artifact set
 
-All artifacts share the group `io.vegaduta` (decision, see 7.1), the version line `0.x` until
+All artifacts share the group `io.github.cd-lc` (decision, see 7.1), the version line `0.x` until
 the API freeze in phase 3, Apache-2.0, and a `vegaduta-agent-bom`.
 
 | Artifact | Depends on | Contents (extracted from) | Java |
@@ -197,7 +197,7 @@ Target: a Spring Boot team goes from zero to a governed tool in under fifteen mi
 
 ```xml
 <dependency>
-  <groupId>io.vegaduta</groupId>
+  <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
 </dependency>
 ```
@@ -238,12 +238,14 @@ classpath.
 
 ### 7.1 Group id and namespace
 
-Maven Central namespace verification needs a domain (`io.vegaduta` requires control of
-`vegaduta.io`, proven by a DNS TXT record) or falls back to
-`io.github.cdandlc`. The latter is unreadable in a POM and hurts
-adoption. **Recommendation:** register `vegaduta.io` (or use an existing project domain) and
-verify `io.vegaduta` before anything is published. Do not use `com.agenticai` for published
-artifacts; it is the retired internal name (AGENTS.md naming rule).
+Maven Central namespace verification needs a domain or a GitHub handle. `io.vegaduta`
+would need a DNS TXT on a domain we own; the project domain is `vegaduta.ai`, not
+`vegaduta.io`. **Settled:** `io.github.cd-lc`, verified through a throwaway public repo in
+the `CD-LC` organization (the portal issues a verification-key repo name and checks it
+exists). Group id and Java package names (`io.vegaduta.agent.*`) intentionally differ: the
+coordinates answer to the namespace we control, the packages keep the product name. Do not
+use `com.agenticai` for published artifacts; it is the retired internal name (AGENTS.md
+naming rule).
 
 ### 7.2 Repository layout
 
@@ -257,7 +259,7 @@ sdk/java/                    the Agent SDK: separate Maven reactor, own parent (
 examples/sdk/                governed-tools (Spring Boot), langchain4j-quarkus, plain-java
 ```
 
-`core/pom.xml` depends on `io.vegaduta:*` at the reactor version. CI builds `sdk/java/` first and
+`core/pom.xml` depends on `io.github.cd-lc:*` at the reactor version. CI builds `sdk/java/` first and
 installs it (`mvn -f sdk/java/pom.xml install`), then `core/`; the "one Maven build at a time" rule
 in AGENTS.md still holds. `sdk/java/` gets its own tag prefix (`sdk-v0.1.0`) and release job.
 

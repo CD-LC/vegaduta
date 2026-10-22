@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>io.vegaduta</groupId>
+    <groupId>io.github.cd-lc</groupId>
     <artifactId>vegaduta-agent-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
@@ -23,7 +23,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.vegaduta</groupId>
+      <groupId>io.github.cd-lc</groupId>
       <artifactId>vegaduta-agent-spring-ai</artifactId>
     </dependency>
     <dependency>
@@ -41,7 +41,7 @@
     </dependency>
     <!-- Optional integrations: present only when the host has them. -->
     <dependency>
-      <groupId>io.vegaduta</groupId>
+      <groupId>io.github.cd-lc</groupId>
       <artifactId>vegaduta-agent-jdbc</artifactId>
       <optional>true</optional>
     </dependency>

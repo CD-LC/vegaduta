@@ -19,7 +19,7 @@ vegaduta/
 │                          server for the personal browser add-on), desktop-agent (loopback
 │                          computer-use helper for personal installs)
 ├── sdk/
-│   ├── java/              Java Agent SDK (io.vegaduta:vegaduta-agent-*, 7 modules + BOM, including the
+│   ├── java/              Java Agent SDK (io.github.cd-lc:vegaduta-agent-*, 7 modules + BOM, including the
 │   │                      agent-scanner risk-map CLI), its own Maven reactor
 │   ├── python-agent/      Python Agent SDK (vegaduta-agent), the governance layer for Python apps
 │   ├── typescript/        generated REST client for the platform API
@@ -165,7 +165,7 @@ that regenerates the hashed Python dependency locks, not a service.
 
 | Artifact | Lives in | For | Documented in |
 |---|---|---|---|
-| `io.vegaduta:vegaduta-agent-*` (Java, 7 modules + BOM) | `sdk/java/` | governance inside your own Java application; the `-scanner` module reports the risk map of an existing jar | [Java Agent SDK](sdk/java-agent-sdk.md) |
+| `io.github.cd-lc:vegaduta-agent-*` (Java, 7 modules + BOM) | `sdk/java/` | governance inside your own Java application; the `-scanner` module reports the risk map of an existing jar | [Java Agent SDK](sdk/java-agent-sdk.md) |
 | `vegaduta-agent` (Python) | `sdk/python-agent/` | governance inside your own Python application | [Python Agent SDK](sdk/python-agent-sdk.md) |
 | `vegaduta-sdk` (TypeScript) | `sdk/typescript/` | calling the platform API | [TypeScript and Python clients](sdk/clients.md) |
 | `vegaduta_sdk` (Python) | `sdk/python/` | calling the platform API | same |
@@ -294,7 +294,7 @@ one changes.
 | CODEOWNERS team | `@CD-LC/maintainers`; the organization has no teams yet | create the team, or change it with `scripts/dev/set-repo-identity.sh --team` |
 | Security and conduct contacts | placeholders `contact@cdandlc.com`, `contact@cdandlc.com` | replace with monitored addresses ([Repository setup](maintainers/repo-setup.md)) |
 | GitHub Actions | jobs do not start: the account's payments failed or the spending limit is reached | no remote CI result exists until billing is fixed; run `make gates` and the module builds locally |
-| Java Agent SDK on Maven Central | not published; `0.1.0-SNAPSHOT` builds from source | verify the `io.vegaduta` namespace, then follow [Releasing the SDK](maintainers/releasing-sdk.md) |
+| Java Agent SDK on Maven Central | not published; `0.1.0-SNAPSHOT` builds from source | verify the `io.github.cd-lc` namespace, then follow [Releasing the SDK](maintainers/releasing-sdk.md) |
 | Python Agent SDK on PyPI | not published (`sdk/python-agent/README.md`: "not yet on PyPI"); `pypi-release.yml` uploads only when `SDK_PUBLISH_PYPI` is `true` | configure PyPI trusted publishing, then tag `pysdk-v*` |
 | TypeScript and Python client packages | package names are placeholders; not on npm or PyPI | reserve names, then publish |
 | Client builds for plugins and apps | not in this repository | published through the plugin catalog per deployment |

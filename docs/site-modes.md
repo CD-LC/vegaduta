@@ -26,7 +26,7 @@ the row.
 | API reference | `/api-reference` | footer | not in the footer | `docs/api/openapi.json` |
 | Downloads (Setup apps, source tarball, `SHA256SUMS`, images, Helm chart) | `/downloads` | header "Downloads", footer, landing install cards | footer "Developers" column | GitHub releases API, read on the server and cached an hour (`web/app/downloads/page.tsx`) |
 | Academy (separate, hosted) | `NEXT_PUBLIC_ACADEMY_URL`, else `https://academy.vegaduta.ai` | header "Academy", footer | footer, only when the variable is set | `web/app/lib/academyUrl.ts` |
-| Java Agent SDK | `io.vegaduta:vegaduta-agent-spring-boot-starter` | landing "Use it as a dependency" (docs button) | footer "Developers" column | `sdk/java/README.md` |
+| Java Agent SDK | `io.github.cd-lc:vegaduta-agent-spring-boot-starter` | landing "Use it as a dependency" (docs button) | footer "Developers" column | `sdk/java/README.md` |
 | TypeScript and Python clients | `vegaduta-sdk`, `vegaduta_sdk` | landing "Use it as a dependency" (cards and the "All SDKs" button) | not linked | `sdk/README.md` |
 | Python Agent SDK | `vegaduta-agent` (`sdk/python-agent/`) | reachable through "All SDKs" ([SDKs and dependencies](sdk/README.md)); no card of its own on the landing | not linked | `sdk/python-agent/README.md` |
 | Plugins (VS Code, JetBrains, Chrome) | `/plugins` | header "Plugins & apps", landing "Where it runs" | footer "Developers" column | `GET /api/plugins/catalog` (`PluginCatalogController`) |
