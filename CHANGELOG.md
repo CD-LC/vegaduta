@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **`scripts/vegaduta personal --minimal` (and `--no-valkey`) no longer exits in silence.** The Valkey step ended with a test that returns failure when Valkey is off, and under `set -e` that stopped the whole run before it printed its plan or started anything. `tests/install` now covers it.
 - **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.
 - **`ApprovalNotificationBlockedException` is a `GovernanceException` again.** It extended `RuntimeException`, so `catch (GovernanceException)` - the documented one-stop handler - missed it.
 - **REST clients: streams, retries and errors are publish-grade.** The Python client's 60 s request timeout also applied to SSE reads, so a stream idle for a minute died; `stream()` now bounds connect+headers only (`http.client`, blocking reads). Both clients retry idempotent GET/HEAD on 429/5xx/network failures honouring `Retry-After`, re-resolve a callable token once on 401, wrap transport failures in a `NetworkError`, expose `code`, `headers` and `retry_after`/`retryAfterMs` on `ApiError`, and send an SDK `User-Agent`. The TypeScript client gains `timeoutMs` (client and per-call), `maxRetries` and `userAgent` options.

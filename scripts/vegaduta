@@ -452,7 +452,9 @@ tools_args() {
 # the flag only applies to personal.
 valkey_args() {
   [ "$TIER" = personal ] || return 0
-  [ "${VALKEY:-1}" = 1 ] && COMPOSE_ARGS+=(--profile valkey)
+  # An `a && b` as the last command returns 1 when VALKEY is 0 (--minimal, --no-valkey), and under
+  # `set -e` that ended the whole run in silence before the plan was printed.
+  if [ "${VALKEY:-1}" = 1 ]; then COMPOSE_ARGS+=(--profile valkey); fi
 }
 
 # The agent's own browser (personal/lite, `--browser`): a Playwright server in its own container that core
