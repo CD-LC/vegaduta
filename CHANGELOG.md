@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **The web console image no longer ships known High vulnerabilities with fixes available.** `next` 16.3.6 -> 16.3.8 (GHSA-cjq9-62q9-8jv4, SSRF in the image optimiser, already limited to the hosts in `images.remotePatterns`) and `sharp` 0.35.4 -> 0.35.5 (GHSA-wq5f-xc86-pv6w). The runtime stage also deletes the node base image's npm, corepack and yarn, which the console never runs and whose bundled brace-expansion, ip-address, picomatch, pacote and sigstore carried 10 more High advisories; grype `--only-fixed` now reports nothing for the image. `scripts/ci/web-image-deps.sh` keeps both fixes from regressing.
+
 ### Fixed
 
 - **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.

@@ -88,6 +88,10 @@ jobs:
         if: always()
         run: sh scripts/ci/dockerfile-poms.sh
 
+      - name: Web image dependency floors and no package manager
+        if: always()
+        run: sh scripts/ci/web-image-deps.sh
+
       # Generated documents must match their sources (ADR-0011 module graph,
       # the SDKs under sdk/ from docs/api/openapi.json, the ownership tables in
       # docs/deploy/DEPLOYMENT-SHAPES.md from the @Scheduled sources + shape profiles).
