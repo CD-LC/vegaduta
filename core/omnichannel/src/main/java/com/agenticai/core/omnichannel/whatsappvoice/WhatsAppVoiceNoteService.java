@@ -153,8 +153,7 @@ public class WhatsAppVoiceNoteService {
 
         private static VoiceSpeechException unavailable() {
             return new VoiceSpeechException(
-                    VoiceSpeechException.Failure.NOT_CONFIGURED,
-                    "no speech provider is installed");
+                    VoiceSpeechException.Failure.NOT_CONFIGURED, "no speech provider is installed");
         }
 
         @Override
