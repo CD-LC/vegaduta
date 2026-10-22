@@ -229,12 +229,12 @@ python3 -m tests.test_github_credentials  # encrypted PAT store
 python3 -m tests.test_github_routes       # the connect/status/disconnect API
 python3 -m tests.test_byo_repo            # ACCEPTANCE GATE: create->generate->push->PR
 
-# docker, alongside the existing stack + code-intel (deploy/ untouched)
-echo "APP_BUILDER_INTERNAL_TOKEN=$(openssl rand -hex 24)" >> deploy/.env
-docker compose -f deploy/docker-compose.yml \
-               -f code-intel/docker-compose.code-intel.yml \
-               -f app-builder/docker-compose.app-builder.yml \
-               up -d --build app-builder
+# docker: app-builder is a service of the platform stack, compose profile `builder`
+# (deploy/compose/docker-compose.yml); it pulls in code-intel. The launcher fills the
+# app-builder secrets in deploy/compose/.env.
+scripts/vegaduta up --full --profile builder
+# Do not layer services/app-builder/docker-compose.app-builder.yml on the platform stack:
+# it is superseded and is only for running app-builder standalone.
 ```
 
 ## Required environment variables

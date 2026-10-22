@@ -61,7 +61,7 @@ elif not _SHARED_SECRET:
     log.error(
         "SIDECAR_SHARED_SECRET is not set while SIDECAR_AUTH_REQUIRED=true - "
         "every request except /health will be rejected with 503. Set "
-        "SIDECAR_SHARED_SECRET in deploy/.env (openssl rand -hex 32) or, for "
+        "SIDECAR_SHARED_SECRET in deploy/compose/.env (openssl rand -hex 32) or, for "
         "bare local dev only, set SIDECAR_AUTH_REQUIRED=false."
     )
 

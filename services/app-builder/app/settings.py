@@ -37,7 +37,7 @@ class Settings:
         default_factory=lambda: os.environ.get("APP_BUILDER_INTERNAL_TOKEN", "")
     )
 
-    # Keycloak (auth_mode=keycloak). Defaults match deploy/docker-compose.yml
+    # Keycloak (auth_mode=keycloak). Defaults match deploy/compose/docker-compose.yml
     # and code-intel/app/settings.py's own keycloak_issuer default — see that
     # file's docstring for why the issuer must be the BROWSER-facing URL
     # under KC_HOSTNAME_STRICT while the JWKS fetch host may differ.
@@ -234,7 +234,7 @@ class Settings:
 
     # ingress.py: Caddy admin API base URL used to register/deregister real
     # preview routes. "caddy" is the compose DNS name of the platform's
-    # single reverse-proxy container (deploy/docker-compose.yml) — port
+    # single reverse-proxy container (deploy/compose/docker-compose.yml) — port
     # 2019 is Caddy's admin API, deliberately NOT published to the host or
     # the tunnel (see deploy/caddy/Caddyfile's `admin` global directive),
     # so this only ever resolves container-to-container. Unreachable here
@@ -278,7 +278,7 @@ class Settings:
     # Personal Access Token at rest. Generate with
     #   python -c "from cryptography.fernet import Fernet; \
     #              print(Fernet.generate_key().decode())"
-    # and set APP_BUILDER_ENCRYPTION_KEY in deploy/.env.
+    # and set APP_BUILDER_ENCRYPTION_KEY in deploy/compose/.env.
     #
     # DELIBERATELY NOT core's APP_ENCRYPTION_KEY. Different service,
     # different trust boundary — exactly the reasoning
