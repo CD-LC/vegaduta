@@ -232,17 +232,37 @@ keep_secrets() { # copies every secret in .env to the per-user file (0600); neve
 # A new .env with newly generated secrets, while Docker still holds the data of an earlier personal
 # install (its folder deleted, or one made before secrets were kept): that database and its encrypted
 # values belong to secrets this install does not have. Leave it untouched and give this install a
-# project of its own (personal.yml reads VEGADUTA_PERSONAL_PROJECT), stopping the old containers so
-# their ports are free.
+# project of its own (personal.yml reads VEGADUTA_PERSONAL_PROJECT). This only chooses the name: it
+# never touches a container, because `secrets`, a dry run and the install tests all reach it, and a
+# run that only prepares files must not stop someone's running stack. The old containers' ports are
+# freed when this install really starts (personal_free_old_install_ports).
 personal_separate_from_old_data() {
   command -v docker >/dev/null 2>&1 && docker volume inspect vegaduta-personal_postgres-data >/dev/null 2>&1 || return 0
   local n=2
   while docker volume inspect "vegaduta-personal-${n}_postgres-data" >/dev/null 2>&1; do n=$((n + 1)); done
   set_env VEGADUTA_PERSONAL_PROJECT "vegaduta-personal-$n" force
-  local ids; ids="$(docker ps -q --filter label=com.docker.compose.project=vegaduta-personal 2>/dev/null)"
-  # shellcheck disable=SC2086
-  [ -n "$ids" ] && docker stop $ids >/dev/null 2>&1
-  warn "An earlier VegaDuta install left its data in Docker, made with secrets this install does not have. It is kept untouched; this install starts with its own data (project vegaduta-personal-$n). To delete the old data later: docker volume ls -q --filter name=vegaduta-personal_ (then docker volume rm each)"
+  warn "An earlier VegaDuta install left its data in Docker, made with secrets this install does not have. It is kept untouched; this install starts with its own data (project vegaduta-personal-$n). To delete the old data: docker volume rm vegaduta-personal_postgres-data"
+}
+
+# Called only on a real start. Stops a container of the default `vegaduta-personal` project, and only
+# when it publishes a host port this install needs, so a stack that is running beside it (another
+# project, other ports) is left alone. Does nothing when this install IS that project.
+personal_free_old_install_ports() {
+  local proj; proj="$(get_env VEGADUTA_PERSONAL_PROJECT)"
+  [ -n "$proj" ] && [ "$proj" != vegaduta-personal ] || return 0
+  command -v docker >/dev/null 2>&1 || return 0
+  local want id host hp
+  want=" $(env_or WEB_HOST_PORT 3000) $(env_or CORE_HOST_PORT 8080) "
+  for id in $(docker ps -q --filter label=com.docker.compose.project=vegaduta-personal 2>/dev/null); do
+    host="$(docker port "$id" 2>/dev/null | sed -n 's/.*:\([0-9][0-9]*\)$/\1/p')"
+    for hp in $host; do
+      case "$want" in *" $hp "*)
+        docker stop "$id" >/dev/null 2>&1 || true
+        say "Stopped $(docker inspect -f '{{.Name}}' "$id" 2>/dev/null | sed 's#^/##') of the earlier install: it held port $hp, which this install needs."
+        break ;;
+      esac
+    done
+  done
 }
 
 cmd_secrets() {
@@ -2038,6 +2058,7 @@ personal_up() {
     printf 'plan: docker compose %s up -d\n' "${COMPOSE_ARGS[*]}"
     return 0
   fi
+  personal_free_old_install_ports
   personal_sync_public_urls
   cmd_doctor || die "fix the problems above, then re-run. (scripts/vegaduta doctor --personal)"
   save_state
