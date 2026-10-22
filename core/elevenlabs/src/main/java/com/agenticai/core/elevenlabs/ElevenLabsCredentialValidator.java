@@ -1,5 +1,7 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
@@ -22,6 +24,7 @@ import org.springframework.web.client.RestClientResponseException;
  * basic auth.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsCredentialValidator {
 
     private static final Logger log = LoggerFactory.getLogger(ElevenLabsCredentialValidator.class);

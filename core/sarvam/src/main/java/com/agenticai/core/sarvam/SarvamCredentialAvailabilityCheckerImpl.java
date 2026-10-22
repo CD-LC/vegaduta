@@ -1,5 +1,7 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Component;
  * if Sarvam is configured for the current tenant.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamCredentialAvailabilityCheckerImpl implements SarvamCredentialAvailabilityChecker {
 
     private final SarvamCredentialService credentialService;

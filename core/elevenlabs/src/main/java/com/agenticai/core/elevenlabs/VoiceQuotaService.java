@@ -1,6 +1,8 @@
 package com.agenticai.core.elevenlabs;
 
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.time.Duration;
 import java.time.Instant;
@@ -35,6 +37,7 @@ import org.springframework.stereotype.Service;
  * reply audio via the same {@code store} call right after generating it.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class VoiceQuotaService {
 
     private final ElevenLabsGeneratedAudioRepository audioRepository;

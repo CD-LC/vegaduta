@@ -5,6 +5,8 @@ import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.providers.ProviderStatus;
 import com.agenticai.core.providers.dto.ProviderResponse;
 import com.agenticai.core.sarvam.dto.SarvamCredentialResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  * the non-chat Sarvam clients (translate/STT/TTS/etc.).
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamProviderCredentialSource implements ExternalProviderCredentialSource {
 
     private final SarvamCredentialService credentialService;
