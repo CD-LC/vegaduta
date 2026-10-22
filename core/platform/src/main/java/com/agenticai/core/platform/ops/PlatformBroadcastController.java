@@ -6,6 +6,8 @@ import com.agenticai.core.platform.ops.PlatformBroadcastService.AnnouncementUpda
 import com.agenticai.core.platform.ops.PlatformBroadcastService.MaintenanceState;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.MaintenanceUpdate;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@code X-Master-Key}, checked exactly as tenant deletion does
  * ({@link TenantDeletionController#authenticateMasterKey}); the banner does not.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform")
 public class PlatformBroadcastController {

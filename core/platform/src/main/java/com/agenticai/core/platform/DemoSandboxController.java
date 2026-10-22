@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * class is long-lived and under concurrent edit, and a self-contained feature
  * with its own services gains nothing from living in it.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform")
 public class DemoSandboxController {

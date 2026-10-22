@@ -4,6 +4,8 @@ import com.agenticai.core.audit.AuditLogEntry;
 import com.agenticai.core.audit.AuditLogRepository;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import jakarta.persistence.criteria.Predicate;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Service;
  * complete. Scope: ACTIVE, non-demo tenants only (erased tenants' schemas are
  * gone by design; demo sandboxes are excluded like every other admin roster).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformAuditSearchService {
 

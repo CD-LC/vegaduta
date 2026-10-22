@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.abuse;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,7 @@ import org.springframework.web.client.RestClient;
  * than shipped here - wiring SMTP credentials into core is an operator/infra
  * decision, and the {@link AbuseAlertSink} seam makes it a drop-in bean.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 @ConditionalOnProperty(name = "abuse.alert.webhook.url")
 public class WebhookAbuseAlertSink implements AbuseAlertSink {

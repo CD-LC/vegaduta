@@ -2,6 +2,8 @@ package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.platform.ops.PlatformEmailSuppressionService.SuppressionPage;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Gated by the blanket {@code /api/platform/** -> ROLE_platform-admin} rule.
  * {@code page} is 1-based.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/email/suppressions")
 public class PlatformEmailSuppressionController {

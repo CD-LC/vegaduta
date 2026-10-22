@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
  * channels are the other piece, configured entirely inside {@code
  * alertmanager.yml}, no code change needed there).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/webhook/alerts")
 public class PlatformAlertWebhookController {

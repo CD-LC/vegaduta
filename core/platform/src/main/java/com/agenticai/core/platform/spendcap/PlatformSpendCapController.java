@@ -6,6 +6,8 @@ import com.agenticai.core.platform.PlatformTenantNotFoundException;
 import com.agenticai.core.platform.TenantDeletionController;
 import com.agenticai.core.platform.ops.PlatformTenantAuditor;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@code /api/platform/** -> ROLE_platform-admin} rule; changing a cap also
  * needs {@code X-Master-Key} and is written to the tenant's own audit log.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform")
 public class PlatformSpendCapController {

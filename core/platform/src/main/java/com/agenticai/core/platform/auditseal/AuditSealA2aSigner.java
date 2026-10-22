@@ -3,6 +3,8 @@ package com.agenticai.core.platform.auditseal;
 import com.agenticai.core.agents.a2a.A2aCardSigningService;
 import com.agenticai.core.agents.a2a.A2aProperties;
 import com.agenticai.core.audit.seal.AuditSealSigner;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +22,7 @@ import org.springframework.util.StringUtils;
  * reports itself UNAVAILABLE (no seal is created) until the key is pinned (APP_A2A_SIGNING_PRIVATE_KEY +
  * APP_A2A_SIGNING_PUBLIC_KEY).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class AuditSealA2aSigner implements AuditSealSigner {
 

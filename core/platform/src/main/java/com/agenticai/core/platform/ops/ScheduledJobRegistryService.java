@@ -2,6 +2,8 @@ package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.platform.ops.ScheduledJobRunTracker.RunState;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.beans.Introspector;
 import java.time.Duration;
 import java.time.Instant;
@@ -60,6 +62,7 @@ import org.springframework.web.server.ResponseStatusException;
  * through the bean proxy ({@code @Transactional} applies) and is tracked like a
  * scheduled run.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class ScheduledJobRegistryService {
 

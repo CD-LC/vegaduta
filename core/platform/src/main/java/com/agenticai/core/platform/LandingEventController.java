@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -84,6 +86,7 @@ import org.springframework.web.bind.annotation.RestController;
  * DemoSandboxController}'s javadoc for that posture) - no separate
  * authorization check in this class.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 public class LandingEventController {
 

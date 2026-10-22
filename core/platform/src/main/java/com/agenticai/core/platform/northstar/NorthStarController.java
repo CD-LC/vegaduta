@@ -1,6 +1,8 @@
 package com.agenticai.core.platform.northstar;
 
 import com.agenticai.core.platform.northstar.NorthStarDtos.NorthStarResponse;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * ({@link IllegalArgumentException} answers 400, a disabled feature 404).
  * The result is aggregates only and is cached for an hour.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/metrics/north-star")
 @Profile("security")

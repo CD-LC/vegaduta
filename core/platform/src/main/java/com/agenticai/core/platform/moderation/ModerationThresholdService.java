@@ -3,6 +3,8 @@ package com.agenticai.core.platform.moderation;
 import com.agenticai.core.guardrails.moderation.ModerationPolicyPack;
 import com.agenticai.core.guardrails.moderation.ModerationPolicyPackNotAvailableException;
 import com.agenticai.core.guardrails.moderation.ModerationPolicyService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
  * key scheme for both directions). V216 deleted the four orphan rows so they
  * cannot mislead anyone browsing {@code platform_setting}.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class ModerationThresholdService {
 

@@ -9,6 +9,8 @@ import com.agenticai.core.platform.reliability.ReliabilityApi.SloResponse;
 import com.agenticai.core.platform.reliability.SloMath.Delta;
 import com.agenticai.core.platform.reliability.SloMath.Share;
 import com.agenticai.core.platform.reliability.SloSample.Hist;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -41,6 +43,7 @@ import org.springframework.web.server.ResponseStatusException;
  * too but has no target - it is the length of the whole streamed answer, which
  * depends on the model, not on the platform's health.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class SloService {
 
