@@ -6,6 +6,7 @@ import { PLATFORM_TOPICS } from "./platform/platform-data";
 import { TUTORIALS } from "./tutorials/tutorials-data";
 import { INDEXABLE_LOCALES, isLocalizedRoute, localizedPath } from "./lib/i18n-config";
 import { hreflangMap } from "./lib/seo-i18n";
+import { isPersonalEdition } from "./lib/edition";
 import { siteUrl } from "./lib/site-url";
 import { isBillingEnabled, isBillingRoute } from "./lib/billing-flag";
 import { isCommercialRoute, isOssSite } from "./lib/siteMode";
@@ -36,6 +37,8 @@ const BUILT_AT = new Date();
 // so the duplicate-content concern that justified removing them is fixed;
 // see robots.ts's matching comment.
 export default function sitemap(): MetadataRoute.Sitemap {
+  // A personal install has no public funnel to advertise (robots.ts disallows everything there).
+  if (isPersonalEdition()) return [];
   const BASE = siteUrl();
   // Stamped onto every entry below in one place rather than repeated 20+
   // times — see BUILT_AT above for why build time is the right date.
@@ -284,7 +287,10 @@ function withLanguageVersions(BASE: string, entries: MetadataRoute.Sitemap): Met
 }
 
 function withLastModified(BASE: string, entries: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
-  return withLanguageVersions(BASE, withoutRedirectedRoutes(BASE, entries)).map((entry) => ({ lastModified: BUILT_AT, ...entry }));
+  return withLanguageVersions(BASE, withoutRedirectedRoutes(BASE, entries)).map((entry) => ({
+    lastModified: BUILT_AT,
+    ...entry,
+  }));
 }
 
 // Billing off (lib/billing-flag.ts): /billing and /features redirect away, and

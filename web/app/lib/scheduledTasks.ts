@@ -10,21 +10,14 @@
 // Where the two could disagree - a wall-clock time inside a spring-forward gap - the preview shifts forward to the
 // next real instant, which is what the server's cron library does as well.
 
+import { channelOffered } from "./edition";
+
 export type ScheduleKind = "daily" | "weekdays" | "weekly" | "monthly" | "custom";
 export const SCHEDULE_KINDS: readonly ScheduleKind[] = ["daily", "weekdays", "weekly", "monthly", "custom"];
 
 export type DeliveryChannel =
-  | "in_app"
-  | "email"
-  | "whatsapp"
-  | "telegram"
-  | "slack"
-  | "signal"
-  | "matrix"
-  | "imessage"
-  | "a2a"
-  | "voice";
-export const DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
+  "in_app" | "email" | "whatsapp" | "telegram" | "slack" | "signal" | "matrix" | "imessage" | "a2a" | "voice";
+const ALL_DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
   "in_app",
   "email",
   "whatsapp",
@@ -36,6 +29,13 @@ export const DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
   "a2a",
   "voice",
 ];
+
+/**
+ * The delivery channels the form and the explainer offer: ALL of them minus the ones this install does not run
+ * (Slack on a personal install). The server's /capabilities list narrows this further. {@link normalizeDeliveryTarget}
+ * still understands every channel, so an existing task keeps validating.
+ */
+export const DELIVERY_CHANNELS: readonly DeliveryChannel[] = ALL_DELIVERY_CHANNELS.filter((c) => channelOffered(c));
 
 export const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 export type WeekdayCode = (typeof WEEKDAY_CODES)[number];
@@ -194,7 +194,10 @@ export function cronMinimumGapMinutes(cron: string): number | null {
   const step = /^(?:\*|\d+-\d+)\/(\d+)$/.exec(minute);
   if (step) return Math.max(1, Number(step[1]));
   if (/^\d+(,\d+)+$/.test(minute) && hour === "*") {
-    const values = minute.split(",").map(Number).sort((a, b) => a - b);
+    const values = minute
+      .split(",")
+      .map(Number)
+      .sort((a, b) => a - b);
     let gap = 60 - values[values.length - 1] + values[0];
     for (let i = 1; i < values.length; i++) gap = Math.min(gap, values[i] - values[i - 1]);
     return Math.max(1, gap);
@@ -412,7 +415,13 @@ export function nextRuns(draft: ScheduleDraft, from: Date, count = 3): Date[] {
 
 export interface ScheduleDescription {
   /** A key in the "scheduledTasks" i18n namespace. */
-  key: "describeDaily" | "describeWeekdays" | "describeWeekly" | "describeMonthly" | "describeMonthlyLast" | "describeCustom";
+  key:
+    | "describeDaily"
+    | "describeWeekdays"
+    | "describeWeekly"
+    | "describeMonthly"
+    | "describeMonthlyLast"
+    | "describeCustom";
   params: Record<string, string>;
 }
 

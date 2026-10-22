@@ -1,6 +1,8 @@
 package com.agenticai.core.payments;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,20 +16,19 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
- * Builds the canonical JSON a {@link PaymentMandate}'s Ed25519 signature
- * covers (Build Specs §E1). Deterministic by construction: fields are
- * appended to Jackson {@link ObjectNode}s in a fixed order (ObjectNode
- * preserves insertion order) and serialized compactly - the stored
- * {@code canonical_json} column holds these exact bytes, so verification at
- * execution time never re-canonicalizes.
+ * Builds the canonical JSON a {@link PaymentMandate}'s Ed25519 signature covers (Build Specs §E1).
+ * Deterministic by construction: fields are appended to Jackson {@link ObjectNode}s in a fixed
+ * order (ObjectNode preserves insertion order) and serialized compactly - the stored {@code
+ * canonical_json} column holds these exact bytes, so verification at execution time never
+ * re-canonicalizes.
  *
- * <p>The envelope deliberately mirrors an AP2/UAP mandate shape
- * ({@code version} + {@code mandate} body: subject, scope, limits,
- * payee allow-list, approval rule, validity window) so a future
- * {@code NpciUapAdapter} can carry the same document without a migration -
- * the signing story is identical either way.
+ * <p>The envelope deliberately mirrors an AP2/UAP mandate shape ({@code version} + {@code mandate}
+ * body: subject, scope, limits, payee allow-list, approval rule, validity window) so a future
+ * {@code NpciUapAdapter} can carry the same document without a migration - the signing story is
+ * identical either way.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class MandateCanonicalizer {
 
     public static final String MANDATE_VERSION = "vegaduta-upi-mandate/1";
@@ -38,21 +39,20 @@ public class MandateCanonicalizer {
      * @return the canonical JSON string that gets signed verbatim
      */
     public String canonicalize(
-        UUID mandateId,
-        String tenantId,
-        UUID agentId,
-        String grantedByUserId,
-        MandateScope scope,
-        long maxPerTxnPaise,
-        long maxDailyPaise,
-        long maxMonthlyPaise,
-        List<String> allowedVpas,
-        List<String> allowedMerchantCategories,
-        MandateApprovalPolicy approvalPolicy,
-        Long approvalThresholdPaise,
-        Instant validFrom,
-        Instant validUntil
-    ) {
+            UUID mandateId,
+            String tenantId,
+            UUID agentId,
+            String grantedByUserId,
+            MandateScope scope,
+            long maxPerTxnPaise,
+            long maxDailyPaise,
+            long maxMonthlyPaise,
+            List<String> allowedVpas,
+            List<String> allowedMerchantCategories,
+            MandateApprovalPolicy approvalPolicy,
+            Long approvalThresholdPaise,
+            Instant validFrom,
+            Instant validUntil) {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("version", MANDATE_VERSION);
         ObjectNode mandate = root.putObject("mandate");
@@ -75,7 +75,8 @@ public class MandateCanonicalizer {
         }
         ObjectNode approval = mandate.putObject("approval");
         approval.put("policy", approvalPolicy.name());
-        if (approvalPolicy == MandateApprovalPolicy.ABOVE_THRESHOLD && approvalThresholdPaise != null) {
+        if (approvalPolicy == MandateApprovalPolicy.ABOVE_THRESHOLD
+                && approvalThresholdPaise != null) {
             approval.put("threshold_paise", approvalThresholdPaise);
         }
         ObjectNode validity = mandate.putObject("validity");
@@ -84,11 +85,14 @@ public class MandateCanonicalizer {
         return root.toString();
     }
 
-    /** SHA-256 hex of the canonical document - the "review-and-sign" hash the grant wizard displays. */
+    /**
+     * SHA-256 hex of the canonical document - the "review-and-sign" hash the grant wizard displays.
+     */
     public String canonicalHash(String canonicalJson) {
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                .digest(canonicalJson.getBytes(StandardCharsets.UTF_8));
+            byte[] digest =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(canonicalJson.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 unavailable", e);

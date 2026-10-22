@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, waitFor, fireEvent, cleanup } from "@testing-library/react";
 import AgentWorkbench from "./AgentWorkbench";
 
 vi.mock("../../lib/i18n", async (importOriginal) => ({
@@ -76,5 +76,49 @@ describe("AgentWorkbench (split shell)", () => {
     );
     await waitFor(() => expect(screen.getByTestId("playground")).toBeTruthy());
     expect(screen.getAllByText("Saved bot").length).toBeGreaterThan(0);
+  });
+
+  describe("teammate sharing section", () => {
+    afterEach(() => {
+      cleanup();
+      vi.unstubAllEnvs();
+    });
+    const saved: any = {
+      id: "a1",
+      name: "Saved bot",
+      systemPrompt: "Be brief.",
+      providerName: "OPENAI",
+      model: "gpt-x",
+      maxTokens: 512,
+      temperature: 0.4,
+      topP: 1,
+      editable: true,
+      allowedKnowledgeCollectionIds: [],
+    };
+    const mount = () =>
+      render(
+        <AgentWorkbench
+          agents={[saved]}
+          providers={[provider]}
+          collections={[]}
+          selectedAgentId="a1"
+          onSelect={vi.fn()}
+          onChanged={vi.fn()}
+          agentsLoaded
+        />
+      );
+
+    it("is offered on a shared install", async () => {
+      vi.stubEnv("NEXT_PUBLIC_EDITION", "full");
+      mount();
+      await waitFor(() => expect(screen.getByText("SHARING")).toBeTruthy());
+    });
+
+    it("is not offered on a personal install (one person, no teammates)", async () => {
+      vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+      mount();
+      await waitFor(() => expect(screen.getByTestId("playground")).toBeTruthy());
+      expect(screen.queryByText("SHARING")).toBeNull();
+    });
   });
 });
