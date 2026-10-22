@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 from typing import Callable
 
 from . import audit, github_client, github_credentials, projects
@@ -112,7 +113,10 @@ BINARY_EXTS = frozenset(
 )
 
 
-_SUBDIR_RX = re.compile(r"^[A-Za-z0-9._\-]+(/[A-Za-z0-9._\-]+)*$")
+# `/`-separated segments of plain path characters, matched with fullmatch (a "$"
+# anchor also accepts one trailing newline). The first character may not be "-":
+# `cd -x` would be read as an option, not a directory.
+_SUBDIR_RX = re.compile(r"[A-Za-z0-9._][A-Za-z0-9._\-]*(/[A-Za-z0-9._\-]+)*")
 
 
 class ImportTooLargeError(RuntimeError):
@@ -236,11 +240,12 @@ def detect_stack(names: set[str], read: Callable[[str], str | None]) -> dict:
             m["preview_dir"] = preview_dir
         return m
 
-    has_cap_cfg = any(re.match(r"^capacitor\.config\.(ts|js|json|mjs)$", n) for n in root_files)
+    has_cap_cfg = any(re.fullmatch(r"capacitor\.config\.(ts|js|json|mjs)", n) for n in root_files)
     if has_pkg and (has_cap_cfg or "@capacitor/core" in deps):
         return node("capacitor-app", "Mobile App (Capacitor)", 5173, "--host 0.0.0.0 --port 5173")
     if has_pkg and (
-        any(re.match(r"^astro\.config\.(mjs|ts|js|cjs)$", n) for n in root_files) or "astro" in deps
+        any(re.fullmatch(r"astro\.config\.(mjs|ts|js|cjs)", n) for n in root_files)
+        or "astro" in deps
     ):
         return node("astro-site", "Astro Website", 4321, "--host 0.0.0.0 --port 4321")
     if (
@@ -304,15 +309,33 @@ def detect_stack(names: set[str], read: Callable[[str], str | None]) -> dict:
     )
 
 
+def validate_subdir(subdir: str) -> str:
+    """The normalized sub-folder, or GitHubError(400).
+
+    The value is interpolated into `cd <sub> && ...` shell commands (and from
+    there into a generated GitHub Actions workflow), so only plain path
+    characters are allowed: no whitespace or other control character (a newline
+    would start a second command), no `;` `$` backtick `|` `&` and so on.
+    """
+    sub = safe_repo_path(subdir).strip("/")
+    if any(ord(c) < 0x20 or ord(c) == 0x7F for c in sub) or not _SUBDIR_RX.fullmatch(sub):
+        raise GitHubError(
+            400,
+            "subdir may only contain letters, digits, '.', '_', '-' and '/', and may not "
+            "start with '-'.",
+        )
+    return sub
+
+
 def scope_manifest(manifest: dict, subdir: str | None) -> dict:
     """Prefix every command with `cd <subdir> &&` for a sub-folder import."""
     if not subdir:
         return manifest
-    d = subdir.strip("/")
+    d = validate_subdir(subdir)
     out = dict(manifest)
     for k in ("install", "run", "build", "test"):
         if out.get(k):
-            out[k] = f"cd {d} && {out[k]}"
+            out[k] = f"cd {shlex.quote(d)} && {out[k]}"
     pd = out.get("preview_dir")
     if pd:
         out["preview_dir"] = d if pd == "." else f"{d}/{pd}"
@@ -347,13 +370,7 @@ def import_project(
     name = github_client.validate_repo_full_name(repo_full_name)
     sub = None
     if subdir and subdir.strip("/"):
-        sub = safe_repo_path(subdir).strip("/")
-        # `sub` is interpolated into `cd <sub> && ...` shell commands, so
-        # only plain path characters are allowed (no spaces, ; $ ` | & etc).
-        if not _SUBDIR_RX.match(sub):
-            raise GitHubError(
-                400, "subdir may only contain letters, digits, '.', '_', '-' and '/'."
-            )
+        sub = validate_subdir(subdir)
 
     conn = github_credentials.require(ctx, settings)
     token = github_credentials.token_for(conn, settings)

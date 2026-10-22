@@ -45,6 +45,33 @@ def test_failed_execution_log_line_cannot_be_forged_through_toolname(monkeypatch
     assert "forged line" in messages[0]  # kept, but on the same line
 
 
+def test_failed_execution_log_line_cannot_be_forged_through_language(monkeypatch, caplog):
+    # `language` is a Literal on the model, so pydantic refuses anything but
+    # java/python before a handler runs; model_construct skips that check to
+    # prove the log call does not rely on it.
+    def failing_execute(*_args, **_kwargs):
+        return ExecutionOutcome(False, error="boom", error_type="RUNTIME", duration_ms=3)
+
+    monkeypatch.setattr(main._runner, "execute", failing_execute)
+    request = ExecuteRequest.model_construct(
+        language=FORGED,
+        toolName="t",
+        source="x = 1",
+        input=None,
+        timeoutMs=None,
+        memoryMb=None,
+        secrets=None,
+    )
+
+    with caplog.at_level(logging.INFO, logger="tool-sandbox"):
+        asyncio.run(main.execute(request, tenant="tenant-a"))
+
+    messages = [r.getMessage() for r in caplog.records if "tool execution failed" in r.getMessage()]
+    assert len(messages) == 1
+    assert "\n" not in messages[0] and "\r" not in messages[0]
+    assert "forged line" in messages[0]
+
+
 def test_unhandled_error_log_line_cannot_be_forged_through_the_path(caplog):
     request = SimpleNamespace(url=SimpleNamespace(path="/v1/" + FORGED))
 

@@ -163,12 +163,13 @@ def create_workspace(source_checkout: str, workspaces_dir: str) -> dict:
             shutil.rmtree(ws_path, ignore_errors=True)
             raise WorkspaceError("git worktree add: admin dir not found")
     else:
-        shutil.copytree(
-            source_checkout,
-            ws_path,
-            symlinks=True,
-            ignore=shutil.ignore_patterns(".git", ".coderag", "node_modules"),
-        )
+        # fmt: off
+        # Kept as it was before the formatter pass: CodeQL fingerprints an alert by
+        # the text of its line, so reformatting this call would re-report the
+        # existing path-injection alert on it as new.
+        shutil.copytree(source_checkout, ws_path, symlinks=True,
+                        ignore=shutil.ignore_patterns(".git", ".coderag",
+                                                      "node_modules"))
     meta = {
         "workspace_id": ws_id,
         "path": ws_path,
@@ -315,5 +316,9 @@ def diff_workspace(workspaces_dir: str, ws_id: str) -> str:
     meta = load_workspace(workspaces_dir, ws_id)
     if not meta["git"]:
         return ""
-    r = subprocess.run(_ws_git(meta, "diff"), capture_output=True, text=True, timeout=60)
+    # fmt: off
+    # Kept as it was before the formatter pass (see create_workspace): the
+    # existing command-line-injection alert on this call is matched by its text.
+    r = subprocess.run(_ws_git(meta, "diff"),
+                       capture_output=True, text=True, timeout=60)
     return tail(r.stdout, 60_000)
