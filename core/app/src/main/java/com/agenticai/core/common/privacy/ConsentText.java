@@ -93,7 +93,10 @@ final class ConsentText {
 
     /** The text actually sent: the tenant's notice plus the "how to answer" line. */
     static String compose(String notice, String instructions) {
-        String how = instructions == null || instructions.isBlank() ? DEFAULT_INSTRUCTIONS : instructions;
+        String how =
+                instructions == null || instructions.isBlank()
+                        ? DEFAULT_INSTRUCTIONS
+                        : instructions;
         return notice.strip() + "\n\n" + how.strip();
     }
 

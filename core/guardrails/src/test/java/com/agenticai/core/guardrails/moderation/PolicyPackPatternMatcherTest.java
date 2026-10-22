@@ -11,14 +11,18 @@ class PolicyPackPatternMatcherTest {
 
     @Test
     void detectsEmailAndPhoneAndIdsForPiiPack() {
-        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "reach me at jane.doe@example.com")).contains("email");
-        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "my SSN is 123-45-6789")).contains("ssn");
-        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "PAN ABCDE1234F on file")).contains("pan");
+        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "reach me at jane.doe@example.com"))
+                .contains("email");
+        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "my SSN is 123-45-6789"))
+                .contains("ssn");
+        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "PAN ABCDE1234F on file"))
+                .contains("pan");
     }
 
     @Test
     void detectsProfanityForFoulLanguagePack() {
-        assertThat(matcher.firstMatch(ModerationPolicyPack.FOUL_LANGUAGE, "this is sh*t")).isPresent();
+        assertThat(matcher.firstMatch(ModerationPolicyPack.FOUL_LANGUAGE, "this is sh*t"))
+                .isPresent();
     }
 
     @Test
@@ -28,8 +32,10 @@ class PolicyPackPatternMatcherTest {
 
     @Test
     void cleanContentMatchesNothing() {
-        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "The weather is lovely today.")).isEmpty();
-        assertThat(matcher.firstMatch(ModerationPolicyPack.FOUL_LANGUAGE, "Have a wonderful day!")).isEmpty();
+        assertThat(matcher.firstMatch(ModerationPolicyPack.PII, "The weather is lovely today."))
+                .isEmpty();
+        assertThat(matcher.firstMatch(ModerationPolicyPack.FOUL_LANGUAGE, "Have a wonderful day!"))
+                .isEmpty();
     }
 
     @Test

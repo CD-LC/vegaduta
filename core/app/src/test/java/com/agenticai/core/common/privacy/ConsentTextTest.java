@@ -54,7 +54,8 @@ class ConsentTextTest {
         assertThat(parsed.intent()).isEqualTo(Intent.LANGUAGE);
         assertThat(parsed.language()).isEqualTo("hi");
         assertThat(ConsentText.parse("language ta", Keywords.DEFAULTS).language()).isEqualTo("ta");
-        assertThat(ConsentText.parse("lang en-in", Keywords.DEFAULTS).language()).isEqualTo("en-in");
+        assertThat(ConsentText.parse("lang en-in", Keywords.DEFAULTS).language())
+                .isEqualTo("en-in");
     }
 
     @Test

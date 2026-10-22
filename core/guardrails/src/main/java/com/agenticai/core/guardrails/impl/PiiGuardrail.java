@@ -7,28 +7,29 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /**
- * Detects personally identifiable information (PII) in content, primarily
- * in agent responses to prevent accidental data leakage.
+ * Detects personally identifiable information (PII) in content, primarily in agent responses to
+ * prevent accidental data leakage.
  *
  * <p>Detects:
+ *
  * <ul>
- *   <li>Email addresses (basic)</li>
- *   <li>Phone numbers (various formats)</li>
- *   <li>Social Security Numbers (XXX-XX-XXXX)</li>
- *   <li>Credit card numbers (basic patterns)</li>
- *   <li>Bank routing numbers</li>
- *   <li>Common PII-related keywords in context</li>
+ *   <li>Email addresses (basic)
+ *   <li>Phone numbers (various formats)
+ *   <li>Social Security Numbers (XXX-XX-XXXX)
+ *   <li>Credit card numbers (basic patterns)
+ *   <li>Bank routing numbers
+ *   <li>Common PII-related keywords in context
  * </ul>
  *
- * <p><b>Premium+ feature.</b> Prevents unintended disclosure of sensitive
- * customer or business data in agent responses.
+ * <p><b>Premium+ feature.</b> Prevents unintended disclosure of sensitive customer or business data
+ * in agent responses.
  */
 @Component
 public class PiiGuardrail implements ContentGuardrail {
 
     // Email pattern (simplified - not RFC-complete but good enough for filtering)
     private static final Pattern EMAIL_PATTERN =
-        Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+            Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
 
     // Phone numbers.
     //
@@ -47,28 +48,28 @@ public class PiiGuardrail implements ContentGuardrail {
     // (?<!\d) / (?!\d) are used instead of \b so a match cannot start or end mid-number
     // (e.g. inside a 16-digit card number), which \b would happily allow.
     private static final Pattern PHONE_PATTERN =
-        Pattern.compile(
-            "(?<!\\d)(?:\\+?\\d{1,3}[-. ]?)?"          // optional country code (+1, +91)
-            + "(?:"
-            +   "(?:\\(\\d{3}\\)|\\d{3})[-. ]?\\d{3}[-. ]?\\d{4}"  // 3-3-4, parens optional
-            +   "|\\d{5}[-. ]?\\d{5}"                              // 5-5 (India mobile)
-            + ")(?!\\d)");
+            Pattern.compile(
+                    "(?<!\\d)(?:\\+?\\d{1,3}[-. ]?)?" // optional country code (+1, +91)
+                            + "(?:"
+                            + "(?:\\(\\d{3}\\)|\\d{3})[-. ]?\\d{3}[-. ]?\\d{4}" // 3-3-4, parens
+                            // optional
+                            + "|\\d{5}[-. ]?\\d{5}" // 5-5 (India mobile)
+                            + ")(?!\\d)");
 
     // Social Security Number (XXX-XX-XXXX)
-    private static final Pattern SSN_PATTERN =
-        Pattern.compile("\\b\\d{3}-\\d{2}-\\d{4}\\b");
+    private static final Pattern SSN_PATTERN = Pattern.compile("\\b\\d{3}-\\d{2}-\\d{4}\\b");
 
     // Credit Card (simplified - looks for common credit card format)
     private static final Pattern CREDIT_CARD_PATTERN =
-        Pattern.compile("\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b");
+            Pattern.compile("\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b");
 
     // Bank routing number (9 digits)
-    private static final Pattern ROUTING_NUMBER_PATTERN =
-        Pattern.compile("\\b\\d{9}\\b");
+    private static final Pattern ROUTING_NUMBER_PATTERN = Pattern.compile("\\b\\d{9}\\b");
 
     // Common PII keywords that might appear with PII
     private static final Pattern PII_KEYWORD_PATTERN =
-        Pattern.compile("(?i)\\b(ssn|social.?security|credit.?card|account.?number|routing|cvv|pin|password|secret)\\b");
+            Pattern.compile(
+                    "(?i)\\b(ssn|social.?security|credit.?card|account.?number|routing|cvv|pin|password|secret)\\b");
 
     @Override
     public ContentGuardrailType getType() {
@@ -84,46 +85,41 @@ public class PiiGuardrail implements ContentGuardrail {
         // Check for email addresses
         if (EMAIL_PATTERN.matcher(content).find()) {
             return ContentGuardrailResult.fail(
-                ContentGuardrailType.PII,
-                "Response contains email addresses. Please remove personally identifiable information.",
-                80
-            );
+                    ContentGuardrailType.PII,
+                    "Response contains email addresses. Please remove personally identifiable information.",
+                    80);
         }
 
         // Check for phone numbers
         if (PHONE_PATTERN.matcher(content).find()) {
             return ContentGuardrailResult.fail(
-                ContentGuardrailType.PII,
-                "Response contains phone numbers. Please remove personally identifiable information.",
-                85
-            );
+                    ContentGuardrailType.PII,
+                    "Response contains phone numbers. Please remove personally identifiable information.",
+                    85);
         }
 
         // Check for SSN
         if (SSN_PATTERN.matcher(content).find()) {
             return ContentGuardrailResult.fail(
-                ContentGuardrailType.PII,
-                "Response contains social security numbers. This data must not be exposed.",
-                95
-            );
+                    ContentGuardrailType.PII,
+                    "Response contains social security numbers. This data must not be exposed.",
+                    95);
         }
 
         // Check for credit card numbers
         if (CREDIT_CARD_PATTERN.matcher(content).find()) {
             return ContentGuardrailResult.fail(
-                ContentGuardrailType.PII,
-                "Response contains credit card numbers. This data must not be exposed.",
-                95
-            );
+                    ContentGuardrailType.PII,
+                    "Response contains credit card numbers. This data must not be exposed.",
+                    95);
         }
 
         // Check for PII keywords with numbers (stronger signal)
         if (PII_KEYWORD_PATTERN.matcher(content).find() && containsSuspiciousNumbers(content)) {
             return ContentGuardrailResult.fail(
-                ContentGuardrailType.PII,
-                "Response appears to contain sensitive authentication or account data.",
-                70
-            );
+                    ContentGuardrailType.PII,
+                    "Response appears to contain sensitive authentication or account data.",
+                    70);
         }
 
         return ContentGuardrailResult.pass(ContentGuardrailType.PII);
