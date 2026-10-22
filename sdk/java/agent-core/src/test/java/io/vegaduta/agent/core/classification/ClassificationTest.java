@@ -75,8 +75,7 @@ class ClassificationTest {
   @Test
   void resolverBlocksUnclassifiedAndAppliesSafeDefault() {
     ClassificationResolver resolver =
-        new ClassificationResolver(
-            new StaticClassificationSource(), GovernancePolicy.defaults());
+        new ClassificationResolver(new StaticClassificationSource(), GovernancePolicy.defaults());
 
     ToolClassificationDecision decision = resolver.resolve("mystery");
     assertThat(decision).isInstanceOf(ToolClassificationDecision.Blocked.class);
@@ -98,8 +97,7 @@ class ClassificationTest {
     ClassificationResolver resolver = new ClassificationResolver(source, live);
     ClassificationResolver sharing = resolver.sharing(shadow);
 
-    ToolClassification forced =
-        ToolClassification.builder("t").risk(RiskLabel.CRITICAL).build();
+    ToolClassification forced = ToolClassification.builder("t").risk(RiskLabel.CRITICAL).build();
     resolver.override(forced);
 
     // A lethal-trifecta override applied on the live policy is visible to the shadow one.
@@ -121,7 +119,8 @@ class ClassificationTest {
     ToolClassification different = ToolClassification.builder("a").risk(RiskLabel.LOW).build();
     second.register(different);
 
-    CompositeClassificationSource composite = CompositeClassificationSource.of(empty, first, second);
+    CompositeClassificationSource composite =
+        CompositeClassificationSource.of(empty, first, second);
 
     assertThat(composite.classify("a"))
         .hasValueSatisfying(c -> assertThat(c.risk()).isEqualTo(RiskLabel.MEDIUM));
