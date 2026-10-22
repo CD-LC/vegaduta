@@ -2,6 +2,8 @@ package com.agenticai.core.voice.realtime;
 
 import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.providers.ProviderCredentialResolver;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  * page from driving a signed-in user's browser into opening sessions. {@code *} restores the old
  * allow-all behaviour for a deployment whose console origin is not listed.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Configuration
 public class RealtimeVoiceWebSocketConfig implements WebSocketConfigurer {
 

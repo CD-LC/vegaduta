@@ -1,5 +1,7 @@
 package com.agenticai.core.voice;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
  * <p>Fails closed: if Redis is unreachable at issue time the room has no owner record and cannot be
  * recorded; the call itself is unaffected.
  */
+@ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Component
 public class VoiceCallRoomRegistry {
 

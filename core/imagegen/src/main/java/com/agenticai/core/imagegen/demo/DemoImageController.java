@@ -1,6 +1,8 @@
 package com.agenticai.core.imagegen.demo;
 
 import com.agenticai.core.imagegen.GeminiImageGenerationClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.demo.DemoGeneratedImage;
 import com.agenticai.core.tenancy.demo.DemoImageService;
 import com.agenticai.core.tenancy.demo.DemoSession;
@@ -78,6 +80,7 @@ import org.springframework.web.bind.annotation.RestController;
  *       farming vector.</li>
  * </ol>
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @RestController
 @RequestMapping("/api/demo")
 public class DemoImageController {

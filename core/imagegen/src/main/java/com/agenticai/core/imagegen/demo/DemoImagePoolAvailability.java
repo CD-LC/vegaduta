@@ -1,6 +1,8 @@
 package com.agenticai.core.imagegen.demo;
 
 import com.agenticai.core.imagegen.GeminiImageGenerationClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.demo.DemoImageAvailability;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
  * duplicating the pool lookup, so "configured" means the same thing in both
  * places.
  */
+@ConditionalOnEditionFeature(EditionFeature.VIDEO_DEMO_MEDIA)
 @Component
 public class DemoImagePoolAvailability implements DemoImageAvailability {
 
