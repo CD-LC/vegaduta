@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Duration;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -34,8 +35,8 @@ final class SessionOwnerRecords {
     /**
      * Records who started this session, once: the first append made with a tenant context wins
      * ({@code SETNX}) and the record shares the history list's TTL. Never throws and never blocks
-     * the chat path - an unrecorded session is simply not exportable ({@link SessionMemoryService#isOwnedBy}), which
-     * fails closed.
+     * the chat path - an unrecorded session is simply not exportable ({@link
+     * SessionMemoryService#isOwnedBy}), which fails closed.
      */
     void bindOwner(String sessionId) {
         try {
@@ -51,7 +52,7 @@ final class SessionOwnerRecords {
             redisTemplate.opsForValue().setIfAbsent(ownerKey, owner, sessionTtl);
             redisTemplate.expire(ownerKey, sessionTtl);
         } catch (RuntimeException e) {
-            log.debug("Could not record the owner of session {}", sessionId, e);
+            log.debug("Could not record the owner of session {}", LogSafe.clean(sessionId), e);
         }
     }
 
@@ -66,7 +67,8 @@ final class SessionOwnerRecords {
             return false;
         }
         try {
-            String stored = redisTemplate.opsForValue().get(SessionMemoryService.ownerKey(sessionId));
+            String stored =
+                    redisTemplate.opsForValue().get(SessionMemoryService.ownerKey(sessionId));
             return expected.equals(stored);
         } catch (RuntimeException e) {
             log.debug("Could not read the owner of session {}", sessionId, e);

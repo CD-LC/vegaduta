@@ -10,7 +10,7 @@ import PageHeader from "../components/ax/PageHeader";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { CONNECT_ITEMS, connectState, type ConnectItem, type StatusInput } from "./connectCatalog";
+import { connectState, offeredConnectItems, type ConnectItem, type StatusInput } from "./connectCatalog";
 
 /**
  * /connect - "connect your world": one page that shows what an agent can be reached on or read from
@@ -64,7 +64,7 @@ export default function ConnectPage() {
       <div className="mx-auto w-full max-w-4xl space-y-4">
         <p className="text-sm text-muted-foreground">{t("intro")}</p>
         <div className="grid gap-3 sm:grid-cols-2">
-          {CONNECT_ITEMS.map((item) => {
+          {offeredConnectItems().map((item) => {
             const Icon = ICONS[item.id];
             const state = connectState(item, status);
             return (

@@ -14,7 +14,7 @@
 // list, where an entry starting with "." matches that domain and every
 // subdomain ("." + "example.com" => example.com and *.example.com).
 
-import { getPublicEnv } from "./env";
+import { getPublicEnv, getPublicPolicy } from "./env";
 const ALWAYS_TRUSTED_HOSTS = ["i.ytimg.com"];
 
 function hostOf(url: string | undefined): string | null {
@@ -32,8 +32,11 @@ function trustedConfig(): { exact: string[]; suffixes: string[] } {
   for (const h of [hostOf(getPublicEnv("NEXT_PUBLIC_API_BASE_URL")), hostOf(getPublicEnv("NEXT_PUBLIC_SITE_URL"))]) {
     if (h) exact.push(h);
   }
-  const raw = getPublicEnv("NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS") || "";
-  for (const entry of raw.split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)) {
+  const raw = getPublicPolicy("NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS") || "";
+  for (const entry of raw
+    .split(",")
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean)) {
     if (entry.startsWith(".")) {
       exact.push(entry.slice(1));
       suffixes.push(entry);

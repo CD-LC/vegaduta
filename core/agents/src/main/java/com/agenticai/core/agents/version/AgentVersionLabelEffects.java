@@ -5,6 +5,7 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -13,9 +14,9 @@ import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * What every agent-version label move does besides moving the label: the PRODUCTION eval gate, the
- * promote audit row, and the label-event / resolution-cache / outbox bookkeeping. Not a Spring bean:
- * {@link AgentVersionService} builds it from its own (optional) collaborators, and the transaction
- * boundaries stay on that service's methods.
+ * promote audit row, and the label-event / resolution-cache / outbox bookkeeping. Not a Spring
+ * bean: {@link AgentVersionService} builds it from its own (optional) collaborators, and the
+ * transaction boundaries stay on that service's methods.
  */
 final class AgentVersionLabelEffects {
 
@@ -109,17 +110,18 @@ final class AgentVersionLabelEffects {
     }
 
     /**
-     * The gate check extracted so {@link AgentVersionService#setLabel} stays readable. Only runs for PRODUCTION;
-     * STAGING is the under-test pointer and stays free (see {@link AgentPromotionGate}'s javadoc
-     * for why gating it would invert the workflow). No provider bean means no gate is possible at
-     * all - the SPI is satisfied by core/app's bridge, absent only in hand-built tests.
+     * The gate check extracted so {@link AgentVersionService#setLabel} stays readable. Only runs
+     * for PRODUCTION; STAGING is the under-test pointer and stays free (see {@link
+     * AgentPromotionGate}'s javadoc for why gating it would invert the workflow). No provider bean
+     * means no gate is possible at all - the SPI is satisfied by core/app's bridge, absent only in
+     * hand-built tests.
      *
      * @return null when the gate allowed (or no gate exists); the override detail string when a
-     *     human FORCED past a block, so {@link AgentVersionService#setLabel} can write it into the SUCCESS audit row -
-     *     one row reading "promoted, gate had refused for reason X, overridden by Y because Z".
+     *     human FORCED past a block, so {@link AgentVersionService#setLabel} can write it into the
+     *     SUCCESS audit row - one row reading "promoted, gate had refused for reason X, overridden
+     *     by Y because Z".
      */
-    String enforcePromotionGate(
-            Agent agent, AgentVersion target, boolean force, String reason) {
+    String enforcePromotionGate(Agent agent, AgentVersion target, boolean force, String reason) {
         AgentPromotionGate gate = promotionGate.getIfAvailable();
         if (gate == null) {
             return null;
@@ -154,11 +156,11 @@ final class AgentVersionLabelEffects {
         }
         log.warn(
                 "Agent {} PRODUCTION promote of v{} FORCED past eval gate [{}] by {} ({})",
-                agent.getId(),
-                target.getVersionNumber(),
-                decision.reason(),
-                TenantContext.current().map(TenantContext::getSubject).orElse("?"),
-                reason);
+                LogSafe.clean(agent.getId()),
+                LogSafe.clean(target.getVersionNumber()),
+                LogSafe.clean(decision.reason()),
+                LogSafe.clean(TenantContext.current().map(TenantContext::getSubject).orElse("?")),
+                LogSafe.clean(reason));
         return "FORCED past gate [" + decision.reason() + "]: " + reason.trim();
     }
 
@@ -173,8 +175,7 @@ final class AgentVersionLabelEffects {
                 .orElse(false);
     }
 
-    void auditPromote(
-            Agent agent, AgentVersion target, String detail, AuditOutcome outcome) {
+    void auditPromote(Agent agent, AgentVersion target, String detail, AuditOutcome outcome) {
         String actor = TenantContext.current().map(TenantContext::getSubject).orElse(null);
         String description =
                 "version="
