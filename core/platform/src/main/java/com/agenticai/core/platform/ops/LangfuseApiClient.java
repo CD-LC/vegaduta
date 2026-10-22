@@ -1,6 +1,8 @@
 package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -25,29 +27,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Read-only client for Langfuse's public REST API ({@code /api/public/**}),
- * used by the platform-admin trace console ({@link PlatformTraceController}).
- * The browser never holds Langfuse keys and never needs Langfuse's origin.
+ * Read-only client for Langfuse's public REST API ({@code /api/public/**}), used by the
+ * platform-admin trace console ({@link PlatformTraceController}). The browser never holds Langfuse
+ * keys and never needs Langfuse's origin.
  *
- * <p><b>Config reuse.</b> Same posture as {@code LangfuseScoreClient}
- * (core/chat): with no explicit {@code app.langfuse.base-url} the base URL is
- * derived from {@code management.otlp.tracing.endpoint} (the OTLP exporter's
- * target, minus Langfuse's documented {@code /api/public/otel/v1/traces}
- * suffix), and {@code app.langfuse.auth-header} defaults to the same
- * {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic base64(pk:sk)" value the exporter
- * already sends - Langfuse's public API accepts that pair on every endpoint.
- * No new required configuration.
+ * <p><b>Config reuse.</b> Same posture as {@code LangfuseScoreClient} (core/chat): with no explicit
+ * {@code app.langfuse.base-url} the base URL is derived from {@code
+ * management.otlp.tracing.endpoint} (the OTLP exporter's target, minus Langfuse's documented {@code
+ * /api/public/otel/v1/traces} suffix), and {@code app.langfuse.auth-header} defaults to the same
+ * {@code LANGFUSE_OTEL_AUTH_HEADER} "Basic base64(pk:sk)" value the exporter already sends -
+ * Langfuse's public API accepts that pair on every endpoint. No new required configuration.
  *
- * <p><b>Bounded.</b> Every request has a 5 s connect and response timeout,
- * redirects are not followed, and successful answers are cached in memory
- * for 30 s per URL (at most {@link #MAX_CACHE_ENTRIES} entries), so a busy
- * console cannot hammer Langfuse.
+ * <p><b>Bounded.</b> Every request has a 5 s connect and response timeout, redirects are not
+ * followed, and successful answers are cached in memory for 30 s per URL (at most {@link
+ * #MAX_CACHE_ENTRIES} entries), so a busy console cannot hammer Langfuse.
  *
- * <p><b>Never leaks the credential.</b> The auth header is only ever placed on
- * the outgoing request; failure reasons are written here and name the
- * failure class (HTTP status, timeout, connection refused), never the header,
- * response bodies or the upstream URL.
+ * <p><b>Never leaks the credential.</b> The auth header is only ever placed on the outgoing
+ * request; failure reasons are written here and name the failure class (HTTP status, timeout,
+ * connection refused), never the header, response bodies or the upstream URL.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class LangfuseApiClient {
 
@@ -61,10 +60,12 @@ public class LangfuseApiClient {
         Response get(URI uri, String authHeader) throws IOException, InterruptedException;
     }
 
-    record Response(int status, String body) {
-    }
+    record Response(int status, String body) {}
 
-    /** Langfuse is not configured, or did not give a usable answer. {@code reason} is safe to show an operator. */
+    /**
+     * Langfuse is not configured, or did not give a usable answer. {@code reason} is safe to show
+     * an operator.
+     */
     public static final class LangfuseUnavailableException extends RuntimeException {
         private final int status;
 
@@ -79,8 +80,7 @@ public class LangfuseApiClient {
         }
     }
 
-    private record Cached(Instant at, JsonNode body) {
-    }
+    private record Cached(Instant at, JsonNode body) {}
 
     private static final ObjectMapper JSON = JsonMappers.plain();
 
@@ -92,12 +92,14 @@ public class LangfuseApiClient {
 
     @Autowired
     public LangfuseApiClient(
-        @Value("${app.langfuse.base-url:}") String explicitBaseUrl,
-        @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
-        @Value("${app.langfuse.auth-header:${LANGFUSE_OTEL_AUTH_HEADER:}}") String authHeader
-    ) {
-        this(LangfuseEndpoints.baseUrl(explicitBaseUrl, otlpTracesEndpoint), authHeader, defaultTransport(),
-            Clock.systemUTC());
+            @Value("${app.langfuse.base-url:}") String explicitBaseUrl,
+            @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+            @Value("${app.langfuse.auth-header:${LANGFUSE_OTEL_AUTH_HEADER:}}") String authHeader) {
+        this(
+                LangfuseEndpoints.baseUrl(explicitBaseUrl, otlpTracesEndpoint),
+                authHeader,
+                defaultTransport(),
+                Clock.systemUTC());
     }
 
     LangfuseApiClient(String baseUrl, String authHeader, Transport transport, Clock clock) {
@@ -129,11 +131,11 @@ public class LangfuseApiClient {
     }
 
     /**
-     * GET {@code path} with the given query parameters (null/blank values are
-     * dropped), parsed as JSON, from cache when younger than 30 s.
+     * GET {@code path} with the given query parameters (null/blank values are dropped), parsed as
+     * JSON, from cache when younger than 30 s.
      *
-     * @throws LangfuseUnavailableException when not configured, unreachable,
-     *     slow, or answering non-2xx / non-JSON
+     * @throws LangfuseUnavailableException when not configured, unreachable, slow, or answering
+     *     non-2xx / non-JSON
      */
     public JsonNode get(String path, Map<String, String> query) {
         if (!isConfigured()) {
@@ -149,29 +151,35 @@ public class LangfuseApiClient {
         try {
             response = transport.get(URI.create(url), authHeader);
         } catch (HttpTimeoutException e) {
-            throw new LangfuseUnavailableException("Langfuse did not answer within " + TIMEOUT.toSeconds() + " s.", 0);
+            throw new LangfuseUnavailableException(
+                    "Langfuse did not answer within " + TIMEOUT.toSeconds() + " s.", 0);
         } catch (ConnectException e) {
-            throw new LangfuseUnavailableException("Langfuse could not be reached (connection refused).", 0);
+            throw new LangfuseUnavailableException(
+                    "Langfuse could not be reached (connection refused).", 0);
         } catch (UnknownHostException e) {
-            throw new LangfuseUnavailableException("Langfuse could not be reached (host name not resolved).", 0);
+            throw new LangfuseUnavailableException(
+                    "Langfuse could not be reached (host name not resolved).", 0);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new LangfuseUnavailableException("The Langfuse request was interrupted.", 0);
         } catch (IOException | RuntimeException e) {
             throw new LangfuseUnavailableException(
-                "Langfuse could not be reached (" + e.getClass().getSimpleName() + ").", 0);
+                    "Langfuse could not be reached (" + e.getClass().getSimpleName() + ").", 0);
         }
         if (response.status() < 200 || response.status() >= 300) {
-            throw new LangfuseUnavailableException(describeStatus(response.status()), response.status());
+            throw new LangfuseUnavailableException(
+                    describeStatus(response.status()), response.status());
         }
         JsonNode body;
         try {
             body = JSON.readTree(response.body() == null ? "" : response.body());
         } catch (IOException e) {
-            throw new LangfuseUnavailableException("Langfuse answered with something that is not JSON.", response.status());
+            throw new LangfuseUnavailableException(
+                    "Langfuse answered with something that is not JSON.", response.status());
         }
         if (body == null || body.isMissingNode()) {
-            throw new LangfuseUnavailableException("Langfuse answered with an empty body.", response.status());
+            throw new LangfuseUnavailableException(
+                    "Langfuse answered with an empty body.", response.status());
         }
         if (cache.size() >= MAX_CACHE_ENTRIES) {
             cache.clear();
@@ -203,9 +211,9 @@ public class LangfuseApiClient {
                 continue;
             }
             out.append(out.length() == 0 ? '?' : '&')
-                .append(URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8))
-                .append('=')
-                .append(URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8));
+                    .append(URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8))
+                    .append('=')
+                    .append(URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8));
         }
         return out.toString();
     }
@@ -216,22 +224,25 @@ public class LangfuseApiClient {
     }
 
     private static Transport defaultTransport() {
-        HttpClient http = HttpClient.newBuilder()
-            .connectTimeout(TIMEOUT)
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .build();
+        HttpClient http =
+                HttpClient.newBuilder()
+                        .connectTimeout(TIMEOUT)
+                        .followRedirects(HttpClient.Redirect.NEVER)
+                        .build();
         return (uri, auth) -> {
             String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
             if (!scheme.equals("http") && !scheme.equals("https")) {
                 throw new IOException("unsupported scheme");
             }
-            HttpRequest request = HttpRequest.newBuilder(uri)
-                .timeout(TIMEOUT)
-                .header("Authorization", auth)
-                .header("Accept", "application/json")
-                .GET()
-                .build();
-            HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpRequest request =
+                    HttpRequest.newBuilder(uri)
+                            .timeout(TIMEOUT)
+                            .header("Authorization", auth)
+                            .header("Accept", "application/json")
+                            .GET()
+                            .build();
+            HttpResponse<String> response =
+                    http.send(request, HttpResponse.BodyHandlers.ofString());
             return new Response(response.statusCode(), response.body());
         };
     }

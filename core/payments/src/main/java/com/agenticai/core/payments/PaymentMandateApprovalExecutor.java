@@ -3,6 +3,8 @@ package com.agenticai.core.payments;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
@@ -11,21 +13,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * The {@link ApprovalActionExecutor} for {@code upi.mandate.execute} -
- * picked up by {@code ApprovalActionExecutorRegistry} automatically, so
- * {@code HumanApprovalGateService#approve} runs the payment through the
- * same single executor chokepoint every other gated action uses. The
- * payload (written by {@code PaymentToolService}) carries the transaction
- * id; execution itself re-verifies the mandate inside {@link
- * PaymentExecutionService} - an approval does NOT bypass the mandate check,
- * it only unblocks it (a mandate revoked while pending still fails at
- * execution).
+ * The {@link ApprovalActionExecutor} for {@code upi.mandate.execute} - picked up by {@code
+ * ApprovalActionExecutorRegistry} automatically, so {@code HumanApprovalGateService#approve} runs
+ * the payment through the same single executor chokepoint every other gated action uses. The
+ * payload (written by {@code PaymentToolService}) carries the transaction id; execution itself
+ * re-verifies the mandate inside {@link PaymentExecutionService} - an approval does NOT bypass the
+ * mandate check, it only unblocks it (a mandate revoked while pending still fails at execution).
  *
- * <p>{@link #onRejected} settles the parked transaction FAILED and releases
- * its cap reservation - the pending transaction's CHARGE otherwise holds
- * daily/monthly cap forever.
+ * <p>{@link #onRejected} settles the parked transaction FAILED and releases its cap reservation -
+ * the pending transaction's CHARGE otherwise holds daily/monthly cap forever.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentMandateApprovalExecutor implements ApprovalActionExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentMandateApprovalExecutor.class);
@@ -47,7 +46,9 @@ public class PaymentMandateApprovalExecutor implements ApprovalActionExecutor {
         UUID transactionId = transactionId(request);
         if (transactionId == null) {
             throw new IllegalStateException(
-                "upi.mandate.execute request " + request.getId() + " carries no transactionId payload");
+                    "upi.mandate.execute request "
+                            + request.getId()
+                            + " carries no transactionId payload");
         }
         executionService.execute(transactionId);
     }
@@ -56,7 +57,9 @@ public class PaymentMandateApprovalExecutor implements ApprovalActionExecutor {
     public void onRejected(ApprovalRequest request, String decidedBy, String reason) {
         UUID transactionId = transactionId(request);
         if (transactionId == null) {
-            log.warn("Rejected upi.mandate.execute request {} carries no transactionId - nothing to settle", request.getId());
+            log.warn(
+                    "Rejected upi.mandate.execute request {} carries no transactionId - nothing to settle",
+                    request.getId());
             return;
         }
         executionService.settleRejected(transactionId, decidedBy, reason);
@@ -69,7 +72,10 @@ public class PaymentMandateApprovalExecutor implements ApprovalActionExecutor {
                 return UUID.fromString(node.asText());
             }
         } catch (Exception e) {
-            log.warn("Could not parse transactionId from upi.mandate.execute request {}", request.getId(), e);
+            log.warn(
+                    "Could not parse transactionId from upi.mandate.execute request {}",
+                    request.getId(),
+                    e);
         }
         return null;
     }
