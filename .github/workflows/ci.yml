@@ -249,7 +249,7 @@ jobs:
       # the api booted. It reuses the jars `verify` just built.
       # Advisory for now: it has run locally but not yet on a runner. Remove continue-on-error
       # once it has been green on main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
-      - name: Boot check (packaged jars: api, migrate-only, jobs, worker; Postgres + Redis)
+      - name: "Boot check (packaged jars: api, migrate-only, jobs, worker; Postgres + Redis)"
         continue-on-error: true
         env:
           BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
