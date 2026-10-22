@@ -51,12 +51,12 @@ class DependencyAdvisoryFloorTest {
                     // Jackson 2 (com.fasterxml), still pulled by libraries that have not moved.
                     new Floor(
                             "jackson-core",
-                            "tools.jackson.core.JsonFactory",
+                            "com.fasterxml.jackson.core.JsonFactory",
                             "2.21.7",
                             "GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf"),
                     new Floor(
                             "jackson-databind",
-                            "tools.jackson.databind.ObjectMapper",
+                            "com.fasterxml.jackson.databind.ObjectMapper",
                             "2.21.7",
                             "GHSA-q4xh-88c3-wmh7, GHSA-cxp5-3px4-pw24, GHSA-wv8q-qhhj-9h54"),
                     new Floor(
