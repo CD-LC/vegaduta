@@ -75,6 +75,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+      # start_interval: probe every second while the container is still inside start_period, so
+      # "healthy" lands within a second of the server being ready, not on the next 5-15 s tick.
+      start_period: 30s
+      start_interval: 1s
     deploy:
       resources:
         limits:
@@ -192,8 +196,11 @@ services:
       GOOGLE_OAUTH_REDIRECT_URI: ${GOOGLE_OAUTH_REDIRECT_URI:-${PUBLIC_API_URL:-http://localhost:${CORE_HOST_PORT:-8080}}/oauth/google/callback}
       # Small-heap JVM: SerialGC (no concurrent GC threads, lowest footprint on 1-4 cores), heap
       # trimmed back after a spike (Min/MaxHeapFreeRatio), capped metaspace and code cache.
+      # InitialRAMPercentage=25 starts the heap at ~380 MB: with the JVM default (1/64 of RAM, ~24 MB)
+      # and a 640-migration, 1000-bean boot, SerialGC spent about 65 s in stop-the-world collections
+      # while the heap grew; the heap is trimmed back after boot by Min/MaxHeapFreeRatio.
       # PERSONAL_JAVA_OPTS_EXTRA appends (later flags win), e.g. "-Xmx700m" or "-XX:TieredStopAtLevel=1".
-      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 -XX:MaxMetaspaceSize=256m -XX:ReservedCodeCacheSize=128m -XX:+ExitOnOutOfMemoryError -Djava.net.preferIPv4Stack=true ${PERSONAL_JAVA_OPTS_EXTRA:-}"
+      JAVA_TOOL_OPTIONS: "-XX:InitialRAMPercentage=25 -XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 -XX:MaxMetaspaceSize=256m -XX:ReservedCodeCacheSize=128m -XX:+ExitOnOutOfMemoryError -Djava.net.preferIPv4Stack=true ${PERSONAL_JAVA_OPTS_EXTRA:-}"
       SPRING_PROFILES_ACTIVE: ${PERSONAL_SPRING_PROFILES:-security,knowledge,graph-memory,personal}${CORE_PROFILES_EXTRA:-}
       DB_HOST: postgres
       DB_PORT: 5432
@@ -297,7 +304,13 @@ services:
       interval: 15s
       timeout: 5s
       retries: 10
-      start_period: 120s
+      # A first start on an empty database runs 640 migrations and creates the owner's schema before
+      # readiness flips; on a busy laptop that took 5 minutes, longer than the old 120 s + 10 x 15 s
+      # budget, so compose gave up with core still booting and web was never created. Failed probes
+      # do not count inside start_period, and start_interval probes every 2 s there, so a fast start
+      # still reports healthy within seconds.
+      start_period: 600s
+      start_interval: 2s
     deploy:
       resources:
         limits:
@@ -312,8 +325,12 @@ services:
       - /app/.next/cache:size=256m,uid=999,gid=999,mode=0700
       - /home/nextjs:size=32m,uid=999,gid=999,mode=0700
     depends_on:
+      # service_started, not service_healthy: web is a static-ish Node server that only calls core
+      # per request, so it can start (and pull its first page) while core is still booting instead
+      # of waiting for core's readiness first. `up --wait` still waits for core to be healthy, and
+      # the console shows its own "starting" state until the API answers.
       core:
-        condition: service_healthy
+        condition: service_started
         restart: true
     # Runtime NEXT_PUBLIC_* (window.__ENV) with build-time fallback. Browser-facing URLs come
     # from PUBLIC_* configuration only (AGENTS.md rule 4).
@@ -343,6 +360,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+      start_interval: 2s
     deploy:
       resources:
         limits:
@@ -396,6 +414,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+      start_interval: 1s
     security_opt:
       - no-new-privileges:true
       - seccomp:../../services/mcp-stdio-runner/seccomp-profile.json
