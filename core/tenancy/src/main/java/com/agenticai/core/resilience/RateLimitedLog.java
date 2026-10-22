@@ -150,9 +150,9 @@ public final class RateLimitedLog {
                                 + " similar event(s) suppressed since the last report)"
                         : message;
         if (error != null) {
-            log.warn(text, error);
+            log.warn(LogSafe.clean(text), error);
         } else {
-            log.warn(text);
+            log.warn(LogSafe.clean(text));
         }
     }
 }

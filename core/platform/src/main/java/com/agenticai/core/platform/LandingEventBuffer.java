@@ -229,7 +229,8 @@ public class LandingEventBuffer {
             return; // over the hourly lid - drop silently, as the synchronous path does
         }
         Map<String, Long> deltas = new LinkedHashMap<>();
-        for (int i = 0; i < allowed; i++) {
+        int accepted = (int) Math.min(allowed, group.size());
+        for (int i = 0; i < accepted; i++) {
             Entry e = group.get(i);
             deltas.merge(COUNTER_KEY_PREFIX + e.event() + ":" + e.day(), 1L, Long::sum);
         }

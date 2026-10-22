@@ -128,7 +128,7 @@ public class BriefRateLimiter {
                 Duration.ofHours(1))) {
             log.warn(
                     "Brief proof-run cap hit for tenant {} (cap {} per hour)",
-                    tenantId,
+                    LogSafe.clean(tenantId),
                     PROOF_RUNS_PER_TENANT_HOUR);
             throw new BriefRateLimitException(
                     "Your workspace has started "
