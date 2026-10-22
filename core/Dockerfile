@@ -217,6 +217,16 @@ ENV HOME=/home/agentic
 # >= 2.28 and links only libc/libstdc++/libgcc_s, all present in jammy.
 FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-relay
 
+# The full variant also needs npm/npx. The npm CLI bundled with the Node image carries High
+# advisories in its own dependencies (brace-expansion, ip-address, picomatch, pacote, sigstore)
+# that the base tag has not picked up, so it is replaced here by a pinned release whose bundled
+# dependencies are fixed. Keep NPM_VERSION in step with services/mcp-stdio-runner/Dockerfile and
+# services/workspace-runner/Dockerfile (services/mcp-stdio-runner/dockerfile-npm.test.js checks that).
+FROM node-relay AS node-npm
+ARG NPM_VERSION=11.21.1
+RUN npm install -g "npm@${NPM_VERSION}" \
+    && npm cache clean --force
+
 FROM runtime-base AS mcp-toolchain-none
 COPY --from=node-relay /usr/local/bin/node /usr/local/bin/node
 # No `mcp` here: the static STDIO built-ins need the runner (or core-full).
@@ -240,7 +250,7 @@ FROM runtime-base AS mcp-toolchain-full
 # runtimes every stdio connection dies at spawn no matter what the Java side
 # does. Remote (SSE/streamable-HTTP) servers never needed this.
 COPY --from=node-relay /usr/local/bin/node /usr/local/bin/node
-COPY --from=node-relay /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node-npm /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
     && node --version && npm --version
@@ -267,7 +277,9 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 # PUPPETEER_LAUNCH_OPTIONS (merged into puppeteer.launch by server-puppeteer);
 # application-mcp.yml's puppeteer connection passes this container value to
 # the spawned server.
-ENV PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome"}
+# Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
+# `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
+ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome"}'
 # This RUN still executes as root (HOME=/home/agentic above only points
 # npm/npx at that directory, it doesn't change the executing uid), so npx
 # fetching the `playwright` CLI package leaves root-owned files under
@@ -309,7 +321,17 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # dependency - upstream deprecated, so these versions are frozen; bump
     # both together if the connection block ever changes) into
     # $HOME/.cache/puppeteer, which the chown below hands to the runtime user.
-    && npm exec --yes --package=@modelcontextprotocol/server-puppeteer@2025.5.12 -- node -e "process.exit(0)" \
+    && npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
+    # The pre-warm above uses the SAME unversioned spec as application-mcp.yml's runtime
+    # `npx -y @modelcontextprotocol/server-puppeteer`, so npx reuses this tree (its cache
+    # directory is keyed by the spec). The deprecated 2025.5.12 pins @modelcontextprotocol/sdk
+    # 1.0.1 (GHSA-w48q-cv73-mx4w) and, through puppeteer@23.11.1, basic-ftp 5.x
+    # (GHSA-c475-qrg2-pj4r); no release fixes either, so override both in that tree. The stdio
+    # server only uses the sdk's Server/StdioServerTransport; basic-ftp is only reachable for
+    # ftp: PAC-script URLs, through puppeteer's browser-download proxy agent (get-uri).
+    && sp_dir="$(dirname "$(grep -l '"@modelcontextprotocol/server-puppeteer"' /home/agentic/.npm/_npx/*/package.json)")" \
+    && npm --prefix "$sp_dir" pkg set "overrides.@modelcontextprotocol/sdk=1.32.1" "overrides.basic-ftp=6.2.1" \
+    && npm --prefix "$sp_dir" install --no-audit --no-fund \
     # The frozen puppeteer@23.11.1 pins Chrome 131.0.6778.204, which the
     # release image scan (grype, fail on critical) rejects with fixed
     # criticals. server-puppeteer cannot take a newer puppeteer, but it does
@@ -323,7 +345,10 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # did). `current` is a stable path for PUPPETEER_LAUNCH_OPTIONS above, and
     # the 131 builds puppeteer@23.11.1 downloads for itself are removed so the
     # image carries only the fixed one.
-    && npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    # puppeteer@23.11.1 is used here only for its browser installer. Its own npx tree (basic-ftp
+    # 5.x, High) is not needed afterwards, so it goes to a throwaway cache, not ~/.npm.
+    && npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    && rm -rf /tmp/npx-puppeteer-install \
     && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
     && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
     && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome \
