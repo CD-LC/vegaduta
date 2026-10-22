@@ -9,6 +9,8 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.security.Principal;
 import java.time.Duration;
 import java.util.Optional;
@@ -52,6 +54,7 @@ import reactor.core.publisher.Flux;
  *       drains it into SSE frames on the request thread.
  * </ul>
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aTaskService {
 

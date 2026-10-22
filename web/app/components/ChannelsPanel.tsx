@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
 import { CHANNEL_META, type AgentOption } from "./channels/ChannelInspectorCards";
-import { useSimpleChannel } from "./channels/useSimpleChannel";
+import { credentialGetter, useSimpleChannel } from "./channels/useSimpleChannel";
 import { useDevices } from "./channels/useDevices";
 import { adapterFor, type ChannelCtx } from "./channels/adapters";
 import { useWhatsAppConnect } from "./channels/useWhatsAppConnect";
@@ -20,6 +20,7 @@ import { useTranslations } from "../lib/i18n";
 import SenderApprovalGuide from "./SenderApprovalGuide";
 import { getMobileApkDownload } from "../lib/mobileApp";
 import { errorMessage } from "../lib/errors";
+import { channelOffered } from "../lib/edition";
 
 // AXON Channels screen (#472) - rebuilt to pixel-match Channels.dc.html:
 // a 3-col grid of every channel's real connection status (left) + a link
@@ -62,6 +63,12 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
   const router = useRouter();
   const searchParams = useSearchParams();
   const inspectorRef = useRef(null);
+  // Channels whose adapters this install does not run (Slack, Discord, Teams, X on a personal install). Their
+  // hooks below stay mounted, as hooks must, but get a settled "nothing connected" instead of the credential GET.
+  const slackOffered = channelOffered("slack");
+  const discordOffered = channelOffered("discord");
+  const teamsOffered = channelOffered("teams");
+  const xOffered = channelOffered("x");
 
   const [status, setStatus] = useState<ChannelsStatusResponse | null>(null);
   const [statusLoaded, setStatusLoaded] = useState(false);
@@ -93,7 +100,7 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
   // rather than being purely decorative.
   useImperativeHandle(ref, () => ({
     openConnect() {
-      const firstOpen = status?.channels.find((c) => c.state !== "CONNECTED");
+      const firstOpen = status?.channels.find((c) => c.state !== "CONNECTED" && channelOffered(c.key));
       setSelected(firstOpen ? firstOpen.key : "whatsapp");
       inspectorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     },
@@ -120,6 +127,7 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
   useEffect(() => {
     const channelParam = searchParams.get("channel");
     if (!channelParam || (!CHANNEL_META[channelParam] && channelParam !== "sms")) return;
+    if (!channelOffered(channelParam)) return;
     setSelected(channelParam);
   }, [searchParams]);
   const selectChannel = useCallback(
@@ -161,7 +169,7 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
 
   const slack = useSimpleChannel({
     ...ui,
-    getCredential: api.getSlackCredential,
+    getCredential: credentialGetter(slackOffered, api.getSlackCredential),
     activate: api.activateSlackCredential,
     setDefaultAgent: api.setSlackDefaultAgent,
     disconnect: api.disconnectSlackCredential,
@@ -171,7 +179,7 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
 
   const discord = useSimpleChannel({
     ...ui,
-    getCredential: api.getDiscordCredential,
+    getCredential: credentialGetter(discordOffered, api.getDiscordCredential),
     activate: api.activateDiscordCredential,
     setDefaultAgent: api.setDiscordDefaultAgent,
     disconnect: api.disconnectDiscordCredential,
@@ -182,7 +190,7 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
   // Bot registration (appId + client secret, optional Entra tenant id).
   const teams = useSimpleChannel({
     ...ui,
-    getCredential: api.getTeamsCredential,
+    getCredential: credentialGetter(teamsOffered, api.getTeamsCredential),
     activate: api.activateTeamsCredential,
     setDefaultAgent: api.setTeamsDefaultAgent,
     disconnect: api.disconnectTeamsCredential,
@@ -240,7 +248,7 @@ const ChannelsPanel = forwardRef(function ChannelsPanel({ agents }: { agents?: A
     }
   }
 
-  const xChannel = useXChannel(ui);
+  const xChannel = useXChannel({ ...ui, offered: xOffered });
   const { setXDefaultAgentId } = xChannel;
 
   const voice = useVoiceDtmf(ui);
