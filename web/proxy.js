@@ -139,9 +139,7 @@ function logAiVisibility(request) {
 // /api/client-log stays deliberately unauthenticated (see that route's own
 // comment), which is why the matcher exclusion of /api/* below is fine.
 export function isPlatformAdminPrivilegedApiPath(pathname) {
-  return (
-    pathname === "/platform-admin/api/academy" || pathname.startsWith("/platform-admin/api/academy/")
-  );
+  return pathname === "/platform-admin/api/academy" || pathname.startsWith("/platform-admin/api/academy/");
 }
 
 // True when this install is the personal edition, read from the container's REAL environment.

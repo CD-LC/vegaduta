@@ -184,25 +184,25 @@ export default function ToolCredentialsPage() {
 
       {/* /platform-admin/mcp-catalog is outside the personal allowlist (a real 404 there): no card to it. */}
       {!isPersonalEdition() && (
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Plug size={16} className="text-primary" /> MCP Catalog
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            See the curated MCP server catalog every tenant browses from Tools → MCP Servers, and search the public MCP
-            Registry.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Link
-            href="/platform-admin/mcp-catalog"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            Open MCP Catalog <ChevronRight size={13} />
-          </Link>
-        </CardContent>
-      </Card>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Plug size={16} className="text-primary" /> MCP Catalog
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              See the curated MCP server catalog every tenant browses from Tools → MCP Servers, and search the public
+              MCP Registry.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/platform-admin/mcp-catalog"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              Open MCP Catalog <ChevronRight size={13} />
+            </Link>
+          </CardContent>
+        </Card>
       )}
 
       {searchStatus && (

@@ -313,7 +313,9 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
           <ul className="flex flex-col gap-1" data-testid="data-table-list">
             {[
               // Keep the open table visible even when it falls on another page of the list.
-              ...(selectedId && filteredTables.some((x) => x.id === selectedId) && !tablePager.pageItems.some((x) => x.id === selectedId)
+              ...(selectedId &&
+              filteredTables.some((x) => x.id === selectedId) &&
+              !tablePager.pageItems.some((x) => x.id === selectedId)
                 ? filteredTables.filter((x) => x.id === selectedId)
                 : []),
               ...tablePager.pageItems,

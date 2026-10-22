@@ -9,8 +9,12 @@ import { refreshPlatformStatus, resetPlatformStatusForTests } from "../lib/platf
 // One stable translator, like the real hook: a fresh function per render would change refreshArtifacts' deps each time.
 const translate = (key: string) => key;
 vi.mock("../lib/i18n", () => ({ useTranslations: () => translate }));
-vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
-vi.mock("../components/AppShell", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
+}));
+vi.mock("../components/AppShell", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: () => {} }));
 
 const calls = vi.hoisted(() => ({
@@ -56,7 +60,9 @@ describe("FilesPage - generated audio listings", () => {
     vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
     const reported = (async () => ({
       ok: true,
-      json: async () => ({ edition: { tier: "personal", billingEnabled: false, authMode: "local", features: { "cloud-speech": true } } }),
+      json: async () => ({
+        edition: { tier: "personal", billingEnabled: false, authMode: "local", features: { "cloud-speech": true } },
+      }),
     })) as unknown as typeof fetch;
     try {
       render(<FilesPage />);
@@ -72,11 +78,14 @@ describe("FilesPage - generated audio listings", () => {
     }
   });
 
-  it.each(["lite", "full"])("still lists both on the %s edition (and a rejected one is the partial banner)", async (tier) => {
-    vi.stubEnv("NEXT_PUBLIC_EDITION", tier);
-    render(<FilesPage />);
-    await waitFor(() => expect(calls.listSarvamAudio).toHaveBeenCalled());
-    expect(calls.listElevenLabsAudio).toHaveBeenCalled();
-    expect(await screen.findByText("artifactsPartialTitle")).toBeInTheDocument();
-  });
+  it.each(["lite", "full"])(
+    "still lists both on the %s edition (and a rejected one is the partial banner)",
+    async (tier) => {
+      vi.stubEnv("NEXT_PUBLIC_EDITION", tier);
+      render(<FilesPage />);
+      await waitFor(() => expect(calls.listSarvamAudio).toHaveBeenCalled());
+      expect(calls.listElevenLabsAudio).toHaveBeenCalled();
+      expect(await screen.findByText("artifactsPartialTitle")).toBeInTheDocument();
+    }
+  );
 });

@@ -23,7 +23,7 @@ describe("isBillingEnabled", () => {
     expect(isBillingEnabled()).toBe(false);
   });
 
-  it("is ON only for exactly \"1\"", () => {
+  it('is ON only for exactly "1"', () => {
     process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
     expect(isBillingEnabled()).toBe(true);
     for (const v of ["0", "true", "yes", " 1"]) {
@@ -73,7 +73,8 @@ describe("a personal install has no billing whatever NEXT_PUBLIC_BILLING_ENABLED
 
 describe("route helpers", () => {
   it("recognises billing routes (locale prefix already stripped)", () => {
-    for (const p of ["/billing", "/billing/checkout", "/admin/billing", "/features"]) expect(isBillingRoute(p)).toBe(true);
+    for (const p of ["/billing", "/billing/checkout", "/admin/billing", "/features"])
+      expect(isBillingRoute(p)).toBe(true);
     for (const p of ["/", "/usage", "/billingx", "/admin", "/featuresque"]) expect(isBillingRoute(p)).toBe(false);
     expect(isBillingNavHref("/admin/billing#llm-usage")).toBe(true);
     expect(isBillingNavHref("/billing?plan=PREMIUM")).toBe(true);

@@ -8,7 +8,8 @@ vi.mock("../../lib/auth", () => ({ auth }));
 
 import TemplatesPublicChrome from "./TemplatesPublicChrome";
 
-const hrefs = (container: HTMLElement) => Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+const hrefs = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
 
 afterEach(() => {
   cleanup();

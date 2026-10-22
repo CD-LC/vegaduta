@@ -38,7 +38,8 @@ describe("parseEdition", () => {
     expect(parseEdition(" Personal ")).toBe("personal");
     expect(parseEdition("LITE")).toBe("lite");
     expect(parseEdition("full")).toBe("full");
-    for (const bad of ["", "pro", "enterprise", "true", null, undefined]) expect(parseEdition(bad), String(bad)).toBeNull();
+    for (const bad of ["", "pro", "enterprise", "true", null, undefined])
+      expect(parseEdition(bad), String(bad)).toBeNull();
   });
 });
 
@@ -164,10 +165,31 @@ describe("EDITION_ROUTES", () => {
   it("lists every route the plan hides on a personal install", () => {
     const routes = EDITION_ROUTES.map((r) => r.route);
     for (const r of [
-      "/shared-with-me", "/directory", "/studio", "/roi", "/features", "/admin/agent-trust", "/admin/commerce",
-      "/admin/payments", "/admin/branding", "/admin/mcp-servers", "/admin/api-keys", "/admin/sso", "/admin/leads",
-      "/admin/billing", "/admin/access", "/admin/users", "/playground", "/quick-task", "/jobs", "/view-as",
-      "/signup", "/try", "/templates/mine", "/.well-known/agent-card.json", "/.well-known/agent.json",
+      "/shared-with-me",
+      "/directory",
+      "/studio",
+      "/roi",
+      "/features",
+      "/admin/agent-trust",
+      "/admin/commerce",
+      "/admin/payments",
+      "/admin/branding",
+      "/admin/mcp-servers",
+      "/admin/api-keys",
+      "/admin/sso",
+      "/admin/leads",
+      "/admin/billing",
+      "/admin/access",
+      "/admin/users",
+      "/playground",
+      "/quick-task",
+      "/jobs",
+      "/view-as",
+      "/signup",
+      "/try",
+      "/templates/mine",
+      "/.well-known/agent-card.json",
+      "/.well-known/agent.json",
     ]) {
       expect(routes, r).toContain(r);
     }
@@ -204,7 +226,15 @@ describe("EDITION_ROUTES", () => {
     for (const r of personalRows) expect(railHidden(r.route), r.route).toBe(r.rail);
     expect(railHidden("/admin/payments/mandates")).toBe(true);
     expect(railHidden("/admin/access?tab=roles")).toBe(true);
-    for (const keep of ["/assistant", "/agents", "/providers", "/admin/channels", "/usage", "/admin", "/admin/maintenance"]) {
+    for (const keep of [
+      "/assistant",
+      "/agents",
+      "/providers",
+      "/admin/channels",
+      "/usage",
+      "/admin",
+      "/admin/maintenance",
+    ]) {
       expect(railHidden(keep), keep).toBe(false);
     }
   });
@@ -223,9 +253,20 @@ describe("EDITION_ROUTES", () => {
 describe("proxy deny list", () => {
   it("denies the gated pages, the public pages and the agent cards", () => {
     for (const p of [
-      "/admin/sso", "/admin/payments/mandates", "/shared-with-me", "/admin/access", "/admin/users", "/directory",
-      "/signup", "/signup/complete", "/try", "/try/envoy-demo", "/view-as", "/templates/mine",
-      "/.well-known/agent-card.json", "/.well-known/agent.json",
+      "/admin/sso",
+      "/admin/payments/mandates",
+      "/shared-with-me",
+      "/admin/access",
+      "/admin/users",
+      "/directory",
+      "/signup",
+      "/signup/complete",
+      "/try",
+      "/try/envoy-demo",
+      "/view-as",
+      "/templates/mine",
+      "/.well-known/agent-card.json",
+      "/.well-known/agent.json",
     ]) {
       expect(isPersonalDenied(p), p).toBe(true);
     }
@@ -235,8 +276,18 @@ describe("proxy deny list", () => {
     // /playground, /quick-task and /jobs redirect to /assistant; the billing switch redirects /admin/billing;
     // /templates (the public gallery) stays, only /templates/mine is the submissions page.
     for (const p of [
-      "/playground", "/quick-task", "/jobs", "/admin/billing", "/assistant", "/agents", "/admin/channels", "/templates",
-      "/templates/abc", "/usage", "/code-intel", "/.well-known/change-password",
+      "/playground",
+      "/quick-task",
+      "/jobs",
+      "/admin/billing",
+      "/assistant",
+      "/agents",
+      "/admin/channels",
+      "/templates",
+      "/templates/abc",
+      "/usage",
+      "/code-intel",
+      "/.well-known/change-password",
     ]) {
       expect(isPersonalDenied(p), p).toBe(false);
     }
@@ -244,7 +295,14 @@ describe("proxy deny list", () => {
 
   it("exports the public (outside-the-console) subset for the proxy", () => {
     expect([...PERSONAL_PUBLIC_DENY].sort()).toEqual(
-      ["/.well-known/agent-card.json", "/.well-known/agent.json", "/signup", "/templates/mine", "/try", "/view-as"].sort()
+      [
+        "/.well-known/agent-card.json",
+        "/.well-known/agent.json",
+        "/signup",
+        "/templates/mine",
+        "/try",
+        "/view-as",
+      ].sort()
     );
     for (const p of PERSONAL_PUBLIC_DENY) expect(isPersonalDenied(p), p).toBe(true);
   });
@@ -268,7 +326,13 @@ describe("platform-admin allowlist", () => {
 
   it("lets the Overview root through (it redirects) and refuses the operator pages", () => {
     expect(isPersonalPlatformAdminAllowed("/platform-admin")).toBe(true);
-    for (const p of ["/platform-admin/tenants", "/platform-admin/billing", "/platform-admin/ops", "/platform-admin/api/academy/learners", "/platform-admin/settings-extra"]) {
+    for (const p of [
+      "/platform-admin/tenants",
+      "/platform-admin/billing",
+      "/platform-admin/ops",
+      "/platform-admin/api/academy/learners",
+      "/platform-admin/settings-extra",
+    ]) {
       expect(isPersonalPlatformAdminAllowed(p), p).toBe(false);
     }
   });

@@ -169,9 +169,9 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
     !speech
       ? Promise.resolve()
       : api
-      .getSarvamCredential()
-      .then(setSarvamCredential)
-      .catch(() => setSarvamCredential(null));
+          .getSarvamCredential()
+          .then(setSarvamCredential)
+          .catch(() => setSarvamCredential(null));
   const refreshE2b = () =>
     api
       .getE2bCredential()
@@ -181,9 +181,9 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
     !speech
       ? Promise.resolve()
       : api
-      .getElevenLabsCredential()
-      .then(setElevenLabsCredential)
-      .catch(() => setElevenLabsCredential(null));
+          .getElevenLabsCredential()
+          .then(setElevenLabsCredential)
+          .catch(() => setElevenLabsCredential(null));
   const e2b = useE2bSetup(refreshE2b, setError, setSuccess, t);
   const el = useElevenLabsVoices(setError, setSuccess, t, speech);
 
@@ -402,7 +402,13 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
             <p className="text-sm text-muted-foreground">
               {t("freeTierReadOnlyNote")}
               {platformLlmInfo?.available && (
-                <> {t(isPersonalInstall() ? "localModelActiveNote" : "platformHostedActiveNote", { label: platformLlmInfo.label, model: platformLlmInfo.model })}</>
+                <>
+                  {" "}
+                  {t(isPersonalInstall() ? "localModelActiveNote" : "platformHostedActiveNote", {
+                    label: platformLlmInfo.label,
+                    model: platformLlmInfo.model,
+                  })}
+                </>
               )}
             </p>
           </Card>
@@ -597,9 +603,11 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
                 />
               )}
 
-              {speech && canManageCard && !isFreePlan && name === ELEVENLABS_SPECIAL_CASED && activated?.status === "ACTIVE" && (
-                <ElevenLabsVoicesSection el={el} />
-              )}
+              {speech &&
+                canManageCard &&
+                !isFreePlan &&
+                name === ELEVENLABS_SPECIAL_CASED &&
+                activated?.status === "ACTIVE" && <ElevenLabsVoicesSection el={el} />}
             </Card>
           );
         })}

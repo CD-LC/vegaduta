@@ -94,9 +94,7 @@ export function InboxThread({
                 disabled={busy}
                 onClick={() =>
                   act(() =>
-                    inboxApi
-                      .takeOver(selected.sessionId)
-                      .then((s) => mergeSnapshot(s as Partial<ConversationSummary>))
+                    inboxApi.takeOver(selected.sessionId).then((s) => mergeSnapshot(s as Partial<ConversationSummary>))
                   )
                 }
               >
@@ -110,9 +108,7 @@ export function InboxThread({
                 disabled={busy}
                 onClick={() =>
                   act(() =>
-                    inboxApi
-                      .release(selected.sessionId)
-                      .then((s) => mergeSnapshot(s as Partial<ConversationSummary>))
+                    inboxApi.release(selected.sessionId).then((s) => mergeSnapshot(s as Partial<ConversationSummary>))
                   )
                 }
               >
@@ -124,8 +120,8 @@ export function InboxThread({
 
       {selected.handoffState === "HUMAN" && (
         <div className="border-b border-border bg-accent/30 px-3 py-2 text-xs text-muted-foreground">
-          The agent (and any channel workflow trigger) is silenced on this conversation until you hand it back.
-          New customer messages still arrive below.
+          The agent (and any channel workflow trigger) is silenced on this conversation until you hand it back. New
+          customer messages still arrive below.
         </div>
       )}
       {!selected.paired && (
@@ -163,8 +159,8 @@ export function InboxThread({
           </div>
         ))}
         <p className="pt-1 text-[10px] text-muted-foreground">
-          Full two-way transcript — customer messages, agent replies and operator replies. Agent replies sent
-          before outbound logging landed are absent.
+          Full two-way transcript — customer messages, agent replies and operator replies. Agent replies sent before
+          outbound logging landed are absent.
         </p>
         <div ref={transcriptEndRef} />
       </div>

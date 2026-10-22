@@ -16,16 +16,7 @@ export type ScheduleKind = "daily" | "weekdays" | "weekly" | "monthly" | "custom
 export const SCHEDULE_KINDS: readonly ScheduleKind[] = ["daily", "weekdays", "weekly", "monthly", "custom"];
 
 export type DeliveryChannel =
-  | "in_app"
-  | "email"
-  | "whatsapp"
-  | "telegram"
-  | "slack"
-  | "signal"
-  | "matrix"
-  | "imessage"
-  | "a2a"
-  | "voice";
+  "in_app" | "email" | "whatsapp" | "telegram" | "slack" | "signal" | "matrix" | "imessage" | "a2a" | "voice";
 const ALL_DELIVERY_CHANNELS: readonly DeliveryChannel[] = [
   "in_app",
   "email",
@@ -203,7 +194,10 @@ export function cronMinimumGapMinutes(cron: string): number | null {
   const step = /^(?:\*|\d+-\d+)\/(\d+)$/.exec(minute);
   if (step) return Math.max(1, Number(step[1]));
   if (/^\d+(,\d+)+$/.test(minute) && hour === "*") {
-    const values = minute.split(",").map(Number).sort((a, b) => a - b);
+    const values = minute
+      .split(",")
+      .map(Number)
+      .sort((a, b) => a - b);
     let gap = 60 - values[values.length - 1] + values[0];
     for (let i = 1; i < values.length; i++) gap = Math.min(gap, values[i] - values[i - 1]);
     return Math.max(1, gap);
@@ -421,7 +415,13 @@ export function nextRuns(draft: ScheduleDraft, from: Date, count = 3): Date[] {
 
 export interface ScheduleDescription {
   /** A key in the "scheduledTasks" i18n namespace. */
-  key: "describeDaily" | "describeWeekdays" | "describeWeekly" | "describeMonthly" | "describeMonthlyLast" | "describeCustom";
+  key:
+    | "describeDaily"
+    | "describeWeekdays"
+    | "describeWeekly"
+    | "describeMonthly"
+    | "describeMonthlyLast"
+    | "describeCustom";
   params: Record<string, string>;
 }
 

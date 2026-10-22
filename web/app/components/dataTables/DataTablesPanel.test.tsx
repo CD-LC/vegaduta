@@ -13,11 +13,21 @@ const createDataTable = vi.fn();
 
 vi.mock("../../lib/api", () => ({
   api: {
-    get getDataTablesConfig() { return getDataTablesConfig; },
-    get listDataTables() { return listDataTables; },
-    get listDataTableRows() { return listDataTableRows; },
-    get updateDataTableRow() { return updateDataTableRow; },
-    get createDataTable() { return createDataTable; },
+    get getDataTablesConfig() {
+      return getDataTablesConfig;
+    },
+    get listDataTables() {
+      return listDataTables;
+    },
+    get listDataTableRows() {
+      return listDataTableRows;
+    },
+    get updateDataTableRow() {
+      return updateDataTableRow;
+    },
+    get createDataTable() {
+      return createDataTable;
+    },
   },
   triggerBrowserDownload: vi.fn(),
 }));
@@ -40,7 +50,8 @@ vi.mock("../../lib/toastBus", () => ({
 vi.mock("next/link", async () => {
   const React = await import("react");
   return {
-    default: ({ href, children }: { href: string; children: unknown }) => React.createElement("a", { href }, children as any),
+    default: ({ href, children }: { href: string; children: unknown }) =>
+      React.createElement("a", { href }, children as any),
   };
 });
 
@@ -230,7 +241,9 @@ describe("DataTablesPanel create", () => {
     fireEvent.change(screen.getByLabelText("nameLabel"), { target: { value: "  Leads " } });
     fireEvent.click(screen.getByRole("button", { name: /^create$/ }));
 
-    await waitFor(() => expect(createDataTable).toHaveBeenCalledWith({ name: "Leads", description: undefined, columns: [] }));
+    await waitFor(() =>
+      expect(createDataTable).toHaveBeenCalledWith({ name: "Leads", description: undefined, columns: [] })
+    );
     expect(await screen.findByTestId("data-table-grid")).toBeInTheDocument();
   });
 });

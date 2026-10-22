@@ -20,16 +20,36 @@ const toastInfo = vi.fn();
 
 vi.mock("../../lib/api", () => ({
   api: {
-    get getCodingTasksConfig() { return getCodingTasksConfig; },
-    get listCodingTasks() { return listCodingTasks; },
-    get listAgents() { return listAgents; },
-    get startCodingTask() { return startCodingTask; },
-    get getCodingTask() { return getCodingTask; },
-    get getCodingTaskDiff() { return getCodingTaskDiff; },
-    get approveCodingTask() { return approveCodingTask; },
-    get rejectCodingTask() { return rejectCodingTask; },
-    get cancelCodingTask() { return cancelCodingTask; },
-    get rollbackCodingTask() { return rollbackCodingTask; },
+    get getCodingTasksConfig() {
+      return getCodingTasksConfig;
+    },
+    get listCodingTasks() {
+      return listCodingTasks;
+    },
+    get listAgents() {
+      return listAgents;
+    },
+    get startCodingTask() {
+      return startCodingTask;
+    },
+    get getCodingTask() {
+      return getCodingTask;
+    },
+    get getCodingTaskDiff() {
+      return getCodingTaskDiff;
+    },
+    get approveCodingTask() {
+      return approveCodingTask;
+    },
+    get rejectCodingTask() {
+      return rejectCodingTask;
+    },
+    get cancelCodingTask() {
+      return cancelCodingTask;
+    },
+    get rollbackCodingTask() {
+      return rollbackCodingTask;
+    },
   },
 }));
 
@@ -39,8 +59,12 @@ vi.mock("../../lib/i18n", () => ({
 
 vi.mock("../../lib/toastBus", () => ({
   toast: {
-    get success() { return toastSuccess; },
-    get info() { return toastInfo; },
+    get success() {
+      return toastSuccess;
+    },
+    get info() {
+      return toastInfo;
+    },
     error: vi.fn(),
   },
 }));
@@ -99,7 +123,12 @@ const DIFF = "diff --git a/A.java b/A.java\n--- a/A.java\n+++ b/A.java\n@@ -1 +1
 beforeEach(() => {
   vi.clearAllMocks();
   listAgents.mockResolvedValue([{ id: "a1", name: "Assistant" }]);
-  getCodingTaskDiff.mockResolvedValue({ taskId: "11111111-1111-1111-1111-111111111111", diff: DIFF, diffHash: "hash-1", truncated: false });
+  getCodingTaskDiff.mockResolvedValue({
+    taskId: "11111111-1111-1111-1111-111111111111",
+    diff: DIFF,
+    diffHash: "hash-1",
+    truncated: false,
+  });
 });
 
 afterEach(() => {
@@ -182,7 +211,9 @@ describe("CodingTasksPanel approval gate", () => {
     const approve = await screen.findByTestId("coding-approve");
     await waitFor(() => expect((approve as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(approve);
-    await waitFor(() => expect(approveCodingTask).toHaveBeenCalledWith("11111111-1111-1111-1111-111111111111", "hash-1"));
+    await waitFor(() =>
+      expect(approveCodingTask).toHaveBeenCalledWith("11111111-1111-1111-1111-111111111111", "hash-1")
+    );
   });
 
   it("keeps Approve disabled until the diff has loaded", async () => {
@@ -215,13 +246,17 @@ describe("CodingTasksPanel approval gate", () => {
 
   it("a 409 from approve shows the server's reason and refreshes the task", async () => {
     listCodingTasks.mockResolvedValue([task()]);
-    approveCodingTask.mockRejectedValue(Object.assign(new Error("The change shown to you is no longer the current one."), { status: 409 }));
+    approveCodingTask.mockRejectedValue(
+      Object.assign(new Error("The change shown to you is no longer the current one."), { status: 409 })
+    );
     getCodingTask.mockResolvedValue(task({ diffHash: "hash-9" }));
     render(<CodingTasksPanel />);
     const approve = await screen.findByTestId("coding-approve");
     await waitFor(() => expect((approve as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(approve);
-    await waitFor(() => expect(toastInfo).toHaveBeenCalledWith("The change shown to you is no longer the current one."));
+    await waitFor(() =>
+      expect(toastInfo).toHaveBeenCalledWith("The change shown to you is no longer the current one.")
+    );
     await waitFor(() => expect(getCodingTask).toHaveBeenCalled());
   });
 
@@ -232,7 +267,9 @@ describe("CodingTasksPanel approval gate", () => {
   });
 
   it("offers no approve, reject or cancel on a failed task, and no diff section", async () => {
-    listCodingTasks.mockResolvedValue([task({ status: "FAILED", diffAvailable: false, diffHash: null, message: "Tests still fail." })]);
+    listCodingTasks.mockResolvedValue([
+      task({ status: "FAILED", diffAvailable: false, diffHash: null, message: "Tests still fail." }),
+    ]);
     render(<CodingTasksPanel />);
     await screen.findByTestId("coding-task-detail");
     expect(screen.queryByTestId("coding-approve")).toBeNull();
@@ -253,7 +290,9 @@ describe("CodingTasksPanel approval gate", () => {
   });
 
   it("cancels a running task", async () => {
-    listCodingTasks.mockResolvedValue([task({ status: "RUNNING", phase: "TESTING", diffAvailable: false, diffHash: null })]);
+    listCodingTasks.mockResolvedValue([
+      task({ status: "RUNNING", phase: "TESTING", diffAvailable: false, diffHash: null }),
+    ]);
     cancelCodingTask.mockResolvedValue({ taskId: "x", accepted: true });
     render(<CodingTasksPanel />);
     fireEvent.click(await screen.findByText("cancel"));
@@ -264,8 +303,12 @@ describe("CodingTasksPanel approval gate", () => {
 describe("CodingTasksPanel polling", () => {
   it("polls a live task and stops once it ends", async () => {
     getCodingTasksConfig.mockResolvedValue(config());
-    listCodingTasks.mockResolvedValue([task({ status: "RUNNING", phase: "TESTING", diffAvailable: false, diffHash: null })]);
-    getCodingTask.mockResolvedValue(task({ status: "FAILED", diffAvailable: false, diffHash: null, message: "Tests still fail." }));
+    listCodingTasks.mockResolvedValue([
+      task({ status: "RUNNING", phase: "TESTING", diffAvailable: false, diffHash: null }),
+    ]);
+    getCodingTask.mockResolvedValue(
+      task({ status: "FAILED", diffAvailable: false, diffHash: null, message: "Tests still fail." })
+    );
     vi.useFakeTimers({ shouldAdvanceTime: true });
     render(<CodingTasksPanel />);
     await screen.findByTestId("coding-task-detail");
@@ -287,7 +330,9 @@ describe("CodingTasksPanel create form", () => {
   });
 
   it("will not send an invalid draft, then starts a git task and shows it", async () => {
-    startCodingTask.mockResolvedValue(task({ status: "QUEUED", phase: "QUEUED", diffAvailable: false, diffHash: null, events: [] }));
+    startCodingTask.mockResolvedValue(
+      task({ status: "QUEUED", phase: "QUEUED", diffAvailable: false, diffHash: null, events: [] })
+    );
     render(<CodingTasksPanel />);
     fireEvent.click(await screen.findByText("newTask"));
     fireEvent.click(await screen.findByText("start"));
@@ -321,7 +366,9 @@ describe("CodingTasksPanel create form", () => {
   it("shows no upgrade link for a plan-gate refusal on a personal install", async () => {
     vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
     try {
-      startCodingTask.mockRejectedValue(Object.assign(new Error("Coding tasks are a paid-plan feature."), { status: 403 }));
+      startCodingTask.mockRejectedValue(
+        Object.assign(new Error("Coding tasks are a paid-plan feature."), { status: 403 })
+      );
       render(<CodingTasksPanel />);
       fireEvent.click(await screen.findByText("newTask"));
       fireEvent.change(await screen.findByLabelText("instructionLabel"), { target: { value: "Do it" } });
@@ -336,7 +383,9 @@ describe("CodingTasksPanel create form", () => {
   });
 
   it("shows the server's sentence for a plan gate", async () => {
-    startCodingTask.mockRejectedValue(Object.assign(new Error("Coding tasks are a paid-plan feature."), { status: 403 }));
+    startCodingTask.mockRejectedValue(
+      Object.assign(new Error("Coding tasks are a paid-plan feature."), { status: 403 })
+    );
     render(<CodingTasksPanel />);
     fireEvent.click(await screen.findByText("newTask"));
     fireEvent.change(await screen.findByLabelText("instructionLabel"), { target: { value: "Do it" } });

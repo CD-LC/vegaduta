@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import en from "../../messages/en.json";
 
 vi.mock("../lib/i18n", () => ({
-  useTranslations: (namespace: string) => (key: string) => (en as unknown as Record<string, Record<string, string>>)[namespace]?.[key] ?? `${namespace}.${key}`,
+  useTranslations: (namespace: string) => (key: string) =>
+    (en as unknown as Record<string, Record<string, string>>)[namespace]?.[key] ?? `${namespace}.${key}`,
 }));
 
 import { FamilyLinks, PricesPager, SeeCostPerAgentLink } from "./RoiFamily";
@@ -15,7 +16,12 @@ afterEach(() => {
 
 describe("RoiFamily", () => {
   it("links the cost views together", () => {
-    render(<><FamilyLinks /><SeeCostPerAgentLink /></>);
+    render(
+      <>
+        <FamilyLinks />
+        <SeeCostPerAgentLink />
+      </>
+    );
     expect(screen.getByRole("link", { name: "Usage and quota" }).getAttribute("href")).toBe("/usage");
     expect(screen.getByRole("link", { name: "Insights: spend and activity" }).getAttribute("href")).toBe("/insights");
     expect(screen.getByRole("link", { name: "See cost per agent" }).getAttribute("href")).toBe("/roi");
@@ -23,7 +29,12 @@ describe("RoiFamily", () => {
 
   it("drops the /roi link on a personal install, which has no billing pages", () => {
     vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
-    render(<><FamilyLinks /><SeeCostPerAgentLink /></>);
+    render(
+      <>
+        <FamilyLinks />
+        <SeeCostPerAgentLink />
+      </>
+    );
     expect(screen.getByRole("link", { name: "Usage and quota" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: "See cost per agent" })).toBeNull();
   });

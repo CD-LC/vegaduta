@@ -287,7 +287,10 @@ function withLanguageVersions(BASE: string, entries: MetadataRoute.Sitemap): Met
 }
 
 function withLastModified(BASE: string, entries: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
-  return withLanguageVersions(BASE, withoutRedirectedRoutes(BASE, entries)).map((entry) => ({ lastModified: BUILT_AT, ...entry }));
+  return withLanguageVersions(BASE, withoutRedirectedRoutes(BASE, entries)).map((entry) => ({
+    lastModified: BUILT_AT,
+    ...entry,
+  }));
 }
 
 // Billing off (lib/billing-flag.ts): /billing and /features redirect away, and

@@ -253,7 +253,7 @@ let lastFailed = false;
  */
 export async function refreshPlatformStatus(
   fetchImpl: typeof fetch = fetch,
-  opts: { force?: boolean } = {},
+  opts: { force?: boolean } = {}
 ): Promise<void> {
   if (inflight !== null) return inflight;
   const wait = lastFailed ? FAILURE_BACKOFF_MS : MIN_REFETCH_MS;
@@ -275,7 +275,10 @@ export async function refreshPlatformStatus(
       const verified = verifyEdition(status);
       // The poll is authoritative for "maintenance ended": clear a 503 signal
       // once the server says maintenance is off.
-      setState({ status: verified, maintenanceSignalled: status.maintenance.enabled ? state.maintenanceSignalled : false });
+      setState({
+        status: verified,
+        maintenanceSignalled: status.maintenance.enabled ? state.maintenanceSignalled : false,
+      });
     } catch {
       // Network error / CORS rejection / bad JSON: no banner change, no toast.
       lastFailed = true;

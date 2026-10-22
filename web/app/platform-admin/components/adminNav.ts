@@ -174,7 +174,7 @@ export const NAV_SECTIONS: AdminNavSection[] = [
  */
 export function filterEditionNav<S extends { items: readonly { href: string }[] }>(
   sections: readonly S[],
-  personal = isPersonalEdition(),
+  personal = isPersonalEdition()
 ): S[] {
   if (!personal) return [...sections];
   return sections

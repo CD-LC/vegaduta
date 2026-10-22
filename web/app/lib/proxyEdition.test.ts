@@ -95,7 +95,12 @@ describe("proxy() on a personal install", () => {
   });
 
   it("denies /platform-admin paths outside the personal allowlist and keeps the allowlist", async () => {
-    for (const path of ["/platform-admin/tenants", "/platform-admin/billing", "/platform-admin/ops", "/platform-admin/fleet"]) {
+    for (const path of [
+      "/platform-admin/tenants",
+      "/platform-admin/billing",
+      "/platform-admin/ops",
+      "/platform-admin/fleet",
+    ]) {
       expect((await get(path)).status, path).toBe(404);
     }
     for (const path of [
@@ -127,7 +132,12 @@ describe("proxy() on a personal install", () => {
 
   it("redirects the billing family even when NEXT_PUBLIC_BILLING_ENABLED=1 is set by mistake", async () => {
     process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
-    for (const [path, to] of [["/billing", "/"], ["/pricing", "/"], ["/features", "/"], ["/admin/billing", "/usage"]]) {
+    for (const [path, to] of [
+      ["/billing", "/"],
+      ["/pricing", "/"],
+      ["/features", "/"],
+      ["/admin/billing", "/usage"],
+    ]) {
       const res = await get(path);
       expect(res.status, path).toBe(307);
       expect(res.headers.get("location"), path).toBe(`${ORIGIN}${to}`);

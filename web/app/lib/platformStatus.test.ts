@@ -124,7 +124,9 @@ describe("edition in the public status", () => {
     vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
-      await refreshPlatformStatus(fakeFetch({ maintenance: { enabled: false }, edition: EDITION_BODY }), { force: true });
+      await refreshPlatformStatus(fakeFetch({ maintenance: { enabled: false }, edition: EDITION_BODY }), {
+        force: true,
+      });
       const a = getPlatformStatusState().status?.announcement;
       expect(a?.level).toBe("warning");
       expect(a?.message).toContain("personal");
@@ -209,7 +211,7 @@ describe("maintenance detection", () => {
       (async () => {
         throw new TypeError("Failed to fetch");
       }) as unknown as typeof fetch,
-      { force: true },
+      { force: true }
     );
     expect(getPlatformStatusState()).toBe(before);
   });

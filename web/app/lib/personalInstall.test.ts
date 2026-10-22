@@ -1,5 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { LOCAL_MODEL_LABEL, hiddenOnPersonalInstall, isPersonalInstall, localModelAllowed, poolLabel, showPlatformPoolToggle, tierCommand, workflowNodeOffered } from "./personalInstall";
+import {
+  LOCAL_MODEL_LABEL,
+  hiddenOnPersonalInstall,
+  isPersonalInstall,
+  localModelAllowed,
+  poolLabel,
+  showPlatformPoolToggle,
+  tierCommand,
+  workflowNodeOffered,
+} from "./personalInstall";
 
 // getPublicEnv reads NEXT_PUBLIC_AUTH_MODE from the public runtime config; the
 // test setup leaves it unset, which is the hosted/Keycloak default. Local-auth

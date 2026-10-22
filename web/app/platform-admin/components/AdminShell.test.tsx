@@ -12,7 +12,9 @@ const apiMock = vi.hoisted(() => ({
 const prefetchApiGets = vi.hoisted(() => vi.fn());
 
 vi.mock("../lib/api", () => ({ api: apiMock, prefetchApiGets }));
-vi.mock("./PlatformAdminGate", () => ({ useAuth: () => ({ username: "owner", roles: [] as string[], logout: vi.fn() }) }));
+vi.mock("./PlatformAdminGate", () => ({
+  useAuth: () => ({ username: "owner", roles: [] as string[], logout: vi.fn() }),
+}));
 vi.mock("next/navigation", () => ({ usePathname: () => "/platform-admin/llm-providers" }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: any) => (

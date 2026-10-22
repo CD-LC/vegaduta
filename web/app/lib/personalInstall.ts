@@ -5,13 +5,7 @@
 // link that leads to a page the owner was deliberately spared.
 //
 // The rail hides those pages (useNavSections); a deep link shows the "not available" state.
-import {
-  isFullEdition,
-  isLiteEdition,
-  isPersonalEdition,
-  railHidden,
-  underRoute,
-} from "./edition";
+import { isFullEdition, isLiteEdition, isPersonalEdition, railHidden, underRoute } from "./edition";
 
 /**
  * Surfaces a shared/hosted install does not advertise. /assistant is for every install (the
@@ -111,7 +105,13 @@ export function showPlatformPoolToggle(): boolean {
  * webhook, `bulk_email` an SMTP relay, `crm_lead` the Leads CRM (hidden on this install), `device_control` a
  * paired phone. The palette stops offering them; a saved graph that already contains one still opens.
  */
-const PERSONAL_UNAVAILABLE_WORKFLOW_NODES: readonly string[] = ["wait", "voice_menu", "bulk_email", "crm_lead", "device_control"];
+const PERSONAL_UNAVAILABLE_WORKFLOW_NODES: readonly string[] = [
+  "wait",
+  "voice_menu",
+  "bulk_email",
+  "crm_lead",
+  "device_control",
+];
 
 /** False for a workflow node type the palette should not offer on this install. */
 export function workflowNodeOffered(type: string): boolean {

@@ -29,9 +29,9 @@ export function useElevenLabsVoices(
     !enabled
       ? Promise.resolve()
       : api
-      .listElevenLabsVoices()
-      .then(setVoices)
-      .catch(() => setVoices([]));
+          .listElevenLabsVoices()
+          .then(setVoices)
+          .catch(() => setVoices([]));
 
   useEffect(() => {
     void refreshVoices();

@@ -34,8 +34,8 @@ export default async function MyTemplatesPage({
             Templates you&apos;ve shared
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Draft, submit and track your community templates. Submitted templates are reviewed before they
-            appear publicly.
+            Draft, submit and track your community templates. Submitted templates are reviewed before they appear
+            publicly.
           </p>
         </div>
         <Link

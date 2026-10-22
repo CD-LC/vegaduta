@@ -5,7 +5,12 @@ import { MessageSquare } from "lucide-react";
 import { type StatusDotStatus } from "../../components/ui/status-dot";
 import { CHANNEL_ICON } from "../../components/BrandIcons";
 import { channelOffered } from "../../lib/edition";
-import { type ConversationSummary, type ConversationView, type HandoffChannel, type HandoffTranscriptMessage } from "./inboxApi";
+import {
+  type ConversationSummary,
+  type ConversationView,
+  type HandoffChannel,
+  type HandoffTranscriptMessage,
+} from "./inboxApi";
 
 export const CHANNELS: { value: HandoffChannel; label: string }[] = [
   { value: "WHATSAPP", label: "WhatsApp" },

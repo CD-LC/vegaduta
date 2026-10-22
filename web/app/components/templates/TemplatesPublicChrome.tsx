@@ -58,8 +58,15 @@ export default function TemplatesPublicChrome({
         <div className="absolute -top-40 left-1/2 h-[38rem] w-[38rem] -translate-x-1/2 rounded-full bg-primary/16 blur-[140px]" />
       </div>
 
-      <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-3 px-5 py-5 sm:justify-between sm:px-8" aria-label="Site">
-        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label="VegaDūta home">
+      <nav
+        className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-3 px-5 py-5 sm:justify-between sm:px-8"
+        aria-label="Site"
+      >
+        <Link
+          href="/"
+          className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
+          aria-label="VegaDūta home"
+        >
           <img src="/logo-mark.png" alt="" className="h-8 w-auto object-contain" draggable={false} />
           <span>
             Vega<span className="text-primary">Dūta</span>
