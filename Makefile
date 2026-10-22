@@ -142,6 +142,8 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	sh scripts/ci/check-file-size.sh
 	sh scripts/ci/check-module-size.sh
 	sh scripts/ci/dockerfile-poms.sh
+	bash scripts/ci/check-browser-runner-version.sh
+	bash scripts/ci/check-browser-runner-version.sh --self-test
 	python3 core/tools/module-graph/gen_module_graph.py --check
 	node sdk/generate.mjs --check
 	node scripts/docs/asyncapi.mjs --check

@@ -15,13 +15,25 @@ ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.63.0-noble
 
 FROM ${PLAYWRIGHT_IMAGE}
 
+# The Playwright base image lags Ubuntu's security archive between its releases. Pull in the
+# fixed openssl the release image scan (grype, fixed-only) reports, and nothing else.
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade openssl libssl3t64 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && chown -R pwuser:pwuser /app \
     # Clients connect over chromium.connect() only (app.browseruse.remote-url);
     # the playwright base image also ships Firefox and WebKit builds the service
     # never launches, and the release image scan flags their binaries. Drop them.
-    && rm -rf /ms-playwright/firefox-* /ms-playwright/webkit-*
+    && rm -rf /ms-playwright/firefox-* /ms-playwright/webkit-* \
+    # npm is a build tool: the server below runs on node alone. The npm bundled
+    # in the base image carries its own tar, undici, ip-address and brace-expansion
+    # (the release image scan flags them, and no package.json can override them), so
+    # drop npm and npx once `npm ci` is done rather than chase the base image's npm.
+    && rm -rf /usr/lib/node_modules/npm /usr/bin/npm /usr/bin/npx
 
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     BROWSER_RUNNER_PORT=3000
@@ -29,4 +41,6 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
 USER pwuser
 EXPOSE 3000
 # Playwright starts a fresh headless Chromium per connected client and closes it when the client goes.
-CMD ["sh", "-c", "exec npx playwright run-server --host 0.0.0.0 --port ${BROWSER_RUNNER_PORT}"]
+# Started with node, not npx (npx is removed above): the version that runs is exactly the one in
+# package-lock.json.
+CMD ["sh", "-c", "exec node /app/node_modules/playwright/cli.js run-server --host 0.0.0.0 --port ${BROWSER_RUNNER_PORT}"]
