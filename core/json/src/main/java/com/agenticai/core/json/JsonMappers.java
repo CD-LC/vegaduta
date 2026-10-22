@@ -1,11 +1,11 @@
 package com.agenticai.core.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The one place core code builds a non-Spring-managed Jackson {@link ObjectMapper}.
@@ -23,55 +23,63 @@ public final class JsonMappers {
 
     private JsonMappers() {}
 
-    /** Equivalent to {@code new ObjectMapper()}: no modules registered, Jackson defaults. */
+    /**
+     * Jackson 3 builder carrying the Jackson 2 defaults (ADR-0012 P2): dates as timestamps,
+     * unsorted properties, and so on, so the wire format is unchanged by the major-version jump.
+     * java.time / Jdk8 support is built into Jackson 3, so no module registration is needed.
+     */
+    private static JsonMapper.Builder base() {
+        return JsonMapper.builder().configureForJackson2();
+    }
+
+    /**
+     * The concrete {@link JsonMapper} with Jackson 2 wire defaults, for the Hibernate JSON format
+     * mapper (JSONB output must not change with the Jackson major version).
+     */
+    public static JsonMapper jsonMapper() {
+        return base().build();
+    }
+
+    /** Jackson-2-default mapper: no customisation beyond {@code configureForJackson2()}. */
     public static ObjectMapper plain() {
-        return new ObjectMapper();
+        return base().build();
     }
 
-    /** {@code new ObjectMapper().registerModule(new JavaTimeModule())}. */
+    /**
+     * Formerly {@code new ObjectMapper().registerModule(new JavaTimeModule())}; java.time is now
+     * built in.
+     */
     public static ObjectMapper withJavaTime() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return base().build();
     }
 
-    /**
-     * {@code new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false)}: ignores unknown
-     * fields.
-     */
+    /** Ignores unknown fields on read. */
     public static ObjectMapper lenient() {
-        return new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return base().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).build();
     }
 
-    /**
-     * {@code new ObjectMapper().setDefaultPropertyInclusion(NON_NULL)}: null properties are omitted
-     * on write.
-     */
+    /** Null properties are omitted on write. */
     public static ObjectMapper nonNull() {
-        return new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+        return base().changeDefaultPropertyInclusion(
+                        v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .build();
     }
 
-    /**
-     * {@code new ObjectMapper().enable(ORDER_MAP_ENTRIES_BY_KEYS)}: deterministic map key order
-     * (canonical form).
-     */
+    /** Deterministic map key order (canonical form). */
     public static ObjectMapper sortedMapKeys() {
-        return new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        return base().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
     }
 
     /**
-     * {@code new ObjectMapper(factory)}: a mapper over a caller-built {@link JsonFactory}, for
-     * parsers that need their own {@code StreamReadConstraints} (size, depth and number limits on
-     * untrusted input).
+     * A mapper over a caller-built {@link JsonFactory}, for parsers that need their own {@code
+     * StreamReadConstraints} (size, depth and number limits on untrusted input).
      */
     public static ObjectMapper withFactory(JsonFactory factory) {
-        return new ObjectMapper(factory);
+        return JsonMapper.builder(factory).configureForJackson2().build();
     }
 
-    /**
-     * {@code new ObjectMapper().enable(FAIL_ON_TRAILING_TOKENS)}: rejects input with content after
-     * the first value.
-     */
+    /** Rejects input with content after the first value. */
     public static ObjectMapper strictTrailingTokens() {
-        return new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+        return base().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).build();
     }
 }

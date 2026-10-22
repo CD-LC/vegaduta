@@ -6,7 +6,6 @@ import com.agenticai.core.quality.AggregatedEvaluationResult;
 import com.agenticai.core.quality.EvalEngine;
 import com.agenticai.core.quality.impl.JudgeChatClientFactory;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Triggers, executes and reads regression runs of an {@link EvalDataset} against its agent, scoring

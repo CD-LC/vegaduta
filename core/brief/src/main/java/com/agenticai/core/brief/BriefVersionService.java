@@ -6,12 +6,12 @@ import com.agenticai.core.brief.dto.ApplyDtos.ApplyResult;
 import com.agenticai.core.brief.dto.ApplyDtos.VersionDiff;
 import com.agenticai.core.brief.dto.BriefDtos.VersionSummary;
 import com.agenticai.core.brief.model.Brief;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Version history of a brief: list, JSON-patch diff between two versions, and rollback.

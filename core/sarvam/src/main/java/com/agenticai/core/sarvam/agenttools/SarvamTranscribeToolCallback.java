@@ -1,13 +1,13 @@
 package com.agenticai.core.sarvam.agenttools;
 
 import com.agenticai.core.sarvam.SarvamSpeechToTextClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link SarvamSpeechToTextClient} as a native Spring AI tool - Sarvam Integration Build

@@ -12,13 +12,13 @@ import com.agenticai.core.mcp.registry.OfficialMcpRegistryClient;
 import com.agenticai.core.mcp.registry.RegistryEnvVarSpec;
 import com.agenticai.core.mcp.registry.RegistrySearchResponse;
 import com.agenticai.core.mcp.registry.RegistrySearchResult;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The planner's connector step: MCP servers (chosen only from what the real registry search

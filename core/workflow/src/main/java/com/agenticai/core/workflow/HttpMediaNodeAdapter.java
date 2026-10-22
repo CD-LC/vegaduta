@@ -3,10 +3,10 @@ package com.agenticai.core.workflow;
 import com.agenticai.core.agents.tools.web.HttpRequestExecutor;
 import com.agenticai.core.knowledge.SidecarClient;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /** "http" and "media": the HTTP Request and sidecar Media nodes. */
 @Component

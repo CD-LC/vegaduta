@@ -1,11 +1,11 @@
 package com.agenticai.core.omnichannel.matrix;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Turns a {@code /sync} response into the three things the channel acts on: room invites addressed
@@ -35,7 +35,7 @@ final class MatrixSyncParser {
             Map<String, Integer> joinedCounts) {}
 
     static Batch parse(JsonNode sync, String botUserId) {
-        String next = sync.path("next_batch").asText(null);
+        String next = sync.path("next_batch").asString(null);
         List<Invite> invites = new ArrayList<>();
         List<RoomEvent> events = new ArrayList<>();
         Map<String, Integer> counts = new HashMap<>();
@@ -60,7 +60,7 @@ final class MatrixSyncParser {
                 counts.put(roomId, count.asInt());
             }
             for (JsonNode e : room.path("state").path("events")) {
-                if ("m.room.encryption".equals(e.path("type").asText())) {
+                if ("m.room.encryption".equals(e.path("type").asString())) {
                     events.add(toEvent(roomId, e));
                 }
             }
@@ -74,19 +74,19 @@ final class MatrixSyncParser {
     private static RoomEvent toEvent(String roomId, JsonNode e) {
         return new RoomEvent(
                 roomId,
-                e.path("event_id").asText(null),
-                e.path("sender").asText(null),
-                e.path("type").asText(""),
+                e.path("event_id").asString(null),
+                e.path("sender").asString(null),
+                e.path("type").asString(""),
                 e.path("content"),
                 e.path("origin_server_ts").asLong(0L));
     }
 
     private static String inviterOf(JsonNode room, String botUserId) {
         for (JsonNode e : room.path("invite_state").path("events")) {
-            if ("m.room.member".equals(e.path("type").asText())
-                    && botUserId.equals(e.path("state_key").asText())
-                    && "invite".equals(e.path("content").path("membership").asText())) {
-                String sender = e.path("sender").asText(null);
+            if ("m.room.member".equals(e.path("type").asString())
+                    && botUserId.equals(e.path("state_key").asString())
+                    && "invite".equals(e.path("content").path("membership").asString())) {
+                String sender = e.path("sender").asString(null);
                 return sender == null || sender.isBlank() ? null : sender;
             }
         }

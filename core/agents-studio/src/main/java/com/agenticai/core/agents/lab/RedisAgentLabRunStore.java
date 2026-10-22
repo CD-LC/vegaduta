@@ -2,8 +2,6 @@ package com.agenticai.core.agents.lab;
 
 import com.agenticai.core.agents.lab.AgentLabDtos.LabRunDocument;
 import com.agenticai.core.resilience.RateLimitedLog;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +13,8 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Redis-backed {@link AgentLabRunStore}. No table and no migration: a lab run is an experiment
@@ -152,7 +152,7 @@ public class RedisAgentLabRunStore implements AgentLabRunStore {
     private String toJson(LabRunDocument doc) {
         try {
             return objectMapper.writeValueAsString(doc);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not serialise lab run " + doc.run().runId(), e);
         }
     }
@@ -194,7 +194,7 @@ public class RedisAgentLabRunStore implements AgentLabRunStore {
         try {
             LabRunDocument doc = objectMapper.readValue(json, LabRunDocument.class);
             return doc == null || doc.run() == null ? Optional.empty() : Optional.of(doc);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // A document this build cannot read (written by another version)
             // is as gone as an expired one - and must not 500 every poll.
             log.warn("Unreadable lab run document for run {} - treating it as expired", runId, e);

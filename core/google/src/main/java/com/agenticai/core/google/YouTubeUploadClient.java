@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -12,6 +10,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * YouTube Data API v3 resumable video upload - the write counterpart of {@link
@@ -198,7 +198,7 @@ public class YouTubeUploadClient {
             throw new GoogleApiException(
                     "Could not parse YouTube's upload response: " + e.getMessage(), e);
         }
-        String videoId = body.path("id").asText(null);
+        String videoId = body.path("id").asString(null);
         if (videoId == null) {
             throw new GoogleApiException(
                     "YouTube's upload response had no video id: " + response.body());

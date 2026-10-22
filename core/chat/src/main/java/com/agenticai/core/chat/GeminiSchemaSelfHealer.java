@@ -1,15 +1,15 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.genai.types.Schema;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.model.ModelOptionsUtils;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Dynamic companion to {@code SchemaTypeArrayNormalizer}'s (core/agents) hand-authored fixes for
@@ -31,7 +31,7 @@ import org.springframework.ai.model.ModelOptionsUtils;
  * (see {@code SchemaTypeArrayNormalizer}'s own fix), and (2) a {@code null} value for a field whose
  * AutoValue-generated builder setter does {@code Optional.of(value)} with no null-check - confirmed
  * for {@code default}, {@code description}, and {@code items}. That NPE is wrapped by Jackson into
- * a message-less {@code JsonMappingException} whose {@code getMessage()} returns the literal string
+ * a message-less {@code DatabindException} whose {@code getMessage()} returns the literal string
  * {@code "N/A"} - this is what the original 2026-08-10 production incident's {@code "default":
  * null} logged. So this class' real value is as a safety net for "type"-mismatch and
  * null-valued-field shapes specifically, present or future - not a general unsupported-keyword
@@ -100,7 +100,7 @@ public final class GeminiSchemaSelfHealer {
                 return schemaJson; // Round-tripping our own parsed tree should never fail - fail
                 // safe.
             }
-            JsonMappingException failure = tryDeserialize(candidate);
+            DatabindException failure = tryDeserialize(candidate);
             if (failure == null) {
                 return attempt == 0
                         ? schemaJson
@@ -134,11 +134,11 @@ public final class GeminiSchemaSelfHealer {
      * GoogleGenAiChatModel#jsonToSchema} exactly (see this class' javadoc) so this actually proves
      * the real request-building call would succeed, not just that SOME mapper accepts it.
      */
-    private static JsonMappingException tryDeserialize(String schemaJson) {
+    private static DatabindException tryDeserialize(String schemaJson) {
         try {
             SchemaJson.read(schemaJson, Schema.class);
             return null;
-        } catch (JsonMappingException jme) {
+        } catch (DatabindException jme) {
             return jme;
         } catch (Exception e) {
             // Some other failure shape (unparsable JSON, a non-schema-content error) - not this
@@ -149,26 +149,26 @@ public final class GeminiSchemaSelfHealer {
 
     /**
      * Reads the exact failing field off the real exception (e.g. for {@code properties ->
-     * max_tokens -> default}, {@link JsonMappingException#getPath()} returns reference entries
-     * named exactly "properties", "max_tokens", "default" - confirmed against a live incident's own
+     * max_tokens -> default}, {@link DatabindException#getPath()} returns reference entries named
+     * exactly "properties", "max_tokens", "default" - confirmed against a live incident's own
      * exception message) and removes it from the live tree in place. Returns the removed field's
      * name for logging, or null if the path couldn't be resolved against the actual tree (schema
      * and exception disagree - fail safe rather than remove the wrong thing).
      */
-    private static String removeFailingField(JsonNode root, JsonMappingException failure) {
-        List<JsonMappingException.Reference> path = failure.getPath();
+    private static String removeFailingField(JsonNode root, DatabindException failure) {
+        List<DatabindException.Reference> path = failure.getPath();
         if (path == null || path.isEmpty()) {
             return null;
         }
         JsonNode current = root;
         for (int i = 0; i < path.size() - 1; i++) {
-            String fieldName = path.get(i).getFieldName();
+            String fieldName = path.get(i).getPropertyName();
             if (fieldName == null || current == null || !current.isObject()) {
                 return null;
             }
             current = current.get(fieldName);
         }
-        String lastField = path.get(path.size() - 1).getFieldName();
+        String lastField = path.get(path.size() - 1).getPropertyName();
         if (lastField == null
                 || !(current instanceof ObjectNode objectNode)
                 || !objectNode.has(lastField)) {

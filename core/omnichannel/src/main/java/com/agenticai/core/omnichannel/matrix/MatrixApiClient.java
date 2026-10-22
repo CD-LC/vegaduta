@@ -3,8 +3,6 @@ package com.agenticai.core.omnichannel.matrix;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +23,8 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Matrix Client-Server API over the platform's guarded HTTP client. The homeserver is chosen by the
@@ -96,12 +96,12 @@ public class MatrixApiClient {
                         "",
                         DEFAULT_TIMEOUT,
                         MAX_JSON_RESPONSE_BYTES);
-        String userId = node.path("user_id").asText(null);
+        String userId = node.path("user_id").asString(null);
         if (userId == null || userId.isBlank()) {
             throw new MatrixApiException(
                     200, "M_UNKNOWN", "The homeserver did not say who this token belongs to");
         }
-        return new WhoAmI(userId, node.path("device_id").asText(null));
+        return new WhoAmI(userId, node.path("device_id").asString(null));
     }
 
     /**
@@ -215,7 +215,7 @@ public class MatrixApiClient {
                         "?filename=" + encode(filename),
                         Duration.ofSeconds(120),
                         MAX_JSON_RESPONSE_BYTES);
-        String uri = node.path("content_uri").asText(null);
+        String uri = node.path("content_uri").asString(null);
         if (uri == null || !MXC.matcher(uri).matches()) {
             throw new MatrixApiException(
                     200, "M_UNKNOWN", "The homeserver did not return a media URI");
@@ -331,7 +331,7 @@ public class MatrixApiClient {
                         "",
                         DEFAULT_TIMEOUT,
                         MAX_JSON_RESPONSE_BYTES);
-        return node.path("event_id").asText(null);
+        return node.path("event_id").asString(null);
     }
 
     private JsonNode get(Endpoint ep, String path, String query, Duration timeout, int maxBytes) {
@@ -454,8 +454,8 @@ public class MatrixApiClient {
         long retryAfter = 0L;
         try {
             JsonNode node = mapper.readTree(body);
-            errcode = node.path("errcode").asText(null);
-            error = node.path("error").asText(null);
+            errcode = node.path("errcode").asString(null);
+            error = node.path("error").asString(null);
             retryAfter = node.path("retry_after_ms").asLong(0L);
         } catch (IOException | RuntimeException ignored) {
             // not JSON: fall back to the status

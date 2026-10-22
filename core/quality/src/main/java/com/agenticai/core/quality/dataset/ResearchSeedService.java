@@ -1,14 +1,14 @@
 package com.agenticai.core.quality.dataset;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Creates a dataset from the bundled research-task starter set ({@code
@@ -49,7 +49,7 @@ public class ResearchSeedService {
     @Transactional
     public EvalDataset seed(UUID agentId) {
         JsonNode seed = loadSeed();
-        String name = seed.path("name").asText();
+        String name = seed.path("name").asString();
         List<EvalDataset> existing = datasetService.listDatasets(agentId);
         if (existing.stream().anyMatch(d -> name.equals(d.getName()))) {
             throw new EvalRunConflictException(
@@ -59,7 +59,7 @@ public class ResearchSeedService {
                 datasetService.createDataset(
                         agentId,
                         name,
-                        seed.path("description").asText(null),
+                        seed.path("description").asString(null),
                         seed.path("passThreshold").asDouble(0.7),
                         seed.path("toolExecutionEnabled").asBoolean(true));
         int position = 0;
@@ -68,8 +68,8 @@ public class ResearchSeedService {
                     datasetService.addCase(
                             agentId,
                             dataset.getId(),
-                            task.path("question").asText(),
-                            task.path("answer").asText(null),
+                            task.path("question").asString(),
+                            task.path("answer").asString(null),
                             null,
                             position++);
             datasetService.setCaseGrader(

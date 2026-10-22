@@ -14,9 +14,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The two halves of the human-input node:
@@ -278,9 +278,9 @@ public class WorkflowInputRequestService {
                     if (required
                             && key != null
                             && (values == null
-                                    || values.get(key.asText()) == null
-                                    || values.get(key.asText()).toString().isBlank())) {
-                        missing.add(key.asText());
+                                    || values.get(key.asString()) == null
+                                    || values.get(key.asString()).toString().isBlank())) {
+                        missing.add(key.asString());
                     }
                 }
             }

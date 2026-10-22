@@ -1,15 +1,15 @@
 package com.agenticai.core.guardrails.toolargs;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A validated, immutable set of per-tool argument policies for ONE agent.
@@ -96,7 +96,7 @@ public final class ToolArgPolicySet {
         }
         try {
             return parse(MAPPER.readTree(json));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("The policy document is not valid JSON.");
         }
     }
@@ -110,7 +110,7 @@ public final class ToolArgPolicySet {
             throw new IllegalArgumentException(
                     "The policy document must be a JSON object with a 'policies' array.");
         }
-        for (Iterator<String> it = root.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = root.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!key.equals("policies")) {
                 throw new IllegalArgumentException(
@@ -146,7 +146,7 @@ public final class ToolArgPolicySet {
         if (!p.isObject()) {
             throw new IllegalArgumentException(where + "must be a JSON object.");
         }
-        for (Iterator<String> it = p.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = p.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!POLICY_KEYS.contains(key)) {
                 throw new IllegalArgumentException(
@@ -157,10 +157,10 @@ public final class ToolArgPolicySet {
             }
         }
         JsonNode toolNode = p.get("tool");
-        if (toolNode == null || !toolNode.isTextual() || toolNode.asText().isBlank()) {
+        if (toolNode == null || !toolNode.isString() || toolNode.asString().isBlank()) {
             throw new IllegalArgumentException(where + "'tool' must be a tool name or glob.");
         }
-        String tool = toolNode.asText().trim();
+        String tool = toolNode.asString().trim();
         if (tool.length() > MAX_TOOL_PATTERN_LENGTH) {
             throw new IllegalArgumentException(
                     where + "'tool' is limited to " + MAX_TOOL_PATTERN_LENGTH + " characters.");

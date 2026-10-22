@@ -8,11 +8,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.NoopApiKey;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Sarvam AI's {@code sarvam-105b}/ {@code sarvam-105b} chat models are reached the same
@@ -153,10 +150,11 @@ public class SarvamAgentChatClientFactory implements AgentChatClientFactory {
             double topP,
             java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(API_SUBSCRIPTION_KEY_HEADER, apiKey);
+        java.util.Map<String, String> headers =
+                java.util.Map.of(API_SUBSCRIPTION_KEY_HEADER, apiKey);
 
-        OpenAiApi openAiApi = modelBuilder.api(BASE_URL).noApiKey().headers(headers).build();
+        OpenAiCompatModelBuilder.Api openAiApi =
+                modelBuilder.api(BASE_URL).noApiKey().headers(headers);
 
         OpenAiChatOptions.Builder optionsBuilder =
                 modelBuilder
@@ -175,7 +173,7 @@ public class SarvamAgentChatClientFactory implements AgentChatClientFactory {
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

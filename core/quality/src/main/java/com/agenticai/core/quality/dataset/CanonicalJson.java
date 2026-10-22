@@ -1,11 +1,10 @@
 package com.agenticai.core.quality.dataset;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Canonical JSON (object keys sorted at every level, no insignificant whitespace, UTF-8) plus
@@ -16,10 +15,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class CanonicalJson {
 
-    private static final ObjectMapper MAPPER =
-            JsonMappers.plain()
-                    .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
-                    .configure(SerializationFeature.INDENT_OUTPUT, false);
+    private static final ObjectMapper MAPPER = JsonMappers.sortedMapKeys();
 
     private CanonicalJson() {}
 

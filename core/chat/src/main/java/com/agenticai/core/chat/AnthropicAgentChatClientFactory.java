@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Locale;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
-import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -128,7 +127,7 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
             Integer thinkingBudget) {
         var optionsBuilder = AnthropicChatOptions.builder().model(model).maxTokens(maxTokens);
         if (thinkingBudget != null) {
-            optionsBuilder.thinking(AnthropicApi.ThinkingType.ENABLED, thinkingBudget);
+            optionsBuilder.thinkingEnabled(thinkingBudget);
             if (!sampling.stopSequences().isEmpty()) {
                 optionsBuilder.stopSequences(sampling.stopSequences());
             }
@@ -167,7 +166,6 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
             double topP,
             java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        AnthropicApi anthropicApi = modelBuilder.api(apiKey);
 
         // Anthropic's Messages API rejects a request that sets BOTH
         // temperature and top_p ("`temperature` and `top_p` cannot both be
@@ -197,16 +195,21 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
         cachingStrategy.apply(optionsBuilder, new ProviderCachingContext(apiKey, model));
         AnthropicChatOptions options = optionsBuilder.build();
 
-        AnthropicChatModel baseModel = modelBuilder.chatModel(anthropicApi, options);
+        AnthropicChatModel baseModel = modelBuilder.chatModel(apiKey, options);
         org.springframework.ai.chat.model.ChatModel chatModel = baseModel;
         if (thinkingBudget != null) {
-            // Thinking on: guard against the 1.1.7 defects (reply = reasoning text, thinking not
-            // replayed in tool loops). Tool-carrying requests go to a thinking-off sibling model.
+            // Thinking on: Spring AI 2 still emits the reasoning as the FIRST generation (so the
+            // reply would
+            // read as reasoning text) and the tool-loop replay of thinking blocks is not proven
+            // against the
+            // live API here. Strip thinking generations, and send tool-carrying requests to a
+            // thinking-off
+            // sibling model (see AnthropicThinkingChatModel).
             var plainBuilder = samplingBuilder(model, maxTokens, temperature, topP, sampling, null);
             cachingStrategy.apply(plainBuilder, new ProviderCachingContext(apiKey, model));
             chatModel =
                     new AnthropicThinkingChatModel(
-                            baseModel, modelBuilder.chatModel(anthropicApi, plainBuilder.build()));
+                            baseModel, modelBuilder.chatModel(apiKey, plainBuilder.build()));
         }
         // Native structured output by forced tool use: only when the caller asked for a schema AND
         // app.llm.structured-output.anthropic-tool-forcing.enabled is on; with thinking on it is
@@ -219,7 +222,7 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
         // so it's constructed fresh here; the DefaultAgentAdvisor beans are
         // shared singletons appended after it (order 0 vs 100+, see each).
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

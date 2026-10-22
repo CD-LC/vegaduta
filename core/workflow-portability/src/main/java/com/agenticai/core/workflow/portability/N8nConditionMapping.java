@@ -3,12 +3,12 @@ package com.agenticai.core.workflow.portability;
 import com.agenticai.core.agents.importer.AgentImportJson;
 import com.agenticai.core.agents.importer.AgentImportText;
 import com.agenticai.core.workflow.portability.N8nImportModel.NodeCtx;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Rewrites an n8n IF node's comparisons as one VegaDuta Condition expression. Part of {@link
@@ -162,9 +162,9 @@ final class N8nConditionMapping {
             return value.asBoolean() ? "true" : "false";
         }
         if (value.isNumber()) {
-            return value.asText();
+            return value.asString();
         }
-        String raw = value.asText();
+        String raw = value.asString();
         if (raw.startsWith("=")) {
             c.expression = true;
             Matcher whole = WHOLE_EXPRESSION.matcher(raw.substring(1).strip());

@@ -4,13 +4,13 @@ import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code run_in_code_workspace} - runs a shell command inside an EXISTING code-intel scratch

@@ -3,7 +3,6 @@ package com.agenticai.core.google.agenttools;
 import com.agenticai.core.agentspi.GeneratedVideoReader;
 import com.agenticai.core.google.GoogleApiException;
 import com.agenticai.core.google.YouTubeUploadClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Publishes a completed {@code generate_video} job (see {@code GenerateVideoToolCallback}) to the

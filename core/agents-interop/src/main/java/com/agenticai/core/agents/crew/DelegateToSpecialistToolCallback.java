@@ -3,13 +3,13 @@ package com.agenticai.core.agents.crew;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "Crew"-style chat-time handoff tool - the capability-based sibling of {@code

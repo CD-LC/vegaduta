@@ -26,9 +26,6 @@ import com.agenticai.core.workflow.WorkflowValidationException;
 import com.agenticai.core.workflow.dto.RefGraphResponse;
 import com.agenticai.core.workflow.dto.RefHint;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -38,6 +35,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Prompt to Brief. One SKELETON call decides WHAT to build (agents, workflows, secrets, MCP needs,

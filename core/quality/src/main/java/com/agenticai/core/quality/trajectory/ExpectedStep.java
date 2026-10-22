@@ -1,10 +1,10 @@
 package com.agenticai.core.quality.trajectory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * One step of an expected trajectory: a tool name and, optionally, matchers for some of its

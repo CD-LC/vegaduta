@@ -15,7 +15,6 @@ import com.agenticai.core.agents.turn.AgentLabCompletionService.LabCompletionReq
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
@@ -41,6 +40,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The skill-learning loop: after a successful multi-step turn, one reflective model call (on the
@@ -438,7 +438,7 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
             }
             try {
                 JsonNode in = JsonMappers.plain().readTree(c.getToolInput());
-                String name = in.path("name").asText("").trim();
+                String name = in.path("name").asString("").trim();
                 if (!name.isEmpty()) {
                     names.add(name);
                 }

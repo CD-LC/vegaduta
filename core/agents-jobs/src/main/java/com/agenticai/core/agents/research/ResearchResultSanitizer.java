@@ -1,13 +1,13 @@
 package com.agenticai.core.agents.research;
 
 import com.agenticai.core.agents.tools.web.DeepResearchSession;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Cleans a research run's structured result before it is shown. The model writes the {@code
@@ -59,7 +59,7 @@ public final class ResearchResultSanitizer {
         }
         ArrayNode kept = ((ObjectNode) result).arrayNode();
         for (JsonNode source : sources) {
-            String url = source.path("url").asText(null);
+            String url = source.path("url").asString(null);
             if (!isWebUrl(url)) {
                 continue;
             }

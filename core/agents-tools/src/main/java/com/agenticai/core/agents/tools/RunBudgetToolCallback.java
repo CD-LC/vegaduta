@@ -2,11 +2,11 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.agents.collab.RunBudget;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Gates a delegation tool on the turn's shared {@link RunBudget}: once the cap is hit the tool is

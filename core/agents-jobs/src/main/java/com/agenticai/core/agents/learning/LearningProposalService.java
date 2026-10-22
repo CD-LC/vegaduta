@@ -4,8 +4,6 @@ import com.agenticai.core.agents.skills.learning.SkillDraftScrubber;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -32,6 +30,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The generic store behind every "the assistant learns" loop. A loop only files a proposal here;
@@ -378,9 +378,8 @@ public class LearningProposalService {
     }
 
     private JsonNode scrubNode(JsonNode node) {
-        if (node.isTextual()) {
-            return com.fasterxml.jackson.databind.node.TextNode.valueOf(
-                    scrubber.scrub(node.asText()));
+        if (node.isString()) {
+            return tools.jackson.databind.node.TextNode.valueOf(scrubber.scrub(node.asString()));
         }
         if (node.isObject()) {
             var out = JsonMappers.plain().createObjectNode();
@@ -399,7 +398,7 @@ public class LearningProposalService {
         try {
             String s = JsonMappers.plain().writeValueAsString(node);
             return s.length() > MAX_JSON_CHARS ? null : s;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

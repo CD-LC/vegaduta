@@ -1,9 +1,6 @@
 package com.agenticai.core.mcpserver;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +11,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Keeps a Java exception from reaching an MCP client (B11). The MCP transport answers some client
@@ -157,10 +157,10 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
     }
 
     private static String safeMessage(JsonNode message) {
-        if (!message.isTextual()) {
+        if (!message.isString()) {
             return "Bad request";
         }
-        String text = message.asText().strip();
+        String text = message.asString().strip();
         if (text.isEmpty()
                 || text.length() > 200
                 || QUALIFIED_CLASS.matcher(text).find()

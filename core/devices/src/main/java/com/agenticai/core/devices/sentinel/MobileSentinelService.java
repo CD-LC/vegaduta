@@ -4,9 +4,6 @@ import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Duration;
 import java.time.Instant;
@@ -37,6 +34,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Mobile Sentinels backend - see the Mobile Sentinels design (opt-in sync, privacy-first defaults;
@@ -722,7 +722,7 @@ public class MobileSentinelService {
         return node != null
                 && !node.isNull()
                 && !node.isMissingNode()
-                && !(node.isContainerNode() && node.isEmpty());
+                && !(node.isContainer() && node.isEmpty());
     }
 
     /** Readings whose {@code kind} is outside the allowed set never get stored. */
@@ -732,7 +732,7 @@ public class MobileSentinelService {
             return out;
         }
         for (JsonNode r : readings) {
-            SentinelKind kind = r == null ? null : parseKind(r.path("kind").asText(null));
+            SentinelKind kind = r == null ? null : parseKind(r.path("kind").asString(null));
             if (kind != null && allowed.contains(kind)) {
                 out.add(r);
             }

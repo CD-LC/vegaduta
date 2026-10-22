@@ -4,13 +4,13 @@ import com.agenticai.core.imagegen.VideoGenerationJob;
 import com.agenticai.core.imagegen.VideoGenerationJobService;
 import com.agenticai.core.imagegen.VideoGenerationJobStatus;
 import com.agenticai.core.imagegen.VideoGenerationQuotaExceededException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link VideoGenerationJobService} as a native Spring AI tool - the video counterpart of

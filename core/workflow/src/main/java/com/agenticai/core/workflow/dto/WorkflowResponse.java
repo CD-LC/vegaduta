@@ -5,11 +5,11 @@ import com.agenticai.core.agents.core.TuningMode;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 public record WorkflowResponse(
         UUID id,

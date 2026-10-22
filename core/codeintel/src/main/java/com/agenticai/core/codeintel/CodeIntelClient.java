@@ -2,7 +2,6 @@ package com.agenticai.core.codeintel;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Thin server-to-server client over the code-intel microservice. Same shape and posture as {@code

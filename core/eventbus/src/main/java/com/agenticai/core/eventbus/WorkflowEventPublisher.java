@@ -3,8 +3,6 @@ package com.agenticai.core.eventbus;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -14,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Interactive Workflow Designer PRD, Phase 0 / Section 9 - the single entry point any part of this
@@ -140,7 +140,7 @@ public class WorkflowEventPublisher {
                     eventType,
                     runId,
                     tenantId);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // A serialization failure here means a caller passed a payload
             // Jackson can't handle - fail loudly in logs but never let this
             // take down the actual business flow that called us (e.g. an
@@ -232,7 +232,7 @@ public class WorkflowEventPublisher {
                     eventType,
                     runId,
                     effectiveTenant);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // A serialization failure here means a caller passed a payload
             // Jackson can't handle - fail loudly in logs but never let this
             // take down the actual business flow that called us (e.g. an

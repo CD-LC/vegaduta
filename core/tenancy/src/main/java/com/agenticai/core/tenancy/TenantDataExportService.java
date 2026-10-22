@@ -4,8 +4,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,6 +18,8 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Master Roadmap 2026 item #22 (GDPR/data-residency basics, §G) - {@code POST
@@ -153,7 +153,7 @@ public class TenantDataExportService {
         byte[] json;
         try {
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(export);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Could not serialize the data export for tenant '" + tenant.getName() + "'", e);
         }

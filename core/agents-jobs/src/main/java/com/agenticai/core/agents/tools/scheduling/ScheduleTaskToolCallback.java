@@ -9,9 +9,6 @@ import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
@@ -20,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@code schedule_task} - turn "every weekday at 8am summarise my unread email and send me the top
@@ -176,7 +176,7 @@ public class ScheduleTaskToolCallback implements ToolCallback, ToolConfirmationD
         if (node == null || node.isNull()) {
             return null;
         }
-        String value = node.asText();
+        String value = node.asString();
         return value == null || value.isBlank() ? null : value.trim();
     }
 }

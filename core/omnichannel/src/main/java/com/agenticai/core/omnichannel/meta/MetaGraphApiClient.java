@@ -5,8 +5,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.WhatsAppDeliveryRejectedException;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -22,6 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The Meta Graph API calls this platform needs for WhatsApp Cloud API sending, plus (as of Embedded
@@ -106,8 +106,8 @@ public class MetaGraphApiClient {
             }
             JsonNode node = objectMapper.readTree(response.body());
             return new PhoneNumberInfo(
-                    node.path("display_phone_number").asText(null),
-                    node.path("verified_name").asText(null));
+                    node.path("display_phone_number").asString(null),
+                    node.path("verified_name").asString(null));
         } catch (ChannelConfigurationException e) {
             throw e;
         } catch (Exception e) {
@@ -119,7 +119,7 @@ public class MetaGraphApiClient {
     /** Meta's {@code error.code} from a failed response body, or 0 when absent or unparseable. */
     static int metaErrorCode(String body) {
         try {
-            return new com.fasterxml.jackson.databind.ObjectMapper()
+            return new tools.jackson.databind.ObjectMapper()
                     .readTree(body)
                     .path("error")
                     .path("code")
@@ -159,7 +159,7 @@ public class MetaGraphApiClient {
             }
             JsonNode node = objectMapper.readTree(response.body());
             return new PhoneNumberHealth(
-                    node.path("quality_rating").asText(null), node.path("status").asText(null));
+                    node.path("quality_rating").asString(null), node.path("status").asString(null));
         } catch (ChannelConfigurationException e) {
             throw e;
         } catch (Exception e) {
@@ -223,7 +223,7 @@ public class MetaGraphApiClient {
             try {
                 JsonNode messages = objectMapper.readTree(response.body()).path("messages");
                 if (messages.isArray() && messages.size() > 0) {
-                    messageId = messages.get(0).path("id").asText("unknown");
+                    messageId = messages.get(0).path("id").asString("unknown");
                 }
             } catch (Exception ignored) {
                 // Leave messageId as "unknown" - see comment above.
@@ -297,7 +297,7 @@ public class MetaGraphApiClient {
             try {
                 JsonNode messages = objectMapper.readTree(response.body()).path("messages");
                 if (messages.isArray() && messages.size() > 0) {
-                    messageId = messages.get(0).path("id").asText("unknown");
+                    messageId = messages.get(0).path("id").asString("unknown");
                 }
             } catch (Exception ignored) {
                 // Leave messageId as "unknown".
@@ -422,10 +422,10 @@ public class MetaGraphApiClient {
     /** The {@code after} cursor of a paged response, or null when this was the last page. */
     static String nextTemplateCursor(JsonNode root) {
         JsonNode paging = root == null ? null : root.path("paging");
-        if (paging == null || paging.path("next").asText("").isBlank()) {
+        if (paging == null || paging.path("next").asString("").isBlank()) {
             return null;
         }
-        String after = paging.path("cursors").path("after").asText("");
+        String after = paging.path("cursors").path("after").asString("");
         return after.isBlank() ? null : after;
     }
 
@@ -438,22 +438,22 @@ public class MetaGraphApiClient {
      * button that needs a parameter, no carousel or limited-time-offer component.
      */
     static boolean sendableWithBodyParamsOnly(JsonNode entry) {
-        if ("NAMED".equalsIgnoreCase(entry.path("parameter_format").asText(""))) {
+        if ("NAMED".equalsIgnoreCase(entry.path("parameter_format").asString(""))) {
             return false;
         }
         for (JsonNode component : entry.path("components")) {
-            String type = component.path("type").asText("").toUpperCase(java.util.Locale.ROOT);
+            String type = component.path("type").asString("").toUpperCase(java.util.Locale.ROOT);
             switch (type) {
                 case "HEADER" -> {
-                    String format = component.path("format").asText("TEXT");
+                    String format = component.path("format").asString("TEXT");
                     if (!"TEXT".equalsIgnoreCase(format)
-                            || component.path("text").asText("").contains("{{")) {
+                            || component.path("text").asString("").contains("{{")) {
                         return false;
                     }
                 }
                 case "BODY" -> {
                     Matcher matcher =
-                            TEMPLATE_PLACEHOLDER.matcher(component.path("text").asText(""));
+                            TEMPLATE_PLACEHOLDER.matcher(component.path("text").asString(""));
                     while (matcher.find()) {
                         if (!matcher.group(1).chars().allMatch(Character::isDigit)) {
                             return false;
@@ -463,9 +463,9 @@ public class MetaGraphApiClient {
                 case "BUTTONS" -> {
                     for (JsonNode button : component.path("buttons")) {
                         String buttonType =
-                                button.path("type").asText("").toUpperCase(java.util.Locale.ROOT);
+                                button.path("type").asString("").toUpperCase(java.util.Locale.ROOT);
                         if (UNSENDABLE_BUTTON_TYPES.contains(buttonType)
-                                || button.path("url").asText("").contains("{{")) {
+                                || button.path("url").asString("").contains("{{")) {
                             return false;
                         }
                     }
@@ -497,18 +497,18 @@ public class MetaGraphApiClient {
             return out;
         }
         for (JsonNode entry : data) {
-            String name = entry.path("name").asText("");
-            String language = entry.path("language").asText("");
+            String name = entry.path("name").asString("");
+            String language = entry.path("language").asString("");
             if (name.isBlank()
                     || language.isBlank()
-                    || !"APPROVED".equalsIgnoreCase(entry.path("status").asText(""))
+                    || !"APPROVED".equalsIgnoreCase(entry.path("status").asString(""))
                     || !sendableWithBodyParamsOnly(entry)) {
                 continue;
             }
             String body = "";
             for (JsonNode component : entry.path("components")) {
-                if ("BODY".equalsIgnoreCase(component.path("type").asText(""))) {
-                    body = component.path("text").asText("");
+                if ("BODY".equalsIgnoreCase(component.path("type").asString(""))) {
+                    body = component.path("text").asString("");
                 }
             }
             Set<String> placeholders = new LinkedHashSet<>();
@@ -520,7 +520,7 @@ public class MetaGraphApiClient {
                     new MessageTemplate(
                             name,
                             language,
-                            entry.path("category").asText(null),
+                            entry.path("category").asString(null),
                             body,
                             placeholders.size()));
         }
@@ -586,7 +586,7 @@ public class MetaGraphApiClient {
                                 + response.body());
             }
             JsonNode node = objectMapper.readTree(response.body());
-            String accessToken = node.path("access_token").asText(null);
+            String accessToken = node.path("access_token").asString(null);
             if (accessToken == null) {
                 throw new ChannelConfigurationException(
                         "whatsapp",
@@ -685,7 +685,7 @@ public class MetaGraphApiClient {
                                 + response.body());
             }
             JsonNode node = objectMapper.readTree(response.body());
-            return new PageInfo(node.path("name").asText(null));
+            return new PageInfo(node.path("name").asString(null));
         } catch (ChannelConfigurationException e) {
             throw e;
         } catch (Exception e) {
@@ -720,7 +720,7 @@ public class MetaGraphApiClient {
             if (response.statusCode() >= 300) {
                 return null;
             }
-            return objectMapper.readTree(response.body()).path("username").asText(null);
+            return objectMapper.readTree(response.body()).path("username").asString(null);
         } catch (Exception e) {
             return null;
         }

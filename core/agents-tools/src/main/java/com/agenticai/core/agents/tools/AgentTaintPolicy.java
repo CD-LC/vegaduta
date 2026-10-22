@@ -12,8 +12,6 @@ import com.agenticai.core.guardrails.taint.ToolTaintProfile;
 import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.net.URI;
 import java.util.Collections;
@@ -29,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wires the untrusted-content taint layer ({@code app.agents.taint.mode}, see {@link TaintMode})
@@ -197,12 +197,12 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         }
         try {
             JsonNode args = JSON.readTree(toolInput);
-            String method = args.path("method").asText("GET").trim().toUpperCase(Locale.ROOT);
+            String method = args.path("method").asString("GET").trim().toUpperCase(Locale.ROOT);
             if (!method.isEmpty() && !READ_METHODS.contains(method)) {
                 return new ToolTaintProfile(
                         base.producesTaint(), true, base.label() + "+" + method);
             }
-            if (!getAllowHosts.isEmpty() && !hostAllowed(args.path("url").asText(""))) {
+            if (!getAllowHosts.isEmpty() && !hostAllowed(args.path("url").asString(""))) {
                 return new ToolTaintProfile(
                         base.producesTaint(), true, base.label() + "+host_not_allowlisted");
             }

@@ -2,7 +2,6 @@ package com.agenticai.core.agents.openai;
 
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.Instant;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Open Responses / OpenAI Responses compatible {@code POST /v1/responses}: the same real agent turn

@@ -1,6 +1,5 @@
 package com.agenticai.core.guardrails.toolargs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * One constraint on one argument of a tool call (JSON-schema-lite). Immutable; built and validated
@@ -213,7 +213,7 @@ public final class ToolArgRule {
         if (node == null || !node.isObject()) {
             throw new IllegalArgumentException("Each rule must be a JSON object.");
         }
-        for (Iterator<String> it = node.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = node.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!KNOWN_KEYS.contains(key)) {
                 throw new IllegalArgumentException(
@@ -225,20 +225,20 @@ public final class ToolArgRule {
             }
         }
         JsonNode pathNode = node.get("path");
-        if (pathNode == null || !pathNode.isTextual()) {
+        if (pathNode == null || !pathNode.isString()) {
             throw new IllegalArgumentException("Each rule needs a text 'path'.");
         }
-        ToolArgPathSpec path = ToolArgPathSpec.parse(pathNode.asText());
+        ToolArgPathSpec path = ToolArgPathSpec.parse(pathNode.asString());
         String where = "Rule for '" + path.text() + "': ";
 
         boolean required = optionalBoolean(node, "required", where);
         boolean forbidden = optionalBoolean(node, "forbidden", where);
         ArgType type = null;
         if (node.has("type")) {
-            if (!node.get("type").isTextual()) {
+            if (!node.get("type").isString()) {
                 throw new IllegalArgumentException(where + "'type' must be text.");
             }
-            type = ArgType.parse(node.get("type").asText());
+            type = ArgType.parse(node.get("type").asString());
         }
 
         List<JsonNode> enumValues = null;
@@ -256,11 +256,11 @@ public final class ToolArgRule {
             }
             enumValues = new ArrayList<>();
             for (JsonNode v : e) {
-                if (!(v.isTextual() || v.isNumber() || v.isBoolean())) {
+                if (!(v.isString() || v.isNumber() || v.isBoolean())) {
                     throw new IllegalArgumentException(
                             where + "'enum' values must be strings, numbers or booleans.");
                 }
-                if (v.isTextual() && v.asText().length() > ToolArgPolicySet.MAX_LITERAL_LENGTH) {
+                if (v.isString() && v.asString().length() > ToolArgPolicySet.MAX_LITERAL_LENGTH) {
                     throw new IllegalArgumentException(
                             where
                                     + "an 'enum' value is longer than "
@@ -287,10 +287,10 @@ public final class ToolArgRule {
         Pattern pattern = null;
         if (node.has("pattern")) {
             JsonNode p = node.get("pattern");
-            if (!p.isTextual() || p.asText().isEmpty()) {
+            if (!p.isString() || p.asString().isEmpty()) {
                 throw new IllegalArgumentException(where + "'pattern' must be non-empty text.");
             }
-            if (p.asText().length() > ToolArgPolicySet.MAX_PATTERN_LENGTH) {
+            if (p.asString().length() > ToolArgPolicySet.MAX_PATTERN_LENGTH) {
                 throw new IllegalArgumentException(
                         where
                                 + "'pattern' is limited to "
@@ -298,7 +298,7 @@ public final class ToolArgRule {
                                 + " characters.");
             }
             try {
-                pattern = Pattern.compile(p.asText());
+                pattern = Pattern.compile(p.asString());
             } catch (PatternSyntaxException ex) {
                 throw new IllegalArgumentException(
                         where
@@ -442,11 +442,11 @@ public final class ToolArgRule {
         }
         List<String> out = new ArrayList<>();
         for (JsonNode v : a) {
-            if (!v.isTextual() || v.asText().isBlank()) {
+            if (!v.isString() || v.asString().isBlank()) {
                 throw new IllegalArgumentException(
                         where + "'" + key + "' entries must be non-empty text.");
             }
-            if (v.asText().length() > ToolArgPolicySet.MAX_LITERAL_LENGTH) {
+            if (v.asString().length() > ToolArgPolicySet.MAX_LITERAL_LENGTH) {
                 throw new IllegalArgumentException(
                         where
                                 + "a '"
@@ -455,7 +455,7 @@ public final class ToolArgRule {
                                 + ToolArgPolicySet.MAX_LITERAL_LENGTH
                                 + " characters.");
             }
-            out.add(v.asText());
+            out.add(v.asString());
         }
         return out;
     }

@@ -4,11 +4,11 @@ import com.agenticai.core.agents.skills.SkillDefinition;
 import com.agenticai.core.agents.skills.SkillService;
 import com.agenticai.core.agents.skills.SkillValidationException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Self-improvement: after working out how to do a task well, the agent can write the method down as
@@ -68,9 +68,9 @@ public class ProposeSkillToolCallback implements ToolCallback {
         try {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            name = args.path("name").asText("").trim();
-            description = args.path("description").asText("").trim();
-            instructions = args.path("instructions").asText("").trim();
+            name = args.path("name").asString("").trim();
+            description = args.path("description").asString("").trim();
+            instructions = args.path("instructions").asString("").trim();
         } catch (Exception e) {
             return "Could not save the skill: the tool input was not valid JSON.";
         }

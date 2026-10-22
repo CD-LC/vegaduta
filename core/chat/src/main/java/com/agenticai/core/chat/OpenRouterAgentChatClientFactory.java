@@ -5,14 +5,13 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
  * "implement openrouter, grok and gemini so that consumers can use them" - OpenRouter
  * (openrouter.ai) is a routing gateway in front of dozens of models from many labs, but its own API
  * is OpenAI-chat-completions- compatible, so this reuses Spring AI's {@code
- * spring-ai-starter-model-openai} module ({@link OpenAiApi}/{@link OpenAiChatModel}) rather than a
+ * spring-ai-starter-model-openai} module ({@code OpenAiApi}/{@link OpenAiChatModel}) rather than a
  * dedicated starter (none exists) - only {@code baseUrl} differs from a real OpenAI call. Same
  * "fresh client per call, BYOK, no static application.yml key" shape as {@link
  * AnthropicAgentChatClientFactory} - see that class's javadoc for the reasoning this mirrors,
@@ -99,7 +98,7 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
             double topP,
             java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        OpenAiApi openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey).build();
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey);
 
         var optionsBuilder = modelBuilder.options(ProviderName.OPENROUTER, model);
         // "openai/gpt-5*" / "openai/o*" ids are OpenAI reasoning models behind
@@ -117,7 +116,7 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

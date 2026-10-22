@@ -2,15 +2,15 @@ package com.agenticai.core.approval;
 
 import com.agenticai.core.rl.feedback.FeedbackService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The single entry point every action that might need human sign-off goes through. Nothing in this
@@ -139,11 +139,11 @@ public class HumanApprovalGateService {
                     || !payload.path("resume").isObject()) {
                 return null;
             }
-            com.fasterxml.jackson.databind.node.ObjectNode values =
-                    ((com.fasterxml.jackson.databind.node.ObjectNode) payload.path("resume"))
+            tools.jackson.databind.node.ObjectNode values =
+                    ((tools.jackson.databind.node.ObjectNode) payload.path("resume"))
                             .putObject("formValues");
             for (JsonNode field : payload.path("formFields")) {
-                String name = field.asText("");
+                String name = field.asString("");
                 String value = formValues.get(name);
                 if (!name.isBlank() && value != null && !value.isBlank()) {
                     String trimmed = value.trim();
@@ -239,7 +239,7 @@ public class HumanApprovalGateService {
             JsonNode payload = objectMapper.readTree(payloadJson);
             return payload.path("runId").isMissingNode()
                     ? null
-                    : payload.path("runId").asText(null);
+                    : payload.path("runId").asString(null);
         } catch (Exception e) {
             return null;
         }

@@ -1,8 +1,8 @@
 package com.agenticai.core.brief.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * {@code GET /api/briefs/{id}/ledger} and the rehearsal / experiment shapes (contract section 2).

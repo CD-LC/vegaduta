@@ -1,8 +1,8 @@
 package com.agenticai.core.workflow;
 
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /** Maps a structured agent output to the single string that flows to the next node. */
 @Component

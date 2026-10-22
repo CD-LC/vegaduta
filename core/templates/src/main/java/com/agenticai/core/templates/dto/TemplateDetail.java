@@ -1,10 +1,10 @@
 package com.agenticai.core.templates.dto;
 
 import com.agenticai.core.templates.TemplateKind;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Public detail of ONE approved template: the summary fields plus the sanitised {@code config}

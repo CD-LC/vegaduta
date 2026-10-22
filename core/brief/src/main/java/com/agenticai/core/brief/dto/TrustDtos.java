@@ -1,7 +1,7 @@
 package com.agenticai.core.brief.dto;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.util.List;
+import tools.jackson.databind.node.ArrayNode;
 
 /** Trust ladder shapes (contract sections 1 and 2). */
 public final class TrustDtos {

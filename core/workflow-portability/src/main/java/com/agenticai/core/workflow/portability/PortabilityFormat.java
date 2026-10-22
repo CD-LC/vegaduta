@@ -1,9 +1,9 @@
 package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.agents.importer.AgentImportJson;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Locale;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The workflow file formats this feature reads. {@link #wire()} is the value the API and the web

@@ -1,10 +1,6 @@
 package com.agenticai.core.agents.tools.browseruse;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +9,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Pure helpers for a browser profile's Playwright {@code storageState} JSON ({@code
@@ -217,8 +217,8 @@ final class BrowserStorageState {
             for (JsonNode cookie : inCookies) {
                 JsonNode domain = cookie.get("domain");
                 if (domain != null
-                        && domain.isTextual()
-                        && cookieDomainInScope(domain.asText(), allowedDomains)) {
+                        && domain.isString()
+                        && cookieDomainInScope(domain.asString(), allowedDomains)) {
                     cookies.add(cookie);
                 }
             }
@@ -229,8 +229,8 @@ final class BrowserStorageState {
             for (JsonNode origin : inOrigins) {
                 JsonNode originUrl = origin.get("origin");
                 if (originUrl != null
-                        && originUrl.isTextual()
-                        && hostAllowed(httpHostOf(originUrl.asText()), allowedDomains)) {
+                        && originUrl.isString()
+                        && hostAllowed(httpHostOf(originUrl.asString()), allowedDomains)) {
                     origins.add(origin);
                 }
             }

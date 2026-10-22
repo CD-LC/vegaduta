@@ -9,8 +9,6 @@ import com.agenticai.core.knowledge.KnowledgeDocumentRepository;
 import com.agenticai.core.knowledge.KnowledgeDocumentService;
 import com.agenticai.core.knowledge.KnowledgeDocumentStatus;
 import com.agenticai.core.knowledge.KnowledgeIngestionService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Live-connector sync service (P2 product-completeness: "no Notion/Drive/

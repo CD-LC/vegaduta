@@ -10,9 +10,6 @@ import com.agenticai.core.workflow.expression.EvalContext;
 import com.agenticai.core.workflow.expression.ExpressionEngine;
 import com.agenticai.core.workflow.expression.ExpressionException;
 import com.agenticai.core.workflow.expression.Limits;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,6 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The one place {@code {{ }}} placeholders in node config are evaluated (spec 4.2). {@link
@@ -131,7 +131,10 @@ public class WorkflowExpressionResolver {
         this.objectMapper = objectMapper;
         this.legacyTemplates = new WorkflowLegacyTemplates(objectMapper);
         this.looseMapper =
-                objectMapper.copy().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+                objectMapper
+                        .rebuild()
+                        .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                        .build();
         this.enabled = enabled;
         this.engine = new ExpressionEngine(Limits.defaults().withStrict(strict));
         warmUp();
@@ -164,11 +167,13 @@ public class WorkflowExpressionResolver {
                                     "config",
                                     Map.of(
                                             "url",
-                                                    "https://warm.invalid/{{ $json.a[0] }}/{{ upper($item) }}/{{input}}",
+                                            "https://warm.invalid/{{ $json.a[0] }}/{{ upper($item) }}/{{input}}",
                                             "headers",
-                                                    List.of(Map.of("key", "k", "value", "{{ a }}")),
-                                            "bodyType", "json",
-                                            "body", "{\"v\":{{ $json.a[0] ?? 1 }}}")));
+                                            List.of(Map.of("key", "k", "value", "{{ a }}")),
+                                            "bodyType",
+                                            "json",
+                                            "body",
+                                            "{\"v\":{{ $json.a[0] ?? 1 }}}")));
             resolve(node, "{\"a\":[1,2]}", info, scope);
             evaluateCondition("$json.a[0] > 0 && $index == 0", "{\"a\":[1,2]}", info, scope);
             recipientRenderer("{}", info, scope)

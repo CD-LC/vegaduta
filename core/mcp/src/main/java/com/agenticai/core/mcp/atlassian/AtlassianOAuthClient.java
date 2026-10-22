@@ -2,8 +2,6 @@ package com.agenticai.core.mcp.atlassian;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -14,6 +12,8 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} calls against Atlassian's remote MCP server's OAuth 2.1 endpoints - same
@@ -125,16 +125,16 @@ public class AtlassianOAuthClient {
                                 + response.body());
             }
             JsonNode node = objectMapper.readTree(response.body());
-            String clientId = node.path("client_id").asText(null);
+            String clientId = node.path("client_id").asString(null);
             if (clientId == null) {
                 throw new AtlassianApiException(
                         "Atlassian's registration response had no client_id: " + response.body());
             }
-            String clientSecret = node.path("client_secret").asText(null);
+            String clientSecret = node.path("client_secret").asString(null);
             // The server's actual grant is authoritative, not what was requested - see class
             // javadoc.
             String grantedAuthMethod =
-                    node.path("token_endpoint_auth_method").asText(REQUESTED_AUTH_METHOD);
+                    node.path("token_endpoint_auth_method").asString(REQUESTED_AUTH_METHOD);
             return new DynamicClientRegistration(clientId, clientSecret, grantedAuthMethod);
         } catch (AtlassianApiException e) {
             throw e;
@@ -257,7 +257,7 @@ public class AtlassianOAuthClient {
                 String oauthErrorCode = null;
                 try {
                     oauthErrorCode =
-                            objectMapper.readTree(response.body()).path("error").asText(null);
+                            objectMapper.readTree(response.body()).path("error").asString(null);
                 } catch (Exception ignored) {
                     // Non-JSON or unexpected error body - leave oauthErrorCode null.
                 }
@@ -267,16 +267,16 @@ public class AtlassianOAuthClient {
                         oauthErrorCode);
             }
             JsonNode node = objectMapper.readTree(response.body());
-            String accessToken = node.path("access_token").asText(null);
+            String accessToken = node.path("access_token").asString(null);
             if (accessToken == null) {
                 throw new AtlassianApiException(
                         "Atlassian's token response had no access_token: " + response.body());
             }
             return new TokenResponse(
                     accessToken,
-                    node.path("refresh_token").asText(null),
+                    node.path("refresh_token").asString(null),
                     node.path("expires_in").asInt(3600),
-                    node.path("scope").asText(""));
+                    node.path("scope").asString(""));
         } catch (AtlassianApiException e) {
             throw e;
         } catch (Exception e) {

@@ -5,7 +5,6 @@ import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.graphmemory.MemoryWriteArbitrationService;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link AgentMemoryService#remember} as a native Spring AI tool, the same "plain

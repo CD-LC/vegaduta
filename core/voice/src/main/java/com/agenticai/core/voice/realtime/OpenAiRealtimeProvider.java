@@ -1,9 +1,6 @@
 package com.agenticai.core.voice.realtime;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
@@ -16,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * OpenAI Realtime API provider - {@code wss://api.openai.com/v1/realtime} with a bearer key, {@code
@@ -177,30 +177,30 @@ public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
             textBuf.setLength(0);
             try {
                 JsonNode root = MAPPER.readTree(frame);
-                String type = root.path("type").asText("");
+                String type = root.path("type").asString("");
                 switch (type) {
                     case "session.created", "session.updated" -> ready.countDown();
                     case "response.audio.delta" -> {
-                        String b64 = root.path("delta").asText("");
+                        String b64 = root.path("delta").asString("");
                         if (!b64.isEmpty()) {
                             listener.onAudioChunk(Base64.getDecoder().decode(b64));
                         }
                     }
                     case "response.audio_transcript.delta" -> {
-                        String delta = root.path("delta").asText("");
+                        String delta = root.path("delta").asString("");
                         if (!delta.isEmpty()) {
                             listener.onOutputTranscript(delta);
                         }
                     }
                     case "conversation.item.input_audio_transcription.completed" -> {
-                        String text = root.path("transcript").asText("");
+                        String text = root.path("transcript").asString("");
                         if (!text.isEmpty()) {
                             listener.onInputTranscript(text);
                         }
                     }
                     case "input_audio_buffer.speech_started" -> listener.onInterrupted();
                     case "error" -> {
-                        String msg = root.path("error").path("message").asText("unknown");
+                        String msg = root.path("error").path("message").asString("unknown");
                         if (ready.getCount() > 0) {
                             setupError = msg;
                             ready.countDown();

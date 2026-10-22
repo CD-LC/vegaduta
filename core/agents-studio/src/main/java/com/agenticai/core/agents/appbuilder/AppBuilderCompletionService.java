@@ -10,7 +10,6 @@ import com.agenticai.core.providers.ProviderModelCatalogService;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * App Builder generation routing fix (2026-08-06 live user report: "Failed: generate() requires:

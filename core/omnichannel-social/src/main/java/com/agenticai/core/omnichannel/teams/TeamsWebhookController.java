@@ -22,8 +22,6 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +34,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Microsoft Teams inbound webhook (migration V240, 2026-09-23) - the Bot Framework counterpart to
@@ -140,7 +140,7 @@ public class TeamsWebhookController {
             // SEC-047: the token's serviceurl claim is bound to the activity's
             // serviceUrl (and that host allowlisted) before the serviceUrl is
             // stored as a route or used to send the bot's AAD token anywhere.
-            if (!jwtValidator.isValid(bearer, appId, activity.path("serviceUrl").asText(null))) {
+            if (!jwtValidator.isValid(bearer, appId, activity.path("serviceUrl").asString(null))) {
                 log.warn(
                         "Rejected Teams inbound with invalid Bot Framework JWT for appId ***{}",
                         lastFour(appId));
@@ -149,7 +149,7 @@ public class TeamsWebhookController {
             // Bot Framework redelivers on timeout; activity.id is its own
             // stable per-delivery identifier (same dedup discipline as
             // Telegram's update_id).
-            String activityId = activity.path("id").asText(null);
+            String activityId = activity.path("id").asString(null);
             if (!dedupService.tryClaim(ChannelType.TEAMS, activityId)) {
                 log.info(
                         "Ignoring duplicate Teams activity id {} for bot ***{}",
@@ -167,13 +167,13 @@ public class TeamsWebhookController {
     }
 
     private void handleActivity(JsonNode activity) {
-        if (!"message".equals(activity.path("type").asText(null))) {
+        if (!"message".equals(activity.path("type").asString(null))) {
             return;
         }
-        String conversationId = activity.path("conversation").path("id").asText(null);
-        String serviceUrl = activity.path("serviceUrl").asText(null);
-        String fromId = activity.path("from").path("id").asText(null);
-        String text = stripMention(activity.path("text").asText(null));
+        String conversationId = activity.path("conversation").path("id").asString(null);
+        String serviceUrl = activity.path("serviceUrl").asString(null);
+        String fromId = activity.path("from").path("id").asString(null);
+        String text = stripMention(activity.path("text").asString(null));
         if (conversationId == null || serviceUrl == null || text == null || text.isBlank()) {
             return;
         }
@@ -216,8 +216,10 @@ public class TeamsWebhookController {
                         triggeredBinding.get().workflowId(),
                         triggeredBinding.get().nodeId(),
                         text,
-                        REQUESTED_BY_PREFIX + maskRecipient(conversationId),
-                        // The reply needs BOTH coordinates (see WorkflowTriggerChannel.TEAMS'
+                        REQUESTED_BY_PREFIX
+                                + maskRecipient(
+                                        conversationId), // The reply needs BOTH coordinates (see
+                        // WorkflowTriggerChannel.TEAMS'
                         // note) - "|" cannot appear in either part, so the packed
                         // form is unambiguous.
                         new InboundTriggerContext(
@@ -233,7 +235,7 @@ public class TeamsWebhookController {
 
         // Off the request thread (see AsyncInboundReply). Bot Framework expects the
         // activity POST to be acknowledged promptly; the reply is sent separately anyway.
-        String activityId = activity.path("id").asText(null);
+        String activityId = activity.path("id").asString(null);
         asyncReplies.run(
                 "Teams",
                 session.getId(),

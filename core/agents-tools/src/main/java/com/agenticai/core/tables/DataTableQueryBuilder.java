@@ -4,14 +4,14 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.tables.DataTableFilter.Condition;
 import com.agenticai.core.tables.DataTableFilter.Op;
 import com.agenticai.core.tables.DataTableFilter.Sort;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Renders a typed filter and sort into the SQL fragments {@link DataTableRowStore} appends to its
@@ -244,7 +244,7 @@ public final class DataTableQueryBuilder {
     private static String toJsonText(Object v) {
         try {
             return MAPPER.writeValueAsString(v);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("The filter value is not valid JSON");
         }
     }

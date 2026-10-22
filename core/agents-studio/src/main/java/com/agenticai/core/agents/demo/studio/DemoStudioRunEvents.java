@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.demo.studio;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.FluxSink;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The JSON side of a studio workflow run: each event as one {@code data:} line on the run's sink,
@@ -52,11 +52,10 @@ final class DemoStudioRunEvents {
             Map<String, Object> event =
                     objectMapper.readValue(
                             json,
-                            new com.fasterxml.jackson.core.type.TypeReference<
-                                    Map<String, Object>>() {});
+                            new tools.jackson.core.type.TypeReference<Map<String, Object>>() {});
             event.put("stepId", stepId);
             return objectMapper.writeValueAsString(event);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return json;
         }
     }
@@ -64,7 +63,7 @@ final class DemoStudioRunEvents {
     void emit(FluxSink<String> sink, Map<String, ?> event) {
         try {
             sink.next(objectMapper.writeValueAsString(event));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Unserialisable studio event {}", event.get("type"), e);
         }
     }
@@ -72,7 +71,7 @@ final class DemoStudioRunEvents {
     String toJson(List<Map<String, Object>> trace) {
         try {
             return objectMapper.writeValueAsString(trace);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "[]";
         }
     }

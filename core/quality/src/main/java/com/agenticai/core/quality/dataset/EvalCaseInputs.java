@@ -1,8 +1,8 @@
 package com.agenticai.core.quality.dataset;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Validation and encoding of the fields a caller writes on an {@link EvalDataset} or {@link

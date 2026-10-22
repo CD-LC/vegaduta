@@ -4,12 +4,12 @@ import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Single-node execution logic, extracted out of {@link WorkflowExecutionEngine} so it has exactly

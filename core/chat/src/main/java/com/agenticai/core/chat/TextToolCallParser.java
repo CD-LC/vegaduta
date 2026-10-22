@@ -1,9 +1,5 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +10,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Recognises a tool call that a model wrote as <em>text</em> instead of sending it through the
@@ -316,7 +316,7 @@ final class TextToolCallParser {
         JsonNode function = node.get("function");
         String name = textOfFirst(node, NAME_KEYS);
         if (name == null && function != null) {
-            name = function.isTextual() ? function.asText() : textOfFirst(function, NAME_KEYS);
+            name = function.isString() ? function.asString() : textOfFirst(function, NAME_KEYS);
         }
         if (name == null || name.isBlank()) {
             return null;
@@ -335,8 +335,8 @@ final class TextToolCallParser {
                 }
             }
             args = rest;
-        } else if (args.isTextual()) {
-            JsonNode unwrapped = readJson(args.asText(), objectMapper);
+        } else if (args.isString()) {
+            JsonNode unwrapped = readJson(args.asString(), objectMapper);
             if (unwrapped == null || !unwrapped.isObject()) {
                 return null;
             }
@@ -382,7 +382,7 @@ final class TextToolCallParser {
 
     private static String textOfFirst(JsonNode node, List<String> keys) {
         JsonNode value = firstPresent(node, keys);
-        return value != null && value.isTextual() ? value.asText() : null;
+        return value != null && value.isString() ? value.asString() : null;
     }
 
     private static JsonNode firstPresent(JsonNode node, List<String> keys) {

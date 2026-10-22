@@ -6,11 +6,6 @@ import static com.agenticai.core.agents.tools.openapi.OpenApiSchemaResolver.with
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,6 +20,11 @@ import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Turns an OpenAPI 3.x (or Swagger 2.0) document into one tool definition per operation - the pure,
@@ -210,7 +210,7 @@ public class OpenApiSpecParser {
         if (trimmed.startsWith("{")) {
             try {
                 return MAPPER.readTree(trimmed);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new OpenApiToolException(
                         "The document is not valid JSON: " + e.getOriginalMessage());
             }
@@ -270,7 +270,7 @@ public class OpenApiSpecParser {
         JsonNode schemes = root.path("schemes");
         String scheme = "https";
         if (schemes.isArray() && !schemes.isEmpty()) {
-            scheme = schemes.get(0).asText("https");
+            scheme = schemes.get(0).asString("https");
         }
         return scheme + "://" + host + (basePath == null ? "" : basePath);
     }
@@ -408,8 +408,8 @@ public class OpenApiSpecParser {
                     properties.set(prop.getKey(), prop.getValue());
                 }
                 for (JsonNode r : bodySchema.path("required")) {
-                    if (r.isTextual() && bodySchema.path("properties").has(r.asText())) {
-                        required.add(r.asText());
+                    if (r.isString() && bodySchema.path("properties").has(r.asString())) {
+                        required.add(r.asString());
                     }
                 }
             } else {
@@ -475,7 +475,7 @@ public class OpenApiSpecParser {
         if (!props.isObject() || props.isEmpty()) {
             return false;
         }
-        Iterator<String> names = props.fieldNames();
+        Iterator<String> names = props.propertyNames().iterator();
         while (names.hasNext()) {
             String name = names.next();
             if (parameterNames.contains(name) || name.equals("body")) {
@@ -492,7 +492,7 @@ public class OpenApiSpecParser {
         if (content.has("application/json")) {
             return "application/json";
         }
-        Iterator<String> names = content.fieldNames();
+        Iterator<String> names = content.propertyNames().iterator();
         String first = null;
         while (names.hasNext()) {
             String name = names.next();
@@ -513,11 +513,11 @@ public class OpenApiSpecParser {
         for (JsonNode source : new JsonNode[] {op.path("consumes"), root.path("consumes")}) {
             if (source.isArray() && !source.isEmpty()) {
                 for (JsonNode c : source) {
-                    if (c.asText("").toLowerCase(Locale.ROOT).contains("json")) {
-                        return c.asText();
+                    if (c.asString("").toLowerCase(Locale.ROOT).contains("json")) {
+                        return c.asString();
                     }
                 }
-                return source.get(0).asText();
+                return source.get(0).asString();
             }
         }
         return "application/json";
@@ -549,7 +549,7 @@ public class OpenApiSpecParser {
         if (!schema.has("type")) {
             schema.put("type", "string");
         }
-        if (schema.path("type").asText("").equals("file")) {
+        if (schema.path("type").asString("").equals("file")) {
             schema.put("type", "string");
         }
         return schema;
@@ -624,7 +624,7 @@ public class OpenApiSpecParser {
         if (v == null || v.isNull() || v.isMissingNode()) {
             return null;
         }
-        String s = v.isTextual() ? v.asText() : v.toString();
+        String s = v.isString() ? v.asString() : v.toString();
         return s.isBlank() ? null : s;
     }
 

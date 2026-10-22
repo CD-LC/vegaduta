@@ -1,10 +1,10 @@
 package com.agenticai.core.templates.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A portable, shareable agent: one JSON file that carries an agent's design and nothing else. It

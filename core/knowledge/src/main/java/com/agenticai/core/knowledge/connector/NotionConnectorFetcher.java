@@ -2,14 +2,14 @@ package com.agenticai.core.knowledge.connector;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Notion connector - syncs pages under a database or parent page into the collection as
@@ -90,7 +90,7 @@ public class NotionConnectorFetcher implements ConnectorFetcher {
                             : "{\"page_size\":100,\"start_cursor\":\"" + nextCursor + "\"}";
             JsonNode resp = post("/databases/" + databaseId + "/query", body, token);
             for (JsonNode row : resp.path("results")) {
-                String id = row.path("id").asText();
+                String id = row.path("id").asString();
                 if (id.isBlank()) {
                     continue;
                 }
@@ -102,7 +102,7 @@ public class NotionConnectorFetcher implements ConnectorFetcher {
             }
             nextCursor =
                     resp.path("has_more").asBoolean(false)
-                            ? resp.path("next_cursor").asText(null)
+                            ? resp.path("next_cursor").asString(null)
                             : null;
         } while (nextCursor != null && pageIds.size() < ConnectorHttp.MAX_DOCUMENTS_PER_SYNC);
     }
@@ -123,23 +123,23 @@ public class NotionConnectorFetcher implements ConnectorFetcher {
                     out.append(text).append("\n\n");
                 }
                 if (depth < BLOCK_DEPTH_LIMIT && block.path("has_children").asBoolean(false)) {
-                    collectBlocks(token, block.path("id").asText(), out, depth + 1);
+                    collectBlocks(token, block.path("id").asString(), out, depth + 1);
                 }
             }
             nextCursor =
                     resp.path("has_more").asBoolean(false)
-                            ? resp.path("next_cursor").asText(null)
+                            ? resp.path("next_cursor").asString(null)
                             : null;
         } while (nextCursor != null);
     }
 
     /** Headings/paragraphs/lists all carry their text in {type}.rich_text[].plain_text. */
     private static String extractPlainText(JsonNode block) {
-        String type = block.path("type").asText("");
+        String type = block.path("type").asString("");
         JsonNode rich = block.path(type).path("rich_text");
         StringBuilder sb = new StringBuilder();
         for (JsonNode t : rich) {
-            sb.append(t.path("plain_text").asText(""));
+            sb.append(t.path("plain_text").asString(""));
         }
         if (sb.length() == 0) {
             return "";
@@ -157,10 +157,10 @@ public class NotionConnectorFetcher implements ConnectorFetcher {
         JsonNode props = page.path("properties");
         for (var fields = JsonNodes.fields(props); fields.hasNext(); ) {
             JsonNode prop = fields.next().getValue();
-            if ("title".equals(prop.path("type").asText(""))) {
+            if ("title".equals(prop.path("type").asString(""))) {
                 StringBuilder sb = new StringBuilder();
                 for (JsonNode t : prop.path("title")) {
-                    sb.append(t.path("plain_text").asText(""));
+                    sb.append(t.path("plain_text").asString(""));
                 }
                 return sb.length() == 0 ? null : sb.toString();
             }

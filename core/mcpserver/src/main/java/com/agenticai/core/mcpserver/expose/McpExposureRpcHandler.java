@@ -2,10 +2,6 @@ package com.agenticai.core.mcpserver.expose;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.McpCallerContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * JSON-RPC level hook that lets ONE authenticated caller see - and call - its own exposed agents /
@@ -82,7 +82,7 @@ public class McpExposureRpcHandler {
         if (caller.isEmpty()) {
             return Optional.empty();
         }
-        String method = root.path("method").asText("");
+        String method = root.path("method").asString("");
         try {
             return switch (method) {
                 case "tools/list" -> handleList(id, caller.get());
@@ -116,7 +116,7 @@ public class McpExposureRpcHandler {
     }
 
     private Optional<String> handleCall(JsonNode id, JsonNode params, McpCallerContext caller) {
-        String name = params.path("name").asText("");
+        String name = params.path("name").asString("");
         if (!McpToolSlugs.isDynamicToolName(name)
                 && !McpExposedToolCatalog.GET_RUN_TOOL.equals(name)) {
             return Optional.empty(); // one of the static tools - the normal transport handles it

@@ -1,7 +1,6 @@
 package com.agenticai.core.providers.localmodels;
 
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,6 +16,7 @@ import java.util.concurrent.RejectedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Background {@code ollama pull} jobs for {@code POST /api/local-models/pull}. A pull takes
@@ -162,11 +162,11 @@ public class LocalModelPullService {
     }
 
     private static void progress(Job job, JsonNode event) {
-        String text = event.path("status").asText("");
+        String text = event.path("status").asString("");
         if (!text.isBlank()) {
             job.message = text.length() > 120 ? text.substring(0, 120) : text;
         }
-        String digest = event.path("digest").asText("");
+        String digest = event.path("digest").asString("");
         long total = event.path("total").asLong(0);
         if (!digest.isEmpty() && total > 0) {
             job.layers.put(

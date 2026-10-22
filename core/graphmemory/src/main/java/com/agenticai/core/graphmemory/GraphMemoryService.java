@@ -764,8 +764,7 @@ public class GraphMemoryService {
                                                 result.add(fact);
                                             }
                                         }
-                                    } catch (
-                                            com.fasterxml.jackson.core.JsonProcessingException ex) {
+                                    } catch (tools.jackson.core.JacksonException ex) {
                                         throw new SQLException(
                                                 "Unparseable agtype path: "
                                                         + ex.getOriginalMessage(),

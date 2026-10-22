@@ -3,7 +3,6 @@ package com.agenticai.core.sdlc;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
 import com.agenticai.core.resilience.DependencyUnavailableException;
 import com.agenticai.core.resilience.ResilienceGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps E2B's platform REST API (base {@code https://api.e2b.app}), confirmed live against E2B's
@@ -196,8 +196,7 @@ public class E2bSandboxClient {
                             .retrieve()
                             .body(JsonNode.class);
             call.success();
-
-            String sandboxId = response.path("sandboxID").asText(null);
+            String sandboxId = response.path("sandboxID").asString(null);
             String trafficAccessToken = optionalText(response.path(TRAFFIC_ACCESS_TOKEN_FIELD));
             if (restrictPublicTraffic && trafficAccessToken == null) {
                 // E2B accepted the restriction but handed back no token that gates the sandbox
@@ -219,8 +218,8 @@ public class E2bSandboxClient {
 
             return new SandboxHandle(
                     sandboxId,
-                    response.path("templateID").asText(null),
-                    response.path("envdVersion").asText(null),
+                    response.path("templateID").asString(null),
+                    response.path("envdVersion").asString(null),
                     optionalText(response.path("envdAccessToken")),
                     trafficAccessToken);
         } catch (RestClientResponseException e) {
@@ -297,11 +296,11 @@ public class E2bSandboxClient {
                     .map(
                             node ->
                                     new ListedSandbox(
-                                            node.path("sandboxID").asText(null),
-                                            node.path("templateID").asText(null),
-                                            node.path("state").asText(null),
-                                            parseInstant(node.path("startedAt").asText(null)),
-                                            parseInstant(node.path("endAt").asText(null))))
+                                            node.path("sandboxID").asString(null),
+                                            node.path("templateID").asString(null),
+                                            node.path("state").asString(null),
+                                            parseInstant(node.path("startedAt").asString(null)),
+                                            parseInstant(node.path("endAt").asString(null))))
                     .toList();
         } catch (RestClientResponseException e) {
             throw new E2bApiException(
@@ -334,7 +333,7 @@ public class E2bSandboxClient {
         if (node == null || node.isMissingNode() || node.isNull()) {
             return null;
         }
-        String text = node.asText();
+        String text = node.asString();
         return text == null || text.isBlank() ? null : text;
     }
 

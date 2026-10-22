@@ -8,10 +8,6 @@ import com.agenticai.core.providers.capability.ProviderCredentialService;
 import com.agenticai.core.providers.capability.ProviderKeys;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TtlCache;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,12 +19,16 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.http.client.HttpClientSettings;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * TypeSafe AI's Jev - a "System One" decision model - wired in as the platform's out-of-the-box
@@ -110,7 +110,7 @@ public class JevDecisionService implements DecisionModel {
     @Autowired
     public JevDecisionService(
             RestClient.Builder restClientBuilder,
-            ObjectProvider<ClientHttpRequestFactorySettings> baseSettings,
+            ObjectProvider<HttpClientSettings> baseSettings,
             ObjectProvider<PlatformToolCredentialService> platformToolCredentials,
             ObjectProvider<ProviderCredentialService> providerCredentials,
             @Value("${app.jev.enabled:true}") boolean enabled,
@@ -123,9 +123,9 @@ public class JevDecisionService implements DecisionModel {
         // Same transport-selection posture as LlmHttpClientFactory: inherit the
         // app-wide settings (SSL bundles, proxy) and override only the timeouts,
         // on whichever HTTP stack Boot detected for this deployment.
-        ClientHttpRequestFactorySettings settings =
+        HttpClientSettings settings =
                 baseSettings
-                        .getIfAvailable(ClientHttpRequestFactorySettings::defaults)
+                        .getIfAvailable(HttpClientSettings::defaults)
                         .withConnectTimeout(connectTimeout)
                         .withReadTimeout(readTimeout);
         this.restClient =
@@ -237,7 +237,8 @@ public class JevDecisionService implements DecisionModel {
         Map<String, Double> out = new LinkedHashMap<>();
         for (String key : questions.keySet()) {
             JsonNode answer = answers.get().path(key);
-            if ("noul".equals(answer.path("type").asText(null)) && answer.path("noul").isNumber()) {
+            if ("noul".equals(answer.path("type").asString(null))
+                    && answer.path("noul").isNumber()) {
                 out.put(key, answer.path("noul").asDouble());
             }
         }
@@ -272,10 +273,10 @@ public class JevDecisionService implements DecisionModel {
             return Optional.empty();
         }
         JsonNode answer = answers.get().path("q");
-        if (!"choice".equals(answer.path("type").asText(null))) {
+        if (!"choice".equals(answer.path("type").asString(null))) {
             return Optional.empty();
         }
-        String winning = answer.path("choice").asText(null);
+        String winning = answer.path("choice").asString(null);
         if (winning == null || !criteria.containsKey(winning)) {
             return Optional.empty();
         }
@@ -310,7 +311,8 @@ public class JevDecisionService implements DecisionModel {
             return Optional.empty();
         }
         JsonNode answer = answers.get().path("q");
-        if (!"score".equals(answer.path("type").asText(null)) || !answer.path("score").isNumber()) {
+        if (!"score".equals(answer.path("type").asString(null))
+                || !answer.path("score").isNumber()) {
             return Optional.empty();
         }
         return Optional.of(
@@ -382,7 +384,7 @@ public class JevDecisionService implements DecisionModel {
                 new PlaygroundOutcome(
                         answers,
                         response.path("usage"),
-                        response.path("model").asText(model),
+                        response.path("model").asString(model),
                         key.get().source(),
                         null,
                         null));
@@ -417,8 +419,8 @@ public class JevDecisionService implements DecisionModel {
             if (q == null || !q.isObject()) {
                 throw new IllegalArgumentException("question '" + key + "' must be an object");
             }
-            String type = q.path("type").asText(null);
-            String instructions = q.path("instructions").asText(null);
+            String type = q.path("type").asString(null);
+            String instructions = q.path("instructions").asString(null);
             if (!StringUtils.hasText(instructions)
                     || instructions.length() > MAX_PLAYGROUND_INSTRUCTION_CHARS) {
                 throw new IllegalArgumentException(
@@ -465,8 +467,8 @@ public class JevDecisionService implements DecisionModel {
                 .forEachRemaining(
                         f -> {
                             String label =
-                                    f.getValue().isTextual()
-                                            ? f.getValue().asText()
+                                    f.getValue().isString()
+                                            ? f.getValue().asString()
                                             : f.getValue().toString();
                             out.put(
                                     f.getKey(),
@@ -485,7 +487,7 @@ public class JevDecisionService implements DecisionModel {
         ArrayNode out = MAPPER.createArrayNode();
         criteria.forEach(
                 level -> {
-                    String text = level.isTextual() ? level.asText() : level.toString();
+                    String text = level.isString() ? level.asString() : level.toString();
                     out.add(
                             text.length() <= MAX_PLAYGROUND_CRITERION_CHARS
                                     ? text

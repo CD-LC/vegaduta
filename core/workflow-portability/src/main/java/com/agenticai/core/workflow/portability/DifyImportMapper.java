@@ -9,9 +9,6 @@ import com.agenticai.core.workflow.portability.DifyImportModel.Ctx;
 import com.agenticai.core.workflow.portability.DifyImportModel.Exit;
 import com.agenticai.core.workflow.portability.DifyImportModel.Level;
 import com.agenticai.core.workflow.portability.DifyImportModel.Mapped;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +17,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Best-effort import of a Dify app DSL ({@code kind: app}, {@code workflow.graph.nodes/edges}, as
@@ -354,11 +354,11 @@ public final class DifyImportMapper {
         if (v == null || v.isNull()) {
             return null;
         }
-        if (v.isTextual()) {
-            String s = v.asText().trim();
+        if (v.isString()) {
+            String s = v.asString().trim();
             return s.isEmpty() ? null : s;
         }
-        return v.isIntegralNumber() ? v.asText() : null;
+        return v.isIntegralNumber() ? v.asString() : null;
     }
 
     private boolean isInternalMarker(
@@ -631,13 +631,13 @@ public final class DifyImportMapper {
                 if (value == null || value.isNull()) {
                     continue;
                 }
-                if (value.isTextual()) {
-                    args.put(entry.getKey(), c.text(value.asText()));
+                if (value.isString()) {
+                    args.put(entry.getKey(), c.text(value.asString()));
                 } else if (value.isArray()) {
                     String expression = references.selectorExpression(c, value);
                     args.put(entry.getKey(), expression == null ? "" : "{{ " + expression + " }}");
                 } else {
-                    args.put(entry.getKey(), value.asText());
+                    args.put(entry.getKey(), value.asString());
                 }
             }
         }
@@ -677,8 +677,8 @@ public final class DifyImportMapper {
         if (iterator != null
                 && iterator.isArray()
                 && iterator.size() >= 2
-                && iterator.get(iterator.size() - 1).isTextual()) {
-            config.put("itemsField", iterator.get(iterator.size() - 1).asText());
+                && iterator.get(iterator.size() - 1).isString()) {
+            config.put("itemsField", iterator.get(iterator.size() - 1).asString());
         }
         c.lose(
                 "The Sub-Flow repeats the body once per item of the input field named by itemsField; check that "

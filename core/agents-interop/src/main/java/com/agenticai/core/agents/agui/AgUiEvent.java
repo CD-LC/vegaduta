@@ -2,9 +2,9 @@ package com.agenticai.core.agents.agui;
 
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One AG-UI (Agent-User Interaction Protocol) event, as the wire JSON object a client's {@code
@@ -304,7 +304,7 @@ public record AgUiEvent(
     public String toJson() {
         try {
             return MAPPER.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{\"type\":\"RUN_ERROR\",\"message\":\"Could not serialize an event.\",\"code\":\"SERIALIZATION\"}";
         }
     }

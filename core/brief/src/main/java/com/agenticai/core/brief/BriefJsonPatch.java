@@ -1,14 +1,14 @@
 package com.agenticai.core.brief;
 
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * RFC 6902 JSON Patch between two manifests: {@link #diff} produces {@code add} / {@code remove} /
@@ -108,8 +108,8 @@ public final class BriefJsonPatch {
     public static JsonNode apply(JsonNode doc, List<? extends JsonNode> ops) {
         JsonNode current = doc.deepCopy();
         for (JsonNode op : ops) {
-            String name = op.path("op").asText();
-            String path = op.path("path").asText();
+            String name = op.path("op").asString();
+            String path = op.path("path").asString();
             JsonNode value = op.get("value");
             if (path.isEmpty()) {
                 if (!"replace".equals(name) && !"add".equals(name)) {

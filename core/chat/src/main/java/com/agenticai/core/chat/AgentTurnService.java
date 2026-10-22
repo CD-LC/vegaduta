@@ -9,9 +9,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.security.TenantLimitExceededException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +29,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One model turn for a CLIENT-SIDE tool-calling agent, served from the platform's hosted LLM pool:
@@ -449,7 +449,7 @@ public class AgentTurnService {
         }
         try {
             return JSON.readValue(arguments, MAP_TYPE);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.debug("Agent turn: tool-call arguments were not valid JSON - returning none");
             return Map.of();
         }
@@ -458,7 +458,7 @@ public class AgentTurnService {
     private static String toJson(@Nullable Map<String, Object> value) {
         try {
             return JSON.writeValueAsString(value == null ? Map.of() : value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{}";
         }
     }

@@ -2,10 +2,6 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ToolRouterMode;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,6 +29,10 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Makes a small model choose between "call this tool with these arguments" and "answer" through a
@@ -258,9 +258,9 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         if (node == null || !node.isObject()) {
             return new Decision(null, text);
         }
-        String action = node.path("action").asText("");
+        String action = node.path("action").asString("");
         if ("call".equalsIgnoreCase(action) && node.hasNonNull("tool")) {
-            String tool = node.get("tool").asText();
+            String tool = node.get("tool").asString();
             JsonNode arguments = node.get("arguments");
             String json = arguments == null || !arguments.isObject() ? "{}" : arguments.toString();
             return new Decision(
@@ -272,7 +272,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                     null);
         }
         if (node.hasNonNull("answer")) {
-            return new Decision(null, node.get("answer").asText());
+            return new Decision(null, node.get("answer").asString());
         }
         // A tool-call shape without the wrapper ({"name": ..., "arguments": ...}), or free text.
         List<AssistantMessage.ToolCall> bare =
@@ -298,7 +298,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                     JsonNode args =
                             objectMapper.readTree(
                                     call.arguments() == null ? "{}" : call.arguments());
-                    return new Decision(null, args.path("answer").asText(""));
+                    return new Decision(null, args.path("answer").asString(""));
                 } catch (java.io.IOException e) {
                     return new Decision(null, call.arguments());
                 }

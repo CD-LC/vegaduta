@@ -13,9 +13,9 @@ import com.agenticai.core.providers.ProviderNotActiveException;
 import com.agenticai.core.providers.validation.ProviderNotSupportedException;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Maps platform exceptions onto OpenAI's {@code {"error":{message,type,param,code}}} envelope. */
 final class OpenAiCompatErrors {

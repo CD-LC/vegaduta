@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
@@ -121,7 +120,7 @@ public class MetaAgentChatClientFactory implements AgentChatClientFactory {
             double topP,
             java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        OpenAiApi openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey).build();
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey);
 
         OpenAiChatOptions.Builder optionsBuilder =
                 modelBuilder
@@ -149,12 +148,12 @@ public class MetaAgentChatClientFactory implements AgentChatClientFactory {
         // as GrokAgentChatClientFactory. presence_penalty/frequency_penalty
         // ARE supported by Meta, so unlike the Grok factory they are left
         // alone here (not set, not stripped).
-        options.setStopSequences(null);
+        // (stop is stripped on the options builder above; Spring AI 2 options are immutable)
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

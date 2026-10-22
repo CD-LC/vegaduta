@@ -1,12 +1,12 @@
 package com.agenticai.core.workflow.poll;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns a poll response body into the item list a trigger fires on. Paths are deliberately tiny:
@@ -78,8 +78,8 @@ public final class PollItemExtractor {
 
     private static String itemId(JsonNode item, String idPath) {
         JsonNode id = navigate(item, idPath);
-        if (id != null && id.isValueNode() && !id.asText().isBlank()) {
-            return id.asText();
+        if (id != null && id.isValueNode() && !id.asString().isBlank()) {
+            return id.asString();
         }
         return "sha256:" + sha256Hex(item.toString());
     }

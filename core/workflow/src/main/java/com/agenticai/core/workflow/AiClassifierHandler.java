@@ -12,9 +12,6 @@ import static com.agenticai.core.workflow.WorkflowAiNodeSupport.unitConfig;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,6 +20,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The {@code question_classifier} node: a constrained, temperature-0 JSON model call that picks
@@ -206,10 +206,10 @@ final class AiClassifierHandler {
         }
         JsonNode node = parsed.get();
         JsonNode cls = node.get("class");
-        if (cls == null || !cls.isTextual()) {
+        if (cls == null || !cls.isString()) {
             return new Classification(defaultHandle, null, true, "the model reply had no class");
         }
-        String wanted = cls.asText().strip();
+        String wanted = cls.asString().strip();
         AiClass match = null;
         for (AiClass candidate : classes) {
             if (candidate.handle().equalsIgnoreCase(wanted)) {
@@ -230,9 +230,9 @@ final class AiClassifierHandler {
             double value;
             if (conf.isNumber()) {
                 value = conf.asDouble();
-            } else if (conf.isTextual()) {
+            } else if (conf.isString()) {
                 try {
-                    value = Double.parseDouble(conf.asText().strip());
+                    value = Double.parseDouble(conf.asString().strip());
                 } catch (NumberFormatException e) {
                     return new Classification(
                             defaultHandle, null, true, "the model's confidence was not a number");

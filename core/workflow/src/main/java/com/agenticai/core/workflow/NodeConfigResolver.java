@@ -1,8 +1,6 @@
 package com.agenticai.core.workflow;
 
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +8,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tolerant readers for node config values whose stored shape varies (a parsed object, a JSON string
@@ -110,14 +110,14 @@ class NodeConfigResolver {
                 String handle =
                         routeNode.path("handle").isMissingNode()
                                 ? null
-                                : routeNode.path("handle").asText(null);
+                                : routeNode.path("handle").asString(null);
                 if (handle == null || handle.isBlank()) {
                     continue;
                 }
                 String label =
                         routeNode.path("label").isMissingNode()
                                 ? handle
-                                : routeNode.path("label").asText(handle);
+                                : routeNode.path("label").asString(handle);
                 routes.add(
                         Map.of(
                                 "handle",

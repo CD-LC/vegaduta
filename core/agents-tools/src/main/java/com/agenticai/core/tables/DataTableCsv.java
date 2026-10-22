@@ -1,8 +1,6 @@
 package com.agenticai.core.tables;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -13,6 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * CSV import parsing and export rendering for data tables. Quotes follow RFC 4180 (doubled quote
@@ -306,7 +306,7 @@ public final class DataTableCsv {
         if (col.type() == DataTableColumnType.JSON) {
             try {
                 return value instanceof String s ? s : MAPPER.writeValueAsString(value);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 return "";
             }
         }

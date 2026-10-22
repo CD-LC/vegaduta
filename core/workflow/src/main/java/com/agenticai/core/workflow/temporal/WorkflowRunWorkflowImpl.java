@@ -397,8 +397,9 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                                                 : 30))
                         .setHeartbeatTimeout(Duration.ofSeconds(45))
                         .setRetryOptions(
-                                RetryOptions.newBuilder()
-                                        // input.maxRetryAttempts() is retries AFTER the first try
+                                RetryOptions
+                                        .newBuilder() // input.maxRetryAttempts() is retries AFTER
+                                        // the first try
                                         // (0-5); Temporal's
                                         // setMaximumAttempts is TOTAL attempts and treats a raw 0
                                         // as unlimited, so
@@ -408,8 +409,10 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                                                 Math.max(0, input.maxRetryAttempts()) + 1)
                                         .setInitialInterval(Duration.ofSeconds(2))
                                         .setBackoffCoefficient(2.0)
-                                        .setMaximumInterval(Duration.ofSeconds(20))
-                                        // A quota-exceeded rejection is deterministic within the
+                                        .setMaximumInterval(
+                                                Duration.ofSeconds(
+                                                        20)) // A quota-exceeded rejection is
+                                        // deterministic within the
                                         // same request
                                         // burst - the daily/monthly cap doesn't clear in the 2-20s
                                         // backoff window,

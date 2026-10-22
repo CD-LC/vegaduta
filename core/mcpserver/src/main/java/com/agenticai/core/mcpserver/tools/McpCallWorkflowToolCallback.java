@@ -7,8 +7,6 @@ import com.agenticai.core.mcpserver.McpCallerContext;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The workflow-side mirror of {@link McpCallAgentToolCallback} - routes an external MCP client's
@@ -239,7 +239,7 @@ public class McpCallWorkflowToolCallback implements ToolCallback {
 
     private static String textOrNull(JsonNode node, String field) {
         JsonNode value = node.get(field);
-        return value == null || value.isNull() ? null : value.asText();
+        return value == null || value.isNull() ? null : value.asString();
     }
 
     private String errorJson(String message) {

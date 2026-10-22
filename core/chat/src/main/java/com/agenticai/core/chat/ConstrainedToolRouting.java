@@ -1,12 +1,12 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ToolRouterMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wires {@link ConstrainedToolRouterChatModel} for the hosted-pool rows that opted in (see {@code

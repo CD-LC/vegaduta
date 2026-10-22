@@ -8,11 +8,11 @@ import com.agenticai.core.omnichannel.WhatsAppDispatchService;
 import com.agenticai.core.omnichannel.outbound.ChannelTextSend;
 import com.agenticai.core.omnichannel.outbound.ChannelTextSends;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Where a finished Quick Task answer goes: nowhere for {@link QuickTaskChannel#LOG}, the
@@ -139,7 +139,7 @@ final class QuickTaskDelivery {
         String payloadJson;
         try {
             payloadJson = objectMapper.writeValueAsString(whatsApp.payload(to, null, body));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Failed to serialize Quick Task third-party WhatsApp payload", e);
         }

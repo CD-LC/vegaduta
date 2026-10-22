@@ -18,7 +18,6 @@ import com.agenticai.core.templates.dto.TemplateSummary;
 import com.agenticai.core.templates.dto.TemplateUpdateRequest;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Lifecycle + moderation + snapshot orchestration + import for community templates. Every state

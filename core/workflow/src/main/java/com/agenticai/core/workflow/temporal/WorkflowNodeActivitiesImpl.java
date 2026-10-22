@@ -9,7 +9,6 @@ import com.agenticai.core.workflow.WorkflowNodeExecutor;
 import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.WorkflowRunRepository;
 import com.agenticai.core.workflow.WorkflowRunStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.activity.Activity;
 import io.temporal.activity.ActivityExecutionContext;
 import java.time.Instant;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Spring-managed implementation of {@link WorkflowNodeActivities}, registered with the Temporal

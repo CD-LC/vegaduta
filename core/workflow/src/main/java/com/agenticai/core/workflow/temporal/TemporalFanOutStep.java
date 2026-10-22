@@ -7,13 +7,13 @@ import com.agenticai.core.workflow.WorkflowTraversalRules;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.workflow.Async;
 import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Dynamic Fan-Out - mirrors the in-process engine's fan_out step (see {@code WorkflowNodeType}'s

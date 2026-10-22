@@ -4,15 +4,15 @@ import com.agenticai.core.agents.assist.AssistService;
 import com.agenticai.core.templates.dto.TemplateAiReview;
 import com.agenticai.core.templates.dto.TemplateReadinessReport.Issue;
 import com.agenticai.core.templates.dto.TemplateRequirement;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Semantic review of a template against the published {@link TemplateStandard}, run after the
@@ -130,7 +130,7 @@ Reply with ONE JSON object and nothing else:
                 if (taken >= MAX_FINDINGS) {
                     break;
                 }
-                String code = f.path("code").asText("").trim().toUpperCase(Locale.ROOT);
+                String code = f.path("code").asString("").trim().toUpperCase(Locale.ROOT);
                 TemplateStandard.Rule rule =
                         TemplateStandard.rules().stream()
                                 .filter(
@@ -143,12 +143,12 @@ Reply with ONE JSON object and nothing else:
                 if (rule == null) {
                     continue; // not in the standard: ignore, never invent rules
                 }
-                String message = clip(f.path("message").asText(""));
+                String message = clip(f.path("message").asString(""));
                 if (message.isBlank()) {
                     continue;
                 }
-                String fix = clip(f.path("fix").asText(rule.howToFix()));
-                boolean high = "high".equalsIgnoreCase(f.path("confidence").asText(""));
+                String fix = clip(f.path("fix").asString(rule.howToFix()));
+                boolean high = "high".equalsIgnoreCase(f.path("confidence").asString(""));
                 Issue issue =
                         new Issue(
                                 rule.code(),
@@ -165,7 +165,7 @@ Reply with ONE JSON object and nothing else:
                 taken++;
             }
         }
-        String summary = clip(root.path("summary").asText(""));
+        String summary = clip(root.path("summary").asString(""));
         if (summary.isBlank()) {
             summary =
                     blockers.isEmpty() && advisories.isEmpty()
@@ -199,27 +199,27 @@ Reply with ONE JSON object and nothing else:
             reqs.add(r.label());
         }
         if (kind == TemplateKind.AGENT) {
-            String prompt = config.path("systemPrompt").asText("");
+            String prompt = config.path("systemPrompt").asString("");
             int marker = prompt.indexOf(TemplateReadinessService.PLATFORM_BOILERPLATE_MARKER);
             n.put(
                     "systemPrompt",
                     clipTo(marker >= 0 ? prompt.substring(0, marker) : prompt, MAX_PROMPT_CHARS));
             n.set("allowedToolNames", config.path("allowedToolNames"));
             n.set("enabledGuardrails", config.path("enabledGuardrails"));
-            n.put("autonomyTier", config.path("autonomyTier").asText(""));
+            n.put("autonomyTier", config.path("autonomyTier").asString(""));
             n.put("knowledgeBaseEnabled", config.path("knowledgeBaseEnabled").asBoolean(false));
         } else {
-            n.put("workflowDescription", clipTo(config.path("description").asText(""), 1500));
+            n.put("workflowDescription", clipTo(config.path("description").asString(""), 1500));
             var nodes = n.putArray("nodes");
             for (JsonNode node : config.path("graph").path("nodes")) {
                 ObjectNode s = nodes.addObject();
-                s.put("type", node.path("type").asText(""));
-                s.put("label", clipTo(node.path("data").path("label").asText(""), 120));
-                String tool = node.path("data").path("config").path("toolName").asText("");
+                s.put("type", node.path("type").asString(""));
+                s.put("label", clipTo(node.path("data").path("label").asString(""), 120));
+                String tool = node.path("data").path("config").path("toolName").asString("");
                 if (!tool.isBlank()) {
                     s.put("tool", tool);
                 }
-                String msg = node.path("data").path("config").path("message").asText("");
+                String msg = node.path("data").path("config").path("message").asString("");
                 if (!msg.isBlank()) {
                     s.put("message", clipTo(msg, 300));
                 }

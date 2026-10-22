@@ -2,7 +2,6 @@ package com.agenticai.core.guardrails.procedures;
 
 import com.agenticai.core.guardrails.procedures.dto.ProcedureRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * CRUD + attachment surface for the procedures layer. Reads used by the runtime path ({@link

@@ -2,12 +2,12 @@ package com.agenticai.core.brief;
 
 import com.agenticai.core.brief.model.Brief;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The narrow persistence seam the apply engine, the version service and the trust ladder share:
@@ -121,7 +121,7 @@ public class BriefVersionStore {
     public String toJson(Brief brief) {
         try {
             return objectMapper.writeValueAsString(brief);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Brief could not be serialised", e);
         }
     }
@@ -129,7 +129,7 @@ public class BriefVersionStore {
     private Brief read(BriefVersionEntity v) {
         try {
             return objectMapper.readValue(v.getManifestJson(), Brief.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Stored brief manifest "
                             + v.getBriefId()

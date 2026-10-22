@@ -2,15 +2,15 @@ package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.agents.importer.AgentImportJson;
 import com.agenticai.core.agents.importer.AgentImportText;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Dify variable references and conditions, rewritten into VegaDuta expressions. Authored from the
@@ -108,10 +108,10 @@ final class DifyReferences {
         }
         List<String> parts = new ArrayList<>();
         for (JsonNode p : selector) {
-            if (!p.isTextual() && !p.isIntegralNumber()) {
+            if (!p.isString() && !p.isIntegralNumber()) {
                 return null;
             }
-            parts.add(p.asText());
+            parts.add(p.asString());
         }
         sink.refsSeen();
         return expressionFor(parts, false);
@@ -165,9 +165,9 @@ final class DifyReferences {
             return value.asBoolean() ? "true" : "false";
         }
         if (value.isNumber()) {
-            return value.asText();
+            return value.asString();
         }
-        String raw = value.asText();
+        String raw = value.asString();
         Matcher whole = REF.matcher(raw.strip());
         if (whole.matches()) {
             return selectorExpression(sink, selectorFrom(whole.group(1)));

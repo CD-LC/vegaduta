@@ -1,7 +1,7 @@
 package com.agenticai.core.quality.trajectory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.MissingNode;
 
 /**
  * One tool call of an agent's run, in call order: which tool, with which arguments, and whether the

@@ -1,9 +1,6 @@
 package com.agenticai.core.common.privacy;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -16,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Per-agent consent policy: whether a channel conversation starts with a notice and consent step,
@@ -204,7 +204,7 @@ public class ConsentPolicyService {
     private static String json(Object o) {
         try {
             return MAPPER.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -212,7 +212,7 @@ public class ConsentPolicyService {
     private static Map<String, String> readStrings(String json) {
         try {
             return MAPPER.readValue(json, STRING_MAP);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Unreadable consent policy JSON", e);
         }
     }
@@ -220,7 +220,7 @@ public class ConsentPolicyService {
     private static Map<String, List<String>> readLists(String json) {
         try {
             return MAPPER.readValue(json, LIST_MAP);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Unreadable consent policy JSON", e);
         }
     }

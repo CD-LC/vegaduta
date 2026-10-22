@@ -1,7 +1,7 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * AWS Bedrock's BYOK credential needs three fields, not a plain key: an IAM {@code

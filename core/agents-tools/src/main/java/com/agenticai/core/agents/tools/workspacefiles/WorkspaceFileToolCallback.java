@@ -1,15 +1,15 @@
 package com.agenticai.core.agents.tools.workspacefiles;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The Assistant's file tools over the person's projects folder ({@link WorkspaceFiles}): list,
@@ -130,7 +130,7 @@ final class WorkspaceFileToolCallback implements ToolCallback {
         try {
             JsonNode a =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            String path = a.path("path").asText("");
+            String path = a.path("path").asString("");
             ObjectNode out = MAPPER.createObjectNode();
             switch (kind) {
                 case LIST -> {
@@ -155,7 +155,7 @@ final class WorkspaceFileToolCallback implements ToolCallback {
                 }
                 case SEARCH -> {
                     ArrayNode hits = out.putArray("matches");
-                    for (WorkspaceFiles.Hit h : files.search(path, a.path("query").asText(""))) {
+                    for (WorkspaceFiles.Hit h : files.search(path, a.path("query").asString(""))) {
                         ObjectNode n = hits.addObject().put("path", h.path());
                         if (h.line() > 0) {
                             n.put("line", h.line()).put("text", h.text());
@@ -181,14 +181,14 @@ final class WorkspaceFileToolCallback implements ToolCallback {
                     if (!a.has("content")) {
                         return error("content is required");
                     }
-                    String content = a.path("content").asText();
+                    String content = a.path("content").asString();
                     boolean existed = files.write(path, content);
                     out.put("path", path)
                             .put(existed ? "replaced" : "created", true)
                             .put("chars", content.length());
                 }
                 case EDIT -> {
-                    String oldText = a.path("old_text").asText("");
+                    String oldText = a.path("old_text").asString("");
                     if (oldText.isEmpty()) {
                         return error("old_text is required");
                     }
@@ -208,7 +208,7 @@ final class WorkspaceFileToolCallback implements ToolCallback {
                     }
                     String updated =
                             current.substring(0, first)
-                                    + a.path("new_text").asText("")
+                                    + a.path("new_text").asString("")
                                     + current.substring(first + oldText.length());
                     files.write(path, updated);
                     out.put("path", path).put("edited", true);

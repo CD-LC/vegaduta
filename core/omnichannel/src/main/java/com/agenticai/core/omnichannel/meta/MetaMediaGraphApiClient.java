@@ -3,8 +3,6 @@ package com.agenticai.core.omnichannel.meta;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Media-send counterpart to {@link MetaGraphApiClient} - deliberately its own class rather than
@@ -151,7 +151,7 @@ public class MetaMediaGraphApiClient {
                                 + "): "
                                 + response.body());
             }
-            String mediaId = objectMapper.readTree(response.body()).path("id").asText(null);
+            String mediaId = objectMapper.readTree(response.body()).path("id").asString(null);
             if (mediaId == null) {
                 throw new ChannelDeliveryException(
                         "whatsapp", "Meta media upload response had no id: " + response.body());
@@ -228,7 +228,7 @@ public class MetaMediaGraphApiClient {
             try {
                 JsonNode messages = objectMapper.readTree(response.body()).path("messages");
                 if (messages.isArray() && messages.size() > 0) {
-                    messageId = messages.get(0).path("id").asText("unknown");
+                    messageId = messages.get(0).path("id").asString("unknown");
                 }
             } catch (Exception ignored) {
                 // Leave messageId as "unknown" - Meta already accepted the send (status checked

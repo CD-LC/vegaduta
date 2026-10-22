@@ -12,7 +12,6 @@ import com.agenticai.core.agents.turn.AgentLabCompletionService;
 import com.agenticai.core.agents.turn.AgentLabCompletionService.LabCompletionRequest;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.util.LinkedHashMap;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The lessons loop: learns from mistakes and corrections. Two signals are looked for in a finished
@@ -244,7 +244,7 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
         }
         try {
             JsonNode node = JsonMappers.plain().readTree(reply.substring(from, to + 1));
-            String lesson = node.path("lesson").asText("").replaceAll("\\s+", " ").strip();
+            String lesson = node.path("lesson").asString("").replaceAll("\\s+", " ").strip();
             if (lesson.length() < MIN_LESSON_CHARS || lesson.length() > MAX_LESSON_CHARS) {
                 return Optional.empty();
             }

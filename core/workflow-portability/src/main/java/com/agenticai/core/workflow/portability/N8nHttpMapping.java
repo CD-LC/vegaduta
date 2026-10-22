@@ -5,15 +5,15 @@ import static com.agenticai.core.workflow.portability.N8nImportModel.firstNonBla
 import com.agenticai.core.agents.importer.AgentImportJson;
 import com.agenticai.core.agents.importer.AgentImportText;
 import com.agenticai.core.workflow.portability.N8nImportModel.NodeCtx;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Maps an n8n HTTP Request node's parameters onto the HTTP node's config. Part of {@link
@@ -74,7 +74,7 @@ final class N8nHttpMapping {
             config.put("failOnHttpError", Boolean.FALSE);
         }
         List<String> dropped = new ArrayList<>();
-        Iterator<String> names = options.fieldNames();
+        Iterator<String> names = options.propertyNames().iterator();
         while (names.hasNext()) {
             String option = names.next();
             if (!"timeout".equals(option) && !"response".equals(option)) {
@@ -158,7 +158,7 @@ final class N8nHttpMapping {
             }
             Map<String, Object> pair = new LinkedHashMap<>();
             pair.put("name", name);
-            pair.put("value", value == null || value.isNull() ? "" : c.tx(value.asText()));
+            pair.put("value", value == null || value.isNull() ? "" : c.tx(value.asString()));
             out.add(pair);
         }
         return out;

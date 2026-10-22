@@ -2,8 +2,6 @@ package com.agenticai.core.agents.collab;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,6 +14,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Goal verifier for {@code delegate_parallel}: after the workers return, ONE model call checks the
@@ -301,7 +301,7 @@ public class SwarmVerifier {
                 return unverified("malformed_verifier_output");
             }
             JsonNode root = MAPPER.readTree(raw.substring(s, e + 1));
-            String verdict = root.path("verdict").asText("").trim().toUpperCase(Locale.ROOT);
+            String verdict = root.path("verdict").asString("").trim().toUpperCase(Locale.ROOT);
             if (!PASS.equals(verdict) && !PARTIAL.equals(verdict) && !FAIL.equals(verdict)) {
                 return unverified("malformed_verifier_output");
             }
@@ -312,9 +312,9 @@ public class SwarmVerifier {
             for (JsonNode c : root.path("coverage")) {
                 cov.add(
                         new Coverage(
-                                cap(sanitizeOut(c.path("subtask").asText("")), MAX_ITEM_CHARS),
+                                cap(sanitizeOut(c.path("subtask").asString("")), MAX_ITEM_CHARS),
                                 c.path("answered").asBoolean(false),
-                                cap(sanitizeOut(c.path("evidence").asText("")), MAX_ITEM_CHARS)));
+                                cap(sanitizeOut(c.path("evidence").asString("")), MAX_ITEM_CHARS)));
             }
             return new Verdict(
                     verdict,
@@ -335,7 +335,7 @@ public class SwarmVerifier {
                 if (out.size() >= MAX_LIST) {
                     break;
                 }
-                String t = sanitizeOut(n.isTextual() ? n.asText() : n.toString());
+                String t = sanitizeOut(n.isString() ? n.asString() : n.toString());
                 if (!t.isBlank()) {
                     out.add(cap(t, MAX_ITEM_CHARS));
                 }

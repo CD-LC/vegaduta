@@ -1,8 +1,8 @@
 package com.agenticai.core.quality.grader;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Finds the JSON value an agent answered with. Models routinely wrap JSON in prose or a markdown

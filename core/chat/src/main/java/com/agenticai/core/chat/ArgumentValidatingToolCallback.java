@@ -1,11 +1,11 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.BiConsumer;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runs {@link ToolArgumentValidator} on the input and, when it fails, returns the feedback as the

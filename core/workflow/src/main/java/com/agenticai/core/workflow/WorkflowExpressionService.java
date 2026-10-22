@@ -24,8 +24,6 @@ import com.agenticai.core.workflow.expression.ExpressionException;
 import com.agenticai.core.workflow.expression.Limits;
 import com.agenticai.core.workflow.expression.LintContext;
 import com.agenticai.core.workflow.expression.NodeOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,6 +41,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The read-only expression tooling behind the canvas editor (spec 6): live preview ({@link
@@ -474,7 +474,7 @@ public class WorkflowExpressionService {
                 JsonNode tree = objectMapper.readTree(pin.getDataText());
                 if (tree != null && tree.isObject()) {
                     Set<String> names = new HashSet<>();
-                    tree.fieldNames().forEachRemaining(names::add);
+                    tree.propertyNames().forEach(names::add);
                     return names;
                 }
             } catch (Exception ignored) {

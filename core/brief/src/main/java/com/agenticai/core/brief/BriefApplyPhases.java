@@ -14,10 +14,6 @@ import com.agenticai.core.brief.dto.ReadinessRow;
 import com.agenticai.core.brief.model.Brief;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,6 +28,10 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The phases of an apply: one method per kind of artifact (knowledge, procedures, tools, MCP
@@ -754,25 +754,25 @@ final class BriefApplyPhases {
                 }
                 for (String key : List.of("agentId", "collectionId", "targetWorkflowId")) {
                     JsonNode value = cfg.get(key);
-                    if (value == null || !value.isTextual() || !BriefRefs.isRef(value.asText())) {
+                    if (value == null || !value.isString() || !BriefRefs.isRef(value.asString())) {
                         continue;
                     }
-                    Binding b = bindings.get(value.asText());
+                    Binding b = bindings.get(value.asString());
                     if (b == null) {
                         throw new IllegalStateException(
                                 "Workflow "
                                         + workflowRef
                                         + " node '"
-                                        + node.path("id").asText()
+                                        + node.path("id").asString()
                                         + "' needs "
-                                        + value.asText()
+                                        + value.asString()
                                         + ", which was not created.");
                     }
                     cfg.put(key, b.entityId());
                 }
             }
             return objectMapper.treeToValue(tree, WorkflowGraphDto.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Workflow "
                             + workflowRef

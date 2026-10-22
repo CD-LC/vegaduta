@@ -1,10 +1,10 @@
 package com.agenticai.core.agents.coding;
 
 import com.agenticai.core.sdlc.harness.CodingHarnessLoop;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Second-opinion review of the final diff, before the human is asked. Fails closed: anything other
@@ -77,7 +77,7 @@ final class LlmCodingReviewer implements CodingHarnessLoop.Reviewer {
                     false, "the reviewer did not return a usable verdict");
         }
         boolean approved = json.get().get("approved").asBoolean(false);
-        String notes = CodingModelSupport.clip(json.get().path("notes").asText("").strip(), 500);
+        String notes = CodingModelSupport.clip(json.get().path("notes").asString("").strip(), 500);
         return new CodingHarnessLoop.Verdict(
                 approved, notes.isEmpty() ? (approved ? "no concerns" : "rejected") : notes);
     }

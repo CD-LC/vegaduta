@@ -3,8 +3,6 @@ package com.agenticai.core.agents.skills;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.HotpathLookups;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,6 +21,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Agent Skills - the one place that knows a skill can come from two sources (the classpath catalog
@@ -290,7 +290,7 @@ public class SkillService {
                     validFiles.isEmpty()
                             ? null
                             : JsonMappers.plain().writeValueAsString(validFiles);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new SkillValidationException("The staged files could not be serialized.");
         }
         skill.stageImprovement(validDescription, validBody, filesJson, cleanRationale, proposedBy);
@@ -332,7 +332,7 @@ public class SkillService {
                                         .readValue(
                                                 skill.getPendingFilesJson(),
                                                 new TypeReference<Map<String, String>>() {}));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new SkillValidationException(
                         "The staged files are unreadable - discard this improvement instead.");
             }

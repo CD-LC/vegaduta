@@ -5,13 +5,13 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.stream.WorkflowRunStreamHub;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Run-trace recording for {@link WorkflowExecutionEngine}: attaches the per-step run data

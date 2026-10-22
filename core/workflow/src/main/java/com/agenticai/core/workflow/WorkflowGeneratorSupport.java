@@ -9,7 +9,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.guidance.WorkflowGraphExplainer;
 import com.agenticai.core.workflow.guidance.WorkflowSendApprovalGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The deterministic half of the AI workflow generator: the prompt sections that are specific to a
@@ -128,7 +128,7 @@ final class WorkflowGeneratorSupport {
         if (schedule == null || !schedule.isObject()) {
             return null;
         }
-        String rawCron = schedule.path("cron").asText("").trim();
+        String rawCron = schedule.path("cron").asString("").trim();
         if (rawCron.isEmpty()) {
             return null;
         }
@@ -139,7 +139,7 @@ final class WorkflowGeneratorSupport {
                             + "after you activate the workflow.");
             return null;
         }
-        String label = clip(schedule.path("label").asText("").trim(), MAX_LABEL_CHARS);
+        String label = clip(schedule.path("label").asString("").trim(), MAX_LABEL_CHARS);
         return new SuggestedSchedule(cron, label.isEmpty() ? cron : label, "UTC");
     }
 
@@ -149,8 +149,8 @@ final class WorkflowGeneratorSupport {
         JsonNode node = root == null ? null : root.get(field);
         if (node != null && node.isArray()) {
             for (JsonNode entry : node) {
-                if (entry.isTextual() && !entry.asText().isBlank() && out.size() < max) {
-                    out.add(clip(entry.asText().trim(), MAX_ITEM_CHARS));
+                if (entry.isString() && !entry.asString().isBlank() && out.size() < max) {
+                    out.add(clip(entry.asString().trim(), MAX_ITEM_CHARS));
                 }
             }
         }

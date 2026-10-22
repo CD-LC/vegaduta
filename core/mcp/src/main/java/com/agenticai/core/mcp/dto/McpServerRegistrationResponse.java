@@ -7,13 +7,13 @@ import com.agenticai.core.mcp.McpReviewStatus;
 import com.agenticai.core.mcp.McpServerRegistration;
 import com.agenticai.core.mcp.McpServerType;
 import com.agenticai.core.mcp.McpUsageStatus;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code env} is deliberately absent - it's this registration's decrypted secret (API keys,

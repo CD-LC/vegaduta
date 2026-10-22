@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Component;
  * working validator yet." Same shape as {@link OpenRouterAgentChatClientFactory}/ {@link
  * GrokAgentChatClientFactory} (both already reuse Spring AI's {@code
  * spring-ai-starter-model-openai} module for OpenAI-chat-completions-compatible APIs) - this is the
- * trivial case of that pattern, since OpenAI's API *is* the OpenAI chat-completions API, so {@link
- * OpenAiApi.Builder} needs no {@code baseUrl} override at all (its own default is already {@code
+ * trivial case of that pattern, since OpenAI's API *is* the OpenAI chat-completions API, so {@code
+ * OpenAiApi} needs no {@code baseUrl} override at all (its own default is already {@code
  * https://api.openai.com}); set explicitly below anyway to keep this factory visually consistent
  * with its OpenAI-compatible siblings rather than relying on an implicit default a future reader
  * would have to go check.
@@ -109,17 +108,13 @@ public class OpenAIAgentChatClientFactory implements AgentChatClientFactory {
             double topP,
             java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
-        OpenAiApi openAiApi =
-                modelBuilder
-                        .api(BASE_URL)
-                        .apiKey(apiKey)
-                        // withToolStrict is the identity unless app.llm.tools.strict.enabled
-                        // (OpenAI strict function calling).
-                        .restClientBuilder(
-                                modelSupport.withToolStrict(modelBuilder.restClientBuilder()))
-                        .webClientBuilder(
-                                modelSupport.withToolStrict(modelBuilder.webClientBuilder()))
-                        .build();
+        // PORT-TODO(boot4): the REST and WebClient builders used to be wrapped in
+        // modelSupport.withToolStrict (the identity unless app.llm.tools.strict.enabled: OpenAI
+        // strict function calling). Spring AI 2's OpenAI model sits on the SDK, so strict tools
+        // have
+        // to be requested through the options/request body instead; re-seat it in
+        // OpenAiCompatModelBuilder when this compiles.
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey);
 
         var optionsBuilder = modelBuilder.options(ProviderName.OPENAI, model);
         // gpt-5*/o-series need max_completion_tokens and reject temperature/top_p.
@@ -134,7 +129,7 @@ public class OpenAIAgentChatClientFactory implements AgentChatClientFactory {
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

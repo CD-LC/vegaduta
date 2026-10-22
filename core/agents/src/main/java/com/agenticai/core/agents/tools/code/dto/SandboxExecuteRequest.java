@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.tools.code.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.Size;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * {@code POST /v1/execute} request. {@code input} is arbitrary JSON (whatever the model sent as

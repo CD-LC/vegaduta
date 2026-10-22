@@ -2,10 +2,6 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.chat.GeminiSchemaSelfHealer;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +10,10 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Fixes one specific JSON Schema shape a resolved tool's {@code inputSchema()} can carry that
@@ -49,7 +49,7 @@ import org.springframework.ai.tool.metadata.ToolMetadata;
  * <p><b>Extended 2026-08-10</b> for a second, same-class crash: a tool parameter with a {@code
  * "default"} keyword (e.g. {@code {"type": "integer", "default": 100}} for a {@code
  * max_tokens}-shaped parameter) crashes the same Gemini schema-conversion step with a {@code
- * JsonMappingException} on {@code AutoValue_Schema$Builder}'s "default" field - Gemini's function-
+ * DatabindException} on {@code AutoValue_Schema$Builder}'s "default" field - Gemini's function-
  * declaration schema (a restricted subset of OpenAPI schema) has no {@code Schema.Builder} setter
  * for it at all. Same fix shape as the type-array case: strip the field rather than fail the whole
  * turn. A dropped default costs nothing functionally - it was never a value this platform's own
@@ -156,7 +156,7 @@ final class SchemaTypeArrayNormalizer {
                 }
                 changed[0] = true;
             }
-            Iterator<JsonNode> children = obj.elements();
+            Iterator<JsonNode> children = obj.values().iterator();
             while (children.hasNext()) {
                 collapseTypeArrays(children.next(), changed);
             }
@@ -182,7 +182,7 @@ final class SchemaTypeArrayNormalizer {
                 obj.remove("default");
                 changed[0] = true;
             }
-            Iterator<JsonNode> children = obj.elements();
+            Iterator<JsonNode> children = obj.values().iterator();
             while (children.hasNext()) {
                 stripDefaultFields(children.next(), changed);
             }
@@ -209,14 +209,14 @@ final class SchemaTypeArrayNormalizer {
                 JsonNode typeNode = obj.get("type");
                 boolean alreadyArray =
                         typeNode != null
-                                && typeNode.isTextual()
+                                && typeNode.isString()
                                 && "array".equalsIgnoreCase(typeNode.textValue());
                 if (!alreadyArray) {
                     obj.put("type", "array");
                     changed[0] = true;
                 }
             }
-            Iterator<JsonNode> children = obj.elements();
+            Iterator<JsonNode> children = obj.values().iterator();
             while (children.hasNext()) {
                 fixArrayTypeMismatch(children.next(), changed);
             }
@@ -229,7 +229,7 @@ final class SchemaTypeArrayNormalizer {
 
     private static String firstNonNullType(ArrayNode typeArray) {
         for (JsonNode t : typeArray) {
-            if (t.isTextual() && !"null".equalsIgnoreCase(t.textValue())) {
+            if (t.isString() && !"null".equalsIgnoreCase(t.textValue())) {
                 return t.textValue();
             }
         }

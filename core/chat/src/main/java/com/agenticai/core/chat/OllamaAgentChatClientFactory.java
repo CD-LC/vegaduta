@@ -7,7 +7,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.NoopApiKey;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
@@ -156,7 +155,7 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
                         .guarded();
         apiBuilder = hasKey ? apiBuilder.apiKey(credential.apiKey()) : apiBuilder.noApiKey();
 
-        OpenAiApi openAiApi = apiBuilder.build();
+        OpenAiCompatModelBuilder.Api openAiApi = apiBuilder;
 
         OpenAiChatOptions.Builder optionsBuilder =
                 modelBuilder
@@ -192,7 +191,7 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
         }
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -13,6 +11,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Master-Roadmap-2026.md item #8 ("Content feedback loop") - Phase 1 of three planned data sources
@@ -72,12 +72,15 @@ public class YouTubeAnalyticsClient {
         JsonNode item = items.get(0);
         JsonNode stats = item.path("statistics");
         return new ChannelSummary(
-                item.path("snippet").path("title").asText(null),
-                item.path("id").asText(null),
+                item.path("snippet").path("title").asString(null),
+                item.path("id").asString(null),
                 stats.path("subscriberCount").asLong(0),
                 stats.path("viewCount").asLong(0),
                 stats.path("videoCount").asLong(0),
-                item.path("contentDetails").path("relatedPlaylists").path("uploads").asText(null));
+                item.path("contentDetails")
+                        .path("relatedPlaylists")
+                        .path("uploads")
+                        .asString(null));
     }
 
     /**
@@ -101,7 +104,7 @@ public class YouTubeAnalyticsClient {
                                 + "&playlistId="
                                 + urlEncode(uploadsPlaylistId));
         for (JsonNode item : playlistBody.path("items")) {
-            String videoId = item.path("contentDetails").path("videoId").asText(null);
+            String videoId = item.path("contentDetails").path("videoId").asString(null);
             if (videoId != null) {
                 videoIds.add(videoId);
             }
@@ -122,9 +125,9 @@ public class YouTubeAnalyticsClient {
             JsonNode stats = video.path("statistics");
             results.add(
                     new VideoPerformance(
-                            video.path("id").asText(null),
-                            snippet.path("title").asText(null),
-                            snippet.path("publishedAt").asText(null),
+                            video.path("id").asString(null),
+                            snippet.path("title").asString(null),
+                            snippet.path("publishedAt").asString(null),
                             stats.path("viewCount").asLong(0),
                             stats.path("likeCount").asLong(0),
                             stats.path("commentCount").asLong(0)));

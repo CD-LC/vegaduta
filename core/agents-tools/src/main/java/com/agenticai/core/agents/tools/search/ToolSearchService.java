@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.tools.search;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Dependency-free BM25 ranker over a tool catalog: the "tool search" half of on-demand tool loading

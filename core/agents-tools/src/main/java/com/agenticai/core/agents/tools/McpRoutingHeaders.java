@@ -1,7 +1,5 @@
 package com.agenticai.core.agents.tools;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.transport.customizer.McpSyncHttpClientRequestCustomizer;
 import java.io.IOException;
 import java.net.http.HttpRequest;
@@ -12,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Streamable HTTP routing headers from MCP revision 2026-07-28: every POST mirrors the JSON-RPC
@@ -60,7 +60,7 @@ class McpRoutingHeaders {
         }
         try {
             JsonNode message = MAPPER.readTree(body);
-            String method = message.path("method").asText(null);
+            String method = message.path("method").asString(null);
             if (method == null) {
                 return; // a response to a server request: no method to mirror
             }
@@ -68,8 +68,8 @@ class McpRoutingHeaders {
             String name =
                     switch (method) {
                         case "tools/call", "prompts/get" ->
-                                message.path("params").path("name").asText(null);
-                        case "resources/read" -> message.path("params").path("uri").asText(null);
+                                message.path("params").path("name").asString(null);
+                        case "resources/read" -> message.path("params").path("uri").asString(null);
                         default -> null;
                     };
             if (name != null) {

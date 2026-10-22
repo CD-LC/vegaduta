@@ -1,13 +1,13 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Checks a tool call's arguments against the tool's own input schema <em>before</em> the tool runs,
@@ -80,19 +80,19 @@ final class ToolArgumentValidator {
         JsonNode required = schema.get("required");
         if (required != null && required.isArray()) {
             for (JsonNode name : required) {
-                if (!name.isTextual()) {
+                if (!name.isString()) {
                     continue;
                 }
-                JsonNode value = args.get(name.asText());
+                JsonNode value = args.get(name.asString());
                 if (value == null || value.isNull()) {
-                    problems.add("missing required property '" + name.asText() + "'");
+                    problems.add("missing required property '" + name.asString() + "'");
                 }
             }
         }
         JsonNode properties = schema.get("properties");
         if (properties != null && properties.isObject()) {
             Set<String> declared = new LinkedHashSet<>();
-            for (Iterator<String> it = properties.fieldNames(); it.hasNext(); ) {
+            for (Iterator<String> it = properties.propertyNames().iterator(); it.hasNext(); ) {
                 declared.add(it.next());
             }
             for (Iterator<Map.Entry<String, JsonNode>> it = args.fields(); it.hasNext(); ) {

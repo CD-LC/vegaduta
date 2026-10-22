@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.skills.learning;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Locale;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Turns the reflective model call's reply into a skill draft. The model's output is untrusted text:
@@ -43,9 +43,9 @@ final class SkillDraftParser {
         if (!node.isObject() || !truthy(node.path("worth_saving"), node.path("worthSaving"))) {
             return Optional.empty();
         }
-        String name = slug(node.path("name").asText(""));
-        String description = oneLine(node.path("description").asText(""));
-        String instructions = node.path("instructions").asText("").strip();
+        String name = slug(node.path("name").asString(""));
+        String description = oneLine(node.path("description").asString(""));
+        String instructions = node.path("instructions").asString("").strip();
         if (name.length() < 3
                 || description.length() < 20
                 || instructions.length() < MIN_INSTRUCTIONS) {
@@ -56,7 +56,7 @@ final class SkillDraftParser {
                         name,
                         cut(description, MAX_DESCRIPTION),
                         cut(instructions, MAX_INSTRUCTIONS),
-                        cut(oneLine(node.path("rationale").asText("")), MAX_RATIONALE)));
+                        cut(oneLine(node.path("rationale").asString("")), MAX_RATIONALE)));
     }
 
     private static boolean truthy(JsonNode... candidates) {
@@ -64,8 +64,8 @@ final class SkillDraftParser {
             if (n.isBoolean()) {
                 return n.asBoolean();
             }
-            if (n.isTextual()) {
-                return "true".equalsIgnoreCase(n.asText().trim());
+            if (n.isString()) {
+                return "true".equalsIgnoreCase(n.asString().trim());
             }
         }
         return false;

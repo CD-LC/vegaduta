@@ -2,7 +2,7 @@ package com.agenticai.core.agents.openai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The subset of an Open Responses / OpenAI Responses {@code POST /v1/responses} body this platform

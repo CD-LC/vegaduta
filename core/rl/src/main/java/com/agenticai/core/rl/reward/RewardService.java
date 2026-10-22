@@ -7,8 +7,6 @@ import com.agenticai.core.rl.domain.RewardRecord;
 import com.agenticai.core.rl.domain.RewardSource;
 import com.agenticai.core.rl.repo.EpisodeRepository;
 import com.agenticai.core.rl.repo.RewardRecordRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -21,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Computes an {@link Episode}'s VERIFIABLE COMPOSITE reward and persists it.
@@ -183,7 +183,7 @@ public class RewardService {
     private static String toJson(Map<String, Object> breakdown) {
         try {
             return MAPPER.writeValueAsString(breakdown);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to serialize reward breakdown - storing null", e);
             return null;
         }

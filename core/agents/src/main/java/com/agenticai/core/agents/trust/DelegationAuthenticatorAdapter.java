@@ -5,7 +5,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.DelegatedTokenAuthenticator;
 import com.agenticai.core.security.DelegationAuthenticationToken;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@code core/agents} half of delegation-token API authentication - implements the {@link
@@ -97,7 +97,7 @@ public class DelegationAuthenticatorAdapter implements DelegatedTokenAuthenticat
                     objectMapper
                             .readTree(Base64.getUrlDecoder().decode(parts[1]))
                             .path("token_use")
-                            .asText(""));
+                            .asString(""));
         } catch (Exception e) {
             return false;
         }

@@ -23,12 +23,12 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.omnichannel.whatsappvoice.WhatsAppVoiceNoteService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Everything {@link MetaWhatsAppWebhookController} does after a message has passed signature

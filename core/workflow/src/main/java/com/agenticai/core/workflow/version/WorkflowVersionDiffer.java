@@ -4,8 +4,6 @@ import com.agenticai.core.agents.tools.AgentStepEventRedactor;
 import com.agenticai.core.workflow.NodeTracePayloads;
 import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,6 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The read-only diffs of {@link WorkflowVersionService}: the structural version diff (graph +
@@ -78,8 +78,8 @@ final class WorkflowVersionDiffer {
         JsonNode a = readObject(detailsA);
         JsonNode b = readObject(detailsB);
         Set<String> names = new LinkedHashSet<>();
-        a.fieldNames().forEachRemaining(names::add);
-        b.fieldNames().forEachRemaining(names::add);
+        a.propertyNames().forEach(names::add);
+        b.propertyNames().forEach(names::add);
         for (String name : names) {
             JsonNode va = a.get(name);
             JsonNode vb = b.get(name);
@@ -90,12 +90,12 @@ final class WorkflowVersionDiffer {
                         "from",
                         va == null || va.isNull()
                                 ? null
-                                : va.isValueNode() ? va.asText() : va.toString());
+                                : va.isValueNode() ? va.asString() : va.toString());
                 row.put(
                         "to",
                         vb == null || vb.isNull()
                                 ? null
-                                : vb.isValueNode() ? vb.asText() : vb.toString());
+                                : vb.isValueNode() ? vb.asString() : vb.toString());
                 fields.add(row);
             }
         }
@@ -318,7 +318,7 @@ final class WorkflowVersionDiffer {
         for (JsonNode item : items) {
             JsonNode id = item.get("id");
             if (id != null) {
-                index.put(id.asText(), item);
+                index.put(id.asString(), item);
             }
         }
         return index;
@@ -326,26 +326,26 @@ final class WorkflowVersionDiffer {
 
     private Map<String, Object> nodeBrief(JsonNode node) {
         Map<String, Object> brief = new LinkedHashMap<>();
-        brief.put("id", node.path("id").asText(null));
-        brief.put("type", node.path("type").asText(null));
+        brief.put("id", node.path("id").asString(null));
+        brief.put("type", node.path("type").asString(null));
         // Graph JSON keeps label+config under data{} (React Flow shape) -
         // the same place NodeConfigDrawer writes them.
         JsonNode data = node.path("data");
-        brief.put("label", data.path("label").asText(node.path("id").asText(null)));
+        brief.put("label", data.path("label").asString(node.path("id").asString(null)));
         return brief;
     }
 
     private List<String> nodeChanges(JsonNode a, JsonNode b) {
         List<String> changes = new ArrayList<>();
-        String typeA = a.path("type").asText(null);
-        String typeB = b.path("type").asText(null);
+        String typeA = a.path("type").asString(null);
+        String typeB = b.path("type").asString(null);
         if (!safe(typeA).equals(safe(typeB))) {
             changes.add("type: " + typeA + " -> " + typeB);
         }
         JsonNode dataA = a.path("data");
         JsonNode dataB = b.path("data");
-        String labelA = dataA.path("label").asText(null);
-        String labelB = dataB.path("label").asText(null);
+        String labelA = dataA.path("label").asString(null);
+        String labelB = dataB.path("label").asString(null);
         if (!safe(labelA).equals(safe(labelB))) {
             changes.add("label: \"" + labelA + "\" -> \"" + labelB + "\"");
         }
@@ -377,8 +377,8 @@ final class WorkflowVersionDiffer {
         boolean bObj = b != null && b.isObject();
         if (aObj && bObj) {
             Set<String> names = new TreeSet<>();
-            a.fieldNames().forEachRemaining(names::add);
-            b.fieldNames().forEachRemaining(names::add);
+            a.propertyNames().forEach(names::add);
+            b.propertyNames().forEach(names::add);
             for (String name : names) {
                 boolean childSecret = secret || AgentStepEventRedactor.isSecretKey(name);
                 diffValue(path + "." + name, a.path(name), b.path(name), childSecret, out);
@@ -404,7 +404,7 @@ final class WorkflowVersionDiffer {
         if (secret) {
             return REDACTED;
         }
-        String text = value.isValueNode() ? value.asText() : value.toString();
+        String text = value.isValueNode() ? value.asString() : value.toString();
         String redacted = NodeTracePayloads.redact(text);
         return redacted.length() > MAX_DIFF_VALUE_CHARS
                 ? redacted.substring(0, MAX_DIFF_VALUE_CHARS) + "..."
@@ -413,10 +413,10 @@ final class WorkflowVersionDiffer {
 
     private Map<String, Object> edgeBrief(JsonNode edge) {
         Map<String, Object> brief = new LinkedHashMap<>();
-        brief.put("id", edge.path("id").asText(null));
-        brief.put("source", edge.path("source").asText(null));
-        brief.put("target", edge.path("target").asText(null));
-        brief.put("sourceHandle", edge.path("sourceHandle").asText(null));
+        brief.put("id", edge.path("id").asString(null));
+        brief.put("source", edge.path("source").asString(null));
+        brief.put("target", edge.path("target").asString(null));
+        brief.put("sourceHandle", edge.path("sourceHandle").asString(null));
         return brief;
     }
 

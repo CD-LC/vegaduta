@@ -170,9 +170,6 @@ public class AwsBedrockChatModel implements ChatModel {
             if (toolOptions.getToolCallbacks() != null) {
                 toolDefinitions += toolOptions.getToolCallbacks().size();
             }
-            if (toolOptions.getToolNames() != null) {
-                toolDefinitions += toolOptions.getToolNames().size();
-            }
         }
         if (toolDefinitions > 0 || skippedToolMessages > 0) {
             log.warn(

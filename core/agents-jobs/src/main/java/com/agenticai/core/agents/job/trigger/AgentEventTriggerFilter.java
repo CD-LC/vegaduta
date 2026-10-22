@@ -1,11 +1,11 @@
 package com.agenticai.core.agents.job.trigger;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The optional filter on a trigger: a flat JSON object of {@code field -> expected value}, ALL of

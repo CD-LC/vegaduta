@@ -4,12 +4,12 @@ import com.agenticai.core.sdlc.harness.CodingHarnessLoop;
 import com.agenticai.core.sdlc.harness.ShellRunner;
 import com.agenticai.core.sdlc.harness.WorkspaceFiles;
 import com.agenticai.core.sdlc.harness.WorkspacePaths;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The model-driven edit step. Iteration 0 is the initial implementation of the instruction; later
@@ -145,7 +145,7 @@ final class LlmCodingFixer implements CodingHarnessLoop.Fixer {
             if (taken >= MAX_FILES_PER_READ || total >= MAX_TOTAL_READ_BYTES) {
                 break;
             }
-            String raw = p.asText("");
+            String raw = p.asString("");
             String path;
             try {
                 path = WorkspacePaths.normalize(raw);
@@ -174,13 +174,13 @@ final class LlmCodingFixer implements CodingHarnessLoop.Fixer {
                 skipped.add("more than " + MAX_EDITS + " edits");
                 break;
             }
-            String raw = edit.path("path").asText("");
+            String raw = edit.path("path").asString("");
             try {
                 if (edit.path("delete").asBoolean(false)) {
                     WorkspaceFiles.delete(internal, raw);
                     deleted++;
-                } else if (edit.has("content") && edit.get("content").isTextual()) {
-                    WorkspaceFiles.write(internal, raw, edit.get("content").asText());
+                } else if (edit.has("content") && edit.get("content").isString()) {
+                    WorkspaceFiles.write(internal, raw, edit.get("content").asString());
                     written++;
                 } else {
                     skipped.add(shortPath(raw) + " (no content)");
@@ -189,7 +189,7 @@ final class LlmCodingFixer implements CodingHarnessLoop.Fixer {
                 skipped.add(shortPath(raw) + " (" + e.getMessage() + ")");
             }
         }
-        String note = node.path("note").asText("");
+        String note = node.path("note").asString("");
         StringBuilder sb = new StringBuilder();
         sb.append(written).append(" file(s) written");
         if (deleted > 0) {

@@ -6,8 +6,8 @@ import org.springframework.http.codec.ServerSentEvent;
 /** SSE framing of resumable-stream buffer entries; see {@link ResumableChatStreamService}. */
 final class ResumableSseFrames {
 
-    private static final com.fasterxml.jackson.databind.ObjectMapper JSON =
-            new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final tools.jackson.databind.ObjectMapper JSON =
+            new tools.jackson.databind.ObjectMapper();
 
     private ResumableSseFrames() {}
 
@@ -26,9 +26,9 @@ final class ResumableSseFrames {
             return event;
         }
         try {
-            com.fasterxml.jackson.databind.node.ObjectNode node =
-                    (com.fasterxml.jackson.databind.node.ObjectNode) JSON.readTree(event.data());
-            if (!ResumableChatStreamService.STATUS_ERROR.equals(node.path("status").asText())) {
+            tools.jackson.databind.node.ObjectNode node =
+                    (tools.jackson.databind.node.ObjectNode) JSON.readTree(event.data());
+            if (!ResumableChatStreamService.STATUS_ERROR.equals(node.path("status").asString())) {
                 return event;
             }
             node.put("error", message);

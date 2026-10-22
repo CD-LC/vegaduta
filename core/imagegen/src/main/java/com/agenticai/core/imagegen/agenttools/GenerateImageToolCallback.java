@@ -5,13 +5,13 @@ import com.agenticai.core.imagegen.ImageGenNotConfiguredException;
 import com.agenticai.core.imagegen.ImageGenerationOrchestratorService;
 import com.agenticai.core.imagegen.ImageGenerationQuotaExceededException;
 import com.agenticai.core.providers.ProviderNotActiveException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link ImageGenerationOrchestratorService} as a native Spring AI tool -

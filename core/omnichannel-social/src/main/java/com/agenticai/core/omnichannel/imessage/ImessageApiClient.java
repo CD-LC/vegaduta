@@ -5,10 +5,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -30,6 +26,10 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Client for the BlueBubbles server REST API ({@code /api/v1/...}), the macOS bridge that exposes
@@ -83,8 +83,8 @@ public class ImessageApiClient {
         JsonNode data =
                 call(serverUrl, password, "GET", "/api/v1/server/info", null, VALIDATE_TIMEOUT);
         return new ServerInfo(
-                data.path("server_version").asText(null),
-                data.path("os_version").asText(null),
+                data.path("server_version").asString(null),
+                data.path("os_version").asString(null),
                 data.path("private_api").asBoolean(false),
                 data.path("helper_connected").asBoolean(false));
     }
@@ -392,9 +392,9 @@ public class ImessageApiClient {
         }
         String detail = null;
         if (node != null) {
-            detail = node.path("error").path("error").asText(null);
+            detail = node.path("error").path("error").asString(null);
             if (detail == null || detail.isBlank()) {
-                detail = node.path("message").asText(null);
+                detail = node.path("message").asString(null);
             }
         }
         if (detail == null || detail.isBlank()) {

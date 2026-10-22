@@ -10,8 +10,6 @@ import com.agenticai.core.tables.DataTableNodeOps;
 import com.agenticai.core.tables.DataTableService;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +17,8 @@ import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "Data Table" node ({@code data_table}) - read or write the tenant's Data Tables (see {@link
@@ -249,7 +249,7 @@ class WorkflowDataTableNodeHandler {
     private Object parse(String text) {
         try {
             return objectMapper.readValue(text, Object.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("'valuesJson' is not valid JSON.");
         }
     }
@@ -257,7 +257,7 @@ class WorkflowDataTableNodeHandler {
     private String json(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{}";
         }
     }

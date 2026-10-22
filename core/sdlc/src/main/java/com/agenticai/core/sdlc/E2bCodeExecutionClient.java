@@ -3,7 +3,6 @@ package com.agenticai.core.sdlc;
 import com.agenticai.core.sdlc.dto.RunCodeResponse;
 import com.agenticai.core.sdlc.dto.SandboxArtifact;
 import com.agenticai.core.sdlc.dto.SandboxFile;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Master Roadmap 2026 item #14 (E2B code execution completion, §B).
@@ -160,8 +160,8 @@ public class E2bCodeExecutionClient {
             JsonNode response = postWithBootRetry(runUrl, handle.trafficAccessToken(), body);
 
             return new RunCodeResponse(
-                    response.path("stdout").asText(""),
-                    response.path("stderr").asText(""),
+                    response.path("stdout").asString(""),
+                    response.path("stderr").asString(""),
                     response.path("exitCode").isNull() ? null : response.path("exitCode").asInt(),
                     response.path("timedOut").asBoolean(false),
                     handle.sandboxId(),
@@ -250,8 +250,8 @@ public class E2bCodeExecutionClient {
             }
             JsonNode response = postWithBootRetry(runUrl, trafficAccessToken, body);
             return new RunCodeResponse(
-                    response.path("stdout").asText(""),
-                    response.path("stderr").asText(""),
+                    response.path("stdout").asString(""),
+                    response.path("stderr").asString(""),
                     response.path("exitCode").isNull() ? null : response.path("exitCode").asInt(),
                     response.path("timedOut").asBoolean(false),
                     sandboxId,
@@ -306,9 +306,9 @@ public class E2bCodeExecutionClient {
                 log.warn("Dropping sandbox artifacts beyond the {} per-run cap", MAX_ARTIFACTS);
                 break;
             }
-            String name = item.path("name").asText("");
-            String mime = item.path("mimeType").asText("application/octet-stream");
-            String b64 = item.path("contentBase64").asText("");
+            String name = item.path("name").asString("");
+            String mime = item.path("mimeType").asString("application/octet-stream");
+            String b64 = item.path("contentBase64").asString("");
             if (name.isBlank() || b64.isEmpty()) {
                 continue;
             }

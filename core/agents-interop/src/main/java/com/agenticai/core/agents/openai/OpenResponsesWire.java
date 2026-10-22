@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.openai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Builds the Open Responses / OpenAI Responses JSON: the {@code response} object and the streaming
@@ -196,7 +196,7 @@ final class OpenResponsesWire {
 
     private ServerSentEvent<String> frame(ObjectNode event) {
         return ServerSentEvent.<String>builder()
-                .event(event.get("type").asText())
+                .event(event.get("type").asString())
                 .data(event.toString())
                 .build();
     }

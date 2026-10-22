@@ -13,7 +13,6 @@ import com.agenticai.core.tenancy.demo.DemoChannelRateLimiter;
 import com.agenticai.core.tenancy.demo.DemoChannelType;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -27,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Inbound webhook for the SHARED platform demo bot - {@code POST /webhook/demo/telegram}.
@@ -123,7 +123,7 @@ public class DemoTelegramWebhookController {
             return ResponseEntity.status(403).build();
         }
         try {
-            String updateId = update.path("update_id").asText(null);
+            String updateId = update.path("update_id").asString(null);
             if (!dedupService.tryClaim(ChannelType.TELEGRAM, "demo:" + updateId)) {
                 return ResponseEntity.ok().build();
             }
@@ -144,8 +144,8 @@ public class DemoTelegramWebhookController {
         if (message.isMissingNode()) {
             return; // edited_message, callback_query, channel_post - nothing to route
         }
-        String chatId = message.path("chat").path("id").asText(null);
-        String text = message.path("text").asText(null);
+        String chatId = message.path("chat").path("id").asString(null);
+        String text = message.path("text").asString(null);
         if (chatId == null || text == null || text.isBlank()) {
             // Photos, stickers, voice notes. Answered once (rate-limited) so
             // the visitor is not left wondering, then ignored.
@@ -436,11 +436,11 @@ public class DemoTelegramWebhookController {
      */
     private static String peerLabel(JsonNode message) {
         JsonNode from = message.path("from");
-        String username = from.path("username").asText(null);
+        String username = from.path("username").asString(null);
         if (username != null && !username.isBlank()) {
             return "@" + username;
         }
-        String firstName = from.path("first_name").asText(null);
+        String firstName = from.path("first_name").asString(null);
         return firstName == null || firstName.isBlank() ? null : firstName;
     }
 }

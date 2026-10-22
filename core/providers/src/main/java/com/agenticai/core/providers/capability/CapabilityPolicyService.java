@@ -1,13 +1,13 @@
 package com.agenticai.core.providers.capability;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Read/write over {@link CapabilityPolicy} - the generic-registry version of {@code

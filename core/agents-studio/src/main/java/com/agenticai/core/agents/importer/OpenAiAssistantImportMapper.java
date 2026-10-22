@@ -1,7 +1,7 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Maps an OpenAI Assistants API {@code assistant} object to an {@link AgentImportDraft}. Pure: JSON

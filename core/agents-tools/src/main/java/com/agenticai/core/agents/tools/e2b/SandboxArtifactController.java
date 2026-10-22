@@ -4,8 +4,6 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -18,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Serves the files a {@code run_code} call left behind (charts, workbooks, scripts, notebooks) -
@@ -54,11 +54,11 @@ public class SandboxArtifactController {
             if (meta == null) {
                 return ResponseEntity.notFound().build();
             }
-            String ext = meta.path("ext").asText("");
+            String ext = meta.path("ext").asString("");
             String mime = SandboxArtifacts.mimeFor(ext);
             if (mime == null
-                    || !mayView(meta.path("agentId").asText(null))
-                    || !isUploader(meta.path("userId").asText(null))) {
+                    || !mayView(meta.path("agentId").asString(null))
+                    || !isUploader(meta.path("userId").asString(null))) {
                 return ResponseEntity.notFound().build();
             }
             byte[] bytes;
@@ -67,7 +67,7 @@ public class SandboxArtifactController {
             }
             String fallback = "analysis-" + id.toString().substring(0, 8) + "." + ext;
             String filename =
-                    SandboxArtifacts.safeDisplayName(meta.path("name").asText(null), fallback);
+                    SandboxArtifacts.safeDisplayName(meta.path("name").asString(null), fallback);
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(mime))
                     .header(

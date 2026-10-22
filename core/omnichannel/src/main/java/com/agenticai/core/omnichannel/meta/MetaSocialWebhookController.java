@@ -19,8 +19,6 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Inbound Messenger + Instagram DMs - one endpoint for both, because Meta's Messenger Platform
@@ -143,7 +143,7 @@ public class MetaSocialWebhookController {
                     .build(); // 200 regardless - Meta retries/disables the webhook on non-2xx.
         }
 
-        String object = root.path("object").asText("");
+        String object = root.path("object").asString("");
         boolean isInstagram = "instagram".equals(object);
         if (!isInstagram && !"page".equals(object)) {
             log.info("Ignoring Meta social webhook with unrecognized object type '{}'", object);
@@ -151,7 +151,7 @@ public class MetaSocialWebhookController {
         }
 
         for (JsonNode entry : root.path("entry")) {
-            String recipientScopedId = entry.path("id").asText(null);
+            String recipientScopedId = entry.path("id").asString(null);
             if (recipientScopedId == null) {
                 continue;
             }
@@ -191,8 +191,8 @@ public class MetaSocialWebhookController {
                     credentialService.resolveActive();
             signatureValidator.validateOrThrow(rawBody, signatureHeader, credential.appSecret());
 
-            String senderId = messagingEvent.path("sender").path("id").asText(null);
-            String text = messagingEvent.path("message").path("text").asText(null);
+            String senderId = messagingEvent.path("sender").path("id").asString(null);
+            String text = messagingEvent.path("message").path("text").asString(null);
             if (senderId == null || text == null) {
                 log.info(
                         "Skipping non-text or malformed {} messaging event",
@@ -210,7 +210,7 @@ public class MetaSocialWebhookController {
             // processing, per messaging event rather than per payload since
             // Meta batches entries. The 200 for the whole payload still goes
             // out either way (see #inbound).
-            String mid = messagingEvent.path("message").path("mid").asText(null);
+            String mid = messagingEvent.path("message").path("mid").asString(null);
             ChannelType channelType = isInstagram ? ChannelType.INSTAGRAM : ChannelType.MESSENGER;
             if (!dedupService.tryClaim(channelType, mid)) {
                 log.info(

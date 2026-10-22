@@ -5,11 +5,11 @@ import com.agenticai.core.approval.ApprovalNotAuthorizedException;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Deciding a workflow node's approval ({@code workflow.node.*}, raised by {@code
@@ -64,7 +64,7 @@ class WorkflowApprovalDecisionAuthorizer implements ApprovalDecisionAuthorizer {
     private Optional<UUID> runId(ApprovalRequest request) {
         try {
             JsonNode payload = objectMapper.readTree(request.getPayloadJson());
-            return Optional.of(UUID.fromString(payload.path("runId").asText()));
+            return Optional.of(UUID.fromString(payload.path("runId").asString()));
         } catch (Exception e) {
             return Optional.empty();
         }

@@ -4,7 +4,6 @@ import com.agenticai.core.knowledge.EmbeddingModelCatalog;
 import com.agenticai.core.knowledge.SidecarCommunicationException;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * {@link EmbeddingClient} for a local Ollama ({@code POST /api/embed}): the free path, so RAG works

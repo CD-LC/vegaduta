@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.chatport;
 
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * One importable conversation format. {@link #REGISTERED} is checked in order and the first format

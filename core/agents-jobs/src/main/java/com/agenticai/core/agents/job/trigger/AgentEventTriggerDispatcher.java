@@ -8,7 +8,6 @@ import com.agenticai.core.eventbus.WorkflowEvent;
 import com.agenticai.core.eventbus.WorkflowEventSignal;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns a published platform event into agent jobs - the third and last way an agent can start,

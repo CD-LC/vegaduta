@@ -1,9 +1,9 @@
 package com.agenticai.core.chat;
 
-import org.springframework.ai.anthropic.api.AnthropicApi;
+import com.agenticai.core.providers.ProviderName;
+import com.openai.models.completions.CompletionUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.google.genai.metadata.GoogleGenAiUsage;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
  * The cached-vs-uncached split of one LLM call's INPUT tokens, normalized across providers that
@@ -126,6 +126,18 @@ public record CacheTokenAccounting(
      * {@link LlmCallLogService#record}).
      */
     public static CacheTokenAccounting from(Usage usage) {
+        return from(usage, null);
+    }
+
+    /**
+     * Same as {@link #from(Usage)}, with the provider that produced the usage. Spring AI 2 sums
+     * usage across the iterations of a tool turn in a plain {@code DefaultUsage} that carries the
+     * token counts and the cache read/write counts but NOT the provider-native usage object, so on
+     * a tool turn the billing convention (exclusive Anthropic vs inclusive OpenAI/Gemini) can no
+     * longer be recovered from the usage itself; the caller, which knows the provider, passes it
+     * here.
+     */
+    public static CacheTokenAccounting from(Usage usage, ProviderName provider) {
         if (usage == null) {
             return ABSENT;
         }
@@ -146,16 +158,30 @@ public record CacheTokenAccounting(
             return inclusive(cachedContent, promptTokens);
         }
 
+        // Spring AI 2 reports the cache split on the Usage interface itself (null = not reported),
+        // for a
+        // single call AND summed across a tool loop. The native SDK object is only the fallback.
+        Long cacheRead = usage.getCacheReadInputTokens();
+        Long cacheWrite = usage.getCacheWriteInputTokens();
         Object nativeUsage = usage.getNativeUsage();
-        if (nativeUsage instanceof AnthropicApi.Usage anthropicUsage) {
-            Long cacheRead =
-                    anthropicUsage.cacheReadInputTokens() == null
-                            ? null
-                            : anthropicUsage.cacheReadInputTokens().longValue();
-            Long cacheWrite =
-                    anthropicUsage.cacheCreationInputTokens() == null
-                            ? null
-                            : anthropicUsage.cacheCreationInputTokens().longValue();
+        boolean exclusive =
+                provider == ProviderName.ANTHROPIC
+                        || nativeUsage instanceof com.anthropic.models.messages.Usage;
+        boolean inclusive =
+                provider != null && provider != ProviderName.ANTHROPIC
+                        || nativeUsage instanceof CompletionUsage;
+        if (nativeUsage instanceof com.anthropic.models.messages.Usage anthropicUsage) {
+            if (cacheRead == null) {
+                cacheRead = anthropicUsage.cacheReadInputTokens().orElse(null);
+            }
+            if (cacheWrite == null) {
+                cacheWrite = anthropicUsage.cacheCreationInputTokens().orElse(null);
+            }
+        } else if (nativeUsage instanceof CompletionUsage openAiUsage && cacheRead == null) {
+            cacheRead =
+                    openAiUsage.promptTokensDetails().flatMap(d -> d.cachedTokens()).orElse(null);
+        }
+        if (exclusive) {
             if (cacheRead == null && cacheWrite == null) {
                 // Anthropic omits both fields entirely on a request that
                 // carried no cache_control block at all - genuinely nothing
@@ -169,16 +195,11 @@ public record CacheTokenAccounting(
             // billable as their own line items.
             return new CacheTokenAccounting(cacheRead, cacheWrite, promptTokens, false);
         }
-        if (nativeUsage instanceof OpenAiApi.Usage openAiUsage) {
-            OpenAiApi.Usage.PromptTokensDetails details = openAiUsage.promptTokensDetails();
-            Long cachedTokens =
-                    details == null || details.cachedTokens() == null
-                            ? null
-                            : details.cachedTokens().longValue();
-            if (cachedTokens == null) {
+        if (inclusive) {
+            if (cacheRead == null) {
                 return ABSENT;
             }
-            return inclusive(cachedTokens, promptTokens);
+            return inclusive(cacheRead, promptTokens);
         }
         return ABSENT;
     }

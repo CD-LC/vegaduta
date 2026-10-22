@@ -1,7 +1,7 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Azure OpenAI's BYOK credential needs four fields, not a plain key: the per-tenant resource {@code

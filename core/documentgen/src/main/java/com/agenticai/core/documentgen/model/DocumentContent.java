@@ -18,7 +18,7 @@ import java.util.List;
  * @param rawText optional pre-formatted plain text (nullable) - the primary payload for TXT, and
  *     MD's fallback when {@link #sections()} is empty
  * @param json raw passthrough value for {@link DocumentType#JSON} (nullable) - typically a {@code
- *     com.fasterxml.jackson.databind.JsonNode} or {@code Map<String, Object>}; the JSON generator
+ *     tools.jackson.databind.JsonNode} or {@code Map<String, Object>}; the JSON generator
  *     serializes this value verbatim rather than reading title/sections/table
  */
 public record DocumentContent(

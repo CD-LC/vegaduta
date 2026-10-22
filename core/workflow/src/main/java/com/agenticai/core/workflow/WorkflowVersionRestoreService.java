@@ -5,7 +5,6 @@ import com.agenticai.core.agents.core.TuningMode;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Restoring a version snapshot onto the live definition and resolving which graph a run executes
@@ -130,13 +130,13 @@ class WorkflowVersionRestoreService {
             return;
         }
         try {
-            com.fasterxml.jackson.databind.JsonNode details = objectMapper.readTree(detailsJson);
+            tools.jackson.databind.JsonNode details = objectMapper.readTree(detailsJson);
             if (details.hasNonNull("reasoningDepth")) {
                 definition.setReasoningDepth(
-                        ReasoningDepth.valueOf(details.get("reasoningDepth").asText()));
+                        ReasoningDepth.valueOf(details.get("reasoningDepth").asString()));
             }
             if (details.hasNonNull("tuningMode")) {
-                definition.setTuningMode(TuningMode.valueOf(details.get("tuningMode").asText()));
+                definition.setTuningMode(TuningMode.valueOf(details.get("tuningMode").asString()));
             }
             if (details.has("stepCachingEnabled")) {
                 definition.setStepCachingEnabled(details.get("stepCachingEnabled").asBoolean());
@@ -146,14 +146,15 @@ class WorkflowVersionRestoreService {
                     || details.hasNonNull("economyModel")) {
                 ProviderName provider =
                         details.hasNonNull("economyProviderName")
-                                ? ProviderName.valueOf(details.get("economyProviderName").asText())
+                                ? ProviderName.valueOf(
+                                        details.get("economyProviderName").asString())
                                 : null;
                 definition.setCostRouting(
                         details.path("costRoutingEnabled")
                                 .asBoolean(definition.isCostRoutingEnabled()),
                         provider,
                         details.hasNonNull("economyModel")
-                                ? details.get("economyModel").asText()
+                                ? details.get("economyModel").asString()
                                 : definition.getEconomyModel());
             }
             if (details.has("maxStepsPerRun") || details.has("stepTimeoutSeconds")) {
@@ -181,13 +182,13 @@ class WorkflowVersionRestoreService {
      * nextRunAt is recomputed, never restored verbatim.
      */
     private void applyVersionSchedule(
-            WorkflowDefinition definition, com.fasterxml.jackson.databind.JsonNode details) {
+            WorkflowDefinition definition, tools.jackson.databind.JsonNode details) {
         if (!details.has("scheduleCron") && !details.has("scheduleEnabled")) {
             return;
         }
         String cron =
                 details.hasNonNull("scheduleCron")
-                        ? WorkflowCronSupport.normalize(details.get("scheduleCron").asText())
+                        ? WorkflowCronSupport.normalize(details.get("scheduleCron").asString())
                         : definition.getScheduleCron();
         if (cron != null) {
             try {

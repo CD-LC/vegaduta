@@ -2,12 +2,12 @@ package com.agenticai.core.workflow.dto;
 
 import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.WorkflowRunStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 public record WorkflowRunResponse(
         UUID id,

@@ -4,14 +4,14 @@ import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The per-node half of {@link OrchestratorService#validate}: each node type's required config,
@@ -582,7 +582,7 @@ final class WorkflowNodeConfigValidator {
                 String handle =
                         routeNode.path("handle").isMissingNode()
                                 ? null
-                                : routeNode.path("handle").asText(null);
+                                : routeNode.path("handle").asString(null);
                 if (handle != null && !handle.isBlank()) {
                     usable++;
                 }

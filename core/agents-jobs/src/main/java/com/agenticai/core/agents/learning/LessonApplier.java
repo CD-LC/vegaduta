@@ -5,12 +5,12 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryCapExceededException;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Approved LESSON: stored as an agent-private memory fact (the same store and per-person cap as a
@@ -65,7 +65,7 @@ public class LessonApplier implements LearningProposalApplier {
         }
         try {
             JsonNode payload = JsonMappers.plain().readTree(p.getPayload());
-            return UUID.fromString(payload.path("agentId").asText(""));
+            return UUID.fromString(payload.path("agentId").asString(""));
         } catch (Exception e) {
             throw new LearningProposalApplyException(
                     "This lesson does not say which agent should remember it.");

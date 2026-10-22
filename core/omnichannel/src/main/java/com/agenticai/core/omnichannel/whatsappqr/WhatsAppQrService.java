@@ -4,7 +4,6 @@ import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The tenant-facing lifecycle of a WhatsApp QR connection: "link my number" (start a bridge session
@@ -207,9 +207,9 @@ public class WhatsAppQrService {
     }
 
     private void applyBridgeStatus(WhatsAppQrConnection row, JsonNode bridge) {
-        String bridgeStatus = bridge.path("status").asText("");
+        String bridgeStatus = bridge.path("status").asString("");
         if ("CONNECTED".equals(bridgeStatus) && row.getStatus() == WhatsAppQrStatus.PAIRING) {
-            row.markActive(bridge.path("phoneNumber").asText(null));
+            row.markActive(bridge.path("phoneNumber").asString(null));
             repository.save(row);
         } else if ("LOGGED_OUT".equals(bridgeStatus)) {
             row.markDisconnected();
@@ -220,8 +220,8 @@ public class WhatsAppQrService {
     }
 
     private WhatsAppQrStatusResponse merge(WhatsAppQrConnection row, JsonNode bridge) {
-        String bridgeStatus = bridge == null ? null : bridge.path("status").asText(null);
-        String qr = bridge == null ? null : bridge.path("qr").asText(null);
+        String bridgeStatus = bridge == null ? null : bridge.path("status").asString(null);
+        String qr = bridge == null ? null : bridge.path("qr").asString(null);
         return new WhatsAppQrStatusResponse(
                 row.getStatus().name(),
                 bridgeStatus,

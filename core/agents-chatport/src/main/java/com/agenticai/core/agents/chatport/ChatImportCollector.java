@@ -5,11 +5,11 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_WARNINGS;
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParseResult;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The state of one {@link ChatImportParser#parse} call: receives each conversation tree from {@link

@@ -4,7 +4,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.platform.reliability.SloMath.InstanceWindow;
 import com.agenticai.core.platform.reliability.SloSample.Hist;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -31,6 +30,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns this replica's in-memory Micrometer counters into a time series the SLO view can window.

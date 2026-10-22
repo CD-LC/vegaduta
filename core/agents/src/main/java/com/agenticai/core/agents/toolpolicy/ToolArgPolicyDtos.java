@@ -1,7 +1,7 @@
 package com.agenticai.core.agents.toolpolicy;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
+import tools.jackson.databind.JsonNode;
 
 /** Wire shapes of {@code /api/agents/{agentId}/tool-policies}. */
 public final class ToolArgPolicyDtos {

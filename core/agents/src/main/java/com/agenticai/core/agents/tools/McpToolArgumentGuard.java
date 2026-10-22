@@ -2,8 +2,6 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.InetAddress;
 import java.net.URI;
 import java.util.Iterator;
@@ -12,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Baseline security check on LLM-constructed MCP tool-call ARGUMENT VALUES, applied by {@link
@@ -138,7 +138,7 @@ final class McpToolArgumentGuard {
         if (node == null || depth > MAX_SCAN_DEPTH) {
             return Optional.empty();
         }
-        if (node.isTextual()) {
+        if (node.isString()) {
             return checkValue(node.textValue());
         }
         if (node.isObject()) {

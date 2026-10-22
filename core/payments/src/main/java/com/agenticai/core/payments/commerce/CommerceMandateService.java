@@ -10,7 +10,6 @@ import com.agenticai.core.payments.wallet.AgentWalletService;
 import com.agenticai.core.payments.wallet.WalletException;
 import com.agenticai.core.payments.wallet.WalletLedgerEntry;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The AP2-style mandate chain: an <b>intent mandate</b> (user authorizes an agent to shop for X up
@@ -502,7 +502,7 @@ public class CommerceMandateService {
         }
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException(e);
         }
     }

@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.openai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Validates an Open Responses request and folds it into the {@link OpenAiChatRequest} the shared
@@ -62,8 +62,8 @@ final class OpenResponsesInputMapper {
         if (isAbsent(input)) {
             throw bad(INVALID, "'input' is required: a string or an array of message items");
         }
-        if (input.isTextual()) {
-            messages.add(message("user", input.asText()));
+        if (input.isString()) {
+            messages.add(message("user", input.asString()));
         } else if (input.isArray()) {
             int index = 0;
             for (JsonNode item : input) {
@@ -90,10 +90,10 @@ final class OpenResponsesInputMapper {
         if (isAbsent(instructions)) {
             return null;
         }
-        if (!instructions.isTextual()) {
+        if (!instructions.isString()) {
             throw bad(INVALID, "'instructions' must be a string");
         }
-        return instructions.asText().isBlank() ? null : instructions.asText();
+        return instructions.asString().isBlank() ? null : instructions.asString();
     }
 
     private static void rejectUnsupported(OpenResponsesRequest r) {
@@ -124,8 +124,9 @@ final class OpenResponsesInputMapper {
         }
         JsonNode choice = r.toolChoice();
         if (!isAbsent(choice)
-                && !(choice.isTextual()
-                        && ("auto".equals(choice.asText()) || "none".equals(choice.asText())))) {
+                && !(choice.isString()
+                        && ("auto".equals(choice.asString())
+                                || "none".equals(choice.asString())))) {
             throw bad(
                     UNSUPPORTED,
                     "'tool_choice' is not supported: only 'auto' and 'none' are accepted.");
@@ -156,7 +157,7 @@ final class OpenResponsesInputMapper {
         Iterator<Map.Entry<String, JsonNode>> it = metadata.fields();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> e = it.next();
-            if (!e.getValue().isTextual()) {
+            if (!e.getValue().isString()) {
                 throw bad(INVALID, "'metadata' values must be strings");
             }
         }
@@ -168,7 +169,7 @@ final class OpenResponsesInputMapper {
             throw bad(INVALID, at + " must be an object");
         }
         JsonNode type = item.get("type");
-        if (!isAbsent(type) && !(type.isTextual() && "message".equals(type.asText()))) {
+        if (!isAbsent(type) && !(type.isString() && "message".equals(type.asString()))) {
             throw bad(
                     UNSUPPORTED,
                     at
@@ -178,18 +179,18 @@ final class OpenResponsesInputMapper {
                             + "are supported");
         }
         JsonNode role = item.get("role");
-        if (isAbsent(role) || !role.isTextual() || !ROLES.contains(role.asText())) {
+        if (isAbsent(role) || !role.isString() || !ROLES.contains(role.asString())) {
             throw bad(INVALID, at + " needs a 'role' of user, assistant, system or developer");
         }
-        return message(role.asText(), contentText(item.get("content"), at));
+        return message(role.asString(), contentText(item.get("content"), at));
     }
 
     private static String contentText(JsonNode content, String at) {
         if (isAbsent(content)) {
             return "";
         }
-        if (content.isTextual()) {
-            return content.asText();
+        if (content.isString()) {
+            return content.asString();
         }
         if (!content.isArray()) {
             throw bad(INVALID, at + " 'content' must be a string or an array of content parts");
@@ -197,7 +198,7 @@ final class OpenResponsesInputMapper {
         StringBuilder joined = new StringBuilder();
         for (JsonNode part : content) {
             JsonNode type = part == null ? null : part.get("type");
-            if (isAbsent(type) || !type.isTextual() || !TEXT_PART_TYPES.contains(type.asText())) {
+            if (isAbsent(type) || !type.isString() || !TEXT_PART_TYPES.contains(type.asString())) {
                 throw bad(
                         UNSUPPORTED,
                         at
@@ -206,15 +207,18 @@ final class OpenResponsesInputMapper {
                                 + "': only input_text is supported");
             }
             JsonNode text = part.get("text");
-            if (isAbsent(text) || !text.isTextual()) {
+            if (isAbsent(text) || !text.isString()) {
                 throw bad(
                         INVALID,
-                        at + " content part of type '" + type.asText() + "' needs a string 'text'");
+                        at
+                                + " content part of type '"
+                                + type.asString()
+                                + "' needs a string 'text'");
             }
             if (joined.length() > 0) {
                 joined.append('\n');
             }
-            joined.append(text.asText());
+            joined.append(text.asString());
         }
         return joined.toString();
     }
@@ -229,10 +233,10 @@ final class OpenResponsesInputMapper {
 
     /** A type name for an error message, capped and stripped of anything but a plain identifier. */
     private static String safe(JsonNode type) {
-        if (isAbsent(type) || !type.isTextual()) {
+        if (isAbsent(type) || !type.isString()) {
             return "unknown";
         }
-        String s = type.asText();
+        String s = type.asString();
         s = s.length() > 40 ? s.substring(0, 40) : s;
         return s.replaceAll("[^A-Za-z0-9_.:-]", "?");
     }

@@ -3,17 +3,17 @@ package com.agenticai.core.workflow;
 import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Validation and type coercion of a parameter-extractor reply against the declared parameters
@@ -49,19 +49,19 @@ final class AiOutputValidator {
         if (v == null || v.isMissingNode() || v.isNull()) {
             return Coerced.absent();
         }
-        if (v.isTextual()) {
-            String t = v.asText().strip();
+        if (v.isString()) {
+            String t = v.asString().strip();
             if (t.isEmpty() || t.equalsIgnoreCase("null")) {
                 return Coerced.absent();
             }
         }
         switch (p.type()) {
             case STRING -> {
-                if (v.isTextual()) {
-                    return Coerced.of(f.textNode(v.asText().strip()));
+                if (v.isString()) {
+                    return Coerced.of(f.textNode(v.asString().strip()));
                 }
                 if (v.isNumber() || v.isBoolean()) {
-                    return Coerced.of(f.textNode(v.asText()));
+                    return Coerced.of(f.textNode(v.asString()));
                 }
                 return Coerced.bad("expected text");
             }
@@ -69,8 +69,8 @@ final class AiOutputValidator {
                 BigDecimal n = null;
                 if (v.isNumber()) {
                     n = v.decimalValue();
-                } else if (v.isTextual()) {
-                    n = parseNumber(v.asText());
+                } else if (v.isString()) {
+                    n = parseNumber(v.asString());
                 }
                 return n == null ? Coerced.bad("expected a number") : Coerced.of(numberNode(n, f));
             }
@@ -78,8 +78,8 @@ final class AiOutputValidator {
                 if (v.isBoolean()) {
                     return Coerced.of(v);
                 }
-                if (v.isTextual()) {
-                    switch (v.asText().strip().toLowerCase(Locale.ROOT)) {
+                if (v.isString()) {
+                    switch (v.asString().strip().toLowerCase(Locale.ROOT)) {
                         case "true", "yes", "y" -> {
                             return Coerced.of(f.booleanNode(true));
                         }
@@ -95,8 +95,8 @@ final class AiOutputValidator {
             }
             case ARRAY -> {
                 JsonNode array = v;
-                if (v.isTextual()) {
-                    String t = v.asText().strip();
+                if (v.isString()) {
+                    String t = v.asString().strip();
                     array =
                             t.startsWith("[")
                                     ? StructuredOutput.readArray(mapper, t).orElse(null)
@@ -113,8 +113,8 @@ final class AiOutputValidator {
                     if (element == null || element.isNull()) {
                         continue;
                     }
-                    if (element.isTextual()) {
-                        String s = element.asText().strip();
+                    if (element.isString()) {
+                        String s = element.asString().strip();
                         if (!s.isEmpty()) {
                             out.add(s);
                         }
@@ -130,7 +130,7 @@ final class AiOutputValidator {
                 if (!v.isValueNode()) {
                     return Coerced.bad("expected one of the listed options");
                 }
-                String wanted = v.asText().strip();
+                String wanted = v.asString().strip();
                 for (String option : p.options()) {
                     if (option.equalsIgnoreCase(wanted)) {
                         return Coerced.of(f.textNode(option));

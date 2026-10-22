@@ -2,8 +2,6 @@ package com.agenticai.core.tenancy.demo;
 
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,6 +16,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "Email me this conversation" - {@code POST /api/demo/transcript-email}'s engine, and the
@@ -258,7 +258,7 @@ public class DemoTranscriptEmailService {
         for (String json : raw) {
             try {
                 JsonNode turn = objectMapper.readTree(json);
-                String content = turn.path("content").asText("");
+                String content = turn.path("content").asString("");
                 if (content.isBlank()) {
                     continue;
                 }
@@ -266,8 +266,8 @@ public class DemoTranscriptEmailService {
                 // "USER"/"ASSISTANT". Anything unrecognised renders as the
                 // agent side rather than being dropped - a lost label is
                 // better than a lost line.
-                lines.add(new TranscriptLine("USER".equals(turn.path("role").asText()), content));
-            } catch (com.fasterxml.jackson.core.JacksonException e) {
+                lines.add(new TranscriptLine("USER".equals(turn.path("role").asString()), content));
+            } catch (tools.jackson.core.JacksonException e) {
                 log.warn("Skipping unreadable turn while building a demo transcript email", e);
             }
         }

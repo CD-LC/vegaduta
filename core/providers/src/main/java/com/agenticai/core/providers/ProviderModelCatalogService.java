@@ -1,7 +1,6 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * "In model selection also, there should be a dropdown which lists all available models in that
@@ -395,14 +395,14 @@ public class ProviderModelCatalogService {
                 return List.of();
             }
             List<ProviderModelCatalogEntry> entries = new ArrayList<>();
-            Iterator<JsonNode> elements = response.get("data").elements();
+            Iterator<JsonNode> elements = response.get("data").values().iterator();
             while (elements.hasNext()) {
                 JsonNode node = elements.next();
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id == null || id.isBlank()) {
                     continue;
                 }
-                String name = node.path("name").asText(id);
+                String name = node.path("name").asString(id);
                 Integer contextWindow =
                         node.path("context_length").isMissingNode()
                                 ? null
@@ -418,7 +418,7 @@ public class ProviderModelCatalogService {
                 JsonNode modalities = node.path("architecture").path("input_modalities");
                 if (modalities.isArray()) {
                     for (JsonNode modality : modalities) {
-                        String value = modality.asText("");
+                        String value = modality.asString("");
                         supportsImage |= "image".equalsIgnoreCase(value);
                         supportsAudio |= "audio".equalsIgnoreCase(value);
                         supportsVideo |= "video".equalsIgnoreCase(value);

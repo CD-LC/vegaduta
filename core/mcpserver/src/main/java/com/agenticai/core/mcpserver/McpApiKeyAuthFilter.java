@@ -3,8 +3,6 @@ package com.agenticai.core.mcpserver;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.expose.McpExposureRpcHandler;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -26,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Authenticates every inbound request to the MCP server endpoint (see {@code McpServerToolConfig}
@@ -438,9 +438,9 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
             JsonNode node = MAPPER.readTree(body);
             return node != null
                     && node.isObject()
-                    && "tools/call".equals(node.path("method").asText())
-                    && "get_task".equals(node.path("params").path("name").asText());
-        } catch (IOException | RuntimeException e) {
+                    && "tools/call".equals(node.path("method").asString())
+                    && "get_task".equals(node.path("params").path("name").asString());
+        } catch (RuntimeException e) {
             return false;
         }
     }

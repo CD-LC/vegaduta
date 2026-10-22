@@ -3,7 +3,6 @@ package com.agenticai.core.workflow;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Per-node error strategy ({@code onError} / {@code retry} in a node's config JSON - no schema

@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -15,6 +13,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Gmail v1 REST calls, split across two scopes (see {@code GoogleScopes}): {@link
@@ -48,7 +48,7 @@ public class GoogleGmailClient {
                 get(BASE + "/messages?maxResults=" + Math.max(1, Math.min(maxResults, 10)) + q);
         List<MessageSummary> summaries = new ArrayList<>();
         for (JsonNode item : list.path("messages")) {
-            String id = item.path("id").asText(null);
+            String id = item.path("id").asString(null);
             if (id == null) continue;
             summaries.add(fetchSummary(id));
         }
@@ -65,22 +65,22 @@ public class GoogleGmailClient {
         String subject = null;
         String from = null;
         for (JsonNode header : message.path("payload").path("headers")) {
-            String name = header.path("name").asText("");
-            if ("Subject".equalsIgnoreCase(name)) subject = header.path("value").asText(null);
-            if ("From".equalsIgnoreCase(name)) from = header.path("value").asText(null);
+            String name = header.path("name").asString("");
+            if ("Subject".equalsIgnoreCase(name)) subject = header.path("value").asString(null);
+            if ("From".equalsIgnoreCase(name)) from = header.path("value").asString(null);
         }
-        return new MessageSummary(id, from, subject, message.path("snippet").asText(""));
+        return new MessageSummary(id, from, subject, message.path("snippet").asString(""));
     }
 
     public String readMessage(String messageId) {
         JsonNode message = get(BASE + "/messages/" + urlEncode(messageId) + "?format=full");
         String text = extractPlainText(message.path("payload"));
-        return text != null ? text : message.path("snippet").asText("");
+        return text != null ? text : message.path("snippet").asString("");
     }
 
     private String extractPlainText(JsonNode part) {
-        if ("text/plain".equals(part.path("mimeType").asText())) {
-            String data = part.path("body").path("data").asText(null);
+        if ("text/plain".equals(part.path("mimeType").asString())) {
+            String data = part.path("body").path("data").asString(null);
             if (data != null) {
                 return new String(Base64.getUrlDecoder().decode(data), StandardCharsets.UTF_8);
             }

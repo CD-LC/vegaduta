@@ -27,9 +27,6 @@ import com.agenticai.core.workflow.dto.RefHint;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.guidance.WorkflowSendApprovalGuard;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -39,6 +36,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.MissingNode;
 
 /**
  * AI workflow generator (#392 - direct feedback: "What does this workflow does, instead of that
@@ -99,8 +99,9 @@ public class WorkflowGraphGeneratorService {
             AnswerConsistencyChecker answerConsistencyChecker,
             ReflexionService reflexionService,
             TaskPlanningService taskPlanningService,
-            @Value("${app.agents.default-model}") String defaultModel,
-            // Deliberately its OWN config key, not app.agents.default-max-tokens
+            @Value("${app.agents.default-model}")
+                    String defaultModel, // Deliberately its OWN config key, not
+            // app.agents.default-max-tokens
             // (1024) - that default is tuned for a conversational chat reply,
             // not a full JSON workflow graph. A real production bug: at 1024
             // tokens, anything beyond a trivial 1-2 node workflow got its JSON
@@ -112,8 +113,9 @@ public class WorkflowGraphGeneratorService {
             // headroom for a multi-node graph (each node carries a label + a
             // config object, plus edges and notes) while still being far below
             // any provider's actual output ceiling.
-            @Value("${app.workflow.generator.max-tokens:4096}") int generatorMaxTokens,
-            // On (the safe value) = WorkflowSendApprovalGuard runs on every generated graph, so a
+            @Value("${app.workflow.generator.max-tokens:4096}")
+                    int generatorMaxTokens, // On (the safe value) = WorkflowSendApprovalGuard
+            // runs on every generated graph, so a
             // node that messages someone is never handed back without an approval step in front of
             // it - enforced in code after generation, not left to the prompt. Off restores the
             // pre-guard behaviour (the model decides).
@@ -407,8 +409,8 @@ public class WorkflowGraphGeneratorService {
             if (node.isArray()) {
                 node.forEach(
                         n -> {
-                            if (n.isTextual() && !n.asText().isBlank()) {
-                                out.add(n.asText().trim());
+                            if (n.isString() && !n.asString().isBlank()) {
+                                out.add(n.asString().trim());
                             }
                         });
             }

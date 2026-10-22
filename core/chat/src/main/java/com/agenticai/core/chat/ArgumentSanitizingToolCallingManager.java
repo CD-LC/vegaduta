@@ -1,6 +1,5 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -23,6 +22,7 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.execution.ToolExecutionException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wraps a {@link ToolCallingManager} to repair tool-call {@code arguments} that aren't valid JSON
@@ -486,10 +486,6 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 || options.getToolCallbacks().isEmpty()) {
             return prompt;
         }
-        ChatOptions copied = ChatOptionsCopy.of(options);
-        if (!(copied instanceof ToolCallingChatOptions copiedToolOptions)) {
-            return prompt;
-        }
         List<ToolCallback> wrapped = new ArrayList<>(options.getToolCallbacks().size());
         for (ToolCallback callback : options.getToolCallbacks()) {
             wrapped.add(
@@ -497,8 +493,10 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                             ? callback
                             : new ToolExceptionTranslatingCallback(callback));
         }
-        copiedToolOptions.setToolCallbacks(wrapped);
-        return new Prompt(prompt.getInstructions(), copiedToolOptions);
+        // Spring AI 2 options are immutable: mutate() yields a builder seeded with every current
+        // value.
+        ToolCallingChatOptions rewrapped = options.mutate().toolCallbacks(wrapped).build();
+        return new Prompt(prompt.getInstructions(), rewrapped);
     }
 
     /**
@@ -579,21 +577,13 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             return prompt;
         }
 
-        ChatOptions copied = ChatOptionsCopy.of(options);
-        if (!(copied instanceof ToolCallingChatOptions copiedToolOptions)) {
-            // No provider in this codebase does this (every ChatOptions that
-            // implements ToolCallingChatOptions copies to its own type), but a
-            // fallback we cannot attach is not worth an exception of its own -
-            // let the delegate fail the way it did before this method existed.
-            return prompt;
-        }
         List<ToolCallback> merged =
-                copiedToolOptions.getToolCallbacks() == null
+                options.getToolCallbacks() == null
                         ? new ArrayList<>()
-                        : new ArrayList<>(copiedToolOptions.getToolCallbacks());
+                        : new ArrayList<>(options.getToolCallbacks());
         merged.addAll(fallbacks);
-        copiedToolOptions.setToolCallbacks(merged);
-        return new Prompt(prompt.getInstructions(), copiedToolOptions);
+        ToolCallingChatOptions withFallbacks = options.mutate().toolCallbacks(merged).build();
+        return new Prompt(prompt.getInstructions(), withFallbacks);
     }
 
     /**
@@ -604,9 +594,6 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         Set<String> known = new LinkedHashSet<>();
         if (!(prompt.getOptions() instanceof ToolCallingChatOptions options)) {
             return known;
-        }
-        if (options.getToolNames() != null) {
-            known.addAll(options.getToolNames());
         }
         if (options.getToolCallbacks() != null) {
             for (ToolCallback callback : options.getToolCallbacks()) {

@@ -1,6 +1,5 @@
 package com.agenticai.core.providers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Live "what models does this key actually see right now" fetch, per provider - the tenant-key
@@ -187,13 +187,13 @@ public class LiveProviderModelFetcher {
         if (response != null && response.has("models")) {
             List<LiveModel> models = new ArrayList<>();
             for (JsonNode node : response.get("models")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id == null || id.isBlank()) {
                     continue;
                 }
                 boolean image = false;
                 for (JsonNode modality : node.path("input_modalities")) {
-                    image |= "image".equalsIgnoreCase(modality.asText(""));
+                    image |= "image".equalsIgnoreCase(modality.asString(""));
                 }
                 // xAI has shifted this field's name across API revisions -
                 // read both known spellings, null (fall back to catalog) if
@@ -218,7 +218,7 @@ public class LiveProviderModelFetcher {
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id != null && !id.isBlank()) {
                     models.add(new LiveModel(id, id, null, null, null, null));
                 }
@@ -238,11 +238,11 @@ public class LiveProviderModelFetcher {
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id == null || id.isBlank()) {
                     continue;
                 }
-                String displayName = node.path("display_name").asText(id);
+                String displayName = node.path("display_name").asString(id);
                 models.add(
                         new LiveModel(
                                 id,
@@ -264,7 +264,7 @@ public class LiveProviderModelFetcher {
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("models")) {
             for (JsonNode node : response.get("models")) {
-                String name = node.path("name").asText(null);
+                String name = node.path("name").asString(null);
                 if (name == null || name.isBlank() || !supportsGenerateContent(node)) {
                     continue;
                 }
@@ -272,8 +272,8 @@ public class LiveProviderModelFetcher {
                 models.add(
                         new LiveModel(
                                 id,
-                                node.path("displayName").asText(id),
-                                node.path("description").asText(null),
+                                node.path("displayName").asString(id),
+                                node.path("description").asString(null),
                                 intOrNull(node, "inputTokenLimit"),
                                 null,
                                 null));
@@ -284,7 +284,7 @@ public class LiveProviderModelFetcher {
 
     private static boolean supportsGenerateContent(JsonNode geminiModel) {
         for (JsonNode method : geminiModel.path("supportedGenerationMethods")) {
-            if ("generateContent".equals(method.asText(""))) {
+            if ("generateContent".equals(method.asString(""))) {
                 return true;
             }
         }
@@ -299,7 +299,7 @@ public class LiveProviderModelFetcher {
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id == null || id.isBlank()) {
                     continue;
                 }
@@ -310,8 +310,8 @@ public class LiveProviderModelFetcher {
                 models.add(
                         new LiveModel(
                                 id,
-                                node.path("name").asText(id),
-                                node.path("description").asText(null),
+                                node.path("name").asString(id),
+                                node.path("description").asString(null),
                                 intOrNull(node, "max_context_length"),
                                 vision,
                                 node.has("deprecation") && !node.path("deprecation").isNull()
@@ -328,7 +328,7 @@ public class LiveProviderModelFetcher {
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 // Groq's list includes decommissioned rows flagged
                 // active=false - drop them (a missing flag counts as active).
                 if (id == null || id.isBlank() || !node.path("active").asBoolean(true)) {
@@ -348,19 +348,19 @@ public class LiveProviderModelFetcher {
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id == null || id.isBlank()) {
                     continue;
                 }
                 boolean image = false;
                 for (JsonNode modality : node.path("architecture").path("input_modalities")) {
-                    image |= "image".equalsIgnoreCase(modality.asText(""));
+                    image |= "image".equalsIgnoreCase(modality.asString(""));
                 }
                 models.add(
                         new LiveModel(
                                 id,
-                                node.path("name").asText(id),
-                                node.path("description").asText(null),
+                                node.path("name").asString(id),
+                                node.path("description").asString(null),
                                 intOrNull(node, "context_length"),
                                 image,
                                 null));

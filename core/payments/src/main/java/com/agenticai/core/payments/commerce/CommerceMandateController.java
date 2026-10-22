@@ -7,7 +7,6 @@ import com.agenticai.core.payments.commerce.CommerceDtos.EventResponse;
 import com.agenticai.core.payments.commerce.CommerceDtos.MandateResponse;
 import com.agenticai.core.payments.commerce.CommerceDtos.RevokeRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tenant-facing REST for the AP2-style mandate chain (agentic commerce): {@code POST /intent}

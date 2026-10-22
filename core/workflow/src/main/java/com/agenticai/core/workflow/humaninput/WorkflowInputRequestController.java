@@ -5,8 +5,6 @@ import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.workflow.WorkflowApprovalResumeException;
 import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.WorkflowRunnerAccess;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The console surface for paused runs waiting on structured human input - the sibling of the HITL

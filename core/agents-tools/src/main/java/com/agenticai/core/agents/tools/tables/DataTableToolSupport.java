@@ -3,13 +3,13 @@ package com.agenticai.core.agents.tools.tables;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.tables.DataTableDtos.RowView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 
 /** Shared argument parsing and failure rendering for the two data-table tools. */
 final class DataTableToolSupport {
@@ -34,7 +34,7 @@ final class DataTableToolSupport {
             if (parsed instanceof Map<?, ?> m) {
                 return (Map<String, Object>) m;
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // fall through
         }
         throw new IllegalArgumentException("The tool input must be a JSON object");
@@ -79,7 +79,7 @@ final class DataTableToolSupport {
                         + " characters - narrow the filter or lower the limit]";
             }
             return out;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "Could not render the result as JSON.";
         }
     }

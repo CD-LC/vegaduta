@@ -3,9 +3,6 @@ package com.agenticai.core.agents.openai;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.agents.turn.AgentChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Inbound OpenAI-compatible surface: lets any OpenAI SDK, LiteLLM, Continue, Open WebUI or plain

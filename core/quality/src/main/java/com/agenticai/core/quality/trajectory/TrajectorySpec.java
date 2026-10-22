@@ -1,11 +1,6 @@
 package com.agenticai.core.quality.trajectory;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,6 +10,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A dataset case's expected trajectory plus how to score it - stored as the case's {@code
@@ -131,9 +131,9 @@ public final class TrajectorySpec {
             JsonNode node = MAPPER.readTree(specJson);
             return node != null
                     && node.isObject()
-                    && node.path("type").isTextual()
-                    && TYPE.equalsIgnoreCase(node.path("type").asText().trim());
-        } catch (JsonProcessingException e) {
+                    && node.path("type").isString()
+                    && TYPE.equalsIgnoreCase(node.path("type").asString().trim());
+        } catch (JacksonException e) {
             return false;
         }
     }
@@ -167,7 +167,7 @@ public final class TrajectorySpec {
         }
         try {
             return parse(MAPPER.readTree(specJson));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Trajectory spec is not valid JSON.");
         }
     }
@@ -177,7 +177,7 @@ public final class TrajectorySpec {
         if (spec == null || !spec.isObject()) {
             throw new IllegalArgumentException("Trajectory spec must be a JSON object.");
         }
-        for (Iterator<String> it = spec.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = spec.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!KEYS.contains(key)) {
                 throw new IllegalArgumentException(
@@ -188,15 +188,15 @@ public final class TrajectorySpec {
                                 + ".");
             }
         }
-        if (!spec.has("type") || !TYPE.equalsIgnoreCase(spec.path("type").asText("").trim())) {
+        if (!spec.has("type") || !TYPE.equalsIgnoreCase(spec.path("type").asString("").trim())) {
             throw new IllegalArgumentException("Trajectory spec needs \"type\":\"" + TYPE + "\".");
         }
         Mode mode = Mode.IN_ORDER;
         if (spec.has("mode")) {
-            if (!spec.get("mode").isTextual()) {
+            if (!spec.get("mode").isString()) {
                 throw new IllegalArgumentException("'mode' must be text.");
             }
-            mode = Mode.parse(spec.get("mode").asText());
+            mode = Mode.parse(spec.get("mode").asString());
         }
         double minScore = 1.0;
         if (spec.has("minScore")) {
@@ -240,7 +240,7 @@ public final class TrajectorySpec {
         if (!s.isObject()) {
             throw new IllegalArgumentException(where + "must be a JSON object.");
         }
-        for (Iterator<String> it = s.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = s.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!STEP_KEYS.contains(key)) {
                 throw new IllegalArgumentException(
@@ -249,8 +249,8 @@ public final class TrajectorySpec {
         }
         JsonNode tool = s.get("tool");
         if (tool == null
-                || !tool.isTextual()
-                || !TOOL_NAME.matcher(tool.asText().trim()).matches()) {
+                || !tool.isString()
+                || !TOOL_NAME.matcher(tool.asString().trim()).matches()) {
             throw new IllegalArgumentException(
                     where + "'tool' must be an exact tool name (letters, digits, _ - . :).");
         }
@@ -283,7 +283,7 @@ public final class TrajectorySpec {
                 raw.put(e.getKey(), e.getValue());
             }
         }
-        return new ExpectedStep(tool.asText().trim(), matchers, raw);
+        return new ExpectedStep(tool.asString().trim(), matchers, raw);
     }
 
     private static double unitInterval(JsonNode v, String key) {

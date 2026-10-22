@@ -3,9 +3,6 @@ package com.agenticai.core.agents.tools.localshell;
 import com.agenticai.core.agents.tools.stdiosandbox.StdioSandboxException;
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
@@ -13,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The Assistant's terminal, as two tools over one sandboxed runner:
@@ -133,7 +133,7 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
     public String call(String toolInput) {
         try {
             JsonNode args = MAPPER.readTree(toolInput == null ? "{}" : toolInput);
-            String command = args.path("command").asText("");
+            String command = args.path("command").asString("");
             Optional<String> refusal = ShellCommandPolicy.refusal(command);
             if (refusal.isPresent()) {
                 return error(refusal.get());
@@ -151,7 +151,7 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
                 }
             }
             if (args.path("background").asBoolean(false) && !readOnly) {
-                String bgFolder = args.path("folder").asText("");
+                String bgFolder = args.path("folder").asString("");
                 ShellRunner.Server server =
                         runner.runBackground(withoutRedundantCd(command, bgFolder), bgFolder);
                 ObjectNode bg = MAPPER.createObjectNode();
@@ -172,7 +172,7 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
             }
             int timeout = args.path("timeout_seconds").asInt(defaultTimeoutSeconds);
             timeout = Math.min(Math.max(timeout, 1), maxTimeoutSeconds);
-            String folder = args.path("folder").asText("");
+            String folder = args.path("folder").asString("");
             command = withoutRedundantCd(command, folder);
             ShellRunner.Result result = runner.run(command, folder, Duration.ofSeconds(timeout));
             ObjectNode out = MAPPER.createObjectNode();
@@ -223,7 +223,7 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
     private static String folderOf(String toolInput) {
         try {
             JsonNode node = MAPPER.readTree(toolInput == null ? "{}" : toolInput).path("folder");
-            return node.isTextual() && !node.asText().isBlank() ? node.asText() : null;
+            return node.isString() && !node.asString().isBlank() ? node.asString() : null;
         } catch (IOException e) {
             return null;
         }
@@ -232,7 +232,7 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
     private static String commandOf(String toolInput) {
         try {
             JsonNode node = MAPPER.readTree(toolInput == null ? "{}" : toolInput).path("command");
-            return node.isTextual() && !node.asText().isBlank() ? node.asText() : null;
+            return node.isString() && !node.asString().isBlank() ? node.asString() : null;
         } catch (IOException e) {
             return null;
         }

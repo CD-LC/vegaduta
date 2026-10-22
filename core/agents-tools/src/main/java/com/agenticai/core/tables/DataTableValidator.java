@@ -1,8 +1,6 @@
 package com.agenticai.core.tables;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -15,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Validates and normalises cell values against a table's declared column types. Pure and static: no
@@ -216,7 +216,7 @@ public final class DataTableValidator {
             if (t.startsWith("{") || t.startsWith("[")) {
                 try {
                     return MAPPER.readValue(t, Object.class);
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     throw bad(col, "valid JSON");
                 }
             }
@@ -235,7 +235,7 @@ public final class DataTableValidator {
         int bytes;
         try {
             bytes = MAPPER.writeValueAsString(normalized).getBytes(StandardCharsets.UTF_8).length;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw bad(col, "valid JSON");
         }
         if (bytes > maxCellBytes) {

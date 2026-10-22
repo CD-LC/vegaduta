@@ -1,8 +1,8 @@
 package com.agenticai.core.guardrails.toolargs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A tiny, safe path into a tool's JSON arguments: {@code a.b[*].c[2]}.

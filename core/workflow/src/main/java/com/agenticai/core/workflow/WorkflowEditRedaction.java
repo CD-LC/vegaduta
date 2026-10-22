@@ -1,17 +1,17 @@
 package com.agenticai.core.workflow;
 
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Keeps literal credentials out of the AI generator's edit-mode prompt. Edit mode sends the whole
@@ -155,9 +155,10 @@ final class WorkflowEditRedaction {
             ObjectNode object = (ObjectNode) node;
             // A {name, value} pair (http header, query param): the NAME decides whether VALUE is
             // sensitive.
-            String pairName = object.path("name").isTextual() ? object.path("name").asText() : null;
+            String pairName =
+                    object.path("name").isString() ? object.path("name").asString() : null;
             List<String> fields = new ArrayList<>();
-            object.fieldNames().forEachRemaining(fields::add);
+            object.propertyNames().forEach(fields::add);
             for (String field : fields) {
                 String effectiveKey = "value".equals(field) && pairName != null ? pairName : field;
                 object.set(field, walk(object.get(field), effectiveKey, collector, depth + 1));
@@ -171,9 +172,9 @@ final class WorkflowEditRedaction {
             }
             return array;
         }
-        if (node.isTextual()) {
-            String redacted = redactText(key, node.asText(), collector);
-            return redacted.equals(node.asText()) ? node : TextNode.valueOf(redacted);
+        if (node.isString()) {
+            String redacted = redactText(key, node.asString(), collector);
+            return redacted.equals(node.asString()) ? node : StringNode.valueOf(redacted);
         }
         return node;
     }

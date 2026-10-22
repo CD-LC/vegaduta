@@ -4,7 +4,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pulls WhatsApp messages from the operator's whatsapp-qr bridge. Linked-device WhatsApp has no
@@ -280,10 +280,11 @@ public class WhatsAppQrReceiveService {
             if (result == null) {
                 return false;
             }
-            String status = result.path("status").asText("");
+            String status = result.path("status").asString("");
             switch (status) {
                 case "CONNECTED" ->
-                        service.markConnected(sessionKey, result.path("phoneNumber").asText(null));
+                        service.markConnected(
+                                sessionKey, result.path("phoneNumber").asString(null));
                 case "LOGGED_OUT" -> {
                     service.markLoggedOut(sessionKey);
                     stopReceiving(sessionKey);

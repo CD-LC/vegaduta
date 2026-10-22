@@ -4,14 +4,14 @@ import com.agenticai.core.agents.resumable.ResumableStreamBuffer.Entry;
 import com.agenticai.core.agents.resumable.ResumableStreamBuffer.ReadResult;
 import com.agenticai.core.agents.resumable.ResumableStreamBuffer.TurnMeta;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Redis half of the resumable-stream buffer ({@code app.chat.resumable-streams.store=redis}): lets
@@ -125,11 +125,11 @@ final class RedisResumableStreamBuffer {
             JsonNode n = JSON.readTree(raw);
             return Optional.of(
                     new TurnMeta(
-                            n.path("turnId").asText(),
-                            n.path("tenantId").asText(),
-                            n.hasNonNull("ownerSubject") ? n.get("ownerSubject").asText() : null,
-                            n.path("agentId").asText(),
-                            n.path("sessionId").asText(),
+                            n.path("turnId").asString(),
+                            n.path("tenantId").asString(),
+                            n.hasNonNull("ownerSubject") ? n.get("ownerSubject").asString() : null,
+                            n.path("agentId").asString(),
+                            n.path("sessionId").asString(),
                             n.path("startedAtMs").asLong()));
         } catch (Exception e) {
             return Optional.empty();

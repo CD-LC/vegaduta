@@ -3,11 +3,11 @@ package com.agenticai.core.tutor;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The shape of the two JSONB documents on {@link StudyPlan} and the one codec for them. These
@@ -169,7 +169,7 @@ public final class StudyPlanDocs {
         try {
             Curriculum parsed = MAPPER.readValue(json, Curriculum.class);
             return parsed == null ? new Curriculum(List.of()) : parsed;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Stored study plan curriculum is not valid JSON", e);
         }
     }
@@ -181,7 +181,7 @@ public final class StudyPlanDocs {
         try {
             ReviewDeck parsed = MAPPER.readValue(json, ReviewDeck.class);
             return parsed == null ? new ReviewDeck(List.of(), null) : parsed;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Stored study plan review deck is not valid JSON", e);
         }
     }
@@ -189,7 +189,7 @@ public final class StudyPlanDocs {
     public static String write(Object document) {
         try {
             return MAPPER.writeValueAsString(document);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not serialise a study plan document", e);
         }
     }

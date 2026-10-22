@@ -1,9 +1,9 @@
 package com.agenticai.core.voice;
 
 import com.agenticai.core.speech.call.CallSpeechQuotaExceededException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.codec.ServerSentEvent;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The server-sent events {@link VoiceCallController#turn} streams and the person-facing wording of
@@ -23,7 +23,7 @@ final class VoiceTurnEvents {
     static String toJson(Object value) {
         try {
             return SSE_MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize voice turn SSE payload", e);
         }
     }

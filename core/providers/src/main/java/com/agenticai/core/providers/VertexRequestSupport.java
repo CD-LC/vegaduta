@@ -2,9 +2,9 @@ package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.validation.ProviderValidationException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Admin-input checks for the two Vertex AI hosted-provider auth types ({@code VERTEX_ADC}, {@code

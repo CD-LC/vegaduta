@@ -6,7 +6,6 @@ import com.agenticai.core.providers.dto.ProviderAvailabilityResponse;
 import com.agenticai.core.providers.dto.ProviderResponse;
 import com.agenticai.core.providers.modality.ModalityCatalogService;
 import com.agenticai.core.tenancy.ListPaging;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.Arrays;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 @RestController
 @RequestMapping("/api/providers")

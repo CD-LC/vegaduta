@@ -3,11 +3,11 @@ package com.agenticai.core.brief;
 import com.agenticai.core.agents.assist.AssistService;
 import com.agenticai.core.brief.dto.ApplyDtos.TuneResult;
 import com.agenticai.core.brief.model.Brief;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "Tune this": the planner reads the current manifest and an instruction and proposes a changed
@@ -66,7 +66,7 @@ public class BriefTuneService {
         Brief proposed;
         try {
             proposed = objectMapper.treeToValue(reply.get("brief"), Brief.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new BriefValidationException(
                     "tune", "The model's proposal was not a readable brief - try again.");
         }
@@ -77,7 +77,7 @@ public class BriefTuneService {
         if (!result.errors().isEmpty()) {
             throw new BriefValidationException(result.errors());
         }
-        String narrative = reply.path("narrative").asText("");
+        String narrative = reply.path("narrative").asString("");
         if (narrative.length() > MAX_NARRATIVE_CHARS) {
             narrative = narrative.substring(0, MAX_NARRATIVE_CHARS);
         }

@@ -4,12 +4,12 @@ import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Graph/config helpers extracted from {@link WorkflowExecutionEngine} (extract-only split):
@@ -125,12 +125,15 @@ final class WorkflowGraphSupport {
             return objectMapper.writeValueAsString(
                     Map.of(
                             "error",
-                                    errorMessage == null || errorMessage.isBlank()
-                                            ? "Node failed."
-                                            : errorMessage,
-                            "failedNodeId", node.id(),
-                            "failedNodeLabel", node.label() == null ? node.id() : node.label(),
-                            "input", input == null ? "" : input));
+                            errorMessage == null || errorMessage.isBlank()
+                                    ? "Node failed."
+                                    : errorMessage,
+                            "failedNodeId",
+                            node.id(),
+                            "failedNodeLabel",
+                            node.label() == null ? node.id() : node.label(),
+                            "input",
+                            input == null ? "" : input));
         } catch (Exception e) {
             return "{\"error\":\"Node failed.\"}";
         }

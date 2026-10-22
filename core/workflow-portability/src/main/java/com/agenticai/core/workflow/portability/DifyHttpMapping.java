@@ -3,14 +3,14 @@ package com.agenticai.core.workflow.portability;
 import com.agenticai.core.agents.importer.AgentImportJson;
 import com.agenticai.core.agents.importer.AgentImportText;
 import com.agenticai.core.workflow.portability.DifyImportModel.Ctx;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Maps a Dify HTTP Request node onto the HTTP node's config. Part of {@link DifyImportMapper}. */
 final class DifyHttpMapping {
@@ -108,8 +108,8 @@ final class DifyHttpMapping {
         if (data == null || data.isNull()) {
             return "";
         }
-        if (data.isTextual()) {
-            return data.asText();
+        if (data.isString()) {
+            return data.asString();
         }
         if (data.isArray()) {
             StringBuilder sb = new StringBuilder();
@@ -119,7 +119,7 @@ final class DifyHttpMapping {
                     JsonNode v = item.get("value");
                     sb.append(key)
                             .append(':')
-                            .append(v == null || v.isNull() ? "" : v.asText())
+                            .append(v == null || v.isNull() ? "" : v.asString())
                             .append('\n');
                 }
             }

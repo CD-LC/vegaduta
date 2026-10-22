@@ -2,9 +2,9 @@ package com.agenticai.core.agents.tools.browseruse;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Small shared helpers for the five {@code browser_*} tool callbacks - JSON result/error shaping

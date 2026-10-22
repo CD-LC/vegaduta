@@ -2,7 +2,6 @@ package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.CitationSpans;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@code verify_citations} built-in: the verification pass of deep research. For each

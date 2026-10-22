@@ -3,14 +3,14 @@ package com.agenticai.core.agents.tools.search;
 import com.agenticai.core.agents.tools.ToolSearchToolNames;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code call_tool(name, argsJson)}: runs a tool that {@code search_tools} activated this turn.
@@ -106,7 +106,7 @@ public class CallToolToolCallback implements ToolCallback {
                     "Could not run the tool: call_tool's input was not valid JSON. Use {\"name\": \"tool_name\", "
                             + "\"argsJson\": \"{}\"}.");
         }
-        String name = request.path("name").asText("").trim();
+        String name = request.path("name").asString("").trim();
         if (name.isEmpty()) {
             return refuse(
                     "Could not run the tool: no name was given. Find tools with search_tools first.");
@@ -174,8 +174,8 @@ public class CallToolToolCallback implements ToolCallback {
         if (raw.isObject()) {
             return raw.toString();
         }
-        if (raw.isTextual()) {
-            String text = raw.asText().trim();
+        if (raw.isString()) {
+            String text = raw.asString().trim();
             if (text.isEmpty()) {
                 return "{}";
             }

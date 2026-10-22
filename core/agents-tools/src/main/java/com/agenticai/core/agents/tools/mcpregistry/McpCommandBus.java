@@ -1,14 +1,14 @@
 package com.agenticai.core.agents.tools.mcpregistry;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Per-replica command queues on Redis lists ({@code mcp:cmdq:{replicaId}}): LPUSH by the sender,
@@ -36,7 +36,7 @@ public final class McpCommandBus {
             String queue = QUEUE_PREFIX + targetReplica;
             redis.opsForList().leftPush(queue, mapper.writeValueAsString(command));
             redis.expire(queue, QUEUE_TTL);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -98,7 +98,7 @@ public final class McpCommandBus {
             }
             try {
                 out.add(mapper.readValue(json, McpCommand.class));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 // malformed entry: drop it rather than wedge the queue
             }
         }

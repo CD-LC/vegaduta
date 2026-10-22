@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.runbudget;
 
 import com.agenticai.core.agents.dto.AgentRunBudgetResponse;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Per-agent run cap: read the effective cap + estimate, and let whoever may edit the agent lower
@@ -59,9 +59,9 @@ public class AgentRunBudgetController {
         if (value.isNumber()) {
             return value.decimalValue();
         }
-        if (value.isTextual()) {
+        if (value.isString()) {
             try {
-                return new BigDecimal(value.asText().trim());
+                return new BigDecimal(value.asString().trim());
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(
                         FIELD + " must be a number, or null to clear the cap");

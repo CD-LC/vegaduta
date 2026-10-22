@@ -1,7 +1,6 @@
 package com.agenticai.core.sarvam;
 
 import com.agenticai.core.speech.SpeechTextNormalizer;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /text-to-speech}. Sarvam's response is a base64-encoded WAV string inside an
@@ -143,14 +143,14 @@ public class SarvamTextToSpeechClient {
                             .body(JsonNode.class);
             JsonNode audios = response.path("audios");
             String base64Audio =
-                    (audios.isArray() && !audios.isEmpty()) ? audios.get(0).asText(null) : null;
+                    (audios.isArray() && !audios.isEmpty()) ? audios.get(0).asString(null) : null;
             if (base64Audio == null || base64Audio.isBlank()) {
                 throw new SarvamApiException(
                         0, "Sarvam text-to-speech returned no audio in the response.");
             }
             byte[] wavBytes = Base64.getDecoder().decode(base64Audio);
             success = true;
-            return new SynthesisResult(wavBytes, response.path("request_id").asText(null));
+            return new SynthesisResult(wavBytes, response.path("request_id").asString(null));
         } catch (RestClientResponseException e) {
             errorMessage = SarvamTranslateClient.describeError(e);
             throw new SarvamApiException(

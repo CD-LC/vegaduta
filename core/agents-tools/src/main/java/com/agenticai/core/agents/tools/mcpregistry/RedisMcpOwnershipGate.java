@@ -5,7 +5,6 @@ import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.mcp.dto.McpConnectionTestResult;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.AllowUnlockedSchedule;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +17,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code app.mcp.registry-store=redis}. Live clients stay in each JVM; this class only coordinates.
@@ -109,17 +109,17 @@ public final class RedisMcpOwnershipGate implements McpOwnershipGate {
                         "MCP owner replica did not answer the routed tool call within "
                                 + toolCallTimeout);
             }
-            com.fasterxml.jackson.databind.JsonNode node = JSON.readTree(reply.get());
+            tools.jackson.databind.JsonNode node = JSON.readTree(reply.get());
             if (node.path("ok").asBoolean(false)) {
-                return Optional.of(node.path("result").asText(""));
+                return Optional.of(node.path("result").asString(""));
             }
             throw new IllegalStateException(
                     "MCP owner replica failed the tool call: "
-                            + node.path("error").asText("unknown"));
+                            + node.path("error").asString("unknown"));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while routing an MCP tool call", e);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException("Malformed routed MCP tool call or reply", e);
         }
     }
@@ -357,16 +357,16 @@ public final class RedisMcpOwnershipGate implements McpOwnershipGate {
         HANDLING.set(Boolean.TRUE);
         TenantContext.set(TenantContext.of(c.tenant(), COMMAND_ACTOR, Set.of()));
         try {
-            com.fasterxml.jackson.databind.node.ObjectNode out = JSON.createObjectNode();
+            tools.jackson.databind.node.ObjectNode out = JSON.createObjectNode();
             try {
-                com.fasterxml.jackson.databind.JsonNode in = JSON.readTree(c.payload());
+                tools.jackson.databind.JsonNode in = JSON.readTree(c.payload());
                 out.put(
                         "result",
                         caller.call(
                                 c.tenant(),
                                 c.registrationId(),
-                                in.path("tool").asText(),
-                                in.path("args").asText("")));
+                                in.path("tool").asString(),
+                                in.path("args").asString("")));
                 out.put("ok", true);
             } catch (Exception e) {
                 out.put("ok", false);

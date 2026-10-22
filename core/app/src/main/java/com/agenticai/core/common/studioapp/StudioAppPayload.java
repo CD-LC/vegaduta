@@ -1,11 +1,11 @@
 package com.agenticai.core.common.studioapp;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The no-code "contract" a studio builder configures on each connection: what the app's input
@@ -73,7 +73,7 @@ public final class StudioAppPayload {
             return body;
         }
         Optional<JsonNode> node = parse(body).flatMap(root -> lookup(root, effective));
-        return node.map(n -> n.isTextual() ? n.asText() : n.toString()).orElse(body);
+        return node.map(n -> n.isString() ? n.asString() : n.toString()).orElse(body);
     }
 
     /** Extracts {@code path} from an already-parsed JSON tree; empty when absent. */

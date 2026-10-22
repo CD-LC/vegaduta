@@ -1,11 +1,11 @@
 package com.agenticai.core.chat.structured;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * JSON Schema checks and rewrites behind {@link StructuredOutput}'s native structured-output
@@ -57,10 +57,10 @@ final class JsonSchemaRules {
             Set<String> required = new HashSet<>();
             JsonNode req = node.get("required");
             if (req != null && req.isArray()) {
-                req.forEach(r -> required.add(r.asText()));
+                req.forEach(r -> required.add(r.asString()));
             }
             Set<String> names = new HashSet<>();
-            props.fieldNames().forEachRemaining(names::add);
+            props.propertyNames().forEach(names::add);
             if (!required.containsAll(names)) {
                 return false;
             }
@@ -83,12 +83,12 @@ final class JsonSchemaRules {
         if (type == null) {
             return false;
         }
-        if (type.isTextual()) {
-            return "object".equals(type.asText());
+        if (type.isString()) {
+            return "object".equals(type.asString());
         }
         if (type.isArray()) {
             for (JsonNode t : type) {
-                if ("object".equals(t.asText())) {
+                if ("object".equals(t.asString())) {
                     return true;
                 }
             }
@@ -156,7 +156,7 @@ final class JsonSchemaRules {
     static boolean hasNonLocalRef(JsonNode node) {
         if (node.isObject()) {
             JsonNode ref = node.get("$ref");
-            if (ref != null && ref.isTextual() && !ref.asText().startsWith("#")) {
+            if (ref != null && ref.isString() && !ref.asString().startsWith("#")) {
                 return true;
             }
         }

@@ -4,8 +4,6 @@ import com.agenticai.core.workflow.WorkflowExpressionResolver.NodeEvalInfo;
 import com.agenticai.core.workflow.expression.EvalContext;
 import com.agenticai.core.workflow.expression.ExpressionException;
 import com.agenticai.core.workflow.expression.NodeOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,6 +13,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * What expressions can read for one node execution: the node's input, upstream outputs from the run

@@ -1,11 +1,11 @@
 package com.agenticai.core.agents.tools.mcpapps;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Per-request guards of {@link McpAppsService}: the sliding-window rate limit applied to app views
@@ -23,8 +23,8 @@ final class McpAppsRequestGuard {
         if (depth > MAX_JSON_DEPTH) {
             return true; // pathological nesting is refused rather than walked
         }
-        if (n.isTextual()) {
-            return n.asText().toLowerCase(Locale.ROOT).contains("ui://");
+        if (n.isString()) {
+            return n.asString().toLowerCase(Locale.ROOT).contains("ui://");
         }
         if (n.isObject()) {
             var it = n.fields();

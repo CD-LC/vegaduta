@@ -1,9 +1,9 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.Locale;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * BYOK credential for {@link ProviderName#LOCAL_OPENAI}: the base URL of a model server that speaks

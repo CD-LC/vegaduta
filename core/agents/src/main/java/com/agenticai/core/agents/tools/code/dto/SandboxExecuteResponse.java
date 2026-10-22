@@ -1,7 +1,7 @@
 package com.agenticai.core.agents.tools.code.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * {@code POST /v1/execute} response - one record covering both arms of the contract, discriminated

@@ -3,7 +3,6 @@ package com.agenticai.core.eventbus.webhook;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.mcp.McpRemoteUrlGuard;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.SecureRandom;
 import java.util.HexFormat;
 import java.util.LinkedHashSet;
@@ -13,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * CRUD + secret lifecycle for {@link WebhookSubscription}. URL validation is delegated to {@link
@@ -161,7 +161,7 @@ public class WebhookSubscriptionService {
                     deliveryRepository.save(
                             new WebhookDelivery(sub.getId(), "webhook.test", null, payload));
             return delivery.getId();
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException("Could not build test payload", e);
         }
     }

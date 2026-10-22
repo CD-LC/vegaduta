@@ -208,8 +208,9 @@ public class SidecarClient {
     /** Spring constructor: picks up an {@link EmbeddingClient} bean only if one was opted in. */
     @Autowired
     public SidecarClient(
-            @Value("${app.sidecar.base-url}") String baseUrl,
-            // Nested default keeps this out of application-knowledge.yml: the
+            @Value("${app.sidecar.base-url}")
+                    String baseUrl, // Nested default keeps this out of application-knowledge.yml:
+            // the
             // property namespace stays overridable per environment, while the
             // compose deployment only ever sets the SIDECAR_SHARED_SECRET env
             // var (the same value the sidecar and voice-agent read).

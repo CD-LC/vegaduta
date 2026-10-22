@@ -1,8 +1,6 @@
 package com.agenticai.core.admin.keycloak;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * User-write plumbing of the Keycloak Admin API adapter: the create-user sequence (POST, re-fetch,
@@ -350,8 +350,8 @@ abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
     private static String describeUserProfileError(String body) {
         try {
             JsonNode node = OBJECT_MAPPER.readTree(body);
-            String field = node.path("field").asText(null);
-            String errorMessage = node.path("errorMessage").asText(null);
+            String field = node.path("field").asString(null);
+            String errorMessage = node.path("errorMessage").asString(null);
             JsonNode params = node.path("params");
             if ("error-invalid-length".equals(errorMessage)
                     && params.isArray()
@@ -359,9 +359,9 @@ abstract class KeycloakUserAdminSupport extends KeycloakIdentityProviderAdmin {
                 String label = field == null || field.isBlank() ? "This field" : capitalize(field);
                 return label
                         + " must be between "
-                        + params.get(1).asText()
+                        + params.get(1).asString()
                         + " and "
-                        + params.get(2).asText()
+                        + params.get(2).asString()
                         + " characters.";
             }
             if (field != null && !field.isBlank()) {

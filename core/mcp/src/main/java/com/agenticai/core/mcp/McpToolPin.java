@@ -68,10 +68,10 @@ public final class McpToolPin {
                 return new Manifest(out);
             }
             try {
-                com.fasterxml.jackson.databind.JsonNode node =
+                tools.jackson.databind.JsonNode node =
                         com.agenticai.core.json.JsonMappers.plain().readTree(json);
-                node.fields().forEachRemaining(e -> out.put(e.getKey(), e.getValue().asText()));
-            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                node.fields().forEachRemaining(e -> out.put(e.getKey(), e.getValue().asString()));
+            } catch (tools.jackson.core.JacksonException e) {
                 // A corrupt stored manifest only loses the "which tool" detail; the aggregate hash
                 // comparison still decides changed/unchanged.
                 return new Manifest(new TreeMap<>());

@@ -1,13 +1,13 @@
 package com.agenticai.core.knowledge.connector;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * SharePoint/OneDrive-for-Business connector via Microsoft Graph - lists a drive's root children
@@ -62,8 +62,8 @@ public class SharePointConnectorFetcher implements ConnectorFetcher {
                 if (item.path("file").isMissingNode() || item.path("file").isNull()) {
                     continue; // folders have no file facet - skip (lite: no recursion)
                 }
-                String id = item.path("id").asText();
-                String name = item.path("name").asText("untitled");
+                String id = item.path("id").asString();
+                String name = item.path("name").asString("untitled");
                 if (!isReadable(name)) {
                     continue;
                 }
@@ -84,7 +84,7 @@ public class SharePointConnectorFetcher implements ConnectorFetcher {
                 if (content != null && content.length > 0) {
                     docs.add(
                             new ConnectorDocument(
-                                    id, name, item.path("webUrl").asText(""), name, content));
+                                    id, name, item.path("webUrl").asString(""), name, content));
                 }
             }
         } catch (ConnectorFetchException e) {

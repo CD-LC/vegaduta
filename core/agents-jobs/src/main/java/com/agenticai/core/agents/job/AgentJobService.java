@@ -10,7 +10,6 @@ import com.agenticai.core.agents.job.output.InvalidResultSchemaException;
 import com.agenticai.core.agents.job.output.JobResultSchemaValidator;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The request-facing half of agent jobs: submit, read, list, cancel - plus the {@link

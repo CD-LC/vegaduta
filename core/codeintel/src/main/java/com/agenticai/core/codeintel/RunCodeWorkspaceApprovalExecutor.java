@@ -5,13 +5,13 @@ import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalRequestExecutionRecordedEvent;
 import com.agenticai.core.approval.ApprovalRequestRepository;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runs a command inside a code-intel scratch workspace, ONLY once a human has approved the request
@@ -137,17 +137,17 @@ public class RunCodeWorkspaceApprovalExecutor implements ApprovalActionExecutor 
                 "success="
                         + success
                         + ", exit_code="
-                        + finalAttempt.path("exit_code").asText("?")
+                        + finalAttempt.path("exit_code").asString("?")
                         + ", duration_seconds="
-                        + finalAttempt.path("duration_seconds").asText("?")
+                        + finalAttempt.path("duration_seconds").asString("?")
                         + ", attempts_used="
-                        + result.path("attempts_used").asText("?")
+                        + result.path("attempts_used").asString("?")
                         + ", timed_out="
                         + finalAttempt.path("timed_out").asBoolean(false)
                         + "\n--- stdout ---\n"
-                        + truncate(finalAttempt.path("stdout").asText(""))
+                        + truncate(finalAttempt.path("stdout").asString(""))
                         + "\n--- stderr ---\n"
-                        + truncate(finalAttempt.path("stderr").asText(""));
+                        + truncate(finalAttempt.path("stderr").asString(""));
         request.recordExecutionResult(summary);
         requestRepository.save(request);
         // Same reasoning as AgentToolCallApprovalExecutor#persistExecutionResult:

@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
@@ -99,27 +98,12 @@ public class GrokAgentChatClientFactory implements AgentChatClientFactory {
             double topP,
             java.util.Map<String, Object> providerOptions) {
         java.util.Set<String> serverTools = XaiServerToolSupport.enabledTools(providerOptions);
-        org.springframework.web.client.RestClient.Builder restClientBuilder =
-                modelBuilder.restClientBuilder();
-        org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder =
-                modelBuilder.webClientBuilder();
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey);
         if (!serverTools.isEmpty()) {
-            restClientBuilder.messageConverters(
-                    converters ->
-                            converters.add(0, XaiServerToolSupport.messageConverter(serverTools)));
-            webClientBuilder.codecs(
-                    codecs ->
-                            codecs.defaultCodecs()
-                                    .jackson2JsonEncoder(
-                                            XaiServerToolSupport.jsonEncoder(serverTools)));
+            // One request-body rewrite on the shared transport covers the blocking and the
+            // streaming call.
+            openAiApi.bodyTransform(body -> XaiServerToolSupport.inject(body, serverTools));
         }
-        OpenAiApi openAiApi =
-                modelBuilder
-                        .api(BASE_URL)
-                        .apiKey(apiKey)
-                        .restClientBuilder(restClientBuilder)
-                        .webClientBuilder(webClientBuilder)
-                        .build();
 
         OpenAiChatOptions options =
                 modelBuilder
@@ -127,6 +111,9 @@ public class GrokAgentChatClientFactory implements AgentChatClientFactory {
                         .maxTokens(maxTokens)
                         .temperature(temperature)
                         .topP(topP)
+                        .stopSequences(null)
+                        .presencePenalty(null)
+                        .frequencyPenalty(null)
                         .build();
         // Per-agent SamplingOptions are deliberately NOT applied (see the strip
         // below); say so at DEBUG rather than dropping them invisibly.
@@ -147,14 +134,13 @@ public class GrokAgentChatClientFactory implements AgentChatClientFactory {
         // silently fail every turn for a Grok agent - same "clamp/sanitize
         // what the upstream would 400 on" posture as
         // SarvamAgentChatClientFactory's max-tokens ceiling.
-        options.setStopSequences(null);
-        options.setPresencePenalty(null);
-        options.setFrequencyPenalty(null);
+        // (Spring AI 2 options are immutable, so the strip is done on the builder above, before
+        // build().)
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(
