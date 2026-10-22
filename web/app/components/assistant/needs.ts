@@ -1,4 +1,11 @@
-import { CONNECT_ITEMS, connectItemOffered, connectState, offeredConnectItems, type ConnectItem, type StatusInput } from "../../connect/connectCatalog";
+import {
+  CONNECT_ITEMS,
+  connectItemOffered,
+  connectState,
+  offeredConnectItems,
+  type ConnectItem,
+  type StatusInput,
+} from "../../connect/connectCatalog";
 
 // "Connect first": what a request needs that may not be connected yet. Pure, no React and no network.
 // The platform only gives an agent a service's tools once that service is connected (Google tools appear
@@ -124,10 +131,16 @@ export function folderContextLines(folder: string | null): string[] {
  * folder: where each one is, and which tools find things in them. Paths are the app's own (the server
  * chose them), never the person's text.
  */
-export function attachedFilesContextLines(files: ReadonlyArray<{ workspacePath?: string; workspaceTextPath?: string | null }>): string[] {
-  const saved = files.filter((f): f is { workspacePath: string; workspaceTextPath?: string | null } => !!f.workspacePath);
+export function attachedFilesContextLines(
+  files: ReadonlyArray<{ workspacePath?: string; workspaceTextPath?: string | null }>
+): string[] {
+  const saved = files.filter(
+    (f): f is { workspacePath: string; workspaceTextPath?: string | null } => !!f.workspacePath
+  );
   if (saved.length === 0) return [];
-  const list = saved.map((f) => `- "${f.workspacePath}"${f.workspaceTextPath ? ` (its text is in "${f.workspaceTextPath}")` : ""}`);
+  const list = saved.map(
+    (f) => `- "${f.workspacePath}"${f.workspaceTextPath ? ` (its text is in "${f.workspaceTextPath}")` : ""}`
+  );
   return [
     "The user attached these files to this message; they are saved in the projects folder:",
     ...list,

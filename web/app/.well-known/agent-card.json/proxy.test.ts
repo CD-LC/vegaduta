@@ -42,9 +42,15 @@ describe("fetchAgentCard", () => {
   });
 
   it("answers 503 when upstream returns a non-2xx or a non-JSON body", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("nope", { status: 502 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("nope", { status: 502 }))
+    );
     expect((await fetchAgentCard()).status).toBe(503);
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("<html>oops</html>", { status: 200 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("<html>oops</html>", { status: 200 }))
+    );
     const res = await fetchAgentCard();
     expect(res.status).toBe(503);
     expect(await res.json()).toMatchObject({ reason: "upstream returned a non-JSON body" });
@@ -68,7 +74,10 @@ describe("fetchAgentCard on a personal install", () => {
   it("still proxies the card on lite and full", async () => {
     for (const edition of ["lite", "full"]) {
       process.env.NEXT_PUBLIC_EDITION = edition;
-      vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(card), { status: 200 })));
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => new Response(JSON.stringify(card), { status: 200 }))
+      );
       expect((await fetchAgentCard()).status, edition).toBe(200);
     }
   });

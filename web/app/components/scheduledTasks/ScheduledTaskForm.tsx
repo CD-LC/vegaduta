@@ -40,7 +40,6 @@ import { isPersonalEdition } from "../../lib/edition";
  * friendly kinds and by the server for a custom cron. Everything is validated again server-side.
  */
 
-
 export interface AgentOption {
   id: string;
   name: string;

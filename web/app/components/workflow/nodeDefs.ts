@@ -29,7 +29,7 @@ export type VoiceMenuPort = { id: string; title: string };
 
 export function voiceMenuPorts(
   config: { branches?: VoiceMenuBranch[] } | undefined,
-  t: (key: string) => string,
+  t: (key: string) => string
 ): VoiceMenuPort[] {
   const reserved = new Set(["error", VOICE_MENU_NO_MATCH_HANDLE, VOICE_MENU_TIMEOUT_HANDLE]);
   const seen = new Set<string>();
@@ -55,13 +55,17 @@ export const BULK_EMAIL_MAX_PER_MINUTE = 600;
 // bulk_email node is only runnable with a subject, a body and a resolvable
 // recipient source (the server's OrchestratorService#validate enforces the
 // same rules on Validate/Activate/Run).
-export function bulkEmailMissing(config: {
-  subject?: string;
-  body?: unknown;
-  recipientsSource?: string;
-  groupId?: string;
-  staticRecipients?: string;
-} | undefined): "subject" | "body" | "group" | "static" | null {
+export function bulkEmailMissing(
+  config:
+    | {
+        subject?: string;
+        body?: unknown;
+        recipientsSource?: string;
+        groupId?: string;
+        staticRecipients?: string;
+      }
+    | undefined
+): "subject" | "body" | "group" | "static" | null {
   if (!config?.subject?.trim()) return "subject";
   if (typeof config.body !== "string" || !config.body.trim()) return "body";
   if (config.recipientsSource === "group" && !config.groupId) return "group";
@@ -82,12 +86,37 @@ export const EXPRESSION_FIELDS: Record<string, readonly string[]> = {
   http: ["url", "body", "headers[].value", "query[].value"],
   tool: ["argsJson"],
   device_control: ["payload"],
-  output: ["emailTo", "telegramChatId", "teamsConversationId", "whatsappTo", "driveFolderId", "driveFileName", "fileName", "whatsappMessage", "whatsappTemplateParams[]"],
+  output: [
+    "emailTo",
+    "telegramChatId",
+    "teamsConversationId",
+    "whatsappTo",
+    "driveFolderId",
+    "driveFileName",
+    "fileName",
+    "whatsappMessage",
+    "whatsappTemplateParams[]",
+  ],
   bulk_email: ["subject", "body", "replyTo"],
   wait: ["until", "duration"],
   crm_lead: [
-    "action", "leadId", "email", "name", "phone", "company", "title", "source", "stage",
-    "score", "value", "tags", "owner", "notes", "note", "activityType", "activityBody",
+    "action",
+    "leadId",
+    "email",
+    "name",
+    "phone",
+    "company",
+    "title",
+    "source",
+    "stage",
+    "score",
+    "value",
+    "tags",
+    "owner",
+    "notes",
+    "note",
+    "activityType",
+    "activityBody",
   ],
   // Data nodes (core ExpressionFields): only comparison / assignment values and merge sources are expressions.
   set: ["assignments[].value"],

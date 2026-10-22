@@ -225,7 +225,6 @@ export function TriggerNodeConfig({
         </div>
       )}
 
-
       {channel === "WEBHOOK" && (
         <FormTriggerEditor
           config={config}

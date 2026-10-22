@@ -95,15 +95,10 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
           <h1 style={{ fontSize: "1.1rem", marginTop: "1.25rem" }}>Access restricted</h1>
           <p className="muted" style={{ marginTop: "0.5rem" }}>
             You&apos;re signed in as <strong>{ctx.username}</strong>, but this account doesn&apos;t hold the
-            platform-admin role this section requires. Ask an existing platform admin to grant it to you in
-            Keycloak, or sign in with a different account.
+            platform-admin role this section requires. Ask an existing platform admin to grant it to you in Keycloak, or
+            sign in with a different account.
           </p>
-          <button
-            type="button"
-            className="cross-link"
-            style={{ marginTop: "1rem" }}
-            onClick={() => auth.logout()}
-          >
+          <button type="button" className="cross-link" style={{ marginTop: "1rem" }} onClick={() => auth.logout()}>
             Sign out
           </button>
         </div>

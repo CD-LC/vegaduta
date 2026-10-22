@@ -20,7 +20,10 @@ export interface ChannelUi {
 export const noCredential = (): Promise<null> => Promise.resolve(null);
 
 /** {@code getter} when the channel is offered on this install, else {@link noCredential} (a stable reference). */
-export function credentialGetter<T extends () => Promise<unknown>>(offered: boolean, getter: T): T | typeof noCredential {
+export function credentialGetter<T extends () => Promise<unknown>>(
+  offered: boolean,
+  getter: T
+): T | typeof noCredential {
   return offered ? getter : noCredential;
 }
 

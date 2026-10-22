@@ -10,7 +10,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), push: 
 vi.mock("../../components/AuthProvider", () => ({
   useAuth: () => ({ isAdmin: true, hasPermission: () => true }),
 }));
-vi.mock("../../components/AppShell", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
+vi.mock("../../components/AppShell", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../../components/RouteTransition", () => ({ usePageReady: () => {} }));
 vi.mock("../../components/ax/PageHeader", () => ({
   default: ({ actions }: { actions: React.ReactNode }) => <div>{actions}</div>,
@@ -68,7 +70,8 @@ describe("/admin/maintenance Users tab", () => {
     expect(screen.queryByRole("tab", { name: "Users" })).toBeNull();
     expect(screen.getByRole("tab", { name: "Overview" })).toBeTruthy();
     expect(invoked("listAdminUsers")).toBe(0);
-    for (const name of ["getSlackCredential", "getDiscordCredential", "getXCredential"]) expect(invoked(name), name).toBe(0);
+    for (const name of ["getSlackCredential", "getDiscordCredential", "getXCredential"])
+      expect(invoked(name), name).toBe(0);
   });
 
   it("stays on a full install, which also lists and probes everything", async () => {

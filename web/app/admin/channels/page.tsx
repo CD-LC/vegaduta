@@ -73,7 +73,9 @@ function AdminChannelsInner() {
         title={t("pageTitle")}
         subtitle={
           <span className="tabular-nums">
-            <strong className="font-semibold text-foreground">{tiles ? tiles.filter((c: { state: string }) => c.state === "CONNECTED").length : "—"}</strong>{" "}
+            <strong className="font-semibold text-foreground">
+              {tiles ? tiles.filter((c: { state: string }) => c.state === "CONNECTED").length : "—"}
+            </strong>{" "}
             {t("liveLabel")} <span className="text-muted-foreground">/</span> {tiles ? tiles.length : "—"}{" "}
             {t("availableLabel")}
           </span>

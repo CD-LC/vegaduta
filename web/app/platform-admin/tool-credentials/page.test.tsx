@@ -12,10 +12,14 @@ const api = vi.hoisted(() => ({
 }));
 
 vi.mock("../lib/api", () => ({ api }));
-vi.mock("../components/AdminShell", () => ({ default: ({ children }: { children?: ReactNode }) => <div>{children}</div> }));
+vi.mock("../components/AdminShell", () => ({
+  default: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../components/admin/ConfirmDialog", () => ({ useConfirm: () => async () => true }));
 vi.mock("../lib/toastBus", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
-vi.mock("next/link", () => ({ default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a> }));
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>,
+}));
 
 import ToolCredentialsPage from "./page";
 

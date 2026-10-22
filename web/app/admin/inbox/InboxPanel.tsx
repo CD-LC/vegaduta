@@ -28,12 +28,7 @@
 
 import { useTranslations } from "../../lib/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Headset,
-  MessageSquare,
-  RefreshCw,
-  Search,
-} from "lucide-react";
+import { Headset, MessageSquare, RefreshCw, Search } from "lucide-react";
 import { api } from "../../lib/api";
 import { auth } from "../../lib/auth";
 import { Button } from "../../components/ui/button";
@@ -44,7 +39,14 @@ import { EmptyState } from "../../components/ax/page-kit";
 import PaginationControls from "../../components/PaginationControls";
 import Select from "../../components/Select";
 import { cn } from "../../lib/utils";
-import { inboxApi, InboxClientNotWiredError, type ConversationSummary, type ConversationView, type HandoffTranscriptMessage, type InboxStats } from "./inboxApi";
+import {
+  inboxApi,
+  InboxClientNotWiredError,
+  type ConversationSummary,
+  type ConversationView,
+  type HandoffTranscriptMessage,
+  type InboxStats,
+} from "./inboxApi";
 import { InboxDetailsPane, type AgentOption } from "./InboxDetailsPane";
 import { InboxThread } from "./InboxThread";
 import { ChannelBadge, offeredChannels, VIEW_TABS, dotStatus, relTime, stateLabel } from "./inboxFormat";
@@ -93,8 +95,8 @@ export default function InboxPanel({
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
 
   const mySubject = auth.getUserId();
-  const selected = items.find((s) => s.sessionId === selectedId) ??
-    (snapshot?.sessionId === selectedId ? snapshot : null);
+  const selected =
+    items.find((s) => s.sessionId === selectedId) ?? (snapshot?.sessionId === selectedId ? snapshot : null);
 
   const refreshStats = useCallback(() => {
     return inboxApi
@@ -156,7 +158,10 @@ export default function InboxPanel({
           setAgents(
             rows
               .filter((a) => a && typeof a === "object" && "id" in a)
-              .map((a) => ({ id: String((a as { id: unknown }).id), name: String((a as { name?: unknown }).name ?? "Agent") }))
+              .map((a) => ({
+                id: String((a as { id: unknown }).id),
+                name: String((a as { name?: unknown }).name ?? "Agent"),
+              }))
           );
         }
       })
@@ -280,15 +285,13 @@ export default function InboxPanel({
     <div className="flex flex-col gap-4">
       {/* Stats strip - each card jumps to the matching view. */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        {(
-          [
-            { key: "waiting" as const, label: tg("inbox_waiting"), value: stats?.waitingHuman },
-            { key: "held" as const, label: tg("inbox_held"), value: stats?.held },
-            { key: "pending" as const, label: tg("inbox_pending"), value: stats?.pendingPairing },
-            { key: "agent" as const, label: tg("inbox_agent"), value: stats?.agentHandled },
-            { key: "all" as const, label: tg("inbox_all"), value: stats?.total },
-          ]
-        ).map((c) => (
+        {[
+          { key: "waiting" as const, label: tg("inbox_waiting"), value: stats?.waitingHuman },
+          { key: "held" as const, label: tg("inbox_held"), value: stats?.held },
+          { key: "pending" as const, label: tg("inbox_pending"), value: stats?.pendingPairing },
+          { key: "agent" as const, label: tg("inbox_agent"), value: stats?.agentHandled },
+          { key: "all" as const, label: tg("inbox_all"), value: stats?.total },
+        ].map((c) => (
           <button
             key={c.key}
             type="button"
@@ -313,7 +316,11 @@ export default function InboxPanel({
         <div className={cn("min-w-0", selected && "hidden lg:block")}>
           <div className="mb-2 flex items-center gap-2">
             <div className="relative min-w-0 flex-1">
-              <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Search
+                size={13}
+                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <Input
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -329,7 +336,10 @@ export default function InboxPanel({
                 setChannel(e.target.value);
                 setPage(0);
               }}
-              options={[{ value: "", label: "All channels" }, ...offeredChannels().map((c) => ({ value: c.value, label: c.label }))]}
+              options={[
+                { value: "", label: "All channels" },
+                ...offeredChannels().map((c) => ({ value: c.value, label: c.label })),
+              ]}
             />
             <Button
               type="button"
@@ -357,7 +367,9 @@ export default function InboxPanel({
                 }}
                 className={cn(
                   "rounded-full border border-border px-2.5 py-1 text-[11px] transition-colors",
-                  view === t.value ? "border-primary/60 bg-accent/60 text-foreground" : "text-muted-foreground hover:bg-accent/40"
+                  view === t.value
+                    ? "border-primary/60 bg-accent/60 text-foreground"
+                    : "text-muted-foreground hover:bg-accent/40"
                 )}
               >
                 {t.label}

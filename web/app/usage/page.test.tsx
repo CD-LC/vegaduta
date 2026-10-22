@@ -9,7 +9,9 @@ const budgetApi = vi.hoisted(() => ({ getBudgetTopUpOptions: vi.fn() }));
 
 vi.mock("../lib/api", () => ({ api }));
 vi.mock("../lib/api/budgetTopUp", () => ({ budgetTopUpApi: budgetApi }));
-vi.mock("../components/AppShell", () => ({ default: ({ children }: { children?: ReactNode }) => <div>{children}</div> }));
+vi.mock("../components/AppShell", () => ({
+  default: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: (): void => undefined }));
 vi.mock("../components/AuthProvider", () => ({ useAuth: () => ({ hasPermission: () => false }) }));
 vi.mock("../components/SpendCapCard", () => ({ default: (): null => null }));

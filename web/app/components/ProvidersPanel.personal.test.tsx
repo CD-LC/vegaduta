@@ -7,7 +7,9 @@ import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { refreshPlatformStatus, resetPlatformStatusForTests } from "../lib/platformStatus";
 
 vi.mock("../lib/i18n", () => ({ useTranslations: () => (key: string) => key }));
-vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
+}));
 vi.mock("./AuthProvider", () => ({ useAuth: () => ({ hasPermission: () => true }) }));
 
 const speechCalls = vi.hoisted(() => ({
@@ -63,7 +65,9 @@ describe("ProvidersPanel - cloud speech by edition", () => {
     vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
     const reported = (async () => ({
       ok: true,
-      json: async () => ({ edition: { tier: "personal", billingEnabled: false, authMode: "local", features: { "cloud-speech": true } } }),
+      json: async () => ({
+        edition: { tier: "personal", billingEnabled: false, authMode: "local", features: { "cloud-speech": true } },
+      }),
     })) as unknown as typeof fetch;
     try {
       render(<ProvidersPanel providers={[]} onChanged={() => {}} />);

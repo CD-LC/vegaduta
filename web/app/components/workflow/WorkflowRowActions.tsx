@@ -57,13 +57,7 @@ export default function WorkflowRowActions({
     <div className="flex items-center justify-end gap-1">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={onEdit}
-            aria-label={t("editWorkflow")}
-          >
+          <Button variant="ghost" size="icon" className="size-8" onClick={onEdit} aria-label={t("editWorkflow")}>
             <Pencil aria-hidden="true" size={15} />
           </Button>
         </TooltipTrigger>
@@ -86,24 +80,12 @@ export default function WorkflowRowActions({
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          {atLimit ? "Workflow limit reached" : "Duplicate as a new draft"}
-        </TooltipContent>
+        <TooltipContent>{atLimit ? "Workflow limit reached" : "Duplicate as a new draft"}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={onCopyLink}
-            aria-label="Copy workflow link"
-          >
-            {copied ? (
-              <Check aria-hidden="true" size={15} />
-            ) : (
-              <Link2 aria-hidden="true" size={15} />
-            )}
+          <Button variant="ghost" size="icon" className="size-8" onClick={onCopyLink} aria-label="Copy workflow link">
+            {copied ? <Check aria-hidden="true" size={15} /> : <Link2 aria-hidden="true" size={15} />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>{copied ? "Link copied" : "Copy link"}</TooltipContent>

@@ -7,7 +7,9 @@ const api = vi.hoisted(() => ({ getMcpExposure: vi.fn(), setMcpExposure: vi.fn()
 
 vi.mock("../lib/api", () => ({ api, API_BASE: "https://core.example.test" }));
 vi.mock("../lib/i18n", () => ({ useTranslations: () => (key: string) => key }));
-vi.mock("next/link", () => ({ default: ({ children, href }: { children?: unknown; href: string }) => <a href={href}>{children as never}</a> }));
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children?: unknown; href: string }) => <a href={href}>{children as never}</a>,
+}));
 
 import McpExposureField from "./McpExposureField";
 
