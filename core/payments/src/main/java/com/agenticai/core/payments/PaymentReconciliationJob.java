@@ -1,5 +1,7 @@
 package com.agenticai.core.payments;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
  * next_poll_at} ladder.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentReconciliationJob {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentReconciliationJob.class);

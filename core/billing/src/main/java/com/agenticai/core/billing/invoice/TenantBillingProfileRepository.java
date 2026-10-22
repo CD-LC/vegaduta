@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.invoice;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Repository;
  * rationale) as {@code NewsletterService}'s {@code news_opt_in}.
  */
 @Repository
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class TenantBillingProfileRepository {
 
     /**

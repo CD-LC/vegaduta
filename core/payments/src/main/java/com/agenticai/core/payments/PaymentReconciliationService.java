@@ -1,6 +1,8 @@
 package com.agenticai.core.payments;
 
 import com.agenticai.core.payments.adapter.UpiAgentProtocolAdapter;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
  * so a gateway blip reschedules, never fails a payment.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentReconciliationService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentReconciliationService.class);

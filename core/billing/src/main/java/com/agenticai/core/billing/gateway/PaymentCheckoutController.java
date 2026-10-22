@@ -1,7 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import org.slf4j.Logger;
@@ -36,8 +37,8 @@ import java.util.Set;
  * GatewayCapability#UPI_COLLECT}/{@link GatewayCapability#UPI_QR}.
  */
 @RestController
-@ConditionalOnBillingEdition
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentCheckoutController {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentCheckoutController.class);

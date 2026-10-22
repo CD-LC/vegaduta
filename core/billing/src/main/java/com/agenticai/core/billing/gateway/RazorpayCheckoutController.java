@@ -1,7 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
-import com.agenticai.core.security.edition.ConditionalOnBillingEdition;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.context.annotation.Profile;
@@ -44,8 +45,8 @@ import org.springframework.web.server.ResponseStatusException;
  * require authentication. TenantContext is the single source of identity.
  */
 @RestController
-@ConditionalOnBillingEdition
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class RazorpayCheckoutController {
 
 

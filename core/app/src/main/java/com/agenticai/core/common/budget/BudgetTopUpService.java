@@ -7,6 +7,8 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.billing.gateway.GatewayOrder;
 import com.agenticai.core.billing.gateway.PaymentGatewayClient;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -51,6 +53,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class BudgetTopUpService {
 
     private static final Logger log = LoggerFactory.getLogger(BudgetTopUpService.class);
