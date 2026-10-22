@@ -47,3 +47,13 @@ ignore:
   - vulnerability: CVE-2026-40962
     package:
       name: ffmpeg
+  # code-intel: pillow 12.3.0 arrives only through fastembed (its text-embedding
+  # ONNX runtime), whose every release caps pillow < 13.0, so the fixed 13.0.0
+  # cannot be locked there. code-intel never imports PIL and decodes no images, so
+  # the JPEG heap overflow (GHSA-8g5g-8vmr-9782) has no reachable input in that
+  # image. sidecar and voice-agent, which do decode images, moved to 13.0.0.
+  # Re-evaluate when fastembed allows pillow 13. (2026-10-22)
+  - vulnerability: GHSA-8g5g-8vmr-9782
+    package:
+      name: pillow
+      version: 12.3.0

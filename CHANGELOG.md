@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **Release images clear the critical-CVE gate again.** The v0.1.9 release run stopped on the image scan: besides certifi (fixed in the locks already), sidecar, voice-agent and code-intel carried pillow 12.3.0 (GHSA-8g5g-8vmr-9782, a heap overflow decoding a crafted JPEG, fixed in 13.0.0), and the CloudNativePG `postgres-cnpg` image's own pip-installed certifi 2026.10.18 is not covered by any lock. sidecar and voice-agent now pin pillow 13.0.0 (voice-agent also aiohttp 3.14.4 for three high-severity advisories); `postgres-cnpg` upgrades certifi to 2026.10.19 (hash-pinned) at build time until the upstream image ships it; code-intel keeps pillow 12.3.0 behind a scoped, dated `.grype.yaml` exception because it never decodes images and fastembed caps pillow below 13.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added
