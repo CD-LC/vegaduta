@@ -61,8 +61,7 @@ final class TemplateReviewRunner {
         return new TemplateReview(TemplateStandard.VERSION, rules, ai, Instant.now());
     }
 
-    static TemplateReadinessReport mergeAi(
-            TemplateReadinessReport rules, TemplateAiReview ai) {
+    static TemplateReadinessReport mergeAi(TemplateReadinessReport rules, TemplateAiReview ai) {
         List<TemplateReadinessReport.Issue> blockers = new java.util.ArrayList<>(rules.blockers());
         blockers.addAll(ai.blockers());
         List<TemplateReadinessReport.Issue> advisories =

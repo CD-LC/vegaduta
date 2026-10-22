@@ -24,16 +24,28 @@ final class McpOAuthScopes {
     static final String WORKFLOWS_CALL = "mcp:workflows:call";
     static final String KNOWLEDGE_SEARCH = "mcp:knowledge:search";
     static final String TASKS = "mcp:tasks";
-    /** Fallback for a tool this table does not know; not advertised, so a stock token never has it. */
+
+    /**
+     * Fallback for a tool this table does not know; not advertised, so a stock token never has it.
+     */
     static final String TOOLS_CALL = "mcp:tools:call";
 
     /** What {@code scopes_supported} advertises: every concrete scope, never a pattern. */
-    static final List<String> SUPPORTED = List.of(
-        AGENTS_READ, AGENTS_CALL, WORKFLOWS_READ, WORKFLOWS_CALL, KNOWLEDGE_SEARCH, TASKS);
+    static final List<String> SUPPORTED =
+            List.of(
+                    AGENTS_READ,
+                    AGENTS_CALL,
+                    WORKFLOWS_READ,
+                    WORKFLOWS_CALL,
+                    KNOWLEDGE_SEARCH,
+                    TASKS);
 
     private McpOAuthScopes() {}
 
-    /** Scopes required by a JSON-RPC body (single message or batch). Empty set = valid token suffices. */
+    /**
+     * Scopes required by a JSON-RPC body (single message or batch). Empty set = valid token
+     * suffices.
+     */
     static Set<String> requiredFor(JsonNode body) {
         Set<String> required = new LinkedHashSet<>();
         if (body == null) {

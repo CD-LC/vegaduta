@@ -84,10 +84,10 @@ public class SkillService {
     }
 
     /**
-     * Whether {@code load_skill} counts uses. Wired from {@code app.skills.learning.enabled}
-     * (false by default): the counter is one extra bulk UPDATE of the same skill row per load, so
-     * installs that do not use the learning loop keep the pre-lifecycle hot path. The field
-     * defaults to true only for code that builds the service by hand (tests).
+     * Whether {@code load_skill} counts uses. Wired from {@code app.skills.learning.enabled} (false
+     * by default): the counter is one extra bulk UPDATE of the same skill row per load, so installs
+     * that do not use the learning loop keep the pre-lifecycle hot path. The field defaults to true
+     * only for code that builds the service by hand (tests).
      */
     private boolean countUsage = true;
 
@@ -385,7 +385,8 @@ public class SkillService {
                 skills.findByIdWithFiles(id)
                         .orElseThrow(() -> new SkillNotFoundException(id.toString()));
         skill.updateContent(
-                SkillMarkdownParser.validateDescription(description), SkillContentRules.validateBody(body));
+                SkillMarkdownParser.validateDescription(description),
+                SkillContentRules.validateBody(body));
         if (files != null) {
             skill.replaceFiles(SkillContentRules.validateFiles(files));
         }
@@ -672,5 +673,4 @@ public class SkillService {
                 .filter(s -> s != null && !s.isBlank())
                 .orElse("unknown");
     }
-
 }

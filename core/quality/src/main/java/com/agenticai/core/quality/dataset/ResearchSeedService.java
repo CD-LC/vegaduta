@@ -11,11 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Creates a dataset from the bundled research-task starter set
- * ({@code /eval/research-tasks-seed.json}): multi-hop, BrowseComp/GAIA-style
- * questions whose answers are checked by deterministic code graders. Sibling
- * of {@link EvalDatasetService#seedGoldenDataset}: same one-per-agent
- * idempotency (409 on a repeat) and the same "the console shows what you got"
+ * Creates a dataset from the bundled research-task starter set ({@code
+ * /eval/research-tasks-seed.json}): multi-hop, BrowseComp/GAIA-style questions whose answers are
+ * checked by deterministic code graders. Sibling of {@link EvalDatasetService#seedGoldenDataset}:
+ * same one-per-agent idempotency (409 on a repeat) and the same "the console shows what you got"
  * posture. Triggered only by an explicit request - nothing seeds on its own.
  */
 @Service
@@ -39,7 +38,8 @@ public class ResearchSeedService {
             }
             return MAPPER.readTree(in);
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read " + RESOURCE + ": " + e.getMessage(), e);
+            throw new IllegalStateException(
+                    "Could not read " + RESOURCE + ": " + e.getMessage(), e);
         }
     }
 
@@ -53,17 +53,27 @@ public class ResearchSeedService {
         List<EvalDataset> existing = datasetService.listDatasets(agentId);
         if (existing.stream().anyMatch(d -> name.equals(d.getName()))) {
             throw new EvalRunConflictException(
-                "This agent already has the research starter dataset ('" + name + "').");
+                    "This agent already has the research starter dataset ('" + name + "').");
         }
-        EvalDataset dataset = datasetService.createDataset(
-            agentId, name, seed.path("description").asText(null),
-            seed.path("passThreshold").asDouble(0.7), seed.path("toolExecutionEnabled").asBoolean(true));
+        EvalDataset dataset =
+                datasetService.createDataset(
+                        agentId,
+                        name,
+                        seed.path("description").asText(null),
+                        seed.path("passThreshold").asDouble(0.7),
+                        seed.path("toolExecutionEnabled").asBoolean(true));
         int position = 0;
         for (JsonNode task : seed.path("tasks")) {
-            EvalDatasetCase created = datasetService.addCase(
-                agentId, dataset.getId(), task.path("question").asText(), task.path("answer").asText(null),
-                null, position++);
-            datasetService.setCaseGrader(agentId, dataset.getId(), created.getId(), task.path("grader").toString());
+            EvalDatasetCase created =
+                    datasetService.addCase(
+                            agentId,
+                            dataset.getId(),
+                            task.path("question").asText(),
+                            task.path("answer").asText(null),
+                            null,
+                            position++);
+            datasetService.setCaseGrader(
+                    agentId, dataset.getId(), created.getId(), task.path("grader").toString());
         }
         return datasetService.requireDataset(agentId, dataset.getId());
     }

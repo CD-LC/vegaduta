@@ -73,6 +73,7 @@ public class E2bSandboxClient {
      * https://{port}-{sandboxId}.e2b.app} is reachable by anyone who learns the sandbox id.
      */
     private static final String NETWORK_FIELD = "network";
+
     private static final String ALLOW_PUBLIC_TRAFFIC_FIELD = "allowPublicTraffic";
     private static final String TRAFFIC_ACCESS_TOKEN_FIELD = "trafficAccessToken";
     public static final String TRAFFIC_ACCESS_TOKEN_HEADER = "e2b-traffic-access-token";
@@ -89,7 +90,9 @@ public class E2bSandboxClient {
      */
     private volatile CircuitBreakerRegistry breakerRegistry;
 
-    /** Restricted public traffic (the production default); kept for hand-built instances in tests. */
+    /**
+     * Restricted public traffic (the production default); kept for hand-built instances in tests.
+     */
     public E2bSandboxClient(
             RestClient.Builder restClientBuilder, E2bCredentialService credentialService) {
         this(restClientBuilder, credentialService, true);
@@ -310,7 +313,10 @@ public class E2bSandboxClient {
         }
     }
 
-    /** Best-effort teardown of a sandbox this client refuses to hand out; the TTL reaps it otherwise. */
+    /**
+     * Best-effort teardown of a sandbox this client refuses to hand out; the TTL reaps it
+     * otherwise.
+     */
     private void killQuietly(String apiKey, String sandboxId) {
         if (sandboxId == null || sandboxId.isBlank()) {
             return;
@@ -318,7 +324,8 @@ public class E2bSandboxClient {
         try {
             killSandbox(apiKey, sandboxId);
         } catch (RuntimeException e) {
-            // The create error below is the one worth surfacing; the sandbox's own TTL is the backstop.
+            // The create error below is the one worth surfacing; the sandbox's own TTL is the
+            // backstop.
         }
     }
 
@@ -353,8 +360,8 @@ public class E2bSandboxClient {
      * was created secure (this scaffold never sets {@code secure: true}, so it is always null
      * today; kept on the record for when a later stage adds that option). {@code
      * trafficAccessToken} is the {@link E2bSandboxClient#TRAFFIC_ACCESS_TOKEN_HEADER} value every
-     * request to the sandbox's own host must carry; null only when the client was built with
-     * {@code restrictPublicTraffic=false}.
+     * request to the sandbox's own host must carry; null only when the client was built with {@code
+     * restrictPublicTraffic=false}.
      */
     public record SandboxHandle(
             String sandboxId,

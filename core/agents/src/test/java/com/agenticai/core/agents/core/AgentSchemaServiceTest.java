@@ -25,11 +25,19 @@ class AgentSchemaServiceTest {
         service = new AgentSchemaService(mapper);
     }
 
-    private Agent agentWith(boolean knowledgeBaseEnabled, Set<UUID> allowedCollections, Set<String> allowedTools) {
-        Agent agent = new Agent(
-            "Test Agent", "You are helpful.", ProviderName.ANTHROPIC, "claude-sonnet-5",
-            1024, 0.7, 1.0, knowledgeBaseEnabled, ExperienceMode.ADVANCED
-        );
+    private Agent agentWith(
+            boolean knowledgeBaseEnabled, Set<UUID> allowedCollections, Set<String> allowedTools) {
+        Agent agent =
+                new Agent(
+                        "Test Agent",
+                        "You are helpful.",
+                        ProviderName.ANTHROPIC,
+                        "claude-sonnet-5",
+                        1024,
+                        0.7,
+                        1.0,
+                        knowledgeBaseEnabled,
+                        ExperienceMode.ADVANCED);
         agent.setAllowedKnowledgeCollectionIds(allowedCollections);
         agent.setAllowedToolNames(allowedTools);
         return agent;
@@ -60,8 +68,9 @@ class AgentSchemaServiceTest {
         Agent agent = agentWith(false, Set.of(), Set.of());
         JsonNode schema = mapper.readTree(service.generateInputSchema(agent));
 
-        assertFalse(schema.get("properties").has("knowledge_collection_ids"),
-            "an agent with no knowledge access shouldn't advertise a field it can't use");
+        assertFalse(
+                schema.get("properties").has("knowledge_collection_ids"),
+                "an agent with no knowledge access shouldn't advertise a field it can't use");
     }
 
     @Test
@@ -73,7 +82,8 @@ class AgentSchemaServiceTest {
     }
 
     @Test
-    void inputSchemaIncludesKnowledgeCollectionIdsWhenAllowListNonEmptyEvenIfFlagOff() throws Exception {
+    void inputSchemaIncludesKnowledgeCollectionIdsWhenAllowListNonEmptyEvenIfFlagOff()
+            throws Exception {
         Agent agent = agentWith(false, Set.of(UUID.randomUUID()), Set.of());
         JsonNode schema = mapper.readTree(service.generateInputSchema(agent));
 

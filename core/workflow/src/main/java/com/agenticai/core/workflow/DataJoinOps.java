@@ -30,32 +30,39 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The {@code merge} data operation (append / join / first_non_empty) and its keyed join
- * ({@code left | inner | outer}). Extracted from {@link WorkflowDataOps}; see {@link #merge} for the contract.
+ * The {@code merge} data operation (append / join / first_non_empty) and its keyed join ({@code
+ * left | inner | outer}). Extracted from {@link WorkflowDataOps}; see {@link #merge} for the
+ * contract.
  */
 final class DataJoinOps {
 
-    private DataJoinOps() {
-    }
+    private DataJoinOps() {}
 
     /**
-     * {@code mode: append|join|first_non_empty}, {@code key} + {@code joinType: left|inner|outer} (join),
-     * {@code sources: [text]} (each already expression-resolved, typically {@code {{ $node["A"].output }}}),
-     * {@code minInputs}.
+     * {@code mode: append|join|first_non_empty}, {@code key} + {@code joinType: left|inner|outer}
+     * (join), {@code sources: [text]} (each already expression-resolved, typically {@code {{
+     * $node["A"].output }}}), {@code minInputs}.
      *
-     * <p>The inputs being combined are, in order of preference, the {@code sources} (a blank source is an absent
-     * input, e.g. the other side of a branch that did not run) or - when none are configured - the elements of the
-     * node's own input array. That second form is the join after a Parallel / Fan-out / Loop node, whose output is
-     * exactly such an array (one entry per branch or item; entries that are JSON text are parsed). The engine
-     * walks ONE path per run and a node executes once, so this node cannot suspend until N independent branches
-     * have all arrived; it combines whatever is present when it runs, and {@code minInputs} turns "fewer than N
-     * inputs are present" into a visible SKIPPED node (input passed through) instead of a silently thin result.
+     * <p>The inputs being combined are, in order of preference, the {@code sources} (a blank source
+     * is an absent input, e.g. the other side of a branch that did not run) or - when none are
+     * configured - the elements of the node's own input array. That second form is the join after a
+     * Parallel / Fan-out / Loop node, whose output is exactly such an array (one entry per branch
+     * or item; entries that are JSON text are parsed). The engine walks ONE path per run and a node
+     * executes once, so this node cannot suspend until N independent branches have all arrived; it
+     * combines whatever is present when it runs, and {@code minInputs} turns "fewer than N inputs
+     * are present" into a visible SKIPPED node (input passed through) instead of a silently thin
+     * result.
      */
     static Outcome merge(ObjectMapper mapper, Map<String, Object> config, String input) {
-        String mode = str(config.get("mode")) == null || str(config.get("mode")).isBlank()
-            ? "append" : str(config.get("mode")).strip().toLowerCase(Locale.ROOT);
+        String mode =
+                str(config.get("mode")) == null || str(config.get("mode")).isBlank()
+                        ? "append"
+                        : str(config.get("mode")).strip().toLowerCase(Locale.ROOT);
         if (!MERGE_MODES.contains(mode)) {
-            throw new IllegalArgumentException("Unknown merge mode '" + mode + "' (expected append, join or first_non_empty).");
+            throw new IllegalArgumentException(
+                    "Unknown merge mode '"
+                            + mode
+                            + "' (expected append, join or first_non_empty).");
         }
         List<String> log = new ArrayList<>();
         List<JsonNode> present = new ArrayList<>();
@@ -75,7 +82,8 @@ final class DataJoinOps {
             if (root != null && root.isArray()) {
                 declared = root.size();
                 for (JsonNode element : root) {
-                    JsonNode node = element.isTextual() ? parseLenient(mapper, element.asText()) : element;
+                    JsonNode node =
+                            element.isTextual() ? parseLenient(mapper, element.asText()) : element;
                     if (!isAbsentInput(node)) {
                         present.add(node);
                     }
@@ -92,54 +100,89 @@ final class DataJoinOps {
 
         Integer minInputs = intOrNull(config.get("minInputs"));
         if (minInputs != null && minInputs > 0 && present.size() < minInputs) {
-            return Outcome.skippedWith(input, "Merge needs " + minInputs + " input(s) but only " + present.size()
-                + " arrived - input passed through unchanged.", log);
+            return Outcome.skippedWith(
+                    input,
+                    "Merge needs "
+                            + minInputs
+                            + " input(s) but only "
+                            + present.size()
+                            + " arrived - input passed through unchanged.",
+                    log);
         }
 
         switch (mode) {
-            case "first_non_empty": {
-                for (JsonNode node : present) {
-                    if (!isEmpty(node)) {
-                        return Outcome.ok(outputText(node), "Merge picked the first non-empty input.", log);
-                    }
-                }
-                log.add("Every input was empty.");
-                return Outcome.ok("", "Merge found no non-empty input.", log);
-            }
-            case "join": {
-                String key = str(config.get("key"));
-                if (key == null || key.isBlank()) {
-                    throw new IllegalArgumentException("Join needs a key field to match on.");
-                }
-                String joinType = str(config.get("joinType")) == null || str(config.get("joinType")).isBlank()
-                    ? "left" : str(config.get("joinType")).strip().toLowerCase(Locale.ROOT);
-                if (!JOIN_TYPES.contains(joinType)) {
-                    throw new IllegalArgumentException("Unknown join type '" + joinType + "' (expected left, inner or outer).");
-                }
-                ArrayNode joined = join(mapper, present, key.strip(), joinType);
-                return Outcome.ok(joined.toString(), "Joined " + present.size() + " input(s) on '" + key.strip() + "' into "
-                    + joined.size() + " row(s).", log);
-            }
-            default: {
-                ArrayNode out = mapper.createArrayNode();
-                for (JsonNode node : present) {
-                    if (node.isArray()) {
-                        for (JsonNode element : node) {
-                            out.add(element);
+            case "first_non_empty":
+                {
+                    for (JsonNode node : present) {
+                        if (!isEmpty(node)) {
+                            return Outcome.ok(
+                                    outputText(node),
+                                    "Merge picked the first non-empty input.",
+                                    log);
                         }
-                    } else {
-                        out.add(node);
                     }
-                    if (out.size() > MAX_ITEMS) {
-                        throw new IllegalArgumentException("Merged result is larger than " + MAX_ITEMS + " items.");
-                    }
+                    log.add("Every input was empty.");
+                    return Outcome.ok("", "Merge found no non-empty input.", log);
                 }
-                return Outcome.ok(out.toString(), "Merged " + present.size() + " input(s) into " + out.size() + " item(s).", log);
-            }
+            case "join":
+                {
+                    String key = str(config.get("key"));
+                    if (key == null || key.isBlank()) {
+                        throw new IllegalArgumentException("Join needs a key field to match on.");
+                    }
+                    String joinType =
+                            str(config.get("joinType")) == null
+                                            || str(config.get("joinType")).isBlank()
+                                    ? "left"
+                                    : str(config.get("joinType")).strip().toLowerCase(Locale.ROOT);
+                    if (!JOIN_TYPES.contains(joinType)) {
+                        throw new IllegalArgumentException(
+                                "Unknown join type '"
+                                        + joinType
+                                        + "' (expected left, inner or outer).");
+                    }
+                    ArrayNode joined = join(mapper, present, key.strip(), joinType);
+                    return Outcome.ok(
+                            joined.toString(),
+                            "Joined "
+                                    + present.size()
+                                    + " input(s) on '"
+                                    + key.strip()
+                                    + "' into "
+                                    + joined.size()
+                                    + " row(s).",
+                            log);
+                }
+            default:
+                {
+                    ArrayNode out = mapper.createArrayNode();
+                    for (JsonNode node : present) {
+                        if (node.isArray()) {
+                            for (JsonNode element : node) {
+                                out.add(element);
+                            }
+                        } else {
+                            out.add(node);
+                        }
+                        if (out.size() > MAX_ITEMS) {
+                            throw new IllegalArgumentException(
+                                    "Merged result is larger than " + MAX_ITEMS + " items.");
+                        }
+                    }
+                    return Outcome.ok(
+                            out.toString(),
+                            "Merged "
+                                    + present.size()
+                                    + " input(s) into "
+                                    + out.size()
+                                    + " item(s).",
+                            log);
+                }
         }
     }
 
-    private static ArrayNode join(ObjectMapper mapper, List<JsonNode> inputs, String key, String joinType) {
+    private static ArrayNode join(
+            ObjectMapper mapper, List<JsonNode> inputs, String key, String joinType) {
         List<List<JsonNode>> rowSets = new ArrayList<>();
         for (JsonNode input : inputs) {
             List<JsonNode> rows = new ArrayList<>();
@@ -150,7 +193,10 @@ final class DataJoinOps {
             }
             for (JsonNode row : rows) {
                 if (!row.isObject()) {
-                    throw new IllegalArgumentException("Join needs JSON objects (or arrays of objects) to match on '" + key + "'.");
+                    throw new IllegalArgumentException(
+                            "Join needs JSON objects (or arrays of objects) to match on '"
+                                    + key
+                                    + "'.");
                 }
             }
             rowSets.add(rows);
@@ -184,7 +230,8 @@ final class DataJoinOps {
                     next.add(l);
                 }
                 if (next.size() > MAX_ITEMS) {
-                    throw new IllegalArgumentException("Joined result is larger than " + MAX_ITEMS + " rows.");
+                    throw new IllegalArgumentException(
+                            "Joined result is larger than " + MAX_ITEMS + " rows.");
                 }
             }
             if (joinType.equals("outer")) {
@@ -249,6 +296,9 @@ final class DataJoinOps {
     }
 
     private static boolean isAbsentInput(JsonNode n) {
-        return n == null || n.isMissingNode() || n.isNull() || (n.isTextual() && n.asText().isBlank());
+        return n == null
+                || n.isMissingNode()
+                || n.isNull()
+                || (n.isTextual() && n.asText().isBlank());
     }
 }

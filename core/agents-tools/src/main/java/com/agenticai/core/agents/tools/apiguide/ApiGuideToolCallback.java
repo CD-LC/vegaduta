@@ -15,9 +15,10 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 /**
  * {@code vegaduta_api_guide}: the Assistant's way into the platform's REST contract. Read-only - it
  * looks things up in the generated OpenAPI document and never calls the API itself. To show a live
- * result the model embeds an {@code apiCall} node in a {@code json_ui} block; the console runs it with
- * the signed-in user's own session (GET straight away, anything else only after the user presses
- * Send), so the call carries the user's permissions and no credential passes through the model.
+ * result the model embeds an {@code apiCall} node in a {@code json_ui} block; the console runs it
+ * with the signed-in user's own session (GET straight away, anything else only after the user
+ * presses Send), so the call carries the user's permissions and no credential passes through the
+ * model.
  */
 public class ApiGuideToolCallback implements ToolCallback {
 
@@ -63,7 +64,8 @@ public class ApiGuideToolCallback implements ToolCallback {
     @Override
     public String call(String toolInput) {
         try {
-            JsonNode args = MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
+            JsonNode args =
+                    MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
             ApiGuideIndex idx = index();
             String action = args.path("action").asText("search");
             if ("describe".equalsIgnoreCase(action)) {
@@ -72,9 +74,15 @@ public class ApiGuideToolCallback implements ToolCallback {
                 Optional<ObjectNode> found = idx.describe(method, path);
                 return found.isPresent()
                         ? MAPPER.writeValueAsString(found.get())
-                        : error("No " + method + " " + path + " in the spec. Use action=search to find the exact path.");
+                        : error(
+                                "No "
+                                        + method
+                                        + " "
+                                        + path
+                                        + " in the spec. Use action=search to find the exact path.");
             }
-            return MAPPER.writeValueAsString(idx.search(args.path("query").asText(""), args.path("method").asText("")));
+            return MAPPER.writeValueAsString(
+                    idx.search(args.path("query").asText(""), args.path("method").asText("")));
         } catch (IOException | RuntimeException e) {
             log.warn("{} failed", NAME, e);
             return error("The API spec could not be read: " + e.getClass().getSimpleName());

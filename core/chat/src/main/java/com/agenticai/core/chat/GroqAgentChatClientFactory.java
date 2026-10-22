@@ -9,18 +9,15 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
- * Bonus OpenAI-compatible provider (provider fan-out, July 2026) - Groq
- * (GroqCloud, the fast-inference-cloud company - NOT {@link
- * ProviderName#GROK}/xAI, a different company with a near-identical name)
- * publishes an OpenAI-chat-completions-compatible API, so this reuses Spring
- * AI's {@code spring-ai-starter-model-openai} module with a fixed {@code
- * baseUrl}, the exact same shape as {@link OpenRouterAgentChatClientFactory}/
- * {@link GrokAgentChatClientFactory} (no dedicated Spring AI starter exists
- * for Groq either).
+ * Bonus OpenAI-compatible provider (provider fan-out, July 2026) - Groq (GroqCloud, the
+ * fast-inference-cloud company - NOT {@link ProviderName#GROK}/xAI, a different company with a
+ * near-identical name) publishes an OpenAI-chat-completions-compatible API, so this reuses Spring
+ * AI's {@code spring-ai-starter-model-openai} module with a fixed {@code baseUrl}, the exact same
+ * shape as {@link OpenRouterAgentChatClientFactory}/ {@link GrokAgentChatClientFactory} (no
+ * dedicated Spring AI starter exists for Groq either).
  *
- * <p>Model id is the agent's free-text {@code model} field, e.g. {@code
- * "llama-3.3-70b-versatile"} or {@code "llama-3.1-8b-instant"} - see Groq's
- * own model list at console.groq.com/docs/models.
+ * <p>Model id is the agent's free-text {@code model} field, e.g. {@code "llama-3.3-70b-versatile"}
+ * or {@code "llama-3.1-8b-instant"} - see Groq's own model list at console.groq.com/docs/models.
  */
 @Component
 public class GroqAgentChatClientFactory implements AgentChatClientFactory {
@@ -47,16 +44,18 @@ public class GroqAgentChatClientFactory implements AgentChatClientFactory {
     // Bounded retries, real ObservationRegistry, default advisors, stream usage -
     // see LlmModelSupport.
     private final LlmModelSupport modelSupport;
-    // Shared OpenAI-compatible transport/model construction (ADR-0012 P1b) - see OpenAiCompatModelBuilder.
+    // Shared OpenAI-compatible transport/model construction (ADR-0012 P1b) - see
+    // OpenAiCompatModelBuilder.
     private final OpenAiCompatModelBuilder modelBuilder;
 
     public GroqAgentChatClientFactory(
-        LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
-        MeterRegistry meterRegistry, LlmPricingCatalog pricingCatalog,
-        LlmHttpClientFactory llmHttpClientFactory,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        LlmModelSupport modelSupport
-    ) {
+            LlmCallMetricsService llmCallMetricsService,
+            LlmCallLogService llmCallLogService,
+            MeterRegistry meterRegistry,
+            LlmPricingCatalog pricingCatalog,
+            LlmHttpClientFactory llmHttpClientFactory,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            LlmModelSupport modelSupport) {
         this.modelSupport = modelSupport;
         this.llmCallMetricsService = llmCallMetricsService;
         this.llmCallLogService = llmCallLogService;
@@ -64,7 +63,9 @@ public class GroqAgentChatClientFactory implements AgentChatClientFactory {
         this.pricingCatalog = pricingCatalog;
         this.llmHttpClientFactory = llmHttpClientFactory;
         this.toolCallingManagers = toolCallingManagers;
-        this.modelBuilder = new OpenAiCompatModelBuilder(llmHttpClientFactory, toolCallingManagers, modelSupport);
+        this.modelBuilder =
+                new OpenAiCompatModelBuilder(
+                        llmHttpClientFactory, toolCallingManagers, modelSupport);
     }
 
     @Override
@@ -73,32 +74,49 @@ public class GroqAgentChatClientFactory implements AgentChatClientFactory {
     }
 
     @Override
-    public ChatClient create(String apiKey, String model, int maxTokens, double temperature, double topP) {
+    public ChatClient create(
+            String apiKey, String model, int maxTokens, double temperature, double topP) {
         return create(apiKey, model, maxTokens, temperature, topP, java.util.Map.of());
     }
 
-    /** Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields are omitted. */
+    /**
+     * Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields
+     * are omitted.
+     */
     @Override
     public ChatClient create(
-        String apiKey, String model, int maxTokens, double temperature, double topP,
-        java.util.Map<String, Object> providerOptions
-    ) {
+            String apiKey,
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
         OpenAiApi openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey).build();
 
-        var optionsBuilder = modelBuilder.options(ProviderName.GROQ, model)
-            .maxTokens(maxTokens)
-            .temperature(temperature)
-            .topP(topP);
+        var optionsBuilder =
+                modelBuilder
+                        .options(ProviderName.GROQ, model)
+                        .maxTokens(maxTokens)
+                        .temperature(temperature)
+                        .topP(topP);
         sampling.applyTo(optionsBuilder);
         LlmModelSupport.logDroppedSampling(ProviderName.GROQ, model, sampling, "topK");
         OpenAiChatOptions options = optionsBuilder.build();
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
-            .defaultAdvisors(modelSupport.advisors(
-                new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.GROQ, model, meterRegistry, pricingCatalog)))
-            .build();
+        return modelSupport
+                .chatClientBuilder(chatModel)
+                .defaultAdvisors(
+                        modelSupport.advisors(
+                                new LlmMetricsAdvisor(
+                                        llmCallMetricsService,
+                                        llmCallLogService,
+                                        ProviderName.GROQ,
+                                        model,
+                                        meterRegistry,
+                                        pricingCatalog)))
+                .build();
     }
 }

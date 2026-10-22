@@ -58,8 +58,7 @@ public class BrowserTakeoverController {
     private final ObjectMapper mapper;
     private final ScheduledExecutorService pumps =
             TenantAwareExecutors.newScheduledThreadPool(
-                    2,
-                    TenantAwareExecutors.threadFactory("browser-takeover-stream", true));
+                    2, TenantAwareExecutors.threadFactory("browser-takeover-stream", true));
 
     public BrowserTakeoverController(BrowserTakeoverService service, ObjectMapper mapper) {
         this.service = service;
@@ -72,8 +71,9 @@ public class BrowserTakeoverController {
     }
 
     /**
-     * Always 200: {@code {"enabled":true,...}} when takeover is on, {@code {"enabled":false}} when it is off
-     * (the web hides the panel on enabled:false), so a switched-off deployment does not log a 404 per page.
+     * Always 200: {@code {"enabled":true,...}} when takeover is on, {@code {"enabled":false}} when
+     * it is off (the web hides the panel on enabled:false), so a switched-off deployment does not
+     * log a 404 per page.
      */
     @GetMapping("/capabilities")
     public Map<String, Object> capabilities() {

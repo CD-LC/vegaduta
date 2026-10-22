@@ -10,23 +10,25 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * Phase 2 of the Multi-Agent Graph Memory (MAG) plan — exposes
- * {@link GraphMemoryService#recallSharedRelated} as a Spring AI tool. The exact same pattern as
- * {@link GraphRecallToolCallback}, but reads from the tenant-shared graph tier rather than this
- * agent's private tier. Only offered when the agent has {@code shareMemoryWithTenant} enabled —
- * see {@code AgentToolProvider#resolveMemoryTools} — so an agent that never opted in to shared
- * memory is never told the shared tier exists and never queries it, maintaining the "no surprise
- * cross-agent visibility" principle from that flag's javadoc.
+ * Phase 2 of the Multi-Agent Graph Memory (MAG) plan — exposes {@link
+ * GraphMemoryService#recallSharedRelated} as a Spring AI tool. The exact same pattern as {@link
+ * GraphRecallToolCallback}, but reads from the tenant-shared graph tier rather than this agent's
+ * private tier. Only offered when the agent has {@code shareMemoryWithTenant} enabled — see {@code
+ * AgentToolProvider#resolveMemoryTools} — so an agent that never opted in to shared memory is never
+ * told the shared tier exists and never queries it, maintaining the "no surprise cross-agent
+ * visibility" principle from that flag's javadoc.
  */
 public class RecallSharedGraphFactsToolCallback implements ToolCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(RecallSharedGraphFactsToolCallback.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(RecallSharedGraphFactsToolCallback.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     private final GraphMemoryService graphMemoryService;
     private final String subjectKey;
 
-    public RecallSharedGraphFactsToolCallback(GraphMemoryService graphMemoryService, String subjectKey) {
+    public RecallSharedGraphFactsToolCallback(
+            GraphMemoryService graphMemoryService, String subjectKey) {
         this.graphMemoryService = graphMemoryService;
         this.subjectKey = subjectKey;
     }
@@ -34,15 +36,15 @@ public class RecallSharedGraphFactsToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("recall_shared_graph_facts")
-            .description(
-                "Looks up relational facts about a named entity from the SHARED team memory — facts that "
-                    + "other agents on this team have remembered about this user's connections and relationships. "
-                    + "Use this to access knowledge that a colleague agent already discovered (e.g. \"Priya WORKS_AT "
-                    + "Acme Corp\" written by the onboarding agent is now visible to the support agent). "
-                    + "Only available when team memory sharing is enabled for this agent."
-            )
-            .inputSchema("""
+                .name("recall_shared_graph_facts")
+                .description(
+                        "Looks up relational facts about a named entity from the SHARED team memory — facts that "
+                                + "other agents on this team have remembered about this user's connections and relationships. "
+                                + "Use this to access knowledge that a colleague agent already discovered (e.g. \"Priya WORKS_AT "
+                                + "Acme Corp\" written by the onboarding agent is now visible to the support agent). "
+                                + "Only available when team memory sharing is enabled for this agent.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -54,7 +56,7 @@ public class RecallSharedGraphFactsToolCallback implements ToolCallback {
                     "required": ["entity"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -66,7 +68,8 @@ public class RecallSharedGraphFactsToolCallback implements ToolCallback {
             if (entityValue == null || entityValue.toString().isBlank()) {
                 return "{\"error\": \"entity is required\"}";
             }
-            List<GraphFact> facts = graphMemoryService.recallSharedRelated(subjectKey, entityValue.toString(), 2);
+            List<GraphFact> facts =
+                    graphMemoryService.recallSharedRelated(subjectKey, entityValue.toString(), 2);
             if (facts.isEmpty()) {
                 return "{\"facts\": [], \"note\": \"No shared connected facts found for this entity.\"}";
             }

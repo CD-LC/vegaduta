@@ -200,7 +200,9 @@ class AgentToolCallApprovalExecutorTest {
         ApprovalRequest base = envelopeRequest("tenant-a", "user-sub");
         String payload =
                 base.getPayloadJson()
-                        .replace("\"sessionId\":", "\"toolDigest\":\"" + digest + "\",\"sessionId\":");
+                        .replace(
+                                "\"sessionId\":",
+                                "\"toolDigest\":\"" + digest + "\",\"sessionId\":");
         return new ApprovalRequest(
                 ACTION_TYPE, "Tool call: " + TOOL_NAME, payload, base.getRequestedBy());
     }
@@ -232,7 +234,9 @@ class AgentToolCallApprovalExecutorTest {
         AgentToolReplayException thrown =
                 assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
 
-        assertTrue(thrown.getMessage().contains("has changed since this request was approved"), thrown.getMessage());
+        assertTrue(
+                thrown.getMessage().contains("has changed since this request was approved"),
+                thrown.getMessage());
         verify(swapped, never()).call(anyString());
         assertFalse(ApprovalReplayGrant.consume(ACTION_TYPE));
     }

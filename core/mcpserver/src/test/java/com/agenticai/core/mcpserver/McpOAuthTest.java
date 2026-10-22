@@ -34,16 +34,18 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * The OAuth 2.1 option of {@code /mcp}: the authenticator's token checks (signature, issuer, expiry,
- * audience binding), the scope rules (exact match, no wildcards), and the filter behaviour (challenge
- * with {@code resource_metadata}, no token passthrough, {@code vmcp_} keys unaffected). Tokens are
- * minted with a throwaway RSA key and validated by the same validators production wires up.
+ * The OAuth 2.1 option of {@code /mcp}: the authenticator's token checks (signature, issuer,
+ * expiry, audience binding), the scope rules (exact match, no wildcards), and the filter behaviour
+ * (challenge with {@code resource_metadata}, no token passthrough, {@code vmcp_} keys unaffected).
+ * Tokens are minted with a throwaway RSA key and validated by the same validators production wires
+ * up.
  */
 class McpOAuthTest {
 
     private static final String RESOURCE = "https://mcp.example.com/mcp";
     private static final String ISSUER = "https://auth.example.com/realms/vega";
-    private static final String METADATA = "https://mcp.example.com/.well-known/oauth-protected-resource/mcp";
+    private static final String METADATA =
+            "https://mcp.example.com/.well-known/oauth-protected-resource/mcp";
 
     private KeyPair keys;
     private McpOAuthAuthenticator authenticator;
@@ -57,17 +59,22 @@ class McpOAuthTest {
         KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
         gen.initialize(2048);
         keys = gen.generateKeyPair();
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withPublicKey((RSAPublicKey) keys.getPublic()).build();
-        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
-            JwtValidators.createDefaultWithIssuer(ISSUER), McpOAuthAuthenticator.audienceValidator(RESOURCE)));
+        NimbusJwtDecoder decoder =
+                NimbusJwtDecoder.withPublicKey((RSAPublicKey) keys.getPublic()).build();
+        decoder.setJwtValidator(
+                new DelegatingOAuth2TokenValidator<>(
+                        JwtValidators.createDefaultWithIssuer(ISSUER),
+                        McpOAuthAuthenticator.audienceValidator(RESOURCE)));
         authenticator = new McpOAuthAuthenticator(decoder, RESOURCE, "tenant_id", "mcp_grant_id");
 
         grantService = mock(McpServerAccessGrantService.class);
         rateLimiter = mock(McpServerRateLimiter.class);
         when(rateLimiter.allow(any())).thenReturn(true);
-        McpServerAccessGrant grant = new McpServerAccessGrant("oauth-grant", "hash", "abcd", "[]", "[]", "[]");
+        McpServerAccessGrant grant =
+                new McpServerAccessGrant("oauth-grant", "hash", "abcd", "[]", "[]", "[]");
         ReflectionTestUtils.setField(grant, "id", grantId);
-        when(grantService.findEnabledByIdWithinCurrentTenant(grantId)).thenReturn(Optional.of(grant));
+        when(grantService.findEnabledByIdWithinCurrentTenant(grantId))
+                .thenReturn(Optional.of(grant));
         filter = new McpApiKeyAuthFilter(grantService, rateLimiter);
         filter.enableOAuth(authenticator, METADATA);
         TenantContext.clear();
@@ -83,10 +90,13 @@ class McpOAuthTest {
 
     private JWTClaimsSet.Builder claims() {
         return new JWTClaimsSet.Builder()
-            .issuer(ISSUER).audience(RESOURCE).subject("user-1")
-            .expirationTime(Date.from(Instant.now().plusSeconds(300)))
-            .claim("tenant_id", "tenant_a").claim("mcp_grant_id", grantId.toString())
-            .claim("scope", "mcp:agents:read mcp:agents:call");
+                .issuer(ISSUER)
+                .audience(RESOURCE)
+                .subject("user-1")
+                .expirationTime(Date.from(Instant.now().plusSeconds(300)))
+                .claim("tenant_id", "tenant_a")
+                .claim("mcp_grant_id", grantId.toString())
+                .claim("scope", "mcp:agents:read mcp:agents:call");
     }
 
     private String sign(JWTClaimsSet claims) throws JOSEException {
@@ -106,10 +116,11 @@ class McpOAuthTest {
         }
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean[] reached = {false};
-        FilterChain chain = (req, res) -> {
-            reached[0] = true;
-            capture(req);
-        };
+        FilterChain chain =
+                (req, res) -> {
+                    reached[0] = true;
+                    capture(req);
+                };
         filter.doFilter(request, response, chain);
         return new Outcome(response, reached[0]);
     }
@@ -118,13 +129,17 @@ class McpOAuthTest {
     private final java.util.List<String> downstreamTenant = new java.util.ArrayList<>();
 
     private void capture(jakarta.servlet.ServletRequest req) {
-        downstreamAuthorization.add(((jakarta.servlet.http.HttpServletRequest) req).getHeader("Authorization"));
+        downstreamAuthorization.add(
+                ((jakarta.servlet.http.HttpServletRequest) req).getHeader("Authorization"));
         downstreamTenant.add(TenantContext.current().map(TenantContext::getTenantId).orElse(null));
     }
 
-    private static final String LIST_AGENTS = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"list_my_agents\"}}";
-    private static final String CALL_AGENT = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"call_agent\"}}";
-    private static final String SEARCH = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"search_knowledge\"}}";
+    private static final String LIST_AGENTS =
+            "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"list_my_agents\"}}";
+    private static final String CALL_AGENT =
+            "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"call_agent\"}}";
+    private static final String SEARCH =
+            "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"search_knowledge\"}}";
 
     // ---- authenticator ------------------------------------------------------
 
@@ -134,12 +149,14 @@ class McpOAuthTest {
         assertThat(result.rejection()).isNull();
         assertThat(result.principal().tenantId()).isEqualTo("tenant_a");
         assertThat(result.principal().grantId()).isEqualTo(grantId);
-        assertThat(result.principal().scopes()).containsExactlyInAnyOrder("mcp:agents:read", "mcp:agents:call");
+        assertThat(result.principal().scopes())
+                .containsExactlyInAnyOrder("mcp:agents:read", "mcp:agents:call");
     }
 
     @Test
     void tokenIssuedForAnotherResourceIsRejected_wrongAudience() throws Exception {
-        String forOtherServer = sign(claims().audience("https://other-mcp.example.org/mcp").build());
+        String forOtherServer =
+                sign(claims().audience("https://other-mcp.example.org/mcp").build());
         var result = authenticator.authenticate(forOtherServer);
         assertThat(result.rejection().status()).isEqualTo(401);
         assertThat(result.rejection().error()).isEqualTo("invalid_token");
@@ -147,41 +164,94 @@ class McpOAuthTest {
 
     @Test
     void tokenWithoutAnyAudienceIsRejected() throws Exception {
-        JWTClaimsSet noAud = new JWTClaimsSet.Builder().issuer(ISSUER).subject("u")
-            .expirationTime(Date.from(Instant.now().plusSeconds(60)))
-            .claim("tenant_id", "tenant_a").claim("mcp_grant_id", grantId.toString()).build();
+        JWTClaimsSet noAud =
+                new JWTClaimsSet.Builder()
+                        .issuer(ISSUER)
+                        .subject("u")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(60)))
+                        .claim("tenant_id", "tenant_a")
+                        .claim("mcp_grant_id", grantId.toString())
+                        .build();
         assertThat(authenticator.authenticate(sign(noAud)).rejection().status()).isEqualTo(401);
     }
 
     @Test
     void audienceMatchIsExactNotAPrefix() throws Exception {
-        assertThat(authenticator.authenticate(sign(claims().audience(RESOURCE + "/evil").build())).rejection()).isNotNull();
-        assertThat(authenticator.authenticate(sign(claims().audience("https://mcp.example.com").build())).rejection()).isNotNull();
+        assertThat(
+                        authenticator
+                                .authenticate(sign(claims().audience(RESOURCE + "/evil").build()))
+                                .rejection())
+                .isNotNull();
+        assertThat(
+                        authenticator
+                                .authenticate(
+                                        sign(claims().audience("https://mcp.example.com").build()))
+                                .rejection())
+                .isNotNull();
         // Trailing slash / host case are the same resource.
-        assertThat(authenticator.authenticate(sign(claims().audience("https://MCP.example.com/mcp/").build())).rejection()).isNull();
+        assertThat(
+                        authenticator
+                                .authenticate(
+                                        sign(
+                                                claims().audience("https://MCP.example.com/mcp/")
+                                                        .build()))
+                                .rejection())
+                .isNull();
     }
 
     @Test
     void wrongIssuerExpiredAndForgedTokensAreRejected() throws Exception {
-        assertThat(authenticator.authenticate(sign(claims().issuer("https://attacker.example").build())).rejection().status()).isEqualTo(401);
-        assertThat(authenticator.authenticate(sign(claims().expirationTime(Date.from(Instant.now().minusSeconds(3600))).build())).rejection().status()).isEqualTo(401);
+        assertThat(
+                        authenticator
+                                .authenticate(
+                                        sign(claims().issuer("https://attacker.example").build()))
+                                .rejection()
+                                .status())
+                .isEqualTo(401);
+        assertThat(
+                        authenticator
+                                .authenticate(
+                                        sign(
+                                                claims().expirationTime(
+                                                                Date.from(
+                                                                        Instant.now()
+                                                                                .minusSeconds(
+                                                                                        3600)))
+                                                        .build()))
+                                .rejection()
+                                .status())
+                .isEqualTo(401);
 
         KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
         gen.initialize(2048);
         KeyPair attacker = gen.generateKeyPair();
         SignedJWT forged = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claims().build());
         forged.sign(new RSASSASigner((RSAPrivateKey) attacker.getPrivate()));
-        assertThat(authenticator.authenticate(forged.serialize()).rejection().status()).isEqualTo(401);
+        assertThat(authenticator.authenticate(forged.serialize()).rejection().status())
+                .isEqualTo(401);
         assertThat(authenticator.authenticate("not-a-jwt").rejection().status()).isEqualTo(401);
     }
 
     @Test
     void tokenNotLinkedToAGrantIsRefused() throws Exception {
-        JWTClaimsSet noGrant = new JWTClaimsSet.Builder().issuer(ISSUER).audience(RESOURCE).subject("u")
-            .expirationTime(Date.from(Instant.now().plusSeconds(60))).claim("tenant_id", "tenant_a").build();
+        JWTClaimsSet noGrant =
+                new JWTClaimsSet.Builder()
+                        .issuer(ISSUER)
+                        .audience(RESOURCE)
+                        .subject("u")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(60)))
+                        .claim("tenant_id", "tenant_a")
+                        .build();
         assertThat(authenticator.authenticate(sign(noGrant)).rejection().status()).isEqualTo(403);
-        JWTClaimsSet badGrant = new JWTClaimsSet.Builder().issuer(ISSUER).audience(RESOURCE).subject("u")
-            .expirationTime(Date.from(Instant.now().plusSeconds(60))).claim("tenant_id", "tenant_a").claim("mcp_grant_id", "nope").build();
+        JWTClaimsSet badGrant =
+                new JWTClaimsSet.Builder()
+                        .issuer(ISSUER)
+                        .audience(RESOURCE)
+                        .subject("u")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(60)))
+                        .claim("tenant_id", "tenant_a")
+                        .claim("mcp_grant_id", "nope")
+                        .build();
         assertThat(authenticator.authenticate(sign(badGrant)).rejection().status()).isEqualTo(403);
     }
 
@@ -193,7 +263,9 @@ class McpOAuthTest {
         Outcome o = call(wildcard, CALL_AGENT);
         assertThat(o.response().getStatus()).isEqualTo(403);
         assertThat(o.response().getHeader("WWW-Authenticate"))
-            .contains("error=\"insufficient_scope\"").contains("scope=\"mcp:agents:call\"").contains("resource_metadata=\"" + METADATA + "\"");
+                .contains("error=\"insufficient_scope\"")
+                .contains("scope=\"mcp:agents:call\"")
+                .contains("resource_metadata=\"" + METADATA + "\"");
         assertThat(o.reachedChain()).isFalse();
     }
 
@@ -204,9 +276,13 @@ class McpOAuthTest {
         assertThat(call(token, CALL_AGENT).reachedChain()).isTrue();
         Outcome knowledge = call(token, SEARCH);
         assertThat(knowledge.response().getStatus()).isEqualTo(403);
-        assertThat(knowledge.response().getHeader("WWW-Authenticate")).contains("scope=\"mcp:knowledge:search\"");
+        assertThat(knowledge.response().getHeader("WWW-Authenticate"))
+                .contains("scope=\"mcp:knowledge:search\"");
         // An unknown tool needs the generic fallback scope, which a stock token does not carry.
-        Outcome unknown = call(token, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"mystery\"}}");
+        Outcome unknown =
+                call(
+                        token,
+                        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"mystery\"}}");
         assertThat(unknown.response().getStatus()).isEqualTo(403);
     }
 
@@ -230,14 +306,17 @@ class McpOAuthTest {
     void missingTokenGets401WithTheResourceMetadataChallenge() throws Exception {
         Outcome o = call(null, LIST_AGENTS);
         assertThat(o.response().getStatus()).isEqualTo(401);
-        assertThat(o.response().getHeader("WWW-Authenticate")).isEqualTo("Bearer resource_metadata=\"" + METADATA + "\"");
+        assertThat(o.response().getHeader("WWW-Authenticate"))
+                .isEqualTo("Bearer resource_metadata=\"" + METADATA + "\"");
     }
 
     @Test
     void invalidTokenGets401InvalidTokenChallengeAndNeverReachesTheChain() throws Exception {
         Outcome o = call(sign(claims().audience("https://other.example/mcp").build()), LIST_AGENTS);
         assertThat(o.response().getStatus()).isEqualTo(401);
-        assertThat(o.response().getHeader("WWW-Authenticate")).contains("error=\"invalid_token\"").contains(METADATA);
+        assertThat(o.response().getHeader("WWW-Authenticate"))
+                .contains("error=\"invalid_token\"")
+                .contains(METADATA);
         assertThat(o.reachedChain()).isFalse();
         verifyNoInteractions(rateLimiter);
     }
@@ -259,11 +338,19 @@ class McpOAuthTest {
 
     @Test
     void grantKeysKeepWorkingWhenOAuthIsOn() throws Exception {
-        McpServerAccessGrant grant = new McpServerAccessGrant("key-grant", McpApiKeyHasher.sha256Hex("vmcp_abc"), "vmcp_abc", "[]", "[]", "[]");
+        McpServerAccessGrant grant =
+                new McpServerAccessGrant(
+                        "key-grant",
+                        McpApiKeyHasher.sha256Hex("vmcp_abc"),
+                        "vmcp_abc",
+                        "[]",
+                        "[]",
+                        "[]");
         UUID keyGrantId = UUID.randomUUID();
         ReflectionTestUtils.setField(grant, "id", keyGrantId);
         when(grantService.resolveTenantSchema("vmcp_abc")).thenReturn(Optional.of("tenant_b"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_abc")).thenReturn(Optional.of(grant));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_abc"))
+                .thenReturn(Optional.of(grant));
         when(grantService.parseExposedAgentIds(any())).thenReturn(java.util.Set.of());
         when(grantService.parseExposedWorkflowIds(any())).thenReturn(java.util.Set.of());
         when(grantService.parseExposedKnowledgeCollectionIds(any())).thenReturn(java.util.Set.of());
@@ -280,31 +367,42 @@ class McpOAuthTest {
     void metadataDocumentNamesTheResourceAuthorizationServerAndScopes() throws Exception {
         var prm = new McpProtectedResourceMetadataFilter(RESOURCE, List.of(ISSUER));
         MockHttpServletResponse response = new MockHttpServletResponse();
-        prm.doFilter(new MockHttpServletRequest("GET", "/.well-known/oauth-protected-resource/mcp"), response, (a, b) -> {});
+        prm.doFilter(
+                new MockHttpServletRequest("GET", "/.well-known/oauth-protected-resource/mcp"),
+                response,
+                (a, b) -> {});
         assertThat(response.getStatus()).isEqualTo(200);
-        var doc = new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.getContentAsString());
+        var doc =
+                new com.fasterxml.jackson.databind.ObjectMapper()
+                        .readTree(response.getContentAsString());
         assertThat(doc.path("resource").asText()).isEqualTo(RESOURCE);
         assertThat(doc.path("authorization_servers").get(0).asText()).isEqualTo(ISSUER);
-        assertThat(doc.path("scopes_supported").toString()).doesNotContain("*").contains("mcp:agents:call");
+        assertThat(doc.path("scopes_supported").toString())
+                .doesNotContain("*")
+                .contains("mcp:agents:call");
         MockHttpServletResponse post = new MockHttpServletResponse();
-        prm.doFilter(new MockHttpServletRequest("POST", "/.well-known/oauth-protected-resource"), post, (a, b) -> {});
+        prm.doFilter(
+                new MockHttpServletRequest("POST", "/.well-known/oauth-protected-resource"),
+                post,
+                (a, b) -> {});
         assertThat(post.getStatus()).isEqualTo(405);
     }
 
     @Test
     void metadataUrlInsertsTheResourcePathAfterTheWellKnownSegment() {
         assertThat(McpProtectedResourceMetadataFilter.metadataUrl("https://mcp.example.com/mcp"))
-            .isEqualTo("https://mcp.example.com/.well-known/oauth-protected-resource/mcp");
+                .isEqualTo("https://mcp.example.com/.well-known/oauth-protected-resource/mcp");
         assertThat(McpProtectedResourceMetadataFilter.metadataUrl("https://mcp.example.com"))
-            .isEqualTo("https://mcp.example.com/.well-known/oauth-protected-resource");
+                .isEqualTo("https://mcp.example.com/.well-known/oauth-protected-resource");
     }
 
     @Test
     void configRefusesPlainHttpAndMissingValues() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
-            () -> McpOAuthConfig.requireHttpsOrLocal("http://mcp.example.com/mcp", "p"));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
-            () -> McpOAuthConfig.requireHttpsOrLocal("", "p"));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> McpOAuthConfig.requireHttpsOrLocal("http://mcp.example.com/mcp", "p"));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class, () -> McpOAuthConfig.requireHttpsOrLocal("", "p"));
         McpOAuthConfig.requireHttpsOrLocal("https://mcp.example.com/mcp", "p");
         McpOAuthConfig.requireHttpsOrLocal("http://localhost:8080/mcp", "p");
     }

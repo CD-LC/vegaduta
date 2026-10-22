@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Manual/API-triggered iMessage send and the channel's default agent - same posture as {@code
- * TeamsSendController}: the send goes through the approval gate, never straight to the Mac.
- * {@code to} is a chat GUID, or a phone number / email for a direct chat.
+ * TeamsSendController}: the send goes through the approval gate, never straight to the Mac. {@code
+ * to} is a chat GUID, or a phone number / email for a direct chat.
  */
 @RestController
 @RequestMapping("/api/channels/imessage")
@@ -66,7 +66,8 @@ public class ImessageSendController {
         channelSessionService.setDefaultAgent(ChannelType.IMESSAGE, request.agentId());
     }
 
-    public record SendRequest(@NotBlank @Size(max = 320) String to, @NotBlank @Size(max = 8000) String body) {}
+    public record SendRequest(
+            @NotBlank @Size(max = 320) String to, @NotBlank @Size(max = 8000) String body) {}
 
     public record SendResult(boolean approved, java.util.UUID pendingRequestId) {}
 }

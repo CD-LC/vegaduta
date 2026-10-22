@@ -9,8 +9,9 @@ import org.springframework.retry.support.RetryTemplate;
  * implementation ({@link SpringRetryLlmRetry}) and {@link #forSpringAi()} only, not every model
  * builder and {@link GeminiMixedContentToolCallChatModel}.
  *
- * <p>The policy itself lives in {@link LlmModelSupport} docs: few attempts, short capped exponential
- * backoff, transient errors only, never after a read timeout; each transient failure is logged.
+ * <p>The policy itself lives in {@link LlmModelSupport} docs: few attempts, short capped
+ * exponential backoff, transient errors only, never after a read timeout; each transient failure is
+ * logged.
  */
 public interface LlmRetry {
 

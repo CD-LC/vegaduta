@@ -12,12 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * CRUD + attachment surface for the procedures layer. Reads used by the
- * runtime path ({@link #activeRulesForAgent}) return fully-resolved,
- * deterministically ordered rule views - position-ordered procedures, then
- * rule-order - so both consumers ({@link ProcedurePromptService}'s prompt
- * block and {@link ProcedureGuardEvaluator}'s tool-call checks) iterate the
- * same stable sequence without re-sorting.
+ * CRUD + attachment surface for the procedures layer. Reads used by the runtime path ({@link
+ * #activeRulesForAgent}) return fully-resolved, deterministically ordered rule views -
+ * position-ordered procedures, then rule-order - so both consumers ({@link
+ * ProcedurePromptService}'s prompt block and {@link ProcedureGuardEvaluator}'s tool-call checks)
+ * iterate the same stable sequence without re-sorting.
  */
 @Service
 public class ProcedureService {
@@ -28,11 +27,10 @@ public class ProcedureService {
     private final ObjectMapper objectMapper;
 
     public ProcedureService(
-        ProcedureRepository procedureRepository,
-        ProcedureRuleRepository ruleRepository,
-        AgentProcedureLinkRepository linkRepository,
-        ObjectMapper objectMapper
-    ) {
+            ProcedureRepository procedureRepository,
+            ProcedureRuleRepository ruleRepository,
+            AgentProcedureLinkRepository linkRepository,
+            ObjectMapper objectMapper) {
         this.procedureRepository = procedureRepository;
         this.ruleRepository = ruleRepository;
         this.linkRepository = linkRepository;
@@ -40,8 +38,7 @@ public class ProcedureService {
     }
 
     /** One fully-resolved procedure with its rules, in deterministic order. */
-    public record ResolvedProcedure(Procedure procedure, List<ProcedureRule> rules) {
-    }
+    public record ResolvedProcedure(Procedure procedure, List<ProcedureRule> rules) {}
 
     @Transactional(readOnly = true)
     public List<Procedure> listAll() {
@@ -50,20 +47,26 @@ public class ProcedureService {
 
     @Transactional(readOnly = true)
     public Procedure get(UUID id) {
-        return procedureRepository.findById(id)
-            .orElseThrow(() -> new ProcedureNotFoundException("Procedure " + id + " does not exist."));
+        return procedureRepository
+                .findById(id)
+                .orElseThrow(
+                        () ->
+                                new ProcedureNotFoundException(
+                                        "Procedure " + id + " does not exist."));
     }
 
     @Transactional(readOnly = true)
     public ResolvedProcedure getResolved(UUID id) {
-        return new ResolvedProcedure(get(id), ruleRepository.findByProcedureIdOrderByRuleOrderAsc(id));
+        return new ResolvedProcedure(
+                get(id), ruleRepository.findByProcedureIdOrderByRuleOrderAsc(id));
     }
 
     @Transactional
     public Procedure create(ProcedureRequest request, String createdBy) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
-        Procedure procedure = procedureRepository.save(
-            new Procedure(tenantId, request.name(), request.description(), createdBy));
+        Procedure procedure =
+                procedureRepository.save(
+                        new Procedure(tenantId, request.name(), request.description(), createdBy));
         replaceRules(procedure.getId(), request.rules());
         return procedure;
     }
@@ -92,10 +95,9 @@ public class ProcedureService {
     }
 
     /**
-     * Every ACTIVE procedure attached to {@code agentId} with its rules, in
-     * attachment-position order. The runtime path (prompt injection, guard
-     * evaluation) calls this; DRAFT and ARCHIVED procedures never reach an
-     * agent.
+     * Every ACTIVE procedure attached to {@code agentId} with its rules, in attachment-position
+     * order. The runtime path (prompt injection, guard evaluation) calls this; DRAFT and ARCHIVED
+     * procedures never reach an agent.
      */
     @Transactional(readOnly = true)
     public List<ResolvedProcedure> activeRulesForAgent(UUID agentId) {
@@ -109,7 +111,8 @@ public class ProcedureService {
             byId.put(p.getId(), p);
         }
         Map<UUID, List<ProcedureRule>> rulesByProcedure = new LinkedHashMap<>();
-        for (ProcedureRule r : ruleRepository.findByProcedureIdInOrderByProcedureIdAscRuleOrderAsc(ids)) {
+        for (ProcedureRule r :
+                ruleRepository.findByProcedureIdInOrderByProcedureIdAscRuleOrderAsc(ids)) {
             rulesByProcedure.computeIfAbsent(r.getProcedureId(), k -> new ArrayList<>()).add(r);
         }
         List<ResolvedProcedure> resolved = new ArrayList<>();
@@ -118,8 +121,10 @@ public class ProcedureService {
             if (procedure == null || procedure.getStatus() != ProcedureStatus.ACTIVE) {
                 continue;
             }
-            resolved.add(new ResolvedProcedure(
-                procedure, rulesByProcedure.getOrDefault(procedure.getId(), List.of())));
+            resolved.add(
+                    new ResolvedProcedure(
+                            procedure,
+                            rulesByProcedure.getOrDefault(procedure.getId(), List.of())));
         }
         return resolved;
     }
@@ -131,22 +136,32 @@ public class ProcedureService {
         List<AgentProcedureLink> links = linkRepository.findByAgentIdOrderByPositionAsc(agentId);
         List<ResolvedProcedure> out = new ArrayList<>();
         for (AgentProcedureLink link : links) {
-            procedureRepository.findById(link.getProcedureId()).ifPresent(p ->
-                out.add(new ResolvedProcedure(p, ruleRepository.findByProcedureIdOrderByRuleOrderAsc(p.getId()))));
+            procedureRepository
+                    .findById(link.getProcedureId())
+                    .ifPresent(
+                            p ->
+                                    out.add(
+                                            new ResolvedProcedure(
+                                                    p,
+                                                    ruleRepository
+                                                            .findByProcedureIdOrderByRuleOrderAsc(
+                                                                    p.getId()))));
         }
         return out;
     }
 
     /**
-     * Attach (or re-position) a procedure on an agent. Idempotent on the
-     * (agent, procedure) pair - a repeat attach just updates the position,
-     * matching how a "reorder" affordance in a console would call this.
+     * Attach (or re-position) a procedure on an agent. Idempotent on the (agent, procedure) pair -
+     * a repeat attach just updates the position, matching how a "reorder" affordance in a console
+     * would call this.
      */
     @Transactional
     public void attach(UUID agentId, UUID procedureId, int position) {
         get(procedureId);
-        AgentProcedureLink link = linkRepository.findByAgentIdAndProcedureId(agentId, procedureId)
-            .orElseGet(() -> new AgentProcedureLink(agentId, procedureId, position));
+        AgentProcedureLink link =
+                linkRepository
+                        .findByAgentIdAndProcedureId(agentId, procedureId)
+                        .orElseGet(() -> new AgentProcedureLink(agentId, procedureId, position));
         link.setPosition(position);
         linkRepository.save(link);
     }
@@ -155,7 +170,7 @@ public class ProcedureService {
     public void detach(UUID agentId, UUID procedureId) {
         if (linkRepository.findByAgentIdAndProcedureId(agentId, procedureId).isEmpty()) {
             throw new ProcedureNotFoundException(
-                "Procedure " + procedureId + " is not attached to agent " + agentId + ".");
+                    "Procedure " + procedureId + " is not attached to agent " + agentId + ".");
         }
         linkRepository.deleteByAgentIdAndProcedureId(agentId, procedureId);
     }
@@ -174,12 +189,21 @@ public class ProcedureService {
                     guardConfig = objectMapper.writeValueAsString(input.guardConfig());
                 } catch (Exception e) {
                     throw new ProcedureValidationException(
-                        "Rule " + (i + 1) + " has a guardConfig that is not serializable JSON: " + e.getMessage());
+                            "Rule "
+                                    + (i + 1)
+                                    + " has a guardConfig that is not serializable JSON: "
+                                    + e.getMessage());
                 }
             }
             validateGuard(input, i + 1);
-            rows.add(new ProcedureRule(procedureId, i, input.instruction(),
-                input.guardKind(), input.guardTool(), guardConfig));
+            rows.add(
+                    new ProcedureRule(
+                            procedureId,
+                            i,
+                            input.instruction(),
+                            input.guardKind(),
+                            input.guardTool(),
+                            guardConfig));
         }
         ruleRepository.saveAll(rows);
     }
@@ -190,14 +214,20 @@ public class ProcedureService {
         }
         if (input.guardTool() == null || input.guardTool().isBlank()) {
             throw new ProcedureValidationException(
-                "Rule " + ruleNumber + " uses guard " + input.guardKind() + " but names no guardTool.");
+                    "Rule "
+                            + ruleNumber
+                            + " uses guard "
+                            + input.guardKind()
+                            + " but names no guardTool.");
         }
         if (input.guardKind() == ProcedureGuardKind.REQUIRE_TOOL_BEFORE) {
             Object prior = input.guardConfig() == null ? null : input.guardConfig().get("prior");
             if (prior == null || prior.toString().isBlank()) {
                 throw new ProcedureValidationException(
-                    "Rule " + ruleNumber + " uses REQUIRE_TOOL_BEFORE but guardConfig.prior is missing "
-                        + "- name the tool that must run first.");
+                        "Rule "
+                                + ruleNumber
+                                + " uses REQUIRE_TOOL_BEFORE but guardConfig.prior is missing "
+                                + "- name the tool that must run first.");
             }
         }
     }

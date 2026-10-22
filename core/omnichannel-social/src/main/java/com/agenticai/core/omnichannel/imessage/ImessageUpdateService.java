@@ -1,6 +1,5 @@
 package com.agenticai.core.omnichannel.imessage;
 
-import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
@@ -15,6 +14,7 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.ConversationHeldByHumanException;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
+import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,15 +32,15 @@ import org.springframework.stereotype.Service;
  * <p>In order: parse (own messages, reactions and non-message events are dropped), the sender
  * policy (default-deny), the per-chat rate limit, the dedup claim, admission to the bounded inbound
  * executor, then the session / pairing gate and the agent turn with an approval-gated reply. The
- * policy runs before anything is written, so a stranger who is not allowed costs no session row,
- * no transcript and no LLM call.
+ * policy runs before anything is written, so a stranger who is not allowed costs no session row, no
+ * transcript and no LLM call.
  *
  * <p><b>Sender policy.</b> A direct message from an allow-listed handle is served (and its session
  * is paired on the spot). From anyone else it is default-denied: with PAIR (default) the sender
- * gets a one-time pairing code and an admin approves the conversation in the Channels screen;
- * with IGNORE nothing happens at all. A group chat is served only when the tenant enabled groups
- * AND the speaker is allow-listed; a stranger in a group is ignored, never sent a pairing code,
- * so a group cannot be used to make the bridge message arbitrary people.
+ * gets a one-time pairing code and an admin approves the conversation in the Channels screen; with
+ * IGNORE nothing happens at all. A group chat is served only when the tenant enabled groups AND the
+ * speaker is allow-listed; a stranger in a group is ignored, never sent a pairing code, so a group
+ * cannot be used to make the bridge message arbitrary people.
  *
  * <p>The caller has set the {@code TenantContext}.
  */
@@ -91,37 +91,47 @@ public class ImessageUpdateService {
             return true;
         }
         ImessageEventParser.Inbound in = parsed.get();
-        Optional<ImessageCredentialService.InboundSettings> settings = credentialService.inboundSettings();
+        Optional<ImessageCredentialService.InboundSettings> settings =
+                credentialService.inboundSettings();
         if (settings.isEmpty()) {
             return true;
         }
         boolean allowed = settings.get().allowedSenders().contains(in.sender());
         if (in.group()) {
             if (!settings.get().allowGroups() || !allowed) {
-                log.debug("Ignoring iMessage group message from {} (groups off or sender not allowed)", ImessageAddress.mask(in.sender()));
+                log.debug(
+                        "Ignoring iMessage group message from {} (groups off or sender not allowed)",
+                        ImessageAddress.mask(in.sender()));
                 return true;
             }
         } else if (!allowed && settings.get().policy() == UnknownSenderPolicy.IGNORE) {
-            log.debug("Ignoring iMessage from unlisted sender {} (policy IGNORE)", ImessageAddress.mask(in.sender()));
+            log.debug(
+                    "Ignoring iMessage from unlisted sender {} (policy IGNORE)",
+                    ImessageAddress.mask(in.sender()));
             return true;
         }
         if (!rateLimiter.tryInbound(ImessageChannelAdapter.tenantKey() + "|" + in.chatGuid())) {
-            log.warn("iMessage chat {} is over the inbound rate limit - message dropped", ImessageAddress.mask(in.chatGuid()));
+            log.warn(
+                    "iMessage chat {} is over the inbound rate limit - message dropped",
+                    ImessageAddress.mask(in.chatGuid()));
             return true;
         }
         if (!dedupService.tryClaim(ChannelType.IMESSAGE, in.guid())) {
             log.info("Ignoring duplicate iMessage {}", ImessageAddress.mask(in.guid()));
             return true;
         }
-        // Admission BEFORE any side effect (the session create writes a message-log row). An existing
-        // unpaired, unlisted sender only gets the cheap pairing notice, so it takes an inline permit.
+        // Admission BEFORE any side effect (the session create writes a message-log row). An
+        // existing
+        // unpaired, unlisted sender only gets the cheap pairing notice, so it takes an inline
+        // permit.
         boolean cheap =
                 !allowed
                         && channelSessionService
                                 .peek(ChannelType.IMESSAGE, in.chatGuid())
                                 .map(s -> !s.isPaired())
                                 .orElse(false);
-        InboundChannelExecutor.Permit permit = cheap ? inboundExecutor.inline() : inboundExecutor.acquire("imessage");
+        InboundChannelExecutor.Permit permit =
+                cheap ? inboundExecutor.inline() : inboundExecutor.acquire("imessage");
         if (permit == null) {
             dedupService.release(ChannelType.IMESSAGE, in.guid());
             return false;
@@ -134,16 +144,21 @@ public class ImessageUpdateService {
         return true;
     }
 
-    private void route(InboundChannelExecutor.Permit permit, ImessageEventParser.Inbound in, boolean allowed) {
+    private void route(
+            InboundChannelExecutor.Permit permit, ImessageEventParser.Inbound in, boolean allowed) {
         log.info(
                 "Inbound iMessage in chat {} from {}",
                 ImessageAddress.mask(in.chatGuid()),
                 ImessageAddress.mask(in.sender()));
         ChannelSession session;
         try {
-            session = channelSessionService.resolveOrCreate(ChannelType.IMESSAGE, in.chatGuid(), in.text());
+            session =
+                    channelSessionService.resolveOrCreate(
+                            ChannelType.IMESSAGE, in.chatGuid(), in.text());
         } catch (ConversationHeldByHumanException e) {
-            log.info("iMessage chat {} is held by a human operator - agent not invoked", ImessageAddress.mask(in.chatGuid()));
+            log.info(
+                    "iMessage chat {} is held by a human operator - agent not invoked",
+                    ImessageAddress.mask(in.chatGuid()));
             return;
         }
         if (allowed && !session.isPaired()) {
@@ -159,7 +174,8 @@ public class ImessageUpdateService {
                     try {
                         generateAndSendReply(paired, in.chatGuid(), in.text());
                     } catch (RuntimeException e) {
-                        // The claim is kept: releasing it could double-reply if the failure came after the send.
+                        // The claim is kept: releasing it could double-reply if the failure came
+                        // after the send.
                         log.warn("Failed to process iMessage inbound message: {}", e.getMessage());
                     }
                 });
@@ -170,9 +186,13 @@ public class ImessageUpdateService {
         try {
             ChatTurnRequest chatTurn =
                     ChatTurnRequest.builder(
-                                    session.getAgentId(), session.getSessionId(), session.getExternalId(), text)
+                                    session.getAgentId(),
+                                    session.getSessionId(),
+                                    session.getExternalId(),
+                                    text)
                             .build();
-            TurnContext turnContext = TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            TurnContext turnContext =
+                    TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
             reply =
                     agentChatService
                             .chat(turnContext, chatTurn)
@@ -185,13 +205,20 @@ public class ImessageUpdateService {
         }
         if (reply != null && !reply.isBlank()) {
             sendReplyThroughApprovalGate(
-                    chatGuid, channelSessionService.consumeAiDisclosurePrefix(session.getId()) + reply);
+                    chatGuid,
+                    channelSessionService.consumeAiDisclosurePrefix(session.getId()) + reply);
         }
     }
 
-    /** The session points at an agent that was deleted: tell the sender and leave an audit trail for the admin. */
+    /**
+     * The session points at an agent that was deleted: tell the sender and leave an audit trail for
+     * the admin.
+     */
     private void handleStaleAgentBinding(ChannelSession session, String chatGuid) {
-        log.warn("iMessage session {} is bound to agent {} which no longer exists", session.getId(), session.getAgentId());
+        log.warn(
+                "iMessage session {} is bound to agent {} which no longer exists",
+                session.getId(),
+                session.getAgentId());
         auditLogService.record(
                 AUDIT_ACTOR,
                 "channel.imessage.agent_not_found",
@@ -212,7 +239,9 @@ public class ImessageUpdateService {
 
     private void handleUnpairedSender(ChannelSession session, String chatGuid) {
         if (session.isPairingNoticeSent()) {
-            log.info("Ignoring message from still-unpaired iMessage chat {} (already notified)", ImessageAddress.mask(chatGuid));
+            log.info(
+                    "Ignoring message from still-unpaired iMessage chat {} (already notified)",
+                    ImessageAddress.mask(chatGuid));
             return;
         }
         String notice =
@@ -220,16 +249,23 @@ public class ImessageUpdateService {
                         + " respond. Your pairing code is "
                         + session.getPairingCode()
                         + ".";
-        sendReplyThroughApprovalGate(chatGuid, channelSessionService.consumeAiDisclosurePrefix(session.getId()) + notice);
+        sendReplyThroughApprovalGate(
+                chatGuid,
+                channelSessionService.consumeAiDisclosurePrefix(session.getId()) + notice);
         channelSessionService.markPairingNoticeSent(session.getId());
     }
 
     private void sendReplyThroughApprovalGate(String to, String replyText) {
         String payloadJson;
         try {
-            payloadJson = MAPPER.writeValueAsString(new ImessageChannelAdapter.SendPayload(to, replyText));
+            payloadJson =
+                    MAPPER.writeValueAsString(
+                            new ImessageChannelAdapter.SendPayload(to, replyText));
         } catch (Exception e) {
-            log.error("Failed to serialize iMessage auto-reply payload for {}", ImessageAddress.mask(to), e);
+            log.error(
+                    "Failed to serialize iMessage auto-reply payload for {}",
+                    ImessageAddress.mask(to),
+                    e);
             return;
         }
         gateService.evaluate(

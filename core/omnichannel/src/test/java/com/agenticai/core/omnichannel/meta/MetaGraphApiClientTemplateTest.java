@@ -219,7 +219,8 @@ class MetaGraphApiClientTemplateTest {
                         .getStatusCode());
         assertEquals(
                 HttpStatus.FORBIDDEN,
-                assertThrows(ResponseStatusException.class, () -> on.list(null, null, null)).getStatusCode());
+                assertThrows(ResponseStatusException.class, () -> on.list(null, null, null))
+                        .getStatusCode());
         verifyNoInteractions(dispatch);
     }
 
@@ -239,7 +240,8 @@ class MetaGraphApiClientTemplateTest {
                                 new WhatsAppTemplate(
                                         "invoice_reminder", "en_US", "UTILITY", "Hi {{1}}", 1),
                                 new WhatsAppTemplate("long_one", "en", null, longBody, 0)));
-        List<WhatsAppTemplateController.WhatsAppTemplateResponse> listed = controller.list(admin, null, null).getBody();
+        List<WhatsAppTemplateController.WhatsAppTemplateResponse> listed =
+                controller.list(admin, null, null).getBody();
         assertEquals(
                 new WhatsAppTemplateController.WhatsAppTemplateResponse(
                         "invoice_reminder", "en_US", 1, "Hi {{1}}", "UTILITY"),

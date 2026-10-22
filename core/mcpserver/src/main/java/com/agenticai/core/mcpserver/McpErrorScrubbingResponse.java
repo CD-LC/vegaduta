@@ -16,17 +16,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 /**
- * Keeps a Java exception from reaching an MCP client (B11). The MCP transport answers some client errors (a missing
- * {@code Mcp-Session-Id}, for one) by serializing a Java exception object straight into the 400 body, which put the
- * whole {@code stackTrace} - class names, file names, line numbers - on the wire. Responses with a status below 400
- * (including the long-lived SSE stream) are passed through untouched and unbuffered; only an error response is held
- * back, and if its body is such a serialized exception it is replaced by a plain JSON-RPC error carrying just the
- * message. Any other error body is forwarded as it was.
+ * Keeps a Java exception from reaching an MCP client (B11). The MCP transport answers some client
+ * errors (a missing {@code Mcp-Session-Id}, for one) by serializing a Java exception object
+ * straight into the 400 body, which put the whole {@code stackTrace} - class names, file names,
+ * line numbers - on the wire. Responses with a status below 400 (including the long-lived SSE
+ * stream) are passed through untouched and unbuffered; only an error response is held back, and if
+ * its body is such a serialized exception it is replaced by a plain JSON-RPC error carrying just
+ * the message. Any other error body is forwarded as it was.
  */
 final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
-    private static final Pattern QUALIFIED_CLASS = Pattern.compile("\\b[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+\\.[A-Z]\\w*");
+    private static final Pattern QUALIFIED_CLASS =
+            Pattern.compile("\\b[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+\\.[A-Z]\\w*");
 
     private ByteArrayOutputStream buffer;
     private ServletOutputStream bufferedStream;
@@ -47,27 +49,28 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
         }
         if (bufferedStream == null) {
             buffer = new ByteArrayOutputStream();
-            bufferedStream = new ServletOutputStream() {
-                @Override
-                public boolean isReady() {
-                    return true;
-                }
+            bufferedStream =
+                    new ServletOutputStream() {
+                        @Override
+                        public boolean isReady() {
+                            return true;
+                        }
 
-                @Override
-                public void setWriteListener(WriteListener writeListener) {
-                    // synchronous buffer: nothing to signal
-                }
+                        @Override
+                        public void setWriteListener(WriteListener writeListener) {
+                            // synchronous buffer: nothing to signal
+                        }
 
-                @Override
-                public void write(int b) {
-                    buffer.write(b);
-                }
+                        @Override
+                        public void write(int b) {
+                            buffer.write(b);
+                        }
 
-                @Override
-                public void write(byte[] b, int off, int len) {
-                    buffer.write(b, off, len);
-                }
-            };
+                        @Override
+                        public void write(byte[] b, int off, int len) {
+                            buffer.write(b, off, len);
+                        }
+                    };
         }
         return bufferedStream;
     }
@@ -78,7 +81,10 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
             return super.getWriter();
         }
         if (bufferedWriter == null) {
-            bufferedWriter = new PrintWriter(new OutputStreamWriter(getOutputStream(), StandardCharsets.UTF_8), true);
+            bufferedWriter =
+                    new PrintWriter(
+                            new OutputStreamWriter(getOutputStream(), StandardCharsets.UTF_8),
+                            true);
         }
         return bufferedWriter;
     }
@@ -120,7 +126,10 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
         real.getOutputStream().flush();
     }
 
-    /** Package-private for tests: the body to send for an error response with this status and original body. */
+    /**
+     * Package-private for tests: the body to send for an error response with this status and
+     * original body.
+     */
     static byte[] scrub(byte[] body, int status) {
         JsonNode node;
         try {
@@ -143,7 +152,7 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
             return MAPPER.writeValueAsBytes(reply);
         } catch (IOException e) {
             return "{\"jsonrpc\":\"2.0\",\"id\":null,\"error\":{\"code\":-32600,\"message\":\"Bad request\"}}"
-                .getBytes(StandardCharsets.UTF_8);
+                    .getBytes(StandardCharsets.UTF_8);
         }
     }
 
@@ -152,7 +161,10 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
             return "Bad request";
         }
         String text = message.asText().strip();
-        if (text.isEmpty() || text.length() > 200 || QUALIFIED_CLASS.matcher(text).find() || text.contains("\n")) {
+        if (text.isEmpty()
+                || text.length() > 200
+                || QUALIFIED_CLASS.matcher(text).find()
+                || text.contains("\n")) {
             return "Bad request";
         }
         return text;

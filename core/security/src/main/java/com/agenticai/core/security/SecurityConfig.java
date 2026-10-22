@@ -6,24 +6,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -33,7 +29,11 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
@@ -139,14 +139,12 @@ public class SecurityConfig {
     private String requiredAudience = "";
 
     /**
-     * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles,
-     * tenant and (optionally) scopes live in the token. The defaults reproduce
-     * the Keycloak layout EXACTLY ({@code realm_access.roles}, {@code
-     * tenant_id}, no scope mapping), so an unconfigured deployment is
-     * unchanged; point {@code issuer-uri} at Auth0/Entra/Okta and set these to
-     * that provider's claim names. See application-security.yml's
-     * {@code app.security.oidc} block. Env: {@code OIDC_ROLES_CLAIM_PATH},
-     * {@code OIDC_TENANT_CLAIM}, {@code OIDC_SCOPES_CLAIM}.
+     * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles, tenant and (optionally)
+     * scopes live in the token. The defaults reproduce the Keycloak layout EXACTLY ({@code
+     * realm_access.roles}, {@code tenant_id}, no scope mapping), so an unconfigured deployment is
+     * unchanged; point {@code issuer-uri} at Auth0/Entra/Okta and set these to that provider's
+     * claim names. See application-security.yml's {@code app.security.oidc} block. Env: {@code
+     * OIDC_ROLES_CLAIM_PATH}, {@code OIDC_TENANT_CLAIM}, {@code OIDC_SCOPES_CLAIM}.
      */
     @Value("${app.security.oidc.roles-claim-path:realm_access.roles}")
     private String rolesClaimPath;
@@ -158,9 +156,9 @@ public class SecurityConfig {
     private String scopesClaim;
 
     /**
-     * The mapping every claim-reading component below shares - built here once
-     * so the role converter, the tenant filter, the view-as synthetic token
-     * and the denial auditor can never disagree about which claim is which.
+     * The mapping every claim-reading component below shares - built here once so the role
+     * converter, the tenant filter, the view-as synthetic token and the denial auditor can never
+     * disagree about which claim is which.
      */
     private OidcClaimMapping claimMapping() {
         return new OidcClaimMapping(rolesClaimPath, tenantClaim, scopesClaim);
@@ -233,13 +231,14 @@ public class SecurityConfig {
 
     /**
      * The Keycloak / generic-OIDC decoder. Absent only when {@code app.auth.mode=local}, where
-     * {@link com.agenticai.core.security.localauth.LocalAuthSecurityConfig} supplies the decoder for
-     * locally issued tokens; the default (property unset or {@code keycloak}) is unchanged.
+     * {@link com.agenticai.core.security.localauth.LocalAuthSecurityConfig} supplies the decoder
+     * for locally issued tokens; the default (property unset or {@code keycloak}) is unchanged.
      */
     @Bean
     @ConditionalOnProperty(name = "app.auth.mode", havingValue = "keycloak", matchIfMissing = true)
     public JwtDecoder jwtDecoder() {
-        String issuerUri = environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri", "");
+        String issuerUri =
+                environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri", "");
         String jwkSetUri = environment.getProperty("app.keycloak.jwk-set-uri", "");
         if (issuerUri.isBlank() || jwkSetUri.isBlank()) {
             throw new IllegalStateException(
@@ -366,7 +365,10 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain mcpServerFilterChain(HttpSecurity http) throws Exception {
         // The RFC 9728 well-known document is public by design (app.mcpserver.oauth.enabled).
-        http.securityMatcher("/mcp/**", "/api/dev/**", "/.well-known/oauth-protected-resource/**",
+        http.securityMatcher(
+                        "/mcp/**",
+                        "/api/dev/**",
+                        "/.well-known/oauth-protected-resource/**",
                         "/.well-known/oauth-protected-resource")
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
@@ -404,7 +406,7 @@ public class SecurityConfig {
                                                 csp ->
                                                         csp.policyDirectives(
                                                                 "default-src 'none';"
-                                                                    + " frame-ancestors 'none'"))
+                                                                        + " frame-ancestors 'none'"))
                                         .referrerPolicy(
                                                 referrer ->
                                                         referrer.policy(
@@ -562,7 +564,7 @@ public class SecurityConfig {
                 response.getWriter()
                         .write(
                                 "{\"error\":{\"message\":\"Incorrect API key provided.\","
-                                    + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
+                                        + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
                 return;
             }
             delegate.commence(request, response, ex);
@@ -573,8 +575,8 @@ public class SecurityConfig {
     /**
      * SE-80: the stock bearer entry point answers 401 with an empty body while every other error
      * carries a problem+json document. Adds one (fixed text: nothing about why the token failed
-     * leaks; the {@code WWW-Authenticate} header the delegate set still carries the RFC 6750 detail).
-     * Skipped when the response is already committed or has a body.
+     * leaks; the {@code WWW-Authenticate} header the delegate set still carries the RFC 6750
+     * detail). Skipped when the response is already committed or has a body.
      */
     static void writeUnauthorizedProblem(
             jakarta.servlet.http.HttpServletRequest request,
@@ -583,15 +585,21 @@ public class SecurityConfig {
         if (response.isCommitted()) {
             return;
         }
-        String path = request.getRequestURI() == null ? "" : request.getRequestURI().replace("\\", "").replace("\"", "");
+        String path =
+                request.getRequestURI() == null
+                        ? ""
+                        : request.getRequestURI().replace("\\", "").replace("\"", "");
         response.setContentType("application/problem+json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter()
                 .write(
                         "{\"type\":\"urn:vegaduta:problem:unauthorized\",\"title\":\"Unauthorized\","
                                 + "\"status\":401,\"detail\":\"Authentication is required to access this resource.\","
-                                + "\"instance\":\"" + path + "\",\"timestamp\":\""
-                                + java.time.Instant.now() + "\","
+                                + "\"instance\":\""
+                                + path
+                                + "\",\"timestamp\":\""
+                                + java.time.Instant.now()
+                                + "\","
                                 + "\"error\":\"Authentication is required to access this resource.\"}");
     }
 

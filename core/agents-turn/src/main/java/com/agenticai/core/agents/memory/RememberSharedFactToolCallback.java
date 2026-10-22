@@ -15,16 +15,14 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * Shared cross-agent memory tier (#847) - exposes {@link
- * TenantMemoryService#remember} as a native Spring AI tool, only ever
- * offered to an agent whose own config has {@code shareMemoryWithTenant}
- * turned on (see {@code AgentToolProvider#resolveMemoryTools}). Deliberately
- * a separate tool from {@link RememberFactToolCallback}, not a flag on it -
- * the model needs to make an explicit, visible choice between "remember
- * this just for me" (private, {@code remember_fact}) and "remember this for
- * every agent on this team" (shared, {@code remember_shared_fact}), and a
- * tenant-admin who never enabled sharing for an agent should never see that
- * agent's private-memory tool quietly start writing tenant-wide instead.
+ * Shared cross-agent memory tier (#847) - exposes {@link TenantMemoryService#remember} as a native
+ * Spring AI tool, only ever offered to an agent whose own config has {@code shareMemoryWithTenant}
+ * turned on (see {@code AgentToolProvider#resolveMemoryTools}). Deliberately a separate tool from
+ * {@link RememberFactToolCallback}, not a flag on it - the model needs to make an explicit, visible
+ * choice between "remember this just for me" (private, {@code remember_fact}) and "remember this
+ * for every agent on this team" (shared, {@code remember_shared_fact}), and a tenant-admin who
+ * never enabled sharing for an agent should never see that agent's private-memory tool quietly
+ * start writing tenant-wide instead.
  */
 public class RememberSharedFactToolCallback implements ToolCallback {
 
@@ -41,14 +39,18 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     private final EntityExtractionService entityExtractionService;
     private final ChatClient chatClient;
 
-    public RememberSharedFactToolCallback(TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey) {
+    public RememberSharedFactToolCallback(
+            TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey) {
         this(tenantMemoryService, agentId, subjectKey, null, null, null);
     }
 
     public RememberSharedFactToolCallback(
-        TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey,
-        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService, ChatClient chatClient
-    ) {
+            TenantMemoryService tenantMemoryService,
+            UUID agentId,
+            String subjectKey,
+            GraphMemoryService graphMemoryService,
+            EntityExtractionService entityExtractionService,
+            ChatClient chatClient) {
         this.tenantMemoryService = tenantMemoryService;
         this.agentId = agentId;
         this.subjectKey = subjectKey;
@@ -60,15 +62,15 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("remember_shared_fact")
-            .description(
-                "Saves a fact, preference, or correction about the current user so EVERY agent on this team can "
-                    + "recall it, not just you - use this for facts genuinely useful across agents (e.g. \"this "
-                    + "customer's account is on the Enterprise plan\", \"prefers to be called by their first "
-                    + "name\"). For something only relevant to your own conversations with this user, use "
-                    + "remember_fact instead."
-            )
-            .inputSchema("""
+                .name("remember_shared_fact")
+                .description(
+                        "Saves a fact, preference, or correction about the current user so EVERY agent on this team can "
+                                + "recall it, not just you - use this for facts genuinely useful across agents (e.g. \"this "
+                                + "customer's account is on the Enterprise plan\", \"prefers to be called by their first "
+                                + "name\"). For something only relevant to your own conversations with this user, use "
+                                + "remember_fact instead.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -80,7 +82,7 @@ public class RememberSharedFactToolCallback implements ToolCallback {
                     "required": ["fact"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -103,11 +105,11 @@ public class RememberSharedFactToolCallback implements ToolCallback {
 
     /**
      * Phase 2 MAG: best-effort, entirely optional — writes graph triples to the shared graph tier
-     * when the "graph-memory" profile is active and a chat context is available. Never throws —
-     * a failure here must never affect {@code remember_shared_fact}'s already-successful primary
-     * result. Mirrors {@link RememberFactToolCallback#writeToGraphIfAvailable} but calls
-     * {@link GraphMemoryService#rememberShared} so the triples land in the shared tier, not the
-     * calling agent's private tier.
+     * when the "graph-memory" profile is active and a chat context is available. Never throws — a
+     * failure here must never affect {@code remember_shared_fact}'s already-successful primary
+     * result. Mirrors {@link RememberFactToolCallback#writeToGraphIfAvailable} but calls {@link
+     * GraphMemoryService#rememberShared} so the triples land in the shared tier, not the calling
+     * agent's private tier.
      */
     private void writeToSharedGraphIfAvailable(String fact) {
         if (graphMemoryService == null || entityExtractionService == null || chatClient == null) {
@@ -117,7 +119,9 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             List<GraphTriple> triples = entityExtractionService.extractTriples(chatClient, fact);
             graphMemoryService.rememberShared(subjectKey, triples);
         } catch (Exception e) {
-            log.warn("Shared graph memory enrichment failed for remember_shared_fact - vector memory is unaffected", e);
+            log.warn(
+                    "Shared graph memory enrichment failed for remember_shared_fact - vector memory is unaffected",
+                    e);
         }
     }
 

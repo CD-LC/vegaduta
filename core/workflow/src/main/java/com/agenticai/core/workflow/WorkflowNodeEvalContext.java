@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * What expressions can read for one node execution: the node's input, upstream outputs from the run data store,
- * {@code $trigger}, {@code $run}, {@code $workflow} and the loop scope. Built by {@link WorkflowExpressionResolver};
- * single-threaded: built and used inside one executeNode call.
+ * What expressions can read for one node execution: the node's input, upstream outputs from the run
+ * data store, {@code $trigger}, {@code $run}, {@code $workflow} and the loop scope. Built by {@link
+ * WorkflowExpressionResolver}; single-threaded: built and used inside one executeNode call.
  */
 final class WorkflowNodeEvalContext implements EvalContext {
 
@@ -35,13 +35,19 @@ final class WorkflowNodeEvalContext implements EvalContext {
     private JsonNode tree;
     private boolean treeLoaded;
     private Map<String, Object> runMap;
-    /** Set while resolving an INPUT_ONLY / CRM field: {{input}} is the raw input there (see EvalContext). */
+
+    /**
+     * Set while resolving an INPUT_ONLY / CRM field: {{input}} is the raw input there (see
+     * EvalContext).
+     */
     boolean rawInputWins;
 
     WorkflowNodeEvalContext(
-        WorkflowExpressionResolver resolver, String input, NodeEvalInfo info, ExpressionScope scope,
-        boolean withInputJson
-    ) {
+            WorkflowExpressionResolver resolver,
+            String input,
+            NodeEvalInfo info,
+            ExpressionScope scope,
+            boolean withInputJson) {
         this.resolver = resolver;
         this.input = input == null ? "" : input;
         this.info = info;
@@ -69,7 +75,10 @@ final class WorkflowNodeEvalContext implements EvalContext {
         return tree;
     }
 
-    /** Old renderTemplate semantics: blank input is an empty object, non-JSON is null; HTTP adds {@code input_json}. */
+    /**
+     * Old renderTemplate semantics: blank input is an empty object, non-JSON is null; HTTP adds
+     * {@code input_json}.
+     */
     private JsonNode buildTree() {
         JsonNode parsed;
         try {
@@ -87,7 +96,10 @@ final class WorkflowNodeEvalContext implements EvalContext {
             out.put("input_json", "\"\"");
         }
         if (parsed != null && parsed.isObject()) {
-            out.setAll((ObjectNode) parsed.deepCopy()); // the input's own fields win over input_json, as before
+            out.setAll(
+                    (ObjectNode)
+                            parsed.deepCopy()); // the input's own fields win over input_json, as
+            // before
         }
         return out;
     }
@@ -124,35 +136,51 @@ final class WorkflowNodeEvalContext implements EvalContext {
     }
 
     /**
-     * Step test: outputs come only from what the caller supplied. A reference with nothing behind it fails
-     * loudly - an empty string here would show a green test for a request that a real run would not make.
+     * Step test: outputs come only from what the caller supplied. A reference with nothing behind
+     * it fails loudly - an empty string here would show a green test for a request that a real run
+     * would not make.
      */
     private NodeOutput suppliedOutput(String key, String name) {
         NodeOutput out = scope.supplied().get(key);
         if (out == null) {
-            throw new ExpressionException("No data for node '" + name + "' in this test - pin or supply its "
-                + "output (run the workflow once and pin the node), then test again", -1, -1);
+            throw new ExpressionException(
+                    "No data for node '"
+                            + name
+                            + "' in this test - pin or supply its "
+                            + "output (run the workflow once and pin the node), then test again",
+                    -1,
+                    -1);
         }
         return out;
     }
 
-    /** A missing row only means "that node did not run" when writing rows did not fail earlier in this run. */
+    /**
+     * A missing row only means "that node did not run" when writing rows did not fail earlier in
+     * this run.
+     */
     private void failIfRecordingLost(RunDataStore.Stored stored, String what) {
         if (stored == null && runId != null && resolver.recordingFailed(runId)) {
-            throw new ExpressionException("The output of '" + what + "' is unavailable: saving run data failed "
-                + "earlier in this run, so this value cannot be read", -1, -1);
+            throw new ExpressionException(
+                    "The output of '"
+                            + what
+                            + "' is unavailable: saving run data failed "
+                            + "earlier in this run, so this value cannot be read",
+                    -1,
+                    -1);
         }
     }
 
     @Override
     public Object trigger() {
         if (scope != null && scope.supplied() != null) {
-            return resolver.parseLoose(suppliedOutput("id:" + RunDataStore.TRIGGER_NODE_ID, "$trigger").output());
+            return resolver.parseLoose(
+                    suppliedOutput("id:" + RunDataStore.TRIGGER_NODE_ID, "$trigger").output());
         }
         if (resolver.store() == null || runId == null) {
             return null;
         }
-        RunDataStore.Stored stored = readStore(() -> resolver.store().latestById(runId, RunDataStore.TRIGGER_NODE_ID));
+        RunDataStore.Stored stored =
+                readStore(() -> resolver.store().latestById(runId, RunDataStore.TRIGGER_NODE_ID));
         failIfRecordingLost(stored, "$trigger");
         if (stored == null) {
             return null;
@@ -183,7 +211,10 @@ final class WorkflowNodeEvalContext implements EvalContext {
             return null;
         }
         try {
-            return resolver.runs().findById(runId).map(r -> String.valueOf(r.getStartedAt())).orElse(null);
+            return resolver.runs()
+                    .findById(runId)
+                    .map(r -> String.valueOf(r.getStartedAt()))
+                    .orElse(null);
         } catch (RuntimeException e) {
             return null;
         }
@@ -225,7 +256,10 @@ final class WorkflowNodeEvalContext implements EvalContext {
             return read.get();
         } catch (RuntimeException e) {
             log.warn("Run data store read failed for run {}: {}", runId, e.getMessage());
-            throw new ExpressionException("Run data is unavailable right now (" + e.getClass().getSimpleName() + ")", -1, -1);
+            throw new ExpressionException(
+                    "Run data is unavailable right now (" + e.getClass().getSimpleName() + ")",
+                    -1,
+                    -1);
         }
     }
 
@@ -234,13 +268,20 @@ final class WorkflowNodeEvalContext implements EvalContext {
             return null;
         }
         failIfTruncated(stored, "node '" + key + "'");
-        return new NodeOutput(stored.nodeId(), stored.label(), stored.outputText(), stored.status(), null);
+        return new NodeOutput(
+                stored.nodeId(), stored.label(), stored.outputText(), stored.status(), null);
     }
 
     private void failIfTruncated(RunDataStore.Stored stored, String what) {
         if (stored.truncated()) {
-            throw new ExpressionException("Upstream output of " + what + " is too large (over "
-                + RunDataStore.MAX_OUTPUT_CHARS / 1000 + " KB) - reduce it with a Transform node", -1, -1);
+            throw new ExpressionException(
+                    "Upstream output of "
+                            + what
+                            + " is too large (over "
+                            + RunDataStore.MAX_OUTPUT_CHARS / 1000
+                            + " KB) - reduce it with a Transform node",
+                    -1,
+                    -1);
         }
     }
 }

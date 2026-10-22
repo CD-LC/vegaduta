@@ -10,15 +10,20 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * The filter + sort vocabulary shared by the REST API, the workflow node and the agent tools. A filter is a list
- * of {@link Condition}s that must ALL hold (AND); there is deliberately no OR / nesting - "simple column
- * conditions". It is accepted in three spellings so each caller can use the natural one:
+ * The filter + sort vocabulary shared by the REST API, the workflow node and the agent tools. A
+ * filter is a list of {@link Condition}s that must ALL hold (AND); there is deliberately no OR /
+ * nesting - "simple column conditions". It is accepted in three spellings so each caller can use
+ * the natural one:
+ *
  * <ul>
- *   <li>a list of {@code {column, op, value}} objects (the canonical form);</li>
- *   <li>an object shorthand {@code {"status": "open", "owner": "ravi"}} meaning equality on each key;</li>
- *   <li>a JSON string of either of the above (config fields and query parameters arrive as text).</li>
+ *   <li>a list of {@code {column, op, value}} objects (the canonical form);
+ *   <li>an object shorthand {@code {"status": "open", "owner": "ravi"}} meaning equality on each
+ *       key;
+ *   <li>a JSON string of either of the above (config fields and query parameters arrive as text).
  * </ul>
- * Pure and static - parsing only; typing the values and rendering SQL is {@link DataTableQueryBuilder}'s job.
+ *
+ * Pure and static - parsing only; typing the values and rendering SQL is {@link
+ * DataTableQueryBuilder}'s job.
  */
 public final class DataTableFilter {
 
@@ -26,10 +31,12 @@ public final class DataTableFilter {
     public static final int MAX_IN_VALUES = 100;
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private DataTableFilter() {
-    }
+    private DataTableFilter() {}
 
-    /** Condition operators. {@code wire} is the canonical spelling; {@link #parse} also takes common aliases. */
+    /**
+     * Condition operators. {@code wire} is the canonical spelling; {@link #parse} also takes common
+     * aliases.
+     */
     public enum Op {
         EQ("eq"),
         NE("ne"),
@@ -58,7 +65,13 @@ public final class DataTableFilter {
         }
 
         public static Op parse(String raw) {
-            String t = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT).replace('-', '_').replace(' ', '_');
+            String t =
+                    raw == null
+                            ? ""
+                            : raw.trim()
+                                    .toLowerCase(Locale.ROOT)
+                                    .replace('-', '_')
+                                    .replace(' ', '_');
             return switch (t) {
                 case "eq", "=", "==", "equals", "is" -> EQ;
                 case "ne", "!=", "<>", "not_equals", "neq" -> NE;
@@ -71,24 +84,30 @@ public final class DataTableFilter {
                 case "in" -> IN;
                 case "is_null", "isnull", "is_empty", "empty" -> IS_NULL;
                 case "not_null", "notnull", "is_not_null", "not_empty" -> NOT_NULL;
-                default -> throw new IllegalArgumentException(
-                    "Unknown filter operator '" + (raw == null ? "" : raw.trim())
-                        + "' - use eq, ne, gt, gte, lt, lte, contains, starts_with, in, is_null or not_null");
+                default ->
+                        throw new IllegalArgumentException(
+                                "Unknown filter operator '"
+                                        + (raw == null ? "" : raw.trim())
+                                        + "' - use eq, ne, gt, gte, lt, lte, contains, starts_with, in, is_null or not_null");
             };
         }
     }
 
-    /** One column condition. {@code value} is raw (untyped) until the query builder binds it to the column type. */
-    public record Condition(String column, Op op, Object value) {
-    }
-
-    /** One sort key; {@code column} may be a system column ({@code _created_at}, {@code _updated_at}, {@code _id}). */
-    public record Sort(String column, boolean descending) {
-    }
+    /**
+     * One column condition. {@code value} is raw (untyped) until the query builder binds it to the
+     * column type.
+     */
+    public record Condition(String column, Op op, Object value) {}
 
     /**
-     * Parses any accepted filter spelling. Null, blank, an empty list or an empty object = no filter (an empty
-     * list, never null). Malformed input is an IllegalArgumentException (400).
+     * One sort key; {@code column} may be a system column ({@code _created_at}, {@code
+     * _updated_at}, {@code _id}).
+     */
+    public record Sort(String column, boolean descending) {}
+
+    /**
+     * Parses any accepted filter spelling. Null, blank, an empty list or an empty object = no
+     * filter (an empty list, never null). Malformed input is an IllegalArgumentException (400).
      */
     public static List<Condition> parse(Object raw) {
         Object spec = raw;
@@ -100,7 +119,8 @@ public final class DataTableFilter {
             try {
                 spec = MAPPER.readValue(t, Object.class);
             } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("The filter is not valid JSON - use a list of {column, op, value} or an object like {\"status\": \"open\"}");
+                throw new IllegalArgumentException(
+                        "The filter is not valid JSON - use a list of {column, op, value} or an object like {\"status\": \"open\"}");
             }
         }
         if (spec == null) {
@@ -114,7 +134,8 @@ public final class DataTableFilter {
         } else if (spec instanceof List<?> list) {
             for (Object item : list) {
                 if (!(item instanceof Map<?, ?> m)) {
-                    throw new IllegalArgumentException("Each filter condition must be an object like {\"column\": \"status\", \"op\": \"eq\", \"value\": \"open\"}");
+                    throw new IllegalArgumentException(
+                            "Each filter condition must be an object like {\"column\": \"status\", \"op\": \"eq\", \"value\": \"open\"}");
                 }
                 Object column = m.get("column");
                 if (column == null || column.toString().isBlank()) {
@@ -125,10 +146,12 @@ public final class DataTableFilter {
                 out.add(new Condition(column.toString().trim(), parsed, m.get("value")));
             }
         } else {
-            throw new IllegalArgumentException("The filter must be a list of conditions or an object of column/value pairs");
+            throw new IllegalArgumentException(
+                    "The filter must be a list of conditions or an object of column/value pairs");
         }
         if (out.size() > MAX_CONDITIONS) {
-            throw new IllegalArgumentException("A filter can have at most " + MAX_CONDITIONS + " conditions");
+            throw new IllegalArgumentException(
+                    "A filter can have at most " + MAX_CONDITIONS + " conditions");
         }
         return out;
     }

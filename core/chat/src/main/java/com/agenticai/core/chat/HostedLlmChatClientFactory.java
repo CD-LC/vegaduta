@@ -87,7 +87,8 @@ public class HostedLlmChatClientFactory {
     // The install's local model server, to recognise its pool row (see isLocalOllamaRow), and
     // the Ollama context window OllamaAgentChatClientFactory also applies. Field-injected so the
     // one constructor - and every caller that builds this factory by hand - stays as it is.
-    @Value("${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
+    @Value(
+            "${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
     private String localOllamaBaseUrl = "";
 
     @Value("${app.llm.ollama.num-ctx:32768}")
@@ -286,9 +287,9 @@ public class HostedLlmChatClientFactory {
      * ProviderName#GOOGLE_VERTEX}.
      */
     /**
-     * True for the pool row that serves this install's own Ollama: a row whose {@code
-     * providerName} says OLLAMA, or whose base URL is the operator-configured local model server
-     * ({@code app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
+     * True for the pool row that serves this install's own Ollama: a row whose {@code providerName}
+     * says OLLAMA, or whose base URL is the operator-configured local model server ({@code
+     * app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
      */
     boolean isLocalOllamaRow(PlatformHostedLlmProvider provider) {
         if (provider == null) {
@@ -304,10 +305,14 @@ public class HostedLlmChatClientFactory {
 
     /**
      * The thinking switch for a local Ollama row: the row's own setting (Providers -> Local model),
-     * else {@code app.llm.ollama.reasoning-effort}. Null or blank means "leave the model's default".
+     * else {@code app.llm.ollama.reasoning-effort}. Null or blank means "leave the model's
+     * default".
      */
     String effectiveReasoningEffort(PlatformHostedLlmProvider provider) {
-        String value = provider.getReasoningEffort() != null ? provider.getReasoningEffort() : ollamaReasoningEffort;
+        String value =
+                provider.getReasoningEffort() != null
+                        ? provider.getReasoningEffort()
+                        : ollamaReasoningEffort;
         return value == null || value.isBlank() ? null : value.trim();
     }
 
@@ -451,7 +456,9 @@ public class HostedLlmChatClientFactory {
      * catalog, where an unknown model still gets the conservative fallback rate.
      */
     private LlmPricingCatalog pricingCatalogFor(PlatformHostedLlmProvider provider) {
-        return provider != null && provider.isZeroCost() ? LlmPricingCatalog.zeroCost() : pricingCatalog;
+        return provider != null && provider.isZeroCost()
+                ? LlmPricingCatalog.zeroCost()
+                : pricingCatalog;
     }
 
     private static String resolveModel(PlatformHostedLlmProvider provider) {

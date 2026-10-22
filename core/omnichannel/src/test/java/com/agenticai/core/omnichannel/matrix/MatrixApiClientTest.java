@@ -37,7 +37,10 @@ class MatrixApiClientTest {
 
     @Test
     void whoAmIReturnsTheAccountAndSendsTheTokenOnlyInTheHeader() {
-        server.on("GET /_matrix/client/v3/account/whoami", 200, "{\"user_id\":\"@bot:hs\",\"device_id\":\"D1\"}");
+        server.on(
+                "GET /_matrix/client/v3/account/whoami",
+                200,
+                "{\"user_id\":\"@bot:hs\",\"device_id\":\"D1\"}");
 
         MatrixApiClient.WhoAmI who = client.whoAmI(endpoint);
 
@@ -64,17 +67,22 @@ class MatrixApiClientTest {
 
     @Test
     void sendTextIsAnIdempotentPutWithTheTransactionIdAndReplyRelation() throws Exception {
-        server.on("PUT /_matrix/client/v3/rooms/!room:hs/send/m.room.message/", 200, "{\"event_id\":\"$sent\"}");
+        server.on(
+                "PUT /_matrix/client/v3/rooms/!room:hs/send/m.room.message/",
+                200,
+                "{\"event_id\":\"$sent\"}");
 
         String eventId = client.sendText(endpoint, "!room:hs", "txn-1", "hello", "$orig", null);
 
         assertThat(eventId).isEqualTo("$sent");
         FakeHomeserver.Request request = server.requests.get(0);
-        assertThat(request.rawPath()).isEqualTo("/_matrix/client/v3/rooms/%21room%3Ahs/send/m.room.message/txn-1");
+        assertThat(request.rawPath())
+                .isEqualTo("/_matrix/client/v3/rooms/%21room%3Ahs/send/m.room.message/txn-1");
         JsonNode body = MAPPER.readTree(request.body());
         assertThat(body.path("msgtype").asText()).isEqualTo("m.text");
         assertThat(body.path("body").asText()).isEqualTo("hello");
-        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asText()).isEqualTo("$orig");
+        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asText())
+                .isEqualTo("$orig");
     }
 
     @Test
@@ -94,7 +102,13 @@ class MatrixApiClientTest {
     void longTextIsSplitIntoSeveralEventsWithDistinctTransactionIds() {
         server.on("PUT /_matrix/client/v3/rooms/", 200, "{\"event_id\":\"$e\"}");
 
-        client.sendText(endpoint, "!r:hs", "txn", "x".repeat(MatrixApiClient.MAX_BODY_CHARS * 2 + 10), null, null);
+        client.sendText(
+                endpoint,
+                "!r:hs",
+                "txn",
+                "x".repeat(MatrixApiClient.MAX_BODY_CHARS * 2 + 10),
+                null,
+                null);
 
         assertThat(server.requests).hasSize(3);
         assertThat(server.requests.get(0).rawPath()).endsWith("/txn");
@@ -141,7 +155,16 @@ class MatrixApiClientTest {
         server.on("POST /_matrix/media/v3/upload", 200, "{\"content_uri\":\"mxc://hs/abc123\"}");
         server.on("PUT /_matrix/client/v3/rooms/", 200, "{\"event_id\":\"$f\"}");
 
-        client.sendFile(endpoint, "!r:hs", "t", "pic.png", "image/png", new byte[] {1, 2, 3}, "a picture", null, null);
+        client.sendFile(
+                endpoint,
+                "!r:hs",
+                "t",
+                "pic.png",
+                "image/png",
+                new byte[] {1, 2, 3},
+                "a picture",
+                null,
+                null);
 
         FakeHomeserver.Request upload = server.requests.get(0);
         assertThat(upload.query()).contains("filename=pic.png");
@@ -156,15 +179,19 @@ class MatrixApiClientTest {
 
     @Test
     void downloadUsesAuthenticatedMediaAndFallsBackToTheLegacyEndpoint() {
-        server.on("GET /_matrix/client/v1/media/download/", 404, "{\"errcode\":\"M_UNRECOGNIZED\"}");
+        server.on(
+                "GET /_matrix/client/v1/media/download/", 404, "{\"errcode\":\"M_UNRECOGNIZED\"}");
         server.on(
                 "GET /_matrix/media/v3/download/hs/abc123",
-                r -> new FakeHomeserver.Response(200, "text/plain", "contents".getBytes(StandardCharsets.UTF_8)));
+                r ->
+                        new FakeHomeserver.Response(
+                                200, "text/plain", "contents".getBytes(StandardCharsets.UTF_8)));
 
         byte[] bytes = client.downloadMedia(endpoint, "mxc://hs/abc123", 1024);
 
         assertThat(new String(bytes, StandardCharsets.UTF_8)).isEqualTo("contents");
-        assertThat(server.requests.get(0).headers().get("authorization")).isEqualTo("Bearer " + TOKEN);
+        assertThat(server.requests.get(0).headers().get("authorization"))
+                .isEqualTo("Bearer " + TOKEN);
     }
 
     @Test
@@ -174,19 +201,21 @@ class MatrixApiClientTest {
                 r -> new FakeHomeserver.Response(200, "text/plain", new byte[2048]));
 
         assertThatThrownBy(() -> client.downloadMedia(endpoint, "mxc://hs/abc123", 100))
-                .isInstanceOfSatisfying(MatrixApiException.class, e -> assertThat(e.errcode()).isEqualTo("M_TOO_LARGE"));
+                .isInstanceOfSatisfying(
+                        MatrixApiException.class,
+                        e -> assertThat(e.errcode()).isEqualTo("M_TOO_LARGE"));
         assertThatThrownBy(() -> client.downloadMedia(endpoint, "https://evil/x", 100))
                 .isInstanceOf(MatrixApiException.class);
     }
 
     @Test
     void aPrivateHomeserverNotOnTheOperatorListIsRefused() {
-        MatrixApiClient strict =
-                new MatrixApiClient(MAPPER, SsrfGuard::strict);
+        MatrixApiClient strict = new MatrixApiClient(MAPPER, SsrfGuard::strict);
 
         assertThatThrownBy(() -> strict.whoAmI(endpoint))
                 .isInstanceOfSatisfying(
-                        MatrixApiException.class, e -> assertThat(e.errcode()).isEqualTo("M_SSRF_BLOCKED"));
+                        MatrixApiException.class,
+                        e -> assertThat(e.errcode()).isEqualTo("M_SSRF_BLOCKED"));
         assertThat(server.requests).isEmpty();
     }
 
@@ -195,12 +224,20 @@ class MatrixApiClientTest {
         SsrfGuard publicGuard =
                 SsrfGuard.of(
                         Set.of(),
-                        host -> new InetAddress[] {InetAddress.getByAddress(new byte[] {93, (byte) 184, 34, 1})});
+                        host ->
+                                new InetAddress[] {
+                                    InetAddress.getByAddress(new byte[] {93, (byte) 184, 34, 1})
+                                });
         MatrixApiClient c = new MatrixApiClient(MAPPER, () -> publicGuard);
 
-        assertThatThrownBy(() -> c.whoAmI(new MatrixApiClient.Endpoint("http://matrix.example.com", TOKEN)))
+        assertThatThrownBy(
+                        () ->
+                                c.whoAmI(
+                                        new MatrixApiClient.Endpoint(
+                                                "http://matrix.example.com", TOKEN)))
                 .isInstanceOfSatisfying(
-                        MatrixApiException.class, e -> assertThat(e.errcode()).isEqualTo("M_INSECURE_HOMESERVER"));
+                        MatrixApiException.class,
+                        e -> assertThat(e.errcode()).isEqualTo("M_INSECURE_HOMESERVER"));
     }
 
     @Test

@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.math.BigDecimal;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 
-/** Characterisation of {@link DataFilterOps}: operator aliases, typed comparison, combinators, switch routing, regex safety. */
+/**
+ * Characterisation of {@link DataFilterOps}: operator aliases, typed comparison, combinators,
+ * switch routing, regex safety.
+ */
 class DataFilterOpsTest {
     private static final ObjectMapper M = new ObjectMapper();
 
@@ -17,8 +19,11 @@ class DataFilterOpsTest {
         return M.readTree(s);
     }
 
-    private static boolean test(String itemJson, String field, String op, String value, boolean ignoreCase) throws Exception {
-        return new DataFilterOps.ConditionEvaluator(ignoreCase).test(j(itemJson), new WorkflowDataOps.Condition(field, op, value));
+    private static boolean test(
+            String itemJson, String field, String op, String value, boolean ignoreCase)
+            throws Exception {
+        return new DataFilterOps.ConditionEvaluator(ignoreCase)
+                .test(j(itemJson), new WorkflowDataOps.Condition(field, op, value));
     }
 
     @Test
@@ -77,8 +82,15 @@ class DataFilterOpsTest {
     @Test
     void unknownOperatorFailsAndRegexIsBounded() {
         assertThrows(IllegalArgumentException.class, () -> test("{}", "a", "like", "x", false));
-        assertThrows(IllegalArgumentException.class,
-            () -> test("{\"a\":\"x\"}", "a", "regex", "a".repeat(DataFilterOps.MAX_REGEX_PATTERN_CHARS + 1), false));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        test(
+                                "{\"a\":\"x\"}",
+                                "a",
+                                "regex",
+                                "a".repeat(DataFilterOps.MAX_REGEX_PATTERN_CHARS + 1),
+                                false));
     }
 
     @Test
@@ -95,7 +107,10 @@ class DataFilterOpsTest {
 
     @Test
     void combinatorsAndOrWithShortCircuit() throws Exception {
-        List<WorkflowDataOps.Condition> cs = List.of(new WorkflowDataOps.Condition("a", "eq", "1"), new WorkflowDataOps.Condition("b", "eq", "2"));
+        List<WorkflowDataOps.Condition> cs =
+                List.of(
+                        new WorkflowDataOps.Condition("a", "eq", "1"),
+                        new WorkflowDataOps.Condition("b", "eq", "2"));
         DataFilterOps.ConditionEvaluator ev = new DataFilterOps.ConditionEvaluator(false);
         assertTrue(ev.matches(j("{\"a\":1,\"b\":2}"), cs, false));
         assertFalse(ev.matches(j("{\"a\":1,\"b\":3}"), cs, false));
@@ -113,12 +128,25 @@ class DataFilterOpsTest {
 
     @Test
     void switchRoutesToFirstMatchingCaseElseDefault() {
-        Map<String, Object> config = m("cases", List.of(
-            m("name", "big", "conditions", List.of(m("field", "n", "operator", ">", "value", "10"))),
-            m("name", "any", "conditions", List.of(m("field", "n", "operator", "notEmpty")))));
+        Map<String, Object> config =
+                m(
+                        "cases",
+                        List.of(
+                                m(
+                                        "name",
+                                        "big",
+                                        "conditions",
+                                        List.of(m("field", "n", "operator", ">", "value", "10"))),
+                                m(
+                                        "name",
+                                        "any",
+                                        "conditions",
+                                        List.of(m("field", "n", "operator", "notEmpty")))));
         assertEquals("big", DataFilterOps.switchRoute(M, config, "{\"n\":11}").branch());
         assertEquals("any", DataFilterOps.switchRoute(M, config, "{\"n\":1}").branch());
-        assertEquals(WorkflowDataOps.SWITCH_DEFAULT_HANDLE, DataFilterOps.switchRoute(M, config, "{}").branch());
+        assertEquals(
+                WorkflowDataOps.SWITCH_DEFAULT_HANDLE,
+                DataFilterOps.switchRoute(M, config, "{}").branch());
         assertEquals("{}", DataFilterOps.switchRoute(M, config, "{}").output());
     }
 
@@ -126,8 +154,11 @@ class DataFilterOpsTest {
     void filterKeepsMatchesAndEveryItemWhenNoConditions() throws Exception {
         WorkflowDataOps ops = new WorkflowDataOps(M);
         String in = "[{\"n\":1},{\"n\":5}]";
-        Map<String, Object> config = m("conditions", List.of(m("field", "n", "operator", "gt", "value", "2")));
-        assertEquals(j("[{\"n\":5}]"), j(DataFilterOps.filter(M, config, () -> ops.items(in, "")).output()));
+        Map<String, Object> config =
+                m("conditions", List.of(m("field", "n", "operator", "gt", "value", "2")));
+        assertEquals(
+                j("[{\"n\":5}]"),
+                j(DataFilterOps.filter(M, config, () -> ops.items(in, "")).output()));
         assertEquals(j(in), j(DataFilterOps.filter(M, m(), () -> ops.items(in, "")).output()));
     }
 

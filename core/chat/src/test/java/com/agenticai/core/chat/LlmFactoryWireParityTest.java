@@ -41,8 +41,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Wire-level characterisation of every LLM chat-client factory (ADR-0012 P1b). Each factory is
- * driven end to end against a canned HTTP transport and the request it emits (URL, auth headers
- * and JSON body: model, token limit, sampling, stream options, ...) is compared with a snapshot
+ * driven end to end against a canned HTTP transport and the request it emits (URL, auth headers and
+ * JSON body: model, token limit, sampling, stream options, ...) is compared with a snapshot
  * recorded from the pre-refactor code ({@code llm-factory-wire-snapshot.txt}). The snapshot was
  * captured BEFORE the OpenAiCompatModelBuilder / AnthropicModelBuilder refactor, so a green run
  * proves the builders produce the same requests as the old inline construction.
@@ -55,20 +55,27 @@ class LlmFactoryWireParityTest {
     private static final ObjectMapper JSON = JsonMappers.plain();
     private static final ObjectMapper SORTED = JsonMappers.sortedMapKeys();
     private static final String OPENAI_REPLY =
-        "{\"id\":\"c1\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,"
-            + "\"message\":{\"role\":\"assistant\",\"content\":\"ok\"},\"finish_reason\":\"stop\"}],"
-            + "\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}";
+            "{\"id\":\"c1\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,"
+                    + "\"message\":{\"role\":\"assistant\",\"content\":\"ok\"},\"finish_reason\":\"stop\"}],"
+                    + "\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}";
     private static final String ANTHROPIC_REPLY =
-        "{\"id\":\"m1\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"m\",\"content\":[{\"type\":\"text\","
-            + "\"text\":\"ok\"}],\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}";
-    private static final List<String> HEADERS = List.of(
-        "Authorization", "api-key", "api-subscription-key", "x-api-key", "anthropic-version", "Content-Type");
+            "{\"id\":\"m1\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"m\",\"content\":[{\"type\":\"text\","
+                    + "\"text\":\"ok\"}],\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}";
+    private static final List<String> HEADERS =
+            List.of(
+                    "Authorization",
+                    "api-key",
+                    "api-subscription-key",
+                    "x-api-key",
+                    "anthropic-version",
+                    "Content-Type");
 
     private final List<String> captured = new ArrayList<>();
     private final Map<String, String> snapshot = new LinkedHashMap<>();
     private String reply = OPENAI_REPLY;
 
-    private final ResilientToolCallingManagerFactory tools = new ResilientToolCallingManagerFactory(JsonMappers.plain());
+    private final ResilientToolCallingManagerFactory tools =
+            new ResilientToolCallingManagerFactory(JsonMappers.plain());
     private final LlmCallMetricsService metrics = mock(LlmCallMetricsService.class);
     private final LlmCallLogService logs = mock(LlmCallLogService.class);
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
@@ -86,16 +93,20 @@ class LlmFactoryWireParityTest {
     }
 
     private RestClient.Builder restBuilder() {
-        ClientHttpRequestFactory factory = (uri, method) -> new MockClientHttpRequest(method, uri) {
-            @Override
-            protected ClientHttpResponse executeInternal() {
-                capture(this);
-                MockClientHttpResponse response = new MockClientHttpResponse(
-                    reply.getBytes(StandardCharsets.UTF_8), HttpStatus.OK);
-                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                return response;
-            }
-        };
+        ClientHttpRequestFactory factory =
+                (uri, method) ->
+                        new MockClientHttpRequest(method, uri) {
+                            @Override
+                            protected ClientHttpResponse executeInternal() {
+                                capture(this);
+                                MockClientHttpResponse response =
+                                        new MockClientHttpResponse(
+                                                reply.getBytes(StandardCharsets.UTF_8),
+                                                HttpStatus.OK);
+                                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                                return response;
+                            }
+                        };
         return RestClient.builder().requestFactory(factory);
     }
 
@@ -105,14 +116,21 @@ class LlmFactoryWireParityTest {
         HttpHeaders headers = request.getHeaders();
         for (String name : HEADERS) {
             if (headers.containsKey(name)) {
-                sb.append("  ").append(name).append(": ").append(String.join(",", headers.get(name))).append('\n');
+                sb.append("  ")
+                        .append(name)
+                        .append(": ")
+                        .append(String.join(",", headers.get(name)))
+                        .append('\n');
             }
         }
         try {
             JsonNode body = JSON.readTree(request.getBodyAsString());
             Object tree = JSON.treeToValue(body, Object.class);
-            sb.append("  body: ").append(SORTED.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
-                .writeValueAsString(tree)).append('\n');
+            sb.append("  body: ")
+                    .append(
+                            SORTED.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                                    .writeValueAsString(tree))
+                    .append('\n');
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -124,9 +142,20 @@ class LlmFactoryWireParityTest {
         ObjectProvider<ObservationRegistry> obs = mock(ObjectProvider.class);
         when(obs.getIfAvailable(any())).thenReturn(ObservationRegistry.NOOP);
         ObjectProvider<DefaultAgentAdvisor> adv = mock(ObjectProvider.class);
-        when(adv.orderedStream()).thenAnswer(i -> java.util.stream.Stream.<DefaultAgentAdvisor>empty());
-        return new LlmModelSupport(obs, adv, 2, Duration.ofMillis(1), Duration.ofMillis(2), true, "MISTRAL", "low",
-            16, Duration.ofMinutes(30), false);
+        when(adv.orderedStream())
+                .thenAnswer(i -> java.util.stream.Stream.<DefaultAgentAdvisor>empty());
+        return new LlmModelSupport(
+                obs,
+                adv,
+                2,
+                Duration.ofMillis(1),
+                Duration.ofMillis(2),
+                true,
+                "MISTRAL",
+                "low",
+                16,
+                Duration.ofMinutes(30),
+                false);
     }
 
     private void run(String label, ChatClient client) {
@@ -144,60 +173,197 @@ class LlmFactoryWireParityTest {
         SamplingOptions full = new SamplingOptions(40, List.of("END"), 0.4, 0.3, 7);
         Map<String, Object> sampling = Map.of(SamplingOptions.OPTION_KEY, full);
 
-        run("deepseek", new DeepSeekAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
-            .create("sk-ds", "deepseek-chat", 512, 0.7, 0.9, sampling));
-        run("groq", new GroqAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
-            .create("sk-groq", "llama-3.3-70b-versatile", 512, 0.7, 0.9, sampling));
-        run("grok", new GrokAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
-            .create("sk-grok", "grok-4", 512, 0.7, 0.9, sampling));
-        run("meta", new MetaAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
-            .create("sk-meta", "muse-spark", 512, 0.7, 0.9, sampling));
-        run("mistral", new MistralAgentChatClientFactory(metrics, logs, meters, pricing, http, tools,
-            new MistralProviderCachingStrategy(true), support).create("sk-mi", "mistral-large", 512, 0.7, 0.9, sampling));
-        run("openai", new OpenAIAgentChatClientFactory(metrics, logs, meters, pricing, http, tools,
-            new OpenAIProviderCachingStrategy(true), support).create("sk-oa", "gpt-4o", 512, 0.7, 0.9, sampling));
-        run("openai-reasoning", new OpenAIAgentChatClientFactory(metrics, logs, meters, pricing, http, tools,
-            new OpenAIProviderCachingStrategy(true), support).create("sk-oa", "gpt-5", 512, 0.7, 0.9, sampling));
-        run("openrouter", new OpenRouterAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
-            .create("sk-or", "openai/gpt-4o", 512, 0.7, 0.9, sampling));
-        run("sarvam", new SarvamAgentChatClientFactory(metrics, logs, meters, pricing, tools, 4096, http, support)
-            .create("sk-sv", "sarvam-m", 8192, 0.7, 0.9, sampling));
-        run("azure", new AzureOpenAIAgentChatClientFactory(metrics, logs, meters, pricing, http, tools,
-            new AzureOpenAIProviderCachingStrategy(true), support).create(
-            new AzureOpenAiCredential("https://res.openai.azure.com", "az-key", "dep1", null).encode(),
-            "gpt-4o", 512, 0.7, 0.9, sampling));
-        run("ollama-key", new OllamaAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support,
-                32768, 0)
-            .create(new OllamaCredential("http://ollama.example:11434/", "olk").encode(), "llama3", 512, 0.7, 0.9,
-                sampling));
-        run("ollama-nokey", new OllamaAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support,
-                32768, 0)
-            .create(new OllamaCredential("http://ollama.example:11434", null).encode(), "llama3", 512, 0.7, 0.9,
-                sampling));
+        run(
+                "deepseek",
+                new DeepSeekAgentChatClientFactory(
+                                metrics, logs, meters, pricing, http, tools, support)
+                        .create("sk-ds", "deepseek-chat", 512, 0.7, 0.9, sampling));
+        run(
+                "groq",
+                new GroqAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
+                        .create("sk-groq", "llama-3.3-70b-versatile", 512, 0.7, 0.9, sampling));
+        run(
+                "grok",
+                new GrokAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
+                        .create("sk-grok", "grok-4", 512, 0.7, 0.9, sampling));
+        run(
+                "meta",
+                new MetaAgentChatClientFactory(metrics, logs, meters, pricing, http, tools, support)
+                        .create("sk-meta", "muse-spark", 512, 0.7, 0.9, sampling));
+        run(
+                "mistral",
+                new MistralAgentChatClientFactory(
+                                metrics,
+                                logs,
+                                meters,
+                                pricing,
+                                http,
+                                tools,
+                                new MistralProviderCachingStrategy(true),
+                                support)
+                        .create("sk-mi", "mistral-large", 512, 0.7, 0.9, sampling));
+        run(
+                "openai",
+                new OpenAIAgentChatClientFactory(
+                                metrics,
+                                logs,
+                                meters,
+                                pricing,
+                                http,
+                                tools,
+                                new OpenAIProviderCachingStrategy(true),
+                                support)
+                        .create("sk-oa", "gpt-4o", 512, 0.7, 0.9, sampling));
+        run(
+                "openai-reasoning",
+                new OpenAIAgentChatClientFactory(
+                                metrics,
+                                logs,
+                                meters,
+                                pricing,
+                                http,
+                                tools,
+                                new OpenAIProviderCachingStrategy(true),
+                                support)
+                        .create("sk-oa", "gpt-5", 512, 0.7, 0.9, sampling));
+        run(
+                "openrouter",
+                new OpenRouterAgentChatClientFactory(
+                                metrics, logs, meters, pricing, http, tools, support)
+                        .create("sk-or", "openai/gpt-4o", 512, 0.7, 0.9, sampling));
+        run(
+                "sarvam",
+                new SarvamAgentChatClientFactory(
+                                metrics, logs, meters, pricing, tools, 4096, http, support)
+                        .create("sk-sv", "sarvam-m", 8192, 0.7, 0.9, sampling));
+        run(
+                "azure",
+                new AzureOpenAIAgentChatClientFactory(
+                                metrics,
+                                logs,
+                                meters,
+                                pricing,
+                                http,
+                                tools,
+                                new AzureOpenAIProviderCachingStrategy(true),
+                                support)
+                        .create(
+                                new AzureOpenAiCredential(
+                                                "https://res.openai.azure.com",
+                                                "az-key",
+                                                "dep1",
+                                                null)
+                                        .encode(),
+                                "gpt-4o",
+                                512,
+                                0.7,
+                                0.9,
+                                sampling));
+        run(
+                "ollama-key",
+                new OllamaAgentChatClientFactory(
+                                metrics, logs, meters, pricing, http, tools, support, 32768, 0)
+                        .create(
+                                new OllamaCredential("http://ollama.example:11434/", "olk")
+                                        .encode(),
+                                "llama3",
+                                512,
+                                0.7,
+                                0.9,
+                                sampling));
+        run(
+                "ollama-nokey",
+                new OllamaAgentChatClientFactory(
+                                metrics, logs, meters, pricing, http, tools, support, 32768, 0)
+                        .create(
+                                new OllamaCredential("http://ollama.example:11434", null).encode(),
+                                "llama3",
+                                512,
+                                0.7,
+                                0.9,
+                                sampling));
 
-        HostedLlmChatClientFactory hosted = new HostedLlmChatClientFactory(
-            metrics, logs, meters, pricing, http, tools, null, support);
-        run("hosted-default-path", hosted.create(
-            new PlatformHostedLlmProvider("t", "https://api.together.xyz/v1", "llama-x", "enc", true, 1, null, null),
-            " hosted-key\n", 512, 0.7, 0.9));
-        run("hosted-custom-path", hosted.create(
-            new PlatformHostedLlmProvider("t", "https://generativelanguage.googleapis.com", "gemini-2.5-flash", "enc",
-                true, 1, null, "/v1beta/openai/chat/completions"),
-            "gk", 512, 0.7, 0.9, "low", full));
+        HostedLlmChatClientFactory hosted =
+                new HostedLlmChatClientFactory(
+                        metrics, logs, meters, pricing, http, tools, null, support);
+        run(
+                "hosted-default-path",
+                hosted.create(
+                        new PlatformHostedLlmProvider(
+                                "t",
+                                "https://api.together.xyz/v1",
+                                "llama-x",
+                                "enc",
+                                true,
+                                1,
+                                null,
+                                null),
+                        " hosted-key\n",
+                        512,
+                        0.7,
+                        0.9));
+        run(
+                "hosted-custom-path",
+                hosted.create(
+                        new PlatformHostedLlmProvider(
+                                "t",
+                                "https://generativelanguage.googleapis.com",
+                                "gemini-2.5-flash",
+                                "enc",
+                                true,
+                                1,
+                                null,
+                                "/v1beta/openai/chat/completions"),
+                        "gk",
+                        512,
+                        0.7,
+                        0.9,
+                        "low",
+                        full));
 
         reply = ANTHROPIC_REPLY;
-        run("anthropic-temp", new AnthropicAgentChatClientFactory(metrics, logs, support,
-            new AnthropicProviderCachingStrategy(true, "SYSTEM_AND_TOOLS"), meters, pricing, http, tools, true, "")
-            .create("sk-an", "claude-sonnet-4", 512, 0.7, 1.0, Map.of(SamplingOptions.OPTION_KEY, full)));
-        run("anthropic-topp", new AnthropicAgentChatClientFactory(metrics, logs, support,
-            new AnthropicProviderCachingStrategy(true, "SYSTEM_AND_TOOLS"), meters, pricing, http, tools, true, "")
-            .create("sk-an", "claude-sonnet-5", 512, 0.7, 0.8, Map.of()));
+        run(
+                "anthropic-temp",
+                new AnthropicAgentChatClientFactory(
+                                metrics,
+                                logs,
+                                support,
+                                new AnthropicProviderCachingStrategy(true, "SYSTEM_AND_TOOLS"),
+                                meters,
+                                pricing,
+                                http,
+                                tools,
+                                true,
+                                "")
+                        .create(
+                                "sk-an",
+                                "claude-sonnet-4",
+                                512,
+                                0.7,
+                                1.0,
+                                Map.of(SamplingOptions.OPTION_KEY, full)));
+        run(
+                "anthropic-topp",
+                new AnthropicAgentChatClientFactory(
+                                metrics,
+                                logs,
+                                support,
+                                new AnthropicProviderCachingStrategy(true, "SYSTEM_AND_TOOLS"),
+                                meters,
+                                pricing,
+                                http,
+                                tools,
+                                true,
+                                "")
+                        .create("sk-an", "claude-sonnet-5", 512, 0.7, 0.8, Map.of()));
 
         StringBuilder actual = new StringBuilder();
         snapshot.values().forEach(actual::append);
         if (Boolean.getBoolean("wire.snapshot.write")) {
-            Files.writeString(Path.of("src/test/resources/llm-factory-wire-snapshot.txt"), actual.toString(),
-                StandardCharsets.UTF_8);
+            Files.writeString(
+                    Path.of("src/test/resources/llm-factory-wire-snapshot.txt"),
+                    actual.toString(),
+                    StandardCharsets.UTF_8);
             return;
         }
         String expected;
@@ -209,17 +375,35 @@ class LlmFactoryWireParityTest {
 
     @Test
     void ollamaSendsReasoningEffortOnlyWhenConfigured() {
-        OllamaAgentChatClientFactory plain = new OllamaAgentChatClientFactory(
-            metrics, logs, meters, pricing, http(), tools, support(), 32768, 0);
-        run("ollama-default", plain.create(
-            new OllamaCredential("http://ollama.example:11434", null).encode(), "qwen3.5:2b", 512, 0.7, 0.9, java.util.Map.of()));
+        OllamaAgentChatClientFactory plain =
+                new OllamaAgentChatClientFactory(
+                        metrics, logs, meters, pricing, http(), tools, support(), 32768, 0);
+        run(
+                "ollama-default",
+                plain.create(
+                        new OllamaCredential("http://ollama.example:11434", null).encode(),
+                        "qwen3.5:2b",
+                        512,
+                        0.7,
+                        0.9,
+                        java.util.Map.of()));
         assertFalse(snapshot.get("ollama-default").contains("reasoning_effort"));
 
-        OllamaAgentChatClientFactory fast = new OllamaAgentChatClientFactory(
-            metrics, logs, meters, pricing, http(), tools, support(), 32768, 0);
+        OllamaAgentChatClientFactory fast =
+                new OllamaAgentChatClientFactory(
+                        metrics, logs, meters, pricing, http(), tools, support(), 32768, 0);
         org.springframework.test.util.ReflectionTestUtils.setField(fast, "reasoningEffort", "none");
-        run("ollama-none", fast.create(
-            new OllamaCredential("http://ollama.example:11434", null).encode(), "qwen3.5:2b", 512, 0.7, 0.9, java.util.Map.of()));
-        assertTrue(snapshot.get("ollama-none").contains("\"reasoning_effort\":\"none\""), snapshot.get("ollama-none"));
+        run(
+                "ollama-none",
+                fast.create(
+                        new OllamaCredential("http://ollama.example:11434", null).encode(),
+                        "qwen3.5:2b",
+                        512,
+                        0.7,
+                        0.9,
+                        java.util.Map.of()));
+        assertTrue(
+                snapshot.get("ollama-none").contains("\"reasoning_effort\":\"none\""),
+                snapshot.get("ollama-none"));
     }
 }

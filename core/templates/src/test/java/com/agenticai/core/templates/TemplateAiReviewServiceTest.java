@@ -2,7 +2,6 @@ package com.agenticai.core.templates;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +43,7 @@ class TemplateAiReviewServiceTest {
         TemplateAiReview r =
                 service.parse(
                         "{\"findings\":[{\"code\":\"AI_PROMPT_QUALITY\",\"confidence\":\"high\","
-                            + "\"severity\":\"BLOCKER\",\"message\":\"Vague.\",\"fix\":\"Tighten.\"}]}");
+                                + "\"severity\":\"BLOCKER\",\"message\":\"Vague.\",\"fix\":\"Tighten.\"}]}");
         assertThat(r.blockers()).isEmpty();
         assertThat(r.advisories()).hasSize(1);
     }
@@ -54,7 +53,7 @@ class TemplateAiReviewServiceTest {
         TemplateAiReview r =
                 service.parse(
                         "{\"findings\":[{\"code\":\"MY_OWN_RULE\",\"confidence\":\"high\",\"message\":\"x\"},"
-                            + "{\"code\":\"NO_TAGS\",\"confidence\":\"high\",\"message\":\"x\"}]}");
+                                + "{\"code\":\"NO_TAGS\",\"confidence\":\"high\",\"message\":\"x\"}]}");
         assertThat(r.status()).isEqualTo(TemplateAiReview.Status.PASSED);
         assertThat(r.blockers()).isEmpty();
         assertThat(r.advisories()).isEmpty();

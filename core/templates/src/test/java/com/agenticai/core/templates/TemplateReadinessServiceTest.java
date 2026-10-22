@@ -49,9 +49,9 @@ class TemplateReadinessServiceTest {
         // no tags.
         String prompt =
                 "You are an expert AI agent. Your job: # Build LifePilot AI - A Personal AI"
-                    + " Assistant That Takes Action Create a functional, responsive web application"
-                    + " called **LifePilot AI**, with the tagline: \"Your goals. Your assistant."
-                    + " Your next step.\" ## 1. Product vision LifePilot AI i.";
+                        + " Assistant That Takes Action Create a functional, responsive web application"
+                        + " called **LifePilot AI**, with the tagline: \"Your goals. Your assistant."
+                        + " Your next step.\" ## 1. Product vision LifePilot AI i.";
         TemplateReadinessReport r =
                 service.assess(
                         TemplateKind.AGENT,
@@ -105,9 +105,9 @@ class TemplateReadinessServiceTest {
                         "assistant",
                         agent(
                                 "You are a helpful assistant that answers questions about gardening"
-                                    + " and helps people plan their beds, choose plants and"
-                                    + " understand soil, light and watering needs, and in all of"
-                                    + " those you",
+                                        + " and helps people plan their beds, choose plants and"
+                                        + " understand soil, light and watering needs, and in all of"
+                                        + " those you",
                                 "SUPERVISED",
                                 "[]",
                                 "[\"jailbreak\"]",
@@ -119,8 +119,8 @@ class TemplateReadinessServiceTest {
     void guardrailsRequired_andSecretsBlocked() throws Exception {
         String prompt =
                 "You are a support assistant for Acme. Use api_key = sk-abcdefghijklmnopqrstuvwxyz"
-                    + " when calling the billing system. You do not give legal advice. Say when you"
-                    + " are unsure and never invent facts.";
+                        + " when calling the billing system. You do not give legal advice. Say when you"
+                        + " are unsure and never invent facts.";
         TemplateReadinessReport r =
                 service.assess(
                         TemplateKind.AGENT,
@@ -157,8 +157,8 @@ class TemplateReadinessServiceTest {
         JsonNode cfg =
                 mapper.readTree(
                         "{\"providerName\":\"ANTHROPIC\",\"knowledgeBaseEnabled\":true,"
-                            + "\"allowedToolNames\":[\"mcp__office-ally__check_claim_status\",\"mcp__office-ally__check_eligibility\","
-                            + "\"google_gmail\",\"search_knowledge_base\",\"request_human\",\"search_code\",\"run_code\",\"generate_document\"]}");
+                                + "\"allowedToolNames\":[\"mcp__office-ally__check_claim_status\",\"mcp__office-ally__check_eligibility\","
+                                + "\"google_gmail\",\"search_knowledge_base\",\"request_human\",\"search_code\",\"run_code\",\"generate_document\"]}");
         List<TemplateRequirement> reqs = service.requirements(TemplateKind.AGENT, cfg);
 
         assertThat(reqs)
@@ -226,7 +226,7 @@ class TemplateReadinessServiceTest {
                                 null,
                                 mapper.readTree(
                                         "{\"graph\":{\"nodes\":[{\"type\":\"tool\",\"data\":{\"config\":{\"toolName\":\"send_email\"}}}]},\"x\":\"password:"
-                                            + " hunter2hunter2\"}")));
+                                                + " hunter2hunter2\"}")));
         for (TemplateReadinessReport r : reports) {
             for (Issue i :
                     java.util.stream.Stream.concat(r.blockers().stream(), r.advisories().stream())

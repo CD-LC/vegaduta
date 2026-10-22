@@ -35,29 +35,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 /**
- * Per-workflow and per-node run statistics for the canvas's badges (phase 4,
- * "eval badges"), and the source of the lint panel's cost/latency hints.
+ * Per-workflow and per-node run statistics for the canvas's badges (phase 4, "eval badges"), and
+ * the source of the lint panel's cost/latency hints.
  *
- * <p><b>What the numbers are.</b> Everything except {@code evalScore} is
- * derived from STORED runs: the newest {@link #MAX_RUNS_SCANNED} runs inside
- * the {@code days} window, and each run's persisted trace. A node that ran
- * several times in one run (loop / fan-out / sub-flow items, retries recorded
- * as entries) counts every entry as one visit; {@code runs} counts the
- * distinct runs it appeared in. Success rate = OK / (OK + ERROR) visits -
- * SKIPPED, AWAITING_* and CANCELLED visits are neither. Durations are
- * medians; cost is the mean over visits that HAVE a cost (null when none do,
- * never a fabricated zero). {@code sampled: true} says the window held more
- * runs than were scanned.
+ * <p><b>What the numbers are.</b> Everything except {@code evalScore} is derived from STORED runs:
+ * the newest {@link #MAX_RUNS_SCANNED} runs inside the {@code days} window, and each run's
+ * persisted trace. A node that ran several times in one run (loop / fan-out / sub-flow items,
+ * retries recorded as entries) counts every entry as one visit; {@code runs} counts the distinct
+ * runs it appeared in. Success rate = OK / (OK + ERROR) visits - SKIPPED, AWAITING_* and CANCELLED
+ * visits are neither. Durations are medians; cost is the mean over visits that HAVE a cost (null
+ * when none do, never a fabricated zero). {@code sampled: true} says the window held more runs than
+ * were scanned.
  *
- * <p><b>evalScore</b> is real evaluation, not run telemetry: for an Agent
- * node, the latest SUCCEEDED eval run of that agent (core/quality), with its
- * verdict and finish time. Workflows have no eval datasets of their own, so
- * the workflow-level {@code passRate} is always null today - the canvas shows
- * it only when present.
+ * <p><b>evalScore</b> is real evaluation, not run telemetry: for an Agent node, the latest
+ * SUCCEEDED eval run of that agent (core/quality), with its verdict and finish time. Workflows have
+ * no eval datasets of their own, so the workflow-level {@code passRate} is always null today - the
+ * canvas shows it only when present.
  *
- * <p>Cached for {@link #CACHE_TTL} per tenant+workflow+window: the lint
- * endpoint is called on a 1.5 s debounce while someone edits, and its hints
- * must not re-parse every trace each time.
+ * <p>Cached for {@link #CACHE_TTL} per tenant+workflow+window: the lint endpoint is called on a 1.5
+ * s debounce while someone edits, and its hints must not re-parse every trace each time.
  */
 @Service
 public class WorkflowInsightsService {
@@ -80,28 +76,28 @@ public class WorkflowInsightsService {
     // 2026-09-24 prod crash-loop class - InjectableConstructorTest).
     @Autowired
     public WorkflowInsightsService(
-        WorkflowRunRepository runRepository, ObjectMapper objectMapper, ObjectProvider<EvalRunRepository> evalRuns
-    ) {
+            WorkflowRunRepository runRepository,
+            ObjectMapper objectMapper,
+            ObjectProvider<EvalRunRepository> evalRuns) {
         this(runRepository, objectMapper, evalRuns, Clock.systemUTC());
     }
 
     WorkflowInsightsService(
-        WorkflowRunRepository runRepository, ObjectMapper objectMapper, ObjectProvider<EvalRunRepository> evalRuns,
-        Clock clock
-    ) {
+            WorkflowRunRepository runRepository,
+            ObjectMapper objectMapper,
+            ObjectProvider<EvalRunRepository> evalRuns,
+            Clock clock) {
         this.runRepository = runRepository;
         this.objectMapper = objectMapper;
         this.evalRuns = evalRuns;
         this.clock = clock;
     }
 
-    private record Cached(Instant at, Map<String, Object> value) {
-    }
+    private record Cached(Instant at, Map<String, Object> value) {}
 
     /**
-     * The badge summary. Caller has checked VIEWER on {@code workflowId};
-     * {@code graph} (the saved graph) supplies node types/agent ids for eval
-     * scores and may be null.
+     * The badge summary. Caller has checked VIEWER on {@code workflowId}; {@code graph} (the saved
+     * graph) supplies node types/agent ids for eval scores and may be null.
      */
     public Map<String, Object> summary(UUID workflowId, WorkflowGraphDto graph, int days) {
         int window = Math.max(1, Math.min(MAX_DAYS, days));
@@ -120,9 +116,13 @@ public class WorkflowInsightsService {
         return value;
     }
 
-    private Map<String, Object> compute(UUID workflowId, WorkflowGraphDto graph, int days, Instant now) {
-        List<WorkflowRun> runs = runRepository.findByWorkflowIdAndStartedAtAfterOrderByStartedAtDesc(
-            workflowId, now.minus(Duration.ofDays(days)), PageRequest.of(0, MAX_RUNS_SCANNED + 1));
+    private Map<String, Object> compute(
+            UUID workflowId, WorkflowGraphDto graph, int days, Instant now) {
+        List<WorkflowRun> runs =
+                runRepository.findByWorkflowIdAndStartedAtAfterOrderByStartedAtDesc(
+                        workflowId,
+                        now.minus(Duration.ofDays(days)),
+                        PageRequest.of(0, MAX_RUNS_SCANNED + 1));
         boolean sampled = runs.size() > MAX_RUNS_SCANNED;
         if (sampled) {
             runs = runs.subList(0, MAX_RUNS_SCANNED);
@@ -146,9 +146,15 @@ public class WorkflowInsightsService {
             } else if (run.getStatus() == WorkflowRunStatus.FAILED) {
                 failed++;
             }
-            if (run.getStartedAt() != null && run.getCompletedAt() != null
-                && (run.getStatus() == WorkflowRunStatus.COMPLETED || run.getStatus() == WorkflowRunStatus.FAILED)) {
-                runDurations.add(Math.max(0L, Duration.between(run.getStartedAt(), run.getCompletedAt()).toMillis()));
+            if (run.getStartedAt() != null
+                    && run.getCompletedAt() != null
+                    && (run.getStatus() == WorkflowRunStatus.COMPLETED
+                            || run.getStatus() == WorkflowRunStatus.FAILED)) {
+                runDurations.add(
+                        Math.max(
+                                0L,
+                                Duration.between(run.getStartedAt(), run.getCompletedAt())
+                                        .toMillis()));
             }
             BigDecimal runCost = null;
             Set<String> seenInRun = new HashSet<>();
@@ -170,7 +176,9 @@ public class WorkflowInsightsService {
 
         Map<String, Object> workflow = new LinkedHashMap<>();
         workflow.put("runs", runs.size());
-        workflow.put("runs30d", runs.size()); // name kept from the agreed contract; counts `days`, not always 30
+        workflow.put(
+                "runs30d",
+                runs.size()); // name kept from the agreed contract; counts `days`, not always 30
         workflow.put("days", days);
         workflow.put("sampled", sampled);
         workflow.put("successRate", rate(completed, completed + failed));
@@ -193,7 +201,9 @@ public class WorkflowInsightsService {
                 continue;
             }
             @SuppressWarnings("unchecked")
-            Map<String, Object> stats = (Map<String, Object>) nodeStats.computeIfAbsent(node.id(), id -> new NodeAcc().toMap());
+            Map<String, Object> stats =
+                    (Map<String, Object>)
+                            nodeStats.computeIfAbsent(node.id(), id -> new NodeAcc().toMap());
             stats.putAll(eval);
         }
 
@@ -204,7 +214,8 @@ public class WorkflowInsightsService {
         return result;
     }
 
-    private Map<String, Object> evalFor(WorkflowNodeDto node, Map<String, Map<String, Object>> byAgent) {
+    private Map<String, Object> evalFor(
+            WorkflowNodeDto node, Map<String, Map<String, Object>> byAgent) {
         if (!"agent".equalsIgnoreCase(node.type())) {
             return null;
         }
@@ -220,12 +231,17 @@ public class WorkflowInsightsService {
         EvalRunRepository repo = evalRuns.getIfAvailable();
         if (repo != null) {
             try {
-                Optional<EvalRun> latest = repo.findFirstByAgentIdAndStatusOrderByCreatedAtDesc(
-                    UUID.fromString(agentId), EvalRunStatus.SUCCEEDED);
+                Optional<EvalRun> latest =
+                        repo.findFirstByAgentIdAndStatusOrderByCreatedAtDesc(
+                                UUID.fromString(agentId), EvalRunStatus.SUCCEEDED);
                 if (latest.isPresent() && latest.get().getOverallScore() != null) {
                     eval = new LinkedHashMap<>();
                     eval.put("evalScore", latest.get().getOverallScore());
-                    eval.put("evalVerdict", latest.get().getVerdict() == null ? null : latest.get().getVerdict().name());
+                    eval.put(
+                            "evalVerdict",
+                            latest.get().getVerdict() == null
+                                    ? null
+                                    : latest.get().getVerdict().name());
                     eval.put("evalRunAt", latest.get().getFinishedAt());
                 }
             } catch (RuntimeException ex) {
@@ -241,8 +257,11 @@ public class WorkflowInsightsService {
             return List.of();
         }
         try {
-            return objectMapper.readValue(json,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, NodeTraceEntry.class));
+            return objectMapper.readValue(
+                    json,
+                    objectMapper
+                            .getTypeFactory()
+                            .constructCollectionType(List.class, NodeTraceEntry.class));
         } catch (Exception e) {
             return List.of();
         }
@@ -307,7 +326,9 @@ public class WorkflowInsightsService {
         List<Long> sorted = new ArrayList<>(values);
         Collections.sort(sorted);
         int mid = sorted.size() / 2;
-        return sorted.size() % 2 == 1 ? sorted.get(mid) : (sorted.get(mid - 1) + sorted.get(mid)) / 2;
+        return sorted.size() % 2 == 1
+                ? sorted.get(mid)
+                : (sorted.get(mid - 1) + sorted.get(mid)) / 2;
     }
 
     static BigDecimal mean(List<BigDecimal> values) {

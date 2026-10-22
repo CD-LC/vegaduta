@@ -18,19 +18,23 @@ import org.springframework.web.client.ResourceAccessException;
 
 /**
  * {@link LlmRetry} on spring-retry: the exact policy {@code LlmModelSupport} used to build inline
- * (moved verbatim in ADR-0012 P1b). Which failures are worth a second attempt is built on Spring AI's
- * own classification ({@code RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER} maps HTTP 5xx to {@link
- * TransientAiException} and 4xx - including 429 - to {@code NonTransientAiException}), plus two
- * additions:
+ * (moved verbatim in ADR-0012 P1b). Which failures are worth a second attempt is built on Spring
+ * AI's own classification ({@code RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER} maps HTTP 5xx to
+ * {@link TransientAiException} and 4xx - including 429 - to {@code NonTransientAiException}), plus
+ * two additions:
+ *
  * <ul>
- *   <li>A read timeout is NEVER retried. It already cost the full {@code app.llm.http.read-timeout};
- *       retrying doubles the stall while the provider fallback waits. Connect timeouts and other I/O
- *       failures before a response ({@link ResourceAccessException}) are cheap and are retried.</li>
- *   <li>google-genai's {@code ServerException} (Gemini/Vertex 5xx), which {@code GoogleGenAiChatModel}
- *       wraps in a plain RuntimeException, is treated like Spring AI's own transient type.</li>
+ *   <li>A read timeout is NEVER retried. It already cost the full {@code
+ *       app.llm.http.read-timeout}; retrying doubles the stall while the provider fallback waits.
+ *       Connect timeouts and other I/O failures before a response ({@link ResourceAccessException})
+ *       are cheap and are retried.
+ *   <li>google-genai's {@code ServerException} (Gemini/Vertex 5xx), which {@code
+ *       GoogleGenAiChatModel} wraps in a plain RuntimeException, is treated like Spring AI's own
+ *       transient type.
  * </ul>
- * 429 is deliberately not retried: rate limits are exactly what the caller's provider fallback exists
- * to route around.
+ *
+ * 429 is deliberately not retried: rate limits are exactly what the caller's provider fallback
+ * exists to route around.
  */
 final class SpringRetryLlmRetry implements LlmRetry {
 
@@ -41,26 +45,39 @@ final class SpringRetryLlmRetry implements LlmRetry {
 
     SpringRetryLlmRetry(int maxAttempts, Duration initialBackoff, Duration maxBackoff) {
         // RetryTemplateBuilder asserts initial >= 1ms and max > initial.
-        Duration initial = initialBackoff == null || initialBackoff.toMillis() < 1 ? Duration.ofMillis(1) : initialBackoff;
-        Duration max = maxBackoff == null || maxBackoff.compareTo(initial) <= 0 ? initial.plusMillis(1) : maxBackoff;
+        Duration initial =
+                initialBackoff == null || initialBackoff.toMillis() < 1
+                        ? Duration.ofMillis(1)
+                        : initialBackoff;
+        Duration max =
+                maxBackoff == null || maxBackoff.compareTo(initial) <= 0
+                        ? initial.plusMillis(1)
+                        : maxBackoff;
         this.maxAttempts = Math.max(1, maxAttempts);
-        this.template = RetryTemplate.builder()
-            .maxAttempts(this.maxAttempts)
-            .retryOn(SpringRetryLlmRetry::isTransient)
-            .exponentialBackoff(initial, 2.0, max)
-            .withListener(new RetryListener() {
-                @Override
-                public <T, E extends Throwable> void onError(
-                    RetryContext context, RetryCallback<T, E> callback, Throwable throwable
-                ) {
-                    // Only transient failures are interesting here; a 4xx is not
-                    // retried and is reported by whoever handles it upstream.
-                    if (isTransient(throwable)) {
-                        log.warn("LLM call attempt {} failed transiently: {}", context.getRetryCount(), throwable.toString());
-                    }
-                }
-            })
-            .build();
+        this.template =
+                RetryTemplate.builder()
+                        .maxAttempts(this.maxAttempts)
+                        .retryOn(SpringRetryLlmRetry::isTransient)
+                        .exponentialBackoff(initial, 2.0, max)
+                        .withListener(
+                                new RetryListener() {
+                                    @Override
+                                    public <T, E extends Throwable> void onError(
+                                            RetryContext context,
+                                            RetryCallback<T, E> callback,
+                                            Throwable throwable) {
+                                        // Only transient failures are interesting here; a 4xx is
+                                        // not
+                                        // retried and is reported by whoever handles it upstream.
+                                        if (isTransient(throwable)) {
+                                            log.warn(
+                                                    "LLM call attempt {} failed transiently: {}",
+                                                    context.getRetryCount(),
+                                                    throwable.toString());
+                                        }
+                                    }
+                                })
+                        .build();
     }
 
     @Override
@@ -82,13 +99,16 @@ final class SpringRetryLlmRetry implements LlmRetry {
     static boolean isTransient(Throwable failure) {
         boolean transientSeen = false;
         int depth = 0;
-        for (Throwable t = failure; t != null && depth++ < 16; t = t.getCause() == t ? null : t.getCause()) {
-            if (isReadTimeout(t) || t instanceof LlmHttpClientFactory.ModelServerUrlNotAllowedException) {
+        for (Throwable t = failure;
+                t != null && depth++ < 16;
+                t = t.getCause() == t ? null : t.getCause()) {
+            if (isReadTimeout(t)
+                    || t instanceof LlmHttpClientFactory.ModelServerUrlNotAllowedException) {
                 return false;
             }
             if (t instanceof TransientAiException
-                || t instanceof ResourceAccessException
-                || t instanceof ServerException) {
+                    || t instanceof ResourceAccessException
+                    || t instanceof ServerException) {
                 transientSeen = true;
             }
         }

@@ -8,24 +8,26 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * Finds the JSON in a model reply for {@link StructuredOutput}: the fence-stripped reply when it is one complete
- * document of the wanted shape, otherwise the first balanced {@code {...}} / {@code [...]} span (string- and
- * escape-aware) that parses. Pure; always parses through the caller's {@link ObjectMapper}.
+ * Finds the JSON in a model reply for {@link StructuredOutput}: the fence-stripped reply when it is
+ * one complete document of the wanted shape, otherwise the first balanced {@code {...}} / {@code
+ * [...]} span (string- and escape-aware) that parses. Pure; always parses through the caller's
+ * {@link ObjectMapper}.
  */
 final class JsonLocator {
 
     /**
-     * Upper bound on candidate spans tried by the balanced-span scan, so a pathological reply
-     * (tens of KB of code with thousands of braces and no valid JSON) stays linear-ish instead of
+     * Upper bound on candidate spans tried by the balanced-span scan, so a pathological reply (tens
+     * of KB of code with thousands of braces and no valid JSON) stays linear-ish instead of
      * quadratic. Real replies find their JSON within the first few candidates.
      */
     private static final int MAX_CANDIDATES = 64;
 
-    private JsonLocator() {
-    }
+    private JsonLocator() {}
 
     enum Shape {
-        ANY, OBJECT, ARRAY;
+        ANY,
+        OBJECT,
+        ARRAY;
 
         boolean opens(char c) {
             return switch (this) {
@@ -44,8 +46,7 @@ final class JsonLocator {
         }
     }
 
-    record Located(String text, JsonNode node) {
-    }
+    record Located(String text, JsonNode node) {}
 
     static Optional<Located> locate(ObjectMapper mapper, String raw, Shape shape) {
         if (raw == null || raw.isBlank()) {
@@ -73,7 +74,8 @@ final class JsonLocator {
      * more often a citation or step marker ("see [1]") than the answer, while nearly every caller
      * that does not say which shape it wants is waiting for an object.
      */
-    private static Optional<Located> scanPreferringObjects(ObjectMapper mapper, String text, Shape shape) {
+    private static Optional<Located> scanPreferringObjects(
+            ObjectMapper mapper, String text, Shape shape) {
         if (shape != Shape.ANY) {
             return scan(mapper, text, shape);
         }
@@ -151,7 +153,10 @@ final class JsonLocator {
         return -1;
     }
 
-    /** The single JSON value {@code text} consists of, or null (empty, invalid, or trailing content). */
+    /**
+     * The single JSON value {@code text} consists of, or null (empty, invalid, or trailing
+     * content).
+     */
     static JsonNode parseStrict(ObjectMapper mapper, String text) {
         if (text == null || text.isBlank()) {
             return null;

@@ -23,11 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * Workflow-side mirror of {@code McpListAgentsToolCallbackTest} - same
- * leak-prevention stakes (the listing must be the grant's exposed set,
- * nothing more), plus the status field: a caller deciding whether to
- * trigger a workflow needs to see DRAFT vs ACTIVE, since triggering a
- * draft is a legitimate-but-surprising thing to let an external key do.
+ * Workflow-side mirror of {@code McpListAgentsToolCallbackTest} - same leak-prevention stakes (the
+ * listing must be the grant's exposed set, nothing more), plus the status field: a caller deciding
+ * whether to trigger a workflow needs to see DRAFT vs ACTIVE, since triggering a draft is a
+ * legitimate-but-surprising thing to let an external key do.
  */
 class McpListMyWorkflowsToolCallbackTest {
 
@@ -57,7 +56,8 @@ class McpListMyWorkflowsToolCallbackTest {
     void listsExactlyTheGrantsExposedWorkflowsWithIdNameAndStatus() throws Exception {
         UUID workflowId = UUID.randomUUID();
         McpCallerContextTestAccess.set(UUID.randomUUID(), Set.of(), Set.of(workflowId), Set.of());
-        when(workflowService.get(workflowId)).thenReturn(workflowNamed(workflowId, "Invoice Chaser", WorkflowStatus.ACTIVE));
+        when(workflowService.get(workflowId))
+                .thenReturn(workflowNamed(workflowId, "Invoice Chaser", WorkflowStatus.ACTIVE));
 
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 
@@ -92,8 +92,10 @@ class McpListMyWorkflowsToolCallbackTest {
     void aDeletedWorkflowIsOmittedWhileTheRestOfTheListingSurvives() throws Exception {
         UUID liveId = UUID.randomUUID();
         UUID deletedId = UUID.randomUUID();
-        McpCallerContextTestAccess.set(UUID.randomUUID(), Set.of(), new HashSet<>(Set.of(liveId, deletedId)), Set.of());
-        when(workflowService.get(liveId)).thenReturn(workflowNamed(liveId, "Still Here", WorkflowStatus.DRAFT));
+        McpCallerContextTestAccess.set(
+                UUID.randomUUID(), Set.of(), new HashSet<>(Set.of(liveId, deletedId)), Set.of());
+        when(workflowService.get(liveId))
+                .thenReturn(workflowNamed(liveId, "Still Here", WorkflowStatus.DRAFT));
         when(workflowService.get(deletedId)).thenThrow(new RuntimeException("workflow not found"));
 
         JsonNode result = MAPPER.readTree(callback.call("{}"));

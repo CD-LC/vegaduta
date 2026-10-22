@@ -15,8 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Claude's {@code conversations.json}: {@code {uuid, name, created_at, updated_at, chat_messages[{sender, text,
- * content[], attachments[], files[], created_at}]}}. Text blocks of {@code content} win over the flat {@code text}.
+ * Claude's {@code conversations.json}: {@code {uuid, name, created_at, updated_at,
+ * chat_messages[{sender, text, content[], attachments[], files[], created_at}]}}. Text blocks of
+ * {@code content} win over the flat {@code text}.
  */
 final class ClaudeImportFormat implements ChatImportFormat {
 
@@ -36,7 +37,8 @@ final class ClaudeImportFormat implements ChatImportFormat {
     }
 
     @Override
-    public ParsedChat convert(JsonNode conv, String key, String source, String sourceId, ChatImportCollector c) {
+    public ParsedChat convert(
+            JsonNode conv, String key, String source, String sourceId, ChatImportCollector c) {
         JsonNode msgs = conv.get("chat_messages");
         if (msgs == null || !msgs.isArray()) {
             return null;
@@ -70,8 +72,14 @@ final class ClaudeImportFormat implements ChatImportFormat {
             return null;
         }
         String title = cleanTitle(text(conv, "name"), b.firstUserText());
-        return b.build(key, SOURCE_CLAUDE, sourceId, title, parseIso(text(conv, "created_at")),
-            parseIso(text(conv, "updated_at")), false);
+        return b.build(
+                key,
+                SOURCE_CLAUDE,
+                sourceId,
+                title,
+                parseIso(text(conv, "created_at")),
+                parseIso(text(conv, "updated_at")),
+                false);
     }
 
     private static String body(JsonNode m) {

@@ -28,9 +28,9 @@ import org.springframework.stereotype.Component;
  *   <li><b>Bounded.</b> At most {@link #MAX_ACTIVE} jobs are pending or running; more is refused
  *       ({@link TooManyPullsException}). Finished jobs are kept for an hour (at most 100) so a late
  *       poll still gets its answer, then dropped.
- *   <li><b>Progress</b> is the sum of completed over the sum of total bytes of the layers Ollama has
- *       announced so far; it is capped at 99 until Ollama reports {@code success}, because a layer
- *       list is only complete at the end.
+ *   <li><b>Progress</b> is the sum of completed over the sum of total bytes of the layers Ollama
+ *       has announced so far; it is capped at 99 until Ollama reports {@code success}, because a
+ *       layer list is only complete at the end.
  *   <li><b>Not tenant data.</b> The model store belongs to the Ollama server, not to a tenant: jobs
  *       are platform-level, run with no tenant context, and a job id is an unguessable UUID.
  * </ul>
@@ -64,6 +64,7 @@ public class LocalModelPullService {
         volatile String status = "pending";
         volatile int percent;
         volatile String message = "Waiting to start";
+
         /** digest -> {total, completed}; touched only by the job's own thread. */
         final Map<String, long[]> layers = new LinkedHashMap<>();
 
@@ -81,8 +82,9 @@ public class LocalModelPullService {
     }
 
     private final LocalModelOllamaGateway ollama;
-    private final ExecutorService executor = TenantAwareExecutors.newFixedThreadPool(
-            MAX_ACTIVE, TenantAwareExecutors.threadFactory("local-model-pull", true));
+    private final ExecutorService executor =
+            TenantAwareExecutors.newFixedThreadPool(
+                    MAX_ACTIVE, TenantAwareExecutors.threadFactory("local-model-pull", true));
     private final Map<String, Job> jobs = new LinkedHashMap<>();
 
     public LocalModelPullService(LocalModelOllamaGateway ollama) {
@@ -167,7 +169,8 @@ public class LocalModelPullService {
         String digest = event.path("digest").asText("");
         long total = event.path("total").asLong(0);
         if (!digest.isEmpty() && total > 0) {
-            job.layers.put(digest, new long[] {total, Math.min(total, event.path("completed").asLong(0))});
+            job.layers.put(
+                    digest, new long[] {total, Math.min(total, event.path("completed").asLong(0))});
         }
         long sumTotal = 0;
         long sumDone = 0;
@@ -183,9 +186,11 @@ public class LocalModelPullService {
     /** Drops finished jobs past their retention and the oldest finished ones past the cap. */
     private void prune() {
         Instant cutoff = Instant.now().minus(RETAIN_FINISHED);
-        jobs.values().removeIf(j -> !j.active() && j.finished != null && j.finished.isBefore(cutoff));
+        jobs.values()
+                .removeIf(j -> !j.active() && j.finished != null && j.finished.isBefore(cutoff));
         if (jobs.size() > MAX_RETAINED) {
-            List<Job> finished = new ArrayList<>(jobs.values().stream().filter(j -> !j.active()).toList());
+            List<Job> finished =
+                    new ArrayList<>(jobs.values().stream().filter(j -> !j.active()).toList());
             finished.sort(Comparator.comparing(j -> j.created));
             for (Job j : finished) {
                 if (jobs.size() <= MAX_RETAINED) {

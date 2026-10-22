@@ -29,7 +29,8 @@ class ImessageWebhookControllerTest {
     private ImessageCredentialService credentials;
     private ImessageUpdateService updates;
     private ImessageWebhookController controller;
-    private final JsonNode event = JsonMappers.plain().createObjectNode().put("type", "new-message");
+    private final JsonNode event =
+            JsonMappers.plain().createObjectNode().put("type", "new-message");
 
     @BeforeEach
     void setUp() {
@@ -37,8 +38,10 @@ class ImessageWebhookControllerTest {
         credentials = mock(ImessageCredentialService.class);
         updates = mock(ImessageUpdateService.class);
         controller =
-                new ImessageWebhookController(tenants, credentials, updates, InboundChannelExecutor.synchronous());
-        when(tenants.resolveTenantSchema(ExternalAccountProvider.IMESSAGE, ID)).thenReturn(Optional.of("tenant_a"));
+                new ImessageWebhookController(
+                        tenants, credentials, updates, InboundChannelExecutor.synchronous());
+        when(tenants.resolveTenantSchema(ExternalAccountProvider.IMESSAGE, ID))
+                .thenReturn(Optional.of("tenant_a"));
         when(credentials.webhookTokenMatches(ID, TOKEN)).thenReturn(true);
         when(updates.acceptVerified(any())).thenReturn(true);
         TenantContext.clear();
@@ -50,7 +53,10 @@ class ImessageWebhookControllerTest {
         when(updates.acceptVerified(any()))
                 .thenAnswer(
                         inv -> {
-                            tenantSeen.set(TenantContext.current().map(TenantContext::getTenantId).orElse(null));
+                            tenantSeen.set(
+                                    TenantContext.current()
+                                            .map(TenantContext::getTenantId)
+                                            .orElse(null));
                             return true;
                         });
 
@@ -71,22 +77,26 @@ class ImessageWebhookControllerTest {
 
     @Test
     void aMissingTokenIsRejectedAndNothingIsProcessed() {
-        assertThat(controller.inbound(ID, event, null, null).getStatusCode().value()).isEqualTo(403);
+        assertThat(controller.inbound(ID, event, null, null).getStatusCode().value())
+                .isEqualTo(403);
         verify(updates, never()).acceptVerified(any());
     }
 
     @Test
     void aWrongTokenIsRejectedAndNothingIsProcessed() {
-        assertThat(controller.inbound(ID, event, "nope", null).getStatusCode().value()).isEqualTo(403);
+        assertThat(controller.inbound(ID, event, "nope", null).getStatusCode().value())
+                .isEqualTo(403);
         verify(updates, never()).acceptVerified(any());
         assertThat(TenantContext.current()).isEmpty();
     }
 
     @Test
     void anUnknownWebhookIdLooksTheSameAsAWrongToken() {
-        when(tenants.resolveTenantSchema(eq(ExternalAccountProvider.IMESSAGE), eq("unknown"))).thenReturn(Optional.empty());
+        when(tenants.resolveTenantSchema(eq(ExternalAccountProvider.IMESSAGE), eq("unknown")))
+                .thenReturn(Optional.empty());
 
-        assertThat(controller.inbound("unknown", event, TOKEN, null).getStatusCode().value()).isEqualTo(403);
+        assertThat(controller.inbound("unknown", event, TOKEN, null).getStatusCode().value())
+                .isEqualTo(403);
         verify(updates, never()).acceptVerified(any());
     }
 
@@ -94,14 +104,16 @@ class ImessageWebhookControllerTest {
     void whenTheExecutorIsFullTheProviderIsToldToRetry() {
         when(updates.acceptVerified(any())).thenReturn(false);
 
-        assertThat(controller.inbound(ID, event, TOKEN, null).getStatusCode().value()).isEqualTo(503);
+        assertThat(controller.inbound(ID, event, TOKEN, null).getStatusCode().value())
+                .isEqualTo(503);
     }
 
     @Test
     void aProcessingFailureStillAnswers200SoTheBridgeDoesNotRetryForever() {
         when(updates.acceptVerified(any())).thenThrow(new IllegalStateException("boom"));
 
-        assertThat(controller.inbound(ID, event, TOKEN, null).getStatusCode().value()).isEqualTo(200);
+        assertThat(controller.inbound(ID, event, TOKEN, null).getStatusCode().value())
+                .isEqualTo(200);
         assertThat(TenantContext.current()).isEmpty();
     }
 }

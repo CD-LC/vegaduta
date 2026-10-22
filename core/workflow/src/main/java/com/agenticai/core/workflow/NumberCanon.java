@@ -14,12 +14,15 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
 /**
- * Number and date canonicalisation shared by every data operation: canonical (strict) versus lenient number
- * reading, the number text/node forms, and ISO-8601 date parsing. Extracted from {@link WorkflowDataOps}.
+ * Number and date canonicalisation shared by every data operation: canonical (strict) versus
+ * lenient number reading, the number text/node forms, and ISO-8601 date parsing. Extracted from
+ * {@link WorkflowDataOps}.
  */
 final class NumberCanon {
-    private static final Pattern CANONICAL_NUMBER = Pattern.compile("-?(0|[1-9]\\d*)(\\.\\d+)?([eE][-+]?\\d{1,3})?");
-    private static final Pattern LENIENT_NUMBER = Pattern.compile("[-+]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d{1,3})?");
+    private static final Pattern CANONICAL_NUMBER =
+            Pattern.compile("-?(0|[1-9]\\d*)(\\.\\d+)?([eE][-+]?\\d{1,3})?");
+    private static final Pattern LENIENT_NUMBER =
+            Pattern.compile("[-+]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d{1,3})?");
     private static final Pattern DATE_PREFIX = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}.*");
     private static final BigDecimal LONG_MIN = BigDecimal.valueOf(Long.MIN_VALUE);
     private static final BigDecimal LONG_MAX = BigDecimal.valueOf(Long.MAX_VALUE);
@@ -79,7 +82,10 @@ final class NumberCanon {
         return s.toPlainString();
     }
 
-    /** An integral value that fits a long becomes a JSON integer; anything else a JSON double (text if not finite). */
+    /**
+     * An integral value that fits a long becomes a JSON integer; anything else a JSON double (text
+     * if not finite).
+     */
     static JsonNode numberNode(BigDecimal n) {
         BigDecimal s = n.signum() == 0 ? BigDecimal.ZERO : n.stripTrailingZeros();
         if (s.scale() <= 0 && s.compareTo(LONG_MIN) >= 0 && s.compareTo(LONG_MAX) <= 0) {
@@ -89,7 +95,10 @@ final class NumberCanon {
         return Double.isFinite(d) ? DoubleNode.valueOf(d) : TextNode.valueOf(s.toPlainString());
     }
 
-    /** Epoch millis of an ISO-8601 date / date-time (zone-less values are read as UTC); null when it is not one. */
+    /**
+     * Epoch millis of an ISO-8601 date / date-time (zone-less values are read as UTC); null when it
+     * is not one.
+     */
     static Long parseDate(String raw) {
         if (raw == null) {
             return null;
@@ -120,6 +129,5 @@ final class NumberCanon {
         }
     }
 
-    private NumberCanon() {
-    }
+    private NumberCanon() {}
 }

@@ -18,8 +18,8 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.http.HttpClient;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -58,8 +58,11 @@ class MetaVoiceMediaGatewayTest {
 
     private MetaVoiceMediaGateway gateway(String base) {
         // Raw transport: the fixture is loopback, which the SSRF guard rightly refuses.
-        return new MetaVoiceMediaGateway(MAPPER, base, mock(MetaMediaGraphApiClient.class),
-            HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build());
+        return new MetaVoiceMediaGateway(
+                MAPPER,
+                base,
+                mock(MetaMediaGraphApiClient.class),
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build());
     }
 
     private void respond(HttpExchange ex, int status, String contentType, byte[] body)

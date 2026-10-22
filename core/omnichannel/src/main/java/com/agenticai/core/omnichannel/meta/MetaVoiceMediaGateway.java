@@ -1,10 +1,9 @@
 package com.agenticai.core.omnichannel.meta;
 
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceMediaGateway;
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteException;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteOutcome;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
@@ -92,14 +91,23 @@ public class MetaVoiceMediaGateway implements VoiceMediaGateway {
             @Value("${app.omnichannel.meta.graph-base-url:https://graph.facebook.com}")
                     String graphBaseUrl,
             MetaMediaGraphApiClient mediaClient) {
-        this(objectMapper, graphBaseUrl, mediaClient,
-            GuardedJdkHttpClient.defaults(Duration.ofSeconds(5), Duration.ofSeconds(30), false));
+        this(
+                objectMapper,
+                graphBaseUrl,
+                mediaClient,
+                GuardedJdkHttpClient.defaults(
+                        Duration.ofSeconds(5), Duration.ofSeconds(30), false));
     }
 
-    /** Test seam: a raw transport for loopback fixture servers, which the SSRF guard rightly refuses. */
+    /**
+     * Test seam: a raw transport for loopback fixture servers, which the SSRF guard rightly
+     * refuses.
+     */
     MetaVoiceMediaGateway(
-            ObjectMapper objectMapper, String graphBaseUrl,
-            MetaMediaGraphApiClient mediaClient, HttpClient client) {
+            ObjectMapper objectMapper,
+            String graphBaseUrl,
+            MetaMediaGraphApiClient mediaClient,
+            HttpClient client) {
         this.objectMapper = objectMapper;
         this.graphBaseUrl = graphBaseUrl.replaceAll("/+$", "");
         this.mediaClient = mediaClient;

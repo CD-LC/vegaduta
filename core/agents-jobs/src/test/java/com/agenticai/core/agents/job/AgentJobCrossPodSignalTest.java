@@ -28,13 +28,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * The cross-pod half of cancel and deadline: the pod that RUNS a job is not
- * necessarily the pod that received the cancel or ran the deadline sweep, so the
- * row is the only signal that always reaches it.
+ * The cross-pod half of cancel and deadline: the pod that RUNS a job is not necessarily the pod
+ * that received the cancel or ran the deadline sweep, so the row is the only signal that always
+ * reaches it.
  *
- * <p>Plain Mockito, no Spring context, per the module's standing rule. The
- * heartbeat interval is floored at one second by the executor, so the tests that
- * wait for a tick wait a few seconds at most.
+ * <p>Plain Mockito, no Spring context, per the module's standing rule. The heartbeat interval is
+ * floored at one second by the executor, so the tests that wait for a tick wait a few seconds at
+ * most.
  */
 class AgentJobCrossPodSignalTest {
 
@@ -68,12 +68,14 @@ class AgentJobCrossPodSignalTest {
         assertTrue(executor.tryDispatch(jobId, TENANT));
         assertTrue(started.await(5, TimeUnit.SECONDS), "the worker never started");
 
-        assertTrue(interrupted.await(6, TimeUnit.SECONDS),
-            "the heartbeat tick must interrupt a worker whose row another pod already failed");
+        assertTrue(
+                interrupted.await(6, TimeUnit.SECONDS),
+                "the heartbeat tick must interrupt a worker whose row another pod already failed");
     }
 
     @Test
-    void theExternalTerminalCheckIsOffByDefaultSoTodaysSingleProcessBehaviourIsUnchanged() throws Exception {
+    void theExternalTerminalCheckIsOffByDefaultSoTodaysSingleProcessBehaviourIsUnchanged()
+            throws Exception {
         UUID jobId = UUID.randomUUID();
         AgentJobRepository repository = mock(AgentJobRepository.class);
         when(repository.isCancelRequested(jobId)).thenReturn(Optional.of(false));
@@ -87,8 +89,9 @@ class AgentJobCrossPodSignalTest {
         assertTrue(executor.tryDispatch(jobId, TENANT));
         assertTrue(started.await(5, TimeUnit.SECONDS));
 
-        assertFalse(interrupted.await(2500, TimeUnit.MILLISECONDS),
-            "with the flag off the tick must not act on the status column");
+        assertFalse(
+                interrupted.await(2500, TimeUnit.MILLISECONDS),
+                "with the flag off the tick must not act on the status column");
         verify(repository, never()).findStatusById(any());
     }
 
@@ -132,19 +135,29 @@ class AgentJobCrossPodSignalTest {
     @Test
     void enqueueModeWritesTheQueuedRowAndNeverDispatchesInThisJvm() {
         AgentJobRepository repository = mock(AgentJobRepository.class);
-        when(repository.save(any(AgentJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(AgentJob.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         AgentRepository agentRepository = mock(AgentRepository.class);
         Agent agent = mock(Agent.class);
         when(agentRepository.findById(any())).thenReturn(Optional.of(agent));
         AgentJobExecutor mockExecutor = mock(AgentJobExecutor.class);
         AgentJobProperties properties = new AgentJobProperties();
         properties.setRunNowMode(AgentJobProperties.RunNowMode.ENQUEUE);
-        AgentJobService service = new AgentJobService(
-            repository, agentRepository, mock(AgentService.class), mockExecutor,
-            properties, new SimpleMeterRegistry(), new ObjectMapper(), 15);
+        AgentJobService service =
+                new AgentJobService(
+                        repository,
+                        agentRepository,
+                        mock(AgentService.class),
+                        mockExecutor,
+                        properties,
+                        new SimpleMeterRegistry(),
+                        new ObjectMapper(),
+                        15);
         TenantContext.set(TenantContext.of(TENANT, "alice@example.com", Set.of("ROLE_user")));
 
-        service.submit(UUID.randomUUID(), new AgentJobStartRequest("Summarise the tickets", null, null, null));
+        service.submit(
+                UUID.randomUUID(),
+                new AgentJobStartRequest("Summarise the tickets", null, null, null));
 
         verify(repository).save(any(AgentJob.class));
         verify(mockExecutor, never()).tryDispatch(any(), anyString());
@@ -153,7 +166,8 @@ class AgentJobCrossPodSignalTest {
     @Test
     void inlineModeIsTheDefaultAndStillDispatchesLocally() {
         AgentJobRepository repository = mock(AgentJobRepository.class);
-        when(repository.save(any(AgentJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(AgentJob.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         AgentRepository agentRepository = mock(AgentRepository.class);
         Agent agent = mock(Agent.class);
         when(agentRepository.findById(any())).thenReturn(Optional.of(agent));
@@ -161,12 +175,21 @@ class AgentJobCrossPodSignalTest {
         when(mockExecutor.tryDispatch(any(), anyString())).thenReturn(true);
         AgentJobProperties properties = new AgentJobProperties();
         assertEquals(AgentJobProperties.RunNowMode.INLINE, properties.getRunNowMode());
-        AgentJobService service = new AgentJobService(
-            repository, agentRepository, mock(AgentService.class), mockExecutor,
-            properties, new SimpleMeterRegistry(), new ObjectMapper(), 15);
+        AgentJobService service =
+                new AgentJobService(
+                        repository,
+                        agentRepository,
+                        mock(AgentService.class),
+                        mockExecutor,
+                        properties,
+                        new SimpleMeterRegistry(),
+                        new ObjectMapper(),
+                        15);
         TenantContext.set(TenantContext.of(TENANT, "alice@example.com", Set.of("ROLE_user")));
 
-        service.submit(UUID.randomUUID(), new AgentJobStartRequest("Summarise the tickets", null, null, null));
+        service.submit(
+                UUID.randomUUID(),
+                new AgentJobStartRequest("Summarise the tickets", null, null, null));
 
         verify(mockExecutor).tryDispatch(any(), anyString());
     }
@@ -178,18 +201,22 @@ class AgentJobCrossPodSignalTest {
     }
 
     /** An execution whose worker parks until interrupted, and reports that it was. */
-    private static AgentJobExecution blockingExecution(UUID jobId, CountDownLatch started, CountDownLatch interrupted) {
+    private static AgentJobExecution blockingExecution(
+            UUID jobId, CountDownLatch started, CountDownLatch interrupted) {
         AgentJobExecution execution = mock(AgentJobExecution.class);
-        doAnswer(invocation -> {
-            started.countDown();
-            try {
-                Thread.sleep(30_000);
-            } catch (InterruptedException e) {
-                interrupted.countDown();
-                Thread.currentThread().interrupt();
-            }
-            return null;
-        }).when(execution).run(jobId, TENANT);
+        doAnswer(
+                        invocation -> {
+                            started.countDown();
+                            try {
+                                Thread.sleep(30_000);
+                            } catch (InterruptedException e) {
+                                interrupted.countDown();
+                                Thread.currentThread().interrupt();
+                            }
+                            return null;
+                        })
+                .when(execution)
+                .run(jobId, TENANT);
         return execution;
     }
 }

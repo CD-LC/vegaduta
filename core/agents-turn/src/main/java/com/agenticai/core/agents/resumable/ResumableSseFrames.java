@@ -17,8 +17,7 @@ final class ResumableSseFrames {
      * that frame (no text was ever produced) and would otherwise show nothing. Any other event, or
      * a null message, is returned unchanged.
      */
-    static ServerSentEvent<String> withTurnEndError(
-            ServerSentEvent<String> event, String message) {
+    static ServerSentEvent<String> withTurnEndError(ServerSentEvent<String> event, String message) {
         if (event == null
                 || message == null
                 || message.isBlank()

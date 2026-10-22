@@ -18,14 +18,15 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * A stateful, in-process MCP server + authorization server behind the {@link McpOAuthHttp} seam. Unlike a canned
- * fake it ENFORCES the protocol, so a test passing means the client really sent the right thing:
- * PKCE S256 challenge/verifier binding, redirect-uri equality, RFC 8707 {@code resource} equality, client
- * authentication, single-use authorization codes, refresh-token rotation, and - for a CIMD client - that the
- * redirect URI is listed in the client's metadata document.
+ * A stateful, in-process MCP server + authorization server behind the {@link McpOAuthHttp} seam.
+ * Unlike a canned fake it ENFORCES the protocol, so a test passing means the client really sent the
+ * right thing: PKCE S256 challenge/verifier binding, redirect-uri equality, RFC 8707 {@code
+ * resource} equality, client authentication, single-use authorization codes, refresh-token
+ * rotation, and - for a CIMD client - that the redirect URI is listed in the client's metadata
+ * document.
  *
- * <p>It applies the REAL {@link McpRemoteUrlGuard} (DNS-free {@code check}) exactly as {@link JdkMcpOAuthHttp}
- * does, so SSRF refusals in tests are the production guard's, not a stub's.
+ * <p>It applies the REAL {@link McpRemoteUrlGuard} (DNS-free {@code check}) exactly as {@link
+ * JdkMcpOAuthHttp} does, so SSRF refusals in tests are the production guard's, not a stub's.
  */
 final class FakeAuthorizationServer implements McpOAuthHttp {
 
@@ -50,6 +51,7 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
     int expiresIn = 3600;
     boolean refreshInvalidGrant = false;
     int refreshTransientStatus = 0;
+
     /** client_id (URL) -> client metadata document the AS "fetches" for a CIMD client. */
     final Map<String, JsonNode> cimdDocuments = new HashMap<>();
 
@@ -62,11 +64,10 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
     private int counter;
     int registrations;
 
-    private record Client(String id, String secret, Set<String> redirectUris) {
-    }
+    private record Client(String id, String secret, Set<String> redirectUris) {}
 
-    private record Code(String clientId, String redirectUri, String challenge, String resource, String scope) {
-    }
+    private record Code(
+            String clientId, String redirectUri, String challenge, String resource, String scope) {}
 
     FakeAuthorizationServer(String mcpUrl, String issuer) {
         this.mcpUrl = mcpUrl;
@@ -75,7 +76,10 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
         this.prmAuthorizationServer = issuer;
     }
 
-    /** The user's browser "consents": validates the authorization request and returns {code, state, iss} for the callback. */
+    /**
+     * The user's browser "consents": validates the authorization request and returns {code, state,
+     * iss} for the callback.
+     */
     Map<String, String> consent(String authorizationUrl) {
         URI uri = URI.create(authorizationUrl);
         if (!authorizationUrl.startsWith(issuer + "/authorize?")) {
@@ -85,22 +89,35 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
         String clientId = q.get("client_id");
         String redirect = q.get("redirect_uri");
         require("code".equals(q.get("response_type")), "response_type=code");
-        require("S256".equals(q.get("code_challenge_method")) && q.get("code_challenge") != null, "PKCE S256");
+        require(
+                "S256".equals(q.get("code_challenge_method")) && q.get("code_challenge") != null,
+                "PKCE S256");
         require(q.get("state") != null && !q.get("state").isBlank(), "state");
         require(q.get("resource") != null, "RFC 8707 resource");
         Client client = clients.get(clientId);
         if (client == null && cimdDocuments.containsKey(clientId)) {
             // CIMD: the AS fetches the client's metadata document and trusts its redirect_uris.
             JsonNode doc = cimdDocuments.get(clientId);
-            require(clientId.equals(doc.path("client_id").asText()), "document client_id equals its URL");
+            require(
+                    clientId.equals(doc.path("client_id").asText()),
+                    "document client_id equals its URL");
             Set<String> uris = new HashSet<>();
             doc.path("redirect_uris").forEach(n -> uris.add(n.asText()));
             client = new Client(clientId, null, uris);
         }
         require(client != null, "known client " + clientId);
-        require(client.redirectUris().contains(redirect), "redirect_uri registered for the client: " + redirect);
+        require(
+                client.redirectUris().contains(redirect),
+                "redirect_uri registered for the client: " + redirect);
         String code = "code-" + (++counter);
-        codes.put(code, new Code(clientId, redirect, q.get("code_challenge"), q.get("resource"), q.get("scope")));
+        codes.put(
+                code,
+                new Code(
+                        clientId,
+                        redirect,
+                        q.get("code_challenge"),
+                        q.get("resource"),
+                        q.get("scope")));
         Map<String, String> out = new LinkedHashMap<>();
         out.put("code", code);
         out.put("state", q.get("state"));
@@ -115,8 +132,9 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
         Map<String, String> out = new LinkedHashMap<>();
         for (String pair : rawQuery.split("&")) {
             int eq = pair.indexOf('=');
-            out.put(URLDecoder.decode(pair.substring(0, eq), StandardCharsets.UTF_8),
-                URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8));
+            out.put(
+                    URLDecoder.decode(pair.substring(0, eq), StandardCharsets.UTF_8),
+                    URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8));
         }
         return out;
     }
@@ -143,13 +161,19 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
         }
     }
 
-    private Response route(String method, String url, Map<String, String> headers, String body) throws Exception {
+    private Response route(String method, String url, Map<String, String> headers, String body)
+            throws Exception {
         URI mcp = URI.create(mcpUrl);
         String mcpOrigin = "https://" + mcp.getRawAuthority();
-        String prmPath = mcpOrigin + "/.well-known/oauth-protected-resource" + (mcp.getRawPath() == null ? "" : mcp.getRawPath());
+        String prmPath =
+                mcpOrigin
+                        + "/.well-known/oauth-protected-resource"
+                        + (mcp.getRawPath() == null ? "" : mcp.getRawPath());
         if ("POST".equals(method) && url.equals(mcpUrl)) {
             if (!mcpRequiresAuth) {
-                return json(200, "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"bad request\"},\"id\":null}");
+                return json(
+                        200,
+                        "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"bad request\"},\"id\":null}");
             }
             StringBuilder challenge = new StringBuilder("Bearer");
             List<String> params = new ArrayList<>();
@@ -165,18 +189,28 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
             return new Response(401, Map.of("www-authenticate", challenge.toString()), "");
         }
         if ("GET".equals(method) && url.equals(prmPath)) {
-            return json(200, mapper.writeValueAsString(Map.of(
-                "resource", prmResource,
-                "authorization_servers", List.of(prmAuthorizationServer),
-                "scopes_supported", scopesSupported)));
+            return json(
+                    200,
+                    mapper.writeValueAsString(
+                            Map.of(
+                                    "resource", prmResource,
+                                    "authorization_servers", List.of(prmAuthorizationServer),
+                                    "scopes_supported", scopesSupported)));
         }
-        if ("GET".equals(method) && url.equals(issuer + "/.well-known/oauth-authorization-server")) {
+        if ("GET".equals(method)
+                && url.equals(issuer + "/.well-known/oauth-authorization-server")) {
             Map<String, Object> as = new LinkedHashMap<>();
             as.put("issuer", issuer);
             as.put("authorization_endpoint", issuer + "/authorize");
-            as.put("token_endpoint", tokenEndpointOverride != null ? tokenEndpointOverride : issuer + "/token");
+            as.put(
+                    "token_endpoint",
+                    tokenEndpointOverride != null ? tokenEndpointOverride : issuer + "/token");
             if (hasRegistrationEndpoint) {
-                as.put("registration_endpoint", registrationEndpointOverride != null ? registrationEndpointOverride : issuer + "/register");
+                as.put(
+                        "registration_endpoint",
+                        registrationEndpointOverride != null
+                                ? registrationEndpointOverride
+                                : issuer + "/register");
             }
             as.put("code_challenge_methods_supported", List.of("S256"));
             as.put("token_endpoint_auth_methods_supported", List.of("none", "client_secret_basic"));
@@ -196,8 +230,16 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
             Set<String> uris = new HashSet<>();
             req.path("redirect_uris").forEach(n -> uris.add(n.asText()));
             clients.put(id, new Client(id, secret, uris));
-            return json(201, mapper.writeValueAsString(Map.of(
-                "client_id", id, "client_secret", secret, "token_endpoint_auth_method", "client_secret_basic")));
+            return json(
+                    201,
+                    mapper.writeValueAsString(
+                            Map.of(
+                                    "client_id",
+                                    id,
+                                    "client_secret",
+                                    secret,
+                                    "token_endpoint_auth_method",
+                                    "client_secret_basic")));
         }
         if ("POST".equals(method) && url.equals(issuer + "/token")) {
             tokenRequestBodies.add(body);
@@ -211,11 +253,14 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
         String clientId = form.get("client_id");
         String auth = headers.get("Authorization");
         if (auth != null && auth.startsWith("Basic ")) {
-            String decoded = new String(Base64.getDecoder().decode(auth.substring(6)), StandardCharsets.UTF_8);
+            String decoded =
+                    new String(
+                            Base64.getDecoder().decode(auth.substring(6)), StandardCharsets.UTF_8);
             String[] idSecret = decoded.split(":", 2);
             clientId = URLDecoder.decode(idSecret[0], StandardCharsets.UTF_8);
             Client c = clients.get(clientId);
-            if (c == null || !URLDecoder.decode(idSecret[1], StandardCharsets.UTF_8).equals(c.secret())) {
+            if (c == null
+                    || !URLDecoder.decode(idSecret[1], StandardCharsets.UTF_8).equals(c.secret())) {
                 return json(401, "{\"error\":\"invalid_client\"}");
             }
         }
@@ -228,10 +273,14 @@ final class FakeAuthorizationServer implements McpOAuthHttp {
             if (code == null) {
                 return json(400, "{\"error\":\"invalid_grant\"}");
             }
-            boolean ok = code.clientId().equals(clientId)
-                && code.redirectUri().equals(form.get("redirect_uri"))
-                && code.resource().equals(form.get("resource"))
-                && code.challenge().equals(McpOAuthPkce.challengeFor(String.valueOf(form.get("code_verifier"))));
+            boolean ok =
+                    code.clientId().equals(clientId)
+                            && code.redirectUri().equals(form.get("redirect_uri"))
+                            && code.resource().equals(form.get("resource"))
+                            && code.challenge()
+                                    .equals(
+                                            McpOAuthPkce.challengeFor(
+                                                    String.valueOf(form.get("code_verifier"))));
             if (!ok) {
                 return json(400, "{\"error\":\"invalid_grant\"}");
             }

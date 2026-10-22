@@ -1,6 +1,5 @@
 package com.agenticai.core.workflow;
 
-import static com.agenticai.core.workflow.WorkflowAiNodeSupport.fence;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.intConfig;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.isEmptyValue;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.listOfStrings;
@@ -173,7 +172,8 @@ class WorkflowAiNodeHandler {
         this.extractor =
                 new AiExtractorHandler(modelProvider, objectMapper, enabled, this.maxInputChars);
         this.resolver =
-                new AiReferenceResolver(storageProvider, httpProvider, objectMapper, this.docMaxBytes);
+                new AiReferenceResolver(
+                        storageProvider, httpProvider, objectMapper, this.docMaxBytes);
     }
 
     NodeExecutionResult executeQuestionClassifier(WorkflowNodeDto node, String input) {
@@ -190,7 +190,8 @@ class WorkflowAiNodeHandler {
             String defaultHandle,
             double minConfidence,
             ObjectMapper mapper) {
-        return AiClassifierHandler.classify(rawReply, classes, defaultHandle, minConfidence, mapper);
+        return AiClassifierHandler.classify(
+                rawReply, classes, defaultHandle, minConfidence, mapper);
     }
 
     static List<AiClass> parseClasses(Object raw, ObjectMapper mapper, List<String> problems) {
@@ -308,12 +309,6 @@ class WorkflowAiNodeHandler {
      */
     record Classification(String handle, Double confidence, boolean fellBack, String reason) {}
 
-
-
-
-
-
-
     // ------------------------------------------------------------------------------------------------------------
     // parameter_extractor
     // ------------------------------------------------------------------------------------------------------------
@@ -371,17 +366,6 @@ class WorkflowAiNodeHandler {
      */
     record Extraction(ObjectNode values, Map<String, String> problems) {}
 
-
-
-
-
-
-
-
-
-
-
-
     // ------------------------------------------------------------------------------------------------------------
     // variable_aggregator
     // ------------------------------------------------------------------------------------------------------------
@@ -432,8 +416,6 @@ class WorkflowAiNodeHandler {
     // ------------------------------------------------------------------------------------------------------------
     // document_extractor
     // ------------------------------------------------------------------------------------------------------------
-
-
 
     NodeExecutionResult executeDocumentExtractor(WorkflowNodeDto node, String input) {
         Map<String, Object> config = node.config();
@@ -555,9 +537,4 @@ class WorkflowAiNodeHandler {
                     logLines);
         }
     }
-
-
-
-
-
 }

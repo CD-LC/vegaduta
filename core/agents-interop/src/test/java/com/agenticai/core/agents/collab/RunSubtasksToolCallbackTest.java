@@ -115,7 +115,8 @@ class RunSubtasksToolCallbackTest {
                         "local_shell")) {
             assertFalse(filter.test(banned), banned);
         }
-        for (String allowed : List.of("web_search", "fetch_web_page", "local_shell_read", "run_code")) {
+        for (String allowed :
+                List.of("web_search", "fetch_web_page", "local_shell_read", "run_code")) {
             assertTrue(filter.test(allowed), allowed);
         }
     }
@@ -173,14 +174,16 @@ class RunSubtasksToolCallbackTest {
                 .thenReturn("fine");
 
         String out =
-                tool().call("{\"tasks\":[{\"brief\":\"bad\"},{\"brief\":\"good\"},{\"brief\":\" \"}]}");
+                tool().call(
+                                "{\"tasks\":[{\"brief\":\"bad\"},{\"brief\":\"good\"},{\"brief\":\" \"}]}");
 
         JsonNode results = MAPPER.readTree(out).get("results");
         assertEquals("error", results.get(0).get("status").asText());
         assertTrue(results.get(0).get("error").asText().contains("provider down"));
         assertEquals("ok", results.get(1).get("status").asText());
         assertEquals("error", results.get(2).get("status").asText());
-        assertEquals(RunSubtasksToolCallback.ERR_BRIEF_REQUIRED, results.get(2).get("error").asText());
+        assertEquals(
+                RunSubtasksToolCallback.ERR_BRIEF_REQUIRED, results.get(2).get("error").asText());
     }
 
     @Test

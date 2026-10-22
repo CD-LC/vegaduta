@@ -34,7 +34,8 @@ class CreateWorkflowToolCallbackTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final WorkflowCrudService crud = mock(WorkflowCrudService.class);
-    private final WorkflowGraphGeneratorService generator = mock(WorkflowGraphGeneratorService.class);
+    private final WorkflowGraphGeneratorService generator =
+            mock(WorkflowGraphGeneratorService.class);
     private final UUID workflowId = UUID.randomUUID();
     private final WorkflowGraphDto graph =
             new WorkflowGraphDto(
@@ -83,7 +84,8 @@ class CreateWorkflowToolCallbackTest {
     @Test
     void validationProblemsOfTheSavedDraftComeBackAsWarnings() throws Exception {
         when(crud.validate(workflowId))
-                .thenReturn(ValidationResult.failed(List.of("Agent node n2 has no agent selected")));
+                .thenReturn(
+                        ValidationResult.failed(List.of("Agent node n2 has no agent selected")));
 
         JsonNode out = MAPPER.readTree(tool.call("{\"name\":\"W\",\"instruction\":\"do it\"}"));
 
@@ -117,7 +119,8 @@ class CreateWorkflowToolCallbackTest {
     @Test
     void theTenantWorkflowLimitIsRelayedAsTheError() throws Exception {
         when(crud.create(anyString(), anyString(), any()))
-                .thenThrow(new TenantLimitExceededException("The FREE plan allows up to 3 workflows"));
+                .thenThrow(
+                        new TenantLimitExceededException("The FREE plan allows up to 3 workflows"));
 
         JsonNode out = MAPPER.readTree(tool.call("{\"name\":\"W\",\"instruction\":\"do it\"}"));
 
@@ -150,7 +153,8 @@ class CreateWorkflowToolCallbackTest {
     @Test
     void theFactoryBuildsTheToolOnlyWhenEnabledAndTheServicesExist() {
         ObjectProvider<WorkflowCrudService> crudProvider = mock(ObjectProvider.class);
-        ObjectProvider<WorkflowGraphGeneratorService> generatorProvider = mock(ObjectProvider.class);
+        ObjectProvider<WorkflowGraphGeneratorService> generatorProvider =
+                mock(ObjectProvider.class);
         when(crudProvider.getIfAvailable()).thenReturn(crud);
         when(generatorProvider.getIfAvailable()).thenReturn(generator);
 

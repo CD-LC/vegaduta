@@ -9,15 +9,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The sentinel verdict contract - what a sentinel-mode scheduled run is asked
- * to end its answer with, and what {@link AgentSentinelSweep} parses back out.
+ * The sentinel verdict contract - what a sentinel-mode scheduled run is asked to end its answer
+ * with, and what {@link AgentSentinelSweep} parses back out.
  *
- * <p>A sentinel is a WATCHER, not a doer: it observes on a cadence and reports
- * upward, so its output is a verdict, not a deliverable. The contract is a
- * fenced block - the same shape the web console's generative-UI renderer uses
- * for {@code ```json_ui} - because a fenced block survives the model also
- * writing ordinary prose around it, and because a miss is a clean signal
- * rather than a half-parsed document.
+ * <p>A sentinel is a WATCHER, not a doer: it observes on a cadence and reports upward, so its
+ * output is a verdict, not a deliverable. The contract is a fenced block - the same shape the web
+ * console's generative-UI renderer uses for {@code ```json_ui} - because a fenced block survives
+ * the model also writing ordinary prose around it, and because a miss is a clean signal rather than
+ * a half-parsed document.
  *
  * <pre>
  * ```sentinel
@@ -28,41 +27,49 @@ import java.util.regex.Pattern;
  * </pre>
  *
  * <ul>
- *   <li>{@code quiet} - nothing changed worth a human's attention. The common
- *       case; a sentinel that talks every tick is an alarm nobody reads.</li>
- *   <li>{@code notify} - write a notification to the schedule's owner.</li>
- *   <li>{@code propose} - park a follow-up run behind a human approval
- *       ({@code agent.proposal} approval request). {@code proposal.goal} is the
- *       FULL instruction for that run; the verdict's own {@code title}/{@code
- *       body} explain to the human why it is being asked. A propose verdict
- *       without a usable proposal is downgraded to notify - the signal still
- *       reaches a human, just without the one-tap action.</li>
+ *   <li>{@code quiet} - nothing changed worth a human's attention. The common case; a sentinel that
+ *       talks every tick is an alarm nobody reads.
+ *   <li>{@code notify} - write a notification to the schedule's owner.
+ *   <li>{@code propose} - park a follow-up run behind a human approval ({@code agent.proposal}
+ *       approval request). {@code proposal.goal} is the FULL instruction for that run; the
+ *       verdict's own {@code title}/{@code body} explain to the human why it is being asked. A
+ *       propose verdict without a usable proposal is downgraded to notify - the signal still
+ *       reaches a human, just without the one-tap action.
  * </ul>
  *
- * <p>Parsing is deliberately strict at the edges a parser can afford and
- * forgiving everywhere else: the LAST {@code ```sentinel} block wins (a model
- * that emitted an early draft and then revised itself gets its final word
- * evaluated, not its first), field lengths are clamped rather than rejected,
- * and any other malformed shape yields {@link Optional#empty()} - which the
- * sweep records as {@code NO_VERDICT} and otherwise ignores, because a
- * sentinel that cannot even state its verdict is not worth escalating.
+ * <p>Parsing is deliberately strict at the edges a parser can afford and forgiving everywhere else:
+ * the LAST {@code ```sentinel} block wins (a model that emitted an early draft and then revised
+ * itself gets its final word evaluated, not its first), field lengths are clamped rather than
+ * rejected, and any other malformed shape yields {@link Optional#empty()} - which the sweep records
+ * as {@code NO_VERDICT} and otherwise ignores, because a sentinel that cannot even state its
+ * verdict is not worth escalating.
  */
-public record SentinelVerdict(Verdict verdict, String title, String body, Severity severity, Proposal proposal) {
+public record SentinelVerdict(
+        Verdict verdict, String title, String body, Severity severity, Proposal proposal) {
 
-    public enum Verdict { QUIET, NOTIFY, PROPOSE }
+    public enum Verdict {
+        QUIET,
+        NOTIFY,
+        PROPOSE
+    }
 
-    public enum Severity { INFO, WARNING, ERROR }
+    public enum Severity {
+        INFO,
+        WARNING,
+        ERROR
+    }
 
     /** The follow-up run a {@code propose} verdict asks a human to ratify. */
     public record Proposal(String summary, String goal) {}
 
     /**
      * Appended to a sentinel schedule's rendered goal at enqueue (see {@code
-     * AgentScheduleService#renderGoal}) so the contract the sweep parses is
-     * the contract the model was actually shown - the two must never drift
-     * apart, which is why the text lives here next to the parser.
+     * AgentScheduleService#renderGoal}) so the contract the sweep parses is the contract the model
+     * was actually shown - the two must never drift apart, which is why the text lives here next to
+     * the parser.
      */
-    public static final String GOAL_CONTRACT = """
+    public static final String GOAL_CONTRACT =
+            """
 
         [Sentinel mode] This is a scheduled watch run: observe and report, do not act \
         on the world yourself (no sends, writes, or changes - a human ratifies actions).
@@ -84,7 +91,7 @@ public record SentinelVerdict(Verdict verdict, String title, String body, Severi
         """;
 
     private static final Pattern FENCE =
-        Pattern.compile("```sentinel\\s*\\n([\\s\\S]*?)```", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("```sentinel\\s*\\n([\\s\\S]*?)```", Pattern.CASE_INSENSITIVE);
 
     // Clamps, not validation failures: a long title is a style slip, not a reason
     // to throw away a signal the model did produce.
@@ -96,9 +103,8 @@ public record SentinelVerdict(Verdict verdict, String title, String body, Severi
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     /**
-     * Extracts the verdict from a finished job's result text. Empty when no
-     * {@code ```sentinel} block exists or none parses - the caller records
-     * {@code NO_VERDICT} and moves on.
+     * Extracts the verdict from a finished job's result text. Empty when no {@code ```sentinel}
+     * block exists or none parses - the caller records {@code NO_VERDICT} and moves on.
      */
     public static Optional<SentinelVerdict> extract(String resultText) {
         if (resultText == null || resultText.isBlank()) {
@@ -125,11 +131,13 @@ public record SentinelVerdict(Verdict verdict, String title, String body, Severi
             if (verdict == Verdict.PROPOSE && proposal == null) {
                 verdict = Verdict.NOTIFY;
             }
-            return Optional.of(new SentinelVerdict(
-                verdict,
-                clamp(node.path("title").asText(null), MAX_TITLE),
-                clamp(node.path("body").asText(null), MAX_BODY),
-                severity, proposal));
+            return Optional.of(
+                    new SentinelVerdict(
+                            verdict,
+                            clamp(node.path("title").asText(null), MAX_TITLE),
+                            clamp(node.path("body").asText(null), MAX_BODY),
+                            severity,
+                            proposal));
         } catch (Exception e) {
             // Malformed JSON in the block is the same answer as no block:
             // NO_VERDICT upstream, never an escalation for a parse slip.

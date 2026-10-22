@@ -14,18 +14,18 @@ import java.util.Optional;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * Redis half of the resumable-stream buffer ({@code app.chat.resumable-streams.store=redis}):
- * lets a replica that did NOT generate a turn serve a resume for it. Not a
- * {@link ResumableStreamBuffer} itself - the node generating a turn keeps the authoritative
- * in-memory copy and mirrors every entry here with the id it already assigned ({@link #push}),
- * so the two never disagree about numbering. {@link MirroredResumableStreamBuffer} owns the
- * fail-open policy (a Redis error is logged, never thrown into the live stream).
+ * Redis half of the resumable-stream buffer ({@code app.chat.resumable-streams.store=redis}): lets
+ * a replica that did NOT generate a turn serve a resume for it. Not a {@link ResumableStreamBuffer}
+ * itself - the node generating a turn keeps the authoritative in-memory copy and mirrors every
+ * entry here with the id it already assigned ({@link #push}), so the two never disagree about
+ * numbering. {@link MirroredResumableStreamBuffer} owns the fail-open policy (a Redis error is
+ * logged, never thrown into the live stream).
  *
- * <p>Layout, tenant-first like every other Redis key here: one LIST per turn
- * ({@code agentic:chat-resume:{tenant}:{turn}:ev}) whose elements are
- * {@code id|D|payload} (or {@code id|T|status} for the terminal entry), plus one meta JSON value
- * ({@code ...:meta}). The tenant is part of the key, so a lookup with another tenant's id computes
- * a different key and cannot see the turn.
+ * <p>Layout, tenant-first like every other Redis key here: one LIST per turn ({@code
+ * agentic:chat-resume:{tenant}:{turn}:ev}) whose elements are {@code id|D|payload} (or {@code
+ * id|T|status} for the terminal entry), plus one meta JSON value ({@code ...:meta}). The tenant is
+ * part of the key, so a lookup with another tenant's id computes a different key and cannot see the
+ * turn.
  *
  * <p>The list is trimmed from the left to {@code maxEvents} (with some slack so trimming is not a
  * Redis call per token). Reads locate the cursor from the id of the oldest retained element and
@@ -37,6 +37,7 @@ final class RedisResumableStreamBuffer {
 
     static final String KEY_PREFIX = "agentic:chat-resume:";
     private static final ObjectMapper JSON = JsonMappers.plain();
+
     /** Refresh the running-turn TTL every this many entries instead of on each one. */
     private static final int TTL_REFRESH_EVERY = 64;
 
@@ -46,12 +47,14 @@ final class RedisResumableStreamBuffer {
     private final Duration ttl;
     private final Duration runningTtl;
 
-    RedisResumableStreamBuffer(StringRedisTemplate redis, int maxEvents, long ttlSeconds, long detachTimeoutSeconds) {
+    RedisResumableStreamBuffer(
+            StringRedisTemplate redis, int maxEvents, long ttlSeconds, long detachTimeoutSeconds) {
         this.redis = redis;
         this.maxEvents = Math.max(1, maxEvents);
         this.trimAt = this.maxEvents + Math.max(16, this.maxEvents / 10);
         this.ttl = Duration.ofSeconds(Math.max(1L, ttlSeconds));
-        this.runningTtl = Duration.ofSeconds(Math.max(1L, detachTimeoutSeconds) + Math.max(1L, ttlSeconds));
+        this.runningTtl =
+                Duration.ofSeconds(Math.max(1L, detachTimeoutSeconds) + Math.max(1L, ttlSeconds));
     }
 
     static String listKey(String tenantId, String turnId) {
@@ -93,7 +96,8 @@ final class RedisResumableStreamBuffer {
     }
 
     void open(TurnMeta meta) {
-        redis.opsForValue().set(metaKey(meta.tenantId(), meta.turnId()), metaJson(meta), runningTtl);
+        redis.opsForValue()
+                .set(metaKey(meta.tenantId(), meta.turnId()), metaJson(meta), runningTtl);
     }
 
     /** Mirrors one entry (id already assigned by the in-memory buffer). */
@@ -119,13 +123,14 @@ final class RedisResumableStreamBuffer {
         }
         try {
             JsonNode n = JSON.readTree(raw);
-            return Optional.of(new TurnMeta(
-                n.path("turnId").asText(),
-                n.path("tenantId").asText(),
-                n.hasNonNull("ownerSubject") ? n.get("ownerSubject").asText() : null,
-                n.path("agentId").asText(),
-                n.path("sessionId").asText(),
-                n.path("startedAtMs").asLong()));
+            return Optional.of(
+                    new TurnMeta(
+                            n.path("turnId").asText(),
+                            n.path("tenantId").asText(),
+                            n.hasNonNull("ownerSubject") ? n.get("ownerSubject").asText() : null,
+                            n.path("agentId").asText(),
+                            n.path("sessionId").asText(),
+                            n.path("startedAtMs").asLong()));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -137,8 +142,8 @@ final class RedisResumableStreamBuffer {
         List<String> head = redis.opsForList().range(list, 0, 0);
         if (head == null || head.isEmpty()) {
             return Boolean.TRUE.equals(redis.hasKey(metaKey(tenantId, turnId)))
-                ? ReadResult.of(List.of())
-                : ReadResult.notFound();
+                    ? ReadResult.of(List.of())
+                    : ReadResult.notFound();
         }
         Entry oldest = decode(head.get(0));
         if (oldest == null) {
@@ -156,7 +161,8 @@ final class RedisResumableStreamBuffer {
         for (String element : raw) {
             Entry entry = decode(element);
             if (entry == null || entry.id() != expected) {
-                // A trim moved the list under us, a mirror write was lost, or the element is malformed.
+                // A trim moved the list under us, a mirror write was lost, or the element is
+                // malformed.
                 return ReadResult.gapped();
             }
             out.add(entry);

@@ -82,7 +82,8 @@ final class McpTransportFactory {
         }
         return HttpClientStreamableHttpTransport.builder(url)
                 .httpRequestCustomizer(
-                        McpOriginPinning.requestCustomizer(url, routingHeaders.wrap(requestHeaders)))
+                        McpOriginPinning.requestCustomizer(
+                                url, routingHeaders.wrap(requestHeaders)))
                 .customizeClient(cb -> cb.followRedirects(HttpClient.Redirect.NEVER))
                 .build();
     }

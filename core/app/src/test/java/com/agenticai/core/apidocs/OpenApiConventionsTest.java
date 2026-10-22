@@ -13,9 +13,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * The cross-cutting API conventions the generated document must state over the REAL controller
- * set: RFC 9457 errors, the tenant API-key alternative, 429 on throttled routes, and the paging
- * and correlation headers.
+ * The cross-cutting API conventions the generated document must state over the REAL controller set:
+ * RFC 9457 errors, the tenant API-key alternative, 429 on throttled routes, and the paging and
+ * correlation headers.
  */
 class OpenApiConventionsTest {
 
@@ -68,7 +68,12 @@ class OpenApiConventionsTest {
 
     @Test
     void throttledPublicRoutesDocument429WithRetryAfter() throws IOException {
-        assertThat(op("/api/public/status", "get").path("responses").path("429").path("$ref").asText())
+        assertThat(
+                        op("/api/public/status", "get")
+                                .path("responses")
+                                .path("429")
+                                .path("$ref")
+                                .asText())
                 .isEqualTo("#/components/responses/TooManyRequests");
         assertThat(op("/api/agents", "get").path("responses").has("429")).isFalse();
         assertThat(
@@ -114,17 +119,25 @@ class OpenApiConventionsTest {
     @Test
     void webhooksDescribeTheSignedWorkflowEventDelivery() throws IOException {
         JsonNode post = doc().path("webhooks").path("workflowEvent").path("post");
-        assertThat(post.path("requestBody").path("content").path("application/json").path("schema").path("$ref").asText())
+        assertThat(
+                        post.path("requestBody")
+                                .path("content")
+                                .path("application/json")
+                                .path("schema")
+                                .path("$ref")
+                                .asText())
                 .endsWith("/WorkflowEvent");
         List<String> headers = new ArrayList<>();
         post.path("parameters").forEach(p -> headers.add(p.path("name").asText()));
-        assertThat(headers).contains("X-VegaDuta-Signature", "X-VegaDuta-Delivery", "X-VegaDuta-Event");
+        assertThat(headers)
+                .contains("X-VegaDuta-Signature", "X-VegaDuta-Delivery", "X-VegaDuta-Event");
     }
 
     @Test
     void permissionsComeFromTheSecurityRuleSnapshot() throws IOException {
         JsonNode audit = op("/api/audit-log", "get");
-        assertThat(audit.path("x-permissions").path("anyOf").get(0).asText()).isEqualTo("PERM_VIEW_AUDIT_LOG");
+        assertThat(audit.path("x-permissions").path("anyOf").get(0).asText())
+                .isEqualTo("PERM_VIEW_AUDIT_LOG");
         assertThat(audit.path("x-roles").get(0).asText()).isEqualTo("tenant-admin");
         assertThat(audit.path("description").asText()).contains("Requires PERM_VIEW_AUDIT_LOG");
         assertThat(op("/api/agents", "get").has("x-permissions")).isFalse();
@@ -133,7 +146,8 @@ class OpenApiConventionsTest {
     @Test
     void writesDocumentIdempotencyKeyAndConditionalRequests() throws IOException {
         JsonNode create = op("/api/agents", "post");
-        assertThat(create.path("parameters").toString()).contains("#/components/parameters/IdempotencyKey");
+        assertThat(create.path("parameters").toString())
+                .contains("#/components/parameters/IdempotencyKey");
         assertThat(create.path("responses").has("409")).isTrue();
         assertThat(create.path("responses").has("422")).isTrue();
         assertThat(op("/api/workflows/{workflowId}/run", "post").path("parameters").toString())
@@ -142,7 +156,12 @@ class OpenApiConventionsTest {
         JsonNode put = op("/api/workflows/{workflowId}", "put");
         assertThat(put.path("parameters").toString()).contains("#/components/parameters/IfMatch");
         assertThat(put.path("responses").has("412")).isTrue();
-        assertThat(op("/api/workflows/{workflowId}", "get").path("responses").path("200").path("headers").has("ETag"))
+        assertThat(
+                        op("/api/workflows/{workflowId}", "get")
+                                .path("responses")
+                                .path("200")
+                                .path("headers")
+                                .has("ETag"))
                 .isTrue();
     }
 
@@ -151,7 +170,9 @@ class OpenApiConventionsTest {
         for (String path : List.of("/api/audit-log", "/api/workflows/{workflowId}/runs")) {
             JsonNode get = op(path, "get");
             assertThat(get.path("parameters").toString()).as(path).contains("\"cursor\"");
-            assertThat(get.path("responses").path("200").path("headers").has("X-Next-Cursor")).as(path).isTrue();
+            assertThat(get.path("responses").path("200").path("headers").has("X-Next-Cursor"))
+                    .as(path)
+                    .isTrue();
         }
     }
 
@@ -159,12 +180,16 @@ class OpenApiConventionsTest {
     void versionedCollectionsMirrorEveryResourceVersionSource() {
         List<String> actual =
                 List.of(
-                        new com.agenticai.core.agents.core.AgentResourceVersions(null).collectionPath(),
-                        new com.agenticai.core.common.apicontract.WorkflowResourceVersions(null).collectionPath());
-        assertThat(OpenApiOperationConventions.VERSIONED_COLLECTIONS).containsExactlyInAnyOrderElementsOf(actual);
+                        new com.agenticai.core.agents.core.AgentResourceVersions(null)
+                                .collectionPath(),
+                        new com.agenticai.core.common.apicontract.WorkflowResourceVersions(null)
+                                .collectionPath());
+        assertThat(OpenApiOperationConventions.VERSIONED_COLLECTIONS)
+                .containsExactlyInAnyOrderElementsOf(actual);
         // A new ResourceVersionSource must be listed here and in VERSIONED_COLLECTIONS.
         org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider scanner =
-                new org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider(false);
+                new org.springframework.context.annotation
+                        .ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(
                 new org.springframework.core.type.filter.AssignableTypeFilter(
                         com.agenticai.core.security.http.ResourceVersionSource.class));

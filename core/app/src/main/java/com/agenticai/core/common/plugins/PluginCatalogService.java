@@ -22,22 +22,26 @@ public class PluginCatalogService {
     private final PlatformSettingsService platformSettingsService;
     private final ObjectMapper objectMapper;
 
-    public PluginCatalogService(PlatformSettingsService platformSettingsService, ObjectMapper objectMapper) {
+    public PluginCatalogService(
+            PlatformSettingsService platformSettingsService, ObjectMapper objectMapper) {
         this.platformSettingsService = platformSettingsService;
         this.objectMapper = objectMapper;
     }
 
     /** Stored-setting-wins / corrupt-falls-back resolution. */
     public PluginCatalog resolveCatalog() {
-        String stored = platformSettingsService.getString(PluginCatalogController.CATALOG_KEY, null);
+        String stored =
+                platformSettingsService.getString(PluginCatalogController.CATALOG_KEY, null);
         if (stored == null || stored.isBlank()) {
             return PluginCatalogController.DEFAULT_CATALOG;
         }
         try {
             return objectMapper.readValue(stored, PluginCatalog.class);
         } catch (com.fasterxml.jackson.core.JacksonException e) {
-            log.warn("Platform setting '{}' holds unparseable catalog JSON - serving the built-in default. {}",
-                PluginCatalogController.CATALOG_KEY, e.getMessage());
+            log.warn(
+                    "Platform setting '{}' holds unparseable catalog JSON - serving the built-in default. {}",
+                    PluginCatalogController.CATALOG_KEY,
+                    e.getMessage());
             return PluginCatalogController.DEFAULT_CATALOG;
         }
     }

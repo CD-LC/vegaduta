@@ -25,9 +25,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Waking a parked run: due waits resume exactly once through the existing PAUSED re-entry, a run that is no longer
- * parked at the wait's checkpoint retires the row instead of being woken, and the webhook / timeout paths shape the
- * node output as documented.
+ * Waking a parked run: due waits resume exactly once through the existing PAUSED re-entry, a run
+ * that is no longer parked at the wait's checkpoint retires the row instead of being woken, and the
+ * webhook / timeout paths shape the node output as documented.
  */
 class WorkflowWaitResumeServiceTest {
 
@@ -57,26 +57,40 @@ class WorkflowWaitResumeServiceTest {
     }
 
     private static WorkflowWait waitRow(WorkflowRun run, String mode, boolean failOnTimeout) {
-        return new WorkflowWait(UUID.randomUUID(), run.getId(), WORKFLOW_ID, "w1", "a1", mode,
-            Instant.now().minusSeconds(5), failOnTimeout);
+        return new WorkflowWait(
+                UUID.randomUUID(),
+                run.getId(),
+                WORKFLOW_ID,
+                "w1",
+                "a1",
+                mode,
+                Instant.now().minusSeconds(5),
+                failOnTimeout);
     }
 
     private void due(WorkflowWait... due) {
         when(waits.findByStatusAndWakeAtLessThanEqualOrderByWakeAtAsc(
-            eq(WorkflowWait.Status.WAITING), any(Instant.class), any(Pageable.class))).thenReturn(List.of(due));
+                        eq(WorkflowWait.Status.WAITING), any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(due));
     }
 
     private void claimSucceeds(WorkflowWait wait) {
-        when(waits.claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.RESUMED),
-            any(Instant.class))).thenReturn(1);
+        when(waits.claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.RESUMED),
+                        any(Instant.class)))
+                .thenReturn(1);
     }
 
     private void checkpointUpdates(WorkflowRun run) {
-        when(runs.updateParkedCheckpoint(eq(run.getId()), eq(WorkflowRunStatus.PAUSED), anyString(), any()))
-            .thenReturn(1);
+        when(runs.updateParkedCheckpoint(
+                        eq(run.getId()), eq(WorkflowRunStatus.PAUSED), anyString(), any()))
+                .thenReturn(1);
     }
 
-    // ---- the sweep ----------------------------------------------------------------------------------------------
+    // ---- the sweep
+    // ----------------------------------------------------------------------------------------------
 
     @Test
     void aDueDurationWaitResumesTheRunThroughTheNormalPausedReEntry() {
@@ -92,9 +106,16 @@ class WorkflowWaitResumeServiceTest {
         assertEquals(1, handled);
         ArgumentCaptor<String> trace = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
-        verify(runs).updateParkedCheckpoint(eq(run.getId()), eq(WorkflowRunStatus.PAUSED), trace.capture(), input.capture());
-        assertEquals("upstream", input.getValue(), "a timed wait passes its input through untouched");
-        assertTrue(trace.getValue().contains("Wait finished - wake time reached."), trace.getValue());
+        verify(runs)
+                .updateParkedCheckpoint(
+                        eq(run.getId()),
+                        eq(WorkflowRunStatus.PAUSED),
+                        trace.capture(),
+                        input.capture());
+        assertEquals(
+                "upstream", input.getValue(), "a timed wait passes its input through untouched");
+        assertTrue(
+                trace.getValue().contains("Wait finished - wake time reached."), trace.getValue());
         verify(backgroundRuns).resumeRun(WORKFLOW_ID, run.getId());
     }
 
@@ -104,8 +125,12 @@ class WorkflowWaitResumeServiceTest {
         WorkflowWait wait = waitRow(run, "DURATION", true);
         when(runs.findById(run.getId())).thenReturn(Optional.of(run));
         due(wait);
-        when(waits.claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.RESUMED),
-            any(Instant.class))).thenReturn(0);
+        when(waits.claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.RESUMED),
+                        any(Instant.class)))
+                .thenReturn(0);
 
         assertEquals(0, service.sweepDue(Instant.now()));
 
@@ -117,15 +142,24 @@ class WorkflowWaitResumeServiceTest {
     void aCancelledRunRetiresTheWaitInsteadOfWakingIt() {
         WorkflowRun run = parkedRun("a1", "in");
         run.clearPauseEnvelope();
-        run.complete(WorkflowRunStatus.CANCELLED, "[]", "Cancelled by user request while paused.", null, null);
+        run.complete(
+                WorkflowRunStatus.CANCELLED,
+                "[]",
+                "Cancelled by user request while paused.",
+                null,
+                null);
         WorkflowWait wait = waitRow(run, "DURATION", true);
         when(runs.findById(run.getId())).thenReturn(Optional.of(run));
         due(wait);
 
         assertEquals(0, service.sweepDue(Instant.now()));
 
-        verify(waits).claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.CANCELLED),
-            any(Instant.class));
+        verify(waits)
+                .claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.CANCELLED),
+                        any(Instant.class));
         verify(backgroundRuns, never()).resumeRun(any(), any());
     }
 
@@ -138,8 +172,12 @@ class WorkflowWaitResumeServiceTest {
 
         service.sweepDue(Instant.now());
 
-        verify(waits).claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.CANCELLED),
-            any(Instant.class));
+        verify(waits)
+                .claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.CANCELLED),
+                        any(Instant.class));
         verify(backgroundRuns, never()).resumeRun(any(), any());
     }
 
@@ -152,13 +190,18 @@ class WorkflowWaitResumeServiceTest {
 
         service.sweepDue(Instant.now());
 
-        verify(waits).claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.CANCELLED),
-            any(Instant.class));
+        verify(waits)
+                .claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.CANCELLED),
+                        any(Instant.class));
     }
 
     @Test
     void aStillRunningRunIsGivenTimeToParkAndOnlyAnOrphanIsRetired() {
-        WorkflowRun running = new WorkflowRun(UUID.randomUUID(), WORKFLOW_ID, "wf", "user-1"); // RUNNING
+        WorkflowRun running =
+                new WorkflowRun(UUID.randomUUID(), WORKFLOW_ID, "wf", "user-1"); // RUNNING
         WorkflowWait wait = waitRow(running, "DURATION", true);
         when(runs.findById(running.getId())).thenReturn(Optional.of(running));
         due(wait);
@@ -167,8 +210,12 @@ class WorkflowWaitResumeServiceTest {
         verify(waits, never()).claim(any(), any(), any(), any());
 
         service.sweepDue(Instant.now().plus(Duration.ofMinutes(11)));
-        verify(waits).claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.CANCELLED),
-            any(Instant.class));
+        verify(waits)
+                .claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.CANCELLED),
+                        any(Instant.class));
         verify(backgroundRuns, never()).resumeRun(any(), any());
     }
 
@@ -203,7 +250,8 @@ class WorkflowWaitResumeServiceTest {
         verify(backgroundRuns).resumeRun(WORKFLOW_ID, good.getId());
     }
 
-    // ---- webhook mode ---------------------------------------------------------------------------------------------
+    // ---- webhook mode
+    // ---------------------------------------------------------------------------------------------
 
     @Test
     void aTimedOutWebhookWaitFailsTheRunWhenConfiguredTo() {
@@ -212,7 +260,9 @@ class WorkflowWaitResumeServiceTest {
         when(runs.findById(run.getId())).thenReturn(Optional.of(run));
         due(wait);
         claimSucceeds(wait);
-        when(runs.compareAndSetStatus(run.getId(), WorkflowRunStatus.PAUSED, WorkflowRunStatus.FAILED)).thenReturn(1);
+        when(runs.compareAndSetStatus(
+                        run.getId(), WorkflowRunStatus.PAUSED, WorkflowRunStatus.FAILED))
+                .thenReturn(1);
 
         assertEquals(1, service.sweepDue(Instant.now()));
 
@@ -235,7 +285,12 @@ class WorkflowWaitResumeServiceTest {
         service.sweepDue(Instant.now());
 
         ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
-        verify(runs).updateParkedCheckpoint(eq(run.getId()), eq(WorkflowRunStatus.PAUSED), anyString(), input.capture());
+        verify(runs)
+                .updateParkedCheckpoint(
+                        eq(run.getId()),
+                        eq(WorkflowRunStatus.PAUSED),
+                        anyString(),
+                        input.capture());
         JsonNode envelope = mapper().readTree(input.getValue());
         assertTrue(envelope.get("timedOut").asBoolean());
         assertEquals("upstream", envelope.get("input").asText());
@@ -246,22 +301,30 @@ class WorkflowWaitResumeServiceTest {
     void theResumeUrlResumesTheWaitWithThePostedBodyAsTheOutput() throws Exception {
         WorkflowRun run = parkedRun("a1", "upstream");
         WorkflowWait wait = waitRow(run, "WEBHOOK", true);
-        when(waits.findFirstByRunIdAndStatus(run.getId(), WorkflowWait.Status.WAITING)).thenReturn(Optional.of(wait));
+        when(waits.findFirstByRunIdAndStatus(run.getId(), WorkflowWait.Status.WAITING))
+                .thenReturn(Optional.of(wait));
         when(runs.findById(run.getId())).thenReturn(Optional.of(run));
         claimSucceeds(wait);
         checkpointUpdates(run);
 
         WorkflowWaitResumeService.ResumeOutcome outcome =
-            service.resumeByWebhook(run.getId(), "w1", Map.of("approved", true));
+                service.resumeByWebhook(run.getId(), "w1", Map.of("approved", true));
 
         assertEquals(WorkflowWaitResumeService.ResumeOutcome.RESUMED, outcome);
         ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> trace = ArgumentCaptor.forClass(String.class);
-        verify(runs).updateParkedCheckpoint(eq(run.getId()), eq(WorkflowRunStatus.PAUSED), trace.capture(), input.capture());
+        verify(runs)
+                .updateParkedCheckpoint(
+                        eq(run.getId()),
+                        eq(WorkflowRunStatus.PAUSED),
+                        trace.capture(),
+                        input.capture());
         JsonNode envelope = mapper().readTree(input.getValue());
         assertTrue(envelope.get("resume").get("approved").asBoolean());
         assertEquals("upstream", envelope.get("input").asText());
-        assertTrue(trace.getValue().contains("Resumed by a call to the resume URL."), trace.getValue());
+        assertTrue(
+                trace.getValue().contains("Resumed by a call to the resume URL."),
+                trace.getValue());
         verify(backgroundRuns).resumeRun(WORKFLOW_ID, run.getId());
     }
 
@@ -269,13 +332,15 @@ class WorkflowWaitResumeServiceTest {
     void aRunScopedUrlResumesWhicheverWebhookWaitTheRunIsParkedAt() {
         WorkflowRun run = parkedRun("a1", "upstream");
         WorkflowWait wait = waitRow(run, "WEBHOOK", true);
-        when(waits.findFirstByRunIdAndStatus(run.getId(), WorkflowWait.Status.WAITING)).thenReturn(Optional.of(wait));
+        when(waits.findFirstByRunIdAndStatus(run.getId(), WorkflowWait.Status.WAITING))
+                .thenReturn(Optional.of(wait));
         when(runs.findById(run.getId())).thenReturn(Optional.of(run));
         claimSucceeds(wait);
         checkpointUpdates(run);
 
         WorkflowWaitResumeService.ResumeOutcome outcome =
-            service.resumeByWebhook(run.getId(), WorkflowWaitResumeTokens.ANY_NODE, Map.of("ok", true));
+                service.resumeByWebhook(
+                        run.getId(), WorkflowWaitResumeTokens.ANY_NODE, Map.of("ok", true));
 
         assertEquals(WorkflowWaitResumeService.ResumeOutcome.RESUMED, outcome);
         verify(backgroundRuns).resumeRun(WORKFLOW_ID, run.getId());
@@ -286,18 +351,27 @@ class WorkflowWaitResumeServiceTest {
         WorkflowRun run = parkedRun("a1", "in");
         UUID runId = run.getId();
         // nothing waiting
-        when(waits.findFirstByRunIdAndStatus(runId, WorkflowWait.Status.WAITING)).thenReturn(Optional.empty());
-        assertEquals(WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING, service.resumeByWebhook(runId, "w1", Map.of()));
+        when(waits.findFirstByRunIdAndStatus(runId, WorkflowWait.Status.WAITING))
+                .thenReturn(Optional.empty());
+        assertEquals(
+                WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING,
+                service.resumeByWebhook(runId, "w1", Map.of()));
 
         // waiting, but on a different node than the token names
         WorkflowWait wait = waitRow(run, "WEBHOOK", true);
-        when(waits.findFirstByRunIdAndStatus(runId, WorkflowWait.Status.WAITING)).thenReturn(Optional.of(wait));
-        assertEquals(WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING, service.resumeByWebhook(runId, "other", Map.of()));
+        when(waits.findFirstByRunIdAndStatus(runId, WorkflowWait.Status.WAITING))
+                .thenReturn(Optional.of(wait));
+        assertEquals(
+                WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING,
+                service.resumeByWebhook(runId, "other", Map.of()));
 
         // a timed wait cannot be resumed through the URL
         WorkflowWait timed = waitRow(run, "DURATION", true);
-        when(waits.findFirstByRunIdAndStatus(runId, WorkflowWait.Status.WAITING)).thenReturn(Optional.of(timed));
-        assertEquals(WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING, service.resumeByWebhook(runId, "w1", Map.of()));
+        when(waits.findFirstByRunIdAndStatus(runId, WorkflowWait.Status.WAITING))
+                .thenReturn(Optional.of(timed));
+        assertEquals(
+                WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING,
+                service.resumeByWebhook(runId, "w1", Map.of()));
 
         verify(backgroundRuns, never()).resumeRun(any(), any());
     }
@@ -306,13 +380,19 @@ class WorkflowWaitResumeServiceTest {
     void aSecondCallToTheSameResumeUrlIsNotWaitingAnymore() {
         WorkflowRun run = parkedRun("a1", "in");
         WorkflowWait wait = waitRow(run, "WEBHOOK", true);
-        when(waits.findFirstByRunIdAndStatus(run.getId(), WorkflowWait.Status.WAITING)).thenReturn(Optional.of(wait));
+        when(waits.findFirstByRunIdAndStatus(run.getId(), WorkflowWait.Status.WAITING))
+                .thenReturn(Optional.of(wait));
         when(runs.findById(run.getId())).thenReturn(Optional.of(run));
-        when(waits.claim(eq(wait.getId()), eq(WorkflowWait.Status.WAITING), eq(WorkflowWait.Status.RESUMED),
-            any(Instant.class))).thenReturn(0); // the first call already claimed it
+        when(waits.claim(
+                        eq(wait.getId()),
+                        eq(WorkflowWait.Status.WAITING),
+                        eq(WorkflowWait.Status.RESUMED),
+                        any(Instant.class)))
+                .thenReturn(0); // the first call already claimed it
 
-        assertEquals(WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING,
-            service.resumeByWebhook(run.getId(), "w1", Map.of()));
+        assertEquals(
+                WorkflowWaitResumeService.ResumeOutcome.NOT_WAITING,
+                service.resumeByWebhook(run.getId(), "w1", Map.of()));
         verify(backgroundRuns, never()).resumeRun(any(), any());
     }
 }

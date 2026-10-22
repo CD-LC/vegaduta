@@ -27,28 +27,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * The C1 verbs on {@link WorkflowVersionService}: publish (deduped snapshot
- * of the draft), promote (label move), rollback (PRODUCTION pointer moves
- * back - never a new snapshot), run resolution (label-first) and the
- * details/graph diff.
+ * The C1 verbs on {@link WorkflowVersionService}: publish (deduped snapshot of the draft), promote
+ * (label move), rollback (PRODUCTION pointer moves back - never a new snapshot), run resolution
+ * (label-first) and the details/graph diff.
  *
- * <p>The repository is an in-memory proxy fake rather than a Mockito mock:
- * the inline mock maker cannot instrument this interface's Spring Data
- * hierarchy on JDK 24, and a fake that ANSWERS the queries (rather than
- * returning canned values) exercises the service's own label/dedupe logic
- * more honestly anyway - a regression in "at most one label holder" or
- * "newest first" inside the service would fail here, not hide behind a
- * stubbed answer.
+ * <p>The repository is an in-memory proxy fake rather than a Mockito mock: the inline mock maker
+ * cannot instrument this interface's Spring Data hierarchy on JDK 24, and a fake that ANSWERS the
+ * queries (rather than returning canned values) exercises the service's own label/dedupe logic more
+ * honestly anyway - a regression in "at most one label holder" or "newest first" inside the service
+ * would fail here, not hide behind a stubbed answer.
  */
 class WorkflowVersionServiceC1Test {
 
     private static final UUID WORKFLOW_ID = UUID.randomUUID();
-    private static final String GRAPH_A = "{\"nodes\":[{\"id\":\"n1\",\"type\":\"trigger\"}],\"edges\":[]}";
+    private static final String GRAPH_A =
+            "{\"nodes\":[{\"id\":\"n1\",\"type\":\"trigger\"}],\"edges\":[]}";
     private static final String GRAPH_B =
-        "{\"nodes\":[{\"id\":\"n1\",\"type\":\"trigger\"},{\"id\":\"n2\",\"type\":\"agent\"}],\"edges\":[]}";
+            "{\"nodes\":[{\"id\":\"n1\",\"type\":\"trigger\"},{\"id\":\"n2\",\"type\":\"agent\"}],\"edges\":[]}";
 
-    /** The rows the fake repository "persists" - a real store, so ordering/label invariants are exercised. */
+    /**
+     * The rows the fake repository "persists" - a real store, so ordering/label invariants are
+     * exercised.
+     */
     private final List<WorkflowVersion> store = new ArrayList<>();
+
     /** Every repository method invoked, in order - the ordering assertions' datasource. */
     private final List<String> calls = new ArrayList<>();
 
@@ -66,40 +68,60 @@ class WorkflowVersionServiceC1Test {
     }
 
     private WorkflowVersionRepository fakeRepository() {
-        return (WorkflowVersionRepository) Proxy.newProxyInstance(
-            getClass().getClassLoader(),
-            new Class<?>[] {WorkflowVersionRepository.class},
-            (proxy, method, args) -> {
-                calls.add(method.getName());
-                return switch (method.getName()) {
-                    case "save", "saveAndFlush" -> {
-                        WorkflowVersion v = persist((WorkflowVersion) args[0]);
-                        if (!store.contains(v)) {
-                            store.add(v);
-                        }
-                        yield v;
-                    }
-                    case "findFirstByWorkflowIdOrderByVersionNumberDesc" -> store.stream()
-                        .filter(v -> v.getWorkflowId().equals(args[0]))
-                        .max(Comparator.comparingInt(WorkflowVersion::getVersionNumber));
-                    case "findByWorkflowIdAndVersionNumber" -> store.stream()
-                        .filter(v -> v.getWorkflowId().equals(args[0]) && v.getVersionNumber() == (Integer) args[1])
-                        .findFirst();
-                    case "findByWorkflowIdAndLabel" -> store.stream()
-                        .filter(v -> v.getWorkflowId().equals(args[0]) && v.getLabel() == args[1])
-                        .findFirst();
-                    case "findByWorkflowIdOrderByVersionNumberDesc" -> store.stream()
-                        .filter(v -> v.getWorkflowId().equals(args[0]))
-                        .sorted(Comparator.comparingInt(WorkflowVersion::getVersionNumber).reversed())
-                        .toList();
-                    case "latestVersionNumber" -> store.stream()
-                        .filter(v -> v.getWorkflowId().equals(args[0]))
-                        .map(WorkflowVersion::getVersionNumber)
-                        .max(Integer::compareTo)
-                        .orElse(null);
-                    default -> defaultValue(method.getReturnType());
-                };
-            });
+        return (WorkflowVersionRepository)
+                Proxy.newProxyInstance(
+                        getClass().getClassLoader(),
+                        new Class<?>[] {WorkflowVersionRepository.class},
+                        (proxy, method, args) -> {
+                            calls.add(method.getName());
+                            return switch (method.getName()) {
+                                case "save", "saveAndFlush" -> {
+                                    WorkflowVersion v = persist((WorkflowVersion) args[0]);
+                                    if (!store.contains(v)) {
+                                        store.add(v);
+                                    }
+                                    yield v;
+                                }
+                                case "findFirstByWorkflowIdOrderByVersionNumberDesc" ->
+                                        store.stream()
+                                                .filter(v -> v.getWorkflowId().equals(args[0]))
+                                                .max(
+                                                        Comparator.comparingInt(
+                                                                WorkflowVersion::getVersionNumber));
+                                case "findByWorkflowIdAndVersionNumber" ->
+                                        store.stream()
+                                                .filter(
+                                                        v ->
+                                                                v.getWorkflowId().equals(args[0])
+                                                                        && v.getVersionNumber()
+                                                                                == (Integer)
+                                                                                        args[1])
+                                                .findFirst();
+                                case "findByWorkflowIdAndLabel" ->
+                                        store.stream()
+                                                .filter(
+                                                        v ->
+                                                                v.getWorkflowId().equals(args[0])
+                                                                        && v.getLabel() == args[1])
+                                                .findFirst();
+                                case "findByWorkflowIdOrderByVersionNumberDesc" ->
+                                        store.stream()
+                                                .filter(v -> v.getWorkflowId().equals(args[0]))
+                                                .sorted(
+                                                        Comparator.comparingInt(
+                                                                        WorkflowVersion
+                                                                                ::getVersionNumber)
+                                                                .reversed())
+                                                .toList();
+                                case "latestVersionNumber" ->
+                                        store.stream()
+                                                .filter(v -> v.getWorkflowId().equals(args[0]))
+                                                .map(WorkflowVersion::getVersionNumber)
+                                                .max(Integer::compareTo)
+                                                .orElse(null);
+                                default -> defaultValue(method.getReturnType());
+                            };
+                        });
     }
 
     private static WorkflowVersion persist(WorkflowVersion version) {
@@ -127,15 +149,19 @@ class WorkflowVersionServiceC1Test {
         return null;
     }
 
-    private WorkflowVersion saved(UUID workflowId, int number, String graph, WorkflowStatus status) {
-        WorkflowVersion v = persist(
-            WorkflowVersion.snapshot(workflowId, number, graph, "{}", "wf", "d", status, null, null));
+    private WorkflowVersion saved(
+            UUID workflowId, int number, String graph, WorkflowStatus status) {
+        WorkflowVersion v =
+                persist(
+                        WorkflowVersion.snapshot(
+                                workflowId, number, graph, "{}", "wf", "d", status, null, null));
         store.add(v);
         return v;
     }
 
     private WorkflowDefinition definition(String graphJson, WorkflowStatus status) {
-        WorkflowDefinition definition = new WorkflowDefinition("Order Flow", "desc", graphJson, status);
+        WorkflowDefinition definition =
+                new WorkflowDefinition("Order Flow", "desc", graphJson, status);
         // The id is @GeneratedValue on save; tests never hit a database, so
         // stamp it reflectively (same trick persist() uses for version ids).
         try {
@@ -152,7 +178,8 @@ class WorkflowVersionServiceC1Test {
 
     @Test
     void publishSnapshotsTheDraftAsTheNextOrdinal() {
-        WorkflowVersion v = service.publish(definition(GRAPH_A, WorkflowStatus.ACTIVE), "first cut");
+        WorkflowVersion v =
+                service.publish(definition(GRAPH_A, WorkflowStatus.ACTIVE), "first cut");
 
         assertEquals(1, v.getVersionNumber());
         assertEquals(GRAPH_A, v.getGraphJson());
@@ -178,7 +205,8 @@ class WorkflowVersionServiceC1Test {
     @Test
     void publishIncrementsPastExistingOrdinals() {
         saved(WORKFLOW_ID, 4, GRAPH_A, WorkflowStatus.ACTIVE);
-        WorkflowVersion v = service.publish(definition(GRAPH_B, WorkflowStatus.ACTIVE), "changed graph");
+        WorkflowVersion v =
+                service.publish(definition(GRAPH_B, WorkflowStatus.ACTIVE), "changed graph");
         assertEquals(5, v.getVersionNumber());
     }
 
@@ -266,13 +294,15 @@ class WorkflowVersionServiceC1Test {
 
         assertEquals(7, service.resolveRunVersion(WORKFLOW_ID).orElseThrow().getVersionNumber());
         assertEquals(Integer.valueOf(7), service.currentVersionNumber(WORKFLOW_ID));
-        assertEquals(GRAPH_A, service.resolveRunGraphJson(definition(GRAPH_B, WorkflowStatus.ACTIVE)));
+        assertEquals(
+                GRAPH_A, service.resolveRunGraphJson(definition(GRAPH_B, WorkflowStatus.ACTIVE)));
     }
 
     @Test
     void runResolutionFallsBackToNewestWhenNoLabelExists() {
         saved(WORKFLOW_ID, 4, GRAPH_B, WorkflowStatus.ACTIVE);
-        assertEquals(GRAPH_B, service.resolveRunGraphJson(definition(GRAPH_A, WorkflowStatus.ACTIVE)));
+        assertEquals(
+                GRAPH_B, service.resolveRunGraphJson(definition(GRAPH_A, WorkflowStatus.ACTIVE)));
     }
 
     @Test
@@ -280,12 +310,14 @@ class WorkflowVersionServiceC1Test {
         WorkflowVersion v3 = saved(WORKFLOW_ID, 3, GRAPH_A, WorkflowStatus.ACTIVE);
         WorkflowVersion v7 = saved(WORKFLOW_ID, 7, GRAPH_B, WorkflowStatus.ACTIVE);
         service.promote(WORKFLOW_ID, 3, VersionLabel.PRODUCTION);
-        assertEquals(GRAPH_A, service.resolveRunGraphJson(definition(GRAPH_B, WorkflowStatus.ACTIVE)));
+        assertEquals(
+                GRAPH_A, service.resolveRunGraphJson(definition(GRAPH_B, WorkflowStatus.ACTIVE)));
 
         service.promote(WORKFLOW_ID, 7, VersionLabel.PRODUCTION);
         assertNull(v3.getLabel());
         assertEquals(VersionLabel.PRODUCTION, v7.getLabel());
-        assertEquals(GRAPH_B, service.resolveRunGraphJson(definition(GRAPH_A, WorkflowStatus.ACTIVE)));
+        assertEquals(
+                GRAPH_B, service.resolveRunGraphJson(definition(GRAPH_A, WorkflowStatus.ACTIVE)));
     }
 
     // --------------------------------------------------------------- diff
@@ -293,12 +325,28 @@ class WorkflowVersionServiceC1Test {
     @Test
     @SuppressWarnings("unchecked")
     void diffVersionsSurfacesGraphAndDetailsChanges() {
-        WorkflowVersion a = WorkflowVersion.snapshot(
-            WORKFLOW_ID, 3, GRAPH_A, "{\"scheduleEnabled\":false}", "wf", "d",
-            WorkflowStatus.DRAFT, null, null);
-        WorkflowVersion b = WorkflowVersion.snapshot(
-            WORKFLOW_ID, 7, GRAPH_B, "{\"scheduleEnabled\":true}", "wf2", "d2",
-            WorkflowStatus.ACTIVE, null, null);
+        WorkflowVersion a =
+                WorkflowVersion.snapshot(
+                        WORKFLOW_ID,
+                        3,
+                        GRAPH_A,
+                        "{\"scheduleEnabled\":false}",
+                        "wf",
+                        "d",
+                        WorkflowStatus.DRAFT,
+                        null,
+                        null);
+        WorkflowVersion b =
+                WorkflowVersion.snapshot(
+                        WORKFLOW_ID,
+                        7,
+                        GRAPH_B,
+                        "{\"scheduleEnabled\":true}",
+                        "wf2",
+                        "d2",
+                        WorkflowStatus.ACTIVE,
+                        null,
+                        null);
 
         Map<String, Object> diff = service.diffVersions(a, b);
 
@@ -315,10 +363,28 @@ class WorkflowVersionServiceC1Test {
     @Test
     @SuppressWarnings("unchecked")
     void diffVersionsToleratesLegacyRowsWithNullDetails() {
-        WorkflowVersion a = WorkflowVersion.snapshot(
-            WORKFLOW_ID, 1, GRAPH_A, null, "wf", "d", WorkflowStatus.ACTIVE, null, null);
-        WorkflowVersion b = WorkflowVersion.snapshot(
-            WORKFLOW_ID, 2, GRAPH_A, null, "wf", "d", WorkflowStatus.ACTIVE, null, null);
+        WorkflowVersion a =
+                WorkflowVersion.snapshot(
+                        WORKFLOW_ID,
+                        1,
+                        GRAPH_A,
+                        null,
+                        "wf",
+                        "d",
+                        WorkflowStatus.ACTIVE,
+                        null,
+                        null);
+        WorkflowVersion b =
+                WorkflowVersion.snapshot(
+                        WORKFLOW_ID,
+                        2,
+                        GRAPH_A,
+                        null,
+                        "wf",
+                        "d",
+                        WorkflowStatus.ACTIVE,
+                        null,
+                        null);
 
         Map<String, Object> diff = service.diffVersions(a, b);
 

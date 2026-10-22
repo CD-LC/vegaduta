@@ -23,26 +23,62 @@ class SkillRegistryClientSearchCacheTest {
         client.setNanoClockForTest(clock::get);
         AtomicInteger loads = new AtomicInteger();
 
-        client.cachedSearch("pdf", 1, () -> { loads.incrementAndGet(); return result(); });
-        client.cachedSearch("PDF", 1, () -> { loads.incrementAndGet(); return result(); });
+        client.cachedSearch(
+                "pdf",
+                1,
+                () -> {
+                    loads.incrementAndGet();
+                    return result();
+                });
+        client.cachedSearch(
+                "PDF",
+                1,
+                () -> {
+                    loads.incrementAndGet();
+                    return result();
+                });
         assertEquals(1, loads.get());
 
-        client.cachedSearch("pdf", 2, () -> { loads.incrementAndGet(); return result(); });
+        client.cachedSearch(
+                "pdf",
+                2,
+                () -> {
+                    loads.incrementAndGet();
+                    return result();
+                });
         assertEquals(2, loads.get(), "a different page is a different entry");
 
         clock.addAndGet(SkillRegistryClient.SEARCH_CACHE_TTL_NANOS + 1);
-        client.cachedSearch("pdf", 1, () -> { loads.incrementAndGet(); return result(); });
+        client.cachedSearch(
+                "pdf",
+                1,
+                () -> {
+                    loads.incrementAndGet();
+                    return result();
+                });
         assertEquals(3, loads.get());
     }
 
     @Test
     void failuresAreNotCached() {
         SkillRegistryClient client = new SkillRegistryClient(new ObjectMapper(), "", "");
-        assertThrows(IllegalStateException.class, () -> client.cachedSearch("x", 1, () -> {
-            throw new IllegalStateException("down");
-        }));
+        assertThrows(
+                IllegalStateException.class,
+                () ->
+                        client.cachedSearch(
+                                "x",
+                                1,
+                                () -> {
+                                    throw new IllegalStateException("down");
+                                }));
         AtomicInteger loads = new AtomicInteger();
-        client.cachedSearch("x", 1, () -> { loads.incrementAndGet(); return result(); });
+        client.cachedSearch(
+                "x",
+                1,
+                () -> {
+                    loads.incrementAndGet();
+                    return result();
+                });
         assertEquals(1, loads.get());
     }
 }

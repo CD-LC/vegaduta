@@ -10,9 +10,9 @@ import java.util.List;
 
 /**
  * Stores a List&lt;String&gt; as a JSON array in a TEXT column. Used instead of
- * {@code @JdbcTypeCode(SqlTypes.JSON)} because Hibernate resolves the JSON JDBC type
- * for the shared {@code List<String>} java type and then fails schema validation on
- * unrelated {@code SqlTypes.ARRAY} List&lt;String&gt; columns (provider_credential.capabilities).
+ * {@code @JdbcTypeCode(SqlTypes.JSON)} because Hibernate resolves the JSON JDBC type for the shared
+ * {@code List<String>} java type and then fails schema validation on unrelated {@code
+ * SqlTypes.ARRAY} List&lt;String&gt; columns (provider_credential.capabilities).
  */
 @Converter
 public class StringListJsonConverter implements AttributeConverter<List<String>, String> {

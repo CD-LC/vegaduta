@@ -11,12 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 /**
  * A real {@link SessionMemoryService} over a map-backed stand-in for the Redis commands it uses on

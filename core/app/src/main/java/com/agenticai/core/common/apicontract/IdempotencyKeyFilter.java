@@ -1,8 +1,8 @@
 package com.agenticai.core.common.apicontract;
 
 import com.agenticai.core.common.ErrorResponseFactory;
-import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
@@ -42,7 +42,8 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@code Idempotency-Key} for side-effecting requests (IETF draft-ietf-httpapi-idempotency-key-header).
+ * {@code Idempotency-Key} for side-effecting requests (IETF
+ * draft-ietf-httpapi-idempotency-key-header).
  *
  * <p>A client that sends {@code Idempotency-Key: <unique value>} on a {@code POST} or {@code PATCH}
  * under {@code /api/**} can retry the same request safely:
@@ -135,7 +136,8 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
         if (isAsyncDispatch(request)) {
             return request.getAttribute(ATTR_KEY) == null;
         }
-        if (request.getHeader(HEADER) == null || !covers(request.getMethod(), request.getRequestURI())) {
+        if (request.getHeader(HEADER) == null
+                || !covers(request.getMethod(), request.getRequestURI())) {
             return true;
         }
         String ct = request.getContentType();
@@ -167,7 +169,8 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
         if (redis == null || ctx.isEmpty()) {
             if (redis == null && !warnedNoRedis) {
                 warnedNoRedis = true;
-                log.warn("Idempotency-Key received but Redis is not configured; requests run without replay protection");
+                log.warn(
+                        "Idempotency-Key received but Redis is not configured; requests run without replay protection");
             }
             chain.doFilter(request, response);
             return;
@@ -177,9 +180,15 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
         String storeKey =
                 KEY_PREFIX
                         + sha256(
-                                (ctx.get().getTenantId() + "\n" + ctx.get().getSubject() + "\n"
-                                                + request.getMethod() + "\n" + request.getRequestURI()
-                                                + "\n" + key)
+                                (ctx.get().getTenantId()
+                                                + "\n"
+                                                + ctx.get().getSubject()
+                                                + "\n"
+                                                + request.getMethod()
+                                                + "\n"
+                                                + request.getRequestURI()
+                                                + "\n"
+                                                + key)
                                         .getBytes(StandardCharsets.UTF_8));
         String existing;
         boolean claimed;
@@ -189,12 +198,17 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
                     existing == null
                             && Boolean.TRUE.equals(
                                     redis.opsForValue()
-                                            .setIfAbsent(storeKey, IN_FLIGHT + ":" + fingerprint, inFlightTtl));
+                                            .setIfAbsent(
+                                                    storeKey,
+                                                    IN_FLIGHT + ":" + fingerprint,
+                                                    inFlightTtl));
             if (existing == null && !claimed) {
                 existing = redis.opsForValue().get(storeKey);
             }
         } catch (RuntimeException e) {
-            log.warn("Idempotency store unavailable; running request without replay protection: {}", e.toString());
+            log.warn(
+                    "Idempotency store unavailable; running request without replay protection: {}",
+                    e.toString());
             chain.doFilter(new CachedBodyRequest(request, body), response);
             return;
         }
@@ -215,7 +229,8 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
     }
 
     /** Stores (or releases) once the response is complete, i.e. not while async processing runs. */
-    private void finish(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void finish(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         if (isAsyncStarted(request)) {
             return;
         }
@@ -225,8 +240,7 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
         if (storeKey == null || wrapped == null) {
             return;
         }
-        StreamingAwareResponse streaming =
-                wrapped instanceof StreamingAwareResponse s ? s : null;
+        StreamingAwareResponse streaming = wrapped instanceof StreamingAwareResponse s ? s : null;
         int status = wrapped.getStatus();
         byte[] content = wrapped.getContentAsByteArray();
         boolean storable =
@@ -240,7 +254,10 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
                 record.put("status", status);
                 record.put("contentType", wrapped.getContentType());
                 record.put("body", Base64.getEncoder().encodeToString(content));
-                redisProvider.getObject().opsForValue().set(storeKey, MAPPER.writeValueAsString(record), ttl);
+                redisProvider
+                        .getObject()
+                        .opsForValue()
+                        .set(storeKey, MAPPER.writeValueAsString(record), ttl);
             } else {
                 release(storeKey);
             }
@@ -346,8 +363,11 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
         }
     }
 
-    /** The name ShallowEtagHeaderFilter uses for its "streaming, do not cache" request attribute. */
-    static final String STREAMING_ATTRIBUTE = ShallowEtagHeaderFilter.class.getName() + ".STREAMING";
+    /**
+     * The name ShallowEtagHeaderFilter uses for its "streaming, do not cache" request attribute.
+     */
+    static final String STREAMING_ATTRIBUTE =
+            ShallowEtagHeaderFilter.class.getName() + ".STREAMING";
 
     /** Replays the body this filter already read, so the handler can read it again. */
     static final class CachedBodyRequest extends HttpServletRequestWrapper {
@@ -391,7 +411,8 @@ public class IdempotencyKeyFilter extends OncePerRequestFilter {
 
         @Override
         public BufferedReader getReader() {
-            return new BufferedReader(new InputStreamReader(getInputStream(), StandardCharsets.UTF_8));
+            return new BufferedReader(
+                    new InputStreamReader(getInputStream(), StandardCharsets.UTF_8));
         }
 
         @Override

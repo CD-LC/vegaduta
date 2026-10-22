@@ -12,22 +12,18 @@ import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link ProviderName#GOOGLE_VERTEX} - Vertex AI auth mode of the same
- * unified GenAI SDK {@link GeminiAgentChatClientFactory} uses for the AI
- * Studio (API-key) path. The SDK's {@code Client.Builder} routes to Vertex
- * instead of the Developer API once {@code project}/{@code location}/
- * {@code credentials} are supplied instead of {@code apiKey} - see that
- * builder's own field list. {@code apiKey} here is a {@link
- * VertexCredential#encode() encoded} project/location/service-account blob,
- * not a plain secret - see that class's javadoc.
+ * {@link ProviderName#GOOGLE_VERTEX} - Vertex AI auth mode of the same unified GenAI SDK {@link
+ * GeminiAgentChatClientFactory} uses for the AI Studio (API-key) path. The SDK's {@code
+ * Client.Builder} routes to Vertex instead of the Developer API once {@code project}/{@code
+ * location}/ {@code credentials} are supplied instead of {@code apiKey} - see that builder's own
+ * field list. {@code apiKey} here is a {@link VertexCredential#encode() encoded}
+ * project/location/service-account blob, not a plain secret - see that class's javadoc.
  *
- * <p><b>Prompt caching</b> is delegated to {@link
- * VertexProviderCachingStrategy} - see that class's javadoc (and {@link
- * GeminiProviderCachingStrategy}'s, which it mirrors) for the real cache
- * lifecycle it implements and the known interface/data-flow mismatch. This
- * factory's only remaining job re: caching is building the {@link
- * ProviderCachingContext} and calling {@link ProviderCachingStrategy#apply}
- * on the in-progress options builder.
+ * <p><b>Prompt caching</b> is delegated to {@link VertexProviderCachingStrategy} - see that class's
+ * javadoc (and {@link GeminiProviderCachingStrategy}'s, which it mirrors) for the real cache
+ * lifecycle it implements and the known interface/data-flow mismatch. This factory's only remaining
+ * job re: caching is building the {@link ProviderCachingContext} and calling {@link
+ * ProviderCachingStrategy#apply} on the in-progress options builder.
  */
 @Component
 public class VertexAiChatClientFactory implements AgentChatClientFactory {
@@ -51,14 +47,15 @@ public class VertexAiChatClientFactory implements AgentChatClientFactory {
     private final LlmModelSupport modelSupport;
 
     public VertexAiChatClientFactory(
-        VertexAccessTokenProvider tokenProvider,
-        LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
-        VertexProviderCachingStrategy cachingStrategy,
-        MeterRegistry meterRegistry, LlmPricingCatalog pricingCatalog,
-        LlmHttpClientFactory llmHttpClientFactory,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        LlmModelSupport modelSupport
-    ) {
+            VertexAccessTokenProvider tokenProvider,
+            LlmCallMetricsService llmCallMetricsService,
+            LlmCallLogService llmCallLogService,
+            VertexProviderCachingStrategy cachingStrategy,
+            MeterRegistry meterRegistry,
+            LlmPricingCatalog pricingCatalog,
+            LlmHttpClientFactory llmHttpClientFactory,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            LlmModelSupport modelSupport) {
         this.modelSupport = modelSupport;
         this.tokenProvider = tokenProvider;
         this.llmCallMetricsService = llmCallMetricsService;
@@ -76,16 +73,23 @@ public class VertexAiChatClientFactory implements AgentChatClientFactory {
     }
 
     @Override
-    public ChatClient create(String apiKey, String model, int maxTokens, double temperature, double topP) {
+    public ChatClient create(
+            String apiKey, String model, int maxTokens, double temperature, double topP) {
         return create(apiKey, model, maxTokens, temperature, topP, java.util.Map.of());
     }
 
-    /** Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields are omitted. */
+    /**
+     * Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields
+     * are omitted.
+     */
     @Override
     public ChatClient create(
-        String apiKey, String model, int maxTokens, double temperature, double topP,
-        java.util.Map<String, Object> providerOptions
-    ) {
+            String apiKey,
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
         VertexCredential credential = VertexCredential.decode(apiKey);
         // The SDK wants a com.google.auth.oauth2.GoogleCredentials, not a raw
@@ -98,46 +102,78 @@ public class VertexAiChatClientFactory implements AgentChatClientFactory {
         // Reused per (access token, project, location) rather than built per
         // turn - see LlmModelSupport#genAiClient. The token is part of the key,
         // so a refreshed token gets a fresh Client and the stale one ages out.
-        Client genAiClient = modelSupport.genAiClient(() -> Client.builder()
-            .vertexAI(true)
-            .project(credential.projectId())
-            .location(credential.location())
-            .credentials(com.google.auth.oauth2.GoogleCredentials.create(
-                new com.google.auth.oauth2.AccessToken(accessToken, null)))
-            .httpOptions(HttpOptions.builder()
-                // Milliseconds; see GeminiAgentChatClientFactory for why a
-                // single value covers connect/read/write here.
-                .timeout(Math.toIntExact(llmHttpClientFactory.readTimeout().toMillis()))
-                .build())
-            .build(), "vertex-byok", accessToken, credential.projectId(), credential.location());
+        Client genAiClient =
+                modelSupport.genAiClient(
+                        () ->
+                                Client.builder()
+                                        .vertexAI(true)
+                                        .project(credential.projectId())
+                                        .location(credential.location())
+                                        .credentials(
+                                                com.google.auth.oauth2.GoogleCredentials.create(
+                                                        new com.google.auth.oauth2.AccessToken(
+                                                                accessToken, null)))
+                                        .httpOptions(
+                                                HttpOptions.builder()
+                                                        // Milliseconds; see
+                                                        // GeminiAgentChatClientFactory for why a
+                                                        // single value covers connect/read/write
+                                                        // here.
+                                                        .timeout(
+                                                                Math.toIntExact(
+                                                                        llmHttpClientFactory
+                                                                                .readTimeout()
+                                                                                .toMillis()))
+                                                        .build())
+                                        .build(),
+                        "vertex-byok",
+                        accessToken,
+                        credential.projectId(),
+                        credential.location());
 
-        GoogleGenAiChatOptions.Builder optionsBuilder = GoogleGenAiChatOptions.builder()
-            .model(model)
-            .maxOutputTokens(maxTokens)
-            .temperature(temperature)
-            .topP(topP);
+        GoogleGenAiChatOptions.Builder optionsBuilder =
+                GoogleGenAiChatOptions.builder()
+                        .model(model)
+                        .maxOutputTokens(maxTokens)
+                        .temperature(temperature)
+                        .topP(topP);
         sampling.applyTo(optionsBuilder);
         LlmModelSupport.logDroppedSampling(ProviderName.GOOGLE_VERTEX, model, sampling, "seed");
         // Gemini 2.5/3 think by default out of maxOutputTokens; bound it so the
         // reply is not truncated to nothing. Same mapping as the hosted pool.
         modelSupport.applyGeminiByokThinking(optionsBuilder, model);
         cachingStrategy.apply(optionsBuilder, new ProviderCachingContext(apiKey, model));
-        // Provider-enforced JSON schema, only when the caller asked for one (tool-free utility calls).
-        GoogleGenAiChatOptions options = modelSupport.applyStructuredSchema(optionsBuilder.build(), providerOptions);
+        // Provider-enforced JSON schema, only when the caller asked for one (tool-free utility
+        // calls).
+        GoogleGenAiChatOptions options =
+                modelSupport.applyStructuredSchema(optionsBuilder.build(), providerOptions);
 
         // GeminiMixedContentToolCallChatModel, not GoogleGenAiChatModel.builder() -
         // shares the same google-genai SDK/client as GeminiAgentChatClientFactory, so
         // it needs the same spring-ai#5466 tool-call-dropping workaround; see that
         // class's javadoc.
-        GoogleGenAiChatModel chatModel = new GeminiMixedContentToolCallChatModel(
-            genAiClient, options, toolCallingManagers.create(),
-            modelSupport.retry(), modelSupport.observationRegistry());
+        GoogleGenAiChatModel chatModel =
+                new GeminiMixedContentToolCallChatModel(
+                        genAiClient,
+                        options,
+                        toolCallingManagers.create(),
+                        modelSupport.retry(),
+                        modelSupport.observationRegistry());
 
-        return modelSupport.chatClientBuilder(chatModel)
-            .defaultAdvisors(modelSupport.advisors(
-                // Gemini rejects >1 system message; see SystemMessageMergingAdvisor's javadoc.
-                new SystemMessageMergingAdvisor(),
-                new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.GOOGLE_VERTEX, model, meterRegistry, pricingCatalog)))
-            .build();
+        return modelSupport
+                .chatClientBuilder(chatModel)
+                .defaultAdvisors(
+                        modelSupport.advisors(
+                                // Gemini rejects >1 system message; see
+                                // SystemMessageMergingAdvisor's javadoc.
+                                new SystemMessageMergingAdvisor(),
+                                new LlmMetricsAdvisor(
+                                        llmCallMetricsService,
+                                        llmCallLogService,
+                                        ProviderName.GOOGLE_VERTEX,
+                                        model,
+                                        meterRegistry,
+                                        pricingCatalog)))
+                .build();
     }
 }

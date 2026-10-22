@@ -28,11 +28,11 @@ import org.springframework.ai.chat.client.ChatClient;
 /**
  * Deterministic harness for {@link MemoryWriteArbitrationService}: a fake LLM (scripted from the
  * fixture) and an in-memory {@link GraphMemoryService} stand-in whose {@code supersede} mirrors the
- * real one (drop same subject+relation edges with a different object, then add). The fixture
- * {@code arbitration/arbitration-cases.json} (LongMemEval-style add / update / contradiction /
- * merge / discard / failure cases) asserts the FINAL STORE, so a lost memory or a wrongly kept
- * stale fact fails a case. It does not replace verifying {@code supersede} on real AGE Postgres -
- * see the flip checklist in the service javadoc.
+ * real one (drop same subject+relation edges with a different object, then add). The fixture {@code
+ * arbitration/arbitration-cases.json} (LongMemEval-style add / update / contradiction / merge /
+ * discard / failure cases) asserts the FINAL STORE, so a lost memory or a wrongly kept stale fact
+ * fails a case. It does not replace verifying {@code supersede} on real AGE Postgres - see the flip
+ * checklist in the service javadoc.
  */
 class MemoryWriteArbitrationHarnessTest {
 
@@ -43,7 +43,12 @@ class MemoryWriteArbitrationHarnessTest {
     @TestFactory
     Stream<DynamicTest> fixtureCases() throws Exception {
         List<JsonNode> cases = loadCases();
-        return cases.stream().map(c -> DynamicTest.dynamicTest(c.get("cat").asText() + ": " + c.get("n").asText(), () -> runCase(c)));
+        return cases.stream()
+                .map(
+                        c ->
+                                DynamicTest.dynamicTest(
+                                        c.get("cat").asText() + ": " + c.get("n").asText(),
+                                        () -> runCase(c)));
     }
 
     @Test
@@ -54,9 +59,13 @@ class MemoryWriteArbitrationHarnessTest {
         Set<String> names = new LinkedHashSet<>();
         for (JsonNode c : cases) {
             categories.add(c.get("cat").asText());
-            assertThat(names.add(c.get("n").asText())).as("unique case name " + c.get("n")).isTrue();
+            assertThat(names.add(c.get("n").asText()))
+                    .as("unique case name " + c.get("n"))
+                    .isTrue();
         }
-        assertThat(categories).contains("ADD", "UPDATE", "CONTRADICTION", "MERGE", "DISCARD", "FAILURE", "FORMAT");
+        assertThat(categories)
+                .contains(
+                        "ADD", "UPDATE", "CONTRADICTION", "MERGE", "DISCARD", "FAILURE", "FORMAT");
     }
 
     @Test
@@ -66,7 +75,8 @@ class MemoryWriteArbitrationHarnessTest {
         MemoryWriteArbitrationService service = new MemoryWriteArbitrationService();
         service.setEnabled(false);
 
-        service.arbitrateAndWrite(chat, store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Sam", "LIKES", "tea")));
+        service.arbitrateAndWrite(
+                chat, store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Sam", "LIKES", "tea")));
 
         assertThat(store.triples()).containsExactly("Sam|LIKES|tea");
         verify(chat, never()).prompt();
@@ -77,7 +87,8 @@ class MemoryWriteArbitrationHarnessTest {
         FakeStore store = new FakeStore();
         MemoryWriteArbitrationService service = enabledService(null);
 
-        service.arbitrateAndWrite(null, store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Sam", "LIKES", "tea")));
+        service.arbitrateAndWrite(
+                null, store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Sam", "LIKES", "tea")));
 
         assertThat(store.triples()).containsExactly("Sam|LIKES|tea");
     }
@@ -87,7 +98,12 @@ class MemoryWriteArbitrationHarnessTest {
         MemoryWriteArbitrationService service = enabledService(null);
         FakeStore store = new FakeStore();
 
-        service.arbitrateAndWrite(mock(ChatClient.class), null, AGENT, SUBJECT_KEY, List.of(new GraphTriple("a", "B", "c")));
+        service.arbitrateAndWrite(
+                mock(ChatClient.class),
+                null,
+                AGENT,
+                SUBJECT_KEY,
+                List.of(new GraphTriple("a", "B", "c")));
         service.arbitrateAndWrite(mock(ChatClient.class), store, AGENT, SUBJECT_KEY, List.of());
         service.arbitrateAndWrite(mock(ChatClient.class), store, AGENT, SUBJECT_KEY, null);
 
@@ -96,82 +112,140 @@ class MemoryWriteArbitrationHarnessTest {
 
     @Test
     void recallFailureFallsBackToPlainWriteAndCountsIt() {
-        FakeStore store = new FakeStore() {
-            @Override
-            public List<GraphFact> recallRelated(UUID agentId, String subjectKey, String entityHint, int hops) {
-                throw new IllegalStateException("age down");
-            }
-        };
+        FakeStore store =
+                new FakeStore() {
+                    @Override
+                    public List<GraphFact> recallRelated(
+                            UUID agentId, String subjectKey, String entityHint, int hops) {
+                        throw new IllegalStateException("age down");
+                    }
+                };
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         MemoryWriteArbitrationService service = enabledService(registry);
 
-        service.arbitrateAndWrite(scriptedChat("[]", false), store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Sam", "LIKES", "tea")));
+        service.arbitrateAndWrite(
+                scriptedChat("[]", false),
+                store,
+                AGENT,
+                SUBJECT_KEY,
+                List.of(new GraphTriple("Sam", "LIKES", "tea")));
 
         assertThat(store.triples()).containsExactly("Sam|LIKES|tea");
-        assertThat(registry.counter("graph.memory.arbitration.fallbacks", "reason", "exception").count()).isEqualTo(1.0);
+        assertThat(
+                        registry.counter(
+                                        "graph.memory.arbitration.fallbacks", "reason", "exception")
+                                .count())
+                .isEqualTo(1.0);
     }
 
     @Test
     void existingFactsAreShownToTheModel() {
         FakeStore store = new FakeStore();
-        store.remember(AGENT, SUBJECT_KEY, List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Raj")));
+        store.remember(
+                AGENT, SUBJECT_KEY, List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Raj")));
         ChatClient.ChatClientRequestSpec spec = mock(ChatClient.ChatClientRequestSpec.class);
         ChatClient chat = chatWith(spec, "[]", false);
         MemoryWriteArbitrationService service = enabledService(null);
 
-        service.arbitrateAndWrite(chat, store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul")));
+        service.arbitrateAndWrite(
+                chat,
+                store,
+                AGENT,
+                SUBJECT_KEY,
+                List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul")));
 
         ArgumentCaptor<String> user = ArgumentCaptor.forClass(String.class);
         verify(spec).user(user.capture());
-        assertThat(user.getValue()).contains("Priya manager of by Raj").contains("(Priya, MANAGER_OF_BY, Rahul)");
+        assertThat(user.getValue())
+                .contains("Priya manager of by Raj")
+                .contains("(Priya, MANAGER_OF_BY, Rahul)");
     }
 
     @Test
     void decisionAndFallbackMetricsAreRecorded() {
         FakeStore store = new FakeStore();
-        store.remember(AGENT, SUBJECT_KEY, List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Raj"), new GraphTriple("Sam", "LIKES", "tea")));
+        store.remember(
+                AGENT,
+                SUBJECT_KEY,
+                List.of(
+                        new GraphTriple("Priya", "MANAGER_OF_BY", "Raj"),
+                        new GraphTriple("Sam", "LIKES", "tea")));
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         MemoryWriteArbitrationService service = enabledService(registry);
         // UPDATE (valid), DISCARD of a fact with an existing (Sam, LIKES) -> kept as DISCARD,
         // DISCARD of an unknown (Mia, LIKES) -> downgraded to ADD.
-        String response = "[{\"subject\":\"Priya\",\"relation\":\"MANAGER_OF_BY\",\"object\":\"Rahul\",\"decision\":\"UPDATE\"},"
-            + "{\"subject\":\"Sam\",\"relation\":\"LIKES\",\"object\":\"tea\",\"decision\":\"DISCARD\"},"
-            + "{\"subject\":\"Mia\",\"relation\":\"LIKES\",\"object\":\"jazz\",\"decision\":\"DISCARD\"}]";
+        String response =
+                "[{\"subject\":\"Priya\",\"relation\":\"MANAGER_OF_BY\",\"object\":\"Rahul\",\"decision\":\"UPDATE\"},"
+                        + "{\"subject\":\"Sam\",\"relation\":\"LIKES\",\"object\":\"tea\",\"decision\":\"DISCARD\"},"
+                        + "{\"subject\":\"Mia\",\"relation\":\"LIKES\",\"object\":\"jazz\",\"decision\":\"DISCARD\"}]";
 
-        service.arbitrateAndWrite(scriptedChat(response, false), store, AGENT, SUBJECT_KEY, List.of(
-            new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul"),
-            new GraphTriple("Sam", "LIKES", "tea"),
-            new GraphTriple("Mia", "LIKES", "jazz")
-        ));
+        service.arbitrateAndWrite(
+                scriptedChat(response, false),
+                store,
+                AGENT,
+                SUBJECT_KEY,
+                List.of(
+                        new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul"),
+                        new GraphTriple("Sam", "LIKES", "tea"),
+                        new GraphTriple("Mia", "LIKES", "jazz")));
 
-        assertThat(registry.counter("graph.memory.arbitration.decisions", "decision", "UPDATE").count()).isEqualTo(1.0);
-        assertThat(registry.counter("graph.memory.arbitration.decisions", "decision", "DISCARD").count()).isEqualTo(1.0);
-        assertThat(registry.counter("graph.memory.arbitration.decisions", "decision", "ADD").count()).isEqualTo(1.0);
-        assertThat(registry.counter("graph.memory.arbitration.fallbacks", "reason", "discard_unverified").count()).isEqualTo(1.0);
-        assertThat(store.triples()).containsExactlyInAnyOrder("Priya|MANAGER_OF_BY|Rahul", "Sam|LIKES|tea", "Mia|LIKES|jazz");
+        assertThat(
+                        registry.counter("graph.memory.arbitration.decisions", "decision", "UPDATE")
+                                .count())
+                .isEqualTo(1.0);
+        assertThat(
+                        registry.counter(
+                                        "graph.memory.arbitration.decisions", "decision", "DISCARD")
+                                .count())
+                .isEqualTo(1.0);
+        assertThat(
+                        registry.counter("graph.memory.arbitration.decisions", "decision", "ADD")
+                                .count())
+                .isEqualTo(1.0);
+        assertThat(
+                        registry.counter(
+                                        "graph.memory.arbitration.fallbacks",
+                                        "reason",
+                                        "discard_unverified")
+                                .count())
+                .isEqualTo(1.0);
+        assertThat(store.triples())
+                .containsExactlyInAnyOrder(
+                        "Priya|MANAGER_OF_BY|Rahul", "Sam|LIKES|tea", "Mia|LIKES|jazz");
     }
 
     @Test
     void decisionsAreNotCountedWhenAWriteThrowsAndFallbackWritesEverything() {
-        FakeStore store = new FakeStore() {
-            @Override
-            public void supersede(UUID agentId, String subjectKey, GraphTriple triple) {
-                throw new IllegalStateException("age write failed");
-            }
-        };
-        store.remember(AGENT, SUBJECT_KEY, List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Raj")));
+        FakeStore store =
+                new FakeStore() {
+                    @Override
+                    public void supersede(UUID agentId, String subjectKey, GraphTriple triple) {
+                        throw new IllegalStateException("age write failed");
+                    }
+                };
+        store.remember(
+                AGENT, SUBJECT_KEY, List.of(new GraphTriple("Priya", "MANAGER_OF_BY", "Raj")));
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         MemoryWriteArbitrationService service = enabledService(registry);
-        String response = "[{\"subject\":\"Sam\",\"relation\":\"LIKES\",\"object\":\"tea\",\"decision\":\"ADD\"},"
-            + "{\"subject\":\"Priya\",\"relation\":\"MANAGER_OF_BY\",\"object\":\"Rahul\",\"decision\":\"UPDATE\"}]";
+        String response =
+                "[{\"subject\":\"Sam\",\"relation\":\"LIKES\",\"object\":\"tea\",\"decision\":\"ADD\"},"
+                        + "{\"subject\":\"Priya\",\"relation\":\"MANAGER_OF_BY\",\"object\":\"Rahul\",\"decision\":\"UPDATE\"}]";
 
-        service.arbitrateAndWrite(scriptedChat(response, false), store, AGENT, SUBJECT_KEY, List.of(
-            new GraphTriple("Sam", "LIKES", "tea"),
-            new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul")
-        ));
+        service.arbitrateAndWrite(
+                scriptedChat(response, false),
+                store,
+                AGENT,
+                SUBJECT_KEY,
+                List.of(
+                        new GraphTriple("Sam", "LIKES", "tea"),
+                        new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul")));
 
         assertThat(registry.find("graph.memory.arbitration.decisions").counters()).isEmpty();
-        assertThat(registry.counter("graph.memory.arbitration.fallbacks", "reason", "exception").count()).isEqualTo(1.0);
+        assertThat(
+                        registry.counter(
+                                        "graph.memory.arbitration.fallbacks", "reason", "exception")
+                                .count())
+                .isEqualTo(1.0);
         assertThat(store.triples()).contains("Sam|LIKES|tea", "Priya|MANAGER_OF_BY|Rahul");
     }
 
@@ -181,9 +255,20 @@ class MemoryWriteArbitrationHarnessTest {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         MemoryWriteArbitrationService service = enabledService(registry);
 
-        service.arbitrateAndWrite(scriptedChat("not json", false), store, AGENT, SUBJECT_KEY, List.of(new GraphTriple("Sam", "LIKES", "tea")));
+        service.arbitrateAndWrite(
+                scriptedChat("not json", false),
+                store,
+                AGENT,
+                SUBJECT_KEY,
+                List.of(new GraphTriple("Sam", "LIKES", "tea")));
 
-        assertThat(registry.counter("graph.memory.arbitration.fallbacks", "reason", "parse_failure").count()).isEqualTo(1.0);
+        assertThat(
+                        registry.counter(
+                                        "graph.memory.arbitration.fallbacks",
+                                        "reason",
+                                        "parse_failure")
+                                .count())
+                .isEqualTo(1.0);
         assertThat(store.triples()).containsExactly("Sam|LIKES|tea");
     }
 
@@ -196,18 +281,29 @@ class MemoryWriteArbitrationHarnessTest {
         List<GraphTriple> candidates = triples(c.get("cand"));
 
         boolean throwsOnCall = c.path("throws").asBoolean(false);
-        String response = c.path("nullContent").asBoolean(false) ? null : responseFor(c, candidates);
+        String response =
+                c.path("nullContent").asBoolean(false) ? null : responseFor(c, candidates);
 
-        enabledService(null).arbitrateAndWrite(scriptedChat(response, throwsOnCall), store, AGENT, SUBJECT_KEY, candidates);
+        enabledService(null)
+                .arbitrateAndWrite(
+                        scriptedChat(response, throwsOnCall),
+                        store,
+                        AGENT,
+                        SUBJECT_KEY,
+                        candidates);
 
         Set<String> expected = new LinkedHashSet<>();
         for (GraphTriple t : triples(c.get("exp"))) {
             expected.add(key(t));
         }
-        assertThat(store.triples()).as(c.get("n").asText()).containsExactlyInAnyOrderElementsOf(expected);
+        assertThat(store.triples())
+                .as(c.get("n").asText())
+                .containsExactlyInAnyOrderElementsOf(expected);
     }
 
-    /** Raw override, or a JSON array rendered positionally from the candidates + scripted verdicts. */
+    /**
+     * Raw override, or a JSON array rendered positionally from the candidates + scripted verdicts.
+     */
     private String responseFor(JsonNode c, List<GraphTriple> candidates) {
         if (c.has("raw")) {
             return c.get("raw").asText();
@@ -247,7 +343,9 @@ class MemoryWriteArbitrationHarnessTest {
     }
 
     private static List<JsonNode> loadCases() throws Exception {
-        try (InputStream in = MemoryWriteArbitrationHarnessTest.class.getResourceAsStream("/arbitration/arbitration-cases.json")) {
+        try (InputStream in =
+                MemoryWriteArbitrationHarnessTest.class.getResourceAsStream(
+                        "/arbitration/arbitration-cases.json")) {
             assertThat(in).as("fixture on classpath").isNotNull();
             List<JsonNode> out = new ArrayList<>();
             MAPPER.readTree(in).forEach(out::add);
@@ -280,7 +378,8 @@ class MemoryWriteArbitrationHarnessTest {
         return chatWith(mock(ChatClient.ChatClientRequestSpec.class), content, throwsOnCall);
     }
 
-    private static ChatClient chatWith(ChatClient.ChatClientRequestSpec spec, String content, boolean throwsOnCall) {
+    private static ChatClient chatWith(
+            ChatClient.ChatClientRequestSpec spec, String content, boolean throwsOnCall) {
         ChatClient chat = mock(ChatClient.class);
         ChatClient.CallResponseSpec call = mock(ChatClient.CallResponseSpec.class);
         when(chat.prompt()).thenReturn(spec);
@@ -326,7 +425,8 @@ class MemoryWriteArbitrationHarnessTest {
         }
 
         @Override
-        public List<GraphFact> recallRelated(UUID agentId, String subjectKey, String entityHint, int hops) {
+        public List<GraphFact> recallRelated(
+                UUID agentId, String subjectKey, String entityHint, int hops) {
             List<GraphFact> out = new ArrayList<>();
             for (String k : store) {
                 String[] p = k.split("\\|", 3);

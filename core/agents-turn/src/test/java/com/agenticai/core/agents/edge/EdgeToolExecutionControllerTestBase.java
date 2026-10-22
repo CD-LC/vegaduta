@@ -1,51 +1,31 @@
 package com.agenticai.core.agents.edge;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
-import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolExecuteRequest;
-import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolExecuteResponse;
-import com.agenticai.core.agents.edge.EdgeToolExecutionController.EdgeToolListResponse;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.devices.DeviceAuthResolver;
-import com.agenticai.core.devices.DeviceException;
 import com.agenticai.core.devices.MobileDevice;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Shared fixture for the {@link EdgeToolExecutionController} unit tests: a controller over mocked
- * {@link AgentService}, {@code AgentToolProvider} and {@link DeviceAuthResolver}, plus fake tools and
- * device-token stubs. See {@link EdgeToolExecutionControllerTest} for what the suite covers.
+ * {@link AgentService}, {@code AgentToolProvider} and {@link DeviceAuthResolver}, plus fake tools
+ * and device-token stubs. See {@link EdgeToolExecutionControllerTest} for what the suite covers.
  */
 abstract class EdgeToolExecutionControllerTestBase {
 

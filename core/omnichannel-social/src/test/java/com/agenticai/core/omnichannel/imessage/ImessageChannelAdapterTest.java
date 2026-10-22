@@ -16,7 +16,10 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 
-/** The outbound path end to end against a fake BlueBubbles server: approval payload in, REST call out. */
+/**
+ * The outbound path end to end against a fake BlueBubbles server: approval payload in, REST call
+ * out.
+ */
 class ImessageChannelAdapterTest {
 
     private static ApprovalRequest request(String payload) {
@@ -28,20 +31,38 @@ class ImessageChannelAdapterTest {
 
     @Test
     void anApprovedSendReachesTheServerAndIsLoggedToTheTranscript() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles()
+                        .on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             when(credentials.resolveActive())
-                    .thenReturn(new ImessageCredentialService.DecryptedCredential(bb.url(), FakeBlueBubbles.PASSWORD));
+                    .thenReturn(
+                            new ImessageCredentialService.DecryptedCredential(
+                                    bb.url(), FakeBlueBubbles.PASSWORD));
             ChannelOutboundLogger logger = mock(ChannelOutboundLogger.class);
             ImessageChannelAdapter adapter =
-                    new ImessageChannelAdapter(credentials, bb.client(), logger, new ImessageRateLimiter(20, 30, System::currentTimeMillis));
+                    new ImessageChannelAdapter(
+                            credentials,
+                            bb.client(),
+                            logger,
+                            new ImessageRateLimiter(20, 30, System::currentTimeMillis));
 
-            adapter.execute(request(JsonMappers.plain().writeValueAsString(new ImessageChannelAdapter.SendPayload("iMessage;-;+15550100100", "hello back"))));
+            adapter.execute(
+                    request(
+                            JsonMappers.plain()
+                                    .writeValueAsString(
+                                            new ImessageChannelAdapter.SendPayload(
+                                                    "iMessage;-;+15550100100", "hello back"))));
 
             JsonNode body = JsonMappers.plain().readTree(bb.requests.get(0).bodyText());
             assertThat(body.path("chatGuid").asText()).isEqualTo("iMessage;-;+15550100100");
             assertThat(body.path("message").asText()).isEqualTo("hello back");
-            verify(logger).recordSent(ChannelType.IMESSAGE, "iMessage;-;+15550100100", "hello back", "system:imessage-inbound:***0100");
+            verify(logger)
+                    .recordSent(
+                            ChannelType.IMESSAGE,
+                            "iMessage;-;+15550100100",
+                            "hello back",
+                            "system:imessage-inbound:***0100");
         }
     }
 
@@ -50,29 +71,53 @@ class ImessageChannelAdapterTest {
         try (FakeBlueBubbles bb = new FakeBlueBubbles()) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             when(credentials.resolveActive())
-                    .thenReturn(new ImessageCredentialService.DecryptedCredential(bb.url(), FakeBlueBubbles.PASSWORD));
+                    .thenReturn(
+                            new ImessageCredentialService.DecryptedCredential(
+                                    bb.url(), FakeBlueBubbles.PASSWORD));
             ChannelOutboundLogger logger = mock(ChannelOutboundLogger.class);
             ImessageChannelAdapter adapter =
-                    new ImessageChannelAdapter(credentials, bb.client(), logger, new ImessageRateLimiter(20, 30, System::currentTimeMillis));
+                    new ImessageChannelAdapter(
+                            credentials,
+                            bb.client(),
+                            logger,
+                            new ImessageRateLimiter(20, 30, System::currentTimeMillis));
 
-            assertThatThrownBy(() -> adapter.execute(request("{\"to\":\"iMessage;+;chat1\",\"body\":\"x\"}")))
+            assertThatThrownBy(
+                            () ->
+                                    adapter.execute(
+                                            request(
+                                                    "{\"to\":\"iMessage;+;chat1\",\"body\":\"x\"}")))
                     .isInstanceOf(RetryableChannelDeliveryException.class);
-            verify(logger, never()).recordSent(ChannelType.IMESSAGE, "iMessage;+;chat1", "x", "system:imessage-inbound:***0100");
+            verify(logger, never())
+                    .recordSent(
+                            ChannelType.IMESSAGE,
+                            "iMessage;+;chat1",
+                            "x",
+                            "system:imessage-inbound:***0100");
         }
     }
 
     @Test
     void theOutboundRateLimitFailsRetryablyWithoutCallingTheServer() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles()
+                        .on("POST /api/v1/message/text", 200, "{\"status\":200,\"data\":{}}")) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             when(credentials.resolveActive())
-                    .thenReturn(new ImessageCredentialService.DecryptedCredential(bb.url(), FakeBlueBubbles.PASSWORD));
+                    .thenReturn(
+                            new ImessageCredentialService.DecryptedCredential(
+                                    bb.url(), FakeBlueBubbles.PASSWORD));
             ImessageChannelAdapter adapter =
-                    new ImessageChannelAdapter(credentials, bb.client(), mock(ChannelOutboundLogger.class), new ImessageRateLimiter(20, 1, System::currentTimeMillis));
+                    new ImessageChannelAdapter(
+                            credentials,
+                            bb.client(),
+                            mock(ChannelOutboundLogger.class),
+                            new ImessageRateLimiter(20, 1, System::currentTimeMillis));
             ApprovalRequest r = request("{\"to\":\"+15550100100\",\"body\":\"x\"}");
 
             adapter.execute(r);
-            assertThatThrownBy(() -> adapter.execute(r)).isInstanceOf(RetryableChannelDeliveryException.class);
+            assertThatThrownBy(() -> adapter.execute(r))
+                    .isInstanceOf(RetryableChannelDeliveryException.class);
             assertThat(bb.requests).hasSize(1);
         }
     }
@@ -82,9 +127,14 @@ class ImessageChannelAdapterTest {
         ImessageCredentialService credentials = mock(ImessageCredentialService.class);
         when(credentials.resolveActive()).thenThrow(new ImessageNotConfiguredException());
         ImessageChannelAdapter adapter =
-                new ImessageChannelAdapter(credentials, mock(ImessageApiClient.class), mock(ChannelOutboundLogger.class), new ImessageRateLimiter(20, 30, System::currentTimeMillis));
+                new ImessageChannelAdapter(
+                        credentials,
+                        mock(ImessageApiClient.class),
+                        mock(ChannelOutboundLogger.class),
+                        new ImessageRateLimiter(20, 30, System::currentTimeMillis));
 
-        assertThatThrownBy(() -> adapter.execute(request("{\"to\":\"+15550100100\",\"body\":\"x\"}")))
+        assertThatThrownBy(
+                        () -> adapter.execute(request("{\"to\":\"+15550100100\",\"body\":\"x\"}")))
                 .isInstanceOf(ChannelDeliveryException.class)
                 .isNotInstanceOf(RetryableChannelDeliveryException.class);
     }
@@ -92,7 +142,11 @@ class ImessageChannelAdapterTest {
     @Test
     void aBadPayloadIsAPermanentFailure() {
         ImessageChannelAdapter adapter =
-                new ImessageChannelAdapter(mock(ImessageCredentialService.class), mock(ImessageApiClient.class), mock(ChannelOutboundLogger.class), new ImessageRateLimiter(20, 30, System::currentTimeMillis));
+                new ImessageChannelAdapter(
+                        mock(ImessageCredentialService.class),
+                        mock(ImessageApiClient.class),
+                        mock(ChannelOutboundLogger.class),
+                        new ImessageRateLimiter(20, 30, System::currentTimeMillis));
 
         assertThatThrownBy(() -> adapter.execute(request("not json")))
                 .isInstanceOf(ChannelDeliveryException.class)
@@ -103,13 +157,25 @@ class ImessageChannelAdapterTest {
 
     @Test
     void theMediaSenderUploadsThroughTheSameServer() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/attachment", 200, "{\"status\":200,\"data\":{}}")) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles()
+                        .on(
+                                "POST /api/v1/message/attachment",
+                                200,
+                                "{\"status\":200,\"data\":{}}")) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             when(credentials.resolveActive())
-                    .thenReturn(new ImessageCredentialService.DecryptedCredential(bb.url(), FakeBlueBubbles.PASSWORD));
-            ImessageMediaSender sender = new ImessageMediaSender(credentials, bb.client(), new ImessageRateLimiter(20, 30, System::currentTimeMillis));
+                    .thenReturn(
+                            new ImessageCredentialService.DecryptedCredential(
+                                    bb.url(), FakeBlueBubbles.PASSWORD));
+            ImessageMediaSender sender =
+                    new ImessageMediaSender(
+                            credentials,
+                            bb.client(),
+                            new ImessageRateLimiter(20, 30, System::currentTimeMillis));
 
-            sender.send("iMessage;-;+15550100100", new byte[] {1, 2, 3}, "image/jpeg", "p.jpg", null);
+            sender.send(
+                    "iMessage;-;+15550100100", new byte[] {1, 2, 3}, "image/jpeg", "p.jpg", null);
 
             assertThat(sender.channel()).isEqualTo(ChannelType.IMESSAGE);
             assertThat(bb.requests).hasSize(1);
@@ -122,5 +188,7 @@ class ImessageChannelAdapterTest {
         ImessageTextSend send = new ImessageTextSend();
         assertThat(send.actionType()).isEqualTo(ImessageChannelAdapter.ACTION_TYPE);
         assertThat(send.channel()).isEqualTo(ChannelType.IMESSAGE);
-        assertThat(send.payload("+15550100100", null, "hi")).isEqualTo(new ImessageChannelAdapter.SendPayload("+15550100100", "hi"));    }
+        assertThat(send.payload("+15550100100", null, "hi"))
+                .isEqualTo(new ImessageChannelAdapter.SendPayload("+15550100100", "hi"));
+    }
 }

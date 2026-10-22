@@ -2,9 +2,8 @@ package com.agenticai.core.mcp;
 
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.json.JsonMappers;
-import com.agenticai.core.secrets.SecretReferenceResolver;
-import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
+import com.agenticai.core.secrets.SecretReferenceResolver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,8 +17,8 @@ import org.springframework.util.StringUtils;
 /**
  * The stored-config codec behind {@link McpRegistryService}: encrypts a registration's env map,
  * merges a partial credential edit onto the stored one, decrypts it again (flagging an unreadable
- * blob instead of failing), expands {@code {{secret.NAME}}} vault references, and reads/writes
- * the JSON columns. Created and owned by {@link McpRegistryService}; not a bean.
+ * blob instead of failing), expands {@code {{secret.NAME}}} vault references, and reads/writes the
+ * JSON columns. Created and owned by {@link McpRegistryService}; not a bean.
  */
 final class McpRegistrationEnv {
 
@@ -69,8 +68,7 @@ final class McpRegistrationEnv {
         }
         if (wasUpdate && !incoming.isEmpty()) {
             Map<String, String> merged =
-                    new java.util.LinkedHashMap<>(
-                            decryptDetailed(entity.getEncryptedEnv()).env());
+                    new java.util.LinkedHashMap<>(decryptDetailed(entity.getEncryptedEnv()).env());
             merged.putAll(incoming);
             return encrypt(merged);
         }

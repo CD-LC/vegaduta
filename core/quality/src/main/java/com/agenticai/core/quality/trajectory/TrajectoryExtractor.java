@@ -9,19 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Turns recorded tool calls into an ordered {@link TrajectoryToolCall} list: {@code [{tool, args, ok}]}.
+ * Turns recorded tool calls into an ordered {@link TrajectoryToolCall} list: {@code [{tool, args,
+ * ok}]}.
  *
- * <p>Three entry points over the same logic: the tool calls of a freshly replayed eval turn
- * ({@link #fromReplayed}), the {@code tool_calls_json} stored on a finished eval case result
- * ({@link #fromToolCallsJson}), and any other source of (name, input, output) rows via {@link RawCall} - an
- * adapter over the tool-call log of a live session is a one-line map into {@link #fromRaw}. (Agent Lab runs
- * are text-only and carry no tool calls, so there is nothing to extract from them.)
+ * <p>Three entry points over the same logic: the tool calls of a freshly replayed eval turn ({@link
+ * #fromReplayed}), the {@code tool_calls_json} stored on a finished eval case result ({@link
+ * #fromToolCallsJson}), and any other source of (name, input, output) rows via {@link RawCall} - an
+ * adapter over the tool-call log of a live session is a one-line map into {@link #fromRaw}. (Agent
+ * Lab runs are text-only and carry no tool calls, so there is nothing to extract from them.)
  *
- * <p>{@code ok} is derived from the call's OUTPUT text, mirroring how the guard chain words results for calls
- * that did not run: a result starting {@code This tool call (} (refused / blocked / failed), {@code This action (}
- * (parked for human approval), {@code This tool (} (circuit breaker), {@code Tool output from '} (withheld by a
- * safety check) or the structural-validation marker is {@code ok = false}; anything else, including a missing
- * output, is {@code ok = true}. It is a heuristic over wording, documented here because it is one.
+ * <p>{@code ok} is derived from the call's OUTPUT text, mirroring how the guard chain words results
+ * for calls that did not run: a result starting {@code This tool call (} (refused / blocked /
+ * failed), {@code This action (} (parked for human approval), {@code This tool (} (circuit
+ * breaker), {@code Tool output from '} (withheld by a safety check) or the structural-validation
+ * marker is {@code ok = false}; anything else, including a missing output, is {@code ok = true}. It
+ * is a heuristic over wording, documented here because it is one.
  */
 public final class TrajectoryExtractor {
 
@@ -30,12 +32,10 @@ public final class TrajectoryExtractor {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private TrajectoryExtractor() {
-    }
+    private TrajectoryExtractor() {}
 
     /** One recorded call from any source. {@code input} is the raw argument JSON text. */
-    public record RawCall(String toolName, String input, String output) {
-    }
+    public record RawCall(String toolName, String input, String output) {}
 
     public static List<TrajectoryToolCall> fromReplayed(List<ReplayedToolCall> calls) {
         List<RawCall> raw = new ArrayList<>();
@@ -48,8 +48,9 @@ public final class TrajectoryExtractor {
     }
 
     /**
-     * Parses the stored {@code [{"toolName":..,"input":..,"output":..}]} document. Null, blank or unparseable
-     * text yields an empty trajectory (never an exception: a historical row must stay readable).
+     * Parses the stored {@code [{"toolName":..,"input":..,"output":..}]} document. Null, blank or
+     * unparseable text yields an empty trajectory (never an exception: a historical row must stay
+     * readable).
      */
     public static List<TrajectoryToolCall> fromToolCallsJson(String toolCallsJson) {
         if (toolCallsJson == null || toolCallsJson.isBlank()) {
@@ -60,9 +61,11 @@ public final class TrajectoryExtractor {
             List<RawCall> raw = new ArrayList<>();
             if (root != null && root.isArray()) {
                 for (JsonNode entry : root) {
-                    raw.add(new RawCall(
-                        entry.path("toolName").asText(null), entry.path("input").asText(null),
-                        entry.path("output").asText(null)));
+                    raw.add(
+                            new RawCall(
+                                    entry.path("toolName").asText(null),
+                                    entry.path("input").asText(null),
+                                    entry.path("output").asText(null)));
                 }
             }
             return fromRaw(raw);
@@ -80,7 +83,9 @@ public final class TrajectoryExtractor {
             if (steps.size() >= MAX_STEPS) {
                 break;
             }
-            steps.add(new TrajectoryToolCall(c.toolName(), parseArgs(c.input()), !looksFailed(c.output())));
+            steps.add(
+                    new TrajectoryToolCall(
+                            c.toolName(), parseArgs(c.input()), !looksFailed(c.output())));
         }
         return steps;
     }
@@ -103,10 +108,10 @@ public final class TrajectoryExtractor {
             return false;
         }
         return output.startsWith("This tool call (")
-            || output.startsWith("This tool call failed")
-            || output.startsWith("This action (")
-            || output.startsWith("This tool (")
-            || output.startsWith("Tool output from '")
-            || output.startsWith("[TOOL_OUTPUT_VALIDATION_FAILED]");
+                || output.startsWith("This tool call failed")
+                || output.startsWith("This action (")
+                || output.startsWith("This tool (")
+                || output.startsWith("Tool output from '")
+                || output.startsWith("[TOOL_OUTPUT_VALIDATION_FAILED]");
     }
 }

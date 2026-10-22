@@ -47,8 +47,12 @@ class SlackApiClientMediaUploadTest {
     private SlackApiClient clientFor(HttpServer server) {
         String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
         // Raw transport: the fixture is loopback, which the SSRF guard rightly refuses.
-        return new SlackApiClient(MAPPER, baseUrl,
-            java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build());
+        return new SlackApiClient(
+                MAPPER,
+                baseUrl,
+                java.net.http.HttpClient.newBuilder()
+                        .connectTimeout(java.time.Duration.ofSeconds(10))
+                        .build());
     }
 
     private static HttpServer startServer() throws IOException {

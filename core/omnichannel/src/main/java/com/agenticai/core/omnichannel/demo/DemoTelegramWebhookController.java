@@ -231,8 +231,8 @@ public class DemoTelegramWebhookController {
                     chatId,
                     existing.isPresent()
                             ? "You're already connected to your sandbox. Just send me a message -"
-                                  + " try \"write a polite reply to a customer asking if we deliver"
-                                  + " on Sundays\"."
+                                    + " try \"write a polite reply to a customer asking if we deliver"
+                                    + " on Sundays\"."
                             : helpText());
             return;
         }
@@ -279,8 +279,8 @@ public class DemoTelegramWebhookController {
                     bot.sendMessage(
                             chatId,
                             "I couldn't match that code. Codes look like VD-7F3K and can only be"
-                                + " used once - open your sandbox in the browser and tap \"Connect"
-                                + " Telegram\" for a fresh one.");
+                                    + " used once - open your sandbox in the browser and tap \"Connect"
+                                    + " Telegram\" for a fresh one.");
         }
     }
 

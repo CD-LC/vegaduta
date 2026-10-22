@@ -10,13 +10,11 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * {@code diff_code_workspace} - returns the unified diff of everything
- * changed so far in a scratch workspace (empty for non-git repos). Purely
- * READ-ONLY: it inspects the workspace filesystem, it never writes or runs
- * anything, so no human-approval gate applies here, same reasoning as
- * {@code search_code}/{@code code_callers}/etc being auto-allowed. Use this
- * after an approved apply_code_changes/run_in_code_workspace call to see
- * what actually happened.
+ * {@code diff_code_workspace} - returns the unified diff of everything changed so far in a scratch
+ * workspace (empty for non-git repos). Purely READ-ONLY: it inspects the workspace filesystem, it
+ * never writes or runs anything, so no human-approval gate applies here, same reasoning as {@code
+ * search_code}/{@code code_callers}/etc being auto-allowed. Use this after an approved
+ * apply_code_changes/run_in_code_workspace call to see what actually happened.
  */
 public class DiffCodeWorkspaceToolCallback implements ToolCallback {
 
@@ -31,11 +29,9 @@ public class DiffCodeWorkspaceToolCallback implements ToolCallback {
     }
 
     /**
-     * @param allowedRepoIds the calling agent's {@code
-     *     Agent.allowedCodeIntelRepoIds} - EMPTY means deny-all here, same
-     *     "opposite of the knowledge-collection convention" reasoning as
-     *     {@link CreateCodeWorkspaceToolCallback}. See migration V103's
-     *     header comment.
+     * @param allowedRepoIds the calling agent's {@code Agent.allowedCodeIntelRepoIds} - EMPTY means
+     *     deny-all here, same "opposite of the knowledge-collection convention" reasoning as {@link
+     *     CreateCodeWorkspaceToolCallback}. See migration V103's header comment.
      */
     public DiffCodeWorkspaceToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
@@ -45,12 +41,13 @@ public class DiffCodeWorkspaceToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("diff_code_workspace")
-            .description(
-                "Returns the unified diff of everything changed so far in a code workspace (empty for "
-                    + "non-git repos). Read-only. Use this to see what an apply_code_changes or "
-                    + "run_in_code_workspace call actually did, once approved and executed.")
-            .inputSchema("""
+                .name("diff_code_workspace")
+                .description(
+                        "Returns the unified diff of everything changed so far in a code workspace (empty for "
+                                + "non-git repos). Read-only. Use this to see what an apply_code_changes or "
+                                + "run_in_code_workspace call actually did, once approved and executed.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -66,7 +63,7 @@ public class DiffCodeWorkspaceToolCallback implements ToolCallback {
                     "required": ["repo_id", "workspace_id"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -88,7 +85,9 @@ public class DiffCodeWorkspaceToolCallback implements ToolCallback {
             return client.diffWorkspace(repoId.toString(), workspaceId.toString());
         } catch (Exception e) {
             log.warn("diff_code_workspace tool call failed", e);
-            return "{\"error\": \"diff_code_workspace failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"diff_code_workspace failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 }

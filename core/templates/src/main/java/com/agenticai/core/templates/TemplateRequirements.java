@@ -18,9 +18,7 @@ import java.util.Set;
  */
 final class TemplateRequirements {
 
-    private TemplateRequirements() {
-    }
-
+    private TemplateRequirements() {}
 
     /** What an importer must activate. Never throws; unknown shapes yield an empty list. */
     static List<TemplateRequirement> requirements(TemplateKind kind, JsonNode config) {

@@ -253,8 +253,7 @@ class WorkflowNodeExecutorOutputReplyToSenderTest {
     @Test
     void safeFileNameFallsBackWhenNothingUsableIsLeft() {
         assertEquals(
-                "workflow-output.txt",
-                OutputNodeHandler.safeFileName("  ", "workflow-output.txt"));
+                "workflow-output.txt", OutputNodeHandler.safeFileName("  ", "workflow-output.txt"));
         assertEquals(
                 "workflow-output.txt",
                 OutputNodeHandler.safeFileName("///", "workflow-output.txt"));

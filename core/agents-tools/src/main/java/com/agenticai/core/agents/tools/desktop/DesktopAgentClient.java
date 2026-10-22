@@ -17,11 +17,10 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * The core side of {@code services/desktop-agent}: one RestClient pinned to the
- * operator-configured agent URL (its host, and only that host, is let past the private-address
- * check - same pattern as the workspace runner's client). The agent is a loopback HTTP service the
- * person runs on their own laptop; its {@code DESKTOP_AGENT_SECRET} must match {@code
- * app.assistant.desktop.agent-secret}.
+ * The core side of {@code services/desktop-agent}: one RestClient pinned to the operator-configured
+ * agent URL (its host, and only that host, is let past the private-address check - same pattern as
+ * the workspace runner's client). The agent is a loopback HTTP service the person runs on their own
+ * laptop; its {@code DESKTOP_AGENT_SECRET} must match {@code app.assistant.desktop.agent-secret}.
  */
 final class DesktopAgentClient {
 
@@ -38,12 +37,17 @@ final class DesktopAgentClient {
                         .baseUrl(agentUrl)
                         .requestFactory(
                                 SafeHttpClients.requestFactory(
-                                        guard, Duration.ofSeconds(5), Duration.ofSeconds(30), false))
+                                        guard,
+                                        Duration.ofSeconds(5),
+                                        Duration.ofSeconds(30),
+                                        false))
                         .build();
         this.secret = secret;
     }
 
-    /** The agent's answer, or an {@link IOException} with the agent's own error text for the model. */
+    /**
+     * The agent's answer, or an {@link IOException} with the agent's own error text for the model.
+     */
     JsonNode post(String path, Map<String, Object> body) throws IOException {
         try {
             String reply =
@@ -61,7 +65,8 @@ final class DesktopAgentClient {
             return parsed;
         } catch (RestClientResponseException e) {
             JsonNode err = parse(e.getResponseBodyAsString());
-            String why = err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+            String why =
+                    err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
             throw new IOException("The desktop agent refused the action: " + why, e);
         } catch (RuntimeException e) {
             throw new IOException(
@@ -86,7 +91,8 @@ final class DesktopAgentClient {
             return parsed;
         } catch (RestClientResponseException e) {
             JsonNode err = parse(e.getResponseBodyAsString());
-            String why = err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+            String why =
+                    err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
             throw new IOException("The desktop agent refused the action: " + why, e);
         } catch (RuntimeException e) {
             throw new IOException(

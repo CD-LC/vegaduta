@@ -51,8 +51,8 @@ public class TemplateReadinessService {
     private static final Pattern BUILD_BRIEF =
             Pattern.compile(
                     "\\b(create|build|develop|generate|design)\\b.{0,60}\\b(web ?site|web"
-                        + " ?app(lication)?|landing page|mobile app|full[- ]stack|frontend|react"
-                        + " app)\\b",
+                            + " ?app(lication)?|landing page|mobile app|full[- ]stack|frontend|react"
+                            + " app)\\b",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern HONESTY =
@@ -68,7 +68,7 @@ public class TemplateReadinessService {
     private static final Pattern HIGH_STAKES =
             Pattern.compile(
                     "\\b(medical|diagnos\\w*|legal"
-                        + " advice|lawyer|tax|invest\\w*|prescri\\w*|clinical|insurance claim)\\b",
+                            + " advice|lawyer|tax|invest\\w*|prescri\\w*|clinical|insurance claim)\\b",
                     Pattern.CASE_INSENSITIVE);
     private static final Pattern PROFESSIONAL_HANDOFF =
             Pattern.compile(
@@ -78,7 +78,7 @@ public class TemplateReadinessService {
     private static final Pattern CLAIMS_ACTIONS =
             Pattern.compile(
                     "\\b(sends?|emails?|books?|schedules?|posts?|publish\\w*|pays?|orders?|syncs?|integrat\\w*|automat\\w*|takes?"
-                        + " action|manages? (your )?(inbox|calendar|files|tasks))\\b",
+                            + " action|manages? (your )?(inbox|calendar|files|tasks))\\b",
                     Pattern.CASE_INSENSITIVE);
 
     /**
@@ -93,12 +93,12 @@ public class TemplateReadinessService {
     private static final Pattern SECRET =
             Pattern.compile(
                     "(sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|"
-                        + "(?i:bearer)\\s+[A-Za-z0-9._-]{20,}|(?i:(api[_-]?key|secret|password|token))\\s*[:=]\\s*\\S{8,})");
+                            + "(?i:bearer)\\s+[A-Za-z0-9._-]{20,}|(?i:(api[_-]?key|secret|password|token))\\s*[:=]\\s*\\S{8,})");
     private static final Pattern EMAIL = Pattern.compile("[\\w.+-]+@[\\w-]+\\.[\\w.-]+");
     private static final Pattern ACTION_TOOL =
             Pattern.compile(
                     "(^|_)(send|create|update|delete|remove|post|publish|pay|book|schedule|write|approve|submit|cancel|"
-                        + "transfer)(_|$)");
+                            + "transfer)(_|$)");
 
     private static final Set<String> GOOGLE_TOOLS_PREFIX = Set.of("google_");
 
@@ -320,8 +320,8 @@ public class TemplateReadinessService {
                             "EMPTY_TOOL_ALLOWLIST",
                             "Least privilege",
                             "No tool allow-list. The platform treats an empty list as \"no"
-                                + " restriction\", so importers' agents may be able to use every"
-                                + " tool in their workspace.",
+                                    + " restriction\", so importers' agents may be able to use every"
+                                    + " tool in their workspace.",
                             "List only the tools this agent needs; for a pure chat assistant, keep"
                                     + " the tier Supervised."));
         }

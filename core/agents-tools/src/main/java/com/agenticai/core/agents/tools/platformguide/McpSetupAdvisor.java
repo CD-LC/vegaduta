@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.tools.platformguide;
 
 import com.agenticai.core.agentspi.SetupStatusProvider;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcp.McpCatalogService;
 import com.agenticai.core.mcp.McpConnectionStatus;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.dto.McpCatalogEntry;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
-import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,9 +21,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * The MCP half of the setup guide: this tenant's registered servers (for the {@code mcp-servers}
- * status) and the catalogue servers that fit a request ("jira", "postgres", "github"), each marked with
- * whether it is already registered and connected. That is what lets the Assistant say "this needs the
- * Atlassian server - it is registered but failing, fix its credentials" instead of a generic answer.
+ * status) and the catalogue servers that fit a request ("jira", "postgres", "github"), each marked
+ * with whether it is already registered and connected. That is what lets the Assistant say "this
+ * needs the Atlassian server - it is registered but failing, fix its credentials" instead of a
+ * generic answer.
  */
 @Component
 public class McpSetupAdvisor implements SetupStatusProvider, SetupGuideToolCallback.McpAdvisor {
@@ -34,7 +35,9 @@ public class McpSetupAdvisor implements SetupStatusProvider, SetupGuideToolCallb
     private final ObjectProvider<McpRegistryService> registry;
     private final ObjectProvider<McpCatalogService> catalog;
 
-    public McpSetupAdvisor(ObjectProvider<McpRegistryService> registry, ObjectProvider<McpCatalogService> catalog) {
+    public McpSetupAdvisor(
+            ObjectProvider<McpRegistryService> registry,
+            ObjectProvider<McpCatalogService> catalog) {
         this.registry = registry;
         this.catalog = catalog;
     }
@@ -48,10 +51,19 @@ public class McpSetupAdvisor implements SetupStatusProvider, SetupGuideToolCallb
         try {
             List<McpServerRegistrationResponse> all = svc.listAll();
             if (all.isEmpty()) {
-                return Map.of("mcp-servers", new Status(State.NOT_SET_UP, "No MCP server is registered yet."));
+                return Map.of(
+                        "mcp-servers",
+                        new Status(State.NOT_SET_UP, "No MCP server is registered yet."));
             }
-            List<String> connected = names(all, r -> r.enabled() && r.connectionStatus() == McpConnectionStatus.CONNECTED);
-            List<String> failing = names(all, r -> r.connectionStatus() == McpConnectionStatus.ERROR);
+            List<String> connected =
+                    names(
+                            all,
+                            r ->
+                                    r.enabled()
+                                            && r.connectionStatus()
+                                                    == McpConnectionStatus.CONNECTED);
+            List<String> failing =
+                    names(all, r -> r.connectionStatus() == McpConnectionStatus.ERROR);
             List<String> off = names(all, r -> !r.enabled());
             StringBuilder detail = new StringBuilder();
             if (!connected.isEmpty()) {
@@ -63,7 +75,8 @@ public class McpSetupAdvisor implements SetupStatusProvider, SetupGuideToolCallb
             if (!off.isEmpty()) {
                 detail.append("Turned off: ").append(String.join(", ", off)).append(". ");
             }
-            State state = !failing.isEmpty() || connected.isEmpty() ? State.NEEDS_ATTENTION : State.READY;
+            State state =
+                    !failing.isEmpty() || connected.isEmpty() ? State.NEEDS_ATTENTION : State.READY;
             return Map.of("mcp-servers", new Status(state, detail.toString().strip()));
         } catch (RuntimeException e) {
             log.debug("MCP status unavailable", e);
@@ -113,11 +126,24 @@ public class McpSetupAdvisor implements SetupStatusProvider, SetupGuideToolCallb
             McpServerRegistrationResponse r = registered.get(lower(e.name()));
             if (r == null) {
                 n.put("state", "NOT_REGISTERED");
-                n.put("to_register", e.requiresOAuth()
-                        ? "Open Tools, pick " + e.name() + " and sign in through the browser prompt."
-                        : e.ready() ? "Open Tools and register " + e.name() + "; it is already wired on this install."
-                                : "Open Tools, pick " + e.name() + " and enter: "
-                                        + (e.requiredEnvVars() == null || e.requiredEnvVars().isEmpty() ? "no credentials needed" : String.join(", ", e.requiredEnvVars())) + ".");
+                n.put(
+                        "to_register",
+                        e.requiresOAuth()
+                                ? "Open Tools, pick "
+                                        + e.name()
+                                        + " and sign in through the browser prompt."
+                                : e.ready()
+                                        ? "Open Tools and register "
+                                                + e.name()
+                                                + "; it is already wired on this install."
+                                        : "Open Tools, pick "
+                                                + e.name()
+                                                + " and enter: "
+                                                + (e.requiredEnvVars() == null
+                                                                || e.requiredEnvVars().isEmpty()
+                                                        ? "no credentials needed"
+                                                        : String.join(", ", e.requiredEnvVars()))
+                                                + ".");
             } else {
                 n.put("state", !r.enabled() ? "TURNED_OFF" : r.connectionStatus().name());
                 if (r.connectionError() != null && !r.connectionError().isBlank()) {
@@ -145,7 +171,9 @@ public class McpSetupAdvisor implements SetupStatusProvider, SetupGuideToolCallb
         }
     }
 
-    private static List<String> names(List<McpServerRegistrationResponse> all, java.util.function.Predicate<McpServerRegistrationResponse> p) {
+    private static List<String> names(
+            List<McpServerRegistrationResponse> all,
+            java.util.function.Predicate<McpServerRegistrationResponse> p) {
         return all.stream().filter(p).map(McpServerRegistrationResponse::name).toList();
     }
 

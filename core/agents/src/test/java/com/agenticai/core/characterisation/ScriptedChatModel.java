@@ -30,23 +30,26 @@ import reactor.core.scheduler.Schedulers;
  * execution is enabled it hands them to the {@link ToolCallingManager} and calls itself again with
  * the extended conversation.
  *
- * <p>It also reproduces the one metering-relevant detail of those models: across loop iterations the
- * usage is accumulated with {@code UsageCalculator.getCumulativeUsage(current, previousResponse)},
- * which returns a fresh {@code DefaultUsage(prompt, completion, total)} with NO native usage. The
- * scripted {@code Usage} of iteration N therefore reaches the advisors only as a cumulative
- * sum, and provider-specific cache counters (Anthropic cache read/write) survive only on a turn
- * that made a single model call.
+ * <p>It also reproduces the one metering-relevant detail of those models: across loop iterations
+ * the usage is accumulated with {@code UsageCalculator.getCumulativeUsage(current,
+ * previousResponse)}, which returns a fresh {@code DefaultUsage(prompt, completion, total)} with NO
+ * native usage. The scripted {@code Usage} of iteration N therefore reaches the advisors only as a
+ * cumulative sum, and provider-specific cache counters (Anthropic cache read/write) survive only on
+ * a turn that made a single model call.
  *
  * <p><b>P3 touch point.</b> In Spring AI 2 the loop moves out of the model into the ChatClient's
  * {@code ToolCallingAdvisor}, and the model just returns the tool calls. This class is then the
  * only thing to adapt: drop the internal loop and the cumulative-usage step (the advisor
- * accumulates), keep the script format. The tests use only the {@code text}/{@code toolCalls}
- * step builders and {@link ToolLoopHarness}, so they do not change.
+ * accumulates), keep the script format. The tests use only the {@code text}/{@code toolCalls} step
+ * builders and {@link ToolLoopHarness}, so they do not change.
  */
 public final class ScriptedChatModel implements ChatModel {
 
-    /** One model response: text chunks (streaming), optional tool calls, and this call's own usage. */
-    public record Step(List<String> textChunks, List<AssistantMessage.ToolCall> toolCalls, Usage usage) {
+    /**
+     * One model response: text chunks (streaming), optional tool calls, and this call's own usage.
+     */
+    public record Step(
+            List<String> textChunks, List<AssistantMessage.ToolCall> toolCalls, Usage usage) {
         public Step {
             textChunks = List.copyOf(textChunks);
             toolCalls = List.copyOf(toolCalls);
@@ -73,7 +76,8 @@ public final class ScriptedChatModel implements ChatModel {
     private final ToolCallingManager toolCallingManager;
     private final AtomicInteger modelCalls = new AtomicInteger();
     private final List<Prompt> prompts = new CopyOnWriteArrayList<>();
-    private final DefaultToolExecutionEligibilityPredicate eligibility = new DefaultToolExecutionEligibilityPredicate();
+    private final DefaultToolExecutionEligibilityPredicate eligibility =
+            new DefaultToolExecutionEligibilityPredicate();
 
     public ScriptedChatModel(List<Step> script, ToolCallingManager toolCallingManager) {
         this.script = List.copyOf(script);
@@ -110,11 +114,12 @@ public final class ScriptedChatModel implements ChatModel {
             ToolExecutionResult result = toolCallingManager.executeToolCalls(prompt, response);
             if (result.returnDirect()) {
                 return ChatResponse.builder()
-                    .from(response)
-                    .generations(ToolExecutionResult.buildGenerations(result))
-                    .build();
+                        .from(response)
+                        .generations(ToolExecutionResult.buildGenerations(result))
+                        .build();
             }
-            return internalCall(new Prompt(result.conversationHistory(), prompt.getOptions()), response);
+            return internalCall(
+                    new Prompt(result.conversationHistory(), prompt.getOptions()), response);
         }
         return response;
     }
@@ -129,14 +134,16 @@ public final class ScriptedChatModel implements ChatModel {
     private Flux<ChatResponse> internalStream(Prompt prompt, ChatResponse previous) {
         // Lazy, like a real provider request: the "HTTP call" only happens on subscription, so a
         // cancelled subscription never reaches the next model call.
-        return Flux.create(sink -> {
-            if (sink.isCancelled()) {
-                return;
-            }
-            Disposable running = Flux.defer(() -> streamStep(prompt, previous))
-                .subscribe(sink::next, sink::error, sink::complete);
-            sink.onDispose(running);
-        });
+        return Flux.create(
+                sink -> {
+                    if (sink.isCancelled()) {
+                        return;
+                    }
+                    Disposable running =
+                            Flux.defer(() -> streamStep(prompt, previous))
+                                    .subscribe(sink::next, sink::error, sink::complete);
+                    sink.onDispose(running);
+                });
     }
 
     private Flux<ChatResponse> streamStep(Prompt prompt, ChatResponse previous) {
@@ -151,16 +158,29 @@ public final class ScriptedChatModel implements ChatModel {
         if (eligibility.test(prompt.getOptions(), last)) {
             ChatResponse toolCallResponse = response(step, step.text(), cumulative, true);
             // The tool-call chunk itself is not emitted downstream; tools run off the event loop.
-            parts.add(Flux.defer(() -> {
-                ToolExecutionResult result = toolCallingManager.executeToolCalls(prompt, toolCallResponse);
-                if (result.returnDirect()) {
-                    return Flux.just(ChatResponse.builder()
-                        .from(last)
-                        .generations(ToolExecutionResult.buildGenerations(result))
-                        .build());
-                }
-                return internalStream(new Prompt(result.conversationHistory(), prompt.getOptions()), toolCallResponse);
-            }).subscribeOn(Schedulers.boundedElastic()));
+            parts.add(
+                    Flux.defer(
+                                    () -> {
+                                        ToolExecutionResult result =
+                                                toolCallingManager.executeToolCalls(
+                                                        prompt, toolCallResponse);
+                                        if (result.returnDirect()) {
+                                            return Flux.just(
+                                                    ChatResponse.builder()
+                                                            .from(last)
+                                                            .generations(
+                                                                    ToolExecutionResult
+                                                                            .buildGenerations(
+                                                                                    result))
+                                                            .build());
+                                        }
+                                        return internalStream(
+                                                new Prompt(
+                                                        result.conversationHistory(),
+                                                        prompt.getOptions()),
+                                                toolCallResponse);
+                                    })
+                            .subscribeOn(Schedulers.boundedElastic()));
         } else {
             parts.add(Flux.just(last));
         }
@@ -173,19 +193,24 @@ public final class ScriptedChatModel implements ChatModel {
         int index = modelCalls.getAndIncrement();
         prompts.add(prompt);
         if (index >= script.size()) {
-            throw new IllegalStateException("ScriptedChatModel exhausted: call #" + (index + 1)
-                + " but the script has " + script.size() + " steps (a runaway tool loop?)");
+            throw new IllegalStateException(
+                    "ScriptedChatModel exhausted: call #"
+                            + (index + 1)
+                            + " but the script has "
+                            + script.size()
+                            + " steps (a runaway tool loop?)");
         }
         return script.get(index);
     }
 
-    private static ChatResponse response(Step step, String text, Usage usage, boolean withToolCalls) {
+    private static ChatResponse response(
+            Step step, String text, Usage usage, boolean withToolCalls) {
         AssistantMessage.Builder message = AssistantMessage.builder().content(text);
         if (withToolCalls) {
             message.toolCalls(step.toolCalls());
         }
         return new ChatResponse(
-            List.of(new Generation(message.build())),
-            ChatResponseMetadata.builder().model("scripted-model").usage(usage).build());
+                List.of(new Generation(message.build())),
+                ChatResponseMetadata.builder().model("scripted-model").usage(usage).build());
     }
 }

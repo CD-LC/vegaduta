@@ -61,13 +61,19 @@ class ResearchRunOutcomeListenerTest {
 
     @Test
     void successWithoutAReportGivesItsSlotBack() {
-        listener.onTerminal(job(AgentJobStatus.SUCCEEDED, "{\"title\":\"t\",\"reportMarkdown\":\"  \",\"sources\":[]}"));
+        listener.onTerminal(
+                job(
+                        AgentJobStatus.SUCCEEDED,
+                        "{\"title\":\"t\",\"reportMarkdown\":\"  \",\"sources\":[]}"));
         verify(usage).release("t1", "alice");
     }
 
     @Test
     void successWithAReportKeepsItsSlot() {
-        listener.onTerminal(job(AgentJobStatus.SUCCEEDED, "{\"title\":\"t\",\"reportMarkdown\":\"# Hi\",\"sources\":[]}"));
+        listener.onTerminal(
+                job(
+                        AgentJobStatus.SUCCEEDED,
+                        "{\"title\":\"t\",\"reportMarkdown\":\"# Hi\",\"sources\":[]}"));
         verify(usage, never()).release(any(), any());
     }
 

@@ -25,20 +25,17 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * {@link McpApiKeyAuthFilter} is the single authentication gate for the
- * platform's outward-facing developer surface ({@code /mcp/*} and {@code
- * /api/dev/*}) - deliberately OUTSIDE Spring Security's chain (those paths
- * are {@code permitAll()} there), so nothing else rejects a bad key if this
- * filter doesn't. The suite pins the full contract: every rejection path
- * short-circuits before the chain, the happy path populates BOTH
- * {@link TenantContext} (grant-traceable subject + externalTriggerId) and
- * {@link McpCallerContext} (the per-grant capability sets), and both are
+ * {@link McpApiKeyAuthFilter} is the single authentication gate for the platform's outward-facing
+ * developer surface ({@code /mcp/*} and {@code /api/dev/*}) - deliberately OUTSIDE Spring
+ * Security's chain (those paths are {@code permitAll()} there), so nothing else rejects a bad key
+ * if this filter doesn't. The suite pins the full contract: every rejection path short-circuits
+ * before the chain, the happy path populates BOTH {@link TenantContext} (grant-traceable subject +
+ * externalTriggerId) and {@link McpCallerContext} (the per-grant capability sets), and both are
  * cleared afterwards even though the servlet thread is pooled and reused.
  *
- * <p>DB-free Mockito throughout ({@code McpServerAccessGrantService}/{@code
- * McpServerRateLimiter} mocked, servlet plumbing via Spring's mock web
- * types) - the two-step control_plane/tenant-schema resolution itself is
- * exercised in {@code McpServerAccessGrantServiceTest}.
+ * <p>DB-free Mockito throughout ({@code McpServerAccessGrantService}/{@code McpServerRateLimiter}
+ * mocked, servlet plumbing via Spring's mock web types) - the two-step control_plane/tenant-schema
+ * resolution itself is exercised in {@code McpServerAccessGrantServiceTest}.
  */
 class McpApiKeyAuthFilterTest {
 
@@ -66,10 +63,20 @@ class McpApiKeyAuthFilterTest {
         McpCallerContext.clear();
     }
 
-    /** Real grant entity (house style: "entity stays a dumb persistence shape") with the JPA-generated id backfilled via reflection, same idiom as {@code WorkflowEventOutboxRelayTest}. */
+    /**
+     * Real grant entity (house style: "entity stays a dumb persistence shape") with the
+     * JPA-generated id backfilled via reflection, same idiom as {@code
+     * WorkflowEventOutboxRelayTest}.
+     */
     private McpServerAccessGrant grantWithId(UUID grantId) {
-        McpServerAccessGrant grant = new McpServerAccessGrant(
-            "ci-integration", McpApiKeyHasher.sha256Hex("vmcp_raw"), "rawrawra", "[]", "[]", "[]");
+        McpServerAccessGrant grant =
+                new McpServerAccessGrant(
+                        "ci-integration",
+                        McpApiKeyHasher.sha256Hex("vmcp_raw"),
+                        "rawrawra",
+                        "[]",
+                        "[]",
+                        "[]");
         ReflectionTestUtils.setField(grant, "id", grantId);
         return grant;
     }
@@ -114,7 +121,9 @@ class McpApiKeyAuthFilterTest {
         // an attacker probing keys must not learn WHICH step failed.
         assertTrue(body.contains("Invalid API key"));
         verify(grantService, never()).findByRawKeyWithinCurrentTenant(anyString());
-        assertTrue(TenantContext.current().isEmpty(), "no TenantContext may leak from a rejected request");
+        assertTrue(
+                TenantContext.current().isEmpty(),
+                "no TenantContext may leak from a rejected request");
     }
 
     @Test
@@ -124,14 +133,17 @@ class McpApiKeyAuthFilterTest {
         // be rejected - this is the revoke/disable kill switch actually
         // working on the hot path.
         request.addHeader("Authorization", "Bearer vmcp_disabled");
-        when(grantService.resolveTenantSchema("vmcp_disabled")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_disabled")).thenReturn(Optional.empty());
+        when(grantService.resolveTenantSchema("vmcp_disabled"))
+                .thenReturn(Optional.of("tenant_alpha"));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_disabled"))
+                .thenReturn(Optional.empty());
 
         String body = assertRejected(neverReachedChain(), 401);
 
         assertTrue(body.contains("Invalid API key"));
-        assertTrue(TenantContext.current().isEmpty(),
-            "the interim TenantContext set for the step-2 lookup must be cleared on rejection");
+        assertTrue(
+                TenantContext.current().isEmpty(),
+                "the interim TenantContext set for the step-2 lookup must be cleared on rejection");
         verifyNoInteractions(rateLimiter);
     }
 
@@ -140,7 +152,8 @@ class McpApiKeyAuthFilterTest {
         UUID grantId = UUID.randomUUID();
         request.addHeader("Authorization", "Bearer vmcp_raw");
         when(grantService.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grantWithId(grantId)));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw"))
+                .thenReturn(Optional.of(grantWithId(grantId)));
         when(rateLimiter.allow(grantId)).thenReturn(false);
 
         String body = assertRejected(neverReachedChain(), 429);
@@ -174,20 +187,23 @@ class McpApiKeyAuthFilterTest {
         McpServerAccessGrant grant = grantWithId(grantId);
         request.addHeader("Authorization", "Bearer vmcp_raw");
         when(grantService.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grant));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw"))
+                .thenReturn(Optional.of(grant));
         when(rateLimiter.allow(grantId)).thenReturn(true);
         when(grantService.parseExposedAgentIds(grant)).thenReturn(Set.of(agentId));
         when(grantService.parseExposedWorkflowIds(grant)).thenReturn(Set.of(workflowId));
-        when(grantService.parseExposedKnowledgeCollectionIds(grant)).thenReturn(Set.of(collectionId));
+        when(grantService.parseExposedKnowledgeCollectionIds(grant))
+                .thenReturn(Set.of(collectionId));
 
         AtomicReference<TenantContext> tenantSeen = new AtomicReference<>();
         AtomicReference<McpCallerContext> callerSeen = new AtomicReference<>();
         AtomicBoolean chainRan = new AtomicBoolean(false);
-        FilterChain chain = (req, res) -> {
-            chainRan.set(true);
-            tenantSeen.set(TenantContext.current().orElse(null));
-            callerSeen.set(McpCallerContext.current().orElse(null));
-        };
+        FilterChain chain =
+                (req, res) -> {
+                    chainRan.set(true);
+                    tenantSeen.set(TenantContext.current().orElse(null));
+                    callerSeen.set(McpCallerContext.current().orElse(null));
+                };
 
         filter.doFilter(request, response, chain);
 
@@ -195,7 +211,9 @@ class McpApiKeyAuthFilterTest {
         assertEquals(200, response.getStatus());
 
         TenantContext tenant = tenantSeen.get();
-        assertNotNull(tenant, "downstream must see a TenantContext (schema routing + kill-switch depend on it)");
+        assertNotNull(
+                tenant,
+                "downstream must see a TenantContext (schema routing + kill-switch depend on it)");
         assertEquals("tenant_alpha", tenant.getTenantId());
         // Grant-traceable principal, not the generic bootstrap literal - the
         // 2026-07-20 data-governance contract: subject names the exact grant,
@@ -219,7 +237,7 @@ class McpApiKeyAuthFilterTest {
     void bothContextsAreClearedAfterTheChainReturns() throws Exception {
         arrangeValidKey(UUID.randomUUID());
 
-        filter.doFilter(request, response, (req, res) -> { });
+        filter.doFilter(request, response, (req, res) -> {});
 
         // Servlet threads are pooled: anything left here would leak this
         // grant's tenant + capabilities into an unrelated later request.
@@ -232,9 +250,12 @@ class McpApiKeyAuthFilterTest {
         arrangeValidKey(UUID.randomUUID());
 
         try {
-            filter.doFilter(request, response, (req, res) -> {
-                throw new jakarta.servlet.ServletException("downstream blew up");
-            });
+            filter.doFilter(
+                    request,
+                    response,
+                    (req, res) -> {
+                        throw new jakarta.servlet.ServletException("downstream blew up");
+                    });
         } catch (Exception expected) {
             // the exception itself propagates - only the cleanup is under test
         }
@@ -252,7 +273,8 @@ class McpApiKeyAuthFilterTest {
         McpServerAccessGrant grant = grantWithId(grantId);
         request.addHeader("Authorization", "bearer vmcp_raw");
         when(grantService.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grant));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw"))
+                .thenReturn(Optional.of(grant));
         when(rateLimiter.allow(grantId)).thenReturn(true);
         stubEmptyExposedSets(grant);
 
@@ -268,7 +290,8 @@ class McpApiKeyAuthFilterTest {
         McpServerAccessGrant grant = grantWithId(grantId);
         request.addHeader("Authorization", "Bearer vmcp_raw");
         when(grantService.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grant));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw"))
+                .thenReturn(Optional.of(grant));
         when(rateLimiter.allow(grantId)).thenReturn(true);
         stubEmptyExposedSets(grant);
     }
@@ -279,7 +302,10 @@ class McpApiKeyAuthFilterTest {
         when(grantService.parseExposedKnowledgeCollectionIds(grant)).thenReturn(Set.of());
     }
 
-    /** Runs the filter, asserts the expected status, that the chain never ran (enforced by the chain itself), and returns the JSON body for message assertions. */
+    /**
+     * Runs the filter, asserts the expected status, that the chain never ran (enforced by the chain
+     * itself), and returns the JSON body for message assertions.
+     */
     private String assertRejected(FilterChain chain, int expectedStatus) {
         try {
             filter.doFilter(request, response, chain);
@@ -287,7 +313,8 @@ class McpApiKeyAuthFilterTest {
             assertEquals("application/json", response.getContentType());
             return response.getContentAsString();
         } catch (Exception e) {
-            throw new AssertionError("filter threw instead of writing a " + expectedStatus + " response", e);
+            throw new AssertionError(
+                    "filter threw instead of writing a " + expectedStatus + " response", e);
         }
     }
 
@@ -306,16 +333,26 @@ class McpApiKeyAuthFilterTest {
     void getTaskPollsDrawFromThePollBucketAndTheBodyStillReachesTheChain() throws Exception {
         enablePollBucket();
         UUID grantId = UUID.randomUUID();
-        String body = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"get_task\",\"arguments\":{\"task_id\":\"x\"}}}";
+        String body =
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"get_task\",\"arguments\":{\"task_id\":\"x\"}}}";
         arrangeValidKey(grantId);
         when(rateLimiter.allowPoll(grantId)).thenReturn(true);
         setJsonBody(body);
 
         AtomicReference<String> seen = new AtomicReference<>();
-        filter.doFilter(request, response, (req, res) ->
-            seen.set(new String(req.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)));
+        filter.doFilter(
+                request,
+                response,
+                (req, res) ->
+                        seen.set(
+                                new String(
+                                        req.getInputStream().readAllBytes(),
+                                        java.nio.charset.StandardCharsets.UTF_8)));
 
-        assertEquals(body, seen.get(), "the transport must still be able to read the body the filter inspected");
+        assertEquals(
+                body,
+                seen.get(),
+                "the transport must still be able to read the body the filter inspected");
         verify(rateLimiter).allowPoll(grantId);
         verify(rateLimiter, never()).allow(grantId);
     }
@@ -325,9 +362,10 @@ class McpApiKeyAuthFilterTest {
         enablePollBucket();
         UUID grantId = UUID.randomUUID();
         arrangeValidKey(grantId);
-        setJsonBody("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"start_agent_task\"}}");
+        setJsonBody(
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"start_agent_task\"}}");
 
-        filter.doFilter(request, response, (req, res) -> { });
+        filter.doFilter(request, response, (req, res) -> {});
 
         verify(rateLimiter).allow(grantId);
         verify(rateLimiter, never()).allowPoll(grantId);
@@ -353,19 +391,27 @@ class McpApiKeyAuthFilterTest {
 
         filter.doFilter(request, response, (req, res) -> seen.set(req));
 
-        org.junit.jupiter.api.Assertions.assertSame(request, seen.get(), "request must reach the chain unwrapped");
+        org.junit.jupiter.api.Assertions.assertSame(
+                request, seen.get(), "request must reach the chain unwrapped");
         verify(rateLimiter).allow(grantId);
         verify(rateLimiter, never()).allowPoll(grantId);
     }
 
     @Test
     void getTaskDetectionIsStrict() {
-        assertTrue(McpApiKeyAuthFilter.isGetTaskCall(
-            "{\"method\":\"tools/call\",\"params\":{\"name\":\"get_task\"}}".getBytes()));
-        org.junit.jupiter.api.Assertions.assertFalse(McpApiKeyAuthFilter.isGetTaskCall(
-            "{\"method\":\"tools/list\",\"params\":{\"name\":\"get_task\"}}".getBytes()));
-        org.junit.jupiter.api.Assertions.assertFalse(McpApiKeyAuthFilter.isGetTaskCall(
-            "[{\"method\":\"tools/call\",\"params\":{\"name\":\"get_task\"}}]".getBytes()));
-        org.junit.jupiter.api.Assertions.assertFalse(McpApiKeyAuthFilter.isGetTaskCall("not json".getBytes()));
+        assertTrue(
+                McpApiKeyAuthFilter.isGetTaskCall(
+                        "{\"method\":\"tools/call\",\"params\":{\"name\":\"get_task\"}}"
+                                .getBytes()));
+        org.junit.jupiter.api.Assertions.assertFalse(
+                McpApiKeyAuthFilter.isGetTaskCall(
+                        "{\"method\":\"tools/list\",\"params\":{\"name\":\"get_task\"}}"
+                                .getBytes()));
+        org.junit.jupiter.api.Assertions.assertFalse(
+                McpApiKeyAuthFilter.isGetTaskCall(
+                        "[{\"method\":\"tools/call\",\"params\":{\"name\":\"get_task\"}}]"
+                                .getBytes()));
+        org.junit.jupiter.api.Assertions.assertFalse(
+                McpApiKeyAuthFilter.isGetTaskCall("not json".getBytes()));
     }
 }

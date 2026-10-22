@@ -18,12 +18,21 @@ final class MatrixSyncParser {
 
     /** One event from a joined room's timeline (or the encryption state event). */
     record RoomEvent(
-            String roomId, String eventId, String sender, String type, JsonNode content, long originServerTs) {}
+            String roomId,
+            String eventId,
+            String sender,
+            String type,
+            JsonNode content,
+            long originServerTs) {}
 
     /** A pending invite for the bot and who sent it. */
     record Invite(String roomId, String inviter) {}
 
-    record Batch(String nextBatch, List<Invite> invites, List<RoomEvent> events, Map<String, Integer> joinedCounts) {}
+    record Batch(
+            String nextBatch,
+            List<Invite> invites,
+            List<RoomEvent> events,
+            Map<String, Integer> joinedCounts) {}
 
     static Batch parse(JsonNode sync, String botUserId) {
         String next = sync.path("next_batch").asText(null);

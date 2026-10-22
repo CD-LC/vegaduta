@@ -13,12 +13,12 @@ import java.util.Base64;
 
 /**
  * Server-side check of a seal's JWS signature (Ed25519, JDK built-in). Public-key only, pure and
- * thread-safe. A seal verifies only if the signature is valid under the key the seal itself carries AND the
- * signed payload binds this exact seal ({@code seal_hash}, {@code seq}, tenant scope) - so a valid signature
- * lifted from another seal does not transfer.
+ * thread-safe. A seal verifies only if the signature is valid under the key the seal itself carries
+ * AND the signed payload binds this exact seal ({@code seal_hash}, {@code seq}, tenant scope) - so
+ * a valid signature lifted from another seal does not transfer.
  *
- * <p>Note the trust boundary: the key embedded in a seal is only as trustworthy as the database. The
- * offline script lets the customer pin the platform's published key instead.
+ * <p>Note the trust boundary: the key embedded in a seal is only as trustworthy as the database.
+ * The offline script lets the customer pin the platform's published key instead.
  */
 public final class AuditSealSignatures {
 
@@ -29,13 +29,14 @@ public final class AuditSealSignatures {
 
     private static final ObjectMapper JSON = JsonMappers.plain();
 
-    private AuditSealSignatures() {
-    }
+    private AuditSealSignatures() {}
 
     /** True iff the seal's signature verifies under its embedded key and binds this seal. */
     public static boolean verify(AuditSealRecord seal) {
-        if (seal.signature() == null || seal.signature().isBlank()
-            || seal.publicKey() == null || seal.publicKey().isBlank()) {
+        if (seal.signature() == null
+                || seal.signature().isBlank()
+                || seal.publicKey() == null
+                || seal.publicKey().isBlank()) {
             return false;
         }
         try {
@@ -49,8 +50,9 @@ public final class AuditSealSignatures {
             if (!"EdDSA".equals(header.path("alg").asText())) {
                 return false;
             }
-            if (seal.keyId() != null && header.hasNonNull("kid")
-                && !seal.keyId().equals(header.get("kid").asText())) {
+            if (seal.keyId() != null
+                    && header.hasNonNull("kid")
+                    && !seal.keyId().equals(header.get("kid").asText())) {
                 return false;
             }
             PublicKey key = publicKeyOf(decoder.decode(seal.publicKey()));
@@ -61,9 +63,9 @@ public final class AuditSealSignatures {
                 return false;
             }
             return seal.sealHash().equals(payload.path("seal_hash").asText())
-                && payload.path("seq").canConvertToLong()
-                && payload.path("seq").asLong() == seal.seq()
-                && seal.tenantScope().equals(payload.path("tenant").asText());
+                    && payload.path("seq").canConvertToLong()
+                    && payload.path("seq").asLong() == seal.seq()
+                    && seal.tenantScope().equals(payload.path("tenant").asText());
         } catch (GeneralSecurityException | java.io.IOException | IllegalArgumentException e) {
             return false; // malformed material fails closed
         }

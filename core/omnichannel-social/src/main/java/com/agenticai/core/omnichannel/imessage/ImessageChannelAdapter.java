@@ -14,10 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE}: every iMessage the platform sends
- * (agent auto-replies, pairing notices, manual and operator sends) funnels through the approval
- * gate and lands here, where it is rate limited per tenant and handed to the tenant's BlueBubbles
- * server.
+ * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE}: every iMessage the platform sends (agent
+ * auto-replies, pairing notices, manual and operator sends) funnels through the approval gate and
+ * lands here, where it is rate limited per tenant and handed to the tenant's BlueBubbles server.
  */
 @Component
 public class ImessageChannelAdapter implements ApprovalActionExecutor {
@@ -63,12 +62,18 @@ public class ImessageChannelAdapter implements ApprovalActionExecutor {
         }
         try {
             String result =
-                    apiClient.sendText(credential.serverUrl(), credential.password(), payload.to(), payload.body());
+                    apiClient.sendText(
+                            credential.serverUrl(),
+                            credential.password(),
+                            payload.to(),
+                            payload.body());
             log.info(result);
         } catch (RuntimeException e) {
-            throw new RetryableChannelDeliveryException("imessage", "iMessage send failed: " + e.getMessage(), e);
+            throw new RetryableChannelDeliveryException(
+                    "imessage", "iMessage send failed: " + e.getMessage(), e);
         }
-        outboundLogger.recordSent(ChannelType.IMESSAGE, payload.to(), payload.body(), request.getRequestedBy());
+        outboundLogger.recordSent(
+                ChannelType.IMESSAGE, payload.to(), payload.body(), request.getRequestedBy());
     }
 
     static String tenantKey() {
@@ -77,7 +82,8 @@ public class ImessageChannelAdapter implements ApprovalActionExecutor {
 
     private SendPayload parsePayload(String payloadJson) {
         if (payloadJson == null || payloadJson.isBlank()) {
-            throw new ChannelDeliveryException("imessage", "Approval request has no payload to send");
+            throw new ChannelDeliveryException(
+                    "imessage", "Approval request has no payload to send");
         }
         try {
             return MAPPER.readValue(payloadJson, SendPayload.class);
@@ -87,6 +93,8 @@ public class ImessageChannelAdapter implements ApprovalActionExecutor {
         }
     }
 
-    /** {@code to} is a BlueBubbles chat GUID (what a session stores) or a bare phone number / email. */
+    /**
+     * {@code to} is a BlueBubbles chat GUID (what a session stores) or a bare phone number / email.
+     */
     public record SendPayload(String to, String body) {}
 }

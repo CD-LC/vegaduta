@@ -22,27 +22,30 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * The PUBLIC hosted form of a Trigger node whose config says {@code triggerType: "form"} (see {@link
- * WorkflowFormSchema}). Deliberately NO new auth mechanism: the form URL carries the SAME per-node opaque webhook
- * token the shared-secret webhook trigger uses, resolved the same way ({@link WebhookTokenHasher} SHA-256 ->
- * {@code TenantResolutionService} -> {@code WorkflowTriggerNode}), and honours the same switches (the node's
- * webhook must be ENABLED, in {@link WebhookAuthMode#SHARED_SECRET} mode, on an ACTIVE workflow). A submission is
- * validated server-side against the schema in the graph that actually runs (the PRODUCTION snapshot), then
- * starts the run through {@link WorkflowTriggerPort#triggerAsync} - fire-and-forget, so a slow workflow never
- * holds a stranger's browser open - with the validated values as the trigger input (a JSON object keyed by field
- * key).
+ * The PUBLIC hosted form of a Trigger node whose config says {@code triggerType: "form"} (see
+ * {@link WorkflowFormSchema}). Deliberately NO new auth mechanism: the form URL carries the SAME
+ * per-node opaque webhook token the shared-secret webhook trigger uses, resolved the same way
+ * ({@link WebhookTokenHasher} SHA-256 -> {@code TenantResolutionService} -> {@code
+ * WorkflowTriggerNode}), and honours the same switches (the node's webhook must be ENABLED, in
+ * {@link WebhookAuthMode#SHARED_SECRET} mode, on an ACTIVE workflow). A submission is validated
+ * server-side against the schema in the graph that actually runs (the PRODUCTION snapshot), then
+ * starts the run through {@link WorkflowTriggerPort#triggerAsync} - fire-and-forget, so a slow
+ * workflow never holds a stranger's browser open - with the validated values as the trigger input
+ * (a JSON object keyed by field key).
  *
- * <p>Abuse controls: a hidden honeypot field (a bot that fills it gets a normal-looking success and no run), a
- * per-token and a per-IP fixed-window limit ({@link WorkflowPublicRateLimiter}), a serialized-size cap, field
- * count/length caps from the schema, and a uniform 404 for every "this form does not exist" cause (unknown token,
- * disabled webhook, inactive workflow, not a form node) so the endpoint reveals nothing. The whole surface is off
- * unless {@code app.workflow.form-trigger.enabled}.
+ * <p>Abuse controls: a hidden honeypot field (a bot that fills it gets a normal-looking success and
+ * no run), a per-token and a per-IP fixed-window limit ({@link WorkflowPublicRateLimiter}), a
+ * serialized-size cap, field count/length caps from the schema, and a uniform 404 for every "this
+ * form does not exist" cause (unknown token, disabled webhook, inactive workflow, not a form node)
+ * so the endpoint reveals nothing. The whole surface is off unless {@code
+ * app.workflow.form-trigger.enabled}.
  *
- * <p>Known limitation, accepted on purpose: a submission is NOT de-duplicated. Two identical POSTs (a client retry,
- * a second tab) start two runs. The page disables its button while sending, and the per-token / per-IP limits cap
- * the damage. A server-side dedup on token + values ({@code InboundMessageDedupService}) was left out because its
- * window is a fixed hour and would silently swallow a legitimate repeat of the same answers (a visitor filing the
- * same issue twice) while still answering "success"; make the downstream workflow idempotent where that matters.
+ * <p>Known limitation, accepted on purpose: a submission is NOT de-duplicated. Two identical POSTs
+ * (a client retry, a second tab) start two runs. The page disables its button while sending, and
+ * the per-token / per-IP limits cap the damage. A server-side dedup on token + values ({@code
+ * InboundMessageDedupService}) was left out because its window is a fixed hour and would silently
+ * swallow a legitimate repeat of the same answers (a visitor filing the same issue twice) while
+ * still answering "success"; make the downstream workflow idempotent where that matters.
  */
 @Service
 public class WorkflowFormService {
@@ -59,30 +62,47 @@ public class WorkflowFormService {
 
     /** How a submission ended. {@code OK} also covers a honeypot hit (the bot is told nothing). */
     public enum Status {
-        OK, NOT_FOUND, INVALID, RATE_LIMITED, TOO_LARGE
+        OK,
+        NOT_FOUND,
+        INVALID,
+        RATE_LIMITED,
+        TOO_LARGE
     }
 
     /** One field as the public page needs it - nothing internal. */
     public record FieldView(
-        String key, String label, String type, boolean required, String placeholder, List<String> options,
-        Integer maxLength, Double min, Double max
-    ) {
-    }
+            String key,
+            String label,
+            String type,
+            boolean required,
+            String placeholder,
+            List<String> options,
+            Integer maxLength,
+            Double min,
+            Double max) {}
 
-    /** The public form definition; {@code honeypotField} is the name of the hidden field the page must render empty. */
+    /**
+     * The public form definition; {@code honeypotField} is the name of the hidden field the page
+     * must render empty.
+     */
     public record FormView(
-        String title, String description, String submitLabel, List<FieldView> fields, String honeypotField
-    ) {
-    }
+            String title,
+            String description,
+            String submitLabel,
+            List<FieldView> fields,
+            String honeypotField) {}
 
-    public record Submission(Status status, Map<String, String> errors, String message, String redirectUrl) {
+    public record Submission(
+            Status status, Map<String, String> errors, String message, String redirectUrl) {
         static Submission of(Status status) {
             return new Submission(status, Map.of(), null, null);
         }
     }
 
-    private record Resolved(WorkflowDefinition definition, WorkflowTriggerNode triggerNode, WorkflowFormSchema.Form form) {
-    }
+    private record Resolved(
+            WorkflowDefinition definition,
+            WorkflowTriggerNode triggerNode,
+            WorkflowFormSchema.Form form) {}
 
     private final TenantResolutionService tenantResolutionService;
     private final WorkflowTriggerNodeService triggerNodeService;
@@ -97,18 +117,19 @@ public class WorkflowFormService {
     private final int maxPayloadChars;
 
     public WorkflowFormService(
-        TenantResolutionService tenantResolutionService,
-        WorkflowTriggerNodeService triggerNodeService,
-        WorkflowDefinitionRepository definitionRepository,
-        WorkflowService workflowService,
-        WorkflowTriggerPort triggerPort,
-        WorkflowPublicRateLimiter rateLimiter,
-        ObjectMapper objectMapper,
-        @Value("${app.workflow.form-trigger.enabled:false}") boolean enabled,
-        @Value("${app.workflow.form-trigger.max-submissions-per-minute-per-token:30}") long maxPerMinutePerToken,
-        @Value("${app.workflow.form-trigger.max-submissions-per-minute-per-ip:8}") long maxPerMinutePerIp,
-        @Value("${app.workflow.form-trigger.max-payload-chars:20000}") int maxPayloadChars
-    ) {
+            TenantResolutionService tenantResolutionService,
+            WorkflowTriggerNodeService triggerNodeService,
+            WorkflowDefinitionRepository definitionRepository,
+            WorkflowService workflowService,
+            WorkflowTriggerPort triggerPort,
+            WorkflowPublicRateLimiter rateLimiter,
+            ObjectMapper objectMapper,
+            @Value("${app.workflow.form-trigger.enabled:false}") boolean enabled,
+            @Value("${app.workflow.form-trigger.max-submissions-per-minute-per-token:30}")
+                    long maxPerMinutePerToken,
+            @Value("${app.workflow.form-trigger.max-submissions-per-minute-per-ip:8}")
+                    long maxPerMinutePerIp,
+            @Value("${app.workflow.form-trigger.max-payload-chars:20000}") int maxPayloadChars) {
         this.tenantResolutionService = tenantResolutionService;
         this.triggerNodeService = triggerNodeService;
         this.definitionRepository = definitionRepository;
@@ -127,9 +148,10 @@ public class WorkflowFormService {
     }
 
     /**
-     * True when {@code nodeId} of {@code definition}'s PRODUCTION graph is a hosted-form trigger - the webhook
-     * controller uses it to refuse the raw webhook URL for such a node (the form is its only front door, so
-     * schema validation cannot be bypassed). Always false while the feature is off.
+     * True when {@code nodeId} of {@code definition}'s PRODUCTION graph is a hosted-form trigger -
+     * the webhook controller uses it to refuse the raw webhook URL for such a node (the form is its
+     * only front door, so schema validation cannot be bypassed). Always false while the feature is
+     * off.
      */
     public boolean isFormTriggerNode(WorkflowDefinition definition, String nodeId) {
         if (!enabled || definition == null || nodeId == null) {
@@ -137,18 +159,25 @@ public class WorkflowFormService {
         }
         try {
             return findTriggerNode(workflowService.resolveRunGraph(definition), nodeId)
-                .map(n -> WorkflowFormSchema.isFormTrigger(n.config())).orElse(false);
+                    .map(n -> WorkflowFormSchema.isFormTrigger(n.config()))
+                    .orElse(false);
         } catch (RuntimeException e) {
             return false;
         }
     }
 
-    /** Per-IP limit on loading forms (generous: a page load is cheap, but it still costs a tenant lookup). */
+    /**
+     * Per-IP limit on loading forms (generous: a page load is cheap, but it still costs a tenant
+     * lookup).
+     */
     public boolean allowView(String clientIp) {
-        return rateLimiter.tryAcquire(VIEW_RATE_PREFIX, WorkflowShareService.ipHash(clientIp), maxPerMinutePerIp * 8);
+        return rateLimiter.tryAcquire(
+                VIEW_RATE_PREFIX, WorkflowShareService.ipHash(clientIp), maxPerMinutePerIp * 8);
     }
 
-    /** The public form definition for {@code token}, or empty for ANY reason it is not available. */
+    /**
+     * The public form definition for {@code token}, or empty for ANY reason it is not available.
+     */
     public Optional<FormView> view(String token) {
         if (!enabled || !shapeOk(token)) {
             return Optional.empty();
@@ -165,8 +194,8 @@ public class WorkflowFormService {
     }
 
     /**
-     * Validates and accepts one submission. {@code body} is the posted JSON: {@code {"values": {...}, "_hp": ""}}.
-     * {@code clientIp} only feeds the per-IP limiter (never stored or logged).
+     * Validates and accepts one submission. {@code body} is the posted JSON: {@code {"values":
+     * {...}, "_hp": ""}}. {@code clientIp} only feeds the per-IP limiter (never stored or logged).
      */
     public Submission submit(String token, Map<String, Object> body, String clientIp) {
         if (!enabled || !shapeOk(token)) {
@@ -174,13 +203,15 @@ public class WorkflowFormService {
         }
         String tokenKey = WebhookTokenHasher.sha256Hex(token).substring(0, 24);
         if (!rateLimiter.tryAcquire(TOKEN_RATE_PREFIX, tokenKey, maxPerMinutePerToken)
-            || !rateLimiter.tryAcquire(IP_RATE_PREFIX, WorkflowShareService.ipHash(clientIp), maxPerMinutePerIp)) {
+                || !rateLimiter.tryAcquire(
+                        IP_RATE_PREFIX, WorkflowShareService.ipHash(clientIp), maxPerMinutePerIp)) {
             return Submission.of(Status.RATE_LIMITED);
         }
         if (serializedLength(body) > maxPayloadChars) {
             return Submission.of(Status.TOO_LARGE);
         }
-        // Honeypot: a real browser never fills the hidden field. The bot is told the submission worked.
+        // Honeypot: a real browser never fills the hidden field. The bot is told the submission
+        // worked.
         if (body != null && !str(body.get(WorkflowFormSchema.HONEYPOT_FIELD)).isEmpty()) {
             return Submission.of(Status.OK);
         }
@@ -204,13 +235,18 @@ public class WorkflowFormService {
             try {
                 input = objectMapper.writeValueAsString(result.values());
             } catch (Exception e) {
-                log.warn("Workflow form submission for workflow {} could not be serialised: {}",
-                    r.definition().getId(), e.getMessage());
+                log.warn(
+                        "Workflow form submission for workflow {} could not be serialised: {}",
+                        r.definition().getId(),
+                        e.getMessage());
                 return new Submission(Status.INVALID, Map.of("_form", "invalid_body"), null, null);
             }
             // TenantContext is set (resolve) - triggerAsync snapshots it for the background thread.
-            triggerPort.triggerAsync(r.definition().getId(), r.triggerNode().getNodeId(), input,
-                REQUESTED_BY_PREFIX + lastFour(token));
+            triggerPort.triggerAsync(
+                    r.definition().getId(),
+                    r.triggerNode().getNodeId(),
+                    input,
+                    REQUESTED_BY_PREFIX + lastFour(token));
             String redirect = r.form().redirectUrl().isEmpty() ? null : r.form().redirectUrl();
             String message = r.form().successMessage().isEmpty() ? null : r.form().successMessage();
             return new Submission(Status.OK, Map.of(), message, redirect);
@@ -220,29 +256,38 @@ public class WorkflowFormService {
     }
 
     /**
-     * Resolves {@code token} to its form. On a PRESENT result {@link TenantContext} is set to the owning tenant
-     * and the caller must clear it; on empty it is already cleared.
+     * Resolves {@code token} to its form. On a PRESENT result {@link TenantContext} is set to the
+     * owning tenant and the caller must clear it; on empty it is already cleared.
      */
     private Optional<Resolved> resolve(String token) {
         String hash = WebhookTokenHasher.sha256Hex(token);
-        Optional<String> schema = tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.WORKFLOW_WEBHOOK, hash);
+        Optional<String> schema =
+                tenantResolutionService.resolveTenantSchema(
+                        ExternalAccountProvider.WORKFLOW_WEBHOOK, hash);
         if (schema.isEmpty()) {
             return Optional.empty();
         }
-        TenantContext.set(TenantContext.of(schema.get(), CONTEXT_PREFIX + lastFour(token), Set.of()));
+        TenantContext.set(
+                TenantContext.of(schema.get(), CONTEXT_PREFIX + lastFour(token), Set.of()));
         try {
-            WorkflowTriggerNode triggerNode = triggerNodeService.findByWebhookTokenHash(hash).orElse(null);
-            if (triggerNode == null || !triggerNode.isWebhookEnabled()
-                || WebhookAuthMode.fromNullableName(triggerNode.getWebhookAuthMode()) != WebhookAuthMode.SHARED_SECRET) {
+            WorkflowTriggerNode triggerNode =
+                    triggerNodeService.findByWebhookTokenHash(hash).orElse(null);
+            if (triggerNode == null
+                    || !triggerNode.isWebhookEnabled()
+                    || WebhookAuthMode.fromNullableName(triggerNode.getWebhookAuthMode())
+                            != WebhookAuthMode.SHARED_SECRET) {
                 TenantContext.clear();
                 return Optional.empty();
             }
-            WorkflowDefinition definition = definitionRepository.findById(triggerNode.getWorkflowId()).orElse(null);
+            WorkflowDefinition definition =
+                    definitionRepository.findById(triggerNode.getWorkflowId()).orElse(null);
             if (definition == null || definition.getStatus() != WorkflowStatus.ACTIVE) {
                 TenantContext.clear();
                 return Optional.empty();
             }
-            Optional<WorkflowNodeDto> node = findTriggerNode(workflowService.resolveRunGraph(definition), triggerNode.getNodeId());
+            Optional<WorkflowNodeDto> node =
+                    findTriggerNode(
+                            workflowService.resolveRunGraph(definition), triggerNode.getNodeId());
             if (node.isEmpty() || !WorkflowFormSchema.isFormTrigger(node.get().config())) {
                 TenantContext.clear();
                 return Optional.empty();
@@ -251,8 +296,11 @@ public class WorkflowFormService {
             try {
                 form = WorkflowFormSchema.parse(node.get().config());
             } catch (IllegalArgumentException badSchema) {
-                log.warn("Workflow {} trigger node {} has an unusable form schema: {}", definition.getId(),
-                    triggerNode.getNodeId(), badSchema.getMessage());
+                log.warn(
+                        "Workflow {} trigger node {} has an unusable form schema: {}",
+                        definition.getId(),
+                        triggerNode.getNodeId(),
+                        badSchema.getMessage());
                 TenantContext.clear();
                 return Optional.empty();
             }
@@ -263,23 +311,35 @@ public class WorkflowFormService {
         }
     }
 
-    private static Optional<WorkflowNodeDto> findTriggerNode(WorkflowGraphDto graph, String nodeId) {
+    private static Optional<WorkflowNodeDto> findTriggerNode(
+            WorkflowGraphDto graph, String nodeId) {
         return graph.nodes().stream()
-            .filter(n -> nodeId.equals(n.id()) && "trigger".equalsIgnoreCase(n.type()))
-            .findFirst();
+                .filter(n -> nodeId.equals(n.id()) && "trigger".equalsIgnoreCase(n.type()))
+                .findFirst();
     }
 
     private static FormView toView(WorkflowFormSchema.Form form) {
         List<FieldView> fields = new ArrayList<>();
         for (WorkflowFormSchema.Field f : form.fields()) {
             boolean text = f.type().equals("text") || f.type().equals("long_text");
-            fields.add(new FieldView(f.key(), f.label(), f.type(), f.required(), f.placeholder(), f.options(),
-                text ? f.maxLength() : null,
-                f.min() == null ? null : f.min().doubleValue(),
-                f.max() == null ? null : f.max().doubleValue()));
+            fields.add(
+                    new FieldView(
+                            f.key(),
+                            f.label(),
+                            f.type(),
+                            f.required(),
+                            f.placeholder(),
+                            f.options(),
+                            text ? f.maxLength() : null,
+                            f.min() == null ? null : f.min().doubleValue(),
+                            f.max() == null ? null : f.max().doubleValue()));
         }
-        return new FormView(form.title(), form.description(), form.submitLabel(), List.copyOf(fields),
-            WorkflowFormSchema.HONEYPOT_FIELD);
+        return new FormView(
+                form.title(),
+                form.description(),
+                form.submitLabel(),
+                List.copyOf(fields),
+                WorkflowFormSchema.HONEYPOT_FIELD);
     }
 
     private int serializedLength(Map<String, Object> body) {

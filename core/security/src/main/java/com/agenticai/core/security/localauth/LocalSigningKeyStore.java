@@ -1,7 +1,7 @@
 package com.agenticai.core.security.localauth;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.agenticai.core.json.JsonMappers;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory;
  * The RS256 signing keys of local auth mode. One key signs; recently retired keys keep verifying
  * until the tokens they signed have expired, so a rotation never logs anybody out.
  *
- * <p><b>Storage.</b> A single JSON file {@code signing-keys.json} under the data directory
- * ({@code app.auth.local.data-dir}). The directory is created {@code 0700} and the file {@code 0600}
- * (on a POSIX file system; elsewhere the platform default applies and a warning is logged). Writes
- * go to a fresh {@code 0600} temp file first and are moved into place atomically, so a crash
- * mid-write can never leave a half-written or world-readable key file. A file that exists but
- * cannot be parsed stops the boot instead of being replaced: silently minting a new key would
- * invalidate every session with no trace of why.
+ * <p><b>Storage.</b> A single JSON file {@code signing-keys.json} under the data directory ({@code
+ * app.auth.local.data-dir}). The directory is created {@code 0700} and the file {@code 0600} (on a
+ * POSIX file system; elsewhere the platform default applies and a warning is logged). Writes go to
+ * a fresh {@code 0600} temp file first and are moved into place atomically, so a crash mid-write
+ * can never leave a half-written or world-readable key file. A file that exists but cannot be
+ * parsed stops the boot instead of being replaced: silently minting a new key would invalidate
+ * every session with no trace of why.
  *
  * <p><b>Rotation.</b> The current key is replaced once it is older than {@code
  * key-rotation-interval}; the old one is stamped retired and dropped after {@code key-retention}.
@@ -65,13 +65,19 @@ public final class LocalSigningKeyStore {
 
     /** One persisted key. The private key is PKCS#8, the public key X.509, both base64. */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record StoredKey(String kid, String createdAt, String retiredAt, String privateKey, String publicKey) {}
+    record StoredKey(
+            String kid, String createdAt, String retiredAt, String privateKey, String publicKey) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record StoredKeySet(int version, List<StoredKey> keys) {}
 
     /** A key held in memory. */
-    private record Key(String kid, Instant createdAt, Instant retiredAt, RSAPrivateKey privateKey, RSAPublicKey publicKey) {
+    private record Key(
+            String kid,
+            Instant createdAt,
+            Instant retiredAt,
+            RSAPrivateKey privateKey,
+            RSAPublicKey publicKey) {
         Key retire(Instant at) {
             return new Key(kid, createdAt, at, privateKey, publicKey);
         }
@@ -86,7 +92,8 @@ public final class LocalSigningKeyStore {
     private final Clock clock;
     private List<Key> keys = new ArrayList<>();
 
-    public LocalSigningKeyStore(Path dataDir, Duration rotationInterval, Duration retention, Clock clock) {
+    public LocalSigningKeyStore(
+            Path dataDir, Duration rotationInterval, Duration retention, Clock clock) {
         this.file = dataDir.resolve(FILE_NAME);
         this.rotationInterval = rotationInterval;
         this.retention = retention;
@@ -171,7 +178,8 @@ public final class LocalSigningKeyStore {
     /** Drops retired keys older than the retention; true when something was dropped. */
     private boolean pruneRetired() {
         Instant cutoff = clock.instant().minus(retention);
-        boolean removed = keys.removeIf(k -> k.retiredAt() != null && k.retiredAt().isBefore(cutoff));
+        boolean removed =
+                keys.removeIf(k -> k.retiredAt() != null && k.retiredAt().isBefore(cutoff));
         return removed;
     }
 
@@ -199,7 +207,9 @@ public final class LocalSigningKeyStore {
         }
         tightenPermissions(file);
         try {
-            StoredKeySet stored = JSON.readValue(Files.readString(file, StandardCharsets.UTF_8), StoredKeySet.class);
+            StoredKeySet stored =
+                    JSON.readValue(
+                            Files.readString(file, StandardCharsets.UTF_8), StoredKeySet.class);
             if (stored == null || stored.keys() == null || stored.keys().isEmpty()) {
                 throw new IllegalStateException("no keys in " + file);
             }
@@ -213,10 +223,14 @@ public final class LocalSigningKeyStore {
                                 s.retiredAt() == null ? null : Instant.parse(s.retiredAt()),
                                 (RSAPrivateKey)
                                         factory.generatePrivate(
-                                                new PKCS8EncodedKeySpec(Base64.getDecoder().decode(s.privateKey()))),
+                                                new PKCS8EncodedKeySpec(
+                                                        Base64.getDecoder()
+                                                                .decode(s.privateKey()))),
                                 (RSAPublicKey)
                                         factory.generatePublic(
-                                                new X509EncodedKeySpec(Base64.getDecoder().decode(s.publicKey())))));
+                                                new X509EncodedKeySpec(
+                                                        Base64.getDecoder()
+                                                                .decode(s.publicKey())))));
             }
             keys = loaded;
         } catch (IOException | GeneralSecurityException | RuntimeException e) {
@@ -243,9 +257,14 @@ public final class LocalSigningKeyStore {
         Path tmp = null;
         try {
             tmp = createOwnerOnlyTempFile(file.getParent());
-            Files.writeString(tmp, JSON.writeValueAsString(new StoredKeySet(1, out)), StandardCharsets.UTF_8);
+            Files.writeString(
+                    tmp, JSON.writeValueAsString(new StoredKeySet(1, out)), StandardCharsets.UTF_8);
             try {
-                Files.move(tmp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                Files.move(
+                        tmp,
+                        file,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException e) {
                 Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
             }
@@ -257,7 +276,8 @@ public final class LocalSigningKeyStore {
                     // best effort; the temp file is already owner-only
                 }
             }
-            throw new IllegalStateException("could not write the local auth signing keys to " + file, e);
+            throw new IllegalStateException(
+                    "could not write the local auth signing keys to " + file, e);
         }
     }
 
@@ -278,17 +298,23 @@ public final class LocalSigningKeyStore {
                     try {
                         Files.setPosixFilePermissions(dir, ownerOnly);
                     } catch (IOException | UnsupportedOperationException e) {
-                        log.warn("Local auth data directory {} is not owner-only and could not be"
-                                + " restricted ({}); the key file inside is still 0600", dir, e.toString());
+                        log.warn(
+                                "Local auth data directory {} is not owner-only and could not be"
+                                        + " restricted ({}); the key file inside is still 0600",
+                                dir,
+                                e.toString());
                     }
                 }
             } else {
                 Files.createDirectories(dir);
-                log.warn("Local auth data directory {} is on a file system without POSIX permissions;"
-                        + " restrict access to it yourself", dir);
+                log.warn(
+                        "Local auth data directory {} is on a file system without POSIX permissions;"
+                                + " restrict access to it yourself",
+                        dir);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("could not create the local auth data directory " + dir, e);
+            throw new IllegalStateException(
+                    "could not create the local auth data directory " + dir, e);
         }
     }
 
@@ -296,7 +322,11 @@ public final class LocalSigningKeyStore {
     static Path createOwnerOnlyTempFile(Path dir) throws IOException {
         if (posix(dir)) {
             return Files.createTempFile(
-                    dir, "keys-", ".tmp", PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+                    dir,
+                    "keys-",
+                    ".tmp",
+                    PosixFilePermissions.asFileAttribute(
+                            PosixFilePermissions.fromString("rw-------")));
         }
         return Files.createTempFile(dir, "keys-", ".tmp");
     }
@@ -310,7 +340,9 @@ public final class LocalSigningKeyStore {
             Set<PosixFilePermission> ownerOnly = PosixFilePermissions.fromString("rw-------");
             if (!perms.equals(ownerOnly)) {
                 Files.setPosixFilePermissions(path, ownerOnly);
-                log.warn("Local auth key file {} was readable by others; restricted to its owner", path);
+                log.warn(
+                        "Local auth key file {} was readable by others; restricted to its owner",
+                        path);
             }
         } catch (IOException e) {
             log.warn("Could not verify permissions of {}: {}", path, e.toString());

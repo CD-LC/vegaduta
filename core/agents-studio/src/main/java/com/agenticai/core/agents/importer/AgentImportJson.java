@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
  */
 public final class AgentImportJson {
 
-    private AgentImportJson() {
-    }
+    private AgentImportJson() {}
 
     /** Keys whose values are credentials or credential references; never read, only counted. */
-    private static final Pattern SECRET_KEY = Pattern.compile(
-        "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_ ]?token|access[-_ ]?token"
-            + "|refresh[-_ ]?token|private[-_ ]?key|session[-_ ]?token|^token$|^key$)");
+    private static final Pattern SECRET_KEY =
+            Pattern.compile(
+                    "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_ ]?token|access[-_ ]?token"
+                            + "|refresh[-_ ]?token|private[-_ ]?key|session[-_ ]?token|^token$|^key$)");
 
     /** Upper bound on nodes visited when scanning for credential fields. */
     private static final int SCAN_NODE_CAP = 200_000;
@@ -144,10 +144,10 @@ public final class AgentImportJson {
     }
 
     /**
-     * Counts fields anywhere under {@code root} whose NAME looks like a credential and whose value is
-     * non-empty. Values are never read into the result and nothing is copied - this exists only so
-     * the report can say "N credential fields were found and not imported". Iterative (no recursion
-     * depth risk) and bounded by {@link #SCAN_NODE_CAP}.
+     * Counts fields anywhere under {@code root} whose NAME looks like a credential and whose value
+     * is non-empty. Values are never read into the result and nothing is copied - this exists only
+     * so the report can say "N credential fields were found and not imported". Iterative (no
+     * recursion depth risk) and bounded by {@link #SCAN_NODE_CAP}.
      */
     public static int countCredentialFields(JsonNode root) {
         if (root == null) {

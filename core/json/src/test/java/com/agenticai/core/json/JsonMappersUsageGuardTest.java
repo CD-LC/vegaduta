@@ -32,13 +32,16 @@ class JsonMappersUsageGuardTest {
                 try (Stream<Path> files = Files.walk(main)) {
                     for (Path file : files.filter(f -> f.toString().endsWith(".java")).toList()) {
                         scanned++;
-                        if (file.endsWith(Path.of("com", "agenticai", "core", "json", "JsonMappers.java"))) {
+                        if (file.endsWith(
+                                Path.of("com", "agenticai", "core", "json", "JsonMappers.java"))) {
                             continue;
                         }
                         List<String> lines = Files.readAllLines(file, StandardCharsets.ISO_8859_1);
                         for (int i = 0; i < lines.size(); i++) {
                             String line = lines.get(i).strip();
-                            if (line.startsWith("*") || line.startsWith("//") || line.startsWith("/*")) {
+                            if (line.startsWith("*")
+                                    || line.startsWith("//")
+                                    || line.startsWith("/*")) {
                                 continue;
                             }
                             if (line.contains("new ObjectMapper(")) {
@@ -49,8 +52,12 @@ class JsonMappersUsageGuardTest {
                 }
             }
         }
-        assertTrue(scanned > 500, "guard scanned suspiciously few files (" + scanned + "); wrong working directory?");
-        assertTrue(offenders.isEmpty(), "use JsonMappers.plain()/withJavaTime()/... instead of new ObjectMapper(): "
-            + offenders);
+        assertTrue(
+                scanned > 500,
+                "guard scanned suspiciously few files (" + scanned + "); wrong working directory?");
+        assertTrue(
+                offenders.isEmpty(),
+                "use JsonMappers.plain()/withJavaTime()/... instead of new ObjectMapper(): "
+                        + offenders);
     }
 }

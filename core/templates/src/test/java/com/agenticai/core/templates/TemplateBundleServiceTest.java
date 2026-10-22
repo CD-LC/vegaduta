@@ -73,7 +73,8 @@ class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
         verify(agentService).setAutonomyTier(newId, AgentAutonomyTier.SUPERVISED);
         verify(agentService)
                 .setAllowedToolNames(
-                        eq(newId), eq(new LinkedHashSet<>(List.of("fetch_web_page", "request_human"))));
+                        eq(newId),
+                        eq(new LinkedHashSet<>(List.of("fetch_web_page", "request_human"))));
         verify(auditLogService)
                 .record(any(), eq("agent.bundle.import"), eq("agent"), any(), any(), any());
     }
@@ -164,7 +165,9 @@ class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
                 AgentBundle b = mapper.readValue(f.toFile(), AgentBundle.class);
                 AgentBundlePreview preview = bundles.preview(b);
                 assertThat(preview.tools()).as(f.getFileName().toString()).isNotEmpty();
-                assertThat(preview.autonomyTier()).as(f.getFileName().toString()).isEqualTo("SUPERVISED");
+                assertThat(preview.autonomyTier())
+                        .as(f.getFileName().toString())
+                        .isEqualTo("SUPERVISED");
                 assertThat(preview.adjustments()).as(f.getFileName().toString()).isEmpty();
             }
         }

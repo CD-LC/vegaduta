@@ -55,8 +55,14 @@ class WhatsAppQrInboundServiceTest {
         dedup = mock(InboundMessageDedupService.class);
         when(dedup.tryClaim(eq(ChannelType.WHATSAPP_QR), any())).thenReturn(true);
         when(sessions.consumeAiDisclosurePrefix(any())).thenReturn("");
-        service = new WhatsAppQrInboundService(
-                sessions, agentChat, gate, audit, dedup, InboundChannelExecutor.synchronous());
+        service =
+                new WhatsAppQrInboundService(
+                        sessions,
+                        agentChat,
+                        gate,
+                        audit,
+                        dedup,
+                        InboundChannelExecutor.synchronous());
     }
 
     @AfterEach
@@ -64,11 +70,16 @@ class WhatsAppQrInboundServiceTest {
         TenantContext.clear();
     }
 
-    private static JsonNode event(String chatJid, String senderNumber, String text) throws Exception {
+    private static JsonNode event(String chatJid, String senderNumber, String text)
+            throws Exception {
         return MAPPER.readTree(
-                "{\"id\":\"MSG1\",\"chatJid\":\"" + chatJid + "\",\"senderNumber\":"
+                "{\"id\":\"MSG1\",\"chatJid\":\""
+                        + chatJid
+                        + "\",\"senderNumber\":"
                         + (senderNumber == null ? "null" : "\"" + senderNumber + "\"")
-                        + ",\"pushName\":\"Ann\",\"text\":\"" + text + "\",\"timestampMs\":11}");
+                        + ",\"pushName\":\"Ann\",\"text\":\""
+                        + text
+                        + "\",\"timestampMs\":11}");
     }
 
     private ChannelSession session(boolean paired, boolean noticeSent, String externalId) {
@@ -102,7 +113,8 @@ class WhatsAppQrInboundServiceTest {
     @Test
     void anUnknownSenderGetsOnePairingCodeAndTheAgentStaysSilent() throws Exception {
         ChannelSession unpaired = session(false, false, SENDER);
-        when(sessions.resolveOrCreate(eq(ChannelType.WHATSAPP_QR), eq(SENDER), eq("hi"), eq(SENDER)))
+        when(sessions.resolveOrCreate(
+                        eq(ChannelType.WHATSAPP_QR), eq(SENDER), eq("hi"), eq(SENDER)))
                 .thenReturn(unpaired);
 
         assertThat(service.accept(event(SENDER + "@s.whatsapp.net", SENDER, "hi"))).isTrue();
@@ -136,7 +148,9 @@ class WhatsAppQrInboundServiceTest {
         assertThat(service.accept(event(SENDER + "@s.whatsapp.net", SENDER, "what time is it")))
                 .isTrue();
 
-        assertThat(lastGatePayload()).contains("half past nine").contains("\"to\":\"" + SENDER + "\"");
+        assertThat(lastGatePayload())
+                .contains("half past nine")
+                .contains("\"to\":\"" + SENDER + "\"");
     }
 
     @Test
@@ -167,5 +181,4 @@ class WhatsAppQrInboundServiceTest {
         assertThat(service.accept(MAPPER.readTree("{\"status\":\"CONNECTED\"}"))).isTrue();
         verify(sessions, never()).resolveOrCreate(any(), any(), any(), any());
     }
-
 }

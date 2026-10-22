@@ -28,11 +28,13 @@ class SloSamplerTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static SloSample sample(long t, double req, double err) {
-        return new SloSample(SloSample.CURRENT_VERSION, t, req, err, null, null, null, Map.of(), 0, 0);
+        return new SloSample(
+                SloSample.CURRENT_VERSION, t, req, err, null, null, null, Map.of(), 0, 0);
     }
 
     private static SloSampler sampler(StringRedisTemplate redis, boolean viaRedis) {
-        ObjectProvider<io.micrometer.core.instrument.MeterRegistry> registry = mock(ObjectProvider.class);
+        ObjectProvider<io.micrometer.core.instrument.MeterRegistry> registry =
+                mock(ObjectProvider.class);
         ObjectProvider<StringRedisTemplate> redisProvider = mock(ObjectProvider.class);
         when(redisProvider.getIfAvailable()).thenReturn(redis);
         SloSampler s = new SloSampler(registry, redisProvider, true, 60, 48, viaRedis, 300);
@@ -45,14 +47,18 @@ class SloSamplerTest {
     @Test
     void collectCountsServerRequestsAndFiveHundredsAndSkipsActuator() {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        registry.timer("http.server.requests", "uri", "/api/agents", "status", "200").record(5, TimeUnit.MILLISECONDS);
-        registry.timer("http.server.requests", "uri", "/api/agents", "status", "200").record(5, TimeUnit.MILLISECONDS);
-        registry.timer("http.server.requests", "uri", "/api/agents", "status", "503").record(5, TimeUnit.MILLISECONDS);
-        registry.timer("http.server.requests", "uri", "/api/agents", "status", "404").record(5, TimeUnit.MILLISECONDS);
+        registry.timer("http.server.requests", "uri", "/api/agents", "status", "200")
+                .record(5, TimeUnit.MILLISECONDS);
+        registry.timer("http.server.requests", "uri", "/api/agents", "status", "200")
+                .record(5, TimeUnit.MILLISECONDS);
+        registry.timer("http.server.requests", "uri", "/api/agents", "status", "503")
+                .record(5, TimeUnit.MILLISECONDS);
+        registry.timer("http.server.requests", "uri", "/api/agents", "status", "404")
+                .record(5, TimeUnit.MILLISECONDS);
         registry.timer("http.server.requests", "uri", "/api/agents/{agentId}/chat", "status", "500")
-            .record(5, TimeUnit.MILLISECONDS);
+                .record(5, TimeUnit.MILLISECONDS);
         registry.timer("http.server.requests", "uri", "/actuator/prometheus", "status", "500")
-            .record(5, TimeUnit.MILLISECONDS);
+                .record(5, TimeUnit.MILLISECONDS);
 
         SloSample s = SloSampler.collect(registry, 1234L);
 
@@ -69,11 +75,22 @@ class SloSamplerTest {
     @Test
     void collectKeepsLongLivedStreamsOutOfTheApiLatencyClassButCountsThemForAvailability() {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        registry.timer("http.server.requests", "uri", "/api/agents", "status", "200").record(5, TimeUnit.MILLISECONDS);
-        registry.timer("http.server.requests", "uri", "/api/workflows/{workflowId}/runs/{runId}/events", "status", "200")
-            .record(5, TimeUnit.MILLISECONDS);
-        registry.timer("http.server.requests", "uri", "/api/agents/{agentId}/agui/run", "status", "500")
-            .record(5, TimeUnit.MILLISECONDS);
+        registry.timer("http.server.requests", "uri", "/api/agents", "status", "200")
+                .record(5, TimeUnit.MILLISECONDS);
+        registry.timer(
+                        "http.server.requests",
+                        "uri",
+                        "/api/workflows/{workflowId}/runs/{runId}/events",
+                        "status",
+                        "200")
+                .record(5, TimeUnit.MILLISECONDS);
+        registry.timer(
+                        "http.server.requests",
+                        "uri",
+                        "/api/agents/{agentId}/agui/run",
+                        "status",
+                        "500")
+                .record(5, TimeUnit.MILLISECONDS);
 
         SloSample s = SloSampler.collect(registry, 1L);
 
@@ -85,10 +102,14 @@ class SloSamplerTest {
     @Test
     void collectGroupsLlmCallsByProviderAndReadsJobOutcomes() {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        registry.counter("llm.calls", "tenant", "t1", "provider", "OPENAI", "model", "m").increment(3);
-        registry.counter("llm.calls", "tenant", "t2", "provider", "OPENAI", "model", "m").increment(2);
-        registry.counter("llm.calls", "tenant", "t1", "provider", "GEMINI", "model", "g").increment(4);
-        registry.counter("llm.call.errors", "tenant", "t1", "provider", "OPENAI", "model", "m").increment(1);
+        registry.counter("llm.calls", "tenant", "t1", "provider", "OPENAI", "model", "m")
+                .increment(3);
+        registry.counter("llm.calls", "tenant", "t2", "provider", "OPENAI", "model", "m")
+                .increment(2);
+        registry.counter("llm.calls", "tenant", "t1", "provider", "GEMINI", "model", "g")
+                .increment(4);
+        registry.counter("llm.call.errors", "tenant", "t1", "provider", "OPENAI", "model", "m")
+                .increment(1);
         registry.counter("agent.job.completed", "outcome", "SUCCEEDED").increment(7);
         registry.counter("agent.job.completed", "outcome", "FAILED").increment(2);
 
@@ -131,7 +152,8 @@ class SloSamplerTest {
         s.record(sample(60 * hour, 2, 0)); // 60 h later: the first two are older than 48 h
 
         SloSampler.WindowRead read = s.read(Duration.ofHours(48));
-        // clock is fixed at hour 10, so the window start is negative: base is the oldest retained sample
+        // clock is fixed at hour 10, so the window start is negative: base is the oldest retained
+        // sample
         assertThat(read.windows()).hasSize(1);
         assertThat(read.windows().get(0).base().req()).isEqualTo(2);
     }
@@ -175,10 +197,17 @@ class SloSamplerTest {
         long now = 10 * 3_600_000L;
         String base = MAPPER.writeValueAsString(sample(now - 1_800_000L, 0, 0));
         String latest = MAPPER.writeValueAsString(sample(now - 60_000L, 100, 3));
-        when(zset.rangeByScore(eq(SloSampler.INSTANCES_KEY), anyDouble(), anyDouble())).thenReturn(Set.of("other"));
-        when(zset.rangeByScore(eq(SloSampler.SAMPLES_KEY_PREFIX + "other"), anyDouble(), anyDouble(), eq(0L), eq(1L)))
-            .thenReturn(Set.of(base));
-        when(zset.reverseRange(SloSampler.SAMPLES_KEY_PREFIX + "other", 0, 0)).thenReturn(Set.of(latest));
+        when(zset.rangeByScore(eq(SloSampler.INSTANCES_KEY), anyDouble(), anyDouble()))
+                .thenReturn(Set.of("other"));
+        when(zset.rangeByScore(
+                        eq(SloSampler.SAMPLES_KEY_PREFIX + "other"),
+                        anyDouble(),
+                        anyDouble(),
+                        eq(0L),
+                        eq(1L)))
+                .thenReturn(Set.of(base));
+        when(zset.reverseRange(SloSampler.SAMPLES_KEY_PREFIX + "other", 0, 0))
+                .thenReturn(Set.of(latest));
 
         SloSampler s = sampler(redis, true);
         s.record(sample(now - 3_000_000L, 0, 0));

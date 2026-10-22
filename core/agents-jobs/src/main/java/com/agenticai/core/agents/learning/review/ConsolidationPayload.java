@@ -9,19 +9,29 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * What an approved CONSOLIDATION proposal does, stored as the proposal's payload: {@code action} "merge" (the
- * {@code keepId} fact is rewritten with the approved text and every {@code dropIds} fact is forgotten) or "drop"
- * (only {@code dropIds}). {@code scope} is "agent" (then {@code agentId} names the tier) or "shared".
+ * What an approved CONSOLIDATION proposal does, stored as the proposal's payload: {@code action}
+ * "merge" (the {@code keepId} fact is rewritten with the approved text and every {@code dropIds}
+ * fact is forgotten) or "drop" (only {@code dropIds}). {@code scope} is "agent" (then {@code
+ * agentId} names the tier) or "shared".
  *
- * <p>Ids are written with {@code x} in place of the hyphens. The proposal store scrubs card-like digit runs from
- * every stored string, and an id that happens to be mostly digits would otherwise be damaged; no run in the
- * {@code x} form is longer than twelve digits.
+ * <p>Ids are written with {@code x} in place of the hyphens. The proposal store scrubs card-like
+ * digit runs from every stored string, and an id that happens to be mostly digits would otherwise
+ * be damaged; no run in the {@code x} form is longer than twelve digits.
  */
 public record ConsolidationPayload(
-        String action, String scope, UUID agentId, UUID keepId, List<UUID> dropIds, Map<UUID, String> hashes) {
+        String action,
+        String scope,
+        UUID agentId,
+        UUID keepId,
+        List<UUID> dropIds,
+        Map<UUID, String> hashes) {
 
-    /** A payload with no content fingerprints: the applier then checks only that each fact still exists. */
-    public ConsolidationPayload(String action, String scope, UUID agentId, UUID keepId, List<UUID> dropIds) {
+    /**
+     * A payload with no content fingerprints: the applier then checks only that each fact still
+     * exists.
+     */
+    public ConsolidationPayload(
+            String action, String scope, UUID agentId, UUID keepId, List<UUID> dropIds) {
         this(action, scope, agentId, keepId, dropIds, Map.of());
     }
 
@@ -48,7 +58,10 @@ public record ConsolidationPayload(
         return m;
     }
 
-    /** Parses and validates a stored payload; throws {@link IllegalArgumentException} with a person-readable reason. */
+    /**
+     * Parses and validates a stored payload; throws {@link IllegalArgumentException} with a
+     * person-readable reason.
+     */
     public static ConsolidationPayload parse(String json) {
         try {
             JsonNode n = JsonMappers.plain().readTree(json == null ? "{}" : json);
@@ -58,24 +71,30 @@ public record ConsolidationPayload(
                 throw new IllegalArgumentException("This tidy-up has no recognised action.");
             }
             if (!MemoryFactRef.AGENT.equals(scope) && !MemoryFactRef.SHARED.equals(scope)) {
-                throw new IllegalArgumentException("This tidy-up does not say which memories it is about.");
+                throw new IllegalArgumentException(
+                        "This tidy-up does not say which memories it is about.");
             }
             UUID agentId = n.hasNonNull("agentId") ? decode(n.path("agentId").asText()) : null;
             if (MemoryFactRef.AGENT.equals(scope) && agentId == null) {
-                throw new IllegalArgumentException("This tidy-up does not say which assistant's memories it is about.");
+                throw new IllegalArgumentException(
+                        "This tidy-up does not say which assistant's memories it is about.");
             }
             UUID keepId = n.hasNonNull("keepId") ? decode(n.path("keepId").asText()) : null;
             List<UUID> drops = new ArrayList<>();
             n.path("dropIds").forEach(d -> drops.add(decode(d.asText())));
             if (drops.isEmpty() || drops.size() > MAX_DROPS || drops.contains(keepId)) {
-                throw new IllegalArgumentException("This tidy-up lists no valid memories to remove.");
+                throw new IllegalArgumentException(
+                        "This tidy-up lists no valid memories to remove.");
             }
             if (MERGE.equals(action) != (keepId != null)) {
                 throw new IllegalArgumentException("This tidy-up is not well formed.");
             }
             Map<UUID, String> hashes = new LinkedHashMap<>();
-            n.path("hashes").fields().forEachRemaining(e -> hashes.put(decode(e.getKey()), e.getValue().asText()));
-            return new ConsolidationPayload(action, scope, agentId, keepId, List.copyOf(drops), Map.copyOf(hashes));
+            n.path("hashes")
+                    .fields()
+                    .forEachRemaining(e -> hashes.put(decode(e.getKey()), e.getValue().asText()));
+            return new ConsolidationPayload(
+                    action, scope, agentId, keepId, List.copyOf(drops), Map.copyOf(hashes));
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
@@ -84,14 +103,17 @@ public record ConsolidationPayload(
     }
 
     /**
-     * A short fingerprint of a fact's wording, taken when the proposal is filed so the applier can tell the person
-     * approved the fact they were shown. Groups of six hex characters joined by {@code x}: no run of digits long
-     * enough for the card-number scrubber to touch.
+     * A short fingerprint of a fact's wording, taken when the proposal is filed so the applier can
+     * tell the person approved the fact they were shown. Groups of six hex characters joined by
+     * {@code x}: no run of digits long enough for the card-number scrubber to touch.
      */
     public static String fingerprint(String content) {
         try {
-            byte[] d = java.security.MessageDigest.getInstance("SHA-256")
-                    .digest((content == null ? "" : content).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            byte[] d =
+                    java.security.MessageDigest.getInstance("SHA-256")
+                            .digest(
+                                    (content == null ? "" : content)
+                                            .getBytes(java.nio.charset.StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 9; i++) {
                 if (i > 0 && i % 3 == 0) {

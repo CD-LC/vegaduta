@@ -54,18 +54,23 @@ public class AddonCatalog {
 
     static final Pattern ID = Pattern.compile("^[a-z][a-z0-9-]{1,62}$");
     static final Pattern ENV_KEY = Pattern.compile("^[A-Z][A-Z0-9_]{0,63}$");
+
     /** Values are written into {@code .env} unquoted: no spaces, quotes, dollars or newlines. */
     static final Pattern ENV_VALUE = Pattern.compile("^[A-Za-z0-9._:/+-]{1,128}$");
+
     static final Pattern LEARN_MORE = Pattern.compile("^docs/[A-Za-z0-9._/-]+(#[A-Za-z0-9._-]+)?$");
+
     /** Same shape as {@code LocalModelsService.TAG}: an Ollama model name. */
-    static final Pattern MODEL_TAG = Pattern.compile(
-            "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*){0,2}(:[A-Za-z0-9._-]+)?$");
+    static final Pattern MODEL_TAG =
+            Pattern.compile(
+                    "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*){0,2}(:[A-Za-z0-9._-]+)?$");
 
     private static final int MAX_NAME = 80;
     private static final int MAX_DESCRIPTION = 600;
 
     private final List<AddonDefinition> addons;
     private final Map<String, AddonDefinition> byId;
+
     /** Ids with every requirement before the add-on that needs it. */
     private final List<String> order;
 
@@ -103,7 +108,10 @@ public class AddonCatalog {
         return id == null ? Optional.empty() : Optional.ofNullable(byId.get(id));
     }
 
-    /** Everything {@code id} needs, directly or not, requirements first; {@code id} itself is not in the list. */
+    /**
+     * Everything {@code id} needs, directly or not, requirements first; {@code id} itself is not in
+     * the list.
+     */
     public List<AddonDefinition> requirementsOf(String id) {
         Set<String> needed = new LinkedHashSet<>();
         collectRequirements(id, needed);
@@ -122,7 +130,8 @@ public class AddonCatalog {
         List<AddonDefinition> out = new ArrayList<>();
         for (int i = order.size() - 1; i >= 0; i--) {
             String candidate = order.get(i);
-            if (!candidate.equals(id) && requirementsOf(candidate).stream().anyMatch(d -> d.id().equals(id))) {
+            if (!candidate.equals(id)
+                    && requirementsOf(candidate).stream().anyMatch(d -> d.id().equals(id))) {
                 out.add(byId.get(candidate));
             }
         }
@@ -155,24 +164,30 @@ public class AddonCatalog {
     private record CatalogFile(Integer schemaVersion, List<AddonDefinition> addons) {}
 
     private static List<AddonDefinition> readText(String json) {
-        JsonMapper mapper = JsonMapper.builder()
-                .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
-                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-                .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-                .disable(JsonParser.Feature.ALLOW_COMMENTS)
-                .build();
+        JsonMapper mapper =
+                JsonMapper.builder()
+                        .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+                        .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                        .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                        .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                        .disable(JsonParser.Feature.ALLOW_COMMENTS)
+                        .build();
         CatalogFile file;
         try {
             file = mapper.readValue(json, CatalogFile.class);
         } catch (JsonProcessingException e) {
-            throw new AddonCatalogException("addons/catalog.json cannot be parsed: " + e.getOriginalMessage(), e);
+            throw new AddonCatalogException(
+                    "addons/catalog.json cannot be parsed: " + e.getOriginalMessage(), e);
         }
-        if (file == null || file.schemaVersion() == null || file.schemaVersion() != SCHEMA_VERSION) {
-            throw new AddonCatalogException("addons/catalog.json: schemaVersion must be " + SCHEMA_VERSION + ".");
+        if (file == null
+                || file.schemaVersion() == null
+                || file.schemaVersion() != SCHEMA_VERSION) {
+            throw new AddonCatalogException(
+                    "addons/catalog.json: schemaVersion must be " + SCHEMA_VERSION + ".");
         }
         if (file.addons() == null || file.addons().isEmpty()) {
-            throw new AddonCatalogException("addons/catalog.json: addons must be a non-empty list.");
+            throw new AddonCatalogException(
+                    "addons/catalog.json: addons must be a non-empty list.");
         }
         return file.addons();
     }
@@ -206,7 +221,10 @@ public class AddonCatalog {
             }
         }
         validateComposeEnvConflicts(list, problems);
-        long planned = list.stream().filter(d -> d != null && d.availability() == Availability.PLANNED).count();
+        long planned =
+                list.stream()
+                        .filter(d -> d != null && d.availability() == Availability.PLANNED)
+                        .count();
         if (planned > MAX_PLANNED) {
             problems.add("at most " + MAX_PLANNED + " add-ons may be planned, found " + planned);
         }
@@ -216,7 +234,8 @@ public class AddonCatalog {
         return problems;
     }
 
-    private static void validateEntry(AddonDefinition d, Map<String, AddonDefinition> ids, List<String> problems) {
+    private static void validateEntry(
+            AddonDefinition d, Map<String, AddonDefinition> ids, List<String> problems) {
         String where = "'" + d.id() + "'";
         boolean planned = d.availability() == Availability.PLANNED;
         text(problems, where, "name", d.name(), MAX_NAME);
@@ -240,14 +259,18 @@ public class AddonCatalog {
             problems.add(where + ": kind 'planned' and availability 'planned' go together");
         }
         if (d.kind() == Kind.MCP_SERVER && !planned) {
-            problems.add(where + ": kind 'mcp-server' has no executor yet, so it can only be listed as planned");
+            problems.add(
+                    where
+                            + ": kind 'mcp-server' has no executor yet, so it can only be listed as planned");
         }
         if (!planned && (d.license() == null || d.license().isBlank())) {
             problems.add(where + ": license is required for an available add-on");
         }
-        if (d.learnMore() != null && !d.learnMore().isEmpty()
+        if (d.learnMore() != null
+                && !d.learnMore().isEmpty()
                 && (d.learnMore().contains("..") || !LEARN_MORE.matcher(d.learnMore()).matches())) {
-            problems.add(where + ": learnMore must be a repository docs path like docs/x.md#anchor");
+            problems.add(
+                    where + ": learnMore must be a repository docs path like docs/x.md#anchor");
         }
         if (d.learnMore() == null || d.learnMore().isEmpty()) {
             problems.add(where + ": learnMore is required");
@@ -264,7 +287,8 @@ public class AddonCatalog {
             } else if (required.equals(d.id())) {
                 problems.add(where + ": requires itself");
             } else if (!planned && target.availability() == Availability.PLANNED) {
-                problems.add(where + ": is available but requires planned add-on '" + required + "'");
+                problems.add(
+                        where + ": is available but requires planned add-on '" + required + "'");
             }
         }
         if (new HashSet<>(d.requires()).size() != d.requires().size()) {
@@ -284,7 +308,9 @@ public class AddonCatalog {
             problems.add(where + ": a planned add-on cannot be on by default");
         }
         if (d.compose() != null || d.model() != null || d.observe() != null) {
-            problems.add(where + ": a planned add-on cannot carry compose, model or observe (nothing can be switched on)");
+            problems.add(
+                    where
+                            + ": a planned add-on cannot carry compose, model or observe (nothing can be switched on)");
         }
         if (d.hostCommand() != null && !d.hostCommand().isEmpty()) {
             problems.add(where + ": a planned add-on has no hostCommand");
@@ -302,14 +328,22 @@ public class AddonCatalog {
         }
         for (String p : c.profiles()) {
             if (!PERSONAL_PROFILES.contains(p)) {
-                problems.add(where + ": compose profile '" + p + "' is not one scripts/vegaduta personal accepts "
-                        + PERSONAL_PROFILES);
+                problems.add(
+                        where
+                                + ": compose profile '"
+                                + p
+                                + "' is not one scripts/vegaduta personal accepts "
+                                + PERSONAL_PROFILES);
             }
         }
         for (String f : c.flags()) {
             if (!PERSONAL_FLAGS.contains(f)) {
-                problems.add(where + ": compose flag '" + f + "' is not one scripts/vegaduta personal remembers "
-                        + PERSONAL_FLAGS);
+                problems.add(
+                        where
+                                + ": compose flag '"
+                                + f
+                                + "' is not one scripts/vegaduta personal remembers "
+                                + PERSONAL_FLAGS);
             }
         }
         for (Map.Entry<String, String> e : c.env().entrySet()) {
@@ -317,7 +351,12 @@ public class AddonCatalog {
                 problems.add(where + ": env key '" + e.getKey() + "' must be UPPER_SNAKE_CASE");
             }
             if (e.getValue() == null || !ENV_VALUE.matcher(e.getValue()).matches()) {
-                problems.add(where + ": env value of " + e.getKey() + " must match " + ENV_VALUE.pattern());
+                problems.add(
+                        where
+                                + ": env value of "
+                                + e.getKey()
+                                + " must match "
+                                + ENV_VALUE.pattern());
             }
         }
         String command = d.hostCommand() == null ? "" : d.hostCommand();
@@ -336,13 +375,15 @@ public class AddonCatalog {
         }
         for (Map.Entry<String, String> e : c.env().entrySet()) {
             if (!command.contains(e.getKey() + "=" + e.getValue())) {
-                problems.add(where + ": hostCommand must mention " + e.getKey() + "=" + e.getValue());
+                problems.add(
+                        where + ": hostCommand must mention " + e.getKey() + "=" + e.getValue());
             }
         }
         AddonDefinition.Observe o = d.observe();
         if (o != null) {
-            boolean knownTest = AddonDefinition.Observe.NON_BLANK.equals(o.test())
-                    || AddonDefinition.Observe.TRUE.equals(o.test());
+            boolean knownTest =
+                    AddonDefinition.Observe.NON_BLANK.equals(o.test())
+                            || AddonDefinition.Observe.TRUE.equals(o.test());
             if (o.property() == null || o.property().isBlank() || !knownTest) {
                 problems.add(where + ": observe needs a property and test 'non-blank' or 'true'");
             }
@@ -356,13 +397,15 @@ public class AddonCatalog {
         if (d.compose() != null || d.observe() != null) {
             problems.add(where + ": compose and observe belong to kind 'compose-profile'");
         }
-        if (d.hostCommand() == null || d.hostCommand().isBlank()
+        if (d.hostCommand() == null
+                || d.hostCommand().isBlank()
                 || (d.model() != null && !d.hostCommand().contains(d.model()))) {
             problems.add(where + ": hostCommand must be the manual pull of the model");
         }
     }
 
-    private static void text(List<String> problems, String where, String field, String value, int max) {
+    private static void text(
+            List<String> problems, String where, String field, String value, int max) {
         if (value == null || value.isBlank()) {
             problems.add(where + ": " + field + " is required");
         } else if (value.length() > max) {
@@ -371,7 +414,8 @@ public class AddonCatalog {
     }
 
     /** Two add-ons that set the same {@code .env} key to different values cannot both be on. */
-    private static void validateComposeEnvConflicts(List<AddonDefinition> list, List<String> problems) {
+    private static void validateComposeEnvConflicts(
+            List<AddonDefinition> list, List<String> problems) {
         Map<String, String> seen = new HashMap<>();
         Map<String, String> owner = new HashMap<>();
         for (AddonDefinition d : list) {
@@ -381,8 +425,14 @@ public class AddonCatalog {
             for (Map.Entry<String, String> e : d.compose().env().entrySet()) {
                 String previous = seen.putIfAbsent(e.getKey(), e.getValue());
                 if (previous != null && !previous.equals(e.getValue())) {
-                    problems.add("env key " + e.getKey() + " is set to different values by '"
-                            + owner.get(e.getKey()) + "' and '" + d.id() + "'");
+                    problems.add(
+                            "env key "
+                                    + e.getKey()
+                                    + " is set to different values by '"
+                                    + owner.get(e.getKey())
+                                    + "' and '"
+                                    + d.id()
+                                    + "'");
                 }
                 owner.putIfAbsent(e.getKey(), d.id());
             }
@@ -401,7 +451,11 @@ public class AddonCatalog {
     }
 
     private static void findCycle(
-            String id, Map<String, AddonDefinition> byId, Set<String> done, List<String> path, List<String> problems) {
+            String id,
+            Map<String, AddonDefinition> byId,
+            Set<String> done,
+            List<String> path,
+            List<String> problems) {
         if (done.contains(id)) {
             return;
         }
@@ -422,7 +476,10 @@ public class AddonCatalog {
         done.add(id);
     }
 
-    /** Requirements before dependents; stable for the file's order. Only called on a cycle-free catalog. */
+    /**
+     * Requirements before dependents; stable for the file's order. Only called on a cycle-free
+     * catalog.
+     */
     private static List<String> topologicalOrder(List<AddonDefinition> list) {
         Map<String, AddonDefinition> byId = new HashMap<>();
         list.forEach(d -> byId.put(d.id(), d));
@@ -434,7 +491,8 @@ public class AddonCatalog {
         return List.copyOf(out);
     }
 
-    private static void visit(String id, Map<String, AddonDefinition> byId, Set<String> seen, List<String> out) {
+    private static void visit(
+            String id, Map<String, AddonDefinition> byId, Set<String> seen, List<String> out) {
         if (!seen.add(id)) {
             return;
         }

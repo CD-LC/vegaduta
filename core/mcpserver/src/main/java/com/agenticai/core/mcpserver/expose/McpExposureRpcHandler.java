@@ -16,8 +16,8 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * JSON-RPC level hook that lets ONE authenticated caller see - and call - its own exposed
- * agents / workflows as MCP tools, on top of the five static tools.
+ * JSON-RPC level hook that lets ONE authenticated caller see - and call - its own exposed agents /
+ * workflows as MCP tools, on top of the five static tools.
  *
  * <p><b>Why this is a hook in the auth filter and not a tool registration.</b> Spring AI's MCP
  * server keeps a single, application-wide tool registry (see {@code McpServerToolConfig}'s
@@ -25,16 +25,16 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * cannot be registered with it. {@link com.agenticai.core.mcpserver.McpApiKeyAuthFilter} - which
  * has by then authenticated the key, set the tenant context and the caller's grant sets, and
  * applied the per-key rate limit - hands the already-read request body to {@link #tryHandle}; this
- * class answers only three things and passes everything else (initialize, ping, resources, the
- * five static tools' calls, notifications, batches) through untouched:
+ * class answers only three things and passes everything else (initialize, ping, resources, the five
+ * static tools' calls, notifications, batches) through untouched:
  *
  * <ul>
  *   <li>{@code tools/list} - the static tools plus this caller's dynamic ones, but ONLY when the
- *       caller has at least one dynamic tool; otherwise the SDK answers exactly as it always did;</li>
- *   <li>{@code tools/call} of a dynamic name ({@code agent_*}, {@code workflow_*}, {@code get_run}) -
- *       executed by {@link McpExposedToolInvoker}; a name that is not in THIS caller's catalog gets
- *       an "Unknown tool" error (identical for "does not exist", "not exposed" and "not granted",
- *       so nothing is revealed) and an audit row.</li>
+ *       caller has at least one dynamic tool; otherwise the SDK answers exactly as it always did;
+ *   <li>{@code tools/call} of a dynamic name ({@code agent_*}, {@code workflow_*}, {@code get_run})
+ *       - executed by {@link McpExposedToolInvoker}; a name that is not in THIS caller's catalog
+ *       gets an "Unknown tool" error (identical for "does not exist", "not exposed" and "not
+ *       granted", so nothing is revealed) and an audit row.
  * </ul>
  *
  * <p>Answered as a plain {@code application/json} response, which the Streamable HTTP transport
@@ -51,8 +51,9 @@ public class McpExposureRpcHandler {
     private final McpExposedToolInvoker invoker;
 
     public McpExposureRpcHandler(
-        Supplier<List<ToolCallback>> staticTools, McpExposedToolCatalog catalog, McpExposedToolInvoker invoker
-    ) {
+            Supplier<List<ToolCallback>> staticTools,
+            McpExposedToolCatalog catalog,
+            McpExposedToolInvoker invoker) {
         this.staticTools = staticTools;
         this.catalog = catalog;
         this.invoker = invoker;
@@ -60,8 +61,8 @@ public class McpExposureRpcHandler {
 
     /**
      * @param requestBody the raw JSON-RPC request body
-     * @return the complete JSON-RPC response text if this class handled the request, empty to let the
-     *         normal MCP transport handle it. Never throws.
+     * @return the complete JSON-RPC response text if this class handled the request, empty to let
+     *     the normal MCP transport handle it. Never throws.
      */
     public Optional<String> tryHandle(byte[] requestBody) {
         JsonNode root;
@@ -102,7 +103,9 @@ public class McpExposureRpcHandler {
         ArrayNode tools = MAPPER.createArrayNode();
         for (ToolCallback callback : staticTools.get()) {
             ToolDefinition definition = callback.getToolDefinition();
-            tools.add(toolNode(definition.name(), definition.description(), definition.inputSchema()));
+            tools.add(
+                    toolNode(
+                            definition.name(), definition.description(), definition.inputSchema()));
         }
         for (McpExposedTool tool : dynamic) {
             tools.add(toolNode(tool.name(), tool.description(), tool.inputSchemaJson()));
@@ -114,7 +117,8 @@ public class McpExposureRpcHandler {
 
     private Optional<String> handleCall(JsonNode id, JsonNode params, McpCallerContext caller) {
         String name = params.path("name").asText("");
-        if (!McpToolSlugs.isDynamicToolName(name) && !McpExposedToolCatalog.GET_RUN_TOOL.equals(name)) {
+        if (!McpToolSlugs.isDynamicToolName(name)
+                && !McpExposedToolCatalog.GET_RUN_TOOL.equals(name)) {
             return Optional.empty(); // one of the static tools - the normal transport handles it
         }
         Optional<McpExposedTool> tool = catalog.find(caller, name);

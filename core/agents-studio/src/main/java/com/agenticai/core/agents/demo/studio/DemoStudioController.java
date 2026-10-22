@@ -7,12 +7,16 @@ import com.agenticai.core.agents.demo.studio.DemoStudioService.StudioException;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -31,15 +35,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import reactor.core.publisher.Flux;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HTTP surface of the /try Agent Studio - {@code /api/demo/studio/**}, unauthenticated like the
@@ -590,7 +586,9 @@ public class DemoStudioController {
                         .concatWith(streams.workflowCapNotice(capped, WORKFLOW_TIMEOUT))
                         .doFinally(signal -> permit.release())
                         .onErrorResume(
-                                e -> streams.workflowFailure(e, session, workflowId, WORKFLOW_TIMEOUT));
+                                e ->
+                                        streams.workflowFailure(
+                                                e, session, workflowId, WORKFLOW_TIMEOUT));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                 .header("X-Accel-Buffering", "no")

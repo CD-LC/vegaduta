@@ -10,15 +10,16 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Infers the addressable paths of a node's output from one real value (a pin or the last run), for editor
- * autocomplete and the data picker. A path is exactly what an expression would write after the node reference:
- * {@code items[0].price}, {@code customer["e-mail"]}.
+ * Infers the addressable paths of a node's output from one real value (a pin or the last run), for
+ * editor autocomplete and the data picker. A path is exactly what an expression would write after
+ * the node reference: {@code items[0].price}, {@code customer["e-mail"]}.
  *
- * <p>Bounds (contract): at most {@value #MAX_PATHS} paths per node, {@value #MAX_DEPTH} segments deep, and only
- * the first {@value #MAX_ARRAY_ELEMENTS} elements of any array (later elements have the same shape in practice,
- * and walking them would blow the cap on one long list). Containers are listed before their children so a tree
- * can be built from the list in order. Output that is not a JSON object or array (plain text, a bare number)
- * has no sub-paths and yields an empty list; the node itself is still pickable.
+ * <p>Bounds (contract): at most {@value #MAX_PATHS} paths per node, {@value #MAX_DEPTH} segments
+ * deep, and only the first {@value #MAX_ARRAY_ELEMENTS} elements of any array (later elements have
+ * the same shape in practice, and walking them would blow the cap on one long list). Containers are
+ * listed before their children so a tree can be built from the list in order. Output that is not a
+ * JSON object or array (plain text, a bare number) has no sub-paths and yields an empty list; the
+ * node itself is still pickable.
  */
 final class UpstreamSchemaInferer {
 
@@ -61,7 +62,8 @@ final class UpstreamSchemaInferer {
             Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
             while (fields.hasNext() && out.size() < MAX_PATHS) {
                 Map.Entry<String, JsonNode> f = fields.next();
-                String path = prefix.isEmpty() ? keyRoot(f.getKey()) : prefix + keySuffix(f.getKey());
+                String path =
+                        prefix.isEmpty() ? keyRoot(f.getKey()) : prefix + keySuffix(f.getKey());
                 add(path, f.getValue(), out);
                 walk(f.getValue(), path, depth + 1, out);
             }

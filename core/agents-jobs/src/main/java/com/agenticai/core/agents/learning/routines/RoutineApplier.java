@@ -20,13 +20,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Approved ROUTINE: creates the scheduled task through {@link ScheduledTaskService#create}, the same path the
- * console form and the {@code schedule_task} tool use, so every rule applies (the agent must be usable by the
- * approver, the plan's task cap, the minimum interval, unattended-safe autonomy). In-app delivery.
+ * Approved ROUTINE: creates the scheduled task through {@link ScheduledTaskService#create}, the
+ * same path the console form and the {@code schedule_task} tool use, so every rule applies (the
+ * agent must be usable by the approver, the plan's task cap, the minimum interval, unattended-safe
+ * autonomy). In-app delivery.
  *
- * <p>The proposal body reads {@code "<schedule in words>.\nTask: <prompt>"}. If the person edited it, the text
- * after {@code Task:} (or, with no marker, the whole edit) becomes the prompt; the schedule is the proposal's own
- * and is changed afterwards on the Scheduled page. Runs on the approving person's request thread; keeps no state.
+ * <p>The proposal body reads {@code "<schedule in words>.\nTask: <prompt>"}. If the person edited
+ * it, the text after {@code Task:} (or, with no marker, the whole edit) becomes the prompt; the
+ * schedule is the proposal's own and is changed afterwards on the Scheduled page. Runs on the
+ * approving person's request thread; keeps no state.
  */
 @Component
 @ConditionalOnProperty(
@@ -51,7 +53,8 @@ public class RoutineApplier implements LearningProposalApplier {
     }
 
     @Override
-    public void apply(LearningProposal proposal, String text) throws LearningProposalApplyException {
+    public void apply(LearningProposal proposal, String text)
+            throws LearningProposalApplyException {
         JsonNode payload;
         try {
             payload = JsonMappers.plain().readTree(proposal.getPayload());
@@ -78,7 +81,9 @@ public class RoutineApplier implements LearningProposalApplier {
                                         RoutineDetector.tokens(existing.prompt()))
                                 >= RoutineLearningService.SAME_AS_EXISTING) {
                     throw new LearningProposalApplyException(
-                            "You already have a scheduled task for this (\"" + existing.name() + "\").");
+                            "You already have a scheduled task for this (\""
+                                    + existing.name()
+                                    + "\").");
                 }
             }
             scheduledTasks.create(
@@ -120,11 +125,15 @@ public class RoutineApplier implements LearningProposalApplier {
         try {
             return UUID.fromString(payload.path("agentId").asText(""));
         } catch (RuntimeException e) {
-            throw new LearningProposalApplyException("This routine does not say which agent should run it.");
+            throw new LearningProposalApplyException(
+                    "This routine does not say which agent should run it.");
         }
     }
 
-    /** The prompt to schedule: the stored one when the text is untouched, else what the person wrote. */
+    /**
+     * The prompt to schedule: the stored one when the text is untouched, else what the person
+     * wrote.
+     */
     static String promptOf(LearningProposal proposal, JsonNode payload, String text) {
         String edited = text == null ? "" : text.strip();
         if (edited.equals(proposal.getBody() == null ? "" : proposal.getBody().strip())) {

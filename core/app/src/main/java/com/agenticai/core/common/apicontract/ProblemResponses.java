@@ -36,6 +36,8 @@ final class ProblemResponses {
                         : MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter()
-                .write(MAPPER.writeValueAsString(errors.body(status, message, typeSlug, extensions)));
+                .write(
+                        MAPPER.writeValueAsString(
+                                errors.body(status, message, typeSlug, extensions)));
     }
 }

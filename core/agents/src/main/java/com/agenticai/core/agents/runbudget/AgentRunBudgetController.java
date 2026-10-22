@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Per-agent run cap: read the effective cap + estimate, and let whoever may edit the agent
- * lower it. Thin on purpose - access, validation and status codes are decided in
- * {@link AgentRunBudgetService}.
+ * Per-agent run cap: read the effective cap + estimate, and let whoever may edit the agent lower
+ * it. Thin on purpose - access, validation and status codes are decided in {@link
+ * AgentRunBudgetService}.
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/run-budget")
@@ -43,11 +43,14 @@ public class AgentRunBudgetController {
         return runBudgetService.update(agentId, parseRunBudgetUsd(body));
     }
 
-    /** Pure: null = clear. @throws IllegalArgumentException (400) when the field is absent or not a number. */
+    /**
+     * Pure: null = clear. @throws IllegalArgumentException (400) when the field is absent or not a
+     * number.
+     */
     static BigDecimal parseRunBudgetUsd(JsonNode body) {
         if (body == null || !body.isObject() || !body.has(FIELD)) {
             throw new IllegalArgumentException(
-                "Request body must contain " + FIELD + " (a number, or null to clear the cap)");
+                    "Request body must contain " + FIELD + " (a number, or null to clear the cap)");
         }
         JsonNode value = body.get(FIELD);
         if (value.isNull()) {
@@ -60,7 +63,8 @@ public class AgentRunBudgetController {
             try {
                 return new BigDecimal(value.asText().trim());
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(FIELD + " must be a number, or null to clear the cap");
+                throw new IllegalArgumentException(
+                        FIELD + " must be a number, or null to clear the cap");
             }
         }
         throw new IllegalArgumentException(FIELD + " must be a number, or null to clear the cap");

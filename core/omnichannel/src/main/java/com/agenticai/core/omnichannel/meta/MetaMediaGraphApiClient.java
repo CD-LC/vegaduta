@@ -1,8 +1,8 @@
 package com.agenticai.core.omnichannel.meta;
 
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
@@ -23,36 +23,31 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Media-send counterpart to {@link MetaGraphApiClient} - deliberately its
- * own class rather than growing that one further (already a wide surface):
- * every method here builds a multipart/form-data request, a body-
- * construction concern the plain-JSON text-send methods over there never
- * need, so keeping them apart keeps both files readable. Same "no SDK, plain
- * {@link HttpClient} for a handful of REST calls" choice as {@code
- * MetaGraphApiClient}, same host/version/{@code Authorization: Bearer}
- * convention.
+ * Media-send counterpart to {@link MetaGraphApiClient} - deliberately its own class rather than
+ * growing that one further (already a wide surface): every method here builds a multipart/form-data
+ * request, a body- construction concern the plain-JSON text-send methods over there never need, so
+ * keeping them apart keeps both files readable. Same "no SDK, plain {@link HttpClient} for a
+ * handful of REST calls" choice as {@code MetaGraphApiClient}, same host/version/{@code
+ * Authorization: Bearer} convention.
  *
- * <p>Two different upload shapes, because Meta's Graph API itself has two
- * different shapes here:
+ * <p>Two different upload shapes, because Meta's Graph API itself has two different shapes here:
+ *
  * <ul>
- *   <li><b>WhatsApp Cloud API</b> is a real two-step protocol: upload bytes
- *   to {@code POST /{phone-number-id}/media} to get back a media {@code id},
- *   then reference that id in a normal JSON {@code POST /{phone-number-id}/messages}
- *   call - see {@link #sendWhatsAppMedia}, mirroring {@code
- *   MetaGraphApiClient#sendTextMessage}'s JSON-send shape for the second
- *   step.</li>
- *   <li><b>Messenger/Instagram Send API</b> (Meta proxies Instagram business
- *   messaging through the linked Page, same as {@code
- *   MetaGraphApiClient#sendInstagramMessage}) accepts the bytes directly in
- *   one multipart {@code POST /me/messages} call - no separate upload/id
- *   step, but also no caption field on the attachment payload, so a
- *   non-blank caption goes out as a plain follow-up text message rather than
- *   being silently dropped - see {@link #sendPageAttachment}.</li>
+ *   <li><b>WhatsApp Cloud API</b> is a real two-step protocol: upload bytes to {@code POST
+ *       /{phone-number-id}/media} to get back a media {@code id}, then reference that id in a
+ *       normal JSON {@code POST /{phone-number-id}/messages} call - see {@link #sendWhatsAppMedia},
+ *       mirroring {@code MetaGraphApiClient#sendTextMessage}'s JSON-send shape for the second step.
+ *   <li><b>Messenger/Instagram Send API</b> (Meta proxies Instagram business messaging through the
+ *       linked Page, same as {@code MetaGraphApiClient#sendInstagramMessage}) accepts the bytes
+ *       directly in one multipart {@code POST /me/messages} call - no separate upload/id step, but
+ *       also no caption field on the attachment payload, so a non-blank caption goes out as a plain
+ *       follow-up text message rather than being silently dropped - see {@link
+ *       #sendPageAttachment}.
  * </ul>
  *
- * <p>The Graph host is overridable ({@code app.omnichannel.meta.graph-base-url})
- * purely so a test can point this at a local stub server instead of the real
- * Meta API - production never sets the property and gets the real default.
+ * <p>The Graph host is overridable ({@code app.omnichannel.meta.graph-base-url}) purely so a test
+ * can point this at a local stub server instead of the real Meta API - production never sets the
+ * property and gets the real default.
  */
 @Component
 public class MetaMediaGraphApiClient {
@@ -66,14 +61,19 @@ public class MetaMediaGraphApiClient {
 
     @Autowired
     public MetaMediaGraphApiClient(
-        ObjectMapper objectMapper,
-        @Value("${app.omnichannel.meta.graph-base-url:https://graph.facebook.com}") String graphBaseUrl
-    ) {
-        this(objectMapper, graphBaseUrl,
-            GuardedJdkHttpClient.defaults(Duration.ofSeconds(10), UPLOAD_TIMEOUT, false));
+            ObjectMapper objectMapper,
+            @Value("${app.omnichannel.meta.graph-base-url:https://graph.facebook.com}")
+                    String graphBaseUrl) {
+        this(
+                objectMapper,
+                graphBaseUrl,
+                GuardedJdkHttpClient.defaults(Duration.ofSeconds(10), UPLOAD_TIMEOUT, false));
     }
 
-    /** Test seam: a raw transport for loopback fixture servers, which the SSRF guard rightly refuses. */
+    /**
+     * Test seam: a raw transport for loopback fixture servers, which the SSRF guard rightly
+     * refuses.
+     */
     MetaMediaGraphApiClient(ObjectMapper objectMapper, String graphBaseUrl, HttpClient httpClient) {
         this.objectMapper = objectMapper;
         this.httpClient = httpClient;
@@ -90,78 +90,139 @@ public class MetaMediaGraphApiClient {
 
     // ---- WhatsApp Cloud API ----
 
-    /** @return a short, human-readable log line, same contract as {@code MetaGraphApiClient.sendTextMessage}. */
-    public String sendWhatsAppMedia(String phoneNumberId, String accessToken, String to, byte[] bytes,
-                                     String contentType, String filename, String caption) {
-        String mediaId = uploadWhatsAppMedia(phoneNumberId, accessToken, bytes, contentType, filename);
-        return sendWhatsAppMediaMessage(phoneNumberId, accessToken, to, mediaId, contentType, filename, caption);
+    /**
+     * @return a short, human-readable log line, same contract as {@code
+     *     MetaGraphApiClient.sendTextMessage}.
+     */
+    public String sendWhatsAppMedia(
+            String phoneNumberId,
+            String accessToken,
+            String to,
+            byte[] bytes,
+            String contentType,
+            String filename,
+            String caption) {
+        String mediaId =
+                uploadWhatsAppMedia(phoneNumberId, accessToken, bytes, contentType, filename);
+        return sendWhatsAppMediaMessage(
+                phoneNumberId, accessToken, to, mediaId, contentType, filename, caption);
     }
 
-    private String uploadWhatsAppMedia(String phoneNumberId, String accessToken, byte[] bytes, String contentType, String filename) {
+    private String uploadWhatsAppMedia(
+            String phoneNumberId,
+            String accessToken,
+            byte[] bytes,
+            String contentType,
+            String filename) {
         String boundary = "----vegaduta-" + UUID.randomUUID();
         Multipart body = new Multipart(boundary);
         body.addField("messaging_product", "whatsapp");
-        body.addField("type", StringUtils.hasText(contentType) ? contentType : "application/octet-stream");
-        body.addFile("file", StringUtils.hasText(filename) ? filename : "attachment", contentType, bytes);
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(graphBaseUrl + "/" + GRAPH_VERSION + "/" + phoneNumberId + "/media"))
-            .timeout(UPLOAD_TIMEOUT)
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-            .POST(HttpRequest.BodyPublishers.ofByteArray(body.build()))
-            .build();
+        body.addField(
+                "type",
+                StringUtils.hasText(contentType) ? contentType : "application/octet-stream");
+        body.addFile(
+                "file",
+                StringUtils.hasText(filename) ? filename : "attachment",
+                contentType,
+                bytes);
+        HttpRequest request =
+                HttpRequest.newBuilder()
+                        .uri(
+                                URI.create(
+                                        graphBaseUrl
+                                                + "/"
+                                                + GRAPH_VERSION
+                                                + "/"
+                                                + phoneNumberId
+                                                + "/media"))
+                        .timeout(UPLOAD_TIMEOUT)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                        .POST(HttpRequest.BodyPublishers.ofByteArray(body.build()))
+                        .build();
         try {
-            HttpResponse<String> response = MetaGraphGuard.send(breakerRegistry, httpClient, request);
+            HttpResponse<String> response =
+                    MetaGraphGuard.send(breakerRegistry, httpClient, request);
             if (response.statusCode() >= 300) {
                 throw new ChannelDeliveryException(
-                    "whatsapp", "Meta media upload failed (" + response.statusCode() + "): " + response.body()
-                );
+                        "whatsapp",
+                        "Meta media upload failed ("
+                                + response.statusCode()
+                                + "): "
+                                + response.body());
             }
             String mediaId = objectMapper.readTree(response.body()).path("id").asText(null);
             if (mediaId == null) {
-                throw new ChannelDeliveryException("whatsapp", "Meta media upload response had no id: " + response.body());
+                throw new ChannelDeliveryException(
+                        "whatsapp", "Meta media upload response had no id: " + response.body());
             }
             return mediaId;
         } catch (ChannelDeliveryException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChannelDeliveryException("whatsapp", "Could not reach the Meta Graph API: " + e.getMessage());
+            throw new ChannelDeliveryException(
+                    "whatsapp", "Could not reach the Meta Graph API: " + e.getMessage());
         }
     }
 
-    private String sendWhatsAppMediaMessage(String phoneNumberId, String accessToken, String to, String mediaId,
-                                             String contentType, String filename, String caption) {
+    private String sendWhatsAppMediaMessage(
+            String phoneNumberId,
+            String accessToken,
+            String to,
+            String mediaId,
+            String contentType,
+            String filename,
+            String caption) {
         String type = whatsAppMediaType(contentType);
         Map<String, Object> mediaObject = new LinkedHashMap<>();
         mediaObject.put("id", mediaId);
         // Meta rejects a caption/filename param on types that don't support
         // it (audio, sticker) rather than silently ignoring it - only attach
         // what each type actually allows.
-        if (StringUtils.hasText(caption) && (type.equals("image") || type.equals("video") || type.equals("document"))) {
+        if (StringUtils.hasText(caption)
+                && (type.equals("image") || type.equals("video") || type.equals("document"))) {
             mediaObject.put("caption", caption);
         }
         if (type.equals("document") && StringUtils.hasText(filename)) {
             mediaObject.put("filename", filename);
         }
-        Map<String, Object> payload = Map.of(
-            "messaging_product", "whatsapp",
-            "to", normalizeRecipient(to),
-            "type", type,
-            type, mediaObject
-        );
+        Map<String, Object> payload =
+                Map.of(
+                        "messaging_product",
+                        "whatsapp",
+                        "to",
+                        normalizeRecipient(to),
+                        "type",
+                        type,
+                        type,
+                        mediaObject);
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(graphBaseUrl + "/" + GRAPH_VERSION + "/" + phoneNumberId + "/messages"))
-                .timeout(UPLOAD_TIMEOUT)
-                .header("Authorization", "Bearer " + accessToken)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload)))
-                .build();
-            HttpResponse<String> response = MetaGraphGuard.send(breakerRegistry, httpClient, request);
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(
+                                    URI.create(
+                                            graphBaseUrl
+                                                    + "/"
+                                                    + GRAPH_VERSION
+                                                    + "/"
+                                                    + phoneNumberId
+                                                    + "/messages"))
+                            .timeout(UPLOAD_TIMEOUT)
+                            .header("Authorization", "Bearer " + accessToken)
+                            .header("Content-Type", "application/json")
+                            .POST(
+                                    HttpRequest.BodyPublishers.ofString(
+                                            objectMapper.writeValueAsString(payload)))
+                            .build();
+            HttpResponse<String> response =
+                    MetaGraphGuard.send(breakerRegistry, httpClient, request);
             if (response.statusCode() >= 300) {
                 throw new ChannelDeliveryException(
-                    "whatsapp", "Meta Graph API media send failed (" + response.statusCode() + "): " + response.body()
-                );
+                        "whatsapp",
+                        "Meta Graph API media send failed ("
+                                + response.statusCode()
+                                + "): "
+                                + response.body());
             }
             String messageId = "unknown";
             try {
@@ -170,13 +231,21 @@ public class MetaMediaGraphApiClient {
                     messageId = messages.get(0).path("id").asText("unknown");
                 }
             } catch (Exception ignored) {
-                // Leave messageId as "unknown" - Meta already accepted the send (status checked above).
+                // Leave messageId as "unknown" - Meta already accepted the send (status checked
+                // above).
             }
-            return "Sent " + type + " attachment to " + to + " via Meta Cloud API (id " + messageId + ").";
+            return "Sent "
+                    + type
+                    + " attachment to "
+                    + to
+                    + " via Meta Cloud API (id "
+                    + messageId
+                    + ").";
         } catch (ChannelDeliveryException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChannelDeliveryException("whatsapp", "Could not reach the Meta Graph API: " + e.getMessage());
+            throw new ChannelDeliveryException(
+                    "whatsapp", "Could not reach the Meta Graph API: " + e.getMessage());
         }
     }
 
@@ -206,40 +275,67 @@ public class MetaMediaGraphApiClient {
 
     // ---- Messenger / Instagram Send API ----
 
-    /** @return a short, human-readable log line describing what happened. */
-    public String sendPageAttachment(String channelLabel, String pageAccessToken, String recipientId, byte[] bytes,
-                                      String contentType, String filename, String caption) {
+    /**
+     * @return a short, human-readable log line describing what happened.
+     */
+    public String sendPageAttachment(
+            String channelLabel,
+            String pageAccessToken,
+            String recipientId,
+            byte[] bytes,
+            String contentType,
+            String filename,
+            String caption) {
         String type = messengerAttachmentType(contentType);
         String boundary = "----vegaduta-" + UUID.randomUUID();
         Multipart body = new Multipart(boundary);
         try {
             body.addField("recipient", objectMapper.writeValueAsString(Map.of("id", recipientId)));
-            body.addField("message", objectMapper.writeValueAsString(
-                Map.of("attachment", Map.of("type", type, "payload", Map.of("is_reusable", false)))));
+            body.addField(
+                    "message",
+                    objectMapper.writeValueAsString(
+                            Map.of(
+                                    "attachment",
+                                    Map.of(
+                                            "type",
+                                            type,
+                                            "payload",
+                                            Map.of("is_reusable", false)))));
             body.addField("messaging_type", "RESPONSE");
         } catch (Exception e) {
-            throw new ChannelDeliveryException(channelLabel, "Could not build attachment request: " + e.getMessage());
+            throw new ChannelDeliveryException(
+                    channelLabel, "Could not build attachment request: " + e.getMessage());
         }
-        body.addFile("filedata", StringUtils.hasText(filename) ? filename : "attachment", contentType, bytes);
+        body.addFile(
+                "filedata",
+                StringUtils.hasText(filename) ? filename : "attachment",
+                contentType,
+                bytes);
 
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(graphBaseUrl + "/" + GRAPH_VERSION + "/me/messages"))
-            .timeout(UPLOAD_TIMEOUT)
-            .header("Authorization", "Bearer " + pageAccessToken)
-            .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-            .POST(HttpRequest.BodyPublishers.ofByteArray(body.build()))
-            .build();
+        HttpRequest request =
+                HttpRequest.newBuilder()
+                        .uri(URI.create(graphBaseUrl + "/" + GRAPH_VERSION + "/me/messages"))
+                        .timeout(UPLOAD_TIMEOUT)
+                        .header("Authorization", "Bearer " + pageAccessToken)
+                        .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                        .POST(HttpRequest.BodyPublishers.ofByteArray(body.build()))
+                        .build();
         try {
-            HttpResponse<String> response = MetaGraphGuard.send(breakerRegistry, httpClient, request);
+            HttpResponse<String> response =
+                    MetaGraphGuard.send(breakerRegistry, httpClient, request);
             if (response.statusCode() >= 300) {
                 throw new ChannelDeliveryException(
-                    channelLabel, "Meta Graph API attachment send failed (" + response.statusCode() + "): " + response.body()
-                );
+                        channelLabel,
+                        "Meta Graph API attachment send failed ("
+                                + response.statusCode()
+                                + "): "
+                                + response.body());
             }
         } catch (ChannelDeliveryException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChannelDeliveryException(channelLabel, "Could not reach the Meta Graph API: " + e.getMessage());
+            throw new ChannelDeliveryException(
+                    channelLabel, "Could not reach the Meta Graph API: " + e.getMessage());
         }
 
         // Send API's attachment object has no caption field (unlike
@@ -251,30 +347,39 @@ public class MetaMediaGraphApiClient {
         return "Sent " + type + " attachment to " + recipientId + " via Meta Graph API.";
     }
 
-    private void sendFollowUpText(String channelLabel, String pageAccessToken, String recipientId, String text) {
+    private void sendFollowUpText(
+            String channelLabel, String pageAccessToken, String recipientId, String text) {
         try {
-            Map<String, Object> payload = Map.of(
-                "recipient", Map.of("id", recipientId),
-                "message", Map.of("text", text),
-                "messaging_type", "RESPONSE"
-            );
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(graphBaseUrl + "/" + GRAPH_VERSION + "/me/messages"))
-                .timeout(UPLOAD_TIMEOUT)
-                .header("Authorization", "Bearer " + pageAccessToken)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload)))
-                .build();
-            HttpResponse<String> response = MetaGraphGuard.send(breakerRegistry, httpClient, request);
+            Map<String, Object> payload =
+                    Map.of(
+                            "recipient", Map.of("id", recipientId),
+                            "message", Map.of("text", text),
+                            "messaging_type", "RESPONSE");
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(graphBaseUrl + "/" + GRAPH_VERSION + "/me/messages"))
+                            .timeout(UPLOAD_TIMEOUT)
+                            .header("Authorization", "Bearer " + pageAccessToken)
+                            .header("Content-Type", "application/json")
+                            .POST(
+                                    HttpRequest.BodyPublishers.ofString(
+                                            objectMapper.writeValueAsString(payload)))
+                            .build();
+            HttpResponse<String> response =
+                    MetaGraphGuard.send(breakerRegistry, httpClient, request);
             if (response.statusCode() >= 300) {
                 throw new ChannelDeliveryException(
-                    channelLabel, "Meta Graph API caption send failed (" + response.statusCode() + "): " + response.body()
-                );
+                        channelLabel,
+                        "Meta Graph API caption send failed ("
+                                + response.statusCode()
+                                + "): "
+                                + response.body());
             }
         } catch (ChannelDeliveryException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChannelDeliveryException(channelLabel, "Could not reach the Meta Graph API: " + e.getMessage());
+            throw new ChannelDeliveryException(
+                    channelLabel, "Could not reach the Meta Graph API: " + e.getMessage());
         }
     }
 
@@ -297,7 +402,10 @@ public class MetaMediaGraphApiClient {
         return "file";
     }
 
-    /** Minimal multipart/form-data body builder - no extra dependency for the handful of parts these calls ever need. */
+    /**
+     * Minimal multipart/form-data body builder - no extra dependency for the handful of parts these
+     * calls ever need.
+     */
     private static final class Multipart {
         private final String boundary;
         private final List<byte[]> parts = new ArrayList<>();
@@ -307,17 +415,33 @@ public class MetaMediaGraphApiClient {
         }
 
         void addField(String name, String value) {
-            parts.add((
-                "--" + boundary + "\r\n"
-                    + "Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n"
-                    + value + "\r\n"
-            ).getBytes(StandardCharsets.UTF_8));
+            parts.add(
+                    ("--"
+                                    + boundary
+                                    + "\r\n"
+                                    + "Content-Disposition: form-data; name=\""
+                                    + name
+                                    + "\"\r\n\r\n"
+                                    + value
+                                    + "\r\n")
+                            .getBytes(StandardCharsets.UTF_8));
         }
 
         void addFile(String fieldName, String filename, String contentType, byte[] content) {
-            String header = "--" + boundary + "\r\n"
-                + "Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + filename + "\"\r\n"
-                + "Content-Type: " + (StringUtils.hasText(contentType) ? contentType : "application/octet-stream") + "\r\n\r\n";
+            String header =
+                    "--"
+                            + boundary
+                            + "\r\n"
+                            + "Content-Disposition: form-data; name=\""
+                            + fieldName
+                            + "\"; filename=\""
+                            + filename
+                            + "\"\r\n"
+                            + "Content-Type: "
+                            + (StringUtils.hasText(contentType)
+                                    ? contentType
+                                    : "application/octet-stream")
+                            + "\r\n\r\n";
             parts.add(header.getBytes(StandardCharsets.UTF_8));
             parts.add(content);
             parts.add("\r\n".getBytes(StandardCharsets.UTF_8));

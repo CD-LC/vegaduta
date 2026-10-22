@@ -27,8 +27,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * {@link McpApiKeyAuthFilter} in OpenAI-compat mode (registered for {@code /v1/*} by {@link
- * OpenAiCompatKeyAuthConfig}): a {@code vmcp_} key is authenticated exactly as on {@code /mcp},
- * a platform JWT passes through untouched, and rejections use OpenAI's error envelope.
+ * OpenAiCompatKeyAuthConfig}): a {@code vmcp_} key is authenticated exactly as on {@code /mcp}, a
+ * platform JWT passes through untouched, and rejections use OpenAI's error envelope.
  */
 class OpenAiCompatKeyAuthTest {
 
@@ -57,8 +57,9 @@ class OpenAiCompatKeyAuthTest {
     }
 
     private McpServerAccessGrant grantWithId(UUID id) {
-        McpServerAccessGrant grant = new McpServerAccessGrant(
-            "sdk", McpApiKeyHasher.sha256Hex("vmcp_raw"), "rawrawra", "[]", "[]", "[]");
+        McpServerAccessGrant grant =
+                new McpServerAccessGrant(
+                        "sdk", McpApiKeyHasher.sha256Hex("vmcp_raw"), "rawrawra", "[]", "[]", "[]");
         ReflectionTestUtils.setField(grant, "id", id);
         return grant;
     }
@@ -74,7 +75,8 @@ class OpenAiCompatKeyAuthTest {
     }
 
     @Test
-    void noAuthorizationHeaderPassesThroughBecauseSpringSecurityOwnsThatRejection() throws Exception {
+    void noAuthorizationHeaderPassesThroughBecauseSpringSecurityOwnsThatRejection()
+            throws Exception {
         AtomicBoolean ran = new AtomicBoolean();
         filter.doFilter(request, response, (req, res) -> ran.set(true));
         assertTrue(ran.get());
@@ -85,9 +87,12 @@ class OpenAiCompatKeyAuthTest {
     void unknownKeyIsOpenAiShaped401() throws Exception {
         request.addHeader("Authorization", "Bearer vmcp_nope");
         when(grantService.resolveTenantSchema("vmcp_nope")).thenReturn(Optional.empty());
-        filter.doFilter(request, response, (req, res) -> {
-            throw new AssertionError("must not reach the controller");
-        });
+        filter.doFilter(
+                request,
+                response,
+                (req, res) -> {
+                    throw new AssertionError("must not reach the controller");
+                });
         assertEquals(401, response.getStatus());
         JsonNode err = mapper.readTree(response.getContentAsString()).get("error");
         assertEquals("invalid_api_key", err.get("code").asText());
@@ -100,15 +105,20 @@ class OpenAiCompatKeyAuthTest {
         UUID grantId = UUID.randomUUID();
         request.addHeader("Authorization", "Bearer vmcp_raw");
         when(grantService.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grantWithId(grantId)));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw"))
+                .thenReturn(Optional.of(grantWithId(grantId)));
         when(rateLimiter.allow(grantId)).thenReturn(false);
-        filter.doFilter(request, response, (req, res) -> {
-            throw new AssertionError("must not reach the controller");
-        });
+        filter.doFilter(
+                request,
+                response,
+                (req, res) -> {
+                    throw new AssertionError("must not reach the controller");
+                });
         assertEquals(429, response.getStatus());
         assertNotNull(response.getHeader("Retry-After"));
-        assertEquals("rate_limit_exceeded",
-            mapper.readTree(response.getContentAsString()).get("error").get("code").asText());
+        assertEquals(
+                "rate_limit_exceeded",
+                mapper.readTree(response.getContentAsString()).get("error").get("code").asText());
         assertTrue(TenantContext.current().isEmpty());
     }
 
@@ -119,21 +129,26 @@ class OpenAiCompatKeyAuthTest {
         McpServerAccessGrant grant = grantWithId(grantId);
         request.addHeader("Authorization", "Bearer vmcp_raw");
         when(grantService.resolveTenantSchema("vmcp_raw")).thenReturn(Optional.of("tenant_alpha"));
-        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw")).thenReturn(Optional.of(grant));
+        when(grantService.findByRawKeyWithinCurrentTenant("vmcp_raw"))
+                .thenReturn(Optional.of(grant));
         when(rateLimiter.allow(grantId)).thenReturn(true);
         when(grantService.parseExposedAgentIds(grant)).thenReturn(Set.of(agentId));
         when(grantService.parseExposedWorkflowIds(grant)).thenReturn(Set.of());
         when(grantService.parseExposedKnowledgeCollectionIds(grant)).thenReturn(Set.of());
 
         OpenAiCompatCallerScope scope = new OpenAiCompatKeyAuthConfig().openAiCompatCallerScope();
-        assertTrue(scope.exposedAgentIds().isEmpty(), "outside a key-authenticated request there is no grant scope");
+        assertTrue(
+                scope.exposedAgentIds().isEmpty(),
+                "outside a key-authenticated request there is no grant scope");
 
         AtomicReference<Optional<Set<UUID>>> seenScope = new AtomicReference<>();
         AtomicReference<String> seenSubject = new AtomicReference<>();
-        FilterChain chain = (req, res) -> {
-            seenScope.set(scope.exposedAgentIds());
-            seenSubject.set(TenantContext.current().map(TenantContext::getSubject).orElse(null));
-        };
+        FilterChain chain =
+                (req, res) -> {
+                    seenScope.set(scope.exposedAgentIds());
+                    seenSubject.set(
+                            TenantContext.current().map(TenantContext::getSubject).orElse(null));
+                };
         filter.doFilter(request, response, chain);
 
         assertEquals(Set.of(agentId), seenScope.get().orElseThrow());
@@ -144,8 +159,9 @@ class OpenAiCompatKeyAuthTest {
 
     @Test
     void registrationCoversV1AndRunsAfterSpringSecurity() {
-        var registration = new OpenAiCompatKeyAuthConfig()
-            .openAiCompatKeyAuthFilterRegistration(grantService, rateLimiter);
+        var registration =
+                new OpenAiCompatKeyAuthConfig()
+                        .openAiCompatKeyAuthFilterRegistration(grantService, rateLimiter);
         assertTrue(registration.getUrlPatterns().contains("/v1/*"));
         assertEquals(100, registration.getOrder());
     }

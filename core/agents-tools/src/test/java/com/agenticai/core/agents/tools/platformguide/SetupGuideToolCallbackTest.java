@@ -27,17 +27,27 @@ class SetupGuideToolCallbackTest {
     }
 
     private static SetupGuideToolCallback tool(Map<String, Status> live) throws Exception {
-        return new SetupGuideToolCallback(guide(), () -> live, q -> {
-            ObjectNode n = JsonMappers.plain().createObjectNode();
-            n.put("name", "github").put("state", "NOT_REGISTERED");
-            return List.of(n);
-        });
+        return new SetupGuideToolCallback(
+                guide(),
+                () -> live,
+                q -> {
+                    ObjectNode n = JsonMappers.plain().createObjectNode();
+                    n.put("name", "github").put("state", "NOT_REGISTERED");
+                    return List.of(n);
+                });
     }
 
     @Test
     void mcpRequestPointsAtToolsPageWithLiveStatusAndCatalogueMatch() throws Exception {
-        JsonNode r = call(tool(Map.of("mcp-servers", new Status(State.NOT_SET_UP, "No MCP server is registered yet."))),
-                "{\"query\":\"I want my agent to read GitHub issues through an MCP server\"}");
+        JsonNode r =
+                call(
+                        tool(
+                                Map.of(
+                                        "mcp-servers",
+                                        new Status(
+                                                State.NOT_SET_UP,
+                                                "No MCP server is registered yet."))),
+                        "{\"query\":\"I want my agent to read GitHub issues through an MCP server\"}");
         assertEquals("mcp-servers", r.at("/topics/0/id").asText());
         assertEquals("/tools", r.at("/topics/0/link").asText());
         assertEquals("NOT_SET_UP", r.at("/topics/0/status/state").asText());
@@ -56,17 +66,31 @@ class SetupGuideToolCallbackTest {
 
     @Test
     void phrasingWithoutTheToolNameStillFindsTheTopic() throws Exception {
-        assertEquals("agent-tools", call(tool(Map.of()), "{\"query\":\"my agent says it has no tool for that, how do I allow tool access\"}")
-                .at("/topics/0/id").asText());
-        assertEquals("llm-providers", call(tool(Map.of()), "{\"query\":\"add my OpenAI api key so agents can use a model\"}")
-                .at("/topics/0/id").asText());
-        assertEquals("google", call(tool(Map.of()), "{\"query\":\"book a meeting on my calendar\"}")
-                .at("/topics/0/id").asText());
+        assertEquals(
+                "agent-tools",
+                call(
+                                tool(Map.of()),
+                                "{\"query\":\"my agent says it has no tool for that, how do I allow tool access\"}")
+                        .at("/topics/0/id")
+                        .asText());
+        assertEquals(
+                "llm-providers",
+                call(
+                                tool(Map.of()),
+                                "{\"query\":\"add my OpenAI api key so agents can use a model\"}")
+                        .at("/topics/0/id")
+                        .asText());
+        assertEquals(
+                "google",
+                call(tool(Map.of()), "{\"query\":\"book a meeting on my calendar\"}")
+                        .at("/topics/0/id")
+                        .asText());
     }
 
     @Test
     void docsActionReturnsPassagesFromTheBundledDocs() throws Exception {
-        JsonNode r = call(tool(Map.of()), "{\"action\":\"docs\",\"query\":\"tool pinning enforce\"}");
+        JsonNode r =
+                call(tool(Map.of()), "{\"action\":\"docs\",\"query\":\"tool pinning enforce\"}");
         assertFalse(r.path("docs").isEmpty());
         assertTrue(r.at("/docs/0/text").asText().toLowerCase().contains("pin"));
     }
@@ -93,7 +117,9 @@ class SetupGuideToolCallbackTest {
                 assertTrue(g.topic(also).isPresent(), t.id() + " names unknown topic " + also);
             }
             for (String doc : t.docs()) {
-                assertTrue(PlatformGuideTestSupport.bundled(doc), t.id() + " links a doc that is not bundled: " + doc);
+                assertTrue(
+                        PlatformGuideTestSupport.bundled(doc),
+                        t.id() + " links a doc that is not bundled: " + doc);
             }
         }
     }
@@ -102,11 +128,14 @@ class SetupGuideToolCallbackTest {
     void topicRoutesExistInTheWebApp() throws Exception {
         Path web = Path.of("..", "..", "web", "app");
         if (!Files.isDirectory(web)) {
-            return; // built outside the repository checkout (container build): nothing to compare with
+            return; // built outside the repository checkout (container build): nothing to compare
+            // with
         }
         for (SetupTopic t : guide().topics()) {
             String route = t.path().split("\\?")[0].replaceAll("^/", "");
-            assertTrue(new File(web.toFile(), route + "/page.tsx").exists(), t.id() + " points at a console page that does not exist: " + t.path());
+            assertTrue(
+                    new File(web.toFile(), route + "/page.tsx").exists(),
+                    t.id() + " points at a console page that does not exist: " + t.path());
         }
     }
 }

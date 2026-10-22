@@ -27,7 +27,8 @@ public class ConsentPolicyService {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final TypeReference<Map<String, String>> STRING_MAP = new TypeReference<>() {};
-    private static final TypeReference<Map<String, List<String>>> LIST_MAP = new TypeReference<>() {};
+    private static final TypeReference<Map<String, List<String>>> LIST_MAP =
+            new TypeReference<>() {};
     static final Pattern LANGUAGE_TAG = Pattern.compile("[a-z]{2,3}(-[a-z0-9]{2,8})?");
     static final Pattern PURPOSE = Pattern.compile("[a-z0-9][a-z0-9_-]{0,63}");
     private static final int MAX_NOTICE_CHARS = 3000;
@@ -99,7 +100,8 @@ public class ConsentPolicyService {
      */
     public Policy put(UUID agentId, Request req, String actor) {
         Integer agentExists =
-                jdbc.queryForObject("SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
         if (agentExists == null || agentExists == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such agent");
         }
@@ -114,7 +116,11 @@ public class ConsentPolicyService {
 
         Optional<Policy> existing = find(agentId);
         int version =
-                existing.map(p -> p.notices().equals(notices) ? p.noticeVersion() : p.noticeVersion() + 1)
+                existing.map(
+                                p ->
+                                        p.notices().equals(notices)
+                                                ? p.noticeVersion()
+                                                : p.noticeVersion() + 1)
                         .orElse(1);
         boolean erase = req.eraseOnWithdrawal() == null || req.eraseOnWithdrawal();
         jdbc.update(
@@ -171,7 +177,10 @@ public class ConsentPolicyService {
             }
         }
         if (enabled && !notices.containsKey(defaultLanguage)) {
-            throw bad("enabling consent needs a notice in the default language '" + defaultLanguage + "'");
+            throw bad(
+                    "enabling consent needs a notice in the default language '"
+                            + defaultLanguage
+                            + "'");
         }
     }
 

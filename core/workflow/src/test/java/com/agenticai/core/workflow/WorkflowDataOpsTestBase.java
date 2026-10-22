@@ -10,7 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Shared fixture of the {@link WorkflowDataOps} tests: JSON builders and a small filter data set. */
+/**
+ * Shared fixture of the {@link WorkflowDataOps} tests: JSON builders and a small filter data set.
+ */
 abstract class WorkflowDataOpsTestBase {
 
     static final ObjectMapper M = new ObjectMapper();
@@ -55,13 +57,17 @@ abstract class WorkflowDataOpsTestBase {
         return out;
     }
 
-    static final String F = "[{\"n\":\"a\",\"p\":5,\"t\":\"x@y.com\",\"d\":\"2024-01-05\"},"
-        + "{\"n\":\"b\",\"p\":15,\"t\":\"\",\"d\":\"2024-03-01\"},"
-        + "{\"n\":\"c\",\"p\":null,\"t\":\"z@y.org\",\"d\":\"2023-12-31\"},"
-        + "{\"n\":\"A\",\"p\":\"20\"}]";
+    static final String F =
+            "[{\"n\":\"a\",\"p\":5,\"t\":\"x@y.com\",\"d\":\"2024-01-05\"},"
+                    + "{\"n\":\"b\",\"p\":15,\"t\":\"\",\"d\":\"2024-03-01\"},"
+                    + "{\"n\":\"c\",\"p\":null,\"t\":\"z@y.org\",\"d\":\"2023-12-31\"},"
+                    + "{\"n\":\"A\",\"p\":\"20\"}]";
 
     List<String> filterNames(String op, String field, String value, boolean ignoreCase) {
-        Outcome o = ops.filter(m("conditions", List.of(cond(field, op, value)), "ignoreCase", ignoreCase), F);
+        Outcome o =
+                ops.filter(
+                        m("conditions", List.of(cond(field, op, value)), "ignoreCase", ignoreCase),
+                        F);
         return col(o.output(), "n");
     }
 }

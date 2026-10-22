@@ -58,9 +58,9 @@ import reactor.core.scheduler.Scheduler;
  *
  * <h2>Framing</h2>
  *
- * {@link #STEP_EVENT_MARKER} plus one single-line JSON object per chunk; the rules (in-band
- * prefix, not an SSE event name; never more than one line) and why they hold are documented on
- * {@link AgentStepEventPayloads}, which builds and serializes every payload.
+ * {@link #STEP_EVENT_MARKER} plus one single-line JSON object per chunk; the rules (in-band prefix,
+ * not an SSE event name; never more than one line) and why they hold are documented on {@link
+ * AgentStepEventPayloads}, which builds and serializes every payload.
  *
  * <h2>Fail-open, like every other optional enhancement in this codebase</h2>
  *
@@ -141,7 +141,10 @@ public final class AgentStepEventEmitter {
      */
     private volatile Instant runStartedAt;
 
-    /** When this emitter was made, i.e. when the turn was accepted; {@link #phase} reports time since. */
+    /**
+     * When this emitter was made, i.e. when the turn was accepted; {@link #phase} reports time
+     * since.
+     */
     private final Instant createdAt = Instant.now();
 
     /**
@@ -266,16 +269,18 @@ public final class AgentStepEventEmitter {
     }
 
     /**
-     * A pre-token pipeline stage began ({@code guardrails}, {@code routing}, {@code context}, {@code
-     * model}). Unlike {@link #memoryRecall} these are NOT held until {@code run_started}: their whole
-     * point is to reach the client while the turn is still being prepared, which is before the
-     * reply Flux is subscribed. Carries the time since the turn was accepted.
+     * A pre-token pipeline stage began ({@code guardrails}, {@code routing}, {@code context},
+     * {@code model}). Unlike {@link #memoryRecall} these are NOT held until {@code run_started}:
+     * their whole point is to reach the client while the turn is still being prepared, which is
+     * before the reply Flux is subscribed. Carries the time since the turn was accepted.
      */
     public void phase(String phase) {
         if (!enabled) {
             return;
         }
-        emit(AgentStepEventPayloads.phase(phase, Duration.between(createdAt, Instant.now()).toMillis()));
+        emit(
+                AgentStepEventPayloads.phase(
+                        phase, Duration.between(createdAt, Instant.now()).toMillis()));
     }
 
     /**
@@ -498,9 +503,9 @@ public final class AgentStepEventEmitter {
 
     /**
      * The model's own reasoning text (Ollama {@code reasoning}, DeepSeek-style {@code
-     * reasoning_content}) as it streams - surfaced by {@code ReasoningEmitAdvisor} per chunk so
-     * a console can show live thinking. Same flatten/cap as plan: reasoning is model output and
-     * can be long, and the trace is a summary, not a transcript.
+     * reasoning_content}) as it streams - surfaced by {@code ReasoningEmitAdvisor} per chunk so a
+     * console can show live thinking. Same flatten/cap as plan: reasoning is model output and can
+     * be long, and the trace is a summary, not a transcript.
      */
     public void thinking(String text) {
         if (!enabled) {

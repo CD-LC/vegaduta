@@ -262,7 +262,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         // shutdownNow() in the finally, not close(): close() would block on a branch that
         // ignores interrupts past the branch timeout (java:S2095 only recognises close()).
         @SuppressWarnings("java:S2095")
-        ExecutorService pool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("delegate-to-team-tool-callback-");
+        ExecutorService pool =
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                        "delegate-to-team-tool-callback-");
         try {
             List<Future<Map<String, Object>>> futures = new ArrayList<>();
             List<Member> dispatched = new ArrayList<>();
@@ -368,7 +370,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                         Map<Integer, SwarmVerifier.Item> fresh = new LinkedHashMap<>();
                         // Same shutdownNow()-in-finally lifecycle as pool above (java:S2095).
                         @SuppressWarnings("java:S2095")
-                        ExecutorService repairPool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("delegate-to-team-tool-callback-");
+                        ExecutorService repairPool =
+                                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                                        "delegate-to-team-tool-callback-");
                         try {
                             Map<Integer, Future<Map<String, Object>>> futures =
                                     new LinkedHashMap<>();

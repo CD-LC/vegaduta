@@ -15,23 +15,24 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * CSV import parsing and export rendering for data tables. Quotes follow RFC 4180 (doubled quote escapes,
- * embedded newlines allowed); the delimiter (comma, semicolon or tab) is sniffed from the first line. Pure.
+ * CSV import parsing and export rendering for data tables. Quotes follow RFC 4180 (doubled quote
+ * escapes, embedded newlines allowed); the delimiter (comma, semicolon or tab) is sniffed from the
+ * first line. Pure.
  *
- * <p>Round trip: {@link #export} neutralises spreadsheet-formula injection by prefixing a single quote to TEXT
- * cells that start with {@code = + - @ TAB CR} (number/boolean/date/json cells are never touched, so a negative
- * number stays a number), and {@link #parse}'s consumers call {@link #unneutralize} to drop exactly that prefix
- * again - so export followed by import returns the original text. JSON cells holding a bare string are treated
- * like text. A genuine text value that itself starts with a quote and a formula character is exported with a
- * second quote, so the convention is a bijection and nothing collides.
+ * <p>Round trip: {@link #export} neutralises spreadsheet-formula injection by prefixing a single
+ * quote to TEXT cells that start with {@code = + - @ TAB CR} (number/boolean/date/json cells are
+ * never touched, so a negative number stays a number), and {@link #parse}'s consumers call {@link
+ * #unneutralize} to drop exactly that prefix again - so export followed by import returns the
+ * original text. JSON cells holding a bare string are treated like text. A genuine text value that
+ * itself starts with a quote and a formula character is exported with a second quote, so the
+ * convention is a bijection and nothing collides.
  */
 public final class DataTableCsv {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final String FORMULA_CHARS = "=+-@\t\r";
 
-    private DataTableCsv() {
-    }
+    private DataTableCsv() {}
 
     /** Thrown for malformed or over-cap input; the controller maps it to HTTP 400. */
     public static final class CsvException extends IllegalArgumentException {
@@ -41,12 +42,14 @@ public final class DataTableCsv {
     }
 
     /** A parsed file: its header row and the data rows (every row as raw strings). */
-    public record Parsed(List<String> header, List<List<String>> rows) {
-    }
+    public record Parsed(List<String> header, List<List<String>> rows) {}
 
     /** The outcome of mapping parsed rows onto a table's columns. */
-    public record Mapped(List<Map<String, Object>> rows, List<String> errors, List<String> ignoredHeaders, int skipped) {
-    }
+    public record Mapped(
+            List<Map<String, Object>> rows,
+            List<String> errors,
+            List<String> ignoredHeaders,
+            int skipped) {}
 
     // ------------------------------------------------------------------
     // Parse
@@ -69,9 +72,9 @@ public final class DataTableCsv {
     }
 
     /**
-     * Maps parsed rows onto the table's existing columns by header (case-insensitive). Headers that match no
-     * column are ignored (and listed); an empty cell is "no value"; a row with a cell that fails its column type
-     * is skipped and reported ("Row N: ..."), the rest still import.
+     * Maps parsed rows onto the table's existing columns by header (case-insensitive). Headers that
+     * match no column are ignored (and listed); an empty cell is "no value"; a row with a cell that
+     * fails its column type is skipped and reported ("Row N: ..."), the rest still import.
      */
     public static Mapped toRows(List<DataTableColumn> columns, Parsed parsed, int maxCellBytes) {
         DataTableColumn[] byIndex = new DataTableColumn[parsed.header().size()];
@@ -111,7 +114,9 @@ public final class DataTableCsv {
                     if (cell == null || cell.isEmpty()) {
                         continue;
                     }
-                    boolean guarded = byIndex[i].type() == DataTableColumnType.TEXT || byIndex[i].type() == DataTableColumnType.JSON;
+                    boolean guarded =
+                            byIndex[i].type() == DataTableColumnType.TEXT
+                                    || byIndex[i].type() == DataTableColumnType.JSON;
                     String value = guarded ? unneutralize(cell) : cell;
                     Object coerced = DataTableValidator.coerce(byIndex[i], value, maxCellBytes);
                     if (coerced != null) {
@@ -135,14 +140,15 @@ public final class DataTableCsv {
     }
 
     /**
-     * Builds a column list from a CSV header and its values: names are sanitised to the column grammar and made
-     * unique, types are inferred from every value (number, boolean, date or else text). Used to create a table
-     * straight from a file.
+     * Builds a column list from a CSV header and its values: names are sanitised to the column
+     * grammar and made unique, types are inferred from every value (number, boolean, date or else
+     * text). Used to create a table straight from a file.
      */
     public static List<DataTableColumn> inferColumns(Parsed parsed, int maxColumns) {
         List<String> header = parsed.header();
         if (header.size() > maxColumns) {
-            throw new CsvException("The file has " + header.size() + " columns - the limit is " + maxColumns);
+            throw new CsvException(
+                    "The file has " + header.size() + " columns - the limit is " + maxColumns);
         }
         List<DataTableColumn> out = new ArrayList<>();
         Set<String> used = new HashSet<>();
@@ -152,7 +158,13 @@ public final class DataTableCsv {
             int n = 2;
             while (!used.add(unique.toLowerCase(Locale.ROOT))) {
                 String suffix = "_" + n++;
-                unique = name.substring(0, Math.min(name.length(), DataTableColumn.MAX_NAME_LENGTH - suffix.length())) + suffix;
+                unique =
+                        name.substring(
+                                        0,
+                                        Math.min(
+                                                name.length(),
+                                                DataTableColumn.MAX_NAME_LENGTH - suffix.length()))
+                                + suffix;
             }
             out.add(new DataTableColumn(unique, inferType(parsed.rows(), i)));
         }
@@ -160,14 +172,19 @@ public final class DataTableCsv {
     }
 
     static String sanitizeName(String header, int position) {
-        String s = header == null ? "" : header.trim().replaceAll("[^A-Za-z0-9_]+", "_").replaceAll("^_+|_+$", "");
+        String s =
+                header == null
+                        ? ""
+                        : header.trim().replaceAll("[^A-Za-z0-9_]+", "_").replaceAll("^_+|_+$", "");
         if (s.isEmpty()) {
             return "column_" + position;
         }
         if (!Character.isLetter(s.charAt(0))) {
             s = "c_" + s;
         }
-        return s.length() > DataTableColumn.MAX_NAME_LENGTH ? s.substring(0, DataTableColumn.MAX_NAME_LENGTH) : s;
+        return s.length() > DataTableColumn.MAX_NAME_LENGTH
+                ? s.substring(0, DataTableColumn.MAX_NAME_LENGTH)
+                : s;
     }
 
     private static DataTableColumnType inferType(List<List<String>> rows, int index) {
@@ -206,7 +223,10 @@ public final class DataTableCsv {
         return DataTableColumnType.TEXT;
     }
 
-    /** Plain decimal numbers only; leading zeros ("007", phone numbers) and very long digit runs stay text. */
+    /**
+     * Plain decimal numbers only; leading zeros ("007", phone numbers) and very long digit runs
+     * stay text.
+     */
     private static boolean looksNumeric(String v) {
         if (!v.matches("-?\\d+(\\.\\d+)?")) {
             return false;
@@ -235,8 +255,10 @@ public final class DataTableCsv {
 
     /** Drops the single quote {@link #export} adds in front of a formula-looking text cell. */
     static String unneutralize(String cell) {
-        // Mirror of needsGuard: strip one leading quote exactly when what remains would itself have needed the guard,
-        // so '=x -> =x and ''=x -> '=x (a genuine value that starts with a quote and a formula character).
+        // Mirror of needsGuard: strip one leading quote exactly when what remains would itself have
+        // needed the guard,
+        // so '=x -> =x and ''=x -> '=x (a genuine value that starts with a quote and a formula
+        // character).
         if (cell.length() > 1 && cell.charAt(0) == '\'' && needsGuard(cell.substring(1))) {
             return cell.substring(1);
         }
@@ -263,10 +285,13 @@ public final class DataTableCsv {
                 }
                 DataTableColumn col = columns.get(i);
                 Object value = row.get(col.name());
-                // TEXT cells and JSON cells holding a bare string are user-controlled text; objects, arrays, numbers
+                // TEXT cells and JSON cells holding a bare string are user-controlled text;
+                // objects, arrays, numbers
                 // and booleans serialise to JSON and are never a formula.
-                boolean userText = col.type() == DataTableColumnType.TEXT
-                    || (col.type() == DataTableColumnType.JSON && value instanceof String);
+                boolean userText =
+                        col.type() == DataTableColumnType.TEXT
+                                || (col.type() == DataTableColumnType.JSON
+                                        && value instanceof String);
                 sb.append(escape(cell(col, value), userText));
             }
             sb.append("\r\n");
@@ -292,9 +317,10 @@ public final class DataTableCsv {
     }
 
     /**
-     * A cell needs the quote prefix when it starts with a formula character, or when it already starts with a
-     * quote followed by one (so the import-side strip of a single leading quote restores the original exactly:
-     * the guard is a bijection and a genuine {@code '=x} value round-trips as {@code ''=x}).
+     * A cell needs the quote prefix when it starts with a formula character, or when it already
+     * starts with a quote followed by one (so the import-side strip of a single leading quote
+     * restores the original exactly: the guard is a bijection and a genuine {@code '=x} value
+     * round-trips as {@code ''=x}).
      */
     private static boolean needsGuard(String v) {
         if (v.isEmpty()) {
@@ -311,8 +337,12 @@ public final class DataTableCsv {
         if (neutralizeFormulas && needsGuard(v)) {
             v = "'" + v;
         }
-        if (v.indexOf(',') >= 0 || v.indexOf('"') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0 || v.indexOf(';') >= 0
-            || v.indexOf('\t') >= 0) {
+        if (v.indexOf(',') >= 0
+                || v.indexOf('"') >= 0
+                || v.indexOf('\n') >= 0
+                || v.indexOf('\r') >= 0
+                || v.indexOf(';') >= 0
+                || v.indexOf('\t') >= 0) {
             return "\"" + v.replace("\"", "\"\"") + "\"";
         }
         return v;

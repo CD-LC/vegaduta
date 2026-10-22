@@ -93,7 +93,9 @@ class WhatsAppQrClientTest {
 
         client.send(KEY, "4915100000000", "hello");
 
-        assertThat(bridge.sentBodies.getLast()).contains("\"to\":\"4915100000000\"").contains("\"text\":\"hello\"");
+        assertThat(bridge.sentBodies.getLast())
+                .contains("\"to\":\"4915100000000\"")
+                .contains("\"text\":\"hello\"");
     }
 
     @Test

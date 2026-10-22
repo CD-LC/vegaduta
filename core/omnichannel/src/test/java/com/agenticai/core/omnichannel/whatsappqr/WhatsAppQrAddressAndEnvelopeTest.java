@@ -14,8 +14,10 @@ class WhatsAppQrAddressAndEnvelopeTest {
 
     @Test
     void externalIdKeepsDigitsForPeopleAndTheLidSuffixForHiddenNumbers() {
-        assertThat(WhatsAppQrAddress.externalId("4915112345678@s.whatsapp.net")).isEqualTo("4915112345678");
-        assertThat(WhatsAppQrAddress.externalId("4915112345678:12@s.whatsapp.net")).isEqualTo("4915112345678");
+        assertThat(WhatsAppQrAddress.externalId("4915112345678@s.whatsapp.net"))
+                .isEqualTo("4915112345678");
+        assertThat(WhatsAppQrAddress.externalId("4915112345678:12@s.whatsapp.net"))
+                .isEqualTo("4915112345678");
         assertThat(WhatsAppQrAddress.externalId("9988776655@lid")).isEqualTo("9988776655@lid");
         assertThat(WhatsAppQrAddress.externalId("1234-5678@g.us")).isNull();
         assertThat(WhatsAppQrAddress.externalId("status@broadcast")).isNull();
@@ -71,9 +73,21 @@ class WhatsAppQrAddressAndEnvelopeTest {
     @Test
     void malformedEventsAreDropped() throws Exception {
         assertThat(WhatsAppQrEnvelope.parse(MAPPER.readTree("{}"))).isEmpty();
-        assertThat(WhatsAppQrEnvelope.parse(MAPPER.readTree("{\"chatJid\":\"1@g.us\",\"id\":\"x\",\"text\":\"hi\"}"))).isEmpty();
-        assertThat(WhatsAppQrEnvelope.parse(MAPPER.readTree("{\"chatJid\":\"1@s.whatsapp.net\",\"id\":\"\",\"text\":\"hi\"}"))).isEmpty();
-        assertThat(WhatsAppQrEnvelope.parse(MAPPER.readTree("{\"chatJid\":\"1@s.whatsapp.net\",\"id\":\"x\",\"text\":\"  \"}"))).isEmpty();
+        assertThat(
+                        WhatsAppQrEnvelope.parse(
+                                MAPPER.readTree(
+                                        "{\"chatJid\":\"1@g.us\",\"id\":\"x\",\"text\":\"hi\"}")))
+                .isEmpty();
+        assertThat(
+                        WhatsAppQrEnvelope.parse(
+                                MAPPER.readTree(
+                                        "{\"chatJid\":\"1@s.whatsapp.net\",\"id\":\"\",\"text\":\"hi\"}")))
+                .isEmpty();
+        assertThat(
+                        WhatsAppQrEnvelope.parse(
+                                MAPPER.readTree(
+                                        "{\"chatJid\":\"1@s.whatsapp.net\",\"id\":\"x\",\"text\":\"  \"}")))
+                .isEmpty();
         assertThat(WhatsAppQrEnvelope.parse(MAPPER.nullNode())).isEmpty();
     }
 

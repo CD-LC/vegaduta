@@ -23,12 +23,13 @@ import org.springframework.web.client.RestClientResponseException;
  * available. The runner confines {@code folder} to its workspace root (symlinks included); this
  * class only passes it on.
  *
- * <p>The runner URL is operator configuration ({@code app.assistant.local-shell.runner-url}), so its
- * host, and only that host, is let past the private-address check.
+ * <p>The runner URL is operator configuration ({@code app.assistant.local-shell.runner-url}), so
+ * its host, and only that host, is let past the private-address check.
  */
 final class RunnerShellRunner implements ShellRunner {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
+
     /** Head room over the command's own limit for the runner's kill grace and the reply. */
     private static final Duration REPLY_SLACK = Duration.ofSeconds(30);
 
@@ -37,7 +38,12 @@ final class RunnerShellRunner implements ShellRunner {
     private final String workspaceLabel;
     private final int maxOutputChars;
 
-    RunnerShellRunner(String runnerUrl, String secret, String workspaceLabel, int maxOutputChars, Duration maxTimeout) {
+    RunnerShellRunner(
+            String runnerUrl,
+            String secret,
+            String workspaceLabel,
+            int maxOutputChars,
+            Duration maxTimeout) {
         URI uri = URI.create(runnerUrl);
         SsrfGuard guard = SsrfGuard.of(Set.of(uri.getHost()), InetAddress::getAllByName);
         this.client =
@@ -45,7 +51,10 @@ final class RunnerShellRunner implements ShellRunner {
                         .baseUrl(runnerUrl)
                         .requestFactory(
                                 SafeHttpClients.requestFactory(
-                                        guard, Duration.ofSeconds(5), maxTimeout.plus(REPLY_SLACK), false))
+                                        guard,
+                                        Duration.ofSeconds(5),
+                                        maxTimeout.plus(REPLY_SLACK),
+                                        false))
                         .build();
         this.secret = secret;
         this.workspaceLabel = workspaceLabel;
@@ -91,10 +100,12 @@ final class RunnerShellRunner implements ShellRunner {
                             .body(String.class);
         } catch (RestClientResponseException e) {
             JsonNode err = parse(e.getResponseBodyAsString());
-            String why = err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+            String why =
+                    err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
             throw new IOException("The workspace runner refused the command: " + why, e);
         } catch (RuntimeException e) {
-            throw new IOException("The workspace runner could not be reached: " + e.getMessage(), e);
+            throw new IOException(
+                    "The workspace runner could not be reached: " + e.getMessage(), e);
         }
         JsonNode r = parse(reply);
         if (r == null) {
@@ -135,13 +146,20 @@ final class RunnerShellRunner implements ShellRunner {
                             .retrieve()
                             .body(String.class);
         } catch (RuntimeException e) {
-            throw new IOException("The workspace runner could not be reached: " + e.getMessage(), e);
+            throw new IOException(
+                    "The workspace runner could not be reached: " + e.getMessage(), e);
         }
         JsonNode r = parse(reply);
         java.util.List<Preview> out = new java.util.ArrayList<>();
         if (r != null) {
             for (JsonNode p : r.path("previews")) {
-                out.add(new Preview(p.path("port").asInt(), p.path("folder").asText(""), p.path("command").asText(""), p.path("running").asBoolean(false) && p.path("ready").asBoolean(true)));
+                out.add(
+                        new Preview(
+                                p.path("port").asInt(),
+                                p.path("folder").asText(""),
+                                p.path("command").asText(""),
+                                p.path("running").asBoolean(false)
+                                        && p.path("ready").asBoolean(true)));
             }
         }
         return out;
@@ -165,10 +183,12 @@ final class RunnerShellRunner implements ShellRunner {
                     .body(String.class);
         } catch (RestClientResponseException e) {
             JsonNode err = parse(e.getResponseBodyAsString());
-            String why = err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+            String why =
+                    err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
             throw new IOException("The workspace runner refused the request: " + why, e);
         } catch (RuntimeException e) {
-            throw new IOException("The workspace runner could not be reached: " + e.getMessage(), e);
+            throw new IOException(
+                    "The workspace runner could not be reached: " + e.getMessage(), e);
         }
     }
 

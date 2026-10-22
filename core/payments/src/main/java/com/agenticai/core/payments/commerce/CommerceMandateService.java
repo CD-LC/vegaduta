@@ -1,8 +1,8 @@
 package com.agenticai.core.payments.commerce;
 
-import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.payments.MandateSigningService;
 import com.agenticai.core.payments.PaymentSigningKey;
 import com.agenticai.core.payments.wallet.AgentWallet;
@@ -26,25 +26,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * The AP2-style mandate chain: an <b>intent mandate</b> (user authorizes an
- * agent to shop for X up to a ceiling) parents one or more <b>cart mandates</b>
- * (the user signed THIS concrete spend - items, total, payee). Both are
- * Ed25519-signed over the tenant's {@code payment_signing_key} via {@link
- * MandateSigningService}, immutable after signing, and every transition is
- * recorded in {@code commerce_mandate_event} plus the audit log - the
- * dispute trail.
+ * The AP2-style mandate chain: an <b>intent mandate</b> (user authorizes an agent to shop for X up
+ * to a ceiling) parents one or more <b>cart mandates</b> (the user signed THIS concrete spend -
+ * items, total, payee). Both are Ed25519-signed over the tenant's {@code payment_signing_key} via
+ * {@link MandateSigningService}, immutable after signing, and every transition is recorded in
+ * {@code commerce_mandate_event} plus the audit log - the dispute trail.
  *
- * <p><b>Buyer authorization:</b> a cart is born {@code PENDING_AUTHORIZATION}
- * and only the intent's {@code buyer_user_id} can sign it ({@link
- * #authorize}) - the signature covers a sub-document bound to the cart's
- * canonical hash, so it cannot be transplanted onto a different cart.
- * Capture then debits the agent's wallet - the agent spends ITS funded
- * balance on the buyer's behalf, exactly what the mandate authorized.
+ * <p><b>Buyer authorization:</b> a cart is born {@code PENDING_AUTHORIZATION} and only the intent's
+ * {@code buyer_user_id} can sign it ({@link #authorize}) - the signature covers a sub-document
+ * bound to the cart's canonical hash, so it cannot be transplanted onto a different cart. Capture
+ * then debits the agent's wallet - the agent spends ITS funded balance on the buyer's behalf,
+ * exactly what the mandate authorized.
  *
- * <p><b>Ceiling enforcement:</b> a cart's total plus every already
- * AUTHORIZED/CAPTURED sibling cart must fit the intent's {@code
- * max_total_minor} - enforced at both cart creation and authorize time (the
- * sibling set can grow between the two).
+ * <p><b>Ceiling enforcement:</b> a cart's total plus every already AUTHORIZED/CAPTURED sibling cart
+ * must fit the intent's {@code max_total_minor} - enforced at both cart creation and authorize time
+ * (the sibling set can grow between the two).
  */
 @Service
 public class CommerceMandateService {
@@ -62,27 +58,31 @@ public class CommerceMandateService {
 
     @Autowired
     public CommerceMandateService(
-        CommerceMandateRepository mandateRepository,
-        CommerceMandateEventRepository eventRepository,
-        CommerceMandateCanonicalizer canonicalizer,
-        MandateSigningService signingService,
-        AgentWalletService walletService,
-        ObjectProvider<AuditLogService> auditLogService
-    ) {
-        this(mandateRepository, eventRepository, canonicalizer, signingService,
-            walletService, auditLogService, Clock.systemUTC());
+            CommerceMandateRepository mandateRepository,
+            CommerceMandateEventRepository eventRepository,
+            CommerceMandateCanonicalizer canonicalizer,
+            MandateSigningService signingService,
+            AgentWalletService walletService,
+            ObjectProvider<AuditLogService> auditLogService) {
+        this(
+                mandateRepository,
+                eventRepository,
+                canonicalizer,
+                signingService,
+                walletService,
+                auditLogService,
+                Clock.systemUTC());
     }
 
     /** Test seam - fixed clock. */
     CommerceMandateService(
-        CommerceMandateRepository mandateRepository,
-        CommerceMandateEventRepository eventRepository,
-        CommerceMandateCanonicalizer canonicalizer,
-        MandateSigningService signingService,
-        AgentWalletService walletService,
-        ObjectProvider<AuditLogService> auditLogService,
-        Clock clock
-    ) {
+            CommerceMandateRepository mandateRepository,
+            CommerceMandateEventRepository eventRepository,
+            CommerceMandateCanonicalizer canonicalizer,
+            MandateSigningService signingService,
+            AgentWalletService walletService,
+            ObjectProvider<AuditLogService> auditLogService,
+            Clock clock) {
         this.mandateRepository = mandateRepository;
         this.eventRepository = eventRepository;
         this.canonicalizer = canonicalizer;
@@ -95,26 +95,44 @@ public class CommerceMandateService {
     // ------------------------------------------------------------------ intent
 
     /**
-     * Create an INTENT mandate. {@code buyerUserId} is the authorizing user
-     * (resolved from TenantContext by the controller, never caller-supplied).
+     * Create an INTENT mandate. {@code buyerUserId} is the authorizing user (resolved from
+     * TenantContext by the controller, never caller-supplied).
      */
     @Transactional
     public CommerceMandate createIntent(
-        UUID agentId, String buyerUserId, String intentText, List<String> categories,
-        long maxTotalMinor, String currency, Instant expiresAt
-    ) {
+            UUID agentId,
+            String buyerUserId,
+            String intentText,
+            List<String> categories,
+            long maxTotalMinor,
+            String currency,
+            Instant expiresAt) {
         if (maxTotalMinor <= 0) {
             throw new CommerceMandateException("CEILING_INVALID", "maxTotalMinor must be positive");
         }
         Instant now = clock.instant();
         if (expiresAt == null || !expiresAt.isAfter(now)) {
-            throw new CommerceMandateException("EXPIRES_IN_PAST", "expiresAt must be in the future");
+            throw new CommerceMandateException(
+                    "EXPIRES_IN_PAST", "expiresAt must be in the future");
         }
         String normalizedCurrency = normalizeCurrency(currency);
         UUID id = UUID.randomUUID();
-        String canonical = canonicalizer.canonicalizeMandate(
-            id, CommerceMandateKind.INTENT, null, currentTenant(), agentId, buyerUserId,
-            normalizedCurrency, maxTotalMinor, null, null, null, categories, intentText, expiresAt);
+        String canonical =
+                canonicalizer.canonicalizeMandate(
+                        id,
+                        CommerceMandateKind.INTENT,
+                        null,
+                        currentTenant(),
+                        agentId,
+                        buyerUserId,
+                        normalizedCurrency,
+                        maxTotalMinor,
+                        null,
+                        null,
+                        null,
+                        categories,
+                        intentText,
+                        expiresAt);
         PaymentSigningKey key = signingService.activeKey();
 
         CommerceMandate mandate = new CommerceMandate();
@@ -132,23 +150,27 @@ public class CommerceMandateService {
         mandate.setKeyId(key.getKeyId());
         mandate.setExpiresAt(expiresAt);
         CommerceMandate saved = mandateRepository.save(mandate);
-        record(saved.getId(), "intent.created", buyerUserId,
-            "ceiling=" + maxTotalMinor + " " + normalizedCurrency);
+        record(
+                saved.getId(),
+                "intent.created",
+                buyerUserId,
+                "ceiling=" + maxTotalMinor + " " + normalizedCurrency);
         return saved;
     }
 
     // ------------------------------------------------------------------- cart
 
     /**
-     * Build a cart under an ACTIVE intent. Items are [{sku,name,qty,
-     * unit_price_minor}]; the total is computed server-side
-     * (multiplyExact/addExact - never trusted from the caller) and must fit
+     * Build a cart under an ACTIVE intent. Items are [{sku,name,qty, unit_price_minor}]; the total
+     * is computed server-side (multiplyExact/addExact - never trusted from the caller) and must fit
      * inside the intent's remaining ceiling.
      */
     @Transactional
     public CommerceMandate createCart(
-        UUID intentMandateId, List<Map<String, Object>> items, String payee, Instant expiresAt
-    ) {
+            UUID intentMandateId,
+            List<Map<String, Object>> items,
+            String payee,
+            Instant expiresAt) {
         CommerceMandate intent = requireUsableIntent(intentMandateId);
         if (items == null || items.isEmpty()) {
             throw new CommerceMandateException("ITEMS_REQUIRED", "a cart needs at least one item");
@@ -156,9 +178,12 @@ public class CommerceMandateService {
         long total = computeTotal(items);
         long committed = committedUnderIntent(intentMandateId);
         if (Math.addExact(committed, total) > intent.getMaxTotalMinor()) {
-            throw new CommerceMandateException("OVER_CEILING",
-                "cart total " + total + " exceeds intent's remaining ceiling "
-                    + (intent.getMaxTotalMinor() - committed));
+            throw new CommerceMandateException(
+                    "OVER_CEILING",
+                    "cart total "
+                            + total
+                            + " exceeds intent's remaining ceiling "
+                            + (intent.getMaxTotalMinor() - committed));
         }
         Instant now = clock.instant();
         Instant cartExpiry = expiresAt != null ? expiresAt : intent.getExpiresAt();
@@ -166,14 +191,27 @@ public class CommerceMandateService {
             cartExpiry = intent.getExpiresAt();
         }
         if (!cartExpiry.isAfter(now)) {
-            throw new CommerceMandateException("EXPIRES_IN_PAST", "cart expiry must be in the future");
+            throw new CommerceMandateException(
+                    "EXPIRES_IN_PAST", "cart expiry must be in the future");
         }
         String itemsJson = writeJson(items);
         UUID id = UUID.randomUUID();
-        String canonical = canonicalizer.canonicalizeMandate(
-            id, CommerceMandateKind.CART, intentMandateId, currentTenant(), intent.getAgentId(),
-            intent.getBuyerUserId(), intent.getCurrency(), null, total, itemsJson, payee, null,
-            null, cartExpiry);
+        String canonical =
+                canonicalizer.canonicalizeMandate(
+                        id,
+                        CommerceMandateKind.CART,
+                        intentMandateId,
+                        currentTenant(),
+                        intent.getAgentId(),
+                        intent.getBuyerUserId(),
+                        intent.getCurrency(),
+                        null,
+                        total,
+                        itemsJson,
+                        payee,
+                        null,
+                        null,
+                        cartExpiry);
         PaymentSigningKey key = signingService.activeKey();
 
         CommerceMandate cart = new CommerceMandate();
@@ -192,15 +230,18 @@ public class CommerceMandateService {
         cart.setKeyId(key.getKeyId());
         cart.setExpiresAt(cartExpiry);
         CommerceMandate saved = mandateRepository.save(cart);
-        record(saved.getId(), "cart.created", currentSubject(),
-            "intent=" + intentMandateId + " total=" + total + " " + intent.getCurrency());
+        record(
+                saved.getId(),
+                "cart.created",
+                currentSubject(),
+                "intent=" + intentMandateId + " total=" + total + " " + intent.getCurrency());
         return saved;
     }
 
     /**
-     * The buyer signs the cart: verifies the cart's own signature, re-checks
-     * the ceiling (siblings may have committed since creation), then records
-     * a signed buyer-authorization document bound to the cart hash.
+     * The buyer signs the cart: verifies the cart's own signature, re-checks the ceiling (siblings
+     * may have committed since creation), then records a signed buyer-authorization document bound
+     * to the cart hash.
      */
     @Transactional
     public CommerceMandate authorize(UUID cartMandateId) {
@@ -209,14 +250,15 @@ public class CommerceMandateService {
             throw new CommerceMandateException("NOT_A_CART", "only CART mandates are authorized");
         }
         if (cart.getStatus() != CommerceMandateStatus.PENDING_AUTHORIZATION) {
-            throw new CommerceMandateException("WRONG_STATE",
-                "cart is " + cart.getStatus() + ", expected PENDING_AUTHORIZATION");
+            throw new CommerceMandateException(
+                    "WRONG_STATE",
+                    "cart is " + cart.getStatus() + ", expected PENDING_AUTHORIZATION");
         }
         String subject = currentSubject();
         if (!cart.getBuyerUserId().equals(subject)) {
             // Only the intent's authorizing buyer may sign its carts.
-            throw new CommerceMandateException("NOT_THE_BUYER",
-                "only the buyer named on the intent may authorize this cart");
+            throw new CommerceMandateException(
+                    "NOT_THE_BUYER", "only the buyer named on the intent may authorize this cart");
         }
         if (!cart.getExpiresAt().isAfter(clock.instant())) {
             throw new CommerceMandateException("CART_EXPIRED", "cart expired before authorization");
@@ -227,80 +269,105 @@ public class CommerceMandateService {
         CommerceMandate intent = requireMandate(cart.getIntentMandateId());
         long committed = committedUnderIntent(cart.getIntentMandateId());
         if (Math.addExact(committed, cart.getCartTotalMinor()) > intent.getMaxTotalMinor()) {
-            throw new CommerceMandateException("OVER_CEILING",
-                "authorizing would exceed the intent's ceiling");
+            throw new CommerceMandateException(
+                    "OVER_CEILING", "authorizing would exceed the intent's ceiling");
         }
 
         Instant now = clock.instant();
-        String authJson = canonicalizer.canonicalizeBuyerAuth(
-            cart.getId(), cart.getIntentMandateId(),
-            canonicalizer.canonicalHash(cart.getCanonicalJson()),
-            subject, cart.getCartTotalMinor(), cart.getCurrency(), now);
+        String authJson =
+                canonicalizer.canonicalizeBuyerAuth(
+                        cart.getId(),
+                        cart.getIntentMandateId(),
+                        canonicalizer.canonicalHash(cart.getCanonicalJson()),
+                        subject,
+                        cart.getCartTotalMinor(),
+                        cart.getCurrency(),
+                        now);
         PaymentSigningKey key = signingService.activeKey();
         cart.applyBuyerAuthorization(authJson, signingService.sign(key, authJson), now);
         CommerceMandate saved = mandateRepository.save(cart);
-        record(saved.getId(), "cart.authorized", subject,
-            "cart_hash=" + canonicalizer.canonicalHash(cart.getCanonicalJson()));
+        record(
+                saved.getId(),
+                "cart.authorized",
+                subject,
+                "cart_hash=" + canonicalizer.canonicalHash(cart.getCanonicalJson()));
         return saved;
     }
 
     /**
-     * Settle an AUTHORIZED cart: debit the agent's wallet for the cart total.
-     * The debit's idempotency key is the cart id itself - a retried capture
-     * folds onto the first, never double-spends.
+     * Settle an AUTHORIZED cart: debit the agent's wallet for the cart total. The debit's
+     * idempotency key is the cart id itself - a retried capture folds onto the first, never
+     * double-spends.
      */
     @Transactional
     public CommerceMandate capture(UUID cartMandateId) {
         CommerceMandate cart = requireMandate(cartMandateId);
         if (cart.getStatus() != CommerceMandateStatus.AUTHORIZED) {
-            throw new CommerceMandateException("WRONG_STATE",
-                "cart is " + cart.getStatus() + ", expected AUTHORIZED");
+            throw new CommerceMandateException(
+                    "WRONG_STATE", "cart is " + cart.getStatus() + ", expected AUTHORIZED");
         }
-        if (cart.getBuyerAuthJson() == null || cart.getBuyerSignature() == null
-            || !signingService.verify(cart.getKeyId(), cart.getBuyerAuthJson(), cart.getBuyerSignature())) {
-            throw new CommerceMandateException("BAD_BUYER_AUTH", "buyer authorization does not verify");
+        if (cart.getBuyerAuthJson() == null
+                || cart.getBuyerSignature() == null
+                || !signingService.verify(
+                        cart.getKeyId(), cart.getBuyerAuthJson(), cart.getBuyerSignature())) {
+            throw new CommerceMandateException(
+                    "BAD_BUYER_AUTH", "buyer authorization does not verify");
         }
         try {
             AgentWallet wallet = walletService.getOrCreate(cart.getAgentId(), cart.getCurrency());
-            WalletLedgerEntry debit = walletService.debit(
-                wallet.getId(), cart.getCartTotalMinor(),
-                "cart:" + cart.getId(), "commerce_mandate", cart.getId().toString(),
-                "cart capture: " + nullToEmpty(cart.getPayee()));
+            WalletLedgerEntry debit =
+                    walletService.debit(
+                            wallet.getId(),
+                            cart.getCartTotalMinor(),
+                            "cart:" + cart.getId(),
+                            "commerce_mandate",
+                            cart.getId().toString(),
+                            "cart capture: " + nullToEmpty(cart.getPayee()));
             cart.markCaptured(debit.getId(), clock.instant());
         } catch (WalletException e) {
             cart.markFailed(clock.instant());
             mandateRepository.save(cart);
             record(cart.getId(), "cart.capture_failed", currentSubject(), e.getCode());
-            throw new CommerceMandateException("CAPTURE_FAILED",
-                e.getCode() + ": " + e.getMessage());
+            throw new CommerceMandateException(
+                    "CAPTURE_FAILED", e.getCode() + ": " + e.getMessage());
         }
         CommerceMandate saved = mandateRepository.save(cart);
-        record(saved.getId(), "cart.captured", currentSubject(),
-            "debit_ref=" + saved.getWalletDebitRef());
+        record(
+                saved.getId(),
+                "cart.captured",
+                currentSubject(),
+                "debit_ref=" + saved.getWalletDebitRef());
         return saved;
     }
 
     /**
-     * Refund a CAPTURED cart: credit the agent's wallet back. Idempotent -
-     * reference key is the cart id, so a second call replays to REFUNDED
-     * state check and fails fast.
+     * Refund a CAPTURED cart: credit the agent's wallet back. Idempotent - reference key is the
+     * cart id, so a second call replays to REFUNDED state check and fails fast.
      */
     @Transactional
     public CommerceMandate refund(UUID cartMandateId, String reason) {
         CommerceMandate cart = requireMandate(cartMandateId);
         if (cart.getStatus() != CommerceMandateStatus.CAPTURED) {
-            throw new CommerceMandateException("WRONG_STATE",
-                "only a CAPTURED cart can be refunded (cart is " + cart.getStatus() + ")");
+            throw new CommerceMandateException(
+                    "WRONG_STATE",
+                    "only a CAPTURED cart can be refunded (cart is " + cart.getStatus() + ")");
         }
         AgentWallet wallet = walletService.getOrCreate(cart.getAgentId(), cart.getCurrency());
-        WalletLedgerEntry credit = walletService.credit(
-            wallet.getId(), cart.getCartTotalMinor(),
-            "refund:" + cart.getId(), "commerce_mandate", cart.getId().toString(),
-            "refund: " + nullToEmpty(reason));
+        WalletLedgerEntry credit =
+                walletService.credit(
+                        wallet.getId(),
+                        cart.getCartTotalMinor(),
+                        "refund:" + cart.getId(),
+                        "commerce_mandate",
+                        cart.getId().toString(),
+                        "refund: " + nullToEmpty(reason));
         cart.markRefunded(clock.instant());
         CommerceMandate saved = mandateRepository.save(cart);
-        record(saved.getId(), "cart.refunded", currentSubject(),
-            "credit_ref=" + credit.getId() + " reason=" + reason);
+        record(
+                saved.getId(),
+                "cart.refunded",
+                currentSubject(),
+                "credit_ref=" + credit.getId() + " reason=" + reason);
         return saved;
     }
 
@@ -344,14 +411,15 @@ public class CommerceMandateService {
     public boolean verifySignature(UUID mandateId) {
         CommerceMandate m = mandateRepository.findById(mandateId).orElse(null);
         return m != null
-            && signingService.verify(m.getKeyId(), m.getCanonicalJson(), m.getSignature());
+                && signingService.verify(m.getKeyId(), m.getCanonicalJson(), m.getSignature());
     }
 
     // ---------------------------------------------------------------- internals
 
     private CommerceMandate requireMandate(UUID id) {
-        return mandateRepository.findById(id)
-            .orElseThrow(() -> new CommerceMandateException("NOT_FOUND", "no such mandate"));
+        return mandateRepository
+                .findById(id)
+                .orElseThrow(() -> new CommerceMandateException("NOT_FOUND", "no such mandate"));
     }
 
     private CommerceMandate requireUsableIntent(UUID id) {
@@ -360,7 +428,8 @@ public class CommerceMandateService {
             throw new CommerceMandateException("NOT_AN_INTENT", "mandate is not an INTENT");
         }
         if (intent.getStatus() != CommerceMandateStatus.ACTIVE) {
-            throw new CommerceMandateException("INTENT_INACTIVE", "intent is " + intent.getStatus());
+            throw new CommerceMandateException(
+                    "INTENT_INACTIVE", "intent is " + intent.getStatus());
         }
         if (!intent.getExpiresAt().isAfter(clock.instant())) {
             throw new CommerceMandateException("INTENT_EXPIRED", "intent expired");
@@ -371,10 +440,12 @@ public class CommerceMandateService {
     /** Sum of sibling carts that already hold authorization - the committed spend. */
     private long committedUnderIntent(UUID intentMandateId) {
         return mandateRepository.findByIntentMandateIdOrderByCreatedAtDesc(intentMandateId).stream()
-            .filter(c -> c.getStatus() == CommerceMandateStatus.AUTHORIZED
-                || c.getStatus() == CommerceMandateStatus.CAPTURED)
-            .mapToLong(CommerceMandate::getCartTotalMinor)
-            .sum();
+                .filter(
+                        c ->
+                                c.getStatus() == CommerceMandateStatus.AUTHORIZED
+                                        || c.getStatus() == CommerceMandateStatus.CAPTURED)
+                .mapToLong(CommerceMandate::getCartTotalMinor)
+                .sum();
     }
 
     /** Server-side cart total from item qty * unit_price_minor; never caller-totaled. */
@@ -409,7 +480,8 @@ public class CommerceMandateService {
         try {
             AuditLogService audit = auditLogService.getIfAvailable();
             if (audit != null) {
-                audit.record(currentSubject(), action, "commerce_mandate", targetId, outcome, detail);
+                audit.record(
+                        currentSubject(), action, "commerce_mandate", targetId, outcome, detail);
             }
         } catch (RuntimeException e) {
             log.warn("Audit write failed for {}: {}", action, e.toString());
@@ -441,7 +513,8 @@ public class CommerceMandateService {
 
     private static String normalizeCurrency(String currency) {
         if (!StringUtils.hasText(currency) || currency.trim().length() != 3) {
-            throw new CommerceMandateException("CURRENCY_INVALID", "currency must be a 3-letter code");
+            throw new CommerceMandateException(
+                    "CURRENCY_INVALID", "currency must be a 3-letter code");
         }
         return currency.trim().toUpperCase(Locale.ROOT);
     }

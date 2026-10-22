@@ -33,7 +33,9 @@ class OpenApiControllerAliasesTest {
         assertThat(OpenApiControllerAliases.publishedName(String.class)).isEqualTo("String");
     }
 
-    /** The operations moved out of WorkflowController keep the ids and tag the SDKs were built on. */
+    /**
+     * The operations moved out of WorkflowController keep the ids and tag the SDKs were built on.
+     */
     @Test
     void splitWorkflowOperationsKeepTheirPublishedIdsAndTag() throws IOException {
         JsonNode paths =

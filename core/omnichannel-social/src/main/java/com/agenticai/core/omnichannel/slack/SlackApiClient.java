@@ -1,8 +1,8 @@
 package com.agenticai.core.omnichannel.slack;
 
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
@@ -47,7 +47,10 @@ public class SlackApiClient {
         this(objectMapper, apiBase, GuardedJdkHttpClient.defaults(TIMEOUT, TIMEOUT, false));
     }
 
-    /** Test seam: a raw transport for loopback fixture servers, which the SSRF guard rightly refuses. */
+    /**
+     * Test seam: a raw transport for loopback fixture servers, which the SSRF guard rightly
+     * refuses.
+     */
     SlackApiClient(ObjectMapper objectMapper, String apiBase, HttpClient httpClient) {
         this.objectMapper = objectMapper;
         this.apiBase = apiBase;

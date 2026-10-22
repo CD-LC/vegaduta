@@ -22,9 +22,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * ChatGPT's {@code conversations.json}: {@code {title, create_time, update_time, mapping{id -> {message, parent,
- * children}}, current_node}}. The message tree is walked from {@code current_node} (or the newest leaf) up the
- * {@code parent} chain with a visited set and a step cap, so a cyclic or enormous {@code mapping} cannot loop.
+ * ChatGPT's {@code conversations.json}: {@code {title, create_time, update_time, mapping{id ->
+ * {message, parent, children}}, current_node}}. The message tree is walked from {@code
+ * current_node} (or the newest leaf) up the {@code parent} chain with a visited set and a step cap,
+ * so a cyclic or enormous {@code mapping} cannot loop.
  */
 final class ChatGptImportFormat implements ChatImportFormat {
 
@@ -44,7 +45,8 @@ final class ChatGptImportFormat implements ChatImportFormat {
     }
 
     @Override
-    public ParsedChat convert(JsonNode conv, String key, String source, String sourceId, ChatImportCollector c) {
+    public ParsedChat convert(
+            JsonNode conv, String key, String source, String sourceId, ChatImportCollector c) {
         JsonNode mapping = conv.get("mapping");
         if (mapping == null || !mapping.isObject()) {
             return null;
@@ -75,7 +77,8 @@ final class ChatGptImportFormat implements ChatImportFormat {
             cursor = text(node, "parent");
         }
         if (cyclic) {
-            c.warn("A conversation had a cyclic message tree; only the part that could be followed was imported.");
+            c.warn(
+                    "A conversation had a cyclic message tree; only the part that could be followed was imported.");
         }
         Collections.reverse(path);
 
@@ -116,11 +119,20 @@ final class ChatGptImportFormat implements ChatImportFormat {
             return null;
         }
         String title = cleanTitle(text(conv, "title"), b.firstUserText());
-        return b.build(key, SOURCE_CHATGPT, sourceId, title, epochSeconds(conv.get("create_time")),
-            epochSeconds(conv.get("update_time")), false);
+        return b.build(
+                key,
+                SOURCE_CHATGPT,
+                sourceId,
+                title,
+                epochSeconds(conv.get("create_time")),
+                epochSeconds(conv.get("update_time")),
+                false);
     }
 
-    /** The leaf to start from when {@code current_node} is absent: the newest message with no children. */
+    /**
+     * The leaf to start from when {@code current_node} is absent: the newest message with no
+     * children.
+     */
     private static String pickLeaf(JsonNode mapping) {
         String best = null;
         double bestTime = Double.NEGATIVE_INFINITY;
@@ -192,13 +204,16 @@ final class ChatGptImportFormat implements ChatImportFormat {
                     return "";
                 }
                 String lang = text(content, "language");
-                if (lang == null || !lang.matches("[A-Za-z0-9+#._-]{1,20}") || "unknown".equals(lang)) {
+                if (lang == null
+                        || !lang.matches("[A-Za-z0-9+#._-]{1,20}")
+                        || "unknown".equals(lang)) {
                     lang = "";
                 }
                 return "```" + lang + "\n" + code + "\n```";
             }
             default -> {
-                // thoughts, reasoning_recap, execution_output, tether_*, user_editable_context ...: not conversation text
+                // thoughts, reasoning_recap, execution_output, tether_*, user_editable_context ...:
+                // not conversation text
                 return "";
             }
         }

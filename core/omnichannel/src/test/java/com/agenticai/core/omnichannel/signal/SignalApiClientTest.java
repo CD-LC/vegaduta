@@ -1,9 +1,9 @@
 package com.agenticai.core.omnichannel.signal;
 
-import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** The client against a fake signal-cli: REST calls, the receive websocket, and the outbound policy. */
+/**
+ * The client against a fake signal-cli: REST calls, the receive websocket, and the outbound policy.
+ */
 class SignalApiClientTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -36,7 +38,8 @@ class SignalApiClientTest {
     }
 
     private SignalConnection connection(String token) {
-        return new SignalConnection(cli.baseUrl(), NUMBER, token, UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
+        return new SignalConnection(
+                cli.baseUrl(), NUMBER, token, UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
     }
 
     @Test
@@ -52,14 +55,19 @@ class SignalApiClientTest {
 
     @Test
     void longPollsForMessagesWithoutDownloadingAttachments() {
-        cli.receiveBatches.add("[{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\"hi\"}}}]");
+        cli.receiveBatches.add(
+                "[{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\"hi\"}}}]");
 
         JsonNode batch = client.receive(connection(null), 1);
 
         assertThat(batch).hasSize(1);
-        assertThat(batch.get(0).path("envelope").path("dataMessage").path("message").asText()).isEqualTo("hi");
+        assertThat(batch.get(0).path("envelope").path("dataMessage").path("message").asText())
+                .isEqualTo("hi");
         String line = cli.requestLines.get(cli.requestLines.size() - 1);
-        assertThat(line).contains("/v1/receive/%2B4915112345678").contains("timeout=1").contains("ignore_attachments=true");
+        assertThat(line)
+                .contains("/v1/receive/%2B4915112345678")
+                .contains("timeout=1")
+                .contains("ignore_attachments=true");
     }
 
     @Test
@@ -70,7 +78,11 @@ class SignalApiClientTest {
     @Test
     void sendsTextToAPersonAndAGroup() throws Exception {
         client.send(connection(null), "+4917600000001", "hello", List.of());
-        client.send(connection(null), SignalAddress.toRecipient("group:Z3JvdXBpZGdyb3VwaWQ="), "to all", List.of());
+        client.send(
+                connection(null),
+                SignalAddress.toRecipient("group:Z3JvdXBpZGdyb3VwaWQ="),
+                "to all",
+                List.of());
 
         JsonNode first = MAPPER.readTree(cli.sentBodies.get(0));
         assertThat(first.path("message").asText()).isEqualTo("hello");
@@ -91,9 +103,11 @@ class SignalApiClientTest {
                 "see file",
                 List.of(new SignalApiClient.Attachment(bytes, "image/png", "cat;evil,name.png")));
 
-        String uri = MAPPER.readTree(cli.sentBodies.get(0)).path("base64_attachments").get(0).asText();
+        String uri =
+                MAPPER.readTree(cli.sentBodies.get(0)).path("base64_attachments").get(0).asText();
         assertThat(uri).startsWith("data:image/png;filename=cat_evil_name.png;base64,");
-        assertThat(Base64.getDecoder().decode(uri.substring(uri.indexOf("base64,") + 7))).isEqualTo(bytes);
+        assertThat(Base64.getDecoder().decode(uri.substring(uri.indexOf("base64,") + 7)))
+                .isEqualTo(bytes);
     }
 
     @Test
@@ -110,10 +124,12 @@ class SignalApiClientTest {
         cli.requiredToken = "s3cr3t";
 
         assertThatThrownBy(() -> client.about(connection(null)))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> {
-                    assertThat(e.status()).isEqualTo(401);
-                    assertThat(e.retryable()).isFalse();
-                });
+                .isInstanceOfSatisfying(
+                        SignalApiException.class,
+                        e -> {
+                            assertThat(e.status()).isEqualTo(401);
+                            assertThat(e.retryable()).isFalse();
+                        });
         assertThat(client.about(connection("s3cr3t")).mode()).isEqualTo("normal");
         assertThat(cli.authHeaders).contains("Bearer s3cr3t");
     }
@@ -122,29 +138,36 @@ class SignalApiClientTest {
     void aClientErrorIsPermanentAndAServerErrorCanBeRetried() {
         cli.sendStatus = 400;
         assertThatThrownBy(() -> client.send(connection(null), "+4917600000001", "x", List.of()))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> {
-                    assertThat(e.status()).isEqualTo(400);
-                    assertThat(e.retryable()).isFalse();
-                    assertThat(e.getMessage()).contains("Unregistered user");
-                });
+                .isInstanceOfSatisfying(
+                        SignalApiException.class,
+                        e -> {
+                            assertThat(e.status()).isEqualTo(400);
+                            assertThat(e.retryable()).isFalse();
+                            assertThat(e.getMessage()).contains("Unregistered user");
+                        });
 
         cli.sendStatus = 503;
         assertThatThrownBy(() -> client.send(connection(null), "+4917600000001", "x", List.of()))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> assertThat(e.retryable()).isTrue());
+                .isInstanceOfSatisfying(
+                        SignalApiException.class, e -> assertThat(e.retryable()).isTrue());
     }
 
     @Test
     void anUnreachableServerIsRetryableAndNeverEchoesTheToken() throws Exception {
         String url = cli.baseUrl();
         cli.close();
-        SignalConnection c = new SignalConnection(url, NUMBER, "tok-123", UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
+        SignalConnection c =
+                new SignalConnection(
+                        url, NUMBER, "tok-123", UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
 
         assertThatThrownBy(() -> client.about(c))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> {
-                    assertThat(e.status()).isEqualTo(SignalApiException.IO);
-                    assertThat(e.retryable()).isTrue();
-                    assertThat(e.getMessage()).doesNotContain("tok-123");
-                });
+                .isInstanceOfSatisfying(
+                        SignalApiException.class,
+                        e -> {
+                            assertThat(e.status()).isEqualTo(SignalApiException.IO);
+                            assertThat(e.retryable()).isTrue();
+                            assertThat(e.getMessage()).doesNotContain("tok-123");
+                        });
     }
 
     @Test
@@ -152,29 +175,43 @@ class SignalApiClientTest {
         SignalApiClient strict = new SignalApiClient(MAPPER, SsrfGuard::strict);
 
         assertThatThrownBy(() -> strict.about(connection(null)))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> {
-                    assertThat(e.status()).isEqualTo(SignalApiException.REFUSED);
-                    assertThat(e.retryable()).isFalse();
-                    assertThat(e.getMessage()).contains("allowed-private-hosts");
-                });
+                .isInstanceOfSatisfying(
+                        SignalApiException.class,
+                        e -> {
+                            assertThat(e.status()).isEqualTo(SignalApiException.REFUSED);
+                            assertThat(e.retryable()).isFalse();
+                            assertThat(e.getMessage()).contains("allowed-private-hosts");
+                        });
         assertThat(cli.requestLines).isEmpty();
     }
 
     @Test
     void aTokenIsNeverSentOverClearTextToAnUnlistedHost() {
-        // 203.0.113.x is a documentation range: blocked, and with a resolver stub even a public-looking host stays http.
-        SsrfGuard publicHost = SsrfGuard.of(java.util.Set.of(), host -> new java.net.InetAddress[] {
-            java.net.InetAddress.getByAddress(new byte[] {8, 8, 8, 8})
-        });
+        // 203.0.113.x is a documentation range: blocked, and with a resolver stub even a
+        // public-looking host stays http.
+        SsrfGuard publicHost =
+                SsrfGuard.of(
+                        java.util.Set.of(),
+                        host ->
+                                new java.net.InetAddress[] {
+                                    java.net.InetAddress.getByAddress(new byte[] {8, 8, 8, 8})
+                                });
         SignalApiClient publicClient = new SignalApiClient(MAPPER, () -> publicHost);
-        SignalConnection c = new SignalConnection(
-                "http://signal.example.org", NUMBER, "tok", UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
+        SignalConnection c =
+                new SignalConnection(
+                        "http://signal.example.org",
+                        NUMBER,
+                        "tok",
+                        UnknownSenderPolicy.PAIR,
+                        SignalGroupMode.IGNORE);
 
         assertThatThrownBy(() -> publicClient.about(c))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> {
-                    assertThat(e.status()).isEqualTo(SignalApiException.REFUSED);
-                    assertThat(e.getMessage()).contains("https");
-                });
+                .isInstanceOfSatisfying(
+                        SignalApiException.class,
+                        e -> {
+                            assertThat(e.status()).isEqualTo(SignalApiException.REFUSED);
+                            assertThat(e.getMessage()).contains("https");
+                        });
     }
 
     @Test
@@ -185,23 +222,30 @@ class SignalApiClientTest {
             assertThat(stream.isOpen()).isTrue();
             assertThat(stream.poll(Duration.ofMillis(100))).isNull();
 
-            cli.wsFrames.add("{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\"one\"}}}");
+            cli.wsFrames.add(
+                    "{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\"one\"}}}");
             JsonNode frame = stream.poll(Duration.ofSeconds(5));
             assertThat(frame).isNotNull();
-            assertThat(frame.path("envelope").path("dataMessage").path("message").asText()).isEqualTo("one");
+            assertThat(frame.path("envelope").path("dataMessage").path("message").asText())
+                    .isEqualTo("one");
 
             // A large frame crosses the JDK's fragmentation boundary.
             String big = "y".repeat(100_000);
-            cli.wsFrames.add("{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\"" + big + "\"}}}");
+            cli.wsFrames.add(
+                    "{\"envelope\":{\"sourceNumber\":\"+4917600000001\",\"dataMessage\":{\"message\":\""
+                            + big
+                            + "\"}}}");
             JsonNode large = stream.poll(Duration.ofSeconds(5));
-            assertThat(large.path("envelope").path("dataMessage").path("message").asText()).hasSize(100_000);
+            assertThat(large.path("envelope").path("dataMessage").path("message").asText())
+                    .hasSize(100_000);
 
             cli.dropConnections();
-            assertThatThrownBy(() -> {
-                        for (int i = 0; i < 50; i++) {
-                            stream.poll(Duration.ofMillis(200));
-                        }
-                    })
+            assertThatThrownBy(
+                            () -> {
+                                for (int i = 0; i < 50; i++) {
+                                    stream.poll(Duration.ofMillis(200));
+                                }
+                            })
                     .isInstanceOf(SignalApiException.class);
             assertThat(stream.isOpen()).isFalse();
         }
@@ -213,7 +257,9 @@ class SignalApiClientTest {
         SignalApiClient strict = new SignalApiClient(MAPPER, SsrfGuard::strict);
 
         assertThatThrownBy(() -> strict.openStream(connection(null)))
-                .isInstanceOfSatisfying(SignalApiException.class, e -> assertThat(e.status()).isEqualTo(SignalApiException.REFUSED));
+                .isInstanceOfSatisfying(
+                        SignalApiException.class,
+                        e -> assertThat(e.status()).isEqualTo(SignalApiException.REFUSED));
     }
 
     @Test

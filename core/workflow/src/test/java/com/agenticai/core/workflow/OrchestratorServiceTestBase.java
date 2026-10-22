@@ -3,7 +3,6 @@ package com.agenticai.core.workflow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.core.AgentService;
@@ -18,7 +17,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** Shared fixture of the {@link OrchestratorService} tests: a mocked agent service and approval gate. */
+/**
+ * Shared fixture of the {@link OrchestratorService} tests: a mocked agent service and approval
+ * gate.
+ */
 abstract class OrchestratorServiceTestBase {
 
     AgentService agentService;
@@ -34,10 +36,16 @@ abstract class OrchestratorServiceTestBase {
         // validate() calls the unchecked requireExists (2026-08-04 fix - see
         // that method's javadoc), not the per-user-access-checked get(), so
         // that's what needs stubbing here to simulate a dangling agentId.
-        doThrow(new AgentNotFoundException(MISSING_AGENT_ID)).when(agentService).requireExists(MISSING_AGENT_ID);
+        doThrow(new AgentNotFoundException(MISSING_AGENT_ID))
+                .when(agentService)
+                .requireExists(MISSING_AGENT_ID);
         approvalGateService = mock(HumanApprovalGateService.class);
-        orchestrator = new OrchestratorService(agentService, approvalGateService, new ObjectMapper(),
-            mock(ObjectProvider.class));
+        orchestrator =
+                new OrchestratorService(
+                        agentService,
+                        approvalGateService,
+                        new ObjectMapper(),
+                        mock(ObjectProvider.class));
     }
 
     static WorkflowNodeDto node(String id, String type, Map<String, Object> config) {
@@ -48,7 +56,10 @@ abstract class OrchestratorServiceTestBase {
         return new WorkflowEdgeDto(id, source, target, null, null);
     }
 
-    /** Per-node workflow triggers - every trigger node now needs its own 'channel' config; WEBHOOK is the default here since it's the one channel allowed to repeat. */
+    /**
+     * Per-node workflow triggers - every trigger node now needs its own 'channel' config; WEBHOOK
+     * is the default here since it's the one channel allowed to repeat.
+     */
     static WorkflowNodeDto trigger(String id) {
         return trigger(id, "WEBHOOK");
     }
@@ -58,6 +69,7 @@ abstract class OrchestratorServiceTestBase {
     }
 
     List<String> errorsFrom(WorkflowGraphDto graph) {
-        return assertThrows(WorkflowValidationException.class, () -> orchestrator.validate(graph)).getErrors();
+        return assertThrows(WorkflowValidationException.class, () -> orchestrator.validate(graph))
+                .getErrors();
     }
 }

@@ -40,7 +40,11 @@ class MatrixChannelAdapterTest {
                                 server.endpoint("tok"),
                                 "@bot:hs",
                                 null,
-                                new MatrixSenderPolicy("@bot:hs", MatrixSenderMode.PAIRING, MatrixJoinPolicy.OFF, "")));
+                                new MatrixSenderPolicy(
+                                        "@bot:hs",
+                                        MatrixSenderMode.PAIRING,
+                                        MatrixJoinPolicy.OFF,
+                                        "")));
         adapter = new MatrixChannelAdapter(credentials, server.client(), logger);
     }
 
@@ -58,18 +62,22 @@ class MatrixChannelAdapterTest {
     }
 
     @Test
-    void sendsTheApprovedMessageWithAnIdempotentTransactionIdAndLogsTheTranscript() throws Exception {
+    void sendsTheApprovedMessageWithAnIdempotentTransactionIdAndLogsTheTranscript()
+            throws Exception {
         server.on("PUT /_matrix/client/v3/rooms/", 200, "{\"event_id\":\"$ok\"}");
         UUID id = UUID.randomUUID();
 
         adapter.execute(
-                request(id, "{\"to\":\"!r:hs\",\"body\":\"hello\",\"replyToEventId\":\"$q\",\"threadRootEventId\":null}"));
+                request(
+                        id,
+                        "{\"to\":\"!r:hs\",\"body\":\"hello\",\"replyToEventId\":\"$q\",\"threadRootEventId\":null}"));
 
         FakeHomeserver.Request sent = server.requests.get(0);
         assertThat(sent.rawPath()).endsWith("/send/m.room.message/vd-" + id);
         JsonNode body = MAPPER.readTree(sent.body());
         assertThat(body.path("body").asText()).isEqualTo("hello");
-        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asText()).isEqualTo("$q");
+        assertThat(body.path("m.relates_to").path("m.in_reply_to").path("event_id").asText())
+                .isEqualTo("$q");
         verify(logger).recordSent(eq(ChannelType.MATRIX), eq("!r:hs"), eq("hello"), any());
     }
 
@@ -90,10 +98,20 @@ class MatrixChannelAdapterTest {
                 "{\"errcode\":\"M_FORBIDDEN\",\"error\":\"You are not in this room\"}");
         server.on("PUT /_matrix/client/v3/rooms/!down:hs", 502, "{}");
 
-        assertThatThrownBy(() -> adapter.execute(request(UUID.randomUUID(), "{\"to\":\"!no:hs\",\"body\":\"x\"}")))
+        assertThatThrownBy(
+                        () ->
+                                adapter.execute(
+                                        request(
+                                                UUID.randomUUID(),
+                                                "{\"to\":\"!no:hs\",\"body\":\"x\"}")))
                 .isInstanceOf(ChannelDeliveryException.class)
                 .isNotInstanceOf(RetryableChannelDeliveryException.class);
-        assertThatThrownBy(() -> adapter.execute(request(UUID.randomUUID(), "{\"to\":\"!down:hs\",\"body\":\"x\"}")))
+        assertThatThrownBy(
+                        () ->
+                                adapter.execute(
+                                        request(
+                                                UUID.randomUUID(),
+                                                "{\"to\":\"!down:hs\",\"body\":\"x\"}")))
                 .isInstanceOf(RetryableChannelDeliveryException.class);
     }
 
@@ -101,7 +119,8 @@ class MatrixChannelAdapterTest {
     void anEmptyOrMalformedPayloadIsRejectedUpFront() {
         assertThatThrownBy(() -> adapter.execute(request(UUID.randomUUID(), "")))
                 .isInstanceOf(ChannelDeliveryException.class);
-        assertThatThrownBy(() -> adapter.execute(request(UUID.randomUUID(), "{\"body\":\"no room\"}")))
+        assertThatThrownBy(
+                        () -> adapter.execute(request(UUID.randomUUID(), "{\"body\":\"no room\"}")))
                 .isInstanceOf(ChannelDeliveryException.class);
         assertThatThrownBy(() -> adapter.execute(request(UUID.randomUUID(), "not json")))
                 .isInstanceOf(ChannelDeliveryException.class);
@@ -112,7 +131,8 @@ class MatrixChannelAdapterTest {
     void theTextSendProducesAPayloadThisAdapterAccepts() throws Exception {
         MatrixTextSend textSend = new MatrixTextSend();
         String json = MAPPER.writeValueAsString(textSend.payload("!r:hs", null, "hi"));
-        MatrixChannelAdapter.SendPayload parsed = MAPPER.readValue(json, MatrixChannelAdapter.SendPayload.class);
+        MatrixChannelAdapter.SendPayload parsed =
+                MAPPER.readValue(json, MatrixChannelAdapter.SendPayload.class);
 
         assertThat(parsed.to()).isEqualTo("!r:hs");
         assertThat(textSend.actionType()).isEqualTo(MatrixChannelAdapter.ACTION_TYPE);

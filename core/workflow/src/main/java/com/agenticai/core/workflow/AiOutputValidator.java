@@ -1,5 +1,7 @@
 package com.agenticai.core.workflow;
 
+import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
+
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,12 +14,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
-import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 
 /**
- * Validation and type coercion of a parameter-extractor reply against the declared parameters (string / number /
- * boolean / array / enum). Strict: an unusable value becomes JSON null plus a per-parameter problem, never a guess.
- * Extracted from {@link WorkflowAiNodeHandler}; pure and static.
+ * Validation and type coercion of a parameter-extractor reply against the declared parameters
+ * (string / number / boolean / array / enum). Strict: an unusable value becomes JSON null plus a
+ * per-parameter problem, never a guess. Extracted from {@link WorkflowAiNodeHandler}; pure and
+ * static.
  */
 final class AiOutputValidator {
     private static final Pattern PLAIN_NUMBER = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)");

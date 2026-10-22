@@ -21,11 +21,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
- * JAVA-005: the interceptor read a request attribute nothing sets, so it logged a WARN per request and never ran
- * a check. It now takes the tenant and user from {@link TenantContext} via {@link FraudTenantIds} (the same
- * mapping the fraud admin API uses). These tests also pin the safety posture: the request-rate / auth-attempt
- * heuristics only observe unless {@code fraud-detection.enforce=true}, while explicit blacklist entries are
- * always enforced.
+ * JAVA-005: the interceptor read a request attribute nothing sets, so it logged a WARN per request
+ * and never ran a check. It now takes the tenant and user from {@link TenantContext} via {@link
+ * FraudTenantIds} (the same mapping the fraud admin API uses). These tests also pin the safety
+ * posture: the request-rate / auth-attempt heuristics only observe unless {@code
+ * fraud-detection.enforce=true}, while explicit blacklist entries are always enforced.
  */
 class FraudDetectionInterceptorTest {
 

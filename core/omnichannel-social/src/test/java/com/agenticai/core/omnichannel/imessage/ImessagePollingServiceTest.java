@@ -21,36 +21,49 @@ class ImessagePollingServiceTest {
                     + "{\"guid\":\"b\",\"text\":\"two\",\"dateCreated\":3000,\"isFromMe\":false}]}";
 
     private ImessagePollingService service(
-            FakeBlueBubbles bb, ImessageCredentialService credentials, ImessageUpdateService updates) {
-        return new ImessagePollingService(mock(TenantResolutionService.class), credentials, bb.client(), updates, 5000);
+            FakeBlueBubbles bb,
+            ImessageCredentialService credentials,
+            ImessageUpdateService updates) {
+        return new ImessagePollingService(
+                mock(TenantResolutionService.class), credentials, bb.client(), updates, 5000);
     }
 
     @Test
     void aRoundHandsEveryNewMessageToTheUpdateServiceAndAdvancesTheCursor() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/query", 200, PAGE)) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles().on("POST /api/v1/message/query", 200, PAGE)) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             ImessageUpdateService updates = mock(ImessageUpdateService.class);
             when(updates.acceptVerified(any())).thenReturn(true);
             when(credentials.pollTarget("wid"))
-                    .thenReturn(Optional.of(new ImessageCredentialService.PollTarget(bb.url(), FakeBlueBubbles.PASSWORD, 1000L)));
+                    .thenReturn(
+                            Optional.of(
+                                    new ImessageCredentialService.PollTarget(
+                                            bb.url(), FakeBlueBubbles.PASSWORD, 1000L)));
 
             ImessagePollingService.Round round = service(bb, credentials, updates).pollOnce("wid");
 
             assertThat(round).isEqualTo(ImessagePollingService.Round.IDLE);
             ArgumentCaptor<JsonNode> handled = ArgumentCaptor.forClass(JsonNode.class);
             verify(updates, org.mockito.Mockito.times(2)).acceptVerified(handled.capture());
-            assertThat(handled.getAllValues()).extracting(n -> n.path("guid").asText()).containsExactly("a", "b");
+            assertThat(handled.getAllValues())
+                    .extracting(n -> n.path("guid").asText())
+                    .containsExactly("a", "b");
             verify(credentials).savePollCursor(3000L);
         }
     }
 
     @Test
     void theFirstRoundOnlySetsTheCursorAndNeverReplaysHistory() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/query", 200, PAGE)) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles().on("POST /api/v1/message/query", 200, PAGE)) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             ImessageUpdateService updates = mock(ImessageUpdateService.class);
             when(credentials.pollTarget("wid"))
-                    .thenReturn(Optional.of(new ImessageCredentialService.PollTarget(bb.url(), FakeBlueBubbles.PASSWORD, null)));
+                    .thenReturn(
+                            Optional.of(
+                                    new ImessageCredentialService.PollTarget(
+                                            bb.url(), FakeBlueBubbles.PASSWORD, null)));
 
             ImessagePollingService.Round round = service(bb, credentials, updates).pollOnce("wid");
 
@@ -63,12 +76,16 @@ class ImessagePollingServiceTest {
 
     @Test
     void aShedMessageHoldsTheCursorBackSoItIsRetried() throws Exception {
-        try (FakeBlueBubbles bb = new FakeBlueBubbles().on("POST /api/v1/message/query", 200, PAGE)) {
+        try (FakeBlueBubbles bb =
+                new FakeBlueBubbles().on("POST /api/v1/message/query", 200, PAGE)) {
             ImessageCredentialService credentials = mock(ImessageCredentialService.class);
             ImessageUpdateService updates = mock(ImessageUpdateService.class);
             when(updates.acceptVerified(any())).thenReturn(true, false);
             when(credentials.pollTarget("wid"))
-                    .thenReturn(Optional.of(new ImessageCredentialService.PollTarget(bb.url(), FakeBlueBubbles.PASSWORD, 1000L)));
+                    .thenReturn(
+                            Optional.of(
+                                    new ImessageCredentialService.PollTarget(
+                                            bb.url(), FakeBlueBubbles.PASSWORD, 1000L)));
 
             ImessagePollingService.Round round = service(bb, credentials, updates).pollOnce("wid");
 

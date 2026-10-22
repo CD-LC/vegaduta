@@ -38,10 +38,10 @@ import org.mockito.ArgumentCaptor;
 
 /**
  * Characterisation of the per-field configuration setters on {@link AgentService}: for each one the
- * mutation applied to the entity, the exact version-history summary written, and the shared
- * "EDITOR access first, nothing saved on denial" sequence. Written against the public facade API
- * only, so it pins the same behavior whether the setters are inline methods (the old shape) or
- * delegate to {@link AgentSettingsService} (the current shape).
+ * mutation applied to the entity, the exact version-history summary written, and the shared "EDITOR
+ * access first, nothing saved on denial" sequence. Written against the public facade API only, so
+ * it pins the same behavior whether the setters are inline methods (the old shape) or delegate to
+ * {@link AgentSettingsService} (the current shape).
  */
 class AgentSettingsCharacterisationTest {
 
@@ -78,7 +78,8 @@ class AgentSettingsCharacterisationTest {
                         resourceAccess,
                         schema,
                         snapshots,
-                        new AgentConfigSnapshotCodec(new com.fasterxml.jackson.databind.ObjectMapper()),
+                        new AgentConfigSnapshotCodec(
+                                new com.fasterxml.jackson.databind.ObjectMapper()),
                         new AgentCapabilityRegistry(List.of()),
                         "claude-sonnet-5",
                         1024,
@@ -205,7 +206,8 @@ class AgentSettingsCharacterisationTest {
     void edgeRoutingNullClears() {
         service.setEdgeRoutingPolicy(id, null);
         assertThat(agent.getEdgeRoutingPolicy()).isNull();
-        assertThat(lastSummary()).isEqualTo("Cleared edge routing policy (device preferences decide)");
+        assertThat(lastSummary())
+                .isEqualTo("Cleared edge routing policy (device preferences decide)");
     }
 
     @Test

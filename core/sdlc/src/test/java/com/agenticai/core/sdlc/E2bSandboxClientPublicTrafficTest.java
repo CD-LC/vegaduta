@@ -41,7 +41,8 @@ class E2bSandboxClientPublicTrafficTest {
     }
 
     private static RequestMatcher jsonBody(Consumer<JsonNode> check) {
-        return request -> check.accept(MAPPER.readTree(((MockClientHttpRequest) request).getBodyAsString()));
+        return request ->
+                check.accept(MAPPER.readTree(((MockClientHttpRequest) request).getBodyAsString()));
     }
 
     @Test
@@ -55,9 +56,15 @@ class E2bSandboxClientPublicTrafficTest {
                         jsonBody(
                                 body -> {
                                     assertThat(body.path("templateID").asText()).isEqualTo("tpl");
-                                    assertThat(body.path("network").path("allowPublicTraffic").isBoolean())
+                                    assertThat(
+                                                    body.path("network")
+                                                            .path("allowPublicTraffic")
+                                                            .isBoolean())
                                             .isTrue();
-                                    assertThat(body.path("network").path("allowPublicTraffic").asBoolean())
+                                    assertThat(
+                                                    body.path("network")
+                                                            .path("allowPublicTraffic")
+                                                            .asBoolean())
                                             .isFalse();
                                 }))
                 .andRespond(
@@ -108,7 +115,10 @@ class E2bSandboxClientPublicTrafficTest {
                                 "{\"sandboxID\":\"sb1\",\"templateID\":\"tpl\",\"envdVersion\":\"1\","
                                         + "\"trafficAccessToken\":null}",
                                 MediaType.APPLICATION_JSON));
-        server[0].expect(requestTo(KILL_URL)).andExpect(method(HttpMethod.DELETE)).andRespond(withServerError());
+        server[0]
+                .expect(requestTo(KILL_URL))
+                .andExpect(method(HttpMethod.DELETE))
+                .andRespond(withServerError());
 
         assertThatThrownBy(() -> client.createSandbox("key", "tpl", 60, null, null))
                 .isInstanceOf(E2bApiException.class)

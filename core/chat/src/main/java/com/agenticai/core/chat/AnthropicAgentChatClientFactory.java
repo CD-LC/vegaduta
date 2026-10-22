@@ -12,36 +12,33 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Constructs a fresh AnthropicApi + AnthropicChatModel + ChatClient per call
- * from the caller-supplied key - deliberately not a singleton bean built
- * from a static application.yml key, since this platform is BYOK (see the
- * exclusion of AnthropicChatAutoConfiguration in CoreApplication).
+ * Constructs a fresh AnthropicApi + AnthropicChatModel + ChatClient per call from the
+ * caller-supplied key - deliberately not a singleton bean built from a static application.yml key,
+ * since this platform is BYOK (see the exclusion of AnthropicChatAutoConfiguration in
+ * CoreApplication).
  *
- * <p>Spring AI 1.1.x removed the simple `new AnthropicApi(key)` constructor
- * in favor of a builder + typed ApiKey - AnthropicApi.builder().apiKey(String)
- * still accepts a raw string and wraps it as a SimpleApiKey internally.
+ * <p>Spring AI 1.1.x removed the simple `new AnthropicApi(key)` constructor in favor of a builder +
+ * typed ApiKey - AnthropicApi.builder().apiKey(String) still accepts a raw string and wraps it as a
+ * SimpleApiKey internally.
  *
- * <p>Known cost: reconstructs the client on every chat call rather than
- * caching per credential. Fine for MVP correctness; worth caching
- * (keyed by credential id + updatedAt, invalidated on key rotation) once
- * this is under real load - noted for V1 hardening, not done here to avoid
- * a caching bug masquerading as a feature this early.
+ * <p>Known cost: reconstructs the client on every chat call rather than caching per credential.
+ * Fine for MVP correctness; worth caching (keyed by credential id + updatedAt, invalidated on key
+ * rotation) once this is under real load - noted for V1 hardening, not done here to avoid a caching
+ * bug masquerading as a feature this early.
  *
- * <p>Every {@link ChatClient} built here also gets {@link LlmMetricsAdvisor}
- * registered as a default advisor - direct feedback on Platform Maintenance:
- * "capture any metrics like latency, how many LLM calls were made." Since
- * this factory is the sole construction point for every ChatClient in the
- * app (see {@link ChatClientRegistry}), one line here covers every real call
- * site with no per-site instrumentation needed.
+ * <p>Every {@link ChatClient} built here also gets {@link LlmMetricsAdvisor} registered as a
+ * default advisor - direct feedback on Platform Maintenance: "capture any metrics like latency, how
+ * many LLM calls were made." Since this factory is the sole construction point for every ChatClient
+ * in the app (see {@link ChatClientRegistry}), one line here covers every real call site with no
+ * per-site instrumentation needed.
  *
  * <p><b>Prompt caching</b> (Anthropic docs:
- * platform.claude.com/docs/en/build-with-claude/prompt-caching) is no longer
- * inline here - it's delegated to {@link AnthropicProviderCachingStrategy},
- * the {@link ProviderCachingStrategy} implementation for this provider (see
- * that class's javadoc for the strategy/TTL reasoning this factory used to
- * carry directly). This factory's only remaining job re: caching is building
- * the {@link ProviderCachingContext} and calling {@link
- * ProviderCachingStrategy#apply} on the in-progress options builder.
+ * platform.claude.com/docs/en/build-with-claude/prompt-caching) is no longer inline here - it's
+ * delegated to {@link AnthropicProviderCachingStrategy}, the {@link ProviderCachingStrategy}
+ * implementation for this provider (see that class's javadoc for the strategy/TTL reasoning this
+ * factory used to carry directly). This factory's only remaining job re: caching is building the
+ * {@link ProviderCachingContext} and calling {@link ProviderCachingStrategy#apply} on the
+ * in-progress options builder.
  */
 @Component
 public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
@@ -74,17 +71,16 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
     private final String thinkingEffort;
 
     public AnthropicAgentChatClientFactory(
-        LlmCallMetricsService llmCallMetricsService,
-        LlmCallLogService llmCallLogService,
-        LlmModelSupport modelSupport,
-        AnthropicProviderCachingStrategy cachingStrategy,
-        MeterRegistry meterRegistry,
-        LlmPricingCatalog pricingCatalog,
-        LlmHttpClientFactory llmHttpClientFactory,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        @Value("${app.llm.anthropic.thinking.enabled:true}") boolean thinkingEnabled,
-        @Value("${app.llm.anthropic.thinking.effort:}") String thinkingEffort
-    ) {
+            LlmCallMetricsService llmCallMetricsService,
+            LlmCallLogService llmCallLogService,
+            LlmModelSupport modelSupport,
+            AnthropicProviderCachingStrategy cachingStrategy,
+            MeterRegistry meterRegistry,
+            LlmPricingCatalog pricingCatalog,
+            LlmHttpClientFactory llmHttpClientFactory,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            @Value("${app.llm.anthropic.thinking.enabled:true}") boolean thinkingEnabled,
+            @Value("${app.llm.anthropic.thinking.effort:}") String thinkingEffort) {
         this.llmCallMetricsService = llmCallMetricsService;
         this.llmCallLogService = llmCallLogService;
         this.modelSupport = modelSupport;
@@ -93,7 +89,8 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
         this.pricingCatalog = pricingCatalog;
         this.llmHttpClientFactory = llmHttpClientFactory;
         this.toolCallingManagers = toolCallingManagers;
-        this.modelBuilder = new AnthropicModelBuilder(llmHttpClientFactory, toolCallingManagers, modelSupport);
+        this.modelBuilder =
+                new AnthropicModelBuilder(llmHttpClientFactory, toolCallingManagers, modelSupport);
         this.thinkingEnabled = thinkingEnabled;
         this.thinkingEffort = thinkingEffort;
     }
@@ -106,9 +103,8 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
     // is a hand-maintained prefix list rather than something derived from
     // the API - if the same error surfaces for another model id, add its
     // prefix here.
-    private static final List<String> TEMPERATURE_DEPRECATED_MODEL_PREFIXES = List.of(
-        "claude-sonnet-5"
-    );
+    private static final List<String> TEMPERATURE_DEPRECATED_MODEL_PREFIXES =
+            List.of("claude-sonnet-5");
 
     private static boolean temperatureSupported(String model) {
         if (model == null) {
@@ -124,11 +120,13 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
      * {@link SamplingOptions} survive. With thinking off this is the pre-existing behaviour.
      */
     static AnthropicChatOptions.Builder samplingBuilder(
-        String model, int maxTokens, double temperature, double topP, SamplingOptions sampling, Integer thinkingBudget
-    ) {
-        var optionsBuilder = AnthropicChatOptions.builder()
-            .model(model)
-            .maxTokens(maxTokens);
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            SamplingOptions sampling,
+            Integer thinkingBudget) {
+        var optionsBuilder = AnthropicChatOptions.builder().model(model).maxTokens(maxTokens);
         if (thinkingBudget != null) {
             optionsBuilder.thinking(AnthropicApi.ThinkingType.ENABLED, thinkingBudget);
             if (!sampling.stopSequences().isEmpty()) {
@@ -151,16 +149,23 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
     }
 
     @Override
-    public ChatClient create(String apiKey, String model, int maxTokens, double temperature, double topP) {
+    public ChatClient create(
+            String apiKey, String model, int maxTokens, double temperature, double topP) {
         return create(apiKey, model, maxTokens, temperature, topP, java.util.Map.of());
     }
 
-    /** Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields are omitted. */
+    /**
+     * Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields
+     * are omitted.
+     */
     @Override
     public ChatClient create(
-        String apiKey, String model, int maxTokens, double temperature, double topP,
-        java.util.Map<String, Object> providerOptions
-    ) {
+            String apiKey,
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
         AnthropicApi anthropicApi = modelBuilder.api(apiKey);
 
@@ -180,10 +185,15 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
         // omit both sampling params entirely and let Anthropic apply its
         // own default rather than sending a value it will reject.
         // Extended thinking: effort -> budget_tokens (null = off, the default).
-        Integer thinkingBudget = thinkingEnabled
-            ? AnthropicThinking.budgetFor(model, AnthropicThinking.resolveEffort(providerOptions, thinkingEffort), maxTokens)
-            : null;
-        var optionsBuilder = samplingBuilder(model, maxTokens, temperature, topP, sampling, thinkingBudget);
+        Integer thinkingBudget =
+                thinkingEnabled
+                        ? AnthropicThinking.budgetFor(
+                                model,
+                                AnthropicThinking.resolveEffort(providerOptions, thinkingEffort),
+                                maxTokens)
+                        : null;
+        var optionsBuilder =
+                samplingBuilder(model, maxTokens, temperature, topP, sampling, thinkingBudget);
         cachingStrategy.apply(optionsBuilder, new ProviderCachingContext(apiKey, model));
         AnthropicChatOptions options = optionsBuilder.build();
 
@@ -194,19 +204,31 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
             // replayed in tool loops). Tool-carrying requests go to a thinking-off sibling model.
             var plainBuilder = samplingBuilder(model, maxTokens, temperature, topP, sampling, null);
             cachingStrategy.apply(plainBuilder, new ProviderCachingContext(apiKey, model));
-            chatModel = new AnthropicThinkingChatModel(baseModel, modelBuilder.chatModel(anthropicApi, plainBuilder.build()));
+            chatModel =
+                    new AnthropicThinkingChatModel(
+                            baseModel, modelBuilder.chatModel(anthropicApi, plainBuilder.build()));
         }
         // Native structured output by forced tool use: only when the caller asked for a schema AND
         // app.llm.structured-output.anthropic-tool-forcing.enabled is on; with thinking on it is
         // skipped (forced tool_choice + thinking = 400). Otherwise returns chatModel unchanged.
-        chatModel = modelSupport.applyAnthropicStructuredSchema(chatModel, model, thinkingBudget != null, providerOptions);
+        chatModel =
+                modelSupport.applyAnthropicStructuredSchema(
+                        chatModel, model, thinkingBudget != null, providerOptions);
 
         // LlmMetricsAdvisor is per-call (carries this model's provider/model),
         // so it's constructed fresh here; the DefaultAgentAdvisor beans are
         // shared singletons appended after it (order 0 vs 100+, see each).
-        return modelSupport.chatClientBuilder(chatModel)
-            .defaultAdvisors(modelSupport.advisors(
-                new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.ANTHROPIC, model, meterRegistry, pricingCatalog)))
-            .build();
+        return modelSupport
+                .chatClientBuilder(chatModel)
+                .defaultAdvisors(
+                        modelSupport.advisors(
+                                new LlmMetricsAdvisor(
+                                        llmCallMetricsService,
+                                        llmCallLogService,
+                                        ProviderName.ANTHROPIC,
+                                        model,
+                                        meterRegistry,
+                                        pricingCatalog)))
+                .build();
     }
 }

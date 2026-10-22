@@ -18,29 +18,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Gemini Live API ({@code BidiGenerateContent}) realtime provider - Google's
- * native audio-to-audio model.
+ * Gemini Live API ({@code BidiGenerateContent}) realtime provider - Google's native audio-to-audio
+ * model.
  *
  * <p><b>Wire protocol (v1alpha bidirectional stream):</b>
+ *
  * <ul>
  *   <li>connect {@code wss://generativelanguage.googleapis.com/ws/
  *       google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=...}
  *   <li>first outbound frame: {@code {"setup":{model, generationConfig{
  *       responseModalities:["AUDIO"], speechConfig}, systemInstruction}}}
- *   <li>the provider answers {@code {"setupComplete":{}}} - {@link #open}
- *       waits for that before returning, so a bad key/model fails fast at
- *       session-create time instead of silently eating audio
- *   <li>audio in: {@code {"realtimeInput":{"mediaChunks":[{mimeType:
- *       "audio/pcm;rate=16000", data: base64}]}}}
- *   <li>audio out: {@code serverContent.modelTurn.parts[].inlineData.data}
- *       (PCM16 @ 24 kHz), transcripts via {@code inputTranscription}/
- *       {@code outputTranscription}, barge-in via {@code serverContent.
- *       interrupted}
+ *   <li>the provider answers {@code {"setupComplete":{}}} - {@link #open} waits for that before
+ *       returning, so a bad key/model fails fast at session-create time instead of silently eating
+ *       audio
+ *   <li>audio in: {@code {"realtimeInput":{"mediaChunks":[{mimeType: "audio/pcm;rate=16000", data:
+ *       base64}]}}}
+ *   <li>audio out: {@code serverContent.modelTurn.parts[].inlineData.data} (PCM16 @ 24 kHz),
+ *       transcripts via {@code inputTranscription}/ {@code outputTranscription}, barge-in via
+ *       {@code serverContent. interrupted}
  * </ul>
  *
- * <p>The API key travels in the connect URI because the Live API does not
- * take a bearer header on the WebSocket - that is why the relay exists:
- * the browser never sees this URL.
+ * <p>The API key travels in the connect URI because the Live API does not take a bearer header on
+ * the WebSocket - that is why the relay exists: the browser never sees this URL.
  */
 @Component
 public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
@@ -50,8 +49,8 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
 
     static final String DEFAULT_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
     static final String ENDPOINT =
-        "wss://generativelanguage.googleapis.com/ws/"
-            + "google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent";
+            "wss://generativelanguage.googleapis.com/ws/"
+                    + "google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent";
     static final int INPUT_SAMPLE_RATE = 16000;
     static final int OUTPUT_SAMPLE_RATE = 24000;
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
@@ -81,18 +80,31 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
             // Gemini Live only accepts the key as a query parameter, so it is percent-encoded and
             // every message below is scrubbed: a JDK URI syntax error or a handshake failure can
             // quote the full URL, key included, and this message reaches logs and the relay close.
-            ws = httpClient.newWebSocketBuilder()
-                .buildAsync(URI.create(ENDPOINT + "?key="
-                    + java.net.URLEncoder.encode(config.apiKey(), java.nio.charset.StandardCharsets.UTF_8)), session)
-                .orTimeout(CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
-                .join();
+            ws =
+                    httpClient
+                            .newWebSocketBuilder()
+                            .buildAsync(
+                                    URI.create(
+                                            ENDPOINT
+                                                    + "?key="
+                                                    + java.net.URLEncoder.encode(
+                                                            config.apiKey(),
+                                                            java.nio.charset.StandardCharsets
+                                                                    .UTF_8)),
+                                    session)
+                            .orTimeout(CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
+                            .join();
         } catch (IllegalArgumentException e) {
             // No cause: its message is the whole URI.
-            throw new RealtimeVoiceException("Gemini Live connect failed: the endpoint URL is invalid");
+            throw new RealtimeVoiceException(
+                    "Gemini Live connect failed: the endpoint URL is invalid");
         } catch (RuntimeException e) {
             throw new RealtimeVoiceException(
-                "Gemini Live connect failed: " + com.agenticai.core.security.LogMasking.secrets(e.getMessage()),
-                new RuntimeException(e.getClass().getName() + " (details withheld: may quote the request URL)"));
+                    "Gemini Live connect failed: "
+                            + com.agenticai.core.security.LogMasking.secrets(e.getMessage()),
+                    new RuntimeException(
+                            e.getClass().getName()
+                                    + " (details withheld: may quote the request URL)"));
         }
         session.webSocket = ws;
 
@@ -100,7 +112,8 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
         try {
             if (!setupDone.await(CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
                 ws.abort();
-                throw new RealtimeVoiceException("Gemini Live setup timed out waiting for setupComplete");
+                throw new RealtimeVoiceException(
+                        "Gemini Live setup timed out waiting for setupComplete");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -117,8 +130,8 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
     }
 
     /**
-     * The session itself: a WebSocket.Listener that parses inbound provider
-     * frames into listener events, plus the outbound send methods.
+     * The session itself: a WebSocket.Listener that parses inbound provider frames into listener
+     * events, plus the outbound send methods.
      */
     static final class GeminiSession implements WebSocket.Listener, RealtimeVoiceSession {
 
@@ -143,9 +156,10 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
             if (closed || out == null) {
                 return;
             }
-            ObjectNode chunk = MAPPER.createObjectNode()
-                .put("mimeType", "audio/pcm;rate=" + INPUT_SAMPLE_RATE)
-                .put("data", Base64.getEncoder().encodeToString(pcm16le));
+            ObjectNode chunk =
+                    MAPPER.createObjectNode()
+                            .put("mimeType", "audio/pcm;rate=" + INPUT_SAMPLE_RATE)
+                            .put("data", Base64.getEncoder().encodeToString(pcm16le));
             ObjectNode frame = MAPPER.createObjectNode();
             frame.putObject("realtimeInput").putArray("mediaChunks").add(chunk);
             out.sendText(frame.toString());
@@ -197,7 +211,8 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
                     for (JsonNode part : content.path("modelTurn").path("parts")) {
                         JsonNode inline = part.path("inlineData");
                         if (inline.has("data")) {
-                            listener.onAudioChunk(Base64.getDecoder().decode(inline.get("data").asText()));
+                            listener.onAudioChunk(
+                                    Base64.getDecoder().decode(inline.get("data").asText()));
                         }
                     }
                     String in = content.path("inputTranscription").path("text").asText("");
@@ -249,18 +264,27 @@ public class GeminiLiveRealtimeProvider implements RealtimeVoiceProvider {
 
     /** Builds the exact setup frame {@link #open} sends first. */
     static String buildSetupFrame(RealtimeSessionConfig config) {
-        String model = config.model() == null || config.model().isBlank() ? DEFAULT_MODEL : config.model();
+        String model =
+                config.model() == null || config.model().isBlank() ? DEFAULT_MODEL : config.model();
         ObjectNode generationConfig = MAPPER.createObjectNode();
         generationConfig.putArray("responseModalities").add("AUDIO");
-        generationConfig.putObject("speechConfig")
-            .putObject("voiceConfig").putObject("prebuiltVoiceConfig")
-            .put("voiceName", config.voice() == null || config.voice().isBlank() ? "Puck" : config.voice());
+        generationConfig
+                .putObject("speechConfig")
+                .putObject("voiceConfig")
+                .putObject("prebuiltVoiceConfig")
+                .put(
+                        "voiceName",
+                        config.voice() == null || config.voice().isBlank()
+                                ? "Puck"
+                                : config.voice());
         ObjectNode setup = MAPPER.createObjectNode().putObject("setup");
         setup.put("model", model.startsWith("models/") ? model : "models/" + model);
         setup.set("generationConfig", generationConfig);
         if (config.systemPrompt() != null && !config.systemPrompt().isBlank()) {
-            setup.putObject("systemInstruction").putArray("parts")
-                .addObject().put("text", config.systemPrompt());
+            setup.putObject("systemInstruction")
+                    .putArray("parts")
+                    .addObject()
+                    .put("text", config.systemPrompt());
         }
         return MAPPER.createObjectNode().set("setup", setup).toString();
     }

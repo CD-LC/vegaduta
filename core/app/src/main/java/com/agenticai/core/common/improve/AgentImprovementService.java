@@ -24,40 +24,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Auto-improvement loop (Tier-3): turns recurring production failures into
- * concrete, reviewable fixes.
+ * Auto-improvement loop (Tier-3): turns recurring production failures into concrete, reviewable
+ * fixes.
  *
- * <p>The clustering half already exists - {@code PlatformIssueService}
- * fingerprint-dedups every failure signal (tool errors, workflow FAILED
- * runs, LLM-quality flags, provider fallbacks) into one recurring row with
- * an {@code occurrenceCount}. What was missing is the "so fix it" half:
- * this service takes the OPEN issue clusters keyed to one agent
- * ({@code sourceId == agentId}, the convention {@code TOOL_CALL}/
- * {@code LLM_QUALITY}/{@code PROVIDER_FALLBACK} already follow), asks the
- * LLM to distil each cluster into a suggested fix, and parks it as a
- * PENDING {@link AgentImprovementSuggestion} for the admin to accept or
- * dismiss.
+ * <p>The clustering half already exists - {@code PlatformIssueService} fingerprint-dedups every
+ * failure signal (tool errors, workflow FAILED runs, LLM-quality flags, provider fallbacks) into
+ * one recurring row with an {@code occurrenceCount}. What was missing is the "so fix it" half: this
+ * service takes the OPEN issue clusters keyed to one agent ({@code sourceId == agentId}, the
+ * convention {@code TOOL_CALL}/ {@code LLM_QUALITY}/{@code PROVIDER_FALLBACK} already follow), asks
+ * the LLM to distil each cluster into a suggested fix, and parks it as a PENDING {@link
+ * AgentImprovementSuggestion} for the admin to accept or dismiss.
  *
  * <h2>Safety posture</h2>
+ *
  * <ul>
- *   <li>Nothing auto-applies: a suggestion is inert until {@code accept},
- *       and {@code suggestedText} carries the exact bytes that would be
- *       applied so the decision is reviewable.</li>
- *   <li>Generation is bounded: at most {@link #MAX_SUGGESTIONS_PER_SCAN}
- *       new suggestions per call, and an issue cluster that already has a
- *       PENDING or ACCEPTED suggestion is never re-suggested.</li>
- *   <li>Recurring failures only: a cluster needs {@link
- *       #MIN_OCCURRENCES} hits before it's worth a suggestion - a one-off
- *       failure is triage, not a pattern.</li>
- *   <li>Accept is a thin, honest apply: {@code PROMPT_REVISION} goes through
- *       {@code AgentService#updateSystemPrompt} (same path as the admin
- *       console, version snapshot included); {@code NEW_PROCEDURE} creates
- *       a DRAFT procedure, attaches it, then activates it - all reversible
- *       via the existing procedure/agent admin surfaces.</li>
- *   <li>LLM output is validated the same way {@code AgentGenerationService}
- *       does it - fenced-JSON tolerant parse, required-field checks; a
- *       malformed verdict for one cluster is skipped with a warning, not
- *       fatal to the scan.</li>
+ *   <li>Nothing auto-applies: a suggestion is inert until {@code accept}, and {@code suggestedText}
+ *       carries the exact bytes that would be applied so the decision is reviewable.
+ *   <li>Generation is bounded: at most {@link #MAX_SUGGESTIONS_PER_SCAN} new suggestions per call,
+ *       and an issue cluster that already has a PENDING or ACCEPTED suggestion is never
+ *       re-suggested.
+ *   <li>Recurring failures only: a cluster needs {@link #MIN_OCCURRENCES} hits before it's worth a
+ *       suggestion - a one-off failure is triage, not a pattern.
+ *   <li>Accept is a thin, honest apply: {@code PROMPT_REVISION} goes through {@code
+ *       AgentService#updateSystemPrompt} (same path as the admin console, version snapshot
+ *       included); {@code NEW_PROCEDURE} creates a DRAFT procedure, attaches it, then activates it
+ *       - all reversible via the existing procedure/agent admin surfaces.
+ *   <li>LLM output is validated the same way {@code AgentGenerationService} does it - fenced-JSON
+ *       tolerant parse, required-field checks; a malformed verdict for one cluster is skipped with
+ *       a warning, not fatal to the scan.
  * </ul>
  */
 @Service
@@ -74,10 +68,11 @@ public class AgentImprovementService {
     // Package-private (not private): AgentHealthScoreService reuses this exact set so
     // "which issues count against this agent" can never drift between suggestion
     // generation and the health-score snapshot computed from the same clusters.
-    static final Set<String> AGENT_KEYED_SOURCES = Set.of(
-        "TOOL_CALL", "LLM_QUALITY", "PROVIDER_FALLBACK");
+    static final Set<String> AGENT_KEYED_SOURCES =
+            Set.of("TOOL_CALL", "LLM_QUALITY", "PROVIDER_FALLBACK");
 
-    private static final String SUGGESTION_SYSTEM_PROMPT = """
+    private static final String SUGGESTION_SYSTEM_PROMPT =
+            """
         You improve agents on an AI-agent SaaS platform. You are given:
         - the agent's name and current system prompt,
         - one recurring production failure cluster (issue type, title,
@@ -118,14 +113,13 @@ public class AgentImprovementService {
     private final ObjectMapper objectMapper;
 
     public AgentImprovementService(
-        AgentImprovementSuggestionRepository suggestionRepository,
-        PlatformIssueRepository issueRepository,
-        AgentRepository agentRepository,
-        AgentService agentService,
-        ProcedureService procedureService,
-        AssistService assistService,
-        ObjectMapper objectMapper
-    ) {
+            AgentImprovementSuggestionRepository suggestionRepository,
+            PlatformIssueRepository issueRepository,
+            AgentRepository agentRepository,
+            AgentService agentService,
+            ProcedureService procedureService,
+            AssistService assistService,
+            ObjectMapper objectMapper) {
         this.suggestionRepository = suggestionRepository;
         this.issueRepository = issueRepository;
         this.agentRepository = agentRepository;
@@ -140,37 +134,47 @@ public class AgentImprovementService {
     }
 
     /**
-     * Scan this agent's OPEN recurring issue clusters and distil each new
-     * one into a PENDING suggestion. Returns the suggestions created this
-     * call (possibly empty - "no new patterns" is a normal answer, not an
-     * error).
+     * Scan this agent's OPEN recurring issue clusters and distil each new one into a PENDING
+     * suggestion. Returns the suggestions created this call (possibly empty - "no new patterns" is
+     * a normal answer, not an error).
      */
     public List<AgentImprovementSuggestion> generateForAgent(UUID agentId) {
         return generateForAgent(agentId, false);
     }
 
     /**
-     * {@link #generateForAgent(UUID)} for the hourly sweep ({@code background == true}): the distillation
-     * call skips a provider key that was refused recently, and when that leaves nothing the
-     * {@link com.agenticai.core.providers.ProviderCoolingDownException} propagates so the sweep can stop asking
-     * this workspace's provider (prod 2026-10-05: 24 failed calls a day against a rejected key, for two weeks).
+     * {@link #generateForAgent(UUID)} for the hourly sweep ({@code background == true}): the
+     * distillation call skips a provider key that was refused recently, and when that leaves
+     * nothing the {@link com.agenticai.core.providers.ProviderCoolingDownException} propagates so
+     * the sweep can stop asking this workspace's provider (prod 2026-10-05: 24 failed calls a day
+     * against a rejected key, for two weeks).
      */
     public List<AgentImprovementSuggestion> generateForAgent(UUID agentId, boolean background) {
-        Agent agent = agentRepository.findById(agentId)
-            .orElseThrow(() -> new ImprovementNotFoundException("No agent " + agentId));
+        Agent agent =
+                agentRepository
+                        .findById(agentId)
+                        .orElseThrow(() -> new ImprovementNotFoundException("No agent " + agentId));
         String agentKey = agentId.toString();
 
-        List<PlatformIssue> candidates = issueRepository
-            .findTop200ByStatusOrderByLastSeenAtDesc(IssueStatus.OPEN).stream()
-            .filter(i -> i.getSource() != null
-                && AGENT_KEYED_SOURCES.contains(i.getSource().name())
-                && agentKey.equals(i.getSourceId())
-                && i.getOccurrenceCount() >= MIN_OCCURRENCES
-                && !suggestionRepository.existsByAgentIdAndIssueIdAndStatusIn(
-                    agentId, i.getId(),
-                    EnumSet.of(ImprovementStatus.PENDING, ImprovementStatus.ACCEPTED)))
-            .limit(MAX_SUGGESTIONS_PER_SCAN)
-            .toList();
+        List<PlatformIssue> candidates =
+                issueRepository.findTop200ByStatusOrderByLastSeenAtDesc(IssueStatus.OPEN).stream()
+                        .filter(
+                                i ->
+                                        i.getSource() != null
+                                                && AGENT_KEYED_SOURCES.contains(
+                                                        i.getSource().name())
+                                                && agentKey.equals(i.getSourceId())
+                                                && i.getOccurrenceCount() >= MIN_OCCURRENCES
+                                                && !suggestionRepository
+                                                        .existsByAgentIdAndIssueIdAndStatusIn(
+                                                                agentId,
+                                                                i.getId(),
+                                                                EnumSet.of(
+                                                                        ImprovementStatus.PENDING,
+                                                                        ImprovementStatus
+                                                                                .ACCEPTED)))
+                        .limit(MAX_SUGGESTIONS_PER_SCAN)
+                        .toList();
 
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         List<AgentImprovementSuggestion> created = new java.util.ArrayList<>();
@@ -184,36 +188,46 @@ public class AgentImprovementService {
                 throw cooling; // every remaining cluster would hit the same refused provider
             } catch (Exception e) {
                 // One bad LLM verdict must not lose the rest of the scan.
-                log.warn("Improvement distillation failed for issue {} - skipping", issue.getId(), e);
+                log.warn(
+                        "Improvement distillation failed for issue {} - skipping",
+                        issue.getId(),
+                        e);
             }
         }
         return created;
     }
 
     /**
-     * Apply the suggestion. PROMPT_REVISION replaces the agent's system
-     * prompt through the same service the admin console uses; NEW_PROCEDURE
-     * creates + attaches + activates a procedure.
+     * Apply the suggestion. PROMPT_REVISION replaces the agent's system prompt through the same
+     * service the admin console uses; NEW_PROCEDURE creates + attaches + activates a procedure.
      */
     public AgentImprovementSuggestion accept(UUID suggestionId, String actorId) {
         AgentImprovementSuggestion suggestion = getPending(suggestionId);
-        String appliedRef = switch (suggestion.getKind()) {
-            case PROMPT_REVISION -> {
-                agentService.updateSystemPrompt(suggestion.getAgentId(), suggestion.getSuggestedText());
-                yield "systemPrompt";
-            }
-            case NEW_PROCEDURE -> {
-                Procedure procedure = procedureService.create(new ProcedureRequest(
-                    truncate(suggestion.getTitle(), 255),
-                    suggestion.getRationale(),
-                    List.of(new ProcedureRequest.RuleInput(
-                        suggestion.getSuggestedText(), null, null, null))),
-                    actorId);
-                procedureService.attach(suggestion.getAgentId(), procedure.getId(), 0);
-                procedureService.setStatus(procedure.getId(), ProcedureStatus.ACTIVE);
-                yield "procedure:" + procedure.getId();
-            }
-        };
+        String appliedRef =
+                switch (suggestion.getKind()) {
+                    case PROMPT_REVISION -> {
+                        agentService.updateSystemPrompt(
+                                suggestion.getAgentId(), suggestion.getSuggestedText());
+                        yield "systemPrompt";
+                    }
+                    case NEW_PROCEDURE -> {
+                        Procedure procedure =
+                                procedureService.create(
+                                        new ProcedureRequest(
+                                                truncate(suggestion.getTitle(), 255),
+                                                suggestion.getRationale(),
+                                                List.of(
+                                                        new ProcedureRequest.RuleInput(
+                                                                suggestion.getSuggestedText(),
+                                                                null,
+                                                                null,
+                                                                null))),
+                                        actorId);
+                        procedureService.attach(suggestion.getAgentId(), procedure.getId(), 0);
+                        procedureService.setStatus(procedure.getId(), ProcedureStatus.ACTIVE);
+                        yield "procedure:" + procedure.getId();
+                    }
+                };
         suggestion.markAccepted(actorId, appliedRef);
         return suggestionRepository.save(suggestion);
     }
@@ -225,17 +239,24 @@ public class AgentImprovementService {
     }
 
     private AgentImprovementSuggestion getPending(UUID suggestionId) {
-        AgentImprovementSuggestion suggestion = suggestionRepository.findById(suggestionId)
-            .orElseThrow(() -> new ImprovementNotFoundException("No suggestion " + suggestionId));
+        AgentImprovementSuggestion suggestion =
+                suggestionRepository
+                        .findById(suggestionId)
+                        .orElseThrow(
+                                () ->
+                                        new ImprovementNotFoundException(
+                                                "No suggestion " + suggestionId));
         if (suggestion.getStatus() != ImprovementStatus.PENDING) {
             throw new ImprovementNotFoundException(
-                "Suggestion " + suggestionId + " is already " + suggestion.getStatus());
+                    "Suggestion " + suggestionId + " is already " + suggestion.getStatus());
         }
         return suggestion;
     }
 
-    private AgentImprovementSuggestion distill(Agent agent, PlatformIssue issue, String tenantId, boolean background) {
-        String context = """
+    private AgentImprovementSuggestion distill(
+            Agent agent, PlatformIssue issue, String tenantId, boolean background) {
+        String context =
+                """
             Agent name: %s
             Current system prompt:
             ---
@@ -247,17 +268,19 @@ public class AgentImprovementService {
             - latest message (AI diagnosis, when present, is appended):
             %s
             - occurrences: %d
-            """.formatted(
-            agent.getName(),
-            truncate(agent.getSystemPrompt(), 3000),
-            issue.getSource(),
-            issue.getTitle(),
-            truncate(issue.getMessage(), 2000),
-            issue.getOccurrenceCount());
+            """
+                        .formatted(
+                                agent.getName(),
+                                truncate(agent.getSystemPrompt(), 3000),
+                                issue.getSource(),
+                                issue.getTitle(),
+                                truncate(issue.getMessage(), 2000),
+                                issue.getOccurrenceCount());
 
-        String raw = background
-            ? assistService.completeInBackground(SUGGESTION_SYSTEM_PROMPT, context)
-            : assistService.complete(SUGGESTION_SYSTEM_PROMPT, context);
+        String raw =
+                background
+                        ? assistService.completeInBackground(SUGGESTION_SYSTEM_PROMPT, context)
+                        : assistService.complete(SUGGESTION_SYSTEM_PROMPT, context);
         JsonNode spec = parseSpec(raw, issue.getId());
         if ("NO_CLEAR_FIX".equals(spec.path("title").asText(""))) {
             return null;
@@ -273,19 +296,27 @@ public class AgentImprovementService {
         if (suggestedText.isEmpty()) {
             return null;
         }
-        String title = spec.path("title").asText("Suggested fix for recurring " + issue.getSource());
+        String title =
+                spec.path("title").asText("Suggested fix for recurring " + issue.getSource());
         return new AgentImprovementSuggestion(
-            tenantId, agent.getId(), issue.getId(), kind,
-            truncate(title, 255), spec.path("rationale").asText(null), suggestedText);
+                tenantId,
+                agent.getId(),
+                issue.getId(),
+                kind,
+                truncate(title, 255),
+                spec.path("rationale").asText(null),
+                suggestedText);
     }
 
     private JsonNode parseSpec(String raw, UUID issueId) {
         // Markdown fences / prose around the JSON are tolerated by StructuredOutput;
         // a missing or non-object verdict is the same failure either way.
         return StructuredOutput.readTree(objectMapper, raw)
-            .filter(JsonNode::isObject)
-            .orElseThrow(() -> new ImprovementGenerationException(
-                "Unparseable improvement verdict for issue " + issueId));
+                .filter(JsonNode::isObject)
+                .orElseThrow(
+                        () ->
+                                new ImprovementGenerationException(
+                                        "Unparseable improvement verdict for issue " + issueId));
     }
 
     private static String truncate(String value, int max) {

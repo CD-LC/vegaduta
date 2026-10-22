@@ -32,20 +32,27 @@ class DesktopToolCallbackTest {
     @BeforeEach
     void start() throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", exchange -> {
-            requests.add(exchange.getRequestMethod() + " " + exchange.getRequestURI().getPath()
-                    + " auth=" + exchange.getRequestHeaders().getFirst("Authorization"));
-            byte[] bytes = reply.getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().set("content-type", "application/json");
-            exchange.sendResponseHeaders(replyStatus, bytes.length);
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(bytes);
-            }
-            exchange.close();
-        });
+        server.createContext(
+                "/",
+                exchange -> {
+                    requests.add(
+                            exchange.getRequestMethod()
+                                    + " "
+                                    + exchange.getRequestURI().getPath()
+                                    + " auth="
+                                    + exchange.getRequestHeaders().getFirst("Authorization"));
+                    byte[] bytes = reply.getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders().set("content-type", "application/json");
+                    exchange.sendResponseHeaders(replyStatus, bytes.length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(bytes);
+                    }
+                    exchange.close();
+                });
         server.start();
-        client = new DesktopAgentClient(
-                "http://127.0.0.1:" + server.getAddress().getPort(), "s3cret");
+        client =
+                new DesktopAgentClient(
+                        "http://127.0.0.1:" + server.getAddress().getPort(), "s3cret");
     }
 
     @AfterEach
@@ -77,9 +84,10 @@ class DesktopToolCallbackTest {
 
     @Test
     void clickForwardsXYAndBearer() throws Exception {
-        JsonNode r = result(
-                tool(DesktopToolCallback.Action.CLICK, false),
-                "{\"x\":120,\"y\":340,\"button\":\"right\"}");
+        JsonNode r =
+                result(
+                        tool(DesktopToolCallback.Action.CLICK, false),
+                        "{\"x\":120,\"y\":340,\"button\":\"right\"}");
         assertTrue(r.path("ok").asBoolean());
         assertEquals("POST /click auth=Bearer s3cret", requests.poll());
     }
@@ -114,7 +122,8 @@ class DesktopToolCallbackTest {
         assertTrue(s.contains("50") && s.contains("60"), s);
 
         DesktopToolCallback type = tool(DesktopToolCallback.Action.TYPE, true);
-        assertTrue(type.describeForConfirmation("{\"text\":\"hello world\"}").contains("hello world"));
+        assertTrue(
+                type.describeForConfirmation("{\"text\":\"hello world\"}").contains("hello world"));
 
         DesktopToolCallback press = tool(DesktopToolCallback.Action.PRESS, true);
         assertTrue(press.describeForConfirmation("{\"label\":\"Send\"}").contains("Send"));

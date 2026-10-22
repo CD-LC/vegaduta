@@ -55,6 +55,7 @@ public class MatrixApiClient {
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(20);
     private static final int MAX_JSON_RESPONSE_BYTES = 16 * 1024 * 1024;
+
     /** Matrix caps an event at 64 KiB; stay well below it so multi-byte text fits. */
     static final int MAX_BODY_CHARS = 16_000;
 
@@ -65,7 +66,8 @@ public class MatrixApiClient {
                     + "\"timeline\":{\"limit\":50,\"types\":[\"m.room.message\","
                     + "\"m.room.encrypted\",\"m.room.encryption\"]}}}";
 
-    private static final Pattern MXC = Pattern.compile("^mxc://([A-Za-z0-9.:\\-\\[\\]]+)/([A-Za-z0-9_\\-]+)$");
+    private static final Pattern MXC =
+            Pattern.compile("^mxc://([A-Za-z0-9.:\\-\\[\\]]+)/([A-Za-z0-9_\\-]+)$");
 
     private final ObjectMapper mapper;
     private final Supplier<SsrfGuard> guardSupplier;
@@ -87,10 +89,17 @@ public class MatrixApiClient {
 
     /** Proves the token and tells us which account it belongs to. */
     public WhoAmI whoAmI(Endpoint ep) {
-        JsonNode node = get(ep, "/_matrix/client/v3/account/whoami", "", DEFAULT_TIMEOUT, MAX_JSON_RESPONSE_BYTES);
+        JsonNode node =
+                get(
+                        ep,
+                        "/_matrix/client/v3/account/whoami",
+                        "",
+                        DEFAULT_TIMEOUT,
+                        MAX_JSON_RESPONSE_BYTES);
         String userId = node.path("user_id").asText(null);
         if (userId == null || userId.isBlank()) {
-            throw new MatrixApiException(200, "M_UNKNOWN", "The homeserver did not say who this token belongs to");
+            throw new MatrixApiException(
+                    200, "M_UNKNOWN", "The homeserver did not say who this token belongs to");
         }
         return new WhoAmI(userId, node.path("device_id").asText(null));
     }
@@ -106,14 +115,18 @@ public class MatrixApiClient {
             query.append("&since=").append(encode(since));
         }
         Duration timeout = Duration.ofMillis(Math.max(0, timeoutMs) + 20_000L);
-        return get(ep, "/_matrix/client/v3/sync", query.toString(), timeout, MAX_JSON_RESPONSE_BYTES);
+        return get(
+                ep, "/_matrix/client/v3/sync", query.toString(), timeout, MAX_JSON_RESPONSE_BYTES);
     }
 
     public void joinRoom(Endpoint ep, String roomId) {
         post(ep, "/_matrix/client/v3/rooms/" + encode(roomId) + "/join", "{}");
     }
 
-    /** Number of joined members; used to tell a DM from a group room when {@code /sync} gave no summary. */
+    /**
+     * Number of joined members; used to tell a DM from a group room when {@code /sync} gave no
+     * summary.
+     */
     public int joinedMemberCount(Endpoint ep, String roomId) {
         JsonNode node =
                 get(
@@ -147,7 +160,8 @@ public class MatrixApiClient {
             if (end < text.length() && Character.isHighSurrogate(text.charAt(end - 1))) {
                 end--;
             }
-            Map<String, Object> content = textContent(text.substring(offset, end), replyToEventId, threadRootEventId);
+            Map<String, Object> content =
+                    textContent(text.substring(offset, end), replyToEventId, threadRootEventId);
             lastEventId = sendEvent(ep, roomId, index == 0 ? txnId : txnId + "-" + index, content);
             offset = end;
             index++;
@@ -155,7 +169,9 @@ public class MatrixApiClient {
         return lastEventId;
     }
 
-    /** Uploads {@code bytes} and posts them to the room as an m.file/m.image/m.audio/m.video event. */
+    /**
+     * Uploads {@code bytes} and posts them to the room as an m.file/m.image/m.audio/m.video event.
+     */
     public String sendFile(
             Endpoint ep,
             String roomId,
@@ -166,7 +182,10 @@ public class MatrixApiClient {
             String caption,
             String replyToEventId,
             String threadRootEventId) {
-        String mime = contentType == null || contentType.isBlank() ? "application/octet-stream" : contentType;
+        String mime =
+                contentType == null || contentType.isBlank()
+                        ? "application/octet-stream"
+                        : contentType;
         String name = filename == null || filename.isBlank() ? "file" : filename;
         String mxc = uploadMedia(ep, name, mime, bytes);
         Map<String, Object> content = new LinkedHashMap<>();
@@ -190,21 +209,24 @@ public class MatrixApiClient {
                 execute(
                         ep,
                         "POST",
-                        new ByteArrayEntity(bytes, type == null ? ContentType.APPLICATION_OCTET_STREAM : type),
+                        new ByteArrayEntity(
+                                bytes, type == null ? ContentType.APPLICATION_OCTET_STREAM : type),
                         "/_matrix/media/v3/upload",
                         "?filename=" + encode(filename),
                         Duration.ofSeconds(120),
                         MAX_JSON_RESPONSE_BYTES);
         String uri = node.path("content_uri").asText(null);
         if (uri == null || !MXC.matcher(uri).matches()) {
-            throw new MatrixApiException(200, "M_UNKNOWN", "The homeserver did not return a media URI");
+            throw new MatrixApiException(
+                    200, "M_UNKNOWN", "The homeserver did not return a media URI");
         }
         return uri;
     }
 
     /**
-     * Downloads an {@code mxc://} file with the bot's token (authenticated media, falling back to the
-     * legacy endpoint on a homeserver that predates it). Larger than {@code maxBytes} is refused.
+     * Downloads an {@code mxc://} file with the bot's token (authenticated media, falling back to
+     * the legacy endpoint on a homeserver that predates it). Larger than {@code maxBytes} is
+     * refused.
      */
     public byte[] downloadMedia(Endpoint ep, String mxcUri, int maxBytes) {
         Matcher m = mxcUri == null ? null : MXC.matcher(mxcUri);
@@ -228,7 +250,8 @@ public class MatrixApiClient {
             execute(
                     ep,
                     "PUT",
-                    new StringEntity("{\"typing\":true,\"timeout\":15000}", ContentType.APPLICATION_JSON),
+                    new StringEntity(
+                            "{\"typing\":true,\"timeout\":15000}", ContentType.APPLICATION_JSON),
                     "/_matrix/client/v3/rooms/" + encode(roomId) + "/typing/" + encode(botUserId),
                     "",
                     Duration.ofSeconds(5),
@@ -240,7 +263,8 @@ public class MatrixApiClient {
 
     // ------------------------------------------------------------- content builders
 
-    static Map<String, Object> textContent(String body, String replyToEventId, String threadRootEventId) {
+    static Map<String, Object> textContent(
+            String body, String replyToEventId, String threadRootEventId) {
         Map<String, Object> content = new LinkedHashMap<>();
         content.put("msgtype", "m.text");
         content.put("body", body);
@@ -252,7 +276,8 @@ public class MatrixApiClient {
      * A thread reply carries the thread relation (and, as the spec's fallback, an in_reply_to for
      * clients without threads); a plain reply carries only in_reply_to.
      */
-    static void addRelation(Map<String, Object> content, String replyToEventId, String threadRootEventId) {
+    static void addRelation(
+            Map<String, Object> content, String replyToEventId, String threadRootEventId) {
         boolean hasReply = replyToEventId != null && !replyToEventId.isBlank();
         boolean hasThread = threadRootEventId != null && !threadRootEventId.isBlank();
         if (hasThread) {
@@ -260,10 +285,13 @@ public class MatrixApiClient {
             relation.put("rel_type", "m.thread");
             relation.put("event_id", threadRootEventId);
             relation.put("is_falling_back", !hasReply);
-            relation.put("m.in_reply_to", Map.of("event_id", hasReply ? replyToEventId : threadRootEventId));
+            relation.put(
+                    "m.in_reply_to",
+                    Map.of("event_id", hasReply ? replyToEventId : threadRootEventId));
             content.put("m.relates_to", relation);
         } else if (hasReply) {
-            content.put("m.relates_to", Map.of("m.in_reply_to", Map.of("event_id", replyToEventId)));
+            content.put(
+                    "m.relates_to", Map.of("m.in_reply_to", Map.of("event_id", replyToEventId)));
         }
     }
 
@@ -283,7 +311,8 @@ public class MatrixApiClient {
 
     // -------------------------------------------------------------------- plumbing
 
-    private String sendEvent(Endpoint ep, String roomId, String txnId, Map<String, Object> content) {
+    private String sendEvent(
+            Endpoint ep, String roomId, String txnId, Map<String, Object> content) {
         String json;
         try {
             json = mapper.writeValueAsString(content);
@@ -295,7 +324,10 @@ public class MatrixApiClient {
                         ep,
                         "PUT",
                         new StringEntity(json, ContentType.APPLICATION_JSON),
-                        "/_matrix/client/v3/rooms/" + encode(roomId) + "/send/m.room.message/" + encode(txnId),
+                        "/_matrix/client/v3/rooms/"
+                                + encode(roomId)
+                                + "/send/m.room.message/"
+                                + encode(txnId),
                         "",
                         DEFAULT_TIMEOUT,
                         MAX_JSON_RESPONSE_BYTES);
@@ -334,7 +366,10 @@ public class MatrixApiClient {
             JsonNode node = mapper.readTree(reply.body());
             return node == null ? mapper.createObjectNode() : node;
         } catch (IOException e) {
-            throw new MatrixApiException(reply.status(), "M_NOT_JSON", "The homeserver answered with something that is not JSON");
+            throw new MatrixApiException(
+                    reply.status(),
+                    "M_NOT_JSON",
+                    "The homeserver answered with something that is not JSON");
         }
     }
 
@@ -363,7 +398,8 @@ public class MatrixApiClient {
             }
             request = new HttpUriRequestBase(method, target.uri());
         } catch (SsrfBlockedException e) {
-            throw new MatrixApiException(-1, "M_SSRF_BLOCKED", "Homeserver address refused: " + e.getMessage());
+            throw new MatrixApiException(
+                    -1, "M_SSRF_BLOCKED", "Homeserver address refused: " + e.getMessage());
         }
         if (entity != null) {
             request.setEntity(entity);
@@ -389,7 +425,10 @@ public class MatrixApiClient {
                                     }
                                 }
                                 if (bytes.length > maxBytes) {
-                                    throw new MatrixApiException(status, "M_TOO_LARGE", "The homeserver response is too large");
+                                    throw new MatrixApiException(
+                                            status,
+                                            "M_TOO_LARGE",
+                                            "The homeserver response is too large");
                                 }
                                 if (status < 200 || status >= 300) {
                                     throw errorFrom(status, bytes);
@@ -401,7 +440,11 @@ public class MatrixApiClient {
         } catch (IOException e) {
             // Class name only: the message of a connect failure can carry the resolved address.
             throw new MatrixApiException(
-                    -1, "M_NETWORK", "Could not reach the homeserver (" + e.getClass().getSimpleName() + ")", 0L, e);
+                    -1,
+                    "M_NETWORK",
+                    "Could not reach the homeserver (" + e.getClass().getSimpleName() + ")",
+                    0L,
+                    e);
         }
     }
 
@@ -417,7 +460,10 @@ public class MatrixApiClient {
         } catch (IOException | RuntimeException ignored) {
             // not JSON: fall back to the status
         }
-        String message = "Matrix homeserver answered HTTP " + status + (errcode != null ? " " + errcode : "");
+        String message =
+                "Matrix homeserver answered HTTP "
+                        + status
+                        + (errcode != null ? " " + errcode : "");
         if (error != null && !error.isBlank()) {
             message += ": " + (error.length() > 300 ? error.substring(0, 300) : error);
         }

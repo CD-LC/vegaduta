@@ -55,7 +55,10 @@ class LocalShellToolCallbackTest {
     @Test
     void runModeRunsAnythingAndReturnsStructuredOutput() throws Exception {
         FakeRunner runner = new FakeRunner();
-        JsonNode out = json(new LocalShellToolCallback(runner, false, 60, 300).call("{\"command\":\"echo hi > f && cat f\"}"));
+        JsonNode out =
+                json(
+                        new LocalShellToolCallback(runner, false, 60, 300)
+                                .call("{\"command\":\"echo hi > f && cat f\"}"));
         assertThat(runner.commands).containsExactly("echo hi > f && cat f");
         assertThat(out.path("exit_code").asInt()).isZero();
         assertThat(out.path("output").asText()).isEqualTo("hello\n");
@@ -66,7 +69,10 @@ class LocalShellToolCallbackTest {
     @Test
     void readModeRefusesAnythingThatIsNotReadOnlyAndPointsAtTheOtherTool() throws Exception {
         FakeRunner runner = new FakeRunner();
-        JsonNode out = json(new LocalShellToolCallback(runner, true, 60, 300).call("{\"command\":\"rm notes.txt\"}"));
+        JsonNode out =
+                json(
+                        new LocalShellToolCallback(runner, true, 60, 300)
+                                .call("{\"command\":\"rm notes.txt\"}"));
         assertThat(runner.commands).isEmpty();
         assertThat(out.path("error").asText()).contains("local_shell").contains("asked");
     }
@@ -82,7 +88,10 @@ class LocalShellToolCallbackTest {
     void refusedCommandsNeverReachTheRunnerInEitherMode() throws Exception {
         FakeRunner runner = new FakeRunner();
         for (boolean readOnly : new boolean[] {true, false}) {
-            JsonNode out = json(new LocalShellToolCallback(runner, readOnly, 60, 300).call("{\"command\":\"sudo rm -rf /\"}"));
+            JsonNode out =
+                    json(
+                            new LocalShellToolCallback(runner, readOnly, 60, 300)
+                                    .call("{\"command\":\"sudo rm -rf /\"}"));
             assertThat(out.path("error").asText()).contains("not allowed");
         }
         assertThat(runner.commands).isEmpty();
@@ -93,7 +102,8 @@ class LocalShellToolCallbackTest {
         FakeRunner runner = new FakeRunner();
         var tool = new LocalShellToolCallback(runner, false, 60, 300);
         assertThat(json(tool.call("{}")).path("error").asText()).contains("required");
-        assertThat(json(tool.call("{\"command\":\"  \"}")).path("error").asText()).contains("required");
+        assertThat(json(tool.call("{\"command\":\"  \"}")).path("error").asText())
+                .contains("required");
         assertThat(json(tool.call("not json")).has("error")).isTrue();
     }
 
@@ -104,14 +114,19 @@ class LocalShellToolCallbackTest {
         tool.call("{\"command\":\"a\"}");
         tool.call("{\"command\":\"b\",\"timeout_seconds\":9999}");
         tool.call("{\"command\":\"c\",\"timeout_seconds\":0}");
-        assertThat(runner.timeouts).containsExactly(Duration.ofSeconds(60), Duration.ofSeconds(120), Duration.ofSeconds(1));
+        assertThat(runner.timeouts)
+                .containsExactly(
+                        Duration.ofSeconds(60), Duration.ofSeconds(120), Duration.ofSeconds(1));
     }
 
     @Test
     void timedOutRunSaysSo() throws Exception {
         FakeRunner runner = new FakeRunner();
         runner.next = new ShellRunner.Result(-1, "partial", false, true);
-        JsonNode out = json(new LocalShellToolCallback(runner, false, 5, 5).call("{\"command\":\"sleep 99\"}"));
+        JsonNode out =
+                json(
+                        new LocalShellToolCallback(runner, false, 5, 5)
+                                .call("{\"command\":\"sleep 99\"}"));
         assertThat(out.path("timed_out").asBoolean()).isTrue();
         assertThat(out.path("note").asText()).contains("5 s");
     }
@@ -121,29 +136,45 @@ class LocalShellToolCallbackTest {
         FakeRunner runner = new FakeRunner();
         var tool = new LocalShellToolCallback(runner, false, 60, 300);
         runner.failure = new StdioSandboxException("The terminal is off: sandbox unavailable");
-        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asText()).contains("terminal is off");
+        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asText())
+                .contains("terminal is off");
         runner.failure = new IllegalStateException("secret internals");
-        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asText()).doesNotContain("secret internals");
+        assertThat(json(tool.call("{\"command\":\"ls\"}")).path("error").asText())
+                .doesNotContain("secret internals");
     }
 
     @Test
     void confirmationCardShowsTheExactCommand() {
         var tool = new LocalShellToolCallback(new FakeRunner(), false, 60, 300);
-        assertThat(tool.describeForConfirmation("{\"command\":\"make build\"}")).contains("make build").contains("/work");
-        assertThat(tool.describeForConfirmation("{\"command\":\"mvn -q package\",\"folder\":\"demo\"}")).contains("/work/demo");
+        assertThat(tool.describeForConfirmation("{\"command\":\"make build\"}"))
+                .contains("make build")
+                .contains("/work");
+        assertThat(
+                        tool.describeForConfirmation(
+                                "{\"command\":\"mvn -q package\",\"folder\":\"demo\"}"))
+                .contains("/work/demo");
         assertThat(tool.describeForConfirmation("{}")).isNull();
         assertThat(tool.describeForConfirmation("garbage")).isNull();
         String long600 = "x".repeat(900);
-        assertThat(tool.describeForConfirmation("{\"command\":\"" + long600 + "\"}")).endsWith("...");
+        assertThat(tool.describeForConfirmation("{\"command\":\"" + long600 + "\"}"))
+                .endsWith("...");
     }
 
     @Test
     void aLeadingCdIntoTheSameFolderIsDropped() {
-        assertThat(LocalShellToolCallback.withoutRedundantCd("cd greeter && mvn -q package", "greeter")).isEqualTo("mvn -q package");
-        assertThat(LocalShellToolCallback.withoutRedundantCd("cd ./greeter/; ls", "greeter")).isEqualTo("ls");
-        assertThat(LocalShellToolCallback.withoutRedundantCd("cd 'greeter' && ls", "greeter")).isEqualTo("ls");
-        assertThat(LocalShellToolCallback.withoutRedundantCd("cd other && ls", "greeter")).isEqualTo("cd other && ls");
-        assertThat(LocalShellToolCallback.withoutRedundantCd("cd greeter-2 && ls", "greeter")).isEqualTo("cd greeter-2 && ls");
-        assertThat(LocalShellToolCallback.withoutRedundantCd("cd greeter && ls", "")).isEqualTo("cd greeter && ls");
+        assertThat(
+                        LocalShellToolCallback.withoutRedundantCd(
+                                "cd greeter && mvn -q package", "greeter"))
+                .isEqualTo("mvn -q package");
+        assertThat(LocalShellToolCallback.withoutRedundantCd("cd ./greeter/; ls", "greeter"))
+                .isEqualTo("ls");
+        assertThat(LocalShellToolCallback.withoutRedundantCd("cd 'greeter' && ls", "greeter"))
+                .isEqualTo("ls");
+        assertThat(LocalShellToolCallback.withoutRedundantCd("cd other && ls", "greeter"))
+                .isEqualTo("cd other && ls");
+        assertThat(LocalShellToolCallback.withoutRedundantCd("cd greeter-2 && ls", "greeter"))
+                .isEqualTo("cd greeter-2 && ls");
+        assertThat(LocalShellToolCallback.withoutRedundantCd("cd greeter && ls", ""))
+                .isEqualTo("cd greeter && ls");
     }
 }

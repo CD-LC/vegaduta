@@ -32,19 +32,32 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * The {@code aggregate} data operation. {@code aggregations: [{operation, field, as, separator}]}, {@code groupBy}
- * (comma separated paths or a list). Without grouping the output is one object; with grouping it is an array with
- * one object per group, in order of first appearance, starting with the group fields.
+ * The {@code aggregate} data operation. {@code aggregations: [{operation, field, as, separator}]},
+ * {@code groupBy} (comma separated paths or a list). Without grouping the output is one object;
+ * with grouping it is an array with one object per group, in order of first appearance, starting
+ * with the group fields.
  *
- * <p>Strategy: each {@link AggregateOp} reduces one group to one JSON value. Extracted from {@link WorkflowDataOps}.
+ * <p>Strategy: each {@link AggregateOp} reduces one group to one JSON value. Extracted from {@link
+ * WorkflowDataOps}.
  */
 final class DataAggregateOps {
 
-    /** What one aggregation call sees: the group, the field, the separator, the node log and the output name. */
-    record Ctx(ObjectMapper mapper, String field, String separator, List<JsonNode> group, List<String> log, String as) {
-    }
+    /**
+     * What one aggregation call sees: the group, the field, the separator, the node log and the
+     * output name.
+     */
+    record Ctx(
+            ObjectMapper mapper,
+            String field,
+            String separator,
+            List<JsonNode> group,
+            List<String> log,
+            String as) {}
 
-    /** One reduction of a group to a value. The constant names are the config spellings (lower-cased). */
+    /**
+     * One reduction of a group to a value. The constant names are the config spellings
+     * (lower-cased).
+     */
     enum AggregateOp {
         COUNT {
             @Override
@@ -96,7 +109,9 @@ final class DataAggregateOps {
             @Override
             JsonNode apply(Ctx c) {
                 List<JsonNode> present = presentValues(c.group(), c.field());
-                return present.isEmpty() ? NullNode.getInstance() : copy(present.get(present.size() - 1));
+                return present.isEmpty()
+                        ? NullNode.getInstance()
+                        : copy(present.get(present.size() - 1));
             }
         },
         CONCAT {
@@ -107,7 +122,12 @@ final class DataAggregateOps {
                 for (JsonNode v : presentValues(c.group(), c.field())) {
                     String part = text(v);
                     if (sb.length() + part.length() + c.separator().length() > MAX_CONCAT_CHARS) {
-                        c.log().add(c.as() + ": concatenated text capped at " + MAX_CONCAT_CHARS + " characters.");
+                        c.log()
+                                .add(
+                                        c.as()
+                                                + ": concatenated text capped at "
+                                                + MAX_CONCAT_CHARS
+                                                + " characters.");
                         break;
                     }
                     if (!firstPart) {
@@ -132,7 +152,9 @@ final class DataAggregateOps {
 
         abstract JsonNode apply(Ctx c);
 
-        /** The operation for a config spelling (trimmed, case-insensitive), or null when unknown. */
+        /**
+         * The operation for a config spelling (trimmed, case-insensitive), or null when unknown.
+         */
         static AggregateOp parse(String raw) {
             if (raw == null) {
                 return null;
@@ -151,11 +173,12 @@ final class DataAggregateOps {
         }
     }
 
-    private DataAggregateOps() {
-    }
+    private DataAggregateOps() {}
 
-    static WorkflowDataOps.Outcome aggregate(ObjectMapper mapper, Map<String, Object> config,
-                                           Supplier<WorkflowDataOps.Items> itemsSource) {
+    static WorkflowDataOps.Outcome aggregate(
+            ObjectMapper mapper,
+            Map<String, Object> config,
+            Supplier<WorkflowDataOps.Items> itemsSource) {
         List<Map<String, Object>> specs = mapList(config.get("aggregations"));
         if (specs.isEmpty()) {
             throw new IllegalArgumentException("No aggregations configured.");
@@ -178,7 +201,8 @@ final class DataAggregateOps {
                 groups.computeIfAbsent(key.toString(), k -> new ArrayList<>()).add(item);
             }
             if (groups.size() > MAX_ITEMS) {
-                throw new IllegalArgumentException("Too many groups (more than " + MAX_ITEMS + ").");
+                throw new IllegalArgumentException(
+                        "Too many groups (more than " + MAX_ITEMS + ").");
             }
         }
 
@@ -195,21 +219,31 @@ final class DataAggregateOps {
             for (Map<String, Object> spec : specs) {
                 AggregateOp op = AggregateOp.parse(str(spec.get("operation")));
                 if (op == null) {
-                    throw new IllegalArgumentException("Unknown aggregate operation '" + str(spec.get("operation"))
-                        + "' (expected count, sum, avg, min, max, first, last, concat or collect).");
+                    throw new IllegalArgumentException(
+                            "Unknown aggregate operation '"
+                                    + str(spec.get("operation"))
+                                    + "' (expected count, sum, avg, min, max, first, last, concat or collect).");
                 }
                 String field = str(spec.get("field")) == null ? "" : str(spec.get("field")).strip();
-                String as = str(spec.get("as")) == null || str(spec.get("as")).isBlank()
-                    ? defaultAggregateName(op.id(), field) : str(spec.get("as")).strip();
-                String separator = spec.get("separator") == null ? ", " : spec.get("separator").toString();
+                String as =
+                        str(spec.get("as")) == null || str(spec.get("as")).isBlank()
+                                ? defaultAggregateName(op.id(), field)
+                                : str(spec.get("as")).strip();
+                String separator =
+                        spec.get("separator") == null ? ", " : spec.get("separator").toString();
                 row.set(as, op.apply(new Ctx(mapper, field, separator, group, log, as)));
             }
             rows.add(row);
         }
         JsonNode result = groupBy.isEmpty() ? rows.get(0) : rows;
-        String summary = groupBy.isEmpty()
-            ? "Aggregated " + items.array().size() + " item(s) into one result."
-            : "Aggregated " + items.array().size() + " item(s) into " + rows.size() + " group(s).";
+        String summary =
+                groupBy.isEmpty()
+                        ? "Aggregated " + items.array().size() + " item(s) into one result."
+                        : "Aggregated "
+                                + items.array().size()
+                                + " item(s) into "
+                                + rows.size()
+                                + " group(s).";
         return WorkflowDataOps.Outcome.ok(result.toString(), summary, log);
     }
 
@@ -237,8 +271,8 @@ final class DataAggregateOps {
             return numeric == 0 ? LongNode.valueOf(0) : numberNode(total);
         }
         return numeric == 0
-            ? NullNode.getInstance()
-            : numberNode(total.divide(BigDecimal.valueOf(numeric), MathContext.DECIMAL128));
+                ? NullNode.getInstance()
+                : numberNode(total.divide(BigDecimal.valueOf(numeric), MathContext.DECIMAL128));
     }
 
     private static JsonNode extreme(Ctx c, boolean min) {
@@ -256,9 +290,10 @@ final class DataAggregateOps {
         JsonNode best = present.get(0);
         for (int i = 1; i < present.size(); i++) {
             JsonNode v = present.get(i);
-            int cmp = numeric
-                ? lenientNumber(v).compareTo(lenientNumber(best))
-                : text(v).compareTo(text(best));
+            int cmp =
+                    numeric
+                            ? lenientNumber(v).compareTo(lenientNumber(best))
+                            : text(v).compareTo(text(best));
             if (min ? cmp < 0 : cmp > 0) {
                 best = v;
             }
@@ -266,7 +301,9 @@ final class DataAggregateOps {
         return copy(best);
     }
 
-    /** Values of {@code field} (the item itself when blank) that are neither missing nor JSON null. */
+    /**
+     * Values of {@code field} (the item itself when blank) that are neither missing nor JSON null.
+     */
     private static List<JsonNode> presentValues(List<JsonNode> group, String field) {
         List<JsonNode> out = new ArrayList<>();
         for (JsonNode item : group) {

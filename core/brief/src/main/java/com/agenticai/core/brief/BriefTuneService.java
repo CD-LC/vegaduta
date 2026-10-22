@@ -10,14 +10,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 /**
- * "Tune this": the planner reads the current manifest and an instruction and proposes a changed manifest.
- * The proposal is a plain {@link TuneResult} - nothing is saved or applied here. The caller accepts it by
- * sending {@code proposedBrief} (with {@code baseVersion}) to {@code POST /apply}, which validates it again,
- * saves it as the next version and applies it through the normal engine.
+ * "Tune this": the planner reads the current manifest and an instruction and proposes a changed
+ * manifest. The proposal is a plain {@link TuneResult} - nothing is saved or applied here. The
+ * caller accepts it by sending {@code proposedBrief} (with {@code baseVersion}) to {@code POST
+ * /apply}, which validates it again, saves it as the next version and applies it through the normal
+ * engine.
  *
- * <p>The model can never change the rung (it is forced back to the current one), and the proposal must pass the
- * same {@link BriefValidator} a saved brief does, so a proposal that would not apply is refused with the
- * validator's own readable errors instead of being offered.
+ * <p>The model can never change the rung (it is forced back to the current one), and the proposal
+ * must pass the same {@link BriefValidator} a saved brief does, so a proposal that would not apply
+ * is refused with the validator's own readable errors instead of being offered.
  */
 @Service
 public class BriefTuneService {
@@ -31,8 +32,10 @@ public class BriefTuneService {
     private final ObjectMapper objectMapper;
 
     public BriefTuneService(
-        AssistService assistService, BriefVersionStore store, BriefValidator validator, ObjectMapper objectMapper
-    ) {
+            AssistService assistService,
+            BriefVersionStore store,
+            BriefValidator validator,
+            ObjectMapper objectMapper) {
         this.assistService = assistService;
         this.store = store;
         this.validator = validator;
@@ -42,23 +45,30 @@ public class BriefTuneService {
     public TuneResult tune(UUID briefId, String instruction) {
         String ask = instruction == null ? "" : instruction.strip();
         if (ask.isEmpty() || ask.length() > MAX_INSTRUCTION_CHARS) {
-            throw new BriefValidationException("instruction", "Say what to change, in 1 to " + MAX_INSTRUCTION_CHARS + " characters.");
+            throw new BriefValidationException(
+                    "instruction",
+                    "Say what to change, in 1 to " + MAX_INSTRUCTION_CHARS + " characters.");
         }
         BriefEntity entity = store.require(briefId);
         Brief current = store.loadCurrent(entity);
         TrustRung rung = TrustRung.parseOrLowest(entity.getRung());
 
-        String raw = assistService.complete(SYSTEM, "Instruction: " + ask + "\n\nCurrent brief:\n" + store.toJson(current));
+        String raw =
+                assistService.complete(
+                        SYSTEM,
+                        "Instruction: " + ask + "\n\nCurrent brief:\n" + store.toJson(current));
         JsonNode reply = LlmJson.parseObject(objectMapper, raw);
         if (reply == null || !reply.path("brief").isObject()) {
-            throw new BriefValidationException("tune",
-                "The model's answer could not be understood - try again or rephrase the change.");
+            throw new BriefValidationException(
+                    "tune",
+                    "The model's answer could not be understood - try again or rephrase the change.");
         }
         Brief proposed;
         try {
             proposed = objectMapper.treeToValue(reply.get("brief"), Brief.class);
         } catch (JsonProcessingException e) {
-            throw new BriefValidationException("tune", "The model's proposal was not a readable brief - try again.");
+            throw new BriefValidationException(
+                    "tune", "The model's proposal was not a readable brief - try again.");
         }
         // Autonomy is earned, never proposed: the rung stays exactly where it is.
         proposed = BriefVersionStore.withRung(proposed, rung);
@@ -71,12 +81,16 @@ public class BriefTuneService {
         if (narrative.length() > MAX_NARRATIVE_CHARS) {
             narrative = narrative.substring(0, MAX_NARRATIVE_CHARS);
         }
-        return new TuneResult(proposed,
-            BriefJsonPatch.diffAsArray(objectMapper.valueToTree(current), objectMapper.valueToTree(proposed)),
-            narrative, entity.getCurrentVersion());
+        return new TuneResult(
+                proposed,
+                BriefJsonPatch.diffAsArray(
+                        objectMapper.valueToTree(current), objectMapper.valueToTree(proposed)),
+                narrative,
+                entity.getCurrentVersion());
     }
 
-    private static final String SYSTEM = """
+    private static final String SYSTEM =
+            """
         You revise an existing "brief": one JSON manifest describing a whole AI solution (agents, workflows,
         tools, MCP servers, knowledge, secrets, channels, eval set, narrative, trust). You are given the change
         the user wants and the current brief.

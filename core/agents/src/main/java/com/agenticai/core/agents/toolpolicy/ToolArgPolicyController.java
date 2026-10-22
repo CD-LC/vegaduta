@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Per-agent tool ARGUMENT policies: {@code GET} reads them, {@code PUT} replaces them (an empty
- * {@code policies} list clears). Thin on purpose - access, validation, the feature flag and status codes are
- * decided in {@link ToolArgPolicyService}. The body is a JSON object with a {@code policies} array, each entry
- * naming a tool (or glob) and its {@code rules}; see {@code ToolArgPolicySet} for the full grammar.
+ * {@code policies} list clears). Thin on purpose - access, validation, the feature flag and status
+ * codes are decided in {@link ToolArgPolicyService}. The body is a JSON object with a {@code
+ * policies} array, each entry naming a tool (or glob) and its {@code rules}; see {@code
+ * ToolArgPolicySet} for the full grammar.
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/tool-policies")

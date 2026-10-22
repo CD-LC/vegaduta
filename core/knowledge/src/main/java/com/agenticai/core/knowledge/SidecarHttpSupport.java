@@ -12,9 +12,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * Shared HTTP plumbing for the sidecar client family: the single connect-refused retry and the error
- * message builders. Extracted unchanged from {@link SidecarClient}; the logger keeps that class's
- * name so existing log filters still match.
+ * Shared HTTP plumbing for the sidecar client family: the single connect-refused retry and the
+ * error message builders. Extracted unchanged from {@link SidecarClient}; the logger keeps that
+ * class's name so existing log filters still match.
  */
 final class SidecarHttpSupport {
 

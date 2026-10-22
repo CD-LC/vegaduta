@@ -29,16 +29,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 /**
- * The CONFIGURATION half: everything that can be rejected is rejected while the
- * operator is still looking at the form.
+ * The CONFIGURATION half: everything that can be rejected is rejected while the operator is still
+ * looking at the form.
  *
- * <p>That posture is the deliberate difference from {@code
- * AgentScheduleService#renderGoal}, which leaves an unknown placeholder LITERAL
- * so the typo shows up in the job's goal. A schedule has three possible
- * placeholders and fires within a day; a trigger's placeholder set depends on
- * which of nine event types it is bound to, and its next firing may be weeks away
- * and unattended. A trigger that can never match is otherwise indistinguishable
- * from a feature that does not work.
+ * <p>That posture is the deliberate difference from {@code AgentScheduleService#renderGoal}, which
+ * leaves an unknown placeholder LITERAL so the typo shows up in the job's goal. A schedule has
+ * three possible placeholders and fires within a day; a trigger's placeholder set depends on which
+ * of nine event types it is bound to, and its next firing may be weeks away and unattended. A
+ * trigger that can never match is otherwise indistinguishable from a feature that does not work.
  */
 class AgentEventTriggerServiceTest {
 
@@ -59,13 +57,19 @@ class AgentEventTriggerServiceTest {
         // entitlement; the dedicated denial case stubs it off.
         tenantLimits = mock(com.agenticai.core.security.TenantLimits.class);
         when(tenantLimits.automationAllowed(any())).thenReturn(true);
-        service = new AgentEventTriggerService(
-            repository, mock(AgentService.class), properties, new ObjectMapper(),
-            new AgentEventTriggerPresenceCache(), tenantLimits);
+        service =
+                new AgentEventTriggerService(
+                        repository,
+                        mock(AgentService.class),
+                        properties,
+                        new ObjectMapper(),
+                        new AgentEventTriggerPresenceCache(),
+                        tenantLimits);
         when(repository.save(any(AgentEventTrigger.class))).thenAnswer(i -> i.getArgument(0));
         // Every firing runs with the configuring human's identity, so configuring
         // one without an authenticated context is not a thing that can happen.
-        TenantContext.set(TenantContext.of("t_test", AgentEventTriggerTestSupport.CREATED_BY, Set.of()));
+        TenantContext.set(
+                TenantContext.of("t_test", AgentEventTriggerTestSupport.CREATED_BY, Set.of()));
     }
 
     @AfterEach
@@ -73,44 +77,46 @@ class AgentEventTriggerServiceTest {
         TenantContext.clear();
     }
 
-    private AgentEventTriggerResponse upsert(String eventType, String filterJson, String goalTemplate) {
-        return service.upsert(agentId, new AgentEventTriggerRequest(eventType, filterJson, goalTemplate));
+    private AgentEventTriggerResponse upsert(
+            String eventType, String filterJson, String goalTemplate) {
+        return service.upsert(
+                agentId, new AgentEventTriggerRequest(eventType, filterJson, goalTemplate));
     }
 
     @Test
     void anEventTypeThePlatformDoesNotPublishIsRejectedWithTheValidSet() {
         assertThatThrownBy(() -> upsert("customer.churned", null, "React."))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("customer.churned")
-            // Event names are not invented here; the nine real ones have to be in
-            // the message because they are not guessable.
-            .hasMessageContaining(WHATSAPP)
-            .hasMessageContaining(WorkflowEventTypes.DOCUMENT_GENERATION_COMPLETED);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("customer.churned")
+                // Event names are not invented here; the nine real ones have to be in
+                // the message because they are not guessable.
+                .hasMessageContaining(WHATSAPP)
+                .hasMessageContaining(WorkflowEventTypes.DOCUMENT_GENERATION_COMPLETED);
         verify(repository, never()).save(any(AgentEventTrigger.class));
     }
 
     @Test
     void aFilterKeyTheEventDoesNotCarryIsRejectedRatherThanSilentlyNeverMatching() {
         assertThatThrownBy(() -> upsert(WHATSAPP, "{\"sender\":\"+911234\"}", "React."))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("sender")
-            .hasMessageContaining("fromMasked");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("sender")
+                .hasMessageContaining("fromMasked");
     }
 
     @Test
     void aFilterThatIsNotAFlatJsonObjectIsRejected() {
         assertThatThrownBy(() -> upsert(WHATSAPP, "not json at all", "React."))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> upsert(WHATSAPP, "{\"channel\":{\"eq\":\"whatsapp\"}}", "React."))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("nested objects and arrays are not supported");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("nested objects and arrays are not supported");
     }
 
     @Test
     void aGoalTemplateReferencingAFieldTheEventDoesNotCarryIsRejected() {
         assertThatThrownBy(() -> upsert(WHATSAPP, null, "Summarise {{payload.body}}."))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("payload.body");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("payload.body");
     }
 
     @Test
@@ -118,20 +124,24 @@ class AgentEventTriggerServiceTest {
         properties.getTrigger().setMaxGoalChars(100);
 
         assertThatThrownBy(() -> upsert(WHATSAPP, null, "x".repeat(101)))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("max-goal-chars");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("max-goal-chars");
     }
 
     @Test
     void aValidTriggerIsStoredWithTheConfiguringHumanAsItsAuthority() {
         AgentEventTriggerResponse response =
-            upsert(WHATSAPP, "{\"channel\":\"whatsapp\"}", "Triage the message from {{payload.fromMasked}}.");
+                upsert(
+                        WHATSAPP,
+                        "{\"channel\":\"whatsapp\"}",
+                        "Triage the message from {{payload.fromMasked}}.");
 
         ArgumentCaptor<AgentEventTrigger> saved = ArgumentCaptor.forClass(AgentEventTrigger.class);
         verify(repository).save(saved.capture());
         assertThat(saved.getValue().getAgentId()).isEqualTo(agentId);
         assertThat(saved.getValue().getEventType()).isEqualTo(WHATSAPP);
-        assertThat(saved.getValue().getCreatedBy()).isEqualTo(AgentEventTriggerTestSupport.CREATED_BY);
+        assertThat(saved.getValue().getCreatedBy())
+                .isEqualTo(AgentEventTriggerTestSupport.CREATED_BY);
         assertThat(saved.getValue().isEnabled()).isTrue();
         // Served so the console's template help comes from the same source the
         // validator uses, instead of a client-side copy that drifts.
@@ -140,10 +150,17 @@ class AgentEventTriggerServiceTest {
 
     @Test
     void rebindingTheSameEventTypeEditsTheExistingRowRatherThanAddingASecond() {
-        AgentEventTrigger existing = AgentEventTrigger.create(
-            UUID.randomUUID(), agentId, WHATSAPP, null, "Old goal.",
-            AgentEventTriggerTestSupport.CREATED_BY, Instant.now());
-        when(repository.findByAgentIdAndEventType(agentId, WHATSAPP)).thenReturn(Optional.of(existing));
+        AgentEventTrigger existing =
+                AgentEventTrigger.create(
+                        UUID.randomUUID(),
+                        agentId,
+                        WHATSAPP,
+                        null,
+                        "Old goal.",
+                        AgentEventTriggerTestSupport.CREATED_BY,
+                        Instant.now());
+        when(repository.findByAgentIdAndEventType(agentId, WHATSAPP))
+                .thenReturn(Optional.of(existing));
 
         upsert(WHATSAPP, null, "New goal.");
 
@@ -156,11 +173,18 @@ class AgentEventTriggerServiceTest {
 
     @Test
     void reSavingIsTheWayBackFromALoopGuardDisable() {
-        AgentEventTrigger disabled = AgentEventTrigger.create(
-            UUID.randomUUID(), agentId, WHATSAPP, null, "Old goal.",
-            AgentEventTriggerTestSupport.CREATED_BY, Instant.now());
+        AgentEventTrigger disabled =
+                AgentEventTrigger.create(
+                        UUID.randomUUID(),
+                        agentId,
+                        WHATSAPP,
+                        null,
+                        "Old goal.",
+                        AgentEventTriggerTestSupport.CREATED_BY,
+                        Instant.now());
         disabled.disable(AgentEventTriggerDisableReason.LOOP_GUARD_TRIPPED, Instant.now());
-        when(repository.findByAgentIdAndEventType(agentId, WHATSAPP)).thenReturn(Optional.of(disabled));
+        when(repository.findByAgentIdAndEventType(agentId, WHATSAPP))
+                .thenReturn(Optional.of(disabled));
 
         AgentEventTriggerResponse response = upsert(WHATSAPP, null, "A goal that does not loop.");
 
@@ -181,46 +205,61 @@ class AgentEventTriggerServiceTest {
         when(repository.countByAgentIdAndEnabledTrue(agentId)).thenReturn(2L);
 
         assertThatThrownBy(() -> upsert(WHATSAPP, null, "React."))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("maximum of 2");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("maximum of 2");
     }
 
     @Test
     void disableKeepsTheConfigurationSoReEnablingIsOnePut() {
-        AgentEventTrigger trigger = AgentEventTrigger.create(
-            UUID.randomUUID(), agentId, WHATSAPP, "{\"channel\":\"whatsapp\"}", "React.",
-            AgentEventTriggerTestSupport.CREATED_BY, Instant.now());
+        AgentEventTrigger trigger =
+                AgentEventTrigger.create(
+                        UUID.randomUUID(),
+                        agentId,
+                        WHATSAPP,
+                        "{\"channel\":\"whatsapp\"}",
+                        "React.",
+                        AgentEventTriggerTestSupport.CREATED_BY,
+                        Instant.now());
         when(repository.findById(trigger.getId())).thenReturn(Optional.of(trigger));
 
         AgentEventTriggerResponse response = service.disable(agentId, trigger.getId());
 
         assertThat(response.enabled()).isFalse();
-        assertThat(response.disabledReason()).isEqualTo(AgentEventTriggerDisableReason.OPERATOR.name());
+        assertThat(response.disabledReason())
+                .isEqualTo(AgentEventTriggerDisableReason.OPERATOR.name());
         assertThat(response.goalTemplate()).isEqualTo("React.");
         assertThat(response.filterJson()).isEqualTo("{\"channel\":\"whatsapp\"}");
     }
 
     @Test
     void aTriggerBelongingToAnotherAgentIsNotFoundRatherThanDisabled() {
-        AgentEventTrigger someoneElses = AgentEventTrigger.create(
-            UUID.randomUUID(), UUID.randomUUID(), WHATSAPP, null, "React.",
-            AgentEventTriggerTestSupport.CREATED_BY, Instant.now());
+        AgentEventTrigger someoneElses =
+                AgentEventTrigger.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        WHATSAPP,
+                        null,
+                        "React.",
+                        AgentEventTriggerTestSupport.CREATED_BY,
+                        Instant.now());
         when(repository.findById(someoneElses.getId())).thenReturn(Optional.of(someoneElses));
 
         // The access check is on the AGENT in the path, so a trigger id from a
         // different agent must not be reachable through it.
         assertThatThrownBy(() -> service.disable(agentId, someoneElses.getId()))
-            .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class);
         assertThat(someoneElses.isEnabled()).isTrue();
     }
 
     @Test
     void listReadsEveryTriggerForTheAgentIncludingDisabledOnes() {
         AgentEventTrigger enabled = AgentEventTriggerTestSupport.trigger(WHATSAPP, null, "React.");
-        AgentEventTrigger off = AgentEventTriggerTestSupport.trigger(
-            WorkflowEventTypes.CHANNEL_EMAIL_MESSAGE_RECEIVED, null, "React.");
+        AgentEventTrigger off =
+                AgentEventTriggerTestSupport.trigger(
+                        WorkflowEventTypes.CHANNEL_EMAIL_MESSAGE_RECEIVED, null, "React.");
         off.disable(AgentEventTriggerDisableReason.LOOP_GUARD_TRIPPED, Instant.now());
-        when(repository.findByAgentIdOrderByEventTypeAsc(agentId)).thenReturn(List.of(enabled, off));
+        when(repository.findByAgentIdOrderByEventTypeAsc(agentId))
+                .thenReturn(List.of(enabled, off));
 
         List<AgentEventTriggerResponse> triggers = service.list(agentId);
 
@@ -228,7 +267,7 @@ class AgentEventTriggerServiceTest {
         // concludes their subscription was deleted rather than switched off.
         assertThat(triggers).hasSize(2);
         assertThat(triggers.get(1).disabledReason())
-            .isEqualTo(AgentEventTriggerDisableReason.LOOP_GUARD_TRIPPED.name());
+                .isEqualTo(AgentEventTriggerDisableReason.LOOP_GUARD_TRIPPED.name());
     }
 
     @Test
@@ -246,7 +285,8 @@ class AgentEventTriggerServiceTest {
         assertThat(AgentTriggerEventTypes.subscribable()).hasSize(11);
         for (String eventType : AgentTriggerEventTypes.subscribable()) {
             assertThat(AgentTriggerEventTypes.payloadFieldsOf(eventType)).isNotEmpty();
-            assertThat(upsert(eventType, null, "React to {{eventType}}.").eventType()).isEqualTo(eventType);
+            assertThat(upsert(eventType, null, "React to {{eventType}}.").eventType())
+                    .isEqualTo(eventType);
         }
     }
 
@@ -256,7 +296,7 @@ class AgentEventTriggerServiceTest {
         // cannot be evaluated must not degrade into "match everything" - that
         // would turn a narrow subscription into a firehose.
         assertThatThrownBy(() -> AgentEventTriggerFilter.parse("{oops", new ObjectMapper()))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -264,12 +304,18 @@ class AgentEventTriggerServiceTest {
         // Publishers write Boolean, Integer and String for what an operator thinks
         // of as one value, so "TRUE" not matching true would be a filter that
         // looks right and never fires.
-        assertThat(AgentEventTriggerFilter.matches(
-            Map.of("success", "TRUE"), Map.of("success", Boolean.TRUE))).isTrue();
-        assertThat(AgentEventTriggerFilter.matches(
-            Map.of("bodyLength", "42"), Map.of("bodyLength", 42))).isTrue();
-        assertThat(AgentEventTriggerFilter.matches(
-            Map.of("Channel", "whatsapp"), Map.of("channel", "whatsapp"))).isFalse();
+        assertThat(
+                        AgentEventTriggerFilter.matches(
+                                Map.of("success", "TRUE"), Map.of("success", Boolean.TRUE)))
+                .isTrue();
+        assertThat(
+                        AgentEventTriggerFilter.matches(
+                                Map.of("bodyLength", "42"), Map.of("bodyLength", 42)))
+                .isTrue();
+        assertThat(
+                        AgentEventTriggerFilter.matches(
+                                Map.of("Channel", "whatsapp"), Map.of("channel", "whatsapp")))
+                .isFalse();
     }
 
     @Test
@@ -277,14 +323,14 @@ class AgentEventTriggerServiceTest {
         TenantContext.clear();
 
         assertThatThrownBy(() -> upsert(WHATSAPP, null, "React."))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("tenant context");
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("tenant context");
     }
 
     @Test
     void anUnknownEventTypeNeverReachesTheRepository() {
         assertThatThrownBy(() -> upsert("workflow.node.completed", null, "React."))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
         verify(repository, never()).findByAgentIdAndEventType(any(UUID.class), anyString());
     }
 }

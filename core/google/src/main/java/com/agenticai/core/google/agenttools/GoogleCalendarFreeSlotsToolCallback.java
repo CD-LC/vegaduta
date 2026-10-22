@@ -30,14 +30,15 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  *
  * <p>The busy-time read is padded by a day on each side, so a date-only window can be resolved in
  * the calendar's own time zone (only known from Google's answer) without a second request. Slots
- * come back as offset date-times in that zone, ready to pass to {@code google_calendar}'s
- * {@code create_event}.
+ * come back as offset date-times in that zone, ready to pass to {@code google_calendar}'s {@code
+ * create_event}.
  */
 public class GoogleCalendarFreeSlotsToolCallback implements ToolCallback {
 
     static final String NAME = "google_calendar_find_free_slots";
 
-    private static final Logger log = LoggerFactory.getLogger(GoogleCalendarFreeSlotsToolCallback.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(GoogleCalendarFreeSlotsToolCallback.class);
     private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final int DEFAULT_MAX_SLOTS = 10;
     private static final int MAX_SLOTS = 50;
@@ -98,42 +99,60 @@ public class GoogleCalendarFreeSlotsToolCallback implements ToolCallback {
             if (duration < 5 || duration > 480) {
                 return errorJson("duration_minutes must be between 5 and 480");
             }
-            int maxSlots = Math.min(Math.max(intOr(args.get("max_slots"), DEFAULT_MAX_SLOTS), 1), MAX_SLOTS);
-            LocalTime workStart = LocalTime.parse(stringOr(args.get("working_hours_start"), "09:00"));
+            int maxSlots =
+                    Math.min(
+                            Math.max(intOr(args.get("max_slots"), DEFAULT_MAX_SLOTS), 1),
+                            MAX_SLOTS);
+            LocalTime workStart =
+                    LocalTime.parse(stringOr(args.get("working_hours_start"), "09:00"));
             LocalTime workEnd = LocalTime.parse(stringOr(args.get("working_hours_end"), "18:00"));
             ZoneId requestedZone = zoneOrNull(asString(args.get("time_zone")));
 
-            // Pad by a day so a date-only bound resolves correctly in any zone (offsets are < 1 day).
+            // Pad by a day so a date-only bound resolves correctly in any zone (offsets are < 1
+            // day).
             ZoneId probe = requestedZone == null ? ZoneId.of("UTC") : requestedZone;
             Instant padStart = startOf(from, probe).minus(Duration.ofDays(1));
             Instant padEnd = endOf(to, probe).plus(Duration.ofDays(1));
-            if (Duration.between(padStart, padEnd).compareTo(CalendarFreeSlots.MAX_WINDOW.plusDays(3)) > 0) {
-                return errorJson("the window may cover at most " + CalendarFreeSlots.MAX_WINDOW.toDays() + " days");
+            if (Duration.between(padStart, padEnd)
+                            .compareTo(CalendarFreeSlots.MAX_WINDOW.plusDays(3))
+                    > 0) {
+                return errorJson(
+                        "the window may cover at most "
+                                + CalendarFreeSlots.MAX_WINDOW.toDays()
+                                + " days");
             }
             BusyTime busy = client.listBusy(padStart, padEnd);
             if (busy.truncated()) {
-                return errorJson("this calendar has too many events in that window to read in one call; narrow the window");
+                return errorJson(
+                        "this calendar has too many events in that window to read in one call; narrow the window");
             }
             ZoneId zone = requestedZone == null ? busy.calendarZone() : requestedZone;
-            List<Interval> slots = CalendarFreeSlots.find(
-                    new CalendarFreeSlots.Request(
-                            startOf(from, zone),
-                            endOf(to, zone),
-                            clock.instant(),
-                            Duration.ofMinutes(duration),
-                            workStart,
-                            workEnd,
-                            Boolean.TRUE.equals(args.get("include_weekends")),
-                            zone,
-                            maxSlots),
-                    busy.busy());
+            List<Interval> slots =
+                    CalendarFreeSlots.find(
+                            new CalendarFreeSlots.Request(
+                                    startOf(from, zone),
+                                    endOf(to, zone),
+                                    clock.instant(),
+                                    Duration.ofMinutes(duration),
+                                    workStart,
+                                    workEnd,
+                                    Boolean.TRUE.equals(args.get("include_weekends")),
+                                    zone,
+                                    maxSlots),
+                            busy.busy());
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("time_zone", zone.getId());
             result.put("duration_minutes", duration);
             result.put(
                     "slots",
                     slots.stream()
-                            .map(s -> Map.of("start", format(s.start(), zone), "end", format(s.end(), zone)))
+                            .map(
+                                    s ->
+                                            Map.of(
+                                                    "start",
+                                                    format(s.start(), zone),
+                                                    "end",
+                                                    format(s.end(), zone)))
                             .toList());
             return MAPPER.writeValueAsString(result);
         } catch (IllegalArgumentException | DateTimeException e) {
@@ -152,7 +171,9 @@ public class GoogleCalendarFreeSlotsToolCallback implements ToolCallback {
         return OffsetDateTime.parse(value).toInstant();
     }
 
-    /** A date is inclusive (the window runs to the end of that day); a date-time is taken as given. */
+    /**
+     * A date is inclusive (the window runs to the end of that day); a date-time is taken as given.
+     */
     static Instant endOf(String value, ZoneId zone) {
         if (value.length() == 10) {
             return LocalDate.parse(value).plusDays(1).atStartOfDay(zone).toInstant();
@@ -161,7 +182,9 @@ public class GoogleCalendarFreeSlotsToolCallback implements ToolCallback {
     }
 
     private static String format(Instant instant, ZoneId zone) {
-        return instant.atZone(zone).toOffsetDateTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        return instant.atZone(zone)
+                .toOffsetDateTime()
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     private static ZoneId zoneOrNull(String zone) {

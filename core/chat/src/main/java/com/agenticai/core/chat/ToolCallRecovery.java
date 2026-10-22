@@ -25,15 +25,20 @@ public class ToolCallRecovery {
     private final int holdBackChars;
 
     public ToolCallRecovery(
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        ObjectMapper objectMapper,
-        ObjectProvider<MeterRegistry> meterRegistry,
-        @Value("${app.chat.tools.text-call-recovery.enabled:true}") boolean enabled,
-        @Value("${app.chat.tools.text-call-recovery.max-per-invocation:"
-            + TextToolCallRecoveringChatModel.DEFAULT_MAX_RECOVERIES + "}") int maxPerInvocation,
-        @Value("${app.chat.tools.text-call-recovery.hold-back-chars:"
-            + TextToolCallRecoveringChatModel.DEFAULT_HOLD_BACK_CHARS + "}") int holdBackChars
-    ) {
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            ObjectMapper objectMapper,
+            ObjectProvider<MeterRegistry> meterRegistry,
+            @Value("${app.chat.tools.text-call-recovery.enabled:true}") boolean enabled,
+            @Value(
+                            "${app.chat.tools.text-call-recovery.max-per-invocation:"
+                                    + TextToolCallRecoveringChatModel.DEFAULT_MAX_RECOVERIES
+                                    + "}")
+                    int maxPerInvocation,
+            @Value(
+                            "${app.chat.tools.text-call-recovery.hold-back-chars:"
+                                    + TextToolCallRecoveringChatModel.DEFAULT_HOLD_BACK_CHARS
+                                    + "}")
+                    int holdBackChars) {
         this.toolCallingManagers = toolCallingManagers;
         this.objectMapper = objectMapper;
         this.meterRegistry = meterRegistry == null ? null : meterRegistry.getIfAvailable();
@@ -52,6 +57,11 @@ public class ToolCallRecovery {
             return model;
         }
         return new TextToolCallRecoveringChatModel(
-            model, toolCallingManagers.create(), objectMapper, maxPerInvocation, holdBackChars, meterRegistry);
+                model,
+                toolCallingManagers.create(),
+                objectMapper,
+                maxPerInvocation,
+                holdBackChars,
+                meterRegistry);
     }
 }

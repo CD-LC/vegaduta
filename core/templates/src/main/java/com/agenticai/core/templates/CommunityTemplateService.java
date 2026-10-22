@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,7 +92,8 @@ public class CommunityTemplateService {
         this.importRateLimiter = importRateLimiter;
         this.mapper = new CommunityTemplateMapper(snapshotService, readinessService, objectMapper);
         this.reviewRunner =
-                new TemplateReviewRunner(snapshotService, readinessService, aiReviewService, mapper);
+                new TemplateReviewRunner(
+                        snapshotService, readinessService, aiReviewService, mapper);
         this.instantiator =
                 new TemplateInstantiator(
                         snapshotService, agentService, agentGuardrailService, workflowService);
@@ -173,11 +174,13 @@ public class CommunityTemplateService {
             throw new TemplateNotReadyException(review.rules());
         }
         if (!review.ai().blockers().isEmpty()) {
-            throw new TemplateNotReadyException(TemplateReviewRunner.mergeAi(review.rules(), review.ai()));
+            throw new TemplateNotReadyException(
+                    TemplateReviewRunner.mergeAi(review.rules(), review.ai()));
         }
         transition(template, TemplateStatus.PENDING, subject, null);
         template.recordReview(
-                mapper.writeJson(review), reviewRunner.mergedTags(template, review.rules().derivedTags()));
+                mapper.writeJson(review),
+                reviewRunner.mergedTags(template, review.rules().derivedTags()));
         audit(
                 subject,
                 "template.submit",
@@ -527,7 +530,8 @@ public class CommunityTemplateService {
             throw new TemplateNotFoundException();
         }
         String createdBy = definition.getCreatedBy();
-        boolean visible = createdBy == null || createdBy.equals(subject) || TemplateAccess.isAdmin();
+        boolean visible =
+                createdBy == null || createdBy.equals(subject) || TemplateAccess.isAdmin();
         if (!visible) {
             throw new TemplateNotFoundException();
         }

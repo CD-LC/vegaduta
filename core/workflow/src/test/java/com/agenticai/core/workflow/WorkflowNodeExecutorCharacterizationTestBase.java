@@ -33,7 +33,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** Shared fixture of the {@link WorkflowNodeExecutor} characterisation tests: every collaborator mocked. */
+/**
+ * Shared fixture of the {@link WorkflowNodeExecutor} characterisation tests: every collaborator
+ * mocked.
+ */
 @SuppressWarnings("unchecked")
 abstract class WorkflowNodeExecutorCharacterizationTestBase {
 
@@ -127,8 +130,7 @@ abstract class WorkflowNodeExecutorCharacterizationTestBase {
     }
 
     static WorkflowNodeDto node(String type, Map<String, Object> config) {
-        return new WorkflowNodeDto(
-                "n1", type, Map.of(), Map.of("config", config, "label", "Node"));
+        return new WorkflowNodeDto("n1", type, Map.of(), Map.of("config", config, "label", "Node"));
     }
 
     NodeExecutionResult run(WorkflowNodeDto node, String input) {

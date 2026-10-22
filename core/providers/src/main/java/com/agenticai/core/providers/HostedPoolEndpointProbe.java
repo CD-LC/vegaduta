@@ -33,7 +33,6 @@ public final class HostedPoolEndpointProbe {
         this.ssrfGuard = ssrfGuard;
     }
 
-
     /**
      * Strips exactly one trailing {@code /v1} (with or without a trailing slash) before persisting
      * or validating a {@code baseUrl} - {@link com.agenticai.core.chat.HostedLlmChatClientFactory}

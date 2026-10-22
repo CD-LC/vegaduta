@@ -36,8 +36,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>Every call goes through the same address-pinned, redirect-free {@link SsrfGuard} client as
  * {@code SignalApiClient}: a private bridge host works only when the operator lists it in {@code
- * app.security.outbound.allowed-private-hosts}, and the shared secret is only sent over https or
- * to such an allow-listed host - never part of a URL, a log line or an exception message.
+ * app.security.outbound.allowed-private-hosts}, and the shared secret is only sent over https or to
+ * such an allow-listed host - never part of a URL, a log line or an exception message.
  */
 @Component
 public class WhatsAppQrClient {
@@ -81,7 +81,9 @@ public class WhatsAppQrClient {
         return !bridgeUrl.isBlank() && !bridgeSecret.isBlank();
     }
 
-    /** One-line liveness for the connection probe - the bridge's own /health, not a synthetic ping. */
+    /**
+     * One-line liveness for the connection probe - the bridge's own /health, not a synthetic ping.
+     */
     public void health() {
         call("GET", "/health", null, VALIDATE_TIMEOUT);
     }
@@ -178,8 +180,10 @@ public class WhatsAppQrClient {
                                     response -> {
                                         String body = "";
                                         if (response.getEntity() != null) {
-                                            try (InputStream in = response.getEntity().getContent()) {
-                                                byte[] bytes = in.readNBytes(MAX_RESPONSE_BYTES + 1);
+                                            try (InputStream in =
+                                                    response.getEntity().getContent()) {
+                                                byte[] bytes =
+                                                        in.readNBytes(MAX_RESPONSE_BYTES + 1);
                                                 if (bytes.length > MAX_RESPONSE_BYTES) {
                                                     throw new IOException("response too large");
                                                 }
@@ -230,7 +234,9 @@ public class WhatsAppQrClient {
             return "";
         }
         String first = detail.lines().findFirst().orElse("");
-        return first.isBlank() ? "" : " - " + (first.length() > 120 ? first.substring(0, 120) : first);
+        return first.isBlank()
+                ? ""
+                : " - " + (first.length() > 120 ? first.substring(0, 120) : first);
     }
 
     private static void closeQuietly(CloseableHttpClient c) {

@@ -17,9 +17,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * Question classifier of {@link WorkflowAiNodeHandler}, with a scripted fake model. The parameter extractor is
- * in {@link WorkflowAiNodeExtractorTest}, the variable aggregator and document extractor in
- * {@link WorkflowAiNodeDocumentTest}.
+ * Question classifier of {@link WorkflowAiNodeHandler}, with a scripted fake model. The parameter
+ * extractor is in {@link WorkflowAiNodeExtractorTest}, the variable aggregator and document
+ * extractor in {@link WorkflowAiNodeDocumentTest}.
  */
 class WorkflowAiNodeHandlerTest extends WorkflowAiNodeHandlerTestBase {
 

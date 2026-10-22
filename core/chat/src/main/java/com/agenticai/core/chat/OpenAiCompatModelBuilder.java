@@ -16,12 +16,15 @@ import org.springframework.web.reactive.function.client.WebClient;
  * parts that must be identical for all of them:
  *
  * <ul>
- *   <li>the HTTP transport: bounded connect/read timeouts and pool from {@link LlmHttpClientFactory},
- *       or its SSRF-guarded variants for tenant-supplied endpoints ({@link Api#guarded()});</li>
- *   <li>base URL, optional {@code completionsPath}, API key (or the no-key marker) and extra headers;</li>
+ *   <li>the HTTP transport: bounded connect/read timeouts and pool from {@link
+ *       LlmHttpClientFactory}, or its SSRF-guarded variants for tenant-supplied endpoints ({@link
+ *       Api#guarded()});
+ *   <li>base URL, optional {@code completionsPath}, API key (or the no-key marker) and extra
+ *       headers;
  *   <li>the default options every model starts from: model id and {@code streamUsage} per {@link
- *       LlmModelSupport#streamUsage};</li>
- *   <li>the model wiring: shared tool-calling manager, bounded retry template, observation registry.</li>
+ *       LlmModelSupport#streamUsage};
+ *   <li>the model wiring: shared tool-calling manager, bounded retry template, observation
+ *       registry.
  * </ul>
  *
  * <p>Factories keep only what is provider-specific (URL, sampling rules, caching keys, metrics
@@ -36,10 +39,9 @@ final class OpenAiCompatModelBuilder {
     private final LlmModelSupport modelSupport;
 
     OpenAiCompatModelBuilder(
-        LlmHttpClientFactory httpClients,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        LlmModelSupport modelSupport
-    ) {
+            LlmHttpClientFactory httpClients,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            LlmModelSupport modelSupport) {
         this.httpClients = httpClients;
         this.toolCallingManagers = toolCallingManagers;
         this.modelSupport = modelSupport;
@@ -50,37 +52,48 @@ final class OpenAiCompatModelBuilder {
         return new Api(baseUrl);
     }
 
-    /** A fresh timeout-bounded blocking-path builder, for factories that must customise it (Grok). */
+    /**
+     * A fresh timeout-bounded blocking-path builder, for factories that must customise it (Grok).
+     */
     RestClient.Builder restClientBuilder() {
         return httpClients.restClientBuilder();
     }
 
-    /** A fresh timeout-bounded streaming-path builder, for factories that must customise it (Grok). */
+    /**
+     * A fresh timeout-bounded streaming-path builder, for factories that must customise it (Grok).
+     */
     WebClient.Builder webClientBuilder() {
         return httpClients.webClientBuilder();
     }
 
-    /** {@code OpenAiChatOptions.builder().model(model).streamUsage(...)} - the base every factory extends. */
+    /**
+     * {@code OpenAiChatOptions.builder().model(model).streamUsage(...)} - the base every factory
+     * extends.
+     */
     OpenAiChatOptions.Builder options(ProviderName provider, String model) {
         return baseOptions(model, modelSupport.streamUsage(provider));
     }
 
-    /** The same base for callers that already resolved the stream-usage decision (static, unit-testable helpers). */
+    /**
+     * The same base for callers that already resolved the stream-usage decision (static,
+     * unit-testable helpers).
+     */
     static OpenAiChatOptions.Builder baseOptions(String model, boolean streamUsage) {
-        return OpenAiChatOptions.builder()
-            .model(model)
-            .streamUsage(streamUsage);
+        return OpenAiChatOptions.builder().model(model).streamUsage(streamUsage);
     }
 
-    /** The chat model with the shared tool-calling manager, bounded retry and the app's observation registry. */
+    /**
+     * The chat model with the shared tool-calling manager, bounded retry and the app's observation
+     * registry.
+     */
     OpenAiChatModel chatModel(OpenAiApi api, OpenAiChatOptions options) {
         return OpenAiChatModel.builder()
-            .openAiApi(api)
-            .defaultOptions(options)
-            .toolCallingManager(toolCallingManagers.create())
-            .retryTemplate(modelSupport.retryTemplate())
-            .observationRegistry(modelSupport.observationRegistry())
-            .build();
+                .openAiApi(api)
+                .defaultOptions(options)
+                .toolCallingManager(toolCallingManagers.create())
+                .retryTemplate(modelSupport.retryTemplate())
+                .observationRegistry(modelSupport.observationRegistry())
+                .build();
     }
 
     /** Fluent description of one {@link OpenAiApi}; unset parts keep Spring AI's own defaults. */
@@ -99,7 +112,9 @@ final class OpenAiCompatModelBuilder {
             this.baseUrl = baseUrl;
         }
 
-        /** Bearer key sent as {@code Authorization} (may be null, exactly as passed to Spring AI). */
+        /**
+         * Bearer key sent as {@code Authorization} (may be null, exactly as passed to Spring AI).
+         */
         Api apiKey(String key) {
             this.apiKey = key;
             this.noApiKey = false;
@@ -117,25 +132,37 @@ final class OpenAiCompatModelBuilder {
             return this;
         }
 
-        /** Overrides Spring AI's default {@code /v1/chat/completions}; a null path keeps the default. */
+        /**
+         * Overrides Spring AI's default {@code /v1/chat/completions}; a null path keeps the
+         * default.
+         */
         Api completionsPath(String completionsPath) {
             this.completionsPath = completionsPath;
             return this;
         }
 
-        /** Use the SSRF-guarded transport (address-pinned, no redirects) for tenant-supplied endpoints. */
+        /**
+         * Use the SSRF-guarded transport (address-pinned, no redirects) for tenant-supplied
+         * endpoints.
+         */
         Api guarded() {
             this.guarded = true;
             return this;
         }
 
-        /** Replaces the default blocking-path builder (see {@link OpenAiCompatModelBuilder#restClientBuilder()}). */
+        /**
+         * Replaces the default blocking-path builder (see {@link
+         * OpenAiCompatModelBuilder#restClientBuilder()}).
+         */
         Api restClientBuilder(RestClient.Builder builder) {
             this.restClientBuilder = builder;
             return this;
         }
 
-        /** Replaces the default streaming-path builder (see {@link OpenAiCompatModelBuilder#webClientBuilder()}). */
+        /**
+         * Replaces the default streaming-path builder (see {@link
+         * OpenAiCompatModelBuilder#webClientBuilder()}).
+         */
         Api webClientBuilder(WebClient.Builder builder) {
             this.webClientBuilder = builder;
             return this;
@@ -154,10 +181,18 @@ final class OpenAiCompatModelBuilder {
             if (completionsPath != null) {
                 builder.completionsPath(completionsPath);
             }
-            builder.restClientBuilder(restClientBuilder != null ? restClientBuilder
-                : guarded ? httpClients.guardedRestClientBuilder() : httpClients.restClientBuilder());
-            builder.webClientBuilder(webClientBuilder != null ? webClientBuilder
-                : guarded ? httpClients.guardedWebClientBuilder() : httpClients.webClientBuilder());
+            builder.restClientBuilder(
+                    restClientBuilder != null
+                            ? restClientBuilder
+                            : guarded
+                                    ? httpClients.guardedRestClientBuilder()
+                                    : httpClients.restClientBuilder());
+            builder.webClientBuilder(
+                    webClientBuilder != null
+                            ? webClientBuilder
+                            : guarded
+                                    ? httpClients.guardedWebClientBuilder()
+                                    : httpClients.webClientBuilder());
             return builder.build();
         }
     }

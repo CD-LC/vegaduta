@@ -8,31 +8,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * NDJSON (JSON Lines) renderings of eval data - the training/optimization
- * export counterpart to {@link EvalRunBundle} (which is the tamper-evident
- * audit artifact). One JSON object per line, UTF-8, no outer array, so the
- * file streams straight into offline tooling (DSPy/GEPA-style optimizers,
- * pandas, jq) without a wrapper parse.
+ * NDJSON (JSON Lines) renderings of eval data - the training/optimization export counterpart to
+ * {@link EvalRunBundle} (which is the tamper-evident audit artifact). One JSON object per line,
+ * UTF-8, no outer array, so the file streams straight into offline tooling (DSPy/GEPA-style
+ * optimizers, pandas, jq) without a wrapper parse.
  *
  * <p>Two schemas, both versioned in the header line's {@code schema} field:
+ *
  * <ul>
- *   <li>{@code vegaduta.eval-run-jsonl/v1} - line 1 is the run header
- *       ({@code "type":"run"}) carrying the same provenance the bundle signs
- *       (agent version binding, config hash, dataset hash, judge model,
- *       repeats, budget/cost); every following line is one case result
- *       ({@code "type":"case"}).</li>
- *   <li>{@code vegaduta.eval-dataset-jsonl/v1} - line 1 is the dataset
- *       header; following lines are the LIVE cases ({@code input},
- *       {@code expectedOutput}, {@code expectedTools}, {@code grader}) in
- *       position order - the optimization loop's candidate training set.</li>
+ *   <li>{@code vegaduta.eval-run-jsonl/v1} - line 1 is the run header ({@code "type":"run"})
+ *       carrying the same provenance the bundle signs (agent version binding, config hash, dataset
+ *       hash, judge model, repeats, budget/cost); every following line is one case result ({@code
+ *       "type":"case"}).
+ *   <li>{@code vegaduta.eval-dataset-jsonl/v1} - line 1 is the dataset header; following lines are
+ *       the LIVE cases ({@code input}, {@code expectedOutput}, {@code expectedTools}, {@code
+ *       grader}) in position order - the optimization loop's candidate training set.
  * </ul>
  *
- * <p>JSON document columns ({@code scores_json}, {@code tool_calls_json},
- * {@code grader_spec}) are embedded as parsed values, never stringified a
- * second time - an export that double-encodes makes every downstream consumer
- * write an unparse step. An unreadable column is exported as its raw string
- * under a {@code *Raw} key rather than dropped: the export's job is fidelity,
- * and a corrupt blob is still evidence.
+ * <p>JSON document columns ({@code scores_json}, {@code tool_calls_json}, {@code grader_spec}) are
+ * embedded as parsed values, never stringified a second time - an export that double-encodes makes
+ * every downstream consumer write an unparse step. An unreadable column is exported as its raw
+ * string under a {@code *Raw} key rather than dropped: the export's job is fidelity, and a corrupt
+ * blob is still evidence.
  */
 public final class EvalJsonlExport {
 
@@ -41,8 +38,7 @@ public final class EvalJsonlExport {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private EvalJsonlExport() {
-    }
+    private EvalJsonlExport() {}
 
     /** One eval run: header line + one line per case result (position order). */
     public static String run(EvalDataset dataset, EvalRun run, List<EvalRunCaseResult> results) {
@@ -130,9 +126,9 @@ public final class EvalJsonlExport {
     }
 
     /**
-     * Embeds a stored JSON column as a parsed value ({@code key} -> object/
-     * array/scalar). Null/blank stores nothing. Unparseable content is kept
-     * verbatim under {@code key + "Raw"} - see the class javadoc.
+     * Embeds a stored JSON column as a parsed value ({@code key} -> object/ array/scalar).
+     * Null/blank stores nothing. Unparseable content is kept verbatim under {@code key + "Raw"} -
+     * see the class javadoc.
      */
     private static void putJson(Map<String, Object> row, String key, String storedJson) {
         if (storedJson == null || storedJson.isBlank()) {

@@ -31,7 +31,6 @@ final class CommunityTemplateMapper {
         this.objectMapper = objectMapper;
     }
 
-
     TemplateResponse toResponse(CommunityTemplate t) {
         return new TemplateResponse(
                 t.getId(),
