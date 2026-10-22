@@ -1,15 +1,10 @@
 package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -18,6 +13,10 @@ import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Platform-wide maintenance mode and announcement banner, each stored as ONE JSON document in a
@@ -222,9 +221,9 @@ public class PlatformBroadcastService {
         write(MAINTENANCE_KEY, next, actor);
         log.info(
                 "platform-ops-audit actor={} action=platform.maintenance.{} endsAt={}",
-                actor,
-                next.enabled() ? "enable" : "disable",
-                endsAt);
+                LogSafe.clean(actor),
+                LogSafe.clean(next.enabled() ? "enable" : "disable"),
+                LogSafe.clean(endsAt));
         refresh();
         return maintenance();
     }
@@ -252,10 +251,10 @@ public class PlatformBroadcastService {
         write(ANNOUNCEMENT_KEY, next, actor);
         log.info(
                 "platform-ops-audit actor={} action=platform.announcement.{} level={} expiresAt={}",
-                actor,
-                next.enabled() ? "publish" : "withdraw",
-                level,
-                expiresAt);
+                LogSafe.clean(actor),
+                LogSafe.clean(next.enabled() ? "publish" : "withdraw"),
+                LogSafe.clean(level),
+                LogSafe.clean(expiresAt));
         refresh();
         return announcement();
     }
