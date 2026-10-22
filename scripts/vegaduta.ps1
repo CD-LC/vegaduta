@@ -936,8 +936,8 @@ switch ($Command) {
     if ($m.Count -gt 0) { $setup = $m[$m.Count - 1].Value }
     if ($setup) { Write-Host "  First-run setup  $setup" } else { Write-Host '  Open the console and sign in (first-run setup is already done).' }
     if ($script:LocalAi) { Write-Host "  Local model  $($script:LocalModelTag) via $($script:LocalAi) Ollama (free; agents can use it right away)" }
-    if ($script:SearchOn -eq '1') { Write-Host '  Web search   on (a private SearXNG container, no API key). Turn off: .\scripts\vegaduta.ps1 personal -NoSearch' }
     else { Write-Host '  Add an LLM provider key in the console (Settings -> Providers), or run Ollama on this machine.' }
+    if ($script:SearchOn -eq '1') { Write-Host '  Web search   on (a private SearXNG container, no API key). Turn off: .\scripts\vegaduta.ps1 personal -NoSearch' }
   }
   'up' {
     Parse-TierFlags
