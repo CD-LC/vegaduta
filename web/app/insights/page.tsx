@@ -40,6 +40,7 @@ import {
   type SpendSummaryDto,
 } from "../lib/api/insights";
 import { useTranslations } from "../lib/i18n";
+import { hiddenOnPersonalInstall } from "../lib/personalInstall";
 import {
   PERIODS,
   buildDailySeries,
@@ -414,9 +415,11 @@ export default function InsightsPage() {
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {periodSwitch}
-            <Button asChild variant="outline" size="sm">
-              <Link href="/roi">{t("linkRoi")}</Link>
-            </Button>
+            {!hiddenOnPersonalInstall("/roi") && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/roi">{t("linkRoi")}</Link>
+              </Button>
+            )}
           </div>
         }
       />

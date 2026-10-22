@@ -13,6 +13,7 @@ import {
   type McpExposure,
   type McpExposureKind,
 } from "../lib/mcpExposure";
+import { isPersonalEdition } from "../lib/edition";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
 
@@ -24,16 +25,23 @@ import { Switch } from "./ui/switch";
  * renders nothing - an absent optional control must not look like an error. The snippets never
  * contain a real key; the admin pastes their own from Developer API access.
  */
-export default function McpExposureField({
-  kind,
-  resourceId,
-  locked = false,
-}: {
+export default function McpExposureField(props: McpExposureFieldProps) {
+  // core does not run the MCP server on a personal install (MCP_SERVER_EXPOSURE edition feature) and the
+  // /admin/mcp-servers page the instructions point at is not served, so there is nothing to switch on.
+  // Not mounting also skips the exposure lookup. The edition is fixed for the page's life, so the hook
+  // order inside McpExposureFieldInner never changes between renders.
+  if (isPersonalEdition()) return null;
+  return <McpExposureFieldInner {...props} />;
+}
+
+interface McpExposureFieldProps {
   kind: McpExposureKind;
   resourceId: string | null | undefined;
   /** Read-only (e.g. the agent is edit-locked). */
   locked?: boolean;
-}) {
+}
+
+function McpExposureFieldInner({ kind, resourceId, locked = false }: McpExposureFieldProps) {
   const t = useTranslations("mcpExposure");
   // Keyed by what it was fetched for, so switching resources never shows the previous one's state.
   const [loaded, setLoaded] = useState<{ key: string; state: McpExposure } | null>(null);
