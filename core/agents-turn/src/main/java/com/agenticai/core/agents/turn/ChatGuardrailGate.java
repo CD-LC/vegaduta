@@ -13,6 +13,7 @@ import com.agenticai.core.guardrails.moderation.ModerationOutcome;
 import com.agenticai.core.guardrails.moderation.ModerationService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -78,8 +79,8 @@ final class ChatGuardrailGate {
      * Portuguese, Chinese and Japanese phrase families. So "moderation.enabled = false" means no
      * paid content moderation - not "no injection screening".
      *
-     * <p><b>Failure handling.</b> Per {@link GuardrailFailMode}: a {@link RuntimeException} from the
-     * moderation call refuses the turn when closed (the default) and is logged and treated as
+     * <p><b>Failure handling.</b> Per {@link GuardrailFailMode}: a {@link RuntimeException} from
+     * the moderation call refuses the turn when closed (the default) and is logged and treated as
      * {@code ALLOW} when open. The {@code ModerationService} bean being absent is "not configured"
      * and always allows (the {@code null} guard).
      *
@@ -127,16 +128,16 @@ final class ChatGuardrailGate {
                 log.warn(
                         "Content moderation failed for agent {} session {} - failing closed"
                                 + " (refusing the turn)",
-                        agentId,
-                        sessionId,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId),
                         e);
                 return Flux.just(CHECK_UNAVAILABLE_NOTICE);
             }
             log.warn(
                     "Content moderation failed for agent {} session {} - failing open (allowing the"
                             + " turn)",
-                    agentId,
-                    sessionId,
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
                     e);
             return null;
         }
@@ -146,10 +147,10 @@ final class ChatGuardrailGate {
                 log.info(
                         "Content moderation BLOCKED an inbound message for agent {} session {}"
                                 + " (pack={}, layer={})",
-                        agentId,
-                        sessionId,
-                        outcome.pack(),
-                        outcome.decidingLayer());
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId),
+                        LogSafe.clean(outcome.pack()),
+                        LogSafe.clean(outcome.decidingLayer()));
                 yield Flux.just(
                         "I can't help with that request - it was flagged by our content policy and"
                                 + " can't be processed.");
@@ -158,12 +159,12 @@ final class ChatGuardrailGate {
                 log.info(
                         "Content moderation QUEUED an inbound message for review for agent {}"
                                 + " session {} (reviewItem={})",
-                        agentId,
-                        sessionId,
-                        outcome.reviewItemId());
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId),
+                        LogSafe.clean(outcome.reviewItemId()));
                 yield Flux.just(
                         "This request needs a manual review before it can be answered. It has been"
-                            + " sent to our team, and you'll hear back once it's been reviewed.");
+                                + " sent to our team, and you'll hear back once it's been reviewed.");
             }
         };
     }
@@ -296,16 +297,16 @@ final class ChatGuardrailGate {
                 log.warn(
                         "Content-guardrail input check failed for agent {} session {} - failing"
                                 + " closed (refusing the turn)",
-                        agentId,
-                        sessionId,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId),
                         e);
                 return Flux.just(CHECK_UNAVAILABLE_NOTICE);
             }
             log.warn(
                     "Content-guardrail input check failed for agent {} session {} - failing open"
                             + " (allowing the turn)",
-                    agentId,
-                    sessionId,
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
                     e);
             return null;
         }
@@ -361,16 +362,16 @@ final class ChatGuardrailGate {
                 log.warn(
                         "Content-guardrail output check failed for agent {} session {} - failing"
                                 + " closed (withholding the answer)",
-                        agentId,
-                        sessionId,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId),
                         e);
                 return CHECK_UNAVAILABLE_NOTICE;
             }
             log.warn(
                     "Content-guardrail output check failed for agent {} session {} - failing open"
                             + " (returning the answer)",
-                    agentId,
-                    sessionId,
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
                     e);
             return answer;
         }
@@ -383,8 +384,8 @@ final class ChatGuardrailGate {
             if (sanitized != null && !sanitized.equals(answer)) {
                 log.info(
                         "Content guardrails redacted part of the answer for agent {} session {}",
-                        agentId,
-                        sessionId);
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId));
                 return sanitized;
             }
             return answer;
@@ -513,8 +514,8 @@ final class ChatGuardrailGate {
         } catch (RuntimeException e) {
             log.warn(
                     "Failed to audit content-guardrail violation for agent {} session {}",
-                    agentId,
-                    sessionId,
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
                     e);
         }
     }

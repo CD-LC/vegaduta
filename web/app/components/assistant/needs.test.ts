@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StatusInput } from "../../connect/connectCatalog";
 import {
   approvalOutcomeLines,
@@ -115,5 +115,25 @@ describe("attachedFilesContextLines", () => {
     expect(text).toContain('- "Chat uploads/notes.md"');
     expect(text).toContain("workspace_search");
     expect(text).toContain("workspace_read");
+  });
+});
+
+describe("on a personal install Slack is not a connection", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("does not detect Slack as a need or advertise it as not connected", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    expect(detectNeeds("check my calendar and send the plan on slack").map((n) => n.key)).toEqual(["google"]);
+    const ctx = connectionsContext(status({ telegram: "NOT_CONNECTED", slack: "NOT_CONNECTED" }, false));
+    expect(ctx).toContain("Telegram");
+    expect(ctx).not.toContain("Slack");
+  });
+
+  it("keeps advertising Slack on lite and full", () => {
+    for (const e of ["lite", "full"]) {
+      vi.stubEnv("NEXT_PUBLIC_EDITION", e);
+      expect(connectionsContext(status({ slack: "NOT_CONNECTED" }, null))).toContain("Slack");
+      expect(detectNeeds("send the plan on slack").map((n) => n.key)).toEqual(["slack"]);
+    }
   });
 });

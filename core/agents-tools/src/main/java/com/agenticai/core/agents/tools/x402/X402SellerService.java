@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -84,17 +85,20 @@ public class X402SellerService {
             X402OfferRepository offerRepository,
             X402PaymentRepository paymentRepository,
             DelegationTokenService delegationTokenService,
-            AgentWalletLedger walletService,
+            ObjectProvider<AgentWalletLedger> walletLedger,
             @org.springframework.beans.factory.annotation.Value("${app.x402.facilitator-url:}")
                     String facilitatorUrl,
             @org.springframework.beans.factory.annotation.Value(
                             "${app.x402.facilitator-timeout-ms:10000}")
                     int facilitatorTimeoutMs) {
+        // The payments module (the BILLING_PAYMENTS edition feature) may be absent: x402 then
+        // refuses
+        // settlement with a "payments disabled" answer instead of blocking startup.
         this(
                 offerRepository,
                 paymentRepository,
                 delegationTokenService,
-                walletService,
+                PaymentsDisabledAgentWalletLedger.orDisabled(walletLedger),
                 Clock.systemUTC(),
                 facilitatorUrl,
                 facilitatorTimeoutMs);

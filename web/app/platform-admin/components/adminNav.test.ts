@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { NAV_SECTIONS, isNavItemActive, sectionHasActive } from "./adminNav";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { NAV_SECTIONS, filterEditionNav, isNavItemActive, sectionHasActive } from "./adminNav";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  delete window.__ENV;
+});
 
 const all = NAV_SECTIONS.flatMap((s) => s.items);
 const find = (href: string) => all.find((i) => i.href === href)!;
@@ -24,5 +29,31 @@ describe("adminNav", () => {
     const audit = NAV_SECTIONS.find((s) => s.label === "Health & Audit")!;
     expect(sectionHasActive(audit, "/platform-admin/audit")).toBe(true);
     expect(sectionHasActive(audit, "/platform-admin/jobs")).toBe(false);
+  });
+});
+
+describe("adminNav on a personal install", () => {
+  it("keeps only the LLM pools, tool credentials and settings", () => {
+    const rail = filterEditionNav(NAV_SECTIONS, true).flatMap((s) => s.items.map((i) => i.href));
+    expect(rail.sort()).toEqual(
+      ["/platform-admin/llm-providers", "/platform-admin/settings", "/platform-admin/tool-credentials"].sort()
+    );
+  });
+
+  it("drops the sections it empties, so no group is left with a bare header", () => {
+    const sections = filterEditionNav(NAV_SECTIONS, true);
+    expect(sections.map((s) => s.label)).toEqual(["Models & Tools", "Operations"]);
+    for (const s of sections) expect(s.items.length).toBeLessThanOrEqual(7);
+  });
+
+  it("leaves the full rail for every other edition", () => {
+    expect(filterEditionNav(NAV_SECTIONS, false)).toEqual(NAV_SECTIONS);
+  });
+
+  it("follows the declared edition when no flag is passed", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    expect(filterEditionNav(NAV_SECTIONS)).toHaveLength(2);
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "full");
+    expect(filterEditionNav(NAV_SECTIONS)).toHaveLength(NAV_SECTIONS.length);
   });
 });
