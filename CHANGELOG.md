@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **The core images ship the fixed releases of six Java dependencies.** The jar scan of the published 0.1.8/0.1.9 images listed High advisories with a fix available, which the critical-only release gate does not stop: Jackson 2.21.4 to 2.21.7 (jackson-core GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf; jackson-databind GHSA-q4xh-88c3-wmh7, GHSA-cxp5-3px4-pw24, GHSA-wv8q-qhhj-9h54), httpcore5 and httpcore5-h2 5.3.6 to 5.4.3 (GHSA-hf6x-8p5f-cgmf, GHSA-v3jc-474w-2wm6), the PostgreSQL JDBC driver 42.7.11 to 42.7.12 (GHSA-j92g-9f8w-j867) and lz4-java 1.10.1 to 1.11.4 (GHSA-mcr4-qmvw-px4g, via kafka-clients). `core/pom.xml` overrides the Spring Boot BOM properties (or pins the artifact) and `DependencyAdvisoryFloorTest` fails the build if a later change brings one below its fixed release. The Java Agent SDK's build resolved Jackson 3.1.5 (`tools.jackson`, via spring-ai-client-chat) with the same advisories; `sdk/java/pom.xml` now imports the Jackson 3.1.7 BOM first and carries the same guard test. The SDK's published POMs are unchanged. Still open in the core images: the MCP Java SDK (mcp-core 0.18.3, GHSA-8jxr-pr72-r468, a DNS-rebinding gap in MCP servers that do not validate the Origin header; Spring AI's server transport is documented as not affected). Its only fixed release, 1.0.0, removes `SseMessageEndpointValidator` and `io.modelcontextprotocol.json.jackson`, which the remote-MCP origin pinning (SEC-026) and the stdio sidecar routing build on, and needs Spring AI 2.x with Spring Boot 4.
+
 ### Fixed
 
 - **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.
