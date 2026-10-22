@@ -1,4 +1,8 @@
-"""Pure-numpy tests for bench/retrieval_bench.py (no model download). Run from sidecar/: pytest tests/"""
+"""Pure-numpy tests for bench/retrieval_bench.py (no model download).
+
+Run from sidecar/: pytest tests/
+"""
+
 import json
 from pathlib import Path
 

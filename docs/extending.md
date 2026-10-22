@@ -335,7 +335,7 @@ Keycloak-shaped defaults to override for other providers: `KEYCLOAK_JWK_SET_URI`
 (defaults to the Keycloak `/protocol/openid-connect/certs` path) and
 `APP_KEYCLOAK_ALLOWED_AZP` (defaults to Keycloak's first-party client names;
 empty disables the check). See
-[configuration.md](configuration.md#authentication-oidc--keycloak).
+[configuration.md](configuration.md#authentication-oidc-and-keycloak).
 
 ## 8. Hand work to another thread
 

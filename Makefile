@@ -66,7 +66,7 @@ images: ## Build the Full-tier images from source (compose build overlay); PROFI
 ## ---- Test and lint -----------------------------------------------------------
 
 .PHONY: test
-test: test-core test-web test-python test-sdk-clients ## All unit/integration tests
+test: test-core test-web test-python test-node-services test-sdk-clients ## All unit/integration tests
 
 .PHONY: test-core
 test-core: ## mvn verify (context tests need Postgres with pgvector+AGE on DB_HOST:DB_PORT, else they skip)
@@ -91,12 +91,17 @@ contracts: ## Consumer-driven contracts (ADR-0025): web contract is current, the
 	cd core && $(MVN) -B -ntp -pl app -am test -Dsurefire.failIfNoSpecifiedTests=false -Dtest='ConsumerContractVerificationTest,OpenApiSpecFreshnessTest'
 
 .PHONY: test-python
-test-python: ## sidecar (pytest) and code-intel (script harness); needs their requirements installed
+test-python: ## sidecar and rl-trainer (pytest), code-intel (script harness, every tests/test_*.py); needs their requirements installed
 	cd services/sidecar && $(PYTHON) -m pytest tests/ -q
-	cd services/code-intel && for m in test_auth test_service test_guardrails test_agent \
-	    test_approval_reconcile test_exec_and_mcp test_gitops_auth_token \
-	    test_gitops_confinement test_run_modes test_store_search; do \
-	  $(PYTHON) -m "tests.$$m" || exit 1; done
+	cd services/rl-trainer && $(PYTHON) -m pytest tests/ -q
+	cd services/code-intel && for f in tests/test_*.py; do \
+	  $(PYTHON) -m "tests.$$(basename $$f .py)" || exit 1; done
+
+.PHONY: test-node-services
+test-node-services: ## node:test suites of mcp-stdio-runner, piece-host, workspace-runner, whatsapp-qr, desktop-agent
+	for d in mcp-stdio-runner workspace-runner whatsapp-qr desktop-agent; do \
+	  (cd services/$$d && node --test) || exit 1; done
+	cd services/piece-host && npm test
 
 .PHONY: test-sdk-clients
 test-sdk-clients: ## SDK REST clients + python-agent, incl. consumer contracts (contracts/consumers); python-agent needs pytest
@@ -155,6 +160,8 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	bash scripts/ci/internal-reference-lint.sh
 	bash scripts/ci/no-telemetry-check.sh
 	bash scripts/ci/test-internal-reference-lint.sh
+	bash scripts/ci/dependabot-coverage.sh
+	bash scripts/ci/test-gates-parity.sh
 	python3 deploy/helm/scripts/check-values-docs.py
 	bash scripts/ci/secret-scan.sh
 
