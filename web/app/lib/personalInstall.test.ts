@@ -46,6 +46,9 @@ describe("hiddenOnPersonalInstall", () => {
       "/admin/sso",
       "/admin/leads",
       "/features",
+      // Team access: one person on one machine (owner decision assumed per the lean-edition plan).
+      "/admin/access",
+      "/admin/users",
     ]) {
       expect(hiddenOnPersonalInstall(href), href).toBe(true);
     }
@@ -72,7 +75,6 @@ describe("hiddenOnPersonalInstall", () => {
       "/knowledge",
       "/secrets",
       "/admin/channels",
-      "/admin/access",
       "/usage",
       "/learn",
       "/help",
@@ -135,6 +137,34 @@ describe("hiddenOnPersonalInstall", () => {
     expect(localModelAllowed()).toBe(false);
     full();
     expect(localModelAllowed()).toBe(false);
+  });
+});
+
+describe("edition seed", () => {
+  // NEXT_PUBLIC_EDITION wins over the auth-mode / deploy-env derivation the other cases stub.
+  const seeded = (edition: string, auth: boolean) => {
+    vi.mocked(isLocalAuth).mockReturnValue(auth);
+    vi.mocked(getPublicEnv).mockImplementation((key) => (key === "NEXT_PUBLIC_EDITION" ? edition : undefined));
+  };
+
+  it("makes the install personal from NEXT_PUBLIC_EDITION alone", () => {
+    seeded("personal", false);
+    expect(isPersonalInstall()).toBe(true);
+    expect(localModelAllowed()).toBe(true);
+    expect(hiddenOnPersonalInstall("/admin/payments")).toBe(true);
+    expect(workflowNodeOffered("voice_menu")).toBe(false);
+    expect(tierCommand("")).toBe("scripts/vegaduta personal");
+  });
+
+  it("makes the install lite or full from NEXT_PUBLIC_EDITION, whatever the auth mode says", () => {
+    seeded("lite", true);
+    expect(isPersonalInstall()).toBe(false);
+    expect(tierCommand("--browser")).toBe("scripts/vegaduta up --lite --browser");
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    seeded("full", false);
+    expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);
+    expect(hiddenOnPersonalInstall("/admin/payments")).toBe(false);
+    expect(tierCommand("")).toBe("scripts/vegaduta up --full");
   });
 });
 
