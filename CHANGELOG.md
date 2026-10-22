@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Public repository hygiene.** `scripts/dev/repo-identity.env` no longer carries a maintainer's personal mailbox as the Code of Conduct contact (it is the project address `CODE_OF_CONDUCT.md` already uses), which also lets `scripts/dev/set-repo-identity.sh` find that address again; when the security and conduct contacts are the same address, `--conduct-email` now rewrites only `CODE_OF_CONDUCT*.md` and `--security-email` every other file. The internal stage-test work list `docs/operations/stage-e2e-improvements.md` (local paths, private working-copy name, agent prompts) is removed, the desktop-agent `launchd` example no longer names a private checkout path, `AGENTS.md` no longer names the old repository, and the `[Unreleased]` and `[0.1.3]` link references at the bottom of this file point at tags and anchors that exist.
 - **`scripts/vegaduta personal --minimal` (and `--no-valkey`) no longer exits in silence.** The Valkey step ended with a test that returns failure when Valkey is off, and under `set -e` that stopped the whole run before it printed its plan or started anything. `tests/install` now covers it.
 - **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.
 - **A first personal start no longer gives up while core is still booting.** On an empty database core runs about 640 migrations and creates the owner's schema before it reports ready; on a busy laptop that took 5 minutes, longer than core's health budget (120 s plus 10 checks 15 s apart), so Compose stopped with "dependency failed to start" and the console was never created. Core now has a 10-minute start period (failed checks do not count inside it), and the console starts as soon as core's container is up instead of after core is healthy; `up --wait` still waits for core. The personal stack's healthchecks (Postgres, core, console, MCP runner, search) also probe every 1-2 seconds while starting, so each service reports healthy within seconds of being ready instead of on the next 5-30 s tick.
@@ -929,5 +930,5 @@ Release notes on GitHub are generated from the section for each version.
   identity yes; IMDS and Pod Identity need an `extraEgress` rule), and that `core`, `core-jobs` and `core-worker`
   each need the ServiceAccount annotation.
 
-[Unreleased]: https://github.com/CD-LC/vegaduta/compare/v0.1.3...HEAD
-[0.1.3]: https://github.com/CD-LC/vegaduta/releases/tag/v0.1.3
+[Unreleased]: https://github.com/CD-LC/vegaduta/compare/v0.1.9...HEAD
+[0.1.3]: https://github.com/CD-LC/vegaduta/blob/main/CHANGELOG.md#013---2026-10-19
