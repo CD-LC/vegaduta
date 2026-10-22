@@ -5,6 +5,8 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.payments.adapter.UpiAgentProtocolAdapter;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +38,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * sat PENDING must fail the call, which is exactly what the tombstone is for.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentExecutionService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentExecutionService.class);
