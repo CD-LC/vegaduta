@@ -72,6 +72,12 @@ describe("Build Center", () => {
     noMissingKeys();
   });
 
+  it("gives the readiness summary a role, so its aria-label is announced (axe aria-prohibited-attr)", async () => {
+    wrap(<BuildCenter onOpenAppBuilder={() => {}} />);
+    await screen.findByText(brief.title);
+    expect(screen.getAllByRole("group", { name: "Readiness" }).length).toBeGreaterThan(0);
+  });
+
   it("the code door hands off to the App Builder", async () => {
     const open = vi.fn();
     wrap(<BuildCenter onOpenAppBuilder={open} />);

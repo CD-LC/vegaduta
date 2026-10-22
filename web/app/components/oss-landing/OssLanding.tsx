@@ -49,9 +49,16 @@ function Section({ id, title, lead, children }: { id: string; title: string; lea
   );
 }
 
-function Code({ children }: { children: string }) {
+function Code({ children, label = "Code sample" }: { children: string; label?: string }) {
   return (
-    <pre className="m-0 overflow-x-auto rounded-lg border border-border bg-muted p-4 text-sm leading-relaxed text-foreground">
+    // Scrollable, so it must be reachable by keyboard (axe scrollable-region-focusable): a focusable, named region.
+    <pre
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+      tabIndex={0}
+      role="region"
+      aria-label={label}
+      className="m-0 overflow-x-auto rounded-lg border border-border bg-muted p-4 text-sm leading-relaxed text-foreground"
+    >
       <code>{children}</code>
     </pre>
   );

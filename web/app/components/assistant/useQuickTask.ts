@@ -61,6 +61,17 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
 
   const setChannel = useCallback((cardId: string, channel: TaskChannel) => patchTask(cardId, { channel }), [patchTask]);
 
+  /** Save the delivery number, then unlock the channels on every card that was waiting for one. */
+  const savePhone = useCallback(
+    async (phone: string) => {
+      await api.setAccountPhoneNumber(phone);
+      turn.setTurns((list) =>
+        list.map((x) => (x.task?.needsPhone ? { ...x, task: { ...x.task, needsPhone: false } } : x))
+      );
+    },
+    [turn]
+  );
+
   const cancel = useCallback(
     (cardId: string) => {
       turn.setTurns((list) => list.filter((x) => x.id !== cardId));
@@ -119,7 +130,7 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
     [patchTask, onSettled]
   );
 
-  return { start, confirm, cancel, setChannel };
+  return { start, confirm, cancel, setChannel, savePhone };
 }
 
 function mergePreview(

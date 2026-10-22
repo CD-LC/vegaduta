@@ -100,6 +100,8 @@ describe("/learn/tutor", () => {
     apiMock.getTutorStatus.mockRejectedValue(Object.assign(new Error("No endpoint matches this request."), { status: 404 }));
     render(<TutorPage />);
     expect(await screen.findByText("unavailableTitle")).toBeInTheDocument();
+    // The only action must go somewhere that exists: /learn has no index page any more.
+    expect(screen.getByRole("link", { name: "backToHelp" })).toHaveAttribute("href", "/help");
     expect(screen.queryByTestId("tutor-start")).not.toBeInTheDocument();
     expect(apiMock.listTutorPlans).not.toHaveBeenCalled();
   });
