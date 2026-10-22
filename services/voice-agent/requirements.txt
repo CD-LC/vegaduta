@@ -14,7 +14,7 @@ livekit-agents==1.6.8
 # httpx2 package, so with it `import livekit.agents` fails with
 # "No module named 'httpx'" (image and tests alike). Lift this pin together
 # with a livekit-agents release that supports openai 3.
-openai==2.54.0
+openai==3.26.0
 
 # Official ElevenLabs TTS plugin - this platform's preferred/default TTS
 # provider (see core/agents/.../SpeakToolCallback.java's javadoc: "ElevenLabs
