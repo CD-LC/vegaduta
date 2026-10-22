@@ -11,7 +11,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CLI="$ROOT/scripts/vegaduta"
 PASS=0; FAIL=0
 
-new_home() { WORK="$(mktemp -d)"; export VEGADUTA_ENV_FILE="$WORK/.env" VEGADUTA_STATE_FILE="$WORK/state"; }
+# VEGADUTA_SECRETS_KEEP too: without it every run overwrote the developer's real ~/.config/vegaduta/secrets.env
+# (the per-user copy the launcher restores an install's secrets from) with the throwaway secrets of the test.
+new_home() { WORK="$(mktemp -d)"; export VEGADUTA_ENV_FILE="$WORK/.env" VEGADUTA_STATE_FILE="$WORK/state" VEGADUTA_SECRETS_KEEP="$WORK/kept-secrets.env"; }
 check() { # check NAME CONDITION-EXIT-CODE [DETAIL]
   if [ "$2" = 0 ]; then PASS=$((PASS + 1)); printf '  ok   %s\n' "$1"
   else FAIL=$((FAIL + 1)); printf '  FAIL %s\n%s\n' "$1" "${3:-}"; fi
@@ -204,6 +206,29 @@ print("runner" if "mcp-stdio-runner" in s else "no-runner", s["core"]["environme
 else
   echo "  skip docker is not available"
 fi
+
+echo "an earlier install is not touched by a run that only prepares files"
+new_home
+SHIM="$WORK/shim"; mkdir -p "$SHIM"; DOCKER_LOG="$WORK/docker.log"; : > "$DOCKER_LOG"
+cat > "$SHIM/docker" <<'EOS'
+#!/usr/bin/env bash
+# Pretends an earlier personal install is running and records every call. Never touches real Docker.
+echo "$*" >> "$DOCKER_LOG"
+case "$1 $2" in
+  "volume inspect") [ "${3:-}" = vegaduta-personal_postgres-data ] ;;
+  "ps -q") echo deadbeef0001 ;;
+  "port deadbeef0001") echo "8080/tcp -> 127.0.0.1:8080" ;;
+  *) exit 0 ;;
+esac
+EOS
+chmod +x "$SHIM/docker"
+out="$(PATH="$SHIM:$PATH" DOCKER_LOG="$DOCKER_LOG" "$CLI" secrets </dev/null 2>&1)"
+check "secrets gives the new install its own project name" "$([ "$(sed -n 's/^VEGADUTA_PERSONAL_PROJECT=//p' "$VEGADUTA_ENV_FILE")" = vegaduta-personal-2 ]; echo $?)" "$out"
+check "secrets never stops or removes a container" "$(! grep -qE '^(stop|rm|kill|down|compose .* (down|stop|rm))' "$DOCKER_LOG"; echo $?)" "$(cat "$DOCKER_LOG")"
+new_home
+SHIM2="$WORK/shim"; mkdir -p "$SHIM2"; cp "$SHIM/docker" "$SHIM2/docker"; : > "$DOCKER_LOG"
+out="$(PATH="$SHIM2:$PATH" DOCKER_LOG="$DOCKER_LOG" "$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
+check "a dry run never stops or removes a container" "$(! grep -qE '^(stop|rm|kill|down|compose .* (down|stop|rm))' "$DOCKER_LOG"; echo $?)" "$(cat "$DOCKER_LOG")"
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

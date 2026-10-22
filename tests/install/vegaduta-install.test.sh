@@ -48,7 +48,7 @@ esac
 FAKE
 chmod +x "$fake/docker"; new_home
 out="$(FAKE_LOG="$WORK/stops" PATH="$fake:$PATH" "$CLI" secrets 2>&1)"
-check "the old data is left alone and this install gets its own project" "$(grep -qx 'VEGADUTA_PERSONAL_PROJECT=vegaduta-personal-2' "$VEGADUTA_ENV_FILE" && [ -f "$WORK/stops" ] && has "$out" 'kept untouched'; echo $?)" "$out"
+check "the old data is left alone, this install gets its own project, and secrets stops nothing" "$(grep -qx 'VEGADUTA_PERSONAL_PROJECT=vegaduta-personal-2' "$VEGADUTA_ENV_FILE" && [ ! -f "$WORK/stops" ] && has "$out" 'kept untouched'; echo $?)" "$out"
 fresh="$(mktemp -d)"; out="$(PATH="$fake:$PATH" VEGADUTA_ENV_FILE="$fresh/.env" "$CLI" secrets 2>&1)"
 check "a later re-install reuses that project with its secrets" "$(grep -qx 'VEGADUTA_PERSONAL_PROJECT=vegaduta-personal-2' "$fresh/.env" && ! has "$out" 'kept untouched'; echo $?)" "$out"
 export VEGADUTA_ENV_FILE="$saved_env" VEGADUTA_STATE_FILE="$saved_state" VEGADUTA_SECRETS_KEEP="$saved_keep"
