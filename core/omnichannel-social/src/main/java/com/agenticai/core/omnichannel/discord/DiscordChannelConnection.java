@@ -2,10 +2,13 @@ package com.agenticai.core.omnichannel.discord;
 
 import com.agenticai.core.omnichannel.status.ChannelConnection;
 import com.agenticai.core.omnichannel.status.ChannelNotConnectedException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /** Discord's connection state for the Channels screen: the bot's username. */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class DiscordChannelConnection implements ChannelConnection {
 
     private final DiscordCredentialService credentialService;

@@ -16,11 +16,11 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Locks the {@code personal} profile (application-personal.yml): the shared contract property
- * names other areas read, their personal defaults, that each is env-overridable, and that the
- * file stays additive (no localhost in a value, nothing that turns Kafka or Temporal on). Parses
- * the shipped YAML with duplicate keys rejected, as Spring Boot's own loader does, and resolves
- * placeholders through a real {@link StandardEnvironment}.
+ * Locks the {@code personal} profile (application-personal.yml): the shared contract property names
+ * other areas read, their personal defaults, that each is env-overridable, and that the file stays
+ * additive (no localhost in a value, nothing that turns Kafka or Temporal on). Parses the shipped
+ * YAML with duplicate keys rejected, as Spring Boot's own loader does, and resolves placeholders
+ * through a real {@link StandardEnvironment}.
  */
 class PersonalProfileConfigTest {
 
@@ -48,20 +48,56 @@ class PersonalProfileConfigTest {
     }
 
     @Test
+    void theEditionTierIsPersonalHereAndCanBeOverriddenFromTheEnvironment() throws IOException {
+        assertThat(environment(Map.of()).getProperty("app.edition.tier")).isEqualTo("personal");
+        assertThat(environment(Map.of("APP_EDITION_TIER", "full")).getProperty("app.edition.tier"))
+                .isEqualTo("full");
+    }
+
+    @Test
+    void a2aAndTheResolutionSweepAreOffAndTheSchedulerDoesNotOfferSlackOrA2aDelivery()
+            throws IOException {
+        StandardEnvironment env = environment(Map.of());
+
+        assertThat(env.getProperty("app.a2a.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("resolution.sweep.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("app.scheduled-tasks.delivery-channels").split(","))
+                .contains("in_app", "email", "whatsapp", "telegram")
+                .doesNotContain("slack", "a2a");
+
+        StandardEnvironment overridden =
+                environment(
+                        Map.of(
+                                "APP_A2A_ENABLED", "true",
+                                "RESOLUTION_SWEEP_ENABLED", "true",
+                                "SCHEDULED_TASKS_DELIVERY_CHANNELS", "in_app,slack"));
+        assertThat(overridden.getProperty("app.a2a.enabled")).isEqualTo("true");
+        assertThat(overridden.getProperty("resolution.sweep.enabled")).isEqualTo("true");
+        assertThat(overridden.getProperty("app.scheduled-tasks.delivery-channels"))
+                .isEqualTo("in_app,slack");
+    }
+
+    @Test
     void embeddingsFallBackToOllamaAndTheSidecarIsOffUnlessAskedFor() throws IOException {
         StandardEnvironment env = environment(Map.of());
         assertThat(env.getProperty("app.embeddings.provider")).isEqualTo("auto");
         assertThat(env.getProperty("app.sidecar.enabled")).isEqualTo("false");
 
         StandardEnvironment rag =
-                environment(Map.of("APP_SIDECAR_ENABLED", "true", "APP_EMBEDDINGS_PROVIDER", "sidecar"));
+                environment(
+                        Map.of(
+                                "APP_SIDECAR_ENABLED",
+                                "true",
+                                "APP_EMBEDDINGS_PROVIDER",
+                                "sidecar"));
         assertThat(rag.getProperty("app.sidecar.enabled")).isEqualTo("true");
         assertThat(rag.getProperty("app.embeddings.provider")).isEqualTo("sidecar");
     }
 
     @Test
     void theInboundRateLimitStartsOnHereAndIsOffEverywhereElse() throws IOException {
-        assertThat(environment(Map.of()).getProperty("app.omnichannel.rate-limit.enabled")).isEqualTo("true");
+        assertThat(environment(Map.of()).getProperty("app.omnichannel.rate-limit.enabled"))
+                .isEqualTo("true");
         assertThat(
                         environment(Map.of("APP_OMNICHANNEL_RATE_LIMIT_ENABLED", "false"))
                                 .getProperty("app.omnichannel.rate-limit.enabled"))
@@ -99,6 +135,29 @@ class PersonalProfileConfigTest {
     }
 
     @Test
+    void keepsBestEffortWorkOffTheReadinessPath() throws IOException {
+        StandardEnvironment env = environment(Map.of());
+
+        assertThat(env.getProperty("app.startup.background-warmup.enabled")).isEqualTo("true");
+        assertThat(env.getProperty("app.tenancy.migrate-skip-up-to-date")).isEqualTo("true");
+        assertThat(env.getProperty("mcp.registry.warm-on-startup")).isEqualTo("false");
+    }
+
+    @Test
+    void theStartUpShortcutsCanBeSwitchedBackFromTheEnvironment() throws IOException {
+        StandardEnvironment env =
+                environment(
+                        Map.of(
+                                "APP_STARTUP_BACKGROUND_WARMUP_ENABLED", "false",
+                                "TENANCY_MIGRATE_SKIP_UP_TO_DATE", "false",
+                                "MCP_REGISTRY_WARM_ON_STARTUP", "true"));
+
+        assertThat(env.getProperty("app.startup.background-warmup.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("app.tenancy.migrate-skip-up-to-date")).isEqualTo("false");
+        assertThat(env.getProperty("mcp.registry.warm-on-startup")).isEqualTo("true");
+    }
+
+    @Test
     void doesNotSwitchKafkaOrTemporalOn() throws IOException {
         // Both stay governed by the `workflow` / `temporal` profiles (not part of the personal
         // profile set) and by an explicit bootstrap server; this file must not pre-empt that.
@@ -130,11 +189,16 @@ class PersonalProfileConfigTest {
             }
         }
         // Guard against the loop silently matching no source (e.g. a renamed property source).
-        assertThat(checked).as("properties scanned from application-personal.yml").isGreaterThan(10);
+        assertThat(checked)
+                .as("properties scanned from application-personal.yml")
+                .isGreaterThan(10);
         assertThat(env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                 .startsWith("urn:");
         assertThat(
-                        environment(Map.of("KEYCLOAK_ISSUER_URI", "https://auth.example.org/realms/x"))
+                        environment(
+                                        Map.of(
+                                                "KEYCLOAK_ISSUER_URI",
+                                                "https://auth.example.org/realms/x"))
                                 .getProperty(
                                         "spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                 .isEqualTo("https://auth.example.org/realms/x");
@@ -144,8 +208,7 @@ class PersonalProfileConfigTest {
     void yamlHasNoDuplicateKeys() throws IOException {
         LoaderOptions options = new LoaderOptions();
         options.setAllowDuplicateKeys(false);
-        try (InputStream in =
-                getClass().getResourceAsStream("/application-personal.yml")) {
+        try (InputStream in = getClass().getResourceAsStream("/application-personal.yml")) {
             assertThat(in).isNotNull();
             assertThat(new Yaml(options).<Object>load(in)).isNotNull();
         }

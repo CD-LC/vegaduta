@@ -8,6 +8,7 @@ import com.agenticai.core.agents.memory.QueryEmbedding;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -105,7 +106,7 @@ final class ChatMemoryRecall {
             } catch (Exception e) {
                 log.warn(
                         "Memory block render failed for subject '{}' - continuing without it",
-                        subjectKey,
+                        LogSafe.clean(subjectKey),
                         e);
             }
         }
@@ -138,8 +139,8 @@ final class ChatMemoryRecall {
                 log.warn(
                         "Long-term memory recall failed for agent {} subject '{}' - continuing"
                                 + " without it",
-                        agentId,
-                        subjectKey,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(subjectKey),
                         e);
             }
         }
@@ -184,8 +185,8 @@ final class ChatMemoryRecall {
                 log.warn(
                         "Shared tenant memory recall failed for agent {} subject '{}' - continuing"
                                 + " without it",
-                        agentId,
-                        subjectKey,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(subjectKey),
                         e);
             }
         }

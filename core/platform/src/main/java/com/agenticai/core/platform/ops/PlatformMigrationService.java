@@ -1,5 +1,7 @@
 package com.agenticai.core.platform.ops;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import com.agenticai.core.tenancy.TenantSchemaGuard;
@@ -32,20 +34,20 @@ import org.springframework.stereotype.Service;
  * Migration status for the platform console - {@code GET /api/platform/migrations}.
  *
  * <ul>
- *   <li><b>controlPlane</b>: Spring's own {@link Flyway} bean ({@code info()}):
- *       current version, pending and failed counts.</li>
- *   <li><b>expectedTenantVersion</b>: the highest tenant migration on the
- *       classpath ({@link TenantSchemaMigrator#expectedTenantVersions()}).</li>
- *   <li><b>tenants</b>: every registered (non-demo, non-erased) tenant schema,
- *       ONE read-only query each against its own {@code flyway_schema_history}
- *       ({@link #MAX_TENANTS} at most, {@link #QUERY_TIMEOUT_SECONDS} s timeout
- *       each). A schema whose query fails reads {@code version=null},
- *       {@code status="error"} instead of failing the page.</li>
+ *   <li><b>controlPlane</b>: Spring's own {@link Flyway} bean ({@code info()}): current version,
+ *       pending and failed counts.
+ *   <li><b>expectedTenantVersion</b>: the highest tenant migration on the classpath ({@link
+ *       TenantSchemaMigrator#expectedTenantVersions()}).
+ *   <li><b>tenants</b>: every registered (non-demo, non-erased) tenant schema, ONE read-only query
+ *       each against its own {@code flyway_schema_history} ({@link #MAX_TENANTS} at most, {@link
+ *       #QUERY_TIMEOUT_SECONDS} s timeout each). A schema whose query fails reads {@code
+ *       version=null}, {@code status="error"} instead of failing the page.
  * </ul>
  *
- * <p>Schema names come only from {@code control_plane.tenant} rows, never from
- * the request, and are quoted as identifiers. Result cached 30 s per replica.
+ * <p>Schema names come only from {@code control_plane.tenant} rows, never from the request, and are
+ * quoted as identifiers. Result cached 30 s per replica.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformMigrationService {
 
@@ -55,21 +57,27 @@ public class PlatformMigrationService {
     static final int QUERY_TIMEOUT_SECONDS = 5;
     static final Duration CACHE_TTL = Duration.ofSeconds(30);
 
-    public record MigrationCounts(String version, int pending, int failed) {
-    }
+    public record MigrationCounts(String version, int pending, int failed) {}
 
     /** {@code status}: ok | behind | failed | no-history | error. */
-    public record TenantMigration(String tenantId, String name, String schema, String version, int pending, int failed,
-                                  String status) {
-    }
+    public record TenantMigration(
+            String tenantId,
+            String name,
+            String schema,
+            String version,
+            int pending,
+            int failed,
+            String status) {}
 
-    public record MigrationsResponse(MigrationCounts controlPlane, String expectedTenantVersion,
-                                     List<TenantMigration> tenants) {
-    }
+    public record MigrationsResponse(
+            MigrationCounts controlPlane,
+            String expectedTenantVersion,
+            List<TenantMigration> tenants) {}
 
-    /** What one schema's history table says. {@code applied} holds normalized successful versions. */
-    record SchemaHistory(String highestVersion, Set<String> applied, int failed) {
-    }
+    /**
+     * What one schema's history table says. {@code applied} holds normalized successful versions.
+     */
+    record SchemaHistory(String highestVersion, Set<String> applied, int failed) {}
 
     private final ObjectProvider<Flyway> flyway;
     private final ObjectProvider<DataSource> dataSource;
@@ -81,13 +89,20 @@ public class PlatformMigrationService {
     private MigrationsResponse cached;
 
     @Autowired
-    public PlatformMigrationService(ObjectProvider<Flyway> flyway, ObjectProvider<DataSource> dataSource,
-                                    TenantRepository tenantRepository, TenantSchemaMigrator tenantSchemaMigrator) {
+    public PlatformMigrationService(
+            ObjectProvider<Flyway> flyway,
+            ObjectProvider<DataSource> dataSource,
+            TenantRepository tenantRepository,
+            TenantSchemaMigrator tenantSchemaMigrator) {
         this(flyway, dataSource, tenantRepository, tenantSchemaMigrator, Clock.systemUTC());
     }
 
-    PlatformMigrationService(ObjectProvider<Flyway> flyway, ObjectProvider<DataSource> dataSource,
-                             TenantRepository tenantRepository, TenantSchemaMigrator tenantSchemaMigrator, Clock clock) {
+    PlatformMigrationService(
+            ObjectProvider<Flyway> flyway,
+            ObjectProvider<DataSource> dataSource,
+            TenantRepository tenantRepository,
+            TenantSchemaMigrator tenantSchemaMigrator,
+            Clock clock) {
         this.flyway = flyway;
         this.dataSource = dataSource;
         this.tenantRepository = tenantRepository;
@@ -103,10 +118,11 @@ public class PlatformMigrationService {
         Set<String> expected = expectedVersions();
         String expectedHighest = highest(expected);
         List<TenantMigration> tenants = new ArrayList<>();
-        List<Tenant> roster = tenantRepository.findRosterExcludingDemo().stream()
-            .filter(t -> t.getErasedAt() == null)
-            .limit(MAX_TENANTS)
-            .toList();
+        List<Tenant> roster =
+                tenantRepository.findRosterExcludingDemo().stream()
+                        .filter(t -> t.getErasedAt() == null)
+                        .limit(MAX_TENANTS)
+                        .toList();
         DataSource ds = dataSource.getIfAvailable();
         if (ds != null && !roster.isEmpty()) {
             try (Connection conn = ds.getConnection()) {
@@ -116,7 +132,9 @@ public class PlatformMigrationService {
                     tenants.add(tenantRow(conn, t, expected));
                 }
             } catch (SQLException e) {
-                log.warn("Migration status: could not open a connection ({})", e.getClass().getSimpleName());
+                log.warn(
+                        "Migration status: could not open a connection ({})",
+                        e.getClass().getSimpleName());
                 roster.forEach(t -> tenants.add(errorRow(t)));
             }
         } else {
@@ -141,10 +159,16 @@ public class PlatformMigrationService {
                     failed++;
                 }
             }
-            return new MigrationCounts(current == null || current.getVersion() == null ? null
-                : current.getVersion().getVersion(), info.pending().length, failed);
+            return new MigrationCounts(
+                    current == null || current.getVersion() == null
+                            ? null
+                            : current.getVersion().getVersion(),
+                    info.pending().length,
+                    failed);
         } catch (RuntimeException e) {
-            log.warn("Migration status: control-plane Flyway info failed ({})", e.getClass().getSimpleName());
+            log.warn(
+                    "Migration status: control-plane Flyway info failed ({})",
+                    e.getClass().getSimpleName());
             return new MigrationCounts(null, 0, 0);
         }
     }
@@ -155,26 +179,36 @@ public class PlatformMigrationService {
             SchemaHistory history = readHistory(conn, schema);
             return classify(t, history, expected);
         } catch (IllegalArgumentException e) {
-            log.warn("Migration status: tenant {} has a schema name that is not a plain identifier; skipped", t.getId());
+            log.warn(
+                    "Migration status: tenant {} has a schema name that is not a plain identifier; skipped",
+                    t.getId());
             return errorRow(t);
         } catch (SQLException e) {
             boolean missing = "42P01".equals(e.getSQLState()) || "3F000".equals(e.getSQLState());
-            return new TenantMigration(String.valueOf(t.getId()), t.getName(), schema, null,
-                missing ? expected.size() : 0, 0, missing ? "no-history" : "error");
+            return new TenantMigration(
+                    String.valueOf(t.getId()),
+                    t.getName(),
+                    schema,
+                    null,
+                    missing ? expected.size() : 0,
+                    0,
+                    missing ? "no-history" : "error");
         }
     }
 
     /**
-     * Reads one schema's {@code flyway_schema_history}. The schema name is the only dynamic
-     * piece of the statement; it is validated against {@link TenantSchemaGuard#PLAIN_IDENTIFIER}
-     * and quoted by {@link #schemaIdentifier} (JDBC cannot bind an identifier), the rest is
-     * constant SQL with no values at all.
+     * Reads one schema's {@code flyway_schema_history}. The schema name is the only dynamic piece
+     * of the statement; it is validated against {@link TenantSchemaGuard#PLAIN_IDENTIFIER} and
+     * quoted by {@link #schemaIdentifier} (JDBC cannot bind an identifier), the rest is constant
+     * SQL with no values at all.
      *
      * @throws IllegalArgumentException when {@code schema} is not a plain identifier
      */
     static SchemaHistory readHistory(Connection conn, String schema) throws SQLException {
-        String sql = "SELECT version, success FROM " + schemaIdentifier(schema)
-            + ".flyway_schema_history WHERE version IS NOT NULL";
+        String sql =
+                "SELECT version, success FROM "
+                        + schemaIdentifier(schema)
+                        + ".flyway_schema_history WHERE version IS NOT NULL";
         Set<String> applied = new HashSet<>();
         int failed = 0;
         try (Statement st = conn.createStatement()) {
@@ -200,41 +234,54 @@ public class PlatformMigrationService {
             }
         }
         String status = history.failed() > 0 ? "failed" : (pending > 0 ? "behind" : "ok");
-        return new TenantMigration(String.valueOf(t.getId()), t.getName(), t.getSchemaName(), history.highestVersion(),
-            pending, history.failed(), status);
+        return new TenantMigration(
+                String.valueOf(t.getId()),
+                t.getName(),
+                t.getSchemaName(),
+                history.highestVersion(),
+                pending,
+                history.failed(),
+                status);
     }
 
     private static TenantMigration errorRow(Tenant t) {
-        return new TenantMigration(String.valueOf(t.getId()), t.getName(), t.getSchemaName(), null, 0, 0, "error");
+        return new TenantMigration(
+                String.valueOf(t.getId()), t.getName(), t.getSchemaName(), null, 0, 0, "error");
     }
 
     private Set<String> expectedVersions() {
         try {
             return tenantSchemaMigrator.expectedTenantVersions();
         } catch (RuntimeException e) {
-            log.warn("Migration status: could not list tenant migrations on the classpath ({})", e.getClass().getSimpleName());
+            log.warn(
+                    "Migration status: could not list tenant migrations on the classpath ({})",
+                    e.getClass().getSimpleName());
             return Set.of();
         }
     }
 
-    /** Highest of a set of normalized versions ("452", "12.1"), compared numerically part by part; null when empty. */
+    /**
+     * Highest of a set of normalized versions ("452", "12.1"), compared numerically part by part;
+     * null when empty.
+     */
     static String highest(Set<String> versions) {
         return versions.stream().max(VERSION_ORDER).orElse(null);
     }
 
-    static final Comparator<String> VERSION_ORDER = (a, b) -> {
-        String[] pa = a.split("\\.");
-        String[] pb = b.split("\\.");
-        for (int i = 0; i < Math.max(pa.length, pb.length); i++) {
-            BigInteger x = i < pa.length ? toNumber(pa[i]) : BigInteger.ZERO;
-            BigInteger y = i < pb.length ? toNumber(pb[i]) : BigInteger.ZERO;
-            int c = x.compareTo(y);
-            if (c != 0) {
-                return c;
-            }
-        }
-        return 0;
-    };
+    static final Comparator<String> VERSION_ORDER =
+            (a, b) -> {
+                String[] pa = a.split("\\.");
+                String[] pb = b.split("\\.");
+                for (int i = 0; i < Math.max(pa.length, pb.length); i++) {
+                    BigInteger x = i < pa.length ? toNumber(pa[i]) : BigInteger.ZERO;
+                    BigInteger y = i < pb.length ? toNumber(pb[i]) : BigInteger.ZERO;
+                    int c = x.compareTo(y);
+                    if (c != 0) {
+                        return c;
+                    }
+                }
+                return 0;
+            };
 
     private static BigInteger toNumber(String part) {
         try {
@@ -245,8 +292,8 @@ public class PlatformMigrationService {
     }
 
     /**
-     * Validates {@code schema} against {@link TenantSchemaGuard#PLAIN_IDENTIFIER} and returns it
-     * as a double-quoted SQL identifier, via {@link TenantSchemaGuard#quoteIdentifier} (the one
+     * Validates {@code schema} against {@link TenantSchemaGuard#PLAIN_IDENTIFIER} and returns it as
+     * a double-quoted SQL identifier, via {@link TenantSchemaGuard#quoteIdentifier} (the one
      * validation choke point). This is the only way a tenant schema name reaches a SQL string in
      * this package.
      *
