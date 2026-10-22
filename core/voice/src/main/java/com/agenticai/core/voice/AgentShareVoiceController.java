@@ -6,6 +6,7 @@ import com.agenticai.core.agents.share.ShareVisitorSessions;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.voice.dto.VoiceTokenRequest;
 import com.agenticai.core.voice.dto.VoiceTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -110,7 +111,7 @@ public class AgentShareVoiceController {
                 log.warn(
                         "Unknown share voice token mode {} for share {} - treating as voice",
                         mode,
-                        shareId);
+                        LogSafe.clean(shareId));
                 mode = "voice";
             }
             // SEC-005: signed visitor token, never an IP hash.
@@ -145,9 +146,9 @@ public class AgentShareVoiceController {
             // minted token itself - same convention VoiceCallController#issueToken follows.
             log.info(
                     "Issued share-scoped LiveKit token for share {} room {} identity {}",
-                    shareId,
-                    roomName,
-                    identity);
+                    LogSafe.clean(shareId),
+                    LogSafe.clean(roomName),
+                    LogSafe.clean(identity));
             return ResponseEntity.ok(
                     new VoiceTokenResponse(token, tokenService.getUrl(), roomName, identity));
         } finally {

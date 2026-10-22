@@ -6,6 +6,7 @@ import com.agenticai.core.billing.gateway.PaymentGatewayException;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -257,7 +258,7 @@ public class CheckoutSessionService {
             log.warn(
                     "CHECKOUT_SESSION_LINK_FAILED id={} tenant={} amountPaise={} gateway={}",
                     id,
-                    command.tenantId(),
+                    LogSafe.clean(command.tenantId()),
                     command.amountPaise(),
                     gateway.gatewayName(),
                     e);
@@ -275,7 +276,7 @@ public class CheckoutSessionService {
         log.info(
                 "CHECKOUT_SESSION_READY id={} tenant={} agent={} amountPaise={} gatewayRef={}",
                 id,
-                command.tenantId(),
+                LogSafe.clean(command.tenantId()),
                 command.agentId(),
                 command.amountPaise(),
                 link.id());

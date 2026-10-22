@@ -3,6 +3,7 @@ package com.agenticai.core.platform;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -144,7 +145,7 @@ public class PlatformCircuitBreakerController {
         String operator = TenantContext.current().map(TenantContext::getSubject).orElse("unknown");
         log.info(
                 "Platform operator {} reset tool circuit breaker {} (wasOpen={})",
-                operator,
+                LogSafe.clean(operator),
                 suffix,
                 wasOpen);
         return new ResetResult(request.tenantId().trim(), request.tool().trim(), wasOpen);

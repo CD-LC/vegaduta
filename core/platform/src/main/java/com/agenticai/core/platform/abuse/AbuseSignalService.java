@@ -13,6 +13,7 @@ import com.agenticai.core.platform.PlatformTenantNotFoundException;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantEmergencyControlService;
@@ -315,7 +316,7 @@ public class AbuseSignalService {
             log.warn(
                     "Abuse scoring hiccup for {}:{} - returning NORMAL (fail-open)",
                     tenant.getId(),
-                    userId,
+                    LogSafe.clean(userId),
                     e);
             return new AbuseRiskScore(
                     tenant.getId(),

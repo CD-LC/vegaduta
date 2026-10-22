@@ -3,6 +3,7 @@ package com.agenticai.core.billing.gateway;
 import com.agenticai.core.billing.email.BillingEmailService;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -94,7 +95,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
         } catch (EmptyResultDataAccessException e) {
             log.warn(
                     "No tenant found for gateway subscription ID '{}' on subscription.pending",
-                    gatewaySubscriptionId);
+                    LogSafe.clean(gatewaySubscriptionId));
             return;
         } catch (Exception e) {
             // Split out from the no-row case above for the same reason as
@@ -102,7 +103,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
             // and silently reporting it as one loses the payment-failure signal entirely.
             log.error(
                     "Tenant lookup failed for gateway subscription ID '{}' - subscription.pending dropped",
-                    gatewaySubscriptionId,
+                    LogSafe.clean(gatewaySubscriptionId),
                     e);
             return;
         }
@@ -127,7 +128,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
             log.info(
                     "Tenant '{}' subscription '{}' payment pending - failed attempt {} of {} (Razorpay retry in progress)",
                     tenantName,
-                    gatewaySubscriptionId,
+                    LogSafe.clean(gatewaySubscriptionId),
                     failedAttempts,
                     maxFailedAttempts);
         } catch (Exception e) {
@@ -149,7 +150,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
             log.info(
                     "Tenant '{}' is on FREE - subscription '{}' payment pending recorded, no dunning applies",
                     tenantName,
-                    gatewaySubscriptionId);
+                    LogSafe.clean(gatewaySubscriptionId));
             return;
         }
 
@@ -168,7 +169,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
             log.error(
                     "Failed to send payment-failure email for tenant {} (subscription '{}')",
                     tenantId,
-                    gatewaySubscriptionId,
+                    LogSafe.clean(gatewaySubscriptionId),
                     e);
             // Don't fail the handler - the pending state is already recorded
         }
@@ -180,7 +181,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
             log.warn(
                     "Tenant '{}' subscription '{}' reached {} failed payment attempts (max {}) - publishing auto-downgrade to FREE",
                     tenantName,
-                    gatewaySubscriptionId,
+                    LogSafe.clean(gatewaySubscriptionId),
                     failedAttempts,
                     maxFailedAttempts);
             eventPublisher.publishEvent(

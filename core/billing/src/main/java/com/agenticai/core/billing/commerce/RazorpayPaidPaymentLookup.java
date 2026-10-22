@@ -2,6 +2,7 @@ package com.agenticai.core.billing.commerce;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.razorpay.RazorpayException;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class RazorpayPaidPaymentLookup implements PaidPaymentLookup {
             }
             log.warn(
                     "Checkout reconciliation: unrecognised gateway reference id prefix on '{}' - no payment lookup",
-                    gatewayRefId);
+                    LogSafe.clean(gatewayRefId));
             return Optional.empty();
         } catch (RazorpayException | RuntimeException e) {
             // Best-effort by contract (see PaidPaymentLookup) - the caller
@@ -76,7 +77,7 @@ public class RazorpayPaidPaymentLookup implements PaidPaymentLookup {
             log.warn(
                     "Checkout reconciliation: could not fetch the captured payment behind '{}' from Razorpay - "
                             + "the session will complete without a payment id",
-                    gatewayRefId,
+                    LogSafe.clean(gatewayRefId),
                     e);
             return Optional.empty();
         }

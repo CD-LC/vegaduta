@@ -8,6 +8,7 @@ import com.agenticai.core.billing.invoice.InvoiceService;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Instant;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -90,7 +91,7 @@ public class RazorpayWebhookService {
         if (event.gatewaySubscriptionId() == null) {
             log.info(
                     "Razorpay webhook '{}' carried no subscription id - nothing to apply",
-                    event.rawEventName());
+                    LogSafe.clean(event.rawEventName()));
             return;
         }
 
@@ -115,8 +116,8 @@ public class RazorpayWebhookService {
             }
             log.debug(
                     "Razorpay webhook '{}' for subscription '{}' - no pending upgrade or live subscription tracked for it, ignoring",
-                    event.rawEventName(),
-                    event.gatewaySubscriptionId());
+                    LogSafe.clean(event.rawEventName()),
+                    LogSafe.clean(event.gatewaySubscriptionId()));
             return;
         }
 
@@ -128,7 +129,7 @@ public class RazorpayWebhookService {
                 log.info(
                         "Tenant '{}' upgrade confirmed via Razorpay '{}'",
                         tenant.getName(),
-                        event.rawEventName());
+                        LogSafe.clean(event.rawEventName()));
                 recordInvoiceForCapturedPayment(tenant, event);
             }
             case SUBSCRIPTION_CANCELLED, SUBSCRIPTION_HALTED, SUBSCRIPTION_COMPLETED -> {
@@ -137,7 +138,7 @@ public class RazorpayWebhookService {
                 log.info(
                         "Tenant '{}' pending upgrade cleared via Razorpay '{}' - plan unchanged",
                         tenant.getName(),
-                        event.rawEventName());
+                        LogSafe.clean(event.rawEventName()));
             }
             case SUBSCRIPTION_AUTHENTICATED ->
                     // Mandate registration succeeded (card or UPI Autopay - Razorpay
@@ -149,7 +150,7 @@ public class RazorpayWebhookService {
                     log.info(
                             "Tenant '{}' Razorpay subscription '{}' authenticated (mandate registered) - awaiting first charge before upgrade is confirmed",
                             tenant.getName(),
-                            event.gatewaySubscriptionId());
+                            LogSafe.clean(event.gatewaySubscriptionId()));
             case SUBSCRIPTION_UPDATED ->
                     // Subscription attributes changed gateway-side (e.g. a scheduled
                     // plan/quantity change taking effect). Doesn't by itself confirm or
@@ -158,11 +159,11 @@ public class RazorpayWebhookService {
                     log.info(
                             "Tenant '{}' Razorpay subscription '{}' updated gateway-side - no tenant state change applied",
                             tenant.getName(),
-                            event.gatewaySubscriptionId());
+                            LogSafe.clean(event.gatewaySubscriptionId()));
             default ->
                     log.debug(
                             "Razorpay webhook '{}' for tenant '{}' pending upgrade - no action needed for this event type",
-                            event.rawEventName(),
+                            LogSafe.clean(event.rawEventName()),
                             tenant.getName());
         }
     }
@@ -192,9 +193,9 @@ public class RazorpayWebhookService {
         if (tenant.getPlan() == TenantPlan.FREE) {
             log.debug(
                     "Razorpay webhook '{}' for FREE tenant '{}' subscription '{}' - trial-subscription lifecycle, deliberately untouched",
-                    event.rawEventName(),
+                    LogSafe.clean(event.rawEventName()),
                     tenant.getName(),
-                    event.gatewaySubscriptionId());
+                    LogSafe.clean(event.gatewaySubscriptionId()));
             return;
         }
         switch (event.type()) {
@@ -204,7 +205,7 @@ public class RazorpayWebhookService {
                 log.warn(
                         "Tenant '{}' paid subscription '{}' HALTED (payment retries exhausted) - marked past-due since {}, plan {} kept during grace",
                         tenant.getName(),
-                        event.gatewaySubscriptionId(),
+                        LogSafe.clean(event.gatewaySubscriptionId()),
                         tenant.getPastDueSince(),
                         tenant.getPlan());
             }
@@ -215,8 +216,8 @@ public class RazorpayWebhookService {
                 log.info(
                         "Tenant '{}' paid subscription '{}' ended via Razorpay '{}' - downgraded {} -> FREE",
                         tenant.getName(),
-                        event.gatewaySubscriptionId(),
-                        event.rawEventName(),
+                        LogSafe.clean(event.gatewaySubscriptionId()),
+                        LogSafe.clean(event.rawEventName()),
                         previousPlan);
             }
             case SUBSCRIPTION_ACTIVATED, SUBSCRIPTION_CHARGED, SUBSCRIPTION_RESUMED -> {
@@ -226,8 +227,8 @@ public class RazorpayWebhookService {
                     log.info(
                             "Tenant '{}' paid subscription '{}' recovered via Razorpay '{}' - past-due cleared, plan {} unchanged",
                             tenant.getName(),
-                            event.gatewaySubscriptionId(),
-                            event.rawEventName(),
+                            LogSafe.clean(event.gatewaySubscriptionId()),
+                            LogSafe.clean(event.rawEventName()),
                             tenant.getPlan());
                 } else {
                     // A routine renewal charge on a healthy subscription -
@@ -236,15 +237,15 @@ public class RazorpayWebhookService {
                     log.debug(
                             "Tenant '{}' live subscription '{}' event '{}' - healthy, no state change",
                             tenant.getName(),
-                            event.gatewaySubscriptionId(),
-                            event.rawEventName());
+                            LogSafe.clean(event.gatewaySubscriptionId()),
+                            LogSafe.clean(event.rawEventName()));
                 }
                 recordInvoiceForCapturedPayment(tenant, event);
             }
             default ->
                     log.debug(
                             "Razorpay webhook '{}' for tenant '{}' live subscription - no action needed for this event type",
-                            event.rawEventName(),
+                            LogSafe.clean(event.rawEventName()),
                             tenant.getName());
         }
     }
@@ -285,18 +286,18 @@ public class RazorpayWebhookService {
                                         "Invoice {} recorded for tenant '{}' payment '{}' ({} {} minor units) via Razorpay '{}'",
                                         invoice.invoiceNumber(),
                                         tenant.getName(),
-                                        payment.paymentId(),
-                                        payment.currency(),
+                                        LogSafe.clean(payment.paymentId()),
+                                        LogSafe.clean(payment.currency()),
                                         payment.amountMinor(),
-                                        event.rawEventName());
+                                        LogSafe.clean(event.rawEventName()));
                             });
         } catch (Exception e) {
             log.error(
                     "Invoice generation failed for tenant '{}' on '{}' (subscription '{}') - plan state already applied; "
                             + "issue the invoice via a gateway webhook redelivery or reconcile manually against the Razorpay dashboard",
                     tenant.getName(),
-                    event.rawEventName(),
-                    event.gatewaySubscriptionId(),
+                    LogSafe.clean(event.rawEventName()),
+                    LogSafe.clean(event.gatewaySubscriptionId()),
                     e);
         }
     }

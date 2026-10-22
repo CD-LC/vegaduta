@@ -2,6 +2,7 @@ package com.agenticai.core.voice;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class VoiceCallRoomRegistry {
             return owner(tenantId, subject)
                     .equals(redisTemplate.opsForValue().get(KEY_PREFIX + roomName));
         } catch (RuntimeException e) {
-            log.warn("Could not read the owner of call room {}", roomName, e);
+            log.warn("Could not read the owner of call room {}", LogSafe.clean(roomName), e);
             return false;
         }
     }

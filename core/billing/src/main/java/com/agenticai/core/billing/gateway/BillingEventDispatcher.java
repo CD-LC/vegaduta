@@ -2,6 +2,7 @@ package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -89,7 +90,7 @@ public class BillingEventDispatcher {
             log.info(
                     "No handler registered for event type {} (raw event: {})",
                     event.type(),
-                    event.rawEventName());
+                    LogSafe.clean(event.rawEventName()));
         } else {
             handler.handle(event);
         }
@@ -106,7 +107,7 @@ public class BillingEventDispatcher {
                         "Routed handler {} failed for event type {} (reference: {})",
                         routed.getClass().getSimpleName(),
                         event.type(),
-                        event.gatewaySubscriptionId(),
+                        LogSafe.clean(event.gatewaySubscriptionId()),
                         e);
                 if (routedFailure == null) {
                     routedFailure = e;

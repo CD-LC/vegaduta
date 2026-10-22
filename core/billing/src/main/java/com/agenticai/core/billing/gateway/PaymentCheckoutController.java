@@ -3,6 +3,7 @@ package com.agenticai.core.billing.gateway;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import java.util.HashMap;
 import java.util.List;
@@ -146,7 +147,7 @@ public class PaymentCheckoutController {
             log.warn(
                     "Top-up order creation failed on gateway {} for tenant {}",
                     client.gatewayName(),
-                    tenantId,
+                    LogSafe.clean(tenantId),
                     e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,

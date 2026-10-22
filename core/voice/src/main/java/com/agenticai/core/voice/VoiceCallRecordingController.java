@@ -4,6 +4,7 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.voice.dto.VoiceCallRecordingResponse;
 import java.security.Principal;
 import java.util.List;
@@ -104,7 +105,7 @@ public class VoiceCallRecordingController {
             log.warn(
                     "Failed to start LiveKit egress for agent {} room {}: {}",
                     agentId,
-                    roomName,
+                    LogSafe.clean(roomName),
                     e.getMessage());
             // Persist the failure too, so "never started" is distinguishable from a missing row.
             // Re-thrown: a genuine infra failure (LiveKit or the egress worker down) is a 500.
@@ -117,7 +118,7 @@ public class VoiceCallRecordingController {
         log.info(
                 "Started call recording agent={} room={} egressId={}",
                 agentId,
-                roomName,
+                LogSafe.clean(roomName),
                 recording.getEgressId());
         return ResponseEntity.ok(toResponse(recording));
     }
@@ -148,7 +149,7 @@ public class VoiceCallRecordingController {
             log.warn(
                     "Failed to stop LiveKit egress {} for room {}: {}",
                     recording.getEgressId(),
-                    roomName,
+                    LogSafe.clean(roomName),
                     e.getMessage());
             recording.markFailed();
         }
@@ -156,7 +157,7 @@ public class VoiceCallRecordingController {
         log.info(
                 "Stopped call recording agent={} room={} status={}",
                 agentId,
-                roomName,
+                LogSafe.clean(roomName),
                 recording.getStatus());
         return ResponseEntity.ok(toResponse(recording));
     }

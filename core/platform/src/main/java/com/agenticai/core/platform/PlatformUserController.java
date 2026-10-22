@@ -11,6 +11,7 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.AppUserRepository;
 import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.tenancy.Tenant;
@@ -303,7 +304,7 @@ public class PlatformUserController {
         String tenant = tenantOf(target);
         log.info(
                 "platform-user-audit actor={} action={} target={} tenant={} outcome={} detail={}",
-                actor(),
+                LogSafe.clean(actor()),
                 action,
                 target.id(),
                 tenant,
