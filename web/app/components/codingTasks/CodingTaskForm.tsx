@@ -18,6 +18,7 @@ import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import { isPersonalEdition } from "../../lib/edition";
 
 const SELECT_CLASS =
   "flex h-10 w-full min-w-0 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-foreground shadow-sm outline-none transition-[color,box-shadow] " +
@@ -247,7 +248,7 @@ export default function CodingTaskForm({
             className="flex flex-wrap items-center gap-3 rounded-md border border-[color-mix(in_srgb,var(--upgrade)_32%,transparent)] bg-[color-mix(in_srgb,var(--upgrade)_12%,transparent)] px-3 py-2 text-sm text-foreground"
           >
             <span className="min-w-0 flex-1">{serverProblem.message}</span>
-            {serverProblem.status === 403 && (
+            {serverProblem.status === 403 && !isPersonalEdition() && (
               <Link
                 href="/admin/billing"
                 className="inline-flex shrink-0 items-center gap-1 font-semibold text-[var(--upgrade)] hover:underline"
