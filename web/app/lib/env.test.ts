@@ -1,5 +1,51 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { PUBLIC_ENV_KEYS, getPublicEnv, publicEnvScript, publicEnvSnapshot } from "./env";
+import {
+  PUBLIC_ENV_KEYS,
+  PUBLIC_POLICY_KEYS,
+  getPublicEnv,
+  getPublicPolicy,
+  publicEnvScript,
+  publicEnvSnapshot,
+} from "./env";
+
+// The policy settings (billing switch, OAuth state cookie switch, trusted image hosts) have their own reader
+// so their values never share a return value with the URL settings (see PUBLIC_POLICY_KEYS).
+describe("lib/env getPublicPolicy", () => {
+  afterEach(() => {
+    delete window.__ENV;
+    for (const key of PUBLIC_POLICY_KEYS) delete process.env[key];
+  });
+
+  it("is a subset of the allowlisted public keys, so the root layout still ships each one", () => {
+    for (const key of PUBLIC_POLICY_KEYS) expect(PUBLIC_ENV_KEYS).toContain(key);
+  });
+
+  it("keeps the precedence of getPublicEnv: runtime window.__ENV, then build time, then undefined", () => {
+    expect(getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED")).toBeUndefined();
+    process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
+    expect(getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED")).toBe("1");
+    window.__ENV = { NEXT_PUBLIC_BILLING_ENABLED: "0" };
+    expect(getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED")).toBe("0");
+    window.__ENV = { NEXT_PUBLIC_BILLING_ENABLED: "" };
+    expect(getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED")).toBe("1");
+  });
+
+  it("reads every policy key from its own build-time value", () => {
+    process.env.NEXT_PUBLIC_OAUTH_STATE_COOKIE = "1";
+    process.env.NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS = ".example.com,cdn.example.org";
+    expect(getPublicPolicy("NEXT_PUBLIC_OAUTH_STATE_COOKIE")).toBe("1");
+    expect(getPublicPolicy("NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS")).toBe(".example.com,cdn.example.org");
+  });
+
+  it("still appears in the snapshot and script that the root layout embeds", () => {
+    process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
+    process.env.NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS = ".example.com";
+    const snap = publicEnvSnapshot();
+    expect(snap.NEXT_PUBLIC_BILLING_ENABLED).toBe("1");
+    expect(snap.NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS).toBe(".example.com");
+    expect(publicEnvScript()).toContain('"NEXT_PUBLIC_BILLING_ENABLED":"1"');
+  });
+});
 
 // Runtime public config (lib/env.ts). jsdom gives us a `window`, so these
 // exercise the BROWSER branch: window.__ENV first, then the (here: live)

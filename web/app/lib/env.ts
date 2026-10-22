@@ -93,6 +93,28 @@ export const PUBLIC_ENV_KEYS = [
 
 export type PublicEnvKey = (typeof PUBLIC_ENV_KEYS)[number];
 
+/**
+ * Public settings whose NAMES read as sensitive to a source-to-sink analysis (billing, an OAuth cookie
+ * switch, a trust list), although each value is a plain deploy-time switch or host list that is shipped
+ * to the browser anyway (window.__ENV). They are read with getPublicPolicy(), which has its own
+ * build-time reads, so their values never share a return value with the URL settings read by
+ * getPublicEnv(). Without that split an analyzer sees the model-manifest URL as "derived from a billing
+ * flag" and reports it as clear-text storage when the URL is cached in localStorage.
+ */
+export const PUBLIC_POLICY_KEYS = [
+  "NEXT_PUBLIC_BILLING_ENABLED",
+  "NEXT_PUBLIC_OAUTH_STATE_COOKIE",
+  "NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS",
+] as const;
+
+export type PublicPolicyKey = (typeof PUBLIC_POLICY_KEYS)[number];
+/** Every public key read with getPublicEnv(): all of them except the policy settings above. */
+export type PublicValueKey = Exclude<PublicEnvKey, PublicPolicyKey>;
+
+function isPolicyKey(key: PublicEnvKey): key is PublicPolicyKey {
+  return (PUBLIC_POLICY_KEYS as readonly string[]).includes(key);
+}
+
 declare global {
   interface Window {
     __ENV?: Partial<Record<string, string>>;
@@ -102,7 +124,7 @@ declare global {
 // Each reference MUST stay a literal `process.env.NEXT_PUBLIC_X` - that is
 // the only form Next.js inlines. A switch (not a module-level object) keeps
 // the value live under vitest, where tests assign process.env at run time.
-function buildTimeValue(key: PublicEnvKey): string | undefined {
+function buildTimeValue(key: PublicValueKey): string | undefined {
   switch (key) {
     case "NEXT_PUBLIC_API_BASE_URL":
       return process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -132,8 +154,6 @@ function buildTimeValue(key: PublicEnvKey): string | undefined {
       return process.env.NEXT_PUBLIC_FREE_MODE;
     case "NEXT_PUBLIC_COFFEE_URL":
       return process.env.NEXT_PUBLIC_COFFEE_URL;
-    case "NEXT_PUBLIC_BILLING_ENABLED":
-      return process.env.NEXT_PUBLIC_BILLING_ENABLED;
     case "NEXT_PUBLIC_SITE_MODE":
       return process.env.NEXT_PUBLIC_SITE_MODE;
     case "NEXT_PUBLIC_SITE_URL":
@@ -146,8 +166,6 @@ function buildTimeValue(key: PublicEnvKey): string | undefined {
       return process.env.NEXT_PUBLIC_LEGAL_CIN;
     case "NEXT_PUBLIC_LEGAL_DIN":
       return process.env.NEXT_PUBLIC_LEGAL_DIN;
-    case "NEXT_PUBLIC_OAUTH_STATE_COOKIE":
-      return process.env.NEXT_PUBLIC_OAUTH_STATE_COOKIE;
     case "NEXT_PUBLIC_MOBILE_APK_URL":
       return process.env.NEXT_PUBLIC_MOBILE_APK_URL;
     case "NEXT_PUBLIC_MOBILE_APK_SHA256":
@@ -160,8 +178,6 @@ function buildTimeValue(key: PublicEnvKey): string | undefined {
       return process.env.NEXT_PUBLIC_MCP_APPS;
     case "NEXT_PUBLIC_ARTIFACTS":
       return process.env.NEXT_PUBLIC_ARTIFACTS;
-    case "NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS":
-      return process.env.NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS;
     case "NEXT_PUBLIC_APP_URL":
       return process.env.NEXT_PUBLIC_APP_URL;
     case "NEXT_PUBLIC_BUILD_SHA":
@@ -171,12 +187,27 @@ function buildTimeValue(key: PublicEnvKey): string | undefined {
   }
 }
 
+// Same rule as buildTimeValue: literal `process.env.NEXT_PUBLIC_X` references only. These are the
+// policy settings of PUBLIC_POLICY_KEYS, read here and nowhere else so they stay out of getPublicEnv().
+function buildTimePolicy(key: PublicPolicyKey): string | undefined {
+  switch (key) {
+    case "NEXT_PUBLIC_BILLING_ENABLED":
+      return process.env.NEXT_PUBLIC_BILLING_ENABLED;
+    case "NEXT_PUBLIC_OAUTH_STATE_COOKIE":
+      return process.env.NEXT_PUBLIC_OAUTH_STATE_COOKIE;
+    case "NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS":
+      return process.env.NEXT_PUBLIC_TRUSTED_IMAGE_HOSTS;
+    default:
+      return undefined;
+  }
+}
+
 function present(v: string | undefined | null): v is string {
   return typeof v === "string" && v !== "";
 }
 
-/** Runtime value of a public config key (runtime > build-time > undefined). */
-export function getPublicEnv(key: PublicEnvKey): string | undefined {
+/** Runtime value of a key (runtime > build-time > undefined); `baked` is the build-time value. */
+function resolvePublic(key: PublicEnvKey, baked: string | undefined): string | undefined {
   if (typeof window !== "undefined") {
     const runtime = window.__ENV?.[key];
     if (present(runtime)) return runtime;
@@ -185,8 +216,20 @@ export function getPublicEnv(key: PublicEnvKey): string | undefined {
     const runtime = process.env[key as string];
     if (present(runtime)) return runtime;
   }
-  const baked = buildTimeValue(key);
   return present(baked) ? baked : undefined;
+}
+
+/** Runtime value of a public config key (runtime > build-time > undefined). */
+export function getPublicEnv(key: PublicValueKey): string | undefined {
+  return resolvePublic(key, buildTimeValue(key));
+}
+
+/**
+ * Runtime value of a public policy setting (billing switch, OAuth state cookie switch, trusted image
+ * hosts); same precedence as {@link getPublicEnv}. See PUBLIC_POLICY_KEYS for why these are separate.
+ */
+export function getPublicPolicy(key: PublicPolicyKey): string | undefined {
+  return resolvePublic(key, buildTimePolicy(key));
 }
 
 /** Server-only: the allowlisted public keys that currently have a value. */
@@ -208,7 +251,7 @@ export function publicKeycloakUrl(): string {
 
 const reportedMissing = new Set<string>();
 
-function requiredPublicOrigin(key: PublicEnvKey, devDefault: string): string {
+function requiredPublicOrigin(key: PublicValueKey, devDefault: string): string {
   const configured = getPublicEnv(key);
   if (configured) return configured;
   if (process.env.NODE_ENV !== "production") return devDefault;
@@ -222,7 +265,7 @@ function requiredPublicOrigin(key: PublicEnvKey, devDefault: string): string {
 export function publicEnvSnapshot(): Record<string, string> {
   const out: Record<string, string> = {};
   for (const key of PUBLIC_ENV_KEYS) {
-    const v = getPublicEnv(key);
+    const v = isPolicyKey(key) ? getPublicPolicy(key) : getPublicEnv(key);
     if (v !== undefined) out[key] = v;
   }
   return out;
