@@ -49,7 +49,10 @@ BeforeAll {
     foreach ($f in @(Get-ChildItem -LiteralPath (Join-Path (Join-Path $script:Root 'deploy') 'compose') -File -Force)) {
       Copy-Item -LiteralPath $f.FullName -Destination $sb.Compose
     }
-    Copy-Item -LiteralPath (Join-Path (Join-Path (Join-Path $script:Root 'deploy') 'models') 'catalog.txt') -Destination (Join-Path (Join-Path $sb.Repo 'deploy') 'models')
+    # deploy/models/catalog.txt is a symlink to core's catalog (a text file holding the path on a Windows checkout
+    # without symlinks): copy the real file.
+    $catalog = [System.IO.Path]::Combine($script:Root, 'core', 'providers', 'src', 'main', 'resources', 'local-models', 'catalog.txt')
+    Copy-Item -LiteralPath $catalog -Destination (Join-Path (Join-Path (Join-Path $sb.Repo 'deploy') 'models') 'catalog.txt')
     Copy-Item -LiteralPath (Join-Path (Join-Path (Join-Path $script:Root 'deploy') 'keycloak') 'reconcile-realm.kcadm.sh') -Destination (Join-Path (Join-Path $sb.Repo 'deploy') 'keycloak')
     $example = Join-Path $sb.Compose '.env.example'
     $text = [System.IO.File]::ReadAllText($example) -replace '(?m)^VEGADUTA_VERSION=.*$', 'VEGADUTA_VERSION=0.1.0'
