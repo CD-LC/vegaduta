@@ -36,6 +36,10 @@ export const PUBLIC_ENV_KEYS = [
   // "keycloak" (default) or "local": which sign-in the console uses. "local" talks to core's own
   // single-user auth (app.auth.mode=local) through the /api/local-auth proxy; see lib/authMode.ts.
   "NEXT_PUBLIC_AUTH_MODE",
+  // "personal" | "lite" | "full": the edition core runs as (core: app.edition.tier). The synchronous
+  // seed for everything the console hides on a personal install; unset falls back to the pre-edition
+  // derivation (local auth = personal, NEXT_PUBLIC_DEPLOY_ENV = lite | full). See lib/edition.ts.
+  "NEXT_PUBLIC_EDITION",
   "NEXT_PUBLIC_ACADEMY_URL",
   "NEXT_PUBLIC_CODE_INTEL_URL",
   "NEXT_PUBLIC_APP_BUILDER_URL",
@@ -110,6 +114,8 @@ function buildTimeValue(key: PublicEnvKey): string | undefined {
       return process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID;
     case "NEXT_PUBLIC_AUTH_MODE":
       return process.env.NEXT_PUBLIC_AUTH_MODE;
+    case "NEXT_PUBLIC_EDITION":
+      return process.env.NEXT_PUBLIC_EDITION;
     case "NEXT_PUBLIC_ACADEMY_URL":
       return process.env.NEXT_PUBLIC_ACADEMY_URL;
     case "NEXT_PUBLIC_CODE_INTEL_URL":

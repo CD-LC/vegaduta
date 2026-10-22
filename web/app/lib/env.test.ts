@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { getPublicEnv, publicEnvScript, publicEnvSnapshot } from "./env";
+import { PUBLIC_ENV_KEYS, getPublicEnv, publicEnvScript, publicEnvSnapshot } from "./env";
 
 // Runtime public config (lib/env.ts). jsdom gives us a `window`, so these
 // exercise the BROWSER branch: window.__ENV first, then the (here: live)
@@ -28,6 +28,34 @@ describe("lib/env getPublicEnv", () => {
   it("returns undefined when neither is set (call sites keep their own defaults)", () => {
     delete process.env.NEXT_PUBLIC_API_BASE_URL;
     expect(getPublicEnv("NEXT_PUBLIC_API_BASE_URL")).toBeUndefined();
+  });
+});
+
+describe("lib/env NEXT_PUBLIC_EDITION", () => {
+  afterEach(() => {
+    delete window.__ENV;
+    delete process.env.NEXT_PUBLIC_EDITION;
+  });
+
+  it("is an allowlisted public key, so the root layout ships it to the browser", () => {
+    expect(PUBLIC_ENV_KEYS).toContain("NEXT_PUBLIC_EDITION");
+    process.env.NEXT_PUBLIC_EDITION = "personal";
+    expect(publicEnvSnapshot().NEXT_PUBLIC_EDITION).toBe("personal");
+    expect(publicEnvScript()).toContain('"NEXT_PUBLIC_EDITION":"personal"');
+  });
+
+  it("follows the runtime > build-time precedence of every other key", () => {
+    process.env.NEXT_PUBLIC_EDITION = "full";
+    expect(getPublicEnv("NEXT_PUBLIC_EDITION")).toBe("full");
+    window.__ENV = { NEXT_PUBLIC_EDITION: "personal" };
+    expect(getPublicEnv("NEXT_PUBLIC_EDITION")).toBe("personal");
+    window.__ENV = { NEXT_PUBLIC_EDITION: "" };
+    expect(getPublicEnv("NEXT_PUBLIC_EDITION")).toBe("full");
+  });
+
+  it("is unset by default", () => {
+    delete process.env.NEXT_PUBLIC_EDITION;
+    expect(getPublicEnv("NEXT_PUBLIC_EDITION")).toBeUndefined();
   });
 });
 
