@@ -459,7 +459,8 @@ jobs:
       # hash-locked file as the image; its tests need nothing beyond it.
       - name: code-intel deps (hash-locked)
         working-directory: services/code-intel
-        run: pip install --require-hashes -r requirements.lock
+        # --no-deps as in its Dockerfile: see services/code-intel/overrides.txt.
+        run: pip install --require-hashes --no-deps -r requirements.lock
 
       # NOT pytest. code-intel/tests are framework-free scripts on a hand-rolled
       # check() harness that reports failures only through main()'s exit code;

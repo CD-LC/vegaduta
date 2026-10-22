@@ -55,10 +55,19 @@ for svc in "${SERVICES[@]}"; do
   if [ "$svc" = "sidecar" ]; then
     inputs=("$svc/lock/pyproject.toml" "${inputs[@]}")
   fi
+  # <service>/overrides.txt, when present, forces versions past a dependency's own
+  # bounds (uv --override); each line there carries its reason. Such a service's
+  # Dockerfile installs its lock with --no-deps, since pip would otherwise refuse
+  # the overridden pin against that dependency's declared range.
+  overrides=()
+  if [ -f "$svc/overrides.txt" ]; then
+    overrides=(--override "$svc/overrides.txt")
+  fi
   uv pip compile "${inputs[@]}" \
     --universal \
     --python-version "$PY_VERSION" \
     --generate-hashes \
+    "${overrides[@]}" \
     --custom-compile-command "services/lock-requirements.sh $svc" \
     --output-file "$svc/requirements.lock"
 done
