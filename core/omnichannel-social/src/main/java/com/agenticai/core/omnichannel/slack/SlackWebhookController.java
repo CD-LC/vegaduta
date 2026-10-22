@@ -17,6 +17,8 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import java.util.Map;
@@ -56,6 +58,7 @@ import tools.jackson.databind.ObjectMapper;
  * uses - mirrors {@code MetaWhatsAppWebhookController} closely.
  */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 @RequestMapping("/webhook/slack")
 public class SlackWebhookController {
 

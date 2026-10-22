@@ -1,6 +1,11 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.platform.PlatformAlertWebhookEvent.AlertStatus;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.logging.LogSafe;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -10,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Alerting infrastructure pass (2026-07) - persists every alert in an Alertmanager webhook delivery
@@ -27,6 +30,7 @@ import tools.jackson.databind.ObjectMapper;
  * single delivery's {@code alerts} array is recorded independently (a `for` grouping routinely
  * bundles several alerts into one HTTP POST).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformAlertWebhookService {
 
@@ -57,7 +61,7 @@ public class PlatformAlertWebhookService {
         if (!(rawAlerts instanceof List<?> alerts)) {
             log.warn(
                     "Alertmanager webhook delivery had no 'alerts' array - ignoring. Payload keys: {}",
-                    payload.keySet());
+                    LogSafe.clean(payload.keySet()));
             return 0;
         }
         int recorded = 0;

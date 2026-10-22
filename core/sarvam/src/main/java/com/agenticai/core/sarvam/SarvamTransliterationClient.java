@@ -1,5 +1,8 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /transliterate} - converts script while preserving pronunciation (e.g. {@code
@@ -23,6 +25,7 @@ import tools.jackson.databind.JsonNode;
  * {@link SarvamApiException} note.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamTransliterationClient {
 
     private static final String URL = "https://api.sarvam.ai/transliterate";

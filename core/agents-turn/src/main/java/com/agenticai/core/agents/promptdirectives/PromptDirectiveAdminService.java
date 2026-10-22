@@ -5,6 +5,7 @@ import com.agenticai.core.agents.turn.PromptDirectiveSettings;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Owner-facing read and write of the tenant's prompt-directive settings. Every write validates
- * (a security-critical directive cannot be switched off or reworded without an explicit
+ * Owner-facing read and write of the tenant's prompt-directive settings. Every write validates (a
+ * security-critical directive cannot be switched off or reworded without an explicit
  * acknowledgement), evicts the chat path's cache and leaves an audit entry that names the key but
  * never the text.
  */
@@ -175,7 +176,9 @@ public class PromptDirectiveAdminService {
             throw bad("Custom instructions are limited to " + MAX_CUSTOM_TEXT + " characters.");
         }
         if (clean == null && enabled) {
-            repository.findById(PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY).ifPresent(repository::delete);
+            repository
+                    .findById(PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY)
+                    .ifPresent(repository::delete);
         } else {
             save(PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY, enabled, clean);
         }
@@ -197,7 +200,12 @@ public class PromptDirectiveAdminService {
 
     private void afterWrite(String action, String key, String detail) {
         settings.evictCurrentTenant();
-        log.info("Prompt directive {} {} by {} ({})", key, action, actor(), detail);
+        log.info(
+                "Prompt directive {} {} by {} ({})",
+                LogSafe.clean(key),
+                LogSafe.clean(action),
+                LogSafe.clean(actor()),
+                LogSafe.clean(detail));
         try {
             audit.record(actor(), action, "prompt_directive", key, AuditOutcome.SUCCESS, detail);
         } catch (RuntimeException e) {

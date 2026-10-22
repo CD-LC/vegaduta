@@ -3,6 +3,8 @@ package com.agenticai.core.elevenlabs;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.SpeechTextNormalizer;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +36,7 @@ import tools.jackson.databind.JsonNode;
  * generation volume, not the cloning setup step.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsClient {
 
     private static final String API_KEY_HEADER = "xi-api-key";

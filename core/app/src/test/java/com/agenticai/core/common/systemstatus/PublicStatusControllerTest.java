@@ -13,10 +13,14 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.platform.ops.PlatformBroadcastService;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicAnnouncement;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicMaintenance;
+import com.agenticai.core.security.edition.EditionInfo;
 import java.time.Instant;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.boot.health.registry.HealthContributorRegistry;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.kafka.core.KafkaAdmin;
 
 class PublicStatusControllerTest {
@@ -24,6 +28,11 @@ class PublicStatusControllerTest {
     private final HealthContributorRegistry registry = mock(HealthContributorRegistry.class);
 
     private PublicStatusController controller(PlatformBroadcastService broadcast) {
+        return controller(broadcast, EditionInfo.from(new StandardEnvironment()));
+    }
+
+    private PublicStatusController controller(
+            PlatformBroadcastService broadcast, EditionInfo edition) {
         StaticListableBeanFactory beans = new StaticListableBeanFactory();
         if (broadcast != null) {
             beans.addBean("broadcast", broadcast);
@@ -33,7 +42,8 @@ class PublicStatusControllerTest {
                 false,
                 beans.getBeanProvider(KafkaAdmin.class),
                 "",
-                beans.getBeanProvider(PlatformBroadcastService.class));
+                beans.getBeanProvider(PlatformBroadcastService.class),
+                edition);
     }
 
     @Test
@@ -69,5 +79,36 @@ class PublicStatusControllerTest {
         PublicStatusController.PublicStatusResponse r = controller(null).get();
         assertFalse(r.maintenance().enabled());
         assertNull(r.announcement());
+    }
+
+    @Test
+    void reportsTheEditionTheCoreRunsAs() {
+        StandardEnvironment env = new StandardEnvironment();
+        env.getPropertySources()
+                .addFirst(
+                        new MapPropertySource(
+                                "test",
+                                Map.of(
+                                        "app.edition.tier", "personal",
+                                        "app.edition.billing-enabled", "false",
+                                        "app.auth.mode", "local")));
+
+        EditionInfo edition = controller(null, EditionInfo.from(env)).get().edition();
+
+        assertEquals("personal", edition.tier());
+        assertFalse(edition.billingEnabled());
+        assertEquals("local", edition.authMode());
+        assertFalse(edition.features().get("social-channels"));
+        assertFalse(edition.features().get("billing-payments"));
+    }
+
+    @Test
+    void anInstallWithNoEditionPropertyReportsFullWithEveryFeatureOn() {
+        EditionInfo edition = controller(null).get().edition();
+
+        assertEquals("full", edition.tier());
+        assertTrue(edition.billingEnabled());
+        assertEquals("keycloak", edition.authMode());
+        assertTrue(edition.features().values().stream().allMatch(on -> on));
     }
 }

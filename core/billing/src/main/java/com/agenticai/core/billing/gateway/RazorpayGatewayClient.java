@@ -1,5 +1,7 @@
 package com.agenticai.core.billing.gateway;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.razorpay.Order;
 import com.razorpay.RazorpayException;
 import com.razorpay.Subscription;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class RazorpayGatewayClient implements PaymentGatewayClient {
 
     // Razorpay subscriptions require a finite total_count (billing cycles)

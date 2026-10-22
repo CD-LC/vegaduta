@@ -1,5 +1,7 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.SpeechTextNormalizer;
 import java.time.Instant;
 import java.util.Base64;
@@ -29,6 +31,7 @@ import tools.jackson.databind.JsonNode;
  * {@link SarvamApiException} note.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamTextToSpeechClient {
 
     private static final String URL = "https://api.sarvam.ai/text-to-speech";

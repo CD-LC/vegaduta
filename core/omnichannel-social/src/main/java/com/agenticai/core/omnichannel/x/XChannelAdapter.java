@@ -7,10 +7,12 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE} - the X (Twitter) counterpart to {@code
@@ -20,6 +22,7 @@ import tools.jackson.databind.ObjectMapper;
  * GoogleOAuthService#currentAccessToken} uses.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class XChannelAdapter implements ApprovalActionExecutor {
 
     public static final String ACTION_TYPE = "channel.x.send";

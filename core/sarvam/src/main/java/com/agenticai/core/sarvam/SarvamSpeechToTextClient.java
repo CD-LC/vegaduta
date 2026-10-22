@@ -1,5 +1,8 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.JsonNode;
 import java.time.Instant;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -9,7 +12,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /speech-to-text} (multipart file upload). Two models: {@code saarika:v2.5}
@@ -30,6 +32,7 @@ import tools.jackson.databind.JsonNode;
  * {@link SarvamApiException} note.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamSpeechToTextClient {
 
     private static final String URL = "https://api.sarvam.ai/speech-to-text";

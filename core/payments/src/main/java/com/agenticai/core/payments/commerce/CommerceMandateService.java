@@ -10,6 +10,9 @@ import com.agenticai.core.payments.wallet.AgentWalletService;
 import com.agenticai.core.payments.wallet.WalletException;
 import com.agenticai.core.payments.wallet.WalletLedgerEntry;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -23,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The AP2-style mandate chain: an <b>intent mandate</b> (user authorizes an agent to shop for X up
@@ -43,6 +45,7 @@ import tools.jackson.databind.ObjectMapper;
  * (the sibling set can grow between the two).
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CommerceMandateService {
 
     private static final Logger log = LoggerFactory.getLogger(CommerceMandateService.class);

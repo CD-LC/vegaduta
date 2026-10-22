@@ -475,6 +475,7 @@ optional services (app builder, RL trainer), not by core's chat path.
 | `APP_VISION_ENABLED` | `true` | image inputs in chat | |
 | `AGENT_JOB_TRIGGERS_ENABLED` | `true` | scheduled agent jobs | |
 | `SIGNUP_DISPOSABLE_EMAIL_BLOCK_ENABLED` | `true` | block disposable email domains at signup | |
+| `NEXT_PUBLIC_EDITION` (web; Compose: `VEGADUTA_EDITION`) | derived: `personal` when `NEXT_PUBLIC_AUTH_MODE=local`, else `NEXT_PUBLIC_DEPLOY_ENV` when that is `lite` or `full`, else every page on | `personal` \| `lite` \| `full`: which pages the console has. On `personal` the rail, deep links and the proxy (a real 404) leave out the pages for features core does not run; `lite` and `full` hide nothing. Read at runtime, so an old image without it behaves as before. The console compares it with the `edition` core reports on `GET /api/public/status` and warns on a mismatch (see [Edition tier and features](#edition-tier-and-features)) |
 | `NEXT_PUBLIC_BILLING_ENABLED` (web; Compose: `WEB_BILLING_ENABLED`) | off | plans, prices, upgrade prompts and billing pages; off redirects `/billing`, `/features` and `/admin/billing` and hides every upgrade CTA | `1` to turn on (runtime, see `web/docs/RUNTIME-CONFIG.md`) |
 | `NEXT_PUBLIC_SITE_MODE` (web; Compose: `WEB_SITE_MODE`) | `oss` | which signed-out pages are served: `oss` is the technical open-source landing and About, and redirects the pricing, enterprise, hire, earn, compare and similar sales pages to `/`; `classic` restores the original marketing pages (tag `backup/classic-marketing-pages-2026-10-12`) | `oss` or `classic` (runtime) |
 | `NEXT_PUBLIC_DOCS_URL` (web; Compose: `WEB_DOCS_URL`) | empty | absolute URL of the published documentation site; when set, the public pages' "Docs" links and the in-app help banner point there, otherwise at the in-app `/docs` help ([site modes](site-modes.md)) | a URL (runtime) |
@@ -930,7 +931,11 @@ Spring properties, so the environment variable is the relaxed-binding name (`app
 | `app.learning.preferences.enabled` | `APP_LEARNING_PREFERENCES_ENABLED` | `false` | `true` |
 | `app.learning.routines.enabled` | `APP_LEARNING_ROUTINES_ENABLED` | `false` | `true` |
 | `app.learning.review.enabled` | `APP_LEARNING_REVIEW_ENABLED` | `false` | `true` |
+| `app.edition.tier` | `APP_EDITION_TIER` | unset (every [edition feature](#edition-tier-and-features) on) | `personal` (the Compose stack derives it from `VEGADUTA_EDITION`) |
 | `app.edition.billing-enabled` | `APP_EDITION_BILLING_ENABLED` | `true` | `false` |
+| `app.a2a.enabled` | `APP_A2A_ENABLED` | `true` | `false` |
+| `resolution.sweep.enabled` | `RESOLUTION_SWEEP_ENABLED` | `true` | `false` |
+| `app.scheduled-tasks.delivery-channels` | `SCHEDULED_TASKS_DELIVERY_CHANNELS` | the shared list | the shared list without `slack` and `a2a` |
 | `app.omnichannel.rate-limit.enabled` | `APP_OMNICHANNEL_RATE_LIMIT_ENABLED` | `false` | `true` |
 | `app.embeddings.provider` | `APP_EMBEDDINGS_PROVIDER` | `sidecar` | `auto` (cloud key, else Ollama, else the sidecar) |
 | `app.sidecar.enabled` | `APP_SIDECAR_ENABLED` | `true` | `false`; the launcher's `--profile rag` sets it to `true`. With Compose, put an override in `deploy/compose/.env`, not `core.env` |
@@ -956,6 +961,7 @@ Compose and launcher variables used by personal mode (none required in `.env`; t
 | `PERSONAL_JAVA_OPTS_EXTRA` | empty | appended to the core JVM flags (later flags win), e.g. `-Xmx700m` |
 | `PERSONAL_AOT_CACHE` | `false` | with `--build`, passes `ENABLE_AOT_CACHE=true` to `core/Dockerfile` (an AppCDS archive: faster boot, larger image) |
 | `POSTGRES_MEM_LIMIT` / `CORE_MEM_LIMIT` / `WEB_MEM_LIMIT` | `384m` / `1536m` / `384m` | container memory limits in `personal.yml` |
+| `VEGADUTA_EDITION` | `personal` | `personal` \| `lite` \| `full`. The one switch for the edition: becomes core's `APP_EDITION_TIER` and web's `NEXT_PUBLIC_EDITION`, so the two cannot disagree. The launcher writes `personal` into `.env` and never replaces a value you set. See [Edition tier and features](#edition-tier-and-features) |
 | `WEB_AUTH_MODE` | `local` | becomes `NEXT_PUBLIC_AUTH_MODE` on web |
 | `WEB_BILLING_ENABLED` | empty (off) | becomes `NEXT_PUBLIC_BILLING_ENABLED`; billing UI is hidden unless `1` |
 | `VEGADUTA_PERSONAL_HOME` | `~/.vegaduta/personal` | state for `--native-core`: core log, PID file, file storage (mode 700) |
@@ -1174,11 +1180,38 @@ credential, trimmed to ~900 spoken characters).
 
 At most 10 drafts wait for review per workspace. See [Personal mode](personal-mode.md#skills).
 
+### Edition tier and features
+
+core runs as one edition, `app.edition.tier` (`APP_EDITION_TIER`): `personal`, `lite` or `full`. The `personal` profile sets `personal`; with no tier set, or `lite` or `full`, every feature below is on, so Lite, Full and the worker and jobs shapes are unchanged. In Compose you do not set the tier itself: `VEGADUTA_EDITION` in `deploy/compose/.env` feeds both core's `APP_EDITION_TIER` and the console's `NEXT_PUBLIC_EDITION` (`deploy/compose/personal.yml`).
+
+A feature that is off is not registered at all: its controllers, services, schedulers and agent tools do not exist on that core, and its endpoints answer 404. Tables, entities, repositories and migrations are not affected, so turning a feature on later finds its data intact. Each feature is decided once, at boot.
+
+| Feature id | Personal | What it covers |
+|---|---|---|
+| `billing-payments` | off | payment gateways (Razorpay, Stripe, PhonePe), checkout, invoices, subscriptions and upgrades, budget top-ups, the agent wallet, payment mandates, the commerce feed (`/api/commerce/feed`) and the `create_payment_link`, `request_upi_collect` and `check_payment_status` agent tools. The x402 seller endpoints answer "payments disabled" |
+| `social-channels` | off | the Slack, Discord, Microsoft Teams and X channel adapters, webhooks and credential endpoints |
+| `a2a-directory` | off | the A2A JSON-RPC and REST endpoints, agent cards and the public agent directory |
+| `mcp-server-exposure` | off | `/api/dev/v1` and `/api/mcpserver/exposure`. The grants endpoint stays registered while `app.openai-compat.enabled=true` |
+| `operator-console` | off | the platform operator endpoints for tenants, users, plans, spend, abuse, moderation, fleet, impersonation, audit and ops, plus the demo, newsletter and landing surfaces. The platform LLM pool, tool credentials and platform settings are not part of it |
+| `cloud-speech` | off | the Sarvam and ElevenLabs integrations (speech, voice cloning, music). An add-on: switch it on, restart core, add the key in the console |
+| `voice-realtime-share` | off | anonymous realtime voice on share links, call recording and the LiveKit egress |
+| `video-demo-media` | off | Vertex Veo video generation and the demo image and video endpoints |
+
+How each feature is decided, first match wins:
+
+1. `app.edition.features.<feature id>.enabled` (environment: `APP_EDITION_FEATURES_<ID>_ENABLED`, the id with `-` written as `_`, for example `APP_EDITION_FEATURES_CLOUD_SPEECH_ENABLED=true`). It is read as a boolean, so `true`/`false`, `1`/`0`, `on`/`off` and `yes`/`no` work; a blank value counts as unset. Put it in `deploy/compose/core.env` and restart core.
+2. `billing-payments` only: `app.edition.billing-enabled` (`APP_EDITION_BILLING_ENABLED`, default `true`, see below).
+3. Otherwise the tier: `personal` is off, anything else (or no tier) is on.
+
+Rules of the road: a gated bean is only injected by beans gated by the same feature, or through `ObjectProvider`, `Optional` or a collection (`EditionClosureRulesTest` checks it from bytecode); a new gated bean needs nothing else, because `EditionWiringTest` finds them by annotation.
+
+`GET /api/public/status` reports the result in an `edition` object: `{tier, billingEnabled, authMode, features}`, where `features` maps each id above to `true` or `false`. It is computed by the same code as the bean conditions. The console takes its tier from `NEXT_PUBLIC_EDITION` and, once the status arrives, warns and raises the platform status banner if it differs from core's.
+
 ### Billing edition
 
 | Property | Env | Default | Meaning |
 |---|---|---|---|
-| `app.edition.billing-enabled` | `APP_EDITION_BILLING_ENABLED` | `true` | `false`: no plans, prices, payments, billing mail or upgrade prompts; the billing, checkout, invoice and top-up endpoints are not registered; every limit resolves as unlimited. Usage is still counted. The console follows `NEXT_PUBLIC_BILLING_ENABLED` separately |
+| `app.edition.billing-enabled` | `APP_EDITION_BILLING_ENABLED` | `true` | `false`: no plans, prices, payments, billing mail or upgrade prompts; the billing, checkout, invoice and top-up endpoints are not registered; every limit resolves as unlimited. Usage is still counted. This is the `billing-payments` [edition feature](#edition-tier-and-features): an explicit `app.edition.features.billing-payments.enabled` wins over it. The console follows `NEXT_PUBLIC_BILLING_ENABLED` separately |
 
 ### Local models
 

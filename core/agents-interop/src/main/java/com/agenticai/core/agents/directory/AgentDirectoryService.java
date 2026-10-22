@@ -7,6 +7,8 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.OffsetLimitRequest;
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +34,7 @@ import tools.jackson.databind.ObjectMapper;
  * confused-deputy path where a tenant-edited agent silently rewrites what external parties
  * verified.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class AgentDirectoryService {
 

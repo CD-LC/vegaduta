@@ -3,6 +3,10 @@ package com.agenticai.core.omnichannel.teams;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -15,8 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for the two HTTP surfaces a Bot Framework bot needs - the same
@@ -37,6 +39,7 @@ import tools.jackson.databind.ObjectMapper;
  * </ol>
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsApiClient {
 
     private static final String TOKEN_SCOPE = "https://api.botframework.com/.default";

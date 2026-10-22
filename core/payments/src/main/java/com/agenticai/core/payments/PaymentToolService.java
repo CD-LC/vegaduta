@@ -8,6 +8,10 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.payments.adapter.UpiAgentProtocolAdapter;
 import com.agenticai.core.security.HotpathLookups;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -25,8 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * §E1's payment surface for agents - backs the {@code create_payment_link}, {@code
@@ -62,6 +64,7 @@ import tools.jackson.databind.node.ObjectNode;
  * action, and the mandate's own signed policy remains authoritative underneath.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PaymentToolService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentToolService.class);

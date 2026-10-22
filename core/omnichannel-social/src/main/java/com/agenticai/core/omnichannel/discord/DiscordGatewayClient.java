@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.discord;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -33,6 +35,7 @@ import tools.jackson.databind.ObjectMapper;
  * activation.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class DiscordGatewayClient {
 
     private static final Logger log = LoggerFactory.getLogger(DiscordGatewayClient.class);

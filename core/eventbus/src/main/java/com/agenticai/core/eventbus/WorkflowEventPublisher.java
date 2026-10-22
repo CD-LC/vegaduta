@@ -2,6 +2,7 @@ package com.agenticai.core.eventbus;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import java.util.Map;
 import java.util.Set;
@@ -213,8 +214,8 @@ public class WorkflowEventPublisher {
         } catch (RuntimeException e) {
             log.error(
                     "In-JVM workflow event fan-out failed for {} (run {}) - continuing",
-                    eventType,
-                    runId,
+                    LogSafe.clean(eventType),
+                    LogSafe.clean(runId),
                     e);
         }
 
@@ -240,9 +241,9 @@ public class WorkflowEventPublisher {
             // event publishing itself is broken).
             log.error(
                     "Failed to serialize workflow event {} (run {}) for schema '{}' - not queued",
-                    eventType,
-                    runId,
-                    effectiveTenant,
+                    LogSafe.clean(eventType),
+                    LogSafe.clean(runId),
+                    LogSafe.clean(effectiveTenant),
                     e);
         }
     }

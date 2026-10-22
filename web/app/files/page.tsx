@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Download, Files as FilesIcon, Loader2, Search } from "lucide-react";
 import { api } from "../lib/api";
+import { useCloudSpeechOffered } from "../lib/cloudSpeech";
 import { usePagination } from "../lib/usePagination";
 import AppShell from "../components/AppShell";
 import PageHeader from "../components/ax/PageHeader";
@@ -33,7 +34,17 @@ import {
   saveBlob,
   type FileRow,
 } from "./fileRows";
-import { GROUPS, SORTS, countByGroup, filterRows, previewKind, rowKey, sortRows, type FileGroup, type FileSort } from "./filesLogic";
+import {
+  GROUPS,
+  SORTS,
+  countByGroup,
+  filterRows,
+  previewKind,
+  rowKey,
+  sortRows,
+  type FileGroup,
+  type FileSort,
+} from "./filesLogic";
 
 /**
  * A single place to see, search, and download generated files.
@@ -144,7 +155,9 @@ export default function FilesPage() {
         const failed = results.filter((r) => r.status === "rejected").length;
         const ok = results.filter((r) => r.status === "fulfilled").map((r) => (r as PromiseFulfilledResult<any>).value);
         const docs = ok.flatMap((v: any) => v.docs);
-        setMoreDocs(ok.filter((v: any) => v.page.hasMore).map((v: any) => ({ id: v.c.id, name: v.c.name, total: v.page.total })));
+        setMoreDocs(
+          ok.filter((v: any) => v.page.hasMore).map((v: any) => ({ id: v.c.id, name: v.c.name, total: v.page.total }))
+        );
         setRows(docs);
         setPartialFailureCount(failed);
       })
@@ -155,6 +168,8 @@ export default function FilesPage() {
       .finally(() => setLoaded(true));
   }, []);
 
+  // Re-reads the listings if core's status later says the hosted speech vendors are on or off.
+  const speech = useCloudSpeechOffered();
   const refreshArtifacts = useCallback(() => {
     setArtifactsLoaded(false);
     setArtifactsFailed(false);
@@ -168,12 +183,22 @@ export default function FilesPage() {
     };
     Promise.allSettled([
       api.listGeneratedImages().then((r: any) => noteCap(r || []).map((x: any) => normalizeImage(x, t))),
-      api.listElevenLabsAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeElevenLabsAudio(x, t))),
-      api.listSarvamAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeSarvamAudio(x, t))),
+      // The two speech listings belong to core's CLOUD_SPEECH feature. Where it is off (a personal install) the
+      // routes do not exist, and a 404 here would show the partial-failure banner for a list nobody has.
+      ...(speech
+        ? [
+            api
+              .listElevenLabsAudio()
+              .then((r: any) => noteCap(r || []).map((x: any) => normalizeElevenLabsAudio(x, t))),
+            api.listSarvamAudio().then((r: any) => noteCap(r || []).map((x: any) => normalizeSarvamAudio(x, t))),
+          ]
+        : []),
       api.listVideoGenerationJobs().then((r: any) => noteCap(r || []).map((x: any) => normalizeVideoJob(x, t))),
       api.listGeneratedDocuments({ page: 0, size: 200 }).then((r: any) => {
         const shown = (r?.content || []).length;
-        setDocsCapped(typeof r?.totalElements === "number" && r.totalElements > shown ? { shown, total: r.totalElements } : null);
+        setDocsCapped(
+          typeof r?.totalElements === "number" && r.totalElements > shown ? { shown, total: r.totalElements } : null
+        );
         return (r?.content || []).map((x: any) => normalizeDocument(x, t));
       }),
     ])
@@ -185,7 +210,7 @@ export default function FilesPage() {
         setArtifactRows(merged);
         setArtifactsCapped(capSeen.value);
         setArtifactPartialFailureCount(failed);
-        // All five failing at once reads as a real outage, not a partial gap.
+        // Every list failing at once reads as a real outage, not a partial gap.
         if (failed === results.length) setArtifactsFailed(true);
       })
       .catch(() => {
@@ -193,7 +218,7 @@ export default function FilesPage() {
         setArtifactsFailed(true);
       })
       .finally(() => setArtifactsLoaded(true));
-  }, [t]);
+  }, [t, speech]);
 
   useEffect(() => {
     refresh();
@@ -216,9 +241,15 @@ export default function FilesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchText, group, moreDocs, moreDocsBusy]);
 
-  const filteredRows = useMemo(() => sortRows(filterRows(combinedRows, group, searchText), sort), [combinedRows, group, searchText, sort]);
+  const filteredRows = useMemo(
+    () => sortRows(filterRows(combinedRows, group, searchText), sort),
+    [combinedRows, group, searchText, sort]
+  );
 
-  const { page, pageItems, totalItems, totalPages, pageSize, setPage, setPageSize } = usePagination(filteredRows, PAGE_SIZE);
+  const { page, pageItems, totalItems, totalPages, pageSize, setPage, setPageSize } = usePagination(
+    filteredRows,
+    PAGE_SIZE
+  );
 
   // Reset to page 1 whenever the search text changes, so a narrower result set never strands the view on a blank page.
   useEffect(() => {
@@ -259,7 +290,10 @@ export default function FilesPage() {
     }
   }
 
-  const selectedRows = useMemo(() => combinedRows.filter((r) => selected.has(rowKey(r)) && r.downloadable), [combinedRows, selected]);
+  const selectedRows = useMemo(
+    () => combinedRows.filter((r) => selected.has(rowKey(r)) && r.downloadable),
+    [combinedRows, selected]
+  );
 
   async function handleBulkDownload() {
     setDownloadError(null);
@@ -333,7 +367,11 @@ export default function FilesPage() {
               <>
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <div className="relative min-w-0 flex-1 basis-56 sm:max-w-sm">
-                    <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Search
+                      size={14}
+                      aria-hidden="true"
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                     <Input
                       type="text"
                       placeholder={t("searchPlaceholder")}
@@ -366,17 +404,30 @@ export default function FilesPage() {
                   ))}
                 </div>
                 {selected.size > 0 && (
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2" role="status">
+                  <div
+                    className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2"
+                    role="status"
+                  >
                     <span className="text-xs text-foreground">
                       {t("selectedCount", { count: selected.size })}
-                      {selectedRows.length < selected.size && ` ${t("downloadableCount", { count: selectedRows.length })}`}
+                      {selectedRows.length < selected.size &&
+                        ` ${t("downloadableCount", { count: selectedRows.length })}`}
                     </span>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
                         {t("clear")}
                       </Button>
-                      <Button size="sm" className="gap-1" disabled={bulkBusy || selectedRows.length === 0} onClick={handleBulkDownload}>
-                        {bulkBusy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : <Download size={12} aria-hidden="true" />}
+                      <Button
+                        size="sm"
+                        className="gap-1"
+                        disabled={bulkBusy || selectedRows.length === 0}
+                        onClick={handleBulkDownload}
+                      >
+                        {bulkBusy ? (
+                          <Loader2 size={12} className="animate-spin" aria-hidden="true" />
+                        ) : (
+                          <Download size={12} aria-hidden="true" />
+                        )}
                         {t("downloadSelected")}
                       </Button>
                     </div>
@@ -404,7 +455,12 @@ export default function FilesPage() {
                           ? null
                           : rows.length +
                             moreDocs.reduce(
-                              (n, c) => n + Math.max((c.total as number) - rows.filter((d: any) => d.collectionId === c.id).length, 0),
+                              (n, c) =>
+                                n +
+                                Math.max(
+                                  (c.total as number) - rows.filter((d: any) => d.collectionId === c.id).length,
+                                  0
+                                ),
                               0
                             )
                       }
