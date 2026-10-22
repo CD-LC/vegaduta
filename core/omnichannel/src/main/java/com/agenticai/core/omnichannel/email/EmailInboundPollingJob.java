@@ -168,10 +168,12 @@ public class EmailInboundPollingJob {
             // was saved, and the addresses it resolves to are pinned for this connection.
             ImapEndpoint.apply(props, protocol, credential.getImapHost(), credential.getImapPort());
         } catch (RuntimeException e) {
+            // The refusal text can name the tenant-typed host, so only its class is logged.
             log.warn(
-                    "Skipping email poll for mailbox {}: {}",
+                    "Skipping email poll for mailbox {}: the IMAP host was refused by the outbound"
+                            + " request policy ({})",
                     com.agenticai.core.security.LogMasking.email(credential.getImapUsername()),
-                    e.getMessage());
+                    e.getClass().getSimpleName());
             return;
         }
         Session session = Session.getInstance(props);

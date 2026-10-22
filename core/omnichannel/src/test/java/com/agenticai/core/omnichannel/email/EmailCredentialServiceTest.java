@@ -1,5 +1,6 @@
 package com.agenticai.core.omnichannel.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +9,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.email.dto.EmailActivationRequest;
@@ -20,6 +24,7 @@ import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 /**
  * Connecting a tenant's IMAP mailbox must not let the tenant aim the platform at an internal
@@ -82,12 +87,34 @@ class EmailCredentialServiceTest {
                     new EmailActivationRequest(
                             "127.0.0.1", server.getLocalPort(), "user", "pw", false);
 
-            ChannelConfigurationException failure =
-                    assertThrows(
-                            ChannelConfigurationException.class,
-                            () -> service(allowed).activate(request));
+            Logger serviceLog = (Logger) LoggerFactory.getLogger(EmailCredentialService.class);
+            ListAppender<ILoggingEvent> appender = new ListAppender<>();
+            appender.start();
+            serviceLog.addAppender(appender);
+            ChannelConfigurationException failure;
+            try {
+                failure =
+                        assertThrows(
+                                ChannelConfigurationException.class,
+                                () -> service(allowed).activate(request));
+            } finally {
+                serviceLog.detachAppender(appender);
+            }
 
             fake.join(3000);
+            // The server log gets a fixed text and the exception class, never the mail client's
+            // message (banner, host and port) or a stack trace carrying it.
+            assertEquals(1, appender.list.size());
+            ILoggingEvent probe = appender.list.get(0);
+            assertTrue(
+                    probe.getFormattedMessage().startsWith("IMAP connect probe failed for"),
+                    probe.getFormattedMessage());
+            assertFalse(
+                    probe.getFormattedMessage().contains("internal-banner-xyz"),
+                    probe.getFormattedMessage());
+            assertFalse(
+                    probe.getFormattedMessage().contains("127.0.0.1"), probe.getFormattedMessage());
+            assertEquals(null, probe.getThrowableProxy(), "no exception text or stack trace");
             assertTrue(answered.get(), "the allow-listed host really was dialled");
             assertFalse(failure.getMessage().contains("internal-banner-xyz"), failure.getMessage());
             assertFalse(failure.getMessage().contains("BYE"), failure.getMessage());
