@@ -32,7 +32,16 @@ describe("proxy() apex -> app host canonicalisation", () => {
   });
 
   it("redirects console routes on the apex host to app.vegaduta.ai", async () => {
-    for (const path of ["/tools", "/agents", "/build", "/tools/servers", "/admin", "/workflows", "/ai-models", "/help/docs"]) {
+    for (const path of [
+      "/tools",
+      "/agents",
+      "/build",
+      "/tools/servers",
+      "/admin",
+      "/workflows",
+      "/ai-models",
+      "/help/docs",
+    ]) {
       const res = await proxy(fakeRequest(`https://vegaduta.ai${path}`));
       expect(res.status, `${path} should 308`).toBe(308);
       expect(res.headers.get("location")).toBe(`https://app.vegaduta.ai${path}`);
@@ -64,7 +73,19 @@ describe("proxy() apex -> app host canonicalisation", () => {
   });
 
   it("leaves public routes on the apex host (marketing surface)", async () => {
-    for (const path of ["/docs", "/billing", "/signup", "/templates", "/templates/mine", "/a/abc123", "/workflow/wf9", "/try", "/compare/x", "/code", "/status"]) {
+    for (const path of [
+      "/docs",
+      "/billing",
+      "/signup",
+      "/templates",
+      "/templates/mine",
+      "/a/abc123",
+      "/workflow/wf9",
+      "/try",
+      "/compare/x",
+      "/code",
+      "/status",
+    ]) {
       const res = await proxy(fakeRequest(`https://vegaduta.ai${path}`));
       expect(res.status, `${path} should stay on apex`).not.toBe(308);
       expect(res.headers.get("location"), `${path} should stay on apex`).toBeNull();
@@ -195,7 +216,11 @@ describe("proxy() site-mode switch (NEXT_PUBLIC_SITE_MODE)", () => {
 describe("proxy() behind the standalone server (nextUrl is the bind address)", () => {
   const bind = "http://0.0.0.0:3000";
   const cfHttp = '{"scheme":"http"}';
-  const saved = { app: process.env.NEXT_PUBLIC_APP_URL, site: process.env.NEXT_PUBLIC_SITE_URL, admin: process.env.PLATFORM_ADMIN_HOST };
+  const saved = {
+    app: process.env.NEXT_PUBLIC_APP_URL,
+    site: process.env.NEXT_PUBLIC_SITE_URL,
+    admin: process.env.PLATFORM_ADMIN_HOST,
+  };
   const restore = (key: string, value: string | undefined) => {
     if (value === undefined) delete process.env[key];
     else process.env[key] = value;
@@ -225,14 +250,18 @@ describe("proxy() behind the standalone server (nextUrl is the bind address)", (
 
     it("accepts the host configured through NEXT_PUBLIC_SITE_URL, ignoring the port", async () => {
       process.env.NEXT_PUBLIC_SITE_URL = "https://www.example.org";
-      const res = await proxy(fakeRequest(`${bind}/pricing`, {}, { host: "www.example.org:443", "cf-visitor": cfHttp }));
+      const res = await proxy(
+        fakeRequest(`${bind}/pricing`, {}, { host: "www.example.org:443", "cf-visitor": cfHttp })
+      );
       expect(res.status).toBe(308);
       expect(res.headers.get("location")).toBe("https://www.example.org/pricing");
     });
 
     it("accepts the platform-admin host and the hosted apex hosts", async () => {
       process.env.PLATFORM_ADMIN_HOST = "admin.example.com";
-      const admin = await proxy(fakeRequest(`${bind}/platform-admin`, {}, { host: "admin.example.com", "cf-visitor": cfHttp }));
+      const admin = await proxy(
+        fakeRequest(`${bind}/platform-admin`, {}, { host: "admin.example.com", "cf-visitor": cfHttp })
+      );
       expect(admin.headers.get("location")).toBe("https://admin.example.com/platform-admin");
       const apex = await proxy(fakeRequest(`${bind}/`, {}, { host: "vegaduta.ai", "cf-visitor": cfHttp }));
       expect(apex.status).toBe(308);
@@ -252,14 +281,21 @@ describe("proxy() behind the standalone server (nextUrl is the bind address)", (
     it("does not trust X-Forwarded-Host", async () => {
       process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com";
       const res = await proxy(
-        fakeRequest(`${bind}/about`, {}, { host: "0.0.0.0:3000", "x-forwarded-host": "app.example.com", "cf-visitor": cfHttp }),
+        fakeRequest(
+          `${bind}/about`,
+          {},
+          { host: "0.0.0.0:3000", "x-forwarded-host": "app.example.com", "cf-visitor": cfHttp }
+        )
       );
       expect(res.status).not.toBe(308);
     });
 
     it("is a no-op without the CF-Visitor header or when the visitor used https", async () => {
       process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com";
-      for (const headers of [{ host: "app.example.com" }, { host: "app.example.com", "cf-visitor": '{"scheme":"https"}' }]) {
+      for (const headers of [
+        { host: "app.example.com" },
+        { host: "app.example.com", "cf-visitor": '{"scheme":"https"}' },
+      ]) {
         const res = await proxy(fakeRequest(`${bind}/about`, {}, headers));
         expect(res.status).not.toBe(308);
         expect(res.headers.get("location")).toBeNull();
