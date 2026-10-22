@@ -10,9 +10,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.bool;
 import static com.agenticai.core.workflow.WorkflowDataOps.mapList;
 import static com.agenticai.core.workflow.WorkflowDataOps.str;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,6 +17,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * The {@code sort} data operation. {@code sortKeys: [{field, direction: asc|desc, type:
@@ -53,7 +53,7 @@ final class DataSortOps {
                 if (v.isNumber()) {
                     return v.asLong();
                 }
-                return v.isTextual() ? parseDate(v.asText()) : null;
+                return v.isString() ? parseDate(v.asString()) : null;
             }
 
             @Override
@@ -116,7 +116,7 @@ final class DataSortOps {
                 if (canonicalNumber(v) == null) {
                     allNumbers = false;
                 }
-                if (!v.isTextual() || parseDate(v.asText()) == null) {
+                if (!v.isString() || parseDate(v.asString()) == null) {
                     allDates = false;
                 }
             }

@@ -5,8 +5,6 @@ import com.agenticai.core.quality.dataset.AgentHeadVersionLookup;
 import com.agenticai.core.quality.dataset.EvalDataset;
 import com.agenticai.core.quality.dataset.EvalDatasetService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
@@ -22,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The eval gate: decides whether an agent version may be labelled PRODUCTION (the platform's

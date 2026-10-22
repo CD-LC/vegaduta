@@ -2,10 +2,6 @@ package com.agenticai.core.agents.tools.platformguide;
 
 import com.agenticai.core.agentspi.SetupStatusProvider.Status;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@code vegaduta_setup_guide}: how the Assistant turns "I want X" or "why can't you do X" into the
@@ -81,13 +81,13 @@ public class SetupGuideToolCallback implements ToolCallback {
         try {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            String action = args.path("action").asText("help");
-            String query = args.path("query").asText("");
+            String action = args.path("action").asString("help");
+            String query = args.path("query").asString("");
             ObjectNode out = MAPPER.createObjectNode();
             switch (action.toLowerCase()) {
                 case "docs" -> docsInto(out, query);
                 case "topic" -> {
-                    String id = args.path("id").asText("");
+                    String id = args.path("id").asString("");
                     var topic = guide.topic(id);
                     if (topic.isEmpty()) {
                         return error(

@@ -1,7 +1,7 @@
 package com.agenticai.core.omnichannel.signal;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Duration;
+import tools.jackson.databind.JsonNode;
 
 /**
  * An open websocket receive stream from signal-cli-rest-api in json-rpc mode ({@code GET

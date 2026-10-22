@@ -13,12 +13,12 @@ import com.agenticai.core.workflow.dto.ValidationResult;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.dto.WorkflowResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Create / list / update / delete / duplicate / validate and the per-workflow settings setters,

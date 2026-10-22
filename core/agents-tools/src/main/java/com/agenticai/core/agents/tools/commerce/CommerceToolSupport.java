@@ -3,12 +3,12 @@ package com.agenticai.core.agents.tools.commerce;
 import com.agenticai.core.billing.commerce.CheckoutSession;
 import com.agenticai.core.billing.commerce.CheckoutSessionStatus;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared helpers for the two commerce tool callbacks - the same "route error text through Jackson,

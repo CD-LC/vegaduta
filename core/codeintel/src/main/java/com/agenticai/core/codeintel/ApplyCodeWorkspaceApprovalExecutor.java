@@ -3,14 +3,14 @@ package com.agenticai.core.codeintel;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Applies full-file-content writes/deletes to a code-intel scratch workspace, ONLY once a human has

@@ -11,9 +11,6 @@ import com.agenticai.core.brief.dto.TrustDtos.TrustProposal;
 import com.agenticai.core.brief.model.Brief;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -29,6 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Earned autonomy (contract section 1): proposes, applies and reverses trust rungs.
@@ -787,7 +787,7 @@ public class TrustLadderService {
         }
         try {
             return objectMapper.writeValueAsString(body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{}";
         }
     }

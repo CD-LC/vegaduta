@@ -3,8 +3,6 @@ package com.agenticai.core.omnichannel.discord;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -24,6 +22,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for the two Discord REST API calls this platform needs. Unlike
@@ -72,7 +72,7 @@ public class DiscordApiClient {
     public BotInfo fetchBotInfo(String botToken) {
         HttpResponse<String> response = send("GET", apiBase + "/users/@me", botToken, null);
         JsonNode node = parseOrThrow(response, "discord", "Discord rejected this Bot Token");
-        return new BotInfo(node.path("id").asText(null), node.path("username").asText(null));
+        return new BotInfo(node.path("id").asString(null), node.path("username").asString(null));
     }
 
     /**
@@ -210,7 +210,8 @@ public class DiscordApiClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new ChannelConfigurationException(
-                    channel, failureMessage + ": " + node.path("message").asText(response.body()));
+                    channel,
+                    failureMessage + ": " + node.path("message").asString(response.body()));
         }
         return node;
     }
@@ -228,7 +229,7 @@ public class DiscordApiClient {
                     "Discord send to channel "
                             + channelId
                             + " failed: "
-                            + node.path("message").asText(response.body()));
+                            + node.path("message").asString(response.body()));
         }
     }
 

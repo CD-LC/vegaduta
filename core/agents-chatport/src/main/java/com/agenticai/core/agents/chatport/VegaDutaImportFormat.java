@@ -12,9 +12,9 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.SOURCE_CLAUDE;
 import static com.agenticai.core.agents.chatport.ChatImportParser.SOURCE_VEGADUTA;
 
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * One conversation of this platform's own export ({@link ChatExportRenderer}'s JSON): {@code {id,
@@ -69,8 +69,8 @@ final class VegaDutaImportFormat implements ChatImportFormat {
             JsonNode names = m.get("attachments");
             if (names != null && names.isArray()) {
                 for (JsonNode name : names) {
-                    if (name.isTextual()) {
-                        addAttachment(attachments, name.asText());
+                    if (name.isString()) {
+                        addAttachment(attachments, name.asString());
                     }
                 }
             }

@@ -4,7 +4,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Locale;
@@ -21,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pulls Signal messages from the operator's signal-cli REST API. Signal has no push to a public

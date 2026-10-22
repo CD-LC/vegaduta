@@ -2,7 +2,6 @@ package com.agenticai.core.workflow.stream;
 
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.Instant;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Live event stream for workflow runs - the backend of the canvas's agent-native run view (phase

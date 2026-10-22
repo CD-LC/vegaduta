@@ -9,8 +9,6 @@ import com.agenticai.core.documentgen.model.DocumentGenerationRequest;
 import com.agenticai.core.documentgen.repository.DocumentGenerationJobRepository;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Owns the request-side lifecycle of a document generation job: quota check, saving the {@code
@@ -118,7 +118,7 @@ public class DocumentGenerationService {
     private String serializeContent(DocumentContent content) {
         try {
             return objectMapper.writeValueAsString(content);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // A DocumentContent field Jackson can't serialize (e.g. an
             // un-serializable `json` passthrough value) is a caller bug in
             // the request body, not a server error - surfaced the same way

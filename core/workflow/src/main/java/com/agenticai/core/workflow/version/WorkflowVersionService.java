@@ -13,7 +13,6 @@ import com.agenticai.core.tenancy.FeatureFlagService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowRun;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Workflow version history + diffs (Tier-3, V273) - the workflow sibling of {@code
@@ -486,12 +486,18 @@ public class WorkflowVersionService {
                     type,
                     workflowId.toString(),
                     Map.of(
-                            "entityType", "WORKFLOW",
-                            "entityId", workflowId.toString(),
-                            "versionId", version.getId().toString(),
-                            "versionNumber", version.getVersionNumber(),
-                            "label", label.name(),
-                            "automatic", automatic));
+                            "entityType",
+                            "WORKFLOW",
+                            "entityId",
+                            workflowId.toString(),
+                            "versionId",
+                            version.getId().toString(),
+                            "versionNumber",
+                            version.getVersionNumber(),
+                            "label",
+                            label.name(),
+                            "automatic",
+                            automatic));
         } catch (RuntimeException e) {
             log.warn(
                     "Could not publish {} for workflow {} v{}",

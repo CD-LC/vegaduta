@@ -3,8 +3,6 @@ package com.agenticai.core.agents.tools.web;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
@@ -13,6 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * ValidateStage of the {@link HttpRequestExecutor} pipeline: everything that decides, from the spec
@@ -241,8 +241,8 @@ final class HttpRequestValidation {
                     out.append('&');
                 }
                 String value =
-                        field.getValue().isTextual()
-                                ? field.getValue().asText()
+                        field.getValue().isString()
+                                ? field.getValue().asString()
                                 : field.getValue().toString();
                 out.append(URLEncoder.encode(field.getKey(), StandardCharsets.UTF_8))
                         .append('=')

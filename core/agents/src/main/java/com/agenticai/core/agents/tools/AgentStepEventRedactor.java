@@ -1,13 +1,13 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Last-mile redaction and truncation for anything {@link AgentStepEventEmitter} is about to put on
@@ -193,7 +193,7 @@ public final class AgentStepEventRedactor {
             // of masking it) would turn that into a
             // ConcurrentModificationException on a per-tool-call path.
             List<String> names = new ArrayList<>();
-            object.fieldNames().forEachRemaining(names::add);
+            object.propertyNames().iterator().forEachRemaining(names::add);
             for (String name : names) {
                 if (isSecretFieldName(name)) {
                     object.put(name, REDACTED);

@@ -2,14 +2,14 @@ package com.agenticai.core.agents.job.output;
 
 import com.agenticai.core.agents.job.AgentJobProperties;
 import com.agenticai.core.chat.structured.StructuredOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Takes the model's final text for a job and turns it into JSON that provably satisfies the job's

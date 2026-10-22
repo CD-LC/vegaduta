@@ -14,13 +14,13 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Arm management for the admin Agent-Learning surface - the missing half of {@link PolicyStore}

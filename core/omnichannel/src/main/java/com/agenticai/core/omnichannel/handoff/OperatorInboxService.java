@@ -15,7 +15,6 @@ import com.agenticai.core.omnichannel.session.ChannelSessionNotFoundException;
 import com.agenticai.core.omnichannel.session.ChannelSessionRepository;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.HandoffState;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The operator's side of live human handoff (migration V214): list the conversations that need a
@@ -345,7 +345,7 @@ public class OperatorInboxService {
         }
         try {
             return MAPPER.writeValueAsString(payload);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new ChannelPayloadSerializationException(
                     channelName,
                     "Failed to serialize operator reply payload for " + session.getChannel(),

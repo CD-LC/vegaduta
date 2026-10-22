@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -13,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Maps a Flowise chatflow / agentflow export ({@code {nodes: [...], edges: [...]}}) to an {@link
@@ -645,9 +645,7 @@ public final class FlowiseImportMapper {
                 AgentImportJson.text(data, "category"),
                 AgentImportJson.text(n, "type"),
                 data,
-                inputs == null
-                        ? com.fasterxml.jackson.databind.node.MissingNode.getInstance()
-                        : inputs);
+                inputs == null ? tools.jackson.databind.node.MissingNode.getInstance() : inputs);
     }
 
     private static Map<String, List<String>> adjacency(JsonNode edgesNode) {

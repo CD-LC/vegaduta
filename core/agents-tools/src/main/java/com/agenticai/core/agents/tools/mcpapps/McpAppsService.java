@@ -8,9 +8,6 @@ import com.agenticai.core.agents.tools.McpAppStepHook;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Host side of MCP Apps ({@code ui://} resources attached to MCP tools). The whole feature is
@@ -565,7 +565,7 @@ public class McpAppsService {
         JsonNode node;
         try {
             node = JSON.readTree(args);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new McpAppsException(
                     McpAppsException.Code.BAD_REQUEST, "Arguments must be a JSON object.");
         }

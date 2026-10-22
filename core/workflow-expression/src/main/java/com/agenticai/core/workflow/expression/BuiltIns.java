@@ -139,7 +139,7 @@ public final class BuiltIns {
                 (ev, a) -> {
                     try {
                         return Values.parseStrict(str(a, 0));
-                    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                    } catch (tools.jackson.core.JacksonException e) {
                         throw err("parseJson", "invalid JSON");
                     }
                 });

@@ -3,11 +3,11 @@ package com.agenticai.core.agents.job.dto;
 import com.agenticai.core.agents.job.AgentJob;
 import com.agenticai.core.agents.job.AgentJobOrigin;
 import com.agenticai.core.agents.job.AgentJobStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Full single-job view.

@@ -24,11 +24,12 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -293,7 +294,7 @@ public class LlmModelSupport implements DisposableBean {
      * Which failures are worth a second attempt; the policy lives in {@link SpringRetryLlmRetry}.
      */
     static boolean isTransient(Throwable failure) {
-        return SpringRetryLlmRetry.isTransient(failure);
+        return SpringRetryLlmRetry.isTransientFailure(failure);
     }
 
     // ------------------------------------------------------ observation + client
@@ -302,6 +303,25 @@ public class LlmModelSupport implements DisposableBean {
         return observationRegistry;
     }
 
+    /**
+     * Where the tool loop sits in every client's advisor chain (ADR-0012 P3). In Spring AI 2 the
+     * loop is no longer inside the {@code ChatModel}: {@code ToolCallingAdvisor} runs it, and it
+     * accumulates the token usage of all iterations into ONE response. Advisors with a LOWER order
+     * value run outside it and therefore see one call with the turn's total usage - exactly what
+     * they saw when the loop was inside the model - while advisors with a higher value would see
+     * (and, for metering, double count) every iteration.
+     *
+     * <p>Every advisor in this codebase is deliberately placed OUTSIDE: {@code
+     * LlmGatewayContentPolicyAdvisor} (-1500), {@code SystemMessageMergingAdvisor} (-1000), {@code
+     * LlmMetricsAdvisor} / {@code FreeTierTokenTrackingAdvisor} / {@code
+     * PerUserBudgetTrackingAdvisor} (0) and the {@code DefaultAgentAdvisor} beans such as core/rl's
+     * trajectory advisor (100). Metering therefore records one row per turn with the accumulated
+     * totals - never per iteration, never both. Spring AI's default ({@code HIGHEST_PRECEDENCE +
+     * 300}) would have put the loop OUTSIDE all of them; do not change this value without
+     * re-reading {@code MeteringCharacterisationTest}.
+     */
+    public static final int TOOL_CALLING_ADVISOR_ORDER = 1000;
+
     // Text-form tool-call recovery for every provider (see TextToolCallRecoveringChatModel).
     // Setter-injected so the hand-built test instances keep their constructor; null = unwrapped.
     private ToolCallRecovery toolCallRecovery;
@@ -309,16 +329,6 @@ public class LlmModelSupport implements DisposableBean {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setToolCallRecovery(ToolCallRecovery toolCallRecovery) {
         this.toolCallRecovery = toolCallRecovery;
-    }
-
-    /**
-     * {@code ChatClient.builder(model)} with the app's registry instead of NOOP. The model is
-     * wrapped in {@link TextToolCallRecoveringChatModel} when {@link ToolCallRecovery} is wired and
-     * enabled - this is the single seam every factory in this package builds its client through, so
-     * a provider added later is covered without wiring of its own.
-     */
-    public ChatClient.Builder chatClientBuilder(ChatModel chatModel) {
-        return chatClientBuilder(chatModel, null);
     }
 
     // Constrained tool router for hosted-pool rows that opted in (see
@@ -331,18 +341,42 @@ public class LlmModelSupport implements DisposableBean {
     }
 
     /**
-     * {@link #chatClientBuilder(ChatModel)} plus, when {@code routerMode} is non-null and {@link
-     * ConstrainedToolRouting} is wired and enabled, the {@link ConstrainedToolRouterChatModel}
-     * outermost, so it owns the tool loop for that row. A null mode is exactly the one-argument
-     * form: no request of a row that did not opt in changes.
+     * {@code ChatClient.builder(model)} with the app's registry instead of NOOP and the platform's
+     * tool loop: the caller's {@code toolCallingManager} (from {@link
+     * ResilientToolCallingManagerFactory}) is seated on the {@code ToolCallingAdvisor} Spring AI 2
+     * auto-registers, at {@link #TOOL_CALLING_ADVISOR_ORDER}. The same manager is given to the
+     * model builders (they still use it to resolve tool definitions for the request). The model is
+     * wrapped in {@link TextToolCallRecoveringChatModel} when {@link ToolCallRecovery} is wired and
+     * enabled - this is the single seam every factory in this package builds its client through, so
+     * a provider added later is covered without wiring of its own.
      */
     public ChatClient.Builder chatClientBuilder(
-            ChatModel chatModel, com.agenticai.core.providers.ToolRouterMode routerMode) {
+            ChatModel chatModel, ToolCallingManager toolCallingManager) {
+        return chatClientBuilder(chatModel, toolCallingManager, null);
+    }
+
+    /**
+     * {@link #chatClientBuilder(ChatModel, ToolCallingManager)} plus, when {@code routerMode} is
+     * non-null and {@link ConstrainedToolRouting} is wired and enabled, the {@link
+     * ConstrainedToolRouterChatModel} outermost, so it owns the tool loop for that row. A null mode
+     * is exactly the two-argument form: no request of a row that did not opt in changes.
+     */
+    public ChatClient.Builder chatClientBuilder(
+            ChatModel chatModel,
+            ToolCallingManager toolCallingManager,
+            com.agenticai.core.providers.ToolRouterMode routerMode) {
         ChatModel model = toolCallRecovery == null ? chatModel : toolCallRecovery.wrap(chatModel);
         if (routerMode != null && constrainedToolRouting != null) {
             model = constrainedToolRouting.wrap(model, routerMode);
         }
-        return ChatClient.builder(model, observationRegistry, null, null);
+        return ChatClient.builder(
+                model,
+                observationRegistry,
+                null,
+                null,
+                CancellationAwareToolCallingAdvisor.builder()
+                        .toolCallingManager(toolCallingManager)
+                        .advisorOrder(TOOL_CALLING_ADVISOR_ORDER));
     }
 
     /**

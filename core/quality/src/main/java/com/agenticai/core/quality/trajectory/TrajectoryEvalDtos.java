@@ -1,8 +1,8 @@
 package com.agenticai.core.quality.trajectory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
 
 /** Wire shapes of {@code /api/agents/{agentId}/quality/trajectory-eval}. */
 public final class TrajectoryEvalDtos {

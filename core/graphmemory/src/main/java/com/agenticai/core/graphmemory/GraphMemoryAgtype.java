@@ -1,13 +1,13 @@
 package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Text-based parsing of the agtype values Apache AGE hands back for {@link GraphMemoryService}'s
@@ -46,7 +46,7 @@ final class GraphMemoryAgtype {
      * ({@code asOfMillis == null}: not closed; otherwise: valid at that instant). Pure.
      */
     static List<GraphFact> parsePathFacts(String agtypePath, Long asOfMillis)
-            throws com.fasterxml.jackson.core.JsonProcessingException {
+            throws tools.jackson.core.JacksonException {
         if (agtypePath == null || agtypePath.isBlank()) {
             return List.of();
         }
@@ -62,7 +62,7 @@ final class GraphMemoryAgtype {
             } else if (element.has("id")) {
                 names.put(
                         element.get("id").asLong(),
-                        element.path("properties").path("name").asText(""));
+                        element.path("properties").path("name").asString(""));
             }
         }
         List<GraphFact> facts = new ArrayList<>();
@@ -73,7 +73,7 @@ final class GraphMemoryAgtype {
             }
             String subject = names.get(edge.get("start_id").asLong());
             String object = names.get(edge.get("end_id").asLong());
-            String type = props.path("type").asText("");
+            String type = props.path("type").asString("");
             facts.add(
                     new GraphFact(
                             subject == null ? "" : subject,

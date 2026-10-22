@@ -160,7 +160,7 @@ public class TemporalWorkflowExecutionEngine {
                 pinnedVersion = resolved.get().getVersionNumber();
                 try {
                     effectiveGraph =
-                            new com.fasterxml.jackson.databind.ObjectMapper()
+                            new tools.jackson.databind.ObjectMapper()
                                     .readValue(
                                             resolved.get().getGraphJson(), WorkflowGraphDto.class);
                 } catch (Exception e) {

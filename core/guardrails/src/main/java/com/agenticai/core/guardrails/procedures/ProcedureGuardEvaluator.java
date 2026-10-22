@@ -1,8 +1,6 @@
 package com.agenticai.core.guardrails.procedures;
 
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The deterministic half of the procedures layer - consulted by {@code GuardedToolCallback#call}
@@ -250,7 +250,7 @@ public class ProcedureGuardEvaluator {
         }
         try {
             JsonNode prior = objectMapper.readTree(rule.getGuardConfig()).get("prior");
-            return prior != null && !prior.asText().isBlank() ? prior.asText() : null;
+            return prior != null && !prior.asString().isBlank() ? prior.asString() : null;
         } catch (Exception e) {
             return null;
         }

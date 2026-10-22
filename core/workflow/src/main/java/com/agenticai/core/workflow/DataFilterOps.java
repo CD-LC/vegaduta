@@ -16,10 +16,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.str;
 import com.agenticai.core.workflow.WorkflowDataOps.Condition;
 import com.agenticai.core.workflow.WorkflowDataOps.Items;
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +24,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.TextNode;
 
 /**
  * The {@code filter} and {@code switch} data operations and the condition language they share
@@ -316,7 +316,7 @@ final class DataFilterOps {
             if (a != null && b != null) {
                 return a.compareTo(b);
             }
-            Long da = v.isTextual() ? parseDate(v.asText()) : null;
+            Long da = v.isString() ? parseDate(v.asString()) : null;
             Long db = parseDate(rhs);
             if (da != null && db != null) {
                 return Long.compare(da, db);

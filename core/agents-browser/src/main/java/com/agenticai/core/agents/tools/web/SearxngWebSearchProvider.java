@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.tools.web;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * SearXNG adapter - the free-to-run option: a metasearch instance the OPERATOR runs (see the {@code

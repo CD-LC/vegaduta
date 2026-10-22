@@ -1,12 +1,12 @@
 package com.agenticai.core.google.agenttools;
 
 import com.agenticai.core.google.YouTubeAnalyticsClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link YouTubeAnalyticsClient} as a native tool - Master-Roadmap- 2026.md item #8

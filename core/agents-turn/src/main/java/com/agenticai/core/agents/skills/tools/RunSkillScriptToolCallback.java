@@ -6,9 +6,6 @@ import com.agenticai.core.agents.tools.code.ToolSandboxClient;
 import com.agenticai.core.agents.tools.code.ToolSandboxProperties;
 import com.agenticai.core.agents.tools.code.dto.SandboxExecuteRequest;
 import com.agenticai.core.agents.tools.code.dto.SandboxExecuteResponse;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Optional;
@@ -17,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Level 3, executable half: runs a script bundled with a skill and returns only its output - the
@@ -89,8 +89,8 @@ public class RunSkillScriptToolCallback implements ToolCallback {
         try {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            String skillName = args.path("skill").asText("").trim();
-            String path = args.path("path").asText("").trim().replace('\\', '/');
+            String skillName = args.path("skill").asString("").trim();
+            String path = args.path("path").asString("").trim().replace('\\', '/');
             if (skillName.isEmpty() || path.isEmpty()) {
                 return error("Both skill and path are required.");
             }

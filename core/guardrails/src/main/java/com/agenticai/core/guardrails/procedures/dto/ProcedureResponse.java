@@ -5,11 +5,11 @@ import com.agenticai.core.guardrails.procedures.ProcedureGuardKind;
 import com.agenticai.core.guardrails.procedures.ProcedureRule;
 import com.agenticai.core.guardrails.procedures.ProcedureStatus;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** API view of a procedure with its rules fully resolved, in order. */
 public record ProcedureResponse(

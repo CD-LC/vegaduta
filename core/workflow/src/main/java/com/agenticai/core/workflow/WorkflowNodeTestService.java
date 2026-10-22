@@ -8,7 +8,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeTestRequest;
 import com.agenticai.core.workflow.expression.NodeOutput;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "Test this step" for the workflow canvas: runs ONE node of the saved graph through {@link

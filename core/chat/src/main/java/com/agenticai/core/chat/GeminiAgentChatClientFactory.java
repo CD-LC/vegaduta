@@ -154,7 +154,7 @@ public class GeminiAgentChatClientFactory implements AgentChatClientFactory {
                         modelSupport.observationRegistry());
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 // Gemini rejects >1 system message; see

@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -20,6 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Google Calendar v3, scoped to {@code calendar.events} and always against the connected account's
@@ -54,15 +54,15 @@ public class GoogleCalendarClient {
         for (JsonNode item : body.path("items")) {
             events.add(
                     new CalendarEvent(
-                            item.path("id").asText(null),
-                            item.path("summary").asText(null),
+                            item.path("id").asString(null),
+                            item.path("summary").asString(null),
                             firstNonBlank(
-                                    item.path("start").path("dateTime").asText(null),
-                                    item.path("start").path("date").asText(null)),
+                                    item.path("start").path("dateTime").asString(null),
+                                    item.path("start").path("date").asString(null)),
                             firstNonBlank(
-                                    item.path("end").path("dateTime").asText(null),
-                                    item.path("end").path("date").asText(null)),
-                            item.path("htmlLink").asText(null)));
+                                    item.path("end").path("dateTime").asString(null),
+                                    item.path("end").path("date").asString(null)),
+                            item.path("htmlLink").asString(null)));
         }
         return events;
     }
@@ -99,11 +99,11 @@ public class GoogleCalendarClient {
             }
             JsonNode created = objectMapper.readTree(response.body());
             return new CalendarEvent(
-                    created.path("id").asText(null),
-                    created.path("summary").asText(summary),
+                    created.path("id").asString(null),
+                    created.path("summary").asString(summary),
                     startIso,
                     endIso,
-                    created.path("htmlLink").asText(null));
+                    created.path("htmlLink").asString(null));
         } catch (GoogleApiException e) {
             throw e;
         } catch (Exception e) {
@@ -142,7 +142,7 @@ public class GoogleCalendarClient {
                             + "&singleEvents=true&orderBy=startTime&maxResults=250"
                             + (pageToken == null ? "" : "&pageToken=" + urlEncode(pageToken));
             JsonNode body = get(uri);
-            calendarZone = zoneOr(body.path("timeZone").asText(null), calendarZone);
+            calendarZone = zoneOr(body.path("timeZone").asString(null), calendarZone);
             for (JsonNode item : body.path("items")) {
                 if (!blocksTime(item)) {
                     continue;
@@ -153,7 +153,7 @@ public class GoogleCalendarClient {
                     busy.add(new Interval(start, end));
                 }
             }
-            pageToken = body.path("nextPageToken").asText(null);
+            pageToken = body.path("nextPageToken").asString(null);
             pages++;
         } while (pageToken != null && !pageToken.isBlank() && pages < MAX_BUSY_PAGES);
         boolean truncated = pageToken != null && !pageToken.isBlank();
@@ -190,11 +190,11 @@ public class GoogleCalendarClient {
             }
             JsonNode moved = objectMapper.readTree(response.body());
             return new CalendarEvent(
-                    moved.path("id").asText(eventId),
-                    moved.path("summary").asText(null),
+                    moved.path("id").asString(eventId),
+                    moved.path("summary").asString(null),
                     startIso,
                     endIso,
-                    moved.path("htmlLink").asText(null));
+                    moved.path("htmlLink").asString(null));
         } catch (GoogleApiException e) {
             throw e;
         } catch (Exception e) {
@@ -236,15 +236,15 @@ public class GoogleCalendarClient {
     }
 
     private static boolean blocksTime(JsonNode item) {
-        if ("cancelled".equals(item.path("status").asText())) {
+        if ("cancelled".equals(item.path("status").asString())) {
             return false;
         }
-        if ("transparent".equals(item.path("transparency").asText())) {
+        if ("transparent".equals(item.path("transparency").asString())) {
             return false;
         }
         for (JsonNode attendee : item.path("attendees")) {
             if (attendee.path("self").asBoolean(false)
-                    && "declined".equals(attendee.path("responseStatus").asText())) {
+                    && "declined".equals(attendee.path("responseStatus").asString())) {
                 return false;
             }
         }
@@ -257,11 +257,11 @@ public class GoogleCalendarClient {
      */
     private static Instant instantOf(JsonNode time, ZoneId calendarZone) {
         try {
-            String dateTime = time.path("dateTime").asText(null);
+            String dateTime = time.path("dateTime").asString(null);
             if (dateTime != null && !dateTime.isBlank()) {
                 return OffsetDateTime.parse(dateTime).toInstant();
             }
-            String date = time.path("date").asText(null);
+            String date = time.path("date").asString(null);
             if (date != null && !date.isBlank()) {
                 return LocalDate.parse(date).atStartOfDay(calendarZone).toInstant();
             }

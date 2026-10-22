@@ -1,11 +1,11 @@
 package com.agenticai.core.payments.agenttools;
 
 import com.agenticai.core.payments.PaymentToolService.PaymentOutcome;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Shared helpers for the mandate-aware payment tool callbacks - the same conventions {@code

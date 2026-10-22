@@ -14,7 +14,6 @@ import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.RecipeStep;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Browser recipes (app.browser.recipes.enabled, default OFF): records a finished browser run as a

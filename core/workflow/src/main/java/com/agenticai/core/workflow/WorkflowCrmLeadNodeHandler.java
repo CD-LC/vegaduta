@@ -6,8 +6,6 @@ import com.agenticai.core.omnichannel.crm.LeadService;
 import com.agenticai.core.omnichannel.crm.LeadStage;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +15,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "CRM Lead" node ({@code crm_lead}) - upsert a lead, move it to a stage, or add a timeline

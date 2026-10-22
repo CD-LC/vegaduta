@@ -3,12 +3,12 @@ package com.agenticai.core.workflow.portability;
 import com.agenticai.core.agents.importer.AgentImportText;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Small constructors the mappers share, so every imported node has the same shape: React Flow's

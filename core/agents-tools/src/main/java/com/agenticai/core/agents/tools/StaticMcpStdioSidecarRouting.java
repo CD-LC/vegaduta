@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.tools;
 
-import com.agenticai.core.json.JsonMappers;
 import io.modelcontextprotocol.client.transport.ServerParameters;
-import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.json.McpJsonDefaults;
+import io.modelcontextprotocol.json.McpJsonMapper;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,7 +96,8 @@ public class StaticMcpStdioSidecarRouting {
                     routed.keySet(),
                     sidecarProperties.getAddress());
         }
-        JacksonMcpJsonMapper jsonMapper = new JacksonMcpJsonMapper(JsonMappers.plain());
+        // MCP SDK 2.0 is Jackson 3 (mcp-json-jackson3, discovered by the SDK's own service loader).
+        McpJsonMapper jsonMapper = McpJsonDefaults.getMapper();
         return routed.entrySet().stream()
                 .map(
                         e ->

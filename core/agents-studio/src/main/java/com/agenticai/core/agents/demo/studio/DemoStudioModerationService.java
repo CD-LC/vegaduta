@@ -8,8 +8,6 @@ import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.demo.DemoSession;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,6 +30,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Content moderation for everything an anonymous /try visitor types into the Agent Studio (agent
@@ -455,20 +455,20 @@ public class DemoStudioModerationService {
         }
         JsonNode node = parsed.get();
         JsonNode blocked = node.get("blocked");
-        if (blocked == null || !(blocked.isBoolean() || blocked.isTextual())) {
+        if (blocked == null || !(blocked.isBoolean() || blocked.isString())) {
             return Optional.empty();
         }
         boolean isBlocked =
                 blocked.isBoolean()
                         ? blocked.asBoolean()
-                        : "true".equalsIgnoreCase(blocked.asText().strip());
-        if (blocked.isTextual()
+                        : "true".equalsIgnoreCase(blocked.asString().strip());
+        if (blocked.isString()
                 && !isBlocked
-                && !"false".equalsIgnoreCase(blocked.asText().strip())) {
+                && !"false".equalsIgnoreCase(blocked.asString().strip())) {
             return Optional.empty();
         }
         String category =
-                node.hasNonNull("category") ? node.get("category").asText("none") : "none";
+                node.hasNonNull("category") ? node.get("category").asString("none") : "none";
         return Optional.of(
                 new Verdict(
                         isBlocked,

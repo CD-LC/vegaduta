@@ -7,7 +7,6 @@ import com.agenticai.core.agents.turn.AgentChatService.StructuredAgentInput;
 import com.agenticai.core.agents.turn.AgentChatService.StructuredAgentOutput;
 import com.agenticai.core.agents.turn.AgentChatService.ToolCallSummary;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Workflow -> Agent structured parameter passing, extracted verbatim from {@link AgentChatService}

@@ -4,7 +4,6 @@ import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.Expect;
 import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.ParamSpec;
 import com.agenticai.core.agents.tools.browseruse.BrowserRecipeSpec.RecipeStep;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns a finished run's tool-call journal into a replayable {@link BrowserRecipeSpec} - the

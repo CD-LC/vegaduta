@@ -5,12 +5,12 @@ import com.agenticai.core.agents.importer.AgentImportText;
 import com.agenticai.core.workflow.WorkflowNodeType;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Reads a VegaDuta workflow DSL v1 file (see {@link WorkflowDslV1}) into a {@link

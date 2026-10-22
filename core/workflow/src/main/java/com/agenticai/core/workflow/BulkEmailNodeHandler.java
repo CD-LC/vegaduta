@@ -13,8 +13,6 @@ import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.output.BulkEmailSender;
 import com.agenticai.core.workflow.output.WorkflowOutputDedupGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -33,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * "Bulk Email" node ({@link WorkflowNodeType#BULK_EMAIL}). One node, many recipients, each getting
@@ -415,8 +415,8 @@ public class BulkEmailNodeHandler {
         }
         List<Recipient> out = new ArrayList<>();
         for (JsonNode item : array) {
-            if (item.isTextual()) {
-                out.add(new Recipient(item.asText().trim(), Map.of()));
+            if (item.isString()) {
+                out.add(new Recipient(item.asString().trim(), Map.of()));
             } else if (item.isObject()) {
                 Map<String, String> vars = new HashMap<>();
                 com.agenticai.core.json.JsonNodes.fields(item)
@@ -424,8 +424,8 @@ public class BulkEmailNodeHandler {
                                 e ->
                                         vars.put(
                                                 e.getKey(),
-                                                e.getValue().isTextual()
-                                                        ? e.getValue().asText()
+                                                e.getValue().isString()
+                                                        ? e.getValue().asString()
                                                         : e.getValue().toString()));
                 String email = vars.get(emailField);
                 if (email == null || email.isBlank()) {

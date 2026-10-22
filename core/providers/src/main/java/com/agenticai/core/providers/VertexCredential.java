@@ -1,8 +1,8 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code projectId} + {@code location} + a GCP service-account key (JSON, base64-encoded here) as

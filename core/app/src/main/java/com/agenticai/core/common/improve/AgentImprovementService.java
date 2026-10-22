@@ -13,8 +13,6 @@ import com.agenticai.core.guardrails.procedures.ProcedureService;
 import com.agenticai.core.guardrails.procedures.ProcedureStatus;
 import com.agenticai.core.guardrails.procedures.dto.ProcedureRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +20,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Auto-improvement loop (Tier-3): turns recurring production failures into concrete, reviewable
@@ -282,29 +282,29 @@ public class AgentImprovementService {
                         ? assistService.completeInBackground(SUGGESTION_SYSTEM_PROMPT, context)
                         : assistService.complete(SUGGESTION_SYSTEM_PROMPT, context);
         JsonNode spec = parseSpec(raw, issue.getId());
-        if ("NO_CLEAR_FIX".equals(spec.path("title").asText(""))) {
+        if ("NO_CLEAR_FIX".equals(spec.path("title").asString(""))) {
             return null;
         }
         ImprovementKind kind;
         try {
-            kind = ImprovementKind.valueOf(spec.path("kind").asText("").trim());
+            kind = ImprovementKind.valueOf(spec.path("kind").asString("").trim());
         } catch (IllegalArgumentException e) {
             log.warn("Improvement verdict for issue {} had unknown kind - skipping", issue.getId());
             return null;
         }
-        String suggestedText = spec.path("suggestedText").asText("").trim();
+        String suggestedText = spec.path("suggestedText").asString("").trim();
         if (suggestedText.isEmpty()) {
             return null;
         }
         String title =
-                spec.path("title").asText("Suggested fix for recurring " + issue.getSource());
+                spec.path("title").asString("Suggested fix for recurring " + issue.getSource());
         return new AgentImprovementSuggestion(
                 tenantId,
                 agent.getId(),
                 issue.getId(),
                 kind,
                 truncate(title, 255),
-                spec.path("rationale").asText(null),
+                spec.path("rationale").asString(null),
                 suggestedText);
     }
 

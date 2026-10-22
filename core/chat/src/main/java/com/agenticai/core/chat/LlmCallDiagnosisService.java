@@ -9,8 +9,6 @@ import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.tenancy.PlatformFeatureBudgetService;
 import com.agenticai.core.tenancy.PlatformFeatureBudgetService.BudgetDecision;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -26,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns one failed {@link LlmCallLog} row into a structured, user-facing diagnosis - what category
@@ -472,13 +472,15 @@ public class LlmCallDiagnosisService {
         JsonNode node = StructuredOutput.readObject(objectMapper, rawText).orElse(null);
         if (node != null) {
             try {
-                String category = node.path("category").asText("").strip().toUpperCase(Locale.ROOT);
+                String category =
+                        node.path("category").asString("").strip().toUpperCase(Locale.ROOT);
                 if (!CATEGORIES.contains(category)) {
                     category = CATEGORY_UNKNOWN;
                 }
-                String title = clean(node.path("title").asText(null), MAX_TITLE_CHARS);
-                String explanation = clean(node.path("explanation").asText(null), MAX_TEXT_CHARS);
-                String suggestedFix = clean(node.path("suggestedFix").asText(null), MAX_TEXT_CHARS);
+                String title = clean(node.path("title").asString(null), MAX_TITLE_CHARS);
+                String explanation = clean(node.path("explanation").asString(null), MAX_TEXT_CHARS);
+                String suggestedFix =
+                        clean(node.path("suggestedFix").asString(null), MAX_TEXT_CHARS);
                 if (explanation == null && title == null) {
                     return null;
                 }

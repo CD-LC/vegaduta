@@ -8,7 +8,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -17,6 +16,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE} - sends replies via the platform's

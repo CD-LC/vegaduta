@@ -2,7 +2,6 @@ package com.agenticai.core.knowledge;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.dto.IngestResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * New feature - the write/insert companion to {@link KnowledgeSearchToolCallback}: lets an agent

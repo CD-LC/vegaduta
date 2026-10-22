@@ -1,13 +1,13 @@
 package com.agenticai.core.tables;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The filter + sort vocabulary shared by the REST API, the workflow node and the agent tools. A
@@ -118,7 +118,7 @@ public final class DataTableFilter {
             }
             try {
                 spec = MAPPER.readValue(t, Object.class);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new IllegalArgumentException(
                         "The filter is not valid JSON - use a list of {column, op, value} or an object like {\"status\": \"open\"}");
             }

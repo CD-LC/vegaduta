@@ -4,7 +4,6 @@ import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProvi
 import com.agenticai.core.providers.validation.ProviderValidationException;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.security.startup.BackgroundStartupTask;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Registers a local Ollama (or any OpenAI-compatible local server) as the FREE-tier platform pool
@@ -538,7 +538,7 @@ public class LocalLlmPoolBootstrap {
                 for (JsonNode entry : list) {
                     for (String field : List.of("name", "model", "id")) {
                         if (entry.hasNonNull(field)
-                                && sameModel(entry.get(field).asText(), wanted)) {
+                                && sameModel(entry.get(field).asString(), wanted)) {
                             return Boolean.TRUE;
                         }
                     }

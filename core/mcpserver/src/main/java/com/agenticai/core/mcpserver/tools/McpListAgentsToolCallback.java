@@ -4,7 +4,6 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.dto.AgentResponse;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.McpCallerContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One of exactly two MCP tools this server statically exposes (the other is {@link

@@ -1,7 +1,7 @@
 package com.agenticai.core.guardrails;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * 2026 Reliability Gap Analysis (task #815), Gap 1 - "no deterministic,

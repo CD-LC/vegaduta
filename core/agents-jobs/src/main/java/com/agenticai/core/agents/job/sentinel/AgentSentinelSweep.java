@@ -13,7 +13,6 @@ import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns finished sentinel watch runs into outcomes - the "notice and escalate" half of ambient

@@ -14,12 +14,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.intOrNull;
 import static com.agenticai.core.workflow.WorkflowDataOps.str;
 
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +22,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.TextNode;
 
 /**
  * The {@code merge} data operation (append / join / first_non_empty) and its keyed join ({@code
@@ -83,7 +83,7 @@ final class DataJoinOps {
                 declared = root.size();
                 for (JsonNode element : root) {
                     JsonNode node =
-                            element.isTextual() ? parseLenient(mapper, element.asText()) : element;
+                            element.isString() ? parseLenient(mapper, element.asString()) : element;
                     if (!isAbsentInput(node)) {
                         present.add(node);
                     }
@@ -253,7 +253,7 @@ final class DataJoinOps {
         if (isAbsent(v)) {
             return null;
         }
-        if (v.isTextual() && v.asText().isBlank()) {
+        if (v.isString() && v.asString().isBlank()) {
             return null;
         }
         BigDecimal n = canonicalNumber(v);
@@ -274,7 +274,7 @@ final class DataJoinOps {
             JsonNode parsed = DataValues.parse(mapper, s);
             if (parsed != null && parsed.isArray()) {
                 for (JsonNode e : parsed) {
-                    out.add(e.isTextual() ? e.asText() : e.toString());
+                    out.add(e.isString() ? e.asString() : e.toString());
                 }
             }
         }
@@ -299,6 +299,6 @@ final class DataJoinOps {
         return n == null
                 || n.isMissingNode()
                 || n.isNull()
-                || (n.isTextual() && n.asText().isBlank());
+                || (n.isString() && n.asString().isBlank());
     }
 }

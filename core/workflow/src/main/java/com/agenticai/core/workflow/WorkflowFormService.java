@@ -9,7 +9,6 @@ import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.share.WorkflowShareService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The PUBLIC hosted form of a Trigger node whose config says {@code triggerType: "form"} (see

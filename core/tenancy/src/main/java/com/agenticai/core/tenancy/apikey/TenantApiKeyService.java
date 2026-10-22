@@ -14,10 +14,6 @@ import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.apikey.dto.TenantApiKeyCreateRequest;
 import com.agenticai.core.tenancy.apikey.dto.TenantApiKeyCreatedResponse;
 import com.agenticai.core.tenancy.apikey.dto.TenantApiKeyResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,6 +27,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Owns the create/rotate/enable/revoke/list lifecycle for tenant REST API keys ({@code vdak_...}),
@@ -340,7 +340,7 @@ public class TenantApiKeyService implements TenantApiKeyAuthenticator {
     private String writeJson(Object value) {
         try {
             return MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize API key permissions", e);
         }
     }

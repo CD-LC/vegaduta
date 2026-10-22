@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.version;
 
 import com.agenticai.core.agents.core.Agent;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -12,6 +10,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The three operations that make a config version useful: CAPTURE a live {@link Agent} into an
@@ -360,7 +360,7 @@ public class AgentConfigSnapshotCodec {
     public String toJson(AgentConfigSnapshot snapshot) {
         try {
             return objectMapper.writeValueAsString(snapshot);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not serialize agent config snapshot", e);
         }
     }
@@ -373,7 +373,7 @@ public class AgentConfigSnapshotCodec {
     public AgentConfigSnapshot fromJson(String configJson) {
         try {
             return objectMapper.readValue(configJson, AgentConfigSnapshot.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not read stored agent config snapshot", e);
         }
     }

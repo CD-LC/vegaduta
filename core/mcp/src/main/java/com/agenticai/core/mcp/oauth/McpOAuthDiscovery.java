@@ -1,7 +1,5 @@
 package com.agenticai.core.mcp.oauth;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +7,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Discovery half of the MCP authorization spec:
@@ -383,7 +383,7 @@ public class McpOAuthDiscovery {
 
     private static String text(JsonNode node, String field) {
         JsonNode v = node.get(field);
-        return v != null && v.isTextual() && !v.asText().isBlank() ? v.asText() : null;
+        return v != null && v.isString() && !v.asString().isBlank() ? v.asString() : null;
     }
 
     private static List<String> stringList(JsonNode node, String field) {
@@ -392,8 +392,8 @@ public class McpOAuthDiscovery {
         if (v != null && v.isArray()) {
             v.forEach(
                     e -> {
-                        if (e.isTextual()) {
-                            out.add(e.asText());
+                        if (e.isString()) {
+                            out.add(e.asString());
                         }
                     });
         }

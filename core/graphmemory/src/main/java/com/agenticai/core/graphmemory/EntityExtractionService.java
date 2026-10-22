@@ -2,14 +2,14 @@ package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One cheap {@link ChatClient} call per {@code remember_fact} invocation (see {@code
@@ -109,8 +109,8 @@ public class EntityExtractionService {
 
     private String textOrNull(JsonNode node, String field) {
         JsonNode value = node.get(field);
-        return (value == null || value.isNull() || value.asText().isBlank())
+        return (value == null || value.isNull() || value.asString().isBlank())
                 ? null
-                : value.asText().trim();
+                : value.asString().trim();
     }
 }

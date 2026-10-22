@@ -1,8 +1,5 @@
 package com.agenticai.core.mcpserver;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +9,9 @@ import java.net.URI;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Serves this MCP server's OAuth 2.0 Protected Resource Metadata (RFC 9728), which the MCP

@@ -7,11 +7,11 @@ import com.agenticai.core.workflow.WorkflowTraversalRules;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.workflow.Workflow;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Loop / Iterator - same "repeat the next node per item" special-case as the in-process engine's

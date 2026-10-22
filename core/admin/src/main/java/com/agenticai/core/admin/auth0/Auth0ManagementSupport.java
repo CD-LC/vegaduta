@@ -4,8 +4,6 @@ import com.agenticai.core.admin.keycloak.KeycloakAdminException;
 import com.agenticai.core.admin.keycloak.KeycloakUserConflictException;
 import com.agenticai.core.admin.keycloak.KeycloakUserValidationException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * HTTP plumbing shared by the Auth0 Management API adapter: the cached client_credentials token,
@@ -353,7 +353,7 @@ abstract class Auth0ManagementSupport {
     private static String extractAuth0Message(String body) {
         try {
             JsonNode node = OBJECT_MAPPER.readTree(body);
-            String message = node.path("message").asText(null);
+            String message = node.path("message").asString(null);
             return message == null || message.isBlank() ? null : message;
         } catch (Exception ignored) {
             return null;

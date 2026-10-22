@@ -3,9 +3,6 @@ package com.agenticai.core.agents.tools.localshell;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
@@ -15,6 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Runs the Assistant's commands in the workspace-runner container (services/workspace-runner)
@@ -101,7 +101,7 @@ final class RunnerShellRunner implements ShellRunner {
         } catch (RestClientResponseException e) {
             JsonNode err = parse(e.getResponseBodyAsString());
             String why =
-                    err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+                    err == null ? e.getStatusText() : err.path("error").asString(e.getStatusText());
             throw new IOException("The workspace runner refused the command: " + why, e);
         } catch (RuntimeException e) {
             throw new IOException(
@@ -113,7 +113,7 @@ final class RunnerShellRunner implements ShellRunner {
         }
         return new Result(
                 r.path("exitCode").asInt(-1),
-                r.path("output").asText(""),
+                r.path("output").asString(""),
                 r.path("truncated").asBoolean(false),
                 r.path("timedOut").asBoolean(false));
     }
@@ -131,7 +131,7 @@ final class RunnerShellRunner implements ShellRunner {
         return new Server(
                 r.path("port").asInt(-1),
                 r.path("running").asBoolean(false),
-                r.path("output").asText(""),
+                r.path("output").asString(""),
                 r.path("exitCode").isNumber() ? r.path("exitCode").asInt() : null);
     }
 
@@ -156,8 +156,8 @@ final class RunnerShellRunner implements ShellRunner {
                 out.add(
                         new Preview(
                                 p.path("port").asInt(),
-                                p.path("folder").asText(""),
-                                p.path("command").asText(""),
+                                p.path("folder").asString(""),
+                                p.path("command").asString(""),
                                 p.path("running").asBoolean(false)
                                         && p.path("ready").asBoolean(true)));
             }
@@ -184,7 +184,7 @@ final class RunnerShellRunner implements ShellRunner {
         } catch (RestClientResponseException e) {
             JsonNode err = parse(e.getResponseBodyAsString());
             String why =
-                    err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+                    err == null ? e.getStatusText() : err.path("error").asString(e.getStatusText());
             throw new IOException("The workspace runner refused the request: " + why, e);
         } catch (RuntimeException e) {
             throw new IOException(

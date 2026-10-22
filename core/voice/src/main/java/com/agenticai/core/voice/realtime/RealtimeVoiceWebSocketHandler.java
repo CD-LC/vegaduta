@@ -5,9 +5,6 @@ import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +18,10 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Bridges a browser's voice socket to a native speech-to-speech provider session ({@link
@@ -87,11 +88,11 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
         JsonNode node;
         try {
             node = MAPPER.readTree(message.getPayload());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("Malformed realtime-voice frame on {}: {}", session.getId(), e.getMessage());
             return;
         }
-        String type = node.path("type").asText("");
+        String type = node.path("type").asString("");
         if ("setup".equals(type)) {
             handleSetup(session, node);
         } else if ("interrupt".equals(type)) {
@@ -108,7 +109,7 @@ public class RealtimeVoiceWebSocketHandler extends AbstractWebSocketHandler {
             return;
         }
         Optional<RealtimeVoiceTicketService.Admission> admission =
-                ticketService.verifyAndConsume(node.path("ticket").asText(""));
+                ticketService.verifyAndConsume(node.path("ticket").asString(""));
         if (admission.isEmpty()) {
             log.warn(
                     "Rejected realtime voice setup on {} - missing/forged/expired/already-used ticket",

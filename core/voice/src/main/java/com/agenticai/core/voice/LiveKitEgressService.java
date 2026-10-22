@@ -2,8 +2,6 @@ package com.agenticai.core.voice;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.storage.StorageProperties;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,6 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Starts/stops LiveKit Egress recordings of a self-hosted voice call and uploads the result
@@ -215,7 +216,7 @@ public class LiveKitEgressService {
         String requestJson;
         try {
             requestJson = objectMapper.writeValueAsString(body);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new LiveKitEgressException("Could not serialize LiveKit Egress request body", e);
         }
 
@@ -257,8 +258,8 @@ public class LiveKitEgressService {
         try {
             JsonNode json = objectMapper.readTree(response.body());
             JsonNode egressIdNode = json.get("egress_id");
-            return egressIdNode != null ? egressIdNode.asText(null) : null;
-        } catch (IOException e) {
+            return egressIdNode != null ? egressIdNode.asString(null) : null;
+        } catch (JacksonException e) {
             throw new LiveKitEgressException(
                     "Could not parse LiveKit Egress " + method + " response: " + response.body(),
                     e);

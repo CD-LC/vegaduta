@@ -5,10 +5,6 @@ import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowValidationException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,6 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Configures and executes HTTP polling triggers (V482). Two deliberately separate halves:
@@ -376,7 +376,7 @@ public class WorkflowPollTriggerService {
         try {
             ObjectNode node = (ObjectNode) objectMapper.readTree(stateJson);
             if (node.get("seenIds") instanceof ArrayNode ids) {
-                ids.forEach(id -> state.seenIds().add(id.asText()));
+                ids.forEach(id -> state.seenIds().add(id.asString()));
             }
             return new PollState(state.seenIds(), node.path("seeded").asBoolean(false));
         } catch (Exception e) {

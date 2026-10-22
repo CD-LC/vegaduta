@@ -1,9 +1,5 @@
 package com.agenticai.core.workflow;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.LongNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -12,6 +8,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.DoubleNode;
+import tools.jackson.databind.node.LongNode;
+import tools.jackson.databind.node.TextNode;
 
 /**
  * Number and date canonicalisation shared by every data operation: canonical (strict) versus
@@ -34,7 +34,7 @@ final class NumberCanon {
         if (v.isNumber()) {
             return v.decimalValue();
         }
-        return v.isTextual() ? canonicalNumber(v.asText()) : null;
+        return v.isString() ? canonicalNumber(v.asString()) : null;
     }
 
     static BigDecimal canonicalNumber(String s) {
@@ -59,7 +59,7 @@ final class NumberCanon {
         if (v.isNumber()) {
             return v.decimalValue();
         }
-        return v.isTextual() ? lenientNumber(v.asText()) : null;
+        return v.isString() ? lenientNumber(v.asString()) : null;
     }
 
     static BigDecimal lenientNumber(String s) {

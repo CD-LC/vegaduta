@@ -4,8 +4,6 @@ import com.agenticai.core.chat.structured.JsonSchemaCheck;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.chat.structured.StructuredOutputException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +25,8 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.ResponseFormat;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Keeps a structured-output request alive on an Ollama model whose server refuses {@code

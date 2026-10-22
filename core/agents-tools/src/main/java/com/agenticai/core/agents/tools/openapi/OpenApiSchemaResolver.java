@@ -2,15 +2,15 @@ package com.agenticai.core.agents.tools.openapi;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.MissingNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The {@code $ref} handling of {@link OpenApiSpecParser}: inlines internal references with a cycle
@@ -41,7 +41,7 @@ final class OpenApiSchemaResolver {
         for (int hop = 0;
                 hop < MAX_REF_DEPTH && current != null && current.isObject() && current.has("$ref");
                 hop++) {
-            String ref = current.path("$ref").asText("");
+            String ref = current.path("$ref").asString("");
             if (!ref.startsWith("#/")) {
                 return MAPPER.createObjectNode();
             }
@@ -73,7 +73,7 @@ final class OpenApiSchemaResolver {
             return null;
         }
         if (schema.has("$ref")) {
-            String ref = schema.path("$ref").asText("");
+            String ref = schema.path("$ref").asString("");
             if (!ref.startsWith("#/") || stack.contains(ref) || depth > MAX_REF_DEPTH) {
                 return genericObject();
             }
@@ -159,8 +159,8 @@ final class OpenApiSchemaResolver {
                         : null;
         Set<String> required = new LinkedHashSet<>();
         for (JsonNode r : out.path("required")) {
-            if (r.isTextual()) {
-                required.add(r.asText());
+            if (r.isString()) {
+                required.add(r.asString());
             }
         }
         for (JsonNode member : allOf) {
@@ -181,8 +181,8 @@ final class OpenApiSchemaResolver {
                 }
             }
             for (JsonNode r : member.path("required")) {
-                if (r.isTextual()) {
-                    required.add(r.asText());
+                if (r.isString()) {
+                    required.add(r.asString());
                 }
             }
             if (!out.has("type") && member.has("type")) {

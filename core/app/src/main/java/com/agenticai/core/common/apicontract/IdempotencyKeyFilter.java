@@ -3,7 +3,6 @@ package com.agenticai.core.common.apicontract;
 import com.agenticai.core.common.ErrorResponseFactory;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -40,6 +39,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code Idempotency-Key} for side-effecting requests (IETF

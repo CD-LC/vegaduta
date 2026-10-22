@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.hooks;
 
 import com.agenticai.core.agents.hooks.AgentHookDtos.TenantHooksResponse;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The workspace's default hooks: they apply to every agent, always evaluate first, and cannot be

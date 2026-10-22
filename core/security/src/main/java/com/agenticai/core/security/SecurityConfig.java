@@ -422,8 +422,11 @@ public class SecurityConfig {
                                                                         + " geolocation=(),"
                                                                         + " interest-cohort=()")))
                 .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Denied-attempt auditing (granular RBAC, 2026-09-23): an
+                        session ->
+                                session.sessionCreationPolicy(
+                                        SessionCreationPolicy
+                                                .STATELESS)) // Denied-attempt auditing (granular
+                // RBAC, 2026-09-23): an
                 // authenticated request refused by the matchers below gets the
                 // standard 403 JSON body AND an authz.denied audit-log entry via
                 // the AccessDeniedEventListener SPI (empty when core/admin is
@@ -440,8 +443,7 @@ public class SecurityConfig {
                             AdminIntegrationRules.apply(authorize);
                             ToolChannelWorkflowRules.apply(authorize);
                             TenantFeatureRules.apply(authorize);
-                            authorize
-                                    // OpenAI-compatible surface (core/agents
+                            authorize // OpenAI-compatible surface (core/agents
                                     // OpenAiCompatController, only exists when
                                     // app.openai-compat.enabled=true). Accepts a platform JWT
                                     // (authenticated here as for any
@@ -479,23 +481,24 @@ public class SecurityConfig {
                                                         jwt.jwtAuthenticationConverter(
                                                                 jwtAuthenticationConverter(
                                                                         permissionSource,
-                                                                        claimMapping()))))
-                // Delegation tokens (agent acting-for user, core/agents/trust):
+                                                                        claimMapping())))) // Delegation tokens (agent acting-for user, core/agents/trust):
                 // authenticated BEFORE the OAuth2 bearer filter so a valid
                 // Ed25519 delegation JWT isn't 401'd as a malformed Keycloak
                 // token. The SPI is empty when core/agents isn't on the
                 // classpath - the filter then passes everything through.
                 .addFilterBefore(
                         new DelegationTokenAuthFilter(delegatedTokenAuthenticators),
-                        BearerTokenAuthenticationFilter.class)
-                // Tenant REST API keys (vdak_..., V483): authenticated before the
+                        BearerTokenAuthenticationFilter
+                                .class) // Tenant REST API keys (vdak_..., V483): authenticated
+                // before the
                 // OAuth2 bearer filter so a key isn't 401'd as a malformed JWT.
                 // The SPI is empty when core/tenancy's TenantApiKeyService isn't
                 // on the classpath - the filter then passes everything through.
                 .addFilterBefore(
                         new ApiKeyAuthFilter(tenantApiKeyAuthenticators),
-                        BearerTokenAuthenticationFilter.class)
-                // Read-only "view as user" (X-View-As): swaps the admin's validated
+                        BearerTokenAuthenticationFilter
+                                .class) // Read-only "view as user" (X-View-As): swaps the admin's
+                // validated
                 // JWT for the target user's identity BEFORE TenantContextFilter and
                 // URL authorization, so both evaluate the target. See ViewAsFilter.
                 .addFilterAfter(
@@ -507,8 +510,8 @@ public class SecurityConfig {
                 .addFilterAfter(
                         new TenantContextFilter(
                                 tenantStatusGuard, userActivityRecorder, tenantClaim),
-                        ViewAsFilter.class)
-                // end-customer accounts: no console writes beyond chat/voice and their own
+                        ViewAsFilter.class) // end-customer accounts: no console writes beyond
+                // chat/voice and their own
                 // account (see the filter's javadoc for why this is not a matcher rule).
                 .addFilterBefore(new EndCustomerWriteGuardFilter(), AuthorizationFilter.class);
         return http.build();

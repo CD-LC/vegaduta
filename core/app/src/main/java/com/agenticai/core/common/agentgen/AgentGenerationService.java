@@ -12,8 +12,6 @@ import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +19,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Prompt-to-agent generation (Tier-3) - the audit gap "AskAiHelper assists; it doesn't go describe
@@ -139,7 +139,7 @@ public class AgentGenerationService {
                                 null,
                                 spec.path("knowledgeBaseEnabled").asBoolean(false),
                                 null,
-                                parseReasoningDepth(spec.path("reasoningDepth").asText(null)),
+                                parseReasoningDepth(spec.path("reasoningDepth").asString(null)),
                                 null,
                                 null,
                                 null,
@@ -157,7 +157,7 @@ public class AgentGenerationService {
             agentService.setShareMemoryWithTenant(agent.id(), true);
             applied.add("shareMemoryWithTenant");
         }
-        ReasoningDepth depth = parseReasoningDepth(spec.path("reasoningDepth").asText(null));
+        ReasoningDepth depth = parseReasoningDepth(spec.path("reasoningDepth").asString(null));
         if (depth != null) {
             agentService.setReasoningDepth(agent.id(), depth);
             applied.add("reasoningDepth=" + depth.name());
@@ -168,7 +168,7 @@ public class AgentGenerationService {
         List<String> boundChannels = new ArrayList<>();
         List<Map<String, String>> skippedChannels = new ArrayList<>();
         for (JsonNode channelNode : spec.path("suggestedChannels")) {
-            String channelName = channelNode.asText("").toUpperCase(java.util.Locale.ROOT);
+            String channelName = channelNode.asString("").toUpperCase(java.util.Locale.ROOT);
             ChannelType channel;
             try {
                 channel = ChannelType.valueOf(channelName);
@@ -256,8 +256,8 @@ public class AgentGenerationService {
 
     private static String textOr(JsonNode node, String field, String fallback) {
         JsonNode value = node.get(field);
-        return value != null && value.isTextual() && !value.asText().isBlank()
-                ? value.asText().trim()
+        return value != null && value.isString() && !value.asString().isBlank()
+                ? value.asString().trim()
                 : fallback;
     }
 

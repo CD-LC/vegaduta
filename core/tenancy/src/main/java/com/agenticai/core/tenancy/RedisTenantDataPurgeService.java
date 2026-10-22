@@ -1,7 +1,5 @@
 package com.agenticai.core.tenancy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Platform-admin "delete tenant completely" control - best-effort purge of every Redis key this
@@ -264,7 +264,7 @@ public class RedisTenantDataPurgeService {
                 return false;
             }
             JsonNode node = objectMapper.readTree(json);
-            if (tenantSchema.equals(node.path("tenantId").asText(null))) {
+            if (tenantSchema.equals(node.path("tenantId").asString(null))) {
                 redisTemplate.delete(key);
                 return true;
             }

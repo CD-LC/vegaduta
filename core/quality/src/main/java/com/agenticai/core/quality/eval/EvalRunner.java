@@ -1,7 +1,6 @@
 package com.agenticai.core.quality.eval;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Master Roadmap 2026 item #15 (CI golden-dataset eval suite, sec B/C) - entry point. Run via
@@ -444,8 +444,8 @@ public final class EvalRunner {
         }
 
         SdkTracerProvider tracerProvider =
-                SdkTracerProvider.builder()
-                        // SimpleSpanProcessor (synchronous, exports on span#end()), not
+                SdkTracerProvider
+                        .builder() // SimpleSpanProcessor (synchronous, exports on span#end()), not
                         // BatchSpanProcessor - this is a short-lived CLI run with at most
                         // a handful of spans, not a long-running service, so there is no
                         // benefit to batching and a real risk of losing spans to
@@ -533,8 +533,11 @@ public final class EvalRunner {
                                     apiKey,
                                     model,
                                     1024,
-                                    EvalLlmHttp.llmRestClientBuilder(),
-                                    EvalLlmHttp.llmWebClientBuilder()))
+                                    EvalLlmHttp.llmRestClientBuilder(
+                                            LLM_CONNECT_TIMEOUT_ENV_VAR,
+                                            DEFAULT_LLM_CONNECT_TIMEOUT),
+                                    EvalLlmHttp.llmWebClientBuilder(
+                                            LLM_READ_TIMEOUT_ENV_VAR, DEFAULT_LLM_READ_TIMEOUT)))
                     .build();
         }
         // No temperature/topP set at all - simplest safe choice for a

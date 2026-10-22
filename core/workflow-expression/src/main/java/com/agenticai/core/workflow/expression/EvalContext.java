@@ -1,9 +1,9 @@
 package com.agenticai.core.workflow.expression;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Everything an expression can read (spec 3.2). Implementations must be safe to call from the

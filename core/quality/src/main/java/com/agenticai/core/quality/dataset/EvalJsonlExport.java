@@ -1,11 +1,11 @@
 package com.agenticai.core.quality.dataset;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * NDJSON (JSON Lines) renderings of eval data - the training/optimization export counterpart to

@@ -1,9 +1,6 @@
 package com.agenticai.core.quality.calibration;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The production {@link JudgeCalibrationStore}: JSON documents in Redis hashes, no SQL table (this
@@ -43,9 +43,7 @@ public class RedisJudgeCalibrationStore implements JudgeCalibrationStore {
     private static final ObjectMapper MAPPER =
             JsonMappers.plain()
                     .findAndRegisterModules()
-                    .disable(
-                            com.fasterxml.jackson.databind.SerializationFeature
-                                    .WRITE_DATES_AS_TIMESTAMPS)
+                    .disable(tools.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private final StringRedisTemplate redis;
@@ -81,7 +79,7 @@ public class RedisJudgeCalibrationStore implements JudgeCalibrationStore {
     private static String write(Object value) {
         try {
             return MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not serialise calibration record", e);
         }
     }
@@ -92,7 +90,7 @@ public class RedisJudgeCalibrationStore implements JudgeCalibrationStore {
         }
         try {
             return Optional.of(MAPPER.readValue(json, type));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn(
                     "Skipping unreadable calibration record ({}): {}",
                     type.getSimpleName(),

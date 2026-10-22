@@ -1,14 +1,14 @@
 package com.agenticai.core.agents.job.progress;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Lets a running job say what it is doing. The "is this thing alive or hung?" feature, in one tool.
@@ -114,7 +114,7 @@ public class ReportProgressToolCallback implements ToolCallback {
     public String call(String toolInput) {
         try {
             JsonNode args = MAPPER.readTree(toolInput == null ? "{}" : toolInput);
-            String note = args.path("note").asText(null);
+            String note = args.path("note").asString(null);
             if (note == null || note.isBlank()) {
                 // Told plainly, with the fix, because the model will retry and a
                 // vague error just produces the same malformed call again.

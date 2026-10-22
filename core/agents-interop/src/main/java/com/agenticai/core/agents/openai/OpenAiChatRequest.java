@@ -2,9 +2,9 @@ package com.agenticai.core.agents.openai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The subset of an OpenAI {@code POST /v1/chat/completions} body this platform honours. Unknown
@@ -29,8 +29,8 @@ public record OpenAiChatRequest(
             if (content == null || content.isNull()) {
                 return "";
             }
-            if (content.isTextual()) {
-                return content.asText();
+            if (content.isString()) {
+                return content.asString();
             }
             if (content.isArray()) {
                 StringBuilder joined = new StringBuilder();
@@ -38,13 +38,13 @@ public record OpenAiChatRequest(
                     JsonNode type = part.get("type");
                     JsonNode text = part.get("text");
                     if (type != null
-                            && "text".equals(type.asText())
+                            && "text".equals(type.asString())
                             && text != null
-                            && text.isTextual()) {
+                            && text.isString()) {
                         if (joined.length() > 0) {
                             joined.append('\n');
                         }
-                        joined.append(text.asText());
+                        joined.append(text.asString());
                     }
                 }
                 return joined.toString();

@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.openai;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -11,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Renders every failure of {@link OpenAiCompatController} and {@link OpenResponsesController} in

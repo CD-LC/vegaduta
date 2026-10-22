@@ -6,7 +6,6 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.tenancy.ListPaging;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The public agent directory.

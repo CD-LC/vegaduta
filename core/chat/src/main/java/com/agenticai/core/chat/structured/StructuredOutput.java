@@ -1,13 +1,6 @@
 package com.agenticai.core.chat.structured;
 
-import com.agenticai.core.chat.ChatOptionsCopy;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -21,8 +14,14 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The one place "ask a model for JSON, get JSON back" is implemented. Before this class existed, a
@@ -212,7 +211,7 @@ public final class StructuredOutput {
                                                 raw));
         try {
             return mapper.readValue(json, target);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new StructuredOutputException(
                     "The reply's JSON does not match the expected "
                             + typeName
@@ -339,9 +338,13 @@ public final class StructuredOutput {
                     && existing.getType() != ResponseFormat.Type.TEXT) {
                 return options;
             }
-            OpenAiChatOptions copy = ChatOptionsCopy.of(openAi);
-            copy.setResponseFormat(
-                    ResponseFormat.builder().type(ResponseFormat.Type.JSON_OBJECT).build());
+            OpenAiChatOptions copy =
+                    openAi.mutate()
+                            .responseFormat(
+                                    ResponseFormat.builder()
+                                            .type(ResponseFormat.Type.JSON_OBJECT)
+                                            .build())
+                            .build();
             return (O) copy;
         }
         if (options.getClass() == GoogleGenAiChatOptions.class) {
@@ -349,8 +352,8 @@ public final class StructuredOutput {
             if (APPLICATION_JSON.equalsIgnoreCase(gemini.getResponseMimeType())) {
                 return options;
             }
-            GoogleGenAiChatOptions copy = ChatOptionsCopy.of(gemini);
-            copy.setResponseMimeType(APPLICATION_JSON);
+            GoogleGenAiChatOptions copy =
+                    gemini.mutate().responseMimeType(APPLICATION_JSON).build();
             return (O) copy;
         }
         return options;
@@ -430,15 +433,13 @@ public final class StructuredOutput {
             return withJsonMode(options);
         }
         if (options.getClass() == OpenAiChatOptions.class) {
-            return withOpenAiSchema(
-                    options, JsonSchemaRules.sanitizeSchemaName(schemaName), schema);
+            return withOpenAiSchema(options, JsonSchemaRules.schema);
         }
         return withGeminiSchema(options, schema);
     }
 
     @SuppressWarnings("unchecked")
-    private static <O extends ChatOptions> O withOpenAiSchema(
-            O options, String name, JsonNode schema) {
+    private static <O extends ChatOptions> O withOpenAiSchema(O options, JsonNode schema) {
         OpenAiChatOptions openAi = (OpenAiChatOptions) options;
         ResponseFormat existing = openAi.getResponseFormat();
         if (existing != null
@@ -446,18 +447,19 @@ public final class StructuredOutput {
                 && existing.getType() != ResponseFormat.Type.TEXT) {
             return options;
         }
-        ResponseFormat.JsonSchema js =
-                ResponseFormat.JsonSchema.builder()
-                        .name(name)
-                        .schema(schema.toString())
-                        .strict(JsonSchemaRules.isStrictCompatible(schema))
+        // Spring AI 2 (official OpenAI SDK model): ResponseFormat carries the schema as a JSON
+        // string plus the
+        // strict flag; the SDK model supplies the schema name itself, so the name is not sent from
+        // here.
+        OpenAiChatOptions copy =
+                openAi.mutate()
+                        .responseFormat(
+                                ResponseFormat.builder()
+                                        .type(ResponseFormat.Type.JSON_SCHEMA)
+                                        .jsonSchema(schema.toString())
+                                        .strict(JsonSchemaRules.isStrictCompatible(schema))
+                                        .build())
                         .build();
-        OpenAiChatOptions copy = openAi.copy();
-        copy.setResponseFormat(
-                ResponseFormat.builder()
-                        .type(ResponseFormat.Type.JSON_SCHEMA)
-                        .jsonSchema(js)
-                        .build());
         return (O) copy;
     }
 
@@ -473,9 +475,11 @@ public final class StructuredOutput {
         }
         JsonNode cleaned = schema.deepCopy();
         JsonSchemaRules.stripKeys(cleaned);
-        GoogleGenAiChatOptions copy = gemini.copy();
-        copy.setResponseMimeType(APPLICATION_JSON);
-        copy.setResponseSchema(cleaned.toString());
+        GoogleGenAiChatOptions copy =
+                gemini.mutate()
+                        .responseMimeType(APPLICATION_JSON)
+                        .responseSchema(cleaned.toString())
+                        .build();
         return (O) copy;
     }
 
@@ -525,7 +529,7 @@ public final class StructuredOutput {
             return null;
         }
         JsonNode type = schema.get("type");
-        if (type == null || !type.isTextual() || !"object".equals(type.asText())) {
+        if (type == null || !type.isString() || !"object".equals(type.asString())) {
             return null;
         }
         for (String combinator : List.of("anyOf", "oneOf", "allOf", "not", "enum")) {

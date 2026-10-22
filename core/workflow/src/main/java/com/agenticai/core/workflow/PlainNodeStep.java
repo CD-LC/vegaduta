@@ -4,10 +4,10 @@ import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One ordinary (non-container) node of {@link WorkflowExecutionEngine}'s traversal: executes it

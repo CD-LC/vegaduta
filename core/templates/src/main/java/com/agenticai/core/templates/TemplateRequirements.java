@@ -2,12 +2,12 @@ package com.agenticai.core.templates;
 
 import com.agenticai.core.templates.dto.TemplateRequirement;
 import com.agenticai.core.templates.dto.TemplateRequirement.Type;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Works out what an importer has to activate for a template (MCP servers, a Google connection, a
@@ -113,7 +113,7 @@ final class TemplateRequirements {
                     || config.path("codeWorkspaceEnabled").asBoolean(false)) {
                 out.putIfAbsent("sandbox", sandboxRequirement());
             }
-            String provider = config.path("providerName").asText("");
+            String provider = config.path("providerName").asString("");
             if (!provider.isBlank() && !"PLATFORM_HOSTED".equalsIgnoreCase(provider)) {
                 out.putIfAbsent(
                         "model",
@@ -128,23 +128,23 @@ final class TemplateRequirements {
                                 false,
                                 "/providers"));
             }
-            if (!config.path("voiceModel").asText("").isBlank()) {
+            if (!config.path("voiceModel").asString("").isBlank()) {
                 out.putIfAbsent(
                         "voice",
                         new TemplateRequirement(
                                 Type.VOICE_MODEL,
-                                config.path("voiceModel").asText(),
+                                config.path("voiceModel").asString(),
                                 "Voice model",
                                 "Uses a voice model for spoken replies.",
                                 false,
                                 "/providers"));
             }
-            if (!config.path("videoModel").asText("").isBlank()) {
+            if (!config.path("videoModel").asString("").isBlank()) {
                 out.putIfAbsent(
                         "video",
                         new TemplateRequirement(
                                 Type.VIDEO_MODEL,
-                                config.path("videoModel").asText(),
+                                config.path("videoModel").asString(),
                                 "Video model",
                                 "Uses a video model for generated clips.",
                                 false,
@@ -208,14 +208,14 @@ final class TemplateRequirements {
         }
         if (kind == TemplateKind.AGENT) {
             for (JsonNode n : config.path("allowedToolNames")) {
-                if (n.isTextual() && !n.asText().isBlank()) {
-                    out.add(n.asText());
+                if (n.isString() && !n.asString().isBlank()) {
+                    out.add(n.asString());
                 }
             }
         } else {
             for (JsonNode n : config.path("graph").path("nodes")) {
-                if ("tool".equals(n.path("type").asText())) {
-                    String name = n.path("data").path("config").path("toolName").asText("");
+                if ("tool".equals(n.path("type").asString())) {
+                    String name = n.path("data").path("config").path("toolName").asString("");
                     if (!name.isBlank()) {
                         out.add(name);
                     }

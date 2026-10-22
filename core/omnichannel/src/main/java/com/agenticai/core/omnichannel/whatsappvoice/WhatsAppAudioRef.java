@@ -1,8 +1,8 @@
 package com.agenticai.core.omnichannel.whatsappvoice;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The part of an inbound Meta WhatsApp Cloud API {@code messages[]} entry of {@code type: "audio"}
@@ -30,16 +30,16 @@ public record WhatsAppAudioRef(String mediaId, String mimeType, String sha256, b
 
     /** Empty when the entry is not an audio message or has no usable media id. Never throws. */
     public static Optional<WhatsAppAudioRef> parse(JsonNode message) {
-        if (message == null || !"audio".equals(message.path("type").asText(""))) {
+        if (message == null || !"audio".equals(message.path("type").asString(""))) {
             return Optional.empty();
         }
         JsonNode audio = message.path("audio");
-        String id = audio.path("id").asText("");
+        String id = audio.path("id").asString("");
         if (!MEDIA_ID.matcher(id).matches()) {
             return Optional.empty();
         }
-        String mime = audio.path("mime_type").asText(null);
-        String sha = audio.path("sha256").asText(null);
+        String mime = audio.path("mime_type").asString(null);
+        String sha = audio.path("sha256").asString(null);
         return Optional.of(
                 new WhatsAppAudioRef(id, mime, sha, audio.path("voice").asBoolean(false)));
     }

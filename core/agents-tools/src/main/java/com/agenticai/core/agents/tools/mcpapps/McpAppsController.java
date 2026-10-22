@@ -4,7 +4,6 @@ import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tenant-scoped surface for MCP Apps ({@code app.mcp.apps.enabled}, default off - with the flag off

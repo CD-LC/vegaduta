@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.tools.script;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The actual SpEL sandbox {@link UserToolScript}'s javadoc describes - shared by {@link

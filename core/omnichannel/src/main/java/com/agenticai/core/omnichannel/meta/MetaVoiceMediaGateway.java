@@ -4,8 +4,6 @@ import com.agenticai.core.omnichannel.whatsappvoice.VoiceMediaGateway;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteException;
 import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteOutcome;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -27,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link VoiceMediaGateway} over the Meta Graph API.
@@ -140,7 +140,7 @@ public class MetaVoiceMediaGateway implements VoiceMediaGateway {
                     VoiceNoteOutcome.DOWNLOAD_FAILED, "media lookup was not JSON");
         }
 
-        String mime = baseMime(meta.path("mime_type").asText(null));
+        String mime = baseMime(meta.path("mime_type").asString(null));
         if (mime == null || !ALLOWED_MIME_TYPES.contains(mime)) {
             throw new VoiceNoteException(
                     VoiceNoteOutcome.UNSUPPORTED_MEDIA,
@@ -155,7 +155,7 @@ public class MetaVoiceMediaGateway implements VoiceMediaGateway {
 
         URI downloadUri;
         try {
-            downloadUri = URI.create(meta.path("url").asText(""));
+            downloadUri = URI.create(meta.path("url").asString(""));
         } catch (IllegalArgumentException e) {
             throw new VoiceNoteException(
                     VoiceNoteOutcome.DOWNLOAD_FAILED, "media url was not a valid URI");

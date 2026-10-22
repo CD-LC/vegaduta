@@ -6,7 +6,6 @@ import com.agenticai.core.agents.tools.stdiosandbox.StdioSandboxService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcp.McpStdioCommandGuard;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -22,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * STDIO {@code ServerParameters} construction (env chokepoint, per-registration package-cache
@@ -454,7 +454,7 @@ final class McpStdioParamsBuilder {
     private static String toJsonObject(Map<String, String> values) {
         try {
             return JSON_MAPPER.writeValueAsString(values);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException(
                     "Failed to serialize STDIO env for the sidecar relay", e);
         }
@@ -463,7 +463,7 @@ final class McpStdioParamsBuilder {
     private static String toJsonArray(List<String> values) {
         try {
             return JSON_MAPPER.writeValueAsString(values);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             // args are guard-approved strings (McpStdioCommandGuard already ran) -
             // this can only fail on a JVM-level Jackson misconfiguration, not on
             // any value a caller controls.

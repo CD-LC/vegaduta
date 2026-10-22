@@ -1,12 +1,12 @@
 package com.agenticai.core.common.security;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Challenge nonce: temporary one-time-use tokens for fraud challenge verification (hCaptcha, email

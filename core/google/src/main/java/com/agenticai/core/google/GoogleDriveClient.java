@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -14,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Google Drive v3 REST calls, scoped to {@code drive.file} (see {@code GoogleScopes}'s javadoc) -
@@ -58,8 +58,9 @@ public class GoogleDriveClient {
         for (JsonNode f : body.path("files")) {
             files.add(
                     new DriveFile(
-                            f.path("id").asText(null), f.path("name").asText(null),
-                            f.path("mimeType").asText(null), f.path("modifiedTime").asText(null)));
+                            f.path("id").asString(null), f.path("name").asString(null),
+                            f.path("mimeType").asString(null),
+                                    f.path("modifiedTime").asString(null)));
         }
         return files;
     }
@@ -124,7 +125,7 @@ public class GoogleDriveClient {
         } catch (Exception e) {
             throw new GoogleApiException("Could not create Drive file: " + e.getMessage(), e);
         }
-        String fileId = created.path("id").asText();
+        String fileId = created.path("id").asString();
         HttpRequest uploadRequest =
                 authedRequest(UPLOAD_BASE + "/" + urlEncode(fileId) + "?uploadType=media")
                         .header("Content-Type", "text/plain; charset=UTF-8")
@@ -143,9 +144,9 @@ public class GoogleDriveClient {
         }
         return new DriveFile(
                 fileId,
-                created.path("name").asText(name),
-                created.path("mimeType").asText(null),
-                created.path("modifiedTime").asText(null));
+                created.path("name").asString(name),
+                created.path("mimeType").asString(null),
+                created.path("modifiedTime").asString(null));
     }
 
     private JsonNode get(String uri) {

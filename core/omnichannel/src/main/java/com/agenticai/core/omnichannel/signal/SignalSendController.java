@@ -8,7 +8,6 @@ import com.agenticai.core.omnichannel.session.ChannelSessionService;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.SetDefaultAgentRequest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Manual/API-triggered Signal send + default agent - same posture as {@code

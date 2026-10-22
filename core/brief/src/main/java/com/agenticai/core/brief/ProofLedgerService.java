@@ -16,9 +16,6 @@ import com.agenticai.core.brief.dto.LedgerDtos.ThumbsView;
 import com.agenticai.core.brief.dto.LedgerDtos.TrustEventView;
 import com.agenticai.core.brief.dto.LedgerDtos.VariantView;
 import com.agenticai.core.brief.model.Brief;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -33,6 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The proof ledger (contract section 2, {@code GET /ledger}) and the {@link ProofSource} the trust
@@ -324,7 +324,7 @@ public class ProofLedgerService implements ProofSource, BriefAppliedHook {
         }
         try {
             return objectMapper.readTree(json);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

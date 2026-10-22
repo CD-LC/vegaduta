@@ -19,7 +19,6 @@ import com.agenticai.core.tutor.dto.TutorDtos.ModuleView;
 import com.agenticai.core.tutor.dto.TutorDtos.PlanView;
 import com.agenticai.core.tutor.dto.TutorDtos.QuizInput;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +33,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns any topic into a course, and any lesson of that course into an explanation plus a quiz - in

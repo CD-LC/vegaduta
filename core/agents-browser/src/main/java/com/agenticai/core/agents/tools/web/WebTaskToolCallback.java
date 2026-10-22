@@ -1,14 +1,14 @@
 package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@code web_task} built-in - managed browser automation as a tool. Where {@code
@@ -96,11 +96,11 @@ public class WebTaskToolCallback implements ToolCallback {
         String task = null;
         try {
             JsonNode args = MAPPER.readTree(toolInput == null ? "{}" : toolInput);
-            task = args.path("task").asText(null);
+            task = args.path("task").asString(null);
             if (!StringUtils.hasText(task)) {
                 return "Could not run the browser task: the 'task' argument is required.";
             }
-            String startUrl = args.path("startUrl").asText(null);
+            String startUrl = args.path("startUrl").asString(null);
             if (StringUtils.hasText(startUrl)) {
                 String scheme = java.net.URI.create(startUrl.trim()).getScheme();
                 if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {

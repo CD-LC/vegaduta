@@ -2,8 +2,6 @@ package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,6 +18,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Master Roadmap 2026 item #11 ("Memory write arbitration", Mem0-style) - an LLM-arbitrated
@@ -435,9 +435,9 @@ public class MemoryWriteArbitrationService {
 
     private String textOrNull(JsonNode node, String field) {
         JsonNode value = node.get(field);
-        return (value == null || value.isNull() || value.asText().isBlank())
+        return (value == null || value.isNull() || value.asString().isBlank())
                 ? null
-                : value.asText().trim();
+                : value.asString().trim();
     }
 
     private record ArbitrationDecision(

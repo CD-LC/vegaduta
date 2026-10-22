@@ -1,9 +1,6 @@
 package com.agenticai.core.agents.skills;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Supply-chain controls for skills: static scan, content-hash pinning and the re-approval gate.
@@ -594,7 +594,7 @@ public class SkillSupplyChainService {
         if (json != null && !json.isBlank()) {
             try {
                 files = MAPPER.readValue(json, new TypeReference<Map<String, String>>() {});
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 files = Map.of();
             }
         }

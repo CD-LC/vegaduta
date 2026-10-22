@@ -1,9 +1,9 @@
 package com.agenticai.core.mcpserver;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Scope vocabulary of the OAuth 2.1 option of the {@code /mcp} server, and the mapping from a
@@ -55,8 +55,8 @@ final class McpOAuthScopes {
             body.forEach(m -> required.addAll(requiredFor(m)));
             return required;
         }
-        if (body.isObject() && "tools/call".equals(body.path("method").asText())) {
-            required.add(scopeForTool(body.path("params").path("name").asText("")));
+        if (body.isObject() && "tools/call".equals(body.path("method").asString())) {
+            required.add(scopeForTool(body.path("params").path("name").asString("")));
         }
         return required;
     }

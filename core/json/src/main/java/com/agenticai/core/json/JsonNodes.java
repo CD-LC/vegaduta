@@ -1,8 +1,8 @@
 package com.agenticai.core.json;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Iterator;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tree-model helpers wrapped so the Jackson 3 rename of {@code JsonNode#fields()} (deprecated in
@@ -14,10 +14,9 @@ public final class JsonNodes {
 
     /**
      * The object node's entries in insertion order; empty for non-object nodes. Exactly {@code
-     * node.fields()} (a live iterator over the same entries in the same order).
+     * node.properties().iterator()} (same entries in the same order).
      */
-    @SuppressWarnings("deprecation")
     public static Iterator<Map.Entry<String, JsonNode>> fields(JsonNode node) {
-        return node.fields();
+        return node.properties().iterator();
     }
 }

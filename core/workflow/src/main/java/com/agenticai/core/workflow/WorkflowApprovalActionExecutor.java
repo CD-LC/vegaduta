@@ -10,9 +10,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.temporal.TemporalWorkflowExecutionEngine;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The remaining half of F-05: turns a human decision on a {@code "workflow.node.<type>"}-family
@@ -524,8 +524,8 @@ public class WorkflowApprovalActionExecutor implements ApprovalActionExecutor {
                             + e.getMessage(),
                     e);
         }
-        UUID runId = parseUuid(payload.path("runId").asText(null));
-        String nodeId = payload.path("nodeId").asText(null);
+        UUID runId = parseUuid(payload.path("runId").asString(null));
+        String nodeId = payload.path("nodeId").asString(null);
         if (runId == null || nodeId == null || nodeId.isBlank()) {
             throw new WorkflowApprovalResumeException(
                     "Approval request "
@@ -545,9 +545,9 @@ public class WorkflowApprovalActionExecutor implements ApprovalActionExecutor {
         return new ResumeTarget(
                 runId,
                 nodeId,
-                resume.path("tenantId").asText(null),
-                resume.path("subject").asText(null),
-                withFormValues(resume.path("nodeInput").asText(null), resume.path("formValues")));
+                resume.path("tenantId").asString(null),
+                resume.path("subject").asString(null),
+                withFormValues(resume.path("nodeInput").asString(null), resume.path("formValues")));
     }
 
     /**
@@ -570,7 +570,7 @@ public class WorkflowApprovalActionExecutor implements ApprovalActionExecutor {
                                 out.append("\n- ")
                                         .append(e.getKey())
                                         .append(": ")
-                                        .append(e.getValue().asText()));
+                                        .append(e.getValue().asString()));
         return out.toString();
     }
 

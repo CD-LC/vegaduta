@@ -8,15 +8,15 @@ import com.agenticai.core.workflow.dto.GenerateGraphResponse;
 import com.agenticai.core.workflow.dto.ValidationResult;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@code create_workflow} - turns a plain-language instruction into a DRAFT workflow the person can
@@ -200,7 +200,7 @@ public class CreateWorkflowToolCallback implements ToolCallback {
 
     private static String text(JsonNode args, String field) {
         JsonNode value = args == null ? null : args.get(field);
-        return value == null || value.isNull() ? "" : value.asText("").trim();
+        return value == null || value.isNull() ? "" : value.asString("").trim();
     }
 
     private static String message(RuntimeException e) {

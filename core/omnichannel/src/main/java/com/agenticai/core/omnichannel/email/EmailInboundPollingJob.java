@@ -18,7 +18,6 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
@@ -36,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The PRD's "Mail-Checking Agent" (Section 3.2: "scans unread threads, summarizes context against

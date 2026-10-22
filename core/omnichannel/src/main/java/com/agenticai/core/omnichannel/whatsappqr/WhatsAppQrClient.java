@@ -3,10 +3,6 @@ package com.agenticai.core.omnichannel.whatsappqr;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -25,6 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Client for the whatsapp-qr bridge ({@code services/whatsapp-qr}) the operator runs: a Node +
@@ -210,7 +210,7 @@ public class WhatsAppQrClient {
         }
         try {
             return objectMapper.readTree(raw.body());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new WhatsAppQrApiException(
                     raw.status(), "WhatsApp bridge sent a response that is not JSON.", e);
         }
@@ -218,7 +218,7 @@ public class WhatsAppQrClient {
 
     private String errorText(String body) {
         try {
-            String error = objectMapper.readTree(body).path("error").asText("");
+            String error = objectMapper.readTree(body).path("error").asString("");
             if (!error.isBlank()) {
                 return ": " + (error.length() > 200 ? error.substring(0, 200) : error);
             }

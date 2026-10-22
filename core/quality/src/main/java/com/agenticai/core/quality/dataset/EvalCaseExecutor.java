@@ -8,7 +8,6 @@ import com.agenticai.core.quality.EvaluationResult;
 import com.agenticai.core.quality.EvaluationType;
 import com.agenticai.core.quality.grader.CodeGrader;
 import com.agenticai.core.quality.trajectory.TrajectoryCaseGrader;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +18,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Executes ONE dataset case of an eval run: {@code repeats} (replay -> judge) repetitions, the

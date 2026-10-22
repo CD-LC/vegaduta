@@ -1,10 +1,5 @@
 package com.agenticai.core.workflow;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.TextNode;
 
 /**
  * Public bridge from the workflow portability feature ({@code
@@ -193,24 +193,24 @@ public final class WorkflowPortabilityRedactor {
                 // A {name, value} (or {key, value}) pair: the NAME decides whether VALUE is
                 // sensitive.
                 String pairField =
-                        object.path("name").isTextual()
+                        object.path("name").isString()
                                 ? "name"
-                                : object.path("key").isTextual() ? "key" : null;
-                if (pairField != null && !object.path("value").isTextual()) {
+                                : object.path("key").isString() ? "key" : null;
+                if (pairField != null && !object.path("value").isString()) {
                     pairField = null;
                 }
-                String pairName = pairField == null ? null : object.path(pairField).asText();
+                String pairName = pairField == null ? null : object.path(pairField).asString();
                 List<String> fields = new ArrayList<>();
-                object.fieldNames().forEachRemaining(fields::add);
+                object.propertyNames().forEach(fields::add);
                 for (String field : fields) {
                     JsonNode child = object.get(field);
-                    if (child != null && child.isTextual()) {
+                    if (child != null && child.isString()) {
                         boolean isPairName = pairField != null && field.equals(pairField);
                         String nameForCheck =
                                 "value".equals(field) && pairName != null ? pairName : field;
                         object.set(
                                 field,
-                                text(nameForCheck, child.asText(), headerCtx && !isPairName));
+                                text(nameForCheck, child.asString(), headerCtx && !isPairName));
                     } else {
                         object.set(
                                 field,
@@ -229,14 +229,14 @@ public final class WorkflowPortabilityRedactor {
                     JsonNode child = array.get(i);
                     array.set(
                             i,
-                            child != null && child.isTextual()
-                                    ? text(key, child.asText(), headerCtx)
+                            child != null && child.isString()
+                                    ? text(key, child.asString(), headerCtx)
                                     : walk(child, key, headerCtx, depth + 1));
                 }
                 return array;
             }
-            if (node.isTextual()) {
-                return text(key, node.asText(), headerCtx);
+            if (node.isString()) {
+                return text(key, node.asString(), headerCtx);
             }
             return node;
         }

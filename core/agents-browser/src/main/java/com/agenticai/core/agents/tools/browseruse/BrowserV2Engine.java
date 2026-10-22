@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.tools.browseruse;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.JSHandle;
 import com.microsoft.playwright.Page;
@@ -12,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The Playwright-facing half of browser agent v2: every method here runs on {@link
@@ -493,8 +493,8 @@ final class BrowserV2Engine {
                     n.path("snapGen").asLong(-2),
                     n.path("present").asBoolean(false),
                     n.path("connected").asBoolean(false),
-                    n.path("role").asText(""),
-                    n.path("name").asText(""));
+                    n.path("role").asString(""),
+                    n.path("name").asString(""));
         } catch (Exception e) {
             // The document is mid-navigation: the registry is as good as gone.
             return new BrowserIndexStaleness.Probe(false, -1, -2, false, false, "", "");

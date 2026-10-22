@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -9,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@code web_search} built-in: find pages, rather than read a page you were already given.

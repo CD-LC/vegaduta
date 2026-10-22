@@ -2,9 +2,9 @@ package com.agenticai.core.workflow;
 
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Pure data nodes (set, filter, sort, aggregate, limit, dedupe, switch, merge); logic lives in

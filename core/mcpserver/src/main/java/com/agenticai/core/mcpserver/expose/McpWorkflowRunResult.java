@@ -4,12 +4,12 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Pure mapping from a {@link WorkflowRunResponse} to the compact JSON an MCP client gets back from

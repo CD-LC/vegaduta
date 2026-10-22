@@ -1,8 +1,6 @@
 package com.agenticai.core.knowledge.connector;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -10,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Google Drive connector - lists files under a folder (or shared drive root) and exports/downloads
@@ -79,12 +79,12 @@ public class GoogleDriveConnectorFetcher implements ConnectorFetcher {
                 if (docs.size() >= ConnectorHttp.MAX_DOCUMENTS_PER_SYNC) {
                     break;
                 }
-                String id = file.path("id").asText();
-                String name = file.path("name").asText("untitled");
-                String mime = file.path("mimeType").asText("");
+                String id = file.path("id").asString();
+                String name = file.path("name").asString("untitled");
+                String mime = file.path("mimeType").asString("");
                 String link =
                         file.path("webViewLink")
-                                .asText("https://drive.google.com/file/d/" + id + "/view");
+                                .asString("https://drive.google.com/file/d/" + id + "/view");
 
                 byte[] content;
                 String filename;

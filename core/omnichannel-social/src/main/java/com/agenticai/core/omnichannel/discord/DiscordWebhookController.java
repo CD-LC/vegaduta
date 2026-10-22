@@ -20,7 +20,6 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
@@ -35,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Inbound endpoint the {@code channels/discord} Node service posts to for every {@code

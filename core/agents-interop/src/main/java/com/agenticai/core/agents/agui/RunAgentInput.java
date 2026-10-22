@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.agui;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * AG-UI's {@code RunAgentInput} - the request body every AG-UI client ({@code
@@ -69,16 +69,16 @@ public record RunAgentInput(
             if (content == null || content.isNull()) {
                 return "";
             }
-            if (content.isTextual()) {
-                return content.asText();
+            if (content.isString()) {
+                return content.asString();
             }
             if (content.isArray()) {
                 StringBuilder joined = new StringBuilder();
                 for (JsonNode part : content) {
                     if (part != null
                             && part.isObject()
-                            && "text".equals(part.path("type").asText(null))) {
-                        String text = part.path("text").asText("");
+                            && "text".equals(part.path("type").asString(null))) {
+                        String text = part.path("text").asString("");
                         if (!text.isEmpty()) {
                             if (!joined.isEmpty()) {
                                 joined.append('\n');

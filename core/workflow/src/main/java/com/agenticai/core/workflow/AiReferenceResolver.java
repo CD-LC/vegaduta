@@ -10,8 +10,6 @@ import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.workflow.WorkflowDocumentText.DocumentExtractionException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
@@ -21,6 +19,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Resolves the {@code document_extractor} source (config text, or the node input) to a classified
@@ -107,8 +107,8 @@ final class AiReferenceResolver {
     private static String firstText(JsonNode json, String... keys) {
         for (String key : keys) {
             JsonNode value = json.get(key);
-            if (value != null && value.isTextual() && !value.asText().isBlank()) {
-                return value.asText().strip();
+            if (value != null && value.isString() && !value.asString().isBlank()) {
+                return value.asString().strip();
             }
         }
         return "";

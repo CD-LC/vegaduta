@@ -12,7 +12,6 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.SOURCE_CHATGPT
 
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * ChatGPT's {@code conversations.json}: {@code {title, create_time, update_time, mapping{id ->
@@ -174,8 +174,8 @@ final class ChatGptImportFormat implements ChatImportFormat {
                 StringBuilder sb = new StringBuilder();
                 for (JsonNode part : parts) {
                     String piece = null;
-                    if (part.isTextual()) {
-                        piece = part.asText();
+                    if (part.isString()) {
+                        piece = part.asString();
                     } else if (part.isObject()) {
                         String pt = text(part, "content_type");
                         if ("image_asset_pointer".equals(pt)) {

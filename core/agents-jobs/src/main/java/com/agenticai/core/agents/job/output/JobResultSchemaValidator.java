@@ -2,9 +2,6 @@ package com.agenticai.core.agents.job.output;
 
 import com.agenticai.core.agents.job.AgentJobProperties;
 import com.agenticai.core.json.JsonNodes;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
@@ -20,6 +17,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Compiles and applies the JSON Schema a job's result must satisfy.
@@ -162,7 +162,7 @@ public class JobResultSchemaValidator {
         JsonNode schemaNode;
         try {
             schemaNode = objectMapper.readTree(schemaJson);
-        } catch (JsonProcessingException malformed) {
+        } catch (JacksonException malformed) {
             throw new InvalidResultSchemaException(
                     "The result schema is not valid JSON: " + malformed.getOriginalMessage(),
                     malformed);
@@ -209,14 +209,14 @@ public class JobResultSchemaValidator {
             Iterator<Map.Entry<String, JsonNode>> fields = JsonNodes.fields(node);
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
-                if ("$ref".equals(field.getKey()) && field.getValue().isTextual()) {
-                    String ref = field.getValue().asText().trim().toLowerCase(Locale.ROOT);
+                if ("$ref".equals(field.getKey()) && field.getValue().isString()) {
+                    String ref = field.getValue().asString().trim().toLowerCase(Locale.ROOT);
                     if (ref.startsWith("http://")
                             || ref.startsWith("https://")
                             || ref.startsWith("//")) {
                         throw new InvalidResultSchemaException(
                                 "The result schema references a remote document ("
-                                        + field.getValue().asText()
+                                        + field.getValue().asString()
                                         + "). Result schemas must be self-contained; use a local $ref such as "
                                         + "\"#/$defs/Item\" instead.");
                     }

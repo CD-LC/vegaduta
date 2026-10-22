@@ -3,13 +3,13 @@ package com.agenticai.core.agents.tools.messaging;
 import com.agenticai.core.agents.tools.media.GeneratedAttachmentResolver;
 import com.agenticai.core.agents.tools.media.GeneratedAttachmentResolver.ResolvedAttachment;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Lets an agent forward an image or audio clip IT ALREADY GENERATED this conversation (via the

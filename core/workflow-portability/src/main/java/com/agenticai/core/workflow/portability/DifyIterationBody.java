@@ -1,12 +1,12 @@
 package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.agents.importer.AgentImportText;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Accounting for the body of a Dify iteration that could NOT be mapped (a nested iteration, or one

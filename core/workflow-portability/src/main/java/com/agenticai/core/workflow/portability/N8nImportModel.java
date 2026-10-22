@@ -2,9 +2,9 @@ package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.agents.importer.AgentImportJson;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The value types shared by {@link N8nImportMapper} and its collaborators (HTTP, IF and edge

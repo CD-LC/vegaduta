@@ -1,10 +1,10 @@
 package com.agenticai.core.agents.a2a;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Renders A2A protocol objects (Task, Message, the two streaming events) as plain {@code Map}s in
@@ -209,10 +209,10 @@ final class A2aWire {
             if (!part.isObject()) {
                 throw A2aError.invalidParams("message.parts entries must be objects");
             }
-            String kind = part.path("kind").asText(null);
+            String kind = part.path("kind").asString(null);
             boolean isText = "text".equals(kind) || (kind == null && part.hasNonNull("text"));
             if (isText && part.hasNonNull("text")) {
-                text.append(part.get("text").asText());
+                text.append(part.get("text").asString());
                 continue;
             }
             if ("file".equals(kind)

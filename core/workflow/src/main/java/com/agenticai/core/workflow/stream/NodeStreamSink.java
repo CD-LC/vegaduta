@@ -4,11 +4,11 @@ import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.json.JsonNodes;
 import com.agenticai.core.workflow.NodeTracePayloads;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.LongSupplier;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One node execution's live output channel: token deltas and the agent's tool-call steps, published
@@ -128,7 +128,7 @@ public class NodeStreamSink {
         } catch (Exception e) {
             return;
         }
-        String type = event.path("type").asText("");
+        String type = event.path("type").asString("");
         if ("heartbeat".equals(type)) {
             return;
         }

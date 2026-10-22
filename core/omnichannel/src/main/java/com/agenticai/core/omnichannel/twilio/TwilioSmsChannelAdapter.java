@@ -8,11 +8,11 @@ import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.SmsDispatchService;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Approval-gated plain-SMS send (2026-10-14) - the SMS sibling of {@link

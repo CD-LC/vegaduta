@@ -3,8 +3,6 @@ package com.agenticai.core.omnichannel.telegram;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,6 +10,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} wrapper for Telegram's Bot API - a real REST API with
@@ -65,7 +65,8 @@ public class TelegramApiClient {
     public BotInfo fetchBotInfo(String botToken) {
         JsonNode result =
                 call(botToken, "getMe", null, "Telegram rejected this Bot Token", validateTimeout);
-        return new BotInfo(result.path("id").asText(null), result.path("username").asText(null));
+        return new BotInfo(
+                result.path("id").asString(null), result.path("username").asString(null));
     }
 
     /**
@@ -202,7 +203,7 @@ public class TelegramApiClient {
                     || !node.path("ok").asBoolean(false)) {
                 throw new ChannelConfigurationException(
                         "telegram",
-                        failureMessage + ": " + node.path("description").asText(response.body()));
+                        failureMessage + ": " + node.path("description").asString(response.body()));
             }
             return node.path("result");
         } catch (ChannelConfigurationException e) {

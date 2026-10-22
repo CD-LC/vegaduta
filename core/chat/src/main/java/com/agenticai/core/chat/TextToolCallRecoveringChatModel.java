@@ -1,7 +1,6 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -27,6 +26,7 @@ import org.springframework.ai.support.UsageCalculator;
 import org.springframework.ai.tool.ToolCallback;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wraps any {@link ChatModel} so that a tool call the model wrote as <em>text</em> (see {@link

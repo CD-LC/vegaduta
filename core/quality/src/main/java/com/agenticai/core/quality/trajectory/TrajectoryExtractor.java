@@ -2,11 +2,11 @@ package com.agenticai.core.quality.trajectory;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.dataset.AgentTurnReplayer.ReplayedToolCall;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.MissingNode;
 
 /**
  * Turns recorded tool calls into an ordered {@link TrajectoryToolCall} list: {@code [{tool, args,
@@ -63,9 +63,9 @@ public final class TrajectoryExtractor {
                 for (JsonNode entry : root) {
                     raw.add(
                             new RawCall(
-                                    entry.path("toolName").asText(null),
-                                    entry.path("input").asText(null),
-                                    entry.path("output").asText(null)));
+                                    entry.path("toolName").asString(null),
+                                    entry.path("input").asString(null),
+                                    entry.path("output").asString(null)));
                 }
             }
             return fromRaw(raw);

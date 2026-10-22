@@ -7,10 +7,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.NoopApiKey;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Azure OpenAI's data-plane chat completions endpoint is OpenAI-chat- completions-compatible in
@@ -117,8 +114,8 @@ public class AzureOpenAIAgentChatClientFactory implements AgentChatClientFactory
         // redirects).
         llmHttpClientFactory.requireAllowedTenantBaseUrl(credential.endpoint());
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(API_KEY_HEADER, credential.apiKey());
+        java.util.Map<String, String> headers =
+                java.util.Map.of(API_KEY_HEADER, credential.apiKey());
 
         String completionsPath =
                 "/openai/deployments/"
@@ -126,14 +123,13 @@ public class AzureOpenAIAgentChatClientFactory implements AgentChatClientFactory
                         + "/chat/completions?api-version="
                         + credential.apiVersion();
 
-        OpenAiApi openAiApi =
+        OpenAiCompatModelBuilder.Api openAiApi =
                 modelBuilder
                         .api(credential.endpoint())
                         .noApiKey()
                         .headers(headers)
                         .completionsPath(completionsPath)
-                        .guarded()
-                        .build();
+                        .guarded();
 
         var optionsBuilder = modelBuilder.options(ProviderName.AZURE_OPENAI, model);
         // Azure hosts the same gpt-5*/o-series families as OpenAI, with the same
@@ -155,7 +151,7 @@ public class AzureOpenAIAgentChatClientFactory implements AgentChatClientFactory
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(

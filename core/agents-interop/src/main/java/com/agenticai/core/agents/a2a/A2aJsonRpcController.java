@@ -4,10 +4,6 @@ import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,6 +24,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.NullNode;
 
 /**
  * The A2A JSON-RPC 2.0 binding.
@@ -132,7 +132,7 @@ public class A2aJsonRpcController {
         JsonNode request;
         try {
             request = mapper.readTree(body == null ? "" : body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             writeJson(
                     response,
                     version,
@@ -156,10 +156,10 @@ public class A2aJsonRpcController {
             if (!request.isObject()) {
                 throw A2aError.invalidRequest("body must be a JSON object");
             }
-            if (!"2.0".equals(request.path("jsonrpc").asText(null))) {
+            if (!"2.0".equals(request.path("jsonrpc").asString(null))) {
                 throw A2aError.invalidRequest("jsonrpc must be \"2.0\"");
             }
-            String method = request.path("method").asText(null);
+            String method = request.path("method").asString(null);
             if (!StringUtils.hasText(method)) {
                 throw A2aError.invalidRequest("method is required");
             }
@@ -402,11 +402,11 @@ public class A2aJsonRpcController {
         // omnichannel webhooks also call with synthetic subjects).
         agentService.requireAccess(agentId, PermissionLevel.RUNNER);
 
-        String contextId = message.path("contextId").asText(null);
+        String contextId = message.path("contextId").asString(null);
         if (!StringUtils.hasText(contextId)) {
             contextId = UUID.randomUUID().toString();
         }
-        String messageId = message.path("messageId").asText(null);
+        String messageId = message.path("messageId").asString(null);
         if (!StringUtils.hasText(messageId)) {
             messageId = UUID.randomUUID().toString();
         }
@@ -425,9 +425,9 @@ public class A2aJsonRpcController {
     }
 
     private static UUID resolveAgentId(UUID routeAgentId, JsonNode params, JsonNode message) {
-        String fromMetadata = params.path("metadata").path("agentId").asText(null);
+        String fromMetadata = params.path("metadata").path("agentId").asString(null);
         if (!StringUtils.hasText(fromMetadata)) {
-            fromMetadata = message.path("metadata").path("agentId").asText(null);
+            fromMetadata = message.path("metadata").path("agentId").asString(null);
         }
         UUID metadataAgentId = null;
         if (StringUtils.hasText(fromMetadata)) {
@@ -454,7 +454,7 @@ public class A2aJsonRpcController {
     }
 
     private static String requireTaskId(JsonNode params) {
-        String taskId = params == null ? null : params.path("id").asText(null);
+        String taskId = params == null ? null : params.path("id").asString(null);
         if (!StringUtils.hasText(taskId)) {
             throw A2aError.invalidParams("params.id (task id) is required");
         }

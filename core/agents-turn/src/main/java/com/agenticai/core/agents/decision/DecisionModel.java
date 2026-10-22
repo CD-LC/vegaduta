@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.decision;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The provider SPI for the DECISION capability - what {@link DecisionEngine} routes to, and the

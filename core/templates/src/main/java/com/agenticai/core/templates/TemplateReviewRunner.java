@@ -3,9 +3,9 @@ package com.agenticai.core.templates;
 import com.agenticai.core.templates.dto.TemplateAiReview;
 import com.agenticai.core.templates.dto.TemplateReadinessReport;
 import com.agenticai.core.templates.dto.TemplateReview;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Runs the template standard against a template: the deterministic readiness rules first, then

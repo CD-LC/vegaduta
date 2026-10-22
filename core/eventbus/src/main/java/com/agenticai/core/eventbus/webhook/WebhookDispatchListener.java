@@ -4,12 +4,12 @@ import com.agenticai.core.eventbus.WorkflowEvent;
 import com.agenticai.core.eventbus.WorkflowEventSignal;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tenant-webhook fan-out: listens on {@link WorkflowEventSignal}, the in-JVM publish that {@code

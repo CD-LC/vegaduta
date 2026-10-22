@@ -17,7 +17,6 @@ import com.agenticai.core.brief.model.Brief.SecretSpec;
 import com.agenticai.core.brief.model.Brief.ToolSpec;
 import com.agenticai.core.brief.model.Brief.WorkflowSpec;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The planner's closing steps, run once the agents and workflows exist: trust tagging (what cannot

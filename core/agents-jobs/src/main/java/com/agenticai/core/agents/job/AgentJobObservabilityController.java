@@ -11,7 +11,6 @@ import com.agenticai.core.agents.job.progress.AgentJobProgressService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
@@ -35,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The read side of "is this long job alive, and what did it actually do" - plus the agent-level

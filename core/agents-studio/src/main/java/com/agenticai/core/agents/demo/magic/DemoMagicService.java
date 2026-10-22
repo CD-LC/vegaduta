@@ -17,8 +17,6 @@ import com.agenticai.core.tenancy.demo.DemoMagicWorkflow;
 import com.agenticai.core.tenancy.demo.DemoMagicWorkflowRepository;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +34,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Magic Studio orchestration: persists planned workflows, publishes them as public run pages
@@ -439,7 +439,7 @@ public class DemoMagicService {
     public DemoMagicPlanner.MagicPlan readPlan(DemoMagicWorkflow workflow) {
         try {
             return objectMapper.readValue(workflow.getPlanJson(), DemoMagicPlanner.MagicPlan.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Unreadable plan payload for workflow " + workflow.getId(), e);
         }
@@ -448,7 +448,7 @@ public class DemoMagicService {
     private String toJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Could not serialise a magic plan payload", e);
         }
     }

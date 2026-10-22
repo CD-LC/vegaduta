@@ -1,8 +1,8 @@
 package com.agenticai.core.brief;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Parses a model reply into a JSON object. A thin, package-private facade over the platform-wide

@@ -13,10 +13,6 @@ import com.agenticai.core.quality.trajectory.TrajectoryEvalDtos.CaseTrajectory;
 import com.agenticai.core.quality.trajectory.TrajectoryEvalDtos.Config;
 import com.agenticai.core.quality.trajectory.TrajectoryEvalDtos.RunCaseTrajectory;
 import com.agenticai.core.quality.trajectory.TrajectoryEvalDtos.RunTrajectories;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +21,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Reads and writes the expected trajectory of a dataset case and serves the expected-vs-actual

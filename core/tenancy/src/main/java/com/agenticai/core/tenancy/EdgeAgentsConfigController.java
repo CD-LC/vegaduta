@@ -1,6 +1,5 @@
 package com.agenticai.core.tenancy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.time.Duration;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Runtime server-side gate for Edge Agents, companion to the build-time {@code
@@ -228,7 +228,7 @@ public class EdgeAgentsConfigController {
         }
         try {
             return normalizeStoredEntries(objectMapper.readValue(stored, EdgeModelManifest.class));
-        } catch (com.fasterxml.jackson.core.JacksonException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             log.warn(
                     "Platform setting '{}' holds unparseable manifest JSON - serving the built-in default. {}",
                     MANIFEST_KEY,

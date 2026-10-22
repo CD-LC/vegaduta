@@ -5,7 +5,6 @@ import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Optional;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Real public Telegram Bot API webhook - unlike Discord, Telegram delivers ordinary messages over

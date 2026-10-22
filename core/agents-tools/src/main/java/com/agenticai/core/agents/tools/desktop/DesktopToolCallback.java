@@ -2,13 +2,13 @@ package com.agenticai.core.agents.tools.desktop;
 
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * One {@code local_desktop_*} tool over the desktop-agent sidecar (services/desktop-agent). The
@@ -159,7 +159,7 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
             JsonNode args = MAPPER.readTree(toolInput == null ? "{}" : toolInput);
             JsonNode reply;
             if (action == Action.CLIPBOARD) {
-                String text = args.path("text").isTextual() ? args.path("text").asText() : null;
+                String text = args.path("text").isString() ? args.path("text").asString() : null;
                 reply =
                         text == null
                                 ? client.get("/clipboard")
@@ -184,7 +184,7 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
             return switch (action) {
                 case CLICK ->
                         "Click "
-                                + args.path("button").asText("left")
+                                + args.path("button").asString("left")
                                 + "-click at ("
                                 + args.path("x")
                                 + ", "
@@ -276,7 +276,7 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
     }
 
     private static String text(JsonNode args, String field) {
-        return args.path(field).isTextual() ? args.path(field).asText() : "";
+        return args.path(field).isString() ? args.path(field).asString() : "";
     }
 
     private static String opt(JsonNode args, String field, String prefix) {

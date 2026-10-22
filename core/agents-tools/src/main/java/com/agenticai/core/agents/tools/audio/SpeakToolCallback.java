@@ -2,12 +2,12 @@ package com.agenticai.core.agents.tools.audio;
 
 import com.agenticai.core.agentspi.SpeakBackend;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Unifies what used to be two separate, differently-named agent tools - {@code

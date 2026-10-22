@@ -1,7 +1,7 @@
 package com.agenticai.core.agents.decision.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * {@code POST /api/capabilities/decision/playground} body - free-text {@code state} plus a

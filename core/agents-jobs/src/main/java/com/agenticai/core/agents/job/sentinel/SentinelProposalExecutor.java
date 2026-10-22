@@ -6,8 +6,6 @@ import com.agenticai.core.agents.job.AgentJobLauncher;
 import com.agenticai.core.agents.job.AgentJobOrigin;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns an approved {@code agent.proposal} request into a real agent job - the "humans ratify" half
@@ -73,8 +73,8 @@ public class SentinelProposalExecutor implements ApprovalActionExecutor {
     @Override
     public void execute(ApprovalRequest request) {
         JsonNode payload = parse(request);
-        UUID agentId = UUID.fromString(payload.path("agentId").asText());
-        String goal = payload.path("goal").asText("").trim();
+        UUID agentId = UUID.fromString(payload.path("agentId").asString());
+        String goal = payload.path("goal").asString("").trim();
         if (goal.isEmpty()) {
             throw new IllegalStateException(
                     "agent.proposal request " + request.getId() + " has no goal to run");
@@ -94,7 +94,7 @@ public class SentinelProposalExecutor implements ApprovalActionExecutor {
 
         String runAs = request.getDecidedBy();
         if (runAs == null || runAs.isBlank() || runAs.startsWith("agent:")) {
-            runAs = payload.path("configuredBy").asText(null);
+            runAs = payload.path("configuredBy").asString(null);
         }
         if (runAs == null || runAs.isBlank()) {
             throw new IllegalStateException(
@@ -137,7 +137,7 @@ public class SentinelProposalExecutor implements ApprovalActionExecutor {
             JsonNode payload =
                     objectMapper.readTree(
                             request.getPayloadJson() == null ? "" : request.getPayloadJson());
-            if (!payload.path("agentId").isTextual()) {
+            if (!payload.path("agentId").isString()) {
                 throw new IllegalStateException("missing agentId");
             }
             return payload;

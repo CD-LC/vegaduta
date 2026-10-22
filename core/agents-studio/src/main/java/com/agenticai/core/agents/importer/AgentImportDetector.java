@@ -1,7 +1,7 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Detects which platform a payload came from when the request says {@code source: "auto"}. Pure,

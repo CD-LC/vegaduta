@@ -2,10 +2,10 @@ package com.agenticai.core.templates.dto;
 
 import com.agenticai.core.templates.TemplateKind;
 import com.agenticai.core.templates.TemplateStatus;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The OWNER/ADMIN view of a template: the full record including status, the sanitised {@code

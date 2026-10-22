@@ -1,6 +1,6 @@
 package com.agenticai.core.agents.tools.code.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Dry-run request. {@code input} is arbitrary JSON - whatever the tenant's own program expects - so

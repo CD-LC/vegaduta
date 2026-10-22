@@ -5,10 +5,10 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_ATTACHMENT
 import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_ID_CHARS;
 import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_TITLE_CHARS;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Field readers and cleaners shared by every {@link ChatImportFormat}. Every value read here is
@@ -40,7 +40,7 @@ final class ChatImportFields {
             return null;
         }
         JsonNode v = node.get(field);
-        return v != null && v.isTextual() ? v.asText() : null;
+        return v != null && v.isString() ? v.asString() : null;
     }
 
     static String cleanId(String primary, String fallback) {

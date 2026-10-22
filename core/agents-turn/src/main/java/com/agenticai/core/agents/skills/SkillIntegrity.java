@@ -1,9 +1,6 @@
 package com.agenticai.core.agents.skills;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +10,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Content-hash pinning for skills: the pure half (no Spring, no database).
@@ -91,7 +91,7 @@ public final class SkillIntegrity {
         root.put("files", perFile);
         try {
             return MAPPER.writeValueAsString(root);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -122,16 +122,16 @@ public final class SkillIntegrity {
         List<String> added = new ArrayList<>();
         List<String> removed = new ArrayList<>();
         List<String> modified = new ArrayList<>();
-        Iterator<String> names = after.fieldNames();
+        Iterator<String> names = after.propertyNames().iterator();
         while (names.hasNext()) {
             String path = names.next();
             if (!before.has(path)) {
                 added.add(path);
-            } else if (!before.path(path).asText().equals(after.path(path).asText())) {
+            } else if (!before.path(path).asString().equals(after.path(path).asString())) {
                 modified.add(path);
             }
         }
-        Iterator<String> old = before.fieldNames();
+        Iterator<String> old = before.propertyNames().iterator();
         while (old.hasNext()) {
             String path = old.next();
             if (!after.has(path)) {
@@ -220,13 +220,13 @@ public final class SkillIntegrity {
         try {
             JsonNode node = MAPPER.readTree(json);
             return node != null && node.isObject() ? node : null;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }
 
     private static String text(JsonNode node, String field) {
-        return node.path(field).asText("");
+        return node.path(field).asString("");
     }
 
     private static String nz(String s) {

@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -11,6 +9,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Plain {@link HttpClient} calls against Google's OAuth 2.0 endpoints - no Google API Client
@@ -149,16 +149,16 @@ public class GoogleOAuthClient {
                         failureContext + " (" + response.statusCode() + "): " + response.body());
             }
             JsonNode node = objectMapper.readTree(response.body());
-            String accessToken = node.path("access_token").asText(null);
+            String accessToken = node.path("access_token").asString(null);
             if (accessToken == null) {
                 throw new GoogleApiException(
                         "Google's token response had no access_token: " + response.body());
             }
             return new TokenResponse(
                     accessToken,
-                    node.path("refresh_token").asText(null),
+                    node.path("refresh_token").asString(null),
                     node.path("expires_in").asInt(3600),
-                    node.path("scope").asText(""));
+                    node.path("scope").asString(""));
         } catch (GoogleApiException e) {
             throw e;
         } catch (Exception e) {
@@ -186,7 +186,7 @@ public class GoogleOAuthClient {
                                 + response.body());
             }
             JsonNode node = objectMapper.readTree(response.body());
-            String email = node.path("email").asText(null);
+            String email = node.path("email").asString(null);
             if (email == null) {
                 throw new GoogleApiException(
                         "Google's userinfo response had no email: " + response.body());

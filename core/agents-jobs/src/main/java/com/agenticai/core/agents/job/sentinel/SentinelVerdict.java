@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.job.sentinel;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The sentinel verdict contract - what a sentinel-mode scheduled run is asked to end its answer
@@ -120,11 +120,11 @@ public record SentinelVerdict(
         }
         try {
             JsonNode node = MAPPER.readTree(last.trim());
-            Verdict verdict = parseVerdict(node.path("verdict").asText(""));
+            Verdict verdict = parseVerdict(node.path("verdict").asString(""));
             if (verdict == null) {
                 return Optional.empty();
             }
-            Severity severity = parseSeverity(node.path("severity").asText(""));
+            Severity severity = parseSeverity(node.path("severity").asString(""));
             Proposal proposal = parseProposal(node.path("proposal"));
             // A propose without a usable proposal is downgraded to notify: the
             // signal still reaches the human, only the one-tap action is lost.
@@ -134,8 +134,8 @@ public record SentinelVerdict(
             return Optional.of(
                     new SentinelVerdict(
                             verdict,
-                            clamp(node.path("title").asText(null), MAX_TITLE),
-                            clamp(node.path("body").asText(null), MAX_BODY),
+                            clamp(node.path("title").asString(null), MAX_TITLE),
+                            clamp(node.path("body").asString(null), MAX_BODY),
                             severity,
                             proposal));
         } catch (Exception e) {
@@ -166,11 +166,11 @@ public record SentinelVerdict(
         if (!node.isObject()) {
             return null;
         }
-        String goal = clamp(node.path("goal").asText(null), MAX_GOAL);
+        String goal = clamp(node.path("goal").asString(null), MAX_GOAL);
         if (goal == null) {
             return null;
         }
-        String summary = clamp(node.path("summary").asText(null), MAX_SUMMARY);
+        String summary = clamp(node.path("summary").asString(null), MAX_SUMMARY);
         return new Proposal(summary, goal);
     }
 

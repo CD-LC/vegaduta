@@ -3,8 +3,6 @@ package com.agenticai.core.common.quicktask;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +11,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Sinks;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The live-trace half of {@link QuickTaskService#runStream}: serialises SSE events onto the run's
@@ -91,7 +91,7 @@ final class QuickTaskTraceEvents {
     void emit(Sinks.Many<String> sink, Map<String, Object> event) {
         try {
             sink.tryEmitNext(objectMapper.writeValueAsString(event));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to serialize Quick Task trace event", e);
         }
     }

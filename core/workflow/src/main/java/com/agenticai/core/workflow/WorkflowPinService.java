@@ -9,7 +9,6 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.dto.WorkflowPinRequest;
 import com.agenticai.core.workflow.dto.WorkflowPinResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The permission-checked side of data pinning (spec section 5): list, create and delete the pinned
@@ -147,7 +147,7 @@ public class WorkflowPinService {
                 hex.append(String.format("%02x", b));
             }
             return hex.substring(0, 32);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException | NoSuchAlgorithmException e) {
+        } catch (tools.jackson.core.JacksonException | NoSuchAlgorithmException e) {
             // Unreachable for plain config maps; a missing hash only disables the stale-pin hint.
             log.warn("Could not hash the config of node {}: {}", node.id(), e.getMessage());
             return null;

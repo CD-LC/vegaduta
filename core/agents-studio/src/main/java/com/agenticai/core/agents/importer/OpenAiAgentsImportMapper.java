@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Maps an OpenAI Agents SDK style agent config (the keyword arguments of {@code Agent(...)} written
@@ -161,7 +161,8 @@ public final class OpenAiAgentsImportMapper {
                     "Carried over temperature" + (d.topP != null ? " and top_p" : "") + ".");
         }
         List<String> other = new ArrayList<>();
-        settings.fieldNames()
+        settings.propertyNames()
+                .iterator()
                 .forEachRemaining(
                         k -> {
                             if (!k.equals("temperature")

@@ -1,6 +1,5 @@
 package com.agenticai.core.sarvam;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Wraps {@code POST /transliterate} - converts script while preserving pronunciation (e.g. {@code
@@ -63,8 +63,8 @@ public class SarvamTransliterationClient {
                             .body(JsonNode.class);
             success = true;
             return new TransliterationResult(
-                    response.path("transliterated_text").asText(null),
-                    response.path("source_language_code").asText(null));
+                    response.path("transliterated_text").asString(null),
+                    response.path("source_language_code").asString(null));
         } catch (RestClientResponseException e) {
             errorMessage = SarvamTranslateClient.describeError(e);
             throw new SarvamApiException(

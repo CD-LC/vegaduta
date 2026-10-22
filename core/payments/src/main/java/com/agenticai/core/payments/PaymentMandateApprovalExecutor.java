@@ -3,12 +3,12 @@ package com.agenticai.core.payments;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@link ApprovalActionExecutor} for {@code upi.mandate.execute} - picked up by {@code
@@ -65,8 +65,8 @@ public class PaymentMandateApprovalExecutor implements ApprovalActionExecutor {
     private static UUID transactionId(ApprovalRequest request) {
         try {
             JsonNode node = MAPPER.readTree(request.getPayloadJson()).path("transactionId");
-            if (node.isTextual()) {
-                return UUID.fromString(node.asText());
+            if (node.isString()) {
+                return UUID.fromString(node.asString());
             }
         } catch (Exception e) {
             log.warn(

@@ -1,9 +1,6 @@
 package com.agenticai.core.tenancy;
 
 import com.agenticai.core.security.TenantLimits;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Reads/writes a tenant's "AI Model Control" overrides - {@code Tenant#aiModelPreferences}'s {@code

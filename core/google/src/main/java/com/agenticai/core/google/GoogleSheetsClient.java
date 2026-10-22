@@ -1,8 +1,6 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -14,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Google Sheets v4, scoped to {@code spreadsheets} - full read/write, since Sheets has no narrower
@@ -59,7 +59,7 @@ public class GoogleSheetsClient {
         for (JsonNode row : body.path("values")) {
             List<String> cells = new ArrayList<>();
             for (JsonNode cell : row) {
-                cells.add(cell.asText(""));
+                cells.add(cell.asString(""));
             }
             rows.add(cells);
         }
@@ -139,7 +139,7 @@ public class GoogleSheetsClient {
             }
             JsonNode updates = objectMapper.readTree(response.body()).path("updates");
             return new AppendResult(
-                    updates.path("updatedRange").asText(null),
+                    updates.path("updatedRange").asString(null),
                     updates.path("updatedRows").asInt(0));
         } catch (GoogleApiException e) {
             throw e;

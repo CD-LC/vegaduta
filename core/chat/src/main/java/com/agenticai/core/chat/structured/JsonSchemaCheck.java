@@ -1,10 +1,10 @@
 package com.agenticai.core.chat.structured;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A small, forgiving JSON Schema check for the prompt-and-validate fallback ({@code
@@ -93,8 +93,8 @@ public final class JsonSchemaCheck {
         JsonNode required = schema.get("required");
         if (required != null && required.isArray()) {
             for (JsonNode name : required) {
-                if (!value.has(name.asText())) {
-                    out.add(path + "." + name.asText() + " is required");
+                if (!value.has(name.asString())) {
+                    out.add(path + "." + name.asString() + " is required");
                 }
             }
         }
@@ -114,7 +114,7 @@ public final class JsonSchemaCheck {
             }
             JsonNode additional = schema.get("additionalProperties");
             if (additional != null && additional.isBoolean() && !additional.asBoolean()) {
-                Iterator<String> names = value.fieldNames();
+                Iterator<String> names = value.propertyNames().iterator();
                 while (names.hasNext()) {
                     String name = names.next();
                     if (!properties.has(name) && out.size() < MAX_PROBLEMS) {
@@ -137,10 +137,10 @@ public final class JsonSchemaCheck {
             }
             return false;
         }
-        return switch (type.asText()) {
+        return switch (type.asString()) {
             case "object" -> value.isObject();
             case "array" -> value.isArray();
-            case "string" -> value.isTextual();
+            case "string" -> value.isString();
             case "boolean" -> value.isBoolean();
             case "null" -> value.isNull();
             case "integer" ->
@@ -162,7 +162,7 @@ public final class JsonSchemaCheck {
     }
 
     private static String describe(JsonNode type) {
-        return type.isArray() ? "one of " + type : type.asText();
+        return type.isArray() ? "one of " + type : type.asString();
     }
 
     private static String kind(JsonNode value) {
@@ -172,7 +172,7 @@ public final class JsonSchemaCheck {
         if (value.isArray()) {
             return "an array";
         }
-        if (value.isTextual()) {
+        if (value.isString()) {
             return "a string";
         }
         if (value.isBoolean()) {

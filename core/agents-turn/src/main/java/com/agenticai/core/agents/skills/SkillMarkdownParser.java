@@ -225,7 +225,7 @@ public final class SkillMarkdownParser {
         }
         try {
             return com.agenticai.core.json.JsonMappers.plain().writeValueAsString(extras);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new SkillValidationException("The skill's optional metadata could not be saved.");
         }
     }
@@ -239,9 +239,9 @@ public final class SkillMarkdownParser {
             return com.agenticai.core.json.JsonMappers.plain()
                     .readValue(
                             json,
-                            new com.fasterxml.jackson.core.type.TypeReference<
+                            new tools.jackson.core.type.TypeReference<
                                     LinkedHashMap<String, Object>>() {});
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             return Map.of();
         }
     }

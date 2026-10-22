@@ -12,10 +12,6 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -35,6 +31,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Stores, validates and serves hook configuration, and hands the runtime the {@link HookSet} in
@@ -298,8 +298,8 @@ public class AgentHookConfigService {
             List<String> out = new ArrayList<>();
             node.forEach(
                     n -> {
-                        if (n.isTextual() && !n.asText().isBlank()) {
-                            out.add(n.asText().trim().toLowerCase(Locale.ROOT));
+                        if (n.isString() && !n.asString().isBlank()) {
+                            out.add(n.asString().trim().toLowerCase(Locale.ROOT));
                         }
                     });
             return List.copyOf(out);
@@ -326,14 +326,14 @@ public class AgentHookConfigService {
         }
         List<String> out = new ArrayList<>();
         for (JsonNode n : node) {
-            if (!n.isTextual()) {
+            if (!n.isString()) {
                 throw new IllegalArgumentException("webhookHosts: every entry must be a string");
             }
-            String host = n.asText().trim().toLowerCase(Locale.ROOT);
+            String host = n.asString().trim().toLowerCase(Locale.ROOT);
             if (host.length() > 253 || !HOST_PATTERN.matcher(host).matches()) {
                 throw new IllegalArgumentException(
                         "webhookHosts: '"
-                                + n.asText()
+                                + n.asString()
                                 + "' is not a host name "
                                 + "(use example.com or *.example.com - no scheme, port or path)");
             }

@@ -2,7 +2,6 @@ package com.agenticai.core.agents.skills;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.Instant;
@@ -25,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
 
 /**
  * Review lifecycle, version history and usage statistics of custom skills (migration V590).
@@ -476,7 +476,7 @@ public class SkillLifecycleService {
         }
         try {
             return JsonMappers.plain().writeValueAsString(files);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

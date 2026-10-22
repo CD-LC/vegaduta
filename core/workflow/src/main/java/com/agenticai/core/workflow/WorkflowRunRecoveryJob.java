@@ -7,8 +7,6 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,6 +18,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Crash recovery for the DEFAULT (synchronous, in-process) {@link WorkflowExecutionEngine}. That

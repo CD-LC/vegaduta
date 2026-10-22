@@ -6,7 +6,6 @@ import com.agenticai.core.agents.demo.studio.DemoStudioService.Palette;
 import com.agenticai.core.agents.demo.studio.DemoStudioService.StudioException;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * HTTP surface of the /try Agent Studio - {@code /api/demo/studio/**}, unauthenticated like the

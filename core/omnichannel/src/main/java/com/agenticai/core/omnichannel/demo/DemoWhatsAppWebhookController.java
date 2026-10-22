@@ -18,8 +18,6 @@ import com.agenticai.core.tenancy.demo.DemoChannelType;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import com.agenticai.core.tenancy.demo.DemoWhatsAppPhoneGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -40,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Inbound webhook for the SHARED platform demo WhatsApp number - {@code /webhook/demo/whatsapp}.
@@ -172,15 +172,15 @@ public class DemoWhatsAppWebhookController {
             for (JsonNode entry : root.path("entry")) {
                 for (JsonNode change : entry.path("changes")) {
                     JsonNode value = change.path("value");
-                    String pnid = value.path("metadata").path("phone_number_id").asText(null);
+                    String pnid = value.path("metadata").path("phone_number_id").asString(null);
                     if (pnid != null && !pnid.equals(bot.phoneNumberId())) {
                         continue; // not our number - never process another app/number's traffic
                     }
                     for (JsonNode message : value.path("messages")) {
-                        String type = message.path("type").asText("");
-                        String id = message.path("id").asText(null);
-                        String from = message.path("from").asText(null);
-                        String body = message.path("text").path("body").asText(null);
+                        String type = message.path("type").asString("");
+                        String id = message.path("id").asString(null);
+                        String from = message.path("from").asString(null);
+                        String body = message.path("text").path("body").asString(null);
                         executor.execute(() -> safely(id, type, from, body));
                     }
                 }

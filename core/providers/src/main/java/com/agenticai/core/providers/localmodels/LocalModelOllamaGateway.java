@@ -3,9 +3,6 @@ package com.agenticai.core.providers.localmodels;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PreDestroy;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,6 +22,9 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The only door from the local-models API to Ollama: {@code GET /api/tags} (what is installed),
@@ -209,7 +209,7 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
             JsonNode body = quick.get().uri(url.get() + "/api/ps").retrieve().body(JsonNode.class);
             if (body != null && body.path("models").isArray()) {
                 for (JsonNode model : body.get("models")) {
-                    String name = model.path("name").asText(model.path("model").asText(""));
+                    String name = model.path("name").asString(model.path("model").asString(""));
                     if (name.equalsIgnoreCase(tag)
                             || (!tag.contains(":") && name.equalsIgnoreCase(tag + ":latest"))) {
                         return model.hasNonNull("context_length")
@@ -268,7 +268,8 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                             .body(body.toString())
                             .retrieve()
                             .body(JsonNode.class);
-            boolean ok = reply != null && "success".equalsIgnoreCase(reply.path("status").asText());
+            boolean ok =
+                    reply != null && "success".equalsIgnoreCase(reply.path("status").asString());
             log.info(
                     "Local model '{}' created from '{}' with a {}-token context: {}",
                     derived,
@@ -299,8 +300,8 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                 for (JsonNode model : body.get("models")) {
                     String name =
                             model.hasNonNull("name")
-                                    ? model.get("name").asText()
-                                    : model.path("model").asText("");
+                                    ? model.get("name").asString()
+                                    : model.path("model").asString("");
                     if (!name.isBlank()) {
                         names.add(name);
                     }
@@ -357,12 +358,12 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                                                 JsonNode event = MAPPER.readTree(line);
                                                 if (event.hasNonNull("error")) {
                                                     throw new PullException(
-                                                            clip(event.get("error").asText()));
+                                                            clip(event.get("error").asString()));
                                                 }
                                                 onProgress.accept(event);
                                                 if ("success"
                                                         .equalsIgnoreCase(
-                                                                event.path("status").asText())) {
+                                                                event.path("status").asString())) {
                                                     return true;
                                                 }
                                             }
@@ -406,7 +407,7 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         try {
             JsonNode node = MAPPER.readTree(bytes);
             if (node != null && node.hasNonNull("error")) {
-                return clip(node.get("error").asText());
+                return clip(node.get("error").asString());
             }
         } catch (IOException | RuntimeException e) {
             // not JSON: no usable detail

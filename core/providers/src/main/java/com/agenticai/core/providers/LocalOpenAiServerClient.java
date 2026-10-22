@@ -5,8 +5,6 @@ import com.agenticai.core.providers.validation.ProviderValidationException;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -16,6 +14,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The one place that talks to a {@link ProviderName#LOCAL_OPENAI} server outside a chat turn: it
@@ -146,7 +146,7 @@ public class LocalOpenAiServerClient {
 
     private static String firstText(JsonNode node, String... fields) {
         for (String field : fields) {
-            String value = node.path(field).asText(null);
+            String value = node.path(field).asString(null);
             if (value != null && !value.isBlank()) {
                 return value;
             }

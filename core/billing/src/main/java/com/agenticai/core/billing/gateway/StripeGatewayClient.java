@@ -1,8 +1,6 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -20,6 +18,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link PaymentGatewayClient} backed by Stripe's REST API directly (no stripe-java dependency -
@@ -175,7 +175,7 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             }
             customerForm.add("metadata[agentic_ai_tenant_id]", tenantId);
             JsonNode customer = postForm("/v1/customers", customerForm);
-            String customerId = customer.path("id").asText(null);
+            String customerId = customer.path("id").asString(null);
             if (customerId == null || customerId.isBlank()) {
                 throw new PaymentGatewayException("Stripe customer creation returned no id", null);
             }
@@ -195,10 +195,10 @@ public class StripeGatewayClient implements PaymentGatewayClient {
                 form.add("trial_period_days", Integer.toString(trialDays));
             }
             JsonNode subscription = postForm("/v1/subscriptions", form);
-            String subscriptionId = subscription.path("id").asText(null);
-            String status = subscription.path("status").asText("incomplete");
+            String subscriptionId = subscription.path("id").asString(null);
+            String status = subscription.path("status").asString("incomplete");
             String checkoutUrl =
-                    subscription.path("latest_invoice").path("hosted_invoice_url").asText(null);
+                    subscription.path("latest_invoice").path("hosted_invoice_url").asString(null);
             if (subscriptionId == null || subscriptionId.isBlank()) {
                 throw new PaymentGatewayException(
                         "Stripe subscription creation returned no id", null);
@@ -304,22 +304,22 @@ public class StripeGatewayClient implements PaymentGatewayClient {
             log.error("Could not parse Stripe webhook body - dropping the event as UNKNOWN", e);
             return new BillingEvent(BillingEventType.UNKNOWN, null, "", gatewayName());
         }
-        String rawEventName = json.path("type").asText("");
+        String rawEventName = json.path("type").asString("");
         JsonNode object = json.path("data").path("object");
         // Subscription id: customer.subscription.* events ARE the object;
         // invoice.* events reference it via the invoice's parent (API
         // 2025-era shape) with the legacy `subscription` field as fallback.
         String subscriptionId = null;
         if (rawEventName.startsWith("customer.subscription.")) {
-            subscriptionId = object.path("id").asText(null);
+            subscriptionId = object.path("id").asString(null);
         } else if (rawEventName.startsWith("invoice.")) {
             subscriptionId =
                     object.path("parent")
                             .path("subscription_details")
                             .path("subscription")
-                            .asText(null);
+                            .asString(null);
             if (subscriptionId == null) {
-                subscriptionId = object.path("subscription").asText(null);
+                subscriptionId = object.path("subscription").asString(null);
             }
         }
         if (subscriptionId != null && subscriptionId.isBlank()) {
@@ -327,9 +327,9 @@ public class StripeGatewayClient implements PaymentGatewayClient {
         }
         CapturedPaymentDetails capturedPayment = null;
         if ("invoice.paid".equals(rawEventName) && subscriptionId != null) {
-            String paymentRef = object.path("id").asText(null);
+            String paymentRef = object.path("id").asString(null);
             long amountMinor = object.path("amount_paid").asLong(-1L);
-            String currency = object.path("currency").asText(null);
+            String currency = object.path("currency").asString(null);
             if (paymentRef != null && !paymentRef.isBlank() && amountMinor >= 0) {
                 capturedPayment =
                         new CapturedPaymentDetails(
@@ -408,7 +408,7 @@ public class StripeGatewayClient implements PaymentGatewayClient {
                 form.add("cancel_at_period_end", "true");
                 JsonNode subscription =
                         postForm("/v1/subscriptions/" + gatewaySubscriptionId, form);
-                return subscription.path("status").asText("active");
+                return subscription.path("status").asString("active");
             }
             JsonNode deleted =
                     apiClient
@@ -417,7 +417,7 @@ public class StripeGatewayClient implements PaymentGatewayClient {
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
                             .retrieve()
                             .body(JsonNode.class);
-            return deleted != null ? deleted.path("status").asText("canceled") : "canceled";
+            return deleted != null ? deleted.path("status").asString("canceled") : "canceled";
         } catch (RestClientException e) {
             throw new PaymentGatewayException(
                     "Could not cancel Stripe subscription: " + e.getMessage(), e);

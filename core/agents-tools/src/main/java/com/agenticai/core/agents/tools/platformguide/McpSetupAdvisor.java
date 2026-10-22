@@ -7,7 +7,6 @@ import com.agenticai.core.mcp.McpConnectionStatus;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.dto.McpCatalogEntry;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The MCP half of the setup guide: this tenant's registered servers (for the {@code mcp-servers}

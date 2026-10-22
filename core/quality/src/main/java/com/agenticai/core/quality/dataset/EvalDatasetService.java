@@ -4,8 +4,6 @@ import com.agenticai.core.chat.LlmCallLogService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -19,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * CRUD + validation for {@link EvalDataset} / {@link EvalDatasetCase}.
@@ -110,7 +110,7 @@ public class EvalDatasetService {
             ApplicationContext applicationContext,
             @Value("${LANGFUSE_HOST:}") String langfuseHost,
             @Value(
-                            "${management.otlp.tracing.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}")
+                            "${management.opentelemetry.tracing.export.otlp.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}")
                     String otlpTracesEndpoint,
             @Value("${LANGFUSE_OTEL_AUTH_HEADER:}") String langfuseAuthHeader,
             @Value("${LANGFUSE_INIT_PROJECT_ID:}") String langfuseProjectId) {

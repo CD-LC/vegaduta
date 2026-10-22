@@ -13,8 +13,6 @@ import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * MCP-SELF-HEAL (2026-07-26): turns a failed STDIO MCP connection's captured stderr into a
@@ -245,8 +245,8 @@ public class McpStdioSelfHealer {
             JsonNode commandNode = node.get("command");
             if (commandNode == null
                     || commandNode.isNull()
-                    || !commandNode.isTextual()
-                    || commandNode.asText().isBlank()) {
+                    || !commandNode.isString()
+                    || commandNode.asString().isBlank()) {
                 return Optional.empty();
             }
             List<String> args = new ArrayList<>();
@@ -254,17 +254,17 @@ public class McpStdioSelfHealer {
             if (argsNode != null && argsNode.isArray()) {
                 argsNode.forEach(
                         n -> {
-                            if (n.isTextual()) {
-                                args.add(n.asText());
+                            if (n.isString()) {
+                                args.add(n.asString());
                             }
                         });
             }
             JsonNode reasonNode = node.get("reason");
             String reason =
-                    reasonNode != null && reasonNode.isTextual() && !reasonNode.asText().isBlank()
-                            ? reasonNode.asText()
+                    reasonNode != null && reasonNode.isString() && !reasonNode.asString().isBlank()
+                            ? reasonNode.asString()
                             : "Suggested by the platform's AI based on the server's error output.";
-            return Optional.of(new SuggestedFix(commandNode.asText(), List.copyOf(args), reason));
+            return Optional.of(new SuggestedFix(commandNode.asString(), List.copyOf(args), reason));
         } catch (Exception e) {
             return Optional.empty();
         }

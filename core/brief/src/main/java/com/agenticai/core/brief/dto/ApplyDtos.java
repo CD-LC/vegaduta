@@ -1,9 +1,9 @@
 package com.agenticai.core.brief.dto;
 
 import com.agenticai.core.brief.model.Brief;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.util.List;
 import java.util.UUID;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Request/response shapes for apply, versions, rollback and tune (Earned Autonomy contract, section

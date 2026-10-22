@@ -3,8 +3,6 @@ package com.agenticai.core.agents.hooks;
 import com.agenticai.core.agents.tools.classification.ToolSensitivity;
 import com.agenticai.core.agents.tools.classification.ToolTrustTier;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -17,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The one place a hook list is parsed, validated, normalised and serialised. Strict by design: an
@@ -166,7 +166,7 @@ public final class HookSchema {
                 throw new IllegalArgumentException(
                         at + ".failMode: only webhook hooks have a fail mode");
             }
-            failMode = FailMode.parse(node.get("failMode").asText());
+            failMode = FailMode.parse(node.get("failMode").asString());
             if (failMode == null) {
                 throw new IllegalArgumentException(at + ".failMode: must be 'open' or 'closed'");
             }
@@ -461,7 +461,7 @@ public final class HookSchema {
     }
 
     private static void rejectUnknown(JsonNode node, Set<String> allowed, String at) {
-        Iterator<String> names = node.fieldNames();
+        Iterator<String> names = node.propertyNames().iterator();
         while (names.hasNext()) {
             String name = names.next();
             if (!allowed.contains(name)) {
@@ -483,10 +483,10 @@ public final class HookSchema {
         if (v == null || v.isNull()) {
             return null;
         }
-        if (!v.isTextual()) {
+        if (!v.isString()) {
             throw new IllegalArgumentException(at + "." + field + ": must be a string");
         }
-        String s = v.asText().trim();
+        String s = v.asString().trim();
         return s.isEmpty() ? null : s;
     }
 
@@ -560,10 +560,10 @@ public final class HookSchema {
         }
         List<String> out = new ArrayList<>();
         for (JsonNode item : v) {
-            if (!item.isTextual() || item.asText().isBlank()) {
+            if (!item.isString() || item.asString().isBlank()) {
                 throw new IllegalArgumentException(at + ": every entry must be a non-blank string");
             }
-            String s = item.asText();
+            String s = item.asString();
             if (!out.contains(s)) {
                 out.add(s);
             }

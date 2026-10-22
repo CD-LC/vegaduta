@@ -6,8 +6,6 @@ import com.agenticai.core.rl.domain.TrajectoryStep;
 import com.agenticai.core.rl.repo.EpisodeRepository;
 import com.agenticai.core.rl.repo.TrajectoryStepRepository;
 import com.agenticai.core.rl.web.dto.RlPreferenceExport;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +13,8 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * NDJSON exports of the trace/training data - the "JSONL export of evals and traces" first step of

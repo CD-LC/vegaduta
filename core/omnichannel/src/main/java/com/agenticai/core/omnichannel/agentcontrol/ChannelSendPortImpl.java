@@ -7,10 +7,10 @@ import com.agenticai.core.omnichannel.ChannelPayloadSerializationException;
 import com.agenticai.core.omnichannel.outbound.ChannelTextSend;
 import com.agenticai.core.omnichannel.outbound.ChannelTextSends;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@code core/omnichannel} side of {@link ChannelSendPort} - see that interface's javadoc for

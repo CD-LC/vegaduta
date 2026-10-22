@@ -2,15 +2,15 @@ package com.agenticai.core.agents.tools.apiguide;
 
 import com.agenticai.core.agentspi.ApiSpecProvider;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@code vegaduta_api_guide}: the Assistant's way into the platform's REST contract. Read-only - it
@@ -67,10 +67,10 @@ public class ApiGuideToolCallback implements ToolCallback {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
             ApiGuideIndex idx = index();
-            String action = args.path("action").asText("search");
+            String action = args.path("action").asString("search");
             if ("describe".equalsIgnoreCase(action)) {
-                String method = args.path("method").asText("");
-                String path = args.path("path").asText("");
+                String method = args.path("method").asString("");
+                String path = args.path("path").asString("");
                 Optional<ObjectNode> found = idx.describe(method, path);
                 return found.isPresent()
                         ? MAPPER.writeValueAsString(found.get())
@@ -82,7 +82,7 @@ public class ApiGuideToolCallback implements ToolCallback {
                                         + " in the spec. Use action=search to find the exact path.");
             }
             return MAPPER.writeValueAsString(
-                    idx.search(args.path("query").asText(""), args.path("method").asText("")));
+                    idx.search(args.path("query").asString(""), args.path("method").asString("")));
         } catch (IOException | RuntimeException e) {
             log.warn("{} failed", NAME, e);
             return error("The API spec could not be read: " + e.getClass().getSimpleName());

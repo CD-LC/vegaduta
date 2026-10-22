@@ -12,7 +12,6 @@ import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.WorkflowValidationException;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Validates a {@link Brief} against {@code brief-schema.v1.json} plus the rules a JSON Schema

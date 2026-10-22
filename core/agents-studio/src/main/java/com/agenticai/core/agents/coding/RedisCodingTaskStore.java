@@ -2,8 +2,6 @@ package com.agenticai.core.agents.coding;
 
 import com.agenticai.core.agents.coding.CodingTaskDtos.TaskDocument;
 import com.agenticai.core.resilience.RateLimitedLog;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +13,8 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Redis-backed {@link CodingTaskStore}. No table and no migration: a task is one JSON document with
@@ -106,7 +106,7 @@ public class RedisCodingTaskStore implements CodingTaskStore {
         String json;
         try {
             json = mapper.writeValueAsString(doc);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Could not serialise coding task " + doc.task().taskId(), e);
         }
@@ -125,7 +125,7 @@ public class RedisCodingTaskStore implements CodingTaskStore {
         try {
             TaskDocument doc = mapper.readValue(json, TaskDocument.class);
             return doc == null || doc.task() == null ? Optional.empty() : Optional.of(doc);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Unreadable coding task document for {} - treating it as expired", taskId, e);
             return Optional.empty();
         }

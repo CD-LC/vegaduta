@@ -1,7 +1,5 @@
 package com.agenticai.core.agents.tools.platformguide;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * What the Assistant knows about setting this platform up: the topic catalogue and the bundled

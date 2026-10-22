@@ -1,11 +1,11 @@
 package com.agenticai.core.workflow;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Pure helpers shared by the Dify-style AI nodes ({@link WorkflowAiNodeHandler}): the

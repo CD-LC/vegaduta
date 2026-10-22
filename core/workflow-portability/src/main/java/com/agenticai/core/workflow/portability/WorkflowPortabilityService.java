@@ -29,12 +29,6 @@ import com.agenticai.core.workflow.portability.PortabilityDtos.PlaceholderView;
 import com.agenticai.core.workflow.portability.PortabilityDtos.PreviewResponse;
 import com.agenticai.core.workflow.portability.PortabilityDtos.UseView;
 import com.agenticai.core.workflow.portability.PortabilityDtos.WorkflowView;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +50,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Workflow portability: export a saved workflow as the VegaDuta workflow DSL (JSON), and import a
@@ -301,7 +301,7 @@ public class WorkflowPortabilityService {
         JsonNode envelope;
         try {
             envelope = envelopeMapper.readTree(body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // Not echoing the parser message: it can quote a fragment of the payload.
             throw new IllegalArgumentException(
                     "The request body is not valid JSON, or is nested more than "
@@ -312,13 +312,13 @@ public class WorkflowPortabilityService {
             throw new IllegalArgumentException("The request body must be a JSON object.");
         }
         JsonNode sourceNode = envelope.get("source");
-        if (sourceNode != null && !sourceNode.isNull() && !sourceNode.isTextual()) {
+        if (sourceNode != null && !sourceNode.isNull() && !sourceNode.isString()) {
             throw new IllegalArgumentException("\"source\" must be a string.");
         }
         String requestedSource =
-                sourceNode == null || sourceNode.isNull() || sourceNode.asText().isBlank()
+                sourceNode == null || sourceNode.isNull() || sourceNode.asString().isBlank()
                         ? PortabilityFormat.AUTO
-                        : sourceNode.asText();
+                        : sourceNode.asString();
 
         PortabilityDocumentParser.Parsed parsed =
                 parser.parse(payloadText(envelope.get("payload")));
@@ -360,8 +360,8 @@ public class WorkflowPortabilityService {
             throw new IllegalArgumentException("\"payload\" is required.");
         }
         String text;
-        if (payload.isTextual()) {
-            text = payload.asText();
+        if (payload.isString()) {
+            text = payload.asString();
         } else if (payload.isObject() || payload.isArray()) {
             text = payload.toString();
         } else {

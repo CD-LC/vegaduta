@@ -3,13 +3,13 @@ package com.agenticai.core.agents.skills.tools;
 import com.agenticai.core.agents.skills.SkillDefinition;
 import com.agenticai.core.agents.skills.SkillService;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Level 2 of progressive disclosure - the platform's equivalent of "cat my-skill/SKILL.md". Until
@@ -61,7 +61,7 @@ public class LoadSkillToolCallback implements ToolCallback {
         try {
             JsonNode args =
                     MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
-            name = args.path("name").asText("").trim();
+            name = args.path("name").asString("").trim();
         } catch (Exception e) {
             return "Could not load a skill: the tool input was not valid JSON.";
         }

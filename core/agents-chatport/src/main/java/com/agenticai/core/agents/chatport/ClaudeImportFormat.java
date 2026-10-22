@@ -10,9 +10,9 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.ROLE_USER;
 import static com.agenticai.core.agents.chatport.ChatImportParser.SOURCE_CLAUDE;
 
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Claude's {@code conversations.json}: {@code {uuid, name, created_at, updated_at,

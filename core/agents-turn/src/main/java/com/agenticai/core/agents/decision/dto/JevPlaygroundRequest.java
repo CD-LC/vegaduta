@@ -1,7 +1,7 @@
 package com.agenticai.core.agents.decision.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A playground experiment: free-text {@code state} plus a caller-built map of named questions

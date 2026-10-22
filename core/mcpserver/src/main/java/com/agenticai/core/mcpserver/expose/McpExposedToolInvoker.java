@@ -18,7 +18,6 @@ import com.agenticai.core.workflow.WorkflowRunNotFoundException;
 import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -29,6 +28,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Executes a call to one of the dynamic {@code agent_*} / {@code workflow_*} / {@code get_run}
@@ -469,7 +469,7 @@ public class McpExposedToolInvoker {
             return null;
         }
         JsonNode value = arguments.get(field);
-        return value == null || value.isNull() ? null : value.asText();
+        return value == null || value.isNull() ? null : value.asString();
     }
 
     private void audit(

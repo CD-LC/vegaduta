@@ -5,8 +5,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +31,8 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@code webhook} hook action's HTTP client: POSTs one JSON event and reads back a verdict.
@@ -248,16 +248,16 @@ public class HookWebhookClient {
         if (node == null
                 || !node.isObject()
                 || !node.hasNonNull("decision")
-                || !node.get("decision").isTextual()) {
+                || !node.get("decision").isString()) {
             throw new WebhookException("the webhook reply had no decision");
         }
-        String decision = node.get("decision").asText().trim().toLowerCase(Locale.ROOT);
+        String decision = node.get("decision").asString().trim().toLowerCase(Locale.ROOT);
         if (!decision.equals("allow") && !decision.equals("deny")) {
             throw new WebhookException("the webhook decision was neither allow nor deny");
         }
         String reason =
-                node.hasNonNull("reason") && node.get("reason").isTextual()
-                        ? cleanReason(node.get("reason").asText())
+                node.hasNonNull("reason") && node.get("reason").isString()
+                        ? cleanReason(node.get("reason").asString())
                         : null;
         return new Reply(decision.equals("allow"), reason);
     }

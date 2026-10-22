@@ -28,13 +28,13 @@ import org.springframework.web.client.RestClient;
  * single trace applies, e.g. an RL episode that spanned several LLM calls/traces).
  *
  * <p><b>Config reuse, not invention</b> - deliberately does NOT introduce any new property. It
- * derives the Langfuse base URL from the exact same {@code management.otlp.tracing.endpoint}
- * property the OTLP trace exporter already uses (stripping the well-known {@code
- * /api/public/otel/v1/traces} suffix Langfuse's own OTLP ingestion path documents), and reuses the
- * exact same {@code LANGFUSE_OTEL_AUTH_HEADER} pre-built "Basic base64(publicKey: secretKey)" value
- * the OTLP exporter's {@code management.otlp.tracing. headers.Authorization} already sends -
- * Langfuse's public API accepts this identical Basic-Auth pair on every one of its endpoints, so no
- * separate credential wiring is needed.
+ * derives the Langfuse base URL from the exact same {@code
+ * management.opentelemetry.tracing.export.otlp.endpoint} property the OTLP trace exporter already
+ * uses (stripping the well-known {@code /api/public/otel/v1/traces} suffix Langfuse's own OTLP
+ * ingestion path documents), and reuses the exact same {@code LANGFUSE_OTEL_AUTH_HEADER} pre-built
+ * "Basic base64(publicKey: secretKey)" value the OTLP exporter's {@code management.otlp.tracing.
+ * headers.Authorization} already sends - Langfuse's public API accepts this identical Basic-Auth
+ * pair on every one of its endpoints, so no separate credential wiring is needed.
  *
  * <p><b>Trace-id caveat (assumption, not confirmed against a live Langfuse instance - see this
  * build's final report)</b>: this class assumes the 32-lowercase-hex-char OTel trace id captured by
@@ -61,7 +61,7 @@ public class LangfuseScoreClient {
 
     /**
      * Langfuse's documented native OTLP ingestion path - see application.yml's
-     * management.otlp.tracing.endpoint.
+     * management.opentelemetry.tracing.export.otlp.endpoint.
      */
     private static final String OTLP_TRACES_SUFFIX = "/api/public/otel/v1/traces";
 
@@ -92,7 +92,7 @@ public class LangfuseScoreClient {
     public LangfuseScoreClient(
             RestClient.Builder restClientBuilder,
             @Value(
-                            "${management.otlp.tracing.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}")
+                            "${management.opentelemetry.tracing.export.otlp.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}")
                     String otlpTracesEndpoint,
             @Value("${LANGFUSE_OTEL_AUTH_HEADER:}") String authHeader) {
         this.authHeader = authHeader;

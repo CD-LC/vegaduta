@@ -9,7 +9,6 @@ import com.agenticai.core.documentgen.model.DocumentType;
 import com.agenticai.core.documentgen.service.DocumentGenerationService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link DocumentGenerationService} as a native Spring AI tool - generates a

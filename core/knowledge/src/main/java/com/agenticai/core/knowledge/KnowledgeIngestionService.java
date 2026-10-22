@@ -9,7 +9,6 @@ import com.agenticai.core.knowledge.rag.KnowledgeRagSettingsService;
 import com.agenticai.core.knowledge.rag.ParentChildChunker;
 import com.agenticai.core.knowledge.rag.ParentChildPlan;
 import com.agenticai.core.knowledge.rag.ParentChunkStore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Profile("knowledge")

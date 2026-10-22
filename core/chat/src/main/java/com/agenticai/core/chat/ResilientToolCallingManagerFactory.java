@@ -1,13 +1,15 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
+import org.springframework.ai.model.tool.DefaultToolCallingManager;
+import org.springframework.ai.model.tool.ToolCallLimitBehavior;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The one place a tool-capable {@code ChatModel} in this package gets its {@link
@@ -84,6 +86,30 @@ public class ResilientToolCallingManagerFactory {
                 ToolResultClearing.DEFAULT_KEEP_LAST);
     }
 
+    /**
+     * Test seam with explicit round caps and Spring AI's per-turn call limits left unlimited (the
+     * platform default); argument validation and the repeat guard on, as in production.
+     */
+    public ResilientToolCallingManagerFactory(
+            ObjectMapper objectMapper,
+            ObjectProvider<ObservationRegistry> observationRegistry,
+            ObjectProvider<MeterRegistry> meterRegistry,
+            int maxToolRounds,
+            int maxUnknownToolCalls) {
+        this(
+                objectMapper,
+                observationRegistry,
+                meterRegistry,
+                maxToolRounds,
+                maxUnknownToolCalls,
+                true,
+                ToolResultClearing.DEFAULT_THRESHOLD_CHARS,
+                ToolResultClearing.DEFAULT_KEEP_LAST);
+    }
+
+    /** {@code -1} disables a Spring AI tool-call limit (see the constructor's parameter docs). */
+    static final int UNLIMITED = -1;
+
     /** Pre-argument-validation signature (test harnesses); validation on, as in production. */
     public ResilientToolCallingManagerFactory(
             ObjectMapper objectMapper,
@@ -126,6 +152,8 @@ public class ResilientToolCallingManagerFactory {
                 meterRegistry,
                 maxToolRounds,
                 maxUnknownToolCalls,
+                UNLIMITED,
+                UNLIMITED,
                 clearingEnabled,
                 clearingThresholdChars,
                 clearingKeepLast,
@@ -133,6 +161,19 @@ public class ResilientToolCallingManagerFactory {
                 RepeatToolCallGuard.DEFAULT_TOOLS);
     }
 
+    /**
+     * @param maxCallsPerTool Spring AI 2's per-tool cap of calls within one turn ({@code
+     *     app.chat.tools.max-calls-per-tool}); Spring AI's own default is 40. Default here is
+     *     UNLIMITED (-1): the platform's authority on runaway loops is the round cap below, which
+     *     is what has always applied, and a silently-introduced 40 would end legitimate long
+     *     paginations with an error result.
+     * @param maxTotalCalls Spring AI 2's cap on all tool calls within one turn ({@code
+     *     app.chat.tools.max-total-calls}); Spring AI's own default is 150. Default UNLIMITED for
+     *     the same reason. A breach of either does NOT throw (Spring AI's default, which would
+     *     abort a stream whose headers are already flushed): the offending call is answered with an
+     *     error result and the model decides how to proceed - the same "never throws" posture as
+     *     the round cap's soft stop.
+     */
     @Autowired
     public ResilientToolCallingManagerFactory(
             ObjectMapper objectMapper,
@@ -149,6 +190,8 @@ public class ResilientToolCallingManagerFactory {
                                             .DEFAULT_MAX_UNKNOWN_TOOL_CALLS
                                     + "}")
                     int maxUnknownToolCalls,
+            @Value("${app.chat.tools.max-calls-per-tool:-1}") int maxCallsPerTool,
+            @Value("${app.chat.tools.max-total-calls:-1}") int maxTotalCalls,
             @Value("${app.chat.tools.result-clearing.enabled:true}") boolean clearingEnabled,
             @Value(
                             "${app.chat.tools.result-clearing.threshold-chars:"
@@ -174,12 +217,32 @@ public class ResilientToolCallingManagerFactory {
                         ? ObservationRegistry.NOOP
                         : observationRegistry.getIfAvailable(() -> ObservationRegistry.NOOP);
         MeterRegistry meters = meterRegistry == null ? null : meterRegistry.getIfAvailable();
-        org.springframework.ai.model.tool.DefaultToolCallingManager delegate =
+        DefaultToolCallingManager.Builder builder =
                 ToolCallingManager.builder()
                         .observationRegistry(observations)
                         .toolExecutionExceptionProcessor(
                                 new RedactingToolExecutionExceptionProcessor())
-                        .build();
+                        // Explicit, not Spring AI 2's silent defaults (40 per tool / 150 total):
+                        // see the parameter docs.
+                        .onLimitExceeded(ToolCallLimitBehavior.RETURN_ERROR_RESPONSE)
+                        // The tools attached to the request are the only tools that can run (2.0
+                        // default, made explicit):
+                        // AgentToolProvider attaches explicit callbacks and unknown names are
+                        // answered by
+                        // ArgumentSanitizingToolCallingManager's UnavailableToolCallback, never
+                        // resolved by name.
+                        .resolutionFallbackEnabled(false);
+        if (maxCallsPerTool < 0) {
+            builder.unlimitedCallsPerTool();
+        } else {
+            builder.maxCallsPerTool(maxCallsPerTool);
+        }
+        if (maxTotalCalls < 0) {
+            builder.unlimitedTotalToolCalls();
+        } else {
+            builder.maxTotalToolCalls(maxTotalCalls);
+        }
+        DefaultToolCallingManager delegate = builder.build();
         // OTel GenAI shape for the tool spans: "execute_tool <name>", content off.
         delegate.setObservationConvention(new GenAiToolObservationConvention());
         this.manager =

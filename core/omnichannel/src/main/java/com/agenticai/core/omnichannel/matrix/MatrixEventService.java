@@ -19,8 +19,6 @@ import com.agenticai.core.omnichannel.session.ConversationHeldByHumanException;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * What happens to a Matrix {@code /sync} batch once {@link MatrixSyncService} fetched it with the
@@ -207,12 +207,12 @@ public class MatrixEventService {
             MatrixSenderPolicy policy,
             RoomEvent event) {
         JsonNode content = event.content();
-        String msgtype = content.path("msgtype").asText("");
+        String msgtype = content.path("msgtype").asString("");
         if (!Set.of("m.text", "m.emote", "m.image", "m.file", "m.audio", "m.video")
                 .contains(msgtype)) {
             return true; // m.notice (other bots), locations, key verification requests, ...
         }
-        if ("m.replace".equals(content.path("m.relates_to").path("rel_type").asText())) {
+        if ("m.replace".equals(content.path("m.relates_to").path("rel_type").asString())) {
             return true; // an edit of a message already answered
         }
         if (policy.evaluate(event.sender()) == ChannelSenderPolicy.Decision.DROP) {
@@ -402,8 +402,8 @@ public class MatrixEventService {
             MatrixCredentialService.ActiveConnection connection, RoomEvent event) {
         JsonNode rel = event.content().path("m.relates_to");
         String threadRoot =
-                "m.thread".equals(rel.path("rel_type").asText())
-                        ? rel.path("event_id").asText(null)
+                "m.thread".equals(rel.path("rel_type").asString())
+                        ? rel.path("event_id").asString(null)
                         : null;
         boolean group = isGroupRoom(connection, event.roomId());
         // A DM answer needs no quote; a group answer and any thread answer point at the message.
@@ -429,7 +429,7 @@ public class MatrixEventService {
 
     static boolean mentionsBot(JsonNode content, String botUserId) {
         for (JsonNode id : content.path("m.mentions").path("user_ids")) {
-            if (botUserId.equalsIgnoreCase(id.asText())) {
+            if (botUserId.equalsIgnoreCase(id.asString())) {
                 return true;
             }
         }
@@ -438,11 +438,11 @@ public class MatrixEventService {
                 lowered.startsWith("@") && lowered.contains(":")
                         ? lowered.substring(0, lowered.indexOf(':'))
                         : lowered;
-        String body = content.path("body").asText("").toLowerCase(Locale.ROOT);
+        String body = content.path("body").asString("").toLowerCase(Locale.ROOT);
         if (body.contains(lowered) || containsToken(body, localpart)) {
             return true;
         }
-        String formatted = content.path("formatted_body").asText("").toLowerCase(Locale.ROOT);
+        String formatted = content.path("formatted_body").asString("").toLowerCase(Locale.ROOT);
         return formatted.contains(lowered) || formatted.contains(lowered.replace("@", "%40"));
     }
 
@@ -471,7 +471,7 @@ public class MatrixEventService {
      */
     private String textOf(
             MatrixCredentialService.ActiveConnection connection, JsonNode content, String msgtype) {
-        String body = content.path("body").asText("");
+        String body = content.path("body").asString("");
         String text;
         if (msgtype.equals("m.text") || msgtype.equals("m.emote")) {
             text = body;
@@ -486,9 +486,9 @@ public class MatrixEventService {
             JsonNode content,
             String msgtype,
             String body) {
-        String filename = content.path("filename").asText(body);
+        String filename = content.path("filename").asString(body);
         JsonNode info = content.path("info");
-        String mime = info.path("mimetype").asText("application/octet-stream");
+        String mime = info.path("mimetype").asString("application/octet-stream");
         long size = info.path("size").asLong(-1L);
         StringBuilder sb =
                 new StringBuilder("[Attachment (")
@@ -504,7 +504,7 @@ public class MatrixEventService {
         if (!body.isBlank() && !body.equals(filename)) {
             sb.append('\n').append(body);
         }
-        String url = content.path("url").asText(null);
+        String url = content.path("url").asString(null);
         if (content.has("file") && url == null) {
             sb.append("\n(The file is encrypted and was not downloaded.)");
         } else if (url != null

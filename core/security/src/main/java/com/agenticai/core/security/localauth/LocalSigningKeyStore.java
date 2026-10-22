@@ -2,7 +2,6 @@ package com.agenticai.core.security.localauth;
 
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -34,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The RS256 signing keys of local auth mode. One key signs; recently retired keys keep verifying

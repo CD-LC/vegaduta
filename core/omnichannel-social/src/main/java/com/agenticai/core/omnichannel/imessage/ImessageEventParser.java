@@ -1,7 +1,7 @@
 package com.agenticai.core.omnichannel.imessage;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Turns a BlueBubbles message into the few fields the router needs. The same shape arrives two
@@ -51,7 +51,7 @@ final class ImessageEventParser {
         }
         JsonNode message = root;
         if (root.has("type")) {
-            if (!"new-message".equals(root.path("type").asText())) {
+            if (!"new-message".equals(root.path("type").asString())) {
                 return Optional.empty();
             }
             message = root.path("data");
@@ -62,18 +62,18 @@ final class ImessageEventParser {
         if (message.path("isFromMe").asBoolean(false)) {
             return Optional.empty();
         }
-        if (!message.path("associatedMessageGuid").asText("").isBlank()
+        if (!message.path("associatedMessageGuid").asString("").isBlank()
                 || message.path("itemType").asInt(0) != 0
                 || message.path("groupActionType").asInt(0) != 0) {
             return Optional.empty();
         }
-        String guid = message.path("guid").asText("");
+        String guid = message.path("guid").asString("");
         JsonNode chat = message.path("chats").path(0);
-        String chatGuid = chat.path("guid").asText("");
+        String chatGuid = chat.path("guid").asString("");
         if (guid.isBlank() || chatGuid.isBlank() || chatGuid.length() > MAX_CHAT_GUID_CHARS) {
             return Optional.empty();
         }
-        String text = message.path("text").asText("");
+        String text = message.path("text").asString("");
         boolean attachments =
                 message.path("attachments").isArray() && !message.path("attachments").isEmpty();
         if (text.isBlank()) {
@@ -81,7 +81,7 @@ final class ImessageEventParser {
         }
         boolean group = chat.path("style").asInt(0) == STYLE_GROUP || chatGuid.contains(";+;");
         String sender =
-                ImessageAddress.normalize(message.path("handle").path("address").asText(null));
+                ImessageAddress.normalize(message.path("handle").path("address").asString(null));
         if (sender == null && !group) {
             // The handle is the chat identifier for a direct chat ("iMessage;-;+15550100100").
             int cut = chatGuid.lastIndexOf(';');

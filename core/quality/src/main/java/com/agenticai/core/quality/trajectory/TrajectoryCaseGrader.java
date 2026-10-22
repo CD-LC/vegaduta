@@ -2,13 +2,13 @@ package com.agenticai.core.quality.trajectory;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.dataset.AgentTurnReplayer.ReplayedToolCall;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The seam between the eval runner and trajectory scoring. {@code EvalRunService} calls {@link

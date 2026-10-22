@@ -2,7 +2,6 @@ package com.agenticai.core.omnichannel.relay;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Edge relay (2026-10-14): a signed-in browser with a warm on-device model registers as the

@@ -1,7 +1,5 @@
 package com.agenticai.core.chat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.errors.ApiException;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Best-effort translation of the exceptions Spring AI's model clients throw on non-2xx upstream
@@ -554,10 +554,10 @@ public class ProviderErrorTranslator {
         try {
             JsonNode root = objectMapper.readTree(body);
             if (root.path("error").has("message")) {
-                return Optional.of(root.path("error").path("message").asText());
+                return Optional.of(root.path("error").path("message").asString());
             }
             if (root.has("message")) {
-                return Optional.of(root.path("message").asText());
+                return Optional.of(root.path("message").asString());
             }
         } catch (Exception e) {
             log.debug("Could not parse upstream error body as JSON, using raw body", e);

@@ -1,11 +1,11 @@
 package com.agenticai.core.quality.grader;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A deliberately small JSON-Schema validator for code graders (this module does not depend on a
@@ -64,7 +64,8 @@ final class MiniJsonSchema {
         if (!schema.isObject()) {
             throw new IllegalArgumentException("Every (sub)schema must be a JSON object.");
         }
-        Iterator<Map.Entry<String, JsonNode>> fields = schema.fields();
+        Iterator<Map.Entry<String, JsonNode>> fields =
+                com.agenticai.core.json.JsonNodes.fields(schema);
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> field = fields.next();
             String key = field.getKey();
@@ -119,20 +120,20 @@ final class MiniJsonSchema {
                     }
                     break;
                 case "pattern":
-                    if (value.asText().length() > CodeGrader.MAX_PATTERN_LENGTH) {
+                    if (value.asString().length() > CodeGrader.MAX_PATTERN_LENGTH) {
                         throw new IllegalArgumentException(
                                 "Schema 'pattern' is limited to "
                                         + CodeGrader.MAX_PATTERN_LENGTH
                                         + " characters.");
                     }
                     try {
-                        Pattern.compile(value.asText());
+                        Pattern.compile(value.asString());
                     } catch (RuntimeException e) {
                         throw new IllegalArgumentException("Invalid 'pattern' regex in schema.");
                     }
                     break;
                 case "type":
-                    if (!value.isTextual() && !value.isArray()) {
+                    if (!value.isString() && !value.isArray()) {
                         throw new IllegalArgumentException(
                                 "'type' must be a string or an array of strings.");
                     }
@@ -192,8 +193,8 @@ final class MiniJsonSchema {
                 errors.add(path + ": value matches none of the anyOf alternatives");
             }
         }
-        if (data.isTextual()) {
-            String s = data.asText();
+        if (data.isString()) {
+            String s = data.asString();
             if (schema.has("minLength") && s.length() < schema.get("minLength").asInt()) {
                 errors.add(
                         path
@@ -207,7 +208,7 @@ final class MiniJsonSchema {
             if (schema.has("pattern")) {
                 try {
                     if (!CodeGrader.matchBounded(
-                            Pattern.compile(schema.get("pattern").asText()), s, false)) {
+                            Pattern.compile(schema.get("pattern").asString()), s, false)) {
                         errors.add(path + ": string does not match pattern");
                     }
                 } catch (CodeGrader.BudgetExceeded | StackOverflowError e) {
@@ -217,22 +218,23 @@ final class MiniJsonSchema {
         }
         if (data.isNumber()) {
             if (schema.has("minimum") && data.asDouble() < schema.get("minimum").asDouble()) {
-                errors.add(path + ": number below minimum " + schema.get("minimum").asText());
+                errors.add(path + ": number below minimum " + schema.get("minimum").asString());
             }
             if (schema.has("maximum") && data.asDouble() > schema.get("maximum").asDouble()) {
-                errors.add(path + ": number above maximum " + schema.get("maximum").asText());
+                errors.add(path + ": number above maximum " + schema.get("maximum").asString());
             }
         }
         if (data.isObject()) {
             JsonNode properties = schema.path("properties");
             if (schema.has("required")) {
                 for (JsonNode name : schema.get("required")) {
-                    if (!data.has(name.asText())) {
-                        errors.add(path + ": missing required property '" + name.asText() + "'");
+                    if (!data.has(name.asString())) {
+                        errors.add(path + ": missing required property '" + name.asString() + "'");
                     }
                 }
             }
-            Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
+            Iterator<Map.Entry<String, JsonNode>> fields =
+                    com.agenticai.core.json.JsonNodes.fields(data);
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 JsonNode sub = properties.get(field.getKey());
@@ -270,9 +272,9 @@ final class MiniJsonSchema {
             }
             return false;
         }
-        switch (typeSpec.asText()) {
+        switch (typeSpec.asString()) {
             case "string":
-                return data.isTextual();
+                return data.isString();
             case "boolean":
                 return data.isBoolean();
             case "object":
@@ -292,7 +294,7 @@ final class MiniJsonSchema {
     }
 
     private static String typeName(JsonNode data) {
-        if (data.isTextual()) {
+        if (data.isString()) {
             return "string";
         }
         if (data.isBoolean()) {

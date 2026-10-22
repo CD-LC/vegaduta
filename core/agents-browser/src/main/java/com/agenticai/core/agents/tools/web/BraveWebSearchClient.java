@@ -5,8 +5,6 @@ import com.agenticai.core.resilience.CircuitBreakerRegistry;
 import com.agenticai.core.resilience.DependencyUnavailableException;
 import com.agenticai.core.resilience.ResilienceGuard;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -18,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Brave Search API client behind the {@code web_search} built-in tool.
@@ -181,13 +181,15 @@ public class BraveWebSearchClient {
                 return out;
             }
             for (JsonNode r : results) {
-                String url = r.path("url").asText(null);
+                String url = r.path("url").asString(null);
                 if (url == null || url.isBlank()) {
                     continue;
                 }
                 out.add(
                         new SearchResult(
-                                r.path("title").asText(""), url, r.path("description").asText("")));
+                                r.path("title").asString(""),
+                                url,
+                                r.path("description").asString("")));
             }
         } catch (Exception e) {
             // A shape change upstream degrades to "no results", never a thrown

@@ -2,10 +2,6 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ToolCallCapabilityProbe;
 import com.agenticai.core.providers.ToolCallGrade;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -22,6 +18,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The {@link ToolCallCapabilityProbe} the hosted-pool service calls when a row is saved: one canned
@@ -212,7 +212,7 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
             return true;
         }
         for (JsonNode capability : capabilities) {
-            if ("tools".equalsIgnoreCase(capability.asText())) {
+            if ("tools".equalsIgnoreCase(capability.asString())) {
                 return true;
             }
         }
@@ -226,7 +226,7 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     static Double parameterBillions(JsonNode show) {
         JsonNode details = show.get("details");
         if (details != null && details.hasNonNull("parameter_size")) {
-            Matcher m = PARAMETER_SIZE.matcher(details.get("parameter_size").asText());
+            Matcher m = PARAMETER_SIZE.matcher(details.get("parameter_size").asString());
             if (m.find()) {
                 return Double.parseDouble(m.group(1));
             }
@@ -332,7 +332,7 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
         if (toolCalls != null && toolCalls.isArray() && !toolCalls.isEmpty()) {
             return ToolCallGrade.STRUCTURED;
         }
-        String content = message.hasNonNull("content") ? message.get("content").asText() : "";
+        String content = message.hasNonNull("content") ? message.get("content").asString() : "";
         List<AssistantMessage.ToolCall> textCalls =
                 TextToolCallParser.parse(content, PROBE_TOOL_NAMES, objectMapper);
         return textCalls.isEmpty() ? ToolCallGrade.NONE : ToolCallGrade.TEXT;

@@ -1,11 +1,11 @@
 package com.agenticai.core.agents.chatport;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Reads the conversation exports of ChatGPT ({@code conversations.json}: {@code {title,
@@ -180,7 +180,7 @@ public final class ChatImportParser {
             ChatImportReader.read(data, c);
         } catch (ChatImportReader.LimitExceededException e) {
             throw new IllegalArgumentException(e.getMessage());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException(
                     "That file is not valid chat-export JSON, or it nests or stores values beyond the safe limits.");
         } catch (IOException e) {

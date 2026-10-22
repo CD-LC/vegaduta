@@ -1,7 +1,7 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Ollama's BYOK credential needs more than a plain API key - a tenant-hosted Ollama server's base

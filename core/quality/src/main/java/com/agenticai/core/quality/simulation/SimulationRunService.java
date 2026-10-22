@@ -11,7 +11,6 @@ import com.agenticai.core.quality.simulation.SimulationPersonaService.ResolvedPe
 import com.agenticai.core.quality.simulation.attack.AttackScenarioCatalog;
 import com.agenticai.core.quality.simulation.attack.CanaryVerdict;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Triggers and executes simulation sessions: for each resolved persona, an adversarial

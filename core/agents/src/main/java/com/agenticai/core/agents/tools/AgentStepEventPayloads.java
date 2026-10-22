@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -10,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Builds the single-line JSON payloads {@link AgentStepEventEmitter} puts on the wire, one factory
@@ -59,7 +59,7 @@ final class AgentStepEventPayloads {
      * One payload as single-line JSON (the part after {@link
      * AgentStepEventEmitter#STEP_EVENT_MARKER}).
      */
-    static String toJson(Map<String, Object> event) throws JsonProcessingException {
+    static String toJson(Map<String, Object> event) throws JacksonException {
         return MAPPER.writeValueAsString(event);
     }
 

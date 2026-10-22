@@ -2,7 +2,6 @@ package com.agenticai.core.providers;
 
 import com.agenticai.core.providers.validation.ProviderValidationException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -13,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Upstream HTTP for the hosted LLM pool: the {@code GET .../models} key-validation probe a save
@@ -100,7 +100,7 @@ public final class HostedPoolEndpointProbe {
             }
             List<String> ids = new ArrayList<>();
             for (JsonNode node : response.get("data")) {
-                String id = node.path("id").asText(null);
+                String id = node.path("id").asString(null);
                 if (id != null && !id.isBlank()) {
                     ids.add(id);
                 }

@@ -204,7 +204,7 @@ final class OpenApiSchemaBuilder {
 
     private static boolean isJsonNode(Class<?> raw) {
         for (Class<?> c = raw; c != null; c = c.getSuperclass()) {
-            if (c.getName().equals("com.fasterxml.jackson.databind.JsonNode")) {
+            if (c.getName().equals("tools.jackson.databind.JsonNode")) {
                 return true;
             }
         }

@@ -5,7 +5,6 @@ import com.agenticai.core.providers.HostedLlmBaseUrlGuard;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Validates an Azure OpenAI connection by decoding the {@link AzureOpenAiCredential} JSON blob and
@@ -155,7 +155,7 @@ public class AzureOpenAIProviderValidator implements ProviderValidator {
         if (response != null && response.has("data") && response.get("data").isArray()) {
             boolean deploymentFound = false;
             for (JsonNode deployment : response.get("data")) {
-                String id = deployment.path("id").asText(null);
+                String id = deployment.path("id").asString(null);
                 if (credential.deploymentName().equals(id)) {
                     deploymentFound = true;
                     break;

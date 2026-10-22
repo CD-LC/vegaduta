@@ -13,9 +13,6 @@ import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Owns the create/rotate/revoke/list lifecycle for inbound MCP API keys, and the two-step "raw key
@@ -330,7 +330,7 @@ public class McpServerAccessGrantService {
     private String writeJson(Object value) {
         try {
             return MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "Failed to serialize MCP server access grant config", e);
         }

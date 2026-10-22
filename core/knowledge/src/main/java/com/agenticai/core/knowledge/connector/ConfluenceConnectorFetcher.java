@@ -2,8 +2,6 @@ package com.agenticai.core.knowledge.connector;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Confluence connector - syncs a space's pages via the REST content API. {@code body.storage}
@@ -85,9 +85,9 @@ public class ConfluenceConnectorFetcher implements ConnectorFetcher {
                                     .retrieve()
                                     .body(String.class));
             for (JsonNode page : resp.path("results")) {
-                String id = page.path("id").asText();
-                String title = page.path("title").asText("untitled");
-                String html = page.path("body").path("storage").path("value").asText("");
+                String id = page.path("id").asString();
+                String title = page.path("title").asString("untitled");
+                String html = page.path("body").path("storage").path("value").asString("");
                 if (id.isBlank() || html.isBlank()) {
                     continue;
                 }

@@ -2,7 +2,6 @@ package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.tenancy.replica.ReplicaMode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Signs A2A Agent Cards and verifies cards signed elsewhere - the trust primitive a cross-tenant
@@ -150,7 +150,7 @@ public class A2aCardSigningService {
             entry.put("signature", base64url(signer.sign()));
             entry.put("header", Map.of("kid", keyId()));
             return List.of(entry);
-        } catch (GeneralSecurityException | com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (GeneralSecurityException | tools.jackson.core.JacksonException e) {
             // A signing failure must not break discovery - an unsigned card is
             // still a valid card; log loudly so an operator notices the key is
             // broken rather than silently shipping unsigned cards.
@@ -181,7 +181,7 @@ public class A2aCardSigningService {
             signer.initSign(keyPair().getPrivate());
             signer.update(signingInputB64.getBytes(StandardCharsets.US_ASCII));
             return signingInputB64 + "." + base64url(signer.sign());
-        } catch (GeneralSecurityException | com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (GeneralSecurityException | tools.jackson.core.JacksonException e) {
             log.error("Compact JWS signing failed", e);
             return null;
         }
@@ -218,7 +218,7 @@ public class A2aCardSigningService {
                 }
             }
         } catch (GeneralSecurityException
-                | com.fasterxml.jackson.core.JsonProcessingException
+                | tools.jackson.core.JacksonException
                 | IllegalArgumentException e) {
             return false;
         }

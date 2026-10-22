@@ -3,7 +3,6 @@ package com.agenticai.core.agents.decision;
 import com.agenticai.core.providers.capability.CapabilityPolicyService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TtlCache;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The DECISION capability's routing facade - the single type the internal consumers ({@code

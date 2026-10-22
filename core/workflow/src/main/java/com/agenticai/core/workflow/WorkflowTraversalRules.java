@@ -2,10 +2,10 @@ package com.agenticai.core.workflow;
 
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The pure traversal rules shared by BOTH workflow engines: the in-process {@link
@@ -165,7 +165,7 @@ public final class WorkflowTraversalRules {
             }
             List<String> items = new ArrayList<>();
             for (JsonNode item : arrayNode) {
-                items.add(item.isTextual() ? item.asText() : item.toString());
+                items.add(item.isString() ? item.asString() : item.toString());
             }
             return new LoopItems(items, ItemsProblem.NONE, itemsField);
         } catch (Exception e) {

@@ -1,9 +1,6 @@
 package com.agenticai.core.admin.localauth;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -21,6 +18,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link LocalAccountStore} on the control-plane tables from migration V510. Plain JDBC rather than
@@ -384,7 +384,7 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
     private static String attributesJson(LocalAccount account) {
         try {
             return JSON.writeValueAsString(account.attributes());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("could not serialise account attributes", e);
         }
     }
@@ -395,7 +395,7 @@ public class JdbcLocalAccountStore implements LocalAccountStore {
         }
         try {
             return JSON.readValue(json, ATTRIBUTES);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return Map.of();
         }
     }

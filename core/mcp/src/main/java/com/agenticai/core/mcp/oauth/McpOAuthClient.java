@@ -1,8 +1,6 @@
 package com.agenticai.core.mcp.oauth;
 
 import com.agenticai.core.mcp.oauth.McpOAuthDiscovery.AuthServerMetadata;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -10,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Generic, metadata-driven OAuth 2.1 client for a remote MCP server: RFC 7591 dynamic client
@@ -80,12 +80,12 @@ public class McpOAuthClient {
                     "Dynamic client registration was rejected (HTTP " + response.status() + ").");
         }
         JsonNode node = parse(response.body(), "client registration response");
-        String clientId = node.path("client_id").asText(null);
+        String clientId = node.path("client_id").asString(null);
         if (clientId == null || clientId.isBlank()) {
             throw new McpOAuthException("The registration response had no client_id.");
         }
-        String secret = node.path("client_secret").asText(null);
-        String granted = node.path("token_endpoint_auth_method").asText(requested);
+        String secret = node.path("client_secret").asString(null);
+        String granted = node.path("token_endpoint_auth_method").asString(requested);
         return new Registration(clientId, secret, granted);
     }
 
@@ -195,7 +195,7 @@ public class McpOAuthClient {
         if (response.status() >= 300) {
             String errorCode = null;
             try {
-                errorCode = objectMapper.readTree(response.body()).path("error").asText(null);
+                errorCode = objectMapper.readTree(response.body()).path("error").asString(null);
             } catch (Exception ignored) {
                 // non-JSON error body: leave null (= unknown, treated as transient by callers)
             }
@@ -210,15 +210,15 @@ public class McpOAuthClient {
                     errorCode);
         }
         JsonNode node = parse(response.body(), "token response");
-        String accessToken = node.path("access_token").asText(null);
+        String accessToken = node.path("access_token").asString(null);
         if (accessToken == null || accessToken.isBlank()) {
             throw new McpOAuthException("The token response had no access_token.");
         }
         return new TokenResponse(
                 accessToken,
-                node.path("refresh_token").asText(null),
+                node.path("refresh_token").asString(null),
                 node.path("expires_in").asInt(3600),
-                node.path("scope").asText(""));
+                node.path("scope").asString(""));
     }
 
     private JsonNode parse(String body, String what) {

@@ -13,11 +13,6 @@ import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +26,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Migration kits: turns an agent exported from another platform into a DRAFT agent on this one,
@@ -204,13 +204,13 @@ public class AgentImportService {
             throw new IllegalArgumentException("The request body must be a JSON object.");
         }
         JsonNode sourceNode = envelope.get("source");
-        if (sourceNode != null && !sourceNode.isNull() && !sourceNode.isTextual()) {
+        if (sourceNode != null && !sourceNode.isNull() && !sourceNode.isString()) {
             throw new IllegalArgumentException("\"source\" must be a string.");
         }
         String requestedSource =
-                sourceNode == null || sourceNode.isNull() || sourceNode.asText().isBlank()
+                sourceNode == null || sourceNode.isNull() || sourceNode.asString().isBlank()
                         ? AgentImportSource.AUTO
-                        : sourceNode.asText();
+                        : sourceNode.asString();
         JsonNode payload = resolvePayload(envelope.get("payload"));
 
         AgentImportSource detectedShape = AgentImportDetector.detect(payload).orElse(null);
@@ -379,15 +379,15 @@ public class AgentImportService {
         if (payload == null || payload.isNull()) {
             throw new IllegalArgumentException("\"payload\" is required.");
         }
-        if (payload.isTextual()) {
-            String text = payload.asText();
+        if (payload.isString()) {
+            String text = payload.asString();
             if (utf8Length(text) > maxPayloadBytes) {
                 throw tooLarge();
             }
             JsonNode parsed;
             try {
                 parsed = mapper.readTree(text);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new IllegalArgumentException(
                         "The payload is text but not JSON. Source code is not imported "
                                 + "(OpenAI Agent Builder exports TypeScript/Python code, not JSON); paste a JSON object instead.");
@@ -403,7 +403,7 @@ public class AgentImportService {
     private JsonNode parse(String text, String what) {
         try {
             return mapper.readTree(text);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // Deliberately not echoing the parser message: it can quote a fragment of the payload.
             throw new IllegalArgumentException(
                     what

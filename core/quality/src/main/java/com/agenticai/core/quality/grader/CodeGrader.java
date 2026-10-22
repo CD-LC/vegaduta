@@ -2,11 +2,11 @@ package com.agenticai.core.quality.grader;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A deterministic ("code") grader for one eval case: no LLM, no judge noise, same input always
@@ -100,11 +100,11 @@ public final class CodeGrader {
         if (spec == null || !spec.isObject()) {
             throw new IllegalArgumentException("Grader spec must be a JSON object with a 'type'.");
         }
-        String type = spec.path("type").asText("").trim().toLowerCase(java.util.Locale.ROOT);
+        String type = spec.path("type").asString("").trim().toLowerCase(java.util.Locale.ROOT);
         switch (type) {
             case "regex":
                 {
-                    String raw = spec.path("pattern").asText("");
+                    String raw = spec.path("pattern").asString("");
                     if (raw.isEmpty()) {
                         throw new IllegalArgumentException(
                                 "Regex grader needs a non-empty 'pattern'.");
@@ -117,7 +117,7 @@ public final class CodeGrader {
                     }
                     String mode =
                             spec.path("mode")
-                                    .asText("find")
+                                    .asString("find")
                                     .trim()
                                     .toLowerCase(java.util.Locale.ROOT);
                     if (!mode.equals("find") && !mode.equals("matches")) {
@@ -142,10 +142,10 @@ public final class CodeGrader {
             case "exact":
                 {
                     JsonNode value = spec.get("value");
-                    if (value == null || !value.isTextual()) {
+                    if (value == null || !value.isString()) {
                         throw new IllegalArgumentException("Exact grader needs a string 'value'.");
                     }
-                    if (value.asText().length() > MAX_EXPECTED_LENGTH) {
+                    if (value.asString().length() > MAX_EXPECTED_LENGTH) {
                         throw new IllegalArgumentException(
                                 "Exact 'value' is limited to "
                                         + MAX_EXPECTED_LENGTH
@@ -157,7 +157,7 @@ public final class CodeGrader {
                             Kind.EXACT,
                             null,
                             false,
-                            trim ? value.asText().trim() : value.asText(),
+                            trim ? value.asString().trim() : value.asString(),
                             ignore,
                             trim,
                             null);

@@ -2,7 +2,6 @@ package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The safe-mode flavour of the {@code http_request} tool (see {@link HttpRequestSafetyConfig}): the

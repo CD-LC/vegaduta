@@ -12,8 +12,6 @@ import com.agenticai.core.workflow.portability.N8nImportModel.Level;
 import com.agenticai.core.workflow.portability.N8nImportModel.NodeCtx;
 import com.agenticai.core.workflow.portability.N8nImportModel.Outputs;
 import com.agenticai.core.workflow.portability.N8nImportModel.Src;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Best-effort import of an n8n workflow export (JSON) into a {@link PortableWorkflow}, with an

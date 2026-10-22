@@ -2,11 +2,11 @@ package com.agenticai.core.workflow;
 
 import static com.agenticai.core.workflow.NumberCanon.numberText;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
 import java.util.Locale;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.NullNode;
 
 /**
  * Value-level helpers every data operation shares: absent/empty tests, the text a value compares
@@ -32,8 +32,8 @@ final class DataValues {
         if (isAbsent(v)) {
             return true;
         }
-        if (v.isTextual()) {
-            return v.asText().isBlank();
+        if (v.isString()) {
+            return v.asString().isBlank();
         }
         if (v.isContainerNode()) {
             return v.size() == 0;
@@ -49,8 +49,8 @@ final class DataValues {
         if (isAbsent(v)) {
             return "";
         }
-        if (v.isTextual()) {
-            return v.asText();
+        if (v.isString()) {
+            return v.asString();
         }
         if (v.isNumber()) {
             return numberText(v.decimalValue());
@@ -66,7 +66,7 @@ final class DataValues {
      * otherwise.
      */
     static String outputText(JsonNode v) {
-        return v.isTextual() ? v.asText() : v.toString();
+        return v.isString() ? v.asString() : v.toString();
     }
 
     /**
@@ -77,8 +77,8 @@ final class DataValues {
         if (isAbsent(v)) {
             return "z:";
         }
-        if (v.isTextual()) {
-            return "s:" + (ignoreCase ? v.asText().toLowerCase(Locale.ROOT) : v.asText());
+        if (v.isString()) {
+            return "s:" + (ignoreCase ? v.asString().toLowerCase(Locale.ROOT) : v.asString());
         }
         if (v.isNumber()) {
             return "n:" + numberText(v.decimalValue());

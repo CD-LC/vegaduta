@@ -1,11 +1,11 @@
 package com.agenticai.core.workflow.portability;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Turns the text of an uploaded workflow file into a JSON tree, whatever it is written in: JSON
@@ -63,7 +63,7 @@ public final class PortabilityDocumentParser {
         if (first == '{' || first == '[') {
             try {
                 root = json.readTree(t);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 // A YAML flow mapping ({a: 1}) starts with a brace too; fall through to YAML before
                 // giving up.
                 root = null;

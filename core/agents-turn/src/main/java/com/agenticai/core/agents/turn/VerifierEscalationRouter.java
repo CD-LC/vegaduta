@@ -2,7 +2,6 @@ package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.agents.turn.quality.QueryComplexityClassifier;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * L4 - verifier-escalated model router: the second half of a cheap-to-strong cascade.

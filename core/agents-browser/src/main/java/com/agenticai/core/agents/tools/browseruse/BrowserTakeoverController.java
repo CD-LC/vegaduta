@@ -7,7 +7,6 @@ import com.agenticai.core.agents.tools.browseruse.BrowserTakeoverDtos.TokenRefre
 import com.agenticai.core.agents.tools.browseruse.BrowserTakeoverDtos.View;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The person's side of browser takeover: see where a takeover stands, pause a session, take

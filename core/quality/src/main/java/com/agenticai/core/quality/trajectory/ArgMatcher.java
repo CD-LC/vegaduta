@@ -1,10 +1,10 @@
 package com.agenticai.core.quality.trajectory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * What one expected argument of an expected tool call must look like. Written in a trajectory spec
@@ -63,7 +63,7 @@ final class ArgMatcher {
         if (!spec.isObject() || !isMatcherObject(spec)) {
             return new ArgMatcher(Kind.EQUALS, spec, null);
         }
-        for (Iterator<String> it = spec.fieldNames(); it.hasNext(); ) {
+        for (Iterator<String> it = spec.propertyNames().iterator(); it.hasNext(); ) {
             String key = it.next();
             if (!MATCHER_KEYS.contains(key)) {
                 throw new IllegalArgumentException(where + "unknown matcher key '" + key + "'.");
@@ -93,10 +93,10 @@ final class ArgMatcher {
             return new ArgMatcher(Kind.ABSENT, null, null);
         }
         JsonNode r = spec.get("regex");
-        if (!r.isTextual() || r.asText().isEmpty()) {
+        if (!r.isString() || r.asString().isEmpty()) {
             throw new IllegalArgumentException(where + "'regex' must be non-empty text.");
         }
-        if (r.asText().length() > MAX_REGEX_LENGTH) {
+        if (r.asString().length() > MAX_REGEX_LENGTH) {
             throw new IllegalArgumentException(
                     where + "'regex' is limited to " + MAX_REGEX_LENGTH + " characters.");
         }
@@ -111,7 +111,7 @@ final class ArgMatcher {
             return new ArgMatcher(
                     Kind.REGEX,
                     null,
-                    Pattern.compile(r.asText(), ignoreCase ? Pattern.CASE_INSENSITIVE : 0));
+                    Pattern.compile(r.asString(), ignoreCase ? Pattern.CASE_INSENSITIVE : 0));
         } catch (PatternSyntaxException e) {
             throw new IllegalArgumentException(
                     where
@@ -148,7 +148,7 @@ final class ArgMatcher {
                 if (absent) {
                     return false;
                 }
-                String text = value.isContainerNode() ? value.toString() : value.asText();
+                String text = value.isContainerNode() ? value.toString() : value.asString();
                 if (text.length() > MAX_REGEX_INPUT_CHARS) {
                     return false;
                 }
@@ -179,7 +179,7 @@ final class ArgMatcher {
             if (a.size() != b.size()) {
                 return false;
             }
-            for (Iterator<String> it = a.fieldNames(); it.hasNext(); ) {
+            for (Iterator<String> it = a.propertyNames().iterator(); it.hasNext(); ) {
                 String name = it.next();
                 if (!b.has(name) || !jsonEquals(a.get(name), b.get(name))) {
                     return false;

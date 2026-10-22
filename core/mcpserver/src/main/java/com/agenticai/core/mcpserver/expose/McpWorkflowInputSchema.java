@@ -1,13 +1,13 @@
 package com.agenticai.core.mcpserver.expose;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Pure helpers for the {@code workflow_<slug>} tools' arguments.
@@ -141,8 +141,8 @@ public final class McpWorkflowInputSchema {
         if (arguments.isObject()
                 && arguments.size() == 1
                 && arguments.has("input")
-                && arguments.get("input").isTextual()) {
-            return arguments.get("input").asText();
+                && arguments.get("input").isString()) {
+            return arguments.get("input").asString();
         }
         if (arguments.isObject() && arguments.isEmpty()) {
             return "";

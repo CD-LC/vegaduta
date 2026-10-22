@@ -8,7 +8,6 @@ import com.agenticai.core.omnichannel.ChannelDeliveryException;
 import com.agenticai.core.omnichannel.RetryableChannelDeliveryException;
 import com.agenticai.core.omnichannel.session.ChannelOutboundLogger;
 import com.agenticai.core.omnichannel.session.ChannelType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE}: the Signal counterpart to {@code

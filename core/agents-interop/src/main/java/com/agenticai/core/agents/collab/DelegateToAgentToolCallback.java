@@ -3,13 +3,13 @@ package com.agenticai.core.agents.collab;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Multi-agent delegation - "specialists working together." One instance per collaborator agent,

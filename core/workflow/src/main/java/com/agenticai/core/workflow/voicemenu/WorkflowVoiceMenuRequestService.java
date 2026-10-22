@@ -12,9 +12,6 @@ import com.agenticai.core.workflow.WorkflowRunStatus;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,6 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The two halves of the {@code voice_menu} node - deliberately the same halt/resume shape {@code
@@ -359,10 +359,10 @@ public class WorkflowVoiceMenuRequestService {
                 JsonNode digitNode = entry.get("digit");
                 JsonNode labelNode = entry.get("label");
                 if (digitNode != null
-                        && digits.equals(digitNode.asText())
+                        && digits.equals(digitNode.asString())
                         && labelNode != null
-                        && !labelNode.asText().isBlank()) {
-                    return labelNode.asText();
+                        && !labelNode.asString().isBlank()) {
+                    return labelNode.asString();
                 }
             }
         } catch (Exception e) {

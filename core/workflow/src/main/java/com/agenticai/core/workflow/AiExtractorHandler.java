@@ -11,10 +11,6 @@ import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,6 +20,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.ObjectProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The {@code parameter_extractor} node: typed JSON extraction with strict validation, ONE repair
@@ -167,7 +167,7 @@ final class AiExtractorHandler {
         }
         List<String> missing = new ArrayList<>();
         for (JsonNode n : output.get("_missing")) {
-            missing.add(n.asText());
+            missing.add(n.asString());
         }
         String summary =
                 "Extracted "

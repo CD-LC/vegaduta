@@ -6,7 +6,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
@@ -26,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Mints, introspects and verifies <b>delegation tokens</b>: Ed25519 JWTs in which an agent acts on
@@ -506,7 +506,9 @@ public class DelegationTokenService {
             return claims;
         } catch (DelegationException e) {
             throw e;
-        } catch (GeneralSecurityException | java.io.IOException | IllegalArgumentException e) {
+        } catch (GeneralSecurityException
+                | tools.jackson.core.JacksonException
+                | IllegalArgumentException e) {
             throw new DelegationException(
                     "MALFORMED", "token did not parse or verify: " + e.getMessage());
         }
@@ -535,7 +537,7 @@ public class DelegationTokenService {
     private String writeJson(List<String> scopes) {
         try {
             return objectMapper.writeValueAsString(scopes);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException(e);
         }
     }

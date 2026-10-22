@@ -6,12 +6,12 @@ import static com.agenticai.core.workflow.WorkflowNodeSupport.truncate;
 
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** "code" (Transform): a fixed library of built-in, safe string operations. */
 @Component
@@ -86,7 +86,7 @@ class CodeNodeHandler implements NodeHandler {
      * document.
      */
     private String extractJsonField(WorkflowNodeDto node, String input)
-            throws com.fasterxml.jackson.core.JsonProcessingException {
+            throws tools.jackson.core.JacksonException {
         String field = stringConfig(node, "field", "");
         JsonNode root = objectMapper.readTree(input == null || input.isBlank() ? "{}" : input);
         JsonNode current = root;
@@ -98,7 +98,7 @@ class CodeNodeHandler implements NodeHandler {
         }
         return current.isMissingNode()
                 ? ""
-                : (current.isTextual() ? current.asText() : current.toString());
+                : (current.isString() ? current.asString() : current.toString());
     }
 
     private String regexReplace(WorkflowNodeDto node, String input) {
@@ -126,8 +126,7 @@ class CodeNodeHandler implements NodeHandler {
         return resolved == null ? "" : resolved.toString();
     }
 
-    private String jsonPrettyPrint(String input)
-            throws com.fasterxml.jackson.core.JsonProcessingException {
+    private String jsonPrettyPrint(String input) throws tools.jackson.core.JacksonException {
         JsonNode root = objectMapper.readTree(input == null || input.isBlank() ? "null" : input);
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
     }

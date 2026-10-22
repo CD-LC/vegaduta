@@ -1,13 +1,14 @@
 package com.agenticai.core.workflow;
 
+import com.agenticai.core.json.JsonNodes;
 import com.agenticai.core.workflow.dto.WorkflowExpressionApi.SchemaPath;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Infers the addressable paths of a node's output from one real value (a pin or the last run), for
@@ -59,7 +60,7 @@ final class UpstreamSchemaInferer {
             return;
         }
         if (node.isObject()) {
-            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            Iterator<Map.Entry<String, JsonNode>> fields = JsonNodes.fields(node);
             while (fields.hasNext() && out.size() < MAX_PATHS) {
                 Map.Entry<String, JsonNode> f = fields.next();
                 String path =
@@ -101,7 +102,7 @@ final class UpstreamSchemaInferer {
         if (v == null || v.isNull() || v.isMissingNode()) {
             return "null";
         }
-        if (v.isTextual()) {
+        if (v.isString()) {
             return "string";
         }
         if (v.isNumber()) {
@@ -114,10 +115,10 @@ final class UpstreamSchemaInferer {
     }
 
     private static String sampleOf(JsonNode v) {
-        if (v == null || v.isNull() || v.isContainerNode() || v.isMissingNode()) {
+        if (v == null || v.isNull() || (v.isObject() || v.isArray()) || v.isMissingNode()) {
             return null;
         }
-        String s = v.asText();
+        String s = v.asString();
         return s.length() > MAX_SAMPLE_CHARS ? s.substring(0, MAX_SAMPLE_CHARS) + "..." : s;
     }
 }

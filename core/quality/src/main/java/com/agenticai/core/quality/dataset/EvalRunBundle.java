@@ -184,8 +184,8 @@ public final class EvalRunBundle {
         return o == null ? null : o.toString();
     }
 
-    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER =
-            new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final tools.jackson.databind.ObjectMapper MAPPER =
+            com.agenticai.core.json.JsonMappers.plain();
 
     private static Object parseOrNull(String json) {
         if (json == null || json.isBlank()) {

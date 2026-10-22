@@ -125,7 +125,7 @@ public class OpenAIProviderCachingStrategy
         }
         String cacheKey = promptCacheKeyFor(apiKey, systemPrompt);
         if (cacheKey != null) {
-            options.setPromptCacheKey(cacheKey);
+            return options.mutate().promptCacheKey(cacheKey).build();
         }
         return options;
     }

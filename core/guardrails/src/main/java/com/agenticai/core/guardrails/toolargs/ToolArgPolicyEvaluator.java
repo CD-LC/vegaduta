@@ -4,11 +4,6 @@ import com.agenticai.core.guardrails.toolargs.ToolArgPolicySet.ToolPolicy;
 import com.agenticai.core.guardrails.toolargs.ToolArgRule.ArgType;
 import com.agenticai.core.guardrails.toolargs.ToolArgRule.NormalizedPath;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,6 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Checks one tool call's JSON arguments against a {@link ToolArgPolicySet}, BEFORE the tool runs.
@@ -147,7 +147,7 @@ public final class ToolArgPolicyEvaluator {
                     argumentsJson == null || argumentsJson.isBlank()
                             ? STRICT.createObjectNode()
                             : STRICT.readTree(argumentsJson);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return deny(
                     label,
                     "",
@@ -165,7 +165,8 @@ public final class ToolArgPolicyEvaluator {
                 for (ToolArgRule r : policy.rules()) {
                     listed.add(r.path().topLevelField());
                 }
-                root.fieldNames()
+                root.propertyNames()
+                        .iterator()
                         .forEachRemaining(
                                 name -> {
                                     if (!listed.contains(name)) {
@@ -322,7 +323,7 @@ public final class ToolArgPolicyEvaluator {
             add(out, new Violation(tool, path, "text", q + " must be a text value"));
             return;
         }
-        String text = value.asText();
+        String text = value.asString();
         if (rule.minLength() != null && text.length() < rule.minLength()) {
             add(
                     out,
@@ -472,7 +473,7 @@ public final class ToolArgPolicyEvaluator {
 
     private static boolean typeMatches(ArgType type, JsonNode v) {
         return switch (type) {
-            case STRING -> v.isTextual();
+            case STRING -> v.isString();
             case INTEGER ->
                     v.isIntegralNumber()
                             || (v.isNumber() && v.decimalValue().stripTrailingZeros().scale() <= 0);
@@ -510,8 +511,8 @@ public final class ToolArgPolicyEvaluator {
         if (v.isNumber()) {
             return v.decimalValue();
         }
-        if (v.isTextual()) {
-            String t = v.asText().trim();
+        if (v.isString()) {
+            String t = v.asString().trim();
             if (t.isEmpty() || t.length() > 64) {
                 return null;
             }
@@ -527,7 +528,7 @@ public final class ToolArgPolicyEvaluator {
     private static String describeEnum(List<JsonNode> values) {
         List<String> parts = new ArrayList<>();
         for (JsonNode v : values) {
-            parts.add(v.isTextual() ? v.asText() : v.toString());
+            parts.add(v.isString() ? v.asString() : v.toString());
         }
         return describeList(parts);
     }

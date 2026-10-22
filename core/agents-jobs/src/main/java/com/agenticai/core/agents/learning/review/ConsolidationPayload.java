@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.learning.review;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import tools.jackson.databind.JsonNode;
 
 /**
  * What an approved CONSOLIDATION proposal does, stored as the proposal's payload: {@code action}
@@ -65,8 +65,8 @@ public record ConsolidationPayload(
     public static ConsolidationPayload parse(String json) {
         try {
             JsonNode n = JsonMappers.plain().readTree(json == null ? "{}" : json);
-            String action = n.path("action").asText("");
-            String scope = n.path("scope").asText("");
+            String action = n.path("action").asString("");
+            String scope = n.path("scope").asString("");
             if (!MERGE.equals(action) && !DROP.equals(action)) {
                 throw new IllegalArgumentException("This tidy-up has no recognised action.");
             }
@@ -74,14 +74,14 @@ public record ConsolidationPayload(
                 throw new IllegalArgumentException(
                         "This tidy-up does not say which memories it is about.");
             }
-            UUID agentId = n.hasNonNull("agentId") ? decode(n.path("agentId").asText()) : null;
+            UUID agentId = n.hasNonNull("agentId") ? decode(n.path("agentId").asString()) : null;
             if (MemoryFactRef.AGENT.equals(scope) && agentId == null) {
                 throw new IllegalArgumentException(
                         "This tidy-up does not say which assistant's memories it is about.");
             }
-            UUID keepId = n.hasNonNull("keepId") ? decode(n.path("keepId").asText()) : null;
+            UUID keepId = n.hasNonNull("keepId") ? decode(n.path("keepId").asString()) : null;
             List<UUID> drops = new ArrayList<>();
-            n.path("dropIds").forEach(d -> drops.add(decode(d.asText())));
+            n.path("dropIds").forEach(d -> drops.add(decode(d.asString())));
             if (drops.isEmpty() || drops.size() > MAX_DROPS || drops.contains(keepId)) {
                 throw new IllegalArgumentException(
                         "This tidy-up lists no valid memories to remove.");
@@ -92,7 +92,7 @@ public record ConsolidationPayload(
             Map<UUID, String> hashes = new LinkedHashMap<>();
             n.path("hashes")
                     .fields()
-                    .forEachRemaining(e -> hashes.put(decode(e.getKey()), e.getValue().asText()));
+                    .forEachRemaining(e -> hashes.put(decode(e.getKey()), e.getValue().asString()));
             return new ConsolidationPayload(
                     action, scope, agentId, keepId, List.copyOf(drops), Map.copyOf(hashes));
         } catch (IllegalArgumentException e) {

@@ -3,8 +3,6 @@ package com.agenticai.core.agents.memory;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +13,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Redis-backed, per-session conversation memory.
@@ -597,7 +597,7 @@ public class SessionMemoryService {
     private String serialize(ChatTurn turn) {
         try {
             return objectMapper.writeValueAsString(turn);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize chat turn", e);
         }
     }
@@ -605,7 +605,7 @@ public class SessionMemoryService {
     private ChatTurn deserialize(String json) {
         try {
             return objectMapper.readValue(json, ChatTurn.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // A corrupt/unreadable entry shouldn't take down the whole conversation history.
             log.warn("Skipping unreadable chat turn in session history", e);
             return null;

@@ -3,10 +3,10 @@ package com.agenticai.core.workflow;
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Executor-side adapter for the eight pure data nodes ({@code set}, {@code filter}, {@code sort},

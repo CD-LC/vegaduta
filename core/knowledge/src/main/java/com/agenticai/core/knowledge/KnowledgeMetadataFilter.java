@@ -1,11 +1,11 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * General equality filter over {@code knowledge_chunks.metadata} (jsonb, migration V192) for {@link
@@ -87,7 +87,7 @@ public final class KnowledgeMetadataFilter {
         }
         try {
             return MAPPER.writeValueAsString(root);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             // Only String/Number/Boolean leaves in nested LinkedHashMaps - not reachable in
             // practice.
             throw new IllegalArgumentException("metadataFilter could not be serialized", e);

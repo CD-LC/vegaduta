@@ -1,11 +1,11 @@
 package com.agenticai.core.agents.importer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Type-tolerant accessors over untrusted JSON. A wrong type or a missing field yields null / empty
@@ -46,10 +46,10 @@ public final class AgentImportJson {
 
     /** {@code v}'s text, trimmed, or null when {@code v} is absent, not textual, or blank. */
     public static String textOf(JsonNode v) {
-        if (v == null || !v.isTextual()) {
+        if (v == null || !v.isString()) {
             return null;
         }
-        String s = v.asText().trim();
+        String s = v.asString().trim();
         return s.isEmpty() ? null : s;
     }
 
@@ -79,8 +79,8 @@ public final class AgentImportJson {
         Double d = null;
         if (v.isNumber()) {
             d = v.asDouble();
-        } else if (v.isTextual()) {
-            String s = v.asText().trim();
+        } else if (v.isString()) {
+            String s = v.asString().trim();
             if (!s.isEmpty() && s.length() <= 32) {
                 try {
                     d = Double.valueOf(s);
@@ -109,8 +109,8 @@ public final class AgentImportJson {
         if (v == null || v.isNull() || v.isMissingNode()) {
             return false;
         }
-        if (v.isTextual()) {
-            return !v.asText().isBlank();
+        if (v.isString()) {
+            return !v.asString().isBlank();
         }
         if (v.isContainerNode()) {
             return v.size() > 0;
@@ -133,7 +133,7 @@ public final class AgentImportJson {
         JsonNode o = obj(node, field);
         List<String> out = new ArrayList<>();
         if (o != null) {
-            o.fieldNames().forEachRemaining(out::add);
+            o.propertyNames().forEach(out::add);
         }
         return out;
     }
@@ -182,8 +182,8 @@ public final class AgentImportJson {
         if (v == null || v.isNull() || v.isMissingNode()) {
             return false;
         }
-        if (v.isTextual()) {
-            return !v.asText().isBlank();
+        if (v.isString()) {
+            return !v.asString().isBlank();
         }
         if (v.isContainerNode()) {
             return v.size() > 0;

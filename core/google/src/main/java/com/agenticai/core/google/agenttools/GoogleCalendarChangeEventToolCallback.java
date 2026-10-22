@@ -2,7 +2,6 @@ package com.agenticai.core.google.agenttools;
 
 import com.agenticai.core.google.GoogleCalendarClient;
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.DateTimeException;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The two calendar writes that change an appointment someone else may be relying on: {@code

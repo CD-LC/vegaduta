@@ -1,13 +1,13 @@
 package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * An {@link AbstractHttpSearchProvider} whose only credential is a platform API key, resolved at
@@ -91,6 +91,6 @@ abstract class AbstractKeyedSearchProvider extends AbstractHttpSearchProvider {
     /** Tolerant text read: missing/null/non-text -> empty. */
     static String text(JsonNode node, String field) {
         JsonNode value = node.path(field);
-        return value.isTextual() ? value.asText("") : "";
+        return value.isString() ? value.asString("") : "";
     }
 }

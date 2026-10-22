@@ -4,7 +4,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.PreDestroy;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The polling fallback: asks the tenant's BlueBubbles server for new messages every few seconds

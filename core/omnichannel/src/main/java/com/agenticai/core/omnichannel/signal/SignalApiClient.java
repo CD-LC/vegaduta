@@ -4,11 +4,6 @@ import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SafeWebSockets;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -37,6 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Client for the signal-cli REST API (bbernhard/signal-cli-rest-api) the operator runs. Every REST
@@ -102,7 +102,7 @@ public class SignalApiClient {
 
     public About about(SignalConnection c) {
         JsonNode body = call(c, "GET", "/v1/about", null, VALIDATE_TIMEOUT);
-        return new About(body.path("mode").asText(""), body.path("version").asText(""));
+        return new About(body.path("mode").asString(""), body.path("version").asString(""));
     }
 
     /** The numbers registered with this signal-cli. */
@@ -110,7 +110,7 @@ public class SignalApiClient {
         JsonNode body = call(c, "GET", "/v1/accounts", null, VALIDATE_TIMEOUT);
         List<String> numbers = new ArrayList<>();
         for (JsonNode item : body) {
-            String number = item.isTextual() ? item.asText() : item.path("number").asText("");
+            String number = item.isString() ? item.asString() : item.path("number").asString("");
             if (!number.isBlank()) {
                 numbers.add(number);
             }
@@ -150,7 +150,7 @@ public class SignalApiClient {
         }
         try {
             call(c, "POST", "/v2/send", objectMapper.writeValueAsString(body), REQUEST_TIMEOUT);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new SignalApiException(
                     SignalApiException.IO, "Could not build the Signal send request.", e);
         }
@@ -252,7 +252,7 @@ public class SignalApiClient {
                 partial.setLength(0);
                 try {
                     queue.put(objectMapper.readTree(frame));
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     log.debug("Ignoring a non-JSON Signal websocket frame");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -410,7 +410,7 @@ public class SignalApiClient {
         }
         try {
             return objectMapper.readTree(raw.body());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new SignalApiException(
                     raw.status(), "signal-cli sent a response that is not JSON.", e);
         }
@@ -418,7 +418,7 @@ public class SignalApiClient {
 
     private String errorText(String body) {
         try {
-            String error = objectMapper.readTree(body).path("error").asText("");
+            String error = objectMapper.readTree(body).path("error").asString("");
             if (!error.isBlank()) {
                 return ": " + (error.length() > 200 ? error.substring(0, 200) : error);
             }

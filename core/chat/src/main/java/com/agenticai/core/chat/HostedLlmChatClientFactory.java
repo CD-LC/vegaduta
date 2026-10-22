@@ -17,7 +17,6 @@ import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.google.genai.common.GoogleGenAiThinkingLevel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -192,36 +191,27 @@ public class HostedLlmChatClientFactory {
         }
         ResolvedEndpoint endpoint = resolveEndpoint(provider);
         String model = resolveModel(provider);
-        OpenAiCompatModelBuilder.Api apiBuilder = modelBuilder.api(endpoint.baseUrl());
+        OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(endpoint.baseUrl());
         // The install's own Ollama (LocalLlmPoolBootstrap / LocalModelsService rows) gets what a
         // tenant OLLAMA provider row already gets in OllamaAgentChatClientFactory: the
         // reasoning-field alias, so a thinking model's reasoning reaches the `thinking` step
         // events instead of being dropped, and the num_ctx override below. Other pool rows are
         // untouched: a cloud provider can 400 on an unknown body field.
         boolean localOllama = isLocalOllamaRow(provider);
-        if (localOllama) {
-            apiBuilder =
-                    apiBuilder
-                            .webClientBuilder(
-                                    modelBuilder
-                                            .webClientBuilder()
-                                            .filter(OllamaReasoningAlias.streamFilter()))
-                            .restClientBuilder(
-                                    modelBuilder
-                                            .restClientBuilder()
-                                            .requestInterceptor(
-                                                    OllamaReasoningAlias.restInterceptor()));
-        }
+        // PORT-TODO(boot4): OllamaReasoningAlias was a WebClient/RestClient filter on Spring AI
+        // 1.x's
+        // OpenAiApi builders; those are gone in Spring AI 2 (the model sits on the OpenAI SDK's
+        // OkHttp client), so the alias has to be re-seated as an OkHttp interceptor on this Api
+        // (see OpenAiCompatModelBuilder.rewriteBody) before the local-Ollama pool row is exercised.
         // Keyless rows (a local Ollama / llama.cpp / vLLM entry made by the local-LLM bootstrap)
         // send no Authorization header at all, like OllamaAgentChatClientFactory. Trimmed for the
         // same reason the model is (see resolveModel): the key is decrypted straight out of the
         // row, and rows written before the upsert DTO started trimming can carry a pasted
         // trailing newline, which would go out in the Authorization header verbatim.
-        apiBuilder =
-                isKeyless(decryptedApiKey)
-                        ? apiBuilder.noApiKey()
-                        : apiBuilder.apiKey(decryptedApiKey.trim());
-        OpenAiApi openAiApi = apiBuilder.completionsPath(endpoint.completionsPath()).build();
+        openAiApi =
+                openAiApi
+                        .apiKey(isKeyless(decryptedApiKey) ? null : decryptedApiKey.trim())
+                        .completionsPath(endpoint.completionsPath());
 
         OpenAiChatOptions.Builder optionsBuilder =
                 openAiCompatOptionsBuilder(
@@ -259,7 +249,8 @@ public class HostedLlmChatClientFactory {
         return modelSupport
                 // V500 - a row graded TEXT/NONE on a server that can enforce a schema or
                 // tool_choice=required gets the constrained tool router; null for every other row.
-                .chatClientBuilder(chatModel, provider.effectiveToolRouterMode())
+                .chatClientBuilder(
+                        chatModel, toolCallingManagers.create(), provider.effectiveToolRouterMode())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(
@@ -414,14 +405,14 @@ public class HostedLlmChatClientFactory {
         GoogleGenAiChatModel chatModel =
                 GoogleGenAiChatModel.builder()
                         .genAiClient(genAiClient)
-                        .defaultOptions(options)
+                        .options(options)
                         .toolCallingManager(toolCallingManagers.create())
                         .retryTemplate(modelSupport.retryTemplate())
                         .observationRegistry(modelSupport.observationRegistry())
                         .build();
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(chatModel, toolCallingManagers.create())
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 // Gemini rejects >1 system message; the platform routinely sends

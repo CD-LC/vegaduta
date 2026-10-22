@@ -9,16 +9,16 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * {@code coding_task} - delegate "make this change and get the tests passing" to the coding harness
@@ -205,7 +205,7 @@ public class CodingTaskToolCallback implements ToolCallback, ToolConfirmationDes
         if (node == null || node.isNull()) {
             return null;
         }
-        String value = node.asText();
+        String value = node.asString();
         return value == null || value.isBlank() ? null : value.trim();
     }
 

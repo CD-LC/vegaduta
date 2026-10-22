@@ -4,9 +4,6 @@ import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -24,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Core-side proxy for the web module's {@code /code-intel} console, so the browser talks to core
@@ -125,7 +125,7 @@ public class CodeIntelController {
     @PostMapping("/repos/{repoId}/search")
     public ResponseEntity<String> search(@PathVariable String repoId, @RequestBody String body) {
         JsonNode json = read(body);
-        String query = json.path("query").asText("");
+        String query = json.path("query").asString("");
         int topK = json.path("top_k").asInt(8);
         return respond(client.searchCodeResult(query, repoId, topK));
     }
@@ -269,7 +269,7 @@ public class CodeIntelController {
             @RequestBody String body) {
         try {
             JsonNode json = read(body);
-            String command = json.path("command").asText("");
+            String command = json.path("command").asString("");
             if (command.isBlank()) {
                 return "{\"error\":\"command is required\"}";
             }

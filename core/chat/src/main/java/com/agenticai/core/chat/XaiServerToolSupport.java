@@ -1,25 +1,13 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * xAI Agent Tools API support for the {@link com.agenticai.core.providers.ProviderName#GROK} path
@@ -36,13 +24,12 @@ import org.springframework.util.MimeTypeUtils;
  * is why the whole feature sits behind the per-agent {@code xaiServerToolsEnabled} opt-in
  * (migration V239) rather than being on for every Grok agent.
  *
- * <p><b>Why HTTP-layer injection:</b> Spring AI's {@code OpenAiApi.ChatCompletionRequest#tools} is
- * typed as {@code List<FunctionTool>} - there is no options-level way to express a non-function
- * tool entry in spring-ai 1.1.7. Rather than forking the model/request types, the entries are
- * appended at serialization time: {@link #messageConverter} handles the synchronous RestClient body
- * ({@code .call()}) and {@link #jsonEncoder} the reactive WebClient body ({@code .stream()}), both
- * delegating to {@link #inject} so the two transports can never drift. Anything that is not a
- * {@code ChatCompletionRequest} passes through the default codec untouched.
+ * <p><b>Why HTTP-layer injection:</b> the SDK-based OpenAI model (Spring AI 2) types {@code tools}
+ * as function tools only - there is no options-level way to express a non-function tool entry.
+ * Rather than forking the model/request types, the entries are appended to the outgoing request
+ * body by an OkHttp interceptor on the shared LLM transport ({@link #inject}, wired by {@link
+ * GrokAgentChatClientFactory} through {@code OpenAiCompatModelBuilder.Api#bodyTransform}), which
+ * covers the blocking and the streaming call with one code path.
  */
 public final class XaiServerToolSupport {
 
@@ -116,7 +103,7 @@ public final class XaiServerToolSupport {
             }
             Set<String> present = new LinkedHashSet<>();
             for (JsonNode tool : tools) {
-                present.add(tool.path("type").asText(""));
+                present.add(tool.path("type").asString(""));
             }
             for (String type : serverTools) {
                 if (present.add(type)) {
@@ -127,56 +114,5 @@ public final class XaiServerToolSupport {
         } catch (Exception e) {
             return body;
         }
-    }
-
-    /**
-     * RestClient-side hook for {@link GrokAgentChatClientFactory}: a {@code
-     * MappingJackson2HttpMessageConverter} that serializes a {@code ChatCompletionRequest} through
-     * the normal Jackson path and then runs {@link #inject} on the resulting bytes. Registered at
-     * index 0 of the builder's converter list so it wins for {@code application/json}; every
-     * non-chat-request body delegates to the untouched default serialization.
-     */
-    public static MappingJackson2HttpMessageConverter messageConverter(Set<String> serverTools) {
-        return new MappingJackson2HttpMessageConverter() {
-            @Override
-            protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
-                    throws IOException, HttpMessageNotWritableException {
-                if (!(object instanceof OpenAiApi.ChatCompletionRequest)) {
-                    super.writeInternal(object, type, outputMessage);
-                    return;
-                }
-                outputMessage
-                        .getBody()
-                        .write(inject(getObjectMapper().writeValueAsBytes(object), serverTools));
-            }
-        };
-    }
-
-    /**
-     * WebClient-side hook for the streaming path. {@code Jackson2JsonEncoder#encode} funnels every
-     * element through {@code encodeValue}, so overriding that one method covers both {@code
-     * bodyValue(...)} and {@code body(Mono.just(...))} request styles Spring AI uses.
-     */
-    public static Jackson2JsonEncoder jsonEncoder(Set<String> serverTools) {
-        return new Jackson2JsonEncoder(MAPPER, MimeTypeUtils.APPLICATION_JSON) {
-            @Override
-            public DataBuffer encodeValue(
-                    Object value,
-                    DataBufferFactory bufferFactory,
-                    ResolvableType valueType,
-                    MimeType mimeType,
-                    Map<String, Object> hints) {
-                if (value instanceof OpenAiApi.ChatCompletionRequest) {
-                    try {
-                        return bufferFactory.wrap(
-                                inject(MAPPER.writeValueAsBytes(value), serverTools));
-                    } catch (Exception e) {
-                        throw new IllegalStateException(
-                                "Could not serialize chat request for xAI server tools", e);
-                    }
-                }
-                return super.encodeValue(value, bufferFactory, valueType, mimeType, hints);
-            }
-        };
     }
 }

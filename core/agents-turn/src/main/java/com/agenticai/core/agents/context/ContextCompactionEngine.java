@@ -10,7 +10,6 @@ import com.agenticai.core.agents.context.ContextBudgetPlanner.Settings;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.chat.ToolResultClearing;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,6 +24,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Applies a {@link ContextBudgetPlanner} plan to a list of Spring AI messages: it classifies the

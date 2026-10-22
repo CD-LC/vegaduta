@@ -1,7 +1,6 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -9,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.execution.ToolExecutionException;
 import org.springframework.ai.tool.execution.ToolExecutionExceptionProcessor;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@link ToolExecutionExceptionProcessor} every chat model's tool loop uses (wired in {@link

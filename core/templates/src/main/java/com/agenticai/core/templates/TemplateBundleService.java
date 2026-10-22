@@ -11,14 +11,14 @@ import com.agenticai.core.templates.dto.AgentBundle;
 import com.agenticai.core.templates.dto.AgentBundlePreview;
 import com.agenticai.core.templates.dto.TemplateImportResponse;
 import com.agenticai.core.workflow.WorkflowService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Export an agent as a shareable file and import one. A bundle is untrusted input from another
@@ -144,7 +144,7 @@ public class TemplateBundleService {
                     "knowledge-base restrictions dropped (they point at the author's data)");
         }
         agent.putArray("allowedKnowledgeCollectionIds");
-        String tier = agent.path("autonomyTier").asText("");
+        String tier = agent.path("autonomyTier").asString("");
         if (tier.isBlank()) {
             tier = AgentAutonomyTier.SUPERVISED.name();
             agent.put("autonomyTier", tier);

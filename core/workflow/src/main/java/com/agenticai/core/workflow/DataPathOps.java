@@ -1,11 +1,11 @@
 package com.agenticai.core.workflow;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.MissingNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Field-path reading and writing ({@code a.b[0].c}, {@code ["odd key"]}): {@link #get} never throws

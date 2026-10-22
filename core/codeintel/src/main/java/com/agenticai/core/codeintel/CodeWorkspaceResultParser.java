@@ -1,6 +1,6 @@
 package com.agenticai.core.codeintel;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Shared response-classification logic for {@link RunCodeWorkspaceApprovalExecutor} and {@link
@@ -27,13 +27,13 @@ final class CodeWorkspaceResultParser {
     static void checkForFailure(String toolLabel, JsonNode result) {
         if (result.has("status")) {
             int status = result.path("status").asInt(0);
-            String error = result.path("error").asText("code-intel rejected the request");
+            String error = result.path("error").asString("code-intel rejected the request");
             throw new CodeWorkspaceExecutionException(
                     toolLabel + " was rejected by code-intel (status " + status + "): " + error);
         }
         if (result.has("error") && !result.has("success") && !result.has("written")) {
             throw new RetryableCodeWorkspaceExecutionException(
-                    toolLabel + " failed to reach code-intel: " + result.path("error").asText());
+                    toolLabel + " failed to reach code-intel: " + result.path("error").asString());
         }
     }
 }

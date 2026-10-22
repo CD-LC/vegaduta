@@ -3,14 +3,14 @@ package com.agenticai.core.mcp.oauth;
 import com.agenticai.core.mcp.oauth.OAuthProviderRegistry.Provider;
 import com.agenticai.core.mcp.oauth.OAuthProviderSpec.ClientAuth;
 import com.agenticai.core.mcp.oauth.OAuthProviderSpec.RevokeStyle;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Wire-level half of the provider OAuth flow: authorize-URL construction, code exchange, refresh
@@ -137,14 +137,14 @@ public class OAuthProviderClient {
         JsonNode src = node;
         if (s.slackUserToken()
                 && initialExchange
-                && node.path("authed_user").path("access_token").isTextual()) {
+                && node.path("authed_user").path("access_token").isString()) {
             src = node.path("authed_user");
         }
-        String accessToken = src.path("access_token").asText(null);
+        String accessToken = src.path("access_token").asString(null);
         if (accessToken == null || accessToken.isBlank()) {
             throw new McpOAuthException("The token response had no access_token.");
         }
-        String refreshToken = src.path("refresh_token").asText(null);
+        String refreshToken = src.path("refresh_token").asString(null);
         if (refreshToken != null && refreshToken.isBlank()) {
             refreshToken = null;
         }
@@ -153,7 +153,7 @@ public class OAuthProviderClient {
                 accessToken,
                 refreshToken,
                 expiresIn > 0 ? Integer.valueOf(expiresIn) : null,
-                src.path("scope").asText(""));
+                src.path("scope").asString(""));
     }
 
     /**
@@ -257,21 +257,21 @@ public class OAuthProviderClient {
             return null;
         }
         if (node.has("ok") && !node.path("ok").asBoolean(true)) {
-            String e = node.path("error").asText(null);
+            String e = node.path("error").asString(null);
             return e == null || e.isBlank() ? "oauth_error" : e;
         }
-        if (node.path("error").isTextual() && !node.path("access_token").isTextual()) {
-            return node.path("error").asText();
+        if (node.path("error").isString() && !node.path("access_token").isString()) {
+            return node.path("error").asString();
         }
         // HubSpot reports a revoked/invalid refresh token as HTTP 400
         // {"status":"BAD_REFRESH_TOKEN",...} with no
         // "error" field; lower-cased it matches OAuthProviderService's permanent-refresh-error
         // codes.
         // https://developers.hubspot.com/docs/api/oauth/tokens
-        if (node.path("status").isTextual()
-                && !node.path("access_token").isTextual()
-                && node.path("status").asText().matches("[A-Za-z][A-Za-z_]{0,63}")) {
-            return node.path("status").asText().toLowerCase(java.util.Locale.ROOT);
+        if (node.path("status").isString()
+                && !node.path("access_token").isString()
+                && node.path("status").asString().matches("[A-Za-z][A-Za-z_]{0,63}")) {
+            return node.path("status").asString().toLowerCase(java.util.Locale.ROOT);
         }
         return null;
     }

@@ -8,13 +8,13 @@ import com.agenticai.core.agents.job.AgentJob;
 import com.agenticai.core.agents.job.AgentJobOrigin;
 import com.agenticai.core.agents.job.AgentJobOutcomeListener;
 import com.agenticai.core.agents.job.AgentJobStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The run counter only keeps runs that worked. A research job that ends FAILED (timeout, orphaned,
@@ -78,7 +78,7 @@ public class ResearchRunOutcomeListener implements AgentJobOutcomeListener {
         try {
             JsonNode result =
                     job.getResultJson() == null ? null : objectMapper.readTree(job.getResultJson());
-            return result != null && !result.path("reportMarkdown").asText("").isBlank();
+            return result != null && !result.path("reportMarkdown").asString("").isBlank();
         } catch (Exception e) {
             return false;
         }

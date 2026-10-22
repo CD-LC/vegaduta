@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,6 +12,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * HTTP adapter for the {@code web_task} built-in - POSTs the task to a managed-browser provider's
@@ -83,7 +84,7 @@ public class HttpWebTaskBackend implements WebTaskBackend {
         String json;
         try {
             json = MAPPER.writeValueAsString(body);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new WebTaskException("failed to serialize task request", e);
         }
         HttpRequest.Builder httpReq =
@@ -119,11 +120,11 @@ public class HttpWebTaskBackend implements WebTaskBackend {
         }
         try {
             JsonNode node = MAPPER.readTree(resp.body());
-            String status = node.path("status").asText("success");
-            String result = node.path("result").asText("");
-            String detail = node.path("detail").asText(null);
+            String status = node.path("status").asString("success");
+            String result = node.path("result").asString("");
+            String detail = node.path("detail").asString(null);
             return new WebTaskResult(status, result, detail);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             // A provider that replies non-JSON still ran the task - return the
             // raw body rather than failing, so the model sees SOMETHING useful.
             String raw = resp.body() == null ? "" : resp.body();

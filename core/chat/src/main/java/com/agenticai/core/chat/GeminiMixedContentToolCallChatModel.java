@@ -7,6 +7,7 @@ import com.google.genai.types.FinishReason;
 import com.google.genai.types.FunctionCall;
 import com.google.genai.types.Part;
 import io.micrometer.observation.ObservationRegistry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,16 @@ import org.springframework.ai.model.tool.ToolCallingManager;
  * model "explaining" it can't do the thing it just tried to call a tool for). Confirmed via the
  * upstream 1.1.7 jar's bytecode (allMatch at the Stream.allMatch call site in
  * responseCandidateToGeneration) and the upstream issue thread.
+ *
+ * <p><b>Spring AI 2.0.1 (ADR-0012 P3).</b> Upstream now uses {@code anyMatch} too, but still drops
+ * the lead-in text of a mixed candidate ({@code content("")}) and throws on a candidate with no
+ * content at all, so this override is still needed for both. Its protected hook survived the 2.0
+ * rework (the tool loop moved out of the model into {@code ToolCallingAdvisor}, this method did
+ * not) and is still called virtually from both the blocking and the streaming path. It now also
+ * carries the two metadata additions 2.0 made to the base implementation - {@code isThought} on
+ * text parts (2.0's {@code MessageAggregator} uses it to keep thought text out of the aggregated
+ * answer) and {@code serverSideToolInvocations} - so a turn behaves as the base class would, plus
+ * the two fixes above.
  *
  * <p>This subclass overrides that one protected method with an {@code anyMatch}-based version
  * instead: any functionCall part in the candidate makes it a tool-call generation, with the
@@ -100,6 +111,10 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
         if (!thoughtSignatures.isEmpty()) {
             messageMetadata.put("thoughtSignatures", thoughtSignatures);
         }
+        List<Map<String, Object>> serverSideToolInvocations = serverSideToolInvocations(parts);
+        if (!serverSideToolInvocations.isEmpty()) {
+            messageMetadata.put("serverSideToolInvocations", serverSideToolInvocations);
+        }
 
         ChatGenerationMetadata chatGenerationMetadata =
                 ChatGenerationMetadata.builder()
@@ -136,17 +151,39 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
         boolean hasFunctionCall = parts.stream().anyMatch(part -> part.functionCall().isPresent());
 
         if (!hasFunctionCall) {
-            return parts.stream()
-                    .map(
-                            part ->
-                                    AssistantMessage.builder()
-                                            .content(part.text().orElse(""))
-                                            .properties(messageMetadata)
-                                            .build())
-                    .map(
-                            assistantMessage ->
-                                    new Generation(assistantMessage, chatGenerationMetadata))
-                    .toList();
+            List<Generation> generations =
+                    parts.stream()
+                            .filter(
+                                    part ->
+                                            part.toolCall().isEmpty()
+                                                    && part.toolResponse().isEmpty())
+                            .map(
+                                    part -> {
+                                        Map<String, Object> partMetadata =
+                                                new HashMap<>(messageMetadata);
+                                        partMetadata.put("isThought", part.thought().orElse(false));
+                                        return AssistantMessage.builder()
+                                                .content(part.text().orElse(""))
+                                                .properties(partMetadata)
+                                                .build();
+                                    })
+                            .map(
+                                    assistantMessage ->
+                                            new Generation(
+                                                    assistantMessage, chatGenerationMetadata))
+                            .toList();
+            if (generations.isEmpty()) {
+                // Every part was a server-side tool invocation: one empty-text generation carrying
+                // the metadata.
+                return List.of(
+                        new Generation(
+                                AssistantMessage.builder()
+                                        .content("")
+                                        .properties(messageMetadata)
+                                        .build(),
+                                chatGenerationMetadata));
+            }
+            return generations;
         }
 
         List<AssistantMessage.ToolCall> assistantToolCalls =
@@ -177,6 +214,31 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
                         .build();
 
         return List.of(new Generation(assistantMessage, chatGenerationMetadata));
+    }
+
+    private static List<Map<String, Object>> serverSideToolInvocations(List<Part> parts) {
+        List<Map<String, Object>> invocations = new ArrayList<>();
+        for (Part part : parts) {
+            if (part.toolCall().isPresent()) {
+                com.google.genai.types.ToolCall tc = part.toolCall().get();
+                Map<String, Object> inv = new HashMap<>();
+                inv.put("type", "toolCall");
+                inv.put("id", tc.id().orElse(""));
+                inv.put("toolType", tc.toolType().map(Object::toString).orElse(""));
+                inv.put("args", tc.args().orElse(Map.of()));
+                invocations.add(inv);
+            }
+            if (part.toolResponse().isPresent()) {
+                com.google.genai.types.ToolResponse tr = part.toolResponse().get();
+                Map<String, Object> inv = new HashMap<>();
+                inv.put("type", "toolResponse");
+                inv.put("id", tr.id().orElse(""));
+                inv.put("toolType", tr.toolType().map(Object::toString).orElse(""));
+                inv.put("response", tr.response().orElse(Map.of()));
+                invocations.add(inv);
+            }
+        }
+        return invocations;
     }
 
     private static String mapToJson(Map<String, Object> map) {

@@ -6,8 +6,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.KnowledgeSearchService;
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.agenticai.core.mcpserver.McpCallerContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Third MCP tool this server exposes - a read-only hybrid (vector + keyword, RRF-fused, optionally
@@ -100,7 +100,7 @@ public class McpSearchKnowledgeToolCallback implements ToolCallback {
         try {
             JsonNode input = MAPPER.readTree(toolInput);
             JsonNode queryNode = input.get("query");
-            String query = queryNode == null || queryNode.isNull() ? null : queryNode.asText();
+            String query = queryNode == null || queryNode.isNull() ? null : queryNode.asString();
             if (!StringUtils.hasText(query)) {
                 return errorJson("query is required.");
             }

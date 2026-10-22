@@ -1,8 +1,6 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.platform.PlatformAlertWebhookEvent.AlertStatus;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -12,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Alerting infrastructure pass (2026-07) - persists every alert in an Alertmanager webhook delivery
@@ -192,7 +192,7 @@ public class PlatformAlertWebhookService {
     private String toJson(Map<String, Object> value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "{}";
         }
     }

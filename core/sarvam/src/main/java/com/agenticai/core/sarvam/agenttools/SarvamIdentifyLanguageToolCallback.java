@@ -1,12 +1,12 @@
 package com.agenticai.core.sarvam.agenttools;
 
 import com.agenticai.core.sarvam.SarvamLanguageIdClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exposes {@link SarvamLanguageIdClient} as a native Spring AI tool - see {@link

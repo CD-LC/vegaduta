@@ -3,13 +3,13 @@ package com.agenticai.core.templates;
 import com.agenticai.core.templates.dto.TemplateReadinessReport;
 import com.agenticai.core.templates.dto.TemplateReadinessReport.Issue;
 import com.agenticai.core.templates.dto.TemplateRequirement;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 /**
  * The marketplace quality bar, and the single place that works out what an importer has to
@@ -221,10 +221,10 @@ public class TemplateReadinessService {
 
     private void assessAgent(
             String summary, JsonNode config, List<Issue> blockers, List<Issue> advisories) {
-        String prompt = config.path("systemPrompt").asText("");
+        String prompt = config.path("systemPrompt").asString("");
         String authored = authoredPrompt(prompt);
         Set<String> tools = TemplateRequirements.toolNames(TemplateKind.AGENT, config);
-        String tier = config.path("autonomyTier").asText("");
+        String tier = config.path("autonomyTier").asString("");
         boolean actionCapable = tools.stream().anyMatch(TemplateReadinessService::isActionTool);
 
         // -- Clear role and scope
@@ -390,13 +390,14 @@ public class TemplateReadinessService {
         boolean actionTool = false;
         if (nodes.isArray()) {
             for (JsonNode n : nodes) {
-                String type = n.path("type").asText("");
+                String type = n.path("type").asString("");
                 hasTrigger |= "trigger".equals(type);
                 hasOutput |= "output".equals(type);
                 hasApproval |= "approval".equals(type);
                 if ("tool".equals(type)) {
                     actionTool |=
-                            isActionTool(n.path("data").path("config").path("toolName").asText(""));
+                            isActionTool(
+                                    n.path("data").path("config").path("toolName").asString(""));
                 }
             }
         }
@@ -416,7 +417,7 @@ public class TemplateReadinessService {
                             "The workflow has no output node, so results go nowhere.",
                             "Add an output node."));
         }
-        String description = config.path("description").asText("");
+        String description = config.path("description").asString("");
         if (description.trim().length() < 40) {
             advisories.add(
                     new Issue(

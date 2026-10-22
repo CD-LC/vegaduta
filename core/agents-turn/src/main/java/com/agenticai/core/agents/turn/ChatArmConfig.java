@@ -3,11 +3,11 @@ package com.agenticai.core.agents.turn;
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.rl.domain.PolicyDimension;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Readers for the RL policy-arm config JSON (MODEL_ROUTE / TOOL_SUBSET / PROMPT_VARIANT /
@@ -42,7 +42,7 @@ final class ChatArmConfig {
         }
         try {
             JsonNode model = RL_ARM_MAPPER.readTree(armConfigJson).get("model");
-            return model == null || model.isNull() ? null : model.asText();
+            return model == null || model.isNull() ? null : model.asString();
         } catch (Exception e) {
             // The javadoc above calls the silent-null outcome "the nastiest kind" of failure -
             // an arm that validates, persists, gets selected, parses to null here, and then
@@ -79,8 +79,8 @@ final class ChatArmConfig {
             Set<String> result = new java.util.HashSet<>();
             names.forEach(
                     n -> {
-                        if (n.isTextual() && !n.asText().isBlank()) {
-                            result.add(n.asText());
+                        if (n.isString() && !n.asString().isBlank()) {
+                            result.add(n.asString());
                         }
                     });
             return result.isEmpty() ? null : result;
@@ -100,9 +100,9 @@ final class ChatArmConfig {
         }
         try {
             JsonNode prompt = RL_ARM_MAPPER.readTree(armConfigJson).get("systemPrompt");
-            return prompt == null || prompt.isNull() || prompt.asText().isBlank()
+            return prompt == null || prompt.isNull() || prompt.asString().isBlank()
                     ? null
-                    : prompt.asText();
+                    : prompt.asString();
         } catch (Exception e) {
             return null;
         }
@@ -151,7 +151,7 @@ final class ChatArmConfig {
             }
             ReasoningDepth parsed =
                     ReasoningDepth.valueOf(
-                            depth.asText().trim().toUpperCase(java.util.Locale.ROOT));
+                            depth.asString().trim().toUpperCase(java.util.Locale.ROOT));
             return parsed == ReasoningDepth.PLANNED ? null : parsed;
         } catch (Exception e) {
             return null;

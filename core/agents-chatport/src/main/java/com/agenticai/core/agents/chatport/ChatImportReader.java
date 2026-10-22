@@ -5,15 +5,6 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_STRING_CHA
 
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -23,6 +14,15 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The container and stream layer of {@link ChatImportParser}: unwraps the export .zip under an

@@ -4,7 +4,6 @@ import com.agenticai.core.google.CalendarFreeSlots;
 import com.agenticai.core.google.GoogleCalendarClient;
 import com.agenticai.core.google.GoogleCalendarClient.BusyTime;
 import com.agenticai.core.google.GoogleCalendarClient.Interval;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.DateTimeException;
 import java.time.Duration;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@code google_calendar_find_free_slots}: open appointment slots on the connected account's

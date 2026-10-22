@@ -14,8 +14,6 @@ import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.guardrails.ToolDefinitionDigest;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +24,8 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Actually RUNS a gated agent tool call once a human approves it - the {@code
@@ -451,7 +451,7 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
 
     private ReplayTarget fromEnvelope(ApprovalRequest request, JsonNode payload) {
         JsonNode replay = payload.path("replay");
-        UUID agentId = parseUuid(replay.path("agentId").asText(null));
+        UUID agentId = parseUuid(replay.path("agentId").asString(null));
         if (agentId == null) {
             throw new AgentToolReplayException(
                     "Approval request "
@@ -462,17 +462,17 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         if (payload.has("arguments")) {
             arguments = payload.get("arguments").toString();
         } else {
-            arguments = payload.path("argumentsRaw").asText("{}");
+            arguments = payload.path("argumentsRaw").asString("{}");
         }
-        String sessionId = replay.path("sessionId").asText(null);
+        String sessionId = replay.path("sessionId").asString(null);
         return new ReplayTarget(
                 agentId,
                 sessionId != null && !sessionId.isBlank() ? sessionId : fallbackSessionId(request),
-                replay.path("toolName").asText(),
+                replay.path("toolName").asString(),
                 arguments,
-                replay.path("tenantId").asText(null),
-                replay.path("subject").asText(null),
-                replay.path("toolDigest").asText(null));
+                replay.path("tenantId").asString(null),
+                replay.path("subject").asString(null),
+                replay.path("toolDigest").asString(null));
     }
 
     private ReplayTarget fromLegacyPayload(ApprovalRequest request, String payloadJson) {

@@ -531,8 +531,8 @@ public class EvalDatasetController {
      * Shared read-only mapper for the stored tool-calls documents - static and thread-safe, same
      * pattern as the services' MAPPER constants.
      */
-    private static final com.fasterxml.jackson.databind.ObjectMapper TOOL_CALLS_MAPPER =
-            new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final tools.jackson.databind.ObjectMapper TOOL_CALLS_MAPPER =
+            new tools.jackson.databind.ObjectMapper();
 
     /** Stored tool-calls JSON -> typed DTO list; parse-failure-safe. */
     private static List<ReplayedToolCallResponse> parseToolCalls(String toolCallsJson) {
@@ -540,16 +540,15 @@ public class EvalDatasetController {
             return List.of();
         }
         try {
-            com.fasterxml.jackson.databind.JsonNode node =
-                    TOOL_CALLS_MAPPER.readTree(toolCallsJson);
+            tools.jackson.databind.JsonNode node = TOOL_CALLS_MAPPER.readTree(toolCallsJson);
             List<ReplayedToolCallResponse> calls = new java.util.ArrayList<>();
             if (node.isArray()) {
-                for (com.fasterxml.jackson.databind.JsonNode entry : node) {
+                for (tools.jackson.databind.JsonNode entry : node) {
                     calls.add(
                             new ReplayedToolCallResponse(
-                                    entry.path("toolName").asText(null),
-                                    entry.path("input").asText(null),
-                                    entry.path("output").asText(null)));
+                                    entry.path("toolName").asString(null),
+                                    entry.path("input").asString(null),
+                                    entry.path("output").asString(null)));
                 }
             }
             return calls;

@@ -9,7 +9,6 @@ import com.agenticai.core.omnichannel.twilio.dto.WhatsAppSendResult;
 import com.agenticai.core.omnichannel.whatsapp.policy.WhatsAppBindingPolicy;
 import com.agenticai.core.omnichannel.whatsapp.policy.WhatsAppBindingResponses;
 import com.agenticai.core.security.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Manual/API-triggered WhatsApp send - lets Stage 2 be exercised and verified end-to-end before
