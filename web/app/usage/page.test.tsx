@@ -70,8 +70,18 @@ describe("UsagePage on a shared install", () => {
     expect(container.querySelector("a[href='/roi']")).not.toBeNull();
   });
 
-  it("does not mount the top-up card while billing is off", async () => {
+  it("mounts the top-up card even while billing is off (it hides itself when the server says top-ups are off)", async () => {
     await rendered();
-    expect(screen.queryByTestId("budget-top-up-card")).toBeNull();
+    expect(screen.getByTestId("budget-top-up-card")).toBeTruthy();
+  });
+
+  it("mounts the top-up card on lite and on an undeclared install too", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "lite");
+    await rendered();
+    expect(screen.getByTestId("budget-top-up-card")).toBeTruthy();
+    cleanup();
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "");
+    await rendered();
+    expect(screen.getByTestId("budget-top-up-card")).toBeTruthy();
   });
 });
